@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.70 2004/05/23 04:03:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.71 2004/05/29 01:43:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-// #define CHECK_TIME
+#define CHECK_TIME
 
 #include "bgp_module.h"
 #include "config.h"
@@ -264,6 +264,8 @@ BGPPeer::send_message(const BGPPacket& p)
 void
 BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 {
+    TIMESPENT();
+
     debug_msg("Packet sent, queue size now %d\n",
 	    _SocketClient->output_queue_size());
 
@@ -277,11 +279,13 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 	    if (_handler != NULL)
 		_handler->output_no_longer_busy();
 	}
+	TIMESPENT_CHECK();
 	/*drop through to next case*/
     case SocketClient::FLUSHING:
 	debug_msg("event: flushing\n");
 	debug_msg("Freeing Buffer for sent packet: %x\n", (uint)buf);
 	delete[] buf;
+	TIMESPENT_CHECK();
 	break;
     case SocketClient::ERROR:
 	// The most likely cause of an error is that the peer closed
@@ -292,6 +296,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 	// _SocketClient->disconnect();
 	event_closed();
 	// XLOG_ASSERT(!is_connected());
+	TIMESPENT_CHECK();
     }
 }
 
@@ -434,6 +439,8 @@ BGPPeer::event_start()			// EVENTBGPSTART
 void
 BGPPeer::event_stop()			// EVENTBGPSTOP
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
 	break;
@@ -469,6 +476,8 @@ BGPPeer::event_stop()			// EVENTBGPSTOP
 void
 BGPPeer::event_open()	// EVENTBGPTRANOPEN
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
@@ -513,6 +522,8 @@ BGPPeer::event_open()	// EVENTBGPTRANOPEN
 void
 BGPPeer::event_closed()			// EVENTBGPTRANCLOSED
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
 	break;
@@ -549,6 +560,8 @@ BGPPeer::event_closed()			// EVENTBGPTRANCLOSED
 void
 BGPPeer::event_openfail()			// EVENTBGPCONNOPENFAIL
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATEACTIVE:
@@ -573,6 +586,8 @@ BGPPeer::event_openfail()			// EVENTBGPCONNOPENFAIL
 void
 BGPPeer::event_tranfatal()			// EVENTBGPTRANFATALERR
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
 	break;
@@ -604,6 +619,8 @@ BGPPeer::event_tranfatal()			// EVENTBGPTRANFATALERR
 void
 BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
 {
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATESTOPPED:
@@ -646,6 +663,8 @@ BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
 void
 BGPPeer::event_holdexp()			// EVENTHOLDTIMEEXP
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATESTOPPED:
@@ -675,6 +694,8 @@ BGPPeer::event_holdexp()			// EVENTHOLDTIMEEXP
 void
 BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATESTOPPED:
@@ -701,6 +722,8 @@ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
 void
 BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 {
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATECONNECT:
@@ -766,6 +789,8 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 void
 BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATECONNECT:
@@ -804,6 +829,8 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
 void
 BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 { 
+    TIMESPENT();
+
     switch(_state) {
     case STATEIDLE:
     case STATECONNECT:
@@ -867,6 +894,8 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 void
 BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 { 
+    TIMESPENT();
+
     XLOG_WARNING("In state %s received %s",  pretty_print_state(_state),
 		 p.str().c_str());
 
