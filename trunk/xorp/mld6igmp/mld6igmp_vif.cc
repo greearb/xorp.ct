@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.32 2005/02/27 20:49:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.33 2005/03/15 00:32:39 pavlin Exp $"
 
 
 //
@@ -175,6 +175,9 @@ Mld6igmpVif::proto_is_ssm() const
 int
 Mld6igmpVif::start(string& error_msg)
 {
+    if (! is_enabled())
+	return (XORP_OK);
+
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
@@ -287,6 +290,11 @@ Mld6igmpVif::stop(string& error_msg)
 	error_msg = "the vif state is not UP or PENDING_UP or PENDING_DOWN";
 	return (XORP_ERROR);
     }
+
+    if (ProtoUnit::pending_stop() < 0) {
+	error_msg = "internal error";
+	ret_value = XORP_ERROR;
+    }
     
     //
     // XXX: we don't have to explicitly leave the multicast groups
@@ -345,6 +353,8 @@ void
 Mld6igmpVif::enable()
 {
     ProtoUnit::enable();
+
+    XLOG_INFO("Enabled vif: %s", name().c_str());
 }
 
 /**
@@ -360,6 +370,8 @@ Mld6igmpVif::disable()
 
     stop(error_msg);
     ProtoUnit::disable();
+
+    XLOG_INFO("Disabled vif: %s", name().c_str());
 }
 
 /**
