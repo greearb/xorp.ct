@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.34 2005/03/19 23:45:03 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.35 2005/03/20 00:21:11 pavlin Exp $"
 
 
 //
@@ -216,9 +216,6 @@ Mld6igmpVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("STARTING %s%s",
-	      this->str().c_str(), flags_string().c_str());
-    
     //
     // Join the appropriate multicast groups: ALL-SYSTEMS and ALL-ROUTERS
     //
@@ -266,6 +263,9 @@ Mld6igmpVif::start(string& error_msg)
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
+
+    XLOG_INFO("Interface started: %s%s",
+	      this->str().c_str(), flags_string().c_str());
     
     return (XORP_OK);
 }
@@ -333,7 +333,7 @@ Mld6igmpVif::stop(string& error_msg)
 	ret_value = XORP_ERROR;
     }
     
-    XLOG_INFO("STOPPED %s%s",
+    XLOG_INFO("Interface stopped: %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
     //
@@ -354,7 +354,8 @@ Mld6igmpVif::enable()
 {
     ProtoUnit::enable();
 
-    XLOG_INFO("Enabled vif: %s", name().c_str());
+    XLOG_INFO("Interface enabled: %s%s",
+	      this->str().c_str(), flags_string().c_str());
 }
 
 /**
@@ -371,7 +372,8 @@ Mld6igmpVif::disable()
     stop(error_msg);
     ProtoUnit::disable();
 
-    XLOG_INFO("Disabled vif: %s", name().c_str());
+    XLOG_INFO("Interface disabled: %s%s",
+	      this->str().c_str(), flags_string().c_str());
 }
 
 /**

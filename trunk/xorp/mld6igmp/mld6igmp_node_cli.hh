@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node_cli.hh,v 1.4 2004/02/25 05:54:55 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node_cli.hh,v 1.5 2004/06/10 22:41:27 hodson Exp $
 
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_CLI_HH__
@@ -73,6 +73,21 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+    
+    /**
+     * Enable node operation.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable node operation.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
     
     /**
      * Install all MLD6IGMP-related CLI commands to the CLI.

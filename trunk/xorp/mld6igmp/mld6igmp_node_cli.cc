@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.17 2005/02/27 21:32:54 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.18 2005/03/19 23:44:18 pavlin Exp $"
 
 
 //
@@ -86,7 +86,9 @@ Mld6igmpNodeCli::start()
 
     if (add_all_cli_commands() < 0)
 	return (XORP_ERROR);
-    
+
+    XLOG_INFO("CLI started");
+
     return (XORP_OK);
 }
 
@@ -100,8 +102,38 @@ Mld6igmpNodeCli::stop()
 
     if (delete_all_cli_commands() < 0)
 	ret_code = XORP_ERROR;
-    
+
+    XLOG_INFO("CLI stopped");
+
     return (ret_code);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+Mld6igmpNodeCli::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("CLI enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+Mld6igmpNodeCli::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("CLI disabled");
 }
 
 int

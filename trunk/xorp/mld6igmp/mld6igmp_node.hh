@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.19 2005/03/19 23:50:18 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.20 2005/03/20 00:21:11 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -112,6 +112,21 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop();
+    
+    /**
+     * Enable node operation.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable node operation.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
     
     /**
      * Install a new MLD/IGMP vif.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.41 2005/03/19 23:50:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.42 2005/03/20 00:21:11 pavlin Exp $"
 
 
 //
@@ -185,6 +185,8 @@ Mld6igmpNode::final_start()
     // Start the mld6igmp_vifs
     start_all_vifs();
 
+    XLOG_INFO("Protocol started");
+
     return (XORP_OK);
 }
 
@@ -260,7 +262,37 @@ Mld6igmpNode::final_stop()
     if (ProtoNode<Mld6igmpVif>::stop() < 0)
 	return (XORP_ERROR);
 
+    XLOG_INFO("Protocol stopped");
+
     return (XORP_OK);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+Mld6igmpNode::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("Protocol enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+Mld6igmpNode::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("Protocol disabled");
 }
 
 void
@@ -343,7 +375,7 @@ Mld6igmpNode::add_vif(const Vif& vif, string& error_msg)
 	return (XORP_ERROR);
     } while (false);
 
-    XLOG_INFO("New vif: %s", mld6igmp_vif->str().c_str());
+    XLOG_INFO("Interface added: %s", mld6igmp_vif->str().c_str());
     
     return (XORP_OK);
 }
@@ -410,7 +442,7 @@ Mld6igmpNode::delete_vif(const string& vif_name, string& error_msg)
     
     delete mld6igmp_vif;
     
-    XLOG_INFO("Deleted vif: %s", vif_name.c_str());
+    XLOG_INFO("Interface deleted: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -458,7 +490,7 @@ Mld6igmpNode::set_vif_flags(const string& vif_name,
     }
     
     if (is_changed)
-	XLOG_INFO("Vif flags changed: %s", mld6igmp_vif->str().c_str());
+	XLOG_INFO("Interface flags changed: %s", mld6igmp_vif->str().c_str());
     
     return (XORP_OK);
 }
@@ -589,7 +621,7 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Deleted address on vif %s: %s",
+    XLOG_INFO("Deleted address on interface %s: %s",
 	      mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
     
     //
