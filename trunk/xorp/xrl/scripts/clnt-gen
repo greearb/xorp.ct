@@ -241,6 +241,8 @@ def main():
     # Generate implementation file
     cc_txt = prepare_client_if_cc(hh_file[hh_file.rfind("/") + 1 : ], cc_file)
     for xif in xifs:
+        cls = "Xrl%s%sClient" % (cpp_classname(xif.name()), \
+                                  cpp_version(xif.version()))
         cc_txt += client_if_cc(cls, xif.name(), xif.version(), xif.methods())
     Xif.util.file_write_string(cc_file, cc_txt)
 
