@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.35 2004/02/28 10:43:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.36 2004/02/29 22:59:48 pavlin Exp $"
 
 
 //
@@ -713,12 +713,14 @@ PimNode::delete_vif_addr(const string& vif_name,
     // Update the primary and domain-wide addresses.
     // If the vif has no more primary or a domain-wide address, then stop it.
     //
-    pim_vif->update_primary_and_domain_wide_address();
+    pim_vif->update_primary_and_domain_wide_address(error_msg);
     if (pim_vif->is_up()) {
 	// Check the primary and domain-wide addresses
 	if ((pim_vif->primary_addr() == IPvX::ZERO(family()))
 	    || (pim_vif->domain_wide_addr() == IPvX::ZERO(family()))) {
-	    pim_vif->stop();
+	    XLOG_ERROR("Cannot update primary and domain-wide addresses: %s",
+		       error_msg.c_str());
+	    pim_vif->stop(error_msg);
 	}
     }
 
@@ -812,9 +814,9 @@ PimNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->start() != XORP_OK) {
-	error_msg = c_format("Cannot start vif %s: internal error",
-			     vif_name.c_str());
+    if (pim_vif->start(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot start vif %s: %s",
+			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -844,9 +846,9 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->stop() != XORP_OK) {
-	error_msg = c_format("Cannot stop vif %s: internal error",
-			     vif_name.c_str());
+    if (pim_vif->stop(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot stop vif %s: %s",
+			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -870,13 +872,18 @@ PimNode::start_all_vifs()
 {
     int n = 0;
     vector<PimVif *>::iterator iter;
+    string error_msg;
     
-    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	if (pim_vif->start() == XORP_OK)
+	if (pim_vif->start(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot start vif %s: %s",
+		       pim_vif->name().c_str(), error_msg.c_str());
+	} else {
 	    n++;
+	}
     }
     
     return (n);
@@ -896,13 +903,18 @@ PimNode::stop_all_vifs()
 {
     int n = 0;
     vector<PimVif *>::iterator iter;
+    string error_msg;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	if (pim_vif->stop() == XORP_OK)
+	if (pim_vif->stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot stop vif %s: %s",
+		       pim_vif->name().c_str(), error_msg.c_str());
+	} else {
 	    n++;
+	}
     }
     
     return (n);

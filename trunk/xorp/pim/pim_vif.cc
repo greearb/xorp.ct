@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.30 2004/02/25 02:43:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.31 2004/02/29 22:59:48 pavlin Exp $"
 
 
 //
@@ -174,7 +174,9 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
  **/
 PimVif::~PimVif()
 {
-    stop();
+    string error_msg;
+
+    stop(error_msg);
     
     BUFFER_FREE(_buffer_send);
     BUFFER_FREE(_buffer_send_hello);
@@ -254,37 +256,45 @@ PimVif::pim_mrt() const
 
 /**
  * PimVif::start:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Start PIM on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::start()
+PimVif::start(string& error_msg)
 {
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (! is_underlying_vif_up())
+    if (! is_underlying_vif_up()) {
+	error_msg = "underlying vif is not UP";
 	return (XORP_ERROR);
-    if (is_loopback())
+    }
+    if (is_loopback()) {
+	error_msg = "cannot start a loopback interface";
 	return (XORP_ERROR);
-    if (! (is_multicast_capable() || is_pim_register()))
+    }
+    if (! (is_multicast_capable() || is_pim_register())) {
+	error_msg = "the interface is not multicast capable";
+	return (XORP_ERROR);
+    }
+
+    if (update_primary_and_domain_wide_address(error_msg) < 0)
 	return (XORP_ERROR);
 
-    if (update_primary_and_domain_wide_address() < 0)
+    if (ProtoUnit::start() < 0) {
+	error_msg = "internal error";
 	return (XORP_ERROR);
-
-    if (ProtoUnit::start() < 0)
-	return (XORP_ERROR);
+    }
     
     //
     // Start the vif with the kernel
     //
     if (pim_node().start_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	XLOG_ERROR("Error starting protocol vif %s with the kernel",
-		   name().c_str());
+	error_msg = c_format("cannot start protocol vif %s with the kernel",
+			     name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -297,8 +307,8 @@ PimVif::start()
 	//
 	const IPvX group1 = IPvX::PIM_ROUTERS(family());
 	if (pim_node().join_multicast_group(vif_index(), group1) != XORP_OK) {
-	    XLOG_ERROR("Error joining group %s on vif %s",
-		       cstring(group1), name().c_str());
+	    error_msg = c_format("cannot join group %s on vif %s",
+				 cstring(group1), name().c_str());
 	    return (XORP_ERROR);
 	}
 	
@@ -322,7 +332,7 @@ PimVif::start()
 
 /**
  * PimVif::stop:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Gracefully stop PIM on a single virtual interface.
  * XXX: The graceful stop will attempt to send Join/Prune, Assert, etc.
@@ -337,15 +347,17 @@ PimVif::start()
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::stop()
+PimVif::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
     if (is_down())
 	return (XORP_OK);
     
-    if (! (is_up() || is_pending_up() || is_pending_down()))
+    if (! (is_up() || is_pending_up() || is_pending_down())) {
+	error_msg = "the vif state is not UP or PENDING_UP or PENDING_DOWN";
 	return (XORP_ERROR);
+    }
     
     //
     // Add the tasks to take care of the PimMre processing
@@ -358,7 +370,7 @@ PimVif::stop()
     if ((_usage_by_pim_mre_task == 0)
 	|| is_pending_up()
 	|| is_pending_down()) {
-	ret_value = final_stop();
+	ret_value = final_stop(error_msg);
 	return (ret_value);
     }
     
@@ -377,8 +389,10 @@ PimVif::stop()
 	set_i_am_dr(false);
     }
     
-    if (ProtoUnit::pending_stop() < 0)
+    if (ProtoUnit::pending_stop() < 0) {
+	error_msg = "internal error";
 	ret_value = XORP_ERROR;
+    }
     
     _dr_addr = IPvX::ZERO(family());
     
@@ -390,19 +404,21 @@ PimVif::stop()
 
 /**
  * PimVif::final_stop:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Completely stop PIM on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::final_stop()
+PimVif::final_stop(string& error_msg)
 {
     int ret_value = XORP_OK;
     
-    if (! (is_up() || is_pending_up() || is_pending_down()))
+    if (! (is_up() || is_pending_up() || is_pending_down())) {
+	error_msg = "the vif state is not UP or PENDING_UP or PENDING_DOWN";
 	return (XORP_ERROR);
+    }
     
     if (! is_pim_register()) {
 	//
@@ -416,8 +432,10 @@ PimVif::final_stop()
 	set_i_am_dr(false);
     }
     
-    if (ProtoUnit::stop() < 0)
+    if (ProtoUnit::stop() < 0) {
+	error_msg = "internal error";
 	ret_value = XORP_ERROR;
+    }
     
     _dr_addr = IPvX::ZERO(family());
     _hello_timer.unschedule();
@@ -435,8 +453,8 @@ PimVif::final_stop()
     // Stop the vif with the kernel
     //
     if (pim_node().stop_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	XLOG_ERROR("Error stopping protocol vif %s with the kernel",
-		   name().c_str());
+	error_msg = c_format("cannot stop protocol vif %s with the kernel",
+			     name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -1340,7 +1358,7 @@ PimVif::buffer_send_prepare(buffer_t *buffer)
 
 /**
  * PimVif::update_primary_and_domain_wide_address:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Update the primary and the domain-wide reachable addresses.
  * 
@@ -1353,7 +1371,7 @@ PimVif::buffer_send_prepare(buffer_t *buffer)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::update_primary_and_domain_wide_address()
+PimVif::update_primary_and_domain_wide_address(string& error_msg)
 {
     IPvX primary_a(IPvX::ZERO(family()));
     IPvX domain_wide_a(IPvX::ZERO(family()));
@@ -1389,6 +1407,10 @@ PimVif::update_primary_and_domain_wide_address()
     //
     if ((primary_a == IPvX::ZERO(family()))
 	|| (domain_wide_a == IPvX::ZERO(family()))) {
+	if (primary_a == IPvX::ZERO(family()))
+	    error_msg = "invalid primary address";
+	else
+	    error_msg = "invalid domain-wide address";
 	return (XORP_ERROR);
     }
 
@@ -1695,12 +1717,14 @@ PimVif::incr_usage_by_pim_mre_task()
 void
 PimVif::decr_usage_by_pim_mre_task()
 {
+    string error_msg;
+
     XLOG_ASSERT(_usage_by_pim_mre_task > 0);
     _usage_by_pim_mre_task--;
     
     if (_usage_by_pim_mre_task == 0) {
 	if (is_pending_down()) {
-	    final_stop();
+	    final_stop(error_msg);
 	}
     }
 }

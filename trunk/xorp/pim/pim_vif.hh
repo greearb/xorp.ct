@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.24 2004/02/24 21:04:55 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.25 2004/02/25 02:43:57 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -90,9 +90,10 @@ public:
     /**
      *  Start PIM on a single virtual interface.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start();
+    int		start(string& error_msg);
     
     /**
      * Gracefully stop PIM on a single virtual interface.
@@ -106,9 +107,10 @@ public:
      * will force calling immediately PimVif::final_stop() to quickly
      * finish the job.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop();
+    int		stop(string& error_msg);
     
     /**
      * Completely stop PIM on a single virtual interface.
@@ -116,9 +118,10 @@ public:
      * This method should be called after @ref PimVif::stop() to complete
      * the job.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		final_stop();
+    int		final_stop(string& error_msg);
     
     /**
      * Receive a protocol message.
@@ -235,9 +238,10 @@ public:
      * reachable by all PIM-SM routers in the domain
      * (e.g., the Cand-BSR, or the Cand-RP address).
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		update_primary_and_domain_wide_address();
+    int		update_primary_and_domain_wide_address(string& error_msg);
 
     /**
      * Get the address of the Designated Router on this interface.
