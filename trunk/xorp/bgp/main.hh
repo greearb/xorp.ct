@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.8 2003/01/26 06:15:53 atanu Exp $
+// $XORP: xorp/bgp/main.hh,v 1.9 2003/02/08 07:30:23 rizzo Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -27,8 +27,9 @@
 #include "libxipc/xrl_std_router.hh"
 #include "libxorp/eventloop.hh"
 #include "path_attribute.hh"
-
 #include "peer_handler.hh"
+
+class XrlBgpTarget;
 
 class BGPMain {
 public:
@@ -78,6 +79,8 @@ public:
 
     /**
      * delete peer tear down connection and remove for peerlist.
+
+	XrlBgpTarget xbt(bgp.get_router(), bgp);
      *
      * @param iptuple iptuple.
      *
@@ -265,6 +268,8 @@ public:
 
     XrlStdRouter *get_router() { return _xrl_router; }
     EventLoop *get_eventloop() { return &_eventloop; }
+    XrlBgpTarget *get_xrl_target() { return _xrl_target; }
+
 protected:
 private:
     /**
@@ -317,6 +322,7 @@ private:
     bool _exit_loop;
     BGPPeerList *_peerlist;
     BGPPlumbing *_plumbing;
+    XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
     LocalData _local_data;
     XrlStdRouter *_xrl_router;

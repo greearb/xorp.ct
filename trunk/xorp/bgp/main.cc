@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.16 2003/02/05 07:22:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.17 2003/02/08 07:30:23 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -29,6 +29,7 @@
 #include "main.hh"
 #include "path_attribute.hh"
 #include "iptuple.hh"
+#include "xrl_target.hh"
 
 EventLoop BGPMain::_eventloop;
 
@@ -41,6 +42,7 @@ BGPMain::BGPMain()
     */
     _peerlist = new BGPPeerList();
     _xrl_router = new XrlStdRouter(*get_eventloop(), "bgp");
+    _xrl_target = new XrlBgpTarget(_xrl_router, *this);
     _rib_ipc_handler = new RibIpcHandler(_xrl_router, *get_eventloop());
     _plumbing = new BGPPlumbing(_xrl_router, _rib_ipc_handler);
 }
@@ -89,6 +91,10 @@ BGPMain::~BGPMain()
 	XLOG_INFO("xrl router still has pending operations");
     }
 
+    debug_msg("-------------------------------------------\n");
+    debug_msg("Deleting Xrl Target\n");
+    delete _xrl_target;
+    
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting xrl_router\n");
     delete _xrl_router;

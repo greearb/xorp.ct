@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.3 2003/01/10 01:56:03 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -58,8 +58,6 @@ main(int /*argc*/, char **argv)
 
 	EventLoop *e = bgp.get_eventloop();
 
-	XrlBgpTarget xbt(bgp.get_router(), bgp);
-
 	/*
 	** By default assume there is a rib running.
 	*/
@@ -68,14 +66,14 @@ main(int /*argc*/, char **argv)
 	/*
 	** Wait for our local configuration information.
 	*/
-	while(xbt.waiting()) {
+	while (bgp.get_xrl_target()->waiting()) {
 	    e->run();
 	}
 
 	/*
 	** Check we shouldn't be exiting.
 	*/
- 	if (!xbt.done())
+ 	if (!bgp.get_xrl_target()->done())
  	   bgp.main_loop();
 
     } catch(...) {
