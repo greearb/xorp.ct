@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.11 2003/10/13 23:42:26 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.12 2003/10/14 02:44:06 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -38,6 +38,21 @@ enum  Safi {
     SAFI_UNICAST = SAFI_UNICAST_VAL,
     SAFI_MULTICAST = SAFI_MULTICAST_VAL,
 };
+
+inline
+const char *
+pretty_string_safi(Safi safi)
+{
+    switch(safi) {
+    case SAFI_UNICAST:
+	return "Safi:Unicast";
+    case SAFI_MULTICAST:
+	return "Safi:Multicast";
+    }
+
+    XLOG_UNREACHABLE();
+    return 0;
+}
 
 #if	0
 class AfiSafi {
