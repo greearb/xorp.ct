@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.15 2003/04/10 03:12:03 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.13 2003/04/02 22:58:53 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ dnl XXX: libtool options
 dnl ----------------------------
 dnl AC_DISABLED_STATIC
 dnl AC_DISABLE_SHARED
-dnl AC_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 
 dnl ----------------------------
@@ -183,12 +183,17 @@ dnl
 builtin(include, config/compiler_flags.m4)
 
 
-dnl  ----------------------------
+dnl ----------------------------
 dnl  Get project-specific macros
 dnl ----------------------------
 
 builtin(include, config/acxorp.m4)
+ 
+dnl --------------------------------------
+dnl  Get macro to compare program versions 
+dnl --------------------------------------
 
+builtin(include, config/acversion.m4)
 
 dnl ---------------------------------------------------------------------------
 dnl Additional tool probes
@@ -216,7 +221,7 @@ fi
 
 AC_PROG_INSTALL
 dnl XXX: AUTOMAKE
-dnl AM_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 AC_PROG_LN_S
 AC_PROG_RANLIB
 
@@ -257,6 +262,42 @@ if test "${xorp_python_good}" = "yes" ; then
 fi
 AC_SUBST(PY_BUILD)
 AC_SUBST(PYTHON)
+
+dnl ---------------------------------------------------------------------------
+dnl Check for programs 
+dnl ---------------------------------------------------------------------------
+
+AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
+if test "${net_snmp_found}" = "true" ;  then
+    net_snmp_v=`net-snmp-config --version`
+    net_snmp_maj=`echo $net_snmp_v | sed 's/\..*//'` 
+    net_snmp_min=`echo $net_snmp_v | sed -e 's/[[0-9]]*\.//' -e 's/\.[[0-9]]*//'`
+    net_snmp_rev=`echo $net_snmp_v | sed 's/[[0-9]]*\.[[0-9]]*\.//'` 
+    net_snmp_v=`net-snmp-config --version`
+    AC_CACHE_CHECK(if net-snmp version equal or newer than 5.0.6,
+    ac_cv_net_snmp_usable,
+	net_snmp_too_old=false
+	if test "5" -gt $net_snmp_maj ; then
+	    net_snmp_too_old=true
+	elif test "0" -gt $net_snmp_min ; then
+	    net_snmp_too_old=true
+	elif test "6" -gt $net_snmp_rev ; then
+	    net_snmp_too_old=true
+	fi
+	if test $net_snmp_too_old != "true"; then
+	    MIBS="mibs"	
+	    ac_cv_net_snmp_usable=yes
+	else
+	    ac_cv_net_snmp_usable=no
+	fi
+    )
+    if test ${ac_cv_net_snmp_usable} != "yes" ; then
+	echo "net-snmp version too old.  MIB modules will not be built" 
+    fi
+else
+    echo "net-snmp not found.  MIB modules will not be built"
+fi
+AC_SUBST(MIBS)
 
 dnl ---------------------------------------------------------------------------
 dnl Check for libraries
@@ -1019,6 +1060,7 @@ AC_OUTPUT(
 	libxipc/Makefile
 	libxorp/Makefile
 	mfea/Makefile
+	mibs/Makefile
 	mld6igmp/Makefile 
 	mrt/Makefile
 	ospfd/Makefile
