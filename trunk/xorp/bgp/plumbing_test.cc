@@ -12,17 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.16 2003/09/04 03:42:39 atanu Exp $"
-
-#include "fcntl.h"
-
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.17 2003/09/16 21:00:26 hodson Exp $"
 #include "bgp_module.h"
-#include "bgp.hh"
-#include "plumbing_test.hh"
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-#include "libxipc/xrl_std_router.hh"
+
+#include "bgp.hh"
+#include "plumbing_test.hh"
 
 PlumbingTest::PlumbingTest(EventLoop& eventloop, BGPMain& bgp) 
     //dummy args to BGPPlumbing because we'll not use this constructor
@@ -48,11 +45,14 @@ PlumbingTest::run_tests()
 bool
 PlumbingTest::test1() 
 {
+    Iptuple iptuple;
+    IPv4 nh;
+
     LocalData local_data;
     local_data.set_as(my_AS_number());
 
-    BGPPeerData *peer_data1 = new BGPPeerData();
-    peer_data1->set_as(AsNum(666));
+    BGPPeerData *peer_data1 = new BGPPeerData(iptuple, AsNum(666), nh, 0);
+//     peer_data1->set_as(AsNum(666));
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
@@ -62,8 +62,8 @@ PlumbingTest::test1()
     //add_peering(&dummy_peerhandler1);
     printf("Peering Added.\n");
 
-    BGPPeerData *peer_data2 = new BGPPeerData();;
-    peer_data2->set_as(AsNum(667));
+    BGPPeerData *peer_data2 = new BGPPeerData(iptuple, AsNum(667), nh, 0);
+//     peer_data2->set_as(AsNum(667));
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
@@ -253,11 +253,14 @@ PlumbingTest::test2()
     /*
     ** 1. Create a single peer (peer1).
     */
+    Iptuple iptuple;
+    IPv4 nh;
+
     LocalData local_data;
     local_data.set_as(my_AS_number());
 
-    BGPPeerData *peer_data1 = new BGPPeerData();
-    peer_data1->set_as(AsNum(666));
+    BGPPeerData *peer_data1 = new BGPPeerData(iptuple, AsNum(666), nh, 0);
+//     peer_data1->set_as(AsNum(666));
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
     printf("Adding Peering 1\n");
@@ -306,8 +309,8 @@ PlumbingTest::test2()
     /*
     ** 3. Add another peer (peer2).
     */
-    BGPPeerData *peer_data2 = new BGPPeerData();;
-    peer_data2->set_as(AsNum(667));
+    BGPPeerData *peer_data2 = new BGPPeerData(iptuple, AsNum(667), nh, 0);;
+//     peer_data2->set_as(AsNum(667));
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
     printf("Adding Peering 2\n");
@@ -354,15 +357,31 @@ int main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
-    try { 
+    try {
+	// The BGP constructor expects to use the finder, so start one.
+	pid_t pid;
+	switch(pid = fork()) {
+	case 0:
+	    execlp("../libxipc/xorp_finder", "xorp_finder", 0);
+	    exit(0);
+	case -1:
+	    XLOG_FATAL("unable to exec xorp_finder");
+	default:
+	    break;
+	}
+
 	BGPMain bgpm;
 
 	PlumbingTest *tester;
-	tester = (PlumbingTest*)(bgpm.plumbing());
+ 	tester = (PlumbingTest*)(bgpm.plumbing());
 	if (!tester->run_tests()) {
 	    fprintf(stderr, "Test failed\n");
 	    exit(1);
 	}
+
+	// Remember to kill the finder.
+ 	kill(pid, SIGTERM);
+
 	printf("Tests successful\n");
     } catch(...) {
 	xorp_catch_standard_exceptions();
