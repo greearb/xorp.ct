@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
+// $XORP: xorp/fea/routing_socket_utils.hh,v 1.1 2003/05/02 07:50:49 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_UTILS_HH__
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
@@ -40,8 +40,8 @@ public:
      * @param sock the pointer to the first socket address.
      * @param rti_info the array with the pointers to store the result.
      */
-    static void	get_rta_sockaddr(uint32_t amask, const sockaddr* sock,
-				 const sockaddr* rti_info[]);
+    static void	get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
+				 const struct sockaddr* rti_info[]);
 
     /**
      * Get the masklen encoded in sockaddr.
@@ -50,7 +50,7 @@ public:
      * @param sock the socket address with the encoded masklen.
      * @return the masklen if successfully decoded, otherwise XORP_ERROR.
      */
-    static int	get_sock_masklen(int family, const sockaddr* sock);
+    static int	get_sock_masklen(int family, const struct sockaddr* sock);
     
     /**
      * Extract the routing information from RTM message.

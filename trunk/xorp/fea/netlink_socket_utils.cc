@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -22,6 +22,12 @@
 
 #include "libxorp/ipvx.hh"
 
+#include <net/if.h>
+
+// TODO: XXX: PAVPAVPAV: move this include somewhere else!!
+#ifdef HOST_OS_LINUX
+#include <linux/types.h>
+#endif
 #ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/rtnetlink.h>
 #endif
@@ -47,7 +53,7 @@ NlmUtils::nlm_msg_type(uint32_t m)
 	uint32_t 	value;
 	const char*	name;
     } nlm_msg_types[] = {
-#define NLM_MSG_ENTRY(X) { X, #X }
+#define RTM_MSG_ENTRY(X) { X, #X }
 #ifdef RTM_NEWLINK
 	RTM_MSG_ENTRY(RTM_NEWLINK),
 #endif
@@ -136,13 +142,13 @@ NlmUtils::nlm_msg_type(uint32_t m)
 }
 
 void
-NlmUtils::get_rta_attr(const rtattr* rtattr, int rta_len,
-		       const rtattr* rta_array[])
+NlmUtils::get_rta_attr(const struct rtattr* rtattr, int rta_len,
+		       const struct rtattr* rta_array[])
 {
     while (RTA_OK(rtattr, rta_len)) {
 	if (rtattr->rta_type <= RTA_MAX)
 	    rta_array[rtattr->rta_type] = rtattr;
-	rtattr = RTA_NEXT(rtattr, rta_len);
+	rtattr = RTA_NEXT(const_cast<struct rtattr *>(rtattr), rta_len);
     }
     
     if (rta_len) {
@@ -157,7 +163,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[RTA_MAX + 1];
-    int rta_len, if_index;
+    int if_index;
     string if_name;
     int family = fte.gateway().af();
     
@@ -184,7 +190,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = RTM_RTA(rtmsg);
+    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
     NlmUtils::get_rta_attr(rtattr, rta_len, rta_array);
 
     //
@@ -194,7 +200,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 	// The default entry
     } else {
 	// TODO: fix this!!
-	dst_addr.copy_in(family, (uint8_t *)RTA_DATA(rta_array[RTA_DST]));
+	dst_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_DST])));
 	dst_addr = kernel_ipvx_adjust(dst_addr);
 	if (! dst_addr.is_unicast()) {
 	    // TODO: should we make this check?
@@ -207,20 +213,19 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     // Get the gateway
     //
     if (rta_array[RTA_GATEWAY] != NULL) {
-	gateway_addr.copy_in(family,
-			     (uint8_t *)RTA_DATA(rta_array[RTA_GATEWAY]));
+	gateway_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_GATEWAY])));
     }
     
     //
     // Get the destination masklen
     //
-    dest_masklen = rtmsg->rtm_dst_len;
+    dst_masklen = rtmsg->rtm_dst_len;
     
     //
     // Get the interface index
     //
     if (rta_array[RTA_OIF] != NULL) {
-	if_index = *(int *)RTA_DATA(rta_array[RTA_OIF]);
+	if_index = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF]));
     } else {
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
 	return (XORP_ERROR);

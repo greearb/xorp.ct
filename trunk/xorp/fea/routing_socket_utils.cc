@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.1 2003/05/02 07:50:49 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -140,8 +140,8 @@ round_up(size_t val, size_t step)
  * Step to next socket address pointer.
  * Taken from NEXT_SA macro in Stevens.
  */
-static inline const sockaddr*
-next_sa(const sockaddr* sa)
+static inline const struct sockaddr*
+next_sa(const struct sockaddr* sa)
 {
     const size_t min_size = sizeof(u_long);
     size_t sa_size = min_size;
@@ -165,12 +165,12 @@ next_sa(const sockaddr* sa)
 #endif // ! HAVE_SA_LEN
     
     const uint8_t* p = reinterpret_cast<const uint8_t*>(sa) + sa_size;
-    return reinterpret_cast<const sockaddr*>(p);
+    return reinterpret_cast<const struct sockaddr*>(p);
 }
 
 void
-RtmUtils::get_rta_sockaddr(uint32_t amask, const sockaddr* sock,
-			   const sockaddr* rti_info[])
+RtmUtils::get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
+			   const struct sockaddr* rti_info[])
 {
     for (uint32_t i = 0; i < RTAX_MAX; i++) {
 	if (amask & (1 << i)) {
@@ -185,7 +185,7 @@ RtmUtils::get_rta_sockaddr(uint32_t amask, const sockaddr* sock,
 }
 
 int
-RtmUtils::get_sock_masklen(int family, const sockaddr* sock)
+RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 {
 
 #ifndef HAVE_SA_LEN
@@ -193,7 +193,7 @@ RtmUtils::get_sock_masklen(int family, const sockaddr* sock)
     case AF_INET:
     {
 	// XXX: sock->sa_family is undefined
-	const sockaddr_in *sin = (const sockaddr_in *)sock;
+	const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
 	IPv4 netmask(sin->sin_addr);
 	return (netmask.prefix_length());
     }
@@ -201,7 +201,7 @@ RtmUtils::get_sock_masklen(int family, const sockaddr* sock)
     case AF_INET:
     {
 	// XXX: sock->sa_family is undefined
-	const sockaddr_in6 *sin6 = (const sockaddr_in6 *)sock;
+	const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sock;
 	IPv6 netmask(sin6->sin6_addr);
 	return (netmask.prefix_length());
     }
@@ -242,7 +242,7 @@ RtmUtils::get_sock_masklen(int family, const sockaddr* sock)
 		       family, sock->sa_len);
 	    {
 		// XXX: sock->sa_family is undefined
-		const sockaddr_in *sin = (const sockaddr_in *)sock;
+		const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
 		IPv4 netmask(sin->sin_addr);
 		return (netmask.prefix_length());
 	    }
@@ -259,7 +259,7 @@ RtmUtils::get_sock_masklen(int family, const sockaddr* sock)
 	    return (0);
 	}
 	// XXX: sock->sa_family is undefined
-	const sockaddr_in6 *sin6 = (const sockaddr_in6 *)sock;
+	const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sock;
 	IPv6 netmask(sin6->sin6_addr);
 	return (netmask.prefix_length());
     }
@@ -274,7 +274,7 @@ RtmUtils::get_sock_masklen(int family, const sockaddr* sock)
 }
 
 int
-RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const rt_msghdr* rtm)
+RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 {
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = rtm->rtm_index;
@@ -288,7 +288,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const rt_msghdr* rtm)
     fte.zero();
     
     // Get the pointers to the corresponding data structures    
-    sa = reinterpret_cast<const sockaddr *>(rtm + 1);
+    sa = reinterpret_cast<const struct sockaddr *>(rtm + 1);
     RtmUtils::get_rta_sockaddr(rtm->rtm_addrs, sa, rti_info);
     
     IPvX gateway_addr(family);
@@ -339,7 +339,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const rt_msghdr* rtm)
 	    XLOG_ERROR("Ignoring RTM_GET with sa_family = %d", sa->sa_family);
 	    return (XORP_ERROR);
 	}
-	const sockaddr_dl *sdl = reinterpret_cast<const sockaddr_dl*>(sa);
+	const struct sockaddr_dl *sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
 	
 	if (sdl->sdl_nlen > 0) {
 	    if_name = string(sdl->sdl_data, sdl->sdl_nlen);

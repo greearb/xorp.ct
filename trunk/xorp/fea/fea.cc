@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_rtsock.cc,v 1.3 2003/03/10 23:20:13 hodson Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.1 2003/05/02 07:50:42 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -49,21 +49,14 @@ fea_main(const char* finder_host)
     //
     // Initialize Components
     //
-    // 1. Routing Socket
-    //
-#ifndef HOST_OS_LINUX
-    // RoutingSocket rs(e);
 
     //
-    // 2. Routing Socket based Fti
+    // 1. FtiConfig
     //
-    // RoutingSocketFti fti(rs);
-    
     FtiConfig fticonfig(e);
-#endif
-
+    
     //
-    // 3. Interface Configurator and reporters
+    // 2. Interface Configurator and reporters
     //
     XrlIfConfigUpdateReporter ifreporter(rtr);
     IfConfigErrorReporter iferr;
@@ -72,20 +65,25 @@ fea_main(const char* finder_host)
     ifconfig.start();
     
     //
-    // 4. Interface manager
+    // 3. Interface manager
     //
     InterfaceManager ifm(ifconfig);
 
     //
-    // 5. Raw Socket TODO
+    // 4. Raw Socket TODO
     //
 
-#ifndef HOST_OS_LINUX
+    //
+    // 5. XRL Target
+    //
     XrlFeaTarget xrl_tgt(e, rtr, fticonfig, ifm, ifreporter, 0);
-#endif
-
-    for (;;)
+    
+    //
+    // Main loop
+    //
+    for ( ; ; ) {
 	e.run();
+    }
 }
 
 

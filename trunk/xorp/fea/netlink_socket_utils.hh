@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.1 2003/05/02 07:50:48 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -34,31 +34,22 @@ public:
     static string nlm_msg_type(uint32_t m);
 
     /**
-     * Get pointers to set of socket addresses as defined by a mask.
+     * Get pointers to set of netlink rtattr entries.
      * 
-     * @param amask the mask that defines the set of socket addresses.
-     * @param sock the pointer to the first socket address.
-     * @param rti_info the array with the pointers to store the result.
+     * @param rtattr the pointer to the first rtattr entry.
+     * @param rta_len the length of all rtattr entries.
+     * @param rta_array the array with the pointers to store the result.
      */
-    static void	get_rta_sockaddr(uint32_t amask, const sockaddr* sock,
-				 const sockaddr* rti_info[]);
+    static void get_rta_attr(const struct rtattr* rtattr, int rta_len,
+			     const struct rtattr* rta_array[]);
 
-    /**
-     * Get the masklen encoded in sockaddr.
-     * 
-     * @param family the address family.
-     * @param sock the socket address with the encoded masklen.
-     * @return the masklen if successfully decoded, otherwise XORP_ERROR.
-     */
-    static int	get_sock_masklen(int family, const sockaddr* sock);
-    
     /**
      * Extract the routing information from netlink message.
      * 
      * @param fte the return-by-reference @ref FteX entry to return the result.
      * @param nlm the netlink message.
      */
-    static int	nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg *rtmsg,
+    static int	nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg,
 				   int rta_len);
 };
 

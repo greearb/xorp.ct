@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.5 2003/05/02 07:50:41 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.6 2003/05/02 23:21:35 pavlin Exp $
 ##
 
 
@@ -63,6 +63,7 @@ libfea_a_SOURCES	+= ifmanager_transaction.hh
 libfea_a_SOURCES	+= iftree.hh
 libfea_a_SOURCES	+= kernel_utils.hh
 libfea_a_SOURCES	+= netlink_socket.hh
+libfea_a_SOURCES	+= netlink_socket_utils.hh
 libfea_a_SOURCES	+= rawsock4.hh
 libfea_a_SOURCES	+= routing_socket.hh
 libfea_a_SOURCES	+= routing_socket_utils.hh
@@ -108,6 +109,7 @@ libfea_a_SOURCES	+= ifconfig_set_ioctl.cc
 libfea_a_SOURCES	+= ifmanager_transaction.cc
 libfea_a_SOURCES	+= iftree.cc
 libfea_a_SOURCES	+= netlink_socket.cc
+libfea_a_SOURCES	+= netlink_socket_utils.cc
 libfea_a_SOURCES	+= rawsock4.cc
 libfea_a_SOURCES	+= routing_socket.cc
 libfea_a_SOURCES	+= routing_socket_utils.cc
