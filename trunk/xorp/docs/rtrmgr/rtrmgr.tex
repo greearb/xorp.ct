@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.23 2004/07/09 04:42:53 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.24 2004/08/12 20:23:43 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -128,6 +128,11 @@ started.
 build the list of XRLs that need to be called to configure the process
 just started.  These XRLs are then called, one after another, with the
 successful completion of one XRL triggering the calling of the next.
+The XRLs are ordered according to the semantics of the commands
+used to specify the XRLs (\eg see below the description of commands
+\%create, \%activate, etc). If the semantics of the commands
+do not specify the ordering, then the XRLs follow the order they
+are defined in the rtrmgr template files.
 Some processes may require calling a transaction start XRL before
 configuration, and a transaction complete XRL after configuration -
 the rtrmgr can do this if required.
@@ -703,6 +708,32 @@ integer configuration item may take.  The syntax is:
 of the variable to be restricted.  This is typically
 \texttt{\"\$(@)\"}.  The {\it lowValue} and {\it highVal} parameters
 specify the lower and upper bound of the allowed range of values.
+
+\subsubsection{The {\tt \%help} Command.}
+
+The {\tt \%help} command specifies the CLI configuration-mode help string.
+The syntax is:
+
+\texttt{\%help: }{$\{short \mid long\}$} \texttt{"Help string"} \texttt{;}
+
+\noindent where the first parameter, \textit{short} or \textit{long},
+specifies whether this is the short-version or the long-version of the
+help, and the second parameter is the help string itself.
+
+\subsubsection{The {\tt \%deprecated} Command.}
+
+The {\tt \%deprecated} command can be used to deprecate a template tree
+node and the subtree below it.
+The syntax is:
+
+\texttt{\%deprecated: } \texttt{"String with reason"} \texttt{;}
+
+If the XORP startup configuration contains a statement that uses a
+deprecated node in the template, the rtrmgr prints an error with
+the string with the reason, and exits.
+If, however, somehow the xorpsh sends to the rtrmgr configuration
+that contains a deprecated statement, the rtrmgr returns an error to xorpsh,
+and the error message will contain the string with the reason.
 
 \newpage
 
