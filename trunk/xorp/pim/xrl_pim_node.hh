@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.30 2003/09/12 23:45:43 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.31 2003/09/30 18:27:06 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1212,9 +1212,9 @@ protected:
      *  
      *  @param rp_priority the RP priority (smaller is better).
      *  
-     *  @param hash_mask_len the hash mask length used in computing an RP
-     *  for a group. It should be same across all RPs. If set to zero,
-     *  the default one will be used.
+     *  @param hash_mask_len the hash mask length used in computing an RP for a
+     *  group. It should be same across all RPs. If set to zero, the default
+     *  one will be used.
      */
     XrlCmdError pim_0_1_add_config_static_rp4(
 	// Input values, 
