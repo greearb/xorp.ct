@@ -117,11 +117,11 @@ TEXINPUTS_PATH = $(top_srcdir)/docs/tex:
 SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 
 # -- Document Names
-DOCS = xorpdev101
+DOCS = xorpdev_101
 
 # -- Document Sources
-xorpdev101_LATEX = ../tex/xorp.bib xorpdev101.tex
-subdir = docs/xorpdev-101
+xorpdev_101_LATEX = ../tex/xorp.bib xorpdev_101.tex
+subdir = docs/xorpdev_101
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
@@ -138,7 +138,7 @@ all: all-am
 .SUFFIXES: .tex .bbl .dvi .ps .pdf .fig .ps .eps
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/docs/mk/Makefile.doc.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  docs/xorpdev-101/Makefile
+	  $(AUTOMAKE) --gnu  docs/xorpdev_101/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \

@@ -1,15 +1,15 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/libxorp/Makefile.am,v 1.2 2003/06/06 03:59:17 pavlin Exp $
+## $XORP: xorp/docs/xorpdev_101/Makefile.am,v 1.1 2004/07/18 22:57:35 mjh Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
 
 # -- Document Names
-DOCS			= xorpdev101
+DOCS			= xorpdev_101
 
 # -- Document Sources
-xorpdev101_LATEX	= ../tex/xorp.bib xorpdev101.tex
+xorpdev_101_LATEX	= ../tex/xorp.bib xorpdev_101.tex
 
 
 ################################################################
