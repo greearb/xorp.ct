@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.2 2002/12/14 23:42:50 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.3 2003/01/26 04:06:19 pavlin Exp $"
 
 
 //
@@ -42,6 +42,11 @@
 //
 // Local structures/classes, typedefs and macros
 //
+#ifdef ORIGINAL_FINDER
+typedef FinderServer TestFinderServer;
+#else
+typedef FinderNGServer TestFinderServer;
+#endif
 
 
 //
@@ -168,9 +173,10 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	FinderServer *finder = NULL;
+	TestFinderServer *finder = NULL;
 	try {
-	    finder = new FinderServer(event_loop);
+	    finder = new TestFinderServer(event_loop);
+	    add_permitted_host(IPv4("127.0.0.1"));
 	} catch (const FinderTCPServerIPCFactory::FactoryError& factory_error) {
 	    XLOG_WARNING("Cannot instantiate Finder. Probably already running...");
 	}
@@ -305,8 +311,8 @@ cli_print(const char * ,		// server_name
     // Test to print a number of lines at once
     //
     string my_string = "";
-    for (uint32_t i = 1000; i < 1100; i++)
-	my_string += c_format("This is my line number %u\n", i);
+    for (uint32_t i = 0; i < 100; i++)
+	my_string += c_format("This is my multi-line number %u\n", i);
     cli_client->cli_print(my_string);
     
     //

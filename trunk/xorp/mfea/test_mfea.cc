@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.3 2003/01/23 11:14:23 pavlin Exp $"
+#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.4 2003/01/23 11:22:37 pavlin Exp $"
 
 
 //
@@ -45,6 +45,11 @@
 //
 // Local structures/classes, typedefs and macros
 //
+#ifdef ORIGINAL_FINDER
+typedef FinderServer TestFinderServer;
+#else
+typedef FinderNGServer TestFinderServer;
+#endif
 
 
 //
@@ -155,9 +160,9 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	FinderServer *finder = NULL;
+	TestFinderServer *finder = NULL;
 	try {
-	    finder = new FinderServer(event_loop);
+	    finder = new TestFinderServer(event_loop);
 	} catch (const FinderTCPServerIPCFactory::FactoryError& factory_error) {
 	    XLOG_WARNING("Cannot instantiate Finder. Probably already running...");
 	}

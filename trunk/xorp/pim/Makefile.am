@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.26 2002/12/09 09:43:57 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
 ##
 
 # -- Real Programs
@@ -45,6 +45,7 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### XORP misc libraries
 LDADD		+= $(top_builddir)/libproto/libproto.a
+LDADD		+= $(top_builddir)/libxipc/libfinder.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
