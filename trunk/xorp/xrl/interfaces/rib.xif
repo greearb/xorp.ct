@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.11 2004/03/23 11:24:26 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.12 2004/04/01 19:31:21 hodson Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -205,14 +205,11 @@ interface rib/0.1 {
 	 * Enable route redistribution from one routing protocol to
 	 * another.
 	 *
-	 * @param target the XRL Target instance name of the caller.
+	 * @param to_xrl_target the XRL Target instance name of the caller.
 	 *	  The caller must implement redist4/0.1.
 	 *
-	 * @param from the name of the routing process routes are to be
-	 *	  redistributed from.
-	 *
-	 * @param to the name of the routing process routes are to be
-	 *	  redistributed to.
+	 * @param from_protocol the name of the routing process routes are
+	 * to be redistributed from.
 	 *
 	 * @param unicast enable for unicast RIBs matching from and to.
 	 *
@@ -223,9 +220,8 @@ interface rib/0.1 {
 	 *	  of updates it receives through it redist_client/0.1
 	 *	  interface.
 	 */
-	redist_enable4 ? target:txt					\
-		       & from:txt					\
-		       & to:txt						\
+	redist_enable4 ? to_xrl_target:txt				\
+		       & from_protocol:txt				\
 		       & unicast:bool					\
 		       & multicast:bool					\
 		       & cookie:txt
@@ -234,14 +230,11 @@ interface rib/0.1 {
 	 * Enable route redistribution from one routing protocol to
 	 * another.
 	 *
-	 * @param target the XRL Target instance name of the caller.
+	 * @param to_xrl_target the XRL Target instance name of the caller.
 	 *	  The caller must implement redist6/0.1.
 	 *
-	 * @param from the name of the routing process routes are to be
-	 *	  redistributed from.
-	 *
-	 * @param to the name of the routing process routes are to be
-	 *	  redistributed to.
+	 * @param from_protocol the name of the routing process routes are
+	 * to be redistributed from.
 	 *
 	 * @param unicast enable for unicast RIBs matching from and to.
 	 *
@@ -252,9 +245,8 @@ interface rib/0.1 {
 	 *	  of updates it receives through it redist_client/0.1
 	 *	  interface.
 	 */
-	redist_enable6 ? target:txt					\
-		       & from:txt					\
-		       & to:txt						\
+	redist_enable6 ? to_xrl_target:txt				\
+		       & from_protocol:txt				\
 		       & unicast:bool					\
 		       & multicast:bool					\
 		       & cookie:txt
@@ -263,7 +255,7 @@ interface rib/0.1 {
 	 * Disable route redistribution from one routing protocol to
 	 * another.
 	 *
-	 * @param target the XRL Target instance name of the caller.
+	 * @param to_xrl_target the XRL Target instance name of the caller.
 	 *	  The caller must implement redist4/0.1 and previously
 	 *	  called redist_enable4.
 	 *
@@ -277,35 +269,32 @@ interface rib/0.1 {
 	 *
 	 * @param multicast disable for multicast RIBs matching from and to.
 	 */
-	redist_disable4	? target:txt					\
-			& from:txt					\
-			& to:txt					\
+	redist_disable4	? to_xrl_target:txt				\
+			& from_protocol:txt				\
 			& unicast:bool					\
-			& multicast:bool
+			& multicast:bool				\
+			& cookie:txt
 
 	/**
 	 * Disable route redistribution from one routing protocol to
 	 * another.
 	 *
-	 * @param target:txt the XRL Target instance name of the caller.
+	 * @param to_xrl_target the XRL Target instance name of the caller.
 	 *	  The caller must implement redist6/0.1 and previously
 	 *	  called redist_enable6.
 	 *
-	 * @param from:txt the name of the routing process routes are to be
+	 * @param from the name of the routing process routes are to be
 	 *	  redistributed from.
-	 *
-	 * @param to:txt the name of the routing process routes are to be
-	 *	  redistributed to.
 	 *
 	 * @param unicast disable for unicast RIBs matching from and to.
 	 *
 	 * @param multicast disable for multicast RIBs matching from and to.
 	 */
-	redist_disable6	? target:txt					\
-			& from:txt					\
-			& to:txt					\
+	redist_disable6	? to_xrl_target:txt				\
+			& from_protocol:txt				\
 			& unicast:bool					\
-			& multicast:bool
+			& multicast:bool				\
+			& cookie:txt
 
 	/**
  	 * Register an interest in a route
