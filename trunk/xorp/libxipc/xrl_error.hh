@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.5 2003/03/10 23:20:27 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.6 2003/03/16 08:20:32 pavlin Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
@@ -82,24 +82,18 @@ public:
     static const XrlError& NO_SUCH_METHOD();
 
     /**
-     * XRL appears to have been corrupted by transport protocol.
+     * An error has occurred within the XRL system.  This is usually a sign
+     * of an implementation issue.  This error replaces no longer
+     * existent errors of CORRUPT_XRL, CORRUPT_XRL_RESPONSE, and
+     * BAD_PROTOCOL_VERSION.  The note associated with the error should
+     * contain more information.
      */
-    static const XrlError& CORRUPT_XRL();
-
-    /**
-     * XRL response appears to have been corrupted by transport protocol.
-     */
-    static const XrlError& CORRUPT_RESPONSE();
-
+    static const XrlError& INTERNAL_ERROR();
+    
     /**
      * System call failed in transport protocol implementation.
      */
     static const XrlError& SYSCALL_FAILED();
-
-    /**
-     * Xrl transport protocol version mismatch.
-     */
-    static const XrlError& BAD_PROTOCOL_VERSION();
 
     /**
      * Unspecified error.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_error.cc,v 1.3 2003/02/19 00:30:35 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_error.cc,v 1.4 2003/03/10 23:20:27 hodson Exp $"
 
 #include <stdio.h>
 #include <string>
@@ -76,9 +76,7 @@ XRL_ERROR_GLUE(send_failed, SEND_FAILED, 210, "Transport failed");
 XRL_ERROR_GLUE(reply_timed_out, REPLY_TIMED_OUT, 211, "Reply timed out");
 XRL_ERROR_GLUE(no_such_method, NO_SUCH_METHOD, 212, "No such method");
 
-XRL_ERROR_GLUE(corrupt_xrl, CORRUPT_XRL, 220, "Corrupt XRL");
-XRL_ERROR_GLUE(corrupt_response, CORRUPT_RESPONSE, 221, "Corrupt response");
-XRL_ERROR_GLUE(bad_protocol, BAD_PROTOCOL_VERSION, 222, "Bad protocol version");
+XRL_ERROR_GLUE(corrupt_xrl, INTERNAL_ERROR, 220, "Internal error");
 
 XRL_ERROR_GLUE(syscall_failed, SYSCALL_FAILED, 230, "System call failed");
 

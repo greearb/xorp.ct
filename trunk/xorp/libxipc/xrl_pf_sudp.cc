@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.12 2003/03/10 23:20:29 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.13 2003/04/22 23:27:19 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -118,7 +118,8 @@ static XrlError status_to_xrlerror(const string& status)
     
     if (si == status.begin()) {
 	XLOG_ERROR("Missing XrlError::errorcode value");
-	return XrlError::CORRUPT_RESPONSE();
+	return XrlError(XrlError::INTERNAL_ERROR().error_code(),
+			"corrupt xrl response");
     }
 
     if (si == status.end())
@@ -341,7 +342,9 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	callback->dispatch(err, *px, &response);
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: header_bytes %u content_bytes %u\n\t\"%s\"\n", (uint32_t)header_bytes, (uint32_t)content_bytes, buf + header_bytes);
-	callback->dispatch(XrlError::CORRUPT_RESPONSE(), *px, 0);
+	XrlError xe(XrlError::INTERNAL_ERROR().error_code(),
+		    "corrupt xrl response");
+	callback->dispatch(xe, *px, 0);
     }
 }
 
@@ -436,7 +439,8 @@ XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
     } catch (InvalidString& e) {
 	debug_msg("Invalid string - failed to dispatch %s\n", rbuf);
     }
-    return XrlError::CORRUPT_XRL();
+    return XrlError(XrlError::INTERNAL_ERROR().error_code(),
+		    "corrupt xrl");
 }
 
 void

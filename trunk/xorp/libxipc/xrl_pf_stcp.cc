@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.10 2003/03/10 23:20:28 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.11 2003/04/22 23:27:19 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -237,7 +237,7 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
 	Xrl xrl(xrl_c_str);
 	e = xr->dispatch_xrl(xrl, response);
     } catch (const InvalidString&) {
-	e = XrlError::CORRUPT_XRL();
+	e = XrlError(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
     }
     debug_msg("Response count %u\n", (uint32_t)_responses.size());
 
@@ -631,7 +631,9 @@ XrlPFSTCPSender::dispatch_reply()
 	XrlArgs response(xrl_data);
 	rs->callback->dispatch(rcv_err, rs->xrl, &response);
     } catch (InvalidString& ) {
-	rs->callback->dispatch(XrlError::CORRUPT_RESPONSE(), rs->xrl, 0);
+	XrlError xe (XrlError::INTERNAL_ERROR().error_code(),
+		    "corrupt xrl response");
+	rs->callback->dispatch(xe, rs->xrl, 0);
 	debug_msg("Corrupt response: %s\n", xrl_data);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.13 2003/03/10 23:20:29 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.14 2003/04/02 22:58:57 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -259,7 +259,8 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
 	}
 	ds->dispatch(XrlError::SEND_FAILED(), 0);
     } catch (const InvalidString&) {
-	ds->dispatch(XrlError::CORRUPT_XRL());
+	ds->dispatch(XrlError(XrlError::INTERNAL_ERROR().error_code(),
+			      "bad factory arguments"), 0);
     }
     dispose(ds);
 

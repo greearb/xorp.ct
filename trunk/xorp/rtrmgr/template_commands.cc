@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.12 2003/03/14 23:18:46 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.13 2003/04/22 23:43:01 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -881,40 +881,34 @@ ModuleCommand::action_complete(const XrlError& err,
 	}
 	return;
     } else if (err == XrlError::BAD_ARGS()) {
-	fprintf(stderr, "BAD_ARGS: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
-    } else if (err == XrlError::COMMAND_FAILED()) {	
-	fprintf(stderr, "COMMAND_FAILED: %s\n", cmd.c_str());
+    } else if (err == XrlError::COMMAND_FAILED()) {
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
     } else if (err == XrlError::RESOLVE_FAILED()) {
-	fprintf(stderr, "RESOLVE_FAILED: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
     } else if (err == XrlError::NO_FINDER()) {
-	fprintf(stderr, "NO_FINDER: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
     } else if (err == XrlError::SEND_FAILED()) {
-	fprintf(stderr, "SEND_FAILED: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
     } else if (err == XrlError::REPLY_TIMED_OUT()) {
-	fprintf(stderr, "REPLY_TIMED_OUT: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
     } else if (err == XrlError::NO_SUCH_METHOD()) {
-	fprintf(stderr, "NO_SUCH_METHOD: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
-    } else if (err == XrlError::CORRUPT_XRL()) {
-	fprintf(stderr, "CORRUPT_XRL: %s\n", cmd.c_str());
-	//XXX 
-    } else if (err == XrlError::CORRUPT_RESPONSE()) {
-	fprintf(stderr, "CORRUPT_RESPONSE: %s\n", cmd.c_str());
+    } else if (err == XrlError::INTERNAL_ERROR()) {
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
     } else if (err == XrlError::SYSCALL_FAILED()) {
-	fprintf(stderr, "SYSCALL_FAILED: %s\n", cmd.c_str());
-	//XXX 
-    } else if (err == XrlError::BAD_PROTOCOL_VERSION()) {
-	fprintf(stderr, "BAD_PROTOCOL_VERSION: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
     } else if (err == XrlError::FAILED_UNKNOWN()) {
-	fprintf(stderr, "FAILED_UNKNOWN: %s\n", cmd.c_str());
+	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
     }
     abort();

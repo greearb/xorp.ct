@@ -109,19 +109,23 @@ Internal Errors
 
 These are errors that are detected within the XRL library and are most
 likely indicative of design errors.  They should probably be treated
-as fatal and we probably don't want to expose applications to these at
-all.
+as fatal, though it's up to the application to make that decision.
+
+The former forms:
 
   CORRUPTED_XRL			The receiving application determined that
-				the XRL request it received was corrupted.
+  [deprecated]			the XRL request it received was corrupted.
 
   CORRUPT_RESPONSE		The requesting application received a response
-				that it determined to be corrupt.
+  [deprecated]			that it determined to be corrupt.
 
   BAD_PROTOCOL_VERSION		Bad Xrl transport protocol version.
-				Mismatched implementations.  Should be
+  [deprecated]			Mismatched implementations.  Should be
 				exceedingly rare since protocol
 				implementations are reasonably static.
+
+are now replaced by INTERNAL_ERROR with the note associated with
+the error providing details as to the root cause of the problem.
 
 Deprecated Error(s)
 -------------------
