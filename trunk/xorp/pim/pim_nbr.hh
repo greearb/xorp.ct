@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.7 2003/09/30 18:27:05 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.8 2004/02/22 03:58:19 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -50,6 +50,7 @@ public:
     uint16_t	vif_index()	const;
     const IPvX&	primary_addr()	const	{ return (_primary_addr); }
     void	set_primary_addr(const IPvX& v) { _primary_addr = v; }
+    const list<IPvX>& secondary_addr_list() const { return _secondary_addr_list; }
     void	add_secondary_addr(const IPvX& v);
     void	delete_secondary_addr(const IPvX& v);
     void	clear_secondary_addr_list() { _secondary_addr_list.clear(); }
