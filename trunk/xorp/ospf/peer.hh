@@ -111,7 +111,6 @@ class PeerOut {
      */
     void set_router_dead_interval(OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
-    
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
