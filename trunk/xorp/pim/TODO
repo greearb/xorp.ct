@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.74 2004/05/30 10:42:31 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.75 2004/06/08 22:37:46 pavlin Exp $
 #
+
+* IMPL:
+  Add support for RIB-managed MRIB to test_pim, and remove the support
+  for obtaining the MRIB via the MFEA.
 
 * IMPL:
   Add support for scoped zone configuration (e.g., to the Bootstrap

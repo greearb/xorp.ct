@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/fea/TODO,v 1.19 2004/06/22 01:38:06 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.20 2004/06/22 03:03:02 pavlin Exp $
 #
+
+* Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
+  and friends) for obtaining the network interface information
+  from the FEA. Instead, always use the libfeaclient interface.
+  In addition, prune the "system" interface monitoring, because
+  it is not used. If necessary (e.g., for debugging purpose),
+  then adapt the libfeaclient interface to provide that information.
 
 * Refactor IfTree::align_with() when updating the FEA local config
   interface tree with the system interface tree. Currenty, some of
