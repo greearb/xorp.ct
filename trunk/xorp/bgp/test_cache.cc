@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.19 2004/05/05 18:35:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.20 2004/06/10 22:40:36 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -38,9 +38,12 @@ test_cache(TestInfo& /*info*/)
     BGPMain bgpmain;
     // EventLoop* eventloop = bgpmain.eventloop();
     LocalData localdata;
-    BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
+    Iptuple iptuple;
+    BGPPeerData *pd1 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0);
+    BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
-    BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
+    BGPPeerData *pd2 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0);
+    BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     // trivial plumbing

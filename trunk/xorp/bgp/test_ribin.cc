@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.24 2004/05/15 16:05:22 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.25 2004/06/10 22:40:38 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -41,8 +41,11 @@ test_ribin_dump(TestInfo& /*info*/)
     filename += pwd->pw_name;
     BGPMain bgpmain;
     LocalData localdata;
-    BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
-    BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
+    Iptuple iptuple;
+    BGPPeerData *pd1 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0);
+    BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
+    BGPPeerData *pd2 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0);
+    BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
     PeerHandler handler2("test1", &peer2, NULL, NULL);
 
@@ -175,9 +178,12 @@ test_ribin(TestInfo& /*info*/)
     filename += pwd->pw_name;
     BGPMain bgpmain;
     LocalData localdata;
-    BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
+    Iptuple iptuple;
+    BGPPeerData *pd1 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0);
+    BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
-    BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
+    BGPPeerData *pd2 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0);
+    BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     //trivial plumbing
