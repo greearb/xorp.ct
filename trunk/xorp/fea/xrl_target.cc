@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.16 2003/05/21 00:13:03 atanu Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.17 2003/05/21 00:40:29 atanu Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -35,7 +35,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   XrlIfConfigUpdateReporter&	xifcur,
 			   XrlRawSocket4Manager*	xrsm)
     : XrlFeaTargetBase(&r), _xftm(e, ftic), _xifmgr(e, ifmgr),
-      _xifcur(xifcur), _xrsm(xrsm)
+      _xifcur(xifcur), _xrsm(xrsm), _done(false)
 {
 }
 
@@ -98,8 +98,8 @@ XrlFeaTarget::common_0_1_get_status(
 XrlCmdError 
 XrlFeaTarget::fea_0_1_terminate()
 {
-    XLOG_UNFINISHED("Not implemented yet");
-
+    _done = true;
+    
     return XrlCmdError::OKAY();
 }
 

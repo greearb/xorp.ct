@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.10 2003/05/20 17:27:36 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.11 2003/05/21 00:13:03 atanu Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -35,6 +35,8 @@ public:
 		 XrlIfConfigUpdateReporter&	ifupd,
 		 XrlRawSocket4Manager*		xrsm = 0);
 
+    bool done() const { return _done; }
+    
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
 	string&	name);
@@ -635,6 +637,8 @@ private:
     XrlInterfaceManager 	_xifmgr;
     XrlIfConfigUpdateReporter&	_xifcur;
     XrlRawSocket4Manager*	_xrsm;
+    
+    bool			_done;	// True if we are done
 };
 
 #endif //  __FEA_XRL_TARGET_HH__
