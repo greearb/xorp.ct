@@ -156,13 +156,14 @@ SubnetRoute:
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.2 CHANGES
-[REPLACE]
+[DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -172,13 +173,14 @@ SubnetRoute:
 [PUSH]
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.1 CHANGES
-[REPLACE]
+[DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -210,26 +212,28 @@ SubnetRoute:
 [separator]-------------------------------------
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.1 CHANGES
-[REPLACE]
+[DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-[REPLACE]
+[DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -237,13 +241,14 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
-[REPLACE]
+[DELETE]
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
+[ADD]
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.25 2004/05/18 16:21:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.26 2004/05/19 08:46:42 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -410,7 +410,11 @@ DumpTable<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
 	      peer,
 	      genid);
 
-    _dump_iter.peering_is_down(peer, genid);
+    if (peer != _peer) {
+	//we only care about peers other than our own one - we won't
+	//received routes for our own peer
+	_dump_iter.peering_is_down(peer, genid);
+    }
 }
 
 template<class A>

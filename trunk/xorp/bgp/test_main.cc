@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.9 2004/03/04 03:21:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.10 2004/05/01 00:25:04 atanu Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
@@ -45,7 +45,7 @@ validate_reference_file(string reference_file, string output_file,
 	fclose(file);
 	return false;
     }
-#define BUFSIZE 8192
+#define BUFSIZE 20000
     char testout[BUFSIZE];
     memset(testout, 0, BUFSIZE);
     int bytes1 = fread(testout, 1, BUFSIZE, file);

@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.10 2004/04/01 19:54:08 mjh Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.11 2004/05/19 10:27:01 mjh Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "subnet_route.hh"
+
 
 template<class A> AttributeManager<A> SubnetRoute<A>::_att_mgr;
 
@@ -204,7 +205,7 @@ SubnetRoute<A>::set_nexthop_resolved(bool resolvable) const {
 
 #ifdef DEBUG_FLAGS
     printf("set_nexthop_resolved: %p = ", this);
-    if (used)
+    if (resolvable)
 	printf("true");
     else 
 	printf("false");
@@ -253,6 +254,11 @@ SubnetRoute<A>::str() const {
 	s += "  route is in use";
     } else {
 	s += "  route is not in use";
+    }
+    if (nexthop_resolved()) {
+	s += "  route's nexthop resolved";
+    } else {
+	s += "  route's nexthop did not resolve";
     }
 #endif
     return s;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.29 2004/05/15 15:12:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.30 2004/05/15 23:10:45 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -423,8 +423,11 @@ RibInTable<A>::push_next_changed_nexthop()
 	InternalMessage<A> old_rt_msg(chained_rt, _peer, _genid);
 	InternalMessage<A> new_rt_msg(chained_rt, _peer, _genid);
 
-	this->_next_table->replace_route(old_rt_msg,
-				   new_rt_msg, (BGPRouteTable<A>*)this);
+	//we used to send this as a replace route, but replacing a
+	//route with itself isn't safe in terms of preserving the
+	//flags.
+	this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
+	this->_next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
 
 	if (chained_rt->next() == first_rt) {
 	    debug_msg("end of chain\n");
