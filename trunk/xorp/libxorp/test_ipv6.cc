@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.5 2003/04/25 23:32:25 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -576,6 +576,7 @@ test_ipv6_address_const()
     // Test the IP protocol version.
     //
     verbose_assert(IPv6::ip_version() == 6, "ip_version()");
+    verbose_assert(IPv6::ip_version_str() == "IPv6", "ip_version_str()");
     
     //
     // Test pre-defined constant addresses

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.5 2003/04/02 00:43:31 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.6 2003/04/18 04:52:09 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -570,6 +570,14 @@ public:
      * @return the IP protocol version of this address.
      */
     uint32_t ip_version() const throw (InvalidFamily);
+    
+    /**
+     * Get the human-readable string with the IP protocol version.
+     * 
+     * @return the human-readable string with the IP protocol version of
+     * this address.
+     */
+    string ip_version_str() const throw (InvalidFamily);
     
     /**
      * Extract bits from an address.

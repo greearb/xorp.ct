@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.3 2003/04/02 00:43:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -509,6 +509,21 @@ IPvX::ip_version() const throw (InvalidFamily)
     xorp_throw(InvalidFamily, _af);
     
     return ((size_t)-1);
+}
+
+/**
+ * @return IP protocol version string.
+ */
+string
+IPvX::ip_version_str() const throw (InvalidFamily)
+{
+    if (_af == AF_INET)
+	return (IPv4::ip_version_str());
+    if (_af == AF_INET6)
+	return (IPv6::ip_version_str());
+    xorp_throw(InvalidFamily, _af);
+    
+    return (string("Unknown IP version"));
 }
 
 size_t

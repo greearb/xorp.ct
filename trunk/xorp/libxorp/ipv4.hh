@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.7 2003/04/26 05:58:38 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.8 2003/09/05 08:38:01 atanu Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -439,6 +439,14 @@ public:
     inline static const uint32_t ip_version() { return IPV; }
 
     /**
+     * Get the human-readable string with the IP protocol version.
+     * 
+     * @return the human-readable string with the IP protocol version of
+     * this address.
+     */
+    inline static string ip_version_str() { return "IPv4"; }
+
+    /**
      * Extract bits from an address.
      * 
      * @param lsb starting bit position (from the right) to extract.
@@ -447,7 +455,7 @@ public:
      * position @ref lsb. The returned bits are in host order.
      */
     inline uint32_t bits(size_t lsb, size_t len) const;
-    
+
     /**
      * Pre-defined IPv4 address constants.
      */
