@@ -12,12 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.6 2003/03/18 02:44:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.1 2003/03/31 03:46:48 pavlin Exp $"
 
 
 //
-// MLD6IGMP virtual interfaces implementation.
+// Internet Group Management Protocol implementation.
+// IGMPv1 and IGMPv2 (RFC 2236)
 //
+// AND
+//
+// Multicast Listener Discovery protocol implementation.
+// MLDv1 (RFC 2710)
+//
+
 
 
 #include "mld6igmp_module.h"
