@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.25 2004/03/02 05:27:20 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.26 2004/03/03 01:19:25 pavlin Exp $"
 
 
 //
@@ -440,6 +440,119 @@ cli_print_wide(const string& ,		// server_name
 }
 
 int
+cli_print_test(const string& ,		// server_name
+	       const string& cli_term_name,
+	       uint32_t ,		// cli_session_id
+	       const string& ,		// command_global_name,
+	       const vector<string>& argv)
+{
+    CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
+    if (cli_client == NULL)
+	return (XORP_ERROR);
+
+    if (argv.size() > 0) {
+	cli_client->cli_print("Error: unexpected arguments\n");
+	return (XORP_ERROR);
+    }
+
+    string s = "\
+Group           Source          RP              Flags\n\
+ff0e::8320:1    ::              ffff:fff:ffff:300:1:: WC   \n\
+    Upstream interface (RP):   gif0\n\
+    Upstream MRIB next hop (RP): fe80::ffff:19\n\
+    Upstream RPF'(*,G):        fe80::ffff:19\n\
+    Upstream state:            Joined \n\
+    Join timer:                31\n\
+    Local receiver include WC: .........O..\n\
+    Joins RP:                  ............\n\
+    Joins WC:                  ............\n\
+    Join state:                ............\n\
+    Prune state:               ............\n\
+    Prune pending state:       ............\n\
+    I am assert winner state:  .........O..\n\
+    I am assert loser state:   ............\n\
+    Assert winner WC:          .........O..\n\
+    Assert lost WC:            ............\n\
+    Assert tracking WC:        .....O...O..\n\
+    Could assert WC:           .........O..\n\
+    I am DR:                   .....O...O..\n\
+    Immediate olist RP:        ............\n\
+    Immediate olist WC:        .........O..\n\
+    Inherited olist SG:        .........O..\n\
+    Inherited olist SG_RPT:    .........O..\n\
+    PIM include WC:            .........O..\n\
+ff0e::8320:1    ffff:700:0:fff2::20 ffff:fff:ffff:300:1:: SG_RPT DirectlyConnectedS \n\
+    Upstream interface (S):    rl0\n\
+    Upstream interface (RP):   gif0\n\
+    Upstream MRIB next hop (RP): fe80::ffff:19\n\
+    Upstream RPF'(S,G,rpt):    fe80::ffff:19\n\
+    Upstream state:            Pruned \n\
+    Override timer:            -1\n\
+    Local receiver include WC: .........O..\n\
+    Joins RP:                  ............\n\
+    Joins WC:                  ............\n\
+    Prunes SG_RPT:             ............\n\
+    Join state:                ............\n\
+    Prune state:               ............\n\
+    Prune pending state:       ............\n\
+    Prune tmp state:           ............\n\
+    Prune pending tmp state:   ............\n\
+    Assert winner WC:          .........O..\n\
+    Assert lost WC:            ............\n\
+    Assert lost SG_RPT:        ............\n\
+    Could assert WC:           .........O..\n\
+    Could assert SG:           ...........O\n\
+    I am DR:                   .....O...O..\n\
+    Immediate olist RP:        ............\n\
+    Immediate olist WC:        .........O..\n\
+    Inherited olist SG:        .........O..\n\
+    Inherited olist SG_RPT:    .........O..\n\
+    PIM include WC:            .........O..\n\
+ff0e::8320:1    ffff:700:0:fff2::20 ffff:fff:ffff:300:1:: SG SPT DirectlyConnectedS \n\
+    Upstream interface (S):    rl0\n\
+    Upstream interface (RP):   gif0\n\
+    Upstream MRIB next hop (RP): fe80::ffff:19\n\
+    Upstream MRIB next hop (S):  UNKNOWN\n\
+    Upstream RPF'(S,G):        UNKNOWN\n\
+    Upstream state:            Joined \n\
+    Register state:            RegisterJoin RegisterCouldRegister \n\
+    Join timer:                39\n\
+    Local receiver include WC: .........O..\n\
+    Local receiver include SG: ............\n\
+    Local receiver exclude SG: ............\n\
+    Joins RP:                  ............\n\
+    Joins WC:                  ............\n\
+    Joins SG:                  ...........O\n\
+    Join state:                ...........O\n\
+    Prune state:               ............\n\
+    Prune pending state:       ............\n\
+    I am assert winner state:  ............\n\
+    I am assert loser state:   ............\n\
+    Assert winner WC:          .........O..\n\
+    Assert winner SG:          ............\n\
+    Assert lost WC:            ............\n\
+    Assert lost SG:            ............\n\
+    Assert lost SG_RPT:        ............\n\
+    Assert tracking SG:        .........O.O\n\
+    Could assert WC:           .........O..\n\
+    Could assert SG:           ...........O\n\
+    I am DR:                   .....O...O..\n\
+    Immediate olist RP:        ............\n\
+    Immediate olist WC:        .........O..\n\
+    Immediate olist SG:        ...........O\n\
+    Inherited olist SG:        .........O.O\n\
+    Inherited olist SG_RPT:    .........O..\n\
+    PIM include WC:            .........O..\n\
+    PIM include SG:            ............\n\
+    PIM exclude SG:            ............\n\
+";
+
+    cli_client->cli_print(s);
+
+    return (XORP_OK);
+}
+
+int
 add_my_cli_commands(CliNode& cli_node)
 {
     CliCommand *com0, *com1, *com2, *com3;
@@ -474,6 +587,7 @@ add_my_cli_commands(CliNode& cli_node)
     com1 = com0->add_command("print", "Print numbers", cli_print);
     com1 = com0->add_command("print2", "Print few numbers", cli_print2);
     com1 = com0->add_command("print_wide", "Print wide lines", cli_print_wide);
+    com1 = com0->add_command("print_test", "Print test lines", cli_print_test);
 
     return (XORP_OK);
 }
