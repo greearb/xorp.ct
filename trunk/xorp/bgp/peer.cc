@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.27 2003/02/06 04:19:22 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.28 2003/02/08 09:16:41 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -1291,9 +1291,6 @@ BGPPeer::release_resources()
 
     if (_handler != NULL && _handler->peering_is_up()) {
 	_handler->peering_went_down();
-    } else {
-	XLOG_ERROR("PeerHandler was 0?");
-    }
 
     /*
     ** Only if we are connected call the disconnect.
