@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.28 2004/07/14 07:21:20 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.29 2004/07/14 23:17:51 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -107,6 +107,7 @@ the login shell is csh or tcsh):
                 www/html_src/downloads.html
 		(set the definition for Release tag to $ReleaseTag as
 		defined later)
+		Also, update the status on that page.
 	      - Update www/html_src/getting_started.html with information
 		about supported operating systems, compilers, and XORP
 		configuration.
