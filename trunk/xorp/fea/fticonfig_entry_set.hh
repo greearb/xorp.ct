@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.8 2004/06/10 22:40:49 hodson Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.9 2004/08/17 02:20:07 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -36,6 +36,11 @@ public:
     FtiConfig&	ftic() { return _ftic; }
     
     virtual void register_ftic_primary();
+    virtual void register_ftic_secondary();
+    virtual void set_primary() { _is_primary = true; }
+    virtual void set_secondary() { _is_primary = false; }
+    virtual bool is_primary() const { return _is_primary; }
+    virtual bool is_secondary() const { return !_is_primary; }
 
     /**
      * Start operation.
@@ -154,6 +159,7 @@ protected:
 private:
     FtiConfig&	_ftic;
     bool	_in_configuration;
+    bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
 class FtiConfigEntrySetDummy : public FtiConfigEntrySet {

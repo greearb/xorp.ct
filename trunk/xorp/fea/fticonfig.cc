@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.25 2004/10/02 19:49:50 atanu Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.26 2004/10/04 00:37:54 atanu Exp $"
 
 
 #include "fea_module.h"
@@ -133,8 +133,10 @@ int
 FtiConfig::register_ftic_entry_get_primary(FtiConfigEntryGet *ftic_entry_get)
 {
     _ftic_entry_gets.clear();
-    if (ftic_entry_get != NULL)
+    if (ftic_entry_get != NULL) {
 	_ftic_entry_gets.push_back(ftic_entry_get);
+	ftic_entry_get->set_primary();
+    }
     
     return (XORP_OK);
 }
@@ -143,8 +145,10 @@ int
 FtiConfig::register_ftic_entry_set_primary(FtiConfigEntrySet *ftic_entry_set)
 {
     _ftic_entry_sets.clear();
-    if (ftic_entry_set != NULL)
+    if (ftic_entry_set != NULL) {
 	_ftic_entry_sets.push_back(ftic_entry_set);
+	ftic_entry_set->set_primary();
+    }
     
     return (XORP_OK);
 }
@@ -153,8 +157,10 @@ int
 FtiConfig::register_ftic_entry_observer_primary(FtiConfigEntryObserver *ftic_entry_observer)
 {
     _ftic_entry_observers.clear();
-    if (ftic_entry_observer != NULL)
+    if (ftic_entry_observer != NULL) {
 	_ftic_entry_observers.push_back(ftic_entry_observer);
+	ftic_entry_observer->set_primary();
+    }
     
     return (XORP_OK);
 }
@@ -163,8 +169,10 @@ int
 FtiConfig::register_ftic_table_get_primary(FtiConfigTableGet *ftic_table_get)
 {
     _ftic_table_gets.clear();
-    if (ftic_table_get != NULL)
+    if (ftic_table_get != NULL) {
 	_ftic_table_gets.push_back(ftic_table_get);
+	ftic_table_get->set_primary();
+    }
     
     return (XORP_OK);
 }
@@ -173,8 +181,10 @@ int
 FtiConfig::register_ftic_table_set_primary(FtiConfigTableSet *ftic_table_set)
 {
     _ftic_table_sets.clear();
-    if (ftic_table_set != NULL)
+    if (ftic_table_set != NULL) {
 	_ftic_table_sets.push_back(ftic_table_set);
+	ftic_table_set->set_primary();
+    }
     
     return (XORP_OK);
 }
@@ -183,8 +193,10 @@ int
 FtiConfig::register_ftic_table_observer_primary(FtiConfigTableObserver *ftic_table_observer)
 {
     _ftic_table_observers.clear();
-    if (ftic_table_observer != NULL)
+    if (ftic_table_observer != NULL) {
 	_ftic_table_observers.push_back(ftic_table_observer);
+	ftic_table_observer->set_primary();
+    }
     
     return (XORP_OK);
 }
@@ -192,8 +204,10 @@ FtiConfig::register_ftic_table_observer_primary(FtiConfigTableObserver *ftic_tab
 int
 FtiConfig::register_ftic_entry_get_secondary(FtiConfigEntryGet *ftic_entry_get)
 {
-    if (ftic_entry_get != NULL)
+    if (ftic_entry_get != NULL) {
 	_ftic_entry_gets.push_back(ftic_entry_get);
+	ftic_entry_get->set_secondary();
+    }
     
     return (XORP_OK);
 }
@@ -201,8 +215,10 @@ FtiConfig::register_ftic_entry_get_secondary(FtiConfigEntryGet *ftic_entry_get)
 int
 FtiConfig::register_ftic_entry_set_secondary(FtiConfigEntrySet *ftic_entry_set)
 {
-    if (ftic_entry_set != NULL)
+    if (ftic_entry_set != NULL) {
 	_ftic_entry_sets.push_back(ftic_entry_set);
+	ftic_entry_set->set_secondary();
+    }
     
     return (XORP_OK);
 }
@@ -210,8 +226,10 @@ FtiConfig::register_ftic_entry_set_secondary(FtiConfigEntrySet *ftic_entry_set)
 int
 FtiConfig::register_ftic_entry_observer_secondary(FtiConfigEntryObserver *ftic_entry_observer)
 {
-    if (ftic_entry_observer != NULL)
+    if (ftic_entry_observer != NULL) {
 	_ftic_entry_observers.push_back(ftic_entry_observer);
+	ftic_entry_observer->set_secondary();
+    }
     
     return (XORP_OK);
 }
@@ -219,8 +237,10 @@ FtiConfig::register_ftic_entry_observer_secondary(FtiConfigEntryObserver *ftic_e
 int
 FtiConfig::register_ftic_table_get_secondary(FtiConfigTableGet *ftic_table_get)
 {
-    if (ftic_table_get != NULL)
+    if (ftic_table_get != NULL) {
 	_ftic_table_gets.push_back(ftic_table_get);
+	ftic_table_get->set_secondary();
+    }
     
     return (XORP_OK);
 }
@@ -228,8 +248,10 @@ FtiConfig::register_ftic_table_get_secondary(FtiConfigTableGet *ftic_table_get)
 int
 FtiConfig::register_ftic_table_set_secondary(FtiConfigTableSet *ftic_table_set)
 {
-    if (ftic_table_set != NULL)
+    if (ftic_table_set != NULL) {
 	_ftic_table_sets.push_back(ftic_table_set);
+	ftic_table_set->set_secondary();
+    }
     
     return (XORP_OK);
 }
@@ -237,8 +259,10 @@ FtiConfig::register_ftic_table_set_secondary(FtiConfigTableSet *ftic_table_set)
 int
 FtiConfig::register_ftic_table_observer_secondary(FtiConfigTableObserver *ftic_table_observer)
 {
-    if (ftic_table_observer != NULL)
+    if (ftic_table_observer != NULL) {
 	_ftic_table_observers.push_back(ftic_table_observer);
+	ftic_table_observer->set_secondary();
+    }
     
     return (XORP_OK);
 }

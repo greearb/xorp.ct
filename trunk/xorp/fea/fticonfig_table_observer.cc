@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.5 2004/08/03 03:51:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.6 2004/08/17 02:20:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -35,7 +35,8 @@
 
 FtiConfigTableObserver::FtiConfigTableObserver(FtiConfig& ftic)
     : _is_running(false),
-      _ftic(ftic)
+      _ftic(ftic),
+      _is_primary(true)
 {
     
 }
@@ -49,6 +50,12 @@ void
 FtiConfigTableObserver::register_ftic_primary()
 {
     _ftic.register_ftic_table_observer_primary(this);
+}
+
+void
+FtiConfigTableObserver::register_ftic_secondary()
+{
+    _ftic.register_ftic_table_observer_secondary(this);
 }
 
 /**

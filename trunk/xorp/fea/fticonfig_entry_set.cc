@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set.cc,v 1.3 2004/06/10 22:40:49 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set.cc,v 1.4 2004/08/17 02:20:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -32,7 +32,8 @@
 FtiConfigEntrySet::FtiConfigEntrySet(FtiConfig& ftic)
     : _is_running(false),
       _ftic(ftic),
-      _in_configuration(false)
+      _in_configuration(false),
+      _is_primary(true)
 {
     
 }
@@ -46,4 +47,10 @@ void
 FtiConfigEntrySet::register_ftic_primary()
 {
     _ftic.register_ftic_entry_set_primary(this);
+}
+
+void
+FtiConfigEntrySet::register_ftic_secondary()
+{
+    _ftic.register_ftic_entry_set_secondary(this);
 }
