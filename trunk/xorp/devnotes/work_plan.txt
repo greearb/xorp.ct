@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.7 2003/04/01 18:22:19 jcardona Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.8 2003/04/01 19:06:14 atanu Exp $
 #
 
 Priority:
@@ -28,6 +28,25 @@ Handle errors as specified in error doc.		H
 
 For 0.x:
 Complete Linux support.
+
+================================ RIB =========================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.3:
+
+Handle errors as specified in the error doc		H	MH
+
+
+For 0.x:
+Add route tag support to routing->RIB interface 	M	MH
+  to support policy filtering
+
+Support recursive BGP Lookups				L	MH
+
+Add XRL interface to dump routing table state		M	MH
+
+Support for pipelining of requests to FEA		M	??
 
 ================================ BGP =========================================
 
@@ -89,6 +108,14 @@ Longer Term tasks
 -----------------
 * Bidir-PIM implementation				Wish	PR  1.5-3m
 * Implement multicast support for Click			Wish	PR  2-3 months
+
+============================== RTRMGR ========================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.3:
+
+Isolation test suite					H	MH
 
 ================================ Other =======================================
 * Simulation-like environment for running XORP		H Defer	PR  3-6 months
