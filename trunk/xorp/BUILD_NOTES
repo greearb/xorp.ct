@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.6 2003/11/08 00:56:17 hodson Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.7 2004/03/21 02:29:14 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -51,6 +51,9 @@ gmake check
     - The code compiles with the new compiler, and the internal tests
       appear to succeed.
 
+  * FreeBSD-5.2:
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed.
 
 3.2. NetBSD
 ===========
