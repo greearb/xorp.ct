@@ -286,15 +286,38 @@ TimerList::system_gettimeofday(TimeVal *tv)
     }
 }
 
-// XXX locking need some care here. Worry about it when we have locks.
 void
 TimerList::run()
 {
-    TimeVal now;
+    static const TimeVal WAY_BACK_GAP(15,0);
 
+    TimeVal now;
     _current_time_proc(&now);
+
     struct heap_entry *n;
     while ((n = top()) != 0 && n->key <= now) {
+
+	//
+	// Throw a wobbly if we're a long way behind.
+	//
+	// We shouldn't write code that generates this message, it
+	// means too long was spent in a timer callback or handling a
+	// file descriptor event.  We can expect bad things (tm) to be
+	// correlated with the appearance of this message.
+	//
+	TimeVal tardiness = now - n->key;
+	if (tardiness > WAY_BACK_GAP) {
+	    fprintf(stderr,
+		    "========================================"
+		    "=======================================\n");
+	    fprintf(stderr,
+		    "Timer Expiry *much* later than scheduled: "
+		    "behind by %u seconds\n", tardiness.str().c_str());
+	    fprintf(stderr,
+		    "========================================"
+		    "=======================================\n");
+	}
+
 	TimerNode *t = (TimerNode *)n->object;
 	pop();
 	// _hook() requires a XorpTimer as first argument, we have
