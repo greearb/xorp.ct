@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.5 2004/11/29 09:18:19 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.6 2004/12/03 00:29:05 bms Exp $"
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/uio.h>
 
 #include <netinet/in.h>
@@ -191,26 +192,26 @@ IoRawSocket6::recv(int fd, SelectorMask m)
 	    switch (chp->cmsg_type) {
 #ifdef IPV6_PKTINFO
 	    case IPV6_PKTINFO:
-		pip = (struct in6_pktinfo *)CMSG_DATA(&chp);
+		pip = (struct in6_pktinfo *)CMSG_DATA(chp);
 		_hdrinfo.dst.copy_in(pip->ipi6_addr);
 		_hdrinfo.rcvifindex = pip->ipi6_ifindex;
 		break;
 #endif
 #ifdef IPV6_HOPLIMIT
 	    case IPV6_HOPLIMIT:
-		intp = (uint32_t *)CMSG_DATA(&chp);
+		intp = (uint32_t *)CMSG_DATA(chp);
 		_hdrinfo.hoplimit = *intp & 0xFF;
 		break;
 #endif
 #ifdef IPV6_TCLASS
 	    case IPV6_TCLASS:
-		intp = (uint32_t *)CMSG_DATA(&chp);
+		intp = (uint32_t *)CMSG_DATA(chp);
 		_hdrinfo.tclass = *intp & 0xFF;
 		break;
 #endif
 #ifdef IPV6_HOPOPTS
 	    case IPV6_HOPOPTS:
-		bcopy(chp, &_cmsgbuf[0], chp->cmsg_len -
+		bcopy(CMSG_DATA(chp), &_hoptbuf[0], chp->cmsg_len -
 		    sizeof(struct cmsghdr));
 		_cmsgbuf.resize(chp->cmsg_len);
 		break;
