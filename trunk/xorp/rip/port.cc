@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.28 2004/03/03 22:20:14 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.29 2004/03/10 18:43:48 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -128,6 +128,11 @@ Port<A>::create_peer(const Addr& addr)
     if (peer(addr) == 0) {
 	Peer<A>* peer = new Peer<A>(*this, addr);
 	_peers.push_back(peer);
+
+	EventLoop& e = _pm.eventloop();
+	TimeVal now;
+	e.current_time(now);
+	peer->set_last_active(now);
 	start_peer_gc_timer();
 	return peer;
     }
@@ -631,6 +636,12 @@ Port<A>::parse_request(const Addr&			src_addr,
 
     if (n_entries == 1 && entries[0].is_table_request()) {
 	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
+	    Peer<A>* p = peer(src_addr);
+	    if (p == 0) {
+		p = create_peer(src_addr);
+		p->counters().incr_packets_recv();
+		p->counters().incr_table_requests_recv();
+	    }
 	    // if already doing unsolicited dump, then ignore
 	    // set unsolicited timer timeout to zero to trigger port
 	    // route dump
@@ -837,8 +848,11 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
     IPv4 zero;
 
     Peer<Addr>* p = peer(src_addr);
-    if (p == 0)
+    if (p == 0) {
 	p = create_peer(src_addr);
+	p->counters().incr_packets_recv();
+	p->counters().incr_update_packets_recv();
+    }
 
     RouteDB<Addr>& rdb = _pm.system().route_db();
 
@@ -929,8 +943,11 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 			   uint32_t				n_entries)
 {
     Peer<Addr>* p = peer(src_addr);
-    if (p == 0)
+    if (p == 0) {
 	p = create_peer(src_addr);
+	p->counters().incr_packets_recv();
+	p->counters().incr_update_packets_recv();
+    }
 
     RouteDB<Addr>& rdb = _pm.system().route_db();
 
