@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.4 2003/03/13 09:25:47 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.5 2003/03/13 22:13:26 pavlin Exp $"
 
 
 //
@@ -395,7 +395,9 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
 	}
     }
     
-    if (member_query == NULL) {
+    if (member_query != NULL) {
+	member_query->_last_reported_host = src;
+    } else {
 	// A new group
 	member_query = new MemberQuery(*this, source_address, group_address);
 	member_query->_last_reported_host = src;
