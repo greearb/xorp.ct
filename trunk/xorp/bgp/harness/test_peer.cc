@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.9 2003/04/22 23:27:16 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.10 2003/05/07 23:15:13 mjh Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -76,6 +76,18 @@ XrlTestPeerTarget::common_0_1_get_status(// Output values,
     reason = "Ready";
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+XrlTestPeerTarget::common_0_1_shutdown()
+{
+    string error_string;
+    if(!_test_peer.terminate(error_string)) {
+	return XrlCmdError::COMMAND_FAILED(error_string);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError 
 XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator)

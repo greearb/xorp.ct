@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.3 2003/03/10 23:20:09 hodson Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.4 2003/05/07 23:15:13 mjh Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -109,6 +109,11 @@ public:
 				      // Output values,
 				      uint32_t& status,
 				      string&	reason);
+
+    /**
+     * shutdown target
+     */
+    XrlCmdError common_0_1_shutdown();
 
     /**
      *  Register for receiving packets and events.
