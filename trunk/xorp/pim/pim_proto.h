@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.2 2003/02/26 00:34:24 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.3 2003/03/10 23:20:50 hodson Exp $
  */
 
 
@@ -344,7 +344,9 @@ do {									\
 				"PIM_GRAFT_ACK"				\
 				: ((t) == PIM_CAND_RP_ADV) ?		\
 				    "PIM_CAND_RP_ADV"			\
-				    : "PIM_type_unknown")
+				    : ((t) == PIM_ALL_DF_ELECTION) ?	\
+					"PIM_ALL_DF_ELECTION"		\
+					: "PIM_type_unknown")
 
 /*
  * Global variables
