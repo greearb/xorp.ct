@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.6 2003/05/07 23:15:17 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.7 2003/05/29 21:17:17 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -32,9 +32,12 @@ class RandomGen;
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    XrlRtrmgrInterface(XrlRouter& r, UserDB& db, MasterConfigTree& ct,
-		       EventLoop& eventloop, RandomGen& randgen);
+    XrlRtrmgrInterface(XrlRouter& r, UserDB& db, EventLoop& eventloop,
+		       RandomGen& randgen);
     ~XrlRtrmgrInterface();
+
+    void set_conf_tree(MasterConfigTree *v) { _conf_tree = v; }
+
     XrlCmdError common_0_1_get_target_name(// Output values,
 					   string& name);
 
@@ -164,7 +167,7 @@ private:
     multimap <uint32_t, UserInstance*> _users;
     multimap <uint32_t, UserInstance*> _config_users;
     UserDB& _userdb;
-    MasterConfigTree& _conf_tree;
+    MasterConfigTree *_conf_tree;
     EventLoop& _eventloop;
     RandomGen& _randgen;
 

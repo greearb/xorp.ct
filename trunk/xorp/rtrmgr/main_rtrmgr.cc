@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.25 2003/08/01 23:07:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.26 2003/09/11 22:23:54 hodson Exp $"
 
 #include <signal.h>
 
@@ -362,8 +362,8 @@ main(int argc, char* const argv[])
     userdb.load_password_file();
 
     // initialize the IPC mechanism
-    XrlStdRouter xrlrouter(eventloop, "rtrmgr", fs->addr(), fs->port());
-    XorpClient xclient(eventloop, xrlrouter);
+    XrlStdRouter xrl_router(eventloop, "rtrmgr", fs->addr(), fs->port());
+    XorpClient xclient(eventloop, xrl_router);
 
     // initialize the Task Manager
     TaskManager taskmgr(mmgr, xclient, do_exec);
@@ -371,9 +371,29 @@ main(int argc, char* const argv[])
     try {
 	// read the router startup configuration file,
 	// start the processes required, and initialize them
+	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen);
+	{
+	    // Wait until the XrlRouter becomes ready
+	    bool timed_out = false;
+	    
+	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	    while (xrl_router.ready() == false && timed_out == false) {
+		eventloop.run();
+	    }
+	    
+	    if (xrl_router.ready() == false && timed_out) {
+		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+		exit (1);
+	    }
+	}
 	MasterConfigTree* ct = new MasterConfigTree(config_boot, tt, taskmgr);
-	XrlRtrmgrInterface xrt(xrlrouter, userdb, *ct, eventloop, randgen);
-
+	//
+	// XXX: note that theoretically we may receive an XRL before
+	// we call XrlRtrmgrInterface::set_conf_tree().
+	// For now we ignore that possibility...
+	//
+	xrt.set_conf_tree(ct);
+	
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
 	if (quit_time > 0) {

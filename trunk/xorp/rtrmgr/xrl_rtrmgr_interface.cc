@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.9 2003/05/23 00:02:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.10 2003/05/29 21:17:17 mjh Exp $"
 
 #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -27,11 +27,10 @@
 #include "randomness.hh"
 
 XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
-				       MasterConfigTree& ct, 
 				       EventLoop& eventloop,
 				       RandomGen& randgen) 
     : XrlRtrmgrTargetBase(&r), _client_interface(&r),
-      _userdb(userdb), _conf_tree(ct), _eventloop(eventloop), 
+      _userdb(userdb), _conf_tree(NULL), _eventloop(eventloop), 
       _randgen(randgen)
 {
     _config_locked = false;
@@ -303,7 +302,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
 	string err = "AUTH_FAIL";
 	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
     }
-    config = _conf_tree.show_tree();
+    config = _conf_tree->show_tree();
     return XrlCmdError::OKAY();
 }
 
@@ -332,12 +331,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 	   deltas.c_str(), deletions.c_str());
 
     string response;
-    if (_conf_tree.apply_deltas(user_id, deltas, 
+    if (_conf_tree->apply_deltas(user_id, deltas, 
 				 /*provisional change*/true, 
 				 response) == false) {
 	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
     }
-    if (_conf_tree.apply_deletions(user_id, deletions, 
+    if (_conf_tree->apply_deletions(user_id, deletions, 
 				    /*provisional change*/true, 
 				    response) == false) {
 	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
@@ -345,13 +344,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     //Add nodes providing default values.  Note: they shouldn't be
     //needed, but adding them here acts as a safety mechanism against
     //a client that forgets to add them.
-    _conf_tree.add_default_children();
+    _conf_tree->add_default_children();
 
     CallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		  user_id, string(target), string(deltas), string(deletions));
 
-    _conf_tree.commit_changes_pass1(cb);
+    _conf_tree->commit_changes_pass1(cb);
     return XrlCmdError::OKAY();
 }
 
@@ -367,7 +366,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 
     if (success) {
 	//check everything really worked, and finalize the commit
-	if (_conf_tree.check_commit_status(errmsg) == false) {
+	if (_conf_tree->check_commit_status(errmsg) == false) {
 	    printf("check commit status indicates failure: >%s<\n",
 		   errmsg.c_str());
 	    success = false;;
@@ -398,7 +397,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 						  true, "", cb1);
     } else {
 	//something went wrong
-	_conf_tree.discard_changes();
+	_conf_tree->discard_changes();
 	debug_msg("Sending config change failed to %s\n", target.c_str());
 	_client_interface.send_config_change_done(target.c_str(),
 						  false, errmsg, cb1);
@@ -525,7 +524,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
 	//shouldn't be possible as we already checked the token
 	XLOG_UNREACHABLE();
     }
-    success = _conf_tree.lock_node(node, user_id, timeout, holder);
+    success = _conf_tree->lock_node(node, user_id, timeout, holder);
     return XrlCmdError::OKAY();
 }
 
@@ -544,7 +543,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
 	XLOG_UNREACHABLE();
     }
     bool success;
-    success = _conf_tree.unlock_node(node, user_id);
+    success = _conf_tree->unlock_node(node, user_id);
     if (success) {
 	return XrlCmdError::OKAY();
     } else {
@@ -575,7 +574,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 	    "Save was NOT performed.\n";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    if (_conf_tree.save_to_file(filename, user_id, response)) {
+    if (_conf_tree->save_to_file(filename, user_id, response)) {
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED(response);
@@ -608,7 +607,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
     }
 
     string deltas, deletions; //these are filled in by load_from_file
-    if (_conf_tree.load_from_file(filename, user_id, 
+    if (_conf_tree->load_from_file(filename, user_id, 
 				   response, deltas, deletions)) {
 	CallBack cb;
 	cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
@@ -616,7 +615,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 		      string(deltas), string(deletions));
 	printf("here1: success\n");
 	response = "";
-	_conf_tree.commit_changes_pass1(cb);
+	_conf_tree->commit_changes_pass1(cb);
     } else {
 	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
     }
