@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.4 2003/03/21 03:01:47 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.5 2003/03/22 04:29:46 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -7,14 +7,11 @@
 interface rib/0.1 {
 	/**
 	 * Enable/disable/start/stop RIB.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_rib			-> fail:bool & reason:txt
-	disable_rib			-> fail:bool & reason:txt
-	start_rib			-> fail:bool & reason:txt
-	stop_rib			-> fail:bool & reason:txt
+	enable_rib
+	disable_rib
+	start_rib
+	stop_rib
 
 	/**
 	 * Add/delete/enable/disable a RIB client.
@@ -25,33 +22,30 @@ interface rib/0.1 {
 	 * @param target_name the target name of the RIB client.
 	 * @param unicast true if a client for the unicast RIB.
 	 * @param multicast true if a client for the multicast RIB.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_rib_client4		? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	add_rib_client6		? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	delete_rib_client4	? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	delete_rib_client6	? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	enable_rib_client4	? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	enable_rib_client6	? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	disable_rib_client4	? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
+
 	disable_rib_client6	? target_name:txt			\
-				& unicast:bool & multicast:bool		\
-				-> fail:bool & reason:txt
+				& unicast:bool & multicast:bool
 
 	/**
 	 * Don't send anything to the FEA - used for testing only
