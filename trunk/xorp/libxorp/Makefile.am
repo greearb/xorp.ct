@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.25 2004/08/18 09:04:37 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.26 2004/09/09 19:09:37 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -30,6 +30,7 @@ TESTS		+= test_timeval
 TESTS		+= test_trie
 TESTS		+= test_types
 TESTS		+= test_vif
+TESTS		+= test_profile
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_asyncio
@@ -55,6 +56,7 @@ noinst_PROGRAMS	+= test_timeval
 noinst_PROGRAMS	+= test_trie
 noinst_PROGRAMS	+= test_types
 noinst_PROGRAMS	+= test_vif
+noinst_PROGRAMS	+= test_profile
 
 # -- No-install Libraries
 noinst_LIBRARIES = libxorp.a
@@ -86,7 +88,7 @@ test_timeval_SOURCES	= test_timeval.cc
 test_trie_SOURCES	= test_trie.cc
 test_types_SOURCES	= test_types.cc
 test_vif_SOURCES	= test_vif.cc
-
+test_profile_SOURCES	= test_profile.cc
 
 # -- Library Sources
 libxorp_a_SOURCES  = libxorp_module.h
@@ -131,6 +133,7 @@ libxorp_a_SOURCES += transaction.hh
 libxorp_a_SOURCES += trie.hh
 libxorp_a_SOURCES += utils.hh
 libxorp_a_SOURCES += vif.hh
+libxorp_a_SOURCES += profile.hh
 
 libxorp_a_SOURCES += debug.c
 # libxorp_a_SOURCES += ether_compat.c
@@ -157,6 +160,7 @@ libxorp_a_SOURCES += timer.cc
 libxorp_a_SOURCES += token.cc
 libxorp_a_SOURCES += transaction.cc
 libxorp_a_SOURCES += vif.cc
+libxorp_a_SOURCES += profile.cc
 
 BUILT_SOURCES	   = callback_nodebug.hh callback_debug.hh
 

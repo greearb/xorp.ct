@@ -95,10 +95,10 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
+TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif test_profile
 
 # -- No-install Programs
-noinst_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif
+noinst_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif test_profile
 
 # -- No-install Libraries
 noinst_LIBRARIES = libxorp.a
@@ -130,10 +130,11 @@ test_timeval_SOURCES = test_timeval.cc
 test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
+test_profile_SOURCES = test_profile.cc
 
 # -- Library Sources
 # libxorp_a_SOURCES += ether_compat.c
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc c_format.cc callback.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
+libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh profile.hh debug.c utility.c xlog.c asyncio.cc c_format.cc callback.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc profile.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -158,7 +159,7 @@ am_libxorp_a_OBJECTS = debug.$(OBJEXT) utility.$(OBJEXT) xlog.$(OBJEXT) \
 	nexthop.$(OBJEXT) ref_ptr.$(OBJEXT) safe_callback_obj.$(OBJEXT) \
 	selector.$(OBJEXT) service.$(OBJEXT) time_slice.$(OBJEXT) \
 	timer.$(OBJEXT) token.$(OBJEXT) transaction.$(OBJEXT) \
-	vif.$(OBJEXT)
+	vif.$(OBJEXT) profile.$(OBJEXT)
 libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -170,7 +171,7 @@ noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_service$(EXEEXT) test_test_main$(EXEEXT) \
 	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
 	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
-	test_vif$(EXEEXT)
+	test_vif$(EXEEXT) test_profile$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
@@ -238,6 +239,11 @@ test_observers_OBJECTS = $(am_test_observers_OBJECTS)
 test_observers_LDADD = $(LDADD)
 test_observers_DEPENDENCIES = libxorp.a
 test_observers_LDFLAGS =
+am_test_profile_OBJECTS = test_profile.$(OBJEXT)
+test_profile_OBJECTS = $(am_test_profile_OBJECTS)
+test_profile_LDADD = $(LDADD)
+test_profile_DEPENDENCIES = libxorp.a
+test_profile_LDFLAGS =
 am_test_ref_ptr_OBJECTS = test_ref_ptr.$(OBJEXT)
 test_ref_ptr_OBJECTS = $(am_test_ref_ptr_OBJECTS)
 test_ref_ptr_LDADD = $(LDADD)
@@ -301,7 +307,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/heap.Po $(DEPDIR)/ipv4.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ipv6.Po $(DEPDIR)/ipvx.Po \
 @AMDEP_TRUE@	$(DEPDIR)/mac.Po $(DEPDIR)/nexthop.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ref_ptr.Po $(DEPDIR)/safe_callback_obj.Po \
+@AMDEP_TRUE@	$(DEPDIR)/profile.Po $(DEPDIR)/ref_ptr.Po \
+@AMDEP_TRUE@	$(DEPDIR)/safe_callback_obj.Po \
 @AMDEP_TRUE@	$(DEPDIR)/selector.Po $(DEPDIR)/service.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_asyncio.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_callback.Po \
@@ -311,7 +318,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_ipv6.Po $(DEPDIR)/test_ipv6net.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ipvx.Po $(DEPDIR)/test_ipvxnet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_mac.Po $(DEPDIR)/test_observers.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ref_ptr.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_profile.Po $(DEPDIR)/test_ref_ptr.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ref_trie.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_service.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_test_main.Po \
@@ -339,13 +346,14 @@ DIST_SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) \
 	$(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) \
 	$(test_ipvxnet_SOURCES) $(test_mac_SOURCES) \
-	$(test_observers_SOURCES) $(test_ref_ptr_SOURCES) \
-	$(test_ref_trie_SOURCES) $(test_service_SOURCES) \
-	$(test_test_main_SOURCES) $(test_time_slice_SOURCES) \
-	$(test_timer_SOURCES) $(test_timeval_SOURCES) \
-	$(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+	$(test_observers_SOURCES) $(test_profile_SOURCES) \
+	$(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) \
+	$(test_service_SOURCES) $(test_test_main_SOURCES) \
+	$(test_time_slice_SOURCES) $(test_timer_SOURCES) \
+	$(test_timeval_SOURCES) $(test_trie_SOURCES) \
+	$(test_types_SOURCES) $(test_vif_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_profile_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -433,6 +441,9 @@ test_mac$(EXEEXT): $(test_mac_OBJECTS) $(test_mac_DEPENDENCIES)
 test_observers$(EXEEXT): $(test_observers_OBJECTS) $(test_observers_DEPENDENCIES) 
 	@rm -f test_observers$(EXEEXT)
 	$(CXXLINK) $(test_observers_LDFLAGS) $(test_observers_OBJECTS) $(test_observers_LDADD) $(LIBS)
+test_profile$(EXEEXT): $(test_profile_OBJECTS) $(test_profile_DEPENDENCIES) 
+	@rm -f test_profile$(EXEEXT)
+	$(CXXLINK) $(test_profile_LDFLAGS) $(test_profile_OBJECTS) $(test_profile_LDADD) $(LIBS)
 test_ref_ptr$(EXEEXT): $(test_ref_ptr_OBJECTS) $(test_ref_ptr_DEPENDENCIES) 
 	@rm -f test_ref_ptr$(EXEEXT)
 	$(CXXLINK) $(test_ref_ptr_LDFLAGS) $(test_ref_ptr_OBJECTS) $(test_ref_ptr_LDADD) $(LIBS)
@@ -482,6 +493,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipvx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mac.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nexthop.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ref_ptr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/safe_callback_obj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/selector.Po@am__quote@
@@ -499,6 +511,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ipvxnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mac.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_observers.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_profile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ref_ptr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ref_trie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_service.Po@am__quote@
