@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.15 2004/02/26 11:28:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.16 2004/02/29 22:57:01 pavlin Exp $"
 
 
 //
@@ -239,7 +239,7 @@ bool
 MfeaMrouter::have_multicast_routing4() const
 {
     int s;
-    int v = 1;
+    int mrouter_version = 1;	// XXX: hardcoded version
     
     if (! is_ipv4())
 	return (false);		// Wrong family
@@ -258,7 +258,9 @@ MfeaMrouter::have_multicast_routing4() const
     if (s < 0)
 	return (false);		// Failure to open the socket
     
-    if (setsockopt(s, IPPROTO_IP, MRT_INIT, (void *)&v, sizeof(v)) < 0) {
+    if (setsockopt(s, IPPROTO_IP, MRT_INIT,
+		   (void *)&mrouter_version, sizeof(mrouter_version))
+	< 0) {
 	close(s);
 	return (false);
     }
@@ -281,7 +283,7 @@ MfeaMrouter::have_multicast_routing6() const
     return (false);
 #else
     int s;
-    int v = 1;
+    int mrouter_version = 1;	// XXX: hardcoded version
     
     if (! is_ipv6())
 	return (false);		// Wrong family
@@ -300,7 +302,9 @@ MfeaMrouter::have_multicast_routing6() const
     if (s < 0)
 	return (false);		// Failure to open the socket
     
-    if (setsockopt(s, IPPROTO_IPV6, MRT6_INIT, (void *)&v, sizeof(v)) < 0) {
+    if (setsockopt(s, IPPROTO_IPV6, MRT6_INIT,
+		   (void *)&mrouter_version, sizeof(mrouter_version))
+	< 0) {
 	close(s);
 	return (false);
     }
@@ -514,14 +518,15 @@ MfeaMrouter::close_mrouter_socket()
 int
 MfeaMrouter::start_mrt()
 {
-    int v = 1;
+    int mrouter_version = 1;	// XXX: hardcoded version
     
     switch (family()) {
     case AF_INET:
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
-		       (void *)&v, sizeof(v)) < 0) {
+		       (void *)&mrouter_version, sizeof(mrouter_version))
+	    < 0) {
 	    XLOG_ERROR("setsockopt(MRT_INIT, %u) failed: %s",
-		       v, strerror(errno));
+		       mrouter_version, strerror(errno));
 	    return (XORP_ERROR);
 	}
 	break;
@@ -534,9 +539,10 @@ MfeaMrouter::start_mrt()
 	return (XORP_ERROR);
 #else
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_INIT,
-		       (void *)&v, sizeof(v)) < 0) {
+		       (void *)&mrouter_version, sizeof(mrouter_version))
+	    < 0) {
 	    XLOG_ERROR("setsockopt(MRT6_INIT, %u) failed: %s",
-		       v, strerror(errno));
+		       mrouter_version, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
@@ -697,8 +703,6 @@ MfeaMrouter::start_mrt()
 int
 MfeaMrouter::stop_mrt()
 {
-    int v = 0;
-    
     _mrt_api_mrt_mfc_flags_disable_wrongvif = false;
     _mrt_api_mrt_mfc_flags_border_vif = false;
     _mrt_api_mrt_mfc_rp = false;
@@ -709,10 +713,9 @@ MfeaMrouter::stop_mrt()
     
     switch (family()) {
     case AF_INET:
-	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
-		       (void *)&v, sizeof(v)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_INIT, %u) failed: %s",
-		       v, strerror(errno));
+	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DONE, NULL, 0)
+	    < 0) {
+	    XLOG_ERROR("setsockopt(MRT_DONE) failed: %s", strerror(errno));
 	    return (XORP_ERROR);
 	}
 	break;
@@ -724,10 +727,9 @@ MfeaMrouter::stop_mrt()
 		   "IPv6 multicast routing not supported");
 	return (XORP_ERROR);
 #else
-	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_INIT,
-		       (void *)&v, sizeof(v)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT6_INIT, %u) failed: %s",
-		       v, strerror(errno));
+	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_DONE, NULL, 0)
+	    < 0) {
+	    XLOG_ERROR("setsockopt(MRT6_DONE) failed: %s", strerror(errno));
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
