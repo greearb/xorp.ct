@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.29 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.30 2003/11/19 23:04:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_router.hh"
+#include "conf_tree_node.hh"
 #include "template_commands.hh"
 #include "xrldb.hh"
 #include "template_tree.hh"
@@ -661,5 +662,5 @@ AllowCommand::str() const {
 //
 // Template explicit instatiation
 //
-template string XrlAction::expand_xrl_variables<ConfigTreeNode>(const ConfigTreeNode&);
-template string XrlAction::expand_xrl_variables<TemplateTreeNode>(const TemplateTreeNode&);
+template string XrlAction::expand_xrl_variables<class ConfigTreeNode>(const ConfigTreeNode&) const;
+template string XrlAction::expand_xrl_variables<class TemplateTreeNode>(const TemplateTreeNode&) const;
