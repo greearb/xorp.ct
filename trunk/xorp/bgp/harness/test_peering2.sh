@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.1 2003/01/29 04:43:37 atanu Exp $
 #
 
 #
@@ -54,7 +54,7 @@ PEER2_AS=65000
 
 HOLDTIME=5
 
-TRAFFIC_FILES="traffic_file"
+TRAFFIC_FILES="../../../data/bgp/icsi1.mrtd"
 
 configure_bgp()
 {
