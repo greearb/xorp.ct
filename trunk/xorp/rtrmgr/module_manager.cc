@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.23 2003/11/22 00:17:15 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.24 2003/12/05 06:25:04 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -470,6 +470,41 @@ Module::killed()
     _pid = 0;
 }
 
+int
+Module::module_shutdown_completed(bool success)
+{
+    if ((_status == MODULE_NOT_STARTED) || (_status == MODULE_FAILED)) {
+	return XORP_OK;		// We have already taken care of this module
+    }
+
+    if (success)
+	new_status(MODULE_NOT_STARTED);
+    else
+	new_status(MODULE_FAILED);
+
+    //
+    // Erase the module from the maps
+    //
+    map<pid_t, string>::iterator pid_iter;
+    multimap<string, Module*>::iterator path_iter;
+
+    XLOG_ASSERT(_pid != 0);
+    pid_iter = module_pids.find(_pid);
+    XLOG_ASSERT(pid_iter != module_pids.end());
+    XLOG_ASSERT(pid_iter->second == _expath);
+    path_iter = module_paths.find(_expath);
+    XLOG_ASSERT(path_iter != module_paths.end());
+
+    module_paths.erase(path_iter);
+    path_iter = module_paths.find(_expath);
+    if (path_iter == module_paths.end())
+	module_pids.erase(pid_iter);	// The last module within this process
+
+    _pid = 0;
+
+    return XORP_OK;
+}
+
 void
 Module::new_status(ModuleStatus new_status)
 {
@@ -507,51 +542,63 @@ ModuleManager::~ModuleManager()
 }
 
 bool
-ModuleManager::new_module(const string& name, const string& path)
+ModuleManager::new_module(const string& module_name, const string& path)
 {
     if (_verbose)
-	printf("ModuleManager::new_module %s\n", name.c_str());
+	printf("ModuleManager::new_module %s\n", module_name.c_str());
 
     map<string, Module*>::iterator found_mod;
-    found_mod = _modules.find(name);
+    found_mod = _modules.find(module_name);
     if (found_mod == _modules.end()) {
-	Module* newmod;
-	newmod = new Module(*this, name, _verbose);
-	_modules[name] = newmod;
-	if (newmod->set_execution_path(path) != XORP_OK)
+	Module* new_module;
+	new_module = new Module(*this, module_name, _verbose);
+	_modules[module_name] = new_module;
+	if (new_module->set_execution_path(path) != XORP_OK)
 	    return false;
 	return true;
     } else {
 	if (_verbose)
-	    printf("module %s already exists\n", name.c_str());
+	    printf("module %s already exists\n", module_name.c_str());
 	return true;
     }
 }
 
 int
-ModuleManager::start_module(const string&name, bool do_exec,
+ModuleManager::start_module(const string& module_name, bool do_exec,
 			    XorpCallback1<void, bool>::RefPtr cb)
 {
-    Module* m = find_module(name);
+    Module* module = find_module(module_name);
 
-    XLOG_ASSERT(m != NULL);
-    return m->run(do_exec, cb);
+    XLOG_ASSERT(module != NULL);
+    return module->run(do_exec, cb);
 }
 
 int
-ModuleManager::kill_module(const string&name, XorpCallback0<void>::RefPtr cb)
+ModuleManager::kill_module(const string& module_name,
+			   XorpCallback0<void>::RefPtr cb)
 {
-    Module* m = find_module(name);
+    Module* module = find_module(module_name);
 
-    XLOG_ASSERT(m != NULL);
-    m->terminate(cb);
+    XLOG_ASSERT(module != NULL);
+    module->terminate(cb);
     return XORP_OK;
 }
 
-bool
-ModuleManager::module_is_running(const string& name) const
+int
+ModuleManager::module_shutdown_completed(const string& module_name,
+					 bool success)
 {
-    const Module* module = const_find_module(name);
+    Module* module = find_module(module_name);
+
+    XLOG_ASSERT(module != NULL);
+
+    return (module->module_shutdown_completed(success));
+}
+
+bool
+ModuleManager::module_is_running(const string& module_name) const
+{
+    const Module* module = const_find_module(module_name);
 
     if (module == NULL)
 	return false;
@@ -559,9 +606,9 @@ ModuleManager::module_is_running(const string& name) const
 }
 
 bool
-ModuleManager::module_has_started(const string& name) const
+ModuleManager::module_has_started(const string& module_name) const
 {
-    const Module* module = const_find_module(name);
+    const Module* module = const_find_module(module_name);
 
     if (module == NULL)
 	return false;
@@ -569,26 +616,27 @@ ModuleManager::module_has_started(const string& name) const
 }
 
 Module*
-ModuleManager::find_module(const string& name)
+ModuleManager::find_module(const string& module_name)
 {
     map<string, Module*>::iterator found;
 
-    found = _modules.find(name);
+    found = _modules.find(module_name);
     if (found == _modules.end()) {
-	debug_msg("ModuleManager: Failed to find module %s\n", name.c_str());
+	debug_msg("ModuleManager: Failed to find module %s\n",
+		  module_name.c_str());
 	return NULL;
     } else {
-	debug_msg("ModuleManager: Found module %s\n", name.c_str());
+	debug_msg("ModuleManager: Found module %s\n", module_name.c_str());
 	return found->second;
     }
 }
 
 const Module*
-ModuleManager::const_find_module(const string& name) const
+ModuleManager::const_find_module(const string& module_name) const
 {
     map<string, Module*>::const_iterator found;
 
-    found = _modules.find(name);
+    found = _modules.find(module_name);
     if (found == _modules.end()) {
 	return NULL;
     } else {
@@ -597,18 +645,18 @@ ModuleManager::const_find_module(const string& name) const
 }
 
 bool
-ModuleManager::module_exists(const string& name) const
+ModuleManager::module_exists(const string& module_name) const
 {
-    return _modules.find(name) != _modules.end();
+    return _modules.find(module_name) != _modules.end();
 }
 
 void
-ModuleManager::module_status_changed(const string& name,
+ModuleManager::module_status_changed(const string& module_name,
 				     Module::ModuleStatus old_status,
 				     Module::ModuleStatus new_status)
 {
     // XXX eventually we'll tell someone that things changed
-    UNUSED(name);
+    UNUSED(module_name);
     UNUSED(old_status);
     UNUSED(new_status);
 }
@@ -621,12 +669,12 @@ ModuleManager::shutdown()
     map<string, Module*>::iterator iter;
     for (iter = _modules.begin(); iter != _modules.end(); ++iter) {
 	iter->second->terminate(callback(this,
-					 &ModuleManager::module_shutdown_done));
+					 &ModuleManager::module_shutdown_cb));
     }
 }
 
 void
-ModuleManager::module_shutdown_done()
+ModuleManager::module_shutdown_cb()
 {
     // XXX: TODO: implement it?
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.15 2003/08/01 23:07:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.16 2003/11/22 00:17:15 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -68,6 +68,7 @@ public:
     ModuleStatus status() const { return _status; }
     void terminate(XorpCallback0<void>::RefPtr cb);
     void terminate_with_prejudice(XorpCallback0<void>::RefPtr cb);
+    int module_shutdown_completed(bool success);
 
 private:
     void new_status(ModuleStatus new_status);
@@ -91,26 +92,27 @@ public:
 		  const string& xorp_root_dir);
     ~ModuleManager();
 
-    bool new_module(const string& mod_name, const string& path);
-    int start_module(const string& mod_name, bool do_exec, 
+    bool new_module(const string& module_name, const string& path);
+    int start_module(const string& module_name, bool do_exec, 
 		   XorpCallback1<void, bool>::RefPtr cb);
-    int kill_module(const string& mod_name, 
+    int kill_module(const string& module_name, 
 		   XorpCallback0<void>::RefPtr cb);
-    void module_shutdown_done();
-    bool module_exists(const string& name) const;
-    bool module_is_running(const string& name) const;
-    bool module_has_started(const string& name) const;
+    int module_shutdown_completed(const string& module_name, bool success);
+    void module_shutdown_cb();
+    bool module_exists(const string& module_name) const;
+    bool module_is_running(const string& module_name) const;
+    bool module_has_started(const string& module_name) const;
     void shutdown();
     bool shutdown_complete();
     EventLoop& eventloop() { return _eventloop; }
-    void module_status_changed(const string& name, 
+    void module_status_changed(const string& module_name, 
 			       Module::ModuleStatus old_status,
 			       Module::ModuleStatus new_status);
     const string& xorp_root_dir() const { return _xorp_root_dir; }
 
 private:
-    Module *find_module(const string& name);
-    const Module *const_find_module(const string& name) const;
+    Module* find_module(const string& module_name);
+    const Module* const_find_module(const string& module_name) const;
 
     map<string, Module *> _modules;
     EventLoop&	_eventloop;
