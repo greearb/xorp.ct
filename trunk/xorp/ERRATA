@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.3 2004/06/14 22:04:09 atanu Exp $
+# $XORP: xorp/ERRATA,v 1.4 2004/06/14 23:37:05 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -7,6 +7,7 @@
   ALL:
     - Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
       The simplest work-around is to rerun gmake or not to use the -j flag.
+
     - Overwriting the default installation prefix by running
       "./configure --prefix=/path/to/xorp" currently does not work.
       This will be fixed before XORP Release 1.0
@@ -63,9 +64,13 @@
         [ 2004/06/07 16:08:57  ERROR xorp_fea:1605 FEA +259
 
       This error has no side effects, and can be ignored.
+
     - In some rare cases, the RIB may fail to delete an existing route
       (See http://www.xorp.org/bugzilla/show_bug.cgi?id=62).
       We are aware of the issue and will attempt to fix it in the near future.
+
+  RIP:
+    - No known issues.
 
   BGP:
     - Once BGP selects a route it is taking too long to install it in
@@ -106,6 +111,3 @@
     - net-snmp-5.1.* may have problems with some of its header files, hence
       the XORP SNMP support won't be compiled if those problems exist.
       Instead, use an earlier net-snmp version from the 5.0.x branch.
-
-  RIP:
-    - No known issues.
