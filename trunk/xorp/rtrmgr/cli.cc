@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.49 2004/06/09 06:13:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.50 2004/06/10 22:41:51 hodson Exp $"
 
 
 #include <pwd.h>
@@ -2594,6 +2594,7 @@ RouterCLI::op_mode_func(const string& ,
 	idle_ui();
 
 	op_cmd_list()->execute(&(_xorpsh.eventloop()), path_segments,
+			       callback(this, &RouterCLI::op_mode_cmd_print),
 			       callback(this, &RouterCLI::op_mode_cmd_done));
     } else {
 	//
@@ -2630,25 +2631,23 @@ RouterCLI::op_mode_func(const string& ,
 }
 
 void
-RouterCLI::op_mode_cmd_done(bool success, const string& result,
-			    bool is_result_delayed)
+RouterCLI::op_mode_cmd_print(const string& result)
+{
+    if (! result.empty())
+	_cli_client.cli_print(result);
+}
+
+void
+RouterCLI::op_mode_cmd_done(bool success, const string& error_msg)
 {
     if (success) {
-	// XXX: don't print anything after a command in operational mode
-	// _cli_client.cli_print("OK\n");
+	reenable_ui();
     } else {
 	_cli_client.cli_print("ERROR:\n");
-    }
-    if (! result.empty())
-	_cli_client.cli_print(result + "\n");
-
-    // Re-enable the CLI
-    //  clear_command_set();
-    //  add_op_mode_commands(NULL);
-    if (is_result_delayed)
-	reenable_ui();
-    else
+	if (!error_msg.empty())
+	    _cli_client.cli_print(error_msg + "\n");
 	silent_reenable_ui();
+    }
 }
 
 int

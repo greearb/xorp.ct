@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.15 2004/06/02 03:57:32 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.16 2004/06/10 22:41:52 hodson Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -34,7 +34,9 @@ class TemplateTree;
 class OpInstance {
 public:
     OpInstance(EventLoop* eventloop, const string& executable_filename,
-	       const string& command_arguments, RouterCLI::OpModeCallback cb,
+	       const string& command_arguments,
+	       RouterCLI::OpModePrintCallback print_cb,
+	       RouterCLI::OpModeDoneCallback done_cb,
 	       OpCommand* op_command);
     OpInstance(const OpInstance& orig);
     ~OpInstance();
@@ -57,7 +59,8 @@ private:
     bool		_error;
     size_t		_last_offset;
     string		_response;
-    RouterCLI::OpModeCallback _done_callback;
+    RouterCLI::OpModePrintCallback _print_callback;
+    RouterCLI::OpModeDoneCallback _done_callback;
 };
 
 class OpCommand {
@@ -84,8 +87,6 @@ public:
     /**
      * Select a positional argument.
      *
-     *
-     *
      * @param arguments the list with the arguments.
      * @param position the positional argument (e.g., "$0" specifies all
      * arguments, "$1" is the first argument, "$2" the second argument, etc.)
@@ -96,8 +97,18 @@ public:
     static string select_positional_argument(const list<string>& arguments,
 					     const string& position,
 					     string& error_msg);
-    void execute(EventLoop* eventloop, const list<string>& command_line,
-		 RouterCLI::OpModeCallback cb);
+    /**
+     * Execute an operational mode command.
+     *
+     * @param eventloop
+     * @param command_line command to execute and arguments
+     * @param print_cb callback to be invoked with output from command.
+     * @param done_cb callback to invoke when the command terminates.
+     */
+    void execute(EventLoop* eventloop,
+		 const list<string>& command_line,
+		 RouterCLI::OpModePrintCallback print_cb,
+		 RouterCLI::OpModeDoneCallback done_cb);
 
     bool command_match(const list<string>& path_parts,
 		       SlaveConfigTree* sct, bool exact_match) const;
@@ -133,7 +144,8 @@ public:
     bool command_match(const list<string>& command_parts,
 		       bool exact_match) const;
     void execute(EventLoop* eventloop, const list<string>& command_parts,
-		 RouterCLI::OpModeCallback cb) const;
+		 RouterCLI::OpModePrintCallback print_cb,
+		 RouterCLI::OpModeDoneCallback done_cb) const;
     map<string, string> top_level_commands() const;
     map<string, string> childlist(const string& path,
 				  bool& is_executable,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.26 2004/06/10 22:41:52 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.27 2004/06/10 23:35:13 hodson Exp $"
 
 
 #include <glob.h>
@@ -41,7 +41,8 @@ extern int opcmderror(const char *s);
 
 OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
 		       const string& command_arguments,
-		       RouterCLI::OpModeCallback cb,
+		       RouterCLI::OpModePrintCallback print_cb,
+		       RouterCLI::OpModeDoneCallback done_cb,
 		       OpCommand* op_command)
     : _executable_filename(executable_filename),
       _command_arguments(command_arguments),
@@ -50,7 +51,8 @@ OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
       _stderr_file_reader(NULL),
       _error(false),
       _last_offset(0),
-      _done_callback(cb)
+      _print_callback(print_cb),
+      _done_callback(done_cb)
 {
     XLOG_ASSERT(op_command->is_executable());
 
@@ -63,21 +65,21 @@ OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
 
     popen2(execute, out_stream, err_stream);
     if (out_stream == NULL) {
-	cb->dispatch(false, "Failed to execute command", false);
+	done_cb->dispatch(false, "Failed to execute command");
     }
 
     _stdout_file_reader = new AsyncFileReader(*eventloop, fileno(out_stream));
     _stdout_file_reader->add_buffer((uint8_t*)_outbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stdout_file_reader->start()) {
-	cb->dispatch(false, "Failed to execute command", false);
+	done_cb->dispatch(false, "Failed to execute command");
     }
 
     _stderr_file_reader = new AsyncFileReader(*eventloop, fileno(err_stream));
     _stderr_file_reader->add_buffer((uint8_t*)_errbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stderr_file_reader->start()) {
-	cb->dispatch(false, "Failed to execute command", false);
+	done_cb->dispatch(false, "Failed to execute command");
     }
 }
 
@@ -127,7 +129,8 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	if (offset != _last_offset) {
 	    const char* p   = (const char*)buffer + _last_offset;
 	    size_t 	len = offset - _last_offset;
-	    _response.append(p, p + len);
+	    _print_callback->dispatch(string(p, len));
+	    //	    _response.append(p, p + len);
 	    _last_offset = offset;
 	}
 
@@ -164,7 +167,7 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 void
 OpInstance::done(bool success)
 {
-    _done_callback->dispatch(success, _response, true);
+    _done_callback->dispatch(success, _response);
     _op_command->remove_instance(this);
     delete this;
 }
@@ -296,13 +299,14 @@ OpCommand::select_positional_argument(const list<string>& arguments,
 
 void
 OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
-		   RouterCLI::OpModeCallback cb)
+		   RouterCLI::OpModePrintCallback print_cb,
+		   RouterCLI::OpModeDoneCallback done_cb)
 {
     string command_arguments_str;
     list<string>::const_iterator iter;
 
     if (! is_executable()) {
-	cb->dispatch(false, "Command is not executable", false);
+	done_cb->dispatch(false, "Command is not executable");
 	return;
     }
 
@@ -340,7 +344,8 @@ OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
     }
 
     _instances.insert(new OpInstance(eventloop, _command_executable_filename,
-				     command_arguments_str, cb, this));
+				     command_arguments_str,
+				     print_cb, done_cb, this));
 }
 
 bool
@@ -567,19 +572,20 @@ OpCommandList::command_match(const list<string>& command_parts,
 
 void
 OpCommandList::execute(EventLoop *eventloop, const list<string>& command_parts,
-		       RouterCLI::OpModeCallback cb) const
+		       RouterCLI::OpModePrintCallback print_cb,
+		       RouterCLI::OpModeDoneCallback done_cb) const
 {
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	// Find the right command
 	if ((*iter)->command_match(command_parts, _conf_tree, true)) {
 	    // Execute it
-	    (*iter)->execute(eventloop, command_parts, cb);
+	    (*iter)->execute(eventloop, command_parts, print_cb, done_cb);
 	    // XXX: don't worry about errors - the callback reports them.
 	    return;
 	}
     }
-    cb->dispatch(false, string("No matching command"), false);
+    done_cb->dispatch(false, string("No matching command"));
 }
 
 OpCommand*
