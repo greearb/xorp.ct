@@ -68,6 +68,8 @@ static void get_v4_route_list_next_done(const XrlError& e, const IPv4* peer_id,
     const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*,
     const int32_t*, const vector<uint8_t>*);
 static void rm_old_routes (void *, void *); 
+static uint32_t rows_are_equal(bgp4PathAttrTable_context * lr, 
+    bgp4PathAttrTable_context * rr);
 static int bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx, 
     netsnmp_index * hdr);
 
@@ -573,15 +575,53 @@ get_v4_route_list_next_done(const XrlError& e,
     row->bgp4PathAttrUnknown = (*attr_unknown);
     row->update_signature = update.list_token;
 
-    // remove existing row and insert new one
-    CONTAINER_REMOVE(cb.container, &index);
-    CONTAINER_INSERT(cb.container, row);
+    bgp4PathAttrTable_context * local_row = (bgp4PathAttrTable_context*)
+	CONTAINER_FIND(cb.container, &index);
 
-    DEBUGMSGTL((BgpMib::the_instance().name(),
-        "adding %s route to local table\n", net->masked_addr().str().c_str()));
+    if (NULL != local_row) {
+	if (rows_are_equal(row, local_row)) {
+	    local_row->update_signature = update.list_token;
+	} else {
+	    CONTAINER_REMOVE(cb.container, &index);
+	    CONTAINER_INSERT(cb.container, row);
+	    DEBUGMSGTL((BgpMib::the_instance().name(),
+		"updating %s route to local table\n", 
+		net->masked_addr().str().c_str()));
+	}
+    } else {
+	CONTAINER_INSERT(cb.container, row);
+	DEBUGMSGTL((BgpMib::the_instance().name(),
+	    "adding %s route to local table\n", 
+	    net->masked_addr().str().c_str()));
+    }
 
     // Done with this row, request next
     local_route_table_update();
+}
+
+/****************************************************************************
+ * rows_are_equal - compare two rows excluding the row signature
+ *
+ * The function returns non-zero  if both rows are equal, 0 otherwise
+ * The index and signature fields are not included in the comparison 
+ */
+static uint32_t
+rows_are_equal(bgp4PathAttrTable_context * lr, bgp4PathAttrTable_context * rr)
+{
+    return ((lr->bgp4PathAttrPeer == rr->bgp4PathAttrPeer) &&
+	(lr->bgp4PathAttrIpAddrPrefixLen == rr->bgp4PathAttrIpAddrPrefixLen) &&
+	(lr->bgp4PathAttrIpAddrPrefix == rr->bgp4PathAttrIpAddrPrefix) &&
+	(lr->bgp4PathAttrOrigin == rr->bgp4PathAttrOrigin) &&
+	(lr->bgp4PathAttrASPathSegment == rr->bgp4PathAttrASPathSegment) &&
+	(lr->bgp4PathAttrNextHop == rr->bgp4PathAttrNextHop) &&
+	(lr->bgp4PathAttrMultiExitDisc == rr->bgp4PathAttrMultiExitDisc) &&
+	(lr->bgp4PathAttrLocalPref == rr->bgp4PathAttrLocalPref) &&
+	(lr->bgp4PathAttrAtomicAggregate == rr->bgp4PathAttrAtomicAggregate) &&
+	(lr->bgp4PathAttrAggregatorAS == rr->bgp4PathAttrAggregatorAS) &&
+	(lr->bgp4PathAttrAggregatorAddr == rr->bgp4PathAttrAggregatorAddr) &&
+	(lr->bgp4PathAttrCalcLocalPref == rr->bgp4PathAttrCalcLocalPref) &&
+	(lr->bgp4PathAttrBest == rr->bgp4PathAttrBest) &&
+	(lr->bgp4PathAttrUnknown == rr->bgp4PathAttrUnknown)); 
 }
 
 /****************************************************************************

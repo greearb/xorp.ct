@@ -40,7 +40,7 @@ configure_snmp()
     # the rest is to configure the snmp agent
     SNMPDCONF=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.conf
     LOGSTAMP=`date "+%y%m%d%H%M%S"`
-    SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd${LOGSTAMP}.log
+    export SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd${LOGSTAMP}.log
     SNMPDDBG=bgp4_mib_1657,xorp_if_mib_module
     echo 'rwcommunity xorp' > ${SNMPDCONF}
     echo "dlmod xorp_if_mib_module "					\
@@ -255,7 +255,7 @@ test2()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
     
-    NOBLOCK=true coord peer1 send dump mrtd update $TFILE  50
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE  
 
     peer_stationary_state peer1
 
@@ -267,6 +267,14 @@ test2()
 	
     # verify that the BGP mib is loaded
     ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    echo 'waiting until the BGP MIB receives the entire bgp4PathAttrTable...'
+    echo '(this may take several minutes)'
+    while ! grep "received last route" ${SNMPDLOG}
+    do
+	echo -n '.'
+	sleep 10
+    done
 
     echo 'walking through the values of the BGP path attributes table... '
     snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgp4PathAttrTable   \
@@ -304,7 +312,7 @@ TIME_WAIT=`time_wait_seconds`
 
 if [ ${START_PROGRAMS} = "yes" ]
 then
-    SNMPD=@snmpd@
+    SNMPD=/usr/local/sbin/snmpd
     if [ "$SNMPD" = "not_found" ]; then exit 1; fi
     configure_snmp
     CXRL="$CALLXRL -r 10"
