@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.22 2004/07/09 05:28:36 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.23 2004/07/09 06:23:37 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -47,10 +47,9 @@ the login shell is csh or tcsh):
 	MISC: After a document is reviewed, bump-up Version in the
 	      front-page to correspond to the new release version.
 	COMMANDS:
- # Commands to verify the Version and the date.
+ # Commands to verify the Version.
  cd xorp/docs
  egrep Version */*.tex
- egrep '\\date' */*.tex
 
 ========================================================================
 0700.	TASK: Send email to xorp-dev@xorp.org to remain everyone about
@@ -157,6 +156,9 @@ the login shell is csh or tcsh):
 	      xorp/docs to be set to the release date
 	WHO:  Release manager
 	WHEN: 1 day before the release date
+ # Commands to verify the date.
+ cd xorp/docs
+ egrep '\\date' */*.tex
 
 ========================================================================
 1400.	TASK: Add a new year to the copyright license (only if
