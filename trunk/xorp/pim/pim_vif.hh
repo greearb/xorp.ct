@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.5 2003/01/13 19:38:20 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.6 2003/01/13 20:40:23 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -222,7 +222,7 @@ public:
     //
     // Hello-related configuration parameters
     //
-    ConfigParam<uint16_t>& hello_triggered_delay() {return (_hello_triggered_delay); }
+    ConfigParam<uint16_t>& hello_triggered_delay() { return (_hello_triggered_delay); }
     ConfigParam<uint16_t>& hello_period() { return (_hello_period); }
     ConfigParam<uint16_t>& hello_holdtime() { return (_hello_holdtime); }
     ConfigParam<uint32_t>& genid() { return (_genid); }
