@@ -16,22 +16,22 @@ XrlBgpMibTrapsV0p1Client::send_send_bgp_established_trap(
 	const char*	the_tgt, 
 	const string&	bgp_last_error, 
 	const uint32_t&	bgp_state, 
-	const CB0&	cb
+	const SendBgpEstablishedTrapCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp_mib_traps/0.1/send_bgp_established_trap");
     x.args().add("bgp_last_error", bgp_last_error);
     x.args().add("bgp_state", bgp_state);
-    return _sender->send(x, callback(this, &XrlBgpMibTrapsV0p1Client::unmarshall0, cb));
+    return _sender->send(x, callback(this, &XrlBgpMibTrapsV0p1Client::unmarshall_send_bgp_established_trap, cb));
 }
 
 
 /* Unmarshall send_bgp_established_trap */
 void
-XrlBgpMibTrapsV0p1Client::unmarshall0(
+XrlBgpMibTrapsV0p1Client::unmarshall_send_bgp_established_trap(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB0		cb
+	SendBgpEstablishedTrapCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -50,22 +50,22 @@ XrlBgpMibTrapsV0p1Client::send_send_bgp_backward_transition_trap(
 	const char*	the_tgt, 
 	const string&	bgp_last_error, 
 	const uint32_t&	bgp_state, 
-	const CB1&	cb
+	const SendBgpBackwardTransitionTrapCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp_mib_traps/0.1/send_bgp_backward_transition_trap");
     x.args().add("bgp_last_error", bgp_last_error);
     x.args().add("bgp_state", bgp_state);
-    return _sender->send(x, callback(this, &XrlBgpMibTrapsV0p1Client::unmarshall1, cb));
+    return _sender->send(x, callback(this, &XrlBgpMibTrapsV0p1Client::unmarshall_send_bgp_backward_transition_trap, cb));
 }
 
 
 /* Unmarshall send_bgp_backward_transition_trap */
 void
-XrlBgpMibTrapsV0p1Client::unmarshall1(
+XrlBgpMibTrapsV0p1Client::unmarshall_send_bgp_backward_transition_trap(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB1		cb
+	SendBgpBackwardTransitionTrapCB		cb
 )
 {
     if (e != XrlError::OKAY()) {

@@ -28,7 +28,7 @@ public:
     XrlBgpMibTrapsV0p1Client(XrlSender* s) : _sender(s) {}
     virtual ~XrlBgpMibTrapsV0p1Client() {}
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB0;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr SendBgpEstablishedTrapCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -40,10 +40,10 @@ public:
 	const char*	target_name, 
 	const string&	bgp_last_error, 
 	const uint32_t&	bgp_state, 
-	const CB0&	cb
+	const SendBgpEstablishedTrapCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB1;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr SendBgpBackwardTransitionTrapCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -55,23 +55,23 @@ public:
 	const char*	target_name, 
 	const string&	bgp_last_error, 
 	const uint32_t&	bgp_state, 
-	const CB1&	cb
+	const SendBgpBackwardTransitionTrapCB&	cb
     );
 
 protected:
     XrlSender* _sender;
 
 private:
-    void unmarshall0(
+    void unmarshall_send_bgp_established_trap(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB0		cb
+	SendBgpEstablishedTrapCB		cb
     );
 
-    void unmarshall1(
+    void unmarshall_send_bgp_backward_transition_trap(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB1		cb
+	SendBgpBackwardTransitionTrapCB		cb
     );
 
 };

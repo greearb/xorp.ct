@@ -16,22 +16,22 @@ XrlXorpIfMibV0p1Client::send_load_mib(
 	const char*	the_tgt, 
 	const string&	mod_name, 
 	const string&	abs_path, 
-	const CB0&	cb
+	const LoadMibCB&	cb
 )
 {
     Xrl x(the_tgt, "xorp_if_mib/0.1/load_mib");
     x.args().add("mod_name", mod_name);
     x.args().add("abs_path", abs_path);
-    return _sender->send(x, callback(this, &XrlXorpIfMibV0p1Client::unmarshall0, cb));
+    return _sender->send(x, callback(this, &XrlXorpIfMibV0p1Client::unmarshall_load_mib, cb));
 }
 
 
 /* Unmarshall load_mib */
 void
-XrlXorpIfMibV0p1Client::unmarshall0(
+XrlXorpIfMibV0p1Client::unmarshall_load_mib(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB0		cb
+	LoadMibCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -57,21 +57,21 @@ bool
 XrlXorpIfMibV0p1Client::send_unload_mib(
 	const char*	the_tgt, 
 	const uint32_t&	mib_index, 
-	const CB1&	cb
+	const UnloadMibCB&	cb
 )
 {
     Xrl x(the_tgt, "xorp_if_mib/0.1/unload_mib");
     x.args().add("mib_index", mib_index);
-    return _sender->send(x, callback(this, &XrlXorpIfMibV0p1Client::unmarshall1, cb));
+    return _sender->send(x, callback(this, &XrlXorpIfMibV0p1Client::unmarshall_unload_mib, cb));
 }
 
 
 /* Unmarshall unload_mib */
 void
-XrlXorpIfMibV0p1Client::unmarshall1(
+XrlXorpIfMibV0p1Client::unmarshall_unload_mib(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB1		cb
+	UnloadMibCB		cb
 )
 {
     if (e != XrlError::OKAY()) {

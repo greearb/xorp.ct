@@ -28,7 +28,7 @@ public:
     XrlBgpV0p2Client(XrlSender* s) : _sender(s) {}
     virtual ~XrlBgpV0p2Client() {}
 
-    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr CB0;
+    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr GetBgpVersionCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -38,10 +38,10 @@ public:
      */
     bool send_get_bgp_version(
 	const char*	target_name, 
-	const CB0&	cb
+	const GetBgpVersionCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB1;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr LocalConfigCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -55,10 +55,10 @@ public:
 	const char*	target_name, 
 	const uint32_t&	as, 
 	const IPv4&	id, 
-	const CB1&	cb
+	const LocalConfigCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB2;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr SetLocalAsCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -71,10 +71,10 @@ public:
     bool send_set_local_as(
 	const char*	target_name, 
 	const uint32_t&	as, 
-	const CB2&	cb
+	const SetLocalAsCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr CB3;
+    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr GetLocalAsCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -84,10 +84,10 @@ public:
      */
     bool send_get_local_as(
 	const char*	target_name, 
-	const CB3&	cb
+	const GetLocalAsCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB4;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr SetBgpidCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -100,10 +100,10 @@ public:
     bool send_set_bgpid(
 	const char*	target_name, 
 	const IPv4&	id, 
-	const CB4&	cb
+	const SetBgpidCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr CB5;
+    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr GetBgpidCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -113,10 +113,10 @@ public:
      */
     bool send_get_bgpid(
 	const char*	target_name, 
-	const CB5&	cb
+	const GetBgpidCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB6;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr AddPeerCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -139,10 +139,10 @@ public:
 	const uint32_t&	as, 
 	const IPv4&	next_hop, 
 	const uint32_t&	holdtime, 
-	const CB6&	cb
+	const AddPeerCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB7;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr DeletePeerCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -156,10 +156,10 @@ public:
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB7&	cb
+	const DeletePeerCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB8;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr EnablePeerCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -173,10 +173,10 @@ public:
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB8&	cb
+	const EnablePeerCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB9;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr DisablePeerCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -190,10 +190,10 @@ public:
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB9&	cb
+	const DisablePeerCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB10;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr SetParameterCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -208,10 +208,10 @@ public:
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
 	const string&	parameter, 
-	const CB10&	cb
+	const SetParameterCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB11;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr NextHopRewriteFilterCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -226,10 +226,10 @@ public:
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
 	const IPv4&	next_hop, 
-	const CB11&	cb
+	const NextHopRewriteFilterCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB12;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr SetPeerStateCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -246,10 +246,10 @@ public:
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
 	const bool&	toggle, 
-	const CB12&	cb
+	const SetPeerStateCB&	cb
     );
 
-    typedef XorpCallback3<void, const XrlError&, const uint32_t*, const bool*>::RefPtr CB13;
+    typedef XorpCallback3<void, const XrlError&, const uint32_t*, const bool*>::RefPtr GetPeerListStartCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -260,10 +260,10 @@ public:
      */
     bool send_get_peer_list_start(
 	const char*	target_name, 
-	const CB13&	cb
+	const GetPeerListStartCB&	cb
     );
 
-    typedef XorpCallback6<void, const XrlError&, const IPv4*, const uint32_t*, const IPv4*, const uint32_t*, const bool*>::RefPtr CB14;
+    typedef XorpCallback6<void, const XrlError&, const IPv4*, const uint32_t*, const IPv4*, const uint32_t*, const bool*>::RefPtr GetPeerListNextCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -276,10 +276,10 @@ public:
     bool send_get_peer_list_next(
 	const char*	target_name, 
 	const uint32_t&	token, 
-	const CB14&	cb
+	const GetPeerListNextCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr CB15;
+    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr GetPeerIdCB;
 
     bool send_get_peer_id(
 	const char*	target_name, 
@@ -287,10 +287,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB15&	cb
+	const GetPeerIdCB&	cb
     );
 
-    typedef XorpCallback3<void, const XrlError&, const uint32_t*, const uint32_t*>::RefPtr CB16;
+    typedef XorpCallback3<void, const XrlError&, const uint32_t*, const uint32_t*>::RefPtr GetPeerStatusCB;
 
     bool send_get_peer_status(
 	const char*	target_name, 
@@ -298,10 +298,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB16&	cb
+	const GetPeerStatusCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const int32_t*>::RefPtr CB17;
+    typedef XorpCallback2<void, const XrlError&, const int32_t*>::RefPtr GetPeerNegotiatedVersionCB;
 
     bool send_get_peer_negotiated_version(
 	const char*	target_name, 
@@ -309,10 +309,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB17&	cb
+	const GetPeerNegotiatedVersionCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr CB18;
+    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr GetPeerAsCB;
 
     bool send_get_peer_as(
 	const char*	target_name, 
@@ -320,10 +320,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB18&	cb
+	const GetPeerAsCB&	cb
     );
 
-    typedef XorpCallback7<void, const XrlError&, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*>::RefPtr CB19;
+    typedef XorpCallback7<void, const XrlError&, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*>::RefPtr GetPeerMsgStatsCB;
 
     bool send_get_peer_msg_stats(
 	const char*	target_name, 
@@ -331,10 +331,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB19&	cb
+	const GetPeerMsgStatsCB&	cb
     );
 
-    typedef XorpCallback3<void, const XrlError&, const uint32_t*, const uint32_t*>::RefPtr CB20;
+    typedef XorpCallback3<void, const XrlError&, const uint32_t*, const uint32_t*>::RefPtr GetPeerEstablishedStatsCB;
 
     bool send_get_peer_established_stats(
 	const char*	target_name, 
@@ -342,10 +342,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB20&	cb
+	const GetPeerEstablishedStatsCB&	cb
     );
 
-    typedef XorpCallback8<void, const XrlError&, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*>::RefPtr CB21;
+    typedef XorpCallback8<void, const XrlError&, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*, const uint32_t*>::RefPtr GetPeerTimerConfigCB;
 
     bool send_get_peer_timer_config(
 	const char*	target_name, 
@@ -353,10 +353,10 @@ public:
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB21&	cb
+	const GetPeerTimerConfigCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB22;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr RegisterRibCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -369,10 +369,10 @@ public:
     bool send_register_rib(
 	const char*	target_name, 
 	const string&	name, 
-	const CB22&	cb
+	const RegisterRibCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB23;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr AddRouteCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -393,10 +393,10 @@ public:
 	const int32_t&	asnum, 
 	const IPv4&	next_hop, 
 	const IPv4Net&	nlri, 
-	const CB23&	cb
+	const AddRouteCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr CB24;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr DeleteRouteCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -409,10 +409,10 @@ public:
     bool send_delete_route(
 	const char*	target_name, 
 	const IPv4Net&	nlri, 
-	const CB24&	cb
+	const DeleteRouteCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr CB25;
+    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr GetV4RouteListStartCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -423,10 +423,10 @@ public:
      */
     bool send_get_v4_route_list_start(
 	const char*	target_name, 
-	const CB25&	cb
+	const GetV4RouteListStartCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr CB26;
+    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr GetV6RouteListStartCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -437,10 +437,10 @@ public:
      */
     bool send_get_v6_route_list_start(
 	const char*	target_name, 
-	const CB26&	cb
+	const GetV6RouteListStartCB&	cb
     );
 
-    typedef XorpCallback13<void, const XrlError&, const IPv4*, const IPv4Net*, const uint32_t*, const vector<uint8_t>*, const IPv4*, const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*, const int32_t*, const vector<uint8_t>*, const bool*>::RefPtr CB27;
+    typedef XorpCallback13<void, const XrlError&, const IPv4*, const IPv4Net*, const uint32_t*, const vector<uint8_t>*, const IPv4*, const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*, const int32_t*, const vector<uint8_t>*, const bool*>::RefPtr GetV4RouteListNextCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -452,10 +452,10 @@ public:
     bool send_get_v4_route_list_next(
 	const char*	target_name, 
 	const uint32_t&	token, 
-	const CB27&	cb
+	const GetV4RouteListNextCB&	cb
     );
 
-    typedef XorpCallback13<void, const XrlError&, const IPv4*, const IPv6Net*, const uint32_t*, const vector<uint8_t>*, const IPv6*, const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*, const int32_t*, const vector<uint8_t>*, const bool*>::RefPtr CB28;
+    typedef XorpCallback13<void, const XrlError&, const IPv4*, const IPv6Net*, const uint32_t*, const vector<uint8_t>*, const IPv6*, const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*, const int32_t*, const vector<uint8_t>*, const bool*>::RefPtr GetV6RouteListNextCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -467,185 +467,185 @@ public:
     bool send_get_v6_route_list_next(
 	const char*	target_name, 
 	const uint32_t&	token, 
-	const CB28&	cb
+	const GetV6RouteListNextCB&	cb
     );
 
 protected:
     XrlSender* _sender;
 
 private:
-    void unmarshall0(
+    void unmarshall_get_bgp_version(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB0		cb
+	GetBgpVersionCB		cb
     );
 
-    void unmarshall1(
+    void unmarshall_local_config(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB1		cb
+	LocalConfigCB		cb
     );
 
-    void unmarshall2(
+    void unmarshall_set_local_as(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB2		cb
+	SetLocalAsCB		cb
     );
 
-    void unmarshall3(
+    void unmarshall_get_local_as(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB3		cb
+	GetLocalAsCB		cb
     );
 
-    void unmarshall4(
+    void unmarshall_set_bgpid(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB4		cb
+	SetBgpidCB		cb
     );
 
-    void unmarshall5(
+    void unmarshall_get_bgpid(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB5		cb
+	GetBgpidCB		cb
     );
 
-    void unmarshall6(
+    void unmarshall_add_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB6		cb
+	AddPeerCB		cb
     );
 
-    void unmarshall7(
+    void unmarshall_delete_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB7		cb
+	DeletePeerCB		cb
     );
 
-    void unmarshall8(
+    void unmarshall_enable_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB8		cb
+	EnablePeerCB		cb
     );
 
-    void unmarshall9(
+    void unmarshall_disable_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB9		cb
+	DisablePeerCB		cb
     );
 
-    void unmarshall10(
+    void unmarshall_set_parameter(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB10		cb
+	SetParameterCB		cb
     );
 
-    void unmarshall11(
+    void unmarshall_next_hop_rewrite_filter(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB11		cb
+	NextHopRewriteFilterCB		cb
     );
 
-    void unmarshall12(
+    void unmarshall_set_peer_state(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB12		cb
+	SetPeerStateCB		cb
     );
 
-    void unmarshall13(
+    void unmarshall_get_peer_list_start(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB13		cb
+	GetPeerListStartCB		cb
     );
 
-    void unmarshall14(
+    void unmarshall_get_peer_list_next(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB14		cb
+	GetPeerListNextCB		cb
     );
 
-    void unmarshall15(
+    void unmarshall_get_peer_id(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB15		cb
+	GetPeerIdCB		cb
     );
 
-    void unmarshall16(
+    void unmarshall_get_peer_status(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB16		cb
+	GetPeerStatusCB		cb
     );
 
-    void unmarshall17(
+    void unmarshall_get_peer_negotiated_version(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB17		cb
+	GetPeerNegotiatedVersionCB		cb
     );
 
-    void unmarshall18(
+    void unmarshall_get_peer_as(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB18		cb
+	GetPeerAsCB		cb
     );
 
-    void unmarshall19(
+    void unmarshall_get_peer_msg_stats(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB19		cb
+	GetPeerMsgStatsCB		cb
     );
 
-    void unmarshall20(
+    void unmarshall_get_peer_established_stats(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB20		cb
+	GetPeerEstablishedStatsCB		cb
     );
 
-    void unmarshall21(
+    void unmarshall_get_peer_timer_config(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB21		cb
+	GetPeerTimerConfigCB		cb
     );
 
-    void unmarshall22(
+    void unmarshall_register_rib(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB22		cb
+	RegisterRibCB		cb
     );
 
-    void unmarshall23(
+    void unmarshall_add_route(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB23		cb
+	AddRouteCB		cb
     );
 
-    void unmarshall24(
+    void unmarshall_delete_route(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB24		cb
+	DeleteRouteCB		cb
     );
 
-    void unmarshall25(
+    void unmarshall_get_v4_route_list_start(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB25		cb
+	GetV4RouteListStartCB		cb
     );
 
-    void unmarshall26(
+    void unmarshall_get_v6_route_list_start(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB26		cb
+	GetV6RouteListStartCB		cb
     );
 
-    void unmarshall27(
+    void unmarshall_get_v4_route_list_next(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB27		cb
+	GetV4RouteListNextCB		cb
     );
 
-    void unmarshall28(
+    void unmarshall_get_v6_route_list_next(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB28		cb
+	GetV6RouteListNextCB		cb
     );
 
 };

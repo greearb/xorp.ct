@@ -28,7 +28,7 @@ public:
     XrlXorpIfMibV0p1Client(XrlSender* s) : _sender(s) {}
     virtual ~XrlXorpIfMibV0p1Client() {}
 
-    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr CB0;
+    typedef XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr LoadMibCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -44,10 +44,10 @@ public:
 	const char*	target_name, 
 	const string&	mod_name, 
 	const string&	abs_path, 
-	const CB0&	cb
+	const LoadMibCB&	cb
     );
 
-    typedef XorpCallback2<void, const XrlError&, const bool*>::RefPtr CB1;
+    typedef XorpCallback2<void, const XrlError&, const bool*>::RefPtr UnloadMibCB;
     /**
      *  Send Xrl intended to:
      *  
@@ -58,23 +58,23 @@ public:
     bool send_unload_mib(
 	const char*	target_name, 
 	const uint32_t&	mib_index, 
-	const CB1&	cb
+	const UnloadMibCB&	cb
     );
 
 protected:
     XrlSender* _sender;
 
 private:
-    void unmarshall0(
+    void unmarshall_load_mib(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB0		cb
+	LoadMibCB		cb
     );
 
-    void unmarshall1(
+    void unmarshall_unload_mib(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB1		cb
+	UnloadMibCB		cb
     );
 
 };

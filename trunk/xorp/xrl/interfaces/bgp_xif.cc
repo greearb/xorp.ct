@@ -14,20 +14,20 @@
 bool
 XrlBgpV0p2Client::send_get_bgp_version(
 	const char*	the_tgt, 
-	const CB0&	cb
+	const GetBgpVersionCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_bgp_version");
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall0, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_bgp_version, cb));
 }
 
 
 /* Unmarshall get_bgp_version */
 void
-XrlBgpV0p2Client::unmarshall0(
+XrlBgpV0p2Client::unmarshall_get_bgp_version(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB0		cb
+	GetBgpVersionCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -54,22 +54,22 @@ XrlBgpV0p2Client::send_local_config(
 	const char*	the_tgt, 
 	const uint32_t&	as, 
 	const IPv4&	id, 
-	const CB1&	cb
+	const LocalConfigCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/local_config");
     x.args().add("as", as);
     x.args().add("id", id);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall1, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_local_config, cb));
 }
 
 
 /* Unmarshall local_config */
 void
-XrlBgpV0p2Client::unmarshall1(
+XrlBgpV0p2Client::unmarshall_local_config(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB1		cb
+	LocalConfigCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -87,21 +87,21 @@ bool
 XrlBgpV0p2Client::send_set_local_as(
 	const char*	the_tgt, 
 	const uint32_t&	as, 
-	const CB2&	cb
+	const SetLocalAsCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/set_local_as");
     x.args().add("as", as);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall2, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_set_local_as, cb));
 }
 
 
 /* Unmarshall set_local_as */
 void
-XrlBgpV0p2Client::unmarshall2(
+XrlBgpV0p2Client::unmarshall_set_local_as(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB2		cb
+	SetLocalAsCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -118,20 +118,20 @@ XrlBgpV0p2Client::unmarshall2(
 bool
 XrlBgpV0p2Client::send_get_local_as(
 	const char*	the_tgt, 
-	const CB3&	cb
+	const GetLocalAsCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_local_as");
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall3, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_local_as, cb));
 }
 
 
 /* Unmarshall get_local_as */
 void
-XrlBgpV0p2Client::unmarshall3(
+XrlBgpV0p2Client::unmarshall_get_local_as(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB3		cb
+	GetLocalAsCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -157,21 +157,21 @@ bool
 XrlBgpV0p2Client::send_set_bgpid(
 	const char*	the_tgt, 
 	const IPv4&	id, 
-	const CB4&	cb
+	const SetBgpidCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/set_bgpid");
     x.args().add("id", id);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall4, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_set_bgpid, cb));
 }
 
 
 /* Unmarshall set_bgpid */
 void
-XrlBgpV0p2Client::unmarshall4(
+XrlBgpV0p2Client::unmarshall_set_bgpid(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB4		cb
+	SetBgpidCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -188,20 +188,20 @@ XrlBgpV0p2Client::unmarshall4(
 bool
 XrlBgpV0p2Client::send_get_bgpid(
 	const char*	the_tgt, 
-	const CB5&	cb
+	const GetBgpidCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_bgpid");
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall5, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_bgpid, cb));
 }
 
 
 /* Unmarshall get_bgpid */
 void
-XrlBgpV0p2Client::unmarshall5(
+XrlBgpV0p2Client::unmarshall_get_bgpid(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB5		cb
+	GetBgpidCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -233,7 +233,7 @@ XrlBgpV0p2Client::send_add_peer(
 	const uint32_t&	as, 
 	const IPv4&	next_hop, 
 	const uint32_t&	holdtime, 
-	const CB6&	cb
+	const AddPeerCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/add_peer");
@@ -244,16 +244,16 @@ XrlBgpV0p2Client::send_add_peer(
     x.args().add("as", as);
     x.args().add("next_hop", next_hop);
     x.args().add("holdtime", holdtime);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall6, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_add_peer, cb));
 }
 
 
 /* Unmarshall add_peer */
 void
-XrlBgpV0p2Client::unmarshall6(
+XrlBgpV0p2Client::unmarshall_add_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB6		cb
+	AddPeerCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -274,7 +274,7 @@ XrlBgpV0p2Client::send_delete_peer(
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB7&	cb
+	const DeletePeerCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/delete_peer");
@@ -282,16 +282,16 @@ XrlBgpV0p2Client::send_delete_peer(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall7, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_delete_peer, cb));
 }
 
 
 /* Unmarshall delete_peer */
 void
-XrlBgpV0p2Client::unmarshall7(
+XrlBgpV0p2Client::unmarshall_delete_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB7		cb
+	DeletePeerCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -312,7 +312,7 @@ XrlBgpV0p2Client::send_enable_peer(
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB8&	cb
+	const EnablePeerCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/enable_peer");
@@ -320,16 +320,16 @@ XrlBgpV0p2Client::send_enable_peer(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall8, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_enable_peer, cb));
 }
 
 
 /* Unmarshall enable_peer */
 void
-XrlBgpV0p2Client::unmarshall8(
+XrlBgpV0p2Client::unmarshall_enable_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB8		cb
+	EnablePeerCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -350,7 +350,7 @@ XrlBgpV0p2Client::send_disable_peer(
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB9&	cb
+	const DisablePeerCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/disable_peer");
@@ -358,16 +358,16 @@ XrlBgpV0p2Client::send_disable_peer(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall9, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_disable_peer, cb));
 }
 
 
 /* Unmarshall disable_peer */
 void
-XrlBgpV0p2Client::unmarshall9(
+XrlBgpV0p2Client::unmarshall_disable_peer(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB9		cb
+	DisablePeerCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -389,7 +389,7 @@ XrlBgpV0p2Client::send_set_parameter(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
 	const string&	parameter, 
-	const CB10&	cb
+	const SetParameterCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/set_parameter");
@@ -398,16 +398,16 @@ XrlBgpV0p2Client::send_set_parameter(
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
     x.args().add("parameter", parameter);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall10, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_set_parameter, cb));
 }
 
 
 /* Unmarshall set_parameter */
 void
-XrlBgpV0p2Client::unmarshall10(
+XrlBgpV0p2Client::unmarshall_set_parameter(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB10		cb
+	SetParameterCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -429,7 +429,7 @@ XrlBgpV0p2Client::send_next_hop_rewrite_filter(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
 	const IPv4&	next_hop, 
-	const CB11&	cb
+	const NextHopRewriteFilterCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/next_hop_rewrite_filter");
@@ -438,16 +438,16 @@ XrlBgpV0p2Client::send_next_hop_rewrite_filter(
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
     x.args().add("next_hop", next_hop);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall11, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_next_hop_rewrite_filter, cb));
 }
 
 
 /* Unmarshall next_hop_rewrite_filter */
 void
-XrlBgpV0p2Client::unmarshall11(
+XrlBgpV0p2Client::unmarshall_next_hop_rewrite_filter(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB11		cb
+	NextHopRewriteFilterCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -469,7 +469,7 @@ XrlBgpV0p2Client::send_set_peer_state(
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
 	const bool&	toggle, 
-	const CB12&	cb
+	const SetPeerStateCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/set_peer_state");
@@ -478,16 +478,16 @@ XrlBgpV0p2Client::send_set_peer_state(
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
     x.args().add("toggle", toggle);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall12, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_set_peer_state, cb));
 }
 
 
 /* Unmarshall set_peer_state */
 void
-XrlBgpV0p2Client::unmarshall12(
+XrlBgpV0p2Client::unmarshall_set_peer_state(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB12		cb
+	SetPeerStateCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -504,20 +504,20 @@ XrlBgpV0p2Client::unmarshall12(
 bool
 XrlBgpV0p2Client::send_get_peer_list_start(
 	const char*	the_tgt, 
-	const CB13&	cb
+	const GetPeerListStartCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_list_start");
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall13, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_list_start, cb));
 }
 
 
 /* Unmarshall get_peer_list_start */
 void
-XrlBgpV0p2Client::unmarshall13(
+XrlBgpV0p2Client::unmarshall_get_peer_list_start(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB13		cb
+	GetPeerListStartCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -545,21 +545,21 @@ bool
 XrlBgpV0p2Client::send_get_peer_list_next(
 	const char*	the_tgt, 
 	const uint32_t&	token, 
-	const CB14&	cb
+	const GetPeerListNextCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_list_next");
     x.args().add("token", token);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall14, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_list_next, cb));
 }
 
 
 /* Unmarshall get_peer_list_next */
 void
-XrlBgpV0p2Client::unmarshall14(
+XrlBgpV0p2Client::unmarshall_get_peer_list_next(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB14		cb
+	GetPeerListNextCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -596,7 +596,7 @@ XrlBgpV0p2Client::send_get_peer_id(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB15&	cb
+	const GetPeerIdCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_id");
@@ -604,16 +604,16 @@ XrlBgpV0p2Client::send_get_peer_id(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall15, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_id, cb));
 }
 
 
 /* Unmarshall get_peer_id */
 void
-XrlBgpV0p2Client::unmarshall15(
+XrlBgpV0p2Client::unmarshall_get_peer_id(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB15		cb
+	GetPeerIdCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -642,7 +642,7 @@ XrlBgpV0p2Client::send_get_peer_status(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB16&	cb
+	const GetPeerStatusCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_status");
@@ -650,16 +650,16 @@ XrlBgpV0p2Client::send_get_peer_status(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall16, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_status, cb));
 }
 
 
 /* Unmarshall get_peer_status */
 void
-XrlBgpV0p2Client::unmarshall16(
+XrlBgpV0p2Client::unmarshall_get_peer_status(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB16		cb
+	GetPeerStatusCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -690,7 +690,7 @@ XrlBgpV0p2Client::send_get_peer_negotiated_version(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB17&	cb
+	const GetPeerNegotiatedVersionCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_negotiated_version");
@@ -698,16 +698,16 @@ XrlBgpV0p2Client::send_get_peer_negotiated_version(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall17, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_negotiated_version, cb));
 }
 
 
 /* Unmarshall get_peer_negotiated_version */
 void
-XrlBgpV0p2Client::unmarshall17(
+XrlBgpV0p2Client::unmarshall_get_peer_negotiated_version(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB17		cb
+	GetPeerNegotiatedVersionCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -736,7 +736,7 @@ XrlBgpV0p2Client::send_get_peer_as(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB18&	cb
+	const GetPeerAsCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_as");
@@ -744,16 +744,16 @@ XrlBgpV0p2Client::send_get_peer_as(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall18, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_as, cb));
 }
 
 
 /* Unmarshall get_peer_as */
 void
-XrlBgpV0p2Client::unmarshall18(
+XrlBgpV0p2Client::unmarshall_get_peer_as(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB18		cb
+	GetPeerAsCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -782,7 +782,7 @@ XrlBgpV0p2Client::send_get_peer_msg_stats(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB19&	cb
+	const GetPeerMsgStatsCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_msg_stats");
@@ -790,16 +790,16 @@ XrlBgpV0p2Client::send_get_peer_msg_stats(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall19, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_msg_stats, cb));
 }
 
 
 /* Unmarshall get_peer_msg_stats */
 void
-XrlBgpV0p2Client::unmarshall19(
+XrlBgpV0p2Client::unmarshall_get_peer_msg_stats(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB19		cb
+	GetPeerMsgStatsCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -838,7 +838,7 @@ XrlBgpV0p2Client::send_get_peer_established_stats(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB20&	cb
+	const GetPeerEstablishedStatsCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_established_stats");
@@ -846,16 +846,16 @@ XrlBgpV0p2Client::send_get_peer_established_stats(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall20, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_established_stats, cb));
 }
 
 
 /* Unmarshall get_peer_established_stats */
 void
-XrlBgpV0p2Client::unmarshall20(
+XrlBgpV0p2Client::unmarshall_get_peer_established_stats(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB20		cb
+	GetPeerEstablishedStatsCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -886,7 +886,7 @@ XrlBgpV0p2Client::send_get_peer_timer_config(
 	const uint32_t&	local_port, 
 	const IPv4&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const CB21&	cb
+	const GetPeerTimerConfigCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_peer_timer_config");
@@ -894,16 +894,16 @@ XrlBgpV0p2Client::send_get_peer_timer_config(
     x.args().add("local_port", local_port);
     x.args().add("peer_ip", peer_ip);
     x.args().add("peer_port", peer_port);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall21, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_peer_timer_config, cb));
 }
 
 
 /* Unmarshall get_peer_timer_config */
 void
-XrlBgpV0p2Client::unmarshall21(
+XrlBgpV0p2Client::unmarshall_get_peer_timer_config(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB21		cb
+	GetPeerTimerConfigCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -941,21 +941,21 @@ bool
 XrlBgpV0p2Client::send_register_rib(
 	const char*	the_tgt, 
 	const string&	name, 
-	const CB22&	cb
+	const RegisterRibCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/register_rib");
     x.args().add("name", name);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall22, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_register_rib, cb));
 }
 
 
 /* Unmarshall register_rib */
 void
-XrlBgpV0p2Client::unmarshall22(
+XrlBgpV0p2Client::unmarshall_register_rib(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB22		cb
+	RegisterRibCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -976,7 +976,7 @@ XrlBgpV0p2Client::send_add_route(
 	const int32_t&	asnum, 
 	const IPv4&	next_hop, 
 	const IPv4Net&	nlri, 
-	const CB23&	cb
+	const AddRouteCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/add_route");
@@ -984,16 +984,16 @@ XrlBgpV0p2Client::send_add_route(
     x.args().add("asnum", asnum);
     x.args().add("next_hop", next_hop);
     x.args().add("nlri", nlri);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall23, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_add_route, cb));
 }
 
 
 /* Unmarshall add_route */
 void
-XrlBgpV0p2Client::unmarshall23(
+XrlBgpV0p2Client::unmarshall_add_route(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB23		cb
+	AddRouteCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -1011,21 +1011,21 @@ bool
 XrlBgpV0p2Client::send_delete_route(
 	const char*	the_tgt, 
 	const IPv4Net&	nlri, 
-	const CB24&	cb
+	const DeleteRouteCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/delete_route");
     x.args().add("nlri", nlri);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall24, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_delete_route, cb));
 }
 
 
 /* Unmarshall delete_route */
 void
-XrlBgpV0p2Client::unmarshall24(
+XrlBgpV0p2Client::unmarshall_delete_route(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB24		cb
+	DeleteRouteCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -1042,20 +1042,20 @@ XrlBgpV0p2Client::unmarshall24(
 bool
 XrlBgpV0p2Client::send_get_v4_route_list_start(
 	const char*	the_tgt, 
-	const CB25&	cb
+	const GetV4RouteListStartCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_v4_route_list_start");
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall25, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_v4_route_list_start, cb));
 }
 
 
 /* Unmarshall get_v4_route_list_start */
 void
-XrlBgpV0p2Client::unmarshall25(
+XrlBgpV0p2Client::unmarshall_get_v4_route_list_start(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB25		cb
+	GetV4RouteListStartCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -1080,20 +1080,20 @@ XrlBgpV0p2Client::unmarshall25(
 bool
 XrlBgpV0p2Client::send_get_v6_route_list_start(
 	const char*	the_tgt, 
-	const CB26&	cb
+	const GetV6RouteListStartCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_v6_route_list_start");
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall26, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_v6_route_list_start, cb));
 }
 
 
 /* Unmarshall get_v6_route_list_start */
 void
-XrlBgpV0p2Client::unmarshall26(
+XrlBgpV0p2Client::unmarshall_get_v6_route_list_start(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB26		cb
+	GetV6RouteListStartCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -1119,21 +1119,21 @@ bool
 XrlBgpV0p2Client::send_get_v4_route_list_next(
 	const char*	the_tgt, 
 	const uint32_t&	token, 
-	const CB27&	cb
+	const GetV4RouteListNextCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_v4_route_list_next");
     x.args().add("token", token);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall27, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_v4_route_list_next, cb));
 }
 
 
 /* Unmarshall get_v4_route_list_next */
 void
-XrlBgpV0p2Client::unmarshall27(
+XrlBgpV0p2Client::unmarshall_get_v4_route_list_next(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB27		cb
+	GetV4RouteListNextCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -1181,21 +1181,21 @@ bool
 XrlBgpV0p2Client::send_get_v6_route_list_next(
 	const char*	the_tgt, 
 	const uint32_t&	token, 
-	const CB28&	cb
+	const GetV6RouteListNextCB&	cb
 )
 {
     Xrl x(the_tgt, "bgp/0.2/get_v6_route_list_next");
     x.args().add("token", token);
-    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall28, cb));
+    return _sender->send(x, callback(this, &XrlBgpV0p2Client::unmarshall_get_v6_route_list_next, cb));
 }
 
 
 /* Unmarshall get_v6_route_list_next */
 void
-XrlBgpV0p2Client::unmarshall28(
+XrlBgpV0p2Client::unmarshall_get_v6_route_list_next(
 	const XrlError&	e, 
 	XrlArgs*	a, 
-	CB28		cb
+	GetV6RouteListNextCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
