@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.3 2004/11/10 00:39:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.4 2004/11/12 00:31:05 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -182,17 +182,17 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 	return (false);
     }
 
-    config = c_format("_xorp_rt.add %s %s %d\n",
+    config = c_format("%s %s %d\n",
 		      fte.net().str().c_str(),
 		      fte.nexthop().str().c_str(),
 		      port);
 
     //
-    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is a copy
+    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is almost a copy
     // from IfConfigSetClick::config_end(). Add a new method
     // to ClickSocket that eliminates the need for such replication.
     //
-    string write_config = c_format("WRITEDATA hotconfig %u\n",
+    string write_config = c_format("WRITEDATA _xorp_rt.add %u\n",
 				   static_cast<uint32_t>(config.size()));
     write_config += config;
     if (ClickSocket::write(write_config.c_str(), write_config.size())
@@ -281,17 +281,17 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 	return (false);
     }
 
-    config = c_format("_xorp_rt.remove %s %s %d\n",
+    config = c_format("%s %s %d\n",
 		      fte.net().str().c_str(),
 		      fte.nexthop().str().c_str(),
 		      port);
 
     //
-    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is a copy
+    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is almost a copy
     // from IfConfigSetClick::config_end(). Add a new method
     // to ClickSocket that eliminates the need for such replication.
     //
-    string write_config = c_format("WRITEDATA hotconfig %u\n",
+    string write_config = c_format("WRITEDATA _xorp_rt.remove %u\n",
 				   static_cast<uint32_t>(config.size()));
     write_config += config;
     if (ClickSocket::write(write_config.c_str(), write_config.size())
