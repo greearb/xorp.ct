@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.30 2004/09/28 00:43:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.31 2004/12/05 22:23:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -442,6 +442,13 @@ XrlBgpTarget::bgp_0_2_get_peer_list_next(
 {
     more = _bgp.get_peer_list_next(token, local_ip, local_port, peer_ip, 
 				   peer_port);
+
+    debug_msg("local ip %s local port %d peer ip %s peer port %d "
+	      "token %#x %s\n",
+	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	      token,
+	      more ? "more" : "");
+
     return  XrlCmdError::OKAY();
 }
 
@@ -455,6 +462,9 @@ XrlBgpTarget::bgp_0_2_get_peer_id(
 				  // Output values, 
 				  IPv4&	peer_id)
 {
+    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
+	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
     Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
     if (!_bgp.get_peer_id(iptuple, peer_id)) {
 	return XrlCmdError::COMMAND_FAILED();
