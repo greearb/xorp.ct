@@ -338,7 +338,7 @@ public:
     string str() const;
 
     //    class InvalidString {} ;
-    XrlArgs(const char* str) throw (InvalidString);
+    explicit XrlArgs(const char* str) throw (InvalidString);
 
 protected:
     void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.3 2002/12/18 22:54:30 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.4 2002/12/19 01:29:13 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -61,7 +61,7 @@ public:
 	XrlError	error_code;
 	XrlArgs	response;
 
-	Reply(const XUID& id, const XrlError& error, XrlArgs r = 0)
+	Reply(const XUID& id, const XrlError& error, XrlArgs r)
 	    : xuid(id), error_code(error), response(r) {}
 	~Reply() {}
     };
