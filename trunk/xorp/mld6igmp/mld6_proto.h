@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.2 2003/03/10 23:20:42 hodson Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.3 2003/04/16 04:53:43 pavlin Exp $
  */
 
 
@@ -66,7 +66,9 @@
 #define MLD_MTRACE			MLD6_MTRACE
 #endif
 #ifndef MLDV2_LISTENER_REPORT
-#define MLDV2_LISTENER_REPORT		MLD6V2_LISTENER_REPORT
+#  ifdef MLD6V2_LISTENER_REPORT
+#    define MLDV2_LISTENER_REPORT	MLD6V2_LISTENER_REPORT
+#  endif
 #endif
 #ifndef MLD_MINLEN
 #  ifdef HAVE_MLD_HDR
