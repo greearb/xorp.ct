@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.12 2004/06/15 00:31:08 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.13 2004/06/15 00:40:42 atanu Exp $ */
 
 
 interfaces {
@@ -125,14 +125,14 @@ protocols {
 	    local-port: 179
 	    peer-port: 179
 */
-	    /*holdtime: 120*/
-	    /*enabled: true*/
+	    /* holdtime: 120 */
+	    /* enabled: true */
 
 	    /* Optionally enable other AFI/SAFI combinations */
-	    /*enable-ipv4-multicast*/
+	    /* enable-ipv4-multicast */
 
-            /*enable-ipv6-unicast*/
-            /*enable-ipv6-multicast*/
+	    /* enable-ipv6-unicast */
+	    /* enable-ipv6-multicast */
 	}
 
 	/* Originate IPv4 Routes */
@@ -235,7 +235,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		enabled: true
-		dr-priority: 1
+		/* dr-priority: 1 */
 		/* alternative-subnet 10.40.0.0/16 */
 	    }
 	}
@@ -249,7 +249,7 @@ protocols {
 	static-rps {
 	    rp 10.60.0.1 {
 		group-prefix 224.0.0.0/4 {
-		    rp-priority: 192
+		    /* rp-priority: 192 */
 		    /* hash-mask-len: 30 */
 		}
 	    }
@@ -259,24 +259,25 @@ protocols {
 	    enabled: true
 	    cand-bsr {
 		scope-zone 224.0.0.0/4 {
-		    is-scope-zone: false
+		    /* is-scope-zone: false */
 		    cand-bsr-by-vif-name: "dc0"
-		    bsr-priority: 1
+		    /* bsr-priority: 1 */
 		    /* hash-mask-len: 30 */
 		}
 	    }
 
 	    cand-rp {
 		group-prefix 224.0.0.0/4 {
-		    is-scope-zone: false
+		    /* is-scope-zone: false */
 		    cand-rp-by-vif-name: "dc0"
-		    rp-priority: 192
-		    rp-holdtime: 150
+		    /* rp-priority: 192 */
+		    /* rp-holdtime: 150 */
 		}
 	    }
 	}
 
 	switch-to-spt-threshold {
+	    /* approx. 1K bytes/s (10Kbps) threshold */
 	    enabled: true
 	    interval-sec: 100
 	    bytes: 102400
