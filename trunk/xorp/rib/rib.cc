@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.36 2004/07/22 10:55:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.37 2004/07/24 01:01:51 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -518,6 +518,11 @@ RIB<A>::add_vif_address(const string&	vifname,
     vi->second.add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
     // Add a route for this subnet
     add_route("connected", subnet, addr, "", "", /* best possible metric */ 0);
+    if (vi->second.is_p2p() && (peer_addr != A::ZERO())) {
+	add_route("connected",
+		  IPNet<A>(peer_addr, A::addr_bitlen()),
+		  peer_addr, "", "", 0);
+    }
     return XORP_OK;
 }
 
