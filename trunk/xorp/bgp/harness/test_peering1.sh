@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.21 2004/02/20 04:38:18 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.22 2004/03/04 19:21:41 atanu Exp $
 #
 
 #
@@ -898,11 +898,51 @@ test26()
     coord peer1 assert idle
 }
 
+test27()
+{
+    echo "TEST27 - Verify that routes originated by BGP reach an IBGP peer"
+
+    coord reset
+    coord target $HOST $PORT1
+    coord initialise attach peer1
+
+    # Introduce a route
+    originate_route4 10.10.10.0/24 20.20.20.20 true false
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+
+    sleep 2
+    coord peer1 trie recv lookup 10.10.10.0/24 aspath 65008
+
+    coord peer1 assert queue 0
+    coord peer1 assert established
+}
+
+test28()
+{
+    echo "TEST28 - Verify that routes originated by BGP reach an EBGP peer"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    # Introduce a route
+    originate_route4 10.10.10.0/24 20.20.20.20 true false
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    sleep 2
+    coord peer1 trie recv lookup 10.10.10.0/24 aspath 65008
+
+    coord peer1 assert queue 0
+    coord peer1 assert established
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
-    test25 test26'
+    test25 test26 test27 test28'
 
 # Include command line
 . ${srcdir}/args.sh
