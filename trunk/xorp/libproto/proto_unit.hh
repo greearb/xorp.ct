@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_unit.hh,v 1.4 2003/03/19 01:04:14 pavlin Exp $
+// $XORP: xorp/libproto/proto_unit.hh,v 1.5 2003/03/19 23:38:22 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_UNIT_HH__
@@ -58,6 +58,7 @@ enum xorp_module_id {
     XORP_MODULE_CLI		= 10,
     XORP_MODULE_RIB		= 11,
     XORP_MODULE_RTRMGR		= 12,
+    XORP_MODULE_STATIC_ROUTES	= 13,
     XORP_MODULE_MAX
 };
 
@@ -228,6 +229,13 @@ public:
      * @return true if the protocol is RIP.
      */
     bool	proto_is_rip() const { return (_module_id == XORP_MODULE_RIP); }
+
+    /**
+     * Test if the protocol is StaticRoutes.
+     * 
+     * @return true if the protocol is StaticRoutes
+     */
+    bool	proto_is_static_routes() const { return (_module_id == XORP_MODULE_STATIC_ROUTES); }
     
 private:
     int		_family;		// The address family.
