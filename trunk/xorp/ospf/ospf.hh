@@ -117,7 +117,7 @@ pp_area_type(OspfTypes::AreaType area_type)
 template <typename A>
 class Ospf {
  public:
-    Ospf(OspfTypes::Version version, IO* io);
+    Ospf(OspfTypes::Version version, EventLoop& eventloop, IO* io);
 	
     /**
      * @return which version of OSPF are we implementing.
@@ -166,6 +166,8 @@ class Ospf {
     bool get_version() const { return _version; }
  private:
     const OspfTypes::Version _version;	// OSPF version.
+    EventLoop& _eventloop;
+
     IO* _io;			// Indirection for sending and
 				// receiving packets, as well as
 				// adding and deleting routes. 

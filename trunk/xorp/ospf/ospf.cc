@@ -28,11 +28,14 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#include "libxorp/eventloop.hh"
+
 #include "ospf.hh"
 
 template <typename A>
-Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
-    : _version(version), _io(io), _lsa_decoder(version), _peer_manager(*this),
+Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO* io)
+    : _version(version), _eventloop(eventloop), _io(io),
+      _lsa_decoder(version), _peer_manager(*this),
       _database(*this)
 {
     // Register the LSAs and packets with the associated decoder.

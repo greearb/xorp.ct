@@ -32,6 +32,8 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#include "libxorp/eventloop.hh"
+
 #include "ospf.hh"
 #include "area_router.hh"
 

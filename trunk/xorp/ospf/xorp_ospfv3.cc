@@ -51,8 +51,8 @@ main(int /*argc*/, char **argv)
 
 	string ribname = "rib";
 	XrlIO io(eventloop, ribname);
- 	Ospf<IPv4> ospf_ipv4(OspfTypes::V3, &io);
-	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, &io);
+ 	Ospf<IPv4> ospf_ipv4(OspfTypes::V3, eventloop, &io);
+	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, eventloop, &io);
 
 	XrlStdRouter xrl_router(eventloop, "ospfv3");
 	XrlOspfV3Target v3target(&xrl_router, ospf_ipv4, ospf_ipv6, io);

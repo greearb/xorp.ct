@@ -31,6 +31,8 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#include "libxorp/eventloop.hh"
+
 #include "ospf.hh"
 #include "lsa.hh"
 #include "fletcher_checksum.hh"
