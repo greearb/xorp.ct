@@ -252,7 +252,7 @@ DIST_SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) \
 	$(test_route_walk_SOURCES) $(test_timers_SOURCES) \
 	$(test_update_queue_SOURCES) $(xorp_rip4_SOURCES) \
 	$(xorp_rip6_SOURCES)
-DIST_COMMON = Makefile.am Makefile.in
+DIST_COMMON = Makefile.am Makefile.in TODO
 SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) $(test_auth_SOURCES) $(test_outputs_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES) $(xorp_rip4_SOURCES) $(xorp_rip6_SOURCES)
 
 all: all-am
