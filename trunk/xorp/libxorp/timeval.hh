@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.10 2002/12/09 18:29:15 hodson Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -21,8 +21,7 @@
 
 #include <math.h>
 
-#include <stl_config.h>
-#include <stl_relops.h>
+#include <utility>
 
 
 #define ONE_MILLION	1000000

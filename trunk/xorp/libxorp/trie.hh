@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.27 2002/12/09 23:19:00 rizzo Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -50,7 +50,7 @@ class MiniTraits {
         typedef U Result;
     };
 public:
-    typedef UnConst<T>::Result NonConst;
+    typedef typename UnConst<T>::Result NonConst;
 };
 
 
@@ -73,7 +73,7 @@ template <class A, class Payload>
 class TrieNode {
 public:
     typedef IPNet<A> Key;
-    typedef MiniTraits<Payload>::NonConst PPayload;
+    typedef typename MiniTraits<Payload>::NonConst PPayload;
 
     /**
      * Constructors

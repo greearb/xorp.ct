@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.32 2002/12/09 18:29:16 hodson Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
  */
 
 
@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <utility>
 #include <cstdarg>
 #include <cstdio>
 #endif /* __cplusplus */
@@ -49,6 +50,10 @@
 #include <arpa/inet.h>  
 
 #include "utility.h"
+
+#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+using namespace std::rel_ops;
+#endif
 
 /*
  * Misc. definitions that may be missing from the system header files.

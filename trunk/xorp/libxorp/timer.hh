@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.32 2002/12/09 18:29:15 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -347,6 +347,8 @@ private:
     static void system_gettimeofday(timeval*);	// default time querier
 
     friend class TimerNode;
+
+    static TimerNode _dummy_timer_node;
 };
 
 
@@ -480,8 +482,8 @@ XorpTimer::clear()
     _node = 0;
 }
 
-TimerList::TimerList(query_current_time q = system_gettimeofday)
-    : Heap(OFFSET_OF(*(TimerNode *)0, _pos_in_heap)),
+TimerList::TimerList(query_current_time q)
+    : Heap(OFFSET_OF(_dummy_timer_node, _pos_in_heap)),
       _current_time_proc(q)
 {
 }

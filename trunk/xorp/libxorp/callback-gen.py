@@ -342,7 +342,7 @@ def output_rest(l_types, b_types):
     print
     output_kdoc_factory("function", nl, nb)
     print "template <class R%s>" % joining_csv(class_args(l_types + b_types))
-    print "XorpCallback%d<R%s>::RefPtr" % (nl, joining_csv(l_types))
+    print "typename XorpCallback%d<R%s>::RefPtr" % (nl, joining_csv(l_types))
     print "callback(R (*f)(%s)%s) {" % (csv(l_types + b_types), joining_csv(decl_args(b_types)))
     print "    return XorpCallback%d<R%s>::RefPtr(new XorpFunctionCallback%dB%d<R%s>(f%s));" \
           % (nl, joining_csv(l_types), nl, nb, joining_csv(l_types + b_types), joining_csv(call_args(b_types)))
@@ -370,7 +370,7 @@ def output_rest(l_types, b_types):
         for p,q in [('*', ''), ('&', '&')]:
             print
             output_kdoc_factory("%s member function" % const, nl, nb)
-            print "template <class R, class O%s> XorpCallback%s<R%s>::RefPtr" \
+            print "template <class R, class O%s> typename XorpCallback%s<R%s>::RefPtr" \
                       % (joining_csv(class_args(l_types) + class_args(b_types)), nl, (joining_csv(l_types)))
             print "callback(O %so, R (O::*p)(%s)%s%s)" \
                       % (p, csv(l_types + b_types), const, joining_csv(decl_args(b_types)))

@@ -28,8 +28,9 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.29 2002/12/09 18:29:15 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
+#include "xorp.h"
 #include "timer.hh"
 
 // Implementation Notes:

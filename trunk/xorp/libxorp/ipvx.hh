@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.65 2002/12/09 18:29:12 hodson Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -606,8 +606,8 @@ public:
 	throw (InvalidFamily);
     
 private:
-    friend IPv4;
-    friend IPv6;
+    friend class IPv4;
+    friend class IPv6;
     
     uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
     int _af;		// The address family AF_INET or AF_INET6

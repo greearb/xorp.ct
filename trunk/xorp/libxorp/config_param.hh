@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/config_param.hh,v 1.9 2002/12/09 18:29:11 hodson Exp $
+// $XORP: xorp/libxorp/config_param.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_CONFIG_PARAM_HH__
 #define __LIBXORP_CONFIG_PARAM_HH__
@@ -29,7 +29,7 @@
 template<class T>
 class ConfigParam {
 public:
-    typedef XorpCallback1<void, T>::RefPtr UpdateCallback;
+    typedef typename XorpCallback1<void, T>::RefPtr UpdateCallback;
     
     /**
      * Constructor of a parameter with an initial value.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.63 2002/12/09 18:29:12 hodson Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -402,9 +402,8 @@ inline const IPv6& IPv6::ANY(int) {
     return IPv6Constants::any;
 }
 
-inline const IPv6& IPv6::ALL_ONES(int af = AF_INET6) {
+inline const IPv6& IPv6::ALL_ONES(int) {
     return IPv6Constants::all_ones;
-    UNUSED(af);
 }
 
 inline const IPv6& IPv6::MULTICAST_BASE(int) { 
