@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.14 2004/06/21 06:35:49 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.15 2004/06/21 08:32:25 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -69,6 +69,12 @@ gmake check
 
 3.3. OpenBSD
 ============
+  * If the system would be used as a multicast router, then add the
+    following lines to /etc/rc.conf.local and reboot:
+
+    # Enable multicast routing (see netstart(8) for details).
+    multicast_host=NO
+    multicast_router=YES
 
   * OpenBSD-3.5:
     - The default gcc/g++ compiler (version 2.95.x) has a bug, hence
