@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.6 2003/04/16 08:05:09 hodson Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.7 2004/06/10 22:41:23 hodson Exp $
  */
 
 
@@ -47,8 +47,6 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
-#include <net/route.h>
-#include <arpa/inet.h>  
 
 #include "utility.h"
 
