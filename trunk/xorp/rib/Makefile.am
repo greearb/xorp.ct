@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.9 2003/03/31 16:10:18 hodson Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.10 2003/05/07 21:58:12 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -100,8 +100,8 @@ librib_a_SOURCES += xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = commands
-EXTRA_DIST	 += test_rib_direct.sh
-EXTRA_DIST	 += test_rib_xrls.sh
+EXTRA_DIST	 += test_rib_direct.sh.in
+EXTRA_DIST	 += test_rib_xrls.sh.in
 EXTRA_DIST	 += xrl_shell_funcs.sh
 
 
