@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.26 2003/10/14 21:56:27 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.27 2003/10/16 22:13:57 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -12,7 +12,7 @@ bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
 # -- Test Programs and scripts
 TESTS			 = test_rawsock4 test_ifmanager_transaction
 
-test_scripts		 = test_add_route.sh
+test_scripts		 = test_add_route.sh test_config_interface.sh
 
 # -- No-install Programs
 noinst_PROGRAMS 	 = demo_fea_ifmgr_client
@@ -262,6 +262,7 @@ INCLUDES =	-I$(top_srcdir)
 
 # Test scripts dependency
 test_add_route.sh: $(top_builddir)/fea/xrl_fea_shell_funcs.sh
+test_config_interface.sh: $(top_builddir)/fea/xrl_fea_shell_funcs.sh
 $(top_builddir)/fea/xrl_fea_shell_funcs.sh:				\
     $(top_srcdir)/xrl/targets/fea.xrls					\
     $(top_srcdir)/utils/xrl_wrappers_generator.sh
