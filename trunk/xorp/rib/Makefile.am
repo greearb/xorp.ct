@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.17 2003/09/27 22:32:45 mjh Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.20 2004/02/06 01:35:59 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -12,16 +12,18 @@ bin_PROGRAMS	 = xorp_rib
 # -- Test Programs
 TESTS		 = test_rib_direct.sh
 TESTS		+= test_rib_xrls.sh
+TESTS		+= test_redist
 TESTS		+= test_register
 TESTS		+= test_deletion
 
 # -- No-install Programs
 noinst_PROGRAMS  = main_routemap
-noinst_PROGRAMS	+= test_rib_client
 noinst_PROGRAMS	+= test_register
 noinst_PROGRAMS	+= test_register_xrls
+noinst_PROGRAMS	+= test_rib_client
 noinst_PROGRAMS	+= test_rib_direct
 noinst_PROGRAMS	+= test_rib_xrls
+noinst_PROGRAMS += test_redist
 noinst_PROGRAMS	+= test_deletion
 
 # -- No-install Libraries
@@ -190,6 +192,10 @@ test_rib_client_SOURCES += rib_client.hh
 test_rib_client_SOURCES += route.hh
 test_rib_client_SOURCES += test_rib_client.cc
 test_rib_client_LDADD	 = $(LDADD)
+
+test_redist_SOURCES	 = test_redist.cc
+test_redist_LDADD	 = ./librib.a
+test_redist_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 librib_a_SOURCES	 = rib_module.h
