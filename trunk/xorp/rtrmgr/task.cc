@@ -12,8 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.38 2004/06/10 22:41:54 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.39 2004/06/11 00:53:46 pavlin Exp $"
 
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rtrmgr_module.h"
 
@@ -868,6 +870,7 @@ Task::start_module(const string& module_name,
 		   Validation* config_validation,
 		   Startup* startup)
 {
+    XLOG_ASSERT(!module_name.empty());
     XLOG_ASSERT(_start_module == false);
     XLOG_ASSERT(_stop_module == false);
     XLOG_ASSERT(_startup_validation == NULL);
@@ -885,6 +888,7 @@ void
 Task::shutdown_module(const string& module_name, Validation* validation,
 		      Shutdown* shutdown)
 {
+    XLOG_ASSERT(!module_name.empty());
     XLOG_ASSERT(_start_module == false);
     XLOG_ASSERT(_stop_module == false);
     XLOG_ASSERT(_shutdown_validation == NULL);
@@ -911,7 +915,7 @@ Task::set_ready_validation(Validation* validation)
 void
 Task::run(CallBack cb)
 {
-    debug_msg("Task::run %s\n", _module_name.c_str());
+    debug_msg("Task::run (%s)\n", _module_name.c_str());
 
     _task_complete_cb = cb;
     step1_start();
@@ -1073,6 +1077,8 @@ Task::step4_wait()
 void
 Task::step4_done(bool success)
 {
+    debug_msg("step4_done (%s)\n", _module_name.c_str());
+
     if (success) {
 	step5_stop();
     } else {
@@ -1168,8 +1174,8 @@ Task::task_fail(string errmsg, bool fatal)
 {
     debug_msg("%s\n", errmsg.c_str());
 
-    if (fatal) {
-	XLOG_ERROR("Shutting down fatally wounded process %s",
+    if (fatal && !_module_name.empty()) {
+	XLOG_ERROR("Shutting down fatally wounded process (%s)",
 		   _module_name.c_str());
 	_taskmgr.kill_process(_module_name);
     }
