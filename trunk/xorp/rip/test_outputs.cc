@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.1 2003/08/04 23:46:44 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.2 2003/08/05 06:06:01 hodson Exp $"
 
 #include <set>
 
@@ -26,6 +26,7 @@
 #include "libxorp/ipv4net.hh"
 
 #include "auth.hh"
+#include "output_table.hh"
 #include "output_updates.hh"
 #include "port.hh"
 #include "peer.hh"
@@ -37,18 +38,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // This test comprises of a RIP system with 2 ports injecting routes.  One of
-// the ports has an associated OutputUpdates instance that generates packets
-// containing the updates.
+// the ports has an associated Output class instance that generates packets
+// containing the routes.  We test both the update packets and the unsolicted
+// response packets.
 //
 //			   +---	System ----+
 //	       		TestPort	OtherPort
 // 	 Routes ------> TestPeer	OtherPeer <------ Routes
 //			   |
 //			   V
-//		    update packets (inspected)
+//		    response packets (inspected)
 //
-// We look at the updates in the and compare them against what we'd expect
-// to see.
+// We look at the routes in the response packets and compare them against
+// what we'd expect to see against differing horizon policies.
 //
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -233,8 +235,6 @@ public:
 };
 
 
-
-
 //----------------------------------------------------------------------------
 // Horizon checkers
 
@@ -343,7 +343,6 @@ public:
 			"(%d)\n", test_peer_routes_seen(), 0);
 	    return false;
 	}
-
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
 		    total_routes_seen(), test_peer_routes_seen());
 	return total_routes_seen() == (uint32_t)_opn.size();
@@ -395,12 +394,19 @@ public:
 };
 
 
-
-template <typename A>
-class OutputUpdatesTester
+// ----------------------------------------------------------------------------
+// OutputTester
+//
+// This is a bit nasty, the OutputClass is either OutputUpdates or OutputTable
+// class.  These classes have the same methods and so it seems a waste to
+// write this code out twice.  OutputClass is only referenced in one location
+// so it's not rocket science to comprehend this.
+//
+template <typename A, typename OutputClass>
+class OutputTester
 {
 public:
-    OutputUpdatesTester(const set<IPNet<A> >& test_peer_nets,
+    OutputTester(const set<IPNet<A> >& test_peer_nets,
 			const set<IPNet<A> >& other_peer_nets)
 	: _e(), _rip_system(_e), _pm(_rip_system),
 	  _tpn(test_peer_nets), _opn(other_peer_nets)
@@ -422,7 +428,7 @@ public:
 			new BlockedPortIO<A>(*_pm.other_port()), true);
     }
 
-    ~OutputUpdatesTester()
+    ~OutputTester()
     {
 	RouteDB<A>& rdb = _rip_system.route_db();
 	rdb.flush_routes();
@@ -436,8 +442,8 @@ public:
 
 	RouteDB<A>&    rdb = _rip_system.route_db();
 
-	PacketQueue<A>	 op_out;				// Output out
-	OutputUpdates<A> ou(_e, *_pm.test_port(), op_out, rdb); // Update gen
+	PacketQueue<A> op_out;				      // Output pkt qu.
+	OutputClass    ou(_e, *_pm.test_port(), op_out, rdb); // Output pkt gen
 
 	verbose_log("Injecting routes from test peer.\n");
 	for (typename set<IPNet<A> >::const_iterator n = _tpn.begin();
@@ -546,7 +552,6 @@ make_nets(const IPv4Net& base, uint32_t n, set<IPv4Net>& nets)
     }
 }
 
-
 int
 main(int argc, char* const argv[])
 {
@@ -591,21 +596,46 @@ main(int argc, char* const argv[])
 	make_nets(IPNet<IPv4>(DefaultPeer<IPv4>::get(), 16), n_routes, tpn);
 	make_nets(IPNet<IPv4>(OtherPeer<IPv4>::get(), 16), n_routes, opn);
 
+	//
+	// OutputUpdates class tests
+	//
 	{
-	    verbose_log("=== No Horizon test ===\n");
-	    OutputUpdatesTester<IPv4> tester(tpn, opn);
+	    verbose_log("=== No Horizon updates test ===\n");
+	    OutputTester<IPv4, OutputUpdates<IPv4> > tester(tpn, opn);
 	    NoHorizonValidator<IPv4> nohv(tpn, opn);
 	    rval |= tester.run_test(NONE, nohv);
 	}
 	{
-	    verbose_log("=== Split Horizon test ===\n");
-	    OutputUpdatesTester<IPv4> tester(tpn, opn);
+	    verbose_log("=== Split Horizon updates test ===\n");
+	    OutputTester<IPv4, OutputUpdates<IPv4> > tester(tpn, opn);
 	    SplitHorizonValidator<IPv4> shv(tpn, opn);
 	    rval |= tester.run_test(SPLIT, shv);
 	}
 	{
-	    verbose_log("=== Split Horizon Poison Reverse test ===\n");
-	    OutputUpdatesTester<IPv4> tester(tpn, opn);
+	    verbose_log("=== Split Horizon Poison Reverse updates test ===\n");
+	    OutputTester<IPv4, OutputUpdates<IPv4> > tester(tpn, opn);
+	    PoisonReverseValidator<IPv4> prv(tpn, opn);
+	    rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
+	}
+
+	//
+	// OutputTable class tests
+	//
+	{
+	    verbose_log("=== No Horizon table test ===\n");
+	    OutputTester<IPv4, OutputTable<IPv4> > tester(tpn, opn);
+	    NoHorizonValidator<IPv4> nohv(tpn, opn);
+	    rval |= tester.run_test(NONE, nohv);
+	}
+	{
+	    verbose_log("=== Split Horizon table test ===\n");
+	    OutputTester<IPv4, OutputTable<IPv4> > tester(tpn, opn);
+	    SplitHorizonValidator<IPv4> shv(tpn, opn);
+	    rval |= tester.run_test(SPLIT, shv);
+	}
+	{
+	    verbose_log("=== Split Horizon Poison Reverse table test ===\n");
+	    OutputTester<IPv4, OutputTable<IPv4> > tester(tpn, opn);
 	    PoisonReverseValidator<IPv4> prv(tpn, opn);
 	    rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
 	}
