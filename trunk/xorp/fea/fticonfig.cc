@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.36 2004/12/02 02:37:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.37 2004/12/02 07:02:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -655,21 +655,6 @@ FtiConfig::stop_click(string& error_msg)
 }
 
 /**
- * Specify the external program to generate the Click configuration.
- *
- * @param v the name of the external program to generate the Click
- * configuration.
- */
-void
-FtiConfig::set_click_config_generator_file(const string& v)
-{
-    _ftic_entry_get_click.set_click_config_generator_file(v);
-    _ftic_entry_set_click.set_click_config_generator_file(v);
-    _ftic_table_get_click.set_click_config_generator_file(v);
-    _ftic_table_set_click.set_click_config_generator_file(v);
-}
-
-/**
  * Enable/disable kernel-level Click support.
  *
  * @param enable if true, then enable the kernel-level Click support,
@@ -726,6 +711,22 @@ FtiConfig::set_kernel_click_mount_directory(const string& directory)
     _ftic_entry_set_click.set_kernel_click_mount_directory(directory);
     _ftic_table_get_click.set_kernel_click_mount_directory(directory);
     _ftic_table_set_click.set_kernel_click_mount_directory(directory);
+}
+
+/**
+ * Specify the external program to generate the kernel-level Click
+ * configuration.
+ *
+ * @param v the name of the external program to generate the kernel-level
+ * Click configuration.
+ */
+void
+FtiConfig::set_kernel_click_config_generator_file(const string& v)
+{
+    _ftic_entry_get_click.set_kernel_click_config_generator_file(v);
+    _ftic_entry_set_click.set_kernel_click_config_generator_file(v);
+    _ftic_table_get_click.set_kernel_click_config_generator_file(v);
+    _ftic_table_set_click.set_kernel_click_config_generator_file(v);
 }
 
 /**
@@ -832,6 +833,22 @@ FtiConfig::set_user_click_startup_config_file(const string& v)
     _ftic_entry_set_click.set_user_click_startup_config_file(v);
     _ftic_table_get_click.set_user_click_startup_config_file(v);
     _ftic_table_set_click.set_user_click_startup_config_file(v);
+}
+
+/**
+ * Specify the external program to generate the user-level Click
+ * configuration.
+ *
+ * @param v the name of the external program to generate the user-level
+ * Click configuration.
+ */
+void
+FtiConfig::set_user_click_config_generator_file(const string& v)
+{
+    _ftic_entry_get_click.set_user_click_config_generator_file(v);
+    _ftic_entry_set_click.set_user_click_config_generator_file(v);
+    _ftic_table_get_click.set_user_click_config_generator_file(v);
+    _ftic_table_set_click.set_user_click_config_generator_file(v);
 }
 
 bool

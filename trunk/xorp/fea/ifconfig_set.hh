@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.27 2004/12/08 01:41:19 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.28 2004/12/10 23:19:25 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -569,6 +569,8 @@ public:
     const IfTree& iftree() const { return _iftree; }
 
 private:
+    class ClickConfigGenerator;
+
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -621,14 +623,15 @@ private:
 
     int execute_click_config_generator(string& error_msg);
     void terminate_click_config_generator();
-    void click_config_generator_stdout_cb(RunCommand* run_command,
-					  const string& output);
-    void click_config_generator_stderr_cb(RunCommand* run_command,
-					  const string& output);
-    void click_config_generator_done_cb(RunCommand* run_command,
-					bool success,
-					const string& error_msg);
-    int write_generated_config(const string& config, string& error_msg);
+    void click_config_generator_done(
+	IfConfigSetClick::ClickConfigGenerator* click_config_generator,
+	bool success,
+	const string& error_msg);
+    int write_generated_config(bool is_kernel_click,
+			       const string& kernel_config,
+			       bool is_user_click,
+			       const string& user_config,
+			       string& error_msg);
     string regenerate_xorp_iftree_config() const;
     string regenerate_xorp_fea_click_config() const;
 
@@ -641,10 +644,37 @@ private:
 
     ClickSocketReader	_cs_reader;
     IfTree		_iftree;
-    RunCommand*		_click_config_generator_run_command;
-    string		_click_config_generator_stdout;
-    int			_click_config_generator_tmp_socket;
-    string		_click_config_generator_tmp_filename;
+
+    class ClickConfigGenerator {
+    public:
+	ClickConfigGenerator(IfConfigSetClick& ifc_set_click,
+			     const string& command_name);
+	~ClickConfigGenerator();
+	int execute(const string& xorp_config, string& error_msg);
+
+	const string& command_name() const { return _command_name; }
+	const string& command_stdout() const { return _command_stdout; }
+
+    private:
+	void stdout_cb(RunCommand* run_command, const string& output);
+	void stderr_cb(RunCommand* run_command, const string& output);
+	void done_cb(RunCommand* run_command, bool success,
+		     const string& error_msg);
+
+	IfConfigSetClick& _ifc_set_click;
+	EventLoop&	_eventloop;
+	string		_command_name;
+	string		_command_arguments;
+	RunCommand*	_run_command;
+	string		_command_stdout;
+	int		_tmp_socket;
+	string		_tmp_filename;
+    };
+
+    ClickConfigGenerator*	_kernel_click_config_generator;
+    ClickConfigGenerator*	_user_click_config_generator;
+    string			_generated_kernel_click_config;
+    string			_generated_user_click_config;
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.29 2004/12/02 07:02:38 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.30 2004/12/13 23:15:34 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -169,14 +169,6 @@ public:
     int stop_click(string& error_msg);
 
     /**
-     * Specify the external program to generate the Click configuration.
-     *
-     * @param v the name of the external program to generate the Click
-     * configuration.
-     */
-    void set_click_config_generator_file(const string& v);
-
-    /**
      * Enable/disable kernel-level Click support.
      *
      * @param enable if true, then enable the kernel-level Click support,
@@ -205,6 +197,15 @@ public:
      * @param directory the kernel-level Click mount directory.
      */
     void set_kernel_click_mount_directory(const string& directory);
+
+    /**
+     * Specify the external program to generate the kernel-level Click
+     * configuration.
+     *
+     * @param v the name of the external program to generate the kernel-level
+     * Click configuration.
+     */
+    void set_kernel_click_config_generator_file(const string& v);
 
     /**
      * Enable/disable user-level Click support.
@@ -260,6 +261,15 @@ public:
      * Click on startup.
      */
     void set_user_click_startup_config_file(const string& v);
+
+    /**
+     * Specify the external program to generate the user-level Click
+     * configuration.
+     *
+     * @param v the name of the external program to generate the user-level
+     * Click configuration.
+     */
+    void set_user_click_config_generator_file(const string& v);
 
     /**
      * Start a configuration interval. All modifications must be

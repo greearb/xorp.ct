@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.27 2004/11/30 12:54:53 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.28 2004/12/02 02:37:47 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -7,13 +7,13 @@ fea {
 
     click {
 	enabled:			bool = false;
-	click-config-generator-file:	txt = "/usr/local/xorp/fea/xorp_fea_click_config_generator";
 
 	kernel-click {
 	    enabled:				bool = false;
 	    install-on-startup:	bool = false;
 	    kernel-click-modules:		txt = "/usr/local/click/linuxmodule/proclikefs.o:/usr/local/click/linuxmodule/click.o";
 	    mount-directory:	txt = "/click";
+	    kernel-click-config-generator-file:	txt = "/usr/local/xorp/fea/xorp_fea_click_config_generator";
 	}
 
 	user-click {
@@ -24,6 +24,7 @@ fea {
 	    control-address:		ipv4 = 127.0.0.1;
 	    control-socket-port:	u32 = 13000;
 	    startup-config-file:	txt = "/dev/null";
+	    user-click-config-generator-file:	txt = "/usr/local/xorp/fea/xorp_fea_click_config_generator";
 	}
     }
 }
@@ -64,11 +65,6 @@ fea {
 	    %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(DEFAULT)";
 	}
 
-	click-config-generator-file {
-	    %help:	short "Specify the external program to generate the Click configuration";
-	    %set:	xrl "$(fea.targetname)/fea_click/0.1/set_click_config_generator_file?click_config_generator_file:txt=$(@)";
-	}
-
 	kernel-click {
 	    enabled {
 		%help:	short "Enable kernel-level Click FEA support";
@@ -92,6 +88,11 @@ fea {
 		%help:	short "Specify the kernel-level Click mount directory";
 		%set:		xrl "$(fea.targetname)/fea_click/0.1/set_kernel_click_mount_directory?directory:txt=$(@)";
 		%delete:	xrl "$(fea.targetname)/fea_click/0.1/set_kernel_click_mount_directory?directory:txt=$(DEFAULT)";
+	    }
+
+	    kernel-click-config-generator-file {
+		%help:	short "Specify the external program to generate the kernel-level Click configuration";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_kernel_click_config_generator_file?kernel_click_config_generator_file:txt=$(@)";
 	    }
 	}
 
@@ -131,6 +132,11 @@ fea {
 	    startup-config-file {
 		%help:	short "Specify the configuration file to be used by user-level Click on startup";
 		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_startup_config_file?user_click_startup_config_file:txt=$(@)";
+	    }
+
+	    user-click-config-generator-file {
+		%help:	short "Specify the external program to generate the user-level Click configuration";
+		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_config_generator_file?user_click_config_generator_file:txt=$(@)";
 	    }
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.47 2004/11/29 09:25:09 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.48 2004/12/02 02:37:48 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -87,16 +87,6 @@ public:
     XrlCmdError fea_click_0_1_stop_click();
 
     /**
-     *  Specify the external program to generate the Click configuration.
-     *
-     *  @param click_config_generator_file the name of the external program to
-     *  generate the Click configuration.
-     */
-    XrlCmdError fea_click_0_1_set_click_config_generator_file(
-	// Input values,
-	const string&	click_config_generator_file);
-
-    /**
      *  Enable/disable kernel-level Click FEA support.
      *
      *  @param enable if true, then enable the kernel-level Click FEA support,
@@ -135,6 +125,17 @@ public:
     XrlCmdError fea_click_0_1_set_kernel_click_mount_directory(
 	// Input values,
 	const string&	directory);
+
+    /**
+     *  Specify the external program to generate the kernel-level Click
+     *  configuration.
+     *
+     *  @param kernel_click_config_generator_file the name of the external
+     *  program to generate the kernel-level Click configuration.
+     */
+    XrlCmdError fea_click_0_1_set_kernel_click_config_generator_file(
+	// Input values,
+	const string&	kernel_click_config_generator_file);
 
     /**
      *  Enable/disable user-level Click FEA support.
@@ -208,6 +209,17 @@ public:
     XrlCmdError fea_click_0_1_set_user_click_startup_config_file(
 	// Input values,
 	const string&	user_click_startup_config_file);
+
+    /**
+     *  Specify the external program to generate the user-level Click
+     *  configuration.
+     *
+     *  @param user_click_config_generator_file the name of the external
+     *  program to generate the user-level Click configuration.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_config_generator_file(
+	// Input values,
+	const string&	user_click_config_generator_file);
 
     /**
      *  Add a FIB client.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.14 2004/12/08 01:41:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.15 2004/12/10 23:19:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -38,8 +38,8 @@ IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
     : IfConfigSet(ifc),
       ClickSocket(ifc.eventloop()),
       _cs_reader(*(ClickSocket *)this),
-      _click_config_generator_run_command(NULL),
-      _click_config_generator_tmp_socket(-1)
+      _kernel_click_config_generator(NULL),
+      _user_click_config_generator(NULL)
 {
 }
 
@@ -614,14 +614,30 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 int
 IfConfigSetClick::execute_click_config_generator(string& error_msg)
 {
-    string command = ClickSocket::click_config_generator_file();
+    string kernel_generator_file = ClickSocket::kernel_click_config_generator_file();
+    string user_generator_file = ClickSocket::user_click_config_generator_file();
     string arguments;
 
-    if (command.empty()) {
-	error_msg = c_format(
-	    "Cannot execute the Click configuration generator: "
-	    "empty generator file name");
-	return (XORP_ERROR);
+    //
+    // Test the Click configuration generator filenames are valid
+    //
+    if (ClickSocket::is_kernel_click()) {
+	if (kernel_generator_file.empty()) {
+	    error_msg = c_format(
+		"Cannot execute the kernel-level Click configuration "
+		"generator: "
+		"empty generator file name");
+	    return (XORP_ERROR);
+	}
+    }
+    if (ClickSocket::is_user_click()) {
+	if (user_generator_file.empty()) {
+	    error_msg = c_format(
+		"Cannot execute the user-level Click configuration "
+		"generator: "
+		"empty generator file name");
+	    return (XORP_ERROR);
+	}
     }
 
     //
@@ -635,56 +651,44 @@ IfConfigSetClick::execute_click_config_generator(string& error_msg)
     string xorp_config = regenerate_xorp_iftree_config();
     xorp_config += regenerate_xorp_fea_click_config();
 
-    // Create a temporary file
-    char tmp_filename[1024] = "/tmp/xorp_fea_click.XXXXXXXX";
-    int s = mkstemp(tmp_filename);
-    if (s < 0) {
-	error_msg = c_format("Cannot create a temporary file: %s",
-			     strerror(errno));
-	return (XORP_ERROR);
+    //
+    // XXX: kill any previously running instances
+    //
+    if (_kernel_click_config_generator != NULL) {
+	delete _kernel_click_config_generator;
+	_kernel_click_config_generator = NULL;
     }
-    if (::write(s, xorp_config.c_str(), xorp_config.size())
-	!= static_cast<ssize_t>(xorp_config.size())) {
-	error_msg = c_format("Error writing to temporary file: %s",
-			     strerror(errno));
-	close(s);
-	return (XORP_ERROR);
+    if (_user_click_config_generator != NULL) {
+	delete _user_click_config_generator;
+	_user_click_config_generator = NULL;
     }
-    arguments = tmp_filename;	// XXX: the filename is the argument
 
-    // XXX: kill any previously running instance
-    if (_click_config_generator_run_command != NULL) {
-	delete _click_config_generator_run_command;
-	_click_config_generator_run_command = NULL;
+    //
+    // Execute the Click configuration generators
+    //
+    if (ClickSocket::is_kernel_click()) {
+	_generated_kernel_click_config.erase();
+	_kernel_click_config_generator = new ClickConfigGenerator(
+	    *this,
+	    kernel_generator_file);
+	if (_kernel_click_config_generator->execute(xorp_config, error_msg)
+	    != XORP_OK) {
+	    delete _kernel_click_config_generator;
+	    _kernel_click_config_generator = NULL;
+	    return (XORP_ERROR);
+	}
     }
-    if (_click_config_generator_tmp_socket >= 0) {
-	close(_click_config_generator_tmp_socket);
-	_click_config_generator_tmp_socket = -1;
-	unlink(_click_config_generator_tmp_filename.c_str());
-    }
-    _click_config_generator_tmp_socket = s;
-    _click_config_generator_tmp_filename = tmp_filename;
-
-    // Clear any previous stdout
-    _click_config_generator_stdout.erase();
-
-    _click_config_generator_run_command = new RunCommand(
-	ifc().eventloop(),
-	command,
-	arguments,
-	callback(this, &IfConfigSetClick::click_config_generator_stdout_cb),
-	callback(this, &IfConfigSetClick::click_config_generator_stderr_cb),
-	callback(this, &IfConfigSetClick::click_config_generator_done_cb));
-
-    if (_click_config_generator_run_command->execute() != XORP_OK) {
-	delete _click_config_generator_run_command;
-	_click_config_generator_run_command = NULL;
-	close(_click_config_generator_tmp_socket);
-	_click_config_generator_tmp_socket = -1;
-	unlink(_click_config_generator_tmp_filename.c_str());
-	error_msg = c_format("Could not execute the Click configuration "
-			     "generator");
-	return (XORP_ERROR);
+    if (ClickSocket::is_user_click()) {
+	_generated_user_click_config.erase();
+	_user_click_config_generator = new ClickConfigGenerator(
+	    *this,
+	    user_generator_file);
+	if (_user_click_config_generator->execute(xorp_config, error_msg)
+	    != XORP_OK) {
+	    delete _user_click_config_generator;
+	    _user_click_config_generator = NULL;
+	    return (XORP_ERROR);
+	}
     }
 
     return (XORP_OK);
@@ -693,70 +697,84 @@ IfConfigSetClick::execute_click_config_generator(string& error_msg)
 void
 IfConfigSetClick::terminate_click_config_generator()
 {
-    if (_click_config_generator_run_command != NULL) {
-	delete _click_config_generator_run_command;
-	_click_config_generator_run_command = NULL;
+    if (_kernel_click_config_generator != NULL) {
+	delete _kernel_click_config_generator;
+	_kernel_click_config_generator = NULL;
     }
-    if (_click_config_generator_tmp_socket >= 0) {
-	close(_click_config_generator_tmp_socket);
-	_click_config_generator_tmp_socket = -1;
-	unlink(_click_config_generator_tmp_filename.c_str());
+    if (_user_click_config_generator != NULL) {
+	delete _user_click_config_generator;
+	_user_click_config_generator = NULL;
     }
 }
 
 void
-IfConfigSetClick::click_config_generator_stdout_cb(RunCommand* run_command,
-						   const string& output)
+IfConfigSetClick::click_config_generator_done(
+    IfConfigSetClick::ClickConfigGenerator* click_config_generator,
+    bool success,
+    const string& error_msg)
 {
-    XLOG_ASSERT(run_command == _click_config_generator_run_command);
-    _click_config_generator_stdout += output;
-}
+    bool is_kernel_config = false;
+    bool is_user_config = false;
 
-void
-IfConfigSetClick::click_config_generator_stderr_cb(RunCommand* run_command,
-						   const string& output)
-{
-    XLOG_ASSERT(run_command == _click_config_generator_run_command);
-    XLOG_ERROR("External Click configuration generator stderr output: %s",
-	       output.c_str());
-}
-
-void
-IfConfigSetClick::click_config_generator_done_cb(RunCommand* run_command,
-						 bool success,
-						 const string& error_msg)
-{
-    XLOG_ASSERT(run_command == _click_config_generator_run_command);
+    // Check for errors
+    XLOG_ASSERT((click_config_generator == _kernel_click_config_generator)
+		|| (click_config_generator == _user_click_config_generator));
     if (! success) {
 	XLOG_ERROR("External Click configuration generator (%s) failed: %s",
-		   run_command->command().c_str(), error_msg.c_str());
+		   click_config_generator->command_name().c_str(),
+		   error_msg.c_str());
     }
-    delete _click_config_generator_run_command;
-    _click_config_generator_run_command = NULL;
-    if (_click_config_generator_tmp_socket >= 0) {
-	close(_click_config_generator_tmp_socket);
-	_click_config_generator_tmp_socket = -1;
-	unlink(_click_config_generator_tmp_filename.c_str());
+
+    string command_stdout = click_config_generator->command_stdout();
+
+    if (click_config_generator == _kernel_click_config_generator) {
+	is_kernel_config = true;
+	if (success)
+	    _generated_kernel_click_config = command_stdout;
+	_kernel_click_config_generator = NULL;
     }
+    if (click_config_generator == _user_click_config_generator) {
+	is_user_config = true;
+	if (success)
+	    _generated_user_click_config = command_stdout;
+	_user_click_config_generator = NULL;
+    }
+    delete click_config_generator;
+
     if (! success)
 	return;
 
+    if ((_kernel_click_config_generator != NULL)
+	|| (_user_click_config_generator != NULL)) {
+	// XXX: we are still waiting for some output
+	return;
+    }
+
     string write_error_msg;
-    if (write_generated_config(_click_config_generator_stdout, write_error_msg)
-	!= XORP_OK) {
+    if (write_generated_config(is_kernel_config,
+			       _generated_kernel_click_config,
+			       is_user_config,
+			       _generated_user_click_config,
+			       write_error_msg) != XORP_OK) {
 	XLOG_ERROR("Failed to write the Click configuration: %s",
 		   write_error_msg.c_str());
     }
 }
 
 int
-IfConfigSetClick::write_generated_config(const string& config,
+IfConfigSetClick::write_generated_config(bool is_kernel_config,
+					 const string& kernel_config,
+					 bool is_user_config,
+					 const string& user_config,
 					 string& error_msg)
 {
     string element = "";
     string handler = "hotconfig";
 
-    if (ClickSocket::write_config(element, handler, config, error_msg)
+    if (ClickSocket::write_config(element, handler,
+				  is_kernel_config, kernel_config,
+				  is_user_config, user_config,
+				  error_msg)
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }
@@ -968,4 +986,95 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     }
 
     return (xorp_rt_port);
+}
+
+IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
+    IfConfigSetClick& ifc_set_click,
+    const string& command_name)
+    : _ifc_set_click(ifc_set_click),
+      _eventloop(ifc_set_click.ifc().eventloop()),
+      _command_name(command_name),
+      _run_command(NULL),
+      _tmp_socket(-1)
+{
+}
+
+IfConfigSetClick::ClickConfigGenerator::~ClickConfigGenerator()
+{
+    if (_run_command != NULL)
+	delete _run_command;
+    if (_tmp_socket >= 0) {
+	close(_tmp_socket);
+	unlink(_tmp_filename.c_str());
+    }
+}
+
+int
+IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
+						string& error_msg)
+{
+    // Create a temporary file
+    char tmp_filename[1024] = "/tmp/xorp_fea_click.XXXXXXXX";
+    int s = mkstemp(tmp_filename);
+    if (s < 0) {
+	error_msg = c_format("Cannot create a temporary file: %s",
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+    if (::write(s, xorp_config.c_str(), xorp_config.size())
+	!= static_cast<ssize_t>(xorp_config.size())) {
+	error_msg = c_format("Error writing to temporary file: %s",
+			     strerror(errno));
+	close(s);
+	return (XORP_ERROR);
+    }
+    _command_arguments = tmp_filename;	// XXX: the filename is the argument
+    _tmp_socket = s;
+    _tmp_filename = tmp_filename;
+
+    _run_command = new RunCommand(
+	_eventloop,
+	_command_name,
+	_command_arguments,
+	callback(this, &IfConfigSetClick::ClickConfigGenerator::stdout_cb),
+	callback(this, &IfConfigSetClick::ClickConfigGenerator::stderr_cb),
+	callback(this, &IfConfigSetClick::ClickConfigGenerator::done_cb));
+    if (_run_command->execute() != XORP_OK) {
+	delete _run_command;
+	_run_command = NULL;
+	close(_tmp_socket);
+	_tmp_socket = -1;
+	unlink(_tmp_filename.c_str());
+	error_msg = c_format("Could not execute the Click "
+			     "configuration generator");
+	return (XORP_ERROR);
+    }
+    return (XORP_OK);
+}
+
+void
+IfConfigSetClick::ClickConfigGenerator::stdout_cb(RunCommand* run_command,
+						  const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _command_stdout += output;
+}
+
+void
+IfConfigSetClick::ClickConfigGenerator::stderr_cb(RunCommand* run_command,
+						  const string& output)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    XLOG_ERROR("External Click configuration generator (%s) stderr output: %s",
+	       run_command->command().c_str(),
+	       output.c_str());
+}
+
+void
+IfConfigSetClick::ClickConfigGenerator::done_cb(RunCommand* run_command,
+						bool success,
+						const string& error_msg)
+{
+    XLOG_ASSERT(run_command == _run_command);
+    _ifc_set_click.click_config_generator_done(this, success, error_msg);
 }

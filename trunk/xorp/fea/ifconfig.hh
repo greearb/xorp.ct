@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.38 2004/12/02 02:37:48 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.39 2004/12/02 07:02:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -178,12 +178,13 @@ public:
     int stop_click(string& error_msg);
 
     /**
-     * Specify the external program to generate the Click configuration.
-     *
-     * @param v the name of the external program to generate the Click
+     * Specify the external program to generate the kernel-level Click
      * configuration.
+     *
+     * @param v the name of the external program to generate the kernel-level
+     * Click configuration.
      */
-    void set_click_config_generator_file(const string& v);
+    void set_kernel_click_config_generator_file(const string& v);
 
     /**
      * Enable/disable kernel-level Click support.
@@ -269,6 +270,15 @@ public:
      * Click on startup.
      */
     void set_user_click_startup_config_file(const string& v);
+
+    /**
+     * Specify the external program to generate the user-level Click
+     * configuration.
+     *
+     * @param v the name of the external program to generate the user-level
+     * Click configuration.
+     */
+    void set_user_click_config_generator_file(const string& v);
 
     /**
      * Push IfTree structure down to platform.  Errors are reported

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.12 2004/12/08 01:41:18 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.13 2004/12/09 07:39:26 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -132,24 +132,25 @@ public:
     int stop(string& error_msg);
 
     /**
-     * Get the name of the external program to generate the Click
+     * Get the name of the external program to generate the kernel-level Click
      * configuration.
      *
-     * @return the name of the external program to generate the Click
-     * configuration.
+     * @return the name of the external program to generate the kernel-level
+     * Click configuration.
      */
-    const string& click_config_generator_file() const {
-	return (_click_config_generator_file);
+    const string& kernel_click_config_generator_file() const {
+	return (_kernel_click_config_generator_file);
     }
 
     /**
-     * Specify the external program to generate the Click configuration.
-     *
-     * @param v the name of the external program to generate the Click
+     * Specify the external program to generate the kernel-level Click
      * configuration.
+     *
+     * @param v the name of the external program to generate the kernel-level
+     * Click configuration.
      */
-    void set_click_config_generator_file(const string& v) {
-	_click_config_generator_file = v;
+    void set_kernel_click_config_generator_file(const string& v) {
+	_kernel_click_config_generator_file = v;
     }
 
     /**
@@ -213,14 +214,26 @@ public:
     }
 
     /**
-     * Test if the Click socket is open.
-     * 
-     * This method is needed because ClickSocket may fail to open
-     * Click socket during startup.
-     * 
-     * @return true if the Click socket is open, otherwise false.
+     * Get the name of the external program to generate the user-level Click
+     * configuration.
+     *
+     * @return the name of the external program to generate the user-level
+     * Click configuration.
      */
-    inline bool is_open() const { return _fd >= 0; }
+    const string& user_click_config_generator_file() const {
+	return (_user_click_config_generator_file);
+    }
+
+    /**
+     * Specify the external program to generate the user-level Click
+     * configuration.
+     *
+     * @param v the name of the external program to generate the user-level
+     * Click configuration.
+     */
+    void set_user_click_config_generator_file(const string& v) {
+	_user_click_config_generator_file = v;
+    }
 
     /**
      * Write Click configuration.
@@ -229,12 +242,19 @@ public:
      * is an empty string, then we use only the @see handler to write the
      * configuration.
      * @param handler the Click handler to write the configuration to.
-     * @param data the configuration data to write.
+     * @param is_kernel_config true if we wish to write the kernel-level Click
+     * configuration (if kernel-level Click is enabled).
+     * @param kernel_config the kernel-level Click configuration to write.
+     * @param is_user_config true if we wish to write the user-level Click
+     * configuration (if user-level Click is enabled).
+     * @param user_config the user-level Click configuration to write.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int write_config(const string& element, const string& handler,
-		     const string& data, string& error_msg);
+		     bool is_kernel_config, const string& kernel_config,
+		     bool is_user_config, const string& user_config,
+		     string& error_msg);
 
     /**
      * Write data to Click socket.
@@ -244,7 +264,7 @@ public:
      * 
      * @return the number of bytes which were written, or -1 if error.
      */
-    ssize_t write(const void* data, size_t nbytes);
+    ssize_t write(int fd, const void* data, size_t nbytes);
 
     /**
      * Check the status of a previous command.
@@ -282,7 +302,7 @@ public:
     inline pid_t pid() const { return _pid; }
 
     /**
-     * Force socket to read data.
+     * Force socket to read data from kernel-level Click.
      * 
      * This usually is performed after writing a request that
      * Click will answer (e.g., after writing a configuration change).
@@ -291,10 +311,39 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_read(string& error_msg);
+    int force_kernel_click_read(string& error_msg) {
+	return (force_read(_kernel_fd, error_msg));
+    }
+
+    /**
+     * Force socket to read data from user-level Click.
+     * 
+     * This usually is performed after writing a request that
+     * Click will answer (e.g., after writing a configuration change).
+     * Use sparingly, with caution, and at your own risk.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int force_user_click_read(string& error_msg) {
+	return (force_read(_user_fd, error_msg));
+    }
 
 private:
     typedef list<ClickSocketObserver*> ObserverList;
+
+    /**
+     * Force socket to read data.
+     * 
+     * This usually is performed after writing a request that
+     * Click will answer (e.g., after writing a configuration change).
+     * Use sparingly, with caution, and at your own risk.
+     *
+     * @param fd the file descriptor to read from.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int force_read(int fd, string& error_msg);
 
     /**
      * Read data available for ClickSocket and invoke
@@ -309,11 +358,13 @@ private:
      * Note that unlike method @ref force_read(), this method does not
      * propagate the data to the socket observers.
      *
+     * @param fd the file descriptor to read from.
      * @param message the message with the result.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int  force_read_message(vector<uint8_t>& message, string& error_msg);
+    int  force_read_message(int fd, vector<uint8_t>& message,
+			    string& error_msg);
 
     /**
      * Load the kernel Click modules.
@@ -446,7 +497,8 @@ private:
 
 private:
     EventLoop&	 _eventloop;
-    int		 _fd;
+    int		 _kernel_fd;
+    int		 _user_fd;
     ObserverList _ol;
 
     uint16_t 	 _seqno;	// Seqno of next write()
@@ -459,18 +511,19 @@ private:
     bool	_is_kernel_click;	// True if kernel Click is enabled
     bool	_is_user_click;		// True if user Click is enabled
 
-    string	_click_config_generator_file;
     bool	_kernel_click_install_on_startup;
     list<string> _kernel_click_modules;
     list<string> _loaded_kernel_click_modules;
     string	_kernel_click_mount_directory;
     string	_mounted_kernel_click_mount_directory;
+    string	_kernel_click_config_generator_file;
     string	_user_click_command_file;
     string	_user_click_command_extra_arguments;
     bool	_user_click_command_execute_on_startup;
     string	_user_click_startup_config_file;
     IPv4	_user_click_control_address;
     uint16_t	_user_click_control_socket_port;
+    string	_user_click_config_generator_file;
 
     RunCommand*	_user_click_run_command;
     
@@ -510,14 +563,28 @@ public:
     virtual ~ClickSocketReader();
 
     /**
-     * Force the reader to receive data from the specified Click socket.
+     * Force the reader to receive kernel-level Click data from the specified
+     * Click socket.
      *
      * @param cs the Click socket to receive the data from.
      * @param seqno the sequence number of the data to receive.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int receive_data(ClickSocket& cs, uint32_t seqno, string& error_msg);
+    int receive_kernel_click_data(ClickSocket& cs, uint32_t seqno,
+				  string& error_msg);
+
+    /**
+     * Force the reader to receive user-level Click data from the specified
+     * Click socket.
+     *
+     * @param cs the Click socket to receive the data from.
+     * @param seqno the sequence number of the data to receive.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int receive_user_click_data(ClickSocket& cs, uint32_t seqno,
+				string& error_msg);
 
     /**
      * Return the buffer as a string with the data that was received.

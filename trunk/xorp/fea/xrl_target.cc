@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.65 2004/12/10 09:39:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.66 2004/12/10 23:15:15 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -194,26 +194,6 @@ XrlFeaTarget::fea_click_0_1_stop_click()
 }
 
 /**
- *  Specify the external program to generate the Click configuration.
- *
- *  @param click_config_generator_file the name of the external program to
- *  generate the Click configuration.
- */
-XrlCmdError
-XrlFeaTarget::fea_click_0_1_set_click_config_generator_file(
-    // Input values,
-    const string&	click_config_generator_file)
-{
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
-
-    ifc.set_click_config_generator_file(click_config_generator_file);
-    ftic.set_click_config_generator_file(click_config_generator_file);
-
-    return XrlCmdError::OKAY();
-}
-
-/**
  *  Enable/disable kernel-level Click FEA support.
  *
  *  @param enable if true, then enable the kernel-level Click FEA support,
@@ -310,6 +290,27 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_mount_directory(
 
     ifc.set_kernel_click_mount_directory(directory);
     ftic.set_kernel_click_mount_directory(directory);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the external program to generate the kernel-level Click
+ *  configuration.
+ *
+ *  @param kernel_click_config_generator_file the name of the external
+ *  program to generate the kernel-level Click configuration.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_kernel_click_config_generator_file(
+    // Input values,
+    const string&	kernel_click_config_generator_file)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_kernel_click_config_generator_file(kernel_click_config_generator_file);
+    ftic.set_kernel_click_config_generator_file(kernel_click_config_generator_file);
 
     return XrlCmdError::OKAY();
 }
@@ -453,6 +454,27 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
 
     ifc.set_user_click_startup_config_file(user_click_startup_config_file);
     ftic.set_user_click_startup_config_file(user_click_startup_config_file);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the external program to generate the user-level Click
+ *  configuration.
+ *
+ *  @param user_click_config_generator_file the name of the external
+ *  program to generate the user-level Click configuration.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
+    // Input values,
+    const string&	user_click_config_generator_file)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_config_generator_file(user_click_config_generator_file);
+    ftic.set_user_click_config_generator_file(user_click_config_generator_file);
 
     return XrlCmdError::OKAY();
 }

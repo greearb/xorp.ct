@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.40 2004/12/02 02:37:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.41 2004/12/02 07:02:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -442,16 +442,17 @@ IfConfig::stop_click(string& error_msg)
 }
 
 /**
- * Specify the external program to generate the Click configuration.
- *
- * @param v the name of the external program to generate the Click
+ * Specify the external program to generate the kernel-level Click
  * configuration.
+ *
+ * @param v the name of the external program to generate the kernel-level
+ * Click configuration.
  */
 void
-IfConfig::set_click_config_generator_file(const string& v)
+IfConfig::set_kernel_click_config_generator_file(const string& v)
 {
-    _ifc_get_click.set_click_config_generator_file(v);
-    _ifc_set_click.set_click_config_generator_file(v);
+    _ifc_get_click.set_kernel_click_config_generator_file(v);
+    _ifc_set_click.set_kernel_click_config_generator_file(v);
 }
 
 /**
@@ -594,6 +595,20 @@ IfConfig::set_user_click_startup_config_file(const string& v)
 {
     _ifc_get_click.set_user_click_startup_config_file(v);
     _ifc_set_click.set_user_click_startup_config_file(v);
+}
+
+/**
+ * Specify the external program to generate the user-level Click
+ * configuration.
+ *
+ * @param v the name of the external program to generate the user-level
+ * Click configuration.
+ */
+void
+IfConfig::set_user_click_config_generator_file(const string& v)
+{
+    _ifc_get_click.set_user_click_config_generator_file(v);
+    _ifc_set_click.set_user_click_config_generator_file(v);
 }
 
 bool

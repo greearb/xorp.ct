@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_click.xif,v 1.1 2004/11/10 00:37:54 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_click.xif,v 1.2 2004/12/02 02:37:48 pavlin Exp $ */
 
 /*
  * Click FEA XRL interface.
@@ -24,14 +24,6 @@ interface fea_click/0.1 {
 	 * Stop Click FEA support.
 	 */
 	stop_click
-
-	/**
-	 * Specify the external program to generate the Click configuration.
-	 *
-	 * @param click_config_generator_file the name of the external program
-	 * to generate the Click configuration.
-	 */
-	set_click_config_generator_file	? click_config_generator_file:txt
 
 	/**
 	 * Enable/disable kernel-level Click FEA support.
@@ -64,6 +56,15 @@ interface fea_click/0.1 {
 	 * @param directory the kernel-level Click mount directory.
 	 */
 	set_kernel_click_mount_directory	? directory:txt
+
+	/**
+	 * Specify the external program to generate the kernel-level Click
+	 * configuration.
+	 *
+	 * @param kernel_click_config_generator_file the name of the external
+	 * program to generate the kernel-level Click configuration.
+	 */
+	set_kernel_click_config_generator_file	? kernel_click_config_generator_file:txt
 
 	/**
 	 * Enable/disable user-level Click FEA support.
@@ -128,4 +129,13 @@ interface fea_click/0.1 {
 	 */
 	set_user_click_startup_config_file		?		\
 				user_click_startup_config_file:txt
+
+	/**
+	 * Specify the external program to generate the user-level Click
+	 * configuration.
+	 *
+	 * @param user_click_config_generator_file the name of the external
+	 * program to generate the user-level Click configuration.
+	 */
+	set_user_click_config_generator_file	? user_click_config_generator_file:txt
 }

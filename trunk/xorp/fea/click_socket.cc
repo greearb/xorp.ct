@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.13 2004/12/09 07:39:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.14 2004/12/09 20:52:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -54,7 +54,8 @@ const TimeVal ClickSocket::USER_CLICK_STARTUP_MAX_WAIT_TIME = TimeVal(1, 0);
 
 ClickSocket::ClickSocket(EventLoop& eventloop)
     : _eventloop(eventloop),
-      _fd(-1),
+      _kernel_fd(-1),
+      _user_fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
       _is_enabled(false),
@@ -83,10 +84,7 @@ ClickSocket::~ClickSocket()
 int
 ClickSocket::start(string& error_msg)
 {
-    if (is_kernel_click()) {
-	if (_fd >= 0)
-	    return (XORP_OK);
-
+    if (is_kernel_click() && (_kernel_fd < 0)) {
 	//
 	// Install kernel Click (if necessary)
 	//
@@ -111,8 +109,8 @@ ClickSocket::start(string& error_msg)
 	//
 	string click_error_filename;
 	click_error_filename = _kernel_click_mount_directory + "/errors";
-	_fd = open(click_error_filename.c_str(), O_RDONLY | O_NONBLOCK);
-	if (_fd < 0) {
+	_kernel_fd = open(click_error_filename.c_str(), O_RDONLY | O_NONBLOCK);
+	if (_kernel_fd < 0) {
 	    error_msg = c_format("Cannot open kernel Click error file %s: %s",
 				 click_error_filename.c_str(),
 				 strerror(errno));
@@ -120,10 +118,7 @@ ClickSocket::start(string& error_msg)
 	}
     }
 
-    if (is_user_click()) {
-	if (_fd >= 0)
-	    return (XORP_OK);
-
+    if (is_user_click() && (_user_fd < 0)) {
 	//
 	// Execute the Click command (if necessary)
 	//
@@ -163,10 +158,10 @@ ClickSocket::start(string& error_msg)
 	    //
 	    TimerList::system_sleep(curr_wait_time);
 	    total_wait_time += curr_wait_time;
-	    _fd = comm_connect_tcp4(&in_addr,
-				    htons(_user_click_control_socket_port),
-				    COMM_SOCK_BLOCKING);
-	    if (_fd >= 0)
+	    _user_fd = comm_connect_tcp4(&in_addr,
+					 htons(_user_click_control_socket_port),
+					 COMM_SOCK_BLOCKING);
+	    if (_user_fd >= 0)
 		break;
 	    if (total_wait_time < max_wait_time) {
 		// XXX: exponentially increase the wait time
@@ -189,12 +184,12 @@ ClickSocket::start(string& error_msg)
 	//
 	vector<uint8_t> message;
 	string error_msg2;
-	if (force_read_message(message, error_msg2) != XORP_OK) {
+	if (force_read_message(_user_fd, message, error_msg2) != XORP_OK) {
 	    error_msg = c_format("Could not read on startup from user-level "
 				 "Click socket: %s", error_msg2.c_str());
 	    terminate_user_click_command();
-	    comm_close(_fd);
-	    _fd = -1;
+	    comm_close(_user_fd);
+	    _user_fd = -1;
 	    return (XORP_ERROR);
 	}
 
@@ -248,22 +243,22 @@ ClickSocket::start(string& error_msg)
 
 	error_label:
 	    terminate_user_click_command();
-	    comm_close(_fd);
-	    _fd = -1;
+	    comm_close(_user_fd);
+	    _user_fd = -1;
 	    return (XORP_ERROR);
 	} while (false);
 
 	//
 	// Add the socket to the event loop
 	//
-	if (_eventloop.add_selector(_fd, SEL_RD,
+	if (_eventloop.add_selector(_user_fd, SEL_RD,
 				    callback(this, &ClickSocket::select_hook))
 	    == false) {
 	    error_msg = c_format("Failed to add user-level Click socket "
 				 "to EventLoop");
 	    terminate_user_click_command();
-	    comm_close(_fd);
-	    _fd = -1;
+	    comm_close(_user_fd);
+	    _user_fd = -1;
 	    return (XORP_ERROR);
 	}
     }
@@ -278,9 +273,9 @@ ClickSocket::stop(string& error_msg)
 	//
 	// Close the Click error file (for reading error messages)
 	//
-	if (_fd >= 0) {
-	    close(_fd);
-	    _fd = -1;
+	if (_kernel_fd >= 0) {
+	    close(_kernel_fd);
+	    _kernel_fd = -1;
 	}
 	if (unmount_click_file_system(error_msg) != XORP_OK) {
 	    string error_msg2;
@@ -294,13 +289,13 @@ ClickSocket::stop(string& error_msg)
 
     if (is_user_click()) {
 	terminate_user_click_command();
-	if (_fd >= 0) {
+	if (_user_fd >= 0) {
 	    //
 	    // Remove the socket from the event loop and close it
 	    //
-	    _eventloop.remove_selector(_fd, SEL_ALL);
-	    comm_close(_fd);
-	    _fd = -1;
+	    _eventloop.remove_selector(_user_fd, SEL_ALL);
+	    comm_close(_user_fd);
+	    _user_fd = -1;
 	}
     }
 
@@ -819,9 +814,11 @@ ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
 
 int
 ClickSocket::write_config(const string& element, const string& handler,
-			  const string& data, string& error_msg)
+			  bool is_kernel_config, const string& kernel_config,
+			  bool is_user_config, const string& user_config,
+			  string& error_msg)
 {
-    if (is_kernel_click()) {
+    if (is_kernel_click() && is_kernel_config) {
 	//
 	// Prepare the output handler name
 	//
@@ -833,7 +830,7 @@ ClickSocket::write_config(const string& element, const string& handler,
 	output_handler = _kernel_click_mount_directory + "/" + output_handler;
 
 	//
-	// Prepare the socket to write the data
+	// Prepare the socket to write the configuration
 	//
 	int fd = ::open(output_handler.c_str(), O_WRONLY | O_TRUNC | O_FSYNC);
 	if (fd < 0) {
@@ -844,10 +841,10 @@ ClickSocket::write_config(const string& element, const string& handler,
 	}
 
 	//
-	// Write the data
+	// Write the configuration
 	//
-	if (::write(fd, data.c_str(), data.size())
-	    != static_cast<ssize_t>(data.size())) {
+	if (::write(fd, kernel_config.c_str(), kernel_config.size())
+	    != static_cast<ssize_t>(kernel_config.size())) {
 	    error_msg = c_format("Error writing to kernel Click "
 				 "handler '%s': %s",
 				 output_handler.c_str(), strerror(errno));
@@ -861,7 +858,7 @@ ClickSocket::write_config(const string& element, const string& handler,
 	//
 	char error_buf[8 * 1024];
 	int error_bytes;
-	error_bytes = ::read(_fd, error_buf, sizeof(error_buf));
+	error_bytes = ::read(_kernel_fd, error_buf, sizeof(error_buf));
 	if (error_bytes < 0) {
 	    error_msg = c_format("Error verifying the command status after "
 				 "writing to kernel Click handler: %s",
@@ -889,7 +886,7 @@ ClickSocket::write_config(const string& element, const string& handler,
 	}
     }
 
-    if (is_user_click()) {
+    if (is_user_click() && is_user_config) {
 	//
 	// Prepare the output handler name
 	//
@@ -900,17 +897,17 @@ ClickSocket::write_config(const string& element, const string& handler,
 	    output_handler = handler;
 
 	//
-	// Prepare the data to write
+	// Prepare the configuration to write
 	//
 	string config = c_format("WRITEDATA %s %u\n",
 				 output_handler.c_str(),
-				 static_cast<uint32_t>(data.size()));
-	config += data;
+				 static_cast<uint32_t>(user_config.size()));
+	config += user_config;
 
 	//
-	// Write the data
+	// Write the configuration
 	//
-	if (ClickSocket::write(config.c_str(), config.size())
+	if (ClickSocket::write(_user_fd, config.c_str(), config.size())
 	    != static_cast<ssize_t>(config.size())) {
 	    error_msg = c_format("Error writing to user-level "
 				 "Click socket: %s",
@@ -948,10 +945,10 @@ ClickSocket::write_config(const string& element, const string& handler,
 }
 
 ssize_t
-ClickSocket::write(const void* data, size_t nbytes)
+ClickSocket::write(int fd, const void* data, size_t nbytes)
 {
     _seqno++;
-    return ::write(_fd, data, nbytes);
+    return ::write(fd, data, nbytes);
 }
 
 int
@@ -966,7 +963,7 @@ ClickSocket::check_user_command_status(bool& is_warning,
     is_warning = false;
     is_error = false;
 
-    if (force_read_message(buffer, error_msg) != XORP_OK)
+    if (force_read_message(_user_fd, buffer, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -1051,11 +1048,11 @@ ClickSocket::check_user_command_status(bool& is_warning,
 }
 
 int
-ClickSocket::force_read(string& error_msg)
+ClickSocket::force_read(int fd, string& error_msg)
 {
     vector<uint8_t> message;
 
-    if (force_read_message(message, error_msg) != XORP_OK)
+    if (force_read_message(fd, message, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -1069,7 +1066,8 @@ ClickSocket::force_read(string& error_msg)
 }
 
 int
-ClickSocket::force_read_message(vector<uint8_t>& message, string& error_msg)
+ClickSocket::force_read_message(int fd, vector<uint8_t>& message,
+				string& error_msg)
 {
     vector<uint8_t> buffer(CLSOCK_BYTES);
 
@@ -1077,7 +1075,7 @@ ClickSocket::force_read_message(vector<uint8_t>& message, string& error_msg)
 	ssize_t got;
 	// Find how much data is queued in the first message
 	do {
-	    got = recv(_fd, &buffer[0], buffer.size(),
+	    got = recv(fd, &buffer[0], buffer.size(),
 		       MSG_DONTWAIT | MSG_PEEK);
 	    if ((got < 0) && (errno == EINTR))
 		continue;	// XXX: the receive was interrupted by a signal
@@ -1086,7 +1084,7 @@ ClickSocket::force_read_message(vector<uint8_t>& message, string& error_msg)
 	    buffer.resize(buffer.size() + CLSOCK_BYTES);
 	} while (true);
 
-	got = read(_fd, &buffer[0], buffer.size());
+	got = read(fd, &buffer[0], buffer.size());
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
@@ -1107,9 +1105,9 @@ ClickSocket::select_hook(int fd, SelectorMask m)
 {
     string error_msg;
 
-    XLOG_ASSERT(fd == _fd);
+    XLOG_ASSERT((fd == _kernel_fd) || (fd == _user_fd));
     XLOG_ASSERT(m == SEL_RD);
-    if (force_read(error_msg) != XORP_OK) {
+    if (force_read(fd, error_msg) != XORP_OK) {
 	XLOG_ERROR("Error force_read() from Click socket: %s",
 		   error_msg.c_str());
     }
@@ -1176,7 +1174,8 @@ ClickSocketReader::~ClickSocketReader()
 }
 
 /**
- * Force the reader to receive data from the specified Click socket.
+ * Force the reader to receive kernel-level Click data from the specified
+ * Click socket.
  *
  * @param cs the Click socket to receive the data from.
  * @param seqno the sequence number of the data to receive.
@@ -1184,13 +1183,36 @@ ClickSocketReader::~ClickSocketReader()
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-ClickSocketReader::receive_data(ClickSocket& cs, uint32_t seqno,
-				string& error_msg)
+ClickSocketReader::receive_kernel_click_data(ClickSocket& cs, uint32_t seqno,
+					     string& error_msg)
 {
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	if (cs.force_read(error_msg) != XORP_OK)
+	if (cs.force_kernel_click_read(error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Force the reader to receive user-level Click data from the specified
+ * Click socket.
+ *
+ * @param cs the Click socket to receive the data from.
+ * @param seqno the sequence number of the data to receive.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+ClickSocketReader::receive_user_click_data(ClickSocket& cs, uint32_t seqno,
+					   string& error_msg)
+{
+    _cache_seqno = seqno;
+    _cache_valid = false;
+    while (_cache_valid == false) {
+	if (cs.force_user_click_read(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
