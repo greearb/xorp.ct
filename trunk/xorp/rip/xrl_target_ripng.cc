@@ -435,6 +435,17 @@ XrlRipngTarget::ripng_0_1_get_counters(const string&	ifname,
 }
 
 XrlCmdError
+XrlRipngTarget::ripng_0_1_get_peer_counters(const string&	ifn,
+					    const string&	vifn,
+					    const IPv6&		addr,
+					    const IPv6&		peer,
+					    XrlAtomList&	descs,
+					    XrlAtomList&	vals)
+{
+    return _ct->ripx_0_1_get_peer_counters(ifn, vifn, addr, peer, descs, vals);
+}
+
+XrlCmdError
 XrlRipngTarget::ripng_0_1_add_static_route(const IPv6Net& 	network,
 					   const IPv6& 		nexthop,
 					   const uint32_t& 	cost)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.5 2004/03/02 00:53:04 hodson Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.6 2004/03/02 19:49:28 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -265,6 +265,13 @@ public:
 				     const IPv4&	addr,
 				     XrlAtomList&	descriptions,
 				     XrlAtomList&	values);
+
+    XrlCmdError rip_0_1_get_peer_counters(const string&	ifname,
+					  const string&	vifname,
+					  const IPv4&	addr,
+					  const IPv4&	peer,
+					  XrlAtomList&	descriptions,
+					  XrlAtomList&	values);
 
     XrlCmdError rip_0_1_add_static_route(const IPv4Net& 	network,
 					 const IPv4& 		nexthop,

@@ -306,6 +306,15 @@ interface rip/0.1 {
 					-> status:txt
 
     /**
+     * Get counters associated with interface / vif /address.
+     */
+     get_counters			? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					-> counter_descriptions:list	\
+					&  counter_values:list
+
+    /**
      * Get the list of peers associated with interface / vif / address.
      */
     get_peers				? ifname:txt			\
@@ -323,11 +332,12 @@ interface rip/0.1 {
 					& addrs:list
 
     /**
-     * Get counters associated with interface / vif /address.
+     * Get counters associated with peer of interface / vif /address.
      */
-     get_counters			? ifname:txt			\
+     get_peer_counters			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
+					& peer:ipv4			\
 					-> counter_descriptions:list	\
 					&  counter_values:list
 
