@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.14 2003/08/05 22:14:45 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.15 2003/09/16 21:54:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -105,18 +105,7 @@ Command::pending()
 {
     debug_msg("pending\n");
 
-//     if(_xrlrouter.pending())
-// 	return true;
-
-    /*
-    ** Pending count is non zero when we are attempting to configure a
-    ** new peer. In which case "_xrlrouter.pending()", must return
-    ** true.
-    */
-    //    XLOG_ASSERT(_pending_count == 0);
     if(_init_count != 0) {
-	XLOG_WARNING("_xrlrouter.pending() is false but _init_count is %d",
-		     _init_count);
 	return true;
     }
 
