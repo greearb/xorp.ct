@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.35 2004/11/16 05:41:04 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.36 2004/11/16 05:42:05 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,7 +42,7 @@ extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
-OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
+OpInstance::OpInstance(EventLoop& eventloop, const string& executable_filename,
 		       const string& command_arguments,
 		       RouterCLI::OpModePrintCallback print_cb,
 		       RouterCLI::OpModeDoneCallback done_cb,
@@ -73,14 +73,14 @@ OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
 	done_cb->dispatch(false, "Failed to execute command");
     }
 
-    _stdout_file_reader = new AsyncFileReader(*eventloop, fileno(_out_stream));
+    _stdout_file_reader = new AsyncFileReader(eventloop, fileno(_out_stream));
     _stdout_file_reader->add_buffer((uint8_t*)_outbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stdout_file_reader->start()) {
 	done_cb->dispatch(false, "Failed to execute command");
     }
 
-    _stderr_file_reader = new AsyncFileReader(*eventloop, fileno(_err_stream));
+    _stderr_file_reader = new AsyncFileReader(eventloop, fileno(_err_stream));
     _stderr_file_reader->add_buffer((uint8_t*)_errbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stderr_file_reader->start()) {
@@ -337,7 +337,7 @@ OpCommand::select_positional_argument(const list<string>& arguments,
 }
 
 OpInstance *
-OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
+OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 		   RouterCLI::OpModePrintCallback print_cb,
 		   RouterCLI::OpModeDoneCallback done_cb)
 {
@@ -617,8 +617,8 @@ OpCommandList::command_match(const list<string>& command_parts,
     return false;
 }
 
-OpInstance *
-OpCommandList::execute(EventLoop *eventloop, const list<string>& command_parts,
+OpInstance*
+OpCommandList::execute(EventLoop& eventloop, const list<string>& command_parts,
 		       RouterCLI::OpModePrintCallback print_cb,
 		       RouterCLI::OpModeDoneCallback done_cb) const
 {

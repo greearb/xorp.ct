@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.19 2004/06/12 01:34:11 atanu Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.20 2004/08/19 01:01:14 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -33,7 +33,7 @@ class TemplateTree;
 
 class OpInstance {
 public:
-    OpInstance(EventLoop* eventloop, const string& executable_filename,
+    OpInstance(EventLoop& eventloop, const string& executable_filename,
 	       const string& command_arguments,
 	       RouterCLI::OpModePrintCallback print_cb,
 	       RouterCLI::OpModeDoneCallback done_cb,
@@ -107,14 +107,14 @@ public:
     /**
      * Execute an operational mode command.
      *
-     * @param eventloop
+     * @param eventloop the event loop.
      * @param command_line command to execute and arguments
      * @param print_cb callback to be invoked with output from command.
      * @param done_cb callback to invoke when the command terminates.
      *
      * @return a pointer to the command instance on success.
      */
-    OpInstance *execute(EventLoop* eventloop,
+    OpInstance *execute(EventLoop& eventloop,
 			const list<string>& command_line,
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb);
@@ -152,7 +152,7 @@ public:
     OpCommand* add_op_command(const OpCommand& op_command);
     bool command_match(const list<string>& command_parts,
 		       bool exact_match) const;
-    OpInstance *execute(EventLoop* eventloop,
+    OpInstance *execute(EventLoop& eventloop,
 			const list<string>& command_parts,
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.56 2004/07/20 23:09:21 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.57 2004/08/12 07:16:43 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2599,7 +2599,7 @@ RouterCLI::op_mode_func(const string& ,
 
 	// Verify that any previous command has been disposed of.
 	XLOG_ASSERT(0 == _op_mode_cmd);
-	_op_mode_cmd = op_cmd_list()->execute(&(_xorpsh.eventloop()),
+	_op_mode_cmd = op_cmd_list()->execute(_xorpsh.eventloop(),
 					      path_segments,
 			       callback(this, &RouterCLI::op_mode_cmd_print),
 			       callback(this, &RouterCLI::op_mode_cmd_done));
