@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.42 2003/05/31 15:22:32 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.43 2003/06/03 10:40:56 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1233,9 +1233,11 @@ AC_OUTPUT(
 	xrl/targets/Makefile
 	xrl/tests/Makefile
 	mibs/tests/test_bgpmib.sh
+	mibs/snmpdscripts/startsnmp
 , 
 	echo timestamp > stamp-h
 	chmod a+x mibs/tests/test_bgpmib.sh
+	chmod a+x mibs/snmpdscripts/startsnmp
 )
 
 

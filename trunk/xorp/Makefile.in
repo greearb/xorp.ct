@@ -106,7 +106,7 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = mibs/snmpdscripts/startsnmp
 DIST_SOURCES =
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
@@ -163,6 +163,8 @@ $(srcdir)/./stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) $(top_srcdir)/a
 
 distclean-hdr:
 	-rm -f config.h
+mibs/snmpdscripts/startsnmp: $(top_builddir)/config.status $(top_srcdir)/mibs/snmpdscripts/startsnmp.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
 uninstall-info-am:
 
 # This directory's subdirectories are mostly independent; you can cd
@@ -268,7 +270,7 @@ GZIP_ENV = --best
 distdir: $(DISTFILES)
 	-chmod -R a+w $(distdir) >/dev/null 2>&1; rm -rf $(distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/config $(distdir)/mibs/tests
+	$(mkinstalldirs) $(distdir)/config $(distdir)/mibs/snmpdscripts $(distdir)/mibs/tests
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
