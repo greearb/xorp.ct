@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.15 2004/06/15 16:13:26 hodson Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.16 2004/06/21 18:06:05 hodson Exp $ */
 
 
 interfaces {
@@ -34,6 +34,20 @@ interfaces {
 	    }
 	}
     }
+/*
+    interface discard0 {
+	description: "discard interface"
+	enabled: true
+	discard: true
+	vif discard0 {
+	    enabled: true
+	    address 127.127.0.1 {
+		prefix-length: 32
+		enabled: true
+	    }
+	}
+    }
+*/
 }
 
 fea {
