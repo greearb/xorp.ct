@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.17 2004/12/09 07:54:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.18 2005/02/12 04:50:25 pavlin Exp $"
 
 
 //
@@ -235,8 +235,7 @@ mfea_main(const string& finder_hostname, uint16_t finder_port,
 			       XORP_MODULE_MFEA,
 			       eventloop,
 			       &xrl_std_router_mfea4,
-			       xorp_module_name(AF_INET, XORP_MODULE_FEA),
-			       fticonfig);
+			       xorp_module_name(AF_INET, XORP_MODULE_FEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea4);
 
 #ifdef HAVE_IPV6
@@ -248,8 +247,7 @@ mfea_main(const string& finder_hostname, uint16_t finder_port,
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 			       eventloop,
 			       &xrl_std_router_mfea6,
-			       xorp_module_name(AF_INET6, XORP_MODULE_FEA),
-			       fticonfig);
+			       xorp_module_name(AF_INET6, XORP_MODULE_FEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
 #endif // HAVE_IPV6
 

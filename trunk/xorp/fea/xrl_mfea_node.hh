@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.16 2004/06/10 22:40:58 hodson Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.17 2005/01/28 03:34:18 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -45,13 +45,11 @@ class XrlMfeaNode : public MfeaNode,
 		    public XrlMfeaTargetBase,
 		    public MfeaNodeCli {
 public:
-    // TODO: XXX: PAVPAVPAV: remove the ftic argument
     XrlMfeaNode(int family,
 		xorp_module_id module_id,
 		EventLoop& eventloop,
 		XrlRouter* xrl_router,
-		const string& fea_target,
-		FtiConfig& ftic);
+		const string& fea_target);
     virtual ~XrlMfeaNode();
 
     /**

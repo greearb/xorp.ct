@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.41 2005/01/28 03:34:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.42 2005/02/12 08:09:05 pavlin Exp $"
 
 
 //
@@ -38,8 +38,6 @@
 #include "mfea_kernel_messages.hh"
 #include "mfea_vif.hh"
 
-// TODO: XXX: PAVPAVPAV: TEMPORARY HERE!!
-#include "fticonfig.hh"
 
 //
 // Exported variables
@@ -69,19 +67,15 @@
  * for IPv4 and IPv6 respectively).
  * @module_id: The module ID (must be %XORP_MODULE_MFEA).
  * @eventloop: The event loop.
- * @ftic the @ref FtiConfig entry to use to obtain the routing
- * table (NOTE (TODO: XXX: PAVPAVPAV: this parameter is only temporary here,
- * and will be removed in the near future).
  * 
  * MFEA node constructor.
  **/
 MfeaNode::MfeaNode(int family, xorp_module_id module_id,
-		   EventLoop& eventloop, FtiConfig& ftic)
+		   EventLoop& eventloop)
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
       _mfea_mrouter(*this),
       _mfea_dft(*this),
-      _is_log_trace(false),
-      _ftic(ftic)
+      _is_log_trace(false)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MFEA);
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.31 2004/06/10 22:40:58 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.32 2005/01/28 03:34:18 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -35,9 +35,8 @@ XrlMfeaNode::XrlMfeaNode(int family,
 			 xorp_module_id module_id,
 			 EventLoop& eventloop,
 			 XrlRouter* xrl_router,
-			 const string& fea_target,
-			 FtiConfig& ftic)
-    : MfeaNode(family, module_id, eventloop, ftic),
+			 const string& fea_target)
+    : MfeaNode(family, module_id, eventloop),
       XrlMfeaTargetBase(xrl_router),
       MfeaNodeCli(*static_cast<MfeaNode *>(this)),
       _class_name(xrl_router->class_name()),
