@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/test_subnet_route.cc,v 1.1 2004/05/01 00:24:17 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -54,8 +54,10 @@ test_subnet_route1(TestInfo& info, IPNet<A> net)
 
     PathAttributeList<A> pa;
     A nexthop;
-    pa.add_path_attribute(NextHopAttribute<A>(nexthop));
-    pa.add_path_attribute(ASPathAttribute(AsPath("1,2,3")));
+    NextHopAttribute<A> nha(nexthop);
+    pa.add_path_attribute(nha);
+    ASPathAttribute aspa(AsPath("1,2,3"));
+    pa.add_path_attribute(aspa);
     RefTrie<A, const SubnetRoute<A> > route_table;
 
     for(int i = 0; i < routes; i++) {
@@ -91,8 +93,10 @@ test_subnet_route2(TestInfo& info, IPNet<A> net)
 
     PathAttributeList<A> pa;
     A nexthop;
-    pa.add_path_attribute(NextHopAttribute<A>(nexthop));
-    pa.add_path_attribute(ASPathAttribute(AsPath("1,2,3")));
+    NextHopAttribute<A> nha(nexthop);
+    pa.add_path_attribute(nha);
+    ASPathAttribute aspa(AsPath("1,2,3"));
+    pa.add_path_attribute(aspa);
     RefTrie<A, const SubnetRoute<A> > route_table;
 
     for(int i = 0; i < routes; i++) {
