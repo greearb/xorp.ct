@@ -1,4 +1,4 @@
-<!-- $XORP: xorp/docs/status.html,v 1.10 2003/10/17 01:17:26 pavlin Exp $ -->
+<!-- $XORP: xorp/docs/status.html,v 1.11 2003/10/17 01:38:31 pavlin Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <HTML>
@@ -13,7 +13,7 @@
 See the <a href="index.html">software documentation</a> for details of the
 XORP processes.
 <P>
-As of August 2003 (Release 0.4), the status is as follows:
+As of November 2003 (Release 0.5), the status is as follows:
 <DL>
 <DT><B>RIB</B>
 
@@ -36,16 +36,17 @@ Linux is basically complete.  The MFEA for Click doesn't exist.
 <DT><B>BGP</B>
 
 <DD>The core of BGP is basically complete, with respect to the
-functionality described in draft-ietf-idr-bgp4-20.txt.  There are
+functionality described in draft-ietf-idr-bgp4-22.txt.  There are
 probably still many bugs but the core is reasonably stable.
 <P>
-There are <B>no</B> optional features.  Monitoring is limited to
-listing all the routes and listing all the peers - basically all the
-information demanded by the base BGP MIB.  More fine-grain monitoring
-is definitely needed.  You can't install any optional filters, which
-means in practice it isn't too useful.  Redistribution of routes into
-BGP and origination of routes currently don't work.  IPv4 routing
-works.  IPv6 doesn't, but the core of the architecture is IPv6-ready.
+Monitoring is limited to listing all the routes and listing all the
+peers - basically all the information demanded by the base BGP MIB.
+More fine-grain monitoring is definitely needed.  You can't install
+any optional filters, which means in practice it isn't too useful.
+Redistribution of routes into BGP and origination of routes currently
+don't work.  IPv4 and IPv6 routing works. Multicast SAFI has been
+implemented but not tested. A memory leak was discovered just before
+making the release.
 
 <P>
 <DT><B>OSPF</B>
@@ -114,9 +115,7 @@ can be configured to start the SNMP agent and to load MIB modules.
 <address>feedback&#64;xorp&#46;org</address>
 <!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
 <!-- hhmts start -->
-<small>
-Last modified: $XORP: xorp/docs/status.html,v 1.10 2003/10/17 01:17:26 pavlin Exp $
-</small>
+Last modified: Thu Nov  6 13:56:11 PST 2003
 <!-- hhmts end -->
 
 </BODY>
