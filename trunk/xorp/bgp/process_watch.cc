@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.2 2003/06/17 16:57:10 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.3 2003/06/17 21:47:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -70,7 +70,7 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
     debug_msg("death: %s %s\n", target_class.c_str(), target_instance.c_str());
 
     if (_fea_instance == target_instance) {
-	XLOG_ERROR("The fea died died");
+	XLOG_ERROR("The fea died");
 	::exit(-1);
     } else if (_rib_instance == target_instance) {
 	XLOG_ERROR("The rib died");
