@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.7 2003/09/11 12:57:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.8 2003/09/11 14:19:47 greenhal Exp $"
 
 
 #include "fea_module.h"
@@ -202,16 +202,13 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	// Get the MTU
 	//
 	do {
-	    int mtu ;
-	    mtu = 0;
-	    
 #ifdef AF_LINK
 	    if ((ifa->ifa_addr != NULL)
 		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
 		// Link-level address
 		if (ifa->ifa_data != NULL) {
 		    struct if_data *if_data = (struct if_data *)ifa->ifa_data;
-		    mtu = if_data->ifi_mtu;
+		    int mtu = if_data->ifi_mtu;
 		    if (mtu == 0) {
 			XLOG_ERROR("Couldn't get the MTU for interface %s",
 				   if_name.c_str());
@@ -238,7 +235,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 			      if_name.c_str(), strerror(errno));
 		} else {
-		    mtu = ifrcopy.ifr_mtu;
+		    int mtu = ifrcopy.ifr_mtu;
 		    fi.set_mtu(mtu);
 		    close(s);
 		    break;
