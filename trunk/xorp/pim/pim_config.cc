@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.15 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.16 2003/07/05 18:56:19 pavlin Exp $"
 
 
 //
@@ -72,12 +72,10 @@ PimNode::set_config_all_vifs_done(string& reason)
 	//
 	// Update the vif flags
 	//
-	node_vif->set_pim_register(vif->is_pim_register());
-	node_vif->set_p2p(vif->is_p2p());
-	node_vif->set_loopback(vif->is_loopback());
-	node_vif->set_multicast_capable(vif->is_multicast_capable());
-	node_vif->set_broadcast_capable(vif->is_broadcast_capable());
-	node_vif->set_underlying_vif_up(vif->is_underlying_vif_up());
+	set_vif_flags(vif->name(), vif->is_pim_register(), vif->is_p2p(),
+		      vif->is_loopback(), vif->is_multicast_capable(),
+		      vif->is_broadcast_capable(), vif->is_underlying_vif_up(),
+		      err);
 	
 	//
 	// Delete vif addresses that don't exist anymore
@@ -98,7 +96,7 @@ PimNode::set_config_all_vifs_done(string& reason)
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
-		node_vif->delete_address(ipvx);
+		delete_vif_addr(vif->name(), ipvx, err);
 	    }
 	}
 	
@@ -111,15 +109,9 @@ PimNode::set_config_all_vifs_done(string& reason)
 		 vif_addr_iter != vif->addr_list().end();
 		 ++vif_addr_iter) {
 		const VifAddr& vif_addr = *vif_addr_iter;
-		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
-		if (node_vif_addr == NULL) {
-		    node_vif->add_address(vif_addr);
-		    continue;
-		}
-		// Update the address
-		if (*node_vif_addr != vif_addr) {
-		    *node_vif_addr = vif_addr;
-		}
+		add_vif_addr(vif->name(), vif_addr.addr(),
+			     vif_addr.subnet_addr(), vif_addr.broadcast_addr(),
+			     vif_addr.peer_addr(), err);
 	    }
 	}
     }
