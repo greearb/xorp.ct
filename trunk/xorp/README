@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.4 2003/03/10 20:01:37 pavlin Exp $
+# $XORP: xorp/README,v 1.5 2003/03/10 20:20:14 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -202,9 +202,9 @@ In the short-term we plan to add:
   * PIM-SSM
   * IGMPv3
   * Bi-directional PIM-SM
+  * SNMP
 
 In the long-term, we plan to add:
-  * SNMP
   * IS-IS
   * BGMP
 
