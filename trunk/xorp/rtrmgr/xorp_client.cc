@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.8 2003/04/22 23:43:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.9 2003/04/23 04:24:36 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -84,12 +84,12 @@ XorpBatch::add_xrl(const UnexpandedXrl&   xrl,
 }
 
 int
-XorpBatch::add_module_start(ModuleManager& mmgr, Module* module,
+XorpBatch::add_module_start(ModuleManager& mmgr, const string& mod_name,
 			    XCCommandCallback cb, 
 			    bool do_exec) {
     debug_msg("XorpBatch::add_module_start\n");
     XorpBatchModuleItem *batch_item;
-    batch_item = new XorpBatchModuleItem(mmgr, module, /*start*/true, 
+    batch_item = new XorpBatchModuleItem(mmgr, mod_name, /*start*/true, 
 					 cb, do_exec);
     _batch_items.push_back(batch_item);
     return XORP_OK;
@@ -205,14 +205,16 @@ XorpBatchXrlItem::response_callback(const XrlError& err,
     _batch->batch_item_done(this, success, errmsg);
 }
 
-XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager& mmgr, Module* module,
+XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager& mmgr, 
+					 const string& mod_name,
 					 bool start,
 					 XCCommandCallback cb, 
 					 bool do_exec) 
-    :XorpBatchItem(cb, do_exec), _mmgr(mmgr), _module(module), 
+    :XorpBatchItem(cb, do_exec), _mmgr(mmgr), _mod_name(mod_name), 
     _start(start)
 {
-    debug_msg("new XorpBatchModuleItem %s\n", _module->str().c_str());
+    assert(_mmgr.module_exists(mod_name));
+    debug_msg("new XorpBatchModuleItem %s\n", _mod_name.c_str());
 }
 
 int 
@@ -221,13 +223,11 @@ XorpBatchModuleItem::execute(XorpClient& /*xclient*/, XorpBatch *batch,
     debug_msg("XorpBatchModuleItem::execute (start %d)", _start);
     _batch = batch;
     if (_start) {
-	debug_msg("XorpBatchModuleItem::execute %s\n", _module->str().c_str());
-	if (_module->run(_do_exec) == XORP_OK) {
-	    XorpCallback0<void>::RefPtr cb;
-	    cb = callback(this, &XorpBatchModuleItem::response_callback,
-			  true, string(""));
-	    _startup_timer 
-		= _mmgr.eventloop().new_oneoff_after_ms(2000, cb);
+	debug_msg("XorpBatchModuleItem::execute %s\n", _mod_name.c_str());
+	XorpCallback1<void, bool>::RefPtr cb;
+	cb = callback(this, &XorpBatchModuleItem::response_callback,
+		      string(""));
+	if (_mmgr.run_module(_mod_name, _do_exec, cb) == XORP_OK) {
 	    return XORP_OK;
 	} else {
 	    //we failed - trigger the callback immediately
@@ -246,9 +246,8 @@ XorpBatchModuleItem::execute(XorpClient& /*xclient*/, XorpBatch *batch,
 void 
 XorpBatchModuleItem::response_callback(bool success, string errmsg) {
     debug_msg("XorpBatchModuleItem::response_callback %s\n", 
-	      _module->str().c_str());
+	      _mod_name.c_str());
     if (_start) {
-	_module->module_run_done(success);
 	if (!_callback.is_empty())
 	    _callback->dispatch(XrlError::OKAY(), 0);
     } else {
@@ -371,7 +370,7 @@ XorpClient::send_xrl(uint		  tid,
 
 int XorpClient::start_module(uint tid, 
 			     ModuleManager& module_manager, 
-			     Module *module,
+			     const string& mod_name,
 			     XCCommandCallback cb,
 			     bool do_exec) {
     XorpBatch* transaction;
@@ -380,7 +379,7 @@ int XorpClient::start_module(uint tid,
     assert(i != _transactions.end());
 
     transaction = i->second;
-    return transaction->add_module_start(module_manager, module,
+    return transaction->add_module_start(module_manager, mod_name,
 					 cb, do_exec);
 }
 

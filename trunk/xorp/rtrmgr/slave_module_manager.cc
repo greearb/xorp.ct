@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.3 2003/04/22 19:42:18 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.4 2003/04/23 04:24:35 mjh Exp $"
 
 #include "config.h"
 #include "rtrmgr_module.h"
@@ -23,30 +23,49 @@
   the template commands need to know about a module manager.  This is
   an ugly hack */
 
-int Module::run(bool do_exec) {
-    UNUSED(do_exec);
-    return XORP_OK;
-}
-void Module::module_run_done(bool success) 
-{
-    UNUSED(success);
-};
-string Module::str() const {return string("");}
-
 
 ModuleManager::ModuleManager(EventLoop& eventloop) 
 {
     UNUSED(eventloop);
 }
 
-Module* ModuleManager::new_module(const ModuleCommand& /*cmd*/) 
+bool ModuleManager::new_module(const ModuleCommand& /*cmd*/) 
 {
-    return NULL;
+    return true;
 }
 
+#if 0
 Module *ModuleManager::find_module(const string& name) 
 {
     UNUSED(name);
     return NULL;
+}
+#endif
+
+int 
+ModuleManager::run_module(const string&name, bool do_exec, 
+			  XorpCallback1<void, bool>::RefPtr cb) {
+    UNUSED(name);
+    UNUSED(do_exec);
+    UNUSED(cb);
+    return XORP_OK;
+}
+
+bool 
+ModuleManager::module_exists(const string &name) const {
+    UNUSED(name);
+    return false;
+}
+
+bool 
+ModuleManager::module_starting(const string &name) const {
+    UNUSED(name);
+    return false;
+}
+
+bool 
+ModuleManager::module_running(const string &name) const {
+    UNUSED(name);
+    return false;
 }
 

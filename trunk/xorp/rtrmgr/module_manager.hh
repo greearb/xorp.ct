@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.6 2003/04/23 04:24:35 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.7 2003/04/24 20:45:06 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -21,6 +21,7 @@
 #include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/eventloop.hh"
+#include "libxorp/callback.hh"
 
 #define MODULE_STARTUP 0
 #define MODULE_INITIALIZING 1
@@ -44,10 +45,11 @@ public:
     Module(const ModuleCommand& cmd, bool verbose);
     int set_execution_path(const string &path);
     ~Module();
-    int run(bool do_exec);
+    int run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb);
     void module_run_done(bool success);
     void failed();
     bool is_running() const {return _running;}
+    bool is_starting() const {return _status == MODULE_STARTUP;}
     string str() const;
 private:
     string _name;
@@ -68,15 +70,18 @@ public:
     ModuleManager(EventLoop& eventloop, bool verbose);
 
     ~ModuleManager();
-    Module *new_module(const ModuleCommand& cmd);
-    int run_module(Module& m, bool do_exec);
-    Module *find_module(const string &name);
-    const Module *const_find_module(const string &name) const;
+    bool new_module(const ModuleCommand& cmd);
+    int run_module(const string& mod_name, bool do_exec, 
+		   XorpCallback1<void, bool>::RefPtr cb);
+    bool module_exists(const string &name) const;
     bool module_running(const string &name) const;
     bool module_starting(const string &name) const;
     void shutdown();
     EventLoop& eventloop() {return _eventloop;}
 private:
+    Module *find_module(const string &name);
+    const Module *const_find_module(const string &name) const;
+
     map <string, Module *> _modules;
     EventLoop& _eventloop;
     bool _verbose; //verbose output of important events

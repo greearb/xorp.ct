@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.9 2003/04/21 06:41:45 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.10 2003/04/24 20:45:06 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -13,7 +13,7 @@ bin_PROGRAMS	 = rtrmgr xorpsh
 # -- Test Programs
 #bin_PROGRAMS	+=
 
-TESTS		 = test_templates test_sample_config
+TESTS		 = test_templates test_sample_config test_module_manager
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -122,6 +122,21 @@ test_sample_config_SOURCES	+= xorp_client.cc
 test_sample_config_SOURCES	+= module_manager.cc
 test_sample_config_SOURCES	+= split.cc
 test_sample_config_LDADD 	 = $(LDADD)
+
+test_module_manager_SOURCES	 = test_module_manager.cc
+test_module_manager_SOURCES	+= y.tplt_tab.cc
+test_module_manager_SOURCES	+= lex.tplt.cc
+test_module_manager_SOURCES	+= template_tree.cc
+test_module_manager_SOURCES	+= template_tree_node.cc
+test_module_manager_SOURCES	+= template_commands.cc
+test_module_manager_SOURCES	+= xrldb.cc
+test_module_manager_SOURCES	+= unexpanded_xrl.cc
+test_module_manager_SOURCES	+= conf_tree_node.cc
+#test_module_manager_SOURCES	+= conf_tree.cc
+test_module_manager_SOURCES	+= xorp_client.cc
+test_module_manager_SOURCES	+= module_manager.cc
+test_module_manager_SOURCES	+= split.cc
+test_module_manager_LDADD 	 = $(LDADD)
 
 # -- Library Sources
 

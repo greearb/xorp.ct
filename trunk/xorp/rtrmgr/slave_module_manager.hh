@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.3 2003/04/22 19:42:18 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.4 2003/04/23 04:24:36 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 #define __RTRMGR_SLAVE_MODULE_MANAGER_HH__
@@ -31,42 +31,15 @@
 
 class ModuleCommand;
 
-#ifdef NOTDEF
-class ExecutionError {
-public:
-    ExecutionError(const string &reason) {err = reason;}
-    string err;
-};
-
-class Module {
-public:
-    Module(const string &name, const string &path, EventLoop& eventloop,
-	   bool do_exec) 
-	throw (ExecutionError);
-    ~Module();
-    void failed();
-private:
-    string _name;
-    string _path;
-    pid_t _pid;
-    int _status;
-    bool _do_exec; //false indicates we're running in debug mode, so
-                   //shouldn't actually start any processes
-};
-#endif
-
-class Module {
-public:
-    int run(bool do_exec);
-    void module_run_done(bool success);
-    string str() const;
-};
-
 class ModuleManager {
 public:
     ModuleManager(EventLoop& eventloop);
-    Module* new_module(const ModuleCommand& cmd);
-    Module *find_module(const string &name);
+    bool new_module(const ModuleCommand& cmd);
+    int run_module(const string& mod_name, bool do_exec, 
+		   XorpCallback1<void, bool>::RefPtr cb);
+    bool module_exists(const string &name) const;
+    bool module_running(const string &name) const;
+    bool module_starting(const string &name) const;
 private:
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.7 2003/04/22 23:43:02 mjh Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.8 2003/04/23 04:24:37 mjh Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -36,7 +36,6 @@ class XorpBatchItem;
 class XorpClient;
 class ConfigTreeNode;
 class ModuleManager;
-class Module;
 
 class XorpBatch {
 public:
@@ -45,7 +44,7 @@ public:
     int start(CommitCallback ending_cb);
     int add_xrl(const UnexpandedXrl &xrl, XCCommandCallback cb, 
 		bool do_exec, uint32_t retries = 0, uint32_t retry_ms = 0);
-    int add_module_start(ModuleManager& mmgr, Module* module,
+    int add_module_start(ModuleManager& mmgr, const string& mod_name,
 			 XCCommandCallback cb, bool do_exec);
     
     void batch_item_done(XorpBatchItem* tran_xrl, bool status, 
@@ -104,7 +103,7 @@ protected:
 
 class XorpBatchModuleItem : public XorpBatchItem {
 public:
-    XorpBatchModuleItem(ModuleManager& mmgr, Module* module,
+    XorpBatchModuleItem(ModuleManager& mmgr, const string& mod_name,
 			bool start,
 			XCCommandCallback cb, bool do_exec);
     int execute(XorpClient& xclient, XorpBatch *batch, 
@@ -112,7 +111,7 @@ public:
     void response_callback(bool success, string errmsg);
 public:
     ModuleManager& _mmgr;
-    Module* _module;
+    string _mod_name;
     bool _start; //true = start module, false = stop module
     XorpTimer _startup_timer;
 };
@@ -127,9 +126,9 @@ public:
 		 bool do_exec,
 		 uint32_t retries = 0,
 		 uint32_t retry_ms = 0);
-    int start_module(uint tid, ModuleManager& mmgr, Module* module,
+    int start_module(uint tid, ModuleManager& mmgr, const string& mod_name,
 		     XCCommandCallback cb, bool do_exec);
-    int stop_module(uint tid, ModuleManager& mmgr, Module* module,
+    int stop_module(uint tid, ModuleManager& mmgr, const string& mod_name,
 		    XCCommandCallback cb, bool do_exec);
     int send_now(const Xrl &xrl, XrlRouter::XrlCallback cb, 
 		 const string& expected_response, bool do_exec);

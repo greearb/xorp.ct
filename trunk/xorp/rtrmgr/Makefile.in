@@ -93,7 +93,7 @@ bin_PROGRAMS = rtrmgr xorpsh
 # -- Test Programs
 #bin_PROGRAMS	+=
 
-TESTS = test_templates test_sample_config
+TESTS = test_templates test_sample_config test_module_manager
 
 noinst_PROGRAMS = $(TESTS)
 LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
@@ -106,6 +106,8 @@ test_templates_SOURCES = test_templates.cc y.tplt_tab.cc lex.tplt.cc template_tr
 test_templates_LDADD = $(LDADD)
 test_sample_config_SOURCES = test_sample_config.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc template_tree.cc template_tree_node.cc template_commands.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc command_tree.cc xorp_client.cc module_manager.cc split.cc
 test_sample_config_LDADD = $(LDADD)
+test_module_manager_SOURCES = test_module_manager.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc xorp_client.cc module_manager.cc split.cc
+test_module_manager_LDADD = $(LDADD)
 EXTRA_DIST = Notes config.boot config.template fea.boot
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -158,6 +160,14 @@ test_sample_config_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
 $(top_builddir)/libxorp/libxorp.a
 test_sample_config_LDFLAGS = 
+test_module_manager_OBJECTS =  test_module_manager.o y.tplt_tab.o \
+lex.tplt.o template_tree.o template_tree_node.o template_commands.o \
+xrldb.o unexpanded_xrl.o conf_tree_node.o xorp_client.o \
+module_manager.o split.o
+test_module_manager_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
+test_module_manager_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -181,13 +191,13 @@ DEP_FILES =  .deps/cli.P .deps/command_tree.P .deps/conf_tree.P \
 .deps/slave_conf_tree.P .deps/slave_conf_tree_node.P \
 .deps/slave_module_manager.P .deps/split.P .deps/template_commands.P \
 .deps/template_tree.P .deps/template_tree_node.P \
-.deps/test_sample_config.P .deps/test_templates.P \
-.deps/unexpanded_xrl.P .deps/userdb.P .deps/xorp_client.P \
-.deps/xorpsh_main.P .deps/xrl_rtrmgr_interface.P \
+.deps/test_module_manager.P .deps/test_sample_config.P \
+.deps/test_templates.P .deps/unexpanded_xrl.P .deps/userdb.P \
+.deps/xorp_client.P .deps/xorpsh_main.P .deps/xrl_rtrmgr_interface.P \
 .deps/xrl_xorpsh_interface.P .deps/xrldb.P .deps/y.boot_tab.P \
 .deps/y.opcmd_tab.P .deps/y.tplt_tab.P
-SOURCES = $(rtrmgr_SOURCES) $(xorpsh_SOURCES) $(test_templates_SOURCES) $(test_sample_config_SOURCES)
-OBJECTS = $(rtrmgr_OBJECTS) $(xorpsh_OBJECTS) $(test_templates_OBJECTS) $(test_sample_config_OBJECTS)
+SOURCES = $(rtrmgr_SOURCES) $(xorpsh_SOURCES) $(test_templates_SOURCES) $(test_sample_config_SOURCES) $(test_module_manager_SOURCES)
+OBJECTS = $(rtrmgr_OBJECTS) $(xorpsh_OBJECTS) $(test_templates_OBJECTS) $(test_sample_config_OBJECTS) $(test_module_manager_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -265,6 +275,10 @@ test_templates: $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES)
 test_sample_config: $(test_sample_config_OBJECTS) $(test_sample_config_DEPENDENCIES)
 	@rm -f test_sample_config
 	$(CXXLINK) $(test_sample_config_LDFLAGS) $(test_sample_config_OBJECTS) $(test_sample_config_LDADD) $(LIBS)
+
+test_module_manager: $(test_module_manager_OBJECTS) $(test_module_manager_DEPENDENCIES)
+	@rm -f test_module_manager
+	$(CXXLINK) $(test_module_manager_LDFLAGS) $(test_module_manager_OBJECTS) $(test_module_manager_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 

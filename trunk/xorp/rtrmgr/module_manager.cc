@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.6 2003/04/23 04:24:35 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.7 2003/04/24 20:45:06 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -108,7 +108,7 @@ int Module::set_execution_path(const string &path) {
     return XORP_OK;
 }
 
-int Module::run(bool do_exec)
+int Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 {
     if (_verbose) {
 	printf("**********************************************************\n");
@@ -134,10 +134,12 @@ int Module::run(bool do_exec)
 	printf("New module has PID %d\n", _pid);
     module_pids[_pid] = this;
     _status = MODULE_STARTUP;
+    cb->dispatch(true);
     return XORP_OK;
 }
 
 void Module::module_run_done(bool success) {
+    printf("module_run_done\n");
     //do we think we managed to start it?
     if (success == false) {
 	_status = MODULE_FAILED;
@@ -210,7 +212,7 @@ ModuleManager::~ModuleManager() {
     shutdown();
 }
 
-Module *
+bool
 ModuleManager::new_module(const ModuleCommand& cmd) {
     if (_verbose)
 	printf("ModuleManager::new_module %s\n", cmd.name().c_str());
@@ -222,18 +224,21 @@ ModuleManager::new_module(const ModuleCommand& cmd) {
 	newmod = new Module(cmd, _verbose);
 	_modules[name] = newmod;
 	if (newmod->set_execution_path(cmd.path()) != XORP_OK)
-	    return NULL;
-	return newmod;
+	    return false;
+	return true;
     } else {
 	if (_verbose)
 	    printf("module %s already exists\n", name.c_str());
-	return found_mod->second;
+	return true;
     }
 }
 
 int 
-ModuleManager::run_module(Module& m, bool do_exec) {
-    return m.run(do_exec);
+ModuleManager::run_module(const string&name, bool do_exec, 
+			  XorpCallback1<void, bool>::RefPtr cb) {
+    Module *m =  find_module(name);
+    assert (m != NULL);
+    return m->run(do_exec, cb);
 }
 
 bool
@@ -242,6 +247,14 @@ ModuleManager::module_running(const string &name) const {
     if (module == NULL)
 	return false;
     return (module->is_running());
+}
+
+bool
+ModuleManager::module_starting(const string &name) const {
+    const Module *module = const_find_module(name);
+    if (module == NULL)
+	return false;
+    return (module->is_starting());
 }
 
 Module*
@@ -266,6 +279,11 @@ ModuleManager::const_find_module(const string &name) const {
     } else {
 	return found->second;
     }
+}
+
+bool 
+ModuleManager::module_exists(const string &name) const {
+    return _modules.find(name) != _modules.end();
 }
 
 void

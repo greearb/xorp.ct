@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.14 2003/04/23 00:28:39 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.15 2003/04/23 04:24:36 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -725,20 +725,19 @@ ModuleCommand::execute(XorpClient& xclient, uint tid,
 	//OK, we're actually going to do the commit
 
 	//find or create the module in the module manager
-	Module *m = module_manager.find_module(_modname);
-	if (m == NULL) {
-	    m = module_manager.new_module(*this);
-	    if (m == NULL)
-		return XORP_ERROR;
-	} else {
-	    if (m->is_running())
+	if (module_manager.module_exists(_modname)) {
+	    if (module_manager.module_starting(_modname)
+		|| module_manager.module_running(_modname))
 		return XORP_OK;
+	} else {
+	    if (!module_manager.new_module(*this))
+		return XORP_ERROR;
 	}
 
 	debug_msg("Starting module\n");
 	XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 					&ModuleCommand::exec_complete);
-	int r = xclient.start_module(tid, module_manager, m, cb,
+	int r = xclient.start_module(tid, module_manager, _modname, cb,
 				      do_exec);
 
 	XrlAction* xrl_procready = dynamic_cast<XrlAction*>(_procready);
