@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.2 2003/01/09 01:18:37 atanu Exp $"
 
 #define DEBUG_LOGGING
 
@@ -899,7 +899,6 @@ public:
     IfDelAddr6(int fd, const string& ifname, const IPv6& addr) : IfIoctl(fd) {
 	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
 	ipv6_to_sockaddr(addr, _ifra.ifra_addr);
-	string fucker = addr.str();
 	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s)\n",
 		  fd, ifname.c_str(), addr.str().c_str());
     }
