@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.3 2003/09/20 00:15:46 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.4 2004/06/03 17:27:34 hodson Exp $"
 
 #include "config.h"
 
@@ -163,7 +163,7 @@ void
 IfMgrXrlReplicationManager::push(const Cmd& cmd)
 {
     if (cmd->execute(_iftree) == false) {
-	XLOG_ERROR("Apply bad command.");
+	XLOG_ERROR("Apply bad command. %s", cmd->str().c_str());
 	return;
     }
 
