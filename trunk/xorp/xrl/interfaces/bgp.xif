@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.3 2003/01/17 04:07:24 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.4 2003/01/19 00:59:26 mjh Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -274,6 +274,72 @@ interface bgp/0.2 {
 	 delete_route \
 		? \
 		nlri:ipv4net
+
+	/**
+	 * Get the first item of a list of BGP routes
+	 * See RFC 1657 (BGP MIB) for full definitions of return values.
+	 *	
+	 * @param token returned token to be provided when calling 
+	 * get_route_list_next.
+	 * @param more returned to indicate whether there are more list items 
+	 * remaining.
+	 */	
+	get_v4_route_list_start \
+		-> \
+		token:u32
+
+	/**
+	 * Get the first item of a list of BGP routes
+	 * See RFC 1657 (BGP MIB) for full definitions of return values.
+	 *	
+	 * @param token returned token to be provided when calling 
+	 * get_route_list_next.
+	 * @param more returned to indicate whether there are more list items 
+	 * remaining.
+	 */	
+	get_v6_route_list_start \
+		-> \
+		token:u32
+
+	/**
+         * Get the next route in the list
+	 * See RFC 1657 (BGP MIB) for full definitions of return values.
+         */
+        get_v4_route_list_next \
+		? \
+		token:u32 \
+		-> \
+		peer_id:ipv4 \
+		& net:ipv4net \
+		& best_and_origin:u32 \
+		& aspath:binary \
+		& nexthop:ipv4 \
+		& med:i32 \
+		& localpref:i32 \
+		& atomic_agg:i32 \
+		& aggregator:binary \
+		& calc_localpref:i32 \
+		& attr_unknown:binary
+
+	/**
+         * Get the next route in the list
+	 * See RFC 1657 (BGP MIB) for full definitions of return values.
+         */
+        get_v6_route_list_next \
+		? \
+		token:u32 \
+		-> \
+		peer_id:ipv4 \
+		& net:ipv6net \
+		& best_and_origin:u32 \
+		& aspath:binary \
+		& nexthop:ipv6 \
+		& med:i32 \
+		& localpref:i32 \
+		& atomic_agg:i32 \
+		& aggregator:binary \
+		& calc_localpref:i32 \
+		& attr_unknown:binary
 
 	/**
 	 * Terminate bgp process
