@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: other/bgp/peer_with_icsi.sh,v 1.1 2003/01/31 03:03:23 atanu Exp $
 #
 
 #
@@ -58,7 +58,7 @@ TREETOP=${PWD}/../../xorp
 start_processes()
 {
     (cd $TREETOP 
-    for i in libxipc/finder fea/fea_dummy rib/rib bgp/bgp \
+    for i in libxipc/xorp_finder fea/xorp_fea_dummy rib/xorp_rib bgp/xorp_bgp \
 	    "bgp/harness/test_peer -s peer1 -v" bgp/harness/coord
     do
 	xterm -e $i &
