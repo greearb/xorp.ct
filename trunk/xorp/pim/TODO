@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.46 2003/06/27 02:47:33 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.47 2003/06/27 22:28:20 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -1073,23 +1073,6 @@ for the kernel patches as well.
 
 * The very prefix of each log message should contain the node ID (e.g. its
   IP address)
-
-* PimVif::pim_process() : check whether the destination unicast address
-  is my own address.
-
-* See assert macros on page 62 and 63 and rething the implementation whether
-  it is correct. Also, I still don't get the lost_assert(S,G,I) extra
-  check.
-
-* See Figure 11's TODO: "Receive assert from current winner"
-
-* Make sure set_assert_noinfo_state() is not called more than once
-  within same function (e.g. before goto a5);
-
-* Make sure that when Assert info is removed/added (e.g. moving to
-  NoInfo state), the J/P machinery state is updated appropriately.
-
-* AssertMetric::is_better(AssertMetric a) : replace with > and/or < operator
 
 * IMPL: When "wrong iif" signal arrives, if it is not on one of
   our oifs, and if we don't care about it,
