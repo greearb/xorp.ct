@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.5 2004/09/24 22:46:30 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.6 2004/09/28 21:01:04 pavlin Exp $"
 
 
 //
@@ -61,7 +61,7 @@
 // XRL pipe size.
 //
 #define MAX_XRL_ID			100000		// 100000
-#define XRL_PIPE_SIZE			100000		// 100000
+#define XRL_PIPE_SIZE			100		// 100000
 
 //
 // Define to 1 to send short XRLs, otherwise send long XRLs.
@@ -86,7 +86,7 @@
 #define SEND_METHOD_PIPELINE		1
 #define SEND_METHOD_NO_PIPELINE		2
 #define SEND_METHOD_START_PIPELINE	3
-#define SEND_METHOD			SEND_METHOD_START_PIPELINE
+#define SEND_METHOD			SEND_METHOD_PIPELINE
 
 //
 // Define to 1 to exit after end of transmission
@@ -223,12 +223,12 @@ private:
 	// XXX: select pipeline method
 #if (SEND_METHOD == SEND_METHOD_PIPELINE)
 	send_next_pipeline();
-#endif
-#if (SEND_METHOD == SEND_METHOD_START_PIPELINE)
+#elif (SEND_METHOD == SEND_METHOD_START_PIPELINE)
 	send_next_start_pipeline();
-#endif
-#if (SEND_METHOD == SEND_METHOD_NO_PIPELINE)
+#elif (SEND_METHOD == SEND_METHOD_NO_PIPELINE)
 	send_next();
+#else
+	#error "SEND_METHOD typo"
 #endif
     }
 
@@ -256,7 +256,6 @@ private:
 	}
 	print_xrl_received();
 	_next_xrl_recv_id++;
-
 	send_next();
     }
 
@@ -280,14 +279,12 @@ private:
     void send_next_pipeline() {
 	bool success;
 
-	// printf("send_next_pipeline start\n");
 	size_t i = 0;
 	do {
 	    if (i >= XRL_PIPE_SIZE)
 		break;
 	    i++;
 	    if (_next_xrl_send_id >= _max_xrl_id) {
-		// printf("send_next_pipeline end\n");
 		end_transmission();
 		return;
 	    }
@@ -298,7 +295,6 @@ private:
 		_next_xrl_send_id++;
 		continue;
 	    }
-	    // printf("send_next_pipeline() failure\n");
 	} while (true);
     }
 
