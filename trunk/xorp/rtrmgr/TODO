@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.12 2003/11/21 19:37:54 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.13 2003/12/03 20:13:54 pavlin Exp $
 #
 
 Urgent
@@ -57,7 +57,8 @@ General
 	strncpy(buf, input, sizeof(buf) - 1);
 	buf[sizeof(buf) - 1] = '\0';
 
- - Get rid of the hard-coded buffer size of 256 in xorpsh_main.cc
+ - Change the behavior of command-line option "-d" from "Display defaults"
+   to "Enable debug output" (for both the rtrmgr and xorpsh).
 
 Configure Mode
 
