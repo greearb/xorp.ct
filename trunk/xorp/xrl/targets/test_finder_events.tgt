@@ -1,6 +1,7 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/targets/test_finder_events.tgt,v 1.1 2003/05/16 16:52:09 hodson Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"
 
-target test_finder_events implements common/0.1, finder_event_observer/0.1
+target test_finder_events implements	common/0.1,			\
+					finder_event_observer/0.1

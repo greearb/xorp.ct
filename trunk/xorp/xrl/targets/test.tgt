@@ -1,6 +1,7 @@
-/* $XORP: xorp/xrl/targets/test.tgt,v 1.4 2002/11/05 17:26:28 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/test.tgt,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $ */
 
 #include "common.xif"
 #include "test.xif"
 
-target test implements common/0.1, test/1.0
+target test implements		common/0.1,				\
+				test/1.0

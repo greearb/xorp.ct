@@ -1,7 +1,9 @@
-/* $XORP: xorp/xrl/targets/coord.tgt,v 1.2 2002/11/05 17:26:27 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/coord.tgt,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
 
 #include "common.xif"
 #include "coord.xif"
 #include "datain.xif"
 
-target coord implements common/0.1, coord/0.1, datain/0.1
+target coord implements		common/0.1,				\
+				coord/0.1,				\
+				datain/0.1

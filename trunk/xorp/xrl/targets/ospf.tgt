@@ -1,6 +1,7 @@
-/* $XORP: xorp/xrl/targets/ospf.tgt,v 1.2 2002/05/10 17:24:10 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/ospf.tgt,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $ */
 
 #include "common.xif"
 #include "ospf.xif"
 
-target ospf implements common/0.1, ospf/0.1
+target ospf implements		common/0.1,				\
+				ospf/0.1
