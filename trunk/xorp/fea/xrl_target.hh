@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.19 2003/09/12 23:44:45 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.20 2003/09/30 03:07:57 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -62,7 +62,7 @@ public:
     // FEA network interface management interface
     //
 
-    XrlCmdError ifmgr_0_1_get_all_interface_names(
+    XrlCmdError ifmgr_0_1_get_system_interface_names(
 	// Output values,
 	XrlAtomList&	ifnames);
 
@@ -70,7 +70,7 @@ public:
 	// Output values,
 	XrlAtomList&	ifnames);
 
-    XrlCmdError ifmgr_0_1_get_all_vif_names(
+    XrlCmdError ifmgr_0_1_get_system_vif_names(
 	const string&		ifname,
 	// Output values,
 	XrlAtomList&		ifnames);
@@ -80,7 +80,7 @@ public:
 	// Output values,
 	XrlAtomList&		ifnames);
 
-    XrlCmdError ifmgr_0_1_get_all_vif_flags(
+    XrlCmdError ifmgr_0_1_get_system_vif_flags(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -102,7 +102,7 @@ public:
 	bool&	point_to_point,
 	bool&	multicast);
 
-    XrlCmdError ifmgr_0_1_get_all_vif_pif_index(
+    XrlCmdError ifmgr_0_1_get_system_vif_pif_index(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -144,7 +144,7 @@ public:
 	const string&	ifname,
 	const bool&	enabled);
 
-    XrlCmdError ifmgr_0_1_get_all_interface_enabled(
+    XrlCmdError ifmgr_0_1_get_system_interface_enabled(
 	// Input values,
 	const string&	ifname,
 	// Outputput values,
@@ -162,7 +162,7 @@ public:
 	const string&	ifname,
 	const Mac&	mac);
 
-    XrlCmdError ifmgr_0_1_get_all_mac(
+    XrlCmdError ifmgr_0_1_get_system_mac(
 	// Input values,
 	const string&	ifname,
 	// Output values,
@@ -180,7 +180,7 @@ public:
 	const string&	ifname,
 	const uint32_t&	mtu);
 
-    XrlCmdError ifmgr_0_1_get_all_mtu(
+    XrlCmdError ifmgr_0_1_get_system_mtu(
 	// Input values,
 	const string&	ifname,
 	// Output values,
@@ -192,7 +192,7 @@ public:
 	// Output values,
 	uint32_t&	mtu);
 
-    XrlCmdError ifmgr_0_1_get_all_address_flags4(
+    XrlCmdError ifmgr_0_1_get_system_address_flags4(
 	// Input values,
 	const string& ifname,
 	const string& vifname,
@@ -204,7 +204,7 @@ public:
 	bool& point_to_point,
 	bool& multicast);
 
-    XrlCmdError ifmgr_0_1_get_all_address_flags6(
+    XrlCmdError ifmgr_0_1_get_system_address_flags6(
 	// Input values,
 	const string& ifname,
 	const string& vifname,
@@ -257,7 +257,7 @@ public:
 	const string&	vif,
 	const bool&	enabled);
 
-    XrlCmdError ifmgr_0_1_get_all_vif_enabled(
+    XrlCmdError ifmgr_0_1_get_system_vif_enabled(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -271,7 +271,7 @@ public:
 	// Output values,
 	bool&		enabled);
 
-    XrlCmdError ifmgr_0_1_get_all_vif_addresses4(
+    XrlCmdError ifmgr_0_1_get_system_vif_addresses4(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -314,7 +314,7 @@ public:
 	const IPv4&	address,
 	const bool&	en);
 
-    XrlCmdError ifmgr_0_1_get_all_address_enabled4(
+    XrlCmdError ifmgr_0_1_get_system_address_enabled4(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -336,7 +336,7 @@ public:
 	const IPv4&	address,
 	const uint32_t&	prefix_len);
 
-    XrlCmdError ifmgr_0_1_get_all_prefix4(
+    XrlCmdError ifmgr_0_1_get_system_prefix4(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -360,7 +360,7 @@ public:
 	const IPv4&	address,
 	const IPv4&	broadcast);
 
-    XrlCmdError ifmgr_0_1_get_all_broadcast4(
+    XrlCmdError ifmgr_0_1_get_system_broadcast4(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -384,7 +384,7 @@ public:
 	const IPv4&	address,
 	const IPv4&	endpoint);
 
-    XrlCmdError ifmgr_0_1_get_all_endpoint4(
+    XrlCmdError ifmgr_0_1_get_system_endpoint4(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -400,7 +400,7 @@ public:
 	// Output values,
 	IPv4&	endpoint);
 
-    XrlCmdError ifmgr_0_1_get_all_vif_addresses6(
+    XrlCmdError ifmgr_0_1_get_system_vif_addresses6(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -436,7 +436,7 @@ public:
 	const IPv6&	address,
 	const bool&	enabled);
 
-    XrlCmdError ifmgr_0_1_get_all_address_enabled6(
+    XrlCmdError ifmgr_0_1_get_system_address_enabled6(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -458,7 +458,7 @@ public:
 	const IPv6&	address,
 	const uint32_t&	prefix_len);
 
-    XrlCmdError ifmgr_0_1_get_all_prefix6(
+    XrlCmdError ifmgr_0_1_get_system_prefix6(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,
@@ -482,7 +482,7 @@ public:
 	const IPv6&	address,
 	const IPv6&	endpoint);
 
-    XrlCmdError ifmgr_0_1_get_all_endpoint6(
+    XrlCmdError ifmgr_0_1_get_system_endpoint6(
 	// Input values,
 	const string&	ifname,
 	const string&	vif,

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.9 2003/08/11 21:14:09 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.10 2003/09/30 03:08:01 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -172,20 +172,21 @@ interface ifmgr/0.1 {
 	unregister_client ? clientname:txt
 
 	/*
-	 * get_all methods
+	 * get_system methods
 	 *
 	 * The get_configured methods return the configured interface state
-	 * of the FEA.  The get_all methods return the known interface state.
+	 * of the FEA.  The get_system methods return the interface state
+	 * from the underlying system.
 	 * These are primarily intended as debugging methods, the FEA will
 	 * often be aware of more interfaces than the rtrmgr has configured.
 	 *
 	 * USE OF THESE METHODS IS STRONLY DISCOURAGED.
 	 */
-	get_all_interface_names -> ifnames:list
+	get_system_interface_names -> ifnames:list
 
-	get_all_vif_names ? ifname:txt -> vifs:list
+	get_system_vif_names ? ifname:txt -> vifs:list
 
-	get_all_vif_flags	? ifname:txt				\
+	get_system_vif_flags	? ifname:txt				\
 				& vif:txt				\
 				-> enabled:bool				\
 				& broadcast:bool			\
@@ -193,13 +194,13 @@ interface ifmgr/0.1 {
 				& point_to_point:bool			\
 				& multicast:bool
 
-	get_all_vif_pif_index	? ifname:txt				\
+	get_system_vif_pif_index ? ifname:txt				\
 				& vif:txt				\
 				-> pif_index:u32
 
-	get_all_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
+	get_system_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
 
-	get_all_address_flags4	? ifname:txt				\
+	get_system_address_flags4 ? ifname:txt				\
 				& vif:txt				\
 				& address:ipv4				\
 				-> enabled:bool				\
@@ -208,9 +209,9 @@ interface ifmgr/0.1 {
 				& point_to_point:bool			\
 				& multicast:bool
 
-	get_all_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
+	get_system_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
 
-	get_all_address_flags6	? ifname:txt				\
+	get_system_address_flags6 ? ifname:txt				\
 				& vif:txt 				\
 				& address:ipv6				\
 				-> enabled:bool 			\
@@ -218,35 +219,35 @@ interface ifmgr/0.1 {
 				& point_to_point:bool			\
 				& multicast:bool
 
-	get_all_interface_enabled ? ifname:txt -> enabled:bool
+	get_system_interface_enabled ? ifname:txt -> enabled:bool
 
-	get_all_mac ? ifname:txt -> mac:mac
+	get_system_mac ? ifname:txt -> mac:mac
 
-	get_all_mtu ? ifname:txt -> mtu:u32
+	get_system_mtu ? ifname:txt -> mtu:u32
 
-	get_all_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+	get_system_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 
-	get_all_prefix4 ? ifname:txt & vif:txt & address:ipv4		\
+	get_system_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> prefix_len:u32
 
-	get_all_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+	get_system_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> broadcast:ipv4
 
-	get_all_endpoint4 ? ifname:txt & vif:txt & address:ipv4		\
+	get_system_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> endpoint:ipv4
 
-	get_all_prefix6 ? ifname:txt & vif:txt & address:ipv6		\
+	get_system_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
 			-> prefix_len:u32
 
-	get_all_endpoint6 ? ifname:txt & vif:txt & address:ipv6		\
+	get_system_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
 			-> endpoint:ipv6
 
-	get_all_address_enabled4	? ifname:txt			\
+	get_system_address_enabled4	? ifname:txt			\
 					& vif:txt			\
 					& address:ipv4			\
 					-> enabled:bool
 
-	get_all_address_enabled6	? ifname:txt			\
+	get_system_address_enabled6	? ifname:txt			\
 					& vif:txt			\
 					& address:ipv6			\
 					-> enabled:bool

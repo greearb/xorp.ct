@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.27 2003/09/30 03:07:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.28 2003/10/22 19:30:44 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -104,7 +104,7 @@ XrlFeaTarget::common_0_1_shutdown()
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_interface_names(
+XrlFeaTarget::ifmgr_0_1_get_system_interface_names(
 						// Output values,
 						XrlAtomList&	ifnames)
 {
@@ -134,7 +134,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_names(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_vif_names(
+XrlFeaTarget::ifmgr_0_1_get_system_vif_names(
 					  const string& ifname,
 					  // Output values,
 					  XrlAtomList&	vifnames)
@@ -172,7 +172,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_vif_flags(
+XrlFeaTarget::ifmgr_0_1_get_system_vif_flags(
     // Input values, 
     const string&	ifname, 
     const string&	vif, 
@@ -224,7 +224,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_vif_pif_index(
+XrlFeaTarget::ifmgr_0_1_get_system_vif_pif_index(
     // Input values, 
     const string&	ifname, 
     const string&	vif, 
@@ -260,7 +260,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_interface_enabled(
+XrlFeaTarget::ifmgr_0_1_get_system_interface_enabled(
 					      // Input values,
 					      const string&	ifname,
 					      // Output values,
@@ -292,7 +292,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_mac(
+XrlFeaTarget::ifmgr_0_1_get_system_mac(
 				// Input values,
 				const string& ifname,
 				Mac&	    mac)
@@ -322,7 +322,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mac(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_mtu(
+XrlFeaTarget::ifmgr_0_1_get_system_mtu(
 				// Input values,
 				const string&	ifname,
 				uint32_t&	mtu)
@@ -352,7 +352,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_vif_enabled(
+XrlFeaTarget::ifmgr_0_1_get_system_vif_enabled(
 					// Input values,
 					const string& ifname,
 					const string& vifname,
@@ -386,7 +386,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_prefix4(
+XrlFeaTarget::ifmgr_0_1_get_system_prefix4(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
@@ -422,7 +422,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_broadcast4(
+XrlFeaTarget::ifmgr_0_1_get_system_broadcast4(
 				       // Input values,
 				       const string&	ifname,
 				       const string&	vifname,
@@ -460,7 +460,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_endpoint4(
+XrlFeaTarget::ifmgr_0_1_get_system_endpoint4(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
@@ -498,7 +498,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_prefix6(
+XrlFeaTarget::ifmgr_0_1_get_system_prefix6(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
@@ -534,7 +534,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_endpoint6(
+XrlFeaTarget::ifmgr_0_1_get_system_endpoint6(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
@@ -572,7 +572,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_vif_addresses6(
+XrlFeaTarget::ifmgr_0_1_get_system_vif_addresses6(
 					       // Input values,
 					       const string&	ifname,
 					       const string&	vif,
@@ -613,7 +613,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_address_flags4(
+XrlFeaTarget::ifmgr_0_1_get_system_address_flags4(
 				       // Input values
 				       const string& ifname,
 				       const string& vif,
@@ -667,7 +667,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_address_flags6(
+XrlFeaTarget::ifmgr_0_1_get_system_address_flags6(
 				       // Input values
 				       const string& ifname,
 				       const string& vif,
@@ -717,7 +717,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_vif_addresses4(
+XrlFeaTarget::ifmgr_0_1_get_system_vif_addresses4(
 					       // Input values,
 					       const string&	ifname,
 					       const string&	vif,
@@ -911,7 +911,7 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_address_enabled4(
+XrlFeaTarget::ifmgr_0_1_get_system_address_enabled4(
 					     // Input values,
 					     const string&	ifname,
 					     const string&	vifname,
@@ -1024,7 +1024,7 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_all_address_enabled6(
+XrlFeaTarget::ifmgr_0_1_get_system_address_enabled6(
 					     // Input values,
 					     const string&	ifname,
 					     const string&	vifname,

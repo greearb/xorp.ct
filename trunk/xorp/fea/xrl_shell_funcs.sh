@@ -6,10 +6,10 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
 XRLDIR=${XRLDIR:-${srcdir}/../xrl}
 
-get_all_interface_names()
+get_system_interface_names()
 {
-    echo -n "get_all_interface_names"
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_interface_names"
+    echo -n "get_system_interface_names"
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_interface_names"
 }
 
 get_configured_interface_names()
@@ -92,10 +92,10 @@ set_mac()
     $CALLXRL "finder://fea/ifmgr/0.1/set_mac?tid:u32=$1&ifname:txt=$2&mac:mac=$3"
 }
 
-get_all_mac()
+get_system_mac()
 {
-    echo -n "get_all_mac" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_mac?ifname:txt=$1"
+    echo -n "get_system_mac" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_mac?ifname:txt=$1"
 }
 
 get_configured_mac()
@@ -110,10 +110,10 @@ set_mtu()
     $CALLXRL "finder://fea/ifmgr/0.1/set_mtu?tid:u32=$1&ifname:txt=$2&mtu:u32=$3"
 }
 
-get_all_mtu()
+get_system_mtu()
 {
-    echo -n "get_all_mtu" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_mtu?ifname:txt=$1"
+    echo -n "get_system_mtu" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_mtu?ifname:txt=$1"
 }
 
 get_configured_mtu()
@@ -122,10 +122,10 @@ get_configured_mtu()
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_mtu?ifname:txt=$1"
 }
 
-get_all_vif_names()
+get_system_vif_names()
 {
-    echo -n "get_all_vif_names" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_vif_names?ifname:txt=$1"
+    echo -n "get_system_vif_names" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_vif_names?ifname:txt=$1"
 }
 
 get_configured_vif_names()
@@ -158,10 +158,10 @@ disable_vif()
     $CALLXRL "finder://fea/ifmgr/0.1/set_vif_enabled?tid:u32=$1&ifname:txt=$2&vif:txt=$3&enabled:bool=false"
 }
 
-get_all_vif_addresses4()
+get_system_vif_addresses4()
 {
-    echo -n "get_all_vif_addresses4" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_vif_addresses4?ifname:txt=$1&vif:txt=$2"
+    echo -n "get_system_vif_addresses4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_vif_addresses4?ifname:txt=$1&vif:txt=$2"
 }
 
 get_configured_vif_addresses4()
@@ -200,10 +200,10 @@ set_prefix4()
     $CALLXRL "finder://fea/ifmgr/0.1/set_prefix4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&prefix_len:u32=$5"
 }
 
-get_all_prefix4()
+get_system_prefix4()
 {
-    echo -n "get_all_prefix4" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_prefix4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
+    echo -n "get_system_prefix4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_prefix4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
 get_configured_prefix4()
@@ -218,10 +218,10 @@ set_broadcast4()
     $CALLXRL "finder://fea/ifmgr/0.1/set_broadcast4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&broadcast:ipv4=$5"
 }
 
-get_all_broadcast4()
+get_system_broadcast4()
 {
-    echo -n "get_all_broadcast4" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
+    echo -n "get_system_broadcast4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
 get_configured_broadcast4()
@@ -230,10 +230,10 @@ get_configured_broadcast4()
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
-get_all_vif_addresses6()
+get_system_vif_addresses6()
 {
-    echo -n "get_all_vif_addresses6" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_vif_addresses6?ifname:txt=$1&vif:txt=$2"
+    echo -n "get_system_vif_addresses6" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_vif_addresses6?ifname:txt=$1&vif:txt=$2"
 }
 
 get_configured_vif_addresses6()
@@ -272,10 +272,10 @@ set_prefix6()
     $CALLXRL "finder://fea/ifmgr/0.1/set_prefix6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&prefix_len:u32=$5"
 }
 
-get_all_prefix6()
+get_system_prefix6()
 {
-    echo -n "get_all_prefix6" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_all_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
+    echo -n "get_system_prefix6" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_system_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
 }
 
 get_configured_prefix6()
