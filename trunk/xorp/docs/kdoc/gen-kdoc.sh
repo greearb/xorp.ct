@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.2 2003/03/07 02:39:47 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.3 2003/04/10 00:29:02 hodson Exp $
 #
 
 #
@@ -417,6 +417,17 @@ xref="libxorp libxorp-callback libcomm libxipc"
 kdocify
 
 #
+# mibs 
+#
+lib="mibs"
+desc="MIB modules for Net-SNMP"
+html_start_page="index.html"
+files="mibs/*.hh"
+excludes=""
+xref="libxorp"
+kdocify
+
+#
 # rib
 #
 lib="rib"
@@ -437,6 +448,8 @@ files="rip/*.hh"
 excludes=""
 xref="libxorp libxorp-callback"
 kdocify
+
+
 
 #
 # Build html index if appropriate
