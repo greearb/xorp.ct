@@ -1,14 +1,17 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.7 2003/08/14 02:07:10 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.8 2003/08/14 02:57:00 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running MLD6IGMP process.
 #
 
-. ../utils/xrl_shell_lib.sh
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+. ${srcdir}/../utils/xrl_shell_lib.sh
 
 #
 # Conditionally set the target name

@@ -1,14 +1,17 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.3 2003/08/14 02:57:00 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.4 2003/09/23 03:35:39 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running MFEA process.
 #
 
-. ../utils/xrl_shell_lib.sh
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+. ${srcdir}/../utils/xrl_shell_lib.sh
 
 #
 # Conditionally set the target name

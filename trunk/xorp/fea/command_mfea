@@ -1,15 +1,18 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/command_mfea,v 1.2 2003/01/23 11:14:23 pavlin Exp $
+# $XORP: xorp/fea/command_mfea,v 1.1 2003/06/03 21:54:42 pavlin Exp $
 #
 
 #
 # Send commands to a running MFEA process.
 #
 
-. ../cli/xrl_cli_shell_funcs.sh
-. ../fea/xrl_mfea_shell_funcs.sh
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
+. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
 
 MODULE_NAME="MFEA"
 HOSTNAME=`hostname`

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.4 2003/08/14 02:08:18 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.5 2003/08/14 02:57:40 pavlin Exp $
 #
 
 #
@@ -12,7 +12,10 @@
 # TODO: this file is temporary in the "xorp/pim" directory
 #
 
-. ../utils/xrl_shell_lib.sh
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+. ${srcdir}/../utils/xrl_shell_lib.sh
 
 #
 # Conditionally set the target name

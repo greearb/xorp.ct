@@ -1,14 +1,17 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.6 2003/08/14 02:07:41 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.7 2003/08/14 02:56:59 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running CLI process.
 #
 
-. ../utils/xrl_shell_lib.sh
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+. ${srcdir}/../utils/xrl_shell_lib.sh
 
 #
 # Conditionally set the target name

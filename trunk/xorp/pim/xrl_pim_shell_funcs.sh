@@ -1,14 +1,17 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.17 2003/08/14 02:57:00 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.18 2003/09/30 18:27:07 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running PIM process.
 #
 
-. ../utils/xrl_shell_lib.sh
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
+. ${srcdir}/../utils/xrl_shell_lib.sh
 
 #
 # Conditionally set the target name

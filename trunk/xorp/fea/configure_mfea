@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/configure_mfea,v 1.1 2003/06/03 21:54:42 pavlin Exp $
+# $XORP: xorp/fea/configure_mfea,v 1.2 2003/08/14 02:06:42 pavlin Exp $
 #
 
 #
@@ -12,6 +12,9 @@ MODULE_NAME="MFEA"
 HOSTNAME=`hostname`
 
 echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
+
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 
 
 ###############################################################
@@ -24,8 +27,8 @@ echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
 IP_VERSION=IPV4
 #IP_VERSION=IPV6
 
-. ../cli/xrl_cli_shell_funcs.sh
-. ../fea/xrl_mfea_shell_funcs.sh
+. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
+. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
 
 #
 # Select the vifs to enable
