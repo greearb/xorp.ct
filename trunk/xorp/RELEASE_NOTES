@@ -1,10 +1,47 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.3 2003/03/10 20:43:55 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.4 2003/03/10 23:48:30 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
+
+Release 0.3 (2003/??/??)
+========================
+  ALL:
+    - 
+
+  LIBXORP:
+    - 
+
+  LIBXIPC:
+    - 
+
+  RTRMGR:
+    - 
+
+  FEA:
+    - 
+
+  RIB: 
+    - 
+
+  BGP:
+    - 
+
+  MFEA:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  PIM-SM:
+    - 
+
+  CLI:
+    - Critical bug fix (could be triggered if a program like
+      xorp/pim/test_pim is run in background, and is accessed
+      by the built-in CLI).
 
 
 Release 0.2 (2003/03/10)
