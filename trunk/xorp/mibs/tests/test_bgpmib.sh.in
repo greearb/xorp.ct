@@ -37,6 +37,10 @@ onexit()
     fi
 
     trap '' 0 2
+
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=2"
+    sleep 1
+
     killall snmpd
     rm -fr bgpPeerTable?.tmp
 }
