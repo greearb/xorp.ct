@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.15 2003/12/05 06:25:26 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.16 2004/01/05 23:24:52 pavlin Exp $
 #
 
 Urgent
@@ -16,7 +16,6 @@ Configure Mode
  - Can't delete leaf nodes.
     - Can delete some leaf nodes, but the xorpsh thinks there are still
       uncommitted changes.
- - Implement $(@.DEFAULT) varname.
  - In xorpsh, variable expansion can fail (for example with FEA
    transation IDs).  Currently the xorpsh-side checks are disabled in
    slave_config_tree.cc, but this is the wrong solution to the
@@ -62,16 +61,9 @@ Non-Urgent
 
 General
 
- - user database needs proper implementation of capabilities
+ - User database needs proper implementation of capabilities.
  - When the rtrmgr is running in no-exec mode do not instantiate a
    finder and XrlRouter.
- - Audit the number of symbols copied by strncpy in the lex/yacc
-   files, and write '\0' at the end of the array. E.g., always
-   do something like:
-	char buf[1024];
-	strncpy(buf, input, sizeof(buf) - 1);
-	buf[sizeof(buf) - 1] = '\0';
-
  - Change the behavior of command-line option "-d" from "Display defaults"
    to "Enable debug output" (for both the rtrmgr and xorpsh).
 
@@ -80,8 +72,15 @@ Configure Mode
  - Rollback when a commit fails.
  - Allow more flexible syntax in text_entry_mode.
  - Add support for "%setting" command.
+ - Check whether UNIX shell environment $EDITOR exists and is a valid
+   command. If "yes", then fire the editor, create a temporary file,
+   then apply "diff" on the configuration changes (or something like this).
+ - Check whetner UNIX shell environment $PAGER exists and is a valid
+   command. If "yes", then pipe the output through it instead of
+   the built-in pager.
 
 Operational Mode
+ - Add template specification for "show" output: fields formatting, etc.
 
 Done
 ====
@@ -93,6 +92,7 @@ Done
    fail all authentication checks.  Handle this more gracefully.
  - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
    and list all *.cc files there in alphabetical order
+ - Implement $(@.DEFAULT) varname.
 
 RESOLVED: restart is detected and user is advised to logout and login again.
 
