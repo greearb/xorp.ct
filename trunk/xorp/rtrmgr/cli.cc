@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.12 2003/09/30 20:53:22 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.13 2003/09/30 21:55:19 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -195,7 +195,8 @@ RouterCLI::text_entry_mode()
     _mode = CLI_MODE_TEXTENTRY;
     clear_command_set();
     char prompt[256];
-    strncpy(prompt, "    > ", 256);
+    strncpy(prompt, "    > ", sizeof(prompt) - 1);
+    prompt[sizeof(prompt) - 1] = '\0';
     assert(_nesting_depth < 128);
     for (int i = 0; i < _nesting_depth; i++)
 	strncat(prompt, "  ", 255);
