@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.8 2003/03/10 23:20:34 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.9 2003/04/02 02:53:51 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -187,26 +187,31 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
 int
 SelectorList::select(TimeVal* timeout)
 {
-    struct timeval select_timeout;
-    struct timeval *select_timeout_p;
     fd_set testfds[SEL_MAX_IDX];
-    
     memcpy(testfds, _fds, sizeof(_fds));
-    if (timeout != NULL) {
-	timeout->copy_out(select_timeout);
-	select_timeout_p = &select_timeout;
-    } else {
-	select_timeout_p = NULL;
-    }
-    
-    int n = ::select(_maxfd + 1,
+
+    int n = 0;
+    if (timeout == 0 || *timeout == TimeVal::MAXIMUM()) {
+	n = ::select(_maxfd + 1,
 		     &testfds[SEL_RD_IDX],
 		     &testfds[SEL_WR_IDX],
 		     &testfds[SEL_EX_IDX],
-		     select_timeout_p);
+		     0);
+    } else {
+	struct timeval tv_to;
+	timeout->copy_out(tv_to);
+	n = ::select(_maxfd + 1,
+		     &testfds[SEL_RD_IDX],
+		     &testfds[SEL_WR_IDX],
+		     &testfds[SEL_EX_IDX],
+		     &tv_to);
+    }
+    
     if (n < 0) {
 	if (errno == EBADF) {
 	    callback_bad_descriptors();
+	} if (errno == EINVAL) {
+	    XLOG_FATAL("Bad select argument (probably timeval)");
 	} else {
 	    XLOG_ERROR("SelectorList::select failed: %s", strerror(errno));
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.9 2003/03/31 23:04:24 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.10 2003/04/02 02:53:51 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -22,9 +22,6 @@
 #include <math.h>
 #include <sys/time.h>
 
-
-#define ONE_MILLION	1000000
-
 /**
  * @short TimeVal class
  *
@@ -32,6 +29,9 @@
  * the time value is in seconds and microseconds.
  */
 class TimeVal {
+public:
+    static const int32_t ONE_MILLION = 1000000;
+
 public:
     /**
      * Default constructor
@@ -44,7 +44,7 @@ public:
      * @param sec the number of seconds.
      * @param usec the number of microseconds.
      */
-    TimeVal(uint32_t sec, uint32_t usec) : _sec(sec), _usec(usec) {}
+    TimeVal(int32_t sec, int32_t usec) : _sec(sec), _usec(usec) {}
     
     /**
      * Constructor for given "struct timeval".
@@ -52,7 +52,7 @@ public:
      * @param timeval the "struct timeval" time value to initialize this
      * object with.
      */
-    explicit TimeVal(const struct timeval& timeval)
+    explicit TimeVal(const timeval& timeval)
 	: _sec(timeval.tv_sec), _usec(timeval.tv_usec) {}
     
     /**
@@ -67,14 +67,14 @@ public:
      * 
      * @return the number of seconds.
      */
-    uint32_t sec() const	{ return _sec; }
+    int32_t sec() const		{ return _sec; }
     
     /**
      * Get the number of microseconds.
      * 
      * @return the number of microseconds.
      */
-    uint32_t usec() const	{ return _usec; }
+    int32_t usec() const	{ return _usec; }
     
     /**
      * Set the time value.
@@ -82,17 +82,22 @@ public:
      * @param sec the number of seconds.
      * @param usec the number of microseconds.
      */
-    void set(uint32_t sec, uint32_t usec) { _sec = sec; _usec = usec; }
+    void set(int32_t sec, int32_t usec) { _sec = sec; _usec = usec; }
     
     /**
-     * Set the time value to zero.
+     * Get zero value.
      */
-    void clear() { _sec = 0; _usec = 0; }
+    inline static TimeVal ZERO();
     
     /**
-     * Set the time value to its maximum possible value.
+     * Get the maximum permitted value.
      */
-    void set_max() { _sec = ~0, _usec = ONE_MILLION - 1; }
+    inline static TimeVal MAXIMUM();
+
+    /**
+     * Get the minimum permitted value.
+     */
+    inline static TimeVal MINIMUM();
     
     /**
      * Copy the time value from a timeval structure.
@@ -100,7 +105,7 @@ public:
      * @param timeval the storage to copy the time from.
      * @return the number of copied octets.
      */
-    inline size_t copy_in(const struct timeval& timeval);
+    inline size_t copy_in(const timeval& timeval);
     
     /**
      * Copy the time value to a timeval structure.
@@ -108,7 +113,7 @@ public:
      * @param timeval the storage to copy the time to.
      * @return the number of copied octets.
      */
-    inline size_t copy_out(struct timeval& timeval) const;
+    inline size_t copy_out(timeval& timeval) const;
     
     /**
      * Convert a TimeVal value to a double-float value.
@@ -227,14 +232,14 @@ public:
     inline TimeVal operator/(const double& d) const;
     
 private:
-    uint32_t _sec;		// The number of seconds
-    uint32_t _usec;		// The number of microseconds
+    int32_t _sec;		// The number of seconds
+    int32_t _usec;		// The number of microseconds
 };
 
 inline
 TimeVal::TimeVal(const double& d)
-    : _sec((uint32_t)d),
-      _usec((uint32_t)((d - ((double)_sec)) * ONE_MILLION + 0.5e-6))
+    : _sec((int32_t)d),
+      _usec((int32_t)((d - ((double)_sec)) * ONE_MILLION + 0.5e-6))
 {
     //
     // Adjust
@@ -246,7 +251,7 @@ TimeVal::TimeVal(const double& d)
 }
 
 inline size_t
-TimeVal::copy_in(const struct timeval& timeval)
+TimeVal::copy_in(const timeval& timeval)
 {
     _sec = timeval.tv_sec;
     _usec = timeval.tv_usec;
@@ -254,7 +259,7 @@ TimeVal::copy_in(const struct timeval& timeval)
 }
 
 inline size_t
-TimeVal::copy_out(struct timeval& timeval) const
+TimeVal::copy_out(timeval& timeval) const
 {
     timeval.tv_sec = _sec;
     timeval.tv_usec = _usec;
@@ -265,8 +270,8 @@ inline const TimeVal&
 TimeVal::randomize_uniform(const double& factor)
 {
     TimeVal delta(factor * get_double());
-    uint32_t random_sec = delta.sec();
-    uint32_t random_usec = delta.usec();
+    int32_t random_sec = delta.sec();
+    int32_t random_usec = delta.usec();
     
     // Randomize the offset
     if (random_sec != 0)
@@ -372,6 +377,24 @@ inline TimeVal
 TimeVal::operator/(const double& d) const
 {
     return TimeVal(get_double() / d);
+}
+
+inline TimeVal
+TimeVal::ZERO()
+{
+    return TimeVal(0, 0);
+}
+
+inline TimeVal
+TimeVal::MAXIMUM()
+{
+    return TimeVal(0x7fffffff, ONE_MILLION - 1);
+}
+
+inline TimeVal
+TimeVal::MINIMUM()
+{
+    return TimeVal(- 0x7fffffff - 1, - (ONE_MILLION - 1));
 }
 
 #endif // __LIBXORP_TIMEVAL_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.7 2003/03/10 23:20:59 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.8 2003/04/02 02:53:52 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -58,7 +58,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
     _user_id = user_id;
     _committed_user_id = 0;
     TimerList::system_gettimeofday(&_modification_time);
-    _committed_modification_time.clear();
+    _committed_modification_time = TimeVal::ZERO();
     _existence_committed = false;
     _value_committed = false;
     _actions_pending = 0;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.8 2003/03/30 03:50:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.9 2003/04/01 00:56:24 pavlin Exp $"
 
 
 //
@@ -1234,7 +1234,7 @@ PimVif::upstream_join_timer_t_suppressed() const
 	tv = tv * base_ratio;
 	tv.randomize_uniform(random_factor);
     } else {
-	tv.clear();
+	tv = TimeVal::ZERO();
     }
     
     return (tv);

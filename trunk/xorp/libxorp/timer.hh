@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.9 2003/03/28 14:27:36 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.10 2003/04/02 02:53:51 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -426,7 +426,7 @@ inline bool
 XorpTimer::time_remaining(TimeVal& remain) const
 {
     if (_node == NULL) {
-	remain.clear();
+	remain = TimeVal::ZERO();
 	return (false);
     }
     return(_node->time_remaining(remain));

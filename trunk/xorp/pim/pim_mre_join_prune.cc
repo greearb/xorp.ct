@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.16 2003/03/30 03:50:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.17 2003/04/01 00:56:21 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1657,7 +1657,7 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     if (override_timer().scheduled())
 	override_timer().time_remaining(tv_left);
     else
-	tv_left.set_max();
+	tv_left = TimeVal::MAXIMUM();
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	override_timer() =
@@ -1705,7 +1705,7 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
     if (override_timer().scheduled())
 	override_timer().time_remaining(tv_left);
     else
-	tv_left.set_max();
+	tv_left = TimeVal::MAXIMUM();
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	override_timer() =

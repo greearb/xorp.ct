@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.5 2003/03/31 03:45:19 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.6 2003/04/02 02:53:51 pavlin Exp $"
 
 
 //
@@ -270,7 +270,7 @@ MfeaDfe::MfeaDfe(MfeaDfeLookup& mfea_dfe_lookup,
     _is_bootstrap_completed = false;
     _measurement_interval = _threshold_interval / MFEA_DATAFLOW_TEST_FREQUENCY;
     for (size_t i = 0; i < sizeof(_start_time)/sizeof(_start_time[0]); i++)
-	_start_time[i].clear();
+	_start_time[i] = TimeVal::ZERO();
 }
 
 MfeaDfe::~MfeaDfe()
