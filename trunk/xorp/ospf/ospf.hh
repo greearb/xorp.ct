@@ -166,7 +166,7 @@ class Ospf {
     /**
      * Get the current OSPF version.
      */
-    bool get_version() const { return _version; }
+    const OspfTypes::Version get_version() const { return _version; }
 
     /**
      * @return a reference to the eventloop, required for timers etc...
