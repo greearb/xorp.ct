@@ -1,10 +1,11 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.xorp0,v 1.2 2003/11/17 22:11:51 pavlin Exp $ */
 
 /* this is the test config for xorp0.icir.org */
 
 interfaces {
   interface fxp0 {
     description: "control interface"
+    /* default_system_config */
     vif fxp0 {
       address 192.150.187.100 {
 	prefix-length: 24
@@ -12,6 +13,11 @@ interfaces {
       }
     }
   }
+}
+
+fea {
+    enable_unicast_forwarding4: true;
+    /* enable_unicast_forwarding6: true; */
 }
 
 /*

@@ -1,9 +1,10 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.3 2003/11/21 02:06:03 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.4 2004/04/16 01:27:22 atanu Exp $ */
 
 
 interfaces {
   interface fxp0 {
     description: "control interface"
+    /* default_system_config */
     vif fxp0 {
       address 192.150.187.100 {
 	prefix-length: 24
@@ -11,6 +12,11 @@ interfaces {
       }
     }
   }
+}
+
+fea {
+    enable_unicast_forwarding4: true;
+    /* enable_unicast_forwarding6: true; */
 }
 
 /*

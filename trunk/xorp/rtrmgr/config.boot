@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot,v 1.14 2004/02/20 06:35:39 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot,v 1.15 2004/04/06 07:16:50 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
@@ -10,7 +10,7 @@
 interfaces {
   interface rl0 {
     description: "control interface"
-    /* default_system_config; */
+    /* default_system_config */
     vif rl0 {
       address 192.150.187.108 {
 	prefix-length: 25
@@ -18,6 +18,11 @@ interfaces {
       }
     }
   }
+}
+
+fea {
+    enable_unicast_forwarding4: true;
+    /* enable_unicast_forwarding6: true; */
 }
 
 /*
