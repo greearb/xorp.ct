@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.6 2003/07/16 05:03:33 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.7 2003/07/16 15:46:46 hodson Exp $"
 
 #include "config.h"
 #include <map>
@@ -33,7 +33,7 @@
 
 template <typename A>
 bool
-NetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r)
+NetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r) const
 {
     if (l.prefix_len() < r.prefix_len())
 	return true;
@@ -211,6 +211,16 @@ uint32_t
 RouteDB<A>::route_count() const
 {
     return _routes.size();
+}
+
+template <typename A>
+const RouteEntry<A>*
+RouteDB<A>::find_route(const IPNet<A>& net) const
+{
+    typename RouteContainer::const_iterator ri = _routes.find(net);
+    if (ri == _routes.end())
+	return 0;
+    return ri->second.get();
 }
 
 template <typename A>

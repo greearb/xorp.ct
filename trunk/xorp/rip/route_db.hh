@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.7 2003/07/16 05:03:33 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.8 2003/07/16 18:40:26 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -38,7 +38,7 @@ class RouteWalker;
 template <typename A>
 struct NetCmp {
     typedef IPNet<A> Net;
-    bool operator() (const Net& l, const Net& r);
+    bool operator() (const Net& l, const Net& r) const;
 };
 
 /**
@@ -104,6 +104,11 @@ public:
      * @return count of routes in database.
      */
     uint32_t route_count() const;
+
+    /**
+     * @return pointer to route entry if it exists, 0 otherwise.
+     */
+    const Route* find_route(const Net& n) const;
 
     /**
      * Accessor.
