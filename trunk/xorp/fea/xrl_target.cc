@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.14 2003/05/19 06:50:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.15 2003/05/20 17:27:36 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -91,6 +91,20 @@ XrlFeaTarget::common_0_1_get_status(
 	status = PROC_NOT_READY;
 	reason = "Communicating config changes to other processes";
     }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlFeaTarget::fea_0_1_terminate()
+{
+#ifdef XLOG_UNFINISHED
+#error "Delete this block now DOOFUS is defined"
+#else
+#define XLOG_UNFINISHED XLOG_FATAL
+#endif
+
+    XLOG_UNFINISHED("Not implemented yet");
 
     return XrlCmdError::OKAY();
 }

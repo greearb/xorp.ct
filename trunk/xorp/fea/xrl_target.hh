@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.9 2003/05/19 06:50:29 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.10 2003/05/20 17:27:36 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -50,6 +50,11 @@ public:
 	// Output values,
         uint32_t& status,
 	string&	reason);
+
+    /*
+    ** Terminate fea process
+    */
+    XrlCmdError fea_0_1_terminate();
 
     //
     // FEA network interface management interface
