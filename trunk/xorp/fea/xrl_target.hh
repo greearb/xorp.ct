@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.40 2004/11/05 03:37:14 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.41 2004/11/10 00:39:48 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -305,13 +305,13 @@ public:
     XrlCmdError ifmgr_0_1_get_system_interface_enabled(
 	// Input values,
 	const string&	ifname,
-	// Outputput values,
+	// Output values,
 	bool&		enabled);
 
     XrlCmdError ifmgr_0_1_get_configured_interface_enabled(
 	// Input values,
 	const string&	ifname,
-	// Outputput values,
+	// Output values,
 	bool&		enabled);
 
     XrlCmdError ifmgr_0_1_set_interface_discard(

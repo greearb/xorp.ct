@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.53 2004/11/05 03:37:14 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.54 2004/11/10 00:39:48 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -607,7 +607,9 @@ XrlFeaTarget::ifmgr_0_1_get_system_interface_discard(
 					      bool&		discard)
 {
     const IfTreeInterface* fi = 0;
-    //XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi); // XXX
+    // XXX: We assume that the discard property exists wholly in the FEA,
+    // and that it is never set by the underlying network stack; therefore
+    // we never 'pull' it.
     XrlCmdError e = _xifmgr.get_if(ifname, fi);
 
     if (e == XrlCmdError::OKAY())
