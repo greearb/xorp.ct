@@ -1,6 +1,6 @@
 ## Include this file into Makefile.am that is used to generate documentation
 ##
-## # $XORP: xorp/docs/mk/Makefile.doc.am,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
+## # $XORP: xorp/docs/mk/Makefile.doc.am,v 1.2 2003/04/22 16:54:31 hodson Exp $
 ##
 
 
@@ -40,7 +40,18 @@ TEXINPUTS_PATH = $(top_srcdir)/docs/tex:
 #
 $(DOCS:%=%.dvi): %.dvi: %_FIGURES %_BBL %_LATEX
 	@is_newer=NO; \
-	dep_files="$($(subst -,_,$*)_LATEX) $*.bbl $($(subst -,_,$*)_FIGURES)"; \
+	latex_files0="$($(subst -,_,$*)_LATEX)"; \
+	latex_files=""; \
+	for i in $$latex_files0 ; do \
+		latex_files="$$latex_files $(srcdir)/$$i"; \
+	done; \
+	bbl_files="$*.bbl"; \
+	figures_files0="$($(subst -,_,$*)_FIGURES)"; \
+	figures_files=""; \
+	for i in $$figures_files0 ; do \
+		figures_files="$$figures_files $(srcdir)/$$i"; \
+	done; \
+	dep_files="$$latex_files $$bbl_files $$figures_files"; \
 	for i in $$dep_files ; do \
 		if [ $$i = $*.bbl -a ! -f $$i ] ; then continue; fi; \
 		if [ ! -f $$i ] ; then \
@@ -56,7 +67,7 @@ $(DOCS:%=%.dvi): %.dvi: %_FIGURES %_BBL %_LATEX
 			file_prefix=`echo $$i | sed 's/\.tex$$//'`; \
 			if [ -z $$file_prefix ] ; then continue; fi; \
 			if [ $$file_prefix = $$i ] ; then continue; fi; \
-			if [ $$file_prefix != $* ] ; then continue; fi; \
+			if [ $$file_prefix != $(srcdir)/$* ] ; then continue; fi; \
 			(TEXINPUTS="${TEXINPUTS_PATH}"; export TEXINPUTS; latex $$i); \
 			(TEXINPUTS="${TEXINPUTS_PATH}"; export TEXINPUTS; latex $$i); \
 			if [ -f $*.lof -o -f $*.lot -o -f $*.toc ] ; then \
@@ -74,7 +85,12 @@ $(DOCS_BBL): %_BBL: %_LATEX
 	@bbl_filename=$*.bbl; \
 	is_newer=NO; \
 	has_bib=NO; \
-	dep_files="$($(subst -,_,$<))"; \
+	latex_files0="$($(subst -,_,$<))"; \
+	latex_files=""; \
+	for i in $$latex_files0 ; do \
+		latex_files="$$latex_files $(srcdir)/$$i"; \
+	done; \
+	dep_files="$$latex_files"; \
 	for i in $$dep_files ; do \
 		if [ ! $$i -ot $$bbl_filename ] ; then \
 			is_newer="YES"; \
@@ -90,9 +106,9 @@ $(DOCS_BBL): %_BBL: %_LATEX
 			file_prefix=`echo $$i | sed 's/\.tex$$//'`; \
 			if [ -z $$file_prefix ] ; then continue; fi; \
 			if [ $$file_prefix = $$i ] ; then continue; fi; \
-			if [ $$file_prefix != $* ] ; then continue; fi; \
+			if [ $$file_prefix != $(srcdir)/$* ] ; then continue; fi; \
 			(TEXINPUTS="${TEXINPUTS_PATH}"; export TEXINPUTS; latex $$i); \
-			bibtex $$file_prefix; \
+			bibtex $*; \
 		done; \
 	fi;
 
@@ -101,7 +117,12 @@ $(DOCS_BBL): %_BBL: %_LATEX
 # then run fig2dev to (re)create that file.
 #
 $(DOCS_FIGURES):
-	@dep_files="$($(subst -,_,$@))"; \
+	@figures_files0="$($(subst -,_,$@))"; \
+	figures_files=""; \
+	for i in $$figures_files0 ; do \
+		figures_files="$$figures_files $(srcdir)/$$i"; \
+	done; \
+	dep_files="$$figures_files"; \
 	for i in $$dep_files ; do \
 		file_prefix=`echo $$i | sed 's/\.eps$$//'`; \
 		if [ -z $$file_prefix ] ; then continue; fi; \
