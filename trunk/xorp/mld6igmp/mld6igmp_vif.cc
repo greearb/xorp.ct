@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.29 2004/06/18 21:51:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.30 2004/08/24 19:00:49 pavlin Exp $"
 
 
 //
@@ -315,24 +315,14 @@ Mld6igmpVif::stop(string& error_msg)
     // Stop the vif with the kernel
     //
     if (mld6igmp_node().stop_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	error_msg = c_format("cannot stop protocol vif %s with the kernel",
-			     name().c_str());
-	return (XORP_ERROR);
+	XLOG_ERROR("Cannot stop protocol vif %s with the kernel",
+		   name().c_str());
+	ret_value = XORP_ERROR;
     }
     
     XLOG_INFO("STOPPED %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
-    //
-    // Test if time to completely stop the Mld6igmpNode itself because
-    // of this vif
-    //
-    string dummy_string;
-    if (mld6igmp_node().is_pending_down()
-	&& (! mld6igmp_node().has_pending_down_units(dummy_string))) {
-	mld6igmp_node().final_stop();
-    }
-    
     return (ret_value);
 }
 
