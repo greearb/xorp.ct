@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.5 2003/11/06 03:00:31 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.6 2004/06/10 22:41:10 hodson Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -79,13 +79,13 @@ is_a_quote(char c)
     return (c == '%' || c == '+');
 }
 
-inline static const char*
+inline string
 escape_encode(char c)
 {
     if (c == ' ') {
 	return "+";
     } else {
-	static char e[4];
+	char e[4];
 	snprintf(e, sizeof(e) / sizeof(e[0]), "%%%02X", (unsigned char)c);
 	return e;
     }
