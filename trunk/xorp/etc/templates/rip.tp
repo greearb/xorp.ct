@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.16 2004/10/28 09:24:14 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.17 2004/10/29 01:23:31 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -56,6 +56,11 @@ protocols {
     rip {
 	%modinfo:	provides		rip;
 	%modinfo:	depends			rib;
+	/*
+	 * TODO: temporary RIP depends on static_routes so the static
+	 * routes redistribution would work properly.
+	 */
+	%modinfo:	depends			static_routes;
 	/*
 	 * TODO: temporary comment-out the policy stuff until the
 	 * policy-based config is fixed.
