@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.12 2003/10/13 23:32:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.13 2003/11/03 07:38:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -224,7 +224,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     // XXX: reset the multipart message read hackish flag
     ns_ptr->set_multipart_message_read(false);
     if (parse_buffer_nlm(family, fte_list, _ns_reader.buffer(),
-			 _ns_reader.buffer_size())
+			 _ns_reader.buffer_size(), true)
 	!= true) {
 	return (false);
     }
