@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.22 2003/10/23 10:54:40 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.23 2004/03/24 19:34:30 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -113,6 +113,27 @@ public:
      * @return true on success
      */
     bool disable_peer(const Iptuple& iptuple);
+
+    /**
+     * Set peer state.
+     *
+     * @param iptuple iptuple.
+     * @param state should the peering be enable or disabled.
+     *
+     * @ return true on success.
+     */
+    bool set_peer_state(const Iptuple& iptuple, bool state);
+
+    /**
+     * Activate peer.
+     *
+     * Enable the peering based on the peer state.
+     *
+     * @param iptuple iptuple.
+     *
+     * @ return true on success.
+     */
+    bool activate(const Iptuple& iptuple);
 
     /*
      * Set next hop rewrite filter.

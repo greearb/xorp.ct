@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.22 2004/03/24 19:34:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.23 2004/04/15 16:13:30 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -266,6 +266,45 @@ XrlBgpTarget::bgp_0_2_disable_peer(
 }
 
 XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_peer_state(
+	// Input values, 
+	const string&	local_ip, 
+	const uint32_t&	local_port, 
+	const string&	peer_ip, 
+	const uint32_t&	peer_port, 
+	const bool& toggle)
+{
+    debug_msg("local ip %s local port %d peer ip %s peer port %d toggle %d\n",
+	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port, toggle);
+
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
+    if(!_bgp.set_peer_state(iptuple, toggle))
+	return XrlCmdError::COMMAND_FAILED();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_activate(
+	// Input values, 
+	const string&	local_ip, 
+	const uint32_t&	local_port, 
+	const string&	peer_ip, 
+	const uint32_t&	peer_port)
+{
+    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
+	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
+    if(!_bgp.activate(iptuple))
+	return XrlCmdError::COMMAND_FAILED();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
 	// Input values, 
 	const string&	local_ip, 
@@ -283,31 +322,6 @@ XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
 
     if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
 	return XrlCmdError::COMMAND_FAILED();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_peer_state(
-	// Input values, 
-	const string&	local_ip, 
-	const uint32_t&	local_port, 
-	const string&	peer_ip, 
-	const uint32_t&	peer_port, 
-	const bool& toggle)
-{
-    debug_msg("local ip %s local port %d peer ip %s peer port %d toggle %d\n",
-	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port, toggle);
-
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-
-    if(toggle) {
-	if(!_bgp.enable_peer(iptuple))
-	    return XrlCmdError::COMMAND_FAILED();
-    } else {
-	if(!_bgp.disable_peer(iptuple))
-	    return XrlCmdError::COMMAND_FAILED();
-    }
 
     return XrlCmdError::OKAY();
 }

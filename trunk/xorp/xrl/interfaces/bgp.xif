@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.14 2004/03/23 19:33:20 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.15 2004/03/24 19:34:31 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -114,6 +114,38 @@ interface bgp/0.2 {
 		& peer_port:u32
 
 	/**
+         * Set the peer state enabled or disabled.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+         * @param toggle enabled or disabled.
+	 */
+	set_peer_state \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& toggle:bool
+
+	/**
+         * Enable or disable the peering based on the peer state.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 */
+	activate \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32
+
+	/**
 	 * Set which parameters we support per peer
 	 */
          set_parameter \
@@ -143,25 +175,6 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		& next_hop:ipv4
-
-	/**
-         * Set the peer state enabled or disabled.
-	 *
-	 * @param local IP address.
-	 * @param local server port.
-	 * @param peer IP address.
-	 * @param peer port.
-	 * @param as the peer's AS number.
-         * @param toggle enabled or disabled.
-	 */
-	set_peer_state \
-		? \
-		local_ip:txt \
-	        & local_port:u32 \
-		& peer_ip:txt \
-		& peer_port:u32 \
-		& toggle:bool
-
 
 	/**
 	 * Originate route IPv4
