@@ -238,10 +238,9 @@ class PacketDecoder {
 /**
  * Hello packet
  */
-
 class HelloPacket : public Packet {
  public:
-    static const size_t MINIMUM_LENGTH = 20;	// The same of OSPF V2 and V3
+    static const size_t MINIMUM_LENGTH = 20;	// The same for OSPF V2 and V3
 						// How did that happen?
 
     HelloPacket(OspfTypes::Version version)
