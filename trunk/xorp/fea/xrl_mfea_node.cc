@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.17 2003/11/19 01:32:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.18 2003/12/06 00:11:17 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -895,8 +895,24 @@ XrlMfeaNode::common_0_1_get_status(
 XrlCmdError
 XrlMfeaNode::common_0_1_shutdown()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    return XrlCmdError::COMMAND_FAILED("Not implemented yet");
+    bool is_error = false;
+    string error_msg;
+
+    if (_xrl_mfea_vif_manager.stop() != XORP_OK) {
+	error_msg = c_format("Failed to stop XRL MFEA Vif Manager");
+	is_error = true;
+    }
+    
+    if (stop_mfea() != XORP_OK) {
+	if (! is_error)
+	    error_msg = c_format("Failed to stop MFEA");
+	is_error = true;
+    }
+    
+    if (is_error)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
