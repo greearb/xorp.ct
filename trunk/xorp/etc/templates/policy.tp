@@ -1,7 +1,7 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.1 2004/09/17 14:14:24 abittau Exp $ */
 
 policy {
-targetname: txt = "policy";
+	targetname: txt = "policy";
 	policy-statement @: txt {
 		term @: txt {
 			source {
@@ -22,15 +22,15 @@ targetname: txt = "policy";
 }
 
 policy {
-%help:		short "Configure policies";
-%modinfo:	provides policy;
-%modinfo:	depends rib;
-%modinfo:	path "policy/xorp_policy";
-%modinfo:	default_targetname "policy";
-%modinfo:	status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
-%modinfo:	shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";
-%modinfo:	end_commit xrl "$(policy.targetname)/policy/0.1/done_global_policy_conf";
-%mandatory:	targetname;
+	%help:		short "Configure policies";
+	%modinfo:	provides policy;
+	%modinfo:	depends rib;
+	%modinfo:	path "policy/xorp_policy";
+	%modinfo:	default_targetname "policy";
+	%modinfo:	status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";
+	%modinfo:	end_commit xrl "$(policy.targetname)/policy/0.1/done_global_policy_conf";
+	%mandatory:	targetname;
 
 	targetname {
 		%help: short "set target name";
