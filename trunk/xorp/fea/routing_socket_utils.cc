@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.19 2004/10/26 00:58:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.20 2004/11/05 00:47:17 bms Exp $"
 
 
 #include "fea_module.h"
@@ -274,7 +274,8 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 }
 
 bool
-RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
+RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
+    const struct rt_msghdr* rtm)
 {
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = rtm->rtm_index;
@@ -365,16 +366,39 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     if (rtm->rtm_flags & RTF_PROTO1)
 	xorp_route = true;
 
-#ifdef notyet
     //
     // Test whether this route is a discard route.
+    // BSD kernels do not implement a software discard interface,
+    // so map this back to a reference to the FEA's notion of one.
+    //
     // XXX: Currently RTF_REJECT is assumed to mean the same thing.
     //
     if (rtm->rtm_flags & (RTF_BLACKHOLE|RTF_REJECT)) {
-	/* code to force the fea's idea of nexthop to point to the
-	 * discard interface */ ;
+	//
+	// Find first discard interface in the FEA. If we don't have one,
+	// log a warning and ignore this route. Because IfTree elements
+	// are held in a map, and we don't key on this property, we
+	// have to walk for it.
+	//
+	const IfTreeInterface* pi = NULL;
+	for (IfTree::IfMap::const_iterator ii = iftree.ifs().begin();
+	     ii != iftree.ifs().end(); ++ii) {
+		if (ii->second.discard()) {
+			pi = &ii->second;
+			break;
+		}
+	}
+
+	if (pi == NULL) {
+	    XLOG_ERROR(
+"Cannot map a discard route back to an FEA soft discard interface.");
+	    return false;
+	}
+
+	if_name = pi->ifname();		// XXX: ifname == vifname
+	// XXX: Do we need to change nexthop_addr?
+	goto skip_ifindex;
     }
-#endif
 
     //
     // Get the interface name and index
@@ -406,6 +430,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	    if_name = string(name);
 	}
     }
+
+skip_ifindex:
     
     //
     // TODO: define default routing metric and admin distance instead of ~0

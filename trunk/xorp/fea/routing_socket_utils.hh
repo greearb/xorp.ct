@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket_utils.hh,v 1.3 2003/05/14 01:13:43 pavlin Exp $
+// $XORP: xorp/fea/routing_socket_utils.hh,v 1.5 2004/06/10 22:40:57 hodson Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_UTILS_HH__
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
 
 #include "fte.hh"
+#include "iftree.hh"
 
 /**
  * @short Helper class for various RTM-format related utilities.
@@ -56,10 +57,12 @@ public:
      * Extract the routing information from RTM message.
      * 
      * @param fte the return-by-reference @ref FteX entry to return the result.
+     * @param iftree the interface tree.
      * @param rtm the RTM routing message.
      * @return true on success, otherwise false.
      */
-    static bool rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm);
+    static bool rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
+	const struct rt_msghdr* rtm);
 };
 
 #endif // __FEA_ROUTING_SOCKET_UTILS_HH__

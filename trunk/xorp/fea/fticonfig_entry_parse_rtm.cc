@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.5 2004/03/17 07:50:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.6 2004/06/10 22:40:49 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -82,7 +82,7 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const uint8_t* buf,
 	if (rtm->rtm_errno != 0)
 	    continue;		// XXX: ignore entries with an error
 	
-	return (RtmUtils::rtm_get_to_fte_cfg(fte, rtm));
+	return (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm));
     }
     
     return false;
