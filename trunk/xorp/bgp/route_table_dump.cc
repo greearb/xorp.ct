@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.6 2003/03/10 23:20:04 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.7 2003/04/22 19:20:19 mjh Exp $"
 
 //#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
+
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
@@ -233,7 +235,7 @@ DumpTable<A>::do_next_route_dump()
 	cp(17);
 	// we can't really do anything yet - wait to be triggered by
 	// the output state changing
-	fprintf(stderr, "Dump: output busy\n");
+	debug_msg("Dump: output busy\n");
 	return;
     }
 
@@ -308,9 +310,9 @@ DumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 {
     assert(next_table == _next_table);
     if (busy)
-	fprintf(stderr, "Dump: output state busy\n");
+	debug_msg("Dump: output state busy\n");
     else
-	fprintf(stderr, "Dump: output state not busy\n");
+	debug_msg("Dump: output state not busy\n");
 
     if (_waiting_for_deletion_completion) {
 	cp(31);
@@ -321,7 +323,7 @@ DumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 	if (_output_busy == true && busy == false) {
 	    cp(33);
 	    _output_busy = false;
-	    fprintf(stderr, "Dump: output went idle so dump next\n");
+	    debug_msg("Dump: output went idle so dump next\n");
 	    do_next_route_dump();
 	} else {
 	    cp(34);
