@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.16 2005/01/21 01:59:49 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.17 2005/03/03 07:36:12 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -906,7 +906,7 @@ size_t
 XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
 {
     size_t used = 0;
-    size_t nelem;
+    uint32_t nelem;
 
     if (buffer_bytes < sizeof(nelem)) {
 	return 0;
