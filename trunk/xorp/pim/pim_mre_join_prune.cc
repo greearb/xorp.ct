@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.7 2003/01/17 08:02:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.8 2003/01/17 22:57:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1561,7 +1561,10 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    override_timer().left_timeval(&timeval_left);
+    if (override_timer().is_set())
+	override_timer().left_timeval(&timeval_left);
+    else
+	TIMEVAL_SET(&timeval_left, FOREVER, 0);
     if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
 	// Restart the timer with `t_override'
 	override_timer().start(TIMEVAL_SEC(&t_override),
@@ -1605,7 +1608,10 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    override_timer().left_timeval(&timeval_left);
+    if (override_timer().is_set())
+	override_timer().left_timeval(&timeval_left);
+    else
+	TIMEVAL_SET(&timeval_left, FOREVER, 0);
     if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
 	// Restart the timer with `t_override'
 	override_timer().start(TIMEVAL_SEC(&t_override),

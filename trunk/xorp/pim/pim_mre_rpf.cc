@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.2 2003/01/14 20:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.3 2003/01/17 22:57:02 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -1217,7 +1217,10 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    override_timer().left_timeval(&timeval_left);
+    if (override_timer().is_set())
+	override_timer().left_timeval(&timeval_left);
+    else
+	TIMEVAL_SET(&timeval_left, FOREVER, 0);
     if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
 	// Restart the timer with `t_override'
 	override_timer().start(TIMEVAL_SEC(&t_override),
