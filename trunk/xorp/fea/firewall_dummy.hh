@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_dummy.hh,v 1.1 2004/08/31 17:43:39 bms Exp $
 
 #ifndef __FEA_FIREWALL_DUMMY_HH__
 #define __FEA_FIREWALL_DUMMY_HH__
@@ -26,10 +26,12 @@
  */
 class DummyFwProvider : public FwProvider {
 public:
-	DummyFwProvider()
-		: _initialized(true), _enabled(false),
-		  _numxorprules4(0), _numxorprules6(0)
-		{}
+	DummyFwProvider(FirewallManager &m)
+	    throw(InvalidFwProvider)
+	    : FwProvider(m),
+	      _providername("dummy"), _providerversion("0.1"),
+	      _initialized(true), _enabled(false),
+	      _numrules4(0), _numrules6(0) {}
 
 	virtual ~DummyFwProvider() {
 		_enabled = false;
@@ -43,25 +45,26 @@ public:
 
 	inline int set_enabled(bool enabled) {
 		_enabled = enabled;
+		return (XORP_OK);
 	}
 
 	inline const string& get_provider_name() const {
-		return ("dummy");
+		return (_providername);
 	}
 
 	inline const string& get_provider_version() const {
-		return ("0.1");
+		return (_providerversion);
 	}
 
 	// IPv4 firewall provider interface
 
-	inline int add_rule4(FwRule& rule) {
+	inline int add_rule4(FwRule4& rule) {
 		UNUSED(rule);
 		_numrules4++;
 		return (XORP_OK);
 	}
 
-	inline int delete_rule4(FwRule& rule) {
+	inline int delete_rule4(FwRule4& rule) {
 		UNUSED(rule);
 		--_numrules4;
 		return (XORP_OK);
@@ -77,13 +80,13 @@ public:
 		return (0);
 	}
 
-	inline int add_rule6(FwRule& rule) {
+	inline int add_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		_numrules6++;
 		return (XORP_OK);
 	}
 
-	inline int delete_rule6(FwRule& rule) {
+	inline int delete_rule6(FwRule6& rule) {
 		UNUSED(rule);
 		--_numrules6;
 		return (XORP_OK);
@@ -102,6 +105,8 @@ public:
 	// XXX: What about rule retrieval?
 
 private:
+	string		_providername;
+	string		_providerversion;
 	bool		_initialized;
 	bool		_enabled;
 	uint32_t	_numrules4;
