@@ -382,13 +382,13 @@ redist_transaction4_add_route()
 {
     if [ $# -ne 8 ] ; then
 	cat >&2 <<EOF
-usage: redist_transaction4_add_route <tid> <dest net> <nh> <ifname> <vifname> <metric> <ad> <cookie> <protocol_origin>
+usage: redist_transaction4_add_route <tid> <dest net> <nexthop> <ifname> <vifname> <metric> <admin_distance> <cookie> <protocol_origin>
 eg:    redist_transaction4_add_entry 6987662 187.1.0.0/16 164.27.13.1 ed0 10 20 all BGP
 EOF
 	return 127
     fi
 
-    $CALLXRL "finder://fea/redist_transaction4/0.1/add_route?tid:u32=$1&dst:ipv4net=$2&nh:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&ad:u32=$7&protocol_origin:txt=$8"
+    $CALLXRL "finder://fea/redist_transaction4/0.1/add_route?tid:u32=$1&dst:ipv4net=$2&nexthop:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&admin_distance:u32=$7&protocol_origin:txt=$8"
 }
 
 redist_transaction4_delete_route()

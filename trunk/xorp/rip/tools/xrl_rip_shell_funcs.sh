@@ -67,11 +67,11 @@ rip_finder_event_observer_xrl_target_death()
 rip_redist4_add_route()
 {
     if [ $# -ne 7 ] ; then
-        echo "Usage: rip_redist4_add_route <dst:ipv4net> <nh:ipv4> <ifname:txt> <vifname:txt> <metric:u32> <ad:u32> <cookie:txt>"
+        echo "Usage: rip_redist4_add_route <dst:ipv4net> <nexthop:ipv4> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/redist4/0.1/add_route?dst:ipv4net=$1&nh:ipv4=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&ad:u32=$6&cookie:txt=$7"
+    XRL="finder://rip/redist4/0.1/add_route?dst:ipv4net=$1&nexthop:ipv4=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7"
     call_xrl_wrapper -p all "${XRL}"
 }
 

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist_transaction4.xif,v 1.4 2004/05/13 08:00:52 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist_transaction4.xif,v 1.5 2004/07/28 05:13:57 pavlin Exp $ */
 
 /*
  * RIB routes redistribution transaction-based XRL interface.
@@ -33,11 +33,12 @@ interface redist_transaction4/0.1 {
 	 *
 	 * @param tid the transaction ID of this transaction.
 	 * @param dst destination network.
-	 * @param nh nexthop router address.
+	 * @param nexthop nexthop router address.
 	 * @param ifname interface name associated with nexthop.
 	 * @param vifname virtual interface name with nexthop.
 	 * @param metric origin routing protocol metric for route.
-	 * @param ad administrative distance of origin routing protocol.
+	 * @param admin_distance administrative distance of origin routing
+	 *        protocol.
 	 * @param cookie value set by the requestor to identify
 	 *        redistribution source.  Typical value is the originating
 	 *        protocol name.
@@ -46,11 +47,11 @@ interface redist_transaction4/0.1 {
 	 */
 	add_route ? tid:u32						\
 		  & dst:ipv4net						\
-		  & nh:ipv4						\
+		  & nexthop:ipv4					\
 		  & ifname:txt						\
 		  & vifname:txt						\
 		  & metric:u32						\
-		  & ad:u32						\
+		  & admin_distance:u32					\
 		  & cookie:txt						\
 		  & protocol_origin:txt
 

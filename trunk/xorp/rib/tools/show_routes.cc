@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.3 2004/06/11 23:34:12 hodson Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.4 2004/06/12 14:50:20 hodson Exp $"
 
 #include "rib/rib_module.h"
 
@@ -143,11 +143,11 @@ public:
     XrlCmdError redist4_0_1_starting_route_dump(const string&	cookie);
     XrlCmdError redist4_0_1_finishing_route_dump(const string&	cookie);
     XrlCmdError redist4_0_1_add_route(const IPv4Net&	dst,
-				      const IPv4&	nh,
+				      const IPv4&	nexthop,
 				      const string&	ifname,
 				      const string&	vifname,
 				      const uint32_t&	metric,
-				      const uint32_t&	ad,
+				      const uint32_t&	admin_distance,
 				      const string&	cookie);
     XrlCmdError redist4_0_1_delete_route(const IPv4Net&	network,
 					 const string&	cookie);
@@ -155,11 +155,11 @@ public:
     XrlCmdError redist6_0_1_starting_route_dump(const string&	cookie);
     XrlCmdError redist6_0_1_finishing_route_dump(const string&	cookie);
     XrlCmdError redist6_0_1_add_route(const IPv6Net&	dst,
-				      const IPv6&	nh,
+				      const IPv6&	nexthop,
 				      const string&	ifname,
 				      const string&	vifname,
 				      const uint32_t&	metric,
-				      const uint32_t&	ad,
+				      const uint32_t&	admin_distance,
 				      const string&	cookie);
     XrlCmdError redist6_0_1_delete_route(const IPv6Net&	network,
 					 const string&	cookie);
@@ -471,18 +471,18 @@ ShowRoutesProcessor::redist4_0_1_finishing_route_dump(const string& cookie)
 
 XrlCmdError
 ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
-					   const IPv4&		nh,
+					   const IPv4&		nexthop,
 					   const string&	ifname,
 					   const string&	vifname,
 					   const uint32_t&	metric,
-					   const uint32_t&	ad,
+					   const uint32_t&	admin_distance,
 					   const string&	cookie)
 {
     if (this->status() != RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
 
-    display_route(dst, nh, ifname, vifname, metric, ad);
+    display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
     return XrlCmdError::OKAY();
 }
 
@@ -511,17 +511,17 @@ ShowRoutesProcessor::redist6_0_1_finishing_route_dump(const string& cookie)
 
 XrlCmdError
 ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
-					   const IPv6&		nh,
+					   const IPv6&		nexthop,
 					   const string&	ifname,
 					   const string&	vifname,
 					   const uint32_t&	metric,
-					   const uint32_t&	ad,
+					   const uint32_t&	admin_distance,
 					   const string&	cookie)
 {
     if (this->status() != RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
-    display_route(dst, nh, ifname, vifname, metric, ad);
+    display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.44 2004/07/28 05:13:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.45 2004/07/29 23:46:37 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1570,11 +1570,11 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     // Input values,
     const uint32_t&	tid,
     const IPv4Net&	dst,
-    const IPv4&		nh,
+    const IPv4&		nexthop,
     const string&	ifname,
     const string&	vifname,
     const uint32_t&	metric,
-    const uint32_t&	ad,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
@@ -1591,7 +1591,8 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiAddEntry4(_xftm.ftic(), dst, nh, ifname, vifname, metric, ad)
+	new FtiAddEntry4(_xftm.ftic(), dst, nexthop, ifname, vifname, metric,
+			 admin_distance)
 	);
     return _xftm.add(tid, op);
 
@@ -1667,11 +1668,11 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     // Input values,
     const uint32_t&	tid,
     const IPv6Net&	dst,
-    const IPv6&		nh,
+    const IPv6&		nexthop,
     const string&	ifname,
     const string&	vifname,
     const uint32_t&	metric,
-    const uint32_t&	ad,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
@@ -1688,7 +1689,8 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiAddEntry6(_xftm.ftic(), dst, nh, ifname, vifname, metric, ad)
+	new FtiAddEntry6(_xftm.ftic(), dst, nexthop, ifname, vifname, metric,
+			 admin_distance)
 	);
     return _xftm.add(tid, op);
 

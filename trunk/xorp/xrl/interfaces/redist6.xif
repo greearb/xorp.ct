@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist6.xif,v 1.5 2004/06/10 13:45:55 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist6.xif,v 1.6 2004/07/28 05:08:50 pavlin Exp $ */
 
 /*
  * RIB routes redistribution XRL interface.
@@ -9,21 +9,22 @@ interface redist6/0.1 {
 
 	/**
 	 * @param dst destination network.
-	 * @param nh nexthop router address.
+	 * @param nexthop nexthop router address.
 	 * @param ifname interface name associated with nexthop.
 	 * @param vifname virtual interface name with nexthop.
 	 * @param metric origin routing protocol metric for route.
-	 * @param ad administrative distance of origin routing protocol.
+	 * @param admin_distance administrative distance of origin routing
+	 *        protocol.
 	 * @param cookie value set by the requestor to identify
 	 *        redistribution source.  Typical value is the originating
 	 *        protocol name.
 	 */
 	add_route ? dst:ipv6net						\
-		  & nh:ipv6						\
+		  & nexthop:ipv6					\
 		  & ifname:txt						\
 		  & vifname:txt						\
 		  & metric:u32						\
-		  & ad:u32						\
+		  & admin_distance:u32					\
 		  & cookie:txt
 
 	delete_route ? network:ipv6net					\

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.41 2004/06/10 22:41:35 hodson Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.42 2004/07/28 05:13:56 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -538,7 +538,7 @@ protected:
      *
      *  @param dst destination network.
      *
-     *  @param nh nexthop router address.
+     *  @param nexthop nexthop router address.
      *
      *  @param ifname interface name associated with nexthop.
      *
@@ -546,7 +546,8 @@ protected:
      *
      *  @param metric origin routing protocol metric for route.
      *
-     *  @param ad administrative distance of origin routing protocol.
+     *  @param admin_distance administrative distance of origin routing
+     *  protocol.
      *
      *  @param cookie value set by the requestor to identify redistribution
      *  source. Typical value is the originating protocol name.
@@ -558,11 +559,11 @@ protected:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv4Net&	dst,
-	const IPv4&	nh,
+	const IPv4&	nexthop,
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	metric,
-	const uint32_t&	ad,
+	const uint32_t&	admin_distance,
 	const string&	cookie,
 	const string&	protocol_origin);
 
@@ -619,7 +620,7 @@ protected:
      *
      *  @param dst destination network.
      *
-     *  @param nh nexthop router address.
+     *  @param nexthop nexthop router address.
      *
      *  @param ifname interface name associated with nexthop.
      *
@@ -627,7 +628,8 @@ protected:
      *
      *  @param metric origin routing protocol metric for route.
      *
-     *  @param ad administrative distance of origin routing protocol.
+     *  @param admin_distance administrative distance of origin routing
+     *  protocol.
      *
      *  @param cookie value set by the requestor to identify redistribution
      *  source. Typical value is the originating protocol name.
@@ -639,11 +641,11 @@ protected:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv6Net&	dst,
-	const IPv6&	nh,
+	const IPv6&	nexthop,
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	metric,
-	const uint32_t&	ad,
+	const uint32_t&	admin_distance,
 	const string&	cookie,
 	const string&	protocol_origin);
 

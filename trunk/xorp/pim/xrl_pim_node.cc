@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.55 2004/06/10 22:41:35 hodson Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.56 2004/07/28 05:13:56 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2577,13 +2577,13 @@ XrlPimNode::redist_transaction4_0_1_abort_transaction(
 XrlCmdError
 XrlPimNode::redist_transaction4_0_1_add_route(
     // Input values, 
-    const uint32_t&	tid, 
-    const IPv4Net&	dst, 
-    const IPv4&		nh, 
+    const uint32_t&	tid,
+    const IPv4Net&	dst,
+    const IPv4&		nexthop, 
     const string&	/* ifname */, 
     const string&	vifname,
     const uint32_t&	metric,
-    const uint32_t&	ad,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
@@ -2606,9 +2606,9 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     // Create the Mrib entry
     //
     Mrib mrib = Mrib(IPvXNet(dst));
-    mrib.set_next_hop_router_addr(IPvX(nh));
+    mrib.set_next_hop_router_addr(IPvX(nexthop));
     mrib.set_next_hop_vif_index(vif_index);
-    mrib.set_metric_preference(ad);
+    mrib.set_metric_preference(admin_distance);
     mrib.set_metric(metric);
     
     //
@@ -2764,13 +2764,13 @@ XrlPimNode::redist_transaction6_0_1_abort_transaction(
 XrlCmdError
 XrlPimNode::redist_transaction6_0_1_add_route(
     // Input values, 
-    const uint32_t&	tid, 
-    const IPv6Net&	dst, 
-    const IPv6&		nh, 
+    const uint32_t&	tid,
+    const IPv6Net&	dst,
+    const IPv6&		nexthop, 
     const string&	/* ifname */, 
     const string&	vifname,
     const uint32_t&	metric,
-    const uint32_t&	ad,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
@@ -2793,9 +2793,9 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     // Create the Mrib entry
     //
     Mrib mrib = Mrib(IPvXNet(dst));
-    mrib.set_next_hop_router_addr(IPvX(nh));
+    mrib.set_next_hop_router_addr(IPvX(nexthop));
     mrib.set_next_hop_vif_index(vif_index);
-    mrib.set_metric_preference(ad);
+    mrib.set_metric_preference(admin_distance);
     mrib.set_metric(metric);
     
     //

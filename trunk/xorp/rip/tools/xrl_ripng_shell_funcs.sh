@@ -67,11 +67,11 @@ ripng_finder_event_observer_xrl_target_death()
 ripng_redist6_add_route()
 {
     if [ $# -ne 7 ] ; then
-        echo "Usage: ripng_redist6_add_route <dst:ipv6net> <nh:ipv6> <ifname:txt> <vifname:txt> <metric:u32> <ad:u32> <cookie:txt>"
+        echo "Usage: ripng_redist6_add_route <dst:ipv6net> <nexthop:ipv6> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt>"
         exit 1
     fi
 
-    XRL="finder://ripng/redist6/0.1/add_route?dst:ipv6net=$1&nh:ipv6=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&ad:u32=$6&cookie:txt=$7"
+    XRL="finder://ripng/redist6/0.1/add_route?dst:ipv6net=$1&nexthop:ipv6=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7"
     call_xrl_wrapper -p all "${XRL}"
 }
 
