@@ -1,0 +1,101 @@
+/*
+ * RIP attribute descriptions
+ */
+
+protocols
+{
+    rip4
+    {
+        targetname: text = "rip4";
+	interface @: text
+	{
+	    vif @: text
+	    {
+		address @: ipv4
+		{
+		    enabled:			bool	= false ;
+		    cost:			uint	=   1;
+		    horizon:			text	= "split-horizon-poison-reverse";	/* XXX TODO constrain horizon to allowed values */
+		    route_expiry_secs:		uint	= 180 ;
+		    route_deletion_secs:	uint	= 120 ;
+		    triggered_update_min_secs:	uint	=   1 ;
+		    triggered_update_max_secs:	uint	=   5 ;
+		    table_announce_min_secs:	uint	=  25 ;
+		    table_announce_max_secs:	uint	=  35 ;
+		    table_request_secs:		uint    =   1 ;
+		    interpacket_delay_msecs:	uint	=  50 ;
+		}
+	    }
+	}
+    }
+}
+
+/*
+ * RIP attribute manipulation.
+ */
+protocols
+{
+    rip4 {
+	%modinfo:	provides		rip4;
+	%modinfo:	depends			rib;
+	%modinfo:	path			"rip/xorp_rip4";
+	%modinfo:	default_targetname	"rip4";
+	%modinfo:	statusmethod xrl	"$(rip4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdownmethod xrl	"$(rip4.targetname)/common/0.1/shutdown";
+	interface @ {
+	    vif @ {
+		address @ {
+		    %create: xrl "$(rip4.targetname)/rip4/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)" ;
+		    %delete: xrl "$(rip4.targetname)/rip4/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)" ;
+		    enabled {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->enabled:bool" ;
+		    }
+		    cost {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&cost:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->cost:u32" ;
+		    }
+		    horizon {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&horizon:txt=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->horizon:txt" ;
+		    }
+		    route_expiry_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    route_deletion_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_route_deletion_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/route_deletion_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    trigger_update_min_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_triggered_update_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/triggered_update_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    trigger_update_max_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_triggered_update_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/triggered_update_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    table_announce_min_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_unsolicited_response_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/unsolicited_response_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    table_announce_max_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_unsolicited_response_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/unsolicited_response_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    table_request_secs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_table_request_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/table_request_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32" ;
+		    }
+		    interpacket_delay_msecs {
+			%set: xrl "$(rip4.targetname)/rip4/0.1/set_interpacket_delay_milliseconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_msecs:u32=$(@)" ;
+			%get: xrl "$(rip4.targetname)/rip4/0.1/interpacket_delay_milliseconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_msecs:u32" ;
+		    }
+		    status {
+		        %get: xrl "$(rip4.targetname)/rip4/0.1/rip_address_status?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->status:txt=$(@)" ;
+		    }
+		}
+	    }
+	}
+    }
+}
