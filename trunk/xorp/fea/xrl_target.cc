@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.6 2003/03/21 23:46:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.7 2003/03/29 19:03:09 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -323,7 +323,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_vif_flags4(
+XrlFeaTarget::ifmgr_0_1_get_address_flags4(
 				       // Input values
 				       const string& ifname,
 				       const string& vif,
@@ -354,7 +354,7 @@ XrlFeaTarget::ifmgr_0_1_get_vif_flags4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_vif_flags6(
+XrlFeaTarget::ifmgr_0_1_get_address_flags6(
 				       // Input values
 				       const string& ifname,
 				       const string& vif,

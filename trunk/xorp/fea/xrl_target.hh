@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.4 2003/03/21 23:46:26 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.5 2003/03/29 19:03:09 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -123,7 +123,7 @@ public:
 	// Output values,
 	uint32_t&	mtu);
 
-    XrlCmdError ifmgr_0_1_get_vif_flags4(
+    XrlCmdError ifmgr_0_1_get_address_flags4(
 	// Input values,
 	const string& ifname,
 	const string& vifname,
@@ -135,7 +135,7 @@ public:
 	bool& point_to_point,
 	bool& multicast);
 
-    XrlCmdError ifmgr_0_1_get_vif_flags6(
+    XrlCmdError ifmgr_0_1_get_address_flags6(
 	// Input values,
 	const string& ifname,
 	const string& vifname,

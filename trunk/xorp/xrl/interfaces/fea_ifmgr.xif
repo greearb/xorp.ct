@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.2 2003/01/08 21:59:16 hodson Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -13,22 +13,22 @@ interface ifmgr/0.1 {
 
 	get_configured_vif_names ? ifname:txt -> vifs:list
 
-	get_vif_flags4 ? ifname:txt					      \
-		       & vif:txt					      \
-		       & address:ipv4					      \
-		      -> enabled:bool					      \
-		       & broadcast:bool					      \
-		       & loopback:bool					      \
-		       & point_to_point:bool				      \
-		       & multicast:bool 				      
+	get_address_flags4 ? ifname:txt					      \
+			   & vif:txt					      \
+			   & address:ipv4				      \
+			  -> enabled:bool				      \
+			   & broadcast:bool				      \
+			   & loopback:bool				      \
+			   & point_to_point:bool			      \
+			   & multicast:bool 				      
 
-	get_vif_flags6 ? ifname:txt					      \
-		       & vif:txt 					      \
-		       & address:ipv6					      \
-		      -> enabled:bool 					      \
-		       & loopback:bool					      \
-		       & point_to_point:bool				      \
-		       & multicast:bool
+	get_address_flags6 ? ifname:txt					      \
+			   & vif:txt 					      \
+			   & address:ipv6				      \
+			  -> enabled:bool 				      \
+			   & loopback:bool				      \
+			   & point_to_point:bool			      \
+			   & multicast:bool
 
 	get_all_vif_addresses4 ? ifname:txt 				      \
 			       & vif:txt				      \

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.2 2003/02/24 15:54:56 hodson Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.3 2003/03/14 23:49:10 hodson Exp $ */
 
 interfaces {
   interface @: text {
@@ -80,13 +80,13 @@ interfaces {
 	  %get: xrl "fea/ifmgr/0.1/get_endpoint4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->endpoint:ipv4=$(@)";
 	}
 	multicast-capable {
-	  %get: xrl "fea/ifmgr/0.1/get_vif_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
+	  %get: xrl "fea/ifmgr/0.1/get_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
 	}
 	point-to-point {
-	  %get: xrl "fea/ifmgr/0.1/get_vif_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
+	  %get: xrl "fea/ifmgr/0.1/get_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
 	}
 	loopback {
-	  %get: xrl "fea/ifmgr/0.1/get_vif_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
+	  %get: xrl "fea/ifmgr/0.1/get_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
 	}
       }
       address @: ipv6 {
@@ -106,13 +106,13 @@ interfaces {
 	  %get: xrl "fea/ifmgr/0.1/get_endpoint6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->endpoint:ipv6=$(@)";
 	}
 	multicast-capable {
-	  %get: xrl "fea/ifmgr/0.1/get_vif_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
+	  %get: xrl "fea/ifmgr/0.1/get_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
 	}
 	point-to-point {
-	  %get: xrl "fea/ifmgr/0.1/get_vif_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
+	  %get: xrl "fea/ifmgr/0.1/get_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
 	}
 	loopback {
-	  %get: xrl "fea/ifmgr/0.1/get_vif_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
+	  %get: xrl "fea/ifmgr/0.1/get_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
 	}
       }
     }

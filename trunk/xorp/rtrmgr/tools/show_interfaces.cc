@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.3 2003/03/10 23:21:04 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.4 2003/03/14 23:20:10 hodson Exp $"
 
 #include "rtrmgr/rtrmgr_module.h"
 #include "config.h"
@@ -185,8 +185,8 @@ InterfaceMonitor::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* al
 		const bool*, const bool*, const bool*, const bool*>::RefPtr cb;
 	    cb = callback(this, &InterfaceMonitor::get_flags4_done,
 			  ifname, vifname, addr);
-	    _ifmgr_client.send_get_vif_flags4("fea", ifname, vifname, 
-					      addr, cb);
+	    _ifmgr_client.send_get_address_flags4("fea", ifname, vifname, 
+						  addr, cb);
 	    _flags_remaining++;
 	}
 	_vifs_remaining--;
