@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.22 2004/05/15 11:06:57 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.23 2004/05/15 15:12:16 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -33,7 +33,7 @@
 template<class A>
 DumpTable<A>::DumpTable(string table_name,
 			const PeerHandler *peer,
-			const list <const PeerHandler*>& peer_list,
+			const list <const PeerTableInfo<A>*>& peer_list,
 			BGPRouteTable<A> *parent_table,
 			Safi safi)
     : BGPRouteTable<A>("DumpTable-" + table_name, safi),

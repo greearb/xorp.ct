@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.4 2003/11/04 02:27:19 mjh Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.5 2004/05/15 11:06:56 mjh Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -21,6 +21,9 @@
 
 template<class A>
 class RouteQueueEntry;
+
+template<class A>
+class BGPRouteTable;
 
 template<class A>
 class PeerTableInfo {

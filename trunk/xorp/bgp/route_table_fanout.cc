@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.32 2004/05/15 11:06:57 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.33 2004/05/15 15:12:16 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -441,10 +441,10 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 
     typename NextTableMap<A>::iterator i;
     PeerTableInfo<A> *peer_info = NULL;
-    list <const PeerHandler*> peer_list;
+    list <const PeerTableInfo<A>*> peer_list;
     for (i = _next_tables.begin(); i != _next_tables.end(); i++) {
 	if (i.second().peer_handler() != NULL)
-	    peer_list.push_back(i.second().peer_handler());
+	    peer_list.push_back(&(i.second()));
 	if (i.first() == child_to_dump_to)
 	    peer_info = &(i.second());
     }
@@ -460,10 +460,6 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
     dump_table->set_next_table(child_to_dump_to);
     child_to_dump_to->set_parent(dump_table);
     replace_next_table(child_to_dump_to, dump_table);
-#ifdef NOTDEF
-    remove_next_table(child_to_dump_to);
-    add_next_table(dump_table, peer_handler, peer_info->genid);
-#endif
 
     //find the new peer_info (we just deleted the old one)
     peer_info = NULL;

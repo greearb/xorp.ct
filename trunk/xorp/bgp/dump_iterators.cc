@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.16 2004/05/08 13:05:42 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.17 2004/05/08 16:46:32 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -71,17 +71,17 @@ PeerDumpState<A>::~PeerDumpState()
 
 template <class A>
 DumpIterator<A>::DumpIterator(const PeerHandler* peer,
-			 const list <const PeerHandler*>& peers_to_dump)
+			 const list <const PeerTableInfo<A>*>& peers_to_dump)
 {
     debug_msg("peer: %p\n", peer);
 
     _peer = peer;
-    list <const PeerHandler*>::const_iterator i;
+    list <const PeerTableInfo<A>*>::const_iterator i;
     int ctr = 0;
     for (i = peers_to_dump.begin(); i != peers_to_dump.end(); i++) {
-	if (*i != peer) {
+	if ((*i)->peer_handler() != peer) {
 	    debug_msg("adding peer %p to dump list\n", *i);
-	    _peers_to_dump.push_back(*i);
+	    _peers_to_dump.push_back(**i);
 	    ctr++;
 	}
     }
@@ -106,7 +106,6 @@ void
 DumpIterator<A>::route_dump(const InternalMessage<A> &rtmsg)
 {
     _routes_dumped_on_current_peer = true;
-    _current_peers_genid = rtmsg.genid();
     _last_dumped_net = rtmsg.net();
 }
 
@@ -116,8 +115,8 @@ DumpIterator<A>::is_valid() const
 {
     // stupid hack to get around inability to compare const and
     // non-const iterators
-    list <const PeerHandler*> *peer_lst =
-	const_cast<list <const PeerHandler*> *>(&_peers_to_dump);
+    list <PeerTableInfo<A> > *peer_lst =
+	const_cast<list <PeerTableInfo<A> > *>(&_peers_to_dump);
 
     if (_current_peer == peer_lst->end()) {
 	debug_msg("Iterator is not valid\n");
@@ -133,8 +132,9 @@ DumpIterator<A>::next_peer()
 {
     // record the genid of peer we just finished dumping
     if (_routes_dumped_on_current_peer)
-	_dumped_peers.push_back(PeerDumpState<A>(*_current_peer, 
-						 _current_peers_genid));
+	_dumped_peers.push_back(
+              PeerDumpState<A>(_current_peer->peer_handler(), 
+			       _current_peer->genid()));
 
     _current_peer++;
     // Make sure the iterator no longer points at a trie that may go away.
@@ -152,7 +152,7 @@ void
 DumpIterator<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
 {
     debug_msg("peering_is_down %p genid %d\n", peer, genid);
-    _peers_to_dump.push_back(peer);
+    _peers_to_dump.push_front(PeerTableInfo<A>(NULL, peer, genid));
     _downed_peers.push_back(PeerDumpState<A>(peer, genid));
 }
 
@@ -160,7 +160,8 @@ template <class A>
 void
 DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 {
-    debug_msg("peering_went_down %p current_peer %p\n", peer, *_current_peer);
+    debug_msg("peering_went_down %p current_peer %p\n", peer, 
+	      _current_peer->peer_handler());
     if (_current_peer == _peers_to_dump.end()
 	&& waiting_for_deletion_completion()) {
 	debug_msg("waiting for deletion completion\n");
@@ -168,7 +169,7 @@ DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 	return;
     }
 
-    if (*_current_peer == peer) {
+    if (_current_peer->peer_handler() == peer) {
 	/* The peer we're dumping went down */
 	if (_routes_dumped_on_current_peer) {
 	    /* This is a pain because we're going to get deletes for all the
@@ -196,13 +197,13 @@ DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 	/*skip to the next peer*/
 	next_peer();
     } else {
-	list <const PeerHandler*>::iterator pi;
+	list <PeerTableInfo<A> >::iterator pi;
 	for (pi = _current_peer; pi != _peers_to_dump.end(); pi++) {
-	    if (*pi == peer) {
+	    if (pi->peer_handler() == peer) {
 		/* the peer that went down hasn't been dumped yet */
 		/* move it up the list so we don't dump it later */
+		_peers_to_dump.insert(_current_peer, *pi);
 		_peers_to_dump.erase(pi);
-		_peers_to_dump.insert(_current_peer, peer);
 		/* add it to the downed peers list so we prevent
                    unnecessary deletions for this genid getting
                    though. */
@@ -280,9 +281,9 @@ DumpIterator<A>::peering_came_up(const PeerHandler *peer, uint32_t genid)
 
     //sanity check.  If the peering came up, and it wasn't in the
     //downed_peers list, the we must have never have heard of it,
-    list <const PeerHandler*>::iterator pi;
+    list <PeerTableInfo<A> >::iterator pi;
     for (pi = _current_peer; pi != _peers_to_dump.end(); pi++) {
-	XLOG_ASSERT(*pi != peer);
+	XLOG_ASSERT(pi->peer_handler() != peer);
     }
     
     // this peer is a new one for us, so record it.
@@ -357,7 +358,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	debug_msg("OTHER\n");
     }
 
-    if (origin_peer == *_current_peer) {
+    if (origin_peer == _current_peer->peer_handler()) {
 	cp(6);
 	debug_msg("it's the current peer\n");
 	/* the change is from the peer we're currently dumping */
@@ -373,12 +374,12 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 		      net.str().c_str(), _last_dumped_net.str().c_str());
 	    /*we've already dumped this route*/
 
-	    if (_current_peers_genid != genid) {
+	    if (_current_peer->genid() != genid) {
 		cp(9);
 		// the route comes from an old version of the Rib,
 		// probably from a DeletionTable.
 		debug_msg("Route %s genid %d, expected genid %d\n",
-			  net.str().c_str(), _current_peers_genid, genid);
+			  net.str().c_str(), _current_peer->genid(), genid);
 		return false;
 	    }
 	    cp(10);
@@ -391,10 +392,10 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    return false;
 	}
     }
-    list <const PeerHandler*>::const_iterator pi;
+    list <PeerTableInfo<A> >::const_iterator pi;
     for (pi = _peers_to_dump.begin(); pi != _current_peer; pi++) {
 	cp(12);
-	if (*pi == origin_peer) {
+	if (pi->peer_handler() == origin_peer) {
 	    cp(13);
 	    /* this peer has already finished being dumped */
 	    /* we need to check whether the peering went down while we
@@ -511,7 +512,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
     cp(32);
     for (pi == _current_peer; pi != _peers_to_dump.end(); pi++) {
 	cp(33);
-	if (*pi == origin_peer) {
+	if (pi->peer_handler() == origin_peer) {
 	    cp(34); 
 	    /* we haven't dumped this peer yet */
 	    debug_msg("haven't dumped this peer yet\n");

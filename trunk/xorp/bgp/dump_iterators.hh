@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.7 2004/03/03 04:00:51 atanu Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.8 2004/05/07 11:45:06 mjh Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -22,6 +22,7 @@
 #include "path_attribute.hh"
 #include "bgp_trie.hh"
 #include "route_queue.hh"
+#include "peer_route_pair.hh"
 
 class BGPPlumbing;
 class PeerHandler;
@@ -56,10 +57,12 @@ template <class A>
 class DumpIterator {
 public:
     DumpIterator(const PeerHandler* peer,
-		 const list <const PeerHandler*>& peers_to_dump);
+		 const list <const PeerTableInfo<A>*>& peers_to_dump);
     string str() const;
     void route_dump(const InternalMessage<A> &rtmsg);
-    const PeerHandler* current_peer() const { return *_current_peer; }
+    const PeerHandler* current_peer() const { 
+	return _current_peer->peer_handler(); 
+    }
     const PeerHandler* peer_to_dump_to() const { return _peer; }
     bool is_valid() const;
     bool route_iterator_is_valid() const { return _route_iterator_is_valid; }
@@ -110,9 +113,8 @@ public:
 private:
     BGPPlumbing *_plumbing;
     const PeerHandler *_peer;
-    list <const PeerHandler*> _peers_to_dump;
-    list <const PeerHandler*>::iterator _current_peer;
-    uint32_t _current_peers_genid;
+    list <PeerTableInfo<A> > _peers_to_dump;
+    list <PeerTableInfo<A> >::iterator _current_peer;
     bool _route_iterator_is_valid;
     typename BgpTrie<A>::iterator _route_iterator;
 

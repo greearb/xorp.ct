@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.22 2004/03/04 03:23:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.23 2004/05/13 20:31:46 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -86,8 +86,10 @@ test_ribin_dump(TestInfo& /*info*/)
     delete msg;
     sr2->unref();
 
-    list <const PeerHandler*> peers_to_dump;
-    peers_to_dump.push_back(&handler1);
+    list <const PeerTableInfo<IPv4>*> peers_to_dump;
+    PeerTableInfo<IPv4>* pti = new PeerTableInfo<IPv4>(NULL, &handler1, 
+						       ribin->genid());
+    peers_to_dump.push_back(pti);
     DumpIterator<IPv4>* dump_iter 
 	= new DumpIterator<IPv4>(&handler2, peers_to_dump);
 
@@ -159,6 +161,7 @@ test_ribin_dump(TestInfo& /*info*/)
     // Delete the dump iterator last to verify it no longer has any
     // references to the RIB-IN.
     delete dump_iter;
+    delete pti;
 
     return validate_reference_file("/test_ribin_dump.reference", filename,
 				   "RIBIN DUMP");
@@ -396,8 +399,10 @@ test_ribin(TestInfo& /*info*/)
 
     debug_table->write_comment("NOW DO THE ROUTE DUMP");
 
-    list <const PeerHandler*> peers_to_dump;
-    peers_to_dump.push_back(&handler1);
+    list <const PeerTableInfo<IPv4>*> peers_to_dump;
+    PeerTableInfo<IPv4>* pti = new PeerTableInfo<IPv4>(NULL, &handler1, 
+						       ribin->genid());
+    peers_to_dump.push_back(pti);
     DumpIterator<IPv4>* dump_iter 
 	= new DumpIterator<IPv4>(&handler2, peers_to_dump);
     while (ribin->dump_next_route(*dump_iter)) {
@@ -406,6 +411,7 @@ test_ribin(TestInfo& /*info*/)
 	}
     }
     delete dump_iter;
+    delete pti;
 
     debug_table->write_separator();
 

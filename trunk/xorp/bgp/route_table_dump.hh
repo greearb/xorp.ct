@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.11 2004/05/14 21:34:57 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.12 2004/05/15 15:12:16 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -20,6 +20,7 @@
 #include "route_table_base.hh"
 #include "peer_handler.hh"
 #include "bgp_trie.hh"
+#include "peer_route_pair.hh"
 
 class EventLoop;
 
@@ -28,7 +29,7 @@ class DumpTable : public BGPRouteTable<A>  {
 public:
     DumpTable(string tablename,
 	      const PeerHandler *peer,
-	      const list <const PeerHandler*>& peer_list,
+	      const list <const PeerTableInfo<A>*>& peer_list,
 	      BGPRouteTable<A> *parent,
 	      Safi safi);
     int add_route(const InternalMessage<A> &rtmsg,
