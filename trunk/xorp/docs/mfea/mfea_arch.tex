@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
+% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.2 2003/03/07 07:08:14 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -148,8 +148,8 @@ the same name. The main components are briefly described below:
   (\eg as part of a virtual multicast router).
   Typically, there would be a single MfeaNode per multicast router.
 
-  \item {\bf MfeaVif:} MFEA-specific virtual interface that is used to keep
-  state per interface.
+  \item {\bf MfeaVif:} MFEA-specific virtual (network) interface that is used
+  to keep state per network interface.
 
   \item {\bf MfeaConfig:} contains MFEA-specific configuration.
 
@@ -313,7 +313,7 @@ the following files:
   \item \verb=libproto/proto_unit.hh=
 \end{itemize}
 
-By default, MfeaNode is disabled; therefore, on startup it must be
+By default, each MfeaVif is disabled; therefore, on startup it must be
 enabled explicitly.
 
 
