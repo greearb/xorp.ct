@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.cmds,v 1.2 2004/06/02 02:38:42 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.cmds,v 1.3 2004/06/03 00:41:33 hodson Exp $ */
 
 show rip {
      %command: "" %help: HELP;
@@ -28,5 +28,17 @@ show rip statistics all {
      %command: "rip/tools/show_stats $2" %help: HELP;
      %module: rip;
      %tag: HELP "Show RIP statistics for all addresses";
+}
+
+show rip status $(protocols.rip.interface.*) $(protocols.rip.interface.*.vif.*) $(protocols.rip.interface.*.vif.*.address.*) {
+     %command: "rip/tools/show_stats -b $2 $4 $5 $6" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show RIP status on specified address";
+}
+
+show rip status all {
+     %command: "rip/tools/show_stats -b $2" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show RIP status for all addresses";
 }
 
