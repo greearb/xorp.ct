@@ -55,6 +55,7 @@ void
 deinit_bgp4_mib_1657 (void)
 {
     BgpMib & bgp_mib = BgpMib::the_instance();
+    deinit_bgp4_mib_1657_bgp4pathattrtable();
     DEBUGMSGTL((bgp_mib.name(), "Unloading...\n"));
 }
 

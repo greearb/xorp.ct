@@ -255,7 +255,7 @@ test2()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
     
-    NOBLOCK=true coord peer1 send dump mrtd update $TFILE 5 
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE  50
 
     peer_stationary_state peer1
 

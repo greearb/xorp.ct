@@ -54,6 +54,7 @@ typedef struct bgp4PathAttrTable_context_s {
  * function declarations
  */
 void init_bgp4_mib_1657_bgp4pathattrtable(void);
+void deinit_bgp4_mib_1657_bgp4pathattrtable(void);
 void initialize_table_bgp4PathAttrTable(void);
 const bgp4PathAttrTable_context * bgp4PathAttrTable_get_by_idx(netsnmp_index *);
 const bgp4PathAttrTable_context * bgp4PathAttrTable_get_by_idx_rs(netsnmp_index *,

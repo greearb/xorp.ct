@@ -40,6 +40,7 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgp4pathattrtable.hh"
 
+// Local classes and typedefs
 class UpdateManager
 {
 public:
@@ -48,6 +49,7 @@ public:
     enum Status { RESTING = 0, UPDATING, CLEANING } status;
 };
 
+// Local variables
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 static     XorpTimer * pLocalUpdateTimer = NULL;
@@ -124,10 +126,8 @@ static void local_route_table_update()
 	    CONTAINER_FOR_EACH(cb.container, rm_old_routes, NULL);
 	    update.status = UpdateManager::RESTING;
 	    // schedule next update
-	    // XXX: xorp_if_mib should intercept callbacks for modules that are
-	    // no longer loaded!!
-	    // *pLocalUpdateTimer = eventloop.new_oneoff_after_ms (
-	    // 	UPDATE_REST_INTERVAL_ms, tcb);
+	    *pLocalUpdateTimer = eventloop.new_oneoff_after_ms (
+	    	UPDATE_REST_INTERVAL_ms, tcb);
 	    break;
 	}
 	default:
@@ -135,8 +135,8 @@ static void local_route_table_update()
     }
 }
 
-/************************************************************
- * Initializes the bgp4PathAttrTable module
+/*********************************************************************
+ * init_bgp4_mib_1657_bgp4pathattrtable - Initialization of bgp4PathAttrTable 
  */
 void
 init_bgp4_mib_1657_bgp4pathattrtable(void)
@@ -147,57 +147,29 @@ init_bgp4_mib_1657_bgp4pathattrtable(void)
     // and schedule the first update
     pLocalUpdateTimer = new XorpTimer;
     tcb = callback(local_route_table_update);
-    *pLocalUpdateTimer = eventloop.new_oneoff_after_ms (
-	    UPDATE_REST_INTERVAL_ms, tcb);
+    *pLocalUpdateTimer = eventloop.new_oneoff_after_ms(0, tcb);
 }
 
-#if 0
-/************************************************************
- * the *_row_copy routine
+/*********************************************************************
+ * deinit_bgp4_mib_1657_bgp4pathattrtable - cleanup before unloading
  */
-static int bgp4PathAttrTable_row_copy(bgp4PathAttrTable_context * dst,
-                         bgp4PathAttrTable_context * src)
+void
+deinit_bgp4_mib_1657_bgp4pathattrtable(void)
 {
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void**)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
+    if (pLocalUpdateTimer != NULL) {
+	DEBUGMSGTL((BgpMib::the_instance().name(),
+	    "unscheduling bgp4PathAttrTable update timer...\n"));
+	pLocalUpdateTimer->unschedule();
+	delete pLocalUpdateTimer;
+	pLocalUpdateTimer = NULL;
     }
-    dst->index.len = src->index.len;
-    
-
-    /*
-     * copy components into the context structure
-     */
-    dst->bgp4PathAttrPeer = src->bgp4PathAttrPeer;
-    dst->bgp4PathAttrIpAddrPrefixLen = src->bgp4PathAttrIpAddrPrefixLen;
-    dst->bgp4PathAttrIpAddrPrefix = src->bgp4PathAttrIpAddrPrefix;
-    dst->bgp4PathAttrOrigin = src->bgp4PathAttrOrigin;
-    dst->bgp4PathAttrASPathSegment  = src->bgp4PathAttrASPathSegment;
-    dst->bgp4PathAttrNextHop = src->bgp4PathAttrNextHop;
-    dst->bgp4PathAttrMultiExitDisc = src->bgp4PathAttrMultiExitDisc;
-    dst->bgp4PathAttrLocalPref = src->bgp4PathAttrLocalPref;
-    dst->bgp4PathAttrAtomicAggregate = src->bgp4PathAttrAtomicAggregate;
-    dst->bgp4PathAttrAggregatorAS = src->bgp4PathAttrAggregatorAS;
-    dst->bgp4PathAttrAggregatorAddr = src->bgp4PathAttrAggregatorAddr;
-    dst->bgp4PathAttrCalcLocalPref = src->bgp4PathAttrCalcLocalPref;
-    dst->bgp4PathAttrBest = src->bgp4PathAttrBest;
-    dst->bgp4PathAttrUnknown = src->bgp4PathAttrUnknown;
-    return 0;
 }
-#endif
 
-/************************************************************
+/*********************************************************************
+ * initialize_table_bgp4PathAttrTable - initialize table descriptor
  *
- * Initialize the bgp4PathAttrTable table by defining its contents and how it's structured
+ * Initialize the bgp4PathAttrTable table by defining its contents and how it's
+ * structured
  */
 void
 initialize_table_bgp4PathAttrTable(void)
@@ -410,11 +382,16 @@ bgp4PathAttrTable_create_row( netsnmp_index* hdr)
 }
 
 
-/*
- * the *_extract_index routine
- */
+/****************************************************************************
+ * bgp4PathAttrTable_extract_index - extract the row indices 
+ *
+ * This function extracts the indices from a netsnmp_index structure, and
+ * copies them into the corresponding elements in the provided row
+ *
+ */ 
 int
-bgp4PathAttrTable_extract_index( bgp4PathAttrTable_context * ctx, netsnmp_index * hdr )
+bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx, 
+				netsnmp_index * hdr )
 {
     /*
      * temporary local storage for extracting oid index
@@ -472,14 +449,6 @@ bgp4PathAttrTable_extract_index( bgp4PathAttrTable_context * ctx, netsnmp_index 
    
 	ctx->bgp4PathAttrPeer = 
 	    ntohl(*var_bgp4PathAttrPeer.val.integer);
-   
-       /*
-	* TODO: check index for valid values. For EXAMPLE:
-	*
-	* if ( XXX_check_ip( *var_bgp4PathAttrPeer.val.integer ) ) {
-	*    err = -1;
-	* }
-	*/
     }
 
     // parsing may have allocated memory. free it.
@@ -489,6 +458,9 @@ bgp4PathAttrTable_extract_index( bgp4PathAttrTable_context * ctx, netsnmp_index 
 }
 
 
+/****************************************************************************
+ * get_v4_route_list_start_done - XRL completion callback routine 
+ */ 
 static void
 get_v4_route_list_start_done(
     const XrlError& e,
@@ -499,13 +471,16 @@ get_v4_route_list_start_done(
 	update.list_token = (*token);
 	local_route_table_update();
         DEBUGMSGTL((BgpMib::the_instance().name(),
-	    "receiving bgp4PathAttrTable... %ud %ud\n", *token));
+	    "receiving bgp4PathAttrTable... %ud\n", *token));
     } else {
 	*pLocalUpdateTimer = eventloop.new_oneoff_after_ms (
 	    UPDATE_REST_INTERVAL_ms, tcb);
     }
 }
 
+/****************************************************************************
+ * get_v4_route_list_next_done - XRL completion callback routine 
+ */ 
 static void
 get_v4_route_list_next_done(const XrlError& e,
                             const IPv4* peer_id,
@@ -609,6 +584,12 @@ get_v4_route_list_next_done(const XrlError& e,
     local_route_table_update();
 }
 
+/****************************************************************************
+ * rm_old_routes - remove old routes from the local table
+ *
+ * This function compares the signature on the row, with the one from the most
+ * recent update, and deletes the row if they don't match
+ */ 
 static void 
 rm_old_routes (void * r, void *) 
 {
