@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.21 2003/10/24 20:51:06 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.22 2003/10/28 19:36:27 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -685,6 +685,15 @@ public:
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	proto);
+
+    //
+    // Socket Locator interface(s)
+    //
+    XrlCmdError socket4_locator_0_1_find_socket_server_for_addr(
+	// Input value
+	const IPv4& addr,
+	// Output value
+	string&	xrl_target);
 
 private:
     XrlFtiTransactionManager	_xftm;

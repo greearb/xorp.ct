@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.28 2003/10/17 22:26:12 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.29 2003/11/06 17:12:20 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,15 +10,21 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
 
 # -- Test Programs and Scripts
-TESTS			 = test_rawsock4 test_ifmanager_transaction
+TESTS			 = test_rawsock4
+TESTS			+= test_ifmanager_transaction
+TESTS			+= test_xrl_sockets4_udp.sh
 
-test_scripts		 = test_add_route.sh test_config_interface.sh
+test_scripts		 = test_add_route.sh
+test_scripts		+= test_config_interface.sh
+test_scripts		+= test_xrl_sockets4_udp.sh
 
 # -- No-install Programs and Scripts
 noinst_PROGRAMS 	 = demo_fea_ifmgr_client
+noinst_PROGRAMS		+= test_ifmanager_transaction
 noinst_PROGRAMS 	+= test_mfea
 noinst_PROGRAMS		+= test_rawsock4
-noinst_PROGRAMS		+= test_ifmanager_transaction
+noinst_PROGRAMS		+= test_xrl_sockets4_udp
+
 noinst_SCRIPTS		 = $(test_scripts)
 
 # -- No-install Libraries
@@ -120,6 +126,24 @@ test_ifmanager_transaction_LDADD    = $(top_builddir)/libxorp/libxorp.a
 test_rawsock4_SOURCES	 = test_rawsock4.cc rawsock4.cc
 test_rawsock4_LDADD	 = $(top_builddir)/libxorp/libxorp.a
 
+# -- Sources and Linkage for test_xrl_sockets
+test_xrl_sockets4_udp_SOURCES  = test_xrl_sockets4_udp.cc
+test_xrl_sockets4_udp_SOURCES += addr_table.hh
+test_xrl_sockets4_udp_SOURCES += xrl_socket_cmds.hh
+test_xrl_sockets4_udp_SOURCES += xrl_socket_server.hh
+test_xrl_sockets4_udp_SOURCES += addr_table.cc
+test_xrl_sockets4_udp_SOURCES += xrl_socket_cmds.cc
+test_xrl_sockets4_udp_SOURCES += xrl_socket_server.cc
+
+test_xrl_sockets4_udp_LDADD    = $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/targets/libsocketserverbase.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/targets/libtestsocket4.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/libxipc/libxipc.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/libcomm/libcomm.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/libxorp/libxorp.a
+
 # -- Sources and Linkage for demo_fea_ifmgr_client
 demo_fea_ifmgr_client_SOURCES  = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a
@@ -131,6 +155,7 @@ demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 # -- Library Sources
 libfea_a_SOURCES	 = fea_module.h
 libfea_a_SOURCES	+= mfea_module.h
+libfea_a_SOURCES	+= addr_table.hh
 libfea_a_SOURCES	+= fte.hh
 libfea_a_SOURCES	+= fti.hh
 libfea_a_SOURCES	+= fti_transaction.hh
@@ -142,6 +167,7 @@ libfea_a_SOURCES	+= fticonfig_table_get.hh
 libfea_a_SOURCES	+= fticonfig_table_observer.hh
 libfea_a_SOURCES	+= fticonfig_table_set.hh
 libfea_a_SOURCES	+= ifconfig.hh
+libfea_a_SOURCES	+= ifconfig_addr_table.hh
 libfea_a_SOURCES	+= ifconfig_get.hh
 libfea_a_SOURCES	+= ifconfig_observer.hh
 libfea_a_SOURCES	+= ifconfig_set.hh
@@ -169,8 +195,11 @@ libfea_a_SOURCES	+= xrl_ifupdate.hh
 libfea_a_SOURCES	+= xrl_mfea_node.hh
 libfea_a_SOURCES	+= xrl_mfea_vif_manager.hh
 libfea_a_SOURCES	+= xrl_rawsock4.hh
+libfea_a_SOURCES	+= xrl_socket_cmds.hh
+libfea_a_SOURCES	+= xrl_socket_server.hh
 libfea_a_SOURCES	+= xrl_target.hh
 
+libfea_a_SOURCES	+= addr_table.cc
 libfea_a_SOURCES	+= fti_transaction.cc
 libfea_a_SOURCES	+= fticonfig.cc
 libfea_a_SOURCES	+= fticonfig_entry_get.cc
@@ -202,6 +231,7 @@ libfea_a_SOURCES	+= fticonfig_table_set_dummy.cc
 libfea_a_SOURCES	+= fticonfig_table_set_netlink.cc
 libfea_a_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_a_SOURCES	+= ifconfig.cc
+libfea_a_SOURCES	+= ifconfig_addr_table.cc
 libfea_a_SOURCES	+= ifconfig_get.cc
 libfea_a_SOURCES	+= ifconfig_get_dummy.cc
 libfea_a_SOURCES	+= ifconfig_get_getifaddrs.cc
@@ -242,6 +272,8 @@ libfea_a_SOURCES	+= xrl_ifupdate.cc
 libfea_a_SOURCES	+= xrl_mfea_node.cc
 libfea_a_SOURCES	+= xrl_mfea_vif_manager.cc
 libfea_a_SOURCES	+= xrl_rawsock4.cc
+libfea_a_SOURCES	+= xrl_socket_cmds.cc
+libfea_a_SOURCES	+= xrl_socket_server.cc
 libfea_a_SOURCES	+= xrl_target.cc
 
 # -- Extra files and directories to add to the distribution

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.31 2003/10/28 19:52:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.32 2003/12/10 22:17:31 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -59,7 +59,7 @@ XrlFeaTarget::common_0_1_get_version(
 
 XrlCmdError
 XrlFeaTarget::common_0_1_get_status(
-				    // Output values, 
+				    // Output values,
 				    uint32_t& status,
 				    string&	reason)
 {
@@ -101,11 +101,11 @@ XrlFeaTarget::common_0_1_get_status(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlFeaTarget::common_0_1_shutdown()
 {
     _done = true;
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -115,7 +115,7 @@ XrlFeaTarget::ifmgr_0_1_get_system_interface_names(
 						XrlAtomList&	ifnames)
 {
     const IfTree& it = _xifmgr.ifconfig().pull_config();
-    
+
     for (IfTree::IfMap::const_iterator ii = it.ifs().begin();
 	 ii != it.ifs().end(); ++ii) {
 	ifnames.append(XrlAtom(ii->second.ifname()));
@@ -179,89 +179,89 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_system_vif_flags(
-    // Input values, 
-    const string&	ifname, 
-    const string&	vif, 
-    // Output values, 
-    bool&		enabled, 
-    bool&		broadcast, 
-    bool&		loopback, 
-    bool&		point_to_point, 
+    // Input values,
+    const string&	ifname,
+    const string&	vif,
+    // Output values,
+    bool&		enabled,
+    bool&		broadcast,
+    bool&		loopback,
+    bool&		point_to_point,
     bool&		multicast)
 {
     const IfTreeVif* fv = 0;
     XrlCmdError e = _xifmgr.pull_config_get_vif(ifname, vif, fv);
     if (e != XrlCmdError::OKAY())
 	return e;
-    
+
     enabled = fv->enabled();
     broadcast = fv->broadcast();
     loopback = fv->loopback();
     point_to_point = fv->point_to_point();
     multicast = fv->multicast();
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
-    // Input values, 
-    const string&	ifname, 
-    const string&	vif, 
-    // Output values, 
-    bool&		enabled, 
-    bool&		broadcast, 
-    bool&		loopback, 
-    bool&		point_to_point, 
+    // Input values,
+    const string&	ifname,
+    const string&	vif,
+    // Output values,
+    bool&		enabled,
+    bool&		broadcast,
+    bool&		loopback,
+    bool&		point_to_point,
     bool&		multicast)
 {
     const IfTreeVif* fv = 0;
     XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
     if (e != XrlCmdError::OKAY())
 	return e;
-    
+
     enabled = fv->enabled();
     broadcast = fv->broadcast();
     loopback = fv->loopback();
     point_to_point = fv->point_to_point();
     multicast = fv->multicast();
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_system_vif_pif_index(
-    // Input values, 
-    const string&	ifname, 
-    const string&	vif, 
-    // Output values, 
+    // Input values,
+    const string&	ifname,
+    const string&	vif,
+    // Output values,
     uint32_t&		pif_index)
 {
     const IfTreeVif* fv = 0;
     XrlCmdError e = _xifmgr.pull_config_get_vif(ifname, vif, fv);
     if (e != XrlCmdError::OKAY())
 	return e;
-    
+
     pif_index = fv->pif_index();
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
-    // Input values, 
-    const string&	ifname, 
-    const string&	vif, 
-    // Output values, 
+    // Input values,
+    const string&	ifname,
+    const string&	vif,
+    // Output values,
     uint32_t&		pif_index)
 {
     const IfTreeVif* fv = 0;
     XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
     if (e != XrlCmdError::OKAY())
 	return e;
-    
+
     pif_index = fv->pif_index();
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -1193,7 +1193,7 @@ XrlFeaTarget::fti_0_2_add_entry4(
 {
     // TODO: use those arguments
     UNUSED(protocol_origin);
-    
+
     FtiTransactionManager::Operation op(
 	new FtiAddEntry4(_xftm.ftic(), dst, gateway, ifname, vifname, metric,
 			 admin_distance)
@@ -1215,7 +1215,7 @@ XrlFeaTarget::fti_0_2_add_entry6(
 {
     // TODO: use those arguments
     UNUSED(protocol_origin);
-    
+
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
@@ -1412,73 +1412,73 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_have_ipv4(
-	// Output values, 
+	// Output values,
 	bool&	result)
 {
     result = _xftm.ftic().have_ipv4();
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_have_ipv6(
-	// Output values, 
+	// Output values,
 	bool&	result)
 {
     result = _xftm.ftic().have_ipv6();
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
-	// Output values, 
+	// Output values,
 	bool&	enabled)
 {
     string error_msg;
-    
+
     if (_xftm.ftic().unicast_forwarding_enabled4(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
-	// Output values, 
+	// Output values,
 	bool&	enabled)
 {
     string error_msg;
-    
+
     if (_xftm.ftic().unicast_forwarding_enabled6(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
-	// Input values, 
+	// Input values,
 	const bool&	enabled)
 {
     string error_msg;
-    
+
     if (_xftm.ftic().set_unicast_forwarding_enabled4(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
-	// Input values, 
+	// Input values,
 	const bool&	enabled)
 {
     string error_msg;
-    
+
     if (_xftm.ftic().set_unicast_forwarding_enabled6(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -1548,4 +1548,15 @@ XrlFeaTarget::raw_packet_0_1_unregister_vif_receiver(
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
     }
     return _xrsm->unregister_vif_receiver(router_name, ifname, vifname, proto);
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
+							      const IPv4& addr,
+							      string&	  svr
+							      )
+{
+    UNUSED(addr);
+    UNUSED(svr);
+    return XrlCmdError::COMMAND_FAILED("Not supported.");
 }
