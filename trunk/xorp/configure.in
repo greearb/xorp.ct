@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.41 2003/05/31 07:34:31 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.42 2003/05/31 15:22:32 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1214,7 +1214,6 @@ AC_OUTPUT(
 	libproto/Makefile
 	libxipc/Makefile
 	libxorp/Makefile
-	mfea/Makefile
 	mibs/Makefile
         mibs/tests/Makefile
 	mld6igmp/Makefile 

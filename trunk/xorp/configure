@@ -8315,7 +8315,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile fea/Makefile libcomm/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mfea/Makefile mibs/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh"
+ac_config_files="$ac_config_files Makefile bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile fea/Makefile libcomm/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh"
 ac_config_commands="$ac_config_commands default"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8824,7 +8824,6 @@ do
   "libproto/Makefile" ) CONFIG_FILES="$CONFIG_FILES libproto/Makefile" ;;
   "libxipc/Makefile" ) CONFIG_FILES="$CONFIG_FILES libxipc/Makefile" ;;
   "libxorp/Makefile" ) CONFIG_FILES="$CONFIG_FILES libxorp/Makefile" ;;
-  "mfea/Makefile" ) CONFIG_FILES="$CONFIG_FILES mfea/Makefile" ;;
   "mibs/Makefile" ) CONFIG_FILES="$CONFIG_FILES mibs/Makefile" ;;
   "mibs/tests/Makefile" ) CONFIG_FILES="$CONFIG_FILES mibs/tests/Makefile" ;;
   "mld6igmp/Makefile" ) CONFIG_FILES="$CONFIG_FILES mld6igmp/Makefile" ;;
