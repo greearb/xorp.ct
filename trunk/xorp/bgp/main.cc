@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.31 2003/08/27 22:36:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.32 2003/09/12 17:28:13 hodson Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -47,7 +47,7 @@ BGPMain::BGPMain()
     {
 	bool timed_out = false;
 	XorpTimer t = eventloop().set_flag_after_ms(10000, &timed_out);
-	while (_xrl_router->ready() == false) {
+	while (_xrl_router->ready() == false && timed_out == false) {
 	    eventloop().run();
 	}
 
