@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_iptables.hh,v 1.1 2004/08/31 17:47:28 bms Exp $
+// $XORP: xorp/fea/firewall_iptables.hh,v 1.2 2004/09/02 01:59:19 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPTABLES_HH__
 #define	__FEA_FIREWALL_IPTABLES_HH__
@@ -63,12 +63,12 @@ public:
 	bool get_enabled();
 	int set_enabled(bool enabled);
 
-	inline const string& get_provider_name() const {
-		return (_providername);
+	inline const char* get_provider_name() const {
+		return ("iptables");
 	}
 
-	inline const string& get_provider_version() const {
-		return (_providerversion);
+	inline const char* get_provider_version() const {
+		return ("0.1");
 	}
 
 	//---------------------------------

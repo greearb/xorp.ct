@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.2 2004/09/02 01:55:43 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.3 2004/09/14 10:15:26 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -70,15 +70,15 @@ public:
 	// General provider interface
 	//---------------------------------
 
-	bool get_enabled();
+	bool get_enabled() const;
 	int set_enabled(bool enabled);
 
-	inline const string& get_provider_name() const {
-		return (_providername);
+	inline const char* get_provider_name() const {
+		return ("ipfw");
 	}
 
-	inline const string& get_provider_version() const {
-		return (_providerversion);
+	inline const char* get_provider_version() const {
+		return ("0.1");
 	}
 
 	//---------------------------------
@@ -135,6 +135,7 @@ private:
 	int	_ipfw_xorp_start_idx;	// Beginning of XORP-managed range.
 	int	_ipfw_xorp_end_idx;	// End of XORP-managed range;
 
+private:
 	// Helper function to convert a XORP rule representation into an
 	// IPFW one, in preparation for adding it to IPFW's table.
 	int xorp_rule4_to_ipfw1(FwRule4& rule, struct ip_fw& ipfwrule) const;

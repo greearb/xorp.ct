@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_dummy.hh,v 1.1 2004/08/31 17:43:39 bms Exp $
+// $XORP: xorp/fea/firewall_dummy.hh,v 1.2 2004/09/01 23:47:15 bms Exp $
 
 #ifndef __FEA_FIREWALL_DUMMY_HH__
 #define __FEA_FIREWALL_DUMMY_HH__
@@ -29,7 +29,6 @@ public:
 	DummyFwProvider(FirewallManager &m)
 	    throw(InvalidFwProvider)
 	    : FwProvider(m),
-	      _providername("dummy"), _providerversion("0.1"),
 	      _initialized(true), _enabled(false),
 	      _numrules4(0), _numrules6(0) {}
 
@@ -48,12 +47,12 @@ public:
 		return (XORP_OK);
 	}
 
-	inline const string& get_provider_name() const {
-		return (_providername);
+	inline const char* get_provider_name() const {
+		return ("dummy");
 	}
 
-	inline const string& get_provider_version() const {
-		return (_providerversion);
+	inline const char* get_provider_version() const {
+		return ("0.1");
 	}
 
 	// IPv4 firewall provider interface
@@ -105,8 +104,6 @@ public:
 	// XXX: What about rule retrieval?
 
 private:
-	string		_providername;
-	string		_providerversion;
 	bool		_initialized;
 	bool		_enabled;
 	uint32_t	_numrules4;
