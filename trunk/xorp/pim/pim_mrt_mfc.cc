@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.14 2003/07/12 01:14:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.15 2003/09/25 02:09:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -242,9 +242,16 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	//
 	// Take action if directly-connected source
 	//
+	// From the spec:
 	// set KeepaliveTimer(S,G) to Keepalive_Period
-	// # Note: a register state transition may happen as a result
-	// # of restarting KeepaliveTimer, and must be dealt with here.
+	// # Note: a register state transition or UpstreamJPState(S,G)
+	// # transition may happen as a result of restarting
+	// # KeepaliveTimer, and must be dealt with here.
+	//
+	// Note that starting the KeepaliveTimer(S,G) will automatically
+	// schedule a task that should take care of the register state and
+	// UpstreamJPState(S,G) state transitions.
+	//
 	pim_mre_sg->start_keepalive_timer();
 	is_keepalive_timer_restarted = true;
 	
@@ -305,7 +312,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	is_wrong_iif = false;
 	olist = pim_mre_sg->inherited_olist_sg();
 	if (olist.any() && (! is_keepalive_timer_restarted)) {
-	    // restart KeepaliveTimer(S,G)
+	    // set KeepaliveTimer(S,G) to Keepalive_Period
 	    pim_mre_sg->start_keepalive_timer();
 	    is_keepalive_timer_restarted = true;
 	}
