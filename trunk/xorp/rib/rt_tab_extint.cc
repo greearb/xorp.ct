@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.20 2004/10/06 21:16:32 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.21 2004/11/03 22:19:13 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -397,8 +397,8 @@ template<class A>
 const ResolvedIPRouteEntry<A>*
 ExtIntTable<A>::lookup_by_igp_parent(const IPRouteEntry<A>* route)
 {
-    debug_msg("lookup_by_igp_parent %x -> %s\n",
-	      (u_int)route, route->net().str().c_str());
+    debug_msg("lookup_by_igp_parent %p -> %s\n",
+	      route, route->net().str().c_str());
 
     typename RouteBackLink::iterator iter;
     iter = _ip_igp_parents.find(route);
@@ -406,8 +406,8 @@ ExtIntTable<A>::lookup_by_igp_parent(const IPRouteEntry<A>* route)
 	debug_msg("Found no routes with this IGP parent\n");
 	return NULL;
     } else {
-	debug_msg("Found route with IGP parent %x:\n    %s\n",
-	       (u_int)(route), (iter->second)->str().c_str());
+	debug_msg("Found route with IGP parent %p:\n    %s\n",
+		  route, (iter->second)->str().c_str());
 	return iter->second;
     }
 }
@@ -417,8 +417,8 @@ const ResolvedIPRouteEntry<A>*
 ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A>* route,
 				  const ResolvedIPRouteEntry<A>* previous)
 {
-    debug_msg("lookup_next_by_igp_parent %x -> %s\n",
-	   (u_int)route, route->net().str().c_str());
+    debug_msg("lookup_next_by_igp_parent %p -> %s\n",
+	      route, route->net().str().c_str());
 
     //
     // TODO: if we have a large number of routes with the same IGP parent,
@@ -444,8 +444,8 @@ ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A>* route,
 	return NULL;
     }
 
-    debug_msg("Found next route with IGP parent %x:\n    %s\n",
-	   (u_int)(route), (iter->second)->str().c_str());
+    debug_msg("Found next route with IGP parent %p:\n    %s\n",
+	      route, (iter->second)->str().c_str());
     return iter->second;
 }
 
