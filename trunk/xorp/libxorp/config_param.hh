@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/config_param.hh,v 1.4 2003/03/10 23:20:31 hodson Exp $
+// $XORP: xorp/libxorp/config_param.hh,v 1.5 2003/08/12 02:52:01 pavlin Exp $
 
 #ifndef __LIBXORP_CONFIG_PARAM_HH__
 #define __LIBXORP_CONFIG_PARAM_HH__
@@ -91,6 +91,28 @@ public:
 	set(value);
 	return (*this);
     }
+
+    /**
+     * Increment Operator
+     * 
+     * The numerical value of this configuration parameter is incremented
+     * by one.
+     * 
+     * @return a reference to this configuration parameter after it was
+     * incremented by one.
+     */
+    const T& operator++() { set(_value + 1); return (_value); }
+
+    /**
+     * Decrement Operator
+     * 
+     * The numerical value of this configuration parameter is decremented
+     * by one.
+     * 
+     * @return a reference to this configuration parameter after it was
+     * decremented by one.
+     */
+    const T& operator--() { set(_value - 1); return (_value); }
 
     /**
      * Get the initial value of the parameter.
