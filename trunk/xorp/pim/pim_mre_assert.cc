@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.17 2003/04/22 23:27:23 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.18 2003/05/21 05:32:53 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -188,6 +188,208 @@ PimMre::is_i_am_assert_loser_state(uint16_t vif_index) const
 	return (false);
     
     return (_i_am_assert_loser_state.test(vif_index));
+}
+
+// Note: works for (*,G), (S,G), (S,G,rpt)
+const Mifset&
+PimMre::i_am_assert_winner_wc() const
+{
+    static Mifset mifs;
+    const PimMre *pim_mre_wc;
+    
+    if (is_wc()) {
+	pim_mre_wc = this;
+    } else {
+	pim_mre_wc = wc_entry();
+	if (pim_mre_wc == NULL) {
+	    mifs.reset();
+	    return (mifs);
+	}
+    }
+    
+    mifs = pim_mre_wc->i_am_assert_winner_state();
+    
+    return (mifs);
+}
+
+// Note: works only for (S,G)
+const Mifset&
+PimMre::i_am_assert_winner_sg() const
+{
+    static Mifset mifs;
+    
+    if (! is_sg()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = i_am_assert_winner_state();
+    
+    return (mifs);
+}
+
+// Note: applies for (*,G), (S,G), (S,G,rpt)
+const Mifset&
+PimMre::i_am_assert_loser_wc() const
+{
+    static Mifset mifs;
+    const PimMre *pim_mre_wc;
+    
+    if (is_wc()) {
+	pim_mre_wc = this;
+    } else {
+	pim_mre_wc = wc_entry();
+	if (pim_mre_wc == NULL) {
+	    mifs.reset();
+	    return (mifs);
+	}
+    }
+    
+    mifs = pim_mre_wc->i_am_assert_loser_state();
+    
+    return (mifs);
+}
+
+// Note: applies only for (S,G)
+const Mifset&
+PimMre::i_am_assert_loser_sg() const
+{
+    static Mifset mifs;
+    
+    if (! is_sg()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = i_am_assert_loser_state();
+    
+    return (mifs);
+}
+
+// Note: applies for (*,G), (S,G), (S,G,rpt)
+const Mifset&
+PimMre::lost_assert_wc() const
+{
+    static Mifset mifs;
+    uint16_t vif_index;
+    
+    mifs = i_am_assert_loser_wc();
+    vif_index = rpf_interface_rp();
+    if (vif_index != Vif::VIF_INDEX_INVALID)
+	mifs.reset(vif_index);
+    
+    return (mifs);
+}
+
+// Note: applies only for (S,G)
+const Mifset&
+PimMre::lost_assert_sg() const
+{
+    static Mifset mifs;
+    uint16_t vif_index;
+    
+    if (! is_sg()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = i_am_assert_loser_sg();
+    mifs &= assert_winner_metric_is_better_than_spt_assert_metric_sg();	// XXX
+    vif_index = rpf_interface_s();
+    if (vif_index != Vif::VIF_INDEX_INVALID)
+	mifs.reset(vif_index);
+    
+    return (mifs);
+}
+
+// Note: applies only for (S,G,rpt)
+const Mifset&
+PimMre::lost_assert_sg_rpt() const
+{
+    static Mifset mifs;
+    PimMre *pim_mre_sg;
+    uint16_t vif_index;
+    
+    if (! is_sg_rpt()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs.reset();
+    
+    pim_mre_sg = sg_entry();
+    if (pim_mre_sg != NULL)
+	mifs = pim_mre_sg->i_am_assert_loser_sg();
+    
+    vif_index = rpf_interface_rp();
+    if (vif_index != Vif::VIF_INDEX_INVALID)
+	mifs.reset(vif_index);
+    
+    if (pim_mre_sg != NULL) {
+	if (pim_mre_sg->is_spt()) {
+	    vif_index = pim_mre_sg->rpf_interface_s();
+	    if (vif_index != Vif::VIF_INDEX_INVALID)
+		mifs.reset(vif_index);
+	}
+    }
+    
+    return (mifs);
+}
+
+// Note: applies only for (*,G) and (S,G)
+void
+PimMre::set_could_assert_state(uint16_t vif_index, bool v)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (v) {
+	if (is_could_assert_state(vif_index))
+	    return;			// Nothing changed
+	_could_assert_state.set(vif_index);
+    } else {
+	if (! is_could_assert_state(vif_index))
+	    return;			// Nothing changed
+	_could_assert_state.reset(vif_index);
+    }
+}
+
+// Note: applies only for (*,G) and (S,G)
+bool
+PimMre::is_could_assert_state(uint16_t vif_index) const
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    return (_could_assert_state.test(vif_index));
+}
+
+// Note: applies only for (*,G) and (S,G)
+void
+PimMre::set_assert_tracking_desired_state(uint16_t vif_index, bool v)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    if (v) {
+	if (is_assert_tracking_desired_state(vif_index))
+	    return;			// Nothing changed
+	_assert_tracking_desired_state.set(vif_index);
+    } else {
+	if (! is_assert_tracking_desired_state(vif_index))
+	    return;			// Nothing changed
+	_assert_tracking_desired_state.reset(vif_index);
+    }
+}
+
+// Note: applies only for (*,G) and (S,G)
+bool
+PimMre::is_assert_tracking_desired_state(uint16_t vif_index) const
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    return (_assert_tracking_desired_state.test(vif_index));
 }
 
 // Note: applies only for (*,G) and (S,G)
@@ -589,6 +791,24 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
     return (XORP_OK);
 }
 
+// Note: applies only for (*,G) and (S,G)
+const Mifset&
+PimMre::could_assert_wc() const
+{
+    static Mifset mifs;
+    uint16_t vif_index;
+    
+    mifs = joins_rp();
+    mifs |= joins_wc();
+    mifs |= pim_include_wc();
+    
+    vif_index = rpf_interface_rp();
+    if (vif_index != Vif::VIF_INDEX_INVALID)
+	mifs.reset(vif_index);
+    
+    return (mifs);
+}
+
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
@@ -652,6 +872,46 @@ PimMre::process_could_assert_wc(uint16_t vif_index, bool new_value)
     // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
+}
+
+// Note: applies only for (S,G)
+const Mifset&
+PimMre::could_assert_sg() const
+{
+    static Mifset mifs;
+    Mifset mifs2;
+    PimMre *pim_mre_sg_rpt;
+    uint16_t vif_index;
+    
+    if (! is_sg()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    if (! is_spt()) {		// XXX: SPTbit(S,G) must be true
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = joins_rp();
+    mifs |= joins_wc();
+    pim_mre_sg_rpt = sg_rpt_entry();
+    if (pim_mre_sg_rpt != NULL)
+	mifs &= ~(pim_mre_sg_rpt->prunes_sg_rpt());
+    
+    mifs2 = pim_include_wc();
+    mifs2 &= ~pim_exclude_sg();
+    mifs |= mifs2;
+    
+    mifs &= ~lost_assert_wc();
+    mifs |= joins_sg();
+    mifs |= pim_include_sg();
+    
+    vif_index = rpf_interface_s();
+    if (vif_index != Vif::VIF_INDEX_INVALID)
+	mifs.reset(vif_index);
+    
+    return (mifs);
 }
 
 // Note: applies only for (S,G)
@@ -1041,6 +1301,53 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
     return (XORP_OK);
 }
 
+// Note: applies for (S,G)
+const Mifset&
+PimMre::assert_tracking_desired_sg() const
+{
+    static Mifset mifs;
+    Mifset mifs2;
+    PimMre *pim_mre_sg_rpt;
+    uint16_t vif_index;
+    
+    if (! is_sg()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = joins_rp();
+    mifs |= joins_wc();
+    
+    pim_mre_sg_rpt = sg_rpt_entry();
+    if (pim_mre_sg_rpt != NULL)
+	mifs &= ~(pim_mre_sg_rpt->prunes_sg_rpt());
+    
+    mifs2 = pim_include_wc();
+    mifs2 &= ~pim_exclude_sg();
+    mifs |= mifs2;
+
+    mifs2 &= ~lost_assert_wc();
+    mifs |= joins_sg();
+
+    mifs2 = i_am_dr();
+    mifs2 |= i_am_assert_winner_sg();
+    mifs2 &= local_receiver_include_sg();
+    mifs |= mifs2;
+    
+    if (is_join_desired_sg()) {
+	vif_index = rpf_interface_s();
+	if (vif_index != Vif::VIF_INDEX_INVALID)
+	    mifs.set(vif_index);
+    }
+    if (is_join_desired_wc() && (! is_spt())) {
+	vif_index = rpf_interface_rp();
+	if (vif_index != Vif::VIF_INDEX_INVALID)
+	    mifs.set(vif_index);
+    }
+    
+    return (mifs);
+}
+
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
@@ -1101,6 +1408,35 @@ PimMre::process_assert_tracking_desired_sg(uint16_t vif_index, bool new_value)
     return (true);
 }
 
+// Note: applies for (*,G)
+const Mifset&
+PimMre::assert_tracking_desired_wc() const
+{
+    static Mifset mifs;
+    Mifset mifs2;
+    uint16_t vif_index;
+    
+    if (! is_wc()) {
+	mifs.reset();
+	return (mifs);
+    }
+    
+    mifs = could_assert_wc();
+    
+    mifs2 = i_am_dr();
+    mifs2 |= i_am_assert_winner_wc();
+    mifs2 &= local_receiver_include_wc();
+    mifs |= mifs2;
+    
+    if (is_rpt_join_desired_g()) {
+	vif_index = rpf_interface_rp();
+	if (vif_index != Vif::VIF_INDEX_INVALID)
+	    mifs.set(vif_index);
+    }
+    
+    return (mifs);
+}
+
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
@@ -1159,6 +1495,142 @@ PimMre::process_assert_tracking_desired_wc(uint16_t vif_index, bool new_value)
     // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
+}
+
+// Note: applies only for (S,G)
+AssertMetric *
+PimMre::spt_assert_metric(uint16_t vif_index) const
+{
+    static AssertMetric assert_metric(IPvX::ZERO(family()));
+    PimVif *pim_vif;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (NULL);
+    
+    if (! is_sg())
+	return (NULL);
+    
+    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    if (pim_vif == NULL)
+	return (NULL);
+    
+    assert_metric.set_addr(pim_vif->addr());
+    assert_metric.set_rpt_bit_flag(false);
+    assert_metric.set_metric_preference(metric_preference_s());
+    assert_metric.set_metric(metric_s());
+    
+    return (&assert_metric);
+}
+
+// Note: applies only for (*,G) and (S,G)
+AssertMetric *
+PimMre::rpt_assert_metric(uint16_t vif_index) const
+{
+    static AssertMetric assert_metric(IPvX::ZERO(family()));
+    PimVif *pim_vif;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (NULL);
+    
+    if (! (is_wc() || is_sg()))
+	return (NULL);
+    
+    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    if (pim_vif == NULL)
+	return (NULL);
+    
+    assert_metric.set_addr(pim_vif->addr());
+    assert_metric.set_rpt_bit_flag(true);
+    assert_metric.set_metric_preference(metric_preference_rp());
+    assert_metric.set_metric(metric_rp());
+    
+    return (&assert_metric);
+}
+
+// Note: applies only for (*,G) and (S,G) (but is used only for (S,G))
+AssertMetric *
+PimMre::infinite_assert_metric() const
+{
+    static AssertMetric assert_metric(IPvX::ZERO(family()));
+    
+    // XXX: in case of Assert, the IP address with minimum value is the loser
+    assert_metric.set_addr(IPvX::ZERO(family()));
+    assert_metric.set_rpt_bit_flag(true);
+    assert_metric.set_metric_preference(PIM_ASSERT_MAX_METRIC_PREFERENCE);
+    assert_metric.set_metric(PIM_ASSERT_MAX_METRIC);
+    
+    return (&assert_metric);
+}
+
+// Note: applies only for (S,G) and (S,G,rpt)
+uint32_t
+PimMre::metric_preference_s() const
+{
+    Mrib *mrib = mrib_s();
+    
+    if (mrib != NULL)
+	return (mrib->metric_preference());
+    
+    return (PIM_ASSERT_MAX_METRIC_PREFERENCE);
+}
+
+// Note: applies for all entries
+uint32_t
+PimMre::metric_preference_rp() const
+{
+    Mrib *mrib = mrib_rp();
+    
+    if (mrib != NULL)
+	return (mrib->metric_preference());
+    
+    return (PIM_ASSERT_MAX_METRIC_PREFERENCE);
+}
+
+// Note: applies only for (S,G) and (S,G,rpt)
+uint32_t
+PimMre::metric_s() const
+{
+    Mrib *mrib = mrib_s();
+    
+    if (mrib != NULL)
+	return (mrib->metric());
+    
+    return (PIM_ASSERT_MAX_METRIC);
+}
+
+// Note: applies for all entries
+uint32_t
+PimMre::metric_rp() const
+{
+    Mrib *mrib = mrib_rp();
+    
+    if (mrib != NULL)
+	return (mrib->metric());
+    
+    return (PIM_ASSERT_MAX_METRIC);
+}
+
+// Note: applies only for (S,G)
+AssertMetric *
+PimMre::my_assert_metric_sg(uint16_t vif_index) const
+{
+    Mifset mifs;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (NULL);
+    
+    if (! is_sg())
+	return (NULL);
+    
+    mifs = could_assert_sg();
+    if (mifs.test(vif_index))
+	return (spt_assert_metric(vif_index));
+    
+    mifs = could_assert_wc();
+    if (mifs.test(vif_index))
+	return (rpt_assert_metric(vif_index));
+    
+    return (infinite_assert_metric());
 }
 
 // Note: applies only for (S,G)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.19 2003/03/10 23:20:48 hodson Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.20 2003/04/01 00:56:20 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -575,6 +575,22 @@ public:
     }
     Mifset	_i_am_assert_winner_state; // The interfaces I am Assert winner
     Mifset	_i_am_assert_loser_state;  // The interfaces I am Assert loser
+    
+    // Note: works for (*,G), (S,G), (S,G,rpt)
+    const Mifset& i_am_assert_winner_wc() const;
+    // Note: works only for (S,G)
+    const Mifset& i_am_assert_winner_sg() const;
+    // Note: applies for (*,G), (S,G), (S,G,rpt)
+    const Mifset& i_am_assert_loser_wc() const;
+    // Note: applies only for (S,G)
+    const Mifset& i_am_assert_loser_sg() const;
+    // Note: applies for (*,G), (S,G), (S,G,rpt)
+    const Mifset& lost_assert_wc() const;
+    // Note: applies only for (S,G)
+    const Mifset& lost_assert_sg() const;
+    // Note: applies only for (S,G,rpt)
+    const Mifset& lost_assert_sg_rpt() const;
+    
     XorpTimer	_assert_timers[MAX_VIFS];  // The Assert (winner/loser) timers
     // Note: applies only for (*,G)
     void	assert_timer_timeout_wc(uint16_t vif_index);
@@ -607,20 +623,6 @@ public:
     // Note: applies only for (S,G)
     void	set_assert_winner_metric_is_better_than_spt_assert_metric_sg(uint16_t vif_index, bool v);
     Mifset	_assert_winner_metric_is_better_than_spt_assert_metric_sg;
-    // Note: works for (*,G), (S,G), (S,G,rpt)
-    const Mifset& i_am_assert_winner_wc() const;
-    // Note: works only for (S,G)
-    const Mifset& i_am_assert_winner_sg() const;
-    // Note: applies for (*,G), (S,G), (S,G,rpt)
-    const Mifset& i_am_assert_loser_wc() const;
-    // Note: applies only for (S,G)
-    const Mifset& i_am_assert_loser_sg() const;
-    // Note: applies for (*,G), (S,G), (S,G,rpt)
-    const Mifset& lost_assert_wc() const;
-    // Note: applies only for (S,G)
-    const Mifset& lost_assert_sg() const;
-    // Note: applies only for (S,G,rpt)
-    const Mifset& lost_assert_sg_rpt() const;
     
     // Note: applies for (*,G)
     const Mifset& assert_tracking_desired_wc() const;
@@ -637,10 +639,6 @@ public:
     Mifset	_assert_tracking_desired_state;	// To store the
 						// AssertTrackingDesired state
     
-    // Note: applies only for (*,G) and (S,G)
-    const Mifset& could_assert_wc() const;
-    // Note: applies only for (S,G)
-    const Mifset& could_assert_sg() const;
     // Note: applies only for (*,G) and (S,G)
     const Mifset& could_assert_state() const { return (_could_assert_state); }
     // Note: applies only for (*,G) and (S,G)
@@ -689,9 +687,13 @@ public:
     bool	process_assert_tracking_desired_wc(uint16_t vif_index,
 						   bool new_value);
     // Note: applies only for (S,G)
+    const Mifset& could_assert_sg() const;
+    // Note: applies only for (S,G)
     bool	recompute_could_assert_sg();
     // Note: applies only for (S,G)
     bool	process_could_assert_sg(uint16_t vif_index, bool new_value);
+    // Note: applies only for (*,G) and (S,G)
+    const Mifset& could_assert_wc() const;
     // Note: applies only for (*,G)
     bool	recompute_could_assert_wc();
     // Note: applies only for (*,G)

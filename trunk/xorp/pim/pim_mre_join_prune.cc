@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.20 2003/04/22 23:27:23 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.21 2003/05/21 05:32:53 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1720,6 +1720,23 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 //
 // Upstream J/P (*,*,RP) state machine
 //
+//
+// Note: works for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+bool
+PimMre::is_join_desired_rp() const
+{
+    Mifset m;
+    
+    m = immediate_olist_rp();
+    if (m.any())
+	return (true);
+    else
+	return (false);
+}
+
+//
+// Upstream J/P (*,*,RP) state machine
+//
 // Note: applies only for (*,*,RP)
 // Return true if state has changed, otherwise return false.
 bool
@@ -1796,6 +1813,45 @@ PimMre::recompute_is_join_desired_rp()
     set_not_joined_state();
     entry_try_remove();
     return (true);
+}
+
+//
+// Upstream J/P (*,G) state machine
+//
+// Note: works for (*,G), (S,G), (S,G,rpt)
+bool
+PimMre::is_join_desired_wc() const
+{
+    Mifset m;
+    uint16_t vif_index;
+    const PimMre *pim_mre_wc = NULL;
+    
+    m = immediate_olist_wc();
+    if (m.any())
+	return (true);
+    
+    vif_index = rpf_interface_rp();
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    do {
+	if (is_wc()) {
+	    pim_mre_wc = this;
+	    break;
+	}
+	if (is_sg() || is_sg_rpt()) {
+	    pim_mre_wc = wc_entry();
+	    break;
+	}
+	break;
+    } while (false);
+    
+    if (is_join_desired_rp()
+	&& ((pim_mre_wc != NULL)
+	    && (pim_mre_wc->assert_winner_metric_wc(vif_index) != NULL)))
+	return (true);
+    else
+	return (false);
 }
 
 //
@@ -1897,6 +1953,40 @@ PimMre::recompute_is_join_desired_wc()
 }
 
 //
+// Upstream J/P (*,*,RP) and (*,G) state machine
+//
+// Note: works for (*,G), (S,G), (S,G,rpt)
+bool
+PimMre::is_rpt_join_desired_g() const
+{
+    return (is_join_desired_wc() || is_join_desired_rp());
+}
+
+//
+// Upstream J/P (S,G) state machine
+//
+// Note: works only for (S,G)
+bool
+PimMre::is_join_desired_sg() const
+{
+    Mifset m;
+    
+    if (! is_sg())
+	return (false);
+    
+    m = immediate_olist_sg();
+    if (m.any())
+	return (true);
+    
+    m = inherited_olist_sg();
+    if (is_keepalive_timer_running()
+	&& m.any())
+	return (true);
+    else
+	return (false);
+}
+
+//
 // Upstream J/P (S,G) state machine
 //
 // Note: applies only for (S,G)
@@ -1977,6 +2067,38 @@ PimMre::recompute_is_join_desired_sg()
     set_not_joined_state();
     entry_try_remove();
     return (true);
+}
+
+//
+// Upstream J/P (S,G,rpt) state machine
+//
+// Note: works only for (S,G,rpt)
+bool
+PimMre::is_prune_desired_sg_rpt() const
+{
+    Mifset m;
+    PimMre *pim_mre_sg;
+    
+    if (! is_sg_rpt())
+	return (false);
+    
+    if (! is_rpt_join_desired_g())
+	return (false);
+    
+    m = inherited_olist_sg_rpt();
+    if (m.none())
+	return (true);
+    
+    pim_mre_sg = sg_entry();
+    if (pim_mre_sg == NULL)
+	return (false);
+    
+    if (pim_mre_sg->is_spt()
+	&& (rpfp_nbr_wc() != pim_mre_sg->rpfp_nbr_sg())) {
+	return (true);
+    }
+    
+    return (false);
 }
 
 //
