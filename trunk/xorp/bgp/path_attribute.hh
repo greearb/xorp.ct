@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.18 2003/08/11 18:11:48 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.19 2003/08/14 03:12:13 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -399,7 +399,18 @@ public:
 
     string str() const;
 
-    const A& nexthop() const			{ return _next_hop; }
+    const A& nexthop() const		{ return _next_hop; }
+    void set_nexthop(const A& nexthop)	{ _next_hop = next_hop;}
+
+    void add_nlri(const IPNet<A>& nlri) {_nlri.pushback(nlri); }
+    const list<IPNet<A> >& nlri_list() const { return _nlri;}
+
+    // IPv6 specific
+    const A& link_local_nexthop() const	{ return _link_local_next_hop; }
+    void set_link_local_nexthop(const A& n) { _link_local_next_hop = n;}
+
+    // SNPA - Don't deal. (ATM, FRAME RELAY, SMDS)
+    
 protected:
 private:
     void encode();
@@ -408,7 +419,7 @@ private:
     uint8_t _safi;		// Subsequent Address Family Identifier.
     
     A _next_hop;		// Next Hop.
-    list<A> _snpa;		// Subnetwork point of attachment.
+//     list<A> _snpa;		// Subnetwork point of attachment.
     list<IPNet<A> > _nlri;	// Network level reachability information.
 
     A _link_local_next_hop;	// Link local next hop IPv6 specific.
@@ -427,6 +438,9 @@ public:
     MPUNReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
 
     string str() const;
+
+    void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.pushback(nlri); }
+    const list<IPNet<A> >& wr_list() const { return _withdrawn;}
 
 protected:
 private:
