@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.5 2004/04/22 01:14:30 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.6 2004/04/29 23:27:47 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -240,6 +240,7 @@ private:
     bool ifmgr_startup();
     bool ifmgr_shutdown();
 
+    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
     void rib_register_startup();

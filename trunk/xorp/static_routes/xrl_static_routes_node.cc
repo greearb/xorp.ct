@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.8 2004/04/22 01:14:30 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.9 2004/04/29 23:27:47 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -44,6 +44,7 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
       _is_rib_igp_table4_registered(false),
       _is_rib_igp_table6_registered(false)
 {
+    _ifmgr.set_observer(dynamic_cast<StaticRoutesNode*>(this));
     _ifmgr.attach_hint_observer(dynamic_cast<StaticRoutesNode*>(this));
 }
 
@@ -52,6 +53,7 @@ XrlStaticRoutesNode::~XrlStaticRoutesNode()
     StaticRoutesNode::shutdown();
 
     _ifmgr.detach_hint_observer(dynamic_cast<StaticRoutesNode*>(this));
+    _ifmgr.unset_observer(dynamic_cast<StaticRoutesNode*>(this));
 }
 
 bool
@@ -93,9 +95,10 @@ XrlStaticRoutesNode::ifmgr_shutdown()
 
     ret_value = _ifmgr.shutdown();
 
-    // TODO: XXX: PAVPAVPAV: use ServiceChangeObserverBase
-    // to signal when the interface manager shutdown has completed.
-    StaticRoutesNode::decr_shutdown_requests_n();
+    //
+    // XXX: when the shutdown is completed, StaticRoutesNode::status_change()
+    // will be called.
+    //
 
     return ret_value;
 }

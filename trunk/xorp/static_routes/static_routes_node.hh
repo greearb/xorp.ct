@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.7 2004/04/22 01:14:29 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.8 2004/04/29 23:24:55 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -266,7 +266,9 @@ private:
  * 
  * There should be one node per StaticRoutes instance.
  */
-class StaticRoutesNode : public IfMgrHintObserver, public ServiceBase {
+class StaticRoutesNode : public IfMgrHintObserver,
+			 public ServiceBase,
+			 public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given event loop.
@@ -482,6 +484,27 @@ protected:
     void update_status();
 
 private:
+    /**
+     * A method invoked when the status of a service changes.
+     * 
+     * @param service the service whose status has changed.
+     * @param old_status the old status.
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status);
+
+    /**
+     * Get a reference to the service base of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the service base of the interface manager.
+     */
+    virtual const ServiceBase* ifmgr_mirror_service_base() const = 0;
+
     /**
      * Get a reference to the interface manager tree.
      * 

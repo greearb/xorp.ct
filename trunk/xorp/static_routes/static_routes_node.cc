@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.9 2004/04/29 23:26:30 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.10 2004/05/05 07:34:22 pavlin Exp $"
 
 
 //
@@ -130,6 +130,38 @@ StaticRoutesNode::shutdown()
     _node_status = PROC_SHUTDOWN;
 
     return true;
+}
+
+void
+StaticRoutesNode::status_change(ServiceBase*  service,
+				ServiceStatus old_status,
+				ServiceStatus new_status)
+{
+    if (service == this) {
+	// My own status has changed
+	if ((old_status == STARTING) && (new_status == RUNNING)) {
+	    // The startup process has completed
+	    _node_status = PROC_READY;
+	    return;
+	}
+
+	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	    // The shutdown process has completed
+	    _node_status = PROC_DONE;
+	    return;
+	}
+
+	//
+	// TODO: check if there was an error
+	//
+	return;
+    }
+
+    if (service == ifmgr_mirror_service_base()) {
+	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	    decr_shutdown_requests_n();
+	}
+    }
 }
 
 void
