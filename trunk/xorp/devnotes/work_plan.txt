@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.12 2003/04/15 22:23:27 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.13 2003/04/29 22:53:11 pavlin Exp $
 #
 
 Priority:
@@ -161,7 +161,7 @@ For 0.3:
 
 ================================ Next Release ================================
 * Next release (xorp-0.3): May 29, 2003
-  - Add second CVSWEB for public
+  - Add second CVSWEB for public (DONE)
   - Write a wishlist of tasks/projects that other people may choose to do
   - Add a pointer from the web page to xorp/RELEASE_NOTES (PR)
   - Finder supports target failure registration/notification requests
