@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.4 2003/09/25 01:28:42 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.5 2003/10/31 00:20:38 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -91,27 +91,36 @@ time_wait_seconds()
 	return
     fi
 
-    local tw 
+    local tw os
 
-    # Linux sysctl
-    tw=`sysctl -n net.ipv4.tcp_fin_timeout 2>/dev/null`
-    if [ $? -eq 0 ] ; then
-	echo $tw
-	return
-    fi
+    os=`uname -s`
+    case $os in
+	Linux)
+	tw=`sysctl -n net.ipv4.tcp_fin_timeout 2>/dev/null`
+	if [ $? -eq 0 ] ; then
+	    echo $tw
+	    return
+	fi
+	;;
 
-    # BSD
-    local msl
-    msl=`sysctl -n net.inet.tcp.msl 2>/dev/null`
-    if [ $? -eq 0 ] ; then
-	# Timewait is 2 * msl and msl is in milliseconds
-	tw=`expr $msl + $msl + 1`
-	tw=`expr $tw / 1000`
-	echo $tw
-	return
-    fi
+	FreeBSD)
+	local msl
+	msl=`sysctl -n net.inet.tcp.msl 2>/dev/null`
+	if [ $? -eq 0 ] ; then
+	    # Timewait is 2 * msl and msl is in milliseconds
+	    tw=`expr $msl + $msl + 1`
+	    tw=`expr $tw / 1000`
+	    echo $tw
+	    return
+	fi
+	;;
 
-    # Whatever
+	*)
+	# All other OS: use the default value below
+	;;
+    esac
+
+    # Defailt to 60 seconds
     echo "60"
 }
 
