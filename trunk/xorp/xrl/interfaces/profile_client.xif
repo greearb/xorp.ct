@@ -1,0 +1,30 @@
+/* $XORP$ */
+
+/*
+** Profiling client
+*/
+
+interface profile_client/0.1 {
+	/**
+	 * A log entry that is sent from a profile server.
+	 *
+	 * @param pname profiling variable.
+	 * @param sec absolute time in seconds that this entry was created.
+	 * @param usec absolute time in micro seconds that this entry was
+	 * created.
+	 * @param comment
+	 */
+	log ? \
+		pname:txt \
+		& sec:u32 \
+	        & usec:u32 \
+	        & comment:txt
+
+	/**
+	 * Sent to notify the client that all log entries have been sent.
+	 *
+	 * @param pname profiling variable.
+	 */
+	finished ? \
+		pname:txt
+}

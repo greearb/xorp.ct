@@ -1781,6 +1781,145 @@ XrlBgpTargetBase::handle_rib_client_0_1_route_info_invalid6(const XrlArgs& xa_in
     return XrlCmdError::OKAY();
 }
 
+const XrlCmdError
+XrlBgpTargetBase::handle_profile_0_1_enable(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 1) {
+	XLOG_ERROR("Wrong number of arguments (%u != %u) handling %s",
+            1, (uint32_t)xa_inputs.size(), "profile/0.1/enable");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = profile_0_1_enable(
+	    xa_inputs.get_string("pname"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for %s failed: %s",
+            		 "profile/0.1/enable", e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlBgpTargetBase::handle_profile_0_1_disable(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 1) {
+	XLOG_ERROR("Wrong number of arguments (%u != %u) handling %s",
+            1, (uint32_t)xa_inputs.size(), "profile/0.1/disable");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = profile_0_1_disable(
+	    xa_inputs.get_string("pname"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for %s failed: %s",
+            		 "profile/0.1/disable", e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlBgpTargetBase::handle_profile_0_1_get_entries(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 2) {
+	XLOG_ERROR("Wrong number of arguments (%u != %u) handling %s",
+            2, (uint32_t)xa_inputs.size(), "profile/0.1/get_entries");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = profile_0_1_get_entries(
+	    xa_inputs.get_string("pname"),
+	    xa_inputs.get_string("instance_name"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for %s failed: %s",
+            		 "profile/0.1/get_entries", e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlBgpTargetBase::handle_profile_0_1_clear(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 1) {
+	XLOG_ERROR("Wrong number of arguments (%u != %u) handling %s",
+            1, (uint32_t)xa_inputs.size(), "profile/0.1/clear");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = profile_0_1_clear(
+	    xa_inputs.get_string("pname"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for %s failed: %s",
+            		 "profile/0.1/clear", e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlBgpTargetBase::handle_profile_0_1_list(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 0) {
+	XLOG_ERROR("Wrong number of arguments (%u != %u) handling %s",
+            0, (uint32_t)xa_inputs.size(), "profile/0.1/list");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    string info;
+    try {
+	XrlCmdError e = profile_0_1_list(
+	    info);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for %s failed: %s",
+            		 "profile/0.1/list", e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("info", info);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
 void
 XrlBgpTargetBase::add_handlers()
 {
@@ -1984,6 +2123,26 @@ XrlBgpTargetBase::add_handlers()
 	    callback(this, &XrlBgpTargetBase::handle_rib_client_0_1_route_info_invalid6)) == false) {
 	    XLOG_ERROR("Failed to xrl handler finder://%s/%s", "bgp", "rib_client/0.1/route_info_invalid6");
 	}
+	if (_cmds->add_handler("profile/0.1/enable",
+	    callback(this, &XrlBgpTargetBase::handle_profile_0_1_enable)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://%s/%s", "bgp", "profile/0.1/enable");
+	}
+	if (_cmds->add_handler("profile/0.1/disable",
+	    callback(this, &XrlBgpTargetBase::handle_profile_0_1_disable)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://%s/%s", "bgp", "profile/0.1/disable");
+	}
+	if (_cmds->add_handler("profile/0.1/get_entries",
+	    callback(this, &XrlBgpTargetBase::handle_profile_0_1_get_entries)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://%s/%s", "bgp", "profile/0.1/get_entries");
+	}
+	if (_cmds->add_handler("profile/0.1/clear",
+	    callback(this, &XrlBgpTargetBase::handle_profile_0_1_clear)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://%s/%s", "bgp", "profile/0.1/clear");
+	}
+	if (_cmds->add_handler("profile/0.1/list",
+	    callback(this, &XrlBgpTargetBase::handle_profile_0_1_list)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://%s/%s", "bgp", "profile/0.1/list");
+	}
 	_cmds->finalize();
 }
 
@@ -2040,4 +2199,9 @@ XrlBgpTargetBase::remove_handlers()
 	_cmds->remove_handler("rib_client/0.1/route_info_changed6");
 	_cmds->remove_handler("rib_client/0.1/route_info_invalid4");
 	_cmds->remove_handler("rib_client/0.1/route_info_invalid6");
+	_cmds->remove_handler("profile/0.1/enable");
+	_cmds->remove_handler("profile/0.1/disable");
+	_cmds->remove_handler("profile/0.1/get_entries");
+	_cmds->remove_handler("profile/0.1/clear");
+	_cmds->remove_handler("profile/0.1/list");
 }

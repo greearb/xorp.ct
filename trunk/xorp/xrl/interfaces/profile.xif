@@ -1,0 +1,41 @@
+/* $XORP$ */
+
+/*
+** Profiling
+*/
+
+interface profile/0.1 {
+	/**
+	 * Enable profiling
+	 *
+	 * @param pname profile variable
+	 */
+	enable ? pname:txt
+
+	/**
+	 * Disable profiling
+	 *
+	 * @param pname profile variable
+	 */
+	disable ? pname:txt
+
+	/**
+	 * Get log entries.
+	 *
+	 * @param pname profile variable
+         * @param instance_name to send the profiling info to.
+	 */
+	get_entries ? pname:txt & instance_name:txt
+
+	/**
+	 * Clear the profiling entries
+	 *
+	 * @param pname profile variable
+	 */
+	clear ? pname:txt
+
+	/**
+	 * List all the profiling variables registered with this target.
+	 */
+	list -> info:txt
+}

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.20 2004/09/03 20:53:12 bms Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.21 2004/09/17 14:05:09 abittau Exp $
 ##
 
 ###############################################################################
@@ -141,6 +141,14 @@ libpolicyredist4xif_a_SOURCES = policy_redist4_xif.hh policy_redist4_xif.cc
 # Policy route redistribution IPv6 Interface
 noinst_LIBRARIES += libpolicyredist6xif.a
 libpolicyredist6xif_a_SOURCES = policy_redist6_xif.hh policy_redist6_xif.cc
+
+# Profiling Interface
+noinst_LIBRARIES += libprofilexif.a
+libprofilexif_a_SOURCES = profile_xif.hh profile_xif.cc
+
+# Profiling Client Interface
+noinst_LIBRARIES += libprofileclientxif.a
+libprofileclientxif_a_SOURCES = profile_client_xif.hh profile_client_xif.cc
 
 # Redistribution Interface to Routing Protocols
 noinst_LIBRARIES += libredist4xif.a

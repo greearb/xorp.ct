@@ -100,7 +100,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt firewall.tgt mfea.tgt mld6igmp.tgt ospf.tgt policy.tgt pim.tgt rip.tgt ripng.tgt rib.tgt ribclient.tgt rtrmgr.tgt show_routes.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt firewall.tgt mfea.tgt mld6igmp.tgt ospf.tgt policy.tgt profiler.tgt pim.tgt rip.tgt ripng.tgt rib.tgt ribclient.tgt rtrmgr.tgt show_routes.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -109,7 +109,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfib2mribbase.a libfinderbase.a libfinderclientbase.a libfirewallbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libpolicybase.a libribbase.a libribclientbase.a libripbase.a libripngbase.a librtrmgrbase.a libshowroutesbase.a libsocketserverbase.a libstaticroutesbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libtestsocket4.a libtestsocket6.a libxorpifmibbase.a libxorpshbase.a
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfib2mribbase.a libfinderbase.a libfinderclientbase.a libfirewallbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libpolicybase.a libprofileclientbase.a libribbase.a libribclientbase.a libripbase.a libripngbase.a librtrmgrbase.a libshowroutesbase.a libsocketserverbase.a libstaticroutesbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libtestsocket4.a libtestsocket6.a libxorpifmibbase.a libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -172,6 +172,9 @@ libpimbase_a_SOURCES = pim_base.hh pim_base.cc
 
 # Policy manager
 libpolicybase_a_SOURCES = policy_base.hh policy_base.cc
+
+# Profiler
+libprofileclientbase_a_SOURCES = profiler_base.hh profiler_base.cc
 
 # RIB
 libribbase_a_SOURCES = rib_base.hh rib_base.cc
@@ -313,6 +316,10 @@ libpolicybase_a_AR = $(AR) cru
 libpolicybase_a_LIBADD =
 am_libpolicybase_a_OBJECTS = policy_base.$(OBJEXT)
 libpolicybase_a_OBJECTS = $(am_libpolicybase_a_OBJECTS)
+libprofileclientbase_a_AR = $(AR) cru
+libprofileclientbase_a_LIBADD =
+am_libprofileclientbase_a_OBJECTS = profiler_base.$(OBJEXT)
+libprofileclientbase_a_OBJECTS = $(am_libprofileclientbase_a_OBJECTS)
 libribbase_a_AR = $(AR) cru
 libribbase_a_LIBADD =
 am_libribbase_a_OBJECTS = rib_base.$(OBJEXT)
@@ -397,9 +404,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/firewall_base.Po $(DEPDIR)/mfea_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_base.Po $(DEPDIR)/ospf_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_base.Po $(DEPDIR)/policy_base.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rib_base.Po $(DEPDIR)/ribclient_base.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rip_base.Po $(DEPDIR)/ripng_base.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/profiler_base.Po $(DEPDIR)/rib_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ribclient_base.Po $(DEPDIR)/rip_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ripng_base.Po $(DEPDIR)/rtrmgr_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/show_routes_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/socket_server_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/static_routes_base.Po \
@@ -430,10 +437,10 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 	$(libfirewallbase_a_SOURCES) $(libmfeabase_a_SOURCES) \
 	$(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) \
 	$(libpimbase_a_SOURCES) $(libpolicybase_a_SOURCES) \
-	$(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) \
-	$(libripbase_a_SOURCES) $(libripngbase_a_SOURCES) \
-	$(librtrmgrbase_a_SOURCES) $(libshowroutesbase_a_SOURCES) \
-	$(libsocketserverbase_a_SOURCES) \
+	$(libprofileclientbase_a_SOURCES) $(libribbase_a_SOURCES) \
+	$(libribclientbase_a_SOURCES) $(libripbase_a_SOURCES) \
+	$(libripngbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) \
+	$(libshowroutesbase_a_SOURCES) $(libsocketserverbase_a_SOURCES) \
 	$(libstaticroutesbase_a_SOURCES) $(libtestbase_a_SOURCES) \
 	$(libtestfeaifmgrmirrorbase_a_SOURCES) \
 	$(libtestfindereventsbase_a_SOURCES) \
@@ -443,7 +450,7 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 DATA = $(data_DATA)
 
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfib2mribbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libfirewallbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libpolicybase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(libripbase_a_SOURCES) $(libripngbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libshowroutesbase_a_SOURCES) $(libsocketserverbase_a_SOURCES) $(libstaticroutesbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libtestsocket4_a_SOURCES) $(libtestsocket6_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfib2mribbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libfirewallbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libpolicybase_a_SOURCES) $(libprofileclientbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(libripbase_a_SOURCES) $(libripngbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libshowroutesbase_a_SOURCES) $(libsocketserverbase_a_SOURCES) $(libstaticroutesbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libtestsocket4_a_SOURCES) $(libtestsocket6_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
 
 all: all-am
 
@@ -525,6 +532,10 @@ libpolicybase.a: $(libpolicybase_a_OBJECTS) $(libpolicybase_a_DEPENDENCIES)
 	-rm -f libpolicybase.a
 	$(libpolicybase_a_AR) libpolicybase.a $(libpolicybase_a_OBJECTS) $(libpolicybase_a_LIBADD)
 	$(RANLIB) libpolicybase.a
+libprofileclientbase.a: $(libprofileclientbase_a_OBJECTS) $(libprofileclientbase_a_DEPENDENCIES) 
+	-rm -f libprofileclientbase.a
+	$(libprofileclientbase_a_AR) libprofileclientbase.a $(libprofileclientbase_a_OBJECTS) $(libprofileclientbase_a_LIBADD)
+	$(RANLIB) libprofileclientbase.a
 libribbase.a: $(libribbase_a_OBJECTS) $(libribbase_a_DEPENDENCIES) 
 	-rm -f libribbase.a
 	$(libribbase_a_AR) libribbase.a $(libribbase_a_OBJECTS) $(libribbase_a_LIBADD)
@@ -612,6 +623,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profiler_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ribclient_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip_base.Po@am__quote@
@@ -801,6 +813,7 @@ $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/policy_redist6.xif			\
+                $(INTERFACES_DIR)/profile.xif				\
 		$(INTERFACES_DIR)/rib_client.xif
 $(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
@@ -869,6 +882,9 @@ $(srcdir)/policy_base.hh $(srcdir)/policy_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/policy.xif
+$(srcdir)/profiler_base.hh $(srcdir)/profiler_base.cc:      		\
+                $(INTERFACES_DIR)/common.xif                            \
+                $(INTERFACES_DIR)/profile_client.xif
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.3 2004/04/10 07:41:41 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.4 2004/09/17 14:05:11 abittau Exp $ */
 
 #include "common.xif"
 #include "bgp.xif"
@@ -7,6 +7,7 @@
 #include "policy_redist4.xif"
 #include "policy_redist6.xif"
 #include "rib_client.xif"
+#include "profile.xif"
 
 target bgp implements		common/0.1,				\
 				bgp/0.2,				\
@@ -14,4 +15,5 @@ target bgp implements		common/0.1,				\
 				policy_backend/0.1,			\
 				policy_redist4/0.1,			\
 				policy_redist6/0.1,			\
-				rib_client/0.1
+				rib_client/0.1,				\
+				profile/0.1

@@ -159,6 +159,10 @@ snmpd2 = @snmpd2@
 
 # Policy route redistribution IPv6 Interface
 
+# Profiling Interface
+
+# Profiling Client Interface
+
 # Redistribution Interface to Routing Protocols
 
 # Transaction-based Redistribution Interface to Routing Protocols
@@ -196,7 +200,7 @@ snmpd2 = @snmpd2@
 #
 # Sample Test Client Interface
 #
-noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeafibxif.a libfeafibclientxif.a libfirewallxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libpolicyxif.a libpolicybackendxif.a libpolicyredist4xif.a libpolicyredist6xif.a libredist4xif.a libredist6xif.a libredisttransaction4xif.a libredisttransaction6xif.a libribxif.a libribclientxif.a libripxif.a libripngxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeafibxif.a libfeafibclientxif.a libfirewallxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libpolicyxif.a libpolicybackendxif.a libpolicyredist4xif.a libpolicyredist6xif.a libprofilexif.a libprofileclientxif.a libredist4xif.a libredist6xif.a libredisttransaction4xif.a libredisttransaction6xif.a libribxif.a libribclientxif.a libripxif.a libripngxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -229,6 +233,8 @@ libpolicyxif_a_SOURCES = policy_xif.hh policy_xif.cc
 libpolicybackendxif_a_SOURCES = policy_backend_xif.hh policy_backend_xif.cc
 libpolicyredist4xif_a_SOURCES = policy_redist4_xif.hh policy_redist4_xif.cc
 libpolicyredist6xif_a_SOURCES = policy_redist6_xif.hh policy_redist6_xif.cc
+libprofilexif_a_SOURCES = profile_xif.hh profile_xif.cc
+libprofileclientxif_a_SOURCES = profile_client_xif.hh profile_client_xif.cc
 libredist4xif_a_SOURCES = redist4_xif.hh redist4_xif.cc
 libredist6xif_a_SOURCES = redist6_xif.hh redist6_xif.cc
 libredisttransaction4xif_a_SOURCES = redist_transaction4_xif.hh redist_transaction4_xif.cc
@@ -400,6 +406,14 @@ libpolicyxif_a_AR = $(AR) cru
 libpolicyxif_a_LIBADD =
 am_libpolicyxif_a_OBJECTS = policy_xif.$(OBJEXT)
 libpolicyxif_a_OBJECTS = $(am_libpolicyxif_a_OBJECTS)
+libprofileclientxif_a_AR = $(AR) cru
+libprofileclientxif_a_LIBADD =
+am_libprofileclientxif_a_OBJECTS = profile_client_xif.$(OBJEXT)
+libprofileclientxif_a_OBJECTS = $(am_libprofileclientxif_a_OBJECTS)
+libprofilexif_a_AR = $(AR) cru
+libprofilexif_a_LIBADD =
+am_libprofilexif_a_OBJECTS = profile_xif.$(OBJEXT)
+libprofilexif_a_OBJECTS = $(am_libprofilexif_a_OBJECTS)
 libredist4xif_a_AR = $(AR) cru
 libredist4xif_a_LIBADD =
 am_libredist4xif_a_OBJECTS = redist4_xif.$(OBJEXT)
@@ -517,7 +531,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/policy_backend_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/policy_redist4_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/policy_redist6_xif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policy_xif.Po $(DEPDIR)/redist4_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/policy_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/profile_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/profile_xif.Po $(DEPDIR)/redist4_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/redist6_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/redist_transaction4_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/redist_transaction6_xif.Po \
@@ -564,6 +580,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libpimxif_a_SOURCES) $(libpolicybackendxif_a_SOURCES) \
 	$(libpolicyredist4xif_a_SOURCES) \
 	$(libpolicyredist6xif_a_SOURCES) $(libpolicyxif_a_SOURCES) \
+	$(libprofileclientxif_a_SOURCES) $(libprofilexif_a_SOURCES) \
 	$(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) \
 	$(libredisttransaction4xif_a_SOURCES) \
 	$(libredisttransaction6xif_a_SOURCES) \
@@ -577,7 +594,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) \
 	$(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeafibclientxif_a_SOURCES) $(libfeafibxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfirewallxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libpolicybackendxif_a_SOURCES) $(libpolicyredist4xif_a_SOURCES) $(libpolicyredist6xif_a_SOURCES) $(libpolicyxif_a_SOURCES) $(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) $(libredisttransaction4xif_a_SOURCES) $(libredisttransaction6xif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeafibclientxif_a_SOURCES) $(libfeafibxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfirewallxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libpolicybackendxif_a_SOURCES) $(libpolicyredist4xif_a_SOURCES) $(libpolicyredist6xif_a_SOURCES) $(libpolicyxif_a_SOURCES) $(libprofileclientxif_a_SOURCES) $(libprofilexif_a_SOURCES) $(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) $(libredisttransaction4xif_a_SOURCES) $(libredisttransaction6xif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -723,6 +740,14 @@ libpolicyxif.a: $(libpolicyxif_a_OBJECTS) $(libpolicyxif_a_DEPENDENCIES)
 	-rm -f libpolicyxif.a
 	$(libpolicyxif_a_AR) libpolicyxif.a $(libpolicyxif_a_OBJECTS) $(libpolicyxif_a_LIBADD)
 	$(RANLIB) libpolicyxif.a
+libprofileclientxif.a: $(libprofileclientxif_a_OBJECTS) $(libprofileclientxif_a_DEPENDENCIES) 
+	-rm -f libprofileclientxif.a
+	$(libprofileclientxif_a_AR) libprofileclientxif.a $(libprofileclientxif_a_OBJECTS) $(libprofileclientxif_a_LIBADD)
+	$(RANLIB) libprofileclientxif.a
+libprofilexif.a: $(libprofilexif_a_OBJECTS) $(libprofilexif_a_DEPENDENCIES) 
+	-rm -f libprofilexif.a
+	$(libprofilexif_a_AR) libprofilexif.a $(libprofilexif_a_OBJECTS) $(libprofilexif_a_LIBADD)
+	$(RANLIB) libprofilexif.a
 libredist4xif.a: $(libredist4xif_a_OBJECTS) $(libredist4xif_a_DEPENDENCIES) 
 	-rm -f libredist4xif.a
 	$(libredist4xif_a_AR) libredist4xif.a $(libredist4xif_a_OBJECTS) $(libredist4xif_a_LIBADD)
@@ -842,6 +867,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_redist4_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_redist6_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist4_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist6_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_transaction4_xif.Po@am__quote@
