@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.5 2003/07/03 06:47:09 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.6 2003/07/03 16:20:16 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -42,14 +42,7 @@ VifAddr::VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
 bool
 VifAddr::is_same_subnet(const IPvXNet& ipvxnet) const
 {
-    // TODO: XXX: PAVPAVPAV: temporary reverse back to the old code
-    // which checks whether the subnet addresses overlap
-    // instead of check for exact equation
-    IPvX masked_addr(_addr.mask_by_prefix(ipvxnet.prefix_len()));
-    
-    return (ipvxnet.masked_addr() == masked_addr);
-    
-    // return (_subnet_addr == ipvxnet);
+    return (_subnet_addr == ipvxnet);
 }
 
 bool
