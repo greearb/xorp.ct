@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.8 2004/05/14 20:45:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.9 2004/05/15 03:04:01 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -349,6 +349,18 @@ RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
     if (task_count() == 1) {
 	start_running_tasks();
     }
+}
+
+template <typename A>
+void
+RedistXrlOutput<A>::starting_route_dump()
+{
+}
+
+template <typename A>
+void
+RedistXrlOutput<A>::finishing_route_dump()
+{
 }
 
 template <typename A>
@@ -822,6 +834,18 @@ RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
     enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
     if (no_running_tasks)
 	start_running_tasks();
+}
+
+template <typename A>
+void
+RedistTransactionXrlOutput<A>::starting_route_dump()
+{
+}
+
+template <typename A>
+void
+RedistTransactionXrlOutput<A>::finishing_route_dump()
+{
 }
 
 template <typename A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.3 2004/04/26 23:03:04 hodson Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.4 2004/04/27 17:22:04 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -100,6 +100,9 @@ public:
 
     void add_route(const IPRouteEntry<A>& route);
     void delete_route(const IPRouteEntry<A>& route);
+
+    void starting_route_dump()			{}
+    void finishing_route_dump()			{}
 
     void set_expected_net(const IPNet<A>& n)	{ _expect_net = n; }
     const IPNet<A>& expected_net() const	{ return _expect_net; }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.9 2004/04/26 23:03:04 hodson Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.10 2004/04/28 15:46:35 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
@@ -285,6 +285,20 @@ public:
 
     virtual void add_route(const IPRouteEntry<A>& ipr)		= 0;
     virtual void delete_route(const IPRouteEntry<A>& ipr)	= 0;
+
+    /**
+     * Method called by Redistributor to indicate start of initial
+     * route dump.  This occurs when an output is first attached to
+     * the redistributor to announce the existing routes.
+     */
+    virtual void starting_route_dump()				= 0;
+
+    /**
+     * Method called by Redistributor to indicate end of initial
+     * route dump.  This occurs when an output is first attached to
+     * the redistributor to announce the existing routes.
+     */
+    virtual void finishing_route_dump()				= 0;
 
 protected:
     inline void announce_low_water()	{ _r->output_event().low_water(); }

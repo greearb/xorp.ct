@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.16 2004/04/27 00:33:33 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.17 2004/04/28 15:46:35 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -123,6 +123,7 @@ Redistributor<A>::start_dump()
 	_last_net = NO_LAST_NET;
 	schedule_dump_timer();
 	debug_msg("starting dump\n");
+	_output->starting_route_dump();
     }
 }
 
@@ -133,6 +134,8 @@ Redistributor<A>::finish_dump()
     _dumping = false;
     _last_net = NO_LAST_NET;
     debug_msg("finishing dump\n");
+    if (_output)
+	_output->finishing_route_dump();
 }
 
 template <typename A>

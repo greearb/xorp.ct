@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.3 2004/05/14 20:45:57 pavlin Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.4 2004/05/15 03:04:01 pavlin Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -56,6 +56,9 @@ public:
 
     void add_route(const IPRouteEntry<A>& ipr);
     void delete_route(const IPRouteEntry<A>& ipr);
+
+    void starting_route_dump();
+    void finishing_route_dump();
 
     virtual void task_completed(Task* task);
     void task_failed_fatally(Task* task);
@@ -112,6 +115,9 @@ public:
     void add_route(const IPRouteEntry<A>& ipr);
     void delete_route(const IPRouteEntry<A>& ipr);
 
+    void starting_route_dump();
+    void finishing_route_dump();
+
     void task_completed(Task* task);
 
     inline uint32_t tid() const;
@@ -127,7 +133,7 @@ public:
     inline size_t transaction_size() const { return _transaction_size; }
     inline void reset_transaction_size() { _transaction_size = 0; }
     inline void incr_transaction_size() { _transaction_size++; }
-    
+
     static const size_t MAX_TRANSACTION_SIZE	 = 100;
 
 protected:
