@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.13 2003/05/15 19:18:56 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.14 2003/05/23 00:02:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -617,7 +617,7 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
     queue_ptr = peer_info->queue_position();
     bool more_queued_data = true;
     while (more_queued_data) {
-	fprintf(stderr, "skip_entire_queue\n");
+	XLOG_INFO("skip_entire_queue");
 	bool discard_possible = false;
 	int skipped = 1;
 
