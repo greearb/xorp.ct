@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.8 2004/06/10 22:41:57 hodson Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.9 2004/06/29 10:02:56 atanu Exp $"
 
 #include "config.h"
 
@@ -60,13 +60,13 @@
  */
 void 
 tokenize(const string& str,
-	      vector<string>& tokens,
-	      const string& delimiters = " ")
+	 vector<string>& tokens,
+	 const string& delimiters = " ")
 {
     string::size_type begin = str.find_first_not_of(delimiters, 0);
     string::size_type end = str.find_first_of(delimiters, begin);
 
-    while(string::npos != begin || string::npos != end) {
+    while (string::npos != begin || string::npos != end) {
         tokens.push_back(str.substr(begin, end - begin));
         begin = str.find_first_not_of(delimiters, end);
         end = str.find_first_of(delimiters, begin);
@@ -83,10 +83,10 @@ pid_t
 spawn(const string& process, const char *output = "")
 {
     pid_t pid;
-    switch(pid = fork()) {
+    switch (pid = fork()) {
     case 0:
 	{
-	    if(output != "") {
+	    if (output != "") {
 		close(0);
 		close(1);
 // 		close(2);
@@ -98,7 +98,7 @@ spawn(const string& process, const char *output = "")
 	    vector<string> tokens;
 	    tokenize(process, tokens);
 	    char *argv[tokens.size() + 1];
-	    for(unsigned int i = 0; i < tokens.size(); i++) {
+	    for (unsigned int i = 0; i < tokens.size(); i++) {
 		argv[i] = const_cast<char *>(tokens[i].c_str());
 	    }
 	    argv[tokens.size()] = 0;
@@ -107,7 +107,10 @@ spawn(const string& process, const char *output = "")
 	    ** Unblock any blocked signals.
 	    */
 	    sigset_t set;
-	    sigfillset(&set);
+	    if (0 != sigfillset(&set)) {
+		cerr << "sigfillset failed: " << strerror(errno) << endl;
+		exit(-1);
+	    }
 	    
 	    if (0 != sigprocmask(SIG_UNBLOCK, &set, 0)) {
 		cerr << "sigprockmask failed: " << strerror(errno) << endl;
@@ -173,9 +176,9 @@ sigchld(int)
     int status;
     pid_t pid = wait(&status);
 
-    if(wait_command_pid == pid) {
+    if (wait_command_pid == pid) {
 	wait_command_pid = Command::EMPTY;
-	if(WIFEXITED(status) && 0 != WEXITSTATUS(status)) {
+	if (WIFEXITED(status) && 0 != WEXITSTATUS(status)) {
 	   cerr << "Wait command: " << wait_command 
 	   << " exited with not zero status: " << WEXITSTATUS(status) << endl;
 	   exit(-1);
@@ -183,10 +186,10 @@ sigchld(int)
 	return;
     }
 
-    if(cpid == pid) {
-	if(core_dump)
+    if (cpid == pid) {
+	if (core_dump)
 	    exit(-1);
-	if(WIFEXITED(status))
+	if (WIFEXITED(status))
 	   exit(WEXITSTATUS(status));
 	else
 	    cerr << "Unexpected status";
@@ -195,9 +198,9 @@ sigchld(int)
 
     cout << "\n******************* ";
     vector<Command>::iterator i;
-    for(i = commands.begin(); i != commands.end(); i++) {
-	if(pid == i->_pid) {
-	    if(WIFSIGNALED(status) && WCOREDUMP(status)) {
+    for (i = commands.begin(); i != commands.end(); i++) {
+	if (pid == i->_pid) {
+	    if (WIFSIGNALED(status) && WCOREDUMP(status)) {
 		cout << "Command: " << i->_command <<  
 		    " core dumped " << pid << endl;
 		core_dump = true;
@@ -217,7 +220,7 @@ sigchld(int)
 void
 die(int)
 {
-    for(unsigned int i = 0; i < commands.size(); i++)
+    for (unsigned int i = 0; i < commands.size(); i++)
 	cout << "Command: " << commands[i]._command  << " " << 
 	    commands[i]._pid << " did not die\n";
     _exit(-1);
@@ -238,10 +241,10 @@ tidy()
     */
  restart:
     i = commands.end();
-    if(commands.begin() != i) {
+    if (commands.begin() != i) {
 	do {
 	    i--;
-	    if(Command::EMPTY != i->_pid) {
+	    if (Command::EMPTY != i->_pid) {
 		kill(i->_pid, SIGTERM);
 	    } else {
 		commands.erase(i);
@@ -257,19 +260,19 @@ tidy()
     signal(SIGALRM, die);
     alarm(10);
 
-    for(;;) {
-	if(commands.empty())
+    for (;;) {
+	if (commands.empty())
 	    return;
 	
 	int status;
 	pid_t pid = wait(&status);
 
 	vector<Command>::iterator i;
-	for(i = commands.begin(); i != commands.end(); i++) {
-	    if(pid == i->_pid) {
+	for (i = commands.begin(); i != commands.end(); i++) {
+	    if (pid == i->_pid) {
 // 		cout << "Command: " << i->_command << " killed\n";
 		commands.erase(i);
-		if(commands.empty())
+		if (commands.empty())
 		    return;
 		break;
 	    }
@@ -292,8 +295,8 @@ main(int argc, char *argv[])
     const char *command = 0;
 
     int ch;
-    while((ch = getopt(argc, argv, "qvc:")) != -1)
-	switch(ch) {
+    while ((ch = getopt(argc, argv, "qvc:")) != -1)
+	switch (ch) {
 	case 'q':	// Absolutely no output (quiet).
 	    silent = "/dev/null";
 	    break;
@@ -308,7 +311,7 @@ main(int argc, char *argv[])
 	    usage(argv[0]);
 	}
 
-    if(0 == command)
+    if (0 == command)
 	usage(argv[0]);
 
     /*
@@ -317,14 +320,14 @@ main(int argc, char *argv[])
     ** everything after the '=' is a command to run that will exit
     ** when the real command is ready.
     */
-    while(cin) {
+    while (cin) {
 	string line;
 	getline(cin, line);
-	if("" == line)
+	if ("" == line)
 	    break;
 	vector<string> tokens;
 	tokenize(line, tokens, "=");
-	switch(tokens.size()) {
+	switch (tokens.size()) {
 	case 1:
 	    {
 		Command c(tokens[0], "/bin/sleep 2");
@@ -358,10 +361,16 @@ main(int argc, char *argv[])
     /*
     ** Start all the background processes.
     */
-    for(unsigned int i = 0; i < commands.size(); i++) {
+    for (unsigned int i = 0; i < commands.size(); i++) {
 	sigset_t set;
-	sigemptyset(&set);
-	sigaddset(&set, SIGCHLD);
+	if (0 != sigemptyset(&set)) {
+	    cerr << "sigemptyset failed: " << strerror(errno) << endl;
+	    exit(-1);
+	}
+	if (0 != sigaddset(&set, SIGCHLD)) {
+	    cerr << "sigaddset failed: " << strerror(errno) << endl;
+	    exit(-1);
+	}
 
 	if (0 != sigprocmask(SIG_BLOCK, &set, 0)) {
 	    cerr << "sigprockmask failed: " << strerror(errno) << endl;
@@ -373,7 +382,7 @@ main(int argc, char *argv[])
 	    exit(-1);
 	}
  	sleep(1);
-	if("" != commands[i]._wait_command) {
+	if ("" != commands[i]._wait_command) {
 	    wait_command = commands[i]._wait_command;
 	    /*
 	    ** Block SIGCHLD delivery until the spawn command has completed.
@@ -392,7 +401,7 @@ main(int argc, char *argv[])
 		exit(-1);
 	    }
 
-	    while(Command::EMPTY != wait_command_pid)
+	    while (Command::EMPTY != wait_command_pid)
 		pause();
 	}
     }
@@ -407,7 +416,7 @@ main(int argc, char *argv[])
     ** Start the main script.
     */
     cpid = spawn(command, silent);
-    for(;;)
+    for (;;)
 	pause();
 
     return 0;
