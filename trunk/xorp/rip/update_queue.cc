@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
 
 #include <vector>
 
@@ -121,10 +121,11 @@ public:
 protected:
     static const uint32_t npos = ~0;	// Invalid iterator position rep.
 
-    vector<uint32_t> _pos;		// Position of each reader in updatequeue
+    vector<uint32_t> _pos;		// Reader positions in updatequeue
     uint32_t	     _icnt;		// Number of valid iterators
 };
 
+
 /**
  * Class that is opaquely exported to users of update queue.
  *
@@ -159,6 +160,7 @@ protected:
     uint32_t _reader_no;
 };
 
+
 /* ------------------------------------------------------------------------- */
 /* UpdateQueue methods */
 
