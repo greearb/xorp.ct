@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.3 2003/03/19 09:05:20 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.4 2003/05/24 23:35:27 mjh Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -69,7 +69,7 @@ public:
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
      */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { abort(); }
+    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { abort(); return 0;}
 
     /**
      * Delete a route from the OriginTable.
@@ -82,7 +82,7 @@ public:
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
      */
-    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { abort(); }
+    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { abort(); return 0; }
 
     /**
      * Delete all the routes that are in this OriginTable.  The

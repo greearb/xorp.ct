@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.3 2003/03/16 07:18:58 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.4 2003/03/19 09:05:19 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -167,7 +167,7 @@ public:
     RouteTable *next_table() { return _next_table; }
 
     // parent is only supposed to be called on single-parent tables
-    virtual RouteTable *parent() { abort(); }
+    virtual RouteTable *parent() { abort(); return NULL; }
 
     virtual int type() const = 0;
     const string& tablename() const { return _tablename; }
