@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.2 2003/01/26 06:15:53 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -73,11 +73,10 @@ delete_route()
     $CALLXRL "finder://bgp/bgp/0.2/delete_route?nlri:ipv4net=$1"
 }
 
-terminate()
+shutdown()
 {
-    echo -n "terminate" $*
-#    $CALLXRL "finder://bgp/bgp/0.1/terminate"
-    $CALLXRL "finder://bgp/bgp/0.2/terminate"
+    echo -n "shutdown" $*
+    $CALLXRL "finder://bgp/common/0.1/shutdown"
 }
 
 # Parse a old style config and convert it to using XRL's

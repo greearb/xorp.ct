@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.13 2003/05/08 21:27:01 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.14 2003/05/29 21:17:13 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -48,7 +48,12 @@ XrlBgpTarget::common_0_1_get_status(
 XrlCmdError
 XrlBgpTarget::common_0_1_shutdown()
 {
-    _bgp.terminate();
+    if(!_awaiting_config) {
+	_bgp.terminate();
+    } else {
+	_awaiting_config = false;
+	_done = true;
+    }
     return XrlCmdError::OKAY();
 }
 
@@ -611,20 +616,6 @@ XrlBgpTarget::bgp_0_2_get_v6_route_list_next(
     } else {
 	return XrlCmdError::COMMAND_FAILED("No more routes");
     }
-}
-
-
-XrlCmdError
-XrlBgpTarget::bgp_0_2_terminate()
-{
-    if(!_awaiting_config) {
-	_bgp.terminate();
-    } else {
-	_awaiting_config = false;
-	_done = true;
-    }
-
-    return XrlCmdError::OKAY();
 }
 
 XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_changed4(

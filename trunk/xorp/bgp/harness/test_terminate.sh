@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.2 2003/01/31 03:00:26 atanu Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.3 2003/05/29 18:56:27 hodson Exp $
 #
 
 #
@@ -51,7 +51,7 @@ configure_bgp()
 
 test1()
 {
-    CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh terminate
+    CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh shutdown
 
     sleep 5
 }
