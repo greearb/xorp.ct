@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.2 2003/10/15 18:18:38 pavlin Exp $
+# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.3 2003/10/16 18:23:07 pavlin Exp $
 #
 
 #
@@ -117,7 +117,13 @@ BEGIN {
 			if (j >= 0) {
 				# Non-empty value
 				found = 1;
-				value = a[2];
+				# Concatenate the result in case it was a list
+				value = "";
+				for (k = 2; k <= j; k++) {
+				    value = value "" a[k];
+				    if (k < j)
+					value = value "=";
+				}
 			} else {
 				# Empty value
 				found = 1;
