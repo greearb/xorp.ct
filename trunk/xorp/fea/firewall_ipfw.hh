@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.6 2004/09/16 10:42:09 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.7 2004/09/16 11:43:19 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -51,18 +51,20 @@ typedef IpfwFwRule<IPvX> IpfwFwRuleX;
 #ifdef HAVE_FIREWALL_IPFW
 // Forward declaration of templatized conversion function.
 template <typename N> void
-convert_to_ipfw(IpfwFwRule<N>& nr, const FwRule<N>& or);
+convert_to_ipfw(IpfwFwRule<N>& new_rule, const FwRule<N>& old_rule);
 #endif
 
 // deferred constructor definition.
 // This is necessary because I can't force static linkage for a
 // templatized constructor. so call the conversion function.
 template <typename N>
-IpfwFwRule<N>::IpfwFwRule<N>(const FwRule<N>& or)
+IpfwFwRule<N>::IpfwFwRule<N>(const FwRule<N>& old_rule)
 {
 #ifdef HAVE_FIREWALL_IPFW
-	convert_to_ipfw(*this, or);
-#endif /* HAVE_FIREWALL_IPFW */
+	convert_to_ipfw(*this, old_rule);
+#else
+	UNUSED(old_rule);
+#endif
 }
 
 /****************************************************************************/
