@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.73 2003/10/22 23:23:42 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.74 2003/11/06 04:02:43 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -49,11 +49,12 @@ AC_DEFINE_UNQUOTED(XORP_ROOT, "${ac_default_prefix}",
 AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${ac_default_prefix}",
 		   [Define the path to the root of the XORP installation])
 
-AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "${srcdir}",
-    		   [Define path to the top-level source directory])
-
 AC_DEFINE_UNQUOTED(XORP_BUILD_ROOT, "${PWD}",
     		   [Define path to the top-level build directory])
+
+# We'd like to use ac_abs_srcdir, except it's not available just here.
+AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "`cd ${srcdir} && echo ${PWD}`",
+    		   [Define path to the top-level source directory])
 
 # Add --enable-maintainer-mode as a command-line option for folks who
 # want to play with auto* tools.

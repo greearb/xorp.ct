@@ -1662,13 +1662,14 @@ _ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
-#define XORP_SRC_ROOT "${srcdir}"
+#define XORP_BUILD_ROOT "${PWD}"
 _ACEOF
 
 
+# We'd like to use ac_abs_srcdir, except it's not available just here.
 
 cat >>confdefs.h <<_ACEOF
-#define XORP_BUILD_ROOT "${PWD}"
+#define XORP_SRC_ROOT "`cd ${srcdir} && echo ${PWD}`"
 _ACEOF
 
 
