@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rtsock.hh,v 1.3 2003/03/10 23:20:16 hodson Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.1 2003/05/02 07:50:48 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -50,32 +50,49 @@ public:
      */
     int stop();
 
-    // RoutingSocket may fail to open routing socket during construction.
+    /**
+     * Test if the routing socket is open.
+     * 
+     * This method is needed because RoutingSocket may fail to open
+     * routing socket during construction.
+     * 
+     * @return true if the routing socket is open, otherwise false.
+     */
     inline bool is_open() const { return _fd >= 0; }
 
     /**
-     * Write data to routing socket.  Update sequence number associated
-     * with routing socket.
+     * Write data to routing socket.
+     * 
+     * This method also updates the sequence number associated with
+     * this routing socket.
+     * 
+     * @return the number of bytes which were written, or -1 if error.
      */
     ssize_t write(const void* data, size_t nbytes);
 
     /**
-     * Get sequence number for next message written into kernel.
-     * Sequence number is derived of the instance number of the routing
-     * socket and a 16bit counter.
+     * Get the sequence number for next message written into the kernel.
+     * 
+     * The sequence number is derived from the instance number of this routing
+     * socket and a 16-bit counter.
+     * 
+     * @return the sequence number for the next message written into the
+     * kernel.
      */
     inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
-     * Get cached process identifier value.
+     * Get the cached process identifier value.
+     * 
+     * @return the cached process identifier value.
      */
     inline pid_t pid() const { return _pid; }
 
     /**
-     * Force socket to read data - usually performed after writing
-     * a request that the kernel will answer, eg after writing a route
-     * lookup.
-     *
+     * Force socket to read data.
+     * 
+     * This usually is performed after writing a request that the
+     * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      */
     void force_read();
