@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.17 2003/12/04 07:20:04 pavlin Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.18 2004/01/09 00:29:03 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -79,6 +79,7 @@ librip_a_SOURCES		+= peer.hh
 librip_a_SOURCES		+= port.hh
 librip_a_SOURCES		+= port_io.hh
 librip_a_SOURCES		+= port_manager.hh
+librip_a_SOURCES		+= port_vars.hh
 librip_a_SOURCES		+= redist.hh
 librip_a_SOURCES		+= rib_notifier_base.hh
 librip_a_SOURCES		+= route_db.hh
