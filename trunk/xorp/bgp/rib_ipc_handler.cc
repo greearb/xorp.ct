@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.57 2004/09/23 00:22:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.58 2004/09/23 08:38:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -421,6 +421,8 @@ RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
     debug_msg("nlri %s unicast %d multicast %d\n", nlri.str().c_str(),
 	      unicast, multicast);
 
+// XXX: bug... wrong function called
+#if 0
     /*
     ** Create a subnet route
     */
@@ -435,17 +437,18 @@ RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
     /*
     ** Inject the message into the plumbing.
     */
+#endif    
     if (unicast) {
-	_plumbing_unicast->delete_route(msg, this);
+	_plumbing_unicast->delete_route(nlri, this);
 	_plumbing_unicast->push<IPv6>(this);
     }
 
     if (multicast) {
-	_plumbing_multicast->delete_route(msg, this);
+	_plumbing_multicast->delete_route(nlri, this);
 	_plumbing_multicast->push<IPv6>(this);
     }
 
-    msg_route->unref();
+//    msg_route->unref();
 
     return true;
 }
