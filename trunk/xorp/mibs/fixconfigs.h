@@ -12,8 +12,9 @@
 // The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
-//
-// $Log$
+
+// $XORP$
+
 
 // MIB modules include autoconf generated config.h files from both xorp and
 // net-snmp.  This header file resolves the conflicts between the two.  It
