@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.4 2003/06/17 23:45:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.5 2003/06/20 18:55:56 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -74,16 +74,23 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
 	::exit(-1);
     } else if (_rib_instance == target_instance) {
 	XLOG_ERROR("The rib died");
+	start_kill_timer();
 	_shutdown->dispatch();
-	_shutdown_timer = _eventloop.
-	    new_oneoff_after_ms(1000 * 10, ::callback(::exit, -1));
     }
 }
 
 void
-ProcessWatch::finder_death() const
+ProcessWatch::finder_death()
 {
+    start_kill_timer();
     xorp_throw(NoFinder, "");
+}
+
+void
+ProcessWatch::start_kill_timer()
+{
+    _shutdown_timer = _eventloop.
+	new_oneoff_after_ms(1000 * 10, ::callback(::exit, -1));
 }
 
 bool

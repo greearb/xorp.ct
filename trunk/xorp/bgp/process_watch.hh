@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/process_watch.hh,v 1.2 2003/06/17 16:57:10 atanu Exp $
+// $XORP: xorp/bgp/process_watch.hh,v 1.3 2003/06/20 18:55:56 hodson Exp $
 
 #ifndef __BGP_PROCESS_WATCH_HH__
 #define __BGP_PROCESS_WATCH_HH__
@@ -41,10 +41,16 @@ public:
      */
     void death(const string& target_class, const string& target_instance);
 
-    /*
+    /**
      * Method to call if the finder dies.
      */
-    void finder_death() const;
+    void finder_death();
+
+    /**
+     * Start a timer to kill this process if for some reason we get
+     * hung up.
+     */
+    void start_kill_timer();
 
     /**
      * @return Return true when all the processes that BGP requires
