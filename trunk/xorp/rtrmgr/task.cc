@@ -12,13 +12,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.6 2003/05/03 21:26:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.7 2003/05/04 06:25:20 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 #include "task.hh"
 #include "module_manager.hh"
 #include "xorp_client.hh"
+
+DelayValidation::DelayValidation(EventLoop& eventloop, uint32_t ms)
+    : _eventloop(eventloop), _delay_in_ms(ms)
+{
+}
+
+void DelayValidation::validate(CallBack cb) 
+{
+    _cb = cb;
+    _timer = _eventloop.new_oneoff_after_ms(_delay_in_ms,
+                 callback(this, &DelayValidation::timer_expired));
+}
+
+void DelayValidation::timer_expired() 
+{
+    _cb->dispatch(true);
+}
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 const XrlRouter::XrlCallback& cb, Task& task) 
@@ -158,7 +175,7 @@ Task::step2()
 {
     printf("step2\n");
     if (_start_module && (_validation != NULL)) {
-	_validation->validate(callback(this, &Task::step5_done));
+	_validation->validate(callback(this, &Task::step2_done));
     } else {
 	step3();
     }
@@ -381,4 +398,10 @@ TaskManager::find_task(const string& modname)
     assert(i != _tasks.end());
     assert(i->second != NULL);
     return *(i->second);
+}
+
+EventLoop&
+TaskManager::eventloop() const 
+{
+    return _module_manager.eventloop();
 }

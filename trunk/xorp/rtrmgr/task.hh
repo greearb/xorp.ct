@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.6 2003/05/03 21:26:47 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.7 2003/05/04 06:25:21 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -32,11 +32,22 @@ class Validation {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
 
-    Validation();
+    Validation() {};
     virtual ~Validation() {};
     virtual void validate(CallBack cb) = 0;
+protected:
+};
+
+class DelayValidation : public Validation {
+public:
+    DelayValidation(EventLoop& eventloop, uint32_t ms);
+    void validate(CallBack cb);
 private:
+    void timer_expired();
+    EventLoop& _eventloop;
     CallBack _cb;
+    uint32_t _delay_in_ms;
+    XorpTimer _timer;
 };
 
 
@@ -116,6 +127,7 @@ public:
     XorpClient& xorp_client() const {return _xorp_client;}
     ModuleManager& module_manager() const {return _module_manager;}
     bool do_exec() const {return _current_do_exec;}
+    EventLoop& eventloop() const;
 private:
     void run_task();
     void task_done(bool success, string errmsg);
