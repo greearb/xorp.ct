@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.4 2003/01/07 02:36:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.5 2003/01/07 03:08:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1862,7 +1862,7 @@ PimMre::recompute_is_join_desired_sg()
     }
     // Cancel Join Timer
     join_timer().cancel();
-    // SPTbit(S,G) to FALSE
+    // Set SPTbit(S,G) to FALSE
     set_spt(false);
     // Set the new state
     set_not_joined_state();
