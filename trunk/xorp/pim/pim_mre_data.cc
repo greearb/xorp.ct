@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.8 2003/07/08 01:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.9 2003/07/12 01:14:37 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -68,15 +68,13 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
     if (pim_mre_wc != NULL)
 	pim_nbr_rpfp_nbr_wc = pim_mre_wc->rpfp_nbr_wc();
     
-    // TODO: XXX: PAVPAVPAV: what about if both rpfp_nbr_sg() and
-    // pim_nbr_rpfp_nbr_wc are NULL??
-    
     if ((iif_vif_index == rpf_interface_s())
 	&& is_join_desired_sg()
 	&& (is_directly_connected_s()
 	    || (rpf_interface_s() != rpf_interface_rp())
 	    || (inherited_olist_sg_rpt().none())
-	    || (rpfp_nbr_sg() == pim_nbr_rpfp_nbr_wc))) {
+	    || ((rpfp_nbr_sg() == pim_nbr_rpfp_nbr_wc)
+		&& (rpfp_nbr_sg() != NULL)))) {
 	set_spt(true);
     }
 }
@@ -116,8 +114,8 @@ PimMre::is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const
 // Policy-defined SPT switch.
 // Note: applies for all entries
 bool
-PimMre::is_switch_to_spt_desired_sg(uint32_t threshold_interval_sec,
-				    uint32_t threshold_bytes) const
+PimMre::is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
+				    uint32_t measured_bytes) const
 {
     if (! pim_node().is_switch_to_spt_enabled().get())
 	return (false);		// SPT-switch disabled
@@ -131,8 +129,8 @@ PimMre::is_switch_to_spt_desired_sg(uint32_t threshold_interval_sec,
     // the threshold value, and this is within the boundaries of the
     // pre-defined interval.
     //
-    if ((threshold_bytes >= pim_node().switch_to_spt_threshold_bytes().get())
-	&& (threshold_interval_sec
+    if ((measured_bytes >= pim_node().switch_to_spt_threshold_bytes().get())
+	&& (measured_interval_sec
 	    <= pim_node().switch_to_spt_threshold_interval_sec().get())) {
 	return (true);
     }
@@ -149,17 +147,17 @@ PimMre::is_switch_to_spt_desired_sg(uint32_t threshold_interval_sec,
 bool
 PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
 			       PimMre*& pim_mre_sg,
-			       uint32_t threshold_interval_sec,
-			       uint32_t threshold_bytes)
+			       uint32_t measured_interval_sec,
+			       uint32_t measured_bytes)
 {
     //
     // XXX: Part of the CheckSwitchToSpt(S,G) macro
     // is implemented by is_monitoring_switch_to_spt_desired_sg()
     //
     if (is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)
-	&& is_switch_to_spt_desired_sg(threshold_interval_sec,
-				       threshold_bytes)) {
-	// restart KeepAliveTimer(S,G);
+	&& is_switch_to_spt_desired_sg(measured_interval_sec,
+				       measured_bytes)) {
+	// restart KeepaliveTimer(S,G);
 	if (pim_mre_sg == NULL) {
 	    // XXX: create the (S,G) entry
 	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(src, dst,
