@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.4 2002/12/19 01:29:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.5 2003/01/17 00:49:12 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -371,7 +371,7 @@ void
 XrlPFSTCPListener::connect_hook(int fd, SelectorMask /* m */)
 {
     struct sockaddr_in a;
-    size_t alen = sizeof(a);
+    socklen_t alen = sizeof(a);
 
     int cfd = accept(fd, (sockaddr*)&a, &alen);
     if (cfd < 0) {
