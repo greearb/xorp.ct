@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.14 2004/02/24 20:17:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.15 2004/02/24 21:04:54 pavlin Exp $"
 
 
 //
@@ -213,7 +213,7 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	    if (jp_group->wc()->j_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->wc()->p_list_found(source_addr))
-		return (XORP_ERROR);	// Combination not allowed
+		return (XORP_ERROR);		// Combination not allowed
 	    // Remove redundant entries: all (S,G,rpt)J
 	    while (! jp_group->sg_rpt()->j_list().empty()) {
 		const IPvX& addr = *jp_group->sg_rpt()->j_list().begin();
@@ -222,7 +222,7 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	} else {
 	    // (*,G) Prune
 	    if (jp_group->wc()->j_list_found(source_addr))
-		return (XORP_ERROR);	// Combination not allowed
+		return (XORP_ERROR);		// Combination not allowed
 	    if (jp_group->wc()->p_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	    // Remove redundant entries: all (S,G,rpt)J
@@ -249,13 +249,13 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	    if (jp_group->sg_rpt()->j_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->sg_rpt()->p_list_found(source_addr))
-		return (XORP_ERROR);	// Combination not allowed
+		return (XORP_ERROR);		// Combination not allowed
 	} else {
 	    // (S,G,rpt) Prune
 	    if (! jp_group->wc()->p_list().empty())
 		return (XORP_OK);		// Redundant; ignore.
 	    if (jp_group->sg_rpt()->j_list_found(source_addr))
-		return (XORP_ERROR);	// Combination not allowed
+		return (XORP_ERROR);		// Combination not allowed
 	    if (jp_group->sg_rpt()->p_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->sg()->j_list_found(source_addr))
@@ -272,13 +272,13 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	    if (jp_group->sg()->j_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->sg()->p_list_found(source_addr))
-		return (XORP_ERROR);	// Combination not allowed
+		return (XORP_ERROR);		// Combination not allowed
 	    // Remove redundant entries: (S,G,rpt)P
 	    jp_group->sg_rpt()->p_list_remove(source_addr);
 	} else {
 	    // (S,G) Prune
 	    if (jp_group->sg()->j_list_found(source_addr))
-		return (XORP_ERROR);	// Combination not allowed
+		return (XORP_ERROR);		// Combination not allowed
 	    if (jp_group->sg()->p_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	    // Remove redundant entries: (S,G,rpt)P  (TODO: why?)
