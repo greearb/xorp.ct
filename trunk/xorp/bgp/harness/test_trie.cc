@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.4 2003/09/10 07:50:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.5 2003/09/11 03:42:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -150,8 +150,10 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
     /*
     ** Look for a multiprotocol path attribute, if there is one
     ** present just add the net. Otherwise add a multiprotocol path
-    ** attribute and then add the nexthop.
+    ** attribute and then add the nexthop. Note: if we add the path
+    ** attribute we need operate on a pointer hence the goto.
     */
+ top:
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
@@ -160,16 +162,19 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
 	
 	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
  	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    break;
+	    mpreach->set_nexthop(nexthop);
+	    mpreach->encode();
+
+	    debug_msg("%s\n", p->str().c_str());
+	    return;
 	}
     }
 
-    MPReachNLRIAttribute<IPv6> mp;
     if(0 == mpreach) {
-	mpreach = &mp;
+	MPReachNLRIAttribute<IPv6> mp;
 	p->add_pathatt(mp);
+	goto top;
     }
-    mpreach->set_nexthop(nexthop);
 }
 
 template <class A>
