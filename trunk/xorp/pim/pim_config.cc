@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.16 2003/07/05 18:56:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.17 2003/07/05 19:46:13 pavlin Exp $"
 
 
 //
@@ -742,9 +742,8 @@ PimNode::reset_switch_to_spt_threshold(string& reason)
     return (XORP_OK);
 }
 
-
 int
-PimNode::add_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
+PimNode::add_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 					   const string& vif_name,
 					   string& reason)
 {
@@ -771,7 +770,7 @@ PimNode::add_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
 }
 
 int
-PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
+PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 					   const IPvX& vif_addr,
 					   string& reason)
 {
@@ -798,7 +797,7 @@ PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
 }
 
 int
-PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
+PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 					      const string& vif_name,
 					      string& reason)
 {
@@ -826,7 +825,7 @@ PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
 }
 
 int
-PimNode::delete_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
+PimNode::delete_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 					      const IPvX& vif_addr,
 					      string& reason)
 {
