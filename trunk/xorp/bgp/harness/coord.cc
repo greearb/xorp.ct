@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.4 2003/03/10 23:20:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.5 2003/04/02 22:18:59 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -28,7 +28,7 @@
 #include "command.hh"
 
 static const char SERVER[] = "coord";/* This servers name */
-static const char VERSION[] = "0.1";
+static const char SERVER_VERSION[] = "0.1";
 
 /*
 -------------------- XRL --------------------
@@ -54,7 +54,7 @@ XrlCoordTarget::common_0_1_get_version(string& version)
 {
     debug_msg("\n");
 
-    version = VERSION;
+    version = SERVER_VERSION;
     return XrlCmdError::OKAY();
 }
 

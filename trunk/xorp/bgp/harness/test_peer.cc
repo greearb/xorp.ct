@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.6 2003/03/10 23:20:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.7 2003/04/02 22:19:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -32,7 +32,7 @@
 #include "test_peer.hh"
 
 static const char SERVER[] = "test_peer";/* This servers name */
-static const char VERSION[] = "0.1";
+static const char SERVER_VERSION[] = "0.1";
 
 #define	ZAP(s)	zap(s, #s)
 
@@ -61,7 +61,7 @@ XrlTestPeerTarget::common_0_1_get_version(string& version)
 {
     debug_msg("\n");
 
-    version = VERSION;
+    version = SERVER_VERSION;
     return XrlCmdError::OKAY();
 }
 
