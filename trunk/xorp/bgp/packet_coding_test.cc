@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.3 2002/12/14 00:31:13 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
 
-int test_simple_open_packet() {
+int test_simple_open_packet() 
+{
     /* In this test we create an Open Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
@@ -65,10 +66,13 @@ int test_simple_open_packet() {
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
+    delete[] buf;
+    delete[] buf2;
     return 0;
 }
 
-int test_keepalive_packet() {
+int test_keepalive_packet() 
+{
     /* In this test we create an Keepalive Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
@@ -101,11 +105,14 @@ int test_keepalive_packet() {
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
+    delete[] buf;
+    delete[] buf2;
     return 0;
 }
 
 int test_notification_packets(const uint8_t *d, uint8_t ec, 
-			      uint8_t esc, uint16_t l) {
+			      uint8_t esc, uint16_t l) 
+{
     /* In this test we create a Notification Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
@@ -158,10 +165,15 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
+
+    delete notificationpacket;
+    delete[] buf;
+    delete[] buf2;
     return 0;
 }
 
-int test_withdraw_packet(bool verbose) {
+int test_withdraw_packet(bool verbose) 
+{
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
@@ -215,10 +227,13 @@ int test_withdraw_packet(bool verbose) {
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
+    delete[] buf;
+    delete[] buf2;
     return 0;
 }
 
-int test_announce_packet(bool verbose) {
+int test_announce_packet(bool verbose) 
+{
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
@@ -426,14 +441,25 @@ int test_announce_packet(bool verbose) {
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
+
+
+
+    // clean up
+    delete[] buf;
+    delete[] buf2;
+    for (i=0;i<=9;i++) {
+	delete as[i];
+    }
     return 0;
 }
 
-void sep(bool verbose) {
+void sep(bool verbose) 
+{
     if (verbose) printf("-------------------------------------------------------------------------\n");
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
     int c;
     bool verbose = false;
     while ((c = getopt(argc, argv, "v")) != EOF) {

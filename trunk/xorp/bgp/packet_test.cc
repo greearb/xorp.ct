@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -30,7 +30,7 @@
 
 int main(int /* argc */, char *argv[])
 {
-    BGPTestPacket* tp = new BGPTestPacket();
+    BGPTestPacket tp;
     
     //
     // Initialize and start xlog
@@ -42,14 +42,13 @@ int main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
     
-    tp->run_tests();
+    tp.run_tests();
     
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
     return 0;
 }
 
@@ -112,6 +111,7 @@ bool BGPTestPacket::test_keepalive()
 
     delete keepalivepacket;
     delete ka;
+    delete[] buf;
     
     return result;
 }
@@ -138,6 +138,8 @@ bool BGPTestPacket::test_open()
 	openpacket->decode();
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket from buffer failed\n");
+	delete op;
+	delete[] buf;
 	return false;
     }
     
@@ -147,6 +149,7 @@ bool BGPTestPacket::test_open()
 
     delete openpacket;
     delete op;
+    delete[] buf;
     
     return result;
 }
@@ -172,6 +175,8 @@ bool BGPTestPacket::test_update()
 	updatepacket->decode();
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket from buffer failed\n");
+	delete up;
+	delete[] buf;
 	return false;
     }
     
@@ -181,6 +186,7 @@ bool BGPTestPacket::test_update()
 
     delete updatepacket;
     delete up;
+    delete[] buf;
 
     return result;
 }
@@ -205,6 +211,8 @@ bool BGPTestPacket::test_notification()
 	notificationpacket->decode();
     } catch (InvalidPacket& err) {
 	debug_msg("Construction of NotificationPacket from buffer failed\n");
+	delete np;
+	delete[] buf;
 	return false;
     }
 
@@ -214,6 +222,7 @@ bool BGPTestPacket::test_notification()
 
     delete notificationpacket;
     delete np;
+    delete[] buf;
     
     return result;
 }
@@ -221,49 +230,42 @@ bool BGPTestPacket::test_notification()
 KeepAlivePacket* BGPTestPacket::create_keepalive()
 {
     KeepAlivePacket* p = new KeepAlivePacket();
-    uint8_t* m = new uint8_t[16] = {255,1,255,2,255,3,255,4,255,5,255,6,255,7,255,8};
+    uint8_t m[16] = {255,1,255,2,255,3,255,4,255,5,255,6,255,7,255,8};
     p->set_marker(m);
     return p;
 }
 
 UpdatePacket* BGPTestPacket::create_update()
 {
-	IPv4* ip[3];
-	ip[0] = new IPv4("1.2.3.4");
-	ip[1] = new IPv4("5.6.7.8");
-	ip[2] = new IPv4("1.2.3.4");
-	IPv4Net* net[3];
-	net[0] = new IPv4Net(*ip[0],32);
-	net[1] = new IPv4Net(*ip[1],32);
-	net[2] = new IPv4Net(*ip[2],32);
-	BGPWithdrawnRoute wdr(*net[2]);
+    IPv4Net net[3];
+    net[0] = IPv4Net("1.2.3.4/32");
+    net[1] = IPv4Net("5.6.7.8/32");
+    net[2] = IPv4Net("1.2.3.4/32");
+    BGPWithdrawnRoute wdr(net[2]);
 	
-	AsSegment as_seq;
-	as_seq.set_type(AS_SEQUENCE);
-	debug_msg("sequence length : %d\n",as_seq.get_as_size());
-        as_seq.add_as((uint16_t)12);
-	debug_msg("sequence length : %d\n",as_seq.get_as_size());
-        as_seq.add_as((uint16_t)13);
-	debug_msg("sequence length : %d\n",as_seq.get_as_size());
-        as_seq.add_as((uint16_t)14);
-        //(path_att->as_path()).add_segment(as_seq);
-	AsPath p;
-	p.add_segment(as_seq);
-	debug_msg("sequence length : %d\n",as_seq.get_as_size());
-	NetLayerReachability nlr_0(*net[0]);
-	NetLayerReachability nlr_1(*net[1]);	
-	nlr_0.dump();
-	nlr_1.dump();
-	wdr.dump();
-        ASPathAttribute path_att(p);
-//	return new UpdatePacket(0,0,0,0,0,0);
-//	return new UpdatePacket(1,wdr,1,path_att,2,nlr_0);
-	UpdatePacket *bup = new UpdatePacket();
-	bup->add_withdrawn(wdr);
-	bup->add_pathatt(path_att);
-	bup->add_nlri(nlr_0);
-	bup->add_nlri(nlr_1);
-	return bup;
+    AsSegment as_seq;
+    as_seq.set_type(AS_SEQUENCE);
+    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    as_seq.add_as((uint16_t)12);
+    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    as_seq.add_as((uint16_t)13);
+    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    as_seq.add_as((uint16_t)14);
+    AsPath p;
+    p.add_segment(as_seq);
+    debug_msg("sequence length : %d\n",as_seq.get_as_size());
+    NetLayerReachability nlr_0(net[0]);
+    NetLayerReachability nlr_1(net[1]);	
+    nlr_0.dump();
+    nlr_1.dump();
+    wdr.dump();
+    ASPathAttribute path_att(p);
+    UpdatePacket *bup = new UpdatePacket();
+    bup->add_withdrawn(wdr);
+    bup->add_pathatt(path_att);
+    bup->add_nlri(nlr_0);
+    bup->add_nlri(nlr_1);
+    return bup;
 }
 
 OpenPacket* BGPTestPacket::create_open()
@@ -325,7 +327,12 @@ bool BGPTestPacket::test_aspath()
 	debug_msg("AS 16 (extended) == AS16 (extended)\n");
     else
 	debug_msg("AS 16 (extended) != AS16 (extended)\n");
-    
+
+    delete asnum1;
+    delete asnum2;
+    delete asnum3;
+    delete asnum4;
+    delete asnum5;
     // dummy return value;
     return true;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.2 2002/12/13 22:38:53 rizzo Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -111,6 +111,8 @@ main(int argc, char* argv[])
     assert(aspath->contains(*as[12]) == true);
     assert(aspath->contains(*asn) == true);
     delete asn;
+    for (i=10;i<=12;i++) 
+	delete as[i];
 
     if (verbose)
 	printf("Test constructing an As Path from a string");
@@ -187,6 +189,9 @@ main(int argc, char* argv[])
     assert(aspath->contains(*asn) == false);
     delete asn;
     sleep(10);
+#else
+    delete aspath;
+    delete aspathcopy;
 #endif
     exit(0);
 }

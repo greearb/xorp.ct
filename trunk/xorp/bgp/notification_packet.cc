@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -92,9 +92,9 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
 NotificationPacket::~NotificationPacket()
 {
     if (_Data != NULL)
-	delete _Data;
+	delete[] _Data;
     if (_error_data != NULL)
-	delete _error_data;
+	delete[] _error_data;
 }
 
 void

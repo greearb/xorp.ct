@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.56 2002/12/09 18:28:46 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -227,6 +227,18 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
     
     _tables.insert(filter_out);
     _tables.insert(cache_out);
+}
+
+template <class A>
+BGPPlumbingAF<A>::~BGPPlumbingAF<A>() {
+    set <BGPRouteTable<A>*>::iterator i;
+    for(i = _tables.begin(); i != _tables.end(); i++) {
+	delete (*i);
+    }
+    delete _decision_table;
+    delete _fanout_table;
+    delete _ipc_rib_in_table;
+    delete _ipc_rib_out_table;
 }
 
 template <class A>
@@ -508,6 +520,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
     rt = iter2->second;
     while(rt != _decision_table) {
 	child = rt->next_table();
+	_tables.erase(rt);
 	delete rt;
 	rt = child;
     }
@@ -524,6 +537,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
 	parent = rt->parent();
 	if (rt->type() == CACHE_TABLE)
 	    ((BGPCacheTable<A>*)rt)->flush_cache();
+	_tables.erase(rt);
 	delete rt;
 	rt = parent;
     }

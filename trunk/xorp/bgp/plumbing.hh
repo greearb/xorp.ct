@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.27 2002/12/09 18:28:46 hodson Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -35,7 +35,7 @@ template <class A>
 class BGPPlumbingAF {
 public:
     BGPPlumbingAF(string ribname, BGPPlumbing& master, XrlStdRouter *);
-
+    ~BGPPlumbingAF();
     int add_peering(PeerHandler* peer_handler);
     int stop_peering(PeerHandler* peer_handler);
     int peering_went_down(PeerHandler* peer_handler);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.3 2002/12/14 23:42:49 hodson Exp $"
 
 #include "fcntl.h"
 
@@ -53,6 +53,7 @@ PlumbingTest::test1()
 
     BGPPeerData *peer_data1 = new BGPPeerData();
     peer_data1->set_as_num((uint16_t)666);
+    peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
     printf("Adding Peering 1\n");
@@ -63,6 +64,7 @@ PlumbingTest::test1()
 
     BGPPeerData *peer_data2 = new BGPPeerData();;
     peer_data2->set_as_num((uint16_t)667);
+    peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
     printf("Adding Peering 2\n");
@@ -290,6 +292,8 @@ PlumbingTest::test2()
     printf("Adding Route 1 from peerhandler %x\n", 
 	   (u_int)(&dummy_peerhandler1));
     add_route(*rtm1, &dummy_peerhandler1);
+    delete rtm1;
+    delete route1;
     printf("4 ****>%s<****\n", aspathatt.str().c_str());
     printf("Add done\n");
 
