@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.54 2002/12/09 18:29:29 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -322,7 +322,7 @@ PimNbr::pim_hello_lan_prune_delay_process(bool lan_prune_delay_tbit,
 					  uint16_t override_interval)
 {
     _is_lan_prune_delay_present = true;
-    _is_tracking_support_present = lan_prune_delay_tbit;
+    _is_tracking_support_disabled = lan_prune_delay_tbit;
     _lan_delay = lan_delay;
     _override_interval = override_interval;
 }

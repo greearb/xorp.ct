@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.25 2002/12/09 18:29:28 hodson Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -70,11 +70,11 @@ public:
 	_is_dr_priority_present = v;
     }
     
-    bool	is_tracking_support_present() const {
-	return (_is_tracking_support_present);
+    bool	is_tracking_support_disabled() const {
+	return (_is_tracking_support_disabled);
     }
-    void	set_is_tracking_support_present(bool v) {
-	_is_tracking_support_present = v;
+    void	set_is_tracking_support_disabled(bool v) {
+	_is_tracking_support_disabled = v;
     }
     
     uint16_t	lan_delay() const { return (_lan_delay); }
@@ -148,7 +148,7 @@ private:
     uint16_t	_hello_holdtime;	// The Holdtime from/for this nbr
     Timer	_timeout_timer;		// Timer to expire the neighbor
     // LAN Prune Delay option related info
-    bool	_is_tracking_support_present; // The T-bit
+    bool	_is_tracking_support_disabled; // The T-bit
     uint16_t	_lan_delay;		// The LAN Delay
     uint16_t	_override_interval;	// The Override Interval
     bool	_is_lan_prune_delay_present;// Is the LAN Prune Delay present

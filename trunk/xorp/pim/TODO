@@ -1,10 +1,6 @@
 #
-# $XORP: xorp/pim/TODO,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+# $XORP: xorp/pim/TODO,v 1.2 2002/12/20 00:37:38 pavlin Exp $
 #
-
-* IMPL+SPEC: Rename tracking_support to tracking_support_disabled
-  Also, the explanation for the T bit in the LAN Prune Delay (Hello Option)
-  must be more specific.
 
 * IMPL: Make sure that t_joinsuppress is used as appropriate instead
   of t_suppress

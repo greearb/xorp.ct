@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.29 2002/12/09 18:29:27 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 //
 // PIM neigbor routers handling
@@ -95,7 +95,7 @@ PimNbr::reset_received_options()
     _hello_holdtime = PIM_HELLO_HELLO_HOLDTIME_DEFAULT;
     _timeout_timer.cancel();
     _is_lan_prune_delay_present = false;
-    _is_tracking_support_present = false;
+    _is_tracking_support_disabled = false;
     _lan_delay = 0;
     _override_interval = 0;
     _is_nohello_neighbor = false;

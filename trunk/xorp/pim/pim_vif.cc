@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.76 2002/12/09 18:29:31 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -1202,7 +1202,7 @@ PimVif::is_lan_suppression_state_enabled() const
     list<PimNbr *>::const_iterator iter;
     for (iter = _pim_nbrs.begin(); iter != _pim_nbrs.end(); ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (! pim_nbr->is_tracking_support_present()) {
+	if (! pim_nbr->is_tracking_support_disabled()) {
 	    return (true);
 	}
     }

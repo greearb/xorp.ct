@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.56 2002/12/09 18:29:31 hodson Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -332,12 +332,12 @@ private:
     }
     void	set_lan_delay_callback(uint16_t v) {
 	_pim_nbr_me.set_lan_delay(v);
-	_pim_nbr_me.set_is_tracking_support_present(true);
+	_pim_nbr_me.set_is_tracking_support_disabled(true);
 	_pim_nbr_me.set_is_lan_prune_delay_present(true);
     }
     void	set_override_interval_callback(uint16_t v) {
 	_pim_nbr_me.set_override_interval(v);
-	_pim_nbr_me.set_is_tracking_support_present(true);
+	_pim_nbr_me.set_is_tracking_support_disabled(true);
 	_pim_nbr_me.set_is_lan_prune_delay_present(true);
     }
     void	set_join_prune_period_callback(uint16_t v) {
