@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.20 2004/05/31 02:32:16 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.21 2004/06/10 22:41:53 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -91,10 +91,13 @@ SlaveConfigTree::commit_changes(string& result, XorpShell& xorpsh, CallBack cb)
     size_t tid = 0;
     tid = _xclient.begin_transaction();
     _root_node.initialize_commit();
+    bool needs_update = false;
     if (_root_node.commit_changes(NULL, "", _xclient, tid,
 				  /* do_exec = */ false,
 				  /* do_commit = */ false,
-				  0, 0, result) == false) {
+				  0, 0,
+				  result,
+				  needs_update) == false) {
 	// Something went wrong - return the error message.
 	return false;
     }

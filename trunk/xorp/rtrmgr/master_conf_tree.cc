@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.36 2004/06/04 23:34:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.37 2004/06/10 22:41:52 hodson Exp $"
 
 
 #include <sys/stat.h>
@@ -427,10 +427,12 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 	}
     }
 
+    bool needs_update = false;
     if (_root_node.commit_changes(_task_manager,
 				  /* do_commit = */ false,
 				  0, 0,
-				  result)
+				  result,
+				  needs_update)
 	== false) {
 	// Something went wrong - return the error message.
 	_commit_in_progress = false;
@@ -502,9 +504,12 @@ MasterConfigTree::commit_changes_pass2()
 	}
     }
 
+    bool needs_update = false;
     if (!_root_node.commit_changes(_task_manager,
 				   /* do_commit = */ true,
-				   0, 0, result)) {
+				   0, 0,
+				   result,
+				   needs_update)) {
 	// Abort the commit
 	XLOG_ERROR("Commit failed in config tree");
 	_commit_in_progress = false;

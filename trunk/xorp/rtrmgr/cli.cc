@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.55 2004/07/20 23:02:27 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.56 2004/07/20 23:09:21 mjh Exp $"
 
 #include <pwd.h>
 
@@ -1091,6 +1091,7 @@ RouterCLI::add_edit_subtree()
 
     cmds.push_back("%create");
     cmds.push_back("%activate");
+    cmds.push_back("%update");
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
     XLOG_ASSERT(current_config_node != NULL);
 
@@ -1152,6 +1153,7 @@ RouterCLI::add_delete_subtree()
 
     cmds.push_back("%create");
     cmds.push_back("%activate");
+    cmds.push_back("%update");
     cmds.push_back("%set");
     cmds.push_back("%delete");
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);

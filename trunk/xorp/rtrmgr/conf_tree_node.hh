@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.22 2004/06/09 03:14:13 hodson Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.23 2004/06/10 22:41:52 hodson Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -68,7 +68,8 @@ public:
 
     void initialize_commit();
     bool commit_changes(TaskManager& task_manager, bool do_commit,
-			int depth, int last_depth, string& result);
+			int depth, int last_depth, string& result,
+			bool& needs_update);
     bool check_commit_status(string& response) const;
     void finalize_commit();
     string discard_changes(int depth, int last_depth);
@@ -145,7 +146,7 @@ protected:
 
     // Flags to keep track of what changes we've made since the last commit
     bool _existence_committed;	// Do we need to run %create commands
-    bool _value_committed;	// Do we need to run %setting or %set commands
+    bool _value_committed;	// Do we need to run %set commands
 
     int _actions_pending;	// Needed to track how many response callbacks
 				// callbacks we expect during a commit

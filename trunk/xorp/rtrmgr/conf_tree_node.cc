@@ -412,6 +412,12 @@ ConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
+	    cmd = _template_tree_node->const_command("%update");
+	    if (cmd != NULL) {
+		modules = cmd->affected_xrl_modules();
+		for (iter = modules.begin(); iter != modules.end(); ++iter)
+		    changed_modules.insert(*iter);
+	    }
 	}
     }
 
@@ -436,6 +442,12 @@ ConfigTreeNode::find_active_modules(set<string>& active_modules) const
 		active_modules.insert(*iter);
 	}
 	cmd = _template_tree_node->const_command("%activate");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (iter = modules.begin(); iter != modules.end(); ++iter)
+		active_modules.insert(*iter);
+	}
+	cmd = _template_tree_node->const_command("%update");
 	if (cmd != NULL) {
 	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -471,6 +483,12 @@ ConfigTreeNode::find_all_modules(set<string>& all_modules) const
 		all_modules.insert(*iter);
 	}
 	cmd = _template_tree_node->const_command("%activate");
+	if (cmd != NULL) {
+	    modules = cmd->affected_xrl_modules();
+	    for (iter = modules.begin(); iter != modules.end(); ++iter)
+		all_modules.insert(*iter);
+	}
+	cmd = _template_tree_node->const_command("%update");
 	if (cmd != NULL) {
 	    modules = cmd->affected_xrl_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -572,7 +590,8 @@ bool
 ConfigTreeNode::commit_changes(TaskManager& task_manager,
 			       bool do_commit,
 			       int depth, int last_depth,
-			       string& result)
+			       string& result,
+			       bool& needs_update)
 {
     bool success = true;
     const Command *cmd = NULL;
@@ -634,7 +653,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    }
 		}
 	    } else {
-		// Check any allow commands that might prevent us
+		// Check any %allow commands that might prevent us
 		// going any further
 		cmd = _template_tree_node->const_command("%allow");
 		if (cmd == NULL) {
@@ -705,21 +724,28 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	string child_response;
 	success = (*prev_iter)->commit_changes(task_manager, do_commit,
 					       depth + 1, last_depth, 
-					       child_response);
+					       child_response,
+					       needs_update);
 	result += child_response;
 	if (success == false) {
 	    return false;
 	}
     }
 
-    if (!_deleted
-	&& (_existence_committed == false || _value_committed == false)) {
-	if (_template_tree_node != NULL) {
-	    // Finally, on the way back out, we run the %activate commands
+    //
+    // Take care of %activate and %update commands on the way back out.
+    //
+    do {
+	if (_deleted)
+	    break;
+	if (_template_tree_node == NULL)
+	    break;
+
+	// The %activate command
+	if (_existence_committed == false) {
 	    cmd = _template_tree_node->const_command("%activate");
 	    if (cmd != NULL) {
-		debug_msg("found commands: %s\n",
-			  cmd->str().c_str());
+		debug_msg("found commands: %s\n", cmd->str().c_str());
 		int actions = cmd->execute(*this, task_manager);
 		if (actions < 0) {
 		    result = "Parameter error for \"" + path() + "\"\n";
@@ -730,8 +756,34 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		}
 		_actions_pending += actions;
 	    }
+	    break;
 	}
-    }
+
+	// The %update command
+	if (needs_update || (_value_committed == false)) {
+	    cmd = _template_tree_node->const_command("%update");
+	    if (cmd == NULL) {
+		if (_value_committed == false)
+		    needs_update = true;
+	    } else {
+		debug_msg("found commands: %s\n", cmd->str().c_str());
+		needs_update = false;
+		int actions = cmd->execute(*this, task_manager);
+		if (actions < 0) {
+		    result = "Parameter error for \"" + path() + "\"\n";
+		    result += "No changes have been committed.\n";
+		    result += "Correct this error and try again.\n";
+		    XLOG_WARNING("%s\n", result.c_str());
+		    return false;
+		}
+		_actions_pending += actions;
+	    }
+	    break;
+	}
+
+	break;
+    } while (false);
+
     if (_template_tree_node != NULL) {
 	cmd = _template_tree_node->const_command("%modinfo");
 	if (cmd != NULL) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.26 2004/06/08 19:06:27 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.27 2004/06/10 22:41:54 hodson Exp $"
 
 
 #include <glob.h>
@@ -107,6 +107,7 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
 	// Nothing to do - the work is done by add_action
     } else if ((cmd == "%create")
 	       || (cmd == "%activate")
+	       || (cmd == "%update")
 	       || (cmd == "%list")
 	       || (cmd == "%delete")
 	       || (cmd == "%set")
@@ -124,7 +125,7 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
     } else {
 	string err = "Invalid command \"" + cmd + "\"\n";
 	err += "Valid commands are %create, %delete, %set, %unset, %get, ";
-	err += "%default, %modinfo, %activate, %allow, %allow-range, %mandatory\n";
+	err += "%default, %modinfo, %activate, %update, %allow, %allow-range, %mandatory\n";
 	xorp_throw(ParseError, err);
     }
 }
