@@ -3,6 +3,7 @@
 #
 # This is an example of how to find and source the pathconf shell script.
 # The latter sets path related variables.
+#
 
 #
 # source_pathconf [ <search_start_dir> ]
