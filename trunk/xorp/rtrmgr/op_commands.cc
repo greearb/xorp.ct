@@ -32,13 +32,11 @@ extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
 OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
-		       const string& command_default_arguments,
-		       const string& command_line,
+		       const string& command_arguments,
 		       RouterCLI::OpModeCallback cb,
 		       OpCommand* op_command)
     : _executable_filename(executable_filename),
-      _command_default_arguments(command_default_arguments),
-      _command_line(command_line),
+      _command_arguments(command_arguments),
       _op_command(op_command),
       _error(false),
       _last_offset(0),
@@ -49,8 +47,7 @@ OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
     memset(_outbuffer, 0, OP_BUF_SIZE);
     memset(_errbuffer, 0, OP_BUF_SIZE);
 
-    string execute = executable_filename + " " + command_default_arguments;
-    execute += " " + command_line;
+    string execute = executable_filename + " " + command_arguments;
 
     popen2(execute, out_stream, err_stream);
     if (out_stream == NULL) {
@@ -221,21 +218,110 @@ OpCommand::command_parts2command_name(const list<string>& command_parts)
     return res;
 }
 
+string
+OpCommand::select_positional_argument(const list<string>& arguments,
+				      const string& position,
+				      string& error_msg)
+{
+    //
+    // Check the positional argument
+    //
+    if (position.empty()) {
+	error_msg = c_format("Empty positional argument");
+	return string("");
+    }
+    if (position[0] != '$') {
+	error_msg = c_format("Invalid positional argument \"%s\": "
+			     "first symbol is not '$'", position.c_str());
+	return string("");
+    }
+    if (position.size() <= 1) {
+	error_msg = c_format("Invalid positional argument \"%s\": "
+			     "missing position value", position.c_str());
+	return string("");
+    }
+
+    //
+    // Get the positional argument value
+    //
+    const string pos_str = position.substr(1, string::npos);
+    int pos = atoi(pos_str.c_str());
+    if ((pos < 0) || (pos > static_cast<int>(arguments.size()))) {
+	error_msg = c_format("Invalid positional argument \"%s\": "
+			     "expected values must be in interval "
+			     "[0, %u]",
+			     position.c_str(),
+			     arguments.size());
+	return string("");
+    }
+
+    string resolved_str;
+    list<string>::const_iterator iter;
+    if (pos == 0) {
+	// Add all arguments
+	for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
+	    if (! resolved_str.empty())
+		resolved_str += " ";
+	    resolved_str += *iter;
+	}
+    } else {
+	// Select a single argument
+	int tmp_pos = 0;
+	for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
+	    tmp_pos++;
+	    if (tmp_pos == pos) {
+		resolved_str += *iter;
+		break;
+	    }
+	}
+    }
+    XLOG_ASSERT(! resolved_str.empty());
+
+    return resolved_str;
+}
+
 void
 OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
 		   RouterCLI::OpModeCallback cb)
 {
-    string command_line_str;
+    string command_arguments_str;
+    list<string>::const_iterator iter, iter2;
 
-    list<string>::const_iterator iter;
-    for (iter = command_line.begin(); iter != command_line.end(); ++iter) {
-	if (iter != command_line.begin())
-	    command_line_str += " ";
-	command_line_str += *iter;
+    //
+    // Add all arguments. If an argument is positional (e.g., $0, $1, etc),
+    // then resolve it by using the strings from the command line.
+    //
+    for (iter = _command_action_arguments.begin();
+	 iter != _command_action_arguments.end();
+	 ++iter) {
+	const string& arg = *iter;
+	XLOG_ASSERT(! arg.empty());
+
+	// Add an extra space between arguments
+	if (! command_arguments_str.empty())
+	    command_arguments_str += " ";
+
+	// If the argument is not positional, then just add it
+	if (arg[0] != '$') {
+	    command_arguments_str += arg;
+	    continue;
+	}
+
+	//
+	// The argument is positional, hence resolve it using
+	// the command-line strings.
+	//
+	string error_msg;
+	string resolved_str = select_positional_argument(command_line, arg,
+							 error_msg);
+	if (resolved_str.empty()) {
+	    XLOG_FATAL("Internal programming error: %s", error_msg.c_str());
+	}
+	command_arguments_str += resolved_str;
     }
+
     _instances.insert(new OpInstance(eventloop, _command_executable_filename,
-				     _command_action_arguments,
-				     command_line_str, cb, this));
+				     command_arguments_str, cb, this));
 }
 
 bool

@@ -32,8 +32,7 @@ class TemplateTree;
 class OpInstance {
 public:
     OpInstance(EventLoop* eventloop, const string& executable_filename,
-	       const string& command_default_arguments,
-	       const string& command_line, RouterCLI::OpModeCallback cb,
+	       const string& command_arguments, RouterCLI::OpModeCallback cb,
 	       OpCommand* op_command);
     OpInstance(const OpInstance& orig);
     ~OpInstance();
@@ -47,8 +46,7 @@ private:
     static const size_t OP_BUF_SIZE = 8192;
 
     string		_executable_filename;
-    string		_command_default_arguments;
-    string		_command_line;
+    string		_command_arguments;
     OpCommand*		_op_command;
     AsyncFileReader*	_stdout_file_reader;
     AsyncFileReader*	_stderr_file_reader;
@@ -73,13 +71,28 @@ public:
     void set_module(const string& v) { _module = v; }
     void set_command_action(const string& v) { _command_action = v; }
     void set_command_action_filename(const string& v) { _command_action_filename = v; }
-    void set_command_action_arguments(const string& v) { _command_action_arguments = v; }
+    void set_command_action_arguments(const list<string>& v) { _command_action_arguments = v; }
     void set_command_executable_filename(const string& v) { _command_executable_filename = v; }
 
     void add_opt_param(const string& opt_param, const string& opt_param_help);
     bool has_opt_param(const string& opt_param) const;
     string str() const;
     static string command_parts2command_name(const list<string>& command_parts);
+    /**
+     * Select a positional argument.
+     *
+     *
+     *
+     * @param arguments the list with the arguments.
+     * @param position the positional argument (e.g., "$0" specifies all
+     * arguments, "$1" is the first argument, "$2" the second argument, etc.)
+     * @param error_msg the error message (if error).
+     * @return if @ref position is valid, then the string with the selected
+     * argument, or an empty string if an error.
+     */
+    static string select_positional_argument(const list<string>& arguments,
+					     const string& position,
+					     string& error_msg);
     void execute(EventLoop* eventloop, const list<string>& command_line,
 		 RouterCLI::OpModeCallback cb);
 
@@ -97,7 +110,7 @@ private:
     string		_module;
     string		_command_action;
     string		_command_action_filename;
-    string		_command_action_arguments;
+    list<string>	_command_action_arguments;
     string		_command_executable_filename;
     map<string, string>	_opt_params;	// Optional parameters and the CLI help
     set<OpInstance*>	_instances;

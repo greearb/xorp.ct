@@ -419,6 +419,7 @@ add_cmd_command(char *s)
 	opcmderror(errmsg.c_str());
     }
 
+    // Get a reference to the OpCommand instance
     OpCommand& op_command = op_command_stack.back();
     if (! op_command.command_action().empty()) {
 	string errmsg = c_format("Command action already set to %s "
@@ -426,9 +427,52 @@ add_cmd_command(char *s)
 				 op_command.command_action().c_str());
 	opcmderror(errmsg.c_str());
     }
+
+    //
+    // Split the arguments and verify that the positional arguments
+    // (e.g., $0, $1, etc) are resolvable.
+    //
+    list<string> command_action_arguments;
+    string current_argument;
+    for (size_t i = 0; i < arguments.length(); i++) {
+	if ((arguments[i] == ' ') || (arguments[i] == '\t')) {
+	    if (! current_argument.empty()) {
+		command_action_arguments.push_back(current_argument);
+		current_argument.clear();
+	    }
+	    continue;
+	}
+	current_argument += arguments[i];
+    }
+    // Add the last argument
+    if (! current_argument.empty()) {
+	command_action_arguments.push_back(current_argument);
+	current_argument.clear();
+    }
+    // Verify the positional arguments
+    list<string>::const_iterator iter;
+    for (iter = command_action_arguments.begin();
+	 iter != command_action_arguments.end();
+	 ++iter) {
+	const string& arg = *iter;
+	if (arg.empty()) {
+	    string errmsg = c_format("Internal error spliting the positional "
+				     "arguments");
+	    opcmderror(errmsg.c_str());
+	}
+	if (arg[0] == '$') {
+	    string errmsg;
+	    string resolved_str = op_command.select_positional_argument(
+		op_command.command_parts(), arg, errmsg);
+	    if (resolved_str.empty()) {
+		opcmderror(errmsg.c_str());
+	    }
+	}
+    }
+
     op_command.set_command_action(command);
     op_command.set_command_action_filename(filename);
-    op_command.set_command_action_arguments(arguments);
+    op_command.set_command_action_arguments(command_action_arguments);
     op_command.set_command_executable_filename(executable_filename);
 
     if (is_help_tag) {
@@ -548,7 +592,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 552 "y.opcmd_tab.c"
+#line 596 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -811,7 +855,7 @@ case 26:
 #line 102 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 815 "y.opcmd_tab.c"
+#line 859 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

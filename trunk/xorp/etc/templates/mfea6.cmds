@@ -1,32 +1,32 @@
-/* $XORP: xorp/etc/templates/mfea6.cmds,v 1.1 2004/05/05 07:11:32 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea6.cmds,v 1.2 2004/05/16 07:15:17 pavlin Exp $ */
 
 /* TODO: "show mfea6" is temporary here just for the sake of the HELP string */
 show mfea6 {
-    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
     %module: mfea6;
     %tag: HELP "Display information about IPv6 MFEA";
 }
 
 show mfea6 dataflow {
-    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
     %module: mfea6;
     %tag: HELP "Display information about MFEA IPv6 dataflow filters";
 }
 
 show mfea6 interface {
-    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
     %module: mfea6;
     %tag: HELP "Display information about MFEA IPv6 interfaces";
 }
 
 show mfea6 interface address {
-    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
     %module: mfea6;
     %tag: HELP "Display information about addresses of MFEA IPv6 interfaces";
 }
 
 show mfea6 mrib {
-    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
     %module: mfea6;
     %tag: HELP "Display MRIB IPv6 information inside MFEA";
 }
