@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.5 2003/01/21 16:56:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.6 2003/01/21 18:54:27 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -23,8 +23,10 @@
 
 /* **************** BGPNotificationPacket *********************** */
 
-NotificationPacket::NotificationPacket(uint8_t ec, uint8_t esc = 0,
-		const uint8_t *ed = 0, size_t elen = 0)
+NotificationPacket::NotificationPacket(uint8_t		ec,
+				       uint8_t		esc,
+				       const uint8_t*	ed,
+				       size_t		elen)
 {
     debug_msg("Error code %d sub code %d data %#x len %d\n", ec, esc,
 	      (int)ed, elen);
