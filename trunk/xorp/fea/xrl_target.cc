@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.38 2004/03/21 04:01:45 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.39 2004/03/24 01:26:13 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -926,6 +926,16 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
     return _xifmgr.add(tid, new RemoveInterface(it, ifname));
 }
 
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    IfTree& it = _xifmgr.iftree();
+    return _xifmgr.add(tid, new ConfigureInterfaceFromSystem(ifc, it, ifname));
+}
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_interface_enabled(

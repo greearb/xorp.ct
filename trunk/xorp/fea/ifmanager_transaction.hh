@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.4 2003/09/20 00:18:39 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.5 2003/09/30 03:07:56 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -24,6 +24,7 @@
 #include "libxorp/c_format.hh"
 #include "libxorp/transaction.hh"
 
+#include "ifconfig.hh"
 #include "iftree.hh"
 
 class InterfaceTransactionManager : public TransactionManager
@@ -110,6 +111,35 @@ public:
     }
 
     bool path_valid() const	{ return true; }
+};
+
+/**
+ * Class for configuring an interface within the FEA by using information
+ * from the underlying system.
+ */
+class ConfigureInterfaceFromSystem : public InterfaceManagerOperation {
+public:
+    ConfigureInterfaceFromSystem(IfConfig& ifc, IfTree& it,
+				 const string& ifname)
+	: InterfaceManagerOperation(it, ifname), _ifc(ifc) {}
+
+    bool dispatch() {
+	const IfTree& dev_config = _ifc.pull_config();
+	IfTree::IfMap::const_iterator iter = dev_config.get_if(ifname());
+	if (iter == dev_config.ifs().end())
+	    return false;
+	
+	return iftree().update_if(iter->second);
+    }
+
+    string str() const {
+	return string("ConfigureInterfacefromSystem: ") + ifname();
+    }
+
+    bool path_valid() const	{ return true; }
+
+private:
+    IfConfig& _ifc;
 };
 
 /**
