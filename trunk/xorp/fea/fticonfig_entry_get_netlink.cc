@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.20 2004/08/17 02:20:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.21 2004/09/01 18:12:23 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -326,7 +326,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	XLOG_ERROR("error writing to netlink socket: %s",
+	XLOG_ERROR("Error writing to netlink socket: %s",
 		   strerror(errno));
 	return false;
     }
@@ -334,12 +334,17 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     //
     // Force to receive data from the kernel, and then parse it
     //
-    _ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq);
+    string errmsg;
+    if (_ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq, errmsg) != XORP_OK) {
+	XLOG_ERROR("Error reading from netlink socket: %s", errmsg.c_str());
+	return (false);
+    }
     if (parse_buffer_nlm(fte, _ns_reader.buffer(), _ns_reader.buffer_size(),
 			 true)
 	!= true) {
 	return (false);
     }
+
     return (true);
 }
 
