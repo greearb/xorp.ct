@@ -75,9 +75,7 @@ def implement_send_xrl(cls, method_no, method, ifqname):
 def declare_unmarshall_common(cls, indent, method_no):
     s = xorp_indent_string(indent , "void")
     s += "%sunmarshall%d(" % (cls, method_no)
-    args = [ "const XrlError&\te", "XrlRouter&\t/* r */", \
-             "const Xrl&\t/* x */", "XrlArgs*\ta", \
-             "CB%d\t\tcb" % method_no]
+    args = [ "const XrlError&\te", "XrlArgs*\ta", "CB%d\t\tcb" % method_no]
     for i in range(0, len(args)):
         args[i] = "\n\t" + args[i]
     s += csv(args)
@@ -148,7 +146,7 @@ def client_if_hh(cls, methods):
     s = """
 class %s {
 public:
-    %s(XrlRouter* r) : _router(r) {}
+    %s(XrlSender* r) : _router(r) {}
     virtual ~%s() {}
 
 """ % (cls, cls, cls)
@@ -156,7 +154,7 @@ public:
         s += declare_send_xrl(i, methods[i])
 
     s += """protected:
-    XrlRouter* _router;
+    XrlSender* _router;
 
 private:
 """

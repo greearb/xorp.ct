@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.3 2002/12/18 22:54:31 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.4 2002/12/19 01:29:14 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -51,12 +51,12 @@ struct DispatchState {
 };
 
 void
-XrlRouter::send_callback(const XrlError &e,
-			 const Xrl& xrl,
-			 XrlArgs* ret,
-			 DispatchState* ds)
+XrlRouter::send_callback(const XrlError& e,
+			 const Xrl&	 /* xrl */,
+			 XrlArgs* 	 ret,
+			 DispatchState*	 ds)
 {
-    ds->_cb->dispatch(e, *ds->_router, xrl, ret);
+    ds->_cb->dispatch(e, ret);
 
     ds->_router->_sends_pending--;
     if (e != XrlError::OKAY() && e != XrlError::COMMAND_FAILED()) {
@@ -87,14 +87,12 @@ XrlRouter::resolve_callback(FinderClient::Error	err,
 	    trace_xrl("Sending ", ds->_xrl);
 	} else {
 	    trace_xrl("Resolve failed on ", ds->_xrl);
-	    ds->_cb->dispatch(XrlError::RESOLVE_FAILED(),
-			      *ds->_router, ds->_xrl, 0);
+	    ds->_cb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	    delete ds;
 	}
     } else {
 	trace_xrl("Resolve failed on ", ds->_xrl);
-	ds->_cb->dispatch(XrlError::RESOLVE_FAILED(),
-			  *ds->_router, ds->_xrl, (XrlArgs*)0);
+	ds->_cb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	delete ds;
     }
 }
@@ -115,6 +113,12 @@ XrlRouter::send(const Xrl&      	xrl,
 	       callback(&XrlRouter::resolve_callback, ds));
 
     return true;	// XXX This needs correcting.
+}
+
+bool
+XrlRouter::pending() const
+{
+    return 0 != _sends_pending || 0 != _finder_lookups_pending;
 }
 
 XrlRouter::~XrlRouter()

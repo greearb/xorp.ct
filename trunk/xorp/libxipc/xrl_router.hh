@@ -21,8 +21,10 @@
 #include "libxorp/callback.hh"
 
 #include "xrl.hh"
+#include "xrl_sender.hh"
 #include "xrl_cmd_map.hh"
 #include "xrl_pf.hh"
+
 #include "finder_client.hh"
 
 class DispatchState;
@@ -35,7 +37,7 @@ class DispatchState;
  * XrlRouter objects.  In this case each XrlRouter object corresponds
  * to an independent entity within the process.
  */
-class XrlRouter : public XrlCmdMap {
+class XrlRouter : public XrlCmdMap, public XrlSender {
 public:
     /**
      * Constructor for when the Finder is running on the local host.
@@ -99,7 +101,7 @@ public:
      */
     bool add_listener (XrlPFListener* pf);
 
-    typedef XorpCallback4<void, const XrlError&, XrlRouter&, const Xrl&, XrlArgs*>::RefPtr XrlCallback;
+    typedef XrlSender::Callback XrlCallback;
 
     /**
      * Dispatch an Xrl.
@@ -119,9 +121,7 @@ public:
     /**
      * Returns true if this router has any pending actions.
      */
-    bool pending() const {
-	return 0 != _sends_pending || 0 != _finder_lookups_pending;
-    }
+    bool pending() const; 
 
     /**
      * Assignment operator (unimplemented and compiler generated not wanted).

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.2 2002/12/14 23:42:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.3 2002/12/19 01:29:08 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -31,8 +31,6 @@ static bool stdin_forever = false;
 
 static void
 response_handler(const XrlError& e,
-		 XrlRouter&	 /* router */,
-		 const Xrl&	 /* request */,
 		 XrlArgs*	 response,
 		 bool*		 done_flag,
 		 bool* 		 resolve_failed)

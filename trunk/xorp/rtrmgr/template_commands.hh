@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.18 2002/12/09 18:29:39 hodson Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -81,8 +81,6 @@ public:
     virtual int execute(ConfigTreeNode& ctn,
 			XorpClient *xclient, uint tid, bool no_execute) const ;
     virtual void action_complete(const XrlError& err, 
-			 XrlRouter& rtr, 
-			 const Xrl& xrl, 
 			 XrlArgs* xrlargs,
 			 ConfigTreeNode *ctn);
     set <string> affected_xrl_modules() const;
@@ -107,13 +105,9 @@ public:
 		bool no_execute, 
 		bool no_commit) const;
     void exec_complete(const XrlError& err, 
-		       XrlRouter& rtr, 
-		       const Xrl& xrl, 
 		       XrlArgs* xrlargs);
     void action_complete(const XrlError& err, 
-			 XrlRouter& rtr, 
-			 const Xrl& xrl, 
-			 XrlArgs* xrlargs,
+			 XrlArgs* args,
 			 ConfigTreeNode *ctn,
 			 Action *action);
     const string& name() const {return _modname;}

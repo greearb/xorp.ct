@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.2 2002/12/14 23:42:56 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.3 2002/12/19 01:29:10 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -71,7 +71,9 @@ public:
 	_registered = false;
 	_rtimer = e.new_periodic(200, callback(this, &Lemming::login));
     }
-    ~Lemming() {
+
+    ~Lemming()
+    {
 	vout << "...a lemming dies." << endl;
     }
 
@@ -90,7 +92,8 @@ public:
 
 private:
 
-    void login_cb(const XrlError& e, XrlRouter&, const Xrl&, XrlArgs*) {
+    void login_cb(const XrlError& e, XrlArgs*)
+    {
 	if (e == XrlError::OKAY()) {
 	    vout << "...lemming registered with pinger..." << endl;
 	    _registered = true;
@@ -99,7 +102,8 @@ private:
 	}
     }
 
-    bool login() {
+    bool login()
+    {
 	if (false == _registered) {
 	    Xrl x("pinger", "register",
 		  XrlArgs().add(XrlAtom("who", _r.name())));
@@ -125,25 +129,29 @@ private:
 class Pinger
 {
 public:
-    Pinger(EventLoop& e) : _r(e, "pinger") {
+    Pinger(EventLoop& e) : _r(e, "pinger")
+    {
 	_r.add_handler("register", callback(this, &Pinger::set_who));
 	_ptimer = e.new_periodic(20, callback(this, &Pinger::send_ping));
     }
 
     const XrlCmdError
-    set_who(const Xrl& x, XrlArgs*) {
+    set_who(const Xrl& x, XrlArgs*)
+    {
 	x.const_args().get("who", _who);
 	vout << "Pinger set target to " << _who << endl;
 	return XrlCmdError::OKAY();
     }
 
     void
-    ping_cb(const XrlError& e, XrlRouter&, const Xrl&, XrlArgs*) {
+    ping_cb(const XrlError& e, XrlArgs*)
+    {
 	vout << "Ping callback: " << e.str() << endl;
     }
 
     bool
-    send_ping() {
+    send_ping()
+    {
 	vout << "ping \"" << _who << "\"" << endl;
 	if (_who.empty() == false) {
 	    Xrl x(_who, "ping");

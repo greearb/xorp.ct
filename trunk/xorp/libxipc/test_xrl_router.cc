@@ -42,10 +42,9 @@ exit_on_xrlerror(const XrlError& e, const char* file, int line)
 
 static void
 hello_world_complete(const XrlError&	e,
-		     XrlRouter&		/* router */,
-		     const Xrl&		/* request */,
 		     XrlArgs*		/* response */,
-		     bool*		done) {
+		     bool*		done)
+{
     if (e != XrlError::OKAY())
 	exit_on_xrlerror(e, __FILE__, __LINE__);
 
@@ -54,10 +53,9 @@ hello_world_complete(const XrlError&	e,
 
 static void
 got_integer(const XrlError&	e,
-	    XrlRouter&		/* router */,
-	    const Xrl&		/* request */,
 	    XrlArgs*		response,
-	    bool*		done) {
+	    bool*		done)
+{
     if (e != XrlError::OKAY())
 	exit_on_xrlerror(e, __FILE__, __LINE__);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.28 2002/12/09 18:29:40 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -153,11 +153,9 @@ XorpBatchXrlItem::execute(XorpClient *xclient,
 
 void
 XorpBatchXrlItem::response_callback(const XrlError& err, 
-				      XrlRouter& rtr, 
-				      const Xrl& xrl, 
-				      XrlArgs* xrlargs) {
+				    XrlArgs* xrlargs) {
     if (!_callback.is_empty())
-	_callback->dispatch(err, rtr, xrl, xrlargs);
+	_callback->dispatch(err, xrlargs);
     bool success = true;
     string errmsg;
     if (err != XrlError::OKAY()) {
@@ -240,7 +238,7 @@ XorpClient::send_now(const Xrl &xrl, XrlRouter::XrlCallback cb,
 	debug_msg("DUMMY SEND: immediate callback dispatch\n");
 	if (!cb.is_empty()) {
 	    XrlArgs args = fake_return_args(xrl_return_spec);
-	    cb->dispatch(XrlError::OKAY(), *_xrlrouter, xrl, &args);
+	    cb->dispatch(XrlError::OKAY(), &args);
 	}
 	debug_msg("send_sync after sending\n");
     }

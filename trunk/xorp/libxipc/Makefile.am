@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.2 2002/12/14 23:42:51 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.3 2002/12/15 22:53:22 hodson Exp $
 ##
 
 # - The library
@@ -75,6 +75,7 @@ libxipc_a_SOURCES += xrl_pf_stcp_ph.hh
 libxipc_a_SOURCES += xrl_pf_sudp.hh
 libxipc_a_SOURCES += xrl_pf.hh
 libxipc_a_SOURCES += xrl_router.hh
+libxipc_a_SOURCES += xrl_sender.hh
 libxipc_a_SOURCES += xrl_std_router.hh
 libxipc_a_SOURCES += xuid.hh
 libxipc_a_SOURCES += xrl_error.hh

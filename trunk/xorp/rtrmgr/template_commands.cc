@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.2 2002/12/14 23:43:10 hodson Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -582,10 +582,8 @@ Command::execute(ConfigTreeNode& ctn,
 
 void 
 Command::action_complete(const XrlError& err, 
-			XrlRouter&, 
-			const Xrl&, 
-			XrlArgs*,
-                        ConfigTreeNode *ctn) {
+			 XrlArgs*,
+			 ConfigTreeNode *ctn) {
     if (err == XrlError::OKAY()) {
 	ctn->command_status_callback(this, true);
     } else {	
@@ -792,8 +790,6 @@ ModuleCommand::str() const {
 
 void 
 ModuleCommand::exec_complete(const XrlError& /*err*/, 
-			     XrlRouter&, 
-			     const Xrl&, 
 			     XrlArgs*) {
     printf("ModuleCommand::exec_complete\n");
 #ifdef NOTDEF
@@ -808,8 +804,6 @@ ModuleCommand::exec_complete(const XrlError& /*err*/,
 
 void 
 ModuleCommand::action_complete(const XrlError& err, 
-			       XrlRouter&, 
-			       const Xrl&, 
 			       XrlArgs* args,
 			       ConfigTreeNode *ctn,
 			       Action* action) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.2 2002/12/14 23:43:10 hodson Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -30,12 +30,7 @@
 #include "libxipc/xrl_pf_sudp.hh"
 #include "unexpanded_xrl.hh"
 
-
-typedef XorpCallback4<void,
-    const XrlError&, 
-    XrlRouter&, 
-    const Xrl&, 
-    XrlArgs*>::RefPtr XCCommandCallback;
+typedef XrlRouter::XrlCallback XCCommandCallback;
 
 class XorpBatchItem;
 class XorpClient;
@@ -82,8 +77,6 @@ public:
     int execute(XorpClient *xclient, XorpBatch *batch, 
 		string& errmsg);
     void response_callback(const XrlError& err, 
-			   XrlRouter& rtr, 
-			   const Xrl& xrl, 
 			   XrlArgs* xrlargs);
 public:
     UnexpandedXrl _unexpanded_xrl;
