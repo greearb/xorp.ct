@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.42 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.43 2005/03/15 00:30:20 pavlin Exp $"
 
 
 //
@@ -270,6 +270,9 @@ PimVif::pim_mrt() const
 int
 PimVif::start(string& error_msg)
 {
+    if (! is_enabled())
+	return (XORP_OK);
+
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
@@ -347,9 +350,6 @@ PimVif::start(string& error_msg)
  * state with neighbors.
  * XXX: After the multicast routing entries cleanup is completed,
  * PimVif::final_stop() is called to complete the job.
- * XXX: If this method is called one-after-another, the second one
- * will force calling immediately PimVif::final_stop() to quickly
- * finish the job. TODO: is this a desired semantic?
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -365,22 +365,19 @@ PimVif::stop(string& error_msg)
 	error_msg = "the vif state is not UP or PENDING_UP or PENDING_DOWN";
 	return (XORP_ERROR);
     }
+
+    if (ProtoUnit::pending_stop() < 0) {
+	error_msg = "internal error";
+	ret_value = XORP_ERROR;
+    }
     
     //
     // Add the tasks to take care of the PimMre processing
     //
-    if (is_up()) {
-	pim_node().pim_mrt().add_task_stop_vif(vif_index());
-	pim_node().pim_mrt().add_task_my_ip_address(vif_index());
-	pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
-    }
-    if ((_usage_by_pim_mre_task == 0)
-	|| is_pending_up()
-	|| is_pending_down()) {
-	ret_value = final_stop(error_msg);
-	return (ret_value);
-    }
-    
+    pim_node().pim_mrt().add_task_stop_vif(vif_index());
+    pim_node().pim_mrt().add_task_my_ip_address(vif_index());
+    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+
     //
     // Add the shutdown operation of this vif as a shutdown task
     // for the node.
@@ -400,11 +397,6 @@ PimVif::stop(string& error_msg)
 	pim_hello_stop_dr();
 	
 	set_i_am_dr(false);
-    }
-    
-    if (ProtoUnit::pending_stop() < 0) {
-	error_msg = "internal error";
-	ret_value = XORP_ERROR;
     }
     
     _dr_addr = IPvX::ZERO(family());
@@ -503,6 +495,8 @@ void
 PimVif::enable()
 {
     ProtoUnit::enable();
+
+    XLOG_INFO("Enabled vif: %s", name().c_str());
 }
 
 /**
@@ -518,6 +512,8 @@ PimVif::disable()
 
     stop(error_msg);
     ProtoUnit::disable();
+
+    XLOG_INFO("Disabled vif: %s", name().c_str());
 }
 
 /**

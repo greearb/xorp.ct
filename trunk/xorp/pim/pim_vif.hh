@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.28 2004/06/10 22:41:34 hodson Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.29 2004/06/18 21:51:53 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -103,9 +103,6 @@ public:
      * state with neighbors.
      * After the multicast routing entries cleanup is completed,
      * PimVif::final_stop() is called to complete the job.
-     * If this method is called one-after-another, the second one
-     * will force calling immediately PimVif::final_stop() to quickly
-     * finish the job.
      * 
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
