@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.1 2004/02/18 00:10:56 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.2 2004/03/18 13:17:21 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -194,6 +194,15 @@ public:
      * Set the type of this route to "a route to delete".
      */
     void set_delete_route() { _route_type = DELETE_ROUTE; }
+
+    /**
+     * Test if the route is interface-specific (e.g., if the interface
+     * is explicitly specified).
+     * 
+     * @return true if the route is interface-specific, otherwise false.
+     */
+    bool is_interface_route() const { return ! (_ifname.empty()
+						&& _vifname.empty()); }
 
     /**
      * Check whether the route entry is valid.
