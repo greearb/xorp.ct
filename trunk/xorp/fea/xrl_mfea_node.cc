@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.41 2005/03/15 00:35:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.42 2005/03/15 00:52:21 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -228,7 +228,7 @@ XrlMfeaNode::fea_register_startup()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again.
+	// If an error, then try again
 	//
 	_fea_register_startup_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
@@ -334,7 +334,7 @@ XrlMfeaNode::fea_register_shutdown()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again.
+	// If an error, then try again
 	//
 	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
@@ -429,7 +429,7 @@ XrlMfeaNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: If true, the Router Alert IP option for the IP
+ * @is_router_alert: If true, the Router Alert IP option for the IP
  * packet of the incoming message was set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
@@ -446,7 +446,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 			const IPvX& dst,
 			int ip_ttl,
 			int ip_tos,
-			bool router_alert_bool,
+			bool is_router_alert,
 			const uint8_t *sndbuf,
 			size_t sndlen
     )
@@ -482,7 +482,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 		dst.get_ipv4(),
 		ip_ttl,
 		ip_tos,
-		router_alert_bool,
+		is_router_alert,
 		snd_vector,
 		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb));
 	    break;
@@ -500,7 +500,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 		dst.get_ipv6(),
 		ip_ttl,
 		ip_tos,
-		router_alert_bool,
+		is_router_alert,
 		snd_vector,
 		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb));
 	    break;
