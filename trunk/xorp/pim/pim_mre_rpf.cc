@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.16 2003/04/22 23:27:24 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.17 2003/05/21 05:32:53 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -64,7 +64,7 @@ PimMre::mrib_next_hop_rp() const
     return (NULL);
 }
 
-// Note: applies only for (*,G) ans (S,G,rpt) but works also for (S,G)
+// Note: applies only for (*,G) and (S,G,rpt), but works also for (S,G)
 // Note that we can compute RPF'(*,G) for (S,G) or (S,G,rpt) entry
 // even if there is no (*,G) entry; in that case we return MRIB.next_hop(RP(G))
 // for the corresponding RP.
@@ -670,7 +670,7 @@ PimMre::compute_mrib_next_hop_rp() const
 //
 // Return the MRIB-based RPF neighbor toward the S
 //
-// Note: applies only to (S,G), but if needed can work also for (S,G,rpt).
+// Note: applies only for (S,G)
 // XXX: the return info does NOT take into account the Asserts
 // XXX: if the source is directly connected, return NULL.
 PimNbr *
@@ -694,7 +694,7 @@ PimMre::compute_mrib_next_hop_s() const
     // If the source is directly connected, return NULL.
     //
     if (pim_vif != NULL) {
-	if (pim_vif->is_directly_connected(source_addr()))
+	if (pim_node().is_directly_connected(*pim_vif, source_addr()))
 	    return (NULL);
     }
     
@@ -704,7 +704,7 @@ PimMre::compute_mrib_next_hop_s() const
 //
 // Return the RPF' neighbor toward the RP
 //
-// Note: appies only to (*,G) entry.
+// Note: appies only for (*,G)
 // XXX: the return info takes into account the Asserts
 PimNbr *
 PimMre::compute_rpfp_nbr_wc() const
@@ -740,7 +740,7 @@ PimMre::compute_rpfp_nbr_wc() const
 //
 // Return the RPF' neighbor toward the S
 //
-// Note: applies only to (S,G) entry.
+// Note: applies only for (S,G)
 // XXX: the return info takes into account the Asserts
 // XXX: if the source is directly connected, return NULL.
 PimNbr *
@@ -765,7 +765,7 @@ PimMre::compute_rpfp_nbr_sg() const
     //
     // If the source is directly connected, return NULL.
     //
-    if (pim_vif->is_directly_connected(source_addr()))
+    if (pim_node().is_directly_connected(*pim_vif, source_addr()))
 	return (NULL);
     
     if (is_i_am_assert_loser_state(next_hop_vif_index)) {
@@ -783,7 +783,7 @@ PimMre::compute_rpfp_nbr_sg() const
 //
 // Return the RPF' neighbor toward toward the RP
 //
-// Note: applies only to (S,G,rpt) entry.
+// Note: applies only for (S,G,rpt)
 // XXX: the return info takes into account the Asserts
 PimNbr *
 PimMre::compute_rpfp_nbr_sg_rpt() const
