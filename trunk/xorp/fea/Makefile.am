@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.34 2004/03/18 00:39:22 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.35 2004/05/04 00:08:46 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -55,6 +55,8 @@ xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### libfeaclient libraries
 xorp_fea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 ### socket server libraries and related
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
@@ -71,41 +73,7 @@ xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 # -- Sources and Linkage for xorp_fea_dummy
 xorp_fea_dummy_CXXFLAGS	 = -DFEA_DUMMY
 xorp_fea_dummy_SOURCES	 = fea.cc
-xorp_fea_dummy_LDADD	 = $(noinst_LIBRARIES)
-
-### FEA XRL libraries
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libfeabase.a
-### MFEA XRL libraries
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libmfeabase.a
-### MRT libraries
-xorp_fea_dummy_LDADD	+= $(top_builddir)/mrt/libmrt.a
-### CLI libraries
-xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libcli.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
-xorp_fea_dummy_LDADD	+= @CLI_CURSES_LIB@
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libclibase.a
-### libfeaclient libraries
-xorp_fea_dummy_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
-### socket server libraries and releated
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
-### XORP misc libraries
-xorp_fea_dummy_LDADD	+= $(top_builddir)/libproto/libproto.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/libxipc/libxipc.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/libcomm/libcomm.a
-xorp_fea_dummy_LDADD	+= $(top_builddir)/libxorp/libxorp.a
+xorp_fea_dummy_LDADD	 = $(xorp_fea_LDADD)
 
 # -- Sources and Linkage for test_mfea
 test_mfea_SOURCES	 = test_mfea.cc
@@ -132,6 +100,8 @@ test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### libfeaclient libraries
 test_mfea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 ### socket server libraries and releated
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
@@ -224,7 +194,6 @@ libfea_a_SOURCES	+= xrl_fti.hh
 libfea_a_SOURCES	+= xrl_ifmanager.hh
 libfea_a_SOURCES	+= xrl_ifupdate.hh
 libfea_a_SOURCES	+= xrl_mfea_node.hh
-libfea_a_SOURCES	+= xrl_mfea_vif_manager.hh
 libfea_a_SOURCES	+= xrl_rawsock4.hh
 libfea_a_SOURCES	+= xrl_socket_cmds.hh
 libfea_a_SOURCES	+= xrl_socket_server.hh
@@ -301,7 +270,6 @@ libfea_a_SOURCES	+= xrl_fti.cc
 libfea_a_SOURCES	+= xrl_ifmanager.cc
 libfea_a_SOURCES	+= xrl_ifupdate.cc
 libfea_a_SOURCES	+= xrl_mfea_node.cc
-libfea_a_SOURCES	+= xrl_mfea_vif_manager.cc
 libfea_a_SOURCES	+= xrl_rawsock4.cc
 libfea_a_SOURCES	+= xrl_socket_cmds.cc
 libfea_a_SOURCES	+= xrl_socket_server.cc
