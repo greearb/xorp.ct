@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.11 2004/02/11 08:48:49 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.12 2004/03/25 01:45:09 hodson Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -36,6 +36,9 @@
  */
 template<class A>
 class OriginTable : public RouteTable<A> {
+public:
+    typedef Trie<A, const IPRouteEntry<A>*> RouteContainer;
+
 public:
     /**
      * OriginTable constructor.
@@ -71,10 +74,7 @@ public:
      * Generic @ref RouteTable method that is not used on OriginTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A>* ) {
-	XLOG_UNREACHABLE();
-	return XORP_ERROR;
-    }
+    int add_route(const IPRouteEntry<A>&, RouteTable<A>* );
 
     /**
      * Delete a route from the OriginTable.
@@ -88,10 +88,7 @@ public:
      * Generic @ref RouteTable method that is not used on OriginTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* ) {
-	XLOG_UNREACHABLE();
-	return XORP_ERROR;
-    }
+    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* );
 
     /**
      * Delete all the routes that are in this OriginTable.  The
@@ -163,11 +160,50 @@ public:
      */
     string str() const;
 
+    /**
+     * Get the number of times routing protocol has been shutdown and
+     * restarted.
+     */
+    inline uint32_t generation() const;
+
+    /**
+     * Get the number of routes held internally.
+     */
+    inline uint32_t route_count() const;
+
+    /**
+     * Get the trie.
+     */
+    inline const RouteContainer& route_container() const;
+
 private:
-    int		 _admin_distance;		// 0 .. 255
-    ProtocolType _protocol_type;		// IGP or EGP
-    EventLoop&   _eventloop;
-    Trie<A, const IPRouteEntry<A>* >* _ip_route_table;
+    int		 	_admin_distance;	// 0 .. 255
+    ProtocolType 	_protocol_type;	// IGP or EGP
+    EventLoop&   	_eventloop;
+    RouteContainer*	_ip_route_table;
+    uint32_t	 	_gen;
 };
+
+
+template <class A>
+inline uint32_t
+OriginTable<A>::generation() const
+{
+    return _gen;
+}
+
+template <class A>
+inline uint32_t
+OriginTable<A>::route_count() const
+{
+    return _ip_route_table->route_count();
+}
+
+template <class A>
+inline const typename OriginTable<A>::RouteContainer&
+OriginTable<A>::route_container() const
+{
+    return *_ip_route_table;
+}
 
 #endif // __RIB_RT_TAB_ORIGIN_HH__

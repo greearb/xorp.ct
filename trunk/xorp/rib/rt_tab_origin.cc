@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.13 2004/02/11 08:48:49 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.14 2004/03/25 01:45:09 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -33,12 +33,14 @@ OriginTable<A>::OriginTable<A>(const string& tablename,
     : RouteTable<A>(tablename),
       _admin_distance(admin_distance),
       _protocol_type(protocol_type),
-      _eventloop(eventloop)
+      _eventloop(eventloop),
+      _gen(0)
 {
     XLOG_ASSERT(admin_distance >= 0 && admin_distance <= 255);
     XLOG_ASSERT((protocol_type == IGP) || (protocol_type == EGP));
 
     _ip_route_table = new Trie<A, const IPRouteEntry<A>* >();
+    _gen++;
 }
 
 template<class A>
@@ -101,6 +103,14 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
 
 template<class A>
 int
+OriginTable<A>::add_route(const IPRouteEntry<A>&, RouteTable<A>*)
+{
+    XLOG_UNREACHABLE();
+    return XORP_ERROR;
+}
+
+template<class A>
+int
 OriginTable<A>::delete_route(const IPNet<A>& net)
 {
     debug_msg("OT[%s]: Deleting route %s\n", tablename().c_str(),
@@ -128,6 +138,14 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
 }
 
 template<class A>
+int
+OriginTable<A>::delete_route(const IPRouteEntry<A>*, RouteTable<A>*)
+{
+    XLOG_UNREACHABLE();
+    return XORP_ERROR;
+}
+
+template<class A>
 void
 OriginTable<A>::delete_all_routes()
 {
@@ -145,18 +163,22 @@ void
 OriginTable<A>::routing_protocol_shutdown()
 {
     //
+    // Put existing ip_route_table to one side.  The plumbing changes that
+    // accompany the creation and plumbing of the deletion table may trigger
+    // upstream tables to query whether trie has changed.
+    //
+
+    Trie<A, const IPRouteEntry<A>* >* old_ip_route_table = _ip_route_table;
+    _ip_route_table = new Trie<A, const IPRouteEntry<A>* >();
+
+    //
     // Pass our entire routing table into a DeletionTable, which will
     // handle the background deletion task.  The DeletionTable will
     // plumb itself in.
     //
     DeletionTable<A>* dt;
     dt = new DeletionTable<A>("Delete(" + tablename() + ")",
-			      this,
-			      _ip_route_table,
-			      _eventloop);
-    // Create a new routing table, ready for when the routing protocol
-    // comes back up.
-    _ip_route_table = new Trie<A, const IPRouteEntry<A>* >();
+			      this, old_ip_route_table, _eventloop);
 }
 
 template<class A>
