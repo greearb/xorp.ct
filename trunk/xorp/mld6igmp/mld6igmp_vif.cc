@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.25 2004/03/04 00:16:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.26 2004/04/29 23:35:43 pavlin Exp $"
 
 
 //
@@ -284,21 +284,11 @@ Mld6igmpVif::stop(string& error_msg)
     }
     
     //
-    // Leave the appropriate multicast groups: ALL-SYSTEMS and ALL-ROUTERS
+    // XXX: we don't have to explicitly leave the multicast groups
+    // we have joined on that interface, because this will happen
+    // automatically when we stop the vif through the MFEA.
     //
-    const IPvX group1 = IPvX::MULTICAST_ALL_SYSTEMS(family());
-    const IPvX group2 = IPvX::MULTICAST_ALL_ROUTERS(family());
-    if (mld6igmp_node().leave_multicast_group(vif_index(), group1)
-	!= XORP_OK) {
-	XLOG_ERROR("Error leaving group %s on vif %s",
-		   cstring(group1), name().c_str());
-    }
-    if (mld6igmp_node().leave_multicast_group(vif_index(), group2)
-	!= XORP_OK) {
-	XLOG_ERROR("Error leaving group %s on vif %s",
-		   cstring(group2), name().c_str());
-    }
-    
+
     if (ProtoUnit::stop() < 0) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
