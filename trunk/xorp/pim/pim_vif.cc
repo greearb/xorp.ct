@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.35 2004/03/04 03:06:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.36 2004/03/05 09:17:42 pavlin Exp $"
 
 
 //
@@ -433,6 +433,12 @@ PimVif::final_stop(string& error_msg)
 	
 	set_i_am_dr(false);
     }
+
+    //
+    // XXX: we don't have to explicitly leave the multicast groups
+    // we have joined on that interface, because this will happen
+    // automatically when we stop the vif through the MFEA.
+    //
     
     if (ProtoUnit::stop() < 0) {
 	error_msg = "internal error";
