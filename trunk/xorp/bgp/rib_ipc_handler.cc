@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.59 2004/10/04 07:48:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.60 2004/11/10 22:50:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,7 +33,7 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp)
       _xrl_router(xrl_router),
       _v4_queue(*this, xrl_router, bgp),
       _v6_queue(*this, xrl_router, bgp),
-      _fake_id((unsigned int)0)
+      _fake_id(IPv4::ZERO())
 {
 }
 
@@ -553,7 +553,7 @@ XrlQueue<A>::start()
     // route commands as possible as possible.
 
     for(;;) {
-	debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
+	debug_msg("queue length %u\n", XORP_UINT_CAST(_xrl_queue.size()));
 
 	if(_xrl_queue.empty()) {
 	    debug_msg("Output no longer busy\n");
