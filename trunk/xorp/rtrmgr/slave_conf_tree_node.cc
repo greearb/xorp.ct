@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.2 2003/03/10 23:21:01 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.3 2003/05/10 23:23:03 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
@@ -62,7 +62,6 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					bool include_intermediates,
 					bool include_templates) const {
     bool instantiated = false;
-    printf("BCT\n");
 #ifdef DEBUG
     printf("build_command_tree depth=%d\n", depth);
 #endif

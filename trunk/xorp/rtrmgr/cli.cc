@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.6 2003/05/04 06:25:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.7 2003/05/10 23:23:03 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -390,10 +390,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
     for (cmd_iter = cmdchildren.begin(); 
 	 cmd_iter != cmdchildren.end(); 
 	 ++cmd_iter) {
-	printf("cmdchild: %s\n", (*cmd_iter)->name().c_str());
 	if (include_intermediates || (*cmd_iter)->has_command()) {
-	    if (include_intermediates) printf("include_intermediates\n");
-	    if ((*cmd_iter)->has_command()) printf("has_command\n");
 	    if (path.empty())
 		subpath = (*cmd_iter)->name();
 	    else
@@ -415,27 +412,21 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 
     const TemplateTreeNode *ttn;
     if (_current_config_node->is_root_node()) {
-	printf("we're at the root\n");
 	ttn = template_tree()->root();
     } else {
 	ttn = _current_config_node->template_node();
     }
     assert(ttn != NULL);
 
-    printf("TTN Node: %s\n", ttn->s().c_str());
     list <TemplateTreeNode*>::const_iterator tti;
     for(tti = ttn->children().begin();
 	tti != ttn->children().end();
 	tti++) {
-	printf("TTN: %s\n", (*tti)->segname().c_str());
 	//we don't need to consider this child if it's already added
 	if (existing_children.find((*tti)->segname()) 
 	    == existing_children.end()) {
-	    printf("Not yet added\n");
-	    printf("----------------------------------------------------------------------------\n");
 	    if ((*tti)->check_command_tree(cmd_names, include_intermediates,
 					   /*depth*/0)) {
-		printf("build_command_tree returned true\n");
 		if (path.empty())
 		    subpath = (*tti)->segname();
 		else
@@ -451,12 +442,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 		} else {
 		    com->set_global_name(subpath.c_str());
 		}
-	    } else {
-		printf("build_command_tree returned false\n");
 	    }
-	    printf("----------------------------------------------------------------------------\n");
-	} else {
-	    printf("Already added\n");
 	}
     }
 }
@@ -496,7 +482,6 @@ RouterCLI::pathstr2() const {
 
 void 
 RouterCLI::add_edit_subtree() {
-    printf("add_edit_subtree\n");
     CommandTree cmd_tree;
     list <string> cmds;
     cmds.push_back("%create");
@@ -537,7 +522,6 @@ RouterCLI::add_edit_subtree() {
 			    callback(this, &RouterCLI::edit_func), 
 			    cmdpath, 0);
     }
-    printf("here1\n");
     add_immediate_commands(*(_cli_node.cli_command_root()), cmd_tree, 
 			   cmds, /*include_intermediates*/true, 
 			   callback(this, &RouterCLI::text_entry_func), 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.4 2003/05/02 09:00:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.5 2003/05/10 23:23:04 mjh Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -24,7 +24,6 @@
 #include "command_tree.hh"
 
 #define DEBUG_TEMPLATE_PARSER
-#define DEBUG
 
 extern int init_template_parser(const char *, TemplateTree* c);
 extern int parse_template();
@@ -263,8 +262,6 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 		break;
 	    }
 	}
-    } else {
-	printf("%s is not a tag\n", _segname.c_str());
     }
     return instantiated;
 }
