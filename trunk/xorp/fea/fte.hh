@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti.hh,v 1.2 2003/03/10 23:20:13 hodson Exp $
+// $XORP: xorp/fea/fte.hh,v 1.1 2003/05/02 07:50:42 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -41,9 +41,11 @@ public:
 	const string&	ifname,
 	const string&	vifname,
 	uint32_t	metric,
-	uint32_t	admin_distance) :
+	uint32_t	admin_distance,
+	bool		xorp_route = false) :
 	_net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
-	_metric(metric), _admin_distance(admin_distance) {}
+	_metric(metric), _admin_distance(admin_distance),
+	_xorp_route(xorp_route) {}
     Fte(const N& net) : _net(net), _gateway(A::ZERO(net.af())) {}
 
     const N& net() const		{ return _net; }
@@ -52,6 +54,7 @@ public:
     const string& vifname() const	{ return _vifname; }
     uint32_t metric() const		{ return _metric; }
     uint32_t admin_distance() const	{ return _admin_distance; }
+    bool xorp_route() const 		{ return _xorp_route; }
 
     /**
      * Reset all members
@@ -63,6 +66,7 @@ public:
 	_vifname.erase();
 	_metric = 0;
 	_admin_distance = 0;
+	_xorp_route = false;
     }
 
     /**
@@ -80,10 +84,11 @@ public:
      */
     string str() const {
 	return c_format("net = %s gateway = %s ifname = %s vifname = %s "
-			"metric = %u admin_distance = %u",
+			"metric = %u admin_distance = %u xorp_route %s",
 			_net.str().c_str(), _gateway.str().c_str(),
 			_ifname.c_str(), _vifname.c_str(),
-			_metric, _admin_distance);
+			_metric, _admin_distance, _xorp_route ? "true" :
+			"false");
     }
 
 private:
@@ -93,6 +98,7 @@ private:
     string	_vifname;	// Virtual interface name
     uint32_t	_metric;	// Route metric
     uint32_t	_admin_distance; // Route admin distance
+    bool	_xorp_route;	// This route was installed by XORP.
 };
 
 typedef Fte<IPv4, IPv4Net> Fte4;

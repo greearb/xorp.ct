@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_rtsock.cc,v 1.1 2003/05/02 23:21:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_rtsock.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -48,12 +48,18 @@ FtiConfigTableSetRtsock::~FtiConfigTableSetRtsock()
 int
 FtiConfigTableSetRtsock::start()
 {
+    delete_all_entries4();
+    delete_all_entries6();
+
     return (RoutingSocket::start());
 }
     
 int
 FtiConfigTableSetRtsock::stop()
 {
+    delete_all_entries4();
+    delete_all_entries6();
+
     return (RoutingSocket::stop());
 }
 
@@ -83,7 +89,8 @@ FtiConfigTableSetRtsock::delete_all_entries4()
     // Delete the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte4& fte = *iter;
-	ftic().delete_entry4(fte);
+	if (fte.xorp_route())
+	    ftic().delete_entry4(fte);
     }
     
     return true;
@@ -115,7 +122,8 @@ FtiConfigTableSetRtsock::delete_all_entries6()
     // Delete the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte6& fte = *iter;
-	ftic().delete_entry6(fte);
+	if (fte.xorp_route())
+	    ftic().delete_entry6(fte);
     }
     
     return true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.2 2003/05/05 19:34:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.3 2003/05/14 01:13:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -335,6 +335,13 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	    dst_masklen = IPvX::addr_bitlen(family);
     }
     
+    /*
+    ** Did we install this route.
+    */
+    bool xorp_route = false;
+    if (rtm->rtm_flags & RTF_PROTO1)
+	xorp_route = true;
+
     //
     // Get the interface name and index
     //
@@ -369,7 +376,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     // TODO: define default routing metric and admin distance instead of ~0
     //
     fte = FteX(IPvXNet(dst_addr, dst_masklen), gateway_addr, if_name, if_name,
-	       ~0, ~0);
+	       ~0, ~0, xorp_route);
     
     return true;
 }
