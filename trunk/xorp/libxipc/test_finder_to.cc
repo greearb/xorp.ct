@@ -108,7 +108,7 @@ test_main(uint32_t pre_block_secs,
 
     verbose_log("Sleeping for %d seconds\n", block_secs);
     if (block_secs) {
-	sleep(block_secs);
+	TimerList::system_sleep(TimeVal(block_secs, 0));
     }
 
     fprintf(stderr, "Connected %d\n", fc.connected());

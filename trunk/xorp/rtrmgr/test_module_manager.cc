@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.11 2004/06/10 22:41:55 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.12 2004/08/19 02:00:21 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -81,8 +81,8 @@ main(int argc, char* const argv[])
     
     printf("finder should now be running\n");
     // XLOG_ASSERT(mmgr.module_running("finder") == true);
-    sleep(2);
-    
+    TimerList::system_sleep(TimeVal(2, 0));
+
     printf("shutting down\n");
     mmgr.shutdown();
     while (eventloop.timers_pending() && (! mmgr.shutdown_complete())) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xuid.cc,v 1.4 2003/04/02 02:53:50 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xuid.cc,v 1.5 2004/06/10 22:41:13 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -86,7 +86,7 @@ XUID::initialize()
     if (now == last) {
         ticks++;
         if ((ticks & 0x7fff) == 0x7fff) {
-	    usleep(100000);
+	    TimerList::system_sleep(TimeVal(0, 100000));
 	}
     } else {
         ticks = 0;

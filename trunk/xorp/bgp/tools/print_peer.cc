@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.11 2004/06/09 10:14:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.12 2004/06/10 22:40:41 hodson Exp $"
 
 #include "print_peer.hh"
 
@@ -46,7 +46,7 @@ PrintPeers::PrintPeers(bool verbose, int interval)
 	}
 	if (interval <= 0)
 	    break;
-	sleep(interval);
+	TimerList::system_sleep(TimeVal(interval, 0));
     }
 }
 

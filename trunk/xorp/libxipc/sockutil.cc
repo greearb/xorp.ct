@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.9 2004/06/10 22:41:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.10 2004/09/08 02:03:54 atanu Exp $"
 
 #include "config.h"
 
@@ -37,6 +37,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
+#include "libxorp/eventloop.hh"
 
 #include "sockutil.hh"
 
@@ -429,7 +430,7 @@ address_lookup(const string& addr, in_addr& ia)
 	    memcpy(&ia, h->h_addr_list[0], sizeof(ia));
 	    return true;
 	}
-	usleep(100000);
+	TimerList::system_sleep(TimeVal(0, 100000));
 	retry++;
     } while (h_errno == TRY_AGAIN && retry <= 3) ;
 

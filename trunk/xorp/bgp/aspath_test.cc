@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.8 2003/03/10 23:19:57 hodson Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.9 2004/06/10 22:40:28 hodson Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -167,7 +167,7 @@ main(int argc, char* argv[])
     if (verbose) printf("All tests passed\n");
 #if 0
     printf("Check for space leak: check memory usage now....\n");
-    sleep(5);
+    TimerList::system_sleep(TimeVal(5, 0));
     printf("Continuing...\n");
     aspath = new AsPath(*aspathcopy);
     delete aspathcopy;
@@ -188,7 +188,7 @@ main(int argc, char* argv[])
     asn = new AsNum;
     assert(aspath->contains(*asn) == false);
     delete asn;
-    sleep(10);
+    TimerList::system_sleep(TimeVal(10, 0));
 #else
     delete aspath;
     delete aspathcopy;
