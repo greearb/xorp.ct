@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.21 2004/05/03 23:45:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.22 2004/05/04 00:08:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -209,9 +209,16 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
 #endif // HAVE_IPV6_MULTICAST
 
-	// Startup
+    //
+    // Startup
+    //
+    // XXX: temporary enable the built-in CLI access
+    xrl_cli_node.enable_cli();
+    xrl_cli_node.start_cli();
     xrl_mfea_node4.enable_mfea();
     xrl_mfea_node4.startup();
+    xrl_mfea_node4.enable_cli();
+    xrl_mfea_node4.start_cli();
 #ifdef HAVE_IPV6_MULTICAST
     xrl_mfea_node6.enable_mfea();
     xrl_mfea_node6.startup();

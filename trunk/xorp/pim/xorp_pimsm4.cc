@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pim.cc,v 1.1 2004/04/30 02:39:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.1 2004/05/04 00:14:46 pavlin Exp $"
 
 
 //
@@ -124,9 +124,14 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
 			       xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm4);
 
+    //
     // Startup
+    //
+    // XXX: temporary enable the built-in CLI access
     xrl_pimsm_node4.enable_pim();
     xrl_pimsm_node4.startup();
+    xrl_pimsm_node4.enable_cli();
+    xrl_pimsm_node4.start_cli();
 
     //
     // Main loop
