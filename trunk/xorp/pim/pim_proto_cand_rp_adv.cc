@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.6 2003/03/03 04:30:17 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.7 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -156,7 +156,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	// XXX: schedule to send immediately a Bootstrap message if needed
 	// and add to the RP table.
 	if (is_rp_info_changed) {
-	    active_bsr_zone->timeout_bsr_timer();
+	    active_bsr_zone->expire_bsr_timer();
 	    pim_bsr.add_rps_to_rp_table();
 	}
 	
@@ -238,7 +238,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	
 	// XXX: schedule to send immediately a Bootstrap message if needed
 	if (is_rp_info_changed) {
-	    active_bsr_zone->timeout_bsr_timer();
+	    active_bsr_zone->expire_bsr_timer();
 	    bool_add_rps_to_rp_table = true;
 	}
     }

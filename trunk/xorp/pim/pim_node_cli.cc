@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.10 2003/03/06 05:16:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.11 2003/03/10 23:20:49 hodson Exp $"
 
 
 //
@@ -214,18 +214,26 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    return (XORP_ERROR);
 	    break;
 	}
-	int left_sec = -1;
-	if (bsr_zone->const_scope_zone_expiry_timer().is_set()) {
-	    left_sec = bsr_zone->const_scope_zone_expiry_timer().left_sec();
+	int scope_zone_left_sec = -1;
+	if (bsr_zone->const_scope_zone_expiry_timer().scheduled()) {
+	    TimeVal tv_left;
+	    bsr_zone->const_scope_zone_expiry_timer().time_remaining(tv_left);
+	    scope_zone_left_sec = tv_left.sec();
+	}
+	int bsr_zone_left_sec = -1;
+	if (bsr_zone->const_bsr_timer().scheduled()) {
+	    TimeVal tv_left;
+	    bsr_zone->const_bsr_timer().time_remaining(tv_left);
+	    bsr_zone_left_sec = tv_left.sec();
 	}
 	cli_print(c_format("%-16s%4d %-16s%4d %-16s%8d%10d\n",
-		   cstring(bsr_zone->bsr_addr()),
-		   bsr_zone->bsr_priority(),
-		   cstring(bsr_zone->my_bsr_addr()),
-		   bsr_zone->my_bsr_priority(),
-		   zone_state_string.c_str(),
-		   bsr_zone->const_bsr_timer().left_sec(),
-		   left_sec));
+			   cstring(bsr_zone->bsr_addr()),
+			   bsr_zone->bsr_priority(),
+			   cstring(bsr_zone->my_bsr_addr()),
+			   bsr_zone->my_bsr_priority(),
+			   zone_state_string.c_str(),
+			   bsr_zone_left_sec,
+			   scope_zone_left_sec));
     }
     
     cli_print("Expiring zones:\n");
@@ -269,18 +277,26 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    return (XORP_ERROR);
 	    break;
 	}
-	int left_sec = -1;
-	if (bsr_zone->const_scope_zone_expiry_timer().is_set()) {
-	    left_sec = bsr_zone->const_scope_zone_expiry_timer().left_sec();
+	int scope_zone_left_sec = -1;
+	if (bsr_zone->const_scope_zone_expiry_timer().scheduled()) {
+	    TimeVal tv_left;
+	    bsr_zone->const_scope_zone_expiry_timer().time_remaining(tv_left);
+	    scope_zone_left_sec = tv_left.sec();
+	}
+	int bsr_zone_left_sec = -1;
+	if (bsr_zone->const_bsr_timer().scheduled()) {
+	    TimeVal tv_left;
+	    bsr_zone->const_bsr_timer().time_remaining(tv_left);
+	    bsr_zone_left_sec = tv_left.sec();
 	}
 	cli_print(c_format("%-16s%4d %-16s%4d %-16s%8d%10d\n",
-		   cstring(bsr_zone->bsr_addr()),
-		   bsr_zone->bsr_priority(),
-		   cstring(bsr_zone->my_bsr_addr()),
-		   bsr_zone->my_bsr_priority(),
-		   zone_state_string.c_str(),
-		   bsr_zone->const_bsr_timer().left_sec(),
-		   left_sec));
+			   cstring(bsr_zone->bsr_addr()),
+			   bsr_zone->bsr_priority(),
+			   cstring(bsr_zone->my_bsr_addr()),
+			   bsr_zone->my_bsr_priority(),
+			   zone_state_string.c_str(),
+			   bsr_zone_left_sec,
+			   scope_zone_left_sec));
     }
     
     cli_print("Configured zones:\n");
@@ -395,8 +411,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		 ++rp_iter) {
 		BsrRp *bsr_rp = *rp_iter;
 		int left_sec = -1;
-		if (bsr_rp->const_candidate_rp_expiry_timer().is_set())
-		    left_sec = bsr_rp->const_candidate_rp_expiry_timer().left_sec();
+		if (bsr_rp->const_candidate_rp_expiry_timer().scheduled()) {
+		    TimeVal tv_left;
+		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
+		    left_sec = tv_left.sec();
+		}
 		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
 			   cstring(bsr_rp->rp_addr()),
 			   bsr_rp->rp_priority(),
@@ -432,8 +451,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		 ++rp_iter) {
 		BsrRp *bsr_rp = *rp_iter;
 		int left_sec = -1;
-		if (bsr_rp->const_candidate_rp_expiry_timer().is_set())
-		    left_sec = bsr_rp->const_candidate_rp_expiry_timer().left_sec();
+		if (bsr_rp->const_candidate_rp_expiry_timer().scheduled()) {
+		    TimeVal tv_left;
+		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
+		    left_sec = tv_left.sec();
+		}
 		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
 			   cstring(bsr_rp->rp_addr()),
 			   bsr_rp->rp_priority(),
@@ -470,8 +492,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		BsrRp *bsr_rp = *rp_iter;
 		int left_sec = -1;
 		if (pim_node().is_my_addr(bsr_rp->rp_addr())
-		    && (bsr_zone->const_candidate_rp_advertise_timer().is_set()))
-		    left_sec = bsr_zone->const_candidate_rp_advertise_timer().left_sec();
+		    && (bsr_zone->const_candidate_rp_advertise_timer().scheduled())) {
+		    TimeVal tv_left;
+		    bsr_zone->const_candidate_rp_advertise_timer().time_remaining(tv_left);
+		    left_sec = tv_left.sec();
+		}
 		
 		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
 			   cstring(bsr_rp->rp_addr()),
@@ -848,13 +873,21 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 			   register_state.c_str()));
     }
     if (pim_mre->is_sg_rpt()) {
-	cli_print(c_format("    Override timer:           %d\n",
-		   pim_mre->const_override_timer().is_set() ?
-		   (int)pim_mre->const_override_timer().left_sec() : -1));
+	int left_sec = -1;
+	if (pim_mre->const_override_timer().scheduled()) {
+	    TimeVal tv_left;
+	    pim_mre->const_override_timer().time_remaining(tv_left);
+	    left_sec = tv_left.sec();
+	}
+	cli_print(c_format("    Override timer:           %d\n", left_sec));
     } else {
-	cli_print(c_format("    Join timer:               %d\n",
-		   pim_mre->const_join_timer().is_set() ?
-		   (int)pim_mre->const_join_timer().left_sec() : -1));
+	int left_sec = -1;
+	if (pim_mre->const_join_timer().scheduled()) {
+	    TimeVal tv_left;
+	    pim_mre->const_join_timer().time_remaining(tv_left);
+	    left_sec = tv_left.sec();
+	}
+	cli_print(c_format("    Join timer:               %d\n", left_sec));
     }
     
     
@@ -1008,10 +1041,10 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 		dr_priority_string = "none";
 	    
 	    string nbr_timeout_sec_string;
-	    if (pim_nbr->const_timeout_timer().is_set()) {
-		nbr_timeout_sec_string = c_format(
-		    "%d",
-		    pim_nbr->const_timeout_timer().left_sec());
+	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
+		TimeVal tv_left;
+		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
+		nbr_timeout_sec_string = c_format("%d", tv_left.sec());
 	    } else {
 		nbr_timeout_sec_string = "None";
 	    }
@@ -1173,7 +1206,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	// Compute the 'holdtime' and 'timeout' for this RP (if applicable)
 	//
 	int holdtime = -1;
-	int timeout = -1;
+	int left_sec = -1;
 	switch (pim_rp->rp_learned_method()) {
 	case PimRp::RP_LEARNED_METHOD_AUTORP:
 	    break;
@@ -1192,8 +1225,11 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 		if (bsr_rp == NULL)
 		    break;
 		holdtime = bsr_rp->rp_holdtime();
-		if (bsr_rp->const_candidate_rp_expiry_timer().is_set())
-		    timeout = bsr_rp->const_candidate_rp_expiry_timer().left_sec();
+		if (bsr_rp->const_candidate_rp_expiry_timer().scheduled()) {
+		    TimeVal tv_left;
+		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
+		    left_sec = tv_left.sec();
+		}
 	    } while (false);
 	    break;
 	case PimRp::RP_LEARNED_METHOD_STATIC:
@@ -1207,7 +1243,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 		   rp_type.c_str(),
 		   pim_rp->rp_priority(),
 		   holdtime,
-		   timeout,
+		   left_sec,
 		   (uint32_t)(pim_rp->pim_mre_wc_list().size()
 			      + pim_rp->processing_pim_mre_wc_list().size()),
 		   cstring(pim_rp->group_prefix())));

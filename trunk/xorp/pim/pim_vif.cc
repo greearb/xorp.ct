@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.7 2003/03/13 00:27:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.8 2003/03/30 03:50:46 pavlin Exp $"
 
 
 //
@@ -23,6 +23,7 @@
 #include "pim_module.h"
 #include "pim_private.hh"
 #include "mrt/inet_cksum.h"
+#include "mrt/random.h"
 #include "pim_node.hh"
 #include "pim_vif.hh"
 
@@ -345,8 +346,8 @@ PimVif::final_stop(void)
 	ret_value = XORP_ERROR;
     
     _dr_addr = IPvX::ZERO(family());
-    _hello_timer.cancel();
-    _hello_once_timer.cancel();
+    _hello_timer.unschedule();
+    _hello_once_timer.unschedule();
     
     // Remove all PIM neighbor entries
     while (! _pim_nbrs.empty()) {

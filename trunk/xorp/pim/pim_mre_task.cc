@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.4 2003/01/24 19:50:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.5 2003/03/10 23:20:48 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -49,7 +49,6 @@
 //
 // Local functions prototypes
 //
-static void pim_mre_task_run_task_timeout(void *data_pointer);
 
 
 PimMreTask::PimMreTask(PimMrt& pim_mrt,
@@ -201,10 +200,10 @@ PimMreTask::family() const
 void
 PimMreTask::schedule_task()
 {
-    _time_slice_timer.start(0,
-			    1,
-			    pim_mre_task_run_task_timeout,
-			    this);
+    _time_slice_timer =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(0, 1),
+	    callback(this, &PimMreTask::time_slice_timer_timeout));
 }
 
 //
@@ -1683,10 +1682,8 @@ PimMreTask::add_pim_mfc_delete(PimMfc *pim_mfc)
 //
 // A timeout handler to continue processing a task.
 //
-static void
-pim_mre_task_run_task_timeout(void *data_pointer)
+void
+PimMreTask::time_slice_timer_timeout()
 {
-    PimMreTask *pim_mre_task = (PimMreTask *)data_pointer;
-    
-    pim_mre_task->run_task();
+    run_task();
 }

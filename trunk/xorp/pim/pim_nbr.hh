@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.2 2003/01/06 20:28:45 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.3 2003/03/10 23:20:49 hodson Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -25,7 +25,7 @@
 
 
 #include "libxorp/ipvx.hh"
-#include "mrt/timer.hh"
+#include "libxorp/timer.hh"
 #include "pim_proto_join_prune_message.hh"
 
 
@@ -100,15 +100,15 @@ public:
     bool	is_nohello_neighbor() const { return (_is_nohello_neighbor); }
     void	set_is_nohello_neighbor(bool v) { _is_nohello_neighbor = v; }
     
-    PimJpHeader& jp_header() { return (_jp_header); }
-    
     int		jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 			     uint32_t group_masklen,
 			     mrt_entry_type_t mrt_entry_type,
 			     action_jp_t action_jp, uint16_t holdtime,
 			     bool new_group_bool);
     
-    const Timer& const_timeout_timer() const { return (_timeout_timer); }
+    const XorpTimer& const_neighbor_liveness_timer() const {
+	return (_neighbor_liveness_timer);
+    }
     
     list<PimMre *>& pim_mre_rp_list()	{ return (_pim_mre_rp_list); }
     list<PimMre *>& pim_mre_wc_list()	{ return (_pim_mre_wc_list); }
@@ -132,10 +132,13 @@ public:
     void	init_processing_pim_mre_sg_rpt();
     void	add_pim_mre(PimMre *pim_mre);
     void	delete_pim_mre(PimMre *pim_mre);
-
     
 private:
     friend class PimVif;
+    
+    void	neighbor_liveness_timer_timeout();
+    void	jp_send_timer_timeout();
+    
     // Fields to hold information from the PIM_HELLO messages
     PimNode&	_pim_node;		// The associated PIM node
     PimVif&	_pim_vif;		// The corresponding PIM vif
@@ -146,7 +149,7 @@ private:
     uint32_t	_dr_priority;		// The DR priority of the neighbor
     bool	_is_dr_priority_present;// Is the DR priority field present
     uint16_t	_hello_holdtime;	// The Holdtime from/for this nbr
-    Timer	_timeout_timer;		// Timer to expire the neighbor
+    XorpTimer	_neighbor_liveness_timer; // Timer to expire the neighbor
     // LAN Prune Delay option related info
     bool	_is_tracking_support_disabled; // The T-bit
     uint16_t	_lan_delay;		// The LAN Delay
@@ -154,7 +157,7 @@ private:
     bool	_is_lan_prune_delay_present;// Is the LAN Prune Delay present
     bool	_is_nohello_neighbor;	// True if no-Hello neighbor
     
-    Timer	_jp_send_timer;		// Timer to send the accumulated JP msg
+    XorpTimer	_jp_send_timer;		// Timer to send the accumulated JP msg
     
     PimJpHeader _jp_header;
     
@@ -195,6 +198,5 @@ private:
 //
 // Global functions prototypes
 //
-extern void pim_nbr_timeout(void *data_pointer);	// TODO: use callbacks
 
 #endif // __PIM_PIM_NBR_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.19 2003/03/10 23:20:47 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.20 2003/03/30 03:50:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -38,11 +38,6 @@
 //
 // Local structures/classes, typedefs and macros
 //
-struct MifsetTimerArgs {
-    PimMre		*_pim_mre;
-    mifset_timer_func_t	_func;
-    uint16_t		_vif_index;
-};
 
 //
 // Local variables
@@ -51,7 +46,6 @@ struct MifsetTimerArgs {
 //
 // Local functions prototypes
 //
-static void	mifset_timer_timeout(void *data_pointer);
 
 
 PimMre::PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
@@ -1495,7 +1489,7 @@ PimMre::entry_can_remove() const
     if (is_sg_rpt()) {
 	if (is_pruned_state())
 	    return (false);
-	if (is_not_pruned_state() && const_override_timer().is_set())
+	if (is_not_pruned_state() && const_override_timer().scheduled())
 	    return (false);
     }
 #if 0		// TODO: XXX: PAVPAVPAV: not needed?
@@ -1596,59 +1590,6 @@ PimMre::i_am_dr() const
 }
 
 //
-// MifsetTimer related functions
-//
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-void
-PimMre::mifset_timer_start(MifsetTimers& mifset_timers, uint16_t vif_index,
-			   uint32_t delay_sec, uint32_t delay_usec,
-			   mifset_timer_func_t func)
-{
-    MifsetTimerArgs *mifset_timer_args = new MifsetTimerArgs;
-    
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return;
-    
-    mifset_timer_args->_pim_mre = this;
-    mifset_timer_args->_func = func;
-    mifset_timer_args->_vif_index = vif_index;
-    
-    mifset_timers.set_mif_timer(vif_index, delay_sec, delay_usec,
-				mifset_timer_timeout, mifset_timer_args);
-}
-
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-static void
-mifset_timer_timeout(void *data_pointer)
-{
-    MifsetTimerArgs *m = (MifsetTimerArgs *)data_pointer;
-    
-    (m->_pim_mre->*m->_func)(m->_vif_index);
-    
-    delete m;
-}
-
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-uint16_t
-PimMre::mifset_timer_remain(MifsetTimers& mifset_timers, uint16_t vif_index)
-{
-    TimeVal tv;
-    
-    // TODO: the return value should be <= 65535
-    return (mifset_timers.mif_timer_remain(vif_index, tv));
-}
-
-// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-void
-PimMre::mifset_timer_cancel(MifsetTimers& mifset_timers, uint16_t vif_index)
-{
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return;
-    
-    return (mifset_timers.cancel_mif_timer(vif_index));
-}
-
-//
 // PimVif-related methods
 //
 // Note: applies for (*,*,RP)
@@ -1696,12 +1637,12 @@ PimMre::recompute_stop_vif_rp(uint16_t vif_index)
     //
     
     downstream_prune_pending_timer_timeout_rp(vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_prune_pending_timers[vif_index].unschedule();
     downstream_expiry_timer_timeout_rp(vif_index);
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
     
     // TODO: remove the assert-related stuff?
-    // mifset_timer_cancel(assert_timers, vif_index);
+    // _assert_timers[vif_index].unschedule();
     // set_assert_tracking_desired_state(vif_index, false);
     // set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
@@ -1722,14 +1663,14 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
     //
     
     downstream_prune_pending_timer_timeout_wc(vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_prune_pending_timers[vif_index].unschedule();
     downstream_expiry_timer_timeout_wc(vif_index);
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
     
     assert_timer_timeout_wc(vif_index);
     delete_assert_winner_metric_wc(vif_index);
     
-    mifset_timer_cancel(assert_timers, vif_index);
+    _assert_timers[vif_index].unschedule();
     set_assert_tracking_desired_state(vif_index, false);
     set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
@@ -1750,15 +1691,15 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
     //
     
     downstream_prune_pending_timer_timeout_sg(vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_prune_pending_timers[vif_index].unschedule();
     downstream_expiry_timer_timeout_sg(vif_index);
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
     
     assert_timer_timeout_sg(vif_index);
     delete_assert_winner_metric_sg(vif_index);
     set_assert_winner_metric_is_better_than_spt_assert_metric_sg(vif_index, false);
     
-    mifset_timer_cancel(assert_timers, vif_index);
+    _assert_timers[vif_index].unschedule();
     set_assert_tracking_desired_state(vif_index, false);
     set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
@@ -1779,12 +1720,12 @@ PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
     //
     
     downstream_prune_pending_timer_timeout_sg_rpt(vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_prune_pending_timers[vif_index].unschedule();
     downstream_expiry_timer_timeout_sg_rpt(vif_index);
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
     
     // TODO: remove the assert-related stuff?
-    // mifset_timer_cancel(assert_timers, vif_index);
+    // assert_timers[vif_index].unschedule();
     // set_assert_tracking_desired_state(vif_index, false);
     // set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_task.hh,v 1.3 2003/01/24 08:09:54 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_task.hh,v 1.4 2003/03/10 23:20:48 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRE_TASK_HH__
@@ -164,6 +164,8 @@ public:
     PimMreTrackState::input_state_t input_state() const { return (_input_state); }
     
 private:
+    void	time_slice_timer_timeout();
+    
     // Private state
     PimMrt&	_pim_mrt;		// The PIM MRT
     
@@ -178,7 +180,7 @@ private:
     const PimMreTrackState::input_state_t _input_state;	// The input state
     
     // Timer to schedule the processing for the next time slice.
-    Timer	_time_slice_timer;
+    XorpTimer	_time_slice_timer;
     
     //
     // (*,*,RP) related state

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrib_table.hh,v 1.2 2003/03/10 23:20:49 hodson Exp $
+// $XORP: xorp/pim/pim_mrib_table.hh,v 1.3 2003/03/22 03:26:42 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRIB_TABLE_HH__
@@ -26,7 +26,7 @@
 
 #include <list>
 
-#include "mrt/timer.hh"
+#include "libxorp/timer.hh"
 #include "mrt/mrib_table.hh"
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mifset.cc,v 1.2 2003/03/10 23:20:44 hodson Exp $"
+#ident "$XORP: xorp/mrt/mifset.cc,v 1.3 2003/03/30 03:50:45 pavlin Exp $"
 
 
 //
@@ -46,40 +46,6 @@
 // Local functions prototypes
 //
 
-
-MifsetTimers::MifsetTimers()
-{
-    
-}
-
-MifsetTimers::~MifsetTimers()
-{
-    
-}
-
-void
-MifsetTimers::set_mif_timer(size_t vif_index, uint32_t delay_sec,
-			    uint32_t delay_usec, cfunc_t func,
-			    void *data_pointer)
-{
-    _mifset_timers[vif_index].start(delay_sec, delay_usec, func, data_pointer);
-}
-
-void
-MifsetTimers::cancel_mif_timer(size_t vif_index)
-{
-    _mifset_timers[vif_index].cancel();
-}
-
-uint32_t
-MifsetTimers::mif_timer_remain(size_t vif_index, TimeVal& tv_diff) const
-{
-    struct timeval timeval_tmp;
-    
-    _mifset_timers[vif_index].left_timeval(&timeval_tmp);
-    tv_diff.copy_in(timeval_tmp);
-    return tv_diff.sec();
-}
 
 void
 mifset_to_array(const Mifset& mifset, uint8_t *array)

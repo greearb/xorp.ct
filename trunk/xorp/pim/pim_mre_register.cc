@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.5 2003/03/10 23:20:48 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.6 2003/03/30 03:50:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -47,7 +47,6 @@
 //
 // Local functions prototypes
 //
-static void pim_mre_register_stop_timeout(void *data_pointer);
 
 
 // Note: applies for (S,G)
@@ -219,22 +218,21 @@ PimMre::recompute_is_could_register_sg()
     return (true);
 }
 
-static void
-pim_mre_register_stop_timeout(void *data_pointer)
+void
+PimMre::register_stop_timer_timeout()
 {
-    PimMre *pim_mre = (PimMre *)data_pointer;
     PimVif *pim_vif = NULL;
     
-    if (! pim_mre->is_sg())
+    if (! is_sg())
 	return;
     
-    if (pim_mre->is_register_noinfo_state())
+    if (is_register_noinfo_state())
 	goto register_noinfo_state;
-    if (pim_mre->is_register_join_state())
+    if (is_register_join_state())
 	goto register_join_state;
-    if (pim_mre->is_register_join_pending_state())
+    if (is_register_join_pending_state())
 	goto register_join_pending_state;
-    if (pim_mre->is_register_prune_state())
+    if (is_register_prune_state())
 	goto register_prune_state;
     
  register_noinfo_state:
@@ -250,26 +248,26 @@ pim_mre_register_stop_timeout(void *data_pointer)
  register_join_pending_state:
     // Register JoinPending state
     // Register JoinPending state -> Register Join state
-    pim_mre->set_register_join_state();
+    set_register_join_state();
     // Add reg tunnel
-    pim_mre->add_register_tunnel();
+    add_register_tunnel();
     return;
     
  register_prune_state:
     // Register Prune state
     // Register Prune state -> Register JoinPending state
-    pim_mre->set_register_join_pending_state();
+    set_register_join_pending_state();
     // Stop timer(**) (** The RegisterStopTimer is set to Register_Probe_Time
-    pim_mre->register_stop_timer().start(PIM_REGISTER_PROBE_TIME_DEFAULT, 0,
-					 pim_mre_register_stop_timeout,
-					 pim_mre);
+    register_stop_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0),
+	    callback(this, &PimMre::register_stop_timer_timeout));
     // Send Null Register
-    pim_vif = pim_mre->pim_node().vif_find_direct(pim_mre->source_addr());
-    const IPvX *rp_addr_ptr = pim_mre->rp_addr_ptr();
-    if ((pim_vif != NULL) && (rp_addr_ptr != NULL)) {
-	pim_vif->pim_register_null_send(*rp_addr_ptr,
-					pim_mre->source_addr(),
-					pim_mre->group_addr());
+    pim_vif = pim_node().vif_find_direct(source_addr());
+    if ((pim_vif != NULL) && (rp_addr_ptr() != NULL)) {
+	pim_vif->pim_register_null_send(*rp_addr_ptr(),
+					source_addr(),
+					group_addr());
     }
     return;
 }
@@ -311,9 +309,10 @@ PimMre::receive_register_stop()
     register_stop_tv.randomize_uniform(0.5);
     register_probe_tv.set(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
-    register_stop_timer().start(register_stop_tv.sec(),
-				register_stop_tv.usec(),
-				pim_mre_register_stop_timeout, this);
+    register_stop_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    register_stop_tv,
+	    callback(this, &PimMre::register_stop_timer_timeout));
     return;
     
  register_join_pending_state_label:
@@ -325,9 +324,10 @@ PimMre::receive_register_stop()
     register_stop_tv.randomize_uniform(0.5);
     register_probe_tv.set(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
-    register_stop_timer().start(register_stop_tv.sec(),
-				register_stop_tv.usec(),
-				pim_mre_register_stop_timeout, this);
+    register_stop_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    register_stop_tv,
+	    callback(this, &PimMre::register_stop_timer_timeout));
     return;
     
  register_prune_state_label:
@@ -377,7 +377,7 @@ PimMre::rp_register_sg_changed()
     // Add reg tunnel
     add_register_tunnel();
     // Cancel Register-Stop timer
-    register_stop_timer().cancel();
+    register_stop_timer().unschedule();
     return;
     
  register_prune_state_label:
@@ -387,7 +387,7 @@ PimMre::rp_register_sg_changed()
     // Add reg tunnel
     add_register_tunnel();
     // Cancel Register-Stop timer
-    register_stop_timer().cancel();
+    register_stop_timer().unschedule();
     return;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.18 2003/02/11 08:13:18 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.19 2003/03/10 23:20:48 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -24,6 +24,7 @@
 //
 
 
+#include "libxorp/timer.hh"
 #include "mrt/mifset.hh"
 #include "mrt/mrt.hh"
 #include "pim_mrib_table.hh"
@@ -89,7 +90,6 @@ enum {
 
 // PIM-specific Multicast Routing Entry
 // XXX: the source_addr() for (*,*,RP) entry contains the RP address
-typedef void (PimMre::*mifset_timer_func_t)(uint16_t vif_index);
 class PimMre : public Mre<PimMre> {
 public:
     PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group);
@@ -295,16 +295,20 @@ public:
     // JOIN/PRUNE info
     //
     // Note: applies only for (*,*,RP), (*,G), (S,G)
-    Timer&	join_timer() { return (_join_or_override_timer); }
+    XorpTimer&	join_timer() { return (_join_or_override_timer); }
     // Note: applies only for (*,*,RP), (*,G), (S,G)
-    const Timer& const_join_timer() const { return (_join_or_override_timer); }
-    // Note: applies only for (S,G,rpt)
-    Timer&	override_timer() { return (_join_or_override_timer); }
-    // Note: applies only for (S,G,rpt)
-    const Timer& const_override_timer() const {
+    const XorpTimer& const_join_timer() const {
 	return (_join_or_override_timer);
     }
-    Timer	_join_or_override_timer; // The JoinTimer for
+    void	join_timer_timeout();
+    // Note: applies only for (S,G,rpt)
+    XorpTimer&	override_timer() { return (_join_or_override_timer); }
+    // Note: applies only for (S,G,rpt)
+    const XorpTimer& const_override_timer() const {
+	return (_join_or_override_timer);
+    }
+    void	override_timer_timeout();
+    XorpTimer	_join_or_override_timer; // The JoinTimer for
 					 // (*,*,RP) (*,G) (S,G);
 					 // Also OverrideTimer for (S,G,rpt)
     // Note: applies only for (*,*,RP)
@@ -441,8 +445,8 @@ public:
     void	downstream_prune_pending_timer_timeout_sg(uint16_t vif_index);
     // Note: applies only for (S,G,rpt)
     void	downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index);
-    MifsetTimers _downstream_expiry_timers;		// Expiry timers
-    MifsetTimers _downstream_prune_pending_timers;	// PrunePending timers
+    XorpTimer	_downstream_expiry_timers[MAX_VIFS];	// Expiry timers
+    XorpTimer	_downstream_prune_pending_timers[MAX_VIFS]; // PrunePending timers
     
     
     //
@@ -541,8 +545,9 @@ public:
     void	set_not_could_register_sg() {
 	_flags &= ~PIM_MRE_COULD_REGISTER_SG;
     }
-    Timer&	register_stop_timer() { return (_register_stop_timer); }
-    Timer	_register_stop_timer;
+    XorpTimer&	register_stop_timer() { return (_register_stop_timer); }
+    void	register_stop_timer_timeout();
+    XorpTimer	_register_stop_timer;
     
     
     //
@@ -570,7 +575,7 @@ public:
     }
     Mifset	_i_am_assert_winner_state; // The interfaces I am Assert winner
     Mifset	_i_am_assert_loser_state;  // The interfaces I am Assert loser
-    MifsetTimers assert_timers;		// The Assert (winner/loser) timers
+    XorpTimer	_assert_timers[MAX_VIFS];  // The Assert (winner/loser) timers
     // Note: applies only for (*,G)
     void	assert_timer_timeout_wc(uint16_t vif_index);
     // Note: applies only for (S,G)
@@ -750,17 +755,6 @@ public:
     //
     // MISC. other stuff
     //
-    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-    void	mifset_timer_start(MifsetTimers& mifset_timers,
-				   uint16_t vif_index,
-				   uint32_t delay_sec, uint32_t delay_usec,
-				   mifset_timer_func_t func);
-    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-    uint16_t	mifset_timer_remain(MifsetTimers& mifset_timers,
-				    uint16_t vif_index);
-    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
-    void	mifset_timer_cancel(MifsetTimers& mifset_timers,
-				    uint16_t vif_index);
     
     // Note: applies for (*,*,RP)
     void	recompute_start_vif_rp(uint16_t vif_index);
@@ -847,7 +841,7 @@ public:
     
     // TODO: stuff that needs to be adapted or removed
     Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
-    Timer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
+    XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
 						// support
     
 private:
@@ -861,9 +855,5 @@ private:
 //
 // Global functions prototypes
 //
-// TODO: create PimMre:: methods that calls those below, and elimininate
-// them as global functions.
-extern void	pim_mre_join_timer_timeout(void *data_pointer);
-extern void	pim_mre_override_timer_timeout(void *data_pointer);
 
 #endif // __PIM_PIM_MRE_HH__

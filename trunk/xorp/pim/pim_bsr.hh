@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.6 2003/03/10 23:20:47 hodson Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.7 2003/03/30 03:50:46 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -28,8 +28,8 @@
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"
+#include "libxorp/timer.hh"
 #include "libproto/proto_unit.hh"
-#include "mrt/timer.hh"
 #include "pim_scope_zone_table.hh"
 
 
@@ -114,10 +114,12 @@ public:
     int		send_test_cand_rp_adv();
     
 private:
+    void	rp_table_apply_rp_changes_timer_timeout();
+    void	clean_expire_bsr_zones_timer_timeout();
+    
     BsrZone	*find_bsr_zone_by_prefix_from_list(
 	const list<BsrZone *>& zone_list, const IPvXNet& group_prefix,
 	bool is_scope_zone) const;
-    
     bool	can_add_config_bsr_zone(const BsrZone& bsr_zone,
 					string& error_msg) const;
     bool	can_add_active_bsr_zone(const BsrZone& bsr_zone,
@@ -128,9 +130,9 @@ private:
     list<BsrZone *> _active_bsr_zone_list;	// List of active BSR zones
     list<BsrZone *> _expire_bsr_zone_list;	// List of expiring BSR zones
     list<BsrZone *> _test_bsr_zone_list;	// List of test BSR zones
-    Timer	_rp_table_apply_rp_changes_timer; // Timer to apply RP changes
+    XorpTimer	_rp_table_apply_rp_changes_timer; // Timer to apply RP changes
 						  // to the RpTable
-    Timer	_clean_expire_bsr_zones_timer;	// Timer to cleanup expiring
+    XorpTimer	_clean_expire_bsr_zones_timer;	// Timer to cleanup expiring
 						// BSR zones
 };
 
@@ -195,13 +197,13 @@ public:
     void	merge_rp_set(const BsrZone& bsr_zone);
     void	store_rp_set(const BsrZone& bsr_zone);
     
-    Timer&	bsr_timer()			{ return (_bsr_timer);	}
-    const Timer& const_bsr_timer() const	{ return (_bsr_timer);	}
-    void	timeout_bsr_timer();
-    Timer&	scope_zone_expiry_timer() {
+    XorpTimer&	bsr_timer()			{ return (_bsr_timer);	}
+    const XorpTimer& const_bsr_timer() const	{ return (_bsr_timer);	}
+    void	expire_bsr_timer();
+    XorpTimer&	scope_zone_expiry_timer() {
 	return (_scope_zone_expiry_timer);
     }
-    const Timer& const_scope_zone_expiry_timer() const {
+    const XorpTimer& const_scope_zone_expiry_timer() const {
 	return (_scope_zone_expiry_timer);
     }
     
@@ -214,7 +216,7 @@ public:
     void	delete_bsr_group_prefix(BsrGroupPrefix *bsr_group_prefix);
     BsrGroupPrefix *find_bsr_group_prefix(const IPvXNet& group_prefix) const;
     
-    bool	process_candidate_bsr(const BsrZone& bsr_zone);
+    bool	process_candidate_bsr(const BsrZone& cand_bsr_zone);
     bool	i_am_bsr() const;
     bool	is_new_bsr_preferred(const BsrZone& bsr_zone) const;
     bool	is_new_bsr_same_priority(const BsrZone& bsr_zone) const;
@@ -244,16 +246,20 @@ public:
 			uint8_t rp_priority,
 			uint16_t rp_holdtime,
 			string& error_msg);
-    Timer&	candidate_rp_advertise_timer() {
+    XorpTimer&	candidate_rp_advertise_timer() {
 	return (_candidate_rp_advertise_timer);
     }
-    const Timer& const_candidate_rp_advertise_timer() const {
+    const XorpTimer& const_candidate_rp_advertise_timer() const {
 	return (_candidate_rp_advertise_timer);
     }
     void	start_candidate_rp_advertise_timer();
     void	expire_candidate_rp_advertise_timer();
     
 private:
+    void	bsr_timer_timeout();
+    void	scope_zone_expiry_timer_timeout();
+    void	candidate_rp_advertise_timer_timeout();
+    
     PimBsr&	_pim_bsr;		// The PimBsr for this BsrZone
     
     // BsrZone type
@@ -276,14 +282,14 @@ private:
 					// If non-scoped zone, the ID is
 					// IPvXNet:ip_multicast_base_prefix()
     
-    Timer	_bsr_timer;		// The Bootstrap Timer
+    XorpTimer	_bsr_timer;		// The Bootstrap Timer
     list<BsrGroupPrefix *> _bsr_group_prefix_list; // The list of group
 					// prefixes for this zone.
 					// XXX: if a scope zone, and if there
 					// is a group-RP prefix for the whole
 					// zone, this prefix must be in front.
     bsr_zone_state_t _bsr_zone_state;	// Scope zone state
-    Timer	_scope_zone_expiry_timer; // The Scope-Zone Expiry Timer
+    XorpTimer	_scope_zone_expiry_timer; // The Scope-Zone Expiry Timer
     
     // State at a Candidate BSR
     bool	_i_am_candidate_bsr;	// True if I am Cand-BSR for this zone
@@ -291,7 +297,7 @@ private:
     uint8_t	_my_bsr_priority;	// My BSR priority if a Cand-BSR
     
     // State at a Candidate RP
-    Timer	_candidate_rp_advertise_timer; // The C-RP Adv. Timer
+    XorpTimer	_candidate_rp_advertise_timer; // The C-RP Adv. Timer
     
     // Misc. state
     bool	_is_bsm_forward;	// Temp. state: if true, forward BSM
@@ -322,12 +328,14 @@ public:
     
     // Removal related methods
     void	schedule_bsr_group_prefix_remove();
-    const Timer& const_bsr_group_prefix_remove_timer() const {
-	return (_bsr_group_prefix_remove_timer);
+    const XorpTimer& const_remove_timer() const {
+	return (_remove_timer);
     }
     
     
 private:
+    void	remove_timer_timeout();
+    
     BsrZone&	_bsr_zone;		// The BSR zone I belong to
     
     // Group prefix state
@@ -338,7 +346,7 @@ private:
     list<BsrRp *> _rp_list;		// The list of received RPs
     
     // Misc. state
-    Timer	_bsr_group_prefix_remove_timer;	// Timer to remove empty prefix
+    XorpTimer	_remove_timer;		// Timer to remove empty prefix
 };
 
 class BsrRp {
@@ -353,19 +361,21 @@ public:
     uint16_t	rp_holdtime() const { return (_rp_holdtime);		}
     void	set_rp_priority(uint8_t v)  { _rp_priority = v;		}
     void	set_rp_holdtime(uint16_t v) { _rp_holdtime = v;		}
-    const Timer& const_candidate_rp_expiry_timer() const {
+    const XorpTimer& const_candidate_rp_expiry_timer() const {
 	return (_candidate_rp_expiry_timer);
     }
     void	start_candidate_rp_expiry_timer();
     
 private:
+    void	candidate_rp_expiry_timer_timeout();
+    
     BsrGroupPrefix& _bsr_group_prefix;	// The BSR prefix I belong to
     
     // RP state
     IPvX	_rp_addr;		// The address of the RP
     uint8_t	_rp_priority;		// RP priority (smaller is better)
     uint16_t	_rp_holdtime;		// RP holdtime (in seconds)
-    Timer	_candidate_rp_expiry_timer; // The C-RP Expiry Timer
+    XorpTimer	_candidate_rp_expiry_timer; // The C-RP Expiry Timer
 };
 
 //

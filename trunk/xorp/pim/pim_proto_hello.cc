@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.5 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.6 2003/03/30 03:50:46 pavlin Exp $"
 
 
 //
@@ -22,6 +22,7 @@
 
 #include "pim_module.h"
 #include "pim_private.hh"
+#include "mrt/random.h"
 #include "pim_node.hh"
 #include "pim_vif.hh"
 
@@ -47,8 +48,6 @@
 //
 static bool	pim_dr_is_better(PimNbr *pim_nbr1, PimNbr *pim_nbr2,
 				 bool consider_dr_priority);
-static void	pim_hello_send_timeout(void *data_pointer);
-static void	pim_hello_send_once_timeout(void *data_pointer);
 
 
 void
@@ -249,11 +248,13 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	// Schedule a PIM_HELLO message at random in the
 	// interval [0, hello_triggered_delay)
 	// XXX: this message should not affect the periodic `hello_timer'.
-	_hello_once_timer.start_random(hello_triggered_delay().get()/2,
-				       0,
-				       pim_hello_send_once_timeout,
-				       this,
-				       1.0);
+	TimeVal tv(hello_triggered_delay().get(), 0);
+	tv = tv / 2;
+	tv.randomize_uniform(1.0);
+	_hello_once_timer =
+	    pim_node().event_loop().new_oneoff_after(
+		tv,
+		callback(this, &PimVif::hello_once_timer_timeout));
 	
 	//
 	// Add the task that will process all PimMre entries that have no
@@ -307,11 +308,14 @@ PimNbr::pim_hello_holdtime_process(uint16_t holdtime)
     switch (holdtime) {
     case PIM_HELLO_HOLDTIME_FOREVER:
 	// Never expire this neighbor
-	_timeout_timer.cancel();
+	_neighbor_liveness_timer.unschedule();
 	break;
     default:
-	// Start the timeout timer
-	_timeout_timer.start(holdtime, 0, pim_nbr_timeout, this);
+	// Start the Neighbor Liveness Timer
+	_neighbor_liveness_timer =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimNbr::neighbor_liveness_timer_timeout));
 	break;
     }
 }
@@ -456,7 +460,10 @@ pim_dr_is_better(PimNbr *pim_nbr1, PimNbr *pim_nbr2, bool consider_dr_priority)
 void
 PimVif::hello_timer_start(uint32_t sec, uint32_t usec)
 {
-    _hello_timer.start(sec, usec, pim_hello_send_timeout, this);
+    _hello_timer =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(sec, usec),
+	    callback(this, &PimVif::hello_timer_timeout));
 }
 
 // Schedule a PIM_HELLO message at random in the
@@ -467,20 +474,19 @@ PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
     TimeVal tv(sec, usec);
     
     tv = tv / 2;
-    _hello_timer.start_random(tv.sec(),
-			      tv.usec(),
-			      pim_hello_send_timeout,
-			      this,
-			      1.0);
+    tv.randomize_uniform(1.0);
+    
+    _hello_timer =
+	pim_node().event_loop().new_oneoff_after(
+	    tv,
+	    callback(this, &PimVif::hello_timer_timeout));
 }
 
-static void
-pim_hello_send_timeout(void *data_pointer)
+void
+PimVif::hello_timer_timeout()
 {
-    PimVif *pim_vif = (PimVif *)data_pointer;
-    
-    pim_vif->pim_hello_send();
-    pim_vif->hello_timer_start(pim_vif->hello_period().get(), 0);
+    pim_hello_send();
+    hello_timer_start(hello_period().get(), 0);
 }
 
 //
@@ -488,12 +494,10 @@ pim_hello_send_timeout(void *data_pointer)
 // when we have added a new neighbor. If this is not true, the
 // add_task_foo() task scheduling is not needed.
 //
-static void
-pim_hello_send_once_timeout(void *data_pointer)
+void
+PimVif::hello_once_timer_timeout()
 {
-    PimVif *pim_vif = (PimVif *)data_pointer;
-    
-    pim_vif->pim_hello_first_send();
+    pim_hello_first_send();
 }
 
 int
@@ -518,7 +522,7 @@ PimVif::pim_hello_first_send()
 	delete_send_unicast_bootstrap_nbr_list();
     }
     
-    _hello_once_timer.cancel();
+    _hello_once_timer.unschedule();
     
     return (XORP_OK);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.16 2003/03/10 23:20:46 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.17 2003/03/30 03:50:45 pavlin Exp $"
 
 
 //
@@ -26,6 +26,7 @@
 #include "pim_module.h"
 #include "pim_private.hh"
 #include "libxorp/utils.hh"
+#include "mrt/random.h"
 #include "pim_proto.h"
 #include "pim_bsr.hh"
 #include "pim_node.hh"
@@ -52,13 +53,6 @@
 //
 // Local functions prototypes
 //
-static void pim_bsr_rp_table_apply_rp_changes_timeout(void *data_pointer);
-static void pim_bsr_clean_expire_bsr_zones_timeout(void *data_pointer);
-static void bsr_zone_bsr_timer_timeout(void *data_pointer);
-static void bsr_zone_scope_zone_expiry_timer_timeout(void *data_pointer);
-static void bsr_rp_candidate_rp_expiry_timer_timeout(void *data_pointer);
-static void bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer);
-static void bsr_group_prefix_remove_timer_timeout(void *data_pointer);
 
 
 /**
@@ -188,9 +182,9 @@ PimBsr::stop(void)
 	    //
 	    // Cancel the Cand-RP-Advertise timer
 	    //
-	    if (! config_bsr_zone->candidate_rp_advertise_timer().is_set())
+	    if (! config_bsr_zone->candidate_rp_advertise_timer().scheduled())
 		break;		// We were not sending Cand-RP-Adv messages
-	    config_bsr_zone->candidate_rp_advertise_timer().cancel();
+	    config_bsr_zone->candidate_rp_advertise_timer().unschedule();
 	    
 	    if (active_bsr_zone->i_am_bsr())
 		break;		// I am the BSR, hence don't send the messages
@@ -256,7 +250,7 @@ PimBsr::stop(void)
     delete_pointers_list(_expire_bsr_zone_list);
     
     // Cancel unwanted timers
-    _clean_expire_bsr_zones_timer.cancel();
+    _clean_expire_bsr_zones_timer.unschedule();
     
     //
     // XXX: don't stop the _rp_table_apply_rp_changes_timer
@@ -401,9 +395,9 @@ PimBsr::add_expire_bsr_zone(const BsrZone& bsr_zone)
     // Cancel all timers for this zone.
     // Note that we do keep the C-RP Expiry timers running
     //
-    expire_bsr_zone->bsr_timer().cancel();
-    expire_bsr_zone->scope_zone_expiry_timer().cancel();
-    expire_bsr_zone->candidate_rp_advertise_timer().cancel();
+    expire_bsr_zone->bsr_timer().unschedule();
+    expire_bsr_zone->scope_zone_expiry_timer().unschedule();
+    expire_bsr_zone->candidate_rp_advertise_timer().unschedule();
     
     //
     // Don't keep prefixes that have no RPs, or incomplete set of RPs.
@@ -697,23 +691,18 @@ PimBsr::add_rps_to_rp_table()
 void
 PimBsr::schedule_rp_table_apply_rp_changes()
 {
-    _rp_table_apply_rp_changes_timer.start(0,
-					   0,
-					   pim_bsr_rp_table_apply_rp_changes_timeout,
-					   this);
+    _rp_table_apply_rp_changes_timer =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &PimBsr::rp_table_apply_rp_changes_timer_timeout));
 }
 
 // Time to apply the changes to the RP Table
-static void
-pim_bsr_rp_table_apply_rp_changes_timeout(void *data_pointer)
+void
+PimBsr::rp_table_apply_rp_changes_timer_timeout()
 {
-    if (data_pointer == NULL)
-	return;
-    
-    PimBsr& pim_bsr = *(PimBsr *)data_pointer;
-    
     // Apply the changes
-    pim_bsr.pim_node().rp_table().apply_rp_changes();
+    pim_node().rp_table().apply_rp_changes();
 }
 
 //
@@ -748,23 +737,17 @@ PimBsr::clean_expire_bsr_zones()
 void
 PimBsr::schedule_clean_expire_bsr_zones()
 {
-    _clean_expire_bsr_zones_timer.start(0,
-					0,
-					pim_bsr_clean_expire_bsr_zones_timeout,
-					this);
+    _clean_expire_bsr_zones_timer =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &PimBsr::clean_expire_bsr_zones_timer_timeout));
 }
 
-static void
-pim_bsr_clean_expire_bsr_zones_timeout(void *data_pointer)
+void
+PimBsr::clean_expire_bsr_zones_timer_timeout()
 {
-    if (data_pointer == NULL)
-	return;
-    
-    PimBsr& pim_bsr = *(PimBsr *)data_pointer;
-    
     // Clean the expiring zones
-    pim_bsr.clean_expire_bsr_zones();
-    
+    clean_expire_bsr_zones();
 }
 
 // Find the BsrZone that corresponds to @is_scope_zone
@@ -1138,27 +1121,23 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
     set_bsr_zone_state(bsr_zone.bsr_zone_state());
     
     // Conditionally set the Bootstrap timer
-    if (bsr_zone.const_bsr_timer().is_set()) {
-	TimeVal left_tv;
-	struct timeval timeval_tmp;
-	bsr_zone.const_bsr_timer().left_timeval(&timeval_tmp);
-	left_tv.copy_in(timeval_tmp);
-	_bsr_timer.start(left_tv.sec(),
-			 left_tv.usec(),
-			 bsr_zone_bsr_timer_timeout,
-			 this);
+    if (bsr_zone.const_bsr_timer().scheduled()) {
+	TimeVal tv_left;
+	bsr_zone.const_bsr_timer().time_remaining(tv_left);
+	_bsr_timer =
+	    _pim_bsr.pim_node().event_loop().new_oneoff_after(
+		tv_left,
+		callback(this, &BsrZone::bsr_timer_timeout));
     }
     
     // Conditionally set the Scone-Zone Expiry timer
-    if (bsr_zone.const_scope_zone_expiry_timer().is_set()) {
-	TimeVal left_tv;
-	struct timeval timeval_tmp;
-	bsr_zone.const_scope_zone_expiry_timer().left_timeval(&timeval_tmp);
-	left_tv.copy_in(timeval_tmp);
-	_scope_zone_expiry_timer.start(left_tv.sec(),
-				       left_tv.usec(),
-				       bsr_zone_scope_zone_expiry_timer_timeout,
-				       this);
+    if (bsr_zone.const_scope_zone_expiry_timer().scheduled()) {
+	TimeVal tv_left;
+	bsr_zone.const_scope_zone_expiry_timer().time_remaining(tv_left);
+	_scope_zone_expiry_timer =
+	    _pim_bsr.pim_node().event_loop().new_oneoff_after(
+		tv_left,
+		callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
     }
     
     //
@@ -1632,11 +1611,11 @@ BsrZone::find_bsr_group_prefix(const IPvXNet& group_prefix) const
 }
 
 // Process a Cand-BSR information for that zone.
-// Return true if @bsr_zone is the new BSR, otherwise false.
+// Return true if @cand_bsr_zone is the new BSR, otherwise false.
 // XXX: assumes that if necessary, 'Forward BSM' event
 // will happen in the parent function.
 bool
-BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
+BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 {
     XLOG_ASSERT(is_active_bsr_zone());
     
@@ -1669,12 +1648,12 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
 	    // is shorter: 1/10th	(XXX: before was 1/30th)
 	    // (Not in the spec).
 	    // TODO: XXX: PAVPAVPAV: temp. the interval is not shorter.
-	    _bsr_timer.start_random(
-		PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT / 1,
-		0,
-		bsr_zone_bsr_timer_timeout,
-		this,
-		0.5);
+	    TimeVal tv(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0);
+	    tv = tv / 1;
+	    tv.randomize_uniform(0.5);
+	    _bsr_timer = pim_bsr().pim_node().event_loop().new_oneoff_after(
+		tv,
+		callback(this, &BsrZone::bsr_timer_timeout));
 	    return (false);
 	} else {
 	    // I am not a Cand-BSR for this zone
@@ -1710,46 +1689,48 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
     //
     // Candidate BSR state
     //
-    if (is_new_bsr_preferred(bsr_zone) || is_new_bsr_same_priority(bsr_zone)) {
+    if (is_new_bsr_preferred(cand_bsr_zone)
+	|| is_new_bsr_same_priority(cand_bsr_zone)) {
 	// XXX: some of actions below are not in the spec
 	// Receive Preferred BSM or BSM from Elected BSR
 	// -> C-BSR state
 	set_bsr_zone_state(BsrZone::STATE_CANDIDATE_BSR);
 	// Forward BSM  : will happen in the parent function
 	set_bsm_forward(true);
-	if (is_new_bsr_preferred(bsr_zone)) {
+	if (is_new_bsr_preferred(cand_bsr_zone)) {
 	    // Store RP-Set
-	    store_rp_set(bsr_zone);
+	    store_rp_set(cand_bsr_zone);
 	    expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
 	} else {
 	    // Update the Elected BSR 
-	    if (fragment_tag() == bsr_zone.fragment_tag()) {
+	    if (fragment_tag() == cand_bsr_zone.fragment_tag()) {
 		// Merge RP-Set
-		merge_rp_set(bsr_zone);
+		merge_rp_set(cand_bsr_zone);
 	    } else {
 		// Store RP-Set
-		store_rp_set(bsr_zone);
+		store_rp_set(cand_bsr_zone);
 	    }
 	}
 	// Set BS Timer to BS Timeout
-	_bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0,
-			 bsr_zone_bsr_timer_timeout, this);
+	_bsr_timer = pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
 	return (true);
     }
-    if (bsr_addr() == bsr_zone.bsr_addr()) {
+    if (bsr_addr() == cand_bsr_zone.bsr_addr()) {
 	// Receive Non-preferred BSM from Elected BSR
 	// -> P-BSR state
 	set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
 	// Update Elected BSR preference (TODO: XXX: not in the spec)
-	_bsr_addr = bsr_zone.bsr_addr();
-	_bsr_priority = bsr_zone.bsr_priority();
+	_bsr_addr = cand_bsr_zone.bsr_addr();
+	_bsr_priority = cand_bsr_zone.bsr_priority();
 	// Set BS Timer to rand_override
 	TimeVal rand_override = randomized_override_interval(_my_bsr_addr,
 							     _my_bsr_priority);
-	_bsr_timer.start(rand_override.sec(),
-			 rand_override.usec(),
-			 bsr_zone_bsr_timer_timeout,
-			  this);
+	_bsr_timer =
+	    pim_bsr().pim_node().event_loop().new_oneoff_after(
+		rand_override,
+		callback(this, &BsrZone::bsr_timer_timeout));
 	return (false);
     }
     // Receive Non-preferred BSM. Ignore.
@@ -1757,18 +1738,20 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
     
  bsr_zone_state_pending_bsr_label:
     // Pending BSR state
-    if (is_new_bsr_preferred(bsr_zone)) {
+    if (is_new_bsr_preferred(cand_bsr_zone)) {
 	// Receive Preferred BSM
 	// -> C-BSR state
 	set_bsr_zone_state(BsrZone::STATE_CANDIDATE_BSR);
 	// Forward BSM  : will happen in the parent function
 	set_bsm_forward(true);
 	// Store RP-Set
-	store_rp_set(bsr_zone);
+	store_rp_set(cand_bsr_zone);
 	expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
 	// Set BS Timer to BS Timeout
-	_bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0,
-			 bsr_zone_bsr_timer_timeout, this);
+	_bsr_timer =
+	    pim_bsr().pim_node().event_loop().new_oneoff_after(
+		TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+		callback(this, &BsrZone::bsr_timer_timeout));
 	return (true);
     }
     // Receive Non-preferred BSM
@@ -1778,18 +1761,20 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
     
  bsr_zone_state_elected_bsr_label:
     // Elected BSR state
-    if (is_new_bsr_preferred(bsr_zone)) {
+    if (is_new_bsr_preferred(cand_bsr_zone)) {
 	// Receive Preferred BSM
 	// -> C-BSR state
 	set_bsr_zone_state(BsrZone::STATE_CANDIDATE_BSR);
 	// Forward BSM  : will happen in the parent function
 	set_bsm_forward(true);
 	// Store RP-Set
-	store_rp_set(bsr_zone);
+	store_rp_set(cand_bsr_zone);
 	expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
 	// Set BS Timer to BS Timeout
-	_bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0,
-			 bsr_zone_bsr_timer_timeout, this);
+	_bsr_timer =
+	    pim_bsr().pim_node().event_loop().new_oneoff_after(
+		TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+		callback(this, &BsrZone::bsr_timer_timeout));
 	return (true);
     }
     // Receive Non-preferred BSM
@@ -1798,8 +1783,10 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
     // Originate BSM
     _is_bsm_originate = true;
     // Set BS Timer to BS Period
-    _bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0,
-		     bsr_zone_bsr_timer_timeout, this);
+    _bsr_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
     return (false);
     
     
@@ -1824,15 +1811,18 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
     // Forward BSM  : will happen in the parent function
     set_bsm_forward(true);
     // Store RP-Set
-    store_rp_set(bsr_zone);
+    store_rp_set(cand_bsr_zone);
     expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
     // Set BS Timer to BS Timeout
-    _bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0,
-		     bsr_zone_bsr_timer_timeout, this);
+    _bsr_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
     // Set SZ Timer to SZ Timeout
-    _scope_zone_expiry_timer.start(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0,
-				   bsr_zone_scope_zone_expiry_timer_timeout,
-				   this);
+    _scope_zone_expiry_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0),
+	    callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
     return (true);
     
  bsr_zone_state_accept_any_label:
@@ -1842,48 +1832,54 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
     // Forward BSM  : will happen in the parent function
     set_bsm_forward(true);
     // Store RP-Set
-    store_rp_set(bsr_zone);
+    store_rp_set(cand_bsr_zone);
     expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
     // Set BS Timer to BS Timeout
-    _bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0,
-		     bsr_zone_bsr_timer_timeout, this);
+    _bsr_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
     // Set SZ Timer to SZ Timeout
-    _scope_zone_expiry_timer.start(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0,
-				   bsr_zone_scope_zone_expiry_timer_timeout,
-				   this);
+    _scope_zone_expiry_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0),
+	    callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
     return (true);
     
  bsr_zone_state_accept_preferred_label:
     // Accept Preferred state
-    if (is_new_bsr_preferred(bsr_zone) || is_new_bsr_same_priority(bsr_zone)) {
+    if (is_new_bsr_preferred(cand_bsr_zone)
+	|| is_new_bsr_same_priority(cand_bsr_zone)) {
 	// XXX: some of the actions below are not in the spec
 	// Receive Preferred BSM or BSM from Elected BSR
 	// -> AP State
 	set_bsr_zone_state(BsrZone::STATE_ACCEPT_PREFERRED);
 	// Forward BSM  : will happen in the parent function
 	set_bsm_forward(true);
-	if (is_new_bsr_preferred(bsr_zone)) {
+	if (is_new_bsr_preferred(cand_bsr_zone)) {
 	    // Store RP-Set
-	    store_rp_set(bsr_zone);
+	    store_rp_set(cand_bsr_zone);
 	    expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
 	} else {
 	    // Update the Elected BSR
-	    if (fragment_tag() == bsr_zone.fragment_tag()) {
+	    if (fragment_tag() == cand_bsr_zone.fragment_tag()) {
 		// Merge RP-Set
-		merge_rp_set(bsr_zone);
+		merge_rp_set(cand_bsr_zone);
 	    } else {
 		// Store RP-Set
-		store_rp_set(bsr_zone);
+		store_rp_set(cand_bsr_zone);
 	    }
 	}
 	// Set BS Timer to BS Timeout
-	_bsr_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0,
-			 bsr_zone_bsr_timer_timeout, this);
+	_bsr_timer =
+	    pim_bsr().pim_node().event_loop().new_oneoff_after(
+		TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+		callback(this, &BsrZone::bsr_timer_timeout));
 	// Set SZ Timer to SZ Timeout
-	_scope_zone_expiry_timer.start(
-	    PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0,
-	    bsr_zone_scope_zone_expiry_timer_timeout,
-	    this);
+	_scope_zone_expiry_timer =
+	    pim_bsr().pim_node().event_loop().new_oneoff_after(
+		TimeVal(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0),
+		callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
 	return (true);
     }
     // Receive Non-preferred BSM
@@ -1999,32 +1995,29 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
 }
 
 //
-// (Re)start the BsrTimer so it will expire immediately.
+// Expire the BsrTimer (i.e., schedule it to expire NOW).
 //
 void
-BsrZone::timeout_bsr_timer()
+BsrZone::expire_bsr_timer()
 {
-    _bsr_timer.start(0, 0, bsr_zone_bsr_timer_timeout, this);
+    _bsr_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
 }
 
-static void
-bsr_zone_bsr_timer_timeout(void *data_pointer)
+void
+BsrZone::bsr_timer_timeout()
 {
-    if (data_pointer == NULL)
-	return;
+    XLOG_ASSERT(is_active_bsr_zone());
     
-    BsrZone& bsr_zone = *(BsrZone *)data_pointer;
-    PimNode& pim_node = bsr_zone.pim_bsr().pim_node();
-    
-    XLOG_ASSERT(bsr_zone.is_active_bsr_zone());
-    
-    if (bsr_zone.bsr_zone_state() == BsrZone::STATE_CANDIDATE_BSR)
+    if (bsr_zone_state() == BsrZone::STATE_CANDIDATE_BSR)
 	goto bsr_zone_state_candidate_bsr_label;
-    if (bsr_zone.bsr_zone_state() == BsrZone::STATE_PENDING_BSR)
+    if (bsr_zone_state() == BsrZone::STATE_PENDING_BSR)
 	goto bsr_zone_state_pending_bsr_label;
-    if (bsr_zone.bsr_zone_state() == BsrZone::STATE_ELECTED_BSR)
+    if (bsr_zone_state() == BsrZone::STATE_ELECTED_BSR)
 	goto bsr_zone_state_elected_bsr_label;
-    if (bsr_zone.bsr_zone_state() == BsrZone::STATE_ACCEPT_PREFERRED)
+    if (bsr_zone_state() == BsrZone::STATE_ACCEPT_PREFERRED)
 	goto bsr_zone_state_accept_preferred_label;
     // Invalid state
     XLOG_ASSERT(false);
@@ -2033,17 +2026,16 @@ bsr_zone_bsr_timer_timeout(void *data_pointer)
  bsr_zone_state_candidate_bsr_label:
     // Candidate BSR state
     // -> P-BSR state
-    bsr_zone.set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
+    set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
     // Set BS Timer to rand_override
     {
 	TimeVal rand_override;
-	rand_override =
-	    bsr_zone.randomized_override_interval(bsr_zone.my_bsr_addr(),
-						  bsr_zone.my_bsr_priority());
-	bsr_zone.bsr_timer().start(rand_override.sec(),
-				   rand_override.usec(),
-				   bsr_zone_bsr_timer_timeout,
-				   &bsr_zone);
+	rand_override = randomized_override_interval(my_bsr_addr(),
+						     my_bsr_priority());
+	_bsr_timer =
+	    pim_bsr().pim_node().event_loop().new_oneoff_after(
+		rand_override,
+		callback(this, &BsrZone::bsr_timer_timeout));
 	
 	return;
     }
@@ -2051,71 +2043,70 @@ bsr_zone_bsr_timer_timeout(void *data_pointer)
  bsr_zone_state_pending_bsr_label:
     // Pending BSR state
     // -> E-BSR state
-    bsr_zone.set_bsr_zone_state(BsrZone::STATE_ELECTED_BSR);
+    set_bsr_zone_state(BsrZone::STATE_ELECTED_BSR);
     // Store RP-Set
     {
-	BsrZone *config_bsr_zone = bsr_zone.pim_bsr().find_config_bsr_zone(
-	    bsr_zone.zone_id());
+	BsrZone *config_bsr_zone = pim_bsr().find_config_bsr_zone(zone_id());
 	XLOG_ASSERT(config_bsr_zone != NULL);
 	// TODO: XXX: PAVPAVPAV: need to be careful with the above assert in
 	// case we have reconfigured the BSR on-the-fly
-	bsr_zone.store_rp_set(*config_bsr_zone);
+	store_rp_set(*config_bsr_zone);
 	// TODO: XXX: PAVPAVPAV: do we want to set the fragment_tag to
 	// something new here?
 	
 	// Add the RPs to the RP table
-	bsr_zone.pim_bsr().add_rps_to_rp_table();
+	pim_bsr().add_rps_to_rp_table();
     }
     // Originate BSM
-    bsr_zone.new_fragment_tag();
-    for (uint16_t i = 0; i < pim_node.maxvifs(); i++) {
-	PimVif *pim_vif = pim_node.vif_find_by_vif_index(i);
+    new_fragment_tag();
+    for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
+	PimVif *pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
 	pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
-				    bsr_zone);
+				    *this);
     }
     
     // Set BS Timer to BS Period
-    bsr_zone.bsr_timer().start(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0,
-			       bsr_zone_bsr_timer_timeout, &bsr_zone);
+    _bsr_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
     return;
     
  bsr_zone_state_elected_bsr_label:
     // Elected BSR state
     // -> E-BSR state
-    bsr_zone.set_bsr_zone_state(BsrZone::STATE_ELECTED_BSR);
+    set_bsr_zone_state(BsrZone::STATE_ELECTED_BSR);
     // Originate BSM
-    bsr_zone.new_fragment_tag();
-    for (uint16_t i = 0; i < pim_node.maxvifs(); i++) {
-	PimVif *pim_vif = pim_node.vif_find_by_vif_index(i);
+    new_fragment_tag();
+    for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
+	PimVif *pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
 	pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
-				    bsr_zone);
+				    *this);
     }
     // Set BS Timer to BS Period
-    bsr_zone.bsr_timer().start(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0,
-			       bsr_zone_bsr_timer_timeout, &bsr_zone);
+    _bsr_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0),
+	    callback(this, &BsrZone::bsr_timer_timeout));
     return;
     
  bsr_zone_state_accept_preferred_label:
     // Accept Preferred state
     // -> AA State
-    bsr_zone.set_bsr_zone_state(BsrZone::STATE_ACCEPT_ANY);
+    set_bsr_zone_state(BsrZone::STATE_ACCEPT_ANY);
     return;
 }
 
-static void
-bsr_zone_scope_zone_expiry_timer_timeout(void *data_pointer)
+void
+BsrZone::scope_zone_expiry_timer_timeout()
 {
-    if (data_pointer == NULL)
-	return;
+    XLOG_ASSERT(is_active_bsr_zone());
     
-    BsrZone& bsr_zone = *(BsrZone *)data_pointer;
-    XLOG_ASSERT(bsr_zone.is_active_bsr_zone());
-    
-    if (bsr_zone.bsr_zone_state() == BsrZone::STATE_ACCEPT_ANY)
+    if (bsr_zone_state() == BsrZone::STATE_ACCEPT_ANY)
 	goto bsr_zone_state_accept_any_label;
     // Invalid state
     XLOG_ASSERT(false);
@@ -2123,10 +2114,10 @@ bsr_zone_scope_zone_expiry_timer_timeout(void *data_pointer)
     
  bsr_zone_state_accept_any_label:
     // No Info state
-    bsr_zone.set_bsr_zone_state(BsrZone::STATE_NO_INFO);
+    set_bsr_zone_state(BsrZone::STATE_NO_INFO);
     // Cancel timers
     // Clear state
-    bsr_zone.pim_bsr().delete_active_bsr_zone(&bsr_zone);
+    pim_bsr().delete_active_bsr_zone(this);
     return;
 }
 
@@ -2238,11 +2229,10 @@ BsrZone::start_candidate_rp_advertise_timer()
 {
     // TODO: instead of PIM_CAND_RP_ADV_PERIOD_DEFAULT we should use
     // a configurable value
-    _candidate_rp_advertise_timer.start(
-	PIM_CAND_RP_ADV_PERIOD_DEFAULT,
-	0,
-	bsr_zone_candidate_rp_advertise_timer_timeout,
-	this);
+    _candidate_rp_advertise_timer =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_CAND_RP_ADV_PERIOD_DEFAULT, 0),
+	    callback(this, &BsrZone::candidate_rp_advertise_timer_timeout));
 }
 
 //
@@ -2264,26 +2254,24 @@ BsrZone::expire_candidate_rp_advertise_timer()
 	// Probably I am not configured as a Cand-RP. Ignore.
 	return;
     }
-    config_bsr_zone->candidate_rp_advertise_timer().start(
-	0,
-	0,
-	bsr_zone_candidate_rp_advertise_timer_timeout,
-	config_bsr_zone);
+    config_bsr_zone->candidate_rp_advertise_timer() =
+	pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(0, 0),
+	    callback(config_bsr_zone,
+		     &BsrZone::candidate_rp_advertise_timer_timeout));
 }
 
 // Time to send a Cand-RP-Advertise message to the BSR
-static void
-bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer)
+void
+BsrZone::candidate_rp_advertise_timer_timeout()
 {
-    BsrZone& bsr_zone = *(BsrZone *)data_pointer;
-    PimNode& pim_node = bsr_zone.pim_bsr().pim_node();
     PimVif *pim_vif = NULL;
     const BsrZone *active_bsr_zone = NULL;
     
     //
     // Find the active BsrZone
     //
-    active_bsr_zone = bsr_zone.pim_bsr().find_active_bsr_zone(bsr_zone.zone_id());
+    active_bsr_zone = pim_bsr().find_active_bsr_zone(zone_id());
     do {
 	if (active_bsr_zone == NULL)
 	    break;		// No active BsrZone yet
@@ -2306,8 +2294,8 @@ bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer)
 	// Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
 	// messages.
 	//
-	for (uint16_t i = 0; i < pim_node.maxvifs(); i++) {
-	    pim_vif = pim_node.vif_find_by_vif_index(i);
+	for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
+	    pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;
 	    if (! pim_vif->is_up())
@@ -2320,11 +2308,11 @@ bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer)
 	    break;
 	}
 	
-	pim_vif->pim_cand_rp_adv_send(active_bsr_zone->bsr_addr(), bsr_zone);
+	pim_vif->pim_cand_rp_adv_send(active_bsr_zone->bsr_addr(), *this);
     } while (false);
     
     // Restart the timer
-    bsr_zone.start_candidate_rp_advertise_timer();
+    start_candidate_rp_advertise_timer();
 }
 
 BsrGroupPrefix::BsrGroupPrefix(BsrZone& bsr_zone,
@@ -2360,15 +2348,13 @@ BsrGroupPrefix::BsrGroupPrefix(BsrZone& bsr_zone,
     }
 
     // Conditionally set the timer to remove this group prefix
-    if (bsr_group_prefix.const_bsr_group_prefix_remove_timer().is_set()) {
-	TimeVal left_tv;
-	struct timeval timeval_tmp;
-	bsr_group_prefix.const_bsr_group_prefix_remove_timer().left_timeval(&timeval_tmp);
-	left_tv.copy_in(timeval_tmp);
-	_bsr_group_prefix_remove_timer.start(left_tv.sec(),
-					     left_tv.usec(),
-					     bsr_group_prefix_remove_timer_timeout,
-					     this);
+    if (bsr_group_prefix.const_remove_timer().scheduled()) {
+	TimeVal tv_left;
+	bsr_group_prefix.const_remove_timer().time_remaining(tv_left);
+	_remove_timer =
+	    _bsr_zone.pim_bsr().pim_node().event_loop().new_oneoff_after(
+		tv_left,
+		callback(this, &BsrGroupPrefix::remove_timer_timeout));
     }
 }
 
@@ -2474,30 +2460,28 @@ BsrGroupPrefix::find_rp(const IPvX& rp_addr) const
 void
 BsrGroupPrefix::schedule_bsr_group_prefix_remove()
 {
-    _bsr_group_prefix_remove_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT,
-					 0,
-					 bsr_group_prefix_remove_timer_timeout,
-					 this);
+    _remove_timer =
+	bsr_zone().pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
+	    callback(this, &BsrGroupPrefix::remove_timer_timeout));
 }
 
-static void
-bsr_group_prefix_remove_timer_timeout(void *data_pointer)
+void
+BsrGroupPrefix::remove_timer_timeout()
 {
-    BsrGroupPrefix *bsr_group_prefix = (BsrGroupPrefix *)data_pointer;
-    
     //
     // Timeout this entry only if I am the BSR, this is an active BSR zone,
     // and there are no more RPs.
     //
-    if (! bsr_group_prefix->bsr_zone().i_am_bsr())
+    if (! bsr_zone().i_am_bsr())
 	return;
-    if (! bsr_group_prefix->bsr_zone().is_active_bsr_zone())
+    if (! bsr_zone().is_active_bsr_zone())
 	return;
-    if (! bsr_group_prefix->rp_list().empty())
+    if (! rp_list().empty())
 	return;
     
     // Delete the prefix
-    bsr_group_prefix->bsr_zone().delete_bsr_group_prefix(bsr_group_prefix);
+    bsr_zone().delete_bsr_group_prefix(this);
 }
 
 
@@ -2518,32 +2502,28 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const BsrRp& bsr_rp)
       _rp_holdtime(bsr_rp.rp_holdtime())
 {
     // Conditionally set the Cand-RP Expiry timer
-    if (bsr_rp.const_candidate_rp_expiry_timer().is_set()) {
-	TimeVal left_tv;
-	struct timeval timeval_tmp;
-	bsr_rp.const_candidate_rp_expiry_timer().left_timeval(&timeval_tmp);
-	left_tv.copy_in(timeval_tmp);
-	_candidate_rp_expiry_timer.start(left_tv.sec(),
-					 left_tv.usec(),
-					 bsr_rp_candidate_rp_expiry_timer_timeout,
-					 this);
+    if (bsr_rp.const_candidate_rp_expiry_timer().scheduled()) {
+	TimeVal tv_left;
+	bsr_rp.const_candidate_rp_expiry_timer().time_remaining(tv_left);
+	_candidate_rp_expiry_timer =
+	    _bsr_group_prefix.bsr_zone().pim_bsr().pim_node().event_loop().new_oneoff_after(
+		tv_left,
+		callback(this, &BsrRp::candidate_rp_expiry_timer_timeout));
     }
 }
 
 void
 BsrRp::start_candidate_rp_expiry_timer()
 {
-    _candidate_rp_expiry_timer.start(_rp_holdtime, 0,
-				     bsr_rp_candidate_rp_expiry_timer_timeout,
-				     this);
+    _candidate_rp_expiry_timer =
+	bsr_group_prefix().bsr_zone().pim_bsr().pim_node().event_loop().new_oneoff_after(
+	    TimeVal(_rp_holdtime, 0),
+	    callback(this, &BsrRp::candidate_rp_expiry_timer_timeout));
 }
 
 // Time to expire the Cand-RP
-static void
-bsr_rp_candidate_rp_expiry_timer_timeout(void *data_pointer)
+void
+BsrRp::candidate_rp_expiry_timer_timeout()
 {
-    BsrRp *bsr_rp = (BsrRp *)data_pointer;
-    
-    bsr_rp->bsr_group_prefix().delete_rp(bsr_rp);
+    bsr_group_prefix().delete_rp(this);
 }
-

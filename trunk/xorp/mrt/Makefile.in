@@ -79,16 +79,15 @@ PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 
 # -- Test Programs
-bin_PROGRAMS =  test_mrt test_mtimer test_mrib
+bin_PROGRAMS =  test_mrt test_mrib
 
 noinst_LIBRARIES = libmrt.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 test_mrt_SOURCES = test_mrt.cc
-test_mtimer_SOURCES = test_mtimer.cc
 test_mrib_SOURCES = test_mrib.cc
-libmrt_a_SOURCES = mrt_module.h buffer.h counter.h inet_cksum.h max_vifs.h multicast_defs.h netstream_access.h random.h timer.h mifset.hh mrt.hh mrib_table.hh timer.hh buffer.c inet_cksum.c random.c timer.c mifset.cc mrib_table.cc timer2xorp.cc
+libmrt_a_SOURCES = mrt_module.h buffer.h inet_cksum.h max_vifs.h multicast_defs.h netstream_access.h random.h mifset.hh mrt.hh mrib_table.hh buffer.c inet_cksum.c random.c mifset.cc mrib_table.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = include
@@ -103,18 +102,13 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libmrt_a_LIBADD = 
-libmrt_a_OBJECTS =  buffer.o inet_cksum.o random.o timer.o mifset.o \
-mrib_table.o timer2xorp.o
+libmrt_a_OBJECTS =  buffer.o inet_cksum.o random.o mifset.o mrib_table.o
 PROGRAMS =  $(bin_PROGRAMS)
 
 test_mrt_OBJECTS =  test_mrt.o
 test_mrt_LDADD = $(LDADD)
 test_mrt_DEPENDENCIES =  libmrt.a $(top_builddir)/libxorp/libxorp.a
 test_mrt_LDFLAGS = 
-test_mtimer_OBJECTS =  test_mtimer.o
-test_mtimer_LDADD = $(LDADD)
-test_mtimer_DEPENDENCIES =  libmrt.a $(top_builddir)/libxorp/libxorp.a
-test_mtimer_LDFLAGS = 
 test_mrib_OBJECTS =  test_mrib.o
 test_mrib_LDADD = $(LDADD)
 test_mrib_DEPENDENCIES =  libmrt.a $(top_builddir)/libxorp/libxorp.a
@@ -138,10 +132,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/buffer.P .deps/inet_cksum.P .deps/mifset.P \
-.deps/mrib_table.P .deps/random.P .deps/test_mrib.P .deps/test_mrt.P \
-.deps/test_mtimer.P .deps/timer.P .deps/timer2xorp.P
-SOURCES = $(libmrt_a_SOURCES) $(test_mrt_SOURCES) $(test_mtimer_SOURCES) $(test_mrib_SOURCES)
-OBJECTS = $(libmrt_a_OBJECTS) $(test_mrt_OBJECTS) $(test_mtimer_OBJECTS) $(test_mrib_OBJECTS)
+.deps/mrib_table.P .deps/random.P .deps/test_mrib.P .deps/test_mrt.P
+SOURCES = $(libmrt_a_SOURCES) $(test_mrt_SOURCES) $(test_mrib_SOURCES)
+OBJECTS = $(libmrt_a_OBJECTS) $(test_mrt_OBJECTS) $(test_mrib_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -212,10 +205,6 @@ uninstall-binPROGRAMS:
 test_mrt: $(test_mrt_OBJECTS) $(test_mrt_DEPENDENCIES)
 	@rm -f test_mrt
 	$(CXXLINK) $(test_mrt_LDFLAGS) $(test_mrt_OBJECTS) $(test_mrt_LDADD) $(LIBS)
-
-test_mtimer: $(test_mtimer_OBJECTS) $(test_mtimer_DEPENDENCIES)
-	@rm -f test_mtimer
-	$(CXXLINK) $(test_mtimer_LDFLAGS) $(test_mtimer_OBJECTS) $(test_mtimer_LDADD) $(LIBS)
 
 test_mrib: $(test_mrib_OBJECTS) $(test_mrib_DEPENDENCIES)
 	@rm -f test_mrib

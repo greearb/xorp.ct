@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.15 2003/03/10 23:20:48 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.16 2003/03/30 03:50:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -23,6 +23,7 @@
 #include "pim_private.hh"
 #include "pim_mre.hh"
 #include "pim_mrt.hh"
+#include "pim_node.hh"
 #include "pim_vif.hh"
 
 
@@ -486,6 +487,8 @@ PimMre::set_not_pruned_state()
 void
 PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
 {
+    TimeVal tv_left;
+    
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
     
@@ -500,24 +503,36 @@ PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
     
  noinfo_state_label:
     // NoInfo state -> Join state
-    mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-		       &PimMre::downstream_expiry_timer_timeout_rp);
+    _downstream_expiry_timers[vif_index] =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(holdtime, 0),
+	    callback(this, &PimMre::downstream_expiry_timer_timeout_rp,
+		     vif_index));
     set_downstream_join_state(vif_index);
     return;
     
  join_state_label:
     // Join state
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_rp);
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_rp,
+			 vif_index));
+    }
     return;
 
  prune_pending_state_label:
     // PrunePending state -> Join state
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_rp);
+    _downstream_prune_pending_timers[vif_index].unschedule();
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(holdtime, 0),
+	    callback(this, &PimMre::downstream_expiry_timer_timeout_rp,
+		     vif_index));
+    }
     set_downstream_join_state(vif_index);
     return;
 }
@@ -550,14 +565,18 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
 	return;
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
-	// TODO: make sure usec resolution works!!
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   tv.sec(), tv.usec(),
-			   &PimMre::downstream_prune_pending_timer_timeout_rp);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		tv,
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_rp,
+			 vif_index));
     } else {
 	// XXX: force to expire now
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index, 0, 0,
-			   &PimMre::downstream_prune_pending_timer_timeout_rp);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(0, 0),
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_rp,
+			 vif_index));
     }
     set_downstream_prune_pending_state(vif_index);
     return;
@@ -572,6 +591,8 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
 void
 PimMre::receive_join_wc(uint16_t vif_index, uint16_t holdtime)
 {
+    TimeVal tv_left;
+    
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
     
@@ -586,24 +607,37 @@ PimMre::receive_join_wc(uint16_t vif_index, uint16_t holdtime)
     
  noinfo_state_label:
     // NoInfo state -> Join state
-    mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-		       &PimMre::downstream_expiry_timer_timeout_wc);
+    _downstream_expiry_timers[vif_index] =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(holdtime, 0),
+	    callback(this, &PimMre::downstream_expiry_timer_timeout_wc,
+		     vif_index));
     set_downstream_join_state(vif_index);
     return;
 
  join_state_label:
     // Join state
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_wc);
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_wc,
+			 vif_index));
+    }
     return;
 
  prune_pending_state_label:
     // PrunePending state -> Join state
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_wc);
+    _downstream_prune_pending_timers[vif_index].unschedule();
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_wc,
+			 vif_index));
+    }
     set_downstream_join_state(vif_index);
     return;
 }
@@ -637,13 +671,18 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   tv.sec(), tv.usec(),
-			   &PimMre::downstream_prune_pending_timer_timeout_wc);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		tv,
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_wc,
+			 vif_index));
     } else {
 	// XXX: force to expire now
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index, 0, 0,
-			   &PimMre::downstream_prune_pending_timer_timeout_wc);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(0, 0),
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_wc,
+			 vif_index));
     }
     set_downstream_prune_pending_state(vif_index);
     return;
@@ -658,6 +697,8 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
 void
 PimMre::receive_join_sg(uint16_t vif_index, uint16_t holdtime)
 {
+    TimeVal tv_left;
+    
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
     
@@ -672,24 +713,37 @@ PimMre::receive_join_sg(uint16_t vif_index, uint16_t holdtime)
     
  noinfo_state_label:
     // NoInfo state -> Join state
-    mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-		       &PimMre::downstream_expiry_timer_timeout_sg);
+    _downstream_expiry_timers[vif_index] =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(holdtime, 0),
+	    callback(this, &PimMre::downstream_expiry_timer_timeout_sg,
+		     vif_index));
     set_downstream_join_state(vif_index);
     return;
     
  join_state_label:
     // Join state
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_sg);
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_sg,
+			 vif_index));
+    }
     return;
     
  prune_pending_state_label:
     // PrunePending state -> Join state
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_sg);
+    _downstream_prune_pending_timers[vif_index].unschedule();
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_sg,
+			 vif_index));
+    }
     set_downstream_join_state(vif_index);
     return;
 }
@@ -723,13 +777,18 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   tv.sec(), tv.usec(),
-			   &PimMre::downstream_prune_pending_timer_timeout_sg);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		tv,
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_sg,
+			 vif_index));
     } else {
 	// XXX: force to expire now
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index, 0, 0,
-			   &PimMre::downstream_prune_pending_timer_timeout_sg);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(0, 0),
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_sg,
+			 vif_index));
     }
     set_downstream_prune_pending_state(vif_index);
     return;
@@ -794,15 +853,15 @@ PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
     
  prune_state_label:
     // Prune state -> NoInfo state
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
+    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
     
  prune_pending_state_label:
     // PrunePending state -> NoInfo state
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
+    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
     
@@ -816,6 +875,7 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 			     bool join_wc_received_bool)
 {
     PimVif *pim_vif;
+    TimeVal tv_left;
     
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -845,18 +905,26 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
-    mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-		       &PimMre::downstream_expiry_timer_timeout_sg_rpt);
+    _downstream_expiry_timers[vif_index] =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(holdtime, 0),
+	    callback(this, &PimMre::downstream_expiry_timer_timeout_sg_rpt,
+		     vif_index));
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   tv.sec(), tv.usec(),
-			   &PimMre::downstream_prune_pending_timer_timeout_sg_rpt);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		tv,
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_sg_rpt,
+			 vif_index));
     } else {
 	// XXX: force to expire now
-	mifset_timer_start(_downstream_prune_pending_timers, vif_index, 0, 0,
-			   &PimMre::downstream_prune_pending_timer_timeout_sg_rpt);
+	_downstream_prune_pending_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(0, 0),
+		callback(this, &PimMre::downstream_prune_pending_timer_timeout_sg_rpt,
+			 vif_index));
     }
     set_downstream_prune_pending_state(vif_index);
     return;
@@ -867,17 +935,27 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     // FALLTHROUGH to Prune state (XXX: note that the action is same)
  prune_state_label:
     // Prune state
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_sg_rpt);
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_sg_rpt,
+			 vif_index));
+    }
     return;
     
  prune_pending_tmp_state_label:
     // PrunePendingTmp state -> PrunePending state
     set_downstream_prune_pending_state(vif_index);
-    if (mifset_timer_remain(_downstream_expiry_timers, vif_index) < holdtime)
-	mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
-			   &PimMre::downstream_expiry_timer_timeout_sg_rpt);
+    _downstream_expiry_timers[vif_index].time_remaining(tv_left);
+    if (tv_left < TimeVal(holdtime, 0)) {
+	_downstream_expiry_timers[vif_index] =
+	    pim_node().event_loop().new_oneoff_after(
+		TimeVal(holdtime, 0),
+		callback(this, &PimMre::downstream_expiry_timer_timeout_sg_rpt,
+			 vif_index));
+    }
     // FALLTHROUGH to PrunePending state
  prune_pending_state_label:
     // PrunePending state
@@ -909,15 +987,15 @@ PimMre::receive_end_of_message_sg_rpt(uint16_t vif_index)
     
  prune_tmp_state_label:
     // PruneTmp state -> NoInfo state
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
+    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
     
  prune_pending_tmp_state_label:
     // PrunePendingTmp state -> NoInfo state
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
+    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
 }
@@ -1120,8 +1198,8 @@ PimMre::downstream_expiry_timer_timeout_sg_rpt(uint16_t vif_index)
     
  prune_state_label:
     // Prune state -> NoInfo state
-    mifset_timer_cancel(_downstream_expiry_timers, vif_index);
-    mifset_timer_cancel(_downstream_prune_pending_timers, vif_index);
+    _downstream_expiry_timers[vif_index].unschedule();
+    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
 }
@@ -1184,14 +1262,13 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
     t_joinsuppress.set(holdtime, 0);
     if (t_suppressed < t_joinsuppress)
 	t_joinsuppress = t_suppressed;
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left < t_joinsuppress) {
 	// Restart the timer with `t_joinsuppress'
-	join_timer().start(t_joinsuppress.sec(),
-			   t_joinsuppress.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_joinsuppress,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1228,14 +1305,13 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
     
     UNUSED(holdtime);
@@ -1277,14 +1353,13 @@ PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
     t_joinsuppress.set(holdtime, 0);
     if (t_suppressed < t_joinsuppress)
 	t_joinsuppress = t_suppressed;
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left < t_joinsuppress) {
 	// Restart the timer with `t_joinsuppress'
-	join_timer().start(t_joinsuppress.sec(),
-			   t_joinsuppress.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_joinsuppress,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1321,14 +1396,13 @@ PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
     
     UNUSED(holdtime);
@@ -1370,14 +1444,13 @@ PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
     t_joinsuppress.set(holdtime, 0);
     if (t_suppressed < t_joinsuppress)
 	t_joinsuppress = t_suppressed;
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left < t_joinsuppress) {
 	// Restart the timer with `t_joinsuppress'
-	join_timer().start(t_joinsuppress.sec(),
-			   t_joinsuppress.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_joinsuppress,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1414,14 +1487,13 @@ PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
     
     UNUSED(holdtime);
@@ -1459,14 +1531,13 @@ PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left >  t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1503,14 +1574,13 @@ PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
     
     UNUSED(holdtime);
@@ -1543,7 +1613,7 @@ PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(S,G,rpt)
     // Cancel OverrideTimer
-    override_timer().cancel();
+    override_timer().unschedule();
     
     // Try to remove the entry
     entry_try_remove();
@@ -1584,17 +1654,16 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    if (override_timer().is_set())
-	override_timer().left_timeval(&timeval_tmp);
+    if (override_timer().scheduled())
+	override_timer().time_remaining(tv_left);
     else
-	TIMEVAL_SET(&timeval_tmp, FOREVER, 0);
-    tv_left.copy_in(timeval_tmp);
+	tv_left.set_max();
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	override_timer().start(t_override.sec(),
-			       t_override.usec(),
-			       pim_mre_override_timer_timeout, this);
+	override_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::override_timer_timeout));
     }
     
     UNUSED(holdtime);
@@ -1633,17 +1702,16 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    if (override_timer().is_set())
-	override_timer().left_timeval(&timeval_tmp);
+    if (override_timer().scheduled())
+	override_timer().time_remaining(tv_left);
     else
-	TIMEVAL_SET(&timeval_tmp, FOREVER, 0);
-    tv_left.copy_in(timeval_tmp);
+	tv_left.set_max();
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	override_timer().start(t_override.sec(),
-			       t_override.usec(),
-			       pim_mre_override_timer_timeout, this);
+	override_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::override_timer_timeout));
     }
     
     UNUSED(holdtime);
@@ -1693,8 +1761,10 @@ PimMre::recompute_is_join_desired_rp()
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set JoinTimer to t_periodic
-    join_timer().start(join_prune_period, 0,
-		       pim_mre_join_timer_timeout, this);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
     // Set the new state
     set_joined_state();
     return (true);
@@ -1721,7 +1791,7 @@ PimMre::recompute_is_join_desired_rp()
 			      new_group_bool);
     }
     // Cancel Join Timer
-    join_timer().cancel();
+    join_timer().unschedule();
     // Set the new state
     set_not_joined_state();
     entry_try_remove();
@@ -1781,8 +1851,10 @@ PimMre::recompute_is_join_desired_wc()
 	}
     }
     // Set Join Timer to t_periodic
-    join_timer().start(join_prune_period, 0,
-		       pim_mre_join_timer_timeout, this);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
     // Set the new state
     set_joined_state();
     return (true);
@@ -1817,7 +1889,7 @@ PimMre::recompute_is_join_desired_wc()
 	}
     }
     // Cancel Join Timer
-    join_timer().cancel();
+    join_timer().unschedule();
     // Set the new state
     set_not_joined_state();
     entry_try_remove();
@@ -1868,8 +1940,10 @@ PimMre::recompute_is_join_desired_sg()
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
-    join_timer().start(join_prune_period, 0,
-		       pim_mre_join_timer_timeout, this);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
     // Set the new state
     set_joined_state();
     return (true);
@@ -1896,7 +1970,7 @@ PimMre::recompute_is_join_desired_sg()
 			      new_group_bool);
     }
     // Cancel Join Timer
-    join_timer().cancel();
+    join_timer().unschedule();
     // Set SPTbit(S,G) to FALSE
     set_spt(false);
     // Set the new state
@@ -2016,7 +2090,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 	}
     }
     // Cancel Override Timer
-    override_timer().cancel();
+    override_timer().unschedule();
     set_pruned_state();
     // XXX: no need to try to remove the (S,G,rpt) routing state, because
     // it is in Pruned state.
@@ -2107,7 +2181,7 @@ PimMre::recompute_is_rpt_join_desired_g()
     if (is_rpt_join_desired_g())
 	return (false);		// Nothing changed
     // RPTJoinDesired(G) -> false
-    override_timer().cancel();
+    override_timer().unschedule();
     set_rpt_not_joined_state();
     entry_try_remove();
     return (true);
@@ -2147,21 +2221,18 @@ PimMre::recompute_inherited_olist_sg_rpt()
     return (false);		// Nothing changed
 }
 
-// TODO: create a PimMre:: function that calls this one, and elimininate
-// it as a global function.
 void
-pim_mre_join_timer_timeout(void *data_pointer)
+PimMre::join_timer_timeout()
 {
     PimNbr *pim_nbr = NULL;
     uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
-    PimMre *pim_mre = (PimMre *)data_pointer;
     const IPvX *my_rp_addr_ptr = NULL;
     
-    if (pim_mre->is_sg())
+    if (is_sg())
 	goto sg_entry_label;
-    if (pim_mre->is_wc())
+    if (is_wc())
 	goto wc_entry_label;
-    if (pim_mre->is_rp())
+    if (is_rp())
 	goto rp_entry_label;
     
     // TODO: XXX: implement the rest if needed
@@ -2170,22 +2241,22 @@ pim_mre_join_timer_timeout(void *data_pointer)
 	
  rp_entry_label:
     // (*,*,RP) state
-    if (! pim_mre->is_joined_state())
+    if (! is_joined_state())
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
     // Send Join(*,*,RP)
-    pim_nbr = pim_mre->mrib_next_hop_rp();  
+    pim_nbr = mrib_next_hop_rp();  
     if (pim_nbr == NULL) {
-	if (! pim_mre->i_am_rp()) {
+	if (! i_am_rp()) {
 	    XLOG_WARNING("JoinDesired(*,*,RP) = true: "
 			 "upstream neighbor for RP %s: not found",
-			 cstring(*pim_mre->rp_addr_ptr()));
+			 cstring(*rp_addr_ptr()));
 	}
     } else {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
-	pim_nbr->jp_entry_add(*pim_mre->rp_addr_ptr(), IPvX::MULTICAST_BASE(pim_mre->family()),
-			      IPvX::ip_multicast_base_address_masklen(pim_mre->family()),
+	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
+			      IPvX::ip_multicast_base_address_masklen(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -2193,36 +2264,38 @@ pim_mre_join_timer_timeout(void *data_pointer)
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
-    pim_mre->join_timer().start(join_prune_period, 0,
-				pim_mre_join_timer_timeout, pim_mre);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
     return;
     
  wc_entry_label:
     // (*,G) state
-    if (! pim_mre->is_joined_state())
+    if (! is_joined_state())
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
     // Send Join(*,G)
-    my_rp_addr_ptr = pim_mre->rp_addr_ptr();
+    my_rp_addr_ptr = rp_addr_ptr();
     if (my_rp_addr_ptr == NULL) {
 	XLOG_WARNING("JoinDesired(*,G) = true: "
 		     "RP for group %s: not found",
-		     cstring(pim_mre->group_addr()));
+		     cstring(group_addr()));
     } else {
 	// We have RP
-	pim_nbr = pim_mre->rpfp_nbr_wc();
+	pim_nbr = rpfp_nbr_wc();
 	if (pim_nbr == NULL) {
-	    if (! pim_mre->i_am_rp()) {
+	    if (! i_am_rp()) {
 		XLOG_WARNING("JoinDesired(*,G) = true: "
 			     "upstream neighbor for RP %s for group %s: not found",
 			     cstring(*my_rp_addr_ptr),
-			     cstring(pim_mre->group_addr()));
+			     cstring(group_addr()));
 	    }
 	} else {
 	    bool new_group_bool = false; // Allow merging entries for same G
-	    pim_nbr->jp_entry_add(*my_rp_addr_ptr, pim_mre->group_addr(),
-				  IPvX::addr_bitlen(pim_mre->family()),
+	    pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
+				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_JOIN,
 				  pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -2231,29 +2304,31 @@ pim_mre_join_timer_timeout(void *data_pointer)
 	}
     }
     // Set Join Timer to t_periodic
-    pim_mre->join_timer().start(join_prune_period, 0,
-				pim_mre_join_timer_timeout, pim_mre);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
     return;
     
  sg_entry_label:
     // (S,G) state
-    if (! pim_mre->is_joined_state())
+    if (! is_joined_state())
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
     // Send Join(S,G)
-    pim_nbr = pim_mre->rpfp_nbr_sg();
+    pim_nbr = rpfp_nbr_sg();
     if (pim_nbr == NULL) {
-	if (! pim_mre->is_directly_connected_s()) {
+	if (! is_directly_connected_s()) {
 	    XLOG_WARNING("JoinDesired(S,G) = true: "
 			 "upstream neighbor for source %s and group %s: not found",
-			 cstring(pim_mre->source_addr()),
-			 cstring(pim_mre->group_addr()));
+			 cstring(source_addr()),
+			 cstring(group_addr()));
 	}
     } else {
 	bool new_group_bool = false;	// Allow merging entries for same group
-	pim_nbr->jp_entry_add(pim_mre->source_addr(), pim_mre->group_addr(),
-			      IPvX::addr_bitlen(pim_mre->family()),
+	pim_nbr->jp_entry_add(source_addr(), group_addr(),
+			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -2261,21 +2336,20 @@ pim_mre_join_timer_timeout(void *data_pointer)
 	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
     }
     // Set Join Timer to t_periodic
-    pim_mre->join_timer().start(join_prune_period, 0,
-				pim_mre_join_timer_timeout, pim_mre);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
     return;
 }
 
-// TODO: create a PimMre:: function that calls this one, and elimininate
-// it as a global function.
 void
-pim_mre_override_timer_timeout(void *data_pointer)
+PimMre::override_timer_timeout()
 {
     PimNbr *pim_nbr = NULL;
     PimNbr *pim_nbr_rpfp_nbr_wc = NULL;
-    PimMre *pim_mre = (PimMre *)data_pointer;
     
-    if (pim_mre->is_sg_rpt())
+    if (is_sg_rpt())
 	goto sg_rpt_entry_label;
     
     // TODO: XXX: implement the rest if needed
@@ -2283,20 +2357,20 @@ pim_mre_override_timer_timeout(void *data_pointer)
     
  sg_rpt_entry_label:
     // (S,G,rpt) state
-    if (! pim_mre->is_not_pruned_state())
+    if (! is_not_pruned_state())
 	goto return_label;	// Wrong state
     
     // NotPruned state
     // Send Join(S,G,rpt) to RPF'(S,G,rpt)
-    pim_nbr = pim_mre->rpfp_nbr_sg_rpt();
-    pim_nbr_rpfp_nbr_wc = pim_mre->rpfp_nbr_wc();
+    pim_nbr = rpfp_nbr_sg_rpt();
+    pim_nbr_rpfp_nbr_wc = rpfp_nbr_wc();
     if (pim_nbr == NULL) {
 	XLOG_WARNING("Join(S,G,rpt) = true: "
 		     "upstream RPT neighbor for RP %s for "
 		     "source %s group %s: not found",
-		     pim_mre->rp_addr_string().c_str(),
-		     cstring(pim_mre->source_addr()),
-		     cstring(pim_mre->group_addr()));
+		     rp_addr_string().c_str(),
+		     cstring(source_addr()),
+		     cstring(group_addr()));
     } else if (pim_nbr != pim_nbr_rpfp_nbr_wc) {
 	// RPF'(S,G,rpt) != RPF'(*,G)
 	// Ignore.
@@ -2305,8 +2379,8 @@ pim_mre_override_timer_timeout(void *data_pointer)
 	// RPF'(S,G,rpt) == RPF'(*,G)
 	// Send Join(S,G,rpt) to RPF'(S,G,rpt)
 	bool new_group_bool = false;	// Allow merging entries for same group
-	pim_nbr->jp_entry_add(pim_mre->source_addr(), pim_mre->group_addr(),
-			      IPvX::addr_bitlen(pim_mre->family()),
+	pim_nbr->jp_entry_add(source_addr(), group_addr(),
+			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG_RPT,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -2314,7 +2388,7 @@ pim_mre_override_timer_timeout(void *data_pointer)
     }
     
  return_label:
-    if (pim_mre->is_sg_rpt()) {
-	pim_mre->entry_try_remove();
+    if (is_sg_rpt()) {
+	entry_try_remove();
     }
 }

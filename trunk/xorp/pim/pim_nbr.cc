@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.2 2003/01/06 20:28:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.3 2003/03/10 23:20:49 hodson Exp $"
 
 //
 // PIM neigbor routers handling
@@ -46,7 +46,6 @@
 //
 // Local functions prototypes
 //
-static void pim_join_prune_send_timeout(void *data_pointer);
 
 
 /**
@@ -93,7 +92,7 @@ PimNbr::reset_received_options()
     set_dr_priority(PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT);
     set_is_dr_priority_present(false);
     _hello_holdtime = PIM_HELLO_HELLO_HOLDTIME_DEFAULT;
-    _timeout_timer.cancel();
+    _neighbor_liveness_timer.unschedule();
     _is_lan_prune_delay_present = false;
     _is_tracking_support_disabled = false;
     _lan_delay = 0;
@@ -124,52 +123,46 @@ PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 {
     int ret_value;
     
-    ret_value = jp_header().jp_entry_add(source_addr, group_addr,
-					 group_masklen, mrt_entry_type,
-					 action_jp, holdtime, new_group_bool);
+    ret_value = _jp_header.jp_entry_add(source_addr, group_addr,
+					group_masklen, mrt_entry_type,
+					action_jp, holdtime, new_group_bool);
     
     // (Re)start the timer to send the J/P message after time 0.
     // XXX: the automatic restarting will postpone the sending of
     // the message until we have no more entries to add to that message.
-    _jp_send_timer.start(0, 0, pim_join_prune_send_timeout, this);
+    _jp_send_timer = pim_node().event_loop().new_oneoff_after(
+	TimeVal(0, 0),
+	callback(this, &PimNbr::jp_send_timer_timeout));
     
     return (ret_value);
 }
 
-static void
-pim_join_prune_send_timeout(void *data_pointer)
+void
+PimNbr::jp_send_timer_timeout()
 {
-    PimNbr *pim_nbr = (PimNbr *)data_pointer;
-    PimVif& pim_vif = pim_nbr->pim_vif();
-    
-    pim_vif.pim_join_prune_send(pim_nbr, &pim_nbr->jp_header());
+    pim_vif().pim_join_prune_send(this, &_jp_header);
 }
 
 /**
- * pim_nbr_timeout:
- * @data_pointer: The #PimVif neighbor to expire.
+ * PimNbr::neighbor_liveness_timer_timeout:
  * 
  * Timeout: expire a PIM neighbor.
  **/
-// TODO: change it to use callbacks instead
 void
-pim_nbr_timeout(void *data_pointer)
+PimNbr::neighbor_liveness_timer_timeout()
 {
-    PimNbr *pim_nbr = (PimNbr *)data_pointer;
-    PimVif& pim_vif = pim_nbr->pim_vif();
+    pim_vif().delete_pim_nbr_from_nbr_list(this);
     
-    pim_vif.delete_pim_nbr_from_nbr_list(pim_nbr);
-    
-    if (pim_vif.dr_addr() == pim_nbr->addr()) {
+    if (pim_vif().dr_addr() == addr()) {
 	// The neighbor to expire is the DR. Select a new DR.
-	pim_vif.pim_dr_elect();
+	pim_vif().pim_dr_elect();
     }
     
-    if (pim_vif.pim_nbrs_number() <= 1) {
-	// The last neighbor on this vif: take any actions if necessary
+    if (pim_vif().pim_nbrs_number() <= 1) {
+	// XXX: the last neighbor on this vif: take any actions if necessary
     }
     
-    pim_vif.delete_pim_nbr(pim_nbr);
+    pim_vif().delete_pim_nbr(this);
 }
 
 void

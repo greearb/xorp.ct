@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/max_vifs.h,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
+ * $XORP: xorp/mrt/max_vifs.h,v 1.2 2003/03/10 23:20:44 hodson Exp $
  */
 
 #ifndef __MRT_MAX_VIFS_H__
@@ -29,6 +29,7 @@
 
 
 #include "config.h"
+#include "libxorp/xorp.h"
 
 #include <sys/time.h>
 

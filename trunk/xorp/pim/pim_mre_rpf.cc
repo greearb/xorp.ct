@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.12 2003/03/10 23:20:48 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.13 2003/03/30 03:50:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -888,8 +888,10 @@ PimMre::recompute_mrib_next_hop_rp_changed()
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
     // Restart the JoinTimer
-    join_timer().start(join_prune_period, 0,
-		       pim_mre_join_timer_timeout, this);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
 }
 
 //
@@ -922,14 +924,13 @@ PimMre::recompute_mrib_next_hop_rp_gen_id_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1001,8 +1002,10 @@ PimMre::recompute_mrib_next_hop_rp_g_changed()
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
     // Restart the JoinTimer
-    join_timer().start(join_prune_period, 0,
-		       pim_mre_join_timer_timeout, this);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
 }
 
 //
@@ -1044,14 +1047,13 @@ PimMre::recompute_rpfp_nbr_wc_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1085,14 +1087,13 @@ PimMre::recompute_rpfp_nbr_wc_gen_id_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1148,8 +1149,10 @@ PimMre::recompute_mrib_next_hop_s_changed()
 	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
     }
     // Restart the JoinTimer
-    join_timer().start(join_prune_period, 0,
-		       pim_mre_join_timer_timeout, this);
+    join_timer() =
+	pim_node().event_loop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
 }
 
 //
@@ -1192,14 +1195,13 @@ PimMre::recompute_rpfp_nbr_sg_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1233,14 +1235,13 @@ PimMre::recompute_rpfp_nbr_sg_gen_id_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    join_timer().left_timeval(&timeval_tmp);
-    tv_left.copy_in(timeval_tmp);
+    join_timer().time_remaining(tv_left);
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(t_override.sec(),
-			   t_override.usec(),
-			   pim_mre_join_timer_timeout, this);
+	join_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::join_timer_timeout));
     }
 }
 
@@ -1285,17 +1286,16 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    struct timeval timeval_tmp;
-    if (override_timer().is_set())
-	override_timer().left_timeval(&timeval_tmp);
+    if (override_timer().scheduled())
+	override_timer().time_remaining(tv_left);
     else
-	TIMEVAL_SET(&timeval_tmp, FOREVER, 0);
-    tv_left.copy_in(timeval_tmp);
+	tv_left.set_max();
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	override_timer().start(t_override.sec(),
-			       t_override.usec(),
-			       pim_mre_override_timer_timeout, this);
+	override_timer() =
+	    pim_node().event_loop().new_oneoff_after(
+		t_override,
+		callback(this, &PimMre::override_timer_timeout));
     }
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_rp.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/pim_rp.hh,v 1.2 2003/03/10 23:20:52 hodson Exp $
 
 
 #ifndef __PIM_PIM_RP_HH__
@@ -28,8 +28,8 @@
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"
+#include "libxorp/timer.hh"
 #include "libproto/proto_unit.hh"
-#include "mrt/timer.hh"
 
 
 //

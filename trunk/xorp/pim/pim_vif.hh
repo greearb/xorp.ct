@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.11 2003/03/27 00:19:03 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.12 2003/03/30 03:50:46 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -26,13 +26,13 @@
 
 #include <list>
 
-#include "libxorp/vif.hh"
 #include "libxorp/config_param.hh"
+#include "libxorp/vif.hh"
+#include "libxorp/timer.hh"
 #include "libproto/proto_unit.hh"
 #include "mrt/buffer.h"
 #include "mrt/mifset.hh"
 #include "mrt/multicast_defs.h"
-#include "mrt/timer.hh"
 #include "pim_nbr.hh"
 #include "pim_proto_join_prune_message.hh"
 
@@ -305,6 +305,8 @@ public:
     
 private:
     // Private functions
+    void	hello_timer_timeout();
+    void	hello_once_timer_timeout();
     
     //
     // Callbacks for configuration parameters
@@ -380,8 +382,8 @@ private:
     };
     uint32_t	_proto_flags;		// Various flags (PIM_VIF_*)
     IPvX	_dr_addr;		// IP address of the current DR
-    Timer	_hello_timer;		// Timer to send a HELLO message
-    Timer	_hello_once_timer;	// Timer to send once a HELLO message
+    XorpTimer	_hello_timer;		// Timer to send a HELLO message
+    XorpTimer	_hello_once_timer;	// Timer to send once a HELLO message
     list<PimNbr *> _pim_nbrs;		// List of all PIM neighbors
     PimNbr	_pim_nbr_me;		// Myself (for misc. purpose)
     list<IPvX>	_send_unicast_bootstrap_nbr_list; // List of new nbrs to
