@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.3 2002/12/13 22:30:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.4 2002/12/17 22:06:04 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -242,7 +242,7 @@ NextHopCache<A>::~NextHopCache()
     ** Free all the allocated NextHopEntrys.
     */
     PrefixIterator i;
-    for (i = _next_hop_by_prefix.begin(); i != _next_hop_by_prefix.end(); i++) {
+    for (i = _next_hop_by_prefix.begin(); i != _next_hop_by_prefix.end(); i++){
 	NextHopEntry<A> *entry = i.payload();
 	delete entry;
     }
@@ -295,6 +295,9 @@ template<class A>
 bool
 NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix, int real_prefix)
 {
+    debug_msg("addr %s nexthop %s prefix %d real prefix %d\n",
+	      addr.str().c_str(), nexthop.str().c_str(), prefix, real_prefix);
+
     PrefixIterator pi =
 	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix));
     XLOG_ASSERT(pi != _next_hop_by_prefix.end());
@@ -311,6 +314,7 @@ NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix, int real_prefix)
 
     if (en->_nexthop_references.empty()) {
 	delete_entry(addr, prefix);
+ 	debug_msg("No references\n");
 	return false;
     }
 
@@ -449,12 +453,19 @@ template<class A>
 bool
 NextHopCache<A>::register_nexthop(A nexthop, int ref_cnt_incr)
 {
+    debug_msg("nexthop %s reference count %d\n", nexthop.str().c_str(),
+	      ref_cnt_incr);
+
+    XLOG_ASSERT(0 != ref_cnt_incr);
+
     /*
     ** Look for a covering entry. If there is none just return false.
     */
     PrefixIterator pi = _next_hop_by_prefix.find(nexthop);
     if (pi == _next_hop_by_prefix.end())
 	return false;
+
+    debug_msg("nexthop %s covered\n", nexthop.str().c_str());
 
     NextHopEntry<A> *en = pi.payload();
 
@@ -616,6 +627,9 @@ void
 NextHopRibRequest<IPv4>::register_interest(IPv4 nexthop)
 {
     debug_msg("nexthop %s\n", nexthop.str().c_str());
+    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+	return;
+
     XrlRibV0p1Client rib(_xrl_router);
     rib.send_register_interest4(_ribname.c_str(), _xrl_router->name(),
 				nexthop,
@@ -629,6 +643,8 @@ void
 NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
 {
     debug_msg("nexthop %s\n", nexthop.str().c_str());
+    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+	return;
 
     XrlRibV0p1Client rib(_xrl_router);
     rib.send_register_interest6(_ribname.c_str(), _xrl_router->name(),
@@ -715,16 +731,23 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    */
 	    if (rr->_register) {
 		NHRequest<A>* request_data = &rr->_requests;
-		set <NhLookupTable<A> *>::const_iterator req_iter;
-		for (req_iter = request_data->requesters().begin();
-		    req_iter != request_data->requesters().end();
-		    req_iter++) {
-		    NhLookupTable<A> *requester = (*req_iter);
+		/*
+		** If nobody is interested then don't register or run
+		** the callbacks.
+		*/
+		if(0 != request_data->requests()) {
 		    _next_hop_cache.register_nexthop(rr->_nexthop,
-			       request_data->request_nets(requester).size());
-		    requester->RIB_lookup_done(rr->_nexthop,
-				       request_data->request_nets(requester),
-				       lookup_succeeded);
+						     request_data->requests());
+
+		    set <NhLookupTable<A> *>::const_iterator req_iter;
+		    for (req_iter = request_data->requesters().begin();
+			 req_iter != request_data->requesters().end();
+			 req_iter++) {
+			NhLookupTable<A> *requester = (*req_iter);
+			requester->RIB_lookup_done(rr->_nexthop,
+					request_data->request_nets(requester),
+						   lookup_succeeded);
+		    }
 		}
 	    }
 	    /*
@@ -866,9 +889,6 @@ bool
 NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
     const
 {
-    debug_msg("nexthop %s resolvable %d metric %d\n",
-	      nexthop.str().c_str(), resolvable, metric);
-
     /*
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
@@ -878,8 +898,12 @@ NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
 	if ((*i)->_reregister && (*i)->_nexthop == nexthop) {
 	    resolvable = (*i)->_resolvable;
 	    metric = (*i)->_metric;
+	    debug_msg("nexthop %s resolvable %d metric %d\n",
+		      nexthop.str().c_str(), resolvable, metric);
 	    return true;
 	}
+
+    debug_msg("nexthop %s not resolvable\n", nexthop.str().c_str());
 
     return false;
 }
@@ -890,6 +914,8 @@ NextHopRibRequest<IPv4>::deregister_from_rib(IPv4 addr, uint32_t prefix)
     const
 {
     debug_msg("addr %s/%d\n", addr.str().c_str(), prefix);
+    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+	return;
 
     XrlRibV0p1Client rib(_xrl_router);
     rib.send_deregister_interest4(_ribname.c_str(),
@@ -907,6 +933,8 @@ NextHopRibRequest<IPv6>::deregister_from_rib(IPv6 addr, uint32_t prefix)
     const
 {
     debug_msg("addr %s/%d\n", addr.str().c_str(), prefix);
+    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+	return;
 
     XrlRibV0p1Client rib(_xrl_router);
     rib.send_deregister_interest6(_ribname.c_str(),
@@ -932,7 +960,14 @@ NextHopRibRequest<A>::callback(const XrlError& error, string comment)
 /****************************************/
 
 template <class A>
+NHRequest<A>::NHRequest()
+    : _request_total(0)
+{
+}
+
+template <class A>
 NHRequest<A>::NHRequest(IPNet<A> net, NhLookupTable<A> *requester)
+    : _request_total(0)
 {
     add_request(net, requester);
 }
@@ -941,6 +976,7 @@ template <class A>
 void
 NHRequest<A>::add_request(IPNet<A> net, NhLookupTable<A> *requester)
 {
+    _request_total++;
     if (_request_map.find(requester) == _request_map.end()) {
 	_requesters.insert(requester);
 	_request_map[requester].insert(net);
@@ -962,6 +998,7 @@ NHRequest<A>::remove_request(IPNet<A> net, NhLookupTable<A> *requester)
     if (nets_iter == nets->end())
 	return false;
     nets->erase(nets_iter);
+    _request_total--;
 
     return true;
 }

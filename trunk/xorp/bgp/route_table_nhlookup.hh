@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.2 2002/12/16 03:08:21 mjh Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.3 2002/12/17 22:06:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -70,7 +70,7 @@ public:
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
     
-    void RIB_lookup_done(const A& nexthop, 
+    virtual void RIB_lookup_done(const A& nexthop, 
 			 const set <IPNet<A> >& nets,
 			 bool lookup_succeeded);
 

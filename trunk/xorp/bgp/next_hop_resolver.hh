@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.2 2002/12/14 23:42:49 hodson Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.3 2002/12/17 22:06:04 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -167,6 +167,16 @@ public:
      * @param nexthop The next hop that has changed.
      */
     void next_hop_changed(A nexthop);
+
+    /**
+     * Get NextHopRibRequest pointer.
+     *
+     * Used for testing.
+     */
+    NextHopRibRequest<A> *get_next_hop_rib_request()
+    {
+	return &_next_hop_rib_request;
+    }
 protected:
     DecisionTable<A> *_decision;
 private:
@@ -592,7 +602,7 @@ private:
 template<class A>
 class NHRequest {
 public:
-    NHRequest() {}
+    NHRequest();
     NHRequest(IPNet<A> net,
 	      NhLookupTable<A> *requester);
     void add_request(IPNet<A> net,
@@ -603,9 +613,11 @@ public:
 	return _requesters;
     }
     const set <IPNet<A> >& request_nets(NhLookupTable<A>* requester) const;
+    const int requests() { return _request_total; }
 private:
     set <NhLookupTable<A> *> _requesters;
     map <NhLookupTable<A> *, set<IPNet<A> > > _request_map;
+    int _request_total;
 };
 
 #endif // __BGP_NEXT_HOP_RESOLVER_HH__

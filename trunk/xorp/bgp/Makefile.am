@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.2 2002/12/16 03:08:20 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -23,6 +23,7 @@ TESTS		+= test_decision
 TESTS		+= test_fanout
 TESTS		+= test_dump
 TESTS		+= test_ribout
+TESTS		+= test_next_hop_resolver
 
 noinst_PROGRAMS = $(TESTS)
 noinst_LIBRARIES = libbgp.a
@@ -103,6 +104,8 @@ test_ribout_SOURCES		+= route_table_debug.cc
 test_ribout_SOURCES		+= peer_handler_debug.hh
 test_ribout_SOURCES		+= peer_handler_debug.cc
 test_ribout_SOURCES		+= dummy_main.cc
+
+test_next_hop_resolver_SOURCES	= test_next_hop_resolver.cc
 
 # -- Library Sources
 libbgp_a_SOURCES  = bgp_module.h

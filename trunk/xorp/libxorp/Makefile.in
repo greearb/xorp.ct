@@ -81,7 +81,7 @@ RIP = @RIP@
 RIP_OS = @RIP_OS@
 
 noinst_LIBRARIES = libxorp.a
-TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_time_slice test_timer test_trie test_types test_vif
+TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_time_slice test_timer test_trie test_types test_vif test_test_main
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -106,6 +106,7 @@ test_timer_SOURCES = test_timer.cc
 test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
+test_test_main_SOURCES = test_test_main.cc
 libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh selector.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c xlog.c asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc selector.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
 
 BUILT_SOURCES = callback.hh
@@ -191,6 +192,10 @@ test_vif_OBJECTS =  test_vif.o
 test_vif_LDADD = $(LDADD)
 test_vif_DEPENDENCIES =  libxorp.a
 test_vif_LDFLAGS = 
+test_test_main_OBJECTS =  test_test_main.o
+test_test_main_LDADD = $(LDADD)
+test_test_main_DEPENDENCIES =  libxorp.a
+test_test_main_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -216,11 +221,12 @@ DEP_FILES =  .deps/asyncio.P .deps/c_format.P .deps/debug.P \
 .deps/test_config_param.P .deps/test_ipnet.P .deps/test_ipv4.P \
 .deps/test_ipv4net.P .deps/test_ipv6.P .deps/test_ipv6net.P \
 .deps/test_ipvx.P .deps/test_ipvxnet.P .deps/test_mac.P \
-.deps/test_time_slice.P .deps/test_timer.P .deps/test_trie.P \
-.deps/test_types.P .deps/test_vif.P .deps/time_slice.P .deps/timer.P \
-.deps/token.P .deps/transaction.P .deps/vif.P .deps/xlog.P
-SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
-OBJECTS = $(libxorp_a_OBJECTS) $(test_asyncio_OBJECTS) $(test_callback_OBJECTS) $(test_config_param_OBJECTS) $(test_ipnet_OBJECTS) $(test_ipv4_OBJECTS) $(test_ipv4net_OBJECTS) $(test_ipv6_OBJECTS) $(test_ipv6net_OBJECTS) $(test_ipvx_OBJECTS) $(test_ipvxnet_OBJECTS) $(test_mac_OBJECTS) $(test_time_slice_OBJECTS) $(test_timer_OBJECTS) $(test_trie_OBJECTS) $(test_types_OBJECTS) $(test_vif_OBJECTS)
+.deps/test_test_main.P .deps/test_time_slice.P .deps/test_timer.P \
+.deps/test_trie.P .deps/test_types.P .deps/test_vif.P \
+.deps/time_slice.P .deps/timer.P .deps/token.P .deps/transaction.P \
+.deps/vif.P .deps/xlog.P
+SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES) $(test_test_main_SOURCES)
+OBJECTS = $(libxorp_a_OBJECTS) $(test_asyncio_OBJECTS) $(test_callback_OBJECTS) $(test_config_param_OBJECTS) $(test_ipnet_OBJECTS) $(test_ipv4_OBJECTS) $(test_ipv4net_OBJECTS) $(test_ipv6_OBJECTS) $(test_ipv6net_OBJECTS) $(test_ipvx_OBJECTS) $(test_ipvxnet_OBJECTS) $(test_mac_OBJECTS) $(test_time_slice_OBJECTS) $(test_timer_OBJECTS) $(test_trie_OBJECTS) $(test_types_OBJECTS) $(test_vif_OBJECTS) $(test_test_main_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -335,6 +341,10 @@ test_types: $(test_types_OBJECTS) $(test_types_DEPENDENCIES)
 test_vif: $(test_vif_OBJECTS) $(test_vif_DEPENDENCIES)
 	@rm -f test_vif
 	$(CXXLINK) $(test_vif_LDFLAGS) $(test_vif_OBJECTS) $(test_vif_LDADD) $(LIBS)
+
+test_test_main: $(test_test_main_OBJECTS) $(test_test_main_DEPENDENCIES)
+	@rm -f test_test_main
+	$(CXXLINK) $(test_test_main_LDFLAGS) $(test_test_main_OBJECTS) $(test_test_main_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 
