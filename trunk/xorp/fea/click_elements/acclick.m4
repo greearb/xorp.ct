@@ -64,7 +64,7 @@ and Linux header files are GCC-specific.)
     AC_CACHE_CHECK(for recent version of C++, ac_cv_good_cxx,
 	AC_TRY_COMPILE([], [#ifdef __GNUG__
 #if (__GNUC__ == 2) && (__GNUC_MINOR__ <= 7)
-#error "fuckers! fuckers!"
+#error "The gcc version installed is too primative."
 #endif
 #endif
 return 0;], ac_cv_good_cxx=yes, ac_cv_good_cxx=no))
