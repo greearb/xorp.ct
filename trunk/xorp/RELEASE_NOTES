@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.10 2003/06/05 23:32:01 hodson Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.11 2003/06/06 01:29:14 atanu Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 0.3 (2003/??/??)
+Release 0.3 (2003/06/06)
 ========================
   ALL:
     - Compilation fixes for GCC3.3 on FreeBSD 4.8R.
@@ -17,6 +17,10 @@ Release 0.3 (2003/??/??)
       XLOG_UNREACHABLE.
 
     - Change to autoconf-2.53 and automake-1.5 as standard autotool versions.
+      The older autoconf-2.13 and automake-1.4 should still work.
+
+    - Remove the multicast-specific timer implementation, and
+      use instead the default Xorp timers (XorpTimer).
 
   LIBXORP:
     - Allocation without construction bug fixed in SelectorList code.  Fixes
@@ -78,8 +82,35 @@ Release 0.3 (2003/??/??)
   RTRMGR:
     - 
 
-  FEA:
+  XORPSH:
     - 
+
+  FEA:
+    - MFEA code merged with the unicast FEA, though logically the MFEA
+      is still a separate entity.
+
+    - Refactoring of FEA internals regarding reading/writing/observing
+      interfaces-related information and forwarding-table related
+      information.
+
+    - Support for few more OS-specific methods for reading
+      interface-related information or forwarding table related information.
+
+    - Addition of IPv6 support (where missing) for reading/writing information
+      regarding network interfaces or the unicast forwarding table.
+
+    - Addition of a command-line option to ``fea'' and ``fea_dummy'' to
+      specify the finder hostname and port number.
+
+    - On startup and shutdown remove from the kernel all forwarding entries
+      added by the fea.
+
+    - Addition of XRLs to obtain information about all network interfaces
+      (i.e., not only those that are configured by the rtrmgr).
+      Should be used only for debugging purpose (though temporary they
+      are used by the MFEA as well).
+
+    - ``fea_rtsock'' deprecated (replaced with the generic ``fea'').
 
   RIB: 
     - 
@@ -99,24 +130,86 @@ Release 0.3 (2003/??/??)
     - Uninitialised variable bug fix in NextHopRibRequest.
 
   MFEA:
-    - IPv6-related bug fixes.
+    - MFEA code merged with the unicast FEA, though logically the MFEA
+      is still a separate entity.
+      As part of the merging process, the MFEA now obtains the information
+      about network interfaces and the unicast forwarding table from the
+      FEA instead of the the kernel.
+
+    - Addition of a check for Router Alert IP option.
+
+    - Enable receiving of hop-by-hop options.
+
+    - Replace all MLD6_XXX with MLD_XXX (following KAME's recommendation).
+
+    - Compilation fixes for NetBSD-current (and probably NetBSD-1.6.1)
+      (courtesy Hitoshi Asaeda <Hitoshi.Asaeda@sophia.inria.fr>).
+
+    - Initial support for setting the process status PROC_FOO code.
+
+    - Addition of a command-line option to ``test_mfea'' to specify the
+      finder hostname and port number.
+
+    - Misc. bug fixes, internal code refactoring, and cleanup.
 
   MLD/IGMP:
-    - Protocol implementation testing completed
+    - Protocol implementation testing completed.
 
-    - Misc. bug fixes
+    - Replace all MLD6_XXX with MLD_XXX (following KAME's recommendation).
+
+    - Unify some of the MLD and IGMP protocol-specific code.
+
+    - Support for configurable setting of the protocol version per vif.
+
+    - Addition of a command-line option to ``test_mld6igmp'' to specify the
+      finder hostname and port number.
+
+    - Misc. bug fixes.
 
   PIM-SM:
-    - 
+    - Configuration-related fixes.
+
+    - Rename RP-related configuration commands and XRLs:
+      OLD: add_config_rp{4,6}, delete_config_rp{4,6}, config_rp_done
+      NEW: add_config_static_rp{4,6}, delete_config_static_rp{4,6},
+           config_static_rp_done
+
+    - Addition of XRL interface to receive MRIB-related updates
+      from the RIB; the interface is not used yet.
+
+    - Initial support for setting the process status PROC_FOO code.
+
+    - Addition of a mechanism that should hold-off PIM-SM status
+      to PROC_NOT_READY until it has received all necessary confirmation
+      from both MFEA and MLD/IGMP.
+
+    - Addition of PIM configuration option and XRL interface to configure
+      the SPT-switch bandwidth threshold.  Currently, the SPT-switch is
+      enabled only for the corner cases: switch on the first packet, or
+      never switch.
+
+    - Addition of a command-line option to ``test_pim'' to specify the
+      finder hostname and port number.
 
   CLI:
     - Critical bug fix (could be triggered if a program like
-      xorp/pim/test_pim is run in background, and is accessed
+      ${XORP}/pim/test_pim is run in background, and is accessed
       by the built-in CLI).
 
+    - Addition of Ctrl-C handling:
+      o If Ctrl-C is hit before <Enter>, then cancel the current line
+        and present a new prompt.
+      o If Ctrl-C is hit while waiting for command completion, then
+        cancel the wait and present a new prompt.
+
+    - Removed the 5 seconds timer that would timeout the waiting for
+      command completion (the user can use Ctrl-C to cancel the wait).
+
+    - Enable receiving Ctrl-C if the input is stdio (e.g., in case of xorpsh).
+
   SNMP:
-    - Integrated with Net-SNMP agent
-    - Implemented bgpVersion and bgpPeerTable from BGP4-MIB (RFC 1657)
+    - Integrated with Net-SNMP agent.
+    - Implemented bgpVersion and bgpPeerTable from BGP4-MIB (RFC 1657).
 
   RIP:
     - Implementation started.
