@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.14 2003/04/22 23:27:15 hodson Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.15 2003/05/08 23:45:11 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -615,6 +615,7 @@ public:
 				    const uint32_t *real_prefix_len,
 				    const A *actual_nexthop,
 				    const uint32_t *metric,
+				    const A nexthop_interest,
 				    const string comment);
 
 

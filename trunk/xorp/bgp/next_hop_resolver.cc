@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.14 2003/04/22 23:27:14 hodson Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.15 2003/05/08 23:45:10 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -714,8 +714,9 @@ NextHopRibRequest<IPv4>::register_interest(IPv4 nexthop)
     rib.send_register_interest4(_ribname.c_str(), _xrl_router->name(),
 				nexthop,
 				::callback(this,
-	       &NextHopRibRequest::register_interest_response,
-	       c_format("nexthop: %s", nexthop.str().c_str())));
+		&NextHopRibRequest::register_interest_response,
+		nexthop,
+		c_format("nexthop: %s", nexthop.str().c_str())));
 }
 
 template<>
@@ -730,8 +731,9 @@ NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
     rib.send_register_interest6(_ribname.c_str(), _xrl_router->name(),
 				nexthop,
 				::callback(this,
-	       &NextHopRibRequest::register_interest_response,
-	       c_format("nexthop: %s", nexthop.str().c_str())));
+		&NextHopRibRequest::register_interest_response,
+		nexthop,
+		c_format("nexthop: %s", nexthop.str().c_str())));
 }
 
 template<class A>
@@ -743,6 +745,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 						 const uint32_t *real_prefix_len,
 						 const A *actual_nexthop,
 						 const uint32_t *metric,
+						 const A nexthop_interest,
 						 const string comment)
 {
     /*
@@ -773,12 +776,11 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    
 	    //The request will still be on the request queue.
 	    //All we need to do is resend it after a respectable delay
-	    A nexthop = *addr;
 	    _rtx_delay_timer = 
                  _next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
                       ::callback(this,
 				 &NextHopRibRequest<A>::register_interest,
-				 nexthop));
+				 nexthop_interest));
 	    return;
 	}
 	//We received an application-level error when attempting to

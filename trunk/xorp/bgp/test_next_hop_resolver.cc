@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.7 2003/04/02 20:34:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.8 2003/04/22 23:27:15 hodson Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -151,6 +151,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback went all the way to the next hop
@@ -245,6 +246,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback went all the way to the next hop
@@ -340,6 +342,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback went all the way to the next hop
@@ -447,6 +450,7 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** We have deregistered interest in this nexthop we should not get
@@ -535,6 +539,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback went all the way to the next hop
@@ -588,6 +593,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
 
     /*
@@ -686,6 +692,7 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback did not get back to the next hop table.
@@ -765,6 +772,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback went all the way to the next hop
@@ -823,6 +831,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
 
     /*
@@ -899,6 +908,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
     /*
     ** Verify that the callback went all the way to the next hop
@@ -936,6 +946,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
 
     /*
@@ -997,6 +1008,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
 
     /*
@@ -1055,6 +1067,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
 
     /*
@@ -1113,6 +1126,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 						     &real_prefix,
 						     &real_nexthop,
 						     &metric,
+						     nexthop,
 						     comment);
 
     /*
