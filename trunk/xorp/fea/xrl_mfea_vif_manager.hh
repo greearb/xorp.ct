@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.6 2003/05/23 23:35:01 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.7 2003/06/05 01:28:18 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -102,9 +102,10 @@ public:
     enum State { INITIALIZING, READY, FAILED };
 
     /**
-     * Get the state of the XrlMfeaVifManager (@see State).
+     * Get the state of the XrlMfeaVifManager.
      * 
      * @return the state of the XrlMfeaVifManager. 
+     * @see State
      */
     State state() const { return _state; }
 
