@@ -1,8 +1,7 @@
-/* $XORP: xorp/etc/templates/mfea.cmds,v 1.2 2004/05/16 07:15:17 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea.cmds,v 1.3 2004/05/26 04:25:08 pavlin Exp $ */
 
-/* TODO: "show mfea" is temporary here just for the sake of the HELP string */
 show mfea {
-    %command: "cli/tools/send_cli_processor_xrl -t MFEA_4 $0" %help: HELP;
+    %command: "" %help: HELP;
     %module: mfea4;
     %tag: HELP "Display information about IPv4 MFEA";
 }

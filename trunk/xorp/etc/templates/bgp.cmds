@@ -1,4 +1,9 @@
-/* $XORP: xorp/etc/templates/bgp.cmds,v 1.8 2004/05/26 04:25:08 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.cmds,v 1.9 2004/05/30 23:43:16 pavlin Exp $ */
+
+show bgp {
+    %command: "" %help: "Display information about BGP";
+    %module: bgp;
+}
 
 show bgp peers {
     %command: "bgp/tools/xorpsh_print_peers $0" %help: "Show BGP peers info";
