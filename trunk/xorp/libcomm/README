@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libcomm/README,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+# $XORP: xorp/libcomm/README,v 1.2 2003/06/06 08:44:34 pavlin Exp $
 #
 
 This directory contains the COMM socket library.
@@ -15,7 +15,7 @@ Each function declared in that file is reasonably well documented.
 The API has two parts: the high-level `user' API, and the lower-lever
 `sock' API.
 The lower-level API performs the particular operations on a socket
-(e.g., join a multicast group on a socket). 
+(e.g., join a multicast group on a socket).
 The higher-level API usually combines several lower-level operations
 together: e.g., open a socket, bind it to a multicast address and a port,
 and join that multicast address.

@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.2 2003/03/12 22:46:02 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.3 2003/06/09 23:32:16 pavlin Exp $"
 
 
 /*
@@ -73,11 +73,11 @@
  * @domain: The domain of the socket (e.g., %AF_INET, %AF_INET6).
  * @type: The type of the socket (e.g., %SOCK_STREAM, %SOCK_DGRAM).
  * @protocol: The particular protocol to be used with the socket.
- * 
+ *
  * Open a socket of domain = @domain, type = @type, and protocol = @protocol.
  * The sending and receiving buffer size are set, and the socket
  * itself is set to non-blocking, and with %TCP_NODELAY (if a TCP socket).
- * 
+ *
  * Return value: The open socket on success, otherwise %XORP_ERROR.
  **/
 int
@@ -85,7 +85,7 @@ comm_sock_open(int domain, int type, int protocol)
 {
     int sock;
     int flags;
-    
+
     /* Create the kernel socket */
     sock = socket(domain, type, protocol);
     if (sock < 0) {
@@ -94,7 +94,7 @@ comm_sock_open(int domain, int type, int protocol)
 		   domain, type, protocol, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     /* Set the receiving and sending socket buffer size in the kernel */
     if (comm_sock_set_rcvbuf(sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
@@ -106,13 +106,13 @@ comm_sock_open(int domain, int type, int protocol)
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     /* Enable TCP_NODELAY */
     if (type == SOCK_STREAM && comm_set_nodelay(sock, 1) < 0) {
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     /* Set the socket as non-blocking */
     /* TODO: there should be an option to disable the non-blocking behavior */
     if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
@@ -126,7 +126,7 @@ comm_sock_open(int domain, int type, int protocol)
 	XLOG_ERROR("F_SETFL error: %s", strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (sock);
 }
 
@@ -136,9 +136,9 @@ comm_sock_open(int domain, int type, int protocol)
  * @my_addr: The address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
  * @my_port: The port to bind to (in network order).
- * 
+ *
  * Bind an IPv4 socket to an address and a port.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -147,14 +147,14 @@ comm_sock_bind4(int sock, const struct in_addr *my_addr,
 {
     int family;
     struct sockaddr_in sin_addr;
-    
+
     family = socket2family(sock);
     if (family != AF_INET) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET);
 	return (XORP_ERROR);
     }
-    
+
     memset(&sin_addr, 0, sizeof(sin_addr));
 #ifdef HAVE_SIN_LEN
     sin_addr.sin_len = sizeof(sin_addr);
@@ -165,7 +165,7 @@ comm_sock_bind4(int sock, const struct in_addr *my_addr,
 	sin_addr.sin_addr.s_addr = my_addr->s_addr; /* XXX: in network order */
     else
 	sin_addr.sin_addr.s_addr = INADDR_ANY;
-    
+
     if (bind(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) {
 	XLOG_ERROR("Error binding socket (family = %d, "
 		   "my_addr = %s, my_port = %d): %s",
@@ -176,7 +176,7 @@ comm_sock_bind4(int sock, const struct in_addr *my_addr,
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -187,9 +187,9 @@ comm_sock_bind4(int sock, const struct in_addr *my_addr,
  * @my_addr: The address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
  * @my_port: The port to bind to (in network order).
- * 
+ *
  * Bind an IPv6 socket to an address and a port.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -198,14 +198,14 @@ comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 {
     int family;
     struct sockaddr_in6 sin6_addr;
-    
+
     family = socket2family(sock);
     if (family != AF_INET6) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET6);
 	return (XORP_ERROR);
     }
-    
+
     memset(&sin6_addr, 0, sizeof(sin6_addr));
 #ifdef HAVE_SIN6_LEN
     sin6_addr.sin6_len = sizeof(sin6_addr);
@@ -217,9 +217,9 @@ comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 	memcpy(&sin6_addr.sin6_addr, my_addr, sizeof(sin6_addr.sin6_addr));
     else
 	memcpy(&sin6_addr.sin6_addr, &in6addr_any, sizeof(sin6_addr.sin6_addr));
-    
+
     sin6_addr.sin6_scope_id = 0;		/* XXX: unused (?)	     */
-    
+
     if (bind(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	XLOG_ERROR("Error binding socket (family = %d, "
@@ -232,7 +232,7 @@ comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 #endif /* HAVE_IPV6 */
@@ -243,9 +243,9 @@ comm_sock_bind6(int sock, const struct in6_addr *my_addr,
  * @mcast_addr: The multicast address to join.
  * @my_addr: The local unicast address of an interface to join.
  * If it is NULL, the interface is chosen by the kernel.
- * 
+ *
  * Join an IPv4 multicast group on a socket (and an interface).
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -254,14 +254,14 @@ comm_sock_join4(int sock, const struct in_addr *mcast_addr,
 {
     int family;
     struct ip_mreq imr;		/* the multicast join address */
-    
+
     family = socket2family(sock);
     if (family != AF_INET) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET);
 	return (XORP_ERROR);
     }
-    
+
     memset(&imr, 0, sizeof(imr));
     imr.imr_multiaddr.s_addr = mcast_addr->s_addr;
     if (my_addr != NULL)
@@ -287,7 +287,7 @@ comm_sock_join4(int sock, const struct in_addr *mcast_addr,
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -298,9 +298,9 @@ comm_sock_join4(int sock, const struct in_addr *mcast_addr,
  * @mcast_addr: The multicast address to join.
  * @my_ifindex: The local unicast interface index to join.
  * If it is 0, the interface is chosen by the kernel.
- * 
+ *
  * Join an IPv6 multicast group on a socket (and an interface).
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -309,14 +309,14 @@ comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 {
     int family;
     struct ipv6_mreq imr6;	/* the multicast join address */
-    
+
     family = socket2family(sock);
     if (family != AF_INET6) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET6);
 	return (XORP_ERROR);
     }
-    
+
     memset(&imr6, 0, sizeof(imr6));
     memcpy(&imr6.ipv6mr_multiaddr, mcast_addr, sizeof(*mcast_addr));
     imr6.ipv6mr_interface = my_ifindex;
@@ -331,7 +331,7 @@ comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 #endif /* HAVE_IPV6 */
@@ -341,13 +341,13 @@ comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
  * @sock: The socket to use to connect.
  * @remote_addr: The remote address to connect to.
  * @remote_port: The remote port to connect to.
- * 
+ *
  * Connect to a remote IPv4 address.
  * XXX: We can use this not only for TCP, but for UDP sockets as well.
  * TODO: XXX: because it may take time to connect on a TCP socket,
  * the return value actually is %XORP_OK even though the connect did not
  * complete.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -356,14 +356,14 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 {
     int family;
     struct sockaddr_in sin_addr;
-    
+
     family = socket2family(sock);
     if (family != AF_INET) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET);
 	return (XORP_ERROR);
     }
-    
+
     memset(&sin_addr, 0, sizeof(sin_addr));
 #ifdef HAVE_SIN_LEN
     sin_addr.sin_len = sizeof(sin_addr);
@@ -371,7 +371,7 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
     sin_addr.sin_family = (u_char)family;
     sin_addr.sin_port = remote_port;		/* XXX: in network order */
     sin_addr.sin_addr.s_addr = remote_addr->s_addr; /* XXX: in network order */
-    
+
 #if 0 /* XXX: the connection may be in progress */
     if (connect(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) {
 	XLOG_ERROR("Error connecting socket (family = %d, "
@@ -385,7 +385,7 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
     /* XXX: the connection may be in progress */
     connect(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr));
 #endif /* 0/1 */
-    
+
     return (XORP_OK);
 }
 
@@ -395,13 +395,13 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
  * @sock: The socket to use to connect.
  * @remote_addr: The remote address to connect to.
  * @remote_port: The remote port to connect to.
- * 
+ *
  * Connect to a remote IPv6 address.
  * XXX: We can use this not only for TCP, but for UDP sockets as well.
  * TODO: XXX: because it may take time to connect on a TCP socket,
  * the return value actually is %XORP_OK even though the connect did not
  * complete.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -410,14 +410,14 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 {
     int family;
     struct sockaddr_in6 sin6_addr;
-    
+
     family = socket2family(sock);
     if (family != AF_INET6) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET6);
 	return (XORP_ERROR);
     }
-    
+
     memset(&sin6_addr, 0, sizeof(sin6_addr));
 #ifdef HAVE_SIN6_LEN
     sin6_addr.sin6_len = sizeof(sin6_addr);
@@ -427,7 +427,7 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
     sin6_addr.sin6_flowinfo = 0;		/* XXX: unused (?)	     */
     memcpy(&sin6_addr.sin6_addr, remote_addr, sizeof(sin6_addr.sin6_addr));
     sin6_addr.sin6_scope_id = 0;		/* XXX: unused (?)	     */
-    
+
 #if 0 /* XXX: the connection may be in progress */
     if (connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
@@ -445,7 +445,7 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
     /* XXX: the connection may be in progress */
     connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr));
 #endif /* 0/1 */
-    
+
     return (XORP_OK);
 }
 #endif /* HAVE_IPV6 */
@@ -453,9 +453,9 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 /**
  * comm_sock_accept:
  * @sock: The listening socket to accept on.
- * 
+ *
  * Accept a connection on a listening socket.
- * 
+ *
  * Return value: The accepted socket on success, otherwise %XORP_ERROR.
  **/
 int
@@ -464,29 +464,29 @@ comm_sock_accept(int sock)
     int sock_accept;
     struct sockaddr_in addr;
     socklen_t socklen = sizeof(addr);
-    
+
     sock_accept = accept(sock, (struct sockaddr *)&addr, &socklen);
     if (sock_accept < 0) {
 	XLOG_ERROR("Error accepting socket %d: %s",
 		   sock, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     /* Enable TCP_NODELAY */
     if (comm_set_nodelay(sock_accept, 1) < 0) {
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     return (sock_accept);
 }
 
 /**
  * comm_sock_close:
  * @sock: The socket to close.
- * 
+ *
  * Close a socket.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -497,7 +497,7 @@ comm_sock_close(int sock)
 		   sock, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -505,9 +505,9 @@ comm_sock_close(int sock)
  * comm_set_nodelay:
  * @sock: The socket whose option we want to set/reset.
  * @val: If non-zero, the option will be set, otherwise will be reset.
- * 
+ *
  * Set/reset the %TCP_NODELAY option on a TCP socket.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -519,7 +519,7 @@ comm_set_nodelay(int sock, int val)
 		   (val)? "set": "reset",  sock, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -527,10 +527,10 @@ comm_set_nodelay(int sock, int val)
  * comm_set_reuseaddr:
  * @sock: The socket whose option we want to set/reset.
  * @val: If non-zero, the option will be set, otherwise will be reset.
- * 
+ *
  * Set/reset the %SO_REUSEADDR option on a socket.
  * XXX: if the OS doesn't support this option, %XORP_ERROR is returned.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -539,10 +539,10 @@ comm_set_reuseaddr(int sock, int val)
 #ifndef SO_REUSEADDR
     UNUSED(sock);
     UNUSED(val);
-    XLOG_WARNING("SO_REUSEADDR Undefined!"); 
-    
+    XLOG_WARNING("SO_REUSEADDR Undefined!");
+
     return (XORP_ERROR);
-    
+
 #else
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&val, sizeof(val))
 	< 0) {
@@ -550,7 +550,7 @@ comm_set_reuseaddr(int sock, int val)
 		   (val)? "set": "reset", sock, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 #endif /* SO_REUSEADDR */
 }
@@ -559,10 +559,10 @@ comm_set_reuseaddr(int sock, int val)
  * comm_set_reuseport:
  * @sock: The socket whose option we want to set/reset.
  * @val: If non-zero, the option will be set, otherwise will be reset.
- * 
+ *
  * Set/reset the %SO_REUSEPORT option on a socket.
  * XXX: if the OS doesn't support this option, %XORP_OK is returned.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -571,8 +571,8 @@ comm_set_reuseport(int sock, int val)
 #ifndef SO_REUSEPORT
     UNUSED(sock);
     UNUSED(val);
-    XLOG_WARNING("SO_REUSEPORT Undefined!"); 
-    
+    XLOG_WARNING("SO_REUSEPORT Undefined!");
+
     return (XORP_OK);
 #else
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (void *)&val, sizeof(val))
@@ -581,7 +581,7 @@ comm_set_reuseport(int sock, int val)
 		   (val)? "set": "reset", sock, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 #endif /* SO_REUSEPORT */
 }
@@ -590,21 +590,21 @@ comm_set_reuseport(int sock, int val)
  * comm_set_loopback:
  * @sock: The socket whose option we want to set/reset.
  * @val: If non-zero, the option will be set, otherwise will be reset.
- * 
+ *
  * Set/reset the multicast loopback option on a socket.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 comm_set_loopback(int sock, int val)
 {
     int family = socket2family(sock);
-    
+
     switch (family) {
     case AF_INET:
     {
 	u_char loop = val;
-	
+
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       (void *)&loop, sizeof(loop)) < 0) {
 	    XLOG_ERROR("setsockopt IP_MULTICAST_LOOP %u: %s",
@@ -617,7 +617,7 @@ comm_set_loopback(int sock, int val)
     case AF_INET6:
     {
 	uint loop6 = val;
-	
+
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       (void *)&loop6, sizeof(loop6)) < 0) {
 	    XLOG_ERROR("setsockopt IPV6_MULTICAST_LOOP %u: %s",
@@ -634,7 +634,7 @@ comm_set_loopback(int sock, int val)
 		   (val)? "set": "reset", sock, family);
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -642,21 +642,21 @@ comm_set_loopback(int sock, int val)
  * comm_set_ttl:
  * @sock: The socket whose TTL we want to set.
  * @val: The TTL of the outgoing multicast packets.
- * 
+ *
  * Set the TTL of the outgoing multicast packets on a socket.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 comm_set_ttl(int sock, int val)
 {
     int family = socket2family(sock);
-    
+
     switch (family) {
     case AF_INET:
     {
 	u_char ip_ttl = val;	/* XXX: In IPv4 the value arg is 'u_char' */
-	
+
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
 		       (void *)&ip_ttl, sizeof(ip_ttl)) < 0) {
 	    XLOG_ERROR("setsockopt IP_MULTICAST_TTL %u: %s",
@@ -669,7 +669,7 @@ comm_set_ttl(int sock, int val)
     case AF_INET6:
     {
 	int ip_ttl = val;
-	
+
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 		       (void *)&ip_ttl, sizeof(ip_ttl)) < 0) {
 	    XLOG_ERROR("setsockopt IPV6_MULTICAST_HOPS %u: %s",
@@ -683,7 +683,7 @@ comm_set_ttl(int sock, int val)
 	assert(false);
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -693,9 +693,9 @@ comm_set_ttl(int sock, int val)
  * @in_addr: The IPv4 address of the default interface to set.
  * If @in_addr is NULL, the system will choose the interface each time
  * a datagram is sent.
- * 
+ *
  * Set default interface for IPv4 outgoing multicast on a socket.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
@@ -703,13 +703,13 @@ comm_set_iface4(int sock, const struct in_addr *in_addr)
 {
     int family = socket2family(sock);
     struct in_addr my_addr;
-    
+
     if (family != AF_INET) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET);
 	return (XORP_ERROR);
     }
-    
+
     if (in_addr != NULL)
 	my_addr.s_addr = in_addr->s_addr;
     else
@@ -720,7 +720,7 @@ comm_set_iface4(int sock, const struct in_addr *in_addr)
 		   (in_addr)? inet_ntoa(my_addr) : "ANY", strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -731,29 +731,29 @@ comm_set_iface4(int sock, const struct in_addr *in_addr)
  * @ifindex: The IPv6 interface index of the default interface to set.
  * If @ifindex is 0, the system will choose the interface each time
  * a datagram is sent.
- * 
+ *
  * Set default interface for IPv6 outgoing multicast on a socket.
- * 
+ *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 comm_set_iface6(int sock, u_int ifindex)
 {
     int family = socket2family(sock);
-    
+
     if (family != AF_INET6) {
 	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
 		   sock, family, AF_INET6);
 	return (XORP_ERROR);
     }
-    
+
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_IF,
 		   (void *)&ifindex, sizeof(ifindex)) < 0) {
 	XLOG_ERROR("setsockopt IPV6_MULTICAST_IF for ifindex %d: %s",
 		   ifindex, strerror(errno));
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 #endif /* HAVE_IPV6 */
@@ -763,9 +763,9 @@ comm_set_iface6(int sock, u_int ifindex)
  * @sock: The socket whose sending buffer size to set.
  * @desired_bufsize: The preferred buffer size.
  * @min_bufsize: The smallest acceptable buffer size.
- * 
+ *
  * Set the sending buffer size of a socket.
- * 
+ *
  * Return value: The successfully set buffer size on success,
  * otherwise %XORP_ERROR.
  **/
@@ -773,7 +773,7 @@ int
 comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 {
     int delta = desired_bufsize / 2;
-    
+
     /*
      * Set the socket buffer size.  If we can't set it as large as we
      * want, search around to try to find the highest acceptable
@@ -786,7 +786,7 @@ comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 	while (true) {
 	    if (delta > 1)
 		delta /= 2;
-	    
+
 	    if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
@@ -804,7 +804,7 @@ comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 	    return (XORP_ERROR);
 	}
     }
-    
+
     return (desired_bufsize);
 }
 
@@ -813,9 +813,9 @@ comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
  * @sock: The socket whose receiving buffer size to set.
  * @desired_bufsize: The preferred buffer size.
  * @min_bufsize: The smallest acceptable buffer size.
- * 
+ *
  * Set the receiving buffer size of a socket.
- * 
+ *
  * Return value: The successfully set buffer size on success,
  * otherwise %XORP_ERROR.
  **/
@@ -823,7 +823,7 @@ int
 comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 {
     int delta = desired_bufsize / 2;
-    
+
     /*
      * Set the socket buffer size.  If we can't set it as large as we
      * want, search around to try to find the highest acceptable
@@ -836,7 +836,7 @@ comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 	while (true) {
 	    if (delta > 1)
 		delta /= 2;
-	    
+
 	    if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
@@ -854,17 +854,17 @@ comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 	    return (XORP_ERROR);
 	}
     }
-    
+
     return (desired_bufsize);
 }
 
 /**
  * socket2family:
  * @sock: The socket whose address family we need to get.
- * 
+ *
  * Get the address family of a socket.
  * XXX: idea taken from W. Stevens' UNPv1, 2e (pp 109)
- * 
+ *
  * Return value: The address family on success, otherwise %XORP_ERROR.
  **/
 int
@@ -878,7 +878,7 @@ socket2family(int sock)
 	struct sockaddr	sa;
 	char		data[MAXSOCKADDR];
     } un;
-    
+
     len = MAXSOCKADDR;
     if (getsockname(sock, &un.sa, &len) < 0) {
 	XLOG_ERROR("Error getsockname() for socket %d: %s",
@@ -886,6 +886,6 @@ socket2family(int sock)
 	close(sock);
 	return (XORP_ERROR);
     }
-    
+
     return (un.sa.sa_family);
 }

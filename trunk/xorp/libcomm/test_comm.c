@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.2 2003/03/10 23:20:20 hodson Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.3 2003/06/09 22:50:27 hodson Exp $"
 
 
 /*
@@ -56,7 +56,7 @@ main(int argc, char *argv[])
     int sock;
     unsigned short port = htons(12340);		/* XXX: the port to bind to */
     struct in_addr mcast_addr;
-    
+
     /*
      * Initialize and start xlog
      */
@@ -66,17 +66,17 @@ main(int argc, char *argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     /*
      * Initialize the multicast address
      */
     mcast_addr.s_addr = inet_addr("224.0.1.20");
-    
+
     /*
      * Init the `comm' library
      */
     comm_init();
-    
+
     /*
      * Test `open TCP socket'
      */
@@ -98,7 +98,7 @@ main(int argc, char *argv[])
     } else {
 	printf("ERROR: cannot open UDP socket\n");
     }
-    
+
     /*
      * Test `bind TCP socket'
      */
@@ -122,7 +122,7 @@ main(int argc, char *argv[])
 	printf("ERROR: cannot open and bind UDP socket to port %d\n",
 	       ntohs(port));
     }
-    
+
     /*
      * Test 'bind and join a multicast group'
      */
@@ -135,15 +135,15 @@ main(int argc, char *argv[])
 	printf("ERROR: cannot open, bind and join UDP socket to group %s and port %d\n",
 	       inet_ntoa(mcast_addr), ntohs(port));
     }
-    
-    
+
+
     /*
      * Gracefully stop and exit xlog
      */
     xlog_stop();
     xlog_exit();
-    
+
     exit(0);
-    
+
     UNUSED(argc);
 }

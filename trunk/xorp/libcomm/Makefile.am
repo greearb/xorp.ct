@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libcomm/Makefile.am,v 1.4 2003/07/30 23:43:28 pavlin Exp $
+## $XORP: xorp/libcomm/Makefile.am,v 1.5 2003/08/01 02:11:47 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 = 
+bin_PROGRAMS	 =
 
 # -- Test Programs
-TESTS		 = 
+TESTS		 =
 
 # -- No-install Programs
 noinst_PROGRAMS  = test_comm
