@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.5 2004/02/06 22:44:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.6 2004/02/11 08:48:45 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -44,7 +44,7 @@ RibManager::stop()
     return XORP_OK;
 }
 
-ProcessStatus 
+ProcessStatus
 RibManager::status(string& reason) const
 {
     UNUSED(reason);
@@ -52,13 +52,13 @@ RibManager::status(string& reason) const
     return PROC_READY;
 }
 
-void 
+void
 RibManager::register_interest_in_target(const string& target_class)
 {
     UNUSED(target_class);
 }
 
-int 
+int
 RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
 {
     UNUSED(vifname);
@@ -68,7 +68,7 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
     return XORP_OK;
 }
 
-int 
+int
 RibManager::delete_vif(const string& vifname, string& err)
 {
     UNUSED(vifname);
@@ -77,8 +77,8 @@ RibManager::delete_vif(const string& vifname, string& err)
     return XORP_OK;
 }
 
-int 
-RibManager::add_vif_address(const string& vifname, 
+int
+RibManager::add_vif_address(const string& vifname,
 			    const IPv4& addr,
 			    const IPv4Net& net,
 			    string& err)
@@ -91,8 +91,8 @@ RibManager::add_vif_address(const string& vifname,
     return XORP_OK;
 }
 
-int 
-RibManager::add_vif_address(const string& vifname, 
+int
+RibManager::add_vif_address(const string& vifname,
 			    const IPv6& addr,
 			    const IPv6Net& net,
 			    string& err)
@@ -105,8 +105,8 @@ RibManager::add_vif_address(const string& vifname,
     return XORP_OK;
 }
 
-int 
-RibManager::delete_vif_address(const string& vifname, 
+int
+RibManager::delete_vif_address(const string& vifname,
 			       const IPv4& addr,
 			       string& err)
 {
@@ -117,8 +117,8 @@ RibManager::delete_vif_address(const string& vifname,
     return XORP_OK;
 }
 
-int 
-RibManager::delete_vif_address(const string& vifname, 
+int
+RibManager::delete_vif_address(const string& vifname,
 			       const IPv6& addr,
 			       string& err)
 {
@@ -129,18 +129,18 @@ RibManager::delete_vif_address(const string& vifname,
     return XORP_OK;
 }
 
-void 
+void
 RibManager::make_errors_fatal()
 {
 }
 
-int 
+int
 RibManager::no_fea()
 {
     return XORP_OK;
 }
 
-int 
+int
 RibManager::add_rib_client(const string& target_name, int family,
 			   bool unicast, bool multicast)
 {
@@ -152,7 +152,7 @@ RibManager::add_rib_client(const string& target_name, int family,
     return XORP_OK;
 }
 
-int 
+int
 RibManager::delete_rib_client(const string& target_name, int family,
 			      bool unicast, bool multicast)
 {
@@ -164,7 +164,7 @@ RibManager::delete_rib_client(const string& target_name, int family,
     return XORP_OK;
 }
 
-int 
+int
 RibManager::enable_rib_client(const string& target_name, int family,
 			      bool unicast, bool multicast)
 {
@@ -176,7 +176,7 @@ RibManager::enable_rib_client(const string& target_name, int family,
     return XORP_OK;
 }
 
-int 
+int
 RibManager::disable_rib_client(const string& target_name, int family,
 			       bool unicast, bool multicast)
 {
@@ -188,10 +188,51 @@ RibManager::disable_rib_client(const string& target_name, int family,
     return XORP_OK;
 }
 
-void 
+void
 RibManager::target_death(const string& target_class,
 			 const string& target_instance)
 {
     UNUSED(target_class);
     UNUSED(target_instance);
 }
+
+int
+RibManager::add_redist_xrl_output4(const string&	/* target_name */,
+				   const string&	/* from_protocol */,
+				   bool			/* unicast */,
+				   bool			/* multicast */,
+				   const string&	/* cookie */)
+{
+    return XORP_OK;
+}
+
+int
+RibManager::add_redist_xrl_output6(const string&	/* target_name */,
+				   const string&	/* from_protocol */,
+				   bool			/* unicast */,
+				   bool			/* multicast */,
+				   const string&	/* cookie */)
+{
+    return XORP_OK;
+}
+
+int
+RibManager::delete_redist_xrl_output4(const string&	/* target_name */,
+				      const string&	/* from_protocol */,
+				      bool		/* unicast */,
+				      bool		/* multicast */,
+				      const string&	/* cookie */)
+{
+    return XORP_OK;
+}
+
+int
+RibManager::delete_redist_xrl_output6(const string&	/* target_name */,
+				      const string&	/* from_protocol */,
+				      bool		/* unicast */,
+				      bool		/* multicast */,
+				      const string&	/* cookie */)
+{
+    return XORP_OK;
+}
+

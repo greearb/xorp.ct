@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.26 2004/02/11 08:48:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.27 2004/04/28 15:48:47 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -26,6 +26,7 @@
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 #include "rib_manager.hh"
+#include "redist_xrl.hh"
 
 template <typename A>
 void
@@ -587,4 +588,137 @@ RibManager::target_death(const string& target_class,
 	    break;
 	}
     }
+}
+
+static inline
+string
+make_redist_name(const string& xrl_target, const string& cookie)
+{
+    return xrl_target + ":" + cookie;
+}
+
+template <typename A>
+static int
+redist_enable_xrl_output(EventLoop&	eventloop,
+			 XrlRouter&	rtr,
+			 RIB<A>&	rib,
+			 const string&	to_xrl_target,
+			 const string&	protocol,
+			 const string&	cookie)
+{
+    RedistTable<A>* rt = rib.protocol_redist_table(protocol);
+    if (rt == 0)
+	return XORP_ERROR;
+
+    string redist_name = make_redist_name(to_xrl_target, cookie);
+    if (rt->redistributor(redist_name) != 0)
+	return XORP_ERROR;
+
+    Redistributor<A>* redist = new Redistributor<A>(eventloop,
+						    redist_name);
+    redist->set_redist_table(rt);
+    redist->set_output(new RedistXrlOutput<A>(redist, rtr, protocol,
+					      to_xrl_target, cookie));
+    return XORP_OK;
+}
+
+template <typename A>
+static int
+redist_disable_xrl_output(RIB<A>& rib,
+			  const string& to_xrl_target,
+			  const string& protocol,
+			  const string& cookie)
+{
+    RedistTable<A>* rt = rib.protocol_redist_table(protocol);
+    if (rt == 0)
+	return XORP_ERROR;
+
+    string redist_name = make_redist_name(to_xrl_target, cookie);
+    Redistributor<A>* redist = rt->redistributor(redist_name);
+    if (redist == 0)
+	return XORP_ERROR;
+
+    rt->remove_redistributor(redist);
+    delete redist;
+    return XORP_OK;
+}
+
+int
+RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
+				   const string&	from_protocol,
+				   bool			unicast,
+				   bool			multicast,
+				   const string&	cookie)
+{
+    if (unicast) {
+	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _urib4,
+					 to_xrl_target, from_protocol, cookie);
+	if (e != XORP_OK) {
+	    return e;
+	}
+    }
+    if (multicast) {
+	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _mrib4,
+					 to_xrl_target, from_protocol, cookie);
+	if (e != XORP_OK && unicast) {
+	    redist_disable_xrl_output(_urib4,
+				      to_xrl_target, from_protocol, cookie);
+	}
+	return e;
+    }
+    return XORP_OK;
+}
+
+int
+RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
+				   const string&	from_protocol,
+				   bool			unicast,
+				   bool			multicast,
+				   const string&	cookie)
+{
+    if (unicast) {
+	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _urib6,
+					 to_xrl_target, from_protocol, cookie);
+	if (e != XORP_OK) {
+	    return e;
+	}
+    }
+    if (multicast) {
+	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _mrib6,
+					 to_xrl_target, from_protocol, cookie);
+	if (e != XORP_OK && unicast) {
+	    redist_disable_xrl_output(_urib6,
+				      to_xrl_target, from_protocol, cookie);
+	}
+	return e;
+    }
+    return XORP_OK;
+}
+
+int
+RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
+				      const string&	from_protocol,
+				      bool	   	unicast,
+				      bool		multicast,
+				      const string&	cookie)
+{
+    if (unicast)
+	redist_disable_xrl_output(_urib4, to_xrl_target, from_protocol, cookie);
+    if (multicast)
+	redist_disable_xrl_output(_mrib4, to_xrl_target, from_protocol, cookie);
+    return XORP_OK;
+}
+
+int
+RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
+				      const string&	from_protocol,
+				      bool	   	unicast,
+				      bool		multicast,
+				      const string&	cookie)
+{
+    if (unicast)
+	redist_disable_xrl_output(_urib6, to_xrl_target, from_protocol, cookie);
+    if (multicast)
+	redist_disable_xrl_output(_mrib6, to_xrl_target, from_protocol, cookie);
+    return XORP_OK;
 }

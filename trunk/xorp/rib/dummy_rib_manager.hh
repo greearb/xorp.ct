@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.4 2004/02/06 22:44:10 pavlin Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.5 2004/02/11 08:48:45 pavlin Exp $
 
 #ifndef __RIB_DUMMY_RIB_MANAGER_HH__
 #define __RIB_DUMMY_RIB_MANAGER_HH__
@@ -52,22 +52,22 @@ public:
 
     /**
      * Start operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	start();
-    
+
     /**
      * Stop operation.
-     * 
+     *
      * Gracefully stop the RIB.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	stop();
 
     /**
-     * Periodic Status Update 
+     * Periodic Status Update
      *
      * @return true to reschedule next status check.
      */
@@ -78,7 +78,7 @@ public:
      *
      * @return process status code.
      */
-    ProcessStatus status(string& reason) const; 
+    ProcessStatus status(string& reason) const;
 
     /**
      * Inform the RIB about the existence of a Virtual Interface.
@@ -89,7 +89,7 @@ public:
      * @param vif Vif class instance giving the information about this vif.
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.  
+     * for debugging purposes.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_vif(const string& vifname, const Vif& vif, string& err);
@@ -119,7 +119,7 @@ public:
      * for debugging purposes.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_vif_address(const string& vifname, 
+    int add_vif_address(const string& vifname,
 			const IPv4& addr,
 			const IPv4Net& net,
 			string& err);
@@ -136,7 +136,7 @@ public:
      * for debugging purposes.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_vif_address(const string& vifname, 
+    int delete_vif_address(const string& vifname,
 			   const IPv4& addr,
 			   string& err);
 
@@ -170,16 +170,16 @@ public:
      * for debugging purposes.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_vif_address(const string& vifname, 
+    int delete_vif_address(const string& vifname,
 			   const IPv6& addr,
 			   string& err);
 
     /**
      * Find a RIB client.
-     * 
+     *
      * Find a RIB client for a given target name, address family, and
      * unicast/multicast flags.
-     * 
+     *
      * @param target_name the target name of the RIB client.
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
@@ -192,10 +192,10 @@ public:
 
     /**
      * Add a RIB client.
-     * 
+     *
      * Add a RIB client for a given target name, address family, and
      * unicast/multicast flags.
-     * 
+     *
      * @param target_name the target name of the RIB client.
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
@@ -208,10 +208,10 @@ public:
 
     /**
      * Delete a RIB client.
-     * 
+     *
      * Delete a RIB client for a given target name, address family, and
      * unicast/multicast flags.
-     * 
+     *
      * @param target_name the target name of the RIB client.
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
@@ -224,10 +224,10 @@ public:
 
     /**
      * Enable a RIB client.
-     * 
+     *
      * Enable a RIB client for a given target name, address family, and
      * unicast/multicast flags.
-     * 
+     *
      * @param target_name the target name of the RIB client.
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
@@ -240,10 +240,10 @@ public:
 
     /**
      * Disable a RIB client.
-     * 
+     *
      * Disable a RIB client for a given target name, address family, and
      * unicast/multicast flags.
-     * 
+     *
      * @param target_name the target name of the RIB client.
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
@@ -256,10 +256,10 @@ public:
 
     /**
      * Don't try to communicate with the FEA.
-     * 
+     *
      * Note that this method will be obsoleted in the future, and will
      * be replaced with cleaner interface.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int no_fea();
@@ -274,7 +274,7 @@ public:
      * Register Interest in an XRL target so we can monitor process
      * births and deaths and clean up appropriately when things die.
      *
-     * @param target_class the XRL Target Class we're interested in.  
+     * @param target_class the XRL Target Class we're interested in.
      */
     void register_interest_in_target(const string& target_class);
 
@@ -290,10 +290,82 @@ public:
      * an interest in dies.
      *
      * @param target_class the XRL Class of the target that died.
-     * @param target_instance the XRL Class Instance of the target that died.  
+     * @param target_instance the XRL Class Instance of the target that died.
      */
     void target_death(const string& target_class,
 		      const string& target_instance);
+
+    /**
+     * Add Route Redistributor that generates updates with redist4
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int add_redist_xrl_output4(const string&	target_name,
+			       const string&	from_protocol,
+			       bool	   	unicast,
+			       bool		multicast,
+			       const string&	cookie);
+
+    /**
+     * Add Route Redistributor that generates updates with redist6
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int add_redist_xrl_output6(const string&	target_name,
+			       const string&	from_protocol,
+			       bool	   	unicast,
+			       bool		multicast,
+			       const string&	cookie);
+
+    /**
+     * Remove Route Redistributor that generates updates with redist4
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int delete_redist_xrl_output4(const string&	target_name,
+				  const string&	from_protocol,
+				  bool	   	unicast,
+				  bool		multicast,
+				  const string&	cookie);
+
+    /**
+     * Remove Route Redistributor that generates updates with redist6
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int delete_redist_xrl_output6(const string&	target_name,
+				  const string&	from_protocol,
+				  bool	   	unicast,
+				  bool		multicast,
+				  const string&	cookie);
 
 private:
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.20 2004/02/11 08:48:47 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.21 2004/04/28 15:48:47 hodson Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -306,6 +306,79 @@ public:
      */
     void target_death(const string& target_class,
 		      const string& target_instance);
+
+
+    /**
+     * Add Route Redistributor that generates updates with redist4
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int add_redist_xrl_output4(const string&	target_name,
+			       const string&	from_protocol,
+			       bool	   	unicast,
+			       bool		multicast,
+			       const string&	cookie);
+
+    /**
+     * Add Route Redistributor that generates updates with redist6
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int add_redist_xrl_output6(const string&	target_name,
+			       const string&	from_protocol,
+			       bool	   	unicast,
+			       bool		multicast,
+			       const string&	cookie);
+
+    /**
+     * Remove Route Redistributor that generates updates with redist4
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int delete_redist_xrl_output4(const string&	target_name,
+				  const string&	from_protocol,
+				  bool	   	unicast,
+				  bool		multicast,
+				  const string&	cookie);
+
+    /**
+     * Remove Route Redistributor that generates updates with redist6
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int delete_redist_xrl_output6(const string&	target_name,
+				  const string&	from_protocol,
+				  bool	   	unicast,
+				  bool		multicast,
+				  const string&	cookie);
 
 private:
     /**
