@@ -384,7 +384,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(required)));
 
     // Verify the checksum.
-    if (!verify_checksum(buf, len))
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
 
     RouterLsa *lsa;
