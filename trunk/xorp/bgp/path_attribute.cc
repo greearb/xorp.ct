@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.52 2004/04/15 16:13:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.53 2004/06/10 22:40:31 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -81,8 +81,9 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
 {
     if (length(d) != 1)
 	xorp_throw(CorruptMessage,
-                c_format("OriginAttribute bad length %u", (uint32_t)length(d)),
-                        UPDATEMSGERR, UNSPECIFIED);
+		   c_format("OriginAttribute bad length %u",
+			    XORP_UINT_CAST(length(d))),
+		   UPDATEMSGERR, UNSPECIFIED);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Origin attribute",
@@ -266,8 +267,8 @@ MEDAttribute::encode()
 string
 MEDAttribute::str() const
 {
-    return c_format("Multiple Exit Descriminator Attribute: MED=%d",
-		    med());
+    return c_format("Multiple Exit Descriminator Attribute: MED=%u",
+		    XORP_UINT_CAST(med()));
 }
 
 /**
@@ -312,7 +313,8 @@ LocalPrefAttribute::encode()
 string
 LocalPrefAttribute::str() const
 {
-    return c_format("Local Preference Attribute - %d", _localpref);
+    return c_format("Local Preference Attribute - %u",
+		    XORP_UINT_CAST(_localpref));
 }
 
 /**
@@ -337,8 +339,9 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
 {
     if (length(d) != 0)
 	xorp_throw(CorruptMessage,
-                c_format("AtomicAggregate bad length %u", (uint32_t)length(d)),
-                        UPDATEMSGERR, UNSPECIFIED);
+		   c_format("AtomicAggregate bad length %u",
+			    XORP_UINT_CAST(length(d))),
+		   UPDATEMSGERR, UNSPECIFIED);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in AtomicAggregate attribute",
@@ -370,8 +373,9 @@ AggregatorAttribute::AggregatorAttribute(const uint8_t* d)
 {
     if (length(d) != 6)
 	xorp_throw(CorruptMessage,
-                c_format("Aggregator bad length %u", (uint32_t)length(d)),
-                        UPDATEMSGERR, UNSPECIFIED);
+		   c_format("Aggregator bad length %u",
+			    XORP_UINT_CAST(length(d))),
+		   UPDATEMSGERR, UNSPECIFIED);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in AtomicAggregate attribute",
@@ -456,7 +460,7 @@ CommunityAttribute::str() const
     string s = "Community Attribute ";
     const_iterator i = _communities.begin();
     for ( ; i != _communities.end();  ++i)
-	s += c_format("%u ", *i);
+	s += c_format("%u ", XORP_UINT_CAST(*i));
     return s;
 }
 
@@ -736,7 +740,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     while(data < end) {
 	uint8_t prefix_length = *data++;
 	size_t bytes = (prefix_length + 7)/ 8;
-	if(bytes > IPv6::addr_size())
+	if (bytes > IPv6::addr_size())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
@@ -748,7 +752,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
 	_nlri.push_back(IPNet<IPv6>(nlri, prefix_length));
 	data += bytes;
 	debug_msg("decode %s/%d bytes = %u\n", nlri.str().c_str(),
-		  prefix_length, static_cast<uint32_t>(bytes));
+		  prefix_length, XORP_UINT_CAST(bytes));
     }
 
     encode();
@@ -846,7 +850,7 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     while(data < end) {
 	uint8_t prefix_length = *data++;
 	size_t bytes = (prefix_length + 3) / 4;
-	if(bytes > IPv4::addr_size())
+	if (bytes > IPv4::addr_size())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
@@ -858,7 +862,7 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
 	_nlri.push_back(IPNet<IPv4>(nlri, prefix_length));
 	data += bytes;
 	debug_msg("decode %s/%d bytes = %u\n", nlri.str().c_str(),
-		  prefix_length, static_cast<uint32_t>(bytes));
+		  prefix_length, XORP_UINT_CAST(bytes));
     }
 
     encode();
@@ -1051,11 +1055,11 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
 	uint8_t prefix_length = *data++;
 	debug_msg("decode prefix length = %d\n", prefix_length);
 	size_t bytes = (prefix_length + 7)/ 8;
-	if(bytes > IPv6::addr_size())
+	if (bytes > IPv6::addr_size())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
-	debug_msg("decode bytes = %u\n", static_cast<uint32_t>(bytes));
+	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
 	uint8_t buf[IPv6::addr_size()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
@@ -1118,11 +1122,11 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
 	uint8_t prefix_length = *data++;
 	debug_msg("decode prefix length = %d\n", prefix_length);
 	size_t bytes = (prefix_length + 7)/ 8;
-	if(bytes > IPv4::addr_size())
+	if (bytes > IPv4::addr_size())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
-	debug_msg("decode bytes = %u\n", static_cast<uint32_t>(bytes));
+	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
 	uint8_t buf[IPv4::addr_size()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
@@ -1192,25 +1196,25 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 
     if (max_len < 3)	// must be at least 3 bytes!
 	xorp_throw(CorruptMessage,
-                c_format("PathAttribute too short %d bytes", max_len),
-                        UPDATEMSGERR, UNSPECIFIED);
+		   c_format("PathAttribute too short %d bytes", max_len),
+		   UPDATEMSGERR, UNSPECIFIED);
 
     // compute length, which is 1 or 2 bytes depending on flags d[0]
     if ( (d[0] & Extended) && max_len < 4)
 	xorp_throw(CorruptMessage,
-                c_format("PathAttribute (extended) too short %d bytes",
+		   c_format("PathAttribute (extended) too short %d bytes",
 			    max_len),
-                        UPDATEMSGERR, UNSPECIFIED);
+		   UPDATEMSGERR, UNSPECIFIED);
     l = length(d) + (d[0] & Extended ? 4 : 3);
     if (max_len < l)
 	xorp_throw(CorruptMessage,
-                c_format("PathAttribute too short %d bytes need %u",
-			    max_len, (uint32_t)l),
-                        UPDATEMSGERR, UNSPECIFIED);
+		   c_format("PathAttribute too short %d bytes need %u",
+			    max_len, XORP_UINT_CAST(l)),
+		   UPDATEMSGERR, UNSPECIFIED);
 
     // now we are sure that the data block is large enough.
     debug_msg("++ create type %d max_len %d actual_len %u\n",
-	d[1], max_len, (uint32_t)l);
+	d[1], max_len, XORP_UINT_CAST(l));
     switch (d[1]) {	// depending on type, do the right thing.
     case ORIGIN:
 	pa = new OriginAttribute(d);
@@ -1666,7 +1670,7 @@ PathAttributeList<A>::process_unknown_attributes()
     for (i = begin(); i != end();) {
 	iterator tmp = i++;
 	if (dynamic_cast<UnknownAttribute *>(*tmp)) {
-	    if((*tmp)->transitive()) {
+	    if ((*tmp)->transitive()) {
 		(*tmp)->set_partial();
 	    } else {
 		delete *tmp;
