@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.9 2004/05/05 18:35:50 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.10 2004/06/04 23:56:11 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -33,14 +33,6 @@ unicast and multicast decision tables will be notified. This is not a
 big deal.
 
 -- added 2003-10-13 by AG
-
-32) It is possible to set a parameter using set_parameter, but there
-is no way to remove a parameter.
-
-Removing a parameter while a session is established should probably be
-illegal.
-
--- added 2003-11-06 by AG
 
 33) Routes held in cache tables are deleted in the background using a
 timer. Perhaps the shutdown code should check that the deletion has
@@ -145,6 +137,14 @@ reproduced by running "test_peering2.sh" with the "-b" flag.
 
 31) The XRL interface for reading routing tables doesn't take a SAFI
 parameter, so only unicast tables can be read.
+
+-- added 2003-11-06 by AG
+
+32) It is possible to set a parameter using set_parameter, but there
+is no way to remove a parameter.
+
+Removing a parameter while a session is established should probably be
+illegal.
 
 -- added 2003-11-06 by AG
 
