@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.9 2004/06/10 22:41:47 hodson Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.10 2004/10/15 18:23:37 bms Exp $"
 
 #include <set>
 
@@ -91,7 +91,7 @@ public:
     {
 	this->_peers.push_back(new Peer<A>(*this, addr));
 	verbose_log("Constructing SpoofPort<IPv%u> instance\n",
-		    A::ip_version());
+		    XORP_UINT_CAST(A::ip_version()));
     }
     ~SpoofPort()
     {
@@ -169,7 +169,8 @@ test_main()
 
     if (peer->route_count() != n_routes) {
 	verbose_log("Routes lost (count %u != %u)\n",
-		    (uint32_t)peer->route_count(), n_routes);
+		    XORP_UINT_CAST(peer->route_count()),
+		    XORP_UINT_CAST(n_routes));
 	return 1;
     }
 
@@ -224,7 +225,7 @@ test_main()
 
     while (timeout == false) {
 	size_t route_count = peer->route_count();
-	verbose_log("Route count = %u\n", (uint32_t)route_count);
+	verbose_log("Route count = %u\n", XORP_UINT_CAST(route_count));
 	if (route_count == 0)
 	    break;
 	e.run();
