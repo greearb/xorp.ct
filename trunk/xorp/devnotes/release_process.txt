@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.31 2005/03/25 04:51:38 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.32 2005/03/25 19:01:31 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -147,7 +147,7 @@ the login shell is csh or tcsh):
 	COMMANDS:
  ssh www.xorp.org
  cd /home/www/u1/www/data/xorp-test
- cvs update
+ cvs update -d -P
 
 ========================================================================
 1180.	TASK: Verify that the web pages on the test web server
@@ -377,7 +377,7 @@ the login shell is csh or tcsh):
 	COMMANDS:
  ssh www.xorp.org
  cd /home/www/u1/www/data/xorp
- cvs update
+ cvs update -d -P
 
 ========================================================================
 2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
