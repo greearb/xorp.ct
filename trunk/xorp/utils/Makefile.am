@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.6 2003/08/01 02:11:51 pavlin Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.7 2003/08/25 22:20:11 jcardona Exp $
 ##
 
 # -- Real Programs
@@ -31,6 +31,7 @@ EXTRA_DIST	+= bogon-be-gone.sh
 EXTRA_DIST	+= ndbg
 EXTRA_DIST	+= xorpc.sh
 EXTRA_DIST	+= xrl_shell_lib.sh
+EXTRA_DIST	+= xrl_wrappers_generator.sh
 EXTRA_DIST	+= FlowerCheck
 
 

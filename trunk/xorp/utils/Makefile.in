@@ -114,7 +114,7 @@ flower_malloc_so_LDFLAGS = -shared -fPIC -fpic
 test_flower_malloc_SOURCES = test_flower_malloc.c
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = bogon-be-gone.sed bogon-be-gone.sh ndbg xorpc.sh xrl_shell_lib.sh FlowerCheck
+EXTRA_DIST = bogon-be-gone.sed bogon-be-gone.sh ndbg xorpc.sh xrl_shell_lib.sh xrl_wrappers_generator.sh FlowerCheck
 
 
 ################################################################
