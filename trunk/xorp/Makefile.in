@@ -107,9 +107,7 @@ ETAGS_ARGS = --c++
 # --- Applications (directory ordering should not matter)
 
 # --- Other (directory ordering should not matter)
-
-# --- Conditional applications
-SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli policy utils fea fib2mrib mld6igmp rib bgp pim rip rtrmgr static_routes etc contrib @MIBS@
+SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli policy utils fea fib2mrib mld6igmp rib bgp pim rip rtrmgr static_routes etc contrib
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -441,6 +439,9 @@ uninstall-info: uninstall-info-recursive
 	uninstall uninstall-am uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
+
+# --- Conditional applications
+#SUBDIRS += @MIBS@
 
 ################################################################
 
