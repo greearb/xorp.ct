@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.3 2003/01/13 19:49:16 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.4 2003/01/23 11:14:25 pavlin Exp $
 #
 
 #
@@ -114,6 +114,11 @@ PIM_ENABLE_LOG_TRACE=yes
 CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
 CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
 
+#
+# MRIB default metric preference and metric
+#
+#MRIB_TABLE_DEFAULT_METRIC_PREFERENCE=100
+#MRIB_TABLE_DEFAULT_METRIC=100
 
 ###############################################################
 # USER CONFIGURATION END
@@ -163,6 +168,12 @@ mfea_start_cli
 #
 # Enable and start MFEA
 #
+if [ X"$MRIB_TABLE_DEFAULT_METRIC_PREFERENCE" != X ] ; then
+	mfea_set_mrib_table_default_metric_preference $MRIB_TABLE_DEFAULT_METRIC_PREFERENCE
+fi
+if [ X"$MRIB_TABLE_DEFAULT_METRIC" != X ] ; then
+	mfea_set_mrib_table_default_metric $MRIB_TABLE_DEFAULT_METRIC
+fi
 mfea_enable_mfea
 mfea_start_mfea
 
