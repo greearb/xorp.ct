@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
+#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.3 2003/05/21 03:52:13 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -86,14 +86,17 @@ public:
 		    addr.str().c_str());
     }
 
-
     void vifaddr6_update(const string& ifname,
-				 const string& vifname,
-				 const IPv6&   addr,
-				 const Update& u) {
+			 const string& vifname,
+			 const IPv6&   addr,
+			 const Update& u) {
 	verbose_log("%s %s %s %s",
 		    update(u), ifname.c_str(), vifname.c_str(),
 		    addr.str().c_str());
+    }
+
+    void updates_completed() {
+	verbose_log("Updates completed");
     }
 };
 

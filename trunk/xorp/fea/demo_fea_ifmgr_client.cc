@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.5 2003/05/13 00:36:24 hodson Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.6 2003/05/29 22:02:42 mjh Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -124,6 +124,12 @@ public:
     {
 	_os << if_event(event) << " Event on address " << addr.str()
 	    << " on vif " << vifname << " on interface " << ifname << endl;
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError fea_ifmgr_client_0_1_updates_completed()
+    {
+	_os << " Update events completed " << endl;
 	return XrlCmdError::OKAY();
     }
 
