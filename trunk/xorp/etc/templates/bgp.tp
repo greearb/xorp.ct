@@ -20,6 +20,7 @@ protocols {
     %modinfo: provides bgp;
     %modinfo: depends rib;
     %modinfo: path "../bgp/bgp";
+    %modinfo: ready xrl "bgp/common/0.1/get_version->version:txt";
     bgp-id {
       %set: xrl "bgp/bgp/0.2/set_bgpid?id:ipv4=$(@)";
       %get: xrl "bgp/bgp/0.2/get_bgpid->id:ipv4";

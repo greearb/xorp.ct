@@ -1,7 +1,8 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.2 2003/02/22 07:14:32 mjh Exp $ */
 
 plumbing rib {
   %modinfo: provides rib;
   %modinfo: depends fea;
   %modinfo: path "../rib/rib";
+  %modinfo: ready xrl "rib/common/0.1/get_version->version:txt";
 }
