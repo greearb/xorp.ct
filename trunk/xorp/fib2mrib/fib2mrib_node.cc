@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.10 2004/05/07 02:52:18 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.11 2004/06/10 22:41:01 hodson Exp $"
 
 
 //
@@ -733,9 +733,10 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     //
     map<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
     iter = _fib2mrib_routes.find(fib2mrib_route.network());
-    if (iter == _fib2mrib_routes.end()) {
+    if ((iter == _fib2mrib_routes.end())
+	|| (iter->second.network() != fib2mrib_route.network())) {
 	//
-	// Coudn't find the route to replace
+	// Couldn't find the route to replace
 	//
 	error_msg = c_format("Cannot replace route for %s: "
 			     "no such route",
@@ -817,10 +818,27 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Find the route and delete it
     //
-    map<IPvXNet, Fib2mribRoute>::iterator iter;
+    map<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
     iter = _fib2mrib_routes.find(fib2mrib_route.network());
-    for ( ; iter != _fib2mrib_routes.end(); ++iter) {
-	Fib2mribRoute& tmp_route = iter->second;
+    if ((iter == _fib2mrib_routes.end())
+	|| (iter->second.network() != fib2mrib_route.network())) {
+	//
+	// Couldn't find the route to delete
+	//
+    error_label:
+	error_msg = c_format("Cannot delete route for %s: "
+			     "no such route",
+			     fib2mrib_route.network().str().c_str());
+	return XORP_ERROR;
+    }
+
+    //
+    // First check if there is a route with the same ifname and vifname.
+    // If there is such route, then delete it. Otherwise,
+    // delete the first route for the same subnet.
+    //
+    for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
+	Fib2mribRoute& tmp_route = iter2->second;
 	if (tmp_route.network() != fib2mrib_route.network())
 	    break;
 	if ((tmp_route.ifname() != fib2mrib_route.ifname())
@@ -829,36 +847,45 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 	}
 
 	//
-	// Route found. Create a copy of it and erase it.
+	// Route found
 	//
-	Fib2mribRoute copy_route = tmp_route;
-	copy_route.set_delete_route();
-	_fib2mrib_routes.erase(iter);
+	break;
+    }
 
+    if (iter2 == _fib2mrib_routes.end()
+	|| (iter2->second.network() != fib2mrib_route.network())) {
 	//
-	// Inform the RIB about the change
+	// No route found with the same ifname and vifname.
+	// If this is an interface-specific route, then this is an error.
+	// Otherwise, delete the first route for the same subnet.
 	//
-	if (copy_route.is_interface_route()) {
-	    const IfMgrVifAtom* vif_atom;
-	    vif_atom = _iftree.find_vif(copy_route.ifname(),
-					copy_route.vifname());
-	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		inform_rib_route_change(copy_route);
-	} else {
-	    if (is_directly_connected(_iftree, copy_route.nexthop()))
-		inform_rib_route_change(copy_route);
-	}
-
-	return XORP_OK;
+	if (fib2mrib_route.is_interface_route())
+	    goto error_label;
+	iter2 = iter;
     }
 
     //
-    // Coudn't find the route to delete
+    // Create a copy of the route and erase it.
     //
-    error_msg = c_format("Cannot delete route for %s: "
-			 "no such route",
-			 fib2mrib_route.network().str().c_str());
-    return XORP_ERROR;
+    Fib2mribRoute copy_route = iter2->second;
+    copy_route.set_delete_route();
+    _fib2mrib_routes.erase(iter2);
+
+    //
+    // Inform the RIB about the change
+    //
+    if (copy_route.is_interface_route()) {
+	const IfMgrVifAtom* vif_atom;
+	vif_atom = _iftree.find_vif(copy_route.ifname(),
+				    copy_route.vifname());
+	if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    inform_rib_route_change(copy_route);
+    } else {
+	if (is_directly_connected(_iftree, copy_route.nexthop()))
+	    inform_rib_route_change(copy_route);
+    }
+
+    return XORP_OK;
 }
 
 /**
