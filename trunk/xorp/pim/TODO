@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.60 2003/10/24 22:51:39 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.61 2003/11/06 22:31:23 pavlin Exp $
 #
 
 * IMPL: If a PimVif interface fails to start/stop/etc, then
@@ -23,27 +23,11 @@
      participates in the election with an empty BSM. In that case routers
      continue to use the cached RP set.
 
-* IMPL+SPEC: if a data packet arrives on interface I, and both
-  CouldAssert(S,G,I) and CouldAssert(*,G,I) are true,
-  then should both assert-state machines for (S,G) and (*,G)
-  transition? Or should the (*,G) assert-state machine transition
-  when a data packet arrives ONLY if the (S,G) assert state machine
-  is in NoInfo state AND the data packet arrival didn't trigger
-  any (S,G) assert-state machine. Maybe the latter one?
-
 * IMPL: Implement the upstream (*,G) and (S,G) spec modifications
   regarding "RPF'(*,G) changes" -> "RPF'(*,G) changes due to an Assert"
   and "RPF'(S,G) changes" -> "RPF'(S,G) changes due to an Assert"
 
-* PIM SPEC: Add text to specify the PIM border router behavior regarding
-  periodic (*,*,RP) Join and (S,G,rpt) Prune behavior:
-  When the PIM border router receives data for a new group G because of
-  (*,*,RP) Join entry it had originated earlier, then then it originates
-  (*,G) Join. Then the periodic (S,G,rpt)Prune entries are generated
-  properly as specified in the text.
-
-* PIM SPEC: Add the text for the new Hello option that includes the number
-  of addresses per interface.
+* IMPL: Implement the PMBR behavior (Section 4.7)
 
 * PIM SPEC: Fix the description of the PIM Null Register messages
   (e.g., what the mandatory fields are, checksum, etc).
@@ -62,24 +46,24 @@
   Add/describe in each non-BSR a timer per Cand-RP that is based
   on each Cand-RP holdtime (as specified in the Bootstrap message).
 
-* SPEC: Don't use "link-local" terminology, because it has no meaning
+* PIM SPEC: Don't use "link-local" terminology, because it has no meaning
   for IPv4? Or, at least, clarify that it is only for IPv6, and describe
   what happens in case of IPv4.
 
-* IMPL+SPEC+TESTSUITE(?):
+* IMPL+BSR SPEC+TESTSUITE(?):
   In the bootstrap spec, if we receive and accept an unicast BSM,
   should we forward it? I guess yes; however, this may create in
   BSM duplication downstream from a rebooted router. Hence, the
   spec probably should say something about detecting duplicated
   messages, and (silently?) ignoring them(?)  
 
-* IMPL+SPEC+TESTSUITE:
+* IMPL+BSR SPEC+TESTSUITE:
   In the Bootstrap spec, if a Cand-BSR is in Candidate BSR state:
   clarify what exactly means "Receive non-preferred BSM from Elected BSR".
   I.e., non-preferred compared to the previous metrics of the elected BSR,
   or non-preferred compared to the Cand-BSR itself?
 
-* IMPL+SPEC: If Cand-RP received by BSR, when to send the next BSM
+* IMPL+BSR SPEC: If Cand-RP received by BSR, when to send the next BSM
   with the updated RP-Set? Currently, the spec doesn't say anything;
   the implementation sends the new BSM immediately. However, the
   problem with that is that whenever there is a new BSR, all Cand-RPs
@@ -138,7 +122,7 @@ probably should be replaced with
   pruned state timeout. However, is this acceptable, or shall we avoid
   the temporary creation of such state?
 
-* SPEC+IMPL:
+* BSR SPEC+IMPL:
   When accepting an unicast Bootstrap message, should accept
   it only if it comes from a neighbor on the RPF interface.
   Otherwise, we may receive obsolete info from downstream neighbors
@@ -375,7 +359,7 @@ Register_Suppression_Time + Register_Probe_Time )."
   sending of the Hello message itself triggers the sending of the unicast
   Bootstrap messages.
 
-* SPEC (Bootstrap): Never send a Bootstrap message back to its BSR
+* BSR SPEC Bootstrap: Never send a Bootstrap message back to its BSR
 
 * TESTSUITE: Add "LAN Prune Delay" test.
   (Isn't already tested indirecty?? Search the Latex for "LAN Prune Delay")
@@ -478,11 +462,10 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
         INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED,            // 6
         (Maybe yes, because it is never used??)
 
-
 * SPEC: Edit for "Unicast Upstream Neighbor Address"
   "RPF lookup." -> "MRIB lookup." ??
  
-* SPEC: Update cross-references between Bootstrap and PIM-SM spec.
+* PIM SPEC+BSR SPEC: Update cross-references between Bootstrap and PIM-SM spec.
 
 * SPEC+IMPL: If an interface goes down:
   - if IIF, then thread it as the new IIF = INFINITY, and then the protocol
@@ -514,7 +497,7 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   to perform the same action twice once after another?
   This applies to the XRL return result as well.
 
-* SPEC: Bootstrap mechanism:
+* BSR SPEC:
   All Value names must be a single word. E.g:
   BS Timeout -> BS_Timeout
 
@@ -715,7 +698,7 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   in a complicated way is same result as the XOR that is specified
   in the spec.
 
-* SPEC:
+* BSR SPEC:
   If the Elected BSR is a neighbor, and that neighbor expired,
   do we want to apply the optimization to expire immediately that BSR?
 
@@ -726,19 +709,19 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
 * SPEC: In the PIM-SM spec: Section 4.2.1 "Last hop switchover to the SPT":
   Change "Last hop" to "Last-hop"?
 
-* IMPL+SPEC: Can an intermediate router that forwards a Bootstrap message
+* IMPL+BSR SPEC: Can an intermediate router that forwards a Bootstrap message
   fragment it to fit the max. size on the outgoing link?
 
-* IMPL+SPEC: If there is a scope boundary for some group range, it must
-  be a scope boundary (in case of IPv4) for 239.255.0.0/16
+* IMPL+PIM SPEC + BSR SPEC: If there is a scope boundary for some group range,
+  it must be a scope boundary (in case of IPv4) for 239.255.0.0/16
   (the IPv4 Local Scope).
 
 * IMPL: Implement RFC 1256 (Router Solicitation)
 
-* IMPL+SPEC: When the BSR collects all cand. RPs for a prefix, if their number
-  is larger than 255, distribute only the best 255 RPs.
+* IMPL+BSRSPEC: When the BSR collects all cand. RPs for a prefix, if their
+  number is larger than 255, distribute only the best 255 RPs.
 
-* IMPL+SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
+* IMPL+BSR SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
 
 * SPEC: RP Set or RP-Set??
@@ -752,10 +735,10 @@ some reasons, or it was an unintentional miss. If it was the
 latter, probably it should be added when it comes for a revision of
 this experimental RFC.
 
-* IMPL+SPEC: What if the "Hash Mask len" is different for different prefixes
-  in the Bootstrap message? Any issues if different??
+* IMPL+BSR SPEC: What if the "Hash Mask len" is different for different
+  prefixes in the Bootstrap message? Any issues if different??
 
-* TODO (kernel and PIM-SM impl):
+* IMPL+PIMKERN
 > One limitation with using this option is, it won't allow fragmentation
 > of unicast packets also (man page says this). This we found , during RP
 > sending a huge CRP-ADV packets to BSR. i.e CRP configured with huge 
