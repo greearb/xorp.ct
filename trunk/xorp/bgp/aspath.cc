@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.14 2003/01/29 01:05:31 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.15 2003/01/29 05:43:55 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -115,6 +115,22 @@ AsSegment::str() const
     return s;
 }
 
+string
+AsSegment::short_str() const
+{
+    string s;
+    string sep = (_type == AS_SET) ? "{": "[";	// separator
+    const_iterator iter = _aslist.begin();
+
+    for (u_int i = 0; i<_entries; i++, ++iter) {
+	s += sep ;
+	s += iter->short_str();
+	sep = ", ";
+    }
+    s += (_type == AS_SET) ? "}": "]";
+    return s;
+}
+
 /**
  * compares internal representations for equality.
  */
@@ -164,7 +180,7 @@ size_t
 AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
 {
     //See RFC 1657, Page 15 for the encoding
-    assert(buf_size >= (2 * _entries * 2));
+    assert(buf_size >= (2 + _entries * 2));
     uint8_t *p = buf;
     *p = (uint8_t)_type;  p++;
     *p = (uint8_t)_entries; p++;
@@ -258,7 +274,8 @@ AsPath::decode(const uint8_t *d, size_t l)
     _num_segments = 0;
     _path_len = 0;
     while (l > 0) {		// grab segments
-	int len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
+	size_t len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
+	assert(len <= l);
 
 	AsSegment s(d);
 	add_segment(s);
@@ -288,6 +305,19 @@ AsPath::str() const
     while(iter != _segments.end()) {
 	s.append(" ");
 	s.append((*iter).str());
+	++iter;
+    }
+    return s;
+}
+
+string
+AsPath::short_str() const
+{
+    string s;
+    const_iterator iter = _segments.begin();
+    while(iter != _segments.end()) {
+	s.append(" ");
+	s.append((*iter).short_str());
 	++iter;
     }
     return s;

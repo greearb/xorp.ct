@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.4 2003/01/28 19:15:17 rizzo Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.5 2003/01/28 22:06:30 rizzo Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -127,6 +127,10 @@ public:
      */
     string str() const					{
 	return c_format("AS/%d", _as);
+    }
+
+    string short_str() const					{
+	return c_format("%d", _as);
     }
     
 private:

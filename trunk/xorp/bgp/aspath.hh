@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.10 2003/01/29 01:05:32 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.11 2003/01/29 02:09:37 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -178,9 +178,14 @@ public:
     size_t wire_length() const			{ return 2 + 2*_entries; }
 
     /**
-     * @return string representation of the segment
+     * @return fancy string representation of the segment
      */
     string str() const;
+
+    /**
+     * @return compact string representation of the segment
+     */
+    string short_str() const;
 
     /**
      * compares internal representations for equality.
@@ -252,6 +257,7 @@ public:
     }
 
     string str() const;
+    string short_str() const;
 
     const AsSegment& segment(size_t n) const		{
 	if (n < _num_segments) {
