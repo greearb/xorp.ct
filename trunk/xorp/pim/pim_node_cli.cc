@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.12 2003/04/01 00:56:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.13 2003/05/21 05:32:54 pavlin Exp $"
 
 
 //
@@ -831,11 +831,11 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	       pim_mre->rp_addr_string().c_str(),
 	       entry_state_flags.c_str()));
     if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
-	cli_print(c_format("    Upstream interface (S):   %s\n",
+	cli_print(c_format("    Upstream interface (S):    %s\n",
 			   (iif_pim_vif_s != NULL)?
 			   iif_pim_vif_s->name().c_str() : "UNKNOWN"));
     }
-    cli_print(c_format("    Upstream interface (RP):  %s\n",
+    cli_print(c_format("    Upstream interface (RP):   %s\n",
 	       (iif_pim_vif_rp != NULL)?
 	       iif_pim_vif_rp->name().c_str() : "UNKNOWN"));
     cli_print(c_format("    Upstream MRIB next hop (RP): %s\n",
@@ -849,27 +849,27 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_wc()) {
-	cli_print(c_format("    Upstream RPF'(*,G):       %s\n",
+	cli_print(c_format("    Upstream RPF'(*,G):        %s\n",
 			   (pim_mre->rpfp_nbr_wc() != NULL)?
 			   cstring(pim_mre->rpfp_nbr_wc()->addr())
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_sg()) {
-	cli_print(c_format("    Upstream RPF'(S,G):       %s\n",
+	cli_print(c_format("    Upstream RPF'(S,G):        %s\n",
 			   (pim_mre->rpfp_nbr_sg() != NULL)?
 			   cstring(pim_mre->rpfp_nbr_sg()->addr())
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_sg_rpt()) {
-	cli_print(c_format("    Upstream RPF'(S,G,rpt):   %s\n",
+	cli_print(c_format("    Upstream RPF'(S,G,rpt):    %s\n",
 			   (pim_mre->rpfp_nbr_sg_rpt() != NULL)?
 			   cstring(pim_mre->rpfp_nbr_sg_rpt()->addr())
 			   : "UNKNOWN"));
     }
-    cli_print(c_format("    Upstream state:           %s\n",
+    cli_print(c_format("    Upstream state:            %s\n",
 		       upstream_state.c_str()));
     if (pim_mre->is_sg() && pim_mre->is_directly_connected_s()) {
-	cli_print(c_format("    Register state:           %s\n",
+	cli_print(c_format("    Register state:            %s\n",
 			   register_state.c_str()));
     }
     if (pim_mre->is_sg_rpt()) {
@@ -879,7 +879,7 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	    pim_mre->const_override_timer().time_remaining(tv_left);
 	    left_sec = tv_left.sec();
 	}
-	cli_print(c_format("    Override timer:           %d\n", left_sec));
+	cli_print(c_format("    Override timer:            %d\n", left_sec));
     } else {
 	int left_sec = -1;
 	if (pim_mre->const_join_timer().scheduled()) {
@@ -887,81 +887,117 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	    pim_mre->const_join_timer().time_remaining(tv_left);
 	    left_sec = tv_left.sec();
 	}
-	cli_print(c_format("    Join timer:               %d\n", left_sec));
+	cli_print(c_format("    Join timer:                %d\n", left_sec));
     }
     
     
     //
     // The downstream interfaces
     //
-    cli_print(c_format("    Local include:            %s\n",
-	       mifset_str(pim_mre->local_receiver_include()).c_str()));
-    cli_print(c_format("    Local exclude:            %s\n",
-	       mifset_str(pim_mre->local_receiver_exclude()).c_str()));
-    cli_print(c_format("    Local include WC:         %s\n",
-	       mifset_str(pim_mre->local_receiver_include_wc()).c_str()));
-    cli_print(c_format("    Local include SG:         %s\n",
-	       mifset_str(pim_mre->local_receiver_include_sg()).c_str()));
-    cli_print(c_format("    Local exclude SG:         %s\n",
-	       mifset_str(pim_mre->local_receiver_exclude_sg()).c_str()));
-    cli_print(c_format("    Joins RP:                 %s\n",
+    if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Local receiver include WC: %s\n",
+			   mifset_str(pim_mre->local_receiver_include_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Local receiver include SG: %s\n",
+			   mifset_str(pim_mre->local_receiver_include_sg()).c_str()));
+	cli_print(c_format("    Local receiver exclude SG: %s\n",
+			   mifset_str(pim_mre->local_receiver_exclude_sg()).c_str()));
+    }
+    cli_print(c_format("    Joins RP:                  %s\n",
 	       mifset_str(pim_mre->joins_rp()).c_str()));
-    cli_print(c_format("    Joins WC:                 %s\n",
-	       mifset_str(pim_mre->joins_wc()).c_str()));
-    cli_print(c_format("    Joins SG:                 %s\n",
-	       mifset_str(pim_mre->joins_sg()).c_str()));
-    cli_print(c_format("    Prunes SG_RPT:            %s\n",
-	       mifset_str(pim_mre->prunes_sg_rpt()).c_str()));
-    cli_print(c_format("    Join state:               %s\n",
+    if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Joins WC:                  %s\n",
+			   mifset_str(pim_mre->joins_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Joins SG:                  %s\n",
+			   mifset_str(pim_mre->joins_sg()).c_str()));
+    }
+    if (pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Prunes SG_RPT:             %s\n",
+			   mifset_str(pim_mre->prunes_sg_rpt()).c_str()));
+    }
+    cli_print(c_format("    Join state:                %s\n",
 	       mifset_str(pim_mre->downstream_join_state()).c_str()));
-    cli_print(c_format("    Prune state:              %s\n",
+    cli_print(c_format("    Prune state:               %s\n",
 	       mifset_str(pim_mre->downstream_prune_state()).c_str()));
-    cli_print(c_format("    Prune pending state:      %s\n",
+    cli_print(c_format("    Prune pending state:       %s\n",
 	       mifset_str(pim_mre->downstream_prune_pending_state()).c_str()));
-    cli_print(c_format("    Prune tmp state:          %s\n",
-	       mifset_str(pim_mre->downstream_prune_tmp_state()).c_str()));
-    cli_print(c_format("    Prune pending tmp state:  %s\n",
-	       mifset_str(pim_mre->downstream_prune_pending_tmp_state()).c_str()));
-    cli_print(c_format("    I am assert winner state: %s\n",
-	       mifset_str(pim_mre->i_am_assert_winner_state()).c_str()));
-    cli_print(c_format("    I am assert loser state:  %s\n",
-	       mifset_str(pim_mre->i_am_assert_loser_state()).c_str()));
-    cli_print(c_format("    Assert winner WC:         %s\n",
-	       mifset_str(pim_mre->i_am_assert_winner_wc()).c_str()));
-    cli_print(c_format("    Assert winner SG:         %s\n",
-	       mifset_str(pim_mre->i_am_assert_winner_sg()).c_str()));
-    cli_print(c_format("    Assert lost WC:           %s\n",
-	       mifset_str(pim_mre->lost_assert_wc()).c_str()));
-    cli_print(c_format("    Assert lost SG:           %s\n",
-	       mifset_str(pim_mre->lost_assert_sg()).c_str()));
-    cli_print(c_format("    Assert lost SG_RPT:       %s\n",
-	       mifset_str(pim_mre->lost_assert_sg_rpt()).c_str()));
-    cli_print(c_format("    Assert tracking WC:       %s\n",
-	       mifset_str(pim_mre->assert_tracking_desired_wc()).c_str()));
-    cli_print(c_format("    Assert tracking SG:       %s\n",
-	       mifset_str(pim_mre->assert_tracking_desired_sg()).c_str()));
-    cli_print(c_format("    Could assert WC:          %s\n",
-	       mifset_str(pim_mre->could_assert_wc()).c_str()));
-    cli_print(c_format("    Could assert SG:          %s\n",
-	       mifset_str(pim_mre->could_assert_sg()).c_str()));
-    cli_print(c_format("    I am DR:                  %s\n",
+    if (pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Prune tmp state:           %s\n",
+			   mifset_str(pim_mre->downstream_prune_tmp_state()).c_str()));
+	cli_print(c_format("    Prune pending tmp state:   %s\n",
+			   mifset_str(pim_mre->downstream_prune_pending_tmp_state()).c_str()));
+    }
+    if (pim_mre->is_wc() || pim_mre->is_sg()) {
+	cli_print(c_format("    I am assert winner state:  %s\n",
+			   mifset_str(pim_mre->i_am_assert_winner_state()).c_str()));
+	cli_print(c_format("    I am assert loser state:   %s\n",
+			   mifset_str(pim_mre->i_am_assert_loser_state()).c_str()));
+    }
+    if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Assert winner WC:          %s\n",
+			   mifset_str(pim_mre->i_am_assert_winner_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Assert winner SG:          %s\n",
+			   mifset_str(pim_mre->i_am_assert_winner_sg()).c_str()));
+    }
+    if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Assert lost WC:            %s\n",
+			   mifset_str(pim_mre->lost_assert_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Assert lost SG:            %s\n",
+			   mifset_str(pim_mre->lost_assert_sg()).c_str()));
+    }
+    if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Assert lost SG_RPT:        %s\n",
+			   mifset_str(pim_mre->lost_assert_sg_rpt()).c_str()));
+    }
+    if (pim_mre->is_wc()) {
+	cli_print(c_format("    Assert tracking WC:        %s\n",
+			   mifset_str(pim_mre->assert_tracking_desired_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Assert tracking SG:        %s\n",
+			   mifset_str(pim_mre->assert_tracking_desired_sg()).c_str()));
+    }
+    if (pim_mre->is_wc() || pim_mre->is_sg()) {
+	cli_print(c_format("    Could assert WC:           %s\n",
+			   mifset_str(pim_mre->could_assert_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Could assert SG:           %s\n",
+			   mifset_str(pim_mre->could_assert_sg()).c_str()));
+    }
+    cli_print(c_format("    I am DR:                   %s\n",
 	       mifset_str(pim_mre->i_am_dr()).c_str()));
-    cli_print(c_format("    Immediate olist RP:       %s\n",
+    cli_print(c_format("    Immediate olist RP:        %s\n",
 	       mifset_str(pim_mre->immediate_olist_rp()).c_str()));
-    cli_print(c_format("    Immediate olist WC:       %s\n",
-	       mifset_str(pim_mre->immediate_olist_wc()).c_str()));
-    cli_print(c_format("    Immediate olist SG:       %s\n",
-	       mifset_str(pim_mre->immediate_olist_sg()).c_str()));
-    cli_print(c_format("    Inherited olist SG:       %s\n",
+    if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    Immediate olist WC:        %s\n",
+			   mifset_str(pim_mre->immediate_olist_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    Immediate olist SG:        %s\n",
+			   mifset_str(pim_mre->immediate_olist_sg()).c_str()));
+    }
+    cli_print(c_format("    Inherited olist SG:        %s\n",
 	       mifset_str(pim_mre->inherited_olist_sg()).c_str()));
-    cli_print(c_format("    Inherited olist SG_RPT:   %s\n",
+    cli_print(c_format("    Inherited olist SG_RPT:    %s\n",
 	       mifset_str(pim_mre->inherited_olist_sg_rpt()).c_str()));
-    cli_print(c_format("    PIM include WC:           %s\n",
-	       mifset_str(pim_mre->pim_include_wc()).c_str()));
-    cli_print(c_format("    PIM include SG:           %s\n",
-	       mifset_str(pim_mre->pim_include_sg()).c_str()));
-    cli_print(c_format("    PIM exclude SG:           %s\n",
-	       mifset_str(pim_mre->pim_exclude_sg()).c_str()));
+    if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
+	cli_print(c_format("    PIM include WC:            %s\n",
+			   mifset_str(pim_mre->pim_include_wc()).c_str()));
+    }
+    if (pim_mre->is_sg()) {
+	cli_print(c_format("    PIM include SG:            %s\n",
+			   mifset_str(pim_mre->pim_include_sg()).c_str()));
+	cli_print(c_format("    PIM exclude SG:            %s\n",
+			   mifset_str(pim_mre->pim_exclude_sg()).c_str()));
+    }
 }
 
 //
