@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.6 2003/10/02 17:18:08 pavlin Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.7 2004/06/10 22:41:15 hodson Exp $
  */
 
 /* Ethernet manipulation compatibility functions */
@@ -49,7 +49,7 @@ struct ether_addr* ether_aton(const char *a);
 #endif /* NEED_ETHER_ATON */
 
 #ifdef NEED_ETHER_NTOA
-const char* ether_ntoa(const struct ether_addr* ea);
+char* ether_ntoa(const struct ether_addr* ea);
 #endif /* NEED_ETHER_NTOA */
 
 #ifdef __cplusplus
