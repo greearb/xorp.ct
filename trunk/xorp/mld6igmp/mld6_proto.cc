@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.24 2004/02/24 21:02:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.25 2004/02/26 13:07:57 pavlin Exp $"
 
 
 //
@@ -544,32 +544,32 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
     list<MemberQuery *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
 	MemberQuery *member_query = *iter;
-	if (group_address == member_query->group()) {
-	    // Group found
-	    if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
-		member_query->_member_query_timer =
-		    mld6igmp_node().eventloop().new_oneoff_after(
-			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL
-				* MLD_LAST_LISTENER_QUERY_COUNT,
-				0),
-			callback(member_query,
-				 &MemberQuery::member_query_timer_timeout));
-		
-		// Send group-specific query
-		mld6igmp_send(primary_addr(),
-			      member_query->group(),
-			      MLD_LISTENER_QUERY,
-			      (MLD_LAST_LISTENER_QUERY_INTERVAL
-			       * MLD_TIMER_SCALE),
-			      member_query->group());
-		member_query->_last_member_query_timer =
-		    mld6igmp_node().eventloop().new_oneoff_after(
-			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
-			callback(member_query,
-				 &MemberQuery::last_member_query_timer_timeout));
-	    }
-	    return (XORP_OK);
+	if (group_address != member_query->group())
+	    continue;
+
+	// Group found
+	if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
+	    member_query->_member_query_timer =
+		mld6igmp_node().eventloop().new_oneoff_after(
+		    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL
+			    * MLD_LAST_LISTENER_QUERY_COUNT,
+			    0),
+		    callback(member_query,
+			     &MemberQuery::member_query_timer_timeout));
+	    
+	    // Send group-specific query
+	    mld6igmp_send(primary_addr(),
+			  member_query->group(),
+			  MLD_LISTENER_QUERY,
+			  (MLD_LAST_LISTENER_QUERY_INTERVAL * MLD_TIMER_SCALE),
+			  member_query->group());
+	    member_query->_last_member_query_timer =
+		mld6igmp_node().eventloop().new_oneoff_after(
+		    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
+		    callback(member_query,
+			     &MemberQuery::last_member_query_timer_timeout));
 	}
+	return (XORP_OK);
     }
     
     // Nothing found. Ignore.
