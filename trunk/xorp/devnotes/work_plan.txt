@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/work_plan.txt,v 1.22 2003/07/24 23:50:56 pavlin Exp $
+# $XORP: xorp/devnotes/work_plan.txt,v 1.23 2003/08/06 19:19:41 atanu Exp $
 #
 
 Priority:
@@ -22,6 +22,8 @@ Immediate Tasks                                       Priority Who
 For 0.4:
 * Complete Linux support.				M	FB+PR
 * UDP send/receive interface.				H	OH+PR
+* Library for monitoring the network interface state	H	OH
+  from the FEA
 
 For 0.x:
 * Equal-cost multipath					L	??
@@ -39,6 +41,10 @@ Immediate Tasks                                       Priority Who
 For 0.4:
 * Handle route process death				H	MH/PR
   - see the error-handling document (e.g., exit if the FEA is gone)
+  - Example: if BGP goes away, then the RIB should pull-out all
+    routing state that comes from BGP
+    Also, if the FEA goes away, then RIB should go away too.
+  - PR look into it, and if too compicated, then move it to 0.x
 
 For 0.x:
 * Support recursive BGP Lookups				L	MH
@@ -97,7 +103,7 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who  Time
 ---------------                                       -------- ---  ----
 For 0.4:
-* Commit PIM patches to FreeBSD				H       PR  July 2003
+* Commit PIM patches to FreeBSD				Almost  PR  July 2003
 * RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
 * Integration of PIM/MLD/MFEA and RTRMGR		H	PR  2 weeks
 * Finish Kdoc'ing PIM, MLD6IGMP, MFEA			L	PR  background
@@ -173,7 +179,7 @@ For 0.4:
 * Write bgp4_mib_1657 module				Done	JC 3 weeks
 * Hide events synchronization				Done	JC
 * Fix snmpd termination problem				Done	JC
-* Implement SNMP traps					M	JC
+* Implement SNMP traps					Done	JC
 
 For 0.x:
 * Improve documentation					H	JC few days
@@ -184,6 +190,7 @@ Immediate Tasks                                       Priority Who
 For 0.4:
 * Use BGP/RIB/FEA test-router on xorp8			H	Everyone
   (think what exactly we want to happen)
+* Use BGP/RIB/FEA test-router on xorp12			Done	AG
 
 ================================ Other =======================================
 
@@ -196,7 +203,7 @@ Longer Term tasks
 * Rewrite CLI						L	PR  2-3 weeks
 
 ================================ Next Release ================================
-* Next release (xorp-0.4): August 14, 2003
+* Next release (xorp-0.4): August 28, 2003
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
@@ -215,11 +222,11 @@ Immediate Tasks                                       Priority Who
   (see xorp/docs/libxipc/finder_command_line.txt)
 * Add tasks/projects to the web page wishlist		L	Everyone
   (for other people)
-* Add "gmake install" support				L	PR
+* Add "gmake install" support				Done	PR
+* Add bugzilla						Done	JC
 
 ================================ Next-Next Release ===========================
 * Next-next release (xorp-0.5): ?? ??, 200?
-* Add bugzilla						L	??
 * Add automated process running for testing xorpsh on	M	FCFS
   xorp8 (expect scripts, etc)
 
