@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.1 2004/03/11 00:04:20 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.2 2004/03/19 23:21:28 hodson Exp $"
 
 #include <vector>
 #include <fstream>

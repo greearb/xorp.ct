@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.5 2003/05/09 21:00:51 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.6 2003/05/29 21:17:14 mjh Exp $"
 
 #include "libxorp/status_codes.h"
 #include "finder_client_xrl_target.hh"

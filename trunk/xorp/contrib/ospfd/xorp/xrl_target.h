@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.6 2003/05/29 18:36:29 pavlin Exp $
+// $XORP: xorp/contrib/ospfd/xorp/xrl_target.h,v 1.7 2003/05/29 22:37:01 mjh Exp $
 
 #ifndef __XORP_OSPF_XORP_XRL_TARGET_HH__
 #define __XORP_OSPF_XORP_XRL_TARGET_HH__

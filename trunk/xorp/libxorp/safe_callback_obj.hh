@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.1 2003/12/20 00:26:01 hodson Exp $
+// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.2 2004/02/13 06:06:56 hodson Exp $
 
 #ifndef __LIBXORP_SAFE_CALLBACK_OBJ_HH__
 #define __LIBXORP_SAFE_CALLBACK_OBJ_HH__

@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2003 International Computer Science Institute
+ * Copyright (c) 2001-2004 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/debug.h,v 1.3 2004/03/26 06:21:53 hodson Exp $
+ * $XORP: xorp/libxorp/debug.h,v 1.4 2004/03/26 09:03:33 mjh Exp $
  */
 
 #ifndef __LIBXORP_DEBUG_H__

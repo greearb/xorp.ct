@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.53 2004/06/02 18:33:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.54 2004/06/08 14:09:01 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"

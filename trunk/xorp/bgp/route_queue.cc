@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_queue.cc,v 1.5 2003/03/10 23:20:03 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_queue.cc,v 1.6 2003/10/03 00:26:59 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"

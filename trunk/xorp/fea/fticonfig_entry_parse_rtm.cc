@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.4 2004/03/17 07:28:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.5 2004/03/17 07:50:59 pavlin Exp $"
 
 
 #include "fea_module.h"

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.5 2004/01/15 19:15:15 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.6 2004/05/24 01:22:32 hodson Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.5 2004/01/15 19:15:15 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.6 2004/05/24 01:22:32 hodson Exp $"
 
 #include "libfeaclient_module.h"
 

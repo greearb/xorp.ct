@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2003 International Computer Science Institute
+// Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.3 2003/05/21 03:52:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.4 2004/04/10 07:56:20 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
