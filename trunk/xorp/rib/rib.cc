@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.42 2004/11/02 22:51:03 bms Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.43 2004/11/03 22:18:01 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -667,13 +667,11 @@ RIB<A>::add_route(const string&		tablename,
     }
 
     //
-    // Find the vif so we can see if the nexthop is a peer.  First
-    // lookup the nexthop addr, and see it's the subnet is a directly
-    // connected one.
+    // Find the vif so we can see if the nexthop is directly connected.
     //
     const IPRouteEntry<A>* re = _final_table->lookup_route(nexthop_addr);
     if (re != NULL) {
-	// We found a route.  Is the subnet directly connected?
+	// We found a route for the nexthop.
 	Vif* vif = re->vif();
 	if ((vif != NULL)
 	    && (vif->is_same_subnet(IPvXNet(re->net()))
@@ -688,7 +686,7 @@ RIB<A>::add_route(const string&		tablename,
 	    debug_msg("**not directly connected route found for nexthop\n");
 	    //
 	    // XXX: If the route came from an IGP, then we must have
-	    // a directly-connected interface toward the next-hop router
+	    // a directly-connected interface toward the next-hop router.
 	    //
 	    if (protocol->protocol_type() == IGP) {
 		XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
