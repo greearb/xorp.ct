@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.3 2003/10/16 18:23:07 pavlin Exp $
+# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.4 2003/10/17 20:39:33 pavlin Exp $
 #
 
 #
@@ -143,6 +143,35 @@ END {
 # AWK CODE END
 '
 
+}
+
+#
+# Split the value of an XRL variable of type ":list" into a list of values
+# separated by space.
+#
+# Usage: split_xrl_list_values <xrl_list_variable> <xrl_list_values_type>
+#
+# Return the list of values separated by space.
+#
+split_xrl_list_values()
+{
+    local _xrl_list_variable _xrl_list_values_type _list_separator
+    local _tmp_result
+
+    if [ $# -lt 2 ] ; then
+	echo "Usage: $0 <xrl_list_variable> <xrl_list_values_type>"
+	exit 1
+    fi
+    _xrl_variable="$1"
+    _xrl_list_values_type="$2"
+
+    # Separate the values with space
+    _list_separator=",:${_xrl_list_values_type}="
+    _tmp_result=`echo "${_xrl_variable}" | awk -F "${_list_separator}" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'`
+
+    # Get rid of the first value-type prefix
+    _list_separator=":${_xrl_list_values_type}="
+    echo "${_tmp_result}" | awk -F "${_list_separator}" '{for (i = 1; i <= NF; i++) {printf("%s", $i);}}'
 }
 
 #
