@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.2 2003/03/10 23:20:37 hodson Exp $"
 
 #include <functional>
 #include <string>
@@ -234,10 +234,10 @@ Vif::delete_address(const IPvX& ipvx_addr)
     return (XORP_ERROR);
 }
 
-const VifAddr *
-Vif::find_address(const IPvX& ipvx_addr) const
+VifAddr *
+Vif::find_address(const IPvX& ipvx_addr)
 {
-    list<VifAddr>::const_iterator iter;
+    list<VifAddr>::iterator iter;
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_same_addr(ipvx_addr)) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.2 2003/02/26 00:14:14 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.3 2003/03/10 23:20:37 hodson Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -433,7 +433,7 @@ public:
      * @return a pointer to the VifAddr for address @ref ipvx_addr
      * if found, otherwise NULL.
      */
-    const VifAddr *find_address(const IPvX& ipvx_addr) const;
+    VifAddr *find_address(const IPvX& ipvx_addr);
     
     /**
      * Test if an IPvX address belongs to this vif.
