@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.6 2003/01/14 01:30:00 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.7 2003/01/14 20:37:35 pavlin Exp $
 #
+
+* IMPL:
+  If (S,G,rpt) Prune (only) is received, but there is no (*,G) routing state,
+  then (S,G,rpt) routing state is created (in RPTNotJoined state).
+  This state is useless/harmless, and will be deleted after the downstream
+  pruned state timeout. However, is this acceptable, or shall we avoid
+  the temporary creation of such state?
 
 * IMPL:
   If an interface to a directly-connected source is DOWN, but there is
