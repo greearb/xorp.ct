@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.28 2003/10/23 09:41:56 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.29 2003/10/26 04:17:43 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -516,7 +516,14 @@ public:
 			 const OriginAttribute &origin);
     PathAttributeList(const PathAttributeList<A>& palist);
     ~PathAttributeList();
+    /**
+     * Add this path attribute to the list after making a local copy.
+     */
     void add_path_attribute(const PathAttribute &att);
+    /**
+     * Add this path attribute to the list don't make a local copy.
+     */
+    void add_path_attribute(PathAttribute *att);
     const A& nexthop() const		{ return _nexthop_att->nexthop(); }
     const AsPath& aspath() const	{ return _aspath_att->as_path(); }
     const uint8_t origin() const	{ return _origin_att->origin(); }

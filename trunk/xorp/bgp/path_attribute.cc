@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.44 2003/10/26 04:17:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.45 2003/10/30 02:11:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1438,8 +1438,17 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
     debug_msg("%p %s\n", this, att.str().c_str());
 
     PathAttribute *a = att.clone();
+    add_path_attribute(a);
+}
+
+template<class A>
+void
+PathAttributeList<A>::add_path_attribute(PathAttribute *a)
+{
+    debug_msg("%p %s\n", this, a->str().c_str());
+
     // store a reference to the mandatory attributes, ignore others
-    switch (att.type()) {
+    switch (a->type()) {
     default:
 	break;
 
@@ -1458,7 +1467,7 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 	break;
     }
     // Keep the list sorted
-    debug_msg("++ add_path_attribute %s\n", att.str().c_str());
+    debug_msg("++ add_path_attribute %s\n", a->str().c_str());
     if (!empty()) {
 	iterator i;
 	for (i = begin(); i != end(); i++)
