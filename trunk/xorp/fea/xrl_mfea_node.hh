@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.10 2003/12/20 01:43:34 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.11 2004/03/18 00:43:36 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -863,6 +863,8 @@ protected:
 	const string&	vifname, 
 	const IPv6&	addr, 
 	const uint32_t&	event);
+
+    XrlCmdError fea_ifmgr_client_0_1_updates_completed();
     
 private:
     const string& my_xrl_target_name() {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.30 2004/03/24 19:14:08 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.31 2004/04/01 19:31:21 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1087,6 +1087,14 @@ XrlRibTarget::fea_ifmgr_client_0_1_vifaddr6_update(// Input values,
 						   const uint32_t& event)
 {
     _vif_manager.vifaddr6_update(ifname, vifname, addr, event);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::fea_ifmgr_client_0_1_updates_completed()
+{
+    _vif_manager.updates_completed();
+    
     return XrlCmdError::OKAY();
 }
 

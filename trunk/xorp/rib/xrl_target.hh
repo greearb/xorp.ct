@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.16 2004/03/23 11:24:25 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.17 2004/04/01 19:31:21 hodson Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -398,7 +398,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast,
 	// Output values,
-	IPv4&	nexthop);
+	IPv4&		nexthop);
 
     /**
      *  Lookup nexthop.
@@ -506,11 +506,11 @@ protected:
         const string&	target,
 	const IPv4&	addr,
 	// Output values,
-	bool& resolves,
-	IPv4&	base_addr,
+	bool&		resolves,
+	IPv4&		base_addr,
 	uint32_t&	prefix_len,
 	uint32_t&	real_prefix_len,
-	IPv4&	nexthop,
+	IPv4&		nexthop,
 	uint32_t&	metric);
 
     /**
@@ -563,11 +563,11 @@ protected:
         const string&	target,
 	const IPv6&	addr,
 	// Output values,
-	bool& resolves,
-	IPv6&	base_addr,
+	bool&		resolves,
+	IPv6&		base_addr,
 	uint32_t&	prefix_len,
 	uint32_t&	real_prefix_len,
-	IPv6&	nexthop,
+	IPv6&		nexthop,
 	uint32_t&	metric);
 
     /**
@@ -611,6 +611,8 @@ protected:
 	const string&	vifname,
 	const IPv6&	addr,
 	const uint32_t&	event);
+
+    XrlCmdError fea_ifmgr_client_0_1_updates_completed();
 
     /**
      *  Announce target birth.

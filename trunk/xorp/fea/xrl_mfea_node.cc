@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.21 2003/12/20 01:43:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.22 2004/03/18 00:43:36 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -2648,6 +2648,14 @@ XrlMfeaNode::fea_ifmgr_client_0_1_vifaddr6_update(
     const uint32_t&	event)
 {
     _xrl_mfea_vif_manager.vifaddr6_update(ifname, vifname, addr, event);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::fea_ifmgr_client_0_1_updates_completed()
+{
+    _xrl_mfea_vif_manager.updates_completed();
     
     return XrlCmdError::OKAY();
 }
