@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.2 2003/01/13 20:40:22 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -79,6 +79,9 @@ PimMre::set_assert_noinfo_state(uint16_t vif_index)
 	}
 	break;
     } while (false);
+    
+    // Try to remove the entry
+    entry_try_remove();
 }
 
 // Note: applies only for (*,G) and (S,G)
