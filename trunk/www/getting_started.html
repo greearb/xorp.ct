@@ -1,4 +1,4 @@
-<!-- $XORP: www/getting_started.html,v 1.13 2004/06/15 16:19:57 hodson Exp $ -->
+<!-- $XORP: www/getting_started.html,v 1.14 2004/06/15 20:44:58 pavlin Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -230,7 +230,7 @@ The configuration information can be provided in one of the two ways:
 <LI>Use a configuration file when the rtrmgr is started.
     By default, the rtrmgr will load the configuration from file
     "config.boot" in the XORP installation directory.
-    This file can be specified by the "-b <filename> command line
+    This file can be specified by the "-b &lt;filename&gt;" command line
     option:
 <PRE>
     xorp_rtrmgr -b my_config.boot
@@ -355,31 +355,34 @@ protocols {
 </PRE>
 
 Static routes can be redistributed through the RIP protocol using RIP's
-"import" statement.
+"export" statement.
 
 <H4>Routing Information Protocol</H4>
 
 In order to run RIP it is sufficient to specify the "interface"s, "vif"s
 and "address"es on which RIP is enabled. Remember that each "address"
 must be explicitly enabled.
+
 <P>
-If you wish to announce routes then it is necessary to "import" the
+If you wish to announce routes then it is necessary to "export" the
 routes that are to be announced. For example, "connected", "static" and
 "rip".
+
+<p><u>Note</u>: In release candidate 1.0RC, the "import" keyword is used in place of "export".
 
 <PRE>
 protocols {
     rip {
 /* Redistribute routes for connected interfaces */
 /*
-	import connected {
+	export connected {
 	    metric: 0
 	    tag: 0
 	}
 */
 /* Redistribute static routes */
 /*
-	import static {
+	export static {
 	    metric: 1
 	    tag: 0
 	}
@@ -453,7 +456,7 @@ protocols {
 }
 </PRE>
 
-Currently BGP is not able to "import" routes from other routing
+Currently BGP is not able to "export" routes from other routing
 protocols such as "static". It is however possible to originate routes
 using network statements such as in the above example.
 
