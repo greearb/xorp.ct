@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.31 2004/03/05 03:44:10 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.32 2004/05/06 20:23:27 pavlin Exp $
 #
 
 #
@@ -225,7 +225,8 @@ CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
 # average forwarding bandwidth is at least 1024bps within an interval
 # of 100 seconds.
 # If the SPT switch should happen right after the first packet, then
-# the "bytes" value should be zero.
+# the "bytes" value should be zero. However, in all cases the
+# interval value should be at least 3 seconds.
 #
 PIM_ENABLE_SWITCH_TO_SPT_THRESHOLD=yes		# Set to "no" to disable
 PIM_SWITCH_TO_SPT_THRESHOLD_INTERVAL_SEC=100
