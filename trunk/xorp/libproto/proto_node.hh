@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.13 2003/07/03 06:54:22 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.14 2003/07/16 02:56:55 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -418,22 +418,20 @@ public:
      * 
      * Note that it may change the node status.
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_config(string& reason);
+    int		start_config(string& error_msg);
     
     /**
      * End a set of configuration changes.
      * 
      * Note that it may change the node status.
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		end_config(string& reason);
+    int		end_config(string& error_msg);
 
     /**
      * Find an unused vif index from the set of configured vifs.
@@ -447,33 +445,30 @@ public:
      * Add a configured vif.
      * 
      * @param vif the vif with the information to add.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_config_vif(const Vif& vif, string& reason);
+    int		add_config_vif(const Vif& vif, string& error_msg);
     
     /**
      * Add a configured vif.
      * 
      * @param vif_name the name of the vif to add.
      * @param vif_index the vif index of the vif to add.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif(const string& vif_name, uint16_t vif_index,
-			       string& reason);
+			       string& error_msg);
 
     /**
      * Delete a configured vif.
      * 
      * @param vif_name the name of the vif to delete.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_config_vif(const string& vif_name, string& reason);
+    int		delete_config_vif(const string& vif_name, string& error_msg);
 
     /**
      * Add an address to a configured vif.
@@ -483,8 +478,7 @@ public:
      * @param subnet the subnet address to add.
      * @param broadcast the broadcast address to add.
      * @param peer the peer address to add.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif_addr(const string& vif_name,
@@ -492,33 +486,31 @@ public:
 				    const IPvXNet& subnet,
 				    const IPvX& broadcast,
 				    const IPvX& peer,
-				    string& reason);
+				    string& error_msg);
     
     /**
      * Delete an address from a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param addr the address to delete.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif_addr(const string& vif_name,
 				       const IPvX& addr,
-				       string& reason);
+				       string& error_msg);
     
     /**
      * Set the pif_index to a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param pif_index the physical interface index.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_pif_index(const string& vif_name,
 				     uint16_t pif_index,
-				     string& reason);
+				     string& error_msg);
     
     /**
      * Set the vif flags to a configured vif.
@@ -530,8 +522,7 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_vif_flags(const string& vif_name,
@@ -541,7 +532,7 @@ public:
 				     bool is_multicast,
 				     bool is_broadcast,
 				     bool is_up,
-				     string& reason);
+				     string& error_msg);
 
     /**
      * Get the map with configured vifs.
@@ -792,7 +783,7 @@ ProtoNode<V>::delete_vif(const V *vif)
 
 template<class V>
 inline int
-ProtoNode<V>::start_config(string& reason)
+ProtoNode<V>::start_config(string& error_msg)
 {
     switch (node_status()) {
     case PROC_NOT_READY:
@@ -803,13 +794,13 @@ ProtoNode<V>::start_config(string& reason)
 	set_node_status(PROC_NOT_READY);
 	break;	// OK, start a set of configuration changes
     case PROC_STARTUP:
-	reason = "invalid start config in PROC_STARTUP state";
+	error_msg = "invalid start config in PROC_STARTUP state";
 	return (XORP_ERROR);
     case PROC_SHUTDOWN:
-	reason = "invalid start config in PROC_SHUTDOWN state";
+	error_msg = "invalid start config in PROC_SHUTDOWN state";
 	return (XORP_ERROR);
     case PROC_FAILED:
-	reason = "invalid start config in PROC_FAILED state";
+	error_msg = "invalid start config in PROC_FAILED state";
 	return (XORP_ERROR);
     case PROC_NULL:
 	// FALLTHROUGH
@@ -823,23 +814,23 @@ ProtoNode<V>::start_config(string& reason)
 
 template<class V>
 inline int
-ProtoNode<V>::end_config(string& reason)
+ProtoNode<V>::end_config(string& error_msg)
 {
     switch (node_status()) {
     case PROC_NOT_READY:
 	set_node_status(PROC_READY);
 	break;	// OK, end a set of configuration changes
     case PROC_READY:
-	reason = "invalid end config in PROC_READY state";
+	error_msg = "invalid end config in PROC_READY state";
 	return (XORP_ERROR);
     case PROC_STARTUP:
-	reason = "invalid end config in PROC_STARTUP state";
+	error_msg = "invalid end config in PROC_STARTUP state";
 	return (XORP_ERROR);
     case PROC_SHUTDOWN:
-	reason = "invalid end config in PROC_SHUTDOWN state";
+	error_msg = "invalid end config in PROC_SHUTDOWN state";
 	return (XORP_ERROR);
     case PROC_FAILED:
-	reason = "invalid end config in PROC_FAILED state";
+	error_msg = "invalid end config in PROC_FAILED state";
 	return (XORP_ERROR);
     case PROC_NULL:
 	// FALLTHROUGH
@@ -878,12 +869,12 @@ ProtoNode<V>::find_unused_config_vif_index() const
 
 template<class V>
 inline int
-ProtoNode<V>::add_config_vif(const Vif& vif, string& reason)
+ProtoNode<V>::add_config_vif(const Vif& vif, string& error_msg)
 {
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
-    if (add_config_vif(vif.name(), vif.vif_index(), reason) < 0)
+    if (add_config_vif(vif.name(), vif.vif_index(), error_msg) < 0)
 	return (XORP_ERROR);
     
     list<VifAddr>::const_iterator vif_addr_iter;
@@ -896,18 +887,18 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& reason)
 				vif_addr.subnet_addr(),
 				vif_addr.broadcast_addr(),
 				vif_addr.peer_addr(),
-				reason) < 0) {
-	    string dummy_reason;
-	    delete_config_vif(vif.name(), dummy_reason);
+				error_msg) < 0) {
+	    string dummy_error_msg;
+	    delete_config_vif(vif.name(), dummy_error_msg);
 	    return (XORP_ERROR);
 	}
     }
     
     if (set_config_pif_index(vif.name(),
 			     vif.pif_index(),
-			     reason) < 0) {
-	string dummy_reason;
-	delete_config_vif(vif.name(), dummy_reason);
+			     error_msg) < 0) {
+	string dummy_error_msg;
+	delete_config_vif(vif.name(), dummy_error_msg);
 	return (XORP_ERROR);
     }
     
@@ -918,9 +909,9 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& reason)
 			     vif.is_multicast_capable(),
 			     vif.is_broadcast_capable(),
 			     vif.is_underlying_vif_up(),
-			     reason) < 0) {
-	string dummy_reason;
-	delete_config_vif(vif.name(), dummy_reason);
+			     error_msg) < 0) {
+	string dummy_error_msg;
+	delete_config_vif(vif.name(), dummy_error_msg);
 	return (XORP_ERROR);
     }
     
@@ -930,19 +921,19 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& reason)
 template<class V>
 inline int
 ProtoNode<V>::add_config_vif(const string& vif_name, uint16_t vif_index,
-			     string& reason)
+			     string& error_msg)
 {
     map<string, Vif>::iterator iter;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     // Check whether we have vif with same name
     iter = _configured_vifs.find(vif_name);
     if (iter != _configured_vifs.end()) {
-	reason = c_format("Cannot add vif %s: already have such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot add vif %s: already have such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -952,11 +943,11 @@ ProtoNode<V>::add_config_vif(const string& vif_name, uint16_t vif_index,
 	 ++iter) {
 	Vif* tmp_vif = &iter->second;
 	if (tmp_vif->vif_index() == vif_index) {
-	    reason = c_format("Cannot add vif %s with vif_index %d: "
-			      "already have vif %s with same vif_index",
-			      vif_name.c_str(), vif_index,
-			      tmp_vif->name().c_str());
-	    XLOG_ERROR(reason.c_str());
+	    error_msg = c_format("Cannot add vif %s with vif_index %d: "
+				 "already have vif %s with same vif_index",
+				 vif_name.c_str(), vif_index,
+				 tmp_vif->name().c_str());
+	    XLOG_ERROR(error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -971,19 +962,19 @@ ProtoNode<V>::add_config_vif(const string& vif_name, uint16_t vif_index,
 
 template<class V>
 inline int
-ProtoNode<V>::delete_config_vif(const string& vif_name, string& reason)
+ProtoNode<V>::delete_config_vif(const string& vif_name, string& error_msg)
 {
     map<string, Vif>::iterator iter;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     // Find the vif
     iter = _configured_vifs.find(vif_name);
     if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot delete vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot delete vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -997,19 +988,19 @@ template<class V>
 inline int
 ProtoNode<V>::add_config_vif_addr(const string& vif_name, const IPvX& addr,
 				  const IPvXNet& subnet, const IPvX& broadcast,
-				  const IPvX& peer, string& reason)
+				  const IPvX& peer, string& error_msg)
 {
     map<string, Vif>::iterator iter;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     // Find the vif
     iter = _configured_vifs.find(vif_name);
     if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot add address to vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot add address to vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1017,10 +1008,10 @@ ProtoNode<V>::add_config_vif_addr(const string& vif_name, const IPvX& addr,
     
     // Test if we have same address
     if (vif->find_address(addr) != NULL) {
-	reason = c_format("Cannot add address %s to vif %s: "
-			  "already have such address",
-			  cstring(addr), vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot add address %s to vif %s: "
+			     "already have such address",
+			     cstring(addr), vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1033,19 +1024,19 @@ ProtoNode<V>::add_config_vif_addr(const string& vif_name, const IPvX& addr,
 template<class V>
 inline int
 ProtoNode<V>::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
-				     string& reason)
+				     string& error_msg)
 {
     map<string, Vif>::iterator iter;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     // Find the vif
     iter = _configured_vifs.find(vif_name);
     if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot delete address from vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot delete address from vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1053,10 +1044,10 @@ ProtoNode<V>::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
     
     // Test if we have this address
     if (vif->find_address(addr) == NULL) {
-	reason = c_format("Cannot delete address %s from vif %s: "
-			  "no such address",
-			  cstring(addr), vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot delete address %s from vif %s: "
+			     "no such address",
+			     cstring(addr), vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
     }
     
     // Delete the address
@@ -1069,19 +1060,19 @@ template<class V>
 inline int
 ProtoNode<V>::set_config_pif_index(const string& vif_name,
 				   uint16_t pif_index,
-				   string& reason)
+				   string& error_msg)
 {
     map<string, Vif>::iterator iter;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     // Find the vif
     iter = _configured_vifs.find(vif_name);
     if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot set pif_index for vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot set pif_index for vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1101,19 +1092,19 @@ ProtoNode<V>::set_config_vif_flags(const string& vif_name,
 				   bool is_multicast,
 				   bool is_broadcast,
 				   bool is_up,
-				   string& reason)
+				   string& error_msg)
 {
     map<string, Vif>::iterator iter;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
-
+    
     // Find the vif
     iter = _configured_vifs.find(vif_name);
     if (iter == _configured_vifs.end()) {
-	reason = c_format("Cannot set flags for vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	error_msg = c_format("Cannot set flags for vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
