@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.8 2004/08/03 23:16:44 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.9 2004/08/04 04:46:52 pavlin Exp $"
 
 
 /*
@@ -72,15 +72,17 @@
  * @domain: The domain of the socket (e.g., %AF_INET, %AF_INET6).
  * @type: The type of the socket (e.g., %SOCK_STREAM, %SOCK_DGRAM).
  * @protocol: The particular protocol to be used with the socket.
+ * @is_blocking: If true, then the socket will be blocking, otherwise
+ * non-blocking.
  *
  * Open a socket of domain = @domain, type = @type, and protocol = @protocol.
  * The sending and receiving buffer size are set, and the socket
- * itself is set to non-blocking, and with %TCP_NODELAY (if a TCP socket).
+ * itself is set with %TCP_NODELAY (if a TCP socket).
  *
  * Return value: The open socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_open(int domain, int type, int protocol)
+comm_sock_open(int domain, int type, int protocol, bool is_blocking)
 {
     int sock;
     int flags;
@@ -112,18 +114,19 @@ comm_sock_open(int domain, int type, int protocol)
 	return (XORP_ERROR);
     }
 
-    /* Set the socket as non-blocking */
-    /* TODO: there should be an option to disable the non-blocking behavior */
-    if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
-	close(sock);
-	XLOG_ERROR("F_GETFL error: %s", strerror(errno));
-	return (XORP_ERROR);
-    }
-    flags |= O_NONBLOCK;
-    if (fcntl(sock, F_SETFL, flags) < 0) {
-	close(sock);
-	XLOG_ERROR("F_SETFL error: %s", strerror(errno));
-	return (XORP_ERROR);
+    if (! is_blocking) {
+	/* Set the socket as non-blocking */
+	if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
+	    close(sock);
+	    XLOG_ERROR("F_GETFL error: %s", strerror(errno));
+	    return (XORP_ERROR);
+	}
+	flags |= O_NONBLOCK;
+	if (fcntl(sock, F_SETFL, flags) < 0) {
+	    close(sock);
+	    XLOG_ERROR("F_SETFL error: %s", strerror(errno));
+	    return (XORP_ERROR);
+	}
     }
 
     return (sock);
@@ -448,18 +451,18 @@ comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
  * @sock: The socket to use to connect.
  * @remote_addr: The remote address to connect to.
  * @remote_port: The remote port to connect to.
+ * @is_blocking: If true, the socket is blocking, otherwise non-blocking.
  *
  * Connect to a remote IPv4 address.
  * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * TODO: XXX: because it may take time to connect on a TCP socket,
- * the return value actually is %XORP_OK even though the connect did not
- * complete.
+ * XXX: if the socket is non-blocking, and the connection cannot be
+ * completed immediately, then the return value may be %XORP_OK.
  *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 comm_sock_connect4(int sock, const struct in_addr *remote_addr,
-		   unsigned short remote_port)
+		   unsigned short remote_port, bool is_blocking)
 {
     int family;
     struct sockaddr_in sin_addr;
@@ -479,8 +482,17 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
     sin_addr.sin_port = remote_port;		/* XXX: in network order */
     sin_addr.sin_addr.s_addr = remote_addr->s_addr; /* XXX: in network order */
 
-#if 0 /* XXX: the connection may be in progress */
     if (connect(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) {
+	if (! is_blocking) {
+	    if (errno == EINPROGRESS) {
+		/*
+		 * XXX: The connection is non-blocking, and the connection
+		 * cannot be completed immediately, therefore return success.
+		 */
+		return (XORP_OK);
+	    }
+	}
+
 	XLOG_ERROR("Error connecting socket (family = %d, "
 		   "remote_addr = %s, remote_port = %d): %s",
 		   family, inet_ntoa(*remote_addr), ntohs(remote_port),
@@ -488,10 +500,6 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 	close(sock);
 	return (XORP_ERROR);
     }
-#else
-    /* XXX: the connection may be in progress */
-    connect(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr));
-#endif /* 0/1 */
 
     return (XORP_OK);
 }
@@ -501,18 +509,18 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
  * @sock: The socket to use to connect.
  * @remote_addr: The remote address to connect to.
  * @remote_port: The remote port to connect to.
+ * @is_blocking: If true, the socket is blocking, otherwise non-blocking.
  *
  * Connect to a remote IPv6 address.
  * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * TODO: XXX: because it may take time to connect on a TCP socket,
- * the return value actually is %XORP_OK even though the connect did not
- * complete.
+ * XXX: if the socket is non-blocking, and the connection cannot be
+ * completed immediately, then the return value may be %XORP_OK.
  *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
-		   unsigned short remote_port)
+		   unsigned short remote_port, bool is_blocking)
 {
 #ifdef HAVE_IPV6
     int family;
@@ -535,9 +543,18 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
     memcpy(&sin6_addr.sin6_addr, remote_addr, sizeof(sin6_addr.sin6_addr));
     sin6_addr.sin6_scope_id = 0;		/* XXX: unused (?)	     */
 
-#if 0 /* XXX: the connection may be in progress */
     if (connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
+	if (! is_blocking) {
+	    if (errno == EINPROGRESS) {
+		/*
+		 * XXX: The connection is non-blocking, and the connection
+		 * cannot be completed immediately, therefore return success.
+		 */
+		return (XORP_OK);
+	    }
+	}
+
 	XLOG_ERROR("Error connecting socket (family = %d, "
 		   "remote_addr = %s, remote_port = %d): %s",
 		   family,
@@ -548,18 +565,14 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 	close(sock);
 	return (XORP_ERROR);
     }
-#else
-    /* XXX: the connection may be in progress */
-    connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr));
-#endif /* 0/1 */
 
     return (XORP_OK);
 #else
-    comm_sock_no_ipv6("comm_sock_connect6", sock, remote_addr, remote_port);
+    comm_sock_no_ipv6("comm_sock_connect6", sock, remote_addr, remote_port,
+		      is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
-
 
 /**
  * comm_sock_accept:
@@ -903,7 +916,6 @@ comm_set_iface6(int sock, u_int ifindex)
 #endif /* HAVE_IPV6 */
 }
 
-
 /**
  * comm_sock_set_sndbuf:
  * @sock: The socket whose sending buffer size to set.
@@ -1035,7 +1047,6 @@ socket2family(int sock)
 
     return (un.sa.sa_family);
 }
-
 
 /**
  * comm_sock_no_ipv6:

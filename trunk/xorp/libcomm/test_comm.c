@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.3 2003/06/09 22:50:27 hodson Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.5 2004/06/10 22:41:02 hodson Exp $"
 
 
 /*
@@ -80,7 +80,7 @@ main(int argc, char *argv[])
     /*
      * Test `open TCP socket'
      */
-    sock = comm_open_tcp(AF_INET);
+    sock = comm_open_tcp(AF_INET, COMM_SOCK_BLOCKING);
     if (sock >= 0) {
 	printf("OK: open TCP socket\n");
 	comm_close(sock);
@@ -91,7 +91,7 @@ main(int argc, char *argv[])
     /*
      * Test `open UDP socket'
      */
-    sock = comm_open_udp(AF_INET);
+    sock = comm_open_udp(AF_INET, COMM_SOCK_BLOCKING);
     if (sock >= 0) {
 	printf("OK: open UDP socket\n");
 	comm_close(sock);
@@ -102,7 +102,7 @@ main(int argc, char *argv[])
     /*
      * Test `bind TCP socket'
      */
-    sock = comm_bind_tcp4(NULL, port);
+    sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING);
     if (sock >= 0) {
 	printf("OK: open and bind TCP socket to port %d\n", ntohs(port));
 	comm_close(sock);
@@ -114,7 +114,7 @@ main(int argc, char *argv[])
     /*
      * Test `bind UDP socket'
      */
-    sock = comm_bind_udp4(NULL, port);
+    sock = comm_bind_udp4(NULL, port, COMM_SOCK_BLOCKING);
     if (sock >= 0) {
 	printf("OK: open and bind UDP socket to port %d\n", ntohs(port));
 	comm_close(sock);
@@ -126,7 +126,9 @@ main(int argc, char *argv[])
     /*
      * Test 'bind and join a multicast group'
      */
-    sock = comm_bind_join_udp4(&mcast_addr, NULL, port, ADDR_PORT_REUSE_FLAG);
+    sock = comm_bind_join_udp4(&mcast_addr, NULL, port,
+			       COMM_SOCK_ADDR_PORT_REUSE,
+			       COMM_SOCK_BLOCKING);
     if (sock >= 0) {
 	printf("OK: open, bind and join UDP socket to group %s and port %d\n",
 	       inet_ntoa(mcast_addr), ntohs(port));

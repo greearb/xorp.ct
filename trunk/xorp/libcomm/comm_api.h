@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.7 2004/03/21 03:14:08 hodson Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.8 2004/08/03 23:16:44 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -55,7 +55,10 @@
 #define SO_SND_BUF_SIZE_MIN	(48*1024)  /* min. snd socket buf size	     */
 #define SO_SND_BUF_SIZE_MAX	(256*1024) /* desired snd socket buf size    */
 
-#define ADDR_PORT_REUSE_FLAG	true
+#define COMM_SOCK_ADDR_PORT_REUSE	true
+#define COMM_SOCK_ADDR_PORT_DONTREUSE	false
+#define COMM_SOCK_BLOCKING		true
+#define COMM_SOCK_NONBLOCKING		false
 
 #ifndef AF_LOCAL
 #define AF_LOCAL		AF_UNIX	   /* XXX: AF_UNIX is the older name */
@@ -115,17 +118,21 @@ extern int	comm_ipv6_present(void);
  * Open a TCP socket.
  *
  * @param family the address family.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwsise XORP_ERROR.
  */
-extern int	comm_open_tcp(int family);
+extern int	comm_open_tcp(int family, bool is_blocking);
 
 /**
  * Open an UDP socket.
  *
  * @param family the address family.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwsise XORP_ERROR.
  */
-extern int	comm_open_udp(int family);
+extern int	comm_open_udp(int family, bool is_blocking);
 
 /**
  * Close a socket.
@@ -141,10 +148,12 @@ extern int	comm_close(int sock);
  * @param my_addr the local IPv4 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
  * @param my_port the local port to bind to (in network order).
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_tcp4(const struct in_addr *my_addr,
-			       unsigned short my_port);
+			       unsigned short my_port, bool is_blocking);
 
 /**
  * Open an IPv6 TCP socket and bind it to a local address and a port.
@@ -152,10 +161,12 @@ extern int	comm_bind_tcp4(const struct in_addr *my_addr,
  * @param my_addr the local IPv6 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
  * @param my_port the local port to bind to (in network order).
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
-			       unsigned short my_port);
+			       unsigned short my_port, bool is_blocking);
 
 /**
  * Open an IPv4 UDP socket and bind it to a local address and a port.
@@ -163,10 +174,12 @@ extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
  * @param my_addr the local IPv4 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
  * @param my_port the local port to bind to (in network order).
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_udp4(const struct in_addr *my_addr,
-			       unsigned short my_port);
+			       unsigned short my_port, bool is_blocking);
 
 /**
  * Open an IPv6 UDP socket and bind it to a local address and a port.
@@ -174,10 +187,12 @@ extern int	comm_bind_udp4(const struct in_addr *my_addr,
  * @param my_addr the local IPv6 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
  * @param my_port the local port to bind to (in network order).
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_udp6(const struct in6_addr *my_addr,
-			       unsigned short my_port);
+			       unsigned short my_port, bool is_blocking);
 
 /**
  * Open an IPv4 UDP socket on an interface, bind it to a port,
@@ -202,12 +217,15 @@ extern int	comm_bind_udp6(const struct in6_addr *my_addr,
  * @param reuse_flag if true, allow other sockets to bind to the same multicast
  * address and port, otherwise disallow it.
  *
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
+ *
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 				    const struct in_addr *join_if_addr,
 				    unsigned short my_port,
-				    bool reuse_flag);
+				    bool reuse_flag, bool is_blocking);
 
 /**
  * Open an IPv6 UDP socket on an interface, bind it to a port,
@@ -232,12 +250,15 @@ extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * @param reuse_flag if true, allow other sockets to bind to the same multicast
  * address and port, otherwise disallow it.
  *
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
+ *
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 				    unsigned int join_if_index,
 				    unsigned short my_port,
-				    bool reuse_flag);
+				    bool reuse_flag, bool is_blocking);
 
 /**
  * Open an IPv4 TCP socket, and connect it to a remote address and port.
@@ -247,10 +268,13 @@ extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
-				  unsigned short remote_port);
+				  unsigned short remote_port,
+				  bool is_blocking);
 
 /**
  * Open an IPv6 TCP socket, and connect it to a remote address and port.
@@ -261,30 +285,39 @@ extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_connect_tcp6(const struct in6_addr *remote_addr,
-				  unsigned short remote_port);
+				  unsigned short remote_port,
+				  bool is_blocking);
 
 /**
  * Open an IPv4 UDP socket, and connect it to a remote address and port.
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_connect_udp4(const struct in_addr *remote_addr,
-				  unsigned short remote_port);
+				  unsigned short remote_port,
+				  bool is_blocking);
 
 /**
  * Open an IPv6 UDP socket, and connect it to a remote address and port.
  *
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_connect_udp6(const struct in6_addr *remote_addr,
-				  unsigned short remote_port);
+				  unsigned short remote_port,
+				  bool is_blocking);
 
 /**
  * Open an IPv4 UDP socket, bind it to a local address and a port,
@@ -295,12 +328,15 @@ extern int	comm_connect_udp6(const struct in6_addr *remote_addr,
  * @param local_port the local port to bind to.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in_addr *remote_addr,
-				       unsigned short remote_port);
+				       unsigned short remote_port,
+				       bool is_blocking);
 
 /**
  * Open an IPv6 UDP socket, bind it to a local address and a port,
@@ -311,12 +347,15 @@ extern int	comm_bind_connect_udp4(const struct in_addr *local_addr,
  * @param local_port the local port to bind to.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in6_addr *remote_addr,
-				       unsigned short remote_port);
+				       unsigned short remote_port,
+				       bool is_blocking);
 
 
 /*
@@ -325,17 +364,20 @@ extern int	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 
 /**
  * Open a socket of domain = @ref domain, type = @ref type,
- * and protocol = @protocol.
+ * protocol = @protocol, and blocking = @blocking.
  *
  * The sending and receiving buffer size are set, and the socket
- * itself is set to non-blocking, and with TCP_NODELAY (if a TCP socket).
+ * itself is set with TCP_NODELAY (if a TCP socket).
  *
  * @param domain the domain of the socket (e.g., AF_INET, AF_INET6).
  * @param type the type of the socket (e.g., SOCK_STREAM, SOCK_DGRAM).
  * @param protocol the particular protocol to be used with the socket.
+ * @param is_blocking if true then the socket will be blocking, otherwise
+ * non-blocking.
  * @return the open socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_open(int domain, int type, int protocol);
+extern int	comm_sock_open(int domain, int type, int protocol,
+			       bool is_blocking);
 
 /**
  * Bind an IPv4 socket to an address and a port.
@@ -413,34 +455,36 @@ extern int	comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
  * Connect to a remote IPv4 address.
  *
  * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * TODO: XXX: because it may take time to connect on a TCP socket,
- * the return value actually is XORP_OK even though the connect did not
- * complete.
+ * XXX: if the socket is non-blocking, and the connection cannot be
+ * completed immediately, then the return value may be %XORP_OK.
  *
  * @param sock the socket to use to connect.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_connect4(int sock, const struct in_addr *remote_addr,
-				   unsigned short remote_port);
+				   unsigned short remote_port,
+				   bool is_blocking);
 
 /**
  * Connect to a remote IPv6 address.
  *
  * XXX: We can use this not only for TCP, but for UDP sockets as well.
- * TODO: XXX: because it may take time to connect on a TCP socket,
- * the return value actually is XORP_OK even though the connect did not
- * complete.
+ * XXX: if the socket is non-blocking, and the connection cannot be
+ * completed immediately, then the return value may be %XORP_OK.
  *
  * @param sock the socket to use to connect.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
+ * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_connect6(int sock,
 				   const struct in6_addr *remote_addr,
-				   unsigned short remote_port);
+				   unsigned short remote_port,
+				   bool is_blocking);
 
 /**
  * Accept a connection on a listening socket.
