@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.6 2004/06/10 22:40:46 hodson Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.7 2004/08/03 03:51:46 pavlin Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -153,22 +153,6 @@ public:
 
     string str() const { return string("DeleteAllEntries6");  }
 };
-
-/**
- * Class to store request to delete all routing entries to FtiConfig
- * and dispatch it later.
- */
-class FtiDeleteAllEntries : public FtiTransactionOperation {
-public:
-    FtiDeleteAllEntries(FtiConfig& ftic) : FtiTransactionOperation(ftic) {}
-
-    bool dispatch() {
-	return ftic().delete_all_entries4() & ftic().delete_all_entries6();
-    }
-
-    string str() const { return string("DeleteAllEntries");  }
-};
-
 
 /**
  * Class to store and execute FTI transactions.  An FTI transaction is a
