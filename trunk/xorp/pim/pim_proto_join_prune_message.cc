@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.16 2004/03/03 03:22:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.17 2004/06/10 22:41:33 hodson Exp $"
 
 
 //
@@ -188,19 +188,25 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     }
     _holdtime = holdtime;	// XXX: the older holdtime may be modified
     XLOG_ASSERT(jp_group != NULL);
-    
+
+    //
     // Perform sanity check for conflicting entries,
     // and at the same time find the type of entry.
     // XXX: the '?' entries in the J/P rules table are accepted
     // (see the J/P messages format section in the spec).
+    //
     switch(mrt_entry_type) {
     case MRT_ENTRY_RP:
 	if (action_jp == ACTION_JOIN) {
 	    // (*,*,RP) Join
 	    if (jp_group->rp()->j_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
+	    if (jp_group->rp()->p_list_found(source_addr))
+		return (XORP_ERROR);		// Combination not allowed
 	} else {
 	    // (*,*,RP) Prune
+	    if (jp_group->rp()->j_list_found(source_addr))
+		return (XORP_ERROR);		// Combination not allowed
 	    if (jp_group->rp()->p_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
 	}
