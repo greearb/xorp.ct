@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.3 2003/01/30 20:20:27 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.4 2003/01/31 00:50:31 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -168,6 +168,18 @@ PimMfc::recompute_iif_olist_mfc()
     if ((new_iif_vif_index == old_iif_vif_index)
 	&& (new_olist == old_olist)) {
 	return;			// Nothing changed
+    }
+    
+    if ((old_iif_vif_index != Vif::VIF_INDEX_INVALID)
+	&& (old_olist.empty())) {
+	// XXX: probably an entry that was installed to stop NOCACHE upcalls,
+	// or that was left around until the (S,G) NotJoined routing state
+	// expires. Just delete the PimMfc entry, and then later when we are
+	// forced to install a new PimMfc entry because of NOCACHE upcall,
+	// we will set appropriately the SPT bit, etc.
+	delete this;
+	
+	return;
     }
     
     set_iif_vif_index(new_iif_vif_index);
