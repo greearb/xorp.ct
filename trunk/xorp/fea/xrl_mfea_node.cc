@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.28 2004/05/30 03:41:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.29 2004/06/02 18:33:24 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -2201,12 +2201,14 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor4(
     const bool&		is_geq_upcall, 
     const bool&		is_leq_upcall)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2220,12 +2222,8 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor4(
 				       is_threshold_in_packets,
 				       is_threshold_in_bytes,
 				       is_geq_upcall,
-				       is_leq_upcall) < 0) {
-	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add dataflow monitoring for "
-				    "source %s and group %s",
-				    cstring(source_address),
-				    cstring(group_address));
+				       is_leq_upcall,
+				       error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2250,12 +2248,14 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
     const bool&		is_geq_upcall, 
     const bool&		is_leq_upcall)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2269,12 +2269,8 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
 				       is_threshold_in_packets,
 				       is_threshold_in_bytes,
 				       is_geq_upcall,
-				       is_leq_upcall) < 0) {
-	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add dataflow monitoring for "
-				    "source %s and group %s",
-				    cstring(source_address),
-				    cstring(group_address));
+				       is_leq_upcall,
+				       error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2299,12 +2295,14 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor4(
     const bool&		is_geq_upcall, 
     const bool&		is_leq_upcall)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2318,12 +2316,8 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor4(
 					  is_threshold_in_packets,
 					  is_threshold_in_bytes,
 					  is_geq_upcall,
-					  is_leq_upcall) < 0) {
-	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete dataflow monitoring for "
-				    "source %s and group %s",
-				    cstring(source_address),
-				    cstring(group_address));
+					  is_leq_upcall,
+					  error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2348,12 +2342,14 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
     const bool&		is_geq_upcall, 
     const bool&		is_leq_upcall)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2367,12 +2363,8 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
 					  is_threshold_in_packets,
 					  is_threshold_in_bytes,
 					  is_geq_upcall,
-					  is_leq_upcall) < 0) {
-	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete dataflow monitoring for "
-				    "source %s and group %s",
-				    cstring(source_address),
-				    cstring(group_address));
+					  is_leq_upcall,
+					  error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2389,23 +2381,21 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor4(
     const IPv4&		source_address, 
     const IPv4&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
 					      IPvX(source_address),
-					      IPvX(group_address)) < 0) {
-	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete all dataflow monitoring "
-				    "for source %s and group %s",
-				    cstring(source_address),
-				    cstring(group_address));
+					      IPvX(group_address),
+					      error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2422,23 +2412,21 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
     const IPv6&		source_address, 
     const IPv6&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
 					      IPvX(source_address),
-					      IPvX(group_address)) < 0) {
-	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete all dataflow monitoring "
-				    "for source %s and group %s",
-				    cstring(source_address),
-				    cstring(group_address));
+					      IPvX(group_address),
+					      error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

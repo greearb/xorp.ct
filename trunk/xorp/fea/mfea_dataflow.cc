@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.10 2003/04/23 00:52:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_dataflow.cc,v 1.1 2003/05/15 23:10:30 pavlin Exp $"
 
 
 //
@@ -78,7 +78,8 @@ MfeaDft::add_entry(const IPvX& source, const IPvX& group,
 		   bool is_threshold_in_packets,
 		   bool is_threshold_in_bytes,
 		   bool is_geq_upcall,
-		   bool is_leq_upcall)
+		   bool is_leq_upcall,
+		   string& error_msg)
 {
     MfeaDfe *mfea_dfe;
     MfeaDfeLookup *mfea_dfe_lookup;
@@ -120,6 +121,10 @@ MfeaDft::add_entry(const IPvX& source, const IPvX& group,
 	    remove(mfea_dfe_lookup);
 	    delete mfea_dfe_lookup;
 	}
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "invalid request",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -137,15 +142,21 @@ MfeaDft::delete_entry(const IPvX& source, const IPvX& group,
 		      bool is_threshold_in_packets,
 		      bool is_threshold_in_bytes,
 		      bool is_geq_upcall,
-		      bool is_leq_upcall)
+		      bool is_leq_upcall,
+		      string& error_msg)
 {
     MfeaDfe *mfea_dfe;
     MfeaDfeLookup *mfea_dfe_lookup;
     
     mfea_dfe_lookup = find(source, group);
     
-    if (mfea_dfe_lookup == NULL)
+    if (mfea_dfe_lookup == NULL) {
+	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
+			     "no such entry",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);	// Not found
+    }
     
     // Search for a dataflow entry.
     mfea_dfe = mfea_dfe_lookup->find(threshold_interval,
@@ -155,11 +166,21 @@ MfeaDft::delete_entry(const IPvX& source, const IPvX& group,
 				     is_threshold_in_bytes,
 				     is_geq_upcall,
 				     is_leq_upcall);
-    if (mfea_dfe == NULL)
+    if (mfea_dfe == NULL) {
+	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
+			     "monitor not found",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);	// Not found
+    }
     
-    if (delete_entry(mfea_dfe) < 0)
+    if (delete_entry(mfea_dfe) < 0) {
+	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
+			     "internal error",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }
@@ -304,6 +325,7 @@ MfeaDfe::family() const
 bool
 MfeaDfe::is_valid() const
 {
+    // TODO: the minimum interval is hard-coded
     int min_sec = 3;		// XXX: the minimum threshold interval value
     int min_usec = 0;
     

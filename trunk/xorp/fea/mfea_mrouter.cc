@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.16 2004/02/29 22:57:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.17 2004/04/09 06:02:50 pavlin Exp $"
 
 
 //
@@ -1183,6 +1183,7 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
  * @is_threshold_in_bytes: If true, @threshold_bytes is valid.
  * @is_geq_upcall: If true, the operation for comparison is ">=".
  * @is_leq_upcall: If true, the operation for comparison is "<=".
+ * @error_msg: The error message (if error).
  * 
  * Add a dataflow monitor entry in the kernel.
  * Note: either @is_threshold_in_packets or @is_threshold_in_bytes (or both)
@@ -1199,16 +1200,43 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 			   bool is_threshold_in_packets,
 			   bool is_threshold_in_bytes,
 			   bool is_geq_upcall,
-			   bool is_leq_upcall)
+			   bool is_leq_upcall,
+			   string& error_msg)
 {
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
     if (! mrt_api_mrt_mfc_bw_upcall()) {
-	XLOG_ERROR("add_bw_upcall(%s,%s) failed: "
-		   "dataflow monitor entry in the kernel is not supported",
-		   cstring(source), cstring(group));
+	error_msg = c_format("add_bw_upcall(%s,%s) failed: "
+			     "dataflow monitor entry in the kernel "
+			     "is not supported",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
+    }
+
+    // XXX: flags is_geq_upcall and is_leq_upcall are mutually exclusive
+    if (! (is_geq_upcall ^ is_leq_upcall)) {
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "the GEQ and LEQ flags are mutually exclusive "
+			     "(GEQ = %s; LEQ = %s)",
+			     cstring(source), cstring(group),
+			     (is_geq_upcall)? "true" : "false",
+			     (is_leq_upcall)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);		// Invalid arguments
+    }
+    // XXX: at least one of the threshold flags must be set
+    if (! (is_threshold_in_packets || is_threshold_in_bytes)) {
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "invalid threshold flags "
+			     "(is_threshold_in_packets = %s; "
+			     "is_threshold_in_bytes = %s)",
+			     cstring(source), cstring(group),
+			     (is_threshold_in_packets)? "true" : "false",
+			     (is_threshold_in_bytes)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);		// Invalid arguments
     }
     
     //
@@ -1242,13 +1270,16 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 		bw_upcall.bu_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	} while (false);
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_ADD_BW_UPCALL, (%s, %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    error_msg = c_format("setsockopt(MRT_ADD_BW_UPCALL, (%s, %s)) failed: %s",
+				 cstring(source), cstring(group),
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 #endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
@@ -1259,8 +1290,9 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_ERROR("add_bw_upcall() failed: "
-		   "IPv6 multicast routing not supported");
+	error_msg = c_format("add_bw_upcall() failed: "
+			     "IPv6 multicast routing not supported");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
 #else
 	
@@ -1289,13 +1321,16 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 		bw_upcall.bu6_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	} while (false);
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT6_ADD_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT6_ADD_BW_UPCALL, (%s, %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    error_msg = c_format("setsockopt(MRT6_ADD_BW_UPCALL, (%s, %s)) failed: %s",
+				 cstring(source), cstring(group),
+				 strerror(errno));
+	    XLOG_ERROR(("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 #endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
@@ -1318,8 +1353,6 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
     UNUSED(is_threshold_in_bytes);
     UNUSED(is_geq_upcall);
     UNUSED(is_leq_upcall);
-    
-    return (XORP_OK);
 }
 
 /**
@@ -1333,6 +1366,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
  * @is_threshold_in_bytes: If true, @threshold_bytes is valid.
  * @is_geq_upcall: If true, the operation for comparison is ">=".
  * @is_leq_upcall: If true, the operation for comparison is "<=".
+ * @error_msg: The error message (if error).
  * 
  * Delete a dataflow monitor entry from the kernel.
  * Note: either @is_threshold_in_packets or @is_threshold_in_bytes (or both)
@@ -1349,16 +1383,43 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 			      bool is_threshold_in_packets,
 			      bool is_threshold_in_bytes,
 			      bool is_geq_upcall,
-			      bool is_leq_upcall)
+			      bool is_leq_upcall,
+			      string& error_msg)
 {
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
     if (! mrt_api_mrt_mfc_bw_upcall()) {
-	XLOG_ERROR("add_bw_upcall(%s,%s) failed: "
-		   "dataflow monitor entry in the kernel is not supported",
-		   cstring(source), cstring(group));
+	error_msg = c_format("add_bw_upcall(%s,%s) failed: "
+			     "dataflow monitor entry in the kernel "
+			     "is not supported",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
+    }
+
+    // XXX: flags is_geq_upcall and is_leq_upcall are mutually exclusive
+    if (! (is_geq_upcall ^ is_leq_upcall)) {
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "the GEQ and LEQ flags are mutually exclusive "
+			     "(GEQ = %s; LEQ = %s)",
+			     cstring(source), cstring(group),
+			     (is_geq_upcall)? "true" : "false",
+			     (is_leq_upcall)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);		// Invalid arguments
+    }
+    // XXX: at least one of the threshold flags must be set
+    if (! (is_threshold_in_packets || is_threshold_in_bytes)) {
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "invalid threshold flags "
+			     "(is_threshold_in_packets = %s; "
+			     "is_threshold_in_bytes = %s)",
+			     cstring(source), cstring(group),
+			     (is_threshold_in_packets)? "true" : "false",
+			     (is_threshold_in_bytes)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);		// Invalid arguments
     }
     
     //
@@ -1392,13 +1453,16 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 		bw_upcall.bu_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	} while (false);
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_DEL_BW_UPCALL, (%s, %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    error_msg = c_format("setsockopt(MRT_DEL_BW_UPCALL, (%s, %s)) failed: %s",
+				 cstring(source), cstring(group),
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 #endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
@@ -1409,8 +1473,9 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_ERROR("delete_bw_upcall() failed: "
-		   "IPv6 multicast routing not supported");
+	error_msg = ("delete_bw_upcall() failed: "
+		     "IPv6 multicast routing not supported");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
 #else
 	
@@ -1439,13 +1504,16 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 		bw_upcall.bu6_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	} while (false);
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT6_DEL_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT6_DEL_BW_UPCALL, (%s, %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    error_msg = c_format("setsockopt(MRT6_DEL_BW_UPCALL, (%s, %s)) failed: %s",
+				 cstring(source), cstring(group),
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 #endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
@@ -1468,14 +1536,13 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
     UNUSED(is_threshold_in_bytes);
     UNUSED(is_geq_upcall);
     UNUSED(is_leq_upcall);
-    
-    return (XORP_OK);
 }
 
 /**
  * MfeaMrouter::delete_all_bw_upcall:
  * @source: The source address.
  * @group: The group address.
+ * @error_msg: The error message (if error).
  * 
  * Delete all dataflow monitor entries from the kernel
  * for a given @source and @group address.
@@ -1483,15 +1550,18 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
+MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
+				  string& error_msg)
 {
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
     if (! mrt_api_mrt_mfc_bw_upcall()) {
-	XLOG_ERROR("add_bw_upcall(%s,%s) failed: "
-		   "dataflow monitor entry in the kernel is not supported",
-		   cstring(source), cstring(group));
+	error_msg = c_format("add_bw_upcall(%s,%s) failed: "
+			     "dataflow monitor entry in the kernel "
+			     "is not supported",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1514,8 +1584,10 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_DEL_BW_UPCALL, (%s, %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    error_msg = c_format("setsockopt(MRT_DEL_BW_UPCALL, (%s, %s)) failed: %s",
+				 cstring(source), cstring(group),
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 #endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
@@ -1526,8 +1598,9 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_ERROR("delete_all_bw_upcall() failed: "
-		   "IPv6 multicast routing not supported");
+	error_msg = c_format("delete_all_bw_upcall() failed: "
+			     "IPv6 multicast routing not supported");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
 #else
 	
@@ -1544,8 +1617,10 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT6_DEL_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT6_DEL_BW_UPCALL, (%s, %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    error_msg = c_format("setsockopt(MRT6_DEL_BW_UPCALL, (%s, %s)) failed: %s",
+				 cstring(source), cstring(group),
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 #endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API

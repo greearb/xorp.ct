@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.6 2003/08/28 16:16:13 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.7 2003/09/23 03:35:38 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -234,6 +234,7 @@ public:
      * @param is_threshold_in_bytes if true, @ref threshold_bytes is valid.
      * @param is_geq_upcall if true, the operation for comparison is ">=".
      * @param is_leq_upcall if true, the operation for comparison is "<=".
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_bw_upcall(const IPvX& source, const IPvX& group,
@@ -243,7 +244,8 @@ public:
 			      bool is_threshold_in_packets,
 			      bool is_threshold_in_bytes,
 			      bool is_geq_upcall,
-			      bool is_leq_upcall);
+			      bool is_leq_upcall,
+			      string& error_msg);
     
     /**
      * Delete a dataflow monitor entry from the kernel.
@@ -264,6 +266,7 @@ public:
      * @param is_threshold_in_bytes if true, @ref threshold_bytes is valid.
      * @param is_geq_upcall if true, the operation for comparison is ">=".
      * @param is_leq_upcall if true, the operation for comparison is "<=".
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_bw_upcall(const IPvX& source, const IPvX& group,
@@ -273,7 +276,8 @@ public:
 				 bool is_threshold_in_packets,
 				 bool is_threshold_in_bytes,
 				 bool is_geq_upcall,
-				 bool is_leq_upcall);
+				 bool is_leq_upcall,
+				 string& error_msg);
     
     /**
      * Delete all dataflow monitor entries from the kernel
@@ -281,9 +285,11 @@ public:
      * 
      * @param source the source address.
      * @param group the group address.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_all_bw_upcall(const IPvX& source, const IPvX& group);
+    int		delete_all_bw_upcall(const IPvX& source, const IPvX& group,
+				     string& error_msg);
     
     /**
      * Get various counters per (S,G) entry.

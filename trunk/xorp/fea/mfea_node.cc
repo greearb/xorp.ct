@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.32 2004/05/18 22:15:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.33 2004/05/20 20:57:30 pavlin Exp $"
 
 
 //
@@ -2115,6 +2115,7 @@ MfeaNode::delete_mfc(const string& , // module_instance_name,
  * @is_threshold_in_bytes: If true, @threshold_bytes is valid.
  * @is_geq_upcall: If true, the operation for comparison is ">=".
  * @is_leq_upcall: If true, the operation for comparison is "<=".
+ * @error_msg: The error message (if error).
  * 
  * Add a dataflow monitor entry.
  * Note: either @is_threshold_in_packets or @is_threshold_in_bytes (or both)
@@ -2132,13 +2133,32 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			       bool is_threshold_in_packets,
 			       bool is_threshold_in_bytes,
 			       bool is_geq_upcall,
-			       bool is_leq_upcall)
+			       bool is_leq_upcall,
+			       string& error_msg)
 {
     // XXX: flags is_geq_upcall and is_leq_upcall are mutually exclusive
-    if (! (is_geq_upcall ^ is_leq_upcall))
+    if (! (is_geq_upcall ^ is_leq_upcall)) {
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "the GEQ and LEQ flags are mutually exclusive "
+			     "(GEQ = %s; LEQ = %s)",
+			     cstring(source), cstring(group),
+			     (is_geq_upcall)? "true" : "false",
+			     (is_leq_upcall)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
-    if (! (is_threshold_in_packets || is_threshold_in_bytes))
+    }
+    // XXX: at least one of the threshold flags must be set
+    if (! (is_threshold_in_packets || is_threshold_in_bytes)) {
+	error_msg = c_format("Cannot add dataflow monitor for (%s, %s): "
+			     "invalid threshold flags "
+			     "(is_threshold_in_packets = %s; "
+			     "is_threshold_in_bytes = %s)",
+			     cstring(source), cstring(group),
+			     (is_threshold_in_packets)? "true" : "false",
+			     (is_threshold_in_bytes)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
+    }
     
     //
     // If the kernel supports bandwidth-related upcalls, use it
@@ -2151,7 +2171,8 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 					is_threshold_in_packets,
 					is_threshold_in_bytes,
 					is_geq_upcall,
-					is_leq_upcall)
+					is_leq_upcall,
+					error_msg)
 	    < 0) {
 	    return (XORP_ERROR);
 	}
@@ -2169,7 +2190,8 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			     is_threshold_in_packets,
 			     is_threshold_in_bytes,
 			     is_geq_upcall,
-			     is_leq_upcall)
+			     is_leq_upcall,
+			     error_msg)
 	< 0) {
 	return (XORP_ERROR);
     }
@@ -2190,6 +2212,7 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
  * @is_threshold_in_bytes: If true, @threshold_bytes is valid.
  * @is_geq_upcall: If true, the operation for comparison is ">=".
  * @is_leq_upcall: If true, the operation for comparison is "<=".
+ * @error_msg: The error message (if error).
  * 
  * Delete a dataflow monitor entry.
  * Note: either @is_threshold_in_packets or @is_threshold_in_bytes (or both)
@@ -2207,13 +2230,32 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 				  bool is_threshold_in_packets,
 				  bool is_threshold_in_bytes,
 				  bool is_geq_upcall,
-				  bool is_leq_upcall)
+				  bool is_leq_upcall,
+				  string& error_msg)
 {
     // XXX: flags is_geq_upcall and is_leq_upcall are mutually exclusive
-    if (! (is_geq_upcall ^ is_leq_upcall))
+    if (! (is_geq_upcall ^ is_leq_upcall)) {
+	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
+			     "the GEQ and LEQ flags are mutually exclusive "
+			     "(GEQ = %s; LEQ = %s)",
+			     cstring(source), cstring(group),
+			     (is_geq_upcall)? "true" : "false",
+			     (is_leq_upcall)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
-    if (! (is_threshold_in_packets || is_threshold_in_bytes))
+    }
+    // XXX: at least one of the threshold flags must be set
+    if (! (is_threshold_in_packets || is_threshold_in_bytes)) {
+	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
+			     "invalid threshold flags "
+			     "(is_threshold_in_packets = %s; "
+			     "is_threshold_in_bytes = %s)",
+			     cstring(source), cstring(group),
+			     (is_threshold_in_packets)? "true" : "false",
+			     (is_threshold_in_bytes)? "true" : "false");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
+    }
     
     //
     // If the kernel supports bandwidth-related upcalls, use it
@@ -2226,7 +2268,8 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 					   is_threshold_in_packets,
 					   is_threshold_in_bytes,
 					   is_geq_upcall,
-					   is_leq_upcall)
+					   is_leq_upcall,
+					   error_msg)
 	    < 0) {
 	    return (XORP_ERROR);
 	}
@@ -2244,7 +2287,8 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 				is_threshold_in_packets,
 				is_threshold_in_bytes,
 				is_geq_upcall,
-				is_leq_upcall)
+				is_leq_upcall,
+				error_msg)
 	< 0) {
 	return (XORP_ERROR);
     }
@@ -2258,6 +2302,7 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
  * the dataflow monitor entry.
  * @source: The source address.
  * @group: The group address.
+ * @error_msg: The error message (if error).
  * 
  * Delete all dataflow monitor entries for a given @source and @group address.
  * 
@@ -2265,14 +2310,14 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
  **/
 int
 MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
-				      const IPvX& source, const IPvX& group)
+				      const IPvX& source, const IPvX& group,
+				      string& error_msg)
 {
     //
     // If the kernel supports bandwidth-related upcalls, use it
     //
     if (_mfea_mrouter.mrt_api_mrt_mfc_bw_upcall()) {
-	if (_mfea_mrouter.delete_all_bw_upcall(source, group)
-	    < 0) {
+	if (_mfea_mrouter.delete_all_bw_upcall(source, group, error_msg) < 0) {
 	    return (XORP_ERROR);
 	}
 	return (XORP_OK);
@@ -2282,8 +2327,11 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
     // The kernel doesn't support bandwidth-related upcalls, hence use
     // a work-around mechanism (periodic quering).
     //
-    if (mfea_dft().delete_entry(source, group)
-	< 0) {
+    if (mfea_dft().delete_entry(source, group) < 0) {
+	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
+			     "no such entry",
+			     cstring(source), cstring(group));
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     

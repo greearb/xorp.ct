@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.19 2004/05/19 19:48:33 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.20 2004/05/20 20:52:21 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -1055,6 +1055,8 @@ public:
      * 
      * @param is_leq_upcall if true, the operation for comparison is "<=".
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_dataflow_monitor(const string& module_instance_name,
@@ -1065,7 +1067,8 @@ public:
 				     bool is_threshold_in_packets,
 				     bool is_threshold_in_bytes,
 				     bool is_geq_upcall,
-				     bool is_leq_upcall);
+				     bool is_leq_upcall,
+				     string& error_msg);
     
     /**
      * Delete a dataflow monitor entry.
@@ -1098,6 +1101,8 @@ public:
      * 
      * @param is_leq_upcall if true, the operation for comparison is "<=".
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_dataflow_monitor(const string& module_instance_name,
@@ -1108,7 +1113,8 @@ public:
 					bool is_threshold_in_packets,
 					bool is_threshold_in_bytes,
 					bool is_geq_upcall,
-					bool is_leq_upcall);
+					bool is_leq_upcall,
+					string& error_msg);
     
     /**
      * Delete all dataflow monitor entries for a given source and group
@@ -1121,11 +1127,14 @@ public:
      * 
      * @param group the group address.
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_all_dataflow_monitor(const string& module_instance_name,
 					    const IPvX& source,
-					    const IPvX& group);
+					    const IPvX& group,
+					    string& error_msg);
     
     /**
      * Add a multicast vif to the kernel.

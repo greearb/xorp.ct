@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_dataflow.hh,v 1.1 2003/05/15 23:10:30 pavlin Exp $
+// $XORP: xorp/fea/mfea_dataflow.hh,v 1.2 2003/05/16 19:23:17 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_DATAFLOW_HH__
@@ -97,6 +97,7 @@ public:
      * @param is_threshold_in_bytes if true, @ref threshold_bytes is valid.
      * @param is_geq_upcall if true, the operation for comparison is ">=".
      * @param is_leq_upcall if true, the operation for comparison is "<=".
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_entry(const IPvX& source, const IPvX& group,
@@ -106,7 +107,8 @@ public:
 			  bool is_threshold_in_packets,
 			  bool is_threshold_in_bytes,
 			  bool is_geq_upcall,
-			  bool is_leq_upcall);
+			  bool is_leq_upcall,
+			  string& error_msg);
     
     /**
      * Delete a dataflow entry.
@@ -127,6 +129,7 @@ public:
      * @param is_threshold_in_bytes if true, @ref threshold_bytes is valid.
      * @param is_geq_upcall if true, the operation for comparison is ">=".
      * @param is_leq_upcall if true, the operation for comparison is "<=".
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_entry(const IPvX& source, const IPvX& group,
@@ -136,7 +139,8 @@ public:
 			     bool is_threshold_in_packets,
 			     bool is_threshold_in_bytes,
 			     bool is_geq_upcall,
-			     bool is_leq_upcall);
+			     bool is_leq_upcall,
+			     string& error_msg);
     
     /**
      * Delete all dataflow entries for a given source and group address.
@@ -147,6 +151,7 @@ public:
      */
     int		delete_entry(const IPvX& source, const IPvX& group);
     
+private:
     /**
      * Delete a given @ref MfeaDfe dataflow entry.
      * 
@@ -155,7 +160,6 @@ public:
      */
     int		delete_entry(MfeaDfe *mfea_dfe);
     
-private:
     MfeaNode&	_mfea_node;	// The Mfea node
 };
 
