@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.34 2005/03/04 03:55:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.35 2005/03/19 16:58:35 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -55,7 +55,6 @@ DecisionTable<A>::~DecisionTable()
     typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::iterator i;
     for (i = _parents.begin();  i != _parents.end();  i++) {
 	delete i->second;
-	_parents.erase(i);
     }
 }
 
