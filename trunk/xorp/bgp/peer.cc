@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.67 2004/05/13 00:14:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.68 2004/05/13 00:39:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,7 +56,7 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
     _mainprocess->eventloop().current_time(_established_time);
     _mainprocess->eventloop().current_time(_in_update_time);
 
-    _current_state = _next_state = false;
+    _current_state = _next_state = _activated = false;
 }
 
 BGPPeer::~BGPPeer()

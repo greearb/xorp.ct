@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.13 2004/05/11 00:44:35 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.14 2004/05/11 01:14:56 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -228,6 +228,10 @@ private:
     bool _next_state;
     void set_next_peer_state(bool state) {_next_state = state;}
     bool get_next_peer_state() {return _next_state;}
+
+    bool _activated;
+    void set_activate_state(bool state) {_activated = state;}
+    bool get_activate_state() {return _activated;}
 };
 
 #endif // __BGP_PEER_HH__

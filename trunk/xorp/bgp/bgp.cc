@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.28 2004/05/11 00:44:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.29 2004/05/11 01:14:55 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -467,7 +467,11 @@ BGPMain::set_peer_state(const Iptuple& iptuple, bool state)
     }
 
     peer->set_next_peer_state(state);
-    return true;
+
+    if (false == peer->get_activate_state())
+	return true;
+
+    return activate(iptuple);
 }
 
 bool
@@ -488,6 +492,9 @@ BGPMain::activate(const Iptuple& iptuple)
     } else {
 	disable_peer(iptuple);
     }
+
+    peer->set_activate_state(true);
+
     return true;
 }
 
