@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.53 2002/12/09 18:28:57 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -664,6 +664,7 @@ IfConfigRoutingSocket::parse_buffer(IfTree&	   it,
 	case RTM_CHANGE:
 	case RTM_GET:
 	case RTM_LOSING:
+	case RTM_DELETE:
 	    break;
 	default:
 	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
