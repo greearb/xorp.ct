@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.10 2004/06/09 22:12:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.11 2004/08/12 07:34:31 pavlin Exp $ */
 
 protocols {
     static {
@@ -24,6 +24,8 @@ protocols {
 	    nexthop:		ipv6;
 	    metric:		u32 = 1;
 	}
+	
+        import: txt;
     }
 }
 
@@ -32,6 +34,7 @@ protocols {
 	%help:		short	"Configure static routes";
 	%modinfo:	provides	static_routes;
 	%modinfo:	depends		rib;
+	%modinfo:	depends		policy;
 	%modinfo:	path		"static_routes/xorp_static_routes";
 	%modinfo:	default_targetname "static_routes";
 	%modinfo:	status_method	xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
@@ -132,5 +135,10 @@ protocols {
 		%set:;
 	    }
 	}
+
+        import {
+                %delete: xrl "policy/policy/0.1/import?protocol:txt=$(static.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/import?protocol:txt=$(static.targetname)&policies:txt=$(@)";
+        }       
     }
 }

@@ -1,0 +1,72 @@
+/* $XORP$ */
+
+policy {
+targetname: txt = "policy";
+	policy-statement @: txt {
+		term @: txt {
+			source {
+				match: txt;
+			}
+			dest {
+				match: txt;
+			}
+			action {
+				action: txt;
+			}
+		}
+	}
+
+	set @: txt {
+		elements: txt;
+	}
+}
+
+policy {
+%help:		short "Configure policies";
+%modinfo:	provides policy;
+%modinfo:	depends rib;
+%modinfo:	path "policy/xorp_policy";
+%modinfo:	default_targetname "policy";
+%modinfo:	status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
+%modinfo:	shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";
+%modinfo:	end_commit xrl "$(policy.targetname)/policy/0.1/done_global_policy_conf";
+%mandatory:	targetname;
+
+	targetname {
+		%help: short "set target name";
+		%set:;
+	}
+
+	policy-statement @: txt {
+		%create: xrl "$(policy.targetname)/policy/0.1/create_policy?policy:txt=$(@)";
+		%delete: xrl "$(policy.targetname)/policy/0.1/delete_policy?policy:txt=$(@)";
+		term @: txt {
+			%create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
+			%delete: xrl "$(policy.targetname)/policy/0.1/delete_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
+			source {
+				match {
+					%set: xrl "$(policy.targetname)/policy/0.1/update_term_source?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&source:txt=$(@)";
+				}
+			}
+			dest {
+				match {
+					%set: xrl "$(policy.targetname)/policy/0.1/update_term_dest?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&dest:txt=$(@)";
+				}
+			}
+			action {
+				action {
+					%set: xrl "$(policy.targetname)/policy/0.1/update_term_action?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&action:txt=$(@)";
+				}
+			}
+		}
+	}
+
+	set @: txt {
+		%delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
+		%create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
+		elements {
+			%set: xrl "$(policy.targetname)/policy/0.1/update_set?set:txt=$(set.@)&elements:txt=$(@)";
+		}
+	}
+
+}

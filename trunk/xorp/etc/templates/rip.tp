@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.13 2004/06/15 00:31:55 hodson Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.14 2004/06/21 18:06:05 hodson Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -33,10 +33,16 @@ protocols {
 	    }
 	}
 
+/*
 	export @: txt {
 	    metric:u32	= 1 ;
 	    tag:u32	= 0 ;
 	}
+*/
+        import: txt;
+        export: txt;
+
+
     }
 }
 
@@ -47,6 +53,7 @@ protocols {
     rip {
 	%modinfo:	provides		rip;
 	%modinfo:	depends			rib;
+	%modinfo:	depends			policy;
 	%modinfo:	path			"rip/xorp_rip" ;
 	%modinfo:	default_targetname	"rip" ;
 	%modinfo:	status_method xrl	"$(rip.targetname)/common/0.1/get_status->status:u32&reason:txt" ;
@@ -170,11 +177,22 @@ protocols {
 		}
 	    }
 	}
-
+/*
 	export @: txt {
 	    %activate: xrl "$(rip.targetname)/rip/0.1/redist_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)" ;
 	    %delete: xrl "$(rip.targetname)/rip/0.1/no_redist_protocol_routes?protocol_name:txt=$(@)" ;
 	    %help: short "Export routes from another routing protocol." ;
 	}
+*/
+        
+	import {
+                %delete: xrl "policy/policy/0.1/import?protocol:txt=$(rip.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/import?protocol:txt=$(rip.targetname)&policies:txt=$(@)";
+        }
+        export {
+                %delete: xrl "policy/policy/0.1/export?protocol:txt=$(rip.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/export?protocol:txt=$(rip.targetname)&policies:txt=$(@)";
+        }
+
     }
 }

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.32 2004/06/09 22:40:49 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.33 2004/08/06 01:41:18 bms Exp $ */
 
 protocols {
     bgp {
@@ -34,13 +34,18 @@ protocols {
 	    unicast:bool = true;		/* Default unicast */
 	    multicast:bool = false;
 	}
+
+        import: txt;
+        export: txt;
+
     }
 }
 
 protocols {
     bgp {
 	%modinfo: provides bgp;
-	%modinfo: depends rib;
+	%modinfo: depends rib; 
+	%modinfo: depends policy;
 	%modinfo: path "bgp/xorp_bgp";
 	%modinfo: default_targetname "bgp";
 	%modinfo: status_method xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
@@ -231,5 +236,14 @@ protocols {
 	    enable-ipv6-multicast {
 	    }
 	}
+        
+	import {
+                %delete: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
+        }
+        export {
+                %delete: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
+                %set: xrl "policy/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
+        }
     }
 }
