@@ -1,0 +1,31 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/mfea/command_mfea,v 1.2 2003/01/23 11:14:23 pavlin Exp $
+#
+
+#
+# Send commands to a running MFEA process.
+#
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
+
+MODULE_NAME="MFEA"
+HOSTNAME=`hostname`
+
+echo "Sending command to $MODULE_NAME on $HOSTNAME..."
+
+#
+# The first argument should be the command to call.
+# The rest of the arguments should be the arguments to the command to call.
+#
+
+if [ $# -lt 1 ] ; then
+	echo "Usage: $0 <xrl_command> [xrl_command_arguments ... ]"
+	exit 1
+fi
+
+$*
+
+exit 0
