@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.16 2003/06/17 23:13:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.17 2003/07/22 21:37:51 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -138,7 +138,7 @@ XrlMfeaVifManager::set_vif_state()
 {
     map<string, Vif *>::const_iterator vif_iter;
     map<string, Vif>::iterator mfea_vif_iter;
-    string err;
+    string error_msg;
     
     //
     // Remove vifs that don't exist anymore
@@ -152,10 +152,10 @@ XrlMfeaVifManager::set_vif_state()
 	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
-	    if (_mfea_node.delete_config_vif(vif_name, err) < 0) {
+	    if (_mfea_node.delete_config_vif(vif_name, error_msg) < 0) {
 		XLOG_ERROR("Cannot delete vif %s from the set of configured "
 			   "vifs: %s",
-			   vif_name.c_str(), err.c_str());
+			   vif_name.c_str(), error_msg.c_str());
 	    }
 	    continue;
 	}
@@ -181,10 +181,10 @@ XrlMfeaVifManager::set_vif_state()
 	    uint16_t vif_index = _mfea_node.find_unused_config_vif_index();
 	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	    vif->set_vif_index(vif_index);
-	    if (_mfea_node.add_config_vif(*vif, err) < 0) {
+	    if (_mfea_node.add_config_vif(*vif, error_msg) < 0) {
 		XLOG_ERROR("Cannot add vif %s to the set of configured "
 			   "vifs: %s",
-			   vif->name().c_str(), err.c_str());
+			   vif->name().c_str(), error_msg.c_str());
 	    }
 	    continue;
 	}
@@ -194,7 +194,7 @@ XrlMfeaVifManager::set_vif_state()
 	//
 	_mfea_node.set_config_pif_index(vif->name(),
 					vif->pif_index(),
-					err);
+					error_msg);
 	
 	//
 	// Update the vif flags
@@ -206,7 +206,7 @@ XrlMfeaVifManager::set_vif_state()
 					vif->is_multicast_capable(),
 					vif->is_broadcast_capable(),
 					vif->is_underlying_vif_up(),
-					err);
+					error_msg);
 	
 	//
 	// Delete vif addresses that don't exist anymore
@@ -227,12 +227,13 @@ XrlMfeaVifManager::set_vif_state()
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
-		if (_mfea_node.delete_config_vif_addr(vif->name(), ipvx, err)
+		if (_mfea_node.delete_config_vif_addr(vif->name(), ipvx,
+						      error_msg)
 		    < 0) {
 		    XLOG_ERROR("Cannot delete address %s from vif %s from "
 			       "the set of configured vifs: %s",
 			       cstring(ipvx), vif->name().c_str(),
-			       err.c_str());
+			       error_msg.c_str());
 		}
 	    }
 	}
@@ -254,11 +255,11 @@ XrlMfeaVifManager::set_vif_state()
 			vif_addr.subnet_addr(),
 			vif_addr.broadcast_addr(),
 			vif_addr.peer_addr(),
-			err) < 0) {
+			error_msg) < 0) {
 			XLOG_ERROR("Cannot add address %s to vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(vif_addr), vif->name().c_str(),
-				   err.c_str());
+				   error_msg.c_str());
 		    }
 		    continue;
 		}
@@ -268,12 +269,12 @@ XrlMfeaVifManager::set_vif_state()
 		    {
 			if (_mfea_node.delete_config_vif_addr(vif->name(),
 							      vif_addr.addr(),
-							      err) < 0) {
+							      error_msg) < 0) {
 			    XLOG_ERROR("Cannot delete address %s from vif %s "
 				       "from the set of configured vifs: %s",
 				       cstring(vif_addr.addr()),
 				       vif->name().c_str(),
-				       err.c_str());
+				       error_msg.c_str());
 			}
 			if (_mfea_node.add_config_vif_addr(
 			    vif->name(),
@@ -281,11 +282,11 @@ XrlMfeaVifManager::set_vif_state()
 			    vif_addr.subnet_addr(),
 			    vif_addr.broadcast_addr(),
 			    vif_addr.peer_addr(),
-			    err) < 0) {
+			    error_msg) < 0) {
 			    XLOG_ERROR("Cannot add address %s to vif %s from "
 				       "the set of configured vifs: %s",
 				       cstring(vif_addr), vif->name().c_str(),
-				       err.c_str());
+				       error_msg.c_str());
 			}
 		    }
 		}
@@ -294,7 +295,7 @@ XrlMfeaVifManager::set_vif_state()
     }
     
     // Done
-    _mfea_node.set_config_all_vifs_done(err);
+    _mfea_node.set_config_all_vifs_done(error_msg);
 }
 
 void
