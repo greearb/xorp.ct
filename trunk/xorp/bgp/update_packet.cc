@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.16 2003/02/06 04:19:22 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.17 2003/02/07 05:53:06 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -173,26 +173,10 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     size_t nlri_len = l - MINUPDATEPACKET - pa_len - wr_len;
 
     // Start of decoding of withdrawn routes.
-    // Use a set to check for duplicates.
     d += 2;	// point to the routes.
-    set <IPv4Net> x_set;
+    _wr_list.decode(d, wr_len);
+    d += wr_len;
 
-    while (wr_len >0 && wr_len >= BGPUpdateAttrib::size(d)) {
-	BGPUpdateAttrib wr(d);
-	wr_len -= BGPUpdateAttrib::size(d);
-	d += BGPUpdateAttrib::size(d);
-	if (x_set.find(wr.net()) == x_set.end()) {
-	    _wr_list.push_back(wr);
-	    x_set.insert(wr.net());
-	} else
-	    XLOG_WARNING(("Received duplicate " + wr.str() +
-		       " in update message\n").c_str());
-    }
-    if (wr_len != 0)
-	xorp_throw(CorruptMessage,
-		   c_format("leftover bytes %u", (uint32_t)wr_len),
-		   UPDATEMSGERR, ATTRLEN);
-   
     // Start of decoding of Path Attributes
     d += 2; // move past Total Path Attributes Length field
 	
@@ -211,18 +195,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     }
 
     // Start of decoding of Network Reachability
-    x_set.clear();
-    while (nlri_len > 0 && nlri_len >= BGPUpdateAttrib::size(d)) {
-	BGPUpdateAttrib nlri(d);
-	nlri_len -= BGPUpdateAttrib::size(d);
-	d += BGPUpdateAttrib::size(d);
-	if (x_set.find(nlri.net()) == x_set.end()) {
-	    _nlri_list.push_back(nlri);
-	    x_set.insert(nlri.net());
-	} else
-	    XLOG_WARNING(("Received duplicate nlri " + nlri.str() +
-		       " in update message\n").c_str());
-    }
+    _nlri_list.decode(d, nlri_len);
     /* End of decoding of Network Reachability */
     debug_msg("No of withdrawn routes %u. No of path attributes %u. "
 		"No of networks %u.\n",
