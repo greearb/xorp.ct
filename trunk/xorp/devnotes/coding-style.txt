@@ -1,4 +1,6 @@
-$Id$
+#
+# $XORP$
+#
 
 	Provisional XORP C++ coding style
 
@@ -23,6 +25,8 @@ from our default coding styles that all are equally peturbed.
   We have a standard templates to work from:
      devnotes/template.hh
      devnotes/template.cc
+     devnotes/template.h
+     devnotes/template.c
 
 - INDENTATION
 
@@ -33,7 +37,7 @@ from our default coding styles that all are equally peturbed.
 - BRACES
 
   Try to avoid gratuitous newlines between statements opening a brace
-  and the opening brace, eg prefer:
+  and the opening brace. E.g., prefer:
 
 	if (abc == 3) {
 		/* XXX */    
@@ -47,7 +51,7 @@ from our default coding styles that all are equally peturbed.
 	}
 
   For the sake of readability, try to place white space either side of
-  braces, eg prefer:
+  braces. E.g., prefer:
 	bool foo() { return _some_value; }
   to:
 	bool foo() {return some_value;}
@@ -104,10 +108,15 @@ from our default coding styles that all are equally peturbed.
   When necesary to have a string method, call it str().  In general, try
   to avoid adding operator string().
 
+- BOOL METHODS
+
+  In general, always avoid adding operator bool(), unless there is a
+  strong reason for adding it.
+
 - METHOD DEFINITIONS
 
   When defining C++ in implementation files place the return value
-  and class/method declarations on separate lines, eg:
+  and class/method declarations on separate lines. E.g.,
 
   const char*
   LuckyEightBall::speak() const 
@@ -182,10 +191,11 @@ from our default coding styles that all are equally peturbed.
 
 - PORTABILITY
 
-  All IPv6-specific code should be #ifdef :
+  All IPv6-specific code should be "#ifdef HAVE_IPV6" :
   #ifdef HAVE_IPV6
 	 ....
   #endif // HAVE_IPV6
 
-  (if there is only one line of code between #ifdef and #endif, then
-   do not add the comment after #endif)
+  If there is only one line of code between #ifdef and #endif, then
+  do not add the comment after "#endif".
+
