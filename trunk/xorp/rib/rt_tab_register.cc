@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.22 2004/07/24 01:01:52 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.23 2004/08/31 01:34:33 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -368,6 +368,12 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
     typename Trie<A, RouteRegister<A>* >::iterator iter;
     iter = _ipregistry.lookup_node(net);
     if (iter == _ipregistry.end()) {
+	// If a route is deleted and a client such as BGP has
+	// registered interest in this then it will be sent an invalidate.
+	// Occasionally at the moment the invalidate is being sent the
+	// client may be deleting its registration.
+	// Thus this error will occassionally be seen in correctly
+	// running code.
 	XLOG_ERROR("delete_registration called for unregisted net: %s",
 		   net.str().c_str());
 	return XORP_ERROR;
