@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.8 2003/05/14 10:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.10 2004/02/11 08:48:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -341,38 +341,6 @@ private:
     IPv6Net _dest;
 };
 
-// ----------------------------------------------------------------------
-// Utilities to extract destination, gateway, and vifname from a route entry.
-
-template<typename A>
-inline const IPNet<A>&
-dest(const IPRouteEntry<A>& re)
-{
-    return re.net();
-}
-
-template<typename A>
-inline const A&
-gw(const IPRouteEntry<A>& re)
-{
-    IPNextHop<A>* nexthop = reinterpret_cast<IPNextHop<A>* >(re.nexthop());
-    return nexthop->addr();
-}
-
-template<typename A>
-inline const string&
-vifname(const IPRouteEntry<A>& re)
-{
-    return re.vif()->name();
-}
-
-template<typename A>
-inline const string&
-ifname(const IPRouteEntry<A>& re)
-{
-    return re.vif()->ifname();
-}
-
 // -------------------------------------------------------------------------
 // RibClient
 
@@ -454,8 +422,10 @@ RibClient::add_route(const IPv4RouteEntry& re)
 {
     if (_failed)
 	return;
-    add_route(dest(re), gw(re), ifname(re), vifname(re), re.metric(),
-	      re.admin_distance(), re.protocol().name());
+    XLOG_ASSERT(re.vif() != NULL);
+    add_route(re.net(), re.nexthop_addr(), re.vif()->ifname(),
+	      re.vif()->name(), re.metric(), re.admin_distance(),
+	      re.protocol().name());
 }
 
 void
@@ -463,7 +433,7 @@ RibClient::delete_route(const IPv4RouteEntry& re)
 {
     if (_failed)
 	return;
-    delete_route(dest(re));
+    delete_route(re.net());
 }
 
 void
@@ -471,8 +441,10 @@ RibClient::add_route(const IPv6RouteEntry& re)
 {
     if (_failed)
 	return;
-    add_route(dest(re), gw(re), ifname(re), vifname(re), re.metric(),
-	      re.admin_distance(), re.protocol().name());
+    XLOG_ASSERT(re.vif() != NULL);
+    add_route(re.net(), re.nexthop_addr(), re.vif()->ifname(),
+	      re.vif()->name(), re.metric(), re.admin_distance(),
+	      re.protocol().name());
 }
 
 void
@@ -480,7 +452,7 @@ RibClient::delete_route(const IPv6RouteEntry& re)
 {
     if (_failed)
 	return;
-    delete_route(dest(re));
+    delete_route(re.net());
 }
 
 size_t
