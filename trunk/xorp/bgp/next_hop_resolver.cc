@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.31 2004/06/10 22:40:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.32 2004/08/31 01:25:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -179,8 +179,9 @@ NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
 						  const A& nexthop,
 						  const uint32_t& metric)
 {
-    debug_msg("addr %s prefix_len %d nexthop %s metric %d\n",
-	      addr.str().c_str(), real_prefix_len, nexthop.str().c_str(), metric);
+    debug_msg("addr %s prefix_len %u nexthop %s metric %u\n",
+	      addr.str().c_str(), XORP_UINT_CAST(real_prefix_len),
+	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
 
     UNUSED(nexthop);
 
@@ -201,7 +202,8 @@ bool
 NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
 						  const uint32_t& prefix_len)
 {
-    debug_msg("addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
+    debug_msg("addr %s prefix_len %u\n", addr.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     /*
     ** This is a callback from the RIB telling us that this
@@ -224,8 +226,8 @@ NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
 	if (_next_hop_rib_request.premature_invalid(addr, prefix_len)) {
 	    return true;
 	}
-	XLOG_WARNING("address not found in next hop cache: %s/%d",
-		   addr.str().c_str(), prefix_len);
+	XLOG_WARNING("address not found in next hop cache: %s/%u",
+		   addr.str().c_str(), XORP_UINT_CAST(prefix_len));
 	return false;
     }
 
@@ -710,7 +712,7 @@ void
 NextHopRibRequest<IPv4>::register_interest(IPv4 nexthop)
 {
     debug_msg("nexthop %s\n", nexthop.str().c_str());
-    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
     XrlRibV0p1Client rib(_xrl_router);
@@ -727,7 +729,7 @@ void
 NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
 {
     debug_msg("nexthop %s\n", nexthop.str().c_str());
-    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
     XrlRibV0p1Client rib(_xrl_router);
@@ -783,9 +785,10 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     }
 
     debug_msg("Error %s resolves %d addr %s "
-	      "prefix_len %d real prefix_len %d actual nexthop %s metric %d %s\n",
+	      "prefix_len %u real prefix_len %u actual nexthop %s metric %d %s\n",
  	      error.str().c_str(), *resolves, addr->str().c_str(),
-	      *prefix_len, *real_prefix_len, actual_nexthop->str().c_str(), *metric,
+	      XORP_UINT_CAST(*prefix_len), XORP_UINT_CAST(*real_prefix_len),
+	      actual_nexthop->str().c_str(), XORP_UINT_CAST(*metric),
 	      comment.c_str());
 
 
@@ -874,7 +877,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 		    ** If nobody is interested then don't register or run
 		    ** the callbacks.
 		    */
-		    if(0 != request_data->requests()) {
+		    if (0 != request_data->requests()) {
 			_next_hop_cache.register_nexthop(rr->nexthop(),
 							 request_data->requests());
 
@@ -1026,8 +1029,9 @@ void
 NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
 					 bool resolvable, uint32_t metric)
 {
-    debug_msg(" nexthop %s ref_cnf %d resolvable %d metric %d\n",
-	      nexthop.str().c_str(), ref_cnt, resolvable, metric);
+    debug_msg(" nexthop %s ref_cnf %d resolvable %d metric %u\n",
+	      nexthop.str().c_str(), ref_cnt, resolvable,
+	      XORP_UINT_CAST(metric));
 
     /*
     ** It may be the case that we already have an entry that covers
@@ -1101,8 +1105,9 @@ NextHopRibRequest<A>::lookup(const A& nexthop,
 	if (rr && rr->reregister() && rr->nexthop() == nexthop) {
 	    resolvable = rr->resolvable();
 	    metric = rr->metric();
-	    debug_msg("nexthop %s resolvable %d metric %d\n",
-		      nexthop.str().c_str(), resolvable, metric);
+	    debug_msg("nexthop %s resolvable %d metric %u\n",
+		      nexthop.str().c_str(), resolvable,
+		      XORP_UINT_CAST(metric));
 	    return true;
 	}
     }
@@ -1117,8 +1122,8 @@ void
 NextHopRibRequest<IPv4>::deregister_interest(IPv4 addr, 
 					     uint32_t prefix_len)
 {
-    debug_msg("addr %s/%d\n", addr.str().c_str(), prefix_len);
-    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+    debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
+    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
     XrlRibV0p1Client rib(_xrl_router);
@@ -1128,8 +1133,9 @@ NextHopRibRequest<IPv4>::deregister_interest(IPv4 addr,
 				  prefix_len,
 	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
 		       addr, prefix_len,
-		       c_format("deregister_from_rib: addr %s/%d",
-				addr.str().c_str(), prefix_len)));
+		       c_format("deregister_from_rib: addr %s/%u",
+				addr.str().c_str(),
+				XORP_UINT_CAST(prefix_len))));
 }
 
 template<>
@@ -1137,8 +1143,8 @@ void
 NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr, 
 					     uint32_t prefix_len)
 {
-    debug_msg("addr %s/%d\n", addr.str().c_str(), prefix_len);
-    if(0 == _xrl_router)	// The test code sets _xrl_router to zero
+    debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
+    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
     XrlRibV0p1Client rib(_xrl_router);
@@ -1148,8 +1154,9 @@ NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr,
 				  prefix_len,
 	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
 		       addr, prefix_len,
-		       c_format("deregister_from_rib: addr %s/%d",
-				addr.str().c_str(), prefix_len)));
+		       c_format("deregister_from_rib: addr %s/%u",
+				addr.str().c_str(),
+				XORP_UINT_CAST(prefix_len))));
 }
 
 template <class A>
