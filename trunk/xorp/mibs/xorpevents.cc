@@ -25,7 +25,7 @@
 
 // definition and initialization of static members
 const char * SnmpEventLoop::_log_name = "SnmpEventLoop";
-SnmpEventLoop * SnmpEventLoop::_sel = NULL;
+SnmpEventLoop SnmpEventLoop::_sel;
 
 //
 // run_fd_callbacks and run_timer_callbacks must be callable from C modules,
@@ -67,11 +67,7 @@ run_timer_callbacks(u_int alarm_id, void *)
 SnmpEventLoop&
 SnmpEventLoop::the_instance()
 {
-    if (!_sel) {
-	_sel = new SnmpEventLoop;
-	DEBUGMSGTL((_log_name, "new shared event loop %p...\n", _sel));
-    }
-    return *_sel;
+    return _sel;
 }
 
 SnmpEventLoop::SnmpEventLoop() : EventLoop(), SelectorListObserverBase(),
@@ -79,6 +75,7 @@ SnmpEventLoop::SnmpEventLoop() : EventLoop(), SelectorListObserverBase(),
 {
     timer_list().set_observer(*this);
     selector_list().set_observer(*this);
+    DEBUGMSGTL((_log_name, "new shared event loop %p...\n", this));
 }
 
 SnmpEventLoop::~SnmpEventLoop()
@@ -86,7 +83,6 @@ SnmpEventLoop::~SnmpEventLoop()
     DEBUGMSGTL((_log_name, "shared event loop freed...!\n"));
     clear_pending_alarms();
     clear_monitored_fds();
-    delete _sel;
 }
 
 void 

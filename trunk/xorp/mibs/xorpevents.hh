@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.4 2003/05/14 18:34:33 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.5 2003/06/13 05:58:49 jcardona Exp $
 
 #ifndef __MIBS_XORPEVENTLOOP_HH__
 #define __MIBS_XORPEVENTLOOP_HH__
@@ -25,14 +25,14 @@
 class SnmpEventLoop;
 
 /**
- * @short A singleton @ref EventLoop capable of exporting events to the snmp agent
+ * @short A singleton @ref EventLoop capable of exporting events to
+ * the snmp agent.
  *
  * The @ref SnmpEventLoop class provides an EventLoop to all the MIB modules
  * that need to communicate with XORP.  The modules will use the EventLoop to
  * instanciate listeners required for asyncronous inter-process communication
  * with XORP.
  */
-
 
 class SnmpEventLoop : public EventLoop, public SelectorListObserverBase, 
     public TimerListObserverBase 
@@ -80,14 +80,11 @@ protected:
 private:
     SnmpEventLoop(SnmpEventLoop& o);		    // Not implemented
     SnmpEventLoop& operator= (SnmpEventLoop& o);    // Not implemented
+    SnmpEventLoop();
     virtual ~SnmpEventLoop();
-
-    SnmpEventLoop();		    // Private to prevent instantiation
 
     void clear_pending_alarms ();
     void clear_monitored_fds ();
-    static SnmpEventLoop * _sel;
-    static const char * _log_name;
 
     void notify_added(int, const SelectorMask&);
     void notify_removed(int, const SelectorMask&);
@@ -97,6 +94,9 @@ private:
 
     friend void run_fd_callbacks (int, void *);
     friend void run_timer_callbacks(u_int, void *);
+
+    static const char * _log_name;
+    static SnmpEventLoop _sel;
 };
 
 
