@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.8 2003/10/23 04:10:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.9 2004/04/01 19:54:04 mjh Exp $"
 
-#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 
 #include "bgp_module.h"
 #include "bgp_trie.hh"
