@@ -6,20 +6,20 @@
 #
 # 	host_X       = host to run configuration on
 # 	home_X       = directory for the tinderbox build and execution
-# 	env_X        = environment variable to be set when 
+# 	env_X        = environment variable to be set when
 #	buildflags_X = flags to passed to GNU Make during build phase
 #
 # Configurations must be named in the variable TINDERBOX_CONFIGS in order
 # to become part of the tinderbox build.
 #
 
-host_fbsd462_gcc33="xorpc.icir.org"
+host_fbsd462_gcc33="panther.icir.org"
 env_fbsd462_gcc33="CC=gcc33 CXX=g++33 MALLOC_OPTIONS=AJ"
-home_fbsd462_gcc33="/home/xorpc/u1/hodson/build/tinderbox_gcc33"
+home_fbsd462_gcc33="tinderbox/gcc33"
 buildflags_fbsd462_gcc33="-j 2"
 
-host_fbsd462_gcc295="xorpc.icir.org"
-home_fbsd462_gcc295="/home/xorpc/u1/hodson/build/tinderbox_gcc295"
+host_fbsd462_gcc295="panther.icir.org"
+home_fbsd462_gcc295="tinderbox/gcc295"
 env_fbsd462_gcc295="MALLOC_OPTIONS=AJ"
 buildflags_fbsd462_gcc295="-j 2"
 
