@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.14 2003/01/31 21:04:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.15 2003/02/06 19:56:53 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -483,6 +483,7 @@ PimMre::is_join_desired_wc() const
 {
     Mifset m;
     uint16_t vif_index;
+    const PimMre *pim_mre_wc = NULL;
     
     m = immediate_olist_wc();
     if (m.any())
@@ -492,8 +493,21 @@ PimMre::is_join_desired_wc() const
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
     
+    do {
+	if (is_wc()) {
+	    pim_mre_wc = this;
+	    break;
+	}
+	if (is_sg() || is_sg_rpt()) {
+	    pim_mre_wc = wc_entry();
+	    break;
+	}
+	break;
+    } while (false);
+    
     if (is_join_desired_rp()
-	&& (assert_winner_metric_wc(vif_index) != NULL))
+	&& ((pim_mre_wc != NULL)
+	    && (pim_mre_wc->assert_winner_metric_wc(vif_index) != NULL)))
 	return (true);
     else
 	return (false);
@@ -941,6 +955,7 @@ PimMre::i_am_assert_winner_wc() const
     return (mifs);
 }
 
+// Note: works only for (S,G)
 const Mifset&
 PimMre::i_am_assert_winner_sg() const
 {
@@ -1104,8 +1119,7 @@ PimMre::could_assert_sg() const
     return (mifs);
 }
 
-// TODO: XXX: PAVPAVPAV: make sure that this is not called for (*,*,RP)
-// TODO: XXX: PAVPAVPAV: clarify for which entries this can be called!
+// Note: applies only for (*,G) and (S,G)
 const Mifset&
 PimMre::could_assert_wc() const
 {
@@ -1126,6 +1140,8 @@ PimMre::could_assert_wc() const
 //
 // ASSERT state (per interface)
 //
+
+// Note: applies only for (*,G) and (S,G)
 void
 PimMre::set_could_assert_state(uint16_t vif_index, bool v)
 {
@@ -1143,6 +1159,7 @@ PimMre::set_could_assert_state(uint16_t vif_index, bool v)
     }
 }
 
+// Note: applies only for (*,G) and (S,G)
 bool
 PimMre::is_could_assert_state(uint16_t vif_index) const
 {
@@ -1152,6 +1169,7 @@ PimMre::is_could_assert_state(uint16_t vif_index) const
     return (_could_assert_state.test(vif_index));
 }
 
+// Note: applies for (S,G)
 const Mifset&
 PimMre::assert_tracking_desired_sg() const
 {
@@ -1198,12 +1216,18 @@ PimMre::assert_tracking_desired_sg() const
     return (mifs);
 }
 
+// Note: applies for (*,G)
 const Mifset&
 PimMre::assert_tracking_desired_wc() const
 {
     static Mifset mifs;
     Mifset mifs2;
     uint16_t vif_index;
+    
+    if (! is_wc()) {
+	mifs.reset();
+	return (mifs);
+    }
     
     mifs = could_assert_wc();
     
@@ -1221,6 +1245,7 @@ PimMre::assert_tracking_desired_wc() const
     return (mifs);
 }
 
+// Note: applies only for (*,G) and (S,G)
 void
 PimMre::set_assert_tracking_desired_state(uint16_t vif_index, bool v)
 {
@@ -1238,6 +1263,7 @@ PimMre::set_assert_tracking_desired_state(uint16_t vif_index, bool v)
     }
 }
 
+// Note: applies only for (*,G) and (S,G)
 bool
 PimMre::is_assert_tracking_desired_state(uint16_t vif_index) const
 {
@@ -1290,6 +1316,7 @@ PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
     return (true);
 }
 
+// Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
 PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
@@ -1303,7 +1330,7 @@ PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
 	return (false);
 
     old_value = is_assert_tracking_desired_state(vif_index);
-    new_value = assert_tracking_desired_sg().test(vif_index);
+    new_value = assert_tracking_desired_wc().test(vif_index);
     if (new_value == old_value)
 	return (false);			// Nothing changed
     
@@ -1332,6 +1359,7 @@ PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
     return (true);
 }
 
+// Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
 PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
@@ -1370,6 +1398,7 @@ PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
     return (true);
 }
 
+// Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
 PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
@@ -1410,6 +1439,8 @@ PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
 
 //
 // "RPF_interface(S) stops being I"
+//
+// Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
 PimMre::recompute_assert_rpf_interface_sg(uint16_t vif_index)
@@ -1472,6 +1503,7 @@ PimMre::recompute_assert_rpf_interface_wc(uint16_t vif_index)
     return (true);
 }
 
+// Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
 PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
@@ -1500,6 +1532,7 @@ PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
     return (true);
 }
 
+// Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
 PimMre::recompute_assert_receive_join_wc(uint16_t vif_index)
@@ -1528,6 +1561,7 @@ PimMre::recompute_assert_receive_join_wc(uint16_t vif_index)
     return (true);
 }
 
+// Note: applies only for (S,G)
 AssertMetric *
 PimMre::my_assert_metric_sg(uint16_t vif_index) const
 {
@@ -1550,6 +1584,7 @@ PimMre::my_assert_metric_sg(uint16_t vif_index) const
     return (infinite_assert_metric());
 }
 
+// Note: applies only for (S,G)
 AssertMetric *
 PimMre::spt_assert_metric(uint16_t vif_index) const
 {
@@ -1574,6 +1609,7 @@ PimMre::spt_assert_metric(uint16_t vif_index) const
     return (&assert_metric);
 }
 
+// Note: applies only for (*,G) and (S,G)
 AssertMetric *
 PimMre::rpt_assert_metric(uint16_t vif_index) const
 {
@@ -1581,6 +1617,9 @@ PimMre::rpt_assert_metric(uint16_t vif_index) const
     PimVif *pim_vif;
     
     if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (NULL);
+    
+    if (! (is_wc() || is_sg()))
 	return (NULL);
     
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1595,6 +1634,7 @@ PimMre::rpt_assert_metric(uint16_t vif_index) const
     return (&assert_metric);
 }
 
+// Note: applies only for (*,G) and (S,G) (but is used only for (S,G))
 AssertMetric *
 PimMre::infinite_assert_metric() const
 {
@@ -1659,6 +1699,7 @@ PimMre::metric_rp() const
 
 // Try to remove PimMre entry if not needed anymore.
 // The function is generic and can be applied to any type of PimMre entry.
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 // Return true if entry is scheduled to be removed, othewise false.
 bool
 PimMre::entry_try_remove()
@@ -1682,6 +1723,7 @@ PimMre::entry_try_remove()
 // It tests whether all downstream and upstream
 // states are NoInfo, as well as whether no relevant timers are running.
 // The function is generic and can be applied to any type of PimMre entry.
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 // Return true if entry can be removed, othewise false.
 bool
 PimMre::entry_can_remove() const
@@ -1771,7 +1813,7 @@ PimMre::entry_can_remove() const
 }
 
 // The KeepaliveTimer(S,G)
-// XXX: applies only for (S,G)
+// Note: applies only for (S,G)
 void
 PimMre::start_keepalive_timer()
 {
@@ -1787,7 +1829,7 @@ PimMre::start_keepalive_timer()
 }
 
 // The KeepaliveTimer(S,G)
-// XXX: applies only for (S,G)
+// Note: applies only for (S,G)
 void
 PimMre::cancel_keepalive_timer()
 {
@@ -1814,7 +1856,7 @@ PimMre::is_keepalive_timer_running() const
 }
 
 // The KeepaliveTimer(S,G)
-// XXX: applies only for (S,G)
+// Note: applies only for (S,G)
 void
 PimMre::keepalive_timer_timeout()
 {
@@ -1840,6 +1882,7 @@ PimMre::i_am_dr() const
 //
 // MifsetTimer related functions
 //
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
 PimMre::mifset_timer_start(MifsetTimers& mifset_timers, uint16_t vif_index,
 			   uint32_t delay_sec, uint32_t delay_usec,
@@ -1858,6 +1901,7 @@ PimMre::mifset_timer_start(MifsetTimers& mifset_timers, uint16_t vif_index,
 				mifset_timer_timeout, mifset_timer_args);
 }
 
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 static void
 mifset_timer_timeout(void *data_pointer)
 {
@@ -1868,6 +1912,7 @@ mifset_timer_timeout(void *data_pointer)
     delete m;
 }
 
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 uint16_t
 PimMre::mifset_timer_remain(MifsetTimers& mifset_timers, uint16_t vif_index)
 {
@@ -1877,6 +1922,7 @@ PimMre::mifset_timer_remain(MifsetTimers& mifset_timers, uint16_t vif_index)
     return (mifset_timers.mif_timer_remain(vif_index, timeval));
 }
 
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
 PimMre::mifset_timer_cancel(MifsetTimers& mifset_timers, uint16_t vif_index)
 {
@@ -1889,6 +1935,7 @@ PimMre::mifset_timer_cancel(MifsetTimers& mifset_timers, uint16_t vif_index)
 //
 // PimVif-related methods
 //
+// Note: applies for (*,*,RP)
 void
 PimMre::recompute_start_vif_rp(uint16_t vif_index)
 {
@@ -1897,6 +1944,7 @@ PimMre::recompute_start_vif_rp(uint16_t vif_index)
     UNUSED(vif_index);
 }
 
+// Note: applies for (*,G)
 void
 PimMre::recompute_start_vif_wc(uint16_t vif_index)
 {
@@ -1905,6 +1953,7 @@ PimMre::recompute_start_vif_wc(uint16_t vif_index)
     UNUSED(vif_index);
 }
 
+// Note: applies for (S,G)
 void
 PimMre::recompute_start_vif_sg(uint16_t vif_index)
 {
@@ -1913,6 +1962,7 @@ PimMre::recompute_start_vif_sg(uint16_t vif_index)
     UNUSED(vif_index);
 }
 
+// Note: applies for (G,G,rpt)
 void
 PimMre::recompute_start_vif_sg_rpt(uint16_t vif_index)
 {
@@ -1921,6 +1971,7 @@ PimMre::recompute_start_vif_sg_rpt(uint16_t vif_index)
     UNUSED(vif_index);
 }
 
+// Note: applies for (*,*,RP)
 void
 PimMre::recompute_stop_vif_rp(uint16_t vif_index)
 {
@@ -1933,18 +1984,20 @@ PimMre::recompute_stop_vif_rp(uint16_t vif_index)
     downstream_expiry_timer_timeout_rp(vif_index);
     mifset_timer_cancel(_downstream_expiry_timers, vif_index);
     
-    mifset_timer_cancel(assert_timers, vif_index);
-    set_assert_tracking_desired_state(vif_index, false);
-    set_could_assert_state(vif_index, false);
+    // TODO: remove the assert-related stuff?
+    // mifset_timer_cancel(assert_timers, vif_index);
+    // set_assert_tracking_desired_state(vif_index, false);
+    // set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
-    delete_assert_winner_metric(vif_index);
-    set_assert_noinfo_state(vif_index);
+    // delete_assert_winner_metric(vif_index);
+    // set_assert_noinfo_state(vif_index);
     
     set_local_receiver_include(vif_index, false);
     set_local_receiver_exclude(vif_index, false);
     set_downstream_noinfo_state(vif_index);
 }
 
+// Note: applies for (*,G)
 void
 PimMre::recompute_stop_vif_wc(uint16_t vif_index)
 {
@@ -1972,6 +2025,7 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
     set_downstream_noinfo_state(vif_index);
 }
 
+// Note: applies for (S,G)
 void
 PimMre::recompute_stop_vif_sg(uint16_t vif_index)
 {
@@ -2000,6 +2054,7 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
     set_downstream_noinfo_state(vif_index);
 }
 
+// Note: applies for (S,G,rpt)
 void
 PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
 {
@@ -2012,19 +2067,20 @@ PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
     downstream_expiry_timer_timeout_sg_rpt(vif_index);
     mifset_timer_cancel(_downstream_expiry_timers, vif_index);
     
-    mifset_timer_cancel(assert_timers, vif_index);
-    set_assert_tracking_desired_state(vif_index, false);
-    set_could_assert_state(vif_index, false);
+    // TODO: remove the assert-related stuff?
+    // mifset_timer_cancel(assert_timers, vif_index);
+    // set_assert_tracking_desired_state(vif_index, false);
+    // set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
-    delete_assert_winner_metric(vif_index);
-    set_assert_noinfo_state(vif_index);
+    // delete_assert_winner_metric(vif_index);
+    // set_assert_noinfo_state(vif_index);
     
     set_local_receiver_include(vif_index, false);
     set_local_receiver_exclude(vif_index, false);
     set_downstream_noinfo_state(vif_index);
 }
 
-// XXX: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
 PimMre::add_pim_mre_rp_entry()
 {
@@ -2034,7 +2090,7 @@ PimMre::add_pim_mre_rp_entry()
     }
 }
 
-// XXX: applies for (*,G), (S,G), (S,G,rpt)
+// Note: applies for (*,G), (S,G), (S,G,rpt)
 void
 PimMre::add_pim_mre_wc_entry()
 {
@@ -2057,7 +2113,7 @@ PimMre::add_pim_mre_wc_entry()
     }
 }
 
-// XXX: applies for (S,G), (S,G,rpt)
+// Note: applies for (S,G), (S,G,rpt)
 void
 PimMre::add_pim_mre_sg_entry()
 {
@@ -2065,7 +2121,7 @@ PimMre::add_pim_mre_sg_entry()
     // when the PimMre entry was created
 }
 
-// XXX: applies for (S,G), (S,G,rpt)
+// Note: applies for (S,G), (S,G,rpt)
 void
 PimMre::add_pim_mre_sg_rpt_entry()
 {
@@ -2073,7 +2129,7 @@ PimMre::add_pim_mre_sg_rpt_entry()
     // when the PimMre entry was created
 }
 
-// XXX: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
+// Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_rp_entry()
 {
@@ -2097,7 +2153,7 @@ PimMre::remove_pim_mre_rp_entry()
     }
 }
 
-// XXX: applies for (*,G), (S,G), (S,G,rpt)
+// Note: applies for (*,G), (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_wc_entry()
 {
@@ -2128,7 +2184,7 @@ PimMre::remove_pim_mre_wc_entry()
     }
 }
 
-// XXX: applies for (S,G), (S,G,rpt)
+// Note: applies for (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_sg_entry()
 {
@@ -2157,7 +2213,7 @@ PimMre::remove_pim_mre_sg_entry()
     }
 }
 
-// XXX: applies for (S,G), (S,G,rpt)
+// Note: applies for (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_sg_rpt_entry()
 {

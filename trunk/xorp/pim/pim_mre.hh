@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.14 2003/01/31 02:50:21 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.15 2003/02/05 05:02:28 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -560,35 +560,51 @@ public:
     void	set_i_am_assert_winner_state(uint16_t vif_index);
     //  Note: applies only for (*,G) and (S,G)
     void	set_i_am_assert_loser_state(uint16_t vif_index);
-    // TODO: XXX: PAVPAVPAV: clean-up which states apply to:    
+    // Note: applies only for (*,G) and (S,G)
     const Mifset& i_am_assert_winner_state() const {
 	return (_i_am_assert_winner_state);
     }
+    // Note: applies only for (*,G) and (S,G)
     const Mifset& i_am_assert_loser_state() const {
 	return (_i_am_assert_loser_state);
     }
     Mifset	_i_am_assert_winner_state; // The interfaces I am Assert winner
     Mifset	_i_am_assert_loser_state;  // The interfaces I am Assert loser
     MifsetTimers assert_timers;		// The Assert (winner/loser) timers
+    // Note: applies only for (*,G)
     void	assert_timer_timeout_wc(uint16_t vif_index);
+    // Note: applies only for (S,G)
     void	assert_timer_timeout_sg(uint16_t vif_index);
+    // Note: works for (*,G), (S,G)
     AssertMetric *assert_winner_metric_wc(uint16_t vif_index) const;
+    // Note: works for (S,G)
     AssertMetric *assert_winner_metric_sg(uint16_t vif_index) const;
+    // Note: applies only for (*,G) and (S,G)
     AssertMetric *assert_winner_metric(uint16_t vif_index) const {
 	return (_assert_winner_metrics[vif_index]);
     }
+    // Note: works for (*,G), (S,G)
     void	set_assert_winner_metric_wc(uint16_t vif_index, AssertMetric *v);
+    // Note: works for (S,G)
     void	set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v);
+    // Note: applies only for (*,G) and (S,G)
     void	set_assert_winner_metric(uint16_t vif_index, AssertMetric *v);
+    // Note: works for (*,G), (S,G)
     void	delete_assert_winner_metric_wc(uint16_t vif_index);
+    // Note: works for (S,G)
     void	delete_assert_winner_metric_sg(uint16_t vif_index);
+    // Note: applies only for (*,G) and (S,G)
     void	delete_assert_winner_metric(uint16_t vif_index);
+    // Note: applies only for (S,G)
     const Mifset& assert_winner_metric_is_better_than_spt_assert_metric_sg() const {
 	return (_assert_winner_metric_is_better_than_spt_assert_metric_sg);
     }
+    // Note: applies only for (S,G)
     void	set_assert_winner_metric_is_better_than_spt_assert_metric_sg(uint16_t vif_index, bool v);
     Mifset	_assert_winner_metric_is_better_than_spt_assert_metric_sg;
+    // Note: works for (*,G), (S,G), (S,G,rpt)
     const Mifset& i_am_assert_winner_wc() const;
+    // Note: works only for (S,G)
     const Mifset& i_am_assert_winner_sg() const;
     // Note: applies for (*,G), (S,G), (S,G,rpt)
     const Mifset& i_am_assert_loser_wc() const;
@@ -596,66 +612,99 @@ public:
     const Mifset& i_am_assert_loser_sg() const;
     // Note: applies for (*,G), (S,G), (S,G,rpt)
     const Mifset& lost_assert_wc() const;
+    // Note: applies only for (S,G)
     const Mifset& lost_assert_sg() const;
+    // Note: applies only for (S,G,rpt)
     const Mifset& lost_assert_sg_rpt() const;
-    
+
+    // Note: applies for (*,G)
     const Mifset& assert_tracking_desired_wc() const;
+    // Note: applies for (S,G)
     const Mifset& assert_tracking_desired_sg() const;
     Mifset	_assert_tracking_desired_state;	// To store the
 						// AssertTrackingDesired state
+    // Note: applies only for (*,G) and (S,G)
     void	set_assert_tracking_desired_state(uint16_t vif_index, bool v);
+    // Note: applies only for (*,G) and (S,G)
     bool	is_assert_tracking_desired_state(uint16_t vif_index) const;
+    // Note: applies only for (S,G)
     bool	recompute_assert_tracking_desired_sg(uint16_t vif_index);
+    // Note: applies only for (*,G)
     bool	recompute_assert_tracking_desired_wc(uint16_t vif_index);
+    // Note: applies only for (*,G) and (S,G)
     const Mifset& could_assert_wc() const;
+    // Note: applies only for (S,G)
     const Mifset& could_assert_sg() const;
+    // Note: applies only for (*,G) and (S,G)
     bool	is_could_assert_state(uint16_t vif_index) const;
+    // Note: applies only for (*,G) and (S,G)
     void	set_could_assert_state(uint16_t vif_index, bool v);
     Mifset	_could_assert_state;	// To store the CouldAssert state
     
+    // Note: applies only for (S,G)
     AssertMetric *my_assert_metric_sg(uint16_t vif_index) const;
+    // Note: applies only for (S,G)
     AssertMetric *spt_assert_metric(uint16_t vif_index) const;
+    // Note: applies only for (*,G) and (S,G)
     AssertMetric *rpt_assert_metric(uint16_t vif_index) const;
+    // Note: applies only for (*,G) and (S,G) (but is used only for (S,G))
     AssertMetric *infinite_assert_metric() const;
     AssertMetric *_assert_winner_metrics[MAX_VIFS]; // The Assert winner
 						    // metrics array.
+    // Note: applies only for (*,G) and (S,G)
     int		assert_process(PimVif *pim_vif, AssertMetric *assert_metric);
+    // Note: applies only for (S,G)
     int		assert_process_sg(PimVif *pim_vif,
 				  AssertMetric *assert_metric,
 				  assert_state_t assert_state,
 				  bool i_am_assert_winner_bool);
+    // Note: applies only for (*,G)
     int		assert_process_wc(PimVif *pim_vif,
 				  AssertMetric *assert_metric,
 				  assert_state_t state,
 				  bool i_am_assert_winner_bool);
+    // Note: applies only for (S,G)
     int		wrong_iif_data_arrived_sg(PimVif *pim_vif,
 					  const IPvX& assert_source_addr);
+    // Note: applies only for (*,G)
     int		wrong_iif_data_arrived_wc(PimVif *pim_vif,
 					  const IPvX& assert_source_addr);
+    // Note: applies only for (S,G)
     bool	recompute_could_assert_sg(uint16_t vif_index);
+    // Note: applies only for (*,G)
     bool	recompute_could_assert_wc(uint16_t vif_index);
+    // Note: applies only for (S,G)
     bool	recompute_my_assert_metric_sg(uint16_t vif_index);
+    // Note: applies only for (*,G)
     bool	recompute_my_assert_metric_wc(uint16_t vif_index);
+    // Note: applies only for (S,G)
     bool	recompute_assert_rpf_interface_sg(uint16_t vif_index);
+    // Note: applies only for (*,G)
     bool	recompute_assert_rpf_interface_wc(uint16_t vif_index);
+    // Note: applies only for (S,G)
     bool	recompute_assert_receive_join_sg(uint16_t vif_index);
+    // Note: applies only for (*,G)
     bool	recompute_assert_receive_join_wc(uint16_t vif_index);
     
     
     //
     // MISC. info
     //
-    // Note: applies for all entries
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     const Mifset& i_am_dr() const;
+    
     
     //
     // Data
     //
+    // Note: applies only for (S,G)
     void	update_sptbit_sg(uint16_t iif_vif_index);
+    // TODO: XXX: PAVPAVPAV: clarify which states apply to:
     bool	is_switch_to_spt_desired_sg() const;
     // Note: works for any entry, but should apply only
     // for (*,G), (S,G), (S,G,rpt).
     bool	check_switch_to_spt_sg();
+    // TODO: XXX: PAVPAVPAV: clarify which states apply to:
     void	recompute_check_switch_to_spt_sg();
     
     
@@ -663,49 +712,77 @@ public:
     // MISC. timers
     //
     // The KeepaliveTimer(S,G)
-    // XXX: applies only for (S,G)
+    // Note: applies only for (S,G)
     void	start_keepalive_timer();
+    // Note: applies only for (S,G)
     void	cancel_keepalive_timer();
+    // Note: applies only for (S,G)
     bool	is_keepalive_timer_running() const;
+    // Note: applies only for (S,G)
     void	keepalive_timer_timeout();
     
     //
     // MISC. other stuff
     //
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	mifset_timer_start(MifsetTimers& mifset_timers,
 				   uint16_t vif_index,
 				   uint32_t delay_sec, uint32_t delay_usec,
 				   mifset_timer_func_t func);
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     uint16_t	mifset_timer_remain(MifsetTimers& mifset_timers,
 				    uint16_t vif_index);
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	mifset_timer_cancel(MifsetTimers& mifset_timers,
 				    uint16_t vif_index);
     
+    // Note: applies for (*,*,RP)
     void	recompute_start_vif_rp(uint16_t vif_index);
+    // Note: applies for (*,G)
     void	recompute_start_vif_wc(uint16_t vif_index);
+    // Note: applies for (S,G)
     void	recompute_start_vif_sg(uint16_t vif_index);
+    // Note: applies for (S,G,rpt)
     void	recompute_start_vif_sg_rpt(uint16_t vif_index);
+    // Note: applies for (*,*,RP)
     void	recompute_stop_vif_rp(uint16_t vif_index);
+    // Note: applies for (*,G)
     void	recompute_stop_vif_wc(uint16_t vif_index);
+    // Note: applies for (S,G)
     void	recompute_stop_vif_sg(uint16_t vif_index);
+    // Note: applies for (S,G,rpt)
     void	recompute_stop_vif_sg_rpt(uint16_t vif_index);
     
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	entry_try_remove();    // Try to remove the entry if not needed
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	entry_can_remove() const; // Test if OK to remove the entry
-    
+
     // Actions to take when a related PimMre entry is added or removed
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	add_pim_mre_rp_entry();
+    // Note: applies for (*,G), (S,G), (S,G,rpt)
     void	add_pim_mre_wc_entry();
+    // Note: applies for (S,G), (S,G,rpt)
     void	add_pim_mre_sg_entry();
+    // Note: applies for (S,G), (S,G,rpt)
     void	add_pim_mre_sg_rpt_entry();
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	remove_pim_mre_rp_entry();
+    // Note: applies for (*,G), (S,G), (S,G,rpt)
     void	remove_pim_mre_wc_entry();
+    // Note: applies for (S,G), (S,G,rpt)
     void	remove_pim_mre_sg_entry();
+    // Note: applies for (S,G), (S,G,rpt)
     void	remove_pim_mre_sg_rpt_entry();
     
+    // TODO: XXX: PAVPAVPAV: clean-up which states apply to: (S,G) only
+    // or (S,G,rpt) as well?
     bool	is_directly_connected_s() const {
 	return (_flags & PIM_MRE_DIRECTLY_CONNECTED_S);
     }
+    // TODO: XXX: PAVPAVPAV: clean-up which states apply to: (S,G) only
+    // or (S,G,rpt) as well?
     void	set_directly_connected_s(bool v) {
 	if (v)
 	    _flags |= PIM_MRE_DIRECTLY_CONNECTED_S;
@@ -713,7 +790,9 @@ public:
 	    _flags &= ~PIM_MRE_DIRECTLY_CONNECTED_S;    
     }
     
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	i_am_rp() const	{ return (_flags & PIM_MRE_I_AM_RP); }
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	set_i_am_rp(bool v) {
 	if (v)
 	    _flags |= PIM_MRE_I_AM_RP;
@@ -721,14 +800,18 @@ public:
 	    _flags &= ~PIM_MRE_I_AM_RP;
     }
     
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	is_task_delete_pending() const { return (_flags & PIM_MRE_TASK_DELETE_PENDING); }
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	set_is_task_delete_pending(bool v) {
 	if (v)
 	    _flags |= PIM_MRE_TASK_DELETE_PENDING;
 	else
 	    _flags &= ~PIM_MRE_TASK_DELETE_PENDING;
     }
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	is_task_delete_done() const { return (_flags & PIM_MRE_TASK_DELETE_DONE); }
+    // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     void	set_is_task_delete_done(bool v) {
 	if (v)
 	    _flags |= PIM_MRE_TASK_DELETE_DONE;
@@ -740,7 +823,6 @@ public:
     Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
     Timer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
 						// support
-    
     
 private:
     uint32_t	_flags;			// Various flags (see PIM_MRE_*) above
