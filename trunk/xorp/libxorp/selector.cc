@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.5 2003/02/05 19:36:48 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.6 2003/02/07 17:50:33 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -136,6 +136,9 @@ SelectorList::add_selector(int			   fd,
 			   const SelectorCallback& scb)
 {
     if (fd < 0) {
+	// Probably want to make this XLOG_FATAL should this ever occur
+	XLOG_ERROR("SelectorList::add_selector: attempt to add invalid file "
+		   "descriptor (fd = %d)\n", fd);
 	return -1; 
     }
 
