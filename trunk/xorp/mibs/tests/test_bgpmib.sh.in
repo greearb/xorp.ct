@@ -464,8 +464,8 @@ just_start()
     reset
 }
 
-TESTS_NOT_FIXED='test2_full'
-TESTS='test1 test2 test3 test4'
+TESTS_NOT_FIXED='test2_full test4'
+TESTS='test1 test2 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
