@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.5 2004/05/18 21:35:47 hodson Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.6 2004/06/10 22:41:38 hodson Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
 
 #include "rt_tab_redist.hh"
+#include "libxorp/profile.hh"
 
 class XrlRouter;
 
@@ -49,6 +50,7 @@ public:
      */
     RedistXrlOutput(Redistributor<A>*	redistributor,
 		    XrlRouter& 		xrl_router,
+		    Profile&		profile,
 		    const string& 	from_protocol,
 		    const string& 	xrl_target_name,
 		    const string&	cookie);
@@ -85,6 +87,7 @@ protected:
 
 protected:
     XrlRouter&	_xrl_router;
+    Profile&	_profile;
     string	_from_protocol;
     string	_target_name;
     string	_cookie;
@@ -108,6 +111,7 @@ public:
 public:
     RedistTransactionXrlOutput(Redistributor<A>*	redistributor,
 			       XrlRouter& 		xrl_router,
+			       Profile&			profile,
 			       const string& 		from_protocol,
 			       const string& 		xrl_target_name,
 			       const string&		cookie);

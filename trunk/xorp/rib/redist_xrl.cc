@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.13 2004/08/03 03:01:08 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.14 2004/08/03 18:09:14 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -30,6 +30,7 @@
 
 #include "route.hh"
 #include "redist_xrl.hh"
+#include "profile_vars.hh"
 
 /**
  * Base class for RedistXrlOutput Tasks.  Classes derived from this
@@ -49,7 +50,7 @@ public:
      * @return true on success, false if XrlRouter could not dispatch
      * request.
      */
-    virtual bool dispatch(XrlRouter& xrl_router) = 0;
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile) = 0;
 
     /**
      * Get number of times dispatch() invoked on instance.
@@ -78,7 +79,7 @@ class AddRoute : public RedistXrlTask<A>
 {
 public:
     AddRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr);
-    virtual bool dispatch(XrlRouter& xrl_router);
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe);
 protected:
     IPNet<A>	_net;
@@ -95,7 +96,7 @@ class DeleteRoute : public RedistXrlTask<A>
 {
 public:
     DeleteRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr);
-    virtual bool dispatch(XrlRouter& xrl_router);
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe);
 protected:
     IPNet<A>	_net;
@@ -107,7 +108,7 @@ class StartingRouteDump : public RedistXrlTask<A>
 {
 public:
     StartingRouteDump(RedistXrlOutput<A>* parent);
-    virtual bool dispatch(XrlRouter& xrl_router);
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe);
 };
 
@@ -116,7 +117,7 @@ class FinishingRouteDump : public RedistXrlTask<A>
 {
 public:
     FinishingRouteDump(RedistXrlOutput<A>* parent);
-    virtual bool dispatch(XrlRouter& xrl_router);
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe);
 };
 
@@ -125,7 +126,7 @@ class Pause : public RedistXrlTask<A>
 {
 public:
     Pause(RedistXrlOutput<A>* parent, uint32_t ms);
-    virtual bool dispatch(XrlRouter&  xrl_router);
+    virtual bool dispatch(XrlRouter&  xrl_router, Profile& profile);
     void expire();
 private:
     XorpTimer _t;
@@ -147,8 +148,12 @@ AddRoute<A>::AddRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr)
 
 template <>
 bool
-AddRoute<IPv4>::dispatch(XrlRouter& xrl_router)
+AddRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		    c_format("add %s", _net.str().c_str()));
+
     RedistXrlOutput<IPv4>* p = this->parent();
 
     XrlRedist4V0p1Client cl(&xrl_router);
@@ -161,8 +166,12 @@ AddRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-AddRoute<IPv6>::dispatch(XrlRouter& xrl_router)
+AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		    c_format("add %s", _net.str().c_str()));
+
     RedistXrlOutput<IPv6>* p = this->parent();
 
     XrlRedist6V0p1Client cl(&xrl_router);
@@ -209,8 +218,12 @@ DeleteRoute<A>::DeleteRoute(RedistXrlOutput<A>* parent,
 
 template <>
 bool
-DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router)
+DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		    c_format("delete %s", _net.str().c_str()));
+
     RedistXrlOutput<IPv4>* p = this->parent();
 
     XrlRedist4V0p1Client cl(&xrl_router);
@@ -223,8 +236,12 @@ DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router)
+DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
+    if (profile.enabled(profile_route_rpc_out))
+	profile.log(profile_route_rpc_out,
+		    c_format("delete %s", _net.str().c_str()));
+
     RedistXrlOutput<IPv6>* p = this->parent();
 
     XrlRedist6V0p1Client cl(&xrl_router);
@@ -266,7 +283,7 @@ StartingRouteDump<A>::StartingRouteDump(RedistXrlOutput<A>* parent)
 
 template <>
 bool
-StartingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router)
+StartingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistXrlOutput<IPv4>* p = this->parent();
 
@@ -280,7 +297,7 @@ StartingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-StartingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router)
+StartingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistXrlOutput<IPv6>* p = this->parent();
 
@@ -322,7 +339,7 @@ FinishingRouteDump<A>::FinishingRouteDump(RedistXrlOutput<A>* parent)
 
 template <>
 bool
-FinishingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router)
+FinishingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistXrlOutput<IPv4>* p = this->parent();
 
@@ -336,7 +353,7 @@ FinishingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-FinishingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router)
+FinishingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistXrlOutput<IPv6>* p = this->parent();
 
@@ -378,7 +395,7 @@ Pause<A>::Pause(RedistXrlOutput<A>* parent, uint32_t ms)
 
 template <typename A>
 bool
-Pause<A>::dispatch(XrlRouter& xrl_router)
+Pause<A>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     this->incr_dispatch_attempts();
     EventLoop& e = xrl_router.eventloop();
@@ -400,10 +417,12 @@ Pause<A>::expire()
 template <typename A>
 RedistXrlOutput<A>::RedistXrlOutput(Redistributor<A>*	redistributor,
 				    XrlRouter&		xrl_router,
+				    Profile&		profile,
 				    const string&	from_protocol,
 				    const string&	xrl_target_name,
 				    const string&	cookie)
-    : RedistOutput<A>(redistributor), _xrl_router(xrl_router),
+    : RedistOutput<A>(redistributor), _xrl_router(xrl_router), 
+      _profile(profile),
       _from_protocol(from_protocol), _target_name(xrl_target_name),
       _cookie(cookie), _n_tasks(0)
 {
@@ -468,6 +487,10 @@ template <typename A>
 void
 RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
+    if (_profile.enabled(profile_route_rpc_in))
+	_profile.log(profile_route_rpc_in,
+		     c_format("add %s", ipr.net().str().c_str()));
+    
     enqueue_task(new AddRoute<A>(this, ipr));
     if (task_count() == 1) {
 	start_running_tasks();
@@ -478,6 +501,10 @@ template <typename A>
 void
 RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
+    if (_profile.enabled(profile_route_rpc_in))
+	_profile.log(profile_route_rpc_in,
+		     c_format("delete %s", ipr.net().str().c_str()));
+
     enqueue_task(new DeleteRoute<A>(this, ipr));
     if (task_count() == 1) {
 	start_running_tasks();
@@ -519,7 +546,7 @@ RedistXrlOutput<A>::start_next_task()
     XLOG_ASSERT(task_count() >= 1);
     RedistXrlTask<A>* t = _tasks.front();
 
-    if (t->dispatch(_xrl_router) == false) {
+    if (t->dispatch(_xrl_router, _profile) == false) {
 	if (t->dispatch_attempts() > MAX_RETRIES) {
 	    XLOG_ERROR("Failed to dispatch command after %u attempts.",
 		       t->dispatch_attempts());
@@ -531,7 +558,7 @@ RedistXrlOutput<A>::start_next_task()
 	t = new Pause<A>(this, RETRY_PAUSE_MS);
 	_tasks.push_front(t);
 	incr_task_count();
-	t->dispatch(_xrl_router);
+	t->dispatch(_xrl_router, _profile);
     }
 }
 
@@ -569,7 +596,7 @@ public:
 	: AddRoute<A>(parent, ipr) {
 	parent->incr_transaction_size();
     }
-    virtual bool dispatch(XrlRouter& xrl_router);
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile);
 };
 
 template <typename A>
@@ -580,7 +607,7 @@ public:
 	: DeleteRoute<A>(parent, ipr) {
 	parent->incr_transaction_size();
     }
-    virtual bool dispatch(XrlRouter& xrl_router);
+    virtual bool dispatch(XrlRouter& xrl_router, Profile& profile);
 };
 
 template <typename A>
@@ -590,7 +617,7 @@ public:
 	: RedistXrlTask<A>(parent) {
 	parent->reset_transaction_size();
     }
-    virtual bool dispatch(XrlRouter&  xrl_router);
+    virtual bool dispatch(XrlRouter&  xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe, const uint32_t* tid);
 };
 
@@ -601,7 +628,7 @@ public:
 	: RedistXrlTask<A>(parent) {
 	parent->reset_transaction_size();
     }
-    virtual bool dispatch(XrlRouter&  xrl_router);
+    virtual bool dispatch(XrlRouter&  xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe);
 };
 
@@ -612,7 +639,7 @@ public:
 	: RedistXrlTask<A>(parent) {
 	parent->reset_transaction_size();
     }
-    virtual bool dispatch(XrlRouter&  xrl_router);
+    virtual bool dispatch(XrlRouter&  xrl_router, Profile& profile);
     void dispatch_complete(const XrlError& xe);
 };
 
@@ -622,7 +649,7 @@ public:
 
 template <>
 bool
-AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
+AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -647,7 +674,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
+AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -676,7 +703,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
+DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -701,7 +728,7 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
+DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -730,7 +757,7 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-StartTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
+StartTransaction<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -747,7 +774,7 @@ StartTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-StartTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
+StartTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -792,7 +819,7 @@ StartTransaction<A>::dispatch_complete(const XrlError& xe, const uint32_t* tid)
 
 template <>
 bool
-CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
+CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -812,7 +839,7 @@ CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
+CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -855,7 +882,7 @@ CommitTransaction<A>::dispatch_complete(const XrlError& xe)
 
 template <>
 bool
-AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
+AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
@@ -875,7 +902,7 @@ AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
 
 template <>
 bool
-AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
+AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
@@ -920,11 +947,12 @@ template <typename A>
 RedistTransactionXrlOutput<A>::RedistTransactionXrlOutput(
 				Redistributor<A>*	redistributor,
 				XrlRouter&		xrl_router,
+				Profile&		profile,
 				const string&		from_protocol,
 				const string&		xrl_target_name,
 				const string&		cookie
 				)
-    : RedistXrlOutput<A>(redistributor, xrl_router, from_protocol,
+    : RedistXrlOutput<A>(redistributor, xrl_router, profile, from_protocol,
 			 xrl_target_name, cookie),
       _tid(0),
       _transaction_in_progress(false),
