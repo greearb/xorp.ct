@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/work_plan.txt,v 1.23 2003/08/06 19:19:41 atanu Exp $
+# $XORP: xorp/devnotes/work_plan.txt,v 1.24 2003/08/14 22:36:13 pavlin Exp $
 #
 
 Priority:
@@ -19,7 +19,7 @@ Who:
 ================================ FEA =========================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
+For 0.5:
 * Complete Linux support.				M	FB+PR
 * UDP send/receive interface.				H	OH+PR
 * Library for monitoring the network interface state	H	OH
@@ -38,7 +38,7 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
+For 0.5:
 * Handle route process death				H	MH/PR
   - see the error-handling document (e.g., exit if the FEA is gone)
   - Example: if BGP goes away, then the RIB should pull-out all
@@ -69,11 +69,13 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
 * Add support and tests for unrecognized attributes	Done	AG
-* IPv6 support						L	AG
-* Finish Kdoc'ing BGP                                   L	as needed
 * Make the BGP tests working again			Done	AG
 * Monitoring/Instrumentation (show ip bgp, MIB)		Done	JC
   (DONE: add a trie iterator to libxorp trie implementation)
+
+For 0.5:
+* IPv6 support						L	AG
+* Finish Kdoc'ing BGP                                   L	as needed
 
 For 0.x:
 * Test harness vs Cisco and Zebra to validate tests     L	AG
@@ -104,6 +106,8 @@ Immediate Tasks                                       Priority Who  Time
 ---------------                                       -------- ---  ----
 For 0.4:
 * Commit PIM patches to FreeBSD				Almost  PR  July 2003
+
+For 0.5:
 * RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
 * Integration of PIM/MLD/MFEA and RTRMGR		H	PR  2 weeks
 * Finish Kdoc'ing PIM, MLD6IGMP, MFEA			L	PR  background
@@ -125,7 +129,7 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
+For 0.5:
 * Isolation test suite				     PartlyDone	MH
 * Add target name and instance				H	MH+PR
 
@@ -139,7 +143,7 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
+For 0.5:
 * BGP user tutorial					H	Everyone
 * FEA user tutorial (vifs, etc)				H	Everyone
 * Make sure that XORPSH can be started via a shell script H	PR
@@ -166,7 +170,7 @@ For 0.5:
 ================================ RIP =======================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
+For 0.5:
 * Implementation or RIPv2				H	OH
 
 For 0.x:
@@ -181,6 +185,10 @@ For 0.4:
 * Fix snmpd termination problem				Done	JC
 * Implement SNMP traps					Done	JC
 
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+
 For 0.x:
 * Improve documentation					H	JC few days
 
@@ -188,9 +196,11 @@ For 0.x:
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
+* Use BGP/RIB/FEA test-router on xorp12			Done	AG
+
+For 0.5:
 * Use BGP/RIB/FEA test-router on xorp8			H	Everyone
   (think what exactly we want to happen)
-* Use BGP/RIB/FEA test-router on xorp12			Done	AG
 
 ================================ Other =======================================
 
@@ -207,6 +217,19 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
+* Fix memory leak in SNMP and/or XRL			H	JC+OH
+* Add multiprotocol support to BGP			M	AG
+* Process name convention: xorp_foo			Done	PR
+* Add "gmake install" support				Done	PR
+* Add bugzilla						Done	JC
+
+================================ Next-Next Release ===========================
+* Next-next release (xorp-0.5): October 16, 2003
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+* Add automated process running for testing xorpsh on	M	FCFS
+  xorp8 (expect scripts, etc)
 * Finder notifications handling				H	Everyone
   (handling death of processes you depend on)
   BGP: done
@@ -214,7 +237,6 @@ Immediate Tasks                                       Priority Who
   multicast: todo (PR)
 * Need to complete support for error handling as 	H	Everyone
     specified in error doc (bgp: done; multicast, rib: todo(PR))
-* Process name convention: xorp_foo			Done	PR
 * Work-out the conventions for command-line options	M	OH
 * Test programs infrastructure				L	OH+PR
 * Implement everywhere command-line option for the	H	PR+Everyone
@@ -222,13 +244,6 @@ Immediate Tasks                                       Priority Who
   (see xorp/docs/libxipc/finder_command_line.txt)
 * Add tasks/projects to the web page wishlist		L	Everyone
   (for other people)
-* Add "gmake install" support				Done	PR
-* Add bugzilla						Done	JC
-
-================================ Next-Next Release ===========================
-* Next-next release (xorp-0.5): ?? ??, 200?
-* Add automated process running for testing xorpsh on	M	FCFS
-  xorp8 (expect scripts, etc)
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
