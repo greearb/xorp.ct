@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.13 2003/02/11 20:45:35 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.14 2003/03/10 23:20:07 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -35,7 +35,6 @@ bool test_ribin()
     string filename = "/tmp/test_ribin.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
-    EventLoop* eventloop = bgpmain.get_eventloop();
     LocalData localdata;
     BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL);
@@ -212,8 +211,8 @@ bool test_ribin()
     debug_table->write_comment("NOW DROP THE PEERING");
 
     ribin->ribin_peering_went_down();
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table->write_separator();
@@ -262,8 +261,8 @@ bool test_ribin()
     DumpIterator<IPv4>* dump_iter 
 	= new DumpIterator<IPv4>(&handler2, peers_to_dump);
     while (ribin->dump_next_route(*dump_iter)) {
-	while (eventloop->timers_pending()) {
-	    eventloop->run();
+	while (bgpmain.eventloop().timers_pending()) {
+	    bgpmain.eventloop().run();
 	}
     }
     delete dump_iter;
@@ -330,16 +329,16 @@ bool test_ribin()
     debug_table->write_comment("NEXTHOP 2.0.0.2 CHANGES");
     //this should trigger a replace
     ribin->igp_nexthop_changed(nexthop2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table->write_separator();
     debug_table->write_comment("NEXTHOP 2.0.0.1 CHANGES");
     //this should trigger a replace
     ribin->igp_nexthop_changed(nexthop1);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     IPv4 nexthop3("1.0.0.1");
@@ -347,8 +346,8 @@ bool test_ribin()
     debug_table->write_comment("NEXTHOP 1.0.0.1 CHANGES");
     //this should have no effect
     ribin->igp_nexthop_changed(nexthop3);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     IPv4 nexthop4("3.0.0.1");
@@ -356,8 +355,8 @@ bool test_ribin()
     //this should have no effect
     debug_table->write_comment("NEXTHOP 3.0.0.1 CHANGES");
     ribin->igp_nexthop_changed(nexthop4);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table->write_separator();
@@ -401,8 +400,8 @@ bool test_ribin()
     debug_table->write_comment("NEXTHOP 2.0.0.1 CHANGES");
     //this should trigger three a replaces
     ribin->igp_nexthop_changed(nexthop1);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table->write_separator();

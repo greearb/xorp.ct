@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.2 2003/03/10 23:20:06 hodson Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -43,14 +43,14 @@
 
 class Socket {
 public:
-    Socket(int s);// For testing
-    Socket(const Iptuple& iptuple);
+    Socket(int s, EventLoop& e);// For testing
+    Socket(const Iptuple& iptuple, EventLoop& e);
 
     static void init_sockaddr(struct sockaddr_in *name, struct in_addr addr,
 			      uint16_t port);
 
-    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
-    EventLoop *get_eventloop() {return _eventloop;}
+    //    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
+    EventLoop& eventloop() {return _eventloop;}
 
     int get_sock() { return _s;}
 #ifdef	DEPRECATED
@@ -86,7 +86,7 @@ private:
     */
     const Iptuple _iptuple;
 
-    EventLoop *_eventloop;
+    EventLoop& _eventloop;
 
     /*
     ** Remote host. For debugging only
@@ -96,8 +96,8 @@ private:
 
 class SocketClient : public Socket {
 public:
-    SocketClient(const Iptuple& iptuple);
-    SocketClient(int s);
+    SocketClient(const Iptuple& iptuple, EventLoop& e);
+    SocketClient(int s, EventLoop& e);
     ~SocketClient();
 
     bool connect();
@@ -165,8 +165,8 @@ private:
 
 class SocketServer : public Socket {
 public:
-    SocketServer();
-    SocketServer(const Iptuple& iptuple);
+    SocketServer(EventLoop& e);
+    SocketServer(const Iptuple& iptuple, EventLoop& e);
     void listen();
 };
 

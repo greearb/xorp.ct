@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.11 2003/02/08 09:16:41 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.12 2003/03/10 23:20:01 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -274,9 +274,9 @@ PeerHandler::output_no_longer_busy()
 	_plumbing->output_no_longer_busy(this);
 }
 
-EventLoop *
-PeerHandler::get_eventloop() const
+EventLoop&
+PeerHandler::eventloop() const
 {
-    return _peer->main()->get_eventloop();
+    return _peer->main()->eventloop();
 }
 

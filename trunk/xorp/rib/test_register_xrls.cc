@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.11 2003/03/29 19:03:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.12 2003/04/02 22:58:58 hodson Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -311,17 +311,17 @@ main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     // Finder Server
-    FinderNGServer fs(event_loop);
+    FinderNGServer fs(eventloop);
 
     // Rib Server component
-    XrlStdRouter xrl_router(event_loop, "rib");
+    XrlStdRouter xrl_router(eventloop, "rib");
     RibClient rib_client(xrl_router, "fea");
 
     // Rib Client component
-    XrlStdRouter client_xrl_router(event_loop, "ribclient");
+    XrlStdRouter client_xrl_router(eventloop, "ribclient");
     RibClientTarget ribclienttarget(&client_xrl_router);
 
     // RIB Instantiations for XrlRibTarget
@@ -341,40 +341,40 @@ main(int /* argc */, char *argv[])
     RIB<IPv6> mrib6(MULTICAST);
     mrib6.add_igp_table("connected");
 
-    VifManager vif_manager(xrl_router, event_loop, NULL);
+    VifManager vif_manager(xrl_router, eventloop, NULL);
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
 
     XrlRibV0p1Client xc(&xrl_router);
 
-    add_igp_table(xc, event_loop, "ospf");
-    add_egp_table(xc, event_loop, "ebgp");
+    add_igp_table(xc, eventloop, "ospf");
+    add_egp_table(xc, eventloop, "ebgp");
 
     urib4.print_rib();
 
-    add_vif(xc, event_loop, "xl0", IPv4("1.0.0.1"), IPv4Net("1.0.0.0/24"));
-    add_vif(xc, event_loop, "xl1", IPv4("1.0.1.1"), IPv4Net("1.0.1.0/24"));
+    add_vif(xc, eventloop, "xl0", IPv4("1.0.0.1"), IPv4Net("1.0.0.0/24"));
+    add_vif(xc, eventloop, "xl1", IPv4("1.0.1.1"), IPv4Net("1.0.1.0/24"));
     
-    add_route(xc, event_loop, "ospf",
+    add_route(xc, eventloop, "ospf",
 	      IPv4Net("9.0.0.0/24"), IPv4("1.0.0.2"), 7);
 
     printf("====================================================\n");
 
-    register_interest(xc, event_loop, IPv4("9.0.0.1"), 
+    register_interest(xc, eventloop, IPv4("9.0.0.1"), 
 		      true, IPv4Net("9.0.0.0/24"), IPv4("1.0.0.2"), 7);
 
-    register_interest(xc, event_loop, IPv4("9.0.1.1"), 
+    register_interest(xc, eventloop, IPv4("9.0.1.1"), 
 		      false, IPv4Net("0.0.0.0/0"), IPv4("0.0.0.0"), 0);
 
     printf("====================================================\n");
 
     callback_flag = false;
-    delete_route(xc, event_loop, "ospf", IPv4Net("9.0.0.0/24"));
+    delete_route(xc, eventloop, "ospf", IPv4Net("9.0.0.0/24"));
 
     //wait for a callback
     while (callback_flag == false) {
-	event_loop.run();
+	eventloop.run();
     }
 
     ribclienttarget.verify_invalidated("9.0.0.0/24");
@@ -383,11 +383,11 @@ main(int /* argc */, char *argv[])
     printf("====================================================\n");
 
     callback_flag = false;
-    add_route(xc, event_loop, "ospf", 
+    add_route(xc, eventloop, "ospf", 
 	      IPv4Net("9.0.1.128/25"),  IPv4("1.0.0.2"), 7);
     //wait for a callback
     while (callback_flag == false) {
-	event_loop.run();
+	eventloop.run();
     }
 
     ribclienttarget.verify_invalidated("9.0.1.0/24");

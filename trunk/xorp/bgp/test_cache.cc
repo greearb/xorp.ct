@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.11 2003/02/11 20:45:34 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.12 2003/03/10 23:20:06 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -34,7 +34,7 @@ int test_cache() {
     string filename = "/tmp/test_cache.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
-    // EventLoop* eventloop = bgpmain.get_eventloop();
+    // EventLoop* eventloop = bgpmain.eventloop();
     LocalData localdata;
     BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL);

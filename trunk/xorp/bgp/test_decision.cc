@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.15 2003/04/02 19:44:44 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.16 2003/04/02 20:34:38 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -35,7 +35,6 @@ bool test_decision() {
     string filename = "/tmp/test_decision.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
-    EventLoop* eventloop = bgpmain.get_eventloop();
     LocalData localdata;
 
     Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
@@ -65,7 +64,7 @@ bool test_decision() {
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL);
 
-    DummyNextHopResolver<IPv4> next_hop_resolver(*eventloop);
+    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop());
 
     DecisionTable<IPv4> *decision_table
 	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);
@@ -1682,8 +1681,8 @@ bool test_decision() {
 				" BECOMES UNRESOLVABLE").c_str());
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     decision_table->igp_nexthop_changed(nexthop3);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table->write_separator();
@@ -1738,8 +1737,8 @@ bool test_decision() {
 				" BECOMES UNRESOLVABLE").c_str());
     next_hop_resolver.unset_nexthop_metric(nexthop2);
     decision_table->igp_nexthop_changed(nexthop2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
 
@@ -1796,8 +1795,8 @@ bool test_decision() {
 				" BECOMES RESOLVABLE").c_str());
     next_hop_resolver.set_nexthop_metric(nexthop3, 27);
     decision_table->igp_nexthop_changed(nexthop3);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
 
@@ -1866,8 +1865,8 @@ bool test_decision() {
 				" BECOMES RESOLVABLE").c_str());
     next_hop_resolver.set_nexthop_metric(nexthop2, 27);
     decision_table->igp_nexthop_changed(nexthop2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
 
@@ -1937,8 +1936,8 @@ bool test_decision() {
 				" BECOMES RESOLVABLE").c_str());
     next_hop_resolver.set_nexthop_metric(nexthop1, 27);
     decision_table->igp_nexthop_changed(nexthop1);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
 
@@ -1994,8 +1993,8 @@ bool test_decision() {
 				" BECOMES UNRESOLVABLE").c_str());
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     decision_table->igp_nexthop_changed(nexthop1);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
 

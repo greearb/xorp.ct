@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.11 2003/03/21 03:01:46 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.12 2003/03/22 04:29:45 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -47,10 +47,10 @@ public:
     /**
      * RibManager constructor
      * 
-     * @param event_loop the event loop to user.
+     * @param eventloop the event loop to user.
      * @param xrl_std_router the XRL router to use.
      */
-    RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router);
+    RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router);
 
     /**
      * RibManager destructor
@@ -270,7 +270,7 @@ private:
     list<RibClient *>	*select_rib_clients_list(int family, bool unicast,
 						 bool multicast);
     
-    EventLoop&		_event_loop;	// The event loop to use
+    EventLoop&		_eventloop;	// The event loop to use
     XrlStdRouter&	_xrl_router;	// The XRL router to use
     list<RibClient *>	_urib4_clients_list; // The list of IPv4 URIB clients
     list<RibClient *>	_mrib4_clients_list; // The list of IPv4 MRIB clients

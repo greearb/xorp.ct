@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.14 2003/04/02 19:44:45 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.15 2003/04/02 20:34:39 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -36,7 +36,6 @@ bool test_dump() {
     string filename = "/tmp/test_dump.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
-    EventLoop* eventloop = bgpmain.get_eventloop();
     LocalData localdata;
 
     Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
@@ -66,7 +65,7 @@ bool test_dump() {
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL);
 
-    DummyNextHopResolver<IPv4> next_hop_resolver(*eventloop);
+    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop());
 
     DecisionTable<IPv4> *decision_table
 	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);
@@ -273,8 +272,8 @@ bool test_dump() {
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -353,8 +352,8 @@ bool test_dump() {
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -457,8 +456,8 @@ bool test_dump() {
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -486,8 +485,8 @@ bool test_dump() {
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
     debug_table1->write_separator();
 
@@ -541,12 +540,12 @@ bool test_dump() {
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
@@ -558,8 +557,8 @@ bool test_dump() {
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -580,8 +579,8 @@ bool test_dump() {
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -634,8 +633,8 @@ bool test_dump() {
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -656,8 +655,8 @@ bool test_dump() {
     debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table1);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -713,7 +712,7 @@ bool test_dump() {
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
@@ -724,8 +723,8 @@ bool test_dump() {
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -746,8 +745,8 @@ bool test_dump() {
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -810,8 +809,8 @@ bool test_dump() {
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -832,8 +831,8 @@ bool test_dump() {
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -898,8 +897,8 @@ bool test_dump() {
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -909,8 +908,8 @@ bool test_dump() {
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -920,8 +919,8 @@ bool test_dump() {
     debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table1);
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
@@ -986,17 +985,17 @@ bool test_dump() {
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
@@ -1023,8 +1022,8 @@ bool test_dump() {
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes
@@ -1161,12 +1160,12 @@ bool test_dump() {
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
-    eventloop->run();
+    bgpmain.eventloop().run();
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
@@ -1193,8 +1192,8 @@ bool test_dump() {
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT REPLACE 1.0.3.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3");
-    while (eventloop->timers_pending()) {
-	eventloop->run();
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
     }
 
     //delete the routes

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.12 2003/04/02 22:58:58 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.13 2003/04/03 00:24:00 hodson Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -62,13 +62,13 @@ public:
 static void
 parser_main()
 {
-    EventLoop event_loop;
+    EventLoop eventloop;
 
     // Finder Server
-    FinderNGServer fs(event_loop);
+    FinderNGServer fs(eventloop);
 
     // Rib Server component
-    XrlStdRouter xrl_router(event_loop, "rib");
+    XrlStdRouter xrl_router(eventloop, "rib");
     RibClient rib_client(xrl_router, "fea");
 
     // RIB Instantiations for XrlRibTarget
@@ -81,7 +81,7 @@ parser_main()
     RIB<IPv6> urib6(UNICAST);
     RIB<IPv6> mrib6(MULTICAST);
 
-    VifManager vif_manager(xrl_router, event_loop, NULL);
+    VifManager vif_manager(xrl_router, eventloop, NULL);
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
@@ -90,7 +90,7 @@ parser_main()
 
     // Variable used to signal completion of Xrl parse completion
     XrlCompletion cv;
-    XrlRibParser parser(event_loop, xrl_client, urib4, cv);
+    XrlRibParser parser(eventloop, xrl_client, urib4, cv);
 
     string cmd;
     int line = 0;
@@ -108,7 +108,7 @@ parser_main()
 				// to make compatible test interface with
 				// exist synchronous code.
 	while (cv == XRL_PENDING)
-	    event_loop.run();
+	    eventloop.run();
 	assert (cv == SUCCESS);
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.10 2003/02/08 20:30:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.11 2003/03/10 23:20:05 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -371,7 +371,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 		  next_route_to_push->str().c_str());
 
 	// _next_table->push((BGPRouteTable<A>*)this);
-	_push_timer = get_eventloop()->
+	_push_timer = eventloop().
 	    new_oneoff_after_ms(0 /*call back immediately, but after
 				    network events or expired timers */,
 				callback(this,
@@ -410,7 +410,7 @@ RibInTable<A>::push_next_changed_nexthop()
     if (_nexthop_push_active == false)
 	return;
 
-    _push_timer = get_eventloop()->
+    _push_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,

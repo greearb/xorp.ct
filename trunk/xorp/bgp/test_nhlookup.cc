@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.13 2003/04/02 19:44:45 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.14 2003/04/02 20:34:39 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -63,14 +63,13 @@ int test_nhlookup() {
     string filename = "/tmp/test_nhlookup.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
-    EventLoop* eventloop = bgpmain.get_eventloop();
     LocalData localdata;
     BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL);
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
 
-    DummyResolver<IPv4> nh_resolver(*eventloop);
+    DummyResolver<IPv4> nh_resolver(bgpmain.eventloop());
 
     //trivial plumbing
     NhLookupTable<IPv4> *nhlookup_table

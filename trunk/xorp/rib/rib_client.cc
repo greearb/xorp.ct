@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.4 2003/03/29 19:30:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.5 2003/04/02 23:51:05 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -59,7 +59,9 @@ public:
     typedef ref_ptr<XorpCallback1<void, const XrlError&> > CommandCompleteCallback;
 
     SyncFtiCommand(XrlRouter& rtr, const string& target_name)
-	: _fticlient(&rtr), _target_name(target_name) {}
+	: _eventloop(rtr.eventloop()),
+	  _fticlient(&rtr), _target_name(target_name), 
+	_previously_successful(false), _interface_failed(false) {}
     virtual ~SyncFtiCommand() {}
 
     void start(const CompletionCallback& cb, const GetNextCallback& gncb);
@@ -69,6 +71,7 @@ public:
 	= 0;
 
 protected:
+    void redo_start();
     void start_complete(const XrlError& e, const uint32_t *tid);
 
     void command_complete(const XrlError& e);
@@ -85,10 +88,9 @@ protected:
 	_completion_cb->dispatch();
     }
 
-protected:
     uint32_t tid() const { return _tid; }
 
-protected:
+    EventLoop& _eventloop;
     XrlFtiV0p2Client	_fticlient;
     const string&	_target_name;
 
@@ -96,6 +98,12 @@ private:
     uint32_t		_tid;		// transaction id
     CompletionCallback	_completion_cb;	// callback called when done
     GetNextCallback	_get_next_cb;	// get the next operation
+
+    XorpTimer _rtx_timer; //Used to re-send after a delay when we
+                          //suffered a full transmit buffer.
+    bool _previously_successful; //true when the interface has previously 
+                                 //succeeded
+    bool _interface_failed;  //true when the interface has permanently failed.
 };
 
 void
@@ -104,10 +112,22 @@ SyncFtiCommand::start(const CompletionCallback& ccb,
 {
     _completion_cb = ccb;
     _get_next_cb = gncb;
-    _fticlient.send_start_transaction(_target_name.c_str(),
-				      callback(
-					  this,
-					  &SyncFtiCommand::start_complete));
+    if (!_fticlient.
+	send_start_transaction(_target_name.c_str(),
+			       callback(this,
+					&SyncFtiCommand::start_complete))) {
+	//The send failed - not enough buffer space?.
+	//We resend after a delay
+	_rtx_timer 
+	    = _eventloop.new_oneoff_after_ms(1000, 
+                   callback(this, &SyncFtiCommand::redo_start));
+    }
+}
+
+void
+SyncFtiCommand::redo_start()
+{
+    start(_completion_cb, _get_next_cb);
 }
 
 void
@@ -115,13 +135,28 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
 {
     debug_msg("start completed\n");
     if (e == XrlError::OKAY()) {
+	_previously_successful = true;
 	_tid = *tid;
 	send_command(_tid, callback(this, &SyncFtiCommand::command_complete));
 	return;
+    } else {
+	if ((e == XrlError::NO_FINDER())
+	    || (e == XrlError::RESOLVE_FAILED() && _previously_successful)
+	    /* || (e == XrlError::FATAL_TRANSPORT_ERROR()) */) {
+	    XLOG_ERROR("Fatal transport error from RIB to %s\n",
+		       _target_name.c_str());
+	    _interface_failed = true;
+	} else if (e == XrlError::SEND_FAILED()) {
+	    //We can just resend after a delay
+	    _rtx_timer 
+		= _eventloop.new_oneoff_after_ms(1000, 
+                       callback(this, &SyncFtiCommand::redo_start));
+	} else {
+	    XLOG_ERROR("Could not start Synchronous RibClient command: %s",
+		       e.str().c_str());
+	}
+	done();
     }
-    XLOG_ERROR("Could not start Synchronous RibClient command: %s",
-	       e.str().c_str());
-    done();
 }
 
 void

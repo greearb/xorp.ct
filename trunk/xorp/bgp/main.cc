@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.20 2003/04/02 19:44:44 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.21 2003/04/02 20:34:38 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -41,11 +41,11 @@ BGPMain::BGPMain()
     ** we need to finely control the order of destruction.
     */
     _peerlist = new BGPPeerList();
-    _xrl_router = new XrlStdRouter(*get_eventloop(), "bgp");
+    _xrl_router = new XrlStdRouter(eventloop(), "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
-    _rib_ipc_handler = new RibIpcHandler(_xrl_router, *get_eventloop());
+    _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop());
     _plumbing = new BGPPlumbing(_xrl_router, _rib_ipc_handler,
-				*get_eventloop());
+				eventloop());
 }
 
 BGPMain::~BGPMain()
@@ -65,11 +65,11 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
     while (_peerlist->not_all_idle()
-	   || get_eventloop()->timers_pending() > 1) {
-	    get_eventloop()->run();
+	   || eventloop().timers_pending() > 1) {
+	    eventloop().run();
 	    XLOG_INFO("EVENT: peerlist %d timers %d", 
 		      _peerlist->not_all_idle(),
-		      get_eventloop()->timers_pending());
+		      eventloop().timers_pending());
     }
 
     /*
@@ -79,7 +79,7 @@ BGPMain::~BGPMain()
     _rib_ipc_handler->register_ribname("");
 
     while(_xrl_router->pending()) {
-	get_eventloop()->run();
+	eventloop().run();
 	XLOG_INFO("xrl router still has pending operations");
     }
 
@@ -88,7 +88,7 @@ BGPMain::~BGPMain()
     delete _rib_ipc_handler;
 
     while(_xrl_router->pending()) {
-	get_eventloop()->run();
+	eventloop().run();
 	XLOG_INFO("xrl router still has pending operations");
     }
 
@@ -141,7 +141,7 @@ BGPMain::main_loop()
 
     debug_msg("BGPMain::main_loop started\n");
 #if defined(DEBUG_MAXIMUM_DELAY)
-    static XorpTimer t = get_eventloop()->
+    static XorpTimer t = eventloop().
 	new_periodic(1000, callback(check_callback_duration));
 #endif
     while ( !_exit_loop ) {
@@ -154,7 +154,7 @@ BGPMain::main_loop()
 		  current - last);
 #endif
 
-	get_eventloop()->run();
+	eventloop().run();
 #if defined (DEBUG_MAXIMUM_DELAY)
 	last = current;;
 #endif
@@ -309,10 +309,10 @@ BGPMain::create_peer(BGPPeerData *pd)
 	return false;
     }
 
-    SocketClient *sock = new SocketClient(pd->iptuple());
+    SocketClient *sock = new SocketClient(pd->iptuple(), eventloop());
 
     BGPPeer *p = new BGPPeer(&_local_data, pd, sock, this);
-    sock->set_eventloop(get_eventloop());
+    //    sock->set_eventloop(eventloop());
     sock->set_callback(callback(p, &BGPPeer::get_message));
 
     attach_peer(p);
@@ -537,7 +537,7 @@ BGPMain::register_ribname(const string& name)
 int
 BGPMain::create_listener(const Iptuple& iptuple)
 {
-    SocketServer s = SocketServer(iptuple);
+    SocketServer s = SocketServer(iptuple, eventloop());
     s.create_listener();
     s.listen();
     return s.get_sock();
@@ -582,7 +582,7 @@ BGPMain::start_server(const Iptuple& iptuple)
     }
 
     int sfd = create_listener(iptuple);
-    if (!get_eventloop()->
+    if (!eventloop().
 	add_selector(sfd,
 		     SEL_RD,
 		     callback(this, &BGPMain::connect_attempt,
@@ -603,7 +603,7 @@ BGPMain::stop_server(const Iptuple& iptuple)
 	list<Iptuple>::iterator j;
 	for (j = i->_tuples.begin(); j != i->_tuples.end(); j++) {
 	    if (*j == iptuple) {
-		get_eventloop()->remove_selector(i->_serverfd);
+		eventloop().remove_selector(i->_serverfd);
 		::close(i->_serverfd);
 		i->_tuples.erase(j);
 		if (i->_tuples.empty())
@@ -621,7 +621,7 @@ BGPMain::stop_all_servers()
 {
     list<Server>::iterator i;
     for (i = _serverfds.begin(); i != _serverfds.end(); i++) {
-	get_eventloop()->remove_selector(i->_serverfd);
+	eventloop().remove_selector(i->_serverfd);
 	::close(i->_serverfd);
 	i = _serverfds.erase(i);
     }

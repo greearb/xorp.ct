@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.32 2003/04/02 02:53:49 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.33 2003/04/02 22:16:22 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -48,8 +48,8 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
     _last_error[0] = 0;
     _last_error[1] = 0;
     _established_transitions = 0;
-    _mainprocess->get_eventloop()->current_time(_established_time);
-    _mainprocess->get_eventloop()->current_time(_in_update_time);
+    _mainprocess->eventloop().current_time(_established_time);
+    _mainprocess->eventloop().current_time(_in_update_time);
 }
 
 BGPPeer::~BGPPeer()
@@ -122,7 +122,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    _in_updates++;
-	    _mainprocess->get_eventloop()->current_time(_in_update_time);
+	    _mainprocess->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length);
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -1123,8 +1123,8 @@ BGPPeer::established()
     _in_total_messages = 0;
     _out_total_messages = 0;
     _established_transitions++;
-    _mainprocess->get_eventloop()->current_time(_established_time);
-    _mainprocess->get_eventloop()->current_time(_in_update_time);
+    _mainprocess->eventloop().current_time(_established_time);
+    _mainprocess->eventloop().current_time(_in_update_time);
     return true;
 }
 
@@ -1185,7 +1185,7 @@ BGPPeer::start_connect_retry_timer()
     debug_msg("Start Connect Retry timer after %d ms\n",
 	      _peerdata->get_retry_duration());
 
-    _timer_connect_retry = _mainprocess->get_eventloop()->
+    _timer_connect_retry = _mainprocess->eventloop().
 	new_oneoff_after_ms(_peerdata->get_retry_duration(),
 			    callback(this, &BGPPeer::event_connexp));
 }
@@ -1222,7 +1222,7 @@ BGPPeer::start_hold_timer()
 	/* Add another half a second to give the remote keepalive a chance*/
 	duration += 500;
 	debug_msg("Holdtimer started %d\n", duration);
-	_timer_hold_time = _mainprocess->get_eventloop()->
+	_timer_hold_time = _mainprocess->eventloop().
 	    new_oneoff_after_ms(duration,
 	    callback(this, &BGPPeer::event_holdexp));
     }
@@ -1252,7 +1252,7 @@ BGPPeer::start_keepalive_timer()
 	      duration, time(0));
 
     if (duration > 0)
-	_timer_keep_alive = _mainprocess->get_eventloop()->
+	_timer_keep_alive = _mainprocess->eventloop().
 	    new_oneoff_after_ms(duration,
 		callback(this, &BGPPeer::event_keepexp));
 }
@@ -1273,7 +1273,7 @@ BGPPeer::start_stopped_timer()
     debug_msg("Stopped timer started with duration %d ms %ld\n", delay,
 	      time(0));
 
-    _timer_stopped = _mainprocess->get_eventloop()->
+    _timer_stopped = _mainprocess->eventloop().
 	new_oneoff_after_ms(delay, callback(this, &BGPPeer::hook_stopped));
 }
 
@@ -1305,7 +1305,7 @@ BGPPeer::release_resources()
     _in_total_messages = 0;
     _out_total_messages = 0;
 
-    _mainprocess->get_eventloop()->current_time(_established_time);
+    _mainprocess->eventloop().current_time(_established_time);
     return true;
 }
 
@@ -1428,7 +1428,7 @@ uint32_t
 BGPPeer::get_established_time() const
 {
     TimeVal now;
-    _mainprocess->get_eventloop()->current_time(now);
+    _mainprocess->eventloop().current_time(now);
     return now.sec() - _established_time.sec();
 }
 
@@ -1446,6 +1446,6 @@ BGPPeer::get_msg_stats(uint32_t& in_updates,
     out_msgs = _out_total_messages;
     memcpy(&last_error, _last_error, 2);
     TimeVal now;
-    _mainprocess->get_eventloop()->current_time(now);
+    _mainprocess->eventloop().current_time(now);
     in_update_elapsed = now.sec() - _in_update_time.sec();
 }

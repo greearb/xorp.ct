@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.10 2003/03/10 23:20:03 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.11 2003/04/18 19:57:04 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -521,7 +521,7 @@ XrlQueue<A>::delayed_send(uint32_t delay_ms)
     if (_delayed_send_timer.scheduled())
 	return;
 
-    _delayed_send_timer = get_eventloop().
+    _delayed_send_timer = eventloop().
 	new_oneoff_after_ms(delay_ms, ::callback(this, 
 						 &XrlQueue<A>::sendit));
 }

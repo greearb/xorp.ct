@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.3 2003/01/17 06:01:03 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.4 2003/03/10 23:20:04 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -61,7 +61,7 @@ public:
 private:
     void unplumb_self();
     void do_next_route_dump();
-    EventLoop *get_eventloop() const {return _peer->get_eventloop();}
+    EventLoop& eventloop() const {return _peer->eventloop();}
 
     const PeerHandler *_peer;
     DumpIterator<A> _dump_iter;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.5 2003/01/31 23:39:40 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.6 2003/03/10 23:20:04 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -200,7 +200,7 @@ DumpTable<A>::initiate_background_dump()
 
     _dumped = 0;
     _dump_active = true;
-    _dump_timer = get_eventloop()->
+    _dump_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
@@ -295,8 +295,7 @@ DumpTable<A>::do_next_route_dump()
 	cp(30);
     }
 
-    debug_msg("scheduling next dump on eventloop %p\n", get_eventloop());
-    _dump_timer = get_eventloop()->
+    _dump_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,

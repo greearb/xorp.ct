@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.2 2003/03/10 23:20:55 hodson Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.3 2003/03/16 07:18:57 pavlin Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -49,7 +49,7 @@ public:
 		       XrlRibV0p1Client& xrl_client,
 		       XrlCompletion&	 completion) 
 	: RouteAddCommand(), 
- 	  _event_loop(e), _xrl_client(xrl_client), _completion(completion) {}
+ 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
 	cout << "RouteAddCommand::execute " << _tablename << " " << _net.str()
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };
@@ -77,7 +77,7 @@ public:
 			  XrlRibV0p1Client&	xrl_client,
 			  XrlCompletion&	completion)
 	: RouteDeleteCommand(), 
-	  _event_loop(e), _xrl_client(xrl_client), _completion(completion) {}
+	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
 	cout << "RouteDeleteCommand::execute " << _tablename << " "
@@ -94,7 +94,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&     _completion;
 };
@@ -105,7 +105,7 @@ public:
 			   XrlRibV0p1Client&	xrl_client,
 			   XrlCompletion&	completion)
 	: RedistEnableCommand(), 
-	  _event_loop(e), _xrl_client(xrl_client), _completion(completion) {}
+	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
 	cout << "RedistEnableCommand::execute " << _fromtable << " ";
@@ -122,7 +122,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };
@@ -133,7 +133,7 @@ public:
 			    XrlRibV0p1Client&	xrl_client,
 			    XrlCompletion&	completion) 
 	: RedistDisableCommand(),
-	  _event_loop(e), _xrl_client(xrl_client), _completion(completion) {}
+	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
 	cout << "RedistDisableCommand::execute " << _fromtable << " ";
@@ -150,7 +150,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };
@@ -160,7 +160,7 @@ public:
     XrlAddIGPTableCommand(EventLoop& 	    e, 
 			  XrlRibV0p1Client& xrl_client,
 			  XrlCompletion&    completion) :
-	AddIGPTableCommand(), _event_loop(e), _xrl_client(xrl_client),
+	AddIGPTableCommand(), _eventloop(e), _xrl_client(xrl_client),
 	_completion(completion) {}
 
     int execute() {
@@ -177,7 +177,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };
@@ -188,7 +188,7 @@ public:
 			     XrlRibV0p1Client&	xrl_client,
 			     XrlCompletion&	completion) :
 	DeleteIGPTableCommand(), 
-	_event_loop(e), _xrl_client(xrl_client), _completion(completion) {}
+	_eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
 	cout << "DeleteIGPTableCommand::execute " << _tablename << endl;
@@ -205,7 +205,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };
@@ -215,7 +215,7 @@ public:
     XrlAddEGPTableCommand(EventLoop&	    e, 
 			  XrlRibV0p1Client& xrl_client,
 			  XrlCompletion&    completion) :
-	AddEGPTableCommand(), _event_loop(e), _xrl_client(xrl_client),
+	AddEGPTableCommand(), _eventloop(e), _xrl_client(xrl_client),
 	_completion(completion) {}
     int execute() {
 	cout << "AddEGPTableCommand::execute " << _tablename << endl;
@@ -231,7 +231,7 @@ public:
     }
 
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };
@@ -241,7 +241,7 @@ public:
     XrlDeleteEGPTableCommand(EventLoop&		e, 
 			     XrlRibV0p1Client&	xrl_client,
 			     XrlCompletion&	completion) :
-	DeleteEGPTableCommand(), _event_loop(e), _xrl_client(xrl_client),
+	DeleteEGPTableCommand(), _eventloop(e), _xrl_client(xrl_client),
 	_completion(completion) {}
     int execute() {
 	cout << "DeleteEGPTableCommand::execute " << _tablename << endl;
@@ -254,7 +254,7 @@ public:
 	return _completion;
     }
 private:
-    EventLoop&	      _event_loop;
+    EventLoop&	      _eventloop;
     XrlRibV0p1Client& _xrl_client;
     XrlCompletion&    _completion;
 };

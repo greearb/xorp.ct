@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.7 2003/02/08 20:30:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.8 2003/03/10 23:20:04 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -195,7 +195,7 @@ DeletionTable<A>::initiate_background_deletion()
     // pushed from the output queue in the RibOut tables.
     _next_table->push(this);
 
-    _deletion_timer = get_eventloop()->
+    _deletion_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
@@ -252,8 +252,7 @@ DeletionTable<A>::delete_next_chain()
 	_next_table->push((BGPRouteTable<A>*)this);
     _chains++;
 
-    debug_msg("scheduling next deletion on eventloop %p\n", get_eventloop());
-    _deletion_timer = get_eventloop()->
+    _deletion_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,

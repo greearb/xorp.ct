@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.4 2003/01/16 23:18:58 pavlin Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.5 2003/03/10 23:20:04 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -62,8 +62,8 @@ public:
 private:
     void unplumb_self();
     void delete_next_chain();
-    EventLoop *get_eventloop() const {
-	return _peer->get_eventloop();
+    EventLoop& eventloop() const {
+	return _peer->eventloop();
     }
 
     const PeerHandler *_peer;

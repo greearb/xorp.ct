@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.4 2003/01/26 04:06:18 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.5 2003/03/10 23:20:05 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -34,12 +34,12 @@
 
 /* **************** BGPSocket - PUBLIC METHODS *********************** */
 
-Socket::Socket(const Iptuple& iptuple)
-    : _iptuple(iptuple)
+Socket::Socket(const Iptuple& iptuple, EventLoop& e)
+    : _iptuple(iptuple), _eventloop(e)
 {
     debug_msg("Socket constructor called: %s\n", _iptuple.str().c_str());
 
-    _eventloop = 0;
+    //    _eventloop = 0;
 
     _s = UNCONNECTED;
 
@@ -48,9 +48,9 @@ Socket::Socket(const Iptuple& iptuple)
 #endif
 }
 
-Socket::Socket(int s) : _s(s)
+Socket::Socket(int s, EventLoop& e) : _s(s), _eventloop(e)
 {
-    _eventloop = 0;
+    //    _eventloop = 0;
 }
 
 void Socket::create_listener()
@@ -112,8 +112,8 @@ void Socket::init_sockaddr(struct sockaddr_in *name,
 
 /* **************** BGPSocketClient - PUBLIC METHODS *********************** */
 
-SocketClient::SocketClient(const Iptuple& iptuple)
-    : Socket(iptuple)
+SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e)
+    : Socket(iptuple, e)
 {
     debug_msg("SocketClient constructor called\n");
     _async_writer = 0;
@@ -121,7 +121,7 @@ SocketClient::SocketClient(const Iptuple& iptuple)
     _disconnecting = false;
 }
 
-SocketClient::SocketClient(int s) : Socket(s)
+SocketClient::SocketClient(int s, EventLoop& e) : Socket(s, e)
 {
     _async_writer = 0;
     _async_reader = 0;
@@ -425,10 +425,10 @@ SocketClient::async_add(int sock)
     }
 
     XLOG_ASSERT(0 == _async_writer);
-    _async_writer = new AsyncFileWriter(*get_eventloop(), sock);
+    _async_writer = new AsyncFileWriter(eventloop(), sock);
 
     XLOG_ASSERT(0 == _async_reader);
-    _async_reader = new AsyncFileReader(*get_eventloop(), sock);
+    _async_reader = new AsyncFileReader(eventloop(), sock);
 
     async_read_start();
 }
@@ -486,8 +486,8 @@ bool SocketClient::still_reading()
 
 /* **************** BGPSocketServer *********************** */
 
-SocketServer::SocketServer(const Iptuple& iptuple) :
-    Socket(iptuple)
+SocketServer::SocketServer(const Iptuple& iptuple, EventLoop& e) :
+    Socket(iptuple, e)
 {
     debug_msg("SocketServer constructor called\n");	
 }

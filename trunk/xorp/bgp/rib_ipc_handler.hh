@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.4 2003/03/10 23:20:03 hodson Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.5 2003/04/18 19:57:04 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -66,7 +66,7 @@ private:
 
     void sendit();
     void delayed_send(uint32_t delay_ms);
-    EventLoop& get_eventloop() {return _rib_ipc_handler->eventloop();}
+    EventLoop& eventloop() {return _rib_ipc_handler->eventloop();}
 
     void callback(const XrlError& error, const char *comment);
 };
