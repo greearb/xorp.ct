@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.4 2003/06/05 02:11:21 atanu Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.1 2003/08/22 23:19:02 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -155,6 +155,43 @@ test_main()
 	return 1;
     }
     if (IfMgrIPv4SetEndpoint("if0", "vif0", v4a, "192.168.0.1").execute(t)
+	== false) {
+	verbose_log("Failed to set endpoint");
+	return 1;
+    }
+
+    // Create an address on a non-existant interface and check it fails
+    IPv6 v6a("fe80::909:b3ff:fe10:b467");
+    if (IfMgrIPv6Add("if0", "bad0", v6a).execute(t) == true) {
+	verbose_log("Created address on non-existent interface\n");
+	return 1;
+    }
+
+    // Create and configure an IPv6 address
+    if (IfMgrIPv6Add("if0", "vif0", v6a).execute(t) == false) {
+	verbose_log("Failed to create an address\n");
+	return 1;
+    }
+    if (IfMgrIPv6SetPrefix("if0", "vif0", v6a, 48).execute(t) == false) {
+	verbose_log("Failed to set address prefix");
+	return 1;
+    }
+    if (IfMgrIPv6SetEnabled("if0", "vif0", v6a, true).execute(t)
+	== false) {
+	verbose_log("Failed to set address enabled");
+	return 1;
+    }
+    if (IfMgrIPv6SetMulticastCapable("if0", "vif0", v6a, true).execute(t)
+	== false) {
+	verbose_log("Failed to set multicast capable");
+	return 1;
+    }
+    if (IfMgrIPv6SetLoopback("if0", "vif0", v6a, false).execute(t) == false) {
+	verbose_log("Failed to set loopback");
+	return 1;
+    }
+    IPv6 oaddr("fe80::220:edff:fe5c:d0c7");
+    if (IfMgrIPv6SetEndpoint("if0", "vif0", v6a, oaddr).execute(t)
 	== false) {
 	verbose_log("Failed to set endpoint");
 	return 1;
