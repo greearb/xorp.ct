@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.6 2003/05/23 00:02:08 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.7 2003/05/28 17:37:57 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -284,6 +284,7 @@ ModuleCommand::action_complete(const XrlError& err,
 	}
 	return;
     } else {
+	UNUSED(cmd);
 	//There was an error.  There's nothing we can so here - errors
 	//are handled in the TaskManager.
 	return;
