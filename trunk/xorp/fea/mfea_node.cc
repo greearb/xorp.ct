@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.24 2004/04/01 12:22:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.25 2004/04/05 03:11:45 pavlin Exp $"
 
 
 //
@@ -195,7 +195,10 @@ MfeaNode::stop()
 	if (_proto_comms[i] != NULL)
 	    _proto_comms[i]->stop();
     }
-    
+
+    // Stop the MfeaMrouter
+    _mfea_mrouter.stop();
+
     // Clear the MRIB table
     _mrib_table_read_timer.unschedule();
     mrib_table().clear();
