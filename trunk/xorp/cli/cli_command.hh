@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.3 2003/03/10 23:20:11 hodson Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.7 2004/02/28 21:14:48 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -53,9 +53,10 @@ typedef XorpCallback5<int,	/* return_value */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_PROCESS_CALLBACK;
 
-typedef XorpCallback2<map<string, string>, /* return value */
-    const string&		/* path_so_far */,
-    bool&			/* indicate to copy callback to the new node */
+typedef XorpCallback3<map<string, string>, /* return value */
+    const string& ,		/* global_name */
+    bool& ,			/* can_be_run */
+    bool&			/* can_pipe */
 >::RefPtr DYNAMIC_CHILDREN_CALLBACK;
 
 //

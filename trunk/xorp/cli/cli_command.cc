@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.3 2003/03/10 23:20:11 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.7 2004/02/28 21:14:48 pavlin Exp $"
 
 
 //
@@ -724,10 +724,12 @@ CliCommand::child_command_list()
 
 	// Add dynamic children
 	XLOG_ASSERT(global_name().size() > 0);
-	bool can_be_run;
+	bool can_be_run = false;
+	bool can_pipe = false;
 	map<string, string> dynamic_children;
 	dynamic_children = _dynamic_children_callback->dispatch(global_name(),
-								can_be_run);
+								can_be_run,
+								can_pipe);
 	if (can_be_run) {
 	    if (_cli_process_callback.is_empty())
 		_cli_process_callback = _dynamic_process_callback;
@@ -742,6 +744,7 @@ CliCommand::child_command_list()
 	    new_cmd = add_command(command_name, command_help);
 	    string child_name = global_name() + " " + command_name;
 	    new_cmd->set_global_name(child_name);
+	    new_cmd->set_can_pipe(can_pipe);
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
 	}
