@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.10 2004/03/04 00:09:05 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.11 2004/06/15 00:32:41 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -57,7 +57,7 @@ is are already running.  However, the binary program ``test_mfea''
 already contains it as well, therefore it is sufficient to start only
 this program (as a root).
 
-First, make sure that IP forwarding be enabled before starting XORP:
+First, make sure that IP forwarding is enabled.
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
       sysctl net.inet.ip.forwarding=1
       sysctl net.inet6.ip6.forwarding=1
