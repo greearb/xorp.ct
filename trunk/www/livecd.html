@@ -1,0 +1,91 @@
+<!-- $XORP$ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<HEAD>
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<TITLE>XORP Live CD</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<p>
+<a href="/"><img src="xorp2.png" alt="XORP logo"  border="0"></a>
+<h2>XORP Live CD</h2>
+<P>
+The XORP Live CD is a bootable CD containing the Linux operating
+system and the XORP routing code.  It runs on an x86 PC only.
+<P>
+Linux boots off the CD into a memory filesystem, and then starts up
+XORP directly.  If there is a DOS floppy in the floppy drive, the XORP
+configuration file will be taken from the floppy and
+used for the router configuration.  If the PC has a hard
+disk, that disk will not be modified by running the Live CD.
+<P>
+The Live CD serves a number of purposes:
+<UL>
+<LI> It's an easy way to try out XORP without needing to
+compile anything or reformat the disk on your PC.
+<LI> It's a quick way to get a relatively secure router on demand -
+you don't need to know anything about Linux.
+<LI> It's a great tool for a student lab session, requiring no installation.
+</UL>
+<P>
+<h3>Getting the XORP Live CD</h3>
+<B><font color="red">The Live CD is not yet available.  It will be available from this
+page when the XORP 1.0 release is made</font></B>.
+<P>
+The XORP Live CD will be available as an ISO image.  You need to
+download it and burn it onto a CD.  
+<P>
+Some instructions on how to burn an ISO to a CD-R or CD-RW disk are here:
+<UL>
+<LI>On <a href="http://users.owt.com/kstewart/freebsd/iso-images.html">Windows</a>
+<LI>On <a href="http://www-106.ibm.com/developerworks/linux/library/l-cdburn.html#heading_e">Linux</a> using <a href="http://freshmeat.net/projects/cdrecord/">cdrecord</a> (aka cdrtools).
+<LI>cdrtools also works on FreeBSD.  It's in /usr/ports/sysutils/cdrtools.
+</UL>
+<P>
+<h3>Running the XORP Live CD</h3>
+To run the Live CD will probably require you to modify your PC's BIOS settings.
+In particular, the boot order should be:
+<OL>
+<LI>CD drive.
+<LI>Floppy Disk.
+<LI>Hard Disk.
+</OL>
+Actually it doesn't matter what order the floppy and hard disk are, so
+long as they're after the CD drive in the boot order.  This is usually
+pretty easy to change in the BIOS - you might want to make a note of
+the original boot order in case you want to switch it back afterwards.
+<P>
+If you want the router to start up with a non-default configuration,
+you'll also need to insert a DOS-formatted floppy into the floppy
+drive, and put the XORP <B>config.boot</B> file you want used on it.
+See <a href="getting_started.html">"Getting Started"</a> for
+information about what goes in config.boot.
+<P>
+Then reboot the PC.  The PC should boot from the CD, start the XORP
+router manager, read the config.boot file from the floppy, and
+configure the interfaces and routing protocols as specified in the
+config.boot file.
+<P>
+If there's no config.boot file on the floppy, then a default
+configuration will be loaded with no routing protocols running, and
+the interfaces configured with private addresses.
+<P>
+The default user is <I>xorp</I> with password <I>xorpxorp</I>.  Such a
+machine should not be connected to the public Internet without
+changing the default password.  If you want to connect the machine and
+use it for routing, you will also need to include a passwd file on the
+floppy.  <I>Details of how to create this passwd file will appear here
+when the LiveCD is released<I>.
+<hr>
+<address>feedback&#64;xorp&#46;org</address>
+<!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
+<!-- hhmts start -->
+<small>
+Last modified: $Date$.
+</small>
+<!-- hhmts end -->
+
+  </body>
+</html>
+
