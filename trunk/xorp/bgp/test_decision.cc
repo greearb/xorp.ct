@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.21 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.22 2003/10/11 03:17:56 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -825,6 +825,417 @@ test_decision(TestInfo& /*info*/)
     delete msg;
     delete palist4;
     delete palist5;
+    debug_table->write_separator();
+
+    // ================================================================
+    // Test5F: decision by MED
+    // ================================================================
+
+    peer_data1->set_id("101.0.0.0");
+    peer_data2->set_id("100.0.0.0");
+    peer_data3->set_id("102.0.0.0");
+    palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    palist4->add_path_attribute(LocalPrefAttribute(100));
+    palist4->add_path_attribute(MEDAttribute(100));
+    palist4->rehash();
+
+    palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt3, igp_origin_att);
+    palist5->add_path_attribute(LocalPrefAttribute(100));
+    palist5->add_path_attribute(MEDAttribute(200));
+    palist5->rehash();
+
+    palist6 = new PathAttributeList<IPv4>(nhatt1, aspathatt3, igp_origin_att);
+    palist6->add_path_attribute(LocalPrefAttribute(100));
+    palist6->add_path_attribute(MEDAttribute(50));
+    palist6->rehash();
+
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 5F1");
+    debug_table->write_comment("TEST OF MED");
+    debug_table->write_comment("");
+    debug_table->write_comment("SENDING FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 2");
+    debug_table->write_comment("NEW ROUTE WINS ON BGP ID");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    debug_table->write_comment("ROUTE 1 RE-INSTATED");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    debug_table->write_comment("ROUTE 2 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    debug_table->write_comment("ROUTE 1 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 5F2");
+    debug_table->write_comment("TEST OF MED");
+    debug_table->write_comment("");
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 1");
+    debug_table->write_comment("WINS ON BGP ID");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 2");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    debug_table->write_comment("ROUTE 3 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+    debug_table->write_separator();
+
+
+
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 5F3");
+    debug_table->write_comment("TEST OF MED");
+    debug_table->write_comment("");
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 1");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    debug_table->write_comment("ROUTE 1 NOW WINS");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    debug_table->write_comment("ROUTE 2 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 5F4");
+    debug_table->write_comment("TEST OF MED");
+    debug_table->write_comment("");
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+ 
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 2");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+
+    debug_table->write_separator();
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 5F5");
+    debug_table->write_comment("TEST OF MED");
+    debug_table->write_comment("");
+
+    debug_table->write_comment("SENDING FROM PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    debug_table->write_comment("ROUTE 3 NOW WINS");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 1");
+    debug_table->write_comment("ROUTE 1 NOW WINS");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    debug_table->write_comment("ROUTE 3 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    debug_table->write_comment("ROUTE 2 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 5F6");
+    debug_table->write_comment("TEST OF MED");
+    debug_table->write_comment("");
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 2");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 1");
+    debug_table->write_comment("ROUTE 1 WINS");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    debug_table->write_comment("ROUTE 3 TAKES OVER");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    debug_table->write_comment("NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    delete palist4;
+    delete palist5;
+    delete palist6;
     debug_table->write_separator();
 
     // ================================================================
@@ -2209,7 +2620,7 @@ test_decision(TestInfo& /*info*/)
 	fclose(file);
 	return false;
    }
-#define BUFSIZE 60000
+#define BUFSIZE 80000
     char testout[BUFSIZE];
     memset(testout, 0, BUFSIZE);
     int bytes1 = fread(testout, 1, BUFSIZE, file);

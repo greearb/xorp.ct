@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.15 2003/10/21 20:20:52 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.16 2003/10/22 10:58:26 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -283,6 +283,84 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     assert(_parents.find(caller) != _parents.end());
     assert(_next_table != NULL);
 
+    //find the alternative routes, and the old winner if there was one.
+    RouteData<A> *old_winner = NULL, *old_winner_clone = NULL;
+    list<RouteData<A> > alternatives;
+    old_winner = find_alternative_routes(caller, rtmsg.net(), alternatives);
+
+    //preserve old_winner because the original may be deleted by the
+    //decision process
+    if (old_winner != NULL) {
+	old_winner_clone = new RouteData<A>(*old_winner);
+	debug_msg("The Old winner was %s\n", 
+		  old_winner->route()->str().c_str());
+    } else if (rtmsg.route()->is_winner()) {
+	//the route being deleted was the old winner
+	old_winner_clone = new RouteData<A>(rtmsg.route(), caller,
+					    rtmsg.origin_peer());
+    }
+    
+    RouteData<A> *new_winner = NULL;
+    if (!alternatives.empty()) {
+	//add the new route to the pool of possible winners.
+	new_winner = find_winner(alternatives);
+    }
+
+    if (old_winner_clone == NULL && new_winner == NULL) {
+	//there are no resolvable routes, and there weren't before either/
+	//nothing to do.
+	return -1;
+    }
+    bool delayed_push = rtmsg.push();
+    if (old_winner_clone != NULL) {
+	if (new_winner != NULL
+	    && old_winner_clone->route() == new_winner->route()) {
+	    //the winner didn't change.
+	    assert(old_winner_clone != NULL);
+	    delete old_winner_clone;
+	    return -1;
+	}
+
+	//the winner did change, or there's no new winner, so send a
+	//delete for the old winner
+	if (old_winner_clone->route() != rtmsg.route()) {
+	    InternalMessage<A> old_rt_msg(old_winner_clone->route(), 
+					  old_winner_clone->peer_handler(), 
+					  GENID_UNKNOWN);
+	    if (rtmsg.push() && new_winner == NULL)
+		old_rt_msg.set_push();
+	    _next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
+	    old_winner_clone->set_is_not_winner();
+	} else {
+	    if (new_winner != NULL)
+		rtmsg.force_clear_push();
+	    _next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+	    rtmsg.route()->set_is_not_winner();
+	}
+
+	//clean up temporary state
+	delete old_winner_clone;
+    }
+
+    if (new_winner != NULL) {
+	//send an add for the new winner
+	new_winner->route()->set_is_winner(
+		   igp_distance(new_winner->route()->nexthop()));
+	int result;
+	InternalMessage<A> new_rt_msg(new_winner->route(), 
+				      new_winner->peer_handler(), 
+				      GENID_UNKNOWN);
+	//	if (rtmsg.push())
+	//	    new_rt_msg.set_push();
+	result = _next_table->add_route(new_rt_msg, 
+					(BGPRouteTable<A>*)this);
+	if (delayed_push)
+	    _next_table->push((BGPRouteTable<A>*)this);
+    }
+
+    return 0;
+
+#if 0
     if (rtmsg.route()->is_winner() == false) {
 	cp(28);
 	//the route wasn't the winner before, so we don't need to do anything
@@ -348,6 +426,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 	
     return del_result;
+#endif
 }
 
 template<class A>

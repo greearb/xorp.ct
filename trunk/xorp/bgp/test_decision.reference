@@ -716,6 +716,556 @@ Local Preference Attribute - 100
 
 [separator]-------------------------------------
 [comment] ******************************************
+[comment] TEST 5F1
+[comment] TEST OF MED
+[comment] 
+[comment] SENDING FROM PEER 1
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] NEW ROUTE WINS ON BGP ID
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[comment] ROUTE 1 RE-INSTATED
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[comment] ROUTE 2 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[comment] ROUTE 1 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 5F2
+[comment] TEST OF MED
+[comment] 
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] WINS ON BGP ID
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[comment] ROUTE 3 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 5F3
+[comment] TEST OF MED
+[comment] 
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[comment] ROUTE 1 NOW WINS
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[comment] ROUTE 2 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 5F4
+[comment] TEST OF MED
+[comment] 
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 5F5
+[comment] TEST OF MED
+[comment] 
+[comment] SENDING FROM PEER 2
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[comment] ROUTE 3 NOW WINS
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] ROUTE 1 NOW WINS
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[comment] ROUTE 3 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[comment] ROUTE 2 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=200
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 5F6
+[comment] TEST OF MED
+[comment] 
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] ROUTE 1 WINS
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[comment] ROUTE 3 TAKES OVER
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+Multiple Exit Descriminator Attribute: MED=100
+Local Preference Attribute - 100
+
+
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[comment] NO CHANGE
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+Multiple Exit Descriminator Attribute: MED=50
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ******************************************
 [comment] TEST 6
 [comment] TEST OF ORIGIN
 [comment] IGP beats EGP beats INCOMPLETE
@@ -1906,7 +2456,6 @@ Local Preference Attribute - 300
 
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.1 BECOMES UNRESOLVABLE
-[PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -1916,6 +2465,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
+[PUSH]
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
