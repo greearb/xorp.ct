@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.19 2004/02/24 21:02:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.20 2004/02/24 23:49:42 pavlin Exp $"
 
 
 //
@@ -175,52 +175,12 @@ Mld6igmpVif::start()
     if (! is_multicast_capable())
 	return (XORP_ERROR);
 
-    //
-    // Get the primary address and the domain-wide reachable address.
-    // The primary address should be a link-local unicast address, and
-    // is used for transmitting the multicast control packets on the LAN.
-    // The domain-wide reachable address is the address that should be
-    // used if there is no link-local unicast address (e.g., in case of IPv4).
-    //
-    IPvX primary_a(IPvX::ZERO(family()));
-    IPvX domain_wide_a(IPvX::ZERO(family()));
-
-    // Reset the primary address
-    set_primary_addr(IPvX::ZERO(family()));
-
-    list<VifAddr>::const_iterator iter;
-    for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
-	const VifAddr& vif_addr = *iter;
-	const IPvX& addr = vif_addr.addr();
-	if (! addr.is_unicast())
-	    continue;
-	if (addr.is_linklocal_unicast()) {
-	    primary_a = addr;
-	    continue;
-	}
-	// XXX: assume that everything else can be a domain-wide reachable
-	// address.
-	domain_wide_a = addr;
-    }
-    //
-    // XXX: if there is no link-local address to serve as a primary address,
-    // then use the domain-wide address as a primary address.
-    //
-    if (primary_a == IPvX::ZERO(family()))
-	primary_a = domain_wide_a;
-
-    //
-    // Check that the interface has a primary address.
-    // addresses.
-    //
-    if (primary_a == IPvX::ZERO(family()))
+    if (update_primary_address() < 0)
 	return (XORP_ERROR);
-    
+
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
 
-    set_primary_addr(primary_a);
-    
     // On startup, assume I am the MLD6IGMP Querier
     _querier_addr = primary_addr();
     _proto_flags |= MLD6IGMP_VIF_QUERIER;
@@ -497,6 +457,59 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
     } while (false);
     
     return (ret_value);
+}
+
+/**
+ * Mld6igmpVif::update_primary_address:
+ * @: 
+ * 
+ * Update the primary address.
+ * 
+ * The primary address should be a link-local unicast address, and
+ * is used for transmitting the multicast control packets on the LAN.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+Mld6igmpVif::update_primary_address()
+{
+    IPvX primary_a(IPvX::ZERO(family()));
+    IPvX domain_wide_a(IPvX::ZERO(family()));
+
+    // Reset the primary address
+    set_primary_addr(IPvX::ZERO(family()));
+
+    list<VifAddr>::const_iterator iter;
+    for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
+	const VifAddr& vif_addr = *iter;
+	const IPvX& addr = vif_addr.addr();
+	if (! addr.is_unicast())
+	    continue;
+	if (addr.is_linklocal_unicast()) {
+	    primary_a = addr;
+	    continue;
+	}
+	// XXX: assume that everything else can be a domain-wide reachable
+	// address.
+	domain_wide_a = addr;
+    }
+    //
+    // XXX: if there is no link-local address to serve as a primary address,
+    // then use the domain-wide address as a primary address.
+    //
+    if (primary_a == IPvX::ZERO(family()))
+	primary_a = domain_wide_a;
+
+    //
+    // Check that the interface has a primary address.
+    // addresses.
+    //
+    if (primary_a == IPvX::ZERO(family()))
+	return (XORP_ERROR);
+    
+    set_primary_addr(primary_a);
+    
+    return (XORP_OK);
 }
 
 /**

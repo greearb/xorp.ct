@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.11 2004/02/22 03:12:02 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.12 2004/02/24 21:02:00 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -138,6 +138,16 @@ public:
      * @param v the value of the primary address.
      */
     void	set_primary_addr(const IPvX& v) { _primary_addr = v; }
+
+    /**
+     * Update the primary address.
+     * 
+     * The primary address should be a link-local unicast address, and
+     * is used for transmitting the multicast control packets on the LAN.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		update_primary_address();
     
     /**
      * Get the MLD/IGMP querier address.
