@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.20 2004/05/28 18:26:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.21 2004/05/28 22:28:00 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -130,8 +130,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     //
     filename = "/tmp/rtrmgr-" + clientname;
     mode_t oldmode = umask(S_IRWXG|S_IRWXO);
-    XLOG_TRACE(_verbose, "newmode: %o oldmode: %o\n",
-	       S_IRWXG|S_IRWXO, oldmode);
+    debug_msg("newmode: %o oldmode: %o\n", S_IRWXG|S_IRWXO, oldmode);
 
     FILE* file = fopen(filename.c_str(), "w+");
     if (file == NULL) {
@@ -236,7 +235,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 {
     string response;
 
-    if (!verify_token(token)) {
+    if (! verify_token(token)) {
 	response = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
@@ -724,7 +723,7 @@ XrlRtrmgrInterface::get_user_id_from_token(const string& token) const
     if (token.size() < 10)
 	return (uint32_t)-1;
     string uidstr = token.substr(0, 10);
-    string authstr = token.substr(10,tlen-10);
+    string authstr = token.substr(10, tlen - 10);
     sscanf(uidstr.c_str(), "%u", &user_id);
     return user_id;
 }
