@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.35 2003/04/28 18:13:03 jcardona Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.36 2003/04/28 22:05:07 jcardona Exp $"
 
-//#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "config.h"
@@ -899,6 +899,10 @@ BGPPeer::event_open(const int sock)
 	event_open();
     } else {
 	debug_msg("rejected\n");
+	XLOG_INFO("Peer %s: rejecting connection: current state %s",
+		     peerdata()->iptuple().str().c_str(),
+		     pretty_print_state(_state));
+		     
 	if (-1 == ::close(sock)) {
 	    XLOG_WARNING("Close of incoming connection failed: %s",
 			 strerror(errno));
