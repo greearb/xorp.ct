@@ -1,0 +1,62 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Research and Reality}
+
+The Internet has been fabulously successful; previously unenvisaged
+new applications appear frequently, and changing usage patterns have
+been accomodated with relative ease.  But underneath the successful
+veneer, the low-level protocols that support the Internet have largely
+ossified, and stresses are beginning to show.  Examples are security
+and convergence problems with BGP routing, the inability to deploy
+multicast, QoS, or IPv6, and the lack of effective defense mechanisms
+against denial-of-service attacks.
+
+At the same time, the participation in the IETF by the research
+community is at an all time low, and many distinguished researchers
+have abandoned fundamental Internet research and moved into areas such
+as sensor-nets, Grid computing, and overlay networks where they
+perceive they can still make a difference.  This trend is
+understandable, but seems a recipe for disaster in the long term,
+because the Internet industry is simply not doing research that would
+solve these problems. Thus it behooves us to ask two questions: {\it
+what is the root cause of this disconnect}, and {\it what can we do to
+solve it?}
+
+The root cause appears to be that the router software market is
+closed, in the sense that if you buy a router from a vendor, then that
+router will only run that vendor's software.  This means that it is
+almost impossible for researchers to experiment in real networks, or
+to develop proof-of-concept code that might convince network operators
+that there are alternatives to current practice.  This not only
+affects researchers - much innovation is driven by startup companies,
+but the lack of open router APIs also excludes this channel for
+change.
+
+The solution seems simple in principle: router software needs to have
+open APIs for extensibility.  Unfortunately existing router software
+was not written with third-party extension in mind, so doesn't
+generally include the right hooks, extension mechanisms and security
+boundaries.  
+
+How then can we enable a pathway that permits research and
+experimentation to be performed in production environments whilst
+minimally impacting existing network services?  In part, this
+is the same problem that Active Networks attempted to solve, but we
+believe that a much more conservative approach is more likely to see
+real-world usage.
+
+Our vision is on an integrated open-source software router platform,
+running on commodity hardware, that is viable as both a research and as a
+production platform.  The software architecture should be designed
+with extensibility as a primary goal and should permit experimental
+protocol deployment with minimal risk to existing services using that
+router.  Internet researchers needing access to router software could
+then share a common platform for experimentation deployed in places
+where real traffic conditions exist.  In these ways, the loop
+between research and realistic real-world experimentation can be
+closed, and innovation can take place much more freely.
+
+We started work in early 2001, and made our 1.0 release this summer.
+We call it XORP.
+
+

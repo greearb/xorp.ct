@@ -1,0 +1,31 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Summary}
+
+We believe that much good Internet research is being frustrated by an
+inability to deploy experimental router software at points in the
+network where it makes most sense.  These problems affect a wide range
+of research, including routing protocols themselves, active queue
+management schemes, and so-called ``middlebox'' functionality such as
+our own traffic normalizer~\cite{norm}.  Many of these problems would
+not exist if the router software market more closely resembled the
+end-system software market, which has well defined APIs for
+application software, and high performance reliable open-source
+operating systems that permit kernel protocol experimentation.  Our
+vision for XORP is to provide just such an open
+platform; one that is stable and fully featured enough for serious
+production use (initially on edge-routers), but designed from the very
+outset to support extensibility and experimentation without
+compromising the stability of the core platform.
+
+Thus, while XORP is primarily intended to {\em enable} research, we
+also believe that it will also further knowledge about how to
+construct robust extensible networking systems.
+
+Finally, while we do not expect to change the whole way the router
+software market functions, it is not impossible that the widespread
+use of an open software platform for routers might have this effect.
+The ultimate measure of our success would be if commercial router
+vendors either adopted XORP directly, or opened up their software
+platforms in such a way that a market for router application software
+is enabled.
