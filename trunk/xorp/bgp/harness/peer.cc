@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.40 2003/09/16 21:54:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.41 2003/09/17 03:36:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -768,6 +768,105 @@ mrtd_traffic_dump(const uint8_t *buf, const size_t len , const TimeVal tv,
     fclose(fp);
 }
 
+template <class A>
+void
+mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
+		     const TimeVal tv, const string fname, 
+		     const int sequence)
+{
+    FILE *fp = fopen(fname.c_str(), "a");
+    if(0 == fp)
+	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
+
+    /*
+    ** Figure out the total length of the attributes.
+    */
+    uint16_t length = 0;
+    
+    list <PathAttribute*>::const_iterator pai;
+    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
+	const PathAttribute* pa;
+	pa = *pai;
+
+	length += pa->wire_size();
+    }
+
+    /*
+    ** Due to alignment problems I can't use a structure overlay.
+    */
+    uint8_t viewbuf[18 + A::addr_size()], *ptr;
+
+    mrt_header header;
+    header.time = htonl(tv.sec());
+    header.type = htons(12);
+    if(4 == A::ip_version())
+	header.subtype = htons(1);
+    else if(6 == A::ip_version())
+	header.subtype = htons(2);
+    else
+	XLOG_FATAL("unknown ip version %d", A::ip_version());
+
+    header.length = htonl(length + sizeof(viewbuf));
+    
+    if(fwrite(&header, sizeof(header), 1, fp) != 1)
+	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
+
+    memset(&viewbuf[0], 0, sizeof(viewbuf));
+    ptr = &viewbuf[0];
+
+    // View number
+    *reinterpret_cast<uint16_t *>(ptr) = 0;
+    ptr += 2;
+
+    // Sequence number
+    *reinterpret_cast<uint16_t *>(ptr) = htons(sequence);
+    ptr += 2;
+
+    // Prefix
+    net.masked_addr().copy_out(ptr);
+    ptr += A::addr_size();
+
+    // Prefix length
+    *reinterpret_cast<uint8_t *>(ptr) = net.prefix_len();
+    ptr += 1;
+
+    // Status
+    *reinterpret_cast<uint8_t *>(ptr) = 0x1;
+    ptr += 1;
+
+    // Uptime
+    *reinterpret_cast<uint32_t *>(ptr) = 0;
+    ptr += 4;
+
+    // Peer address
+    *reinterpret_cast<uint32_t *>(ptr) = 0;
+    ptr += 4;
+
+    // Peer AS
+    *reinterpret_cast<uint16_t *>(ptr) = 0;
+    ptr += 2;
+
+    // Attribute length
+    *reinterpret_cast<uint16_t *>(ptr) = htons(length);
+    ptr += 2;
+
+    XLOG_ASSERT(ptr == &viewbuf[sizeof(viewbuf)]);
+
+    if(fwrite(&viewbuf[0], sizeof(viewbuf), 1, fp) != 1)
+	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
+
+    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
+	const PathAttribute* pa;
+	pa = *pai;
+
+	if(fwrite(pa->data(), pa->wire_size(), 1, fp) != 1)
+	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
+		       strerror(errno));
+    }
+
+    fclose(fp);
+}
+
 void
 text_traffic_dump(const uint8_t *buf, const size_t len, const TimeVal, 
 	  const string fname)
@@ -778,6 +877,16 @@ text_traffic_dump(const uint8_t *buf, const size_t len, const TimeVal,
 
     fprintf(fp, bgppp(buf, len).c_str());
     fclose(fp);
+}
+
+template <class A>
+void
+mrtd_routeview_dump(const UpdatePacket* p, const IPNet<A>& net,
+		const TimeVal& tv,
+		const string fname, int *sequence)
+{
+    mrtd_routview_dump<A>(p, net, tv, fname, *sequence);
+    (*sequence)++;
 }
 
 template <class A>
@@ -795,14 +904,15 @@ mrtd_debug_dump(const UpdatePacket* p, const IPNet<A>& /*net*/,
 template <class A>
 void
 text_debug_dump(const UpdatePacket* p, const IPNet<A>& net,
-		const TimeVal& /*tv*/,
+		const TimeVal& tv,
 		const string fname)
 {
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
 	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
 
-    fprintf(fp, "%s\n%s\n", net.str().c_str(), p->str().c_str());
+    fprintf(fp, "%s\n%s\n%s\n", net.str().c_str(), tv.pretty_print().c_str(),
+	    p->str().c_str());
     fclose(fp);
 }
 
@@ -898,6 +1008,28 @@ Peer::dump(const string& line, const vector<string>& words)
  	else
 	    *dumper = callback(text_traffic_dump, filename);
     } else if("routeview" == words[5]) {
+	if("" == filename) {
+	    xorp_throw(InvalidString,
+		       c_format("no filename provided\n[%s]", line.c_str()));
+	}
+	int sequence = 0;
+	if(ipv4) {
+	    Trie::TreeWalker_ipv4 tw_ipv4;
+	    if(mrtd)
+		tw_ipv4 = callback(mrtd_routeview_dump<IPv4>, filename,
+				   &sequence);
+	    else
+		tw_ipv4 = callback(text_debug_dump<IPv4>, filename);
+	    op->tree_walk_table(tw_ipv4);
+	} else {
+	    Trie::TreeWalker_ipv6 tw_ipv6;
+	    if(mrtd)
+		tw_ipv6 = callback(mrtd_routeview_dump<IPv6>, filename,
+				   &sequence);
+	    else
+		tw_ipv6 = callback(text_debug_dump<IPv6>, filename);
+	    op->tree_walk_table(tw_ipv6);
+	}
     } else if("replay" == words[5]) {
 	if("" == filename) {
 	    xorp_throw(InvalidString,
