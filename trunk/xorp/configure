@@ -5532,7 +5532,8 @@ done
 
 
 
-for ac_header in sys/ethernet.h net/ethernet.h net/if_ether.h
+
+for ac_header in sys/ethernet.h net/ethernet.h net/if_ether.h netinet/if_ether.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -5656,6 +5657,10 @@ fi
 if test "${ac_cv_header_net_if_ether_h}" = "yes"
 then
 	xr_cv_ether_header="net/if_ether.h"
+fi
+if test "${ac_cv_header_netinet_if_ether_h}" = "yes"
+then
+	xr_cv_ether_header="netinet/if_ether.h"
 fi
 
 echo "$as_me:$LINENO: checking for ether_ntoa in $xr_cv_ether_header" >&5

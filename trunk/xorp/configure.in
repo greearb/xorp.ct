@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.67 2003/09/30 20:28:46 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.68 2003/09/30 20:55:00 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -560,9 +560,9 @@ AC_CHECK_HEADERS(sys/cdefs.h sys/ioctl.h sys/sockio.h sys/sysctl.h sys/filio.h n
 
 dnl
 dnl XXX ether_addr is defined in one of the following header files:
-dnl sys/ethernet.h, net/ethernet.h or net/if_ether.h
+dnl sys/ethernet.h, net/ethernet.h, net/if_ether.h or netinet/if_ether.h
 dnl
-AC_CHECK_HEADERS(sys/ethernet.h net/ethernet.h net/if_ether.h)
+AC_CHECK_HEADERS(sys/ethernet.h net/ethernet.h net/if_ether.h netinet/if_ether.h)
 if test "${ac_cv_header_sys_ethernet_h}" = "yes"
 then
 	xr_cv_ether_header="sys/ethernet.h"
@@ -574,6 +574,10 @@ fi
 if test "${ac_cv_header_net_if_ether_h}" = "yes"
 then
 	xr_cv_ether_header="net/if_ether.h"
+fi
+if test "${ac_cv_header_netinet_if_ether_h}" = "yes"
+then
+	xr_cv_ether_header="netinet/if_ether.h"
 fi
 
 dnl
