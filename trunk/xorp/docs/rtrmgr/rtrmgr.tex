@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.22 2004/06/25 02:49:58 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.23 2004/07/09 04:42:53 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -507,16 +507,61 @@ For example, if the template tree held the following:
 
 \begin{tabbing}
 \tt addr\=\tt ess \=\tt@: ipv4 \{\\
-    \>\tt\%create: xrl {\it XRL1}\\
-    \>\tt\%activate: xrl {\it XRL2}\\
+    \>\tt\%create: xrl {\it XRL1};\\
+    \>\tt\%activate: xrl {\it XRL2};\\
     \>\tt netmask: ipv4 \{\\
-        \>\>\tt\%set: xrl {\it XRL3}\\
+        \>\>\tt\%set: xrl {\it XRL3};\\
     \>\tt\}\\
 \tt\}
 \end{tabbing}
 
 Then when an instance of address and netmask are created and
 configured, the execution order of the XRLs will be: {\it XRL1, XRL3, XRL2}.
+
+\subsubsection{The {\tt \%update} Command.}
+{\tt \%update} is used to update an existing instance of a
+node in the configuration tree.  It is typically paired with {\tt
+\%activate} - the {\tt \%activate} command is executed
+after the node's children have been configured for very first time (\eg on
+startup), whereas {\tt \%update} is executed if some of the node's children
+have been modified (\eg via xorpsh).
+
+\begin{itemize}
+
+  \item The first parameter indicates the form of action to take to perform
+this action - typically it is {\tt xrl} which indicates an XRL should
+be called.
+
+  \item If the action is {\tt xrl}, then the second parameter gives the XRL to
+call to update the configuration tree instance of this template
+tree node.
+
+\end{itemize}
+
+Note that if the value of a node is modified, only the closest {\tt \%update}
+command up in the hierarchy is executed. For example, if the template tree
+held the following:
+
+\begin{tabbing}
+\tt addr\=\tt ess \=\tt@: i\=\tt pv4 \{\\
+    \>\tt\%create: xrl {\it XRL1};\\
+    \>\tt\%activate: xrl {\it XRL2};\\
+    \>\tt\%update: xrl {\it XRL3};\\
+    \>\tt netmask: ipv4 \{\\
+        \>\>\tt\%update: xrl {\it XRL4};\\
+        \>\>\tt enabled: bool \{\\
+             \>\>\>\tt\%set:;\\
+        \>\>\tt\}\\
+    \>\tt\}\\
+    \>\tt broadcast: ipv4 \{\\
+        \>\>\tt\%set:;\\
+    \>\tt\}\\
+\tt\}
+\end{tabbing}
+
+Then when the value of {\tt netmask} and/or {\tt enabled} are modified, only
+{\it XRL4} will be called. If the value of {\tt broadcast} is modified,
+then {\it XRL3} will be called.
 
 \subsubsection{The {\tt \%list} Command.}
 {\tt \%list} is called to obtain a list of all the configuration tree
