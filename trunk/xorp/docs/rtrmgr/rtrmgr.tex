@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.19 2004/05/26 04:49:21 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.20 2004/06/02 17:36:18 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -652,7 +652,7 @@ combinations are allowed.
 The {\tt \%allow-range} command restricts the range of values an
 integer configuration item may take.  The syntax is:
 
-\texttt{\%allow-range }{\it varName lowValue highValue} \texttt{;}
+\texttt{\%allow-range: }{\it varName lowValue highValue} \texttt{;}
 
 \noindent where the first parameter, \textit{varName}, gives the name
 of the variable to be restricted.  This is typically
@@ -671,7 +671,7 @@ specification:
        ...
        address @: ipv4 {
          prefix-length {
-           %allow-range $(@) "1" "32";
+           %allow-range: $(@) "1" "32";
            %set: xrl "...";
            %get: xrl "...";
          }
