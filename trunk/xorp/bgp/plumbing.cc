@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.33 2003/11/04 02:27:19 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.36 2004/02/12 07:00:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -456,7 +456,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     /* TBD */
     
     /* 10. cause the routing table to be dumped to the new peer */
-    _fanout_table->dump_entire_table(filter_out);
+    dump_entire_table(filter_out);
     if(_awaits_push)
 	push(peer_handler);
 
@@ -564,29 +564,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     rib_in = iter2->second;
     rib_in->ribin_peering_came_up();
 
-    _fanout_table->dump_entire_table(filter_out);
-
-    /*
-    ** It is possible that another peer was in the middle of going
-    ** down when this peering came up. So sweep through the peers and
-    ** look for the deletion tables. Treat them as if they have just
-    ** sent a peering_went_down.
-    */
-    for (iter2 = _in_map.begin(); iter2 != _in_map.end(); iter2++) {
-	rib_in = iter2->second;
-	debug_msg("<%s>\n", rib_in->next_table()->str().c_str());
-	DeletionTable<A> *deletion_table =
-	    dynamic_cast<DeletionTable<A> *>(rib_in->next_table());
-	
-	if (0 != deletion_table) {
-	    debug_msg("Found a deletion table\n");
-	    DumpTable<A> *dump_table =
-	    dynamic_cast<DumpTable<A> *>(filter_out->parent());
-	    XLOG_ASSERT(dump_table);
-	    dump_table->
-		peering_is_down(iter2->first, deletion_table->genid());
-	}
-    }
+    dump_entire_table(filter_out);
 
     if(_awaits_push)
 	push(peer_handler);
@@ -666,6 +644,38 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler)
     return 0;
 }
 
+template <class A>
+void
+BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out)
+{
+    debug_msg("BGPPlumbingAF<IPv%u>::dump_entire_table\n", A::ip_version());
+
+    _fanout_table->dump_entire_table(filter_out);
+
+    /*
+    ** It is possible that another peer was in the middle of going
+    ** down when this peering came up. So sweep through the peers and
+    ** look for the deletion tables. Treat them as if they have just
+    ** sent a peering_went_down.
+    */
+
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
+    for (iter2 = _in_map.begin(); iter2 != _in_map.end(); iter2++) {
+	RibInTable<A> *rib_in = iter2->second;
+	debug_msg("<%s>\n", rib_in->next_table()->str().c_str());
+	DeletionTable<A> *deletion_table =
+	    dynamic_cast<DeletionTable<A> *>(rib_in->next_table());
+	
+	if (0 != deletion_table) {
+	    debug_msg("Found a deletion table\n");
+	    DumpTable<A> *dump_table =
+	    dynamic_cast<DumpTable<A> *>(filter_out->parent());
+	    XLOG_ASSERT(dump_table);
+	    dump_table->
+		peering_is_down(iter2->first, deletion_table->genid());
+	}
+    }
+}
 
 template <class A>
 int 

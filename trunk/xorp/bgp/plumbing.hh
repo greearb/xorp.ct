@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.18 2003/10/31 02:46:03 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.19 2004/02/12 07:00:49 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -48,6 +48,11 @@ public:
     int peering_went_down(PeerHandler* peer_handler);
     int peering_came_up(PeerHandler* peer_handler);
     int delete_peering(PeerHandler* peer_handler);
+
+    /**
+     * A peering has just come up dump all the routes to it.
+     */
+    void dump_entire_table(FilterTable<A> *filter_out);
 
     int add_route(const InternalMessage<A> &rtmsg, 
 		  PeerHandler* peer_handler);
