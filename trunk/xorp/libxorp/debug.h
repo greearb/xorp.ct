@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/debug.h,v 1.4 2004/03/26 09:03:33 mjh Exp $
+ * $XORP: xorp/libxorp/debug.h,v 1.5 2004/06/10 22:41:15 hodson Exp $
  */
 
 #ifndef __LIBXORP_DEBUG_H__
@@ -137,6 +137,18 @@ inline void swallow_args(const char*, A, B, C, D, E, F, G) {}
 
 template <class A, class B, class C, class D, class E, class F, class G, class H>
 inline void swallow_args(const char*, A, B, C, D, E, F, G, H) {}
+
+template <class A, class B, class C, class D, class E, class F, class G, class H, class I>
+inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I) {}
+
+template <class A, class B, class C, class D, class E, class F, class G, class H, class I, class J>
+inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I, J) {}
+
+template <class A, class B, class C, class D, class E, class F, class G, class H, class I, class J, class K>
+inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I, J, K) {}
+
+template <class A, class B, class C, class D, class E, class F, class G, class H, class I, class J, class K, class L>
+inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I, J, K, L) {}
 
 inline void
 check_args(const char* fmt, ...) __printflike(1,2);
