@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.13 2003/05/09 19:36:16 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.14 2003/05/09 21:00:52 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -50,15 +50,6 @@ public:
 
     EventLoop& eventloop() const { return _eventloop; }
 
-    struct Reply {
-	XUID		xuid;
-	XrlError	error_code;
-	XrlArgs	response;
-
-	Reply(const XUID& id, const XrlError& error, XrlArgs r)
-	    : xuid(id), error_code(error), response(r) {}
-	~Reply() {}
-    };
 protected:
     EventLoop& _eventloop;
     const XrlDispatcher* _dispatcher;
