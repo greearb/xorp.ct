@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.4 2004/06/14 23:37:05 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.5 2004/06/14 23:58:04 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -10,7 +10,10 @@
 
     - Overwriting the default installation prefix by running
       "./configure --prefix=/path/to/xorp" currently does not work.
-      This will be fixed before XORP Release 1.0
+      This will be fixed for XORP Release 1.0.
+
+    - Some of the design documentation in ${XORP}/docs/ hasn't been updated
+      for this release candidate. This will be fixed for XORP Release 1.0.
 
   LIBXORP:
     - No known issues.
