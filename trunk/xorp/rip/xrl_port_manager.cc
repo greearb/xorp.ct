@@ -68,6 +68,25 @@ private:
     A _addr;
 };
 
+/**
+ * Unary function object to test whether a particular socket id is
+ * associated with a RIP port.
+ *
+ * NB At a future date we might want to track socket id to XrlPortIO
+ * mappings.  This would be more efficient.
+ */
+template <typename A>
+struct port_has_sockid {
+    inline port_has_sockid(const string& sockid) : _id(sockid) {}
+    inline bool operator() (Port<A>*& p) {
+	PortIOBase<A>* io = p->io_handler();
+	XrlPortIO<A>* xio = dynamic_cast<XrlPortIO<A>*>(io);
+	return xio && xio->socket_id() == _id;
+    }
+private:
+    string _id;
+};
+
 
 // ----------------------------------------------------------------------------
 // XrlPortManager
@@ -86,8 +105,30 @@ void
 XrlPortManager<A>::shutdown()
 {
     set_status(SHUTTING_DOWN);
+
+    typename PortManagerBase<A>::PortList& pl = ports();
+    typename PortManagerBase<A>::PortList::iterator i = pl.begin();
+
     // XXX Walk ports and shut them down.  Only when they are all
     // shutdown should we consider ourselves shutdown.
+
+    debug_msg("XXX XrlPortManager<A>::shutdown (%p)\n", this);
+    debug_msg("XXX n_ports = %u n_dead_ports %u\n",
+	      ports().size(), _dead_ports.size());
+
+    while (i != pl.end()) {
+	Port<A>* p = *i;
+	XrlPortIO<A>* xio = dynamic_cast<XrlPortIO<A>*>(p->io_handler());
+	if (xio) {
+	    _dead_ports.insert(make_pair(xio, p));
+	    xio->shutdown();
+	    pl.erase(i++);
+	    debug_msg("   XXX killing port %p\n", p);
+	} else {
+	    i++;
+	    debug_msg("   XXX skipping port %p\n", p);
+	}
+    }
 }
 
 template <typename A>
@@ -133,12 +174,13 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
 
     // Create port
     Port<A>* p = new Port<A>(*this);
+    ports().push_back(p);
 
     // Create XrlPortIO object for port
     XrlPortIO<A>* io = new XrlPortIO<A>(_xr, *p, ifname, vifname, addr);
 
     // Bind io to port
-    p->set_io_handler(io, true);
+    p->set_io_handler(io, false);
 
     // Add self to observers of io objects status
     io->set_observer(this);
@@ -171,19 +213,40 @@ XrlPortManager<A>::remove_rip_address(const string& 	/* ifname */,
 }
 
 template <typename A>
+bool
+XrlPortManager<A>::deliver_packet(const string& 		sockid,
+				  const A& 			src_addr,
+				  uint16_t 			src_port,
+				  const vector<uint8_t>& 	pdata)
+{
+    typename PortManagerBase<A>::PortList& pl = ports();
+    typename PortManagerBase<A>::PortList::iterator i;
+    i = find_if(pl.begin(), pl.end(), port_has_sockid<A>(sockid));
+    if (i == ports().end()) {
+	return false;
+    }
+    Port<A>* p = *i;
+    p->port_io_receive(src_addr, src_port, &pdata[0], pdata.size());
+    return true;
+}
+
+template <typename A>
 void
 XrlPortManager<A>::status_change(ServiceBase* 	service,
 				 ServiceStatus 	/* old_status */,
 				 ServiceStatus 	new_status)
 {
+    debug_msg("XXX %p status -> %s\n",
+	      service, service_status_name(new_status));
+
     if (new_status != SHUTDOWN)
 	return;
 
     typename map<ServiceBase*, Port<A>*>::iterator i;
     i = _dead_ports.find(service);
     XLOG_ASSERT(i != _dead_ports.end());
-    delete i->second;
-    _dead_ports.erase(i);
+    //    delete i->second;
+    //    _dead_ports.erase(i);
 }
 
 template <typename A>
@@ -192,7 +255,10 @@ XrlPortManager<A>::~XrlPortManager()
     _ifm.detach_hint_observer(this);
 
     while (_dead_ports.empty() == false) {
-	delete _dead_ports.begin()->second;
+	Port<A>* p = _dead_ports.begin()->second;
+	PortIOBase<A>* io = p->io_handler();
+	delete io;
+	delete p;
 	_dead_ports.erase(_dead_ports.begin());
     }
 }

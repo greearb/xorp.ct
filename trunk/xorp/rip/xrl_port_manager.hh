@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.2 2004/01/09 00:29:03 hodson Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.3 2004/01/13 20:38:07 hodson Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -21,7 +21,6 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "port_manager.hh"
 
-#include "xrl_port_io.hh"
 #include "port.hh"
 
 class XrlRouter;
@@ -85,6 +84,23 @@ public:
     bool remove_rip_address(const string&	ifname,
 			    const string&	vifname,
 			    const A&		addr);
+
+    /**
+     * Deliver packet to RIP port associated with socket id that
+     * received the packet.
+     *
+     * @param sockid unique socket identifier.
+     * @param src_addr source address of packet.
+     * @param src_port source port of packet.
+     * @param pdata packet data.
+     *
+     * @return true if packet delivered, false if the owner of the
+     * sockid can not be found.
+     */
+    bool deliver_packet(const string& 		sockid,
+			const A& 		src_addr,
+			uint16_t 		src_port,
+			const vector<uint8_t>& 	pdata);
 
 protected:
     //
