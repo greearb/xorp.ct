@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.6 2003/04/02 02:53:51 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.7 2003/04/02 17:10:41 hodson Exp $"
 
 
 //
@@ -456,7 +456,7 @@ MfeaDfe::start_measurement()
     
     TimeVal now;
     
-    TimerList::system_gettimeofday(&now);
+    mfea_dft().mfea_node().event_loop().current_time(now);
     _start_time[_delta_sg_count_index] = now;
 }
 
