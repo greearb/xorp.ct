@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.11 2003/05/29 17:59:09 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -40,7 +40,7 @@ public:
       RibIn that decides whether this is an add or a replace*/
     int replace_route(const InternalMessage<A> & /*old_rtmsg*/,
 		      const InternalMessage<A> & /*new_rtmsg*/,
-		      BGPRouteTable<A> * /*caller*/ ) { abort(); }
+		      BGPRouteTable<A> * /*caller*/ ) { abort(); return 0; }
 
     int delete_route(const InternalMessage<A> &rtmsg,
 		     BGPRouteTable<A> *caller);
@@ -63,6 +63,7 @@ public:
 
     bool get_next_message(BGPRouteTable<A> */*next_table*/) {
 	abort();
+	return false;
     }
     void set_peer_is_up() { _peer_is_up = true; }
 

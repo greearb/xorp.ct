@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.3 2003/05/29 17:59:07 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -84,7 +84,7 @@ public:
 
     /* mechanisms to implement flow control in the output plumbing */
     virtual void output_state(bool, BGPRouteTable *) {abort();}
-    virtual bool get_next_message(BGPRouteTable *) {abort();}
+    virtual bool get_next_message(BGPRouteTable *) {abort(); return false; }
 
     virtual bool dump_next_route(DumpIterator<A>& dump_iter);
     /**

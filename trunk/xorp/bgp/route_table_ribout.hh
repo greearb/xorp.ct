@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.4 2003/05/29 17:59:09 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -42,7 +42,7 @@ public:
 
     RouteTableType type() const {return RIB_OUT_TABLE;}
     string str() const;
-    int dump_entire_table() {abort();}
+    int dump_entire_table() { abort(); return 0; }
 
     /* mechanisms to implement flow control in the output plumbing */
     void output_state(bool /*busy*/, BGPRouteTable<A> */*next_table*/) {
@@ -58,6 +58,7 @@ public:
 
     bool get_next_message(BGPRouteTable<A> */*next_table*/) {
 	abort();
+	return false;
     }
 
     void peering_went_down(const PeerHandler *peer, uint32_t genid,

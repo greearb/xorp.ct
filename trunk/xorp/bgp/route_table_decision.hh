@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.6 2003/05/29 17:59:08 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -44,7 +44,7 @@ public:
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
 
     //don't call this on a DecisionTable - it's meaningless
-    BGPRouteTable<A> *parent() { abort(); }
+    BGPRouteTable<A> *parent() { abort(); return NULL; }
 
     RouteTableType type() const {return DECISION_TABLE;}
     string str() const;
@@ -56,6 +56,7 @@ public:
 
     bool get_next_message(BGPRouteTable<A> */*next_table*/) {
 	abort();
+	return false;
     }
 
     bool dump_next_route(DumpIterator<A>& dump_iter);
