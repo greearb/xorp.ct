@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.14 2004/05/07 12:18:57 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.15 2004/05/07 20:48:47 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -374,11 +374,11 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    /*we've already dumped this route*/
 
 	    if (_current_peers_genid != genid) {
-		cp(9); //TEST CASE MISSING
+		cp(9);
 		// the route comes from an old version of the Rib,
 		// probably from a DeletionTable.
-		printf("Route %s genid %d, expected genid %d\n",
-		       net.str().c_str(), _current_peers_genid, genid);
+		debug_msg("Route %s genid %d, expected genid %d\n",
+			  net.str().c_str(), _current_peers_genid, genid);
 		return false;
 	    }
 	    cp(10);
