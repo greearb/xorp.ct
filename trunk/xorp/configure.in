@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.113 2004/09/01 21:20:31 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.114 2004/09/01 22:44:13 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1113,9 +1113,41 @@ AC_TRY_COMPILE([
 ],
 [
   int mysockopt = IP_FW_ADD;
+#ifdef IPFW2
+#error IPFW2 defined (should not be defined for IPFW). Test failed.
+#endif
 ],
   [AC_DEFINE(HAVE_FIREWALL_IPFW, 1,
 	[Define to 1 if you have an IPFW build environment])
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+
+dnl ---------------------------------------------
+dnl Check for an IPFW2 firewall build environment
+dnl ---------------------------------------------
+
+AC_MSG_CHECKING(for an IPFW2 firewall build environment)
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/ip_fw.h>
+],
+[
+  int mysockopt = IP_FW_ADD;
+#ifndef IPFW2
+#error IPFW2 not defined (should be defined for IPFW2). Test failed.
+#endif
+],
+  [AC_DEFINE(HAVE_FIREWALL_IPFW2, 1,
+	[Define to 1 if you have an IPFW2 build environment])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE

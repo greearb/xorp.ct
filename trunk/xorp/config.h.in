@@ -58,6 +58,9 @@
 /* Define to 1 if you have an IPFW build environment */
 #undef HAVE_FIREWALL_IPFW
 
+/* Define to 1 if you have an IPFW2 build environment */
+#undef HAVE_FIREWALL_IPFW2
+
 /* Define to 1 if you have an IPTABLES build environment */
 #undef HAVE_FIREWALL_IPTABLES
 
