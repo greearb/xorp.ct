@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.14 2004/05/15 15:12:15 mjh Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.15 2004/06/10 22:40:33 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -22,6 +22,11 @@
 #include "route_table_base.hh"
 #include "libxorp/ref_trie.hh"
 #include "peer_handler.hh"
+
+/**
+ * Used in CacheTable to store a SubnetRoute and the genid of the
+ * RibIn that generated the route.
+ */
 
 template<class A>
 class CacheRoute {
@@ -35,30 +40,40 @@ private:
     uint32_t _genid;
 };
 
-#ifdef NOTDEF
-/**
- * Specialize Trie so that the SubnetRoute payload is deleted using
- * the SubnetRoute's unref method, which permits delayed deletion.
- */
-template<>
-inline void
-RefTrieNode<IPv4, const SubnetRoute<IPv4> >
-::delete_payload(const SubnetRoute<IPv4>* p) 
-{
-    debug_msg("delete_payload %p\n", p);
-    p->unref();
-}
-
-template<>
-inline void
-RefTrieNode<IPv6, const SubnetRoute<IPv6> >
-::delete_payload(const SubnetRoute<IPv6>* p) 
-{
-    p->unref();
-}
-#endif
 
 class EventLoop;
+
+/**
+ * @short specialized BGPRouteTable that stores routes modified by a
+ * FilterTable.
+ *
+ * The XORP BGP is internally implemented as a set of pipelines
+ * consisting of a series of BGPRouteTables.  Each pipeline receives
+ * routes from a BGP peer, stores them, and applies filters to them to
+ * modify the routes.  Then the pipelines converge on a single
+ * decision process, which decides which route wins amongst possible
+ * alternative routes.  After decision, the winning routes fanout
+ * again along a set of pipelines, again being filtered, before being
+ * transmitted to peers.
+ *
+ * Typically there are two FilterTables for each peer which modify
+ * routes passing down the pipeline, one in the input branch from that
+ * peer, and one in the output branch to that peer.  A FilterTable
+ * does not store the routes it modifies, so a CacheTable is placed
+ * downstream of a FilterTable to store routes that are modified.
+ *
+ * In the current code, a CacheTable isn't strictly necessary, but it
+ * simplifies life for all downstream tables, because they know that
+ * all routes they receive are stored in stable storage and won't go
+ * away without explicit notification.  
+ *
+ * In the future, it is likely that the CacheTables in the outgoing
+ * branches will be removed, as they waste quite a bit of memory for
+ * very little gain.  However, they have not yet been removed because
+ * their internal sanity checks have served as a valuable debugging
+ * device to ensure consistency in the messages travelling down the
+ * outgoing branches.
+ */
 
 template<class A>
 class CacheTable : public BGPRouteTable<A>  {

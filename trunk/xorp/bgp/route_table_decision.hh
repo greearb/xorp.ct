@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.13 2004/05/15 15:12:16 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.14 2004/06/10 22:40:34 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -22,6 +22,11 @@
 #include "peer_handler.hh"
 #include "next_hop_resolver.hh"
 #include "peer_route_pair.hh"
+
+/**
+ * Container for a route and the meta-data about the origin of a route
+ * used in the DecisionTable decision process.
+ */
 
 template<class A>
 class RouteData {
@@ -59,6 +64,29 @@ private:
     const PeerHandler* _peer_handler;
     uint32_t _genid;
 };
+
+/**
+ * @short BGPRouteTable which receives routes from all peers and
+ * decided which routes win.
+ *
+ * The XORP BGP is internally implemented as a set of pipelines
+ * consisting of a series of BGPRouteTables.  Each pipeline receives
+ * routes from a BGP peer, stores them, and applies filters to them to
+ * modify the routes.  Then the pipelines converge on a single
+ * decision process, which decides which route wins amongst possible
+ * alternative routes.  
+ *
+ * DecisionTable is a BGPRouteTable which performs this decision
+ * process.  It has many upstream BGPRouteTables and a single
+ * downstream BGPRouteTable.  Only the winning routes according to the
+ * BGP decision process are propagated downstream.
+ *
+ * When a new route reaches DecisionTable from one peer, we must
+ * lookup that route in all the other upstream branches to see if this
+ * route wins, or even if it doesn't win, if it causes a change of
+ * winning route.  Similarly for route deletions coming from a peer,
+ * etc.
+ */
 
 template<class A>
 class DecisionTable : public BGPRouteTable<A>  {
