@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.1 2003/12/17 00:04:48 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.2 2004/01/16 18:36:44 hodson Exp $"
 
 #include <algorithm>
 
@@ -41,6 +41,61 @@ bool
 IfConfigAddressTable::address_valid(const IPv6& addr) const
 {
     return _v6addrs.find(addr) != _v6addrs.end();
+}
+
+uint32_t
+IfConfigAddressTable::address_pif_index(const IPv4& addr) const
+{
+    // XXX This info should be cached...
+    IfTree::IfMap::const_iterator ii = _iftree.ifs().begin();
+    for (; ii != _iftree.ifs().end(); ++ii) {
+	const IfTreeInterface& iti = ii->second;
+	if (iti.state() == IfTreeItem::DELETED)
+	    continue;
+	IfTreeInterface::VifMap::const_iterator vi = iti.vifs().begin();
+	for (; vi != iti.vifs().end(); ++vi) {
+	    const IfTreeVif& itv = vi->second;
+	    if (itv.state() == IfTreeItem::DELETED)
+		continue;
+	    IfTreeVif::V4Map::const_iterator ai4 = itv.v4addrs().begin();
+	    for (; ai4 != itv.v4addrs().end(); ++ai4) {
+		const IfTreeAddr4& ita = ai4->second;
+		if (ita.state() == IfTreeItem::DELETED)
+		    continue;
+		if (ita.addr() == addr)
+		    return itv.pif_index();
+	    }
+	}
+    }
+    return 0;
+}
+
+uint32_t
+IfConfigAddressTable::address_pif_index(const IPv6& addr) const
+{
+    // XXX This info should be cached...
+    IfTree::IfMap::const_iterator ii = _iftree.ifs().begin();
+    for (; ii != _iftree.ifs().end(); ++ii) {
+	const IfTreeInterface& iti = ii->second;
+	if (iti.state() == IfTreeItem::DELETED)
+	    continue;
+	IfTreeInterface::VifMap::const_iterator vi = iti.vifs().begin();
+	for (; vi != iti.vifs().end(); ++vi) {
+	    const IfTreeVif& itv = vi->second;
+	    if (itv.state() == IfTreeItem::DELETED)
+		continue;
+	    IfTreeVif::V6Map::const_iterator ai6 = itv.v6addrs().begin();
+	    for (; ai6 != itv.v6addrs().end(); ++ai6) {
+		const IfTreeAddr6& ita = ai6->second;
+		if (ita.state() == IfTreeItem::DELETED)
+		    continue;
+		if (ita.addr() == addr)
+		    return itv.pif_index();
+	    }
+	}
+    }
+
+    return 0;
 }
 
 void
