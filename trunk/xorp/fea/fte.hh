@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/fea/fte.hh,v 1.5 2003/05/29 17:59:09 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -49,13 +49,13 @@ public:
     Fte(const N& net) : _net(net), _gateway(A::ZERO(net.af())),
 	_metric(0), _admin_distance(0), _xorp_route(false) {}
 
-    const N& net() const		{ return _net; }
-    const A& gateway() const 		{ return _gateway; }
+    const N&	net() const		{ return _net; }
+    const A&	gateway() const 	{ return _gateway; }
     const string& ifname() const	{ return _ifname; }
     const string& vifname() const	{ return _vifname; }
-    uint32_t metric() const		{ return _metric; }
-    uint32_t admin_distance() const	{ return _admin_distance; }
-    bool xorp_route() const 		{ return _xorp_route; }
+    uint32_t	metric() const		{ return _metric; }
+    uint32_t	admin_distance() const	{ return _admin_distance; }
+    bool	xorp_route() const 	{ return _xorp_route; }
 
     /**
      * Reset all members
@@ -85,21 +85,21 @@ public:
      */
     string str() const {
 	return c_format("net = %s gateway = %s ifname = %s vifname = %s "
-			"metric = %u admin_distance = %u xorp_route %s",
+			"metric = %u admin_distance = %u xorp_route = %s",
 			_net.str().c_str(), _gateway.str().c_str(),
 			_ifname.c_str(), _vifname.c_str(),
-			_metric, _admin_distance, _xorp_route ? "true" :
-			"false");
+			_metric, _admin_distance,
+			_xorp_route ? "true" : "false");
     }
 
 private:
-    N		_net;		// Network
-    A		_gateway; 	// Gateway address
-    string	_ifname;	// Interface name
-    string	_vifname;	// Virtual interface name
-    uint32_t	_metric;	// Route metric
-    uint32_t	_admin_distance; // Route admin distance
-    bool	_xorp_route;	// This route was installed by XORP.
+    N		_net;			// Network
+    A		_gateway;		// Gateway address
+    string	_ifname;		// Interface name
+    string	_vifname;		// Virtual interface name
+    uint32_t	_metric;		// Route metric
+    uint32_t	_admin_distance;	// Route admin distance
+    bool	_xorp_route;		// This route was installed by XORP
 };
 
 typedef Fte<IPv4, IPv4Net> Fte4;
