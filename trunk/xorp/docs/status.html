@@ -1,4 +1,4 @@
-<!-- $XORP: xorp/docs/status.html,v 1.17 2004/04/23 11:06:41 mjh Exp $ -->
+<!-- $XORP: xorp/docs/status.html,v 1.18 2004/04/26 19:39:15 pavlin Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <HTML>
@@ -15,17 +15,17 @@
 See the <a href="index.html">software documentation</a> for details of the
 XORP processes.
 <P>
-As of November 2003 (Release 0.5), the status is as follows:
+As of June 2004 (1.0 Release Candidate), the status is as follows:
 <DL>
 <DT><B>RIB</B>
 
-<DD>The basic RIB is complete.  There are probably still many
+<DD>The basic RIB is complete.  There are probably still some
 bugs but the core is reasonably stable. IPv4 and IPv6 are supported,
-and both unicast and multicast routes can be stored.  There's no
-external way to monitor what's going on.  While regular BGP nexthop
-resolution using IGP data works, recursive nexthop resolution does not
-work.  Route redistribution from one routing protocol to another
-doesn't yet work.
+and both unicast and multicast routes can be stored.
+Route redistribution from one routing protocol to another is supported.
+There is a mechanism to monitor the status of internal tables.
+While regular BGP nexthop resolution using IGP data works, recursive
+nexthop resolution does not work.
 
 <DT><B>FEA</B>
 
@@ -38,17 +38,16 @@ Linux is basically complete.  The MFEA for Click doesn't exist.
 <DT><B>BGP</B>
 
 <DD>The core of BGP is basically complete, with respect to the
-functionality described in draft-ietf-idr-bgp4-22.txt.  There are
-probably still many bugs but the core is reasonably stable.
+functionality described in draft-ietf-idr-bgp4-23.txt.  There are
+probably still some bugs but the core is reasonably stable.
 <P>
 Monitoring is limited to listing all the routes and listing all the
 peers - basically all the information demanded by the base BGP MIB.
 More fine-grain monitoring is definitely needed.  You can't install
 any optional filters, which means in practice it isn't too useful.
-Redistribution of routes into BGP and origination of routes currently
-don't work.  IPv4 and IPv6 routing works. Multicast SAFI has been
-implemented but not tested. A memory leak was discovered just before
-making the release.
+Redistribution of routes into BGP currently
+doesn't work.  IPv4 and IPv6 routing works. Multicast SAFI has been
+implemented and has been tested.
 
 <P>
 <DT><B>OSPF</B>
@@ -60,7 +59,7 @@ doesn't work.  OSPFd is IPv4 only.
 <P>
 <DT><B>RIP</B>
 
-<DD>Implementation started.
+<DD>RIP and RIPng are fully functional. RIPng needs more testing.
 
 <P>
 <DT><B>IS-IS</B>
@@ -92,10 +91,9 @@ testing continues.  The MLDv2 implementation is not yet started.
 <DT><B>Rtrmgr and Xorpsh Command Line Interface</B>
 
 <DD>The rtrmgr is capable of starting up and using xorpsh, a user can
-reconfigure the XORP processes that comprise a router. However, the
-code is not yet stable.  Operational mode (monitoring a running
-router) is work in progress, and limited to trivial monitoring of
-interfaces and BGP.
+reconfigure the XORP processes that comprise a router. However, work
+continues on improving its stability. Operational mode (monitoring a running
+router) needs more polishing.
 
 <P>
 <DT><B>LibXIPC</B>
