@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.2 2003/01/28 00:37:55 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.3 2003/03/10 23:21:03 hodson Exp $"
 
 #include "version.h"
 #include "libxipc/xrl_router.hh"
 #include "xrl_xorpsh_interface.hh"
 #include "xorpsh_main.hh"
 
-XrlXorpshInterface::XrlXorpshInterface(XrlRouter *r, XorpShell *xorpsh)
-    : XrlXorpshTargetBase(r) {
-    _xorpsh = xorpsh;
+XrlXorpshInterface::XrlXorpshInterface(XrlRouter *r, XorpShell &xorpsh)
+    : XrlXorpshTargetBase(r),  _xorpsh(xorpsh)
+{
 }
 
 XrlCmdError 
@@ -41,7 +41,7 @@ XrlXorpshInterface::common_0_1_get_version(// Output values,
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_1_new_config_user(// Input values, 
 						      const uint32_t& user_id) {
-    _xorpsh->new_config_user((uid_t)user_id);
+    _xorpsh.new_config_user((uid_t)user_id);
     return XrlCmdError::OKAY();
 }
 
@@ -56,7 +56,7 @@ XrlXorpshInterface::rtrmgr_client_0_1_config_change_done(// Input values,
     else
 	printf("%s\n", errmsg.c_str());
 #endif
-    _xorpsh->commit_done(success, errmsg);
+    _xorpsh.commit_done(success, errmsg);
     return XrlCmdError::OKAY();
 }
 
@@ -69,7 +69,7 @@ XrlXorpshInterface::rtrmgr_client_0_1_config_changed(// Input values,
     printf("config changed: user_id: %d\nDELTAS:\n%sDELETIONS:\n%s\n",
 	   user_id, deltas.c_str(), deletions.c_str());
 #endif
-    _xorpsh->config_changed(user_id, deltas, deletions);
+    _xorpsh.config_changed(user_id, deltas, deletions);
     return XrlCmdError::OKAY();
 }
 

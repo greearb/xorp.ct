@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.5 2003/04/22 19:42:18 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.6 2003/04/22 23:43:02 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -70,7 +70,7 @@ XorpShell::XorpShell(const string& IPCname,
     _xrlrouter(_eventloop, IPCname.c_str()),
     _xclient(_eventloop, _xrlrouter),
     _rtrmgr_client(&_xrlrouter),
-    _xorpsh_interface(&_xrlrouter, this),
+    _xorpsh_interface(&_xrlrouter, *this),
     _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
     _mode(MODE_INITIALIZING)
 {
@@ -183,8 +183,7 @@ XorpShell::run() {
 
     //start up the CLI
     _cli_node.enable();
-    CliClient *cli_client = _cli_node.enable_stdio_access();
-    _router_cli = new RouterCLI(this, _cli_node, *cli_client);
+    _router_cli = new RouterCLI(*this, _cli_node);
 
 
     _mode = MODE_IDLE;

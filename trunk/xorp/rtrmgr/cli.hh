@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.2 2002/12/14 23:43:10 hodson Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.3 2003/03/10 23:20:58 hodson Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -44,16 +44,16 @@ class XrlAtomList;
 
 class RouterCLI {
 public:
-    RouterCLI::RouterCLI(XorpShell* xorpsh,
-			 CliNode& cli_node, CliClient& cli_client);
+    RouterCLI::RouterCLI(XorpShell& xorpsh,
+			 CliNode& cli_node);
     //    void add_command(const string& cmd);
     bool is_config_mode() const;
     void commit_done_by_user(int uid);
     void add_command_tree(const string& cmd, const CommandTree& tree);
     void clear_command_set();
-    int configure_func(const char * ,
-		       const char *cli_term_name,
-		       uint32_t ,		// cli_session_id
+    int configure_func(const char *,
+		       const char *,
+		       uint32_t,		
 		       const char *command_global_name,
 		       const vector<string>& argv);
     void enter_config_done(const XrlError& e);
@@ -61,62 +61,62 @@ public:
     void new_config_user(uid_t user_id);
     void leave_config_done(const XrlError& e);
     void notify_user(const string& alert, bool urgent);
-    int exit_func(const char * ,
-		  const char *cli_term_name,
-		  uint32_t ,		// cli_session_id
+    int exit_func(const char *,
+		  const char *,
+		  uint32_t,		
 		  const char *command_global_name,
 		  const vector<string>& argv);
-    int edit_func(const char * ,
-		  const char *cli_term_name,
-		  uint32_t ,		// cli_session_id
+    int edit_func(const char *,
+		  const char *,
+		  uint32_t,		
 		  const char *command_global_name,
 		  const vector<string>& argv);
-    int text_entry_func(const char * ,
-			const char *cli_term_name,
-			uint32_t ,		// cli_session_id
+    int text_entry_func(const char *,
+			const char *,
+			uint32_t,		
 			const char *command_global_name,
 			const vector<string>& argv);
-    int delete_func(const char * ,
-		    const char *cli_term_name,
-		    uint32_t ,		// cli_session_id
+    int delete_func(const char *,
+		    const char *,
+		    uint32_t,		
 		    const char *command_global_name,
 		    const vector<string>& argv);
-    int set_func(const char * ,
-		  const char *cli_term_name,
-		  uint32_t ,		// cli_session_id
+    int set_func(const char *,
+		  const char *,
+		  uint32_t,		
 		  const char *command_global_name,
 		  const vector<string>& argv);
-    int immediate_set_func(const char * ,
-			   const char *cli_term_name,
-			   uint32_t ,		// cli_session_id
+    int immediate_set_func(const char *,
+			   const char *,
+			   uint32_t,		
 			   const char *command_global_name,
 			   const vector<string>& argv);
-    int commit_func(const char * ,
-		    const char *cli_term_name,
-		    uint32_t ,		// cli_session_id
+    int commit_func(const char *,
+		    const char *,
+		    uint32_t,		
 		    const char *command_global_name,
 		    const vector<string>& argv);
     void commit_done(int status, const string& err_msg);
 
-    int show_func(const char * ,
-		  const char *cli_term_name,
-		  uint32_t ,		// cli_session_id
+    int show_func(const char *,
+		  const char *,
+		  uint32_t,		
 		  const char *command_global_name,
 		  const vector<string>& argv);
-    int op_mode_func(const char * ,
-		     const char *cli_term_name,
-		     uint32_t ,		// cli_session_id
+    int op_mode_func(const char *,
+		     const char *,
+		     uint32_t,		
 		     const char *command_global_name,
 		     const vector<string>& argv);
-    int save_func(const char * ,
-		  const char *cli_term_name,
-		  uint32_t ,		// cli_session_id
+    int save_func(const char *,
+		  const char *,
+		  uint32_t,		
 		  const char *command_global_name,
 		  const vector<string>& argv);
     void save_done(const XrlError& e);
-    int load_func(const char * ,
-		  const char *cli_term_name,
-		  uint32_t ,		// cli_session_id
+    int load_func(const char *,
+		  const char *,
+		  uint32_t,		
 		  const char *command_global_name,
 		  const vector<string>& argv);
     void load_communicated(const XrlError& e);
@@ -168,13 +168,12 @@ private:
     SlaveConfigTree* config_tree();
     OpCommandList* op_cmd_list();
 
-    EventLoop *_eventloop;
-    XorpShell *_xorpsh;
+    XorpShell& _xorpsh;
 
     SlaveConfigTreeNode *_current_config_node;
 
-    CliNode *_cli_node;
-    CliClient *_cli_client;
+    CliNode& _cli_node;
+    CliClient& _cli_client;
     CliModeType _mode;
     CliCommand *_set_node;
     CliCommand *_show_node;

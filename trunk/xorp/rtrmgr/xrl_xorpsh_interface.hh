@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.2 2003/03/10 23:21:03 hodson Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
@@ -23,7 +23,7 @@ class XorpShell;
 
 class XrlXorpshInterface : public XrlXorpshTargetBase {
 public:
-    XrlXorpshInterface(XrlRouter *r, XorpShell *xorpsh);
+    XrlXorpshInterface(XrlRouter *r, XorpShell& xorpsh);
 
     XrlCmdError common_0_1_get_target_name(
 	// Output values, 
@@ -49,7 +49,7 @@ public:
 	const string&	deletions);
 
 private:
-    XorpShell *_xorpsh;
+    XorpShell& _xorpsh;
 
 };
 
