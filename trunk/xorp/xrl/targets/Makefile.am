@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.39 2004/09/21 18:09:13 atanu Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.40 2004/09/21 22:11:53 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -43,6 +43,7 @@ tgt_files		+= test_finder_events.tgt
 tgt_files		+= test_peer.tgt
 tgt_files		+= test_socket4.tgt
 tgt_files		+= test_socket6.tgt
+tgt_files		+= test_xrls.tgt
 tgt_files		+= xorp_if_mib.tgt
 tgt_files		+= xorpsh.tgt
 
@@ -87,6 +88,7 @@ noinst_LIBRARIES	+= libtestfindereventsbase.a
 noinst_LIBRARIES	+= libtestpeerbase.a
 noinst_LIBRARIES	+= libtestsocket4.a
 noinst_LIBRARIES	+= libtestsocket6.a
+noinst_LIBRARIES	+= libtestxrlsbase.a
 noinst_LIBRARIES	+= libxorpifmibbase.a
 noinst_LIBRARIES	+= libxorpshbase.a
 
@@ -332,6 +334,14 @@ libtestsocket6_a_SOURCES = test_socket6_base.hh test_socket6_base.cc
 $(srcdir)/test_socket6_base.hh $(srcdir)/test_socket6_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
+
+#
+# TEST XRLS
+#
+libtestxrlsbase_a_SOURCES = test_xrls_base.hh test_xrls_base.cc
+$(srcdir)/test_xrls_base.hh $(srcdir)/test_xrls_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/test_xrls.xif
 
 # XORP IF MIB
 libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
