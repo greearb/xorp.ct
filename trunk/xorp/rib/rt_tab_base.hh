@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.12 2004/03/25 01:45:09 hodson Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.13 2004/04/16 02:09:42 hodson Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -175,6 +175,9 @@ public:
     inline const string& tablename() const	{ return _tablename; }
     inline RouteTable* next_table()		{ return _next_table; }
     inline const RouteTable* next_table() const	{ return _next_table; }
+
+protected:
+    inline void set_tablename(const string& s) { _tablename = s; }
 
 private:
     string	_tablename;

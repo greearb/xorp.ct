@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.16 2004/03/25 01:45:09 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.17 2004/04/01 19:54:12 mjh Exp $"
 
 #include "rib_module.h"
 
@@ -20,17 +20,22 @@
 
 #include "rt_tab_extint.hh"
 
+template <typename A>
+inline static string
+make_extint_name(const RouteTable<A>* e, const RouteTable<A>* i)
+{
+    return string("Ext:(" + e->tablename() + ")Int:(" + i->tablename() + ")");
+}
 
 template<class A>
-ExtIntTable<A>::ExtIntTable<A>(const string&  tablename,
-			       RouteTable<A>* ext_table,
-			       RouteTable<A>* int_table)
-    : RouteTable<A>(tablename),
-      _ext_table(ext_table),
-      _int_table(int_table)
+ExtIntTable<A>::ExtIntTable(RouteTable<A>* ext_table, RouteTable<A>* int_table)
+    : RouteTable<A>(make_extint_name(ext_table, int_table)),
+      _ext_table(ext_table), _int_table(int_table)
 {
     _ext_table->set_next_table(this);
     _int_table->set_next_table(this);
+
+    debug_msg("New ExtInt: %s\n", this->tablename().c_str());
 }
 
 template<class A>
@@ -609,6 +614,10 @@ void
 ExtIntTable<A>::replumb(RouteTable<A>* old_parent,
 			RouteTable<A>* new_parent)
 {
+    debug_msg("ExtIntTable::replumb replacing %s with %s\n",
+	      old_parent->tablename().c_str(),
+	      new_parent->tablename().c_str());
+
     if (_ext_table == old_parent) {
 	_ext_table = new_parent;
     } else if (_int_table == old_parent) {
@@ -617,6 +626,8 @@ ExtIntTable<A>::replumb(RouteTable<A>* old_parent,
 	// Shouldn't be possible
 	XLOG_UNREACHABLE();
     }
+    set_tablename(make_extint_name(_ext_table, _int_table));
+    debug_msg("ExtIntTable: now called \"%s\"\n", this->tablename().c_str());
 }
 
 template<class A>

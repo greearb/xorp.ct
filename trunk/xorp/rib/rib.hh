@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.16 2004/02/11 08:48:47 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.17 2004/03/23 11:24:25 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -123,38 +123,6 @@ public:
 			 const string&	target_instance,
 			 int		admin_distance,
 			 ProtocolType	protocol_type);
-
-    /**
-     * Add a new MergedTable.  Use is deprecated, except in test suites.
-     *
-     * @see MergedTable
-     * @param tablename human-readable name for this table to help in
-     * debugging.
-     * @param table_a parent routing table that will feed routes in to
-     * this MergedTable.
-     * @param table_b parent routing table that will feed routes in to
-     * this MergedTable.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int new_merged_table(const string& tablename,
-			 const string& table_a,
-			 const string& table_b);
-
-    /**
-     * Add a new ExtIntTable.  Use is deprecated, except in test suites.
-     *
-     * @see ExtIntTable
-     * @param tablename human-readable name for this table to help in
-     * debugging.
-     * @param t_ext parent routing table that will feed EGP routes in to
-     * this ExtIntTable.
-     * @param t_int parent routing table that will feed IGP routes in to
-     * this ExtIntTable.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int new_extint_table(const string& tablename,
-			 const string& t_ext,
-			 const string& t_int);
 
     /**
      * Inform the RIB about the existence of a Virtual Interface.
@@ -418,6 +386,11 @@ public:
      */
     void print_rib() const;
 
+    /**
+     * Get RIB name.
+     */
+    string name() const;
+
 private:
     /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
@@ -430,7 +403,7 @@ private:
      * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_origin_table(const string& tablename, 
+    int add_origin_table(const string& tablename,
 			 const string& target_class,
 			 const string& target_instance,
 			 ProtocolType protocol_type);
@@ -448,6 +421,15 @@ private:
     int delete_origin_table(const string& tablename,
 			    const string& target_class,
 			    const string& target_instance);
+
+    /**
+     * Add a RedistTable behind OriginTable.  This allows routes
+     * associated with the OriginTable to be redistributed in future.
+     *
+     * @param origin_tablename Name of OriginTable.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_redist_table(const string& origin_tablename);
 
     /**
      * track_back trough the RouteTables' parent pointers to find the
@@ -491,7 +473,7 @@ private:
      * @param tablename the name of the protocol to search for.
      * @param target_class the name of the target class to search for.
      * @param target_instance the name of the target instance to search for.
-     * @return pointer to table if exists, NULL otherwise.  
+     * @return pointer to table if exists, NULL otherwise.
      */
     inline OriginTable<A>* find_table_by_instance(const string& tablename,
 						  const string&	target_class,
@@ -506,16 +488,16 @@ private:
     inline Protocol* find_protocol(const string& protocol);
 
     /**
-     * Add table to RIB, but don't do any plumbing.  The caller should
-     * first check that table does not already exist using @ref
-     * find_table.
-     * Note that it is an error to add the same table twice.
+     * Add table to RIB, but don't do any plumbing.
      *
-     * @param tablename the name of the table to be added.
+     * It is an error to add the same table twice or multiple tables
+     * with the same name.
+     *
      * @param table the table to be added.
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline int add_table(const string& tablename, RouteTable<A>* table);
+    inline int add_table(RouteTable<A>* table);
 
     /**
      * Remove table from RIB, but don't do any unplumbing.
@@ -604,7 +586,7 @@ protected:
     bool		_multicast;
     bool		_errors_are_fatal;
 
-    map<const string, RouteTable<A>* >	_tables;
+    list<RouteTable<A>* >		_tables;
     map<const string, Protocol* >	_protocols;
     map<const string, OriginTable<A>* > _routing_protocol_instances;
     map<const string, Vif>		_vifs;

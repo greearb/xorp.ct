@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_merged.hh,v 1.6 2004/02/06 22:44:12 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_merged.hh,v 1.7 2004/02/11 08:48:49 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_MERGED_HH__
 #define __RIB_RT_TAB_MERGED_HH__
@@ -27,34 +27,31 @@
  * form a single table, where routes for the same subnet with a lower
  * admin distance override those with a higher admin distance.
  *
- * The two parent tables are not actually merged.  
- * 
+ * The two parent tables are not actually merged.
+ *
  * An add_route request from a parent tables causes a lookup on the
  * other parent table.  If the route is better than the one from the
  * other table, or no route exists in the other table, then the new
  * route is passed downstream.
- * 
+ *
  * An delete_route request from a parent table also causes a lookup on
  * the other parent table.  The delete_route is propagated downstream.
  * If an alternative route is found, then that is then propagated
  * downsteam as an add_route to replace the deleted route.
  *
  * Lookups from downsteam cause lookups on both parent tables.  The
- * better response is given.  
+ * better response is given.
  */
 template <class A>
 class MergedTable : public RouteTable<A> {
 public:
     /**
      * MergedTable Constructor.
-     * 
-     * @param tablename human-readable tablename to aid debugging.
+     *
      * @param table_a one of two parent RouteTables.
      * @param table_b one of two parent RouteTables.
      */
-    MergedTable(const string&  tablename,
-		RouteTable<A>* table_a,
-		RouteTable<A>* table_b);
+    MergedTable(RouteTable<A>* table_a, RouteTable<A>* table_b);
 
     /**
      * An add_route request from a parent table causes a lookup on the
@@ -66,7 +63,7 @@ public:
      * @param caller the parent table sending the new route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route, 
+    int add_route(const IPRouteEntry<A>& route,
 		  RouteTable<A>* caller);
 
     /**
@@ -89,7 +86,7 @@ public:
      * better admin_distance is returned.
      *
      * @param net the subnet to look up.
-     * @return a pointer to the route entry if it exists, NULL otherwise.  
+     * @return a pointer to the route entry if it exists, NULL otherwise.
      */
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
 
@@ -115,12 +112,12 @@ public:
      * lookup_route, this involves querying both parent tables.  The
      * best, most specific route is returned, and the tightest bounds
      * on the answer are returned.
-     * 
+     *
      * @see RouteRange
      * @param addr the IP address to look up.
      * @return a pointer to a RouteRange class instance containing the
      * relevant answer.  It is up to the recipient of this pointer to
-     * free the associated memory.  
+     * free the associated memory.
      */
     RouteRange<A>* lookup_route_range(const A& addr) const;
 

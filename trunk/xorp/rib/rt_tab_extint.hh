@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.7 2004/02/06 22:44:12 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.8 2004/02/11 08:48:48 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -58,12 +58,10 @@ public:
     /**
      * ExtIntTable Constructor.
      *
-     * @param tablename human-readable tablename to aid debugging.
      * @param ext_table parent RouteTables supplying EGP routes.
      * @param int_table parent RouteTables supplying IGP routes.
      */
-    ExtIntTable(const string&  tblname,
-		RouteTable<A>* ext_table,
+    ExtIntTable(RouteTable<A>* ext_table,
 		RouteTable<A>* int_table);
 
     /**
