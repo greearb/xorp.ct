@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.11 2004/06/14 23:35:20 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.12 2004/06/16 05:37:05 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -71,9 +71,6 @@ gmake check
 ============
 
   * OpenBSD-3.5:
-    - There is a minor compilation glitch when compiling with IPv6 support,
-      therefore as a temporary work-around solution for now XORP should be
-      compiled without IPv6 support by running "./configure --disable-ipv6".
     - The default gcc/g++ compiler (version 2.95.x) has a bug, hence
       you must install a new compiler (e.g., gcc-3.3.2 and g++-3.3.2 from
       packages). Then, you must set environmental variables CC and CXX
