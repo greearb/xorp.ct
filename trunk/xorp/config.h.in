@@ -68,11 +68,6 @@
 #undef ENABLE_ADVANCED_MCAST_API
 
 /*
- * Preprocessor control of debug message output
- */
-#undef ORIGINAL_FINDER
-
-/*
  * Define this if you have <new>
  */
 #undef HAVE_NEW_HEADER

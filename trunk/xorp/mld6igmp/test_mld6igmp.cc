@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.10 2003/03/21 03:01:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.11 2003/03/31 03:46:48 pavlin Exp $"
 
 
 //
@@ -45,11 +45,7 @@
 //
 // Local structures/classes, typedefs and macros
 //
-#ifdef ORIGINAL_FINDER
-typedef FinderServer TestFinderServer;
-#else
 typedef FinderNGServer TestFinderServer;
-#endif
 
 // XXX: set to 1 for IPv4, or set to 0 for IPv6
 #define DO_IPV4 1
@@ -163,11 +159,7 @@ main(int argc, char *argv[])
 	// Finder
 	//
 	TestFinderServer *finder = NULL;
-	try {
-	    finder = new TestFinderServer(event_loop);
-	} catch (const FinderTCPServerIPCFactory::FactoryError& factory_error) {
-	    XLOG_WARNING("Cannot instantiate Finder. Probably already running...");
-	}
+	finder = new TestFinderServer(event_loop);
 	
 	//
 	// CLI

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.4 2003/03/10 23:20:59 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.5 2003/03/11 01:02:59 mjh Exp $"
 
 #include <signal.h>
 
@@ -35,11 +35,8 @@
 #include "randomness.hh"
 #include "main_rtrmgr.hh"
 
-#ifdef ORIGINAL_FINDER
-typedef FinderServer TestFinderServer;
-#else
 typedef FinderNGServer TestFinderServer;
-#endif
+
 //
 // Defaults
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.7 2003/03/18 02:44:33 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.8 2003/03/27 01:51:58 hodson Exp $"
 
 
 //
@@ -25,6 +25,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
+#include "libxorp/xlog.h"
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "cli/cli_client.hh"
@@ -42,11 +43,7 @@
 //
 // Local structures/classes, typedefs and macros
 //
-#ifdef ORIGINAL_FINDER
-typedef FinderServer TestFinderServer;
-#else
 typedef FinderNGServer TestFinderServer;
-#endif
 
 // XXX: set to 1 for IPv4, or set to 0 for IPv6
 #define DO_IPV4 1
@@ -175,13 +172,9 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	TestFinderServer *finder = NULL;
-	try {
-	    finder = new TestFinderServer(event_loop);
-	    add_permitted_host(IPv4("127.0.0.1"));
-	} catch (const FinderTCPServerIPCFactory::FactoryError& factory_error) {
-	    XLOG_WARNING("Cannot instantiate Finder. Probably already running...");
-	}
+	TestFinderServer *finder = 0;
+	finder = new TestFinderServer(event_loop);
+	add_permitted_host(IPv4("127.0.0.1"));
 	
 	//
 	// CLI

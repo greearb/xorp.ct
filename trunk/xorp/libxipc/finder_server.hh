@@ -12,56 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.5 2003/03/16 08:20:28 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
-
-#include <sys/time.h>
-
-#include <map>
-#include <list>
-#include <string>
-
-#include "config.h"
-
-#include "finder_ipc.hh"
-#include "libxorp/eventloop.hh"
-
-class FinderConnectionInfo;
-
-class FinderServer {
-public:
-    FinderServer(EventLoop& e, const char* auth_key,
-		 int port = FINDER_TCP_DEFAULT_PORT)
-	throw (FinderTCPServerIPCFactory::FactoryError);
-    FinderServer(EventLoop& e, int port = FINDER_TCP_DEFAULT_PORT)
-	throw (FinderTCPServerIPCFactory::FactoryError);
-    ~FinderServer();
-
-    const char*	set_auth_key(const char* key);
-    const char*	auth_key();
-
-    void	add_connection(FinderConnectionInfo* fci);
-    void	remove_connection(const FinderConnectionInfo* fci);
-    uint32_t	connection_count();
-
-    const char*	lookup_service(const char* service);
-protected:
-    static void	connect_hook(FinderTCPIPCService *s, void* thunked_server);
-    void	byebye_connections();
-
-    EventLoop&			_event_loop;
-    FinderTCPServerIPCFactory   _ipc_factory;
-    string                      _auth_key;
-
-    list<FinderConnectionInfo*> _connections;
-    typedef list<FinderConnectionInfo*>::iterator connection_iterator;
-
-    friend class FinderConnectionInfo;
-};
-
-// Compatibility shim
 
 #include "libxorp/xlog.h"
 
@@ -71,9 +25,16 @@ protected:
 #include "permits.hh"
 #include "sockutil.hh"
 
+/**
+ * A wrapper class for the components within a Finder.
+ *
+ * Instantiates a Finder object and IPC infrastructure for Finder to accept
+ * accept incoming connections.
+ */
 class FinderNGServer {
 public:
-    FinderNGServer(EventLoop& e) {
+    FinderNGServer(EventLoop& e)
+    {
 	IPv4 	 bind_addr = IPv4(if_get_preferred());
 	uint16_t bind_port = FINDER_NG_TCP_DEFAULT_PORT;
 	_f = new FinderNG();

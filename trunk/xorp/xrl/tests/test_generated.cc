@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.3 2003/03/04 23:41:26 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.4 2003/03/10 23:21:04 hodson Exp $"
 
 #include <iostream>
 
@@ -29,11 +29,7 @@
 #include "test_xifs.hh"
 #include "test_tgt.hh"
 
-#ifdef ORIGINAL_FINDER
-typedef FinderServer TestFinderServer;
-#else
 typedef FinderNGServer TestFinderServer;
-#endif
 
 static const char* g_tgt_name = "test_tgt";
 static const char* g_clnt_name = "test_clnt";

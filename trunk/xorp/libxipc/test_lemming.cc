@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.5 2003/03/04 23:41:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.6 2003/03/10 23:20:25 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -24,11 +24,7 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
-#ifdef ORIGINAL_FINDER
-typedef FinderServer TestFinderServer;
-#else
 typedef FinderNGServer TestFinderServer;
-#endif
 
 class verbose_ostream {
 public:

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.11 2003/03/05 01:49:20 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.12 2003/03/31 16:10:15 hodson Exp $
 ##
 
 
@@ -11,19 +11,12 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 # -- Programs
 bin_PROGRAMS  =	call_xrl finder
 
-if ORIGINAL_FINDER
-finder_SOURCES = finder.cc
-else
 finder_SOURCES = finder_ng_main.cc
-endif
 
-# -- Test Programs - clunkiness is due to automake's inability to handle
-#    variables itself
-noinst_PROGRAMS  = test_finder_client test_finder_ipc test_finder_ipc2
-noinst_PROGRAMS += test_finder_msg test_finder_transport test_header
-noinst_PROGRAMS += test_finder_msgs test_finder_tcp test_finder_messenger
-noinst_PROGRAMS += test_finder_ng
-noinst_PROGRAMS += test_inproc test_lemming test_sudp test_stcp
+# -- Test Programs 
+noinst_PROGRAMS += test_finder_messenger test_finder_msgs test_finder_ng
+noinst_PROGRAMS += test_finder_tcp
+noinst_PROGRAMS += test_header test_inproc test_lemming test_sudp test_stcp
 noinst_PROGRAMS += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
 noinst_PROGRAMS += test_xrl_router test_xrl_parser
 
@@ -43,15 +36,11 @@ finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 # -- Program Sources
 call_xrl_SOURCES		= call_xrl.cc
 
-
-test_finder_client_SOURCES	= test_finder_client.cc
-test_finder_ipc_SOURCES		= test_finder_ipc.cc
-test_finder_ipc2_SOURCES	= test_finder_ipc2.cc
 test_finder_messenger_SOURCES	= test_finder_messenger.cc
-test_finder_msg_SOURCES		= test_finder_msg.cc
 test_finder_msgs_SOURCES	= test_finder_msgs.cc
+test_finder_ng_SOURCES		= test_finder_ng.cc
 test_finder_tcp_SOURCES		= test_finder_tcp.cc
-test_finder_transport_SOURCES	= test_finder_transport.cc
+
 test_header_SOURCES		= test_header.cc
 test_inproc_SOURCES		= test_inproc.cc
 test_lemming_SOURCES		= test_lemming.cc
@@ -78,13 +67,11 @@ libxipc_a_SOURCES += md5.h
 libxipc_a_SOURCES += finder_client.hh
 libxipc_a_SOURCES += finder_ipc.hh
 libxipc_a_SOURCES += finder_messenger.hh
-libxipc_a_SOURCES += finder_msg.hh
 libxipc_a_SOURCES += finder_msgs.hh
 libxipc_a_SOURCES += finder_ng_client.hh
 libxipc_a_SOURCES += finder_ng_client_xrl_target.hh
 libxipc_a_SOURCES += finder_server.hh
 libxipc_a_SOURCES += finder_tcp_messenger.hh
-libxipc_a_SOURCES += finder_transport.hh
 libxipc_a_SOURCES += finder_tcp.hh
 libxipc_a_SOURCES += header.hh
 libxipc_a_SOURCES += hmac.hh
@@ -114,17 +101,12 @@ libxipc_a_SOURCES += xrl_error.hh
 libxipc_a_SOURCES += hmac_md5.c
 libxipc_a_SOURCES += md5.c
 
-libxipc_a_SOURCES += finder_client.cc
-libxipc_a_SOURCES += finder_ipc.cc
 libxipc_a_SOURCES += finder_messenger.cc
-libxipc_a_SOURCES += finder_msg.cc
 libxipc_a_SOURCES += finder_msgs.cc
 libxipc_a_SOURCES += finder_ng_client.cc
 libxipc_a_SOURCES += finder_ng_client_xrl_target.cc
-libxipc_a_SOURCES += finder_server.cc
 libxipc_a_SOURCES += finder_tcp.cc
 libxipc_a_SOURCES += finder_tcp_messenger.cc
-libxipc_a_SOURCES += finder_transport.cc
 libxipc_a_SOURCES += header.cc
 libxipc_a_SOURCES += hmac.cc
 libxipc_a_SOURCES += permits.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.10 2003/03/21 01:25:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.11 2003/03/21 03:01:46 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -30,11 +30,7 @@
 #include "rib_client.hh"
 #include "dummy_register_server.hh"
 
-#ifdef ORIGINAL_FINDER
-typedef FinderServer TestFinderServer;
-#else
 typedef FinderNGServer TestFinderServer;
-#endif
 
 bool verbose = false;
 
