@@ -4934,6 +4934,23 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
  */
     if(gl_bind_terminal_keys(gl))
       return 1;
+
+/*
+ * Unbind the dangerous keys that affect the remote program.
+ */
+    if(gl_bind_control_char(gl, KTB_TERM, gl->oldattr.c_cc[VINTR], NULL) ||
+       gl_bind_control_char(gl, KTB_TERM, gl->oldattr.c_cc[VQUIT], NULL) ||
+       gl_bind_control_char(gl, KTB_TERM, gl->oldattr.c_cc[VSUSP], NULL))
+	return 1;
+    if(gl->editor == GL_VI_MODE) {
+	if(gl_bind_control_char(gl, KTB_TERM,
+				MAKE_META(gl->oldattr.c_cc[VINTR]), NULL) ||
+	   gl_bind_control_char(gl, KTB_TERM,
+				MAKE_META(gl->oldattr.c_cc[VQUIT]), NULL) ||
+	   gl_bind_control_char(gl, KTB_TERM,
+				MAKE_META(gl->oldattr.c_cc[VSUSP]), NULL))
+      return 1;
+    };
   };
 
   return 0;
