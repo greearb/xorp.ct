@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.16 2004/05/17 16:41:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.17 2004/05/24 01:22:29 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -223,18 +223,6 @@ Coord::mark_done()
 {
     _done = true;
 }
-
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
-}
-
 
 static void
 usage(const char *name)

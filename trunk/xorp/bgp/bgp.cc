@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.32 2004/05/15 18:31:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.33 2004/05/24 01:22:29 hodson Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -31,21 +31,6 @@
 #include "iptuple.hh"
 #include "xrl_target.hh"
 
-// ----------------------------------------------------------------------------
-// Utilities
-
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
-}
-
-
 // ----------------------------------------------------------------------------
 // Static class members
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.36 2004/05/24 01:22:32 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.37 2004/05/24 19:10:02 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -534,4 +534,28 @@ XrlRouter::finder_ready_event(const string& tgt_name)
 {
     UNUSED(tgt_name);
     debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
+}
+
+
+// ----------------------------------------------------------------------------
+// wait_until_xrl_router_is_ready
+
+void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.failed() == false) {
+	eventloop.run();
+	if (xrl_router.ready())
+	    return;
+    }
+
+    static const char* msg = "XrlRouter failed.  No Finder?";
+    if (xlog_is_running()) {
+	XLOG_ERROR(msg);
+	xlog_stop();
+	xlog_exit();
+    } else {
+	fprintf(stderr, msg);
+    }
+    exit(-1);
 }

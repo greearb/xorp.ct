@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.22 2004/05/17 16:41:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.23 2004/05/24 01:22:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -767,17 +767,6 @@ TestPeer::xrl_callback(const XrlError& error)
     _flying--;
     XLOG_ASSERT(_flying >= 0);
     sendit();
-}
-
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
 }
 
 static void

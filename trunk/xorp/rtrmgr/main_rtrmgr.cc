@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.45 2004/05/22 06:09:06 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.46 2004/05/24 01:22:35 hodson Exp $"
 
 #include <signal.h>
 
@@ -126,17 +126,6 @@ valid_interface(const IPv4& addr)
         return true;
 
     return false;
-}
-
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
 }
 
 Rtrmgr::Rtrmgr(const string& template_dir, 

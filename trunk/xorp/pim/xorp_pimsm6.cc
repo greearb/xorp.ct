@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.4 2004/05/18 07:47:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.5 2004/05/24 01:22:34 hodson Exp $"
 
 
 //
@@ -81,22 +81,6 @@ usage(const char *argv0, int exit_value)
 
     // NOTREACHED
 }
-
-//
-// Wait until the XrlRouter becomes ready
-//
-#ifdef HAVE_IPV6
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
-}
-#endif // HAVE_IPV6
 
 static void
 pim_main(const char* finder_hostname, uint16_t finder_port)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.26 2004/05/24 01:22:32 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.27 2004/05/24 19:10:03 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -206,5 +206,21 @@ protected:
 
     static uint32_t		_icnt;			// instance count
 };
+
+/**
+ * Run EventLoop until an XrlRouter is ready.  If XrlRouter instance
+ * fails while waiting to become ready, a warning is logged and exit()
+ * is called.
+ *
+ * NB This method is essentially a placeholder.  A future revision to
+ * the XrlRouter API is to add ServiceBase to its parent classes.
+ * This will allow a richer set of event notification semantics.  For
+ * the time being, wait_until_xrl_router_is_ready should be used in
+ * appropriate cases to ease later refactoring.
+ *
+ * @param e eventloop to run.
+ * @param xr xrl_router to wait for.
+ */
+void wait_until_xrl_router_is_ready(EventLoop& e, XrlRouter& xr);
 
 #endif // __LIBXIPC_XRL_ROUTER_HH__

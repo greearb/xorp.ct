@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.31 2004/05/20 23:45:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.32 2004/05/24 01:22:34 hodson Exp $"
 
 
 //
@@ -104,20 +104,6 @@ usage(const char *argv0, int exit_value)
     exit (exit_value);
 
     // NOTREACHED
-}
-
-//
-// Wait until the XrlRouter becomes ready
-//
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
 }
 
 static void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.19 2004/05/20 22:18:17 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.20 2004/05/24 01:22:34 hodson Exp $"
 
 #include <sysexits.h>
 
@@ -24,21 +24,6 @@
 
 #include "rib_manager.hh"
 
-//
-// Wait until the XrlRouter becomes ready
-//
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
-}
-
-
 int
 main (int /* argc */, char* argv[])
 {

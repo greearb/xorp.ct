@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.25 2004/05/20 22:18:18 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.26 2004/05/24 01:22:34 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -34,19 +34,6 @@
 #include "rib_manager.hh"
 #include "xrl_target.hh"
 
-
-static void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
-{
-    while (xrl_router.ready() == false) {
-	eventloop.run();
-	if (xrl_router.failed()) {
-	    XLOG_FATAL("XrlRouter failed.  No Finder?");
-	}
-    }
-}
-
-
 bool callback_flag;
 
 class RibClientTarget : public XrlRibclientTargetBase {
