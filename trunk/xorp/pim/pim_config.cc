@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.18 2003/07/08 01:32:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.19 2003/07/12 01:14:37 pavlin Exp $"
 
 
 //
@@ -29,7 +29,7 @@
 
 
 int
-PimNode::set_config_all_vifs_done(string& reason)
+PimNode::set_config_all_vifs_done(string& error_msg)
 {
     map<string, Vif>::iterator vif_iter;
     string err;
@@ -120,66 +120,103 @@ PimNode::set_config_all_vifs_done(string& reason)
     // TODO: XXX: PAVPAVPAV: remove it!!
     PimNode::set_vif_setup_completed(true);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_proto_version(const string& vif_name, int& proto_version,
+			       string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get protocol version for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    proto_version = pim_vif->proto_version();
     
     return (XORP_OK);
 }
 
 int
 PimNode::set_vif_proto_version(const string& vif_name, int proto_version,
-			       string& reason)
+			       string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set protocol version for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set protocol version for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (pim_vif->set_proto_version(proto_version) < 0) {
-	end_config(reason);
-	reason = c_format("Cannot set protocol version for vif %s: "
-			  "invalid protocol version %d",
-			  vif_name.c_str(), proto_version);
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set protocol version for vif %s: "
+			     "invalid protocol version %d",
+			     vif_name.c_str(), proto_version);
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_proto_version(const string& vif_name, string& reason)
+PimNode::reset_vif_proto_version(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset protocol version for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset protocol version for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_vif->set_proto_version(pim_vif->proto_version_default());
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_hello_triggered_delay(const string& vif_name,
+				       uint16_t& hello_triggered_delay,
+				       string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Hello triggered delay' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    hello_triggered_delay = pim_vif->hello_triggered_delay().get();
     
     return (XORP_OK);
 }
@@ -187,25 +224,25 @@ PimNode::reset_vif_proto_version(const string& vif_name, string& reason)
 int
 PimNode::set_vif_hello_triggered_delay(const string& vif_name,
 				       uint16_t hello_triggered_delay,
-				       string& reason)
+				       string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Hello triggered delay for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Hello triggered delay' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_vif->hello_triggered_delay().set(hello_triggered_delay);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -213,45 +250,64 @@ PimNode::set_vif_hello_triggered_delay(const string& vif_name,
 
 int
 PimNode::reset_vif_hello_triggered_delay(const string& vif_name,
-					 string& reason)
+					 string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Hello triggered delay for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Hello triggered delay' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_vif->hello_triggered_delay().reset();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+
+int
+PimNode::get_vif_hello_period(const string& vif_name, uint16_t& hello_period,
+			      string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Hello period' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    hello_period = pim_vif->hello_period().get();
     
     return (XORP_OK);
 }
 
 int
 PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
-			      string& reason)
+			      string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Hello period for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Hello period' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -262,26 +318,26 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
     pim_vif->pim_hello_send();
     pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_hello_period(const string& vif_name, string& reason)
+PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Hello period for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Hello period' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -292,8 +348,27 @@ PimNode::reset_vif_hello_period(const string& vif_name, string& reason)
     pim_vif->pim_hello_send();
     pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_hello_holdtime(const string& vif_name,
+				uint16_t& hello_holdtime,
+				string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Hello holdtime' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    hello_holdtime = pim_vif->hello_holdtime().get();
     
     return (XORP_OK);
 }
@@ -301,19 +376,19 @@ PimNode::reset_vif_hello_period(const string& vif_name, string& reason)
 int
 PimNode::set_vif_hello_holdtime(const string& vif_name,
 				uint16_t hello_holdtime,
-				string& reason)
+				string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Hello holdtime for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Hello holdtime' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -324,26 +399,26 @@ PimNode::set_vif_hello_holdtime(const string& vif_name,
     pim_vif->pim_hello_send();
     pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_hello_holdtime(const string& vif_name, string& reason)
+PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Hello holdtime for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Hello holdtime' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -354,27 +429,45 @@ PimNode::reset_vif_hello_holdtime(const string& vif_name, string& reason)
     pim_vif->pim_hello_send();
     pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
-			     string& reason)
+PimNode::get_vif_dr_priority(const string& vif_name, uint32_t& dr_priority,
+			     string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'DR priority' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    dr_priority = pim_vif->dr_priority().get();
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
+			     string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set DR priority for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'DR priority' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -386,26 +479,26 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
     // (Re)elect the DR
     pim_vif->pim_dr_elect();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_dr_priority(const string& vif_name, string& reason)
+PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset DR priority for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'DR priority' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -417,27 +510,45 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& reason)
     // (Re)elect the DR
     pim_vif->pim_dr_elect();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::set_vif_lan_delay(const string& vif_name, uint16_t lan_delay,
-			   string& reason)
+PimNode::get_vif_lan_delay(const string& vif_name, uint16_t& lan_delay,
+			   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'LAN delay' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    lan_delay = pim_vif->lan_delay().get();
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::set_vif_lan_delay(const string& vif_name, uint16_t lan_delay,
+			   string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set LAN delay for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'LAN delay' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -446,26 +557,26 @@ PimNode::set_vif_lan_delay(const string& vif_name, uint16_t lan_delay,
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_lan_delay(const string& vif_name, string& reason)
+PimNode::reset_vif_lan_delay(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset LAN delay for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'LAN delay' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -474,8 +585,27 @@ PimNode::reset_vif_lan_delay(const string& vif_name, string& reason)
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_override_interval(const string& vif_name,
+				   uint16_t& override_interval,
+				   string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Override interval' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    override_interval = pim_vif->override_interval().get();
     
     return (XORP_OK);
 }
@@ -483,19 +613,19 @@ PimNode::reset_vif_lan_delay(const string& vif_name, string& reason)
 int
 PimNode::set_vif_override_interval(const string& vif_name,
 				   uint16_t override_interval,
-				   string& reason)
+				   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Override interval for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Override interval' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -504,26 +634,26 @@ PimNode::set_vif_override_interval(const string& vif_name,
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_override_interval(const string& vif_name, string& reason)
+PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Override interval for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Override interval' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -532,8 +662,27 @@ PimNode::reset_vif_override_interval(const string& vif_name, string& reason)
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_is_tracking_support_disabled(const string& vif_name,
+					      bool& is_tracking_support_disabled,
+					      string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Tracking support disabled' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    is_tracking_support_disabled = pim_vif->is_tracking_support_disabled().get();
     
     return (XORP_OK);
 }
@@ -541,19 +690,19 @@ PimNode::reset_vif_override_interval(const string& vif_name, string& reason)
 int
 PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
 					      bool is_tracking_support_disabled,
-					      string& reason)
+					      string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Tracking support disabling for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Tracking support disabled' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -562,7 +711,7 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -570,19 +719,19 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
 
 int
 PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
-						string& reason)
+						string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Tracking support disabling for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Tracking support disabled' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -591,8 +740,27 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_accept_nohello_neighbors(const string& vif_name,
+					  bool& accept_nohello_neighbors,
+					  string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Accept nohello neighbors' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    accept_nohello_neighbors = pim_vif->accept_nohello_neighbors().get();
     
     return (XORP_OK);
 }
@@ -600,19 +768,19 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
 int
 PimNode::set_vif_accept_nohello_neighbors(const string& vif_name,
 					  bool accept_nohello_neighbors,
-					  string& reason)
+					  string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Accept nohello neighbors for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Accept nohello neighbors' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -623,7 +791,7 @@ PimNode::set_vif_accept_nohello_neighbors(const string& vif_name,
     
     pim_vif->accept_nohello_neighbors().set(accept_nohello_neighbors);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -631,26 +799,45 @@ PimNode::set_vif_accept_nohello_neighbors(const string& vif_name,
 
 int
 PimNode::reset_vif_accept_nohello_neighbors(const string& vif_name,
-					    string& reason)
+					    string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Accept nohello neighbors for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Accept nohello neighbors' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_vif->accept_nohello_neighbors().reset();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_vif_join_prune_period(const string& vif_name,
+				   uint16_t& join_prune_period,
+				   string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get 'Join/Prune period' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    join_prune_period = pim_vif->join_prune_period().get();
     
     return (XORP_OK);
 }
@@ -658,51 +845,66 @@ PimNode::reset_vif_accept_nohello_neighbors(const string& vif_name,
 int
 PimNode::set_vif_join_prune_period(const string& vif_name,
 				   uint16_t join_prune_period,
-				   string& reason)
+				   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot set Join/Prune period for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot set 'Join/Prune period' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_vif->join_prune_period().set(join_prune_period);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_vif_join_prune_period(const string& vif_name, string& reason)
+PimNode::reset_vif_join_prune_period(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot reset Join/Prune period for vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot reset 'Join/Prune period' for vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_vif->join_prune_period().reset();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::get_switch_to_spt_threshold(bool& is_enabled,
+				     uint32_t& interval_sec,
+				     uint32_t& bytes,
+				     string& error_msg)
+{
+    UNUSED(error_msg);
+    
+    is_enabled = is_switch_to_spt_enabled().get();
+    interval_sec = switch_to_spt_threshold_interval_sec().get();
+    bytes = switch_to_spt_threshold_bytes().get();
     
     return (XORP_OK);
 }
@@ -711,9 +913,9 @@ int
 PimNode::set_switch_to_spt_threshold(bool is_enabled,
 				     uint32_t interval_sec,
 				     uint32_t bytes,
-				     string& reason)
+				     string& error_msg)
 {
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if ((is_switch_to_spt_enabled().get() != is_enabled)
@@ -727,16 +929,16 @@ PimNode::set_switch_to_spt_threshold(bool is_enabled,
 	pim_mrt().add_task_spt_switch_threshold_changed();
     }
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
 }
 
 int
-PimNode::reset_switch_to_spt_threshold(string& reason)
+PimNode::reset_switch_to_spt_threshold(string& error_msg)
 {
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     do {
@@ -758,7 +960,7 @@ PimNode::reset_switch_to_spt_threshold(string& reason)
 	}
     } while (false);
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -767,25 +969,25 @@ PimNode::reset_switch_to_spt_threshold(string& reason)
 int
 PimNode::add_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 					   const string& vif_name,
-					   string& reason)
+					   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure scope zone with vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot add configure scope zone with vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_scope_zone_table().add_scope_zone(scope_zone_id, pim_vif->vif_index());
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -794,25 +996,25 @@ PimNode::add_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 int
 PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 					   const IPvX& vif_addr,
-					   string& reason)
+					   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_addr(vif_addr);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure scope zone with vif address %s: "
-			  "no such vif",
-			  cstring(vif_addr));
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot add configure scope zone with vif address %s: "
+			     "no such vif",
+			     cstring(vif_addr));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_scope_zone_table().add_scope_zone(scope_zone_id, pim_vif->vif_index());
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -821,26 +1023,26 @@ PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 int
 PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 					      const string& vif_name,
-					      string& reason)
+					      string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure scope zone with vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure scope zone with vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_scope_zone_table().delete_scope_zone(scope_zone_id,
 					     pim_vif->vif_index());
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -849,25 +1051,25 @@ PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 int
 PimNode::delete_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 					      const IPvX& vif_addr,
-					      string& reason)
+					      string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_addr(vif_addr);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure scope zone with vif address %s: "
-		   "no such vif",
-		   cstring(vif_addr));
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure scope zone with vif address %s: "
+			     "no such vif",
+			     cstring(vif_addr));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     pim_scope_zone_table().delete_scope_zone(scope_zone_id, pim_vif->vif_index());
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -882,27 +1084,28 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 					 const string& vif_name,
 					 uint8_t bsr_priority,
 					 uint8_t hash_masklen,
-					 string& reason)
+					 string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure BSR with vif %s: no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot add configure BSR with vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (pim_vif->addr_ptr() == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure BSR with vif %s: "
-			  "the vif has no configured address",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot add configure BSR with vif %s: "
+			     "the vif has no configured address",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);	// The vif has no address yet
     }
     
@@ -910,7 +1113,8 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 					is_scope_zone,
 					*pim_vif->addr_ptr(),
 					bsr_priority,
-					hash_masklen, reason));
+					hash_masklen,
+					error_msg));
 }
 
 //
@@ -923,13 +1127,13 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
 				     const IPvX& my_cand_bsr_addr,
 				     uint8_t bsr_priority,
 				     uint8_t hash_masklen,
-				     string& reason)
+				     string& error_msg)
 {
     uint16_t fragment_tag = RANDOM(0xffff);
-    string error_msg = "";
+    string local_error_msg = "";
     PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     // XXX: if hash_masklen is 0, then set its value to default
@@ -941,17 +1145,18 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
     new_bsr_zone.set_zone_id(zone_id);
     new_bsr_zone.set_i_am_candidate_bsr(true, my_cand_bsr_addr, bsr_priority);
     
-    if (pim_bsr().add_config_bsr_zone(new_bsr_zone, error_msg) == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure BSR with address %s "
-			  "for zone %s: %s",
-			  cstring(my_cand_bsr_addr), cstring(zone_id),
-			  error_msg.c_str());
-	XLOG_ERROR(reason.c_str());
+    if (pim_bsr().add_config_bsr_zone(new_bsr_zone, local_error_msg) == NULL) {
+	string dummy_error_msg;
+	end_config(dummy_error_msg);
+	error_msg = c_format("Cannot add configure BSR with address %s "
+			     "for zone %s: %s",
+			     cstring(my_cand_bsr_addr), cstring(zone_id),
+			     local_error_msg.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -963,13 +1168,13 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
 int
 PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 				bool is_scope_zone,
-				string& reason)
+				string& error_msg)
 {
     BsrZone *bsr_zone = NULL;
     bool is_up = false;
     PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     //
@@ -977,11 +1182,11 @@ PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
     //
     bsr_zone = pim_bsr().find_config_bsr_zone(zone_id);
     if (bsr_zone == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure BSR for zone %s: "
-			  "zone not found",
-			  cstring(zone_id));
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure BSR for zone %s: "
+			     "zone not found",
+			     cstring(zone_id));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1003,7 +1208,7 @@ PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
     if (is_up)
 	pim_bsr().start();	// XXX: restart the BSR
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -1018,28 +1223,28 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					const string& vif_name,
 					uint8_t rp_priority,
 					uint16_t rp_holdtime,
-					string& reason)
+					string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure Cand-RP with vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (pim_vif->addr_ptr() == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure Cand-RP with vif %s: "
-			  "the vif has no configured address",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
+			     "the vif has no configured address",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);	// The vif has no address yet
     }
     
@@ -1047,7 +1252,8 @@ PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 				       is_scope_zone,
 				       *pim_vif->addr_ptr(),
 				       rp_priority,
-				       rp_holdtime, reason));
+				       rp_holdtime,
+				       error_msg));
 }
 
 //
@@ -1060,21 +1266,22 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 				    const IPvX& my_cand_rp_addr,
 				    uint8_t rp_priority,
 				    uint16_t rp_holdtime,
-				    string& reason)
+				    string& error_msg)
 {
     BsrZone *config_bsr_zone = NULL;
-    string error_msg = "";
+    string local_error_msg = "";
     bool is_new_zone = false;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (! is_my_addr(my_cand_rp_addr)) {
-	end_config(reason);
-	reason = c_format("Cannot add configure Cand-RP with address %s: "
-			  "not my address",
-			  cstring(my_cand_rp_addr));
-	XLOG_ERROR(reason.c_str());
+	string dummy_error_msg;
+	end_config(dummy_error_msg);
+	error_msg = c_format("Cannot add configure Cand-RP with address %s: "
+			     "not my address",
+			     cstring(my_cand_rp_addr));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1090,15 +1297,16 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 	}
 	BsrZone new_bsr_zone(pim_bsr(), zone_id);
 	config_bsr_zone = pim_bsr().add_config_bsr_zone(new_bsr_zone,
-							error_msg);
+							local_error_msg);
 	if (config_bsr_zone == NULL) {
-	    end_config(reason);
-	    reason = c_format("Cannot add configure Cand-RP for "
-			      "zone group prefix %s (%s): %s",
-			      cstring(group_prefix),
-			      (is_scope_zone)? "scoped" : "non-scoped",
-			      error_msg.c_str());
-	    XLOG_ERROR(reason.c_str());
+	    string dummy_error_msg;
+	    end_config(dummy_error_msg);
+	    error_msg = c_format("Cannot add configure Cand-RP for "
+				 "zone group prefix %s (%s): %s",
+				 cstring(group_prefix),
+				 (is_scope_zone)? "scoped" : "non-scoped",
+				 local_error_msg.c_str());
+	    XLOG_ERROR(error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	is_new_zone = true;
@@ -1106,22 +1314,23 @@ PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     
     if (config_bsr_zone->add_rp(group_prefix, is_scope_zone,
 				my_cand_rp_addr, rp_priority,
-				rp_holdtime, error_msg)
+				rp_holdtime, local_error_msg)
 	== NULL) {
-	end_config(reason);
-	reason = c_format("Cannot add configure Cand-RP address %s for "
-			  "zone group prefix %s (%s): %s",
-			  cstring(my_cand_rp_addr),
-			  cstring(group_prefix),
-			  (is_scope_zone)? "scoped" : "non-scoped",
-			  error_msg.c_str());
-	XLOG_ERROR(reason.c_str());
+	string dummy_error_msg;
+	end_config(dummy_error_msg);
+	error_msg = c_format("Cannot add configure Cand-RP address %s for "
+			     "zone group prefix %s (%s): %s",
+			     cstring(my_cand_rp_addr),
+			     cstring(group_prefix),
+			     (is_scope_zone)? "scoped" : "non-scoped",
+			     local_error_msg.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	if (is_new_zone)
 	    pim_bsr().delete_config_bsr_zone(config_bsr_zone);
 	return (XORP_ERROR);
     }
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -1135,35 +1344,35 @@ int
 PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					   bool is_scope_zone,
 					   const string& vif_name,
-					   string& reason)
+					   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (pim_vif == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure Cand-RP with vif %s: "
-			  "no such vif",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (pim_vif->addr_ptr() == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure Cand-RP with vif %s: "
-			  "the vif has no configured address",
-			  vif_name.c_str());
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
+			     "the vif has no configured address",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);	// The vif has no address yet
     }
     
     return (delete_config_cand_rp_by_addr(group_prefix,
 					  is_scope_zone,
 					  *pim_vif->addr_ptr(),
-					  reason) < 0);
+					  error_msg) < 0);
 }
 
 //
@@ -1174,14 +1383,14 @@ int
 PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 				       bool is_scope_zone,
 				       const IPvX& my_cand_rp_addr,
-				       string& reason)
+				       string& error_msg)
 {
     BsrZone *bsr_zone;
     BsrGroupPrefix *bsr_group_prefix;
     BsrRp *bsr_rp;
     bool is_up = false;
     
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     //
@@ -1190,12 +1399,12 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     bsr_zone = pim_bsr().find_config_bsr_zone_by_prefix(group_prefix,
 							is_scope_zone);
     if (bsr_zone == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure Cand-RP for zone for "
-			  "group prefix %s (%s): zone not found",
-			  cstring(group_prefix),
-			  (is_scope_zone)? "scoped" : "non-scoped");
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure Cand-RP for zone for "
+			     "group prefix %s (%s): zone not found",
+			     cstring(group_prefix),
+			     (is_scope_zone)? "scoped" : "non-scoped");
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1204,12 +1413,12 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     //
     bsr_group_prefix = bsr_zone->find_bsr_group_prefix(group_prefix);
     if (bsr_group_prefix == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure Cand-RP for zone for "
-			  "group prefix %s (%s): prefix not found",
-			  cstring(group_prefix),
-			  (is_scope_zone)? "scoped" : "non-scoped");
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure Cand-RP for zone for "
+			     "group prefix %s (%s): prefix not found",
+			     cstring(group_prefix),
+			     (is_scope_zone)? "scoped" : "non-scoped");
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1218,13 +1427,13 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     //
     bsr_rp = bsr_group_prefix->find_rp(my_cand_rp_addr);
     if (bsr_rp == NULL) {
-	end_config(reason);
-	reason = c_format("Cannot delete configure Cand-RP for zone for "
-			  "group prefix %s (%s) and RP %s: RP not found",
-			  cstring(group_prefix),
-			  (is_scope_zone)? "scoped" : "non-scoped",
-			  cstring(my_cand_rp_addr));
-	XLOG_ERROR(reason.c_str());
+	end_config(error_msg);
+	error_msg = c_format("Cannot delete configure Cand-RP for zone for "
+			     "group prefix %s (%s) and RP %s: RP not found",
+			     cstring(group_prefix),
+			     (is_scope_zone)? "scoped" : "non-scoped",
+			     cstring(my_cand_rp_addr));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1251,7 +1460,7 @@ PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
     if (is_up)
 	pim_bsr().start();	// XXX: restart the BSR
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -1270,28 +1479,28 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 			      const IPvX& rp_addr,
 			      uint8_t rp_priority,
 			      uint8_t hash_masklen,
-			      string& reason)
+			      string& error_msg)
 {
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (! group_prefix.is_multicast()) {
-	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot add configure static RP with address %s "
-			  "for group prefix %s: "
-			  "not a multicast address",
-			  cstring(rp_addr),
-			  cstring(group_prefix));
-	XLOG_ERROR(reason.c_str());
+	// XXX: don't call end_config(error_msg);
+	error_msg = c_format("Cannot add configure static RP with address %s "
+			     "for group prefix %s: "
+			     "not a multicast address",
+			     cstring(rp_addr),
+			     cstring(group_prefix));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (! rp_addr.is_unicast()) {
-	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot add configure static RP with address %s: "
-			  "not an unicast address",
-			  cstring(rp_addr));
-	XLOG_ERROR(reason.c_str());
+	// XXX: don't call end_config(error_msg);
+	error_msg = c_format("Cannot add configure static RP with address %s: "
+			     "not an unicast address",
+			     cstring(rp_addr));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1302,13 +1511,13 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
     if (rp_table().add_rp(rp_addr, rp_priority, group_prefix, hash_masklen,
 			  PimRp::RP_LEARNED_METHOD_STATIC)
 	== NULL) {
-	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot add configure static RP with address %s "
-			  "and priority %d for group prefix %s",
-			  cstring(rp_addr),
-			  rp_priority,
-			  cstring(group_prefix));
-	XLOG_ERROR(reason.c_str());
+	// XXX: don't call end_config(error_msg);
+	error_msg = c_format("Cannot add configure static RP with address %s "
+			     "and priority %d for group prefix %s",
+			     cstring(rp_addr),
+			     rp_priority,
+			     cstring(group_prefix));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1328,20 +1537,20 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 int
 PimNode::delete_config_static_rp(const IPvXNet& group_prefix,
 				 const IPvX& rp_addr,
-				 string& reason)
+				 string& error_msg)
 {
-    if (start_config(reason) != XORP_OK)
+    if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     if (rp_table().delete_rp(rp_addr, group_prefix,
 			     PimRp::RP_LEARNED_METHOD_STATIC)
 	!= XORP_OK) {
-	// XXX: don't call end_config(reason);
-	reason = c_format("Cannot delete configure static RP with address %s "
-			  "for group prefix %s",
-			  cstring(rp_addr),
-			  cstring(group_prefix));
-	XLOG_ERROR(reason.c_str());
+	// XXX: don't call end_config(error_msg);
+	error_msg = c_format("Cannot delete configure static RP with address %s "
+			     "for group prefix %s",
+			     cstring(rp_addr),
+			     cstring(group_prefix));
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1356,11 +1565,11 @@ PimNode::delete_config_static_rp(const IPvXNet& group_prefix,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::config_static_rp_done(string& reason)
+PimNode::config_static_rp_done(string& error_msg)
 {
     rp_table().apply_rp_changes();
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);

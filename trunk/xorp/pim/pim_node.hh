@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.23 2003/07/12 01:06:56 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.24 2003/08/06 18:52:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -131,50 +131,51 @@ public:
     /**
      * Test if there is an unit that is in PENDING_DOWN state.
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * information about the unit that is in PENDING_DOWN state (if any).
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the unit that is in PENDING_DOWN
+     * state (if any).
      * @return true if there is an unit that is in PENDING_DOWN state,
      * otherwise false.
      */
-    bool	has_pending_down_units(string& reason);
+    bool	has_pending_down_units(string& reason_msg);
 
     /**
      * Get the node status (see @ref ProcessStatus).
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * information about the status.
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the status.
      * @return the node status (see @ref ProcessStatus).
      */
-    ProcessStatus	node_status(string& reason);
+    ProcessStatus	node_status(string& reason_msg);
     
     /**
      * Install a new PIM vif.
      * 
      * @param vif vif information about new PimVif to install.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const Vif& vif, string& err);
+    int		add_vif(const Vif& vif, string& error_msg);
     
     /**
      * Install a new PIM vif.
      * 
      * @param vif_name the name of the new vif.
      * @param vif_index the vif index of the new vif.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_vif(const string& vif_name, uint16_t vif_index,
-			string& err);
+			string& error_msg);
     
     /**
      * Delete an existing PIM vif.
      * 
      * @param vif_name the name of the vif to delete.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_vif(const string& vif_name, string& err);
+    int		delete_vif(const string& vif_name, string& error_msg);
     
     /**
      * Set flags to a vif.
@@ -186,14 +187,14 @@ public:
      * @param is_multicast rue if the vif is multicast-capable.
      * @param is_broadcast true if the vif is broadcast-capable.
      * @param is_up true if the vif is UP and running.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_vif_flags(const string& vif_name,
 			      bool is_pim_register, bool is_p2p,
 			      bool is_loopback, bool is_multicast,
 			      bool is_broadcast, bool is_up,
-			      string& err);
+			      string& error_msg);
     
     /**
      * Add a new address to a vif, or update an existing address.
@@ -203,7 +204,7 @@ public:
      * @param subnet_addr the subnet address to add.
      * @param broadcast_addr the broadcast address (when applicable).
      * @param peer_addr the peer address (when applicable).
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_vif_addr(const string& vif_name,
@@ -211,55 +212,55 @@ public:
 			     const IPvXNet& subnet_addr,
 			     const IPvX& broadcast_addr,
 			     const IPvX& peer_addr,
-			     string& err);
+			     string& error_msg);
     
     /**
      * Delete an address from a vif.
      * 
      * @param vif_name the name of the vif.
      * @param addr the unicast address to delete.
-     * @param vif_name the name of the vif.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_vif_addr(const string& vif_name,
 				const IPvX& addr,
-				string& err);
+				string& error_msg);
     
     /**
      * Enable an existing PIM vif.
      * 
      * @param vif_name the name of the vif to enable.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		enable_vif(const string& vif_name, string& err);
+    int		enable_vif(const string& vif_name, string& error_msg);
 
     /**
      * Disable an existing PIM vif.
      * 
      * @param vif_name the name of the vif to disable.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		disable_vif(const string& vif_name, string& err);
+    int		disable_vif(const string& vif_name, string& error_msg);
 
     /**
      * Start an existing PIM vif.
      * 
      * @param vif_name the name of the vif to start.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_vif(const string& vif_name, string& err);
+    int		start_vif(const string& vif_name, string& error_msg);
     
     /**
      * Stop an existing PIM vif.
      * 
      * @param vif_name the name of the vif to start.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_vif(const string& vif_name, string& err);
+    int		stop_vif(const string& vif_name, string& error_msg);
     
     /**
      * Start PIM on all enabled interfaces.
@@ -836,122 +837,168 @@ public:
     /**
      * Complete the set of vif configuration changes.
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_config_all_vifs_done(string& reason);
-    
+    int		set_config_all_vifs_done(string& error_msg);
+    //
+    int		get_vif_proto_version(const string& vif_name,
+				      int& proto_version,
+				      string& error_msg);
     int		set_vif_proto_version(const string& vif_name,
 				      int proto_version,
-				      string& reason);
+				      string& error_msg);
     int		reset_vif_proto_version(const string& vif_name,
-					string& reason);
+					string& error_msg);
+    //
+    int		get_vif_hello_triggered_delay(const string& vif_name,
+					      uint16_t& hello_triggered_delay,
+					      string& error_msg);
     int		set_vif_hello_triggered_delay(const string& vif_name,
 					      uint16_t hello_triggered_delay,
-					      string& reason);
+					      string& error_msg);
     int		reset_vif_hello_triggered_delay(const string& vif_name,
-						string& reason);
+						string& error_msg);
+    //
+    int		get_vif_hello_period(const string& vif_name,
+				     uint16_t& hello_period,
+				     string& error_msg);
     int		set_vif_hello_period(const string& vif_name,
 				     uint16_t hello_period,
-				     string& reason);
-    int		reset_vif_hello_period(const string& vif_name, string& reason);
+				     string& error_msg);
+    int		reset_vif_hello_period(const string& vif_name,
+				       string& error_msg);
+    //
+    int		get_vif_hello_holdtime(const string& vif_name,
+				       uint16_t& hello_holdtime,
+				       string& error_msg);
     int		set_vif_hello_holdtime(const string& vif_name,
 				       uint16_t	hello_holdtime,
-				       string& reason);
+				       string& error_msg);
     int		reset_vif_hello_holdtime(const string& vif_name,
-					 string& reason);
+					 string& error_msg);
+    //
+    int		get_vif_dr_priority(const string& vif_name,
+				    uint32_t& dr_priority,
+				    string& error_msg);
     int		set_vif_dr_priority(const string& vif_name,
 				    uint32_t dr_priority,
-				    string& reason);
-    int		reset_vif_dr_priority(const string& vif_name, string& reason);
+				    string& error_msg);
+    int		reset_vif_dr_priority(const string& vif_name,
+				      string& error_msg);
+    //
+    int		get_vif_lan_delay(const string&	vif_name,
+				  uint16_t& lan_delay,
+				  string& error_msg);
     int		set_vif_lan_delay(const string&	vif_name,
 				  uint16_t lan_delay,
-				  string& reason);
-    int		reset_vif_lan_delay(const string& vif_name, string& reason);
+				  string& error_msg);
+    int		reset_vif_lan_delay(const string& vif_name,
+				    string& error_msg);
+    //
+    int		get_vif_override_interval(const string&	vif_name,
+					  uint16_t& override_interval,
+					  string& error_msg);
     int		set_vif_override_interval(const string&	vif_name,
 					  uint16_t override_interval,
-					  string& reason);
+					  string& error_msg);
     int		reset_vif_override_interval(const string& vif_name,
-					    string& reason);
+					    string& error_msg);
+    //
+    int		get_vif_is_tracking_support_disabled(const string& vif_name,
+						     bool& is_tracking_support_disabled,
+						     string& error_msg);
     int		set_vif_is_tracking_support_disabled(const string& vif_name,
 						     bool is_tracking_support_disabled,
-						     string& reason);
+						     string& error_msg);
     int		reset_vif_is_tracking_support_disabled(const string& vif_name,
-						       string& reason);
+						       string& error_msg);
+    //
+    int		get_vif_accept_nohello_neighbors(const string& vif_name,
+						 bool& accept_nohello_neighbors,
+						 string& error_msg);
     int		set_vif_accept_nohello_neighbors(const string& vif_name,
 						 bool accept_nohello_neighbors,
-						 string& reason);
+						 string& error_msg);
     int		reset_vif_accept_nohello_neighbors(const string& vif_name,
-						   string& reason);
+						   string& error_msg);
+    //
+    int		get_vif_join_prune_period(const string&	vif_name,
+					  uint16_t& join_prune_period,
+					  string& error_msg);
     int		set_vif_join_prune_period(const string&	vif_name,
 					  uint16_t join_prune_period,
-					  string& reason);
+					  string& error_msg);
     int		reset_vif_join_prune_period(const string& vif_name,
-					    string& reason);
+					    string& error_msg);
+    //
+    int		get_switch_to_spt_threshold(bool& is_enabled,
+					    uint32_t& interval_sec,
+					    uint32_t& bytes,
+					    string& error_msg);
     int		set_switch_to_spt_threshold(bool is_enabled,
 					    uint32_t interval_sec,
 					    uint32_t bytes,
-					    string& reason);
-    int		reset_switch_to_spt_threshold(string& reason);
+					    string& error_msg);
+    int		reset_switch_to_spt_threshold(string& error_msg);
     //
     int		add_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 						  const string& vif_name,
-						  string& reason);
+						  string& error_msg);
     int		add_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 						  const IPvX& vif_addr,
-						  string& reason);
+						  string& error_msg);
     int		delete_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 						     const string& vif_name,
-						     string& reason);
+						     string& error_msg);
     int		delete_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 						     const IPvX& vif_addr,
-						     string& reason);
+						     string& error_msg);
     //
     int		add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 						bool is_scope_zone,
 						const string& vif_name,
 						uint8_t bsr_priority,
 						uint8_t hash_masklen,
-						string& reason);
+						string& error_msg);
     int		add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
 					    bool is_scope_zone,
 					    const IPvX& my_cand_bsr_addr,
 					    uint8_t bsr_priority,
 					    uint8_t hash_masklen,
-					    string& reason);
+					    string& error_msg);
     int		delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 				       bool is_scope_zone,
-				       string& reason);
+				       string& error_msg);
     int		add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					       bool is_scope_zone,
 					       const string& vif_name,
 					       uint8_t rp_priority,
 					       uint16_t rp_holdtime,
-					       string& reason);
+					       string& error_msg);
     int		add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 					   bool is_scope_zone,
 					   const IPvX& my_cand_rp_addr,
 					   uint8_t rp_priority,
 					   uint16_t rp_holdtime,
-					   string& reason);
+					   string& error_msg);
     int		delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 						  bool is_scope_zone,
 						  const string& vif_name,
-						  string& reason);
+						  string& error_msg);
     int		delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 					      bool is_scope_zone,
 					      const IPvX& my_cand_rp_addr,
-					      string& reason);
+					      string& error_msg);
     int		add_config_static_rp(const IPvXNet& group_prefix,
 				     const IPvX& rp_addr,
 				     uint8_t rp_priority,
 				     uint8_t hash_masklen,
-				     string& reason);
+				     string& error_msg);
     int		delete_config_static_rp(const IPvXNet& group_prefix,
 					const IPvX& rp_addr,
-					string& reason);
-    int		config_static_rp_done(string& reason);
+					string& error_msg);
+    int		config_static_rp_done(string& error_msg);
     
     //
     // Debug-related methods
