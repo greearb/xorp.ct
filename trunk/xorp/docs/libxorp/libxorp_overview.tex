@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.11 2003/11/06 20:20:37 hodson Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.12 2003/11/06 20:28:59 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -293,11 +293,10 @@ constructor when invoked with an invalid address family).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{heap.hh}
 
-This file contains \emph{class Heap}.
-Heap implements a priority queue, mostly used by Timer
-objects. This implementation supports removal of arbitrary
-objects from the heap, even if they are not located at the top.
-
+This file contains \emph{class Heap}.  The Heap class is used by the
+TimerList class as it's priority queue for timers. This implementation
+supports removal of arbitrary objects from the heap, even if they are
+not located at the top.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh}
