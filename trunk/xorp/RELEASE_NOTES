@@ -1,10 +1,69 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.52 2004/06/15 06:03:02 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.53 2004/07/09 05:43:23 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
+
+Release 1.1 (2004/??/??)
+=========================
+  ALL:
+    - 
+
+  LIBXORP:
+    - Bug fix in ordering events scheduled at exactly the same time
+      and expiring at exactly the same time.
+
+  LIBXIPC:
+    - 
+
+  LIBFEACLIENT:
+    - 
+
+  XRL:
+    - 
+
+  RTRMGR:
+    - 
+
+  XORPSH:
+    - 
+
+  FEA/MFEA:
+    - 
+
+  RIB:
+    - Bug fix when adding point-to-point network interfaces.
+
+    - Removal of the old mechanism (ExportTable) for propagating
+      the routes to the FEA and all other interested parties.
+
+  RIP:
+    - 
+
+  BGP:
+    - 
+
+  STATIC_ROUTES:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  PIM-SM:
+    - Bug fix in overwriting the MRIB entries.
+
+    - Bug fix in scheduling the internal PimMre tasks.
+
+  FIB2MRIB:
+    - 
+
+  CLI:
+    - 
+
+  SNMP:
+    - 
 
 Release 1.0 (2004/07/08)
 =========================
