@@ -801,8 +801,7 @@ $(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
 $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
-		$(INTERFACES_DIR)/mfea.xif				\
-		$(INTERFACES_DIR)/fea_ifmgr_client.xif
+		$(INTERFACES_DIR)/mfea.xif
 $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif 			\
