@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.8 2003/06/06 03:59:18 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.9 2003/06/09 20:02:20 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Libxorp Library Overview \\
 \vspace{1ex}
-Version 0.3}
+Version 0.4}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 9, 2003}
+\date{August 28, 2003}
 
 \maketitle
 
@@ -375,8 +375,9 @@ provide greater flexibility.
 
 This file implements a trie to support route lookups.  The
 implementation is template-based, and is based on the code in
-trie.hh. From deleloper's point of view, templates RefTrie, RefTrieNode, and
-RefTrieIterator are the most important. Those templates should be invoked
+trie.hh. From deleloper's point of view, templates RefTrie, RefTrieNode,
+RefTriePreOrderIterator, and RefTriePostOrderIterator are the most important.
+Those templates should be invoked
 with two classes, the basetype ``A'' for the search Key (which is a
 subnet, \verb=IPNet<A>=), and the Payload.
 
@@ -385,9 +386,9 @@ RefTrieNode includes a reference count of how many RefTrieIterators
 are pointing at it.  If a RefTrieNode is deleted, but has a non-zero
 reference count, deletion will be delayed until the reference count
 becomes zero.  In this way, additions and deletions to the RefTrie
-cannot cause a RefTrieIterator to reference invalid memory, although a
-deletion and subsequent addition can cause the payload data referenced
-by a RefTrieIterator to change.
+cannot cause a RefTriePreOrderIterator or RefTriePostOrderIterator
+to reference invalid memory, although a deletion and subsequent addition can
+cause the payload data referenced by an iterator to change.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -458,7 +459,8 @@ dispatching, and destroying transactions.
 
 This file implements a trie to support route lookups.
 The implementation is template-based. From deleloper's point
-of view, templates Trie, TrieNode, and TrieIterator
+of view, templates Trie, TrieNode, TriePreOrderIterator,
+and TriePostOrderIterator
 are the most important. Those templates should be invoked with two
 classes, the basetype ``A'' for the search Key (which is a subnet,
 \verb=IPNet<A>=), and the Payload.
@@ -711,6 +713,8 @@ header files, defines several commonly used values, etc.
   add information about RefTrie; cleanup.
 
   \item June 9, 2003: Updated to match XORP version 0.3 release code.
+
+  \item August 28, 2003: Updated to match XORP version 0.4 release code.
 
 \end{itemize}
 
