@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.26 2004/02/29 22:59:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.27 2004/06/10 22:41:29 hodson Exp $"
 
 
 //
@@ -153,10 +153,13 @@ PimBsr::stop()
     
     //
     // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
-    // messages.
+    // messages. Note that the PIM Register vif is excluded.
+    //
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	pim_vif_up = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif_up == NULL)
+	    continue;
+	if (pim_vif_up->is_is_pim_register())
 	    continue;
 	if (pim_vif_up->is_up())
 	    break;
@@ -1066,12 +1069,14 @@ PimBsr::send_test_cand_rp_adv()
     
     //
     // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
-    // messages.
+    // messages. Note that the PIM Register vif is excluded.
     //
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
+	if (pim_vif->is_pim_register())
+	    continue;	
 	if (! pim_vif->is_up())
 	    continue;
 	break;	// Found
@@ -2298,11 +2303,13 @@ BsrZone::candidate_rp_advertise_timer_timeout()
 	
 	//
 	// Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
-	// messages.
+	// messages. Note that the PIM Register vif is excluded.
 	//
 	for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
 	    pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
+		continue;
+	    if (pim_vif->is_pim_register())
 		continue;
 	    if (! pim_vif->is_up())
 		continue;
