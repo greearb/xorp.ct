@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.9 2004/06/10 22:41:09 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.10 2004/09/24 03:47:48 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -22,6 +22,7 @@
 #include "libxorp/exceptions.hh"
 #include "xrl_atom.hh"
 #include "xrl_args.hh"
+#include "xrl_tokens.hh"
 
 /**
  * XORP IPC request.
@@ -92,7 +93,7 @@ public:
     /**
      * @return string representation of Xrl without arguments.
      */
-    string string_no_args() const;
+    inline string string_no_args() const;
 
     /**
      * @return the name of the command
@@ -161,5 +162,19 @@ private:
 };
 
 typedef Xrl XrlTemplate;
+
+// ----------------------------------------------------------------------------
+// Inline methods
+
+#include "libxorp/c_format.hh"
+
+inline string
+Xrl::string_no_args() const
+{
+    //    return _protocol + string(XrlToken::PROTO_TGT_SEP) + _target +
+    //	string(XrlToken::TGT_CMD_SEP) + _command;
+    return c_format("%s%s%s%s%s", _protocol.c_str(), XrlToken::PROTO_TGT_SEP,
+		    _target.c_str(), XrlToken::TGT_CMD_SEP, _command.c_str());
+}
 
 #endif // __LIBXIPC_XRL_HH__
