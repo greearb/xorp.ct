@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.19 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.20 2003/11/17 00:21:50 pavlin Exp $"
 
-//#define DEBUG_LOGGING
-//#define DEBUG_VARIABLES
-#define DEBUG_COMMIT
+// #define DEBUG_LOGGING
+// #define DEBUG_VARIABLES
+// #define DEBUG_COMMIT
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"

@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.13 2003/05/04 06:25:21 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.14 2003/05/23 00:02:08 mjh Exp $"
 
-//#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
