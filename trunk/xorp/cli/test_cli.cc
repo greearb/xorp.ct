@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.27 2004/03/04 04:49:45 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.28 2004/05/24 01:22:30 hodson Exp $"
 
 
 //
@@ -410,6 +410,29 @@ cli_print2(const string& ,		// server_name
 }
 
 int
+cli_print2_newline(const string& ,		// server_name
+		   const string& cli_term_name,
+		   uint32_t ,			// cli_session_id
+		   const string& ,		// command_global_name,
+		   const vector<string>& argv)
+{
+    CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
+    if (cli_client == NULL)
+	return (XORP_ERROR);
+
+    if (argv.size() > 0) {
+	cli_client->cli_print("Error: unexpected arguments\n");
+	return (XORP_ERROR);
+    }
+
+    for (int i = 0; i < 10; i++)
+	cli_client->cli_print(c_format("This is my line number %d\n", i));
+    cli_client->cli_print(c_format("\n"));
+
+    return (XORP_OK);
+}
+
+int
 cli_print_wide(const string& ,		// server_name
 	       const string& cli_term_name,
 	       uint32_t ,		// cli_session_id
@@ -554,20 +577,6 @@ add_my_cli_commands(CliNode& cli_node)
     CliCommand *com0, *com1, *com2, *com3;
 
     com0 = cli_node.cli_command_root();
-#if 0
-    com2 = com0->add_command("myset", "Set my variable", cli_myset_func);
-    com1 = com0->add_command("myshow", "Show my information", "Myshow> ");
-    com2 = com1->add_command("version", "Show my information about system");
-    com3 = com2->add_command("pim", "Show my information about PIM");
-    com3 = com2->add_command("igmp", "Show my information about IGMP");
-
-    com1 = com0->add_command("myset2", "Set my variable2", cli_myset_func);
-    com1 = com0->add_command("myshow2", "Show my information2", "Myshow2> ");
-
-    com1 = com0->add_command("print", "Print numbers", cli_print);
-    com1 = com0->add_command("print2", "Print few numbers", cli_print2);
-    com1 = com0->add_command("print_wide", "Print wide lines", cli_print_wide);
-#endif
     com2 = com0->add_command("myset", "Set my variable", cli_myset_func);
     com1 = com0->add_command("myshow", "Show my information", "Myshow> ");
     com2 = com0->add_command("myshow version",
@@ -582,6 +591,8 @@ add_my_cli_commands(CliNode& cli_node)
 
     com1 = com0->add_command("print", "Print numbers", cli_print);
     com1 = com0->add_command("print2", "Print few numbers", cli_print2);
+    com1 = com0->add_command("print2 newline", "Print few numbers with an extra newline",
+			     cli_print2_newline);
     com1 = com0->add_command("print_wide", "Print wide lines", cli_print_wide);
     com1 = com0->add_command("print_test", "Print test lines", cli_print_test);
 
