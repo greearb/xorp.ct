@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.11 2003/08/10 22:00:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.12 2003/08/11 06:18:55 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -489,7 +489,7 @@ IfTreeAddr4::str() const
 {
     string r = c_format("V4Addr %s { enabled := %s } { broadcast := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
-			"{ multicast := %s } { flags := 0x%02x }"
+			"{ multicast := %s } { flags := 0x%02x } "
 			"{ prefix := %d }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_broadcast), true_false(_loopback),
