@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.58 2004/11/16 21:43:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.59 2004/12/18 02:08:11 mjh Exp $"
 
 #include <pwd.h>
 
@@ -2121,10 +2121,20 @@ RouterCLI::text_entry_func(const string& ,
 		    _cli_client.cli_print("ERROR: mismatched \"}\".\n");
 		    goto cleanup;
 		}
-		// The last brace we entered should match the current depth
 		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
 			   _braces.back(),
 			   ctn->depth(), ctn->segname().c_str());
+		while (ctn->depth() > _braces.back()) {
+		    //looks like one or more close braces on the same
+		    //line as some config - just pop out
+		    //appropriately before we can handle this correctly.
+		    ctn = ctn->parent();
+		    XLOG_TRACE(_verbose, "jumping out one level\n");
+		    XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
+			       _braces.back(),
+			       ctn->depth(), ctn->segname().c_str());
+		}
+		// The last brace we entered should match the current depth
 		XLOG_ASSERT(_braces.back() == ctn->depth());
 		_braces.pop_back();
 		// The next brace should be where we're jumping to.
