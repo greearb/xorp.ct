@@ -1,0 +1,99 @@
+#
+# $XORP: CVSROOT/README,v 1.3 2004/08/02 06:08:41 pavlin Exp $
+#
+
+This is README file for the XORP CVS repository configuration.
+
+Introduction
+============
+The configuration files and scripts are based on the FreeBSD
+CVSROOT-src CVS configuration. The major differences are:
+
+ * The configuration and the scripts are modified to work with
+   a generic CVS installation (currently, 1.12.9) rather than
+   the FreeBSD-specific version.
+
+ * The format of the email message has changed to resemble the
+   original format.
+
+To reconfigure the CVS repository, you need to do the following:
+ 1. cvs -d <CVS_root_directory> co CVSROOT
+ 2. Edit the configuration files
+ 3. CVS commit
+
+Note that the access to the CVS configuration repository is limited
+only to the CVS repository administrators (see file "CVSROOT/avail").
+
+If you make a mistake and as a result of that you cannot commit to
+the CVS repository, do not panic. Just login to the CVS server,
+and edit by hand the particular file.
+For example, if file "CVSROOT/avail" got corrupted, then do the following:
+ 1. ssh xorpc.icir.org
+ 2. cd /usr/local/share/doc/apache/cvs/CVSROOT
+ 3. Edit file "avail" and fix the problem.
+
+After the edit you can cvs commit as usual. Note that a cvs commit
+to any of the files in the CVSROOT directory automatically rebuilds the
+administrative file database. After the rebuild any files such as
+"CVSROOT/avail" in the above example ill be overwritten with their most
+recent checked-in version.
+
+
+Configuration
+=============
+
+ * Source code modification access control.
+   The access control rules are configured in file "CVSROOT/avail".
+   For example, the set of users who can change the CVS configuration
+   is specified in group "cvs_managers".
+   Some of the rules use the following files:
+    - "CVSROOT/access.core" contains the list of core developers who
+      can modify any of the XORP code (including documentation).
+    - "CVSROOT/access.doc" contains the list of documentation commiters
+      who can modify only the XORP documentation.
+
+ * Configuration for checking approvals.
+   If the source code has been tagged as a branch, then committing to
+   a branch for a XORP release should be pre-approved. The
+   set of approvers for each branch/tag is configured in
+   file "CVSROOT/approvers".
+
+ * Local configuration for the CVSROOT perl scripts.
+   The perl scripts inside the CVSROOT directory have default
+   configuration specified in file "CVSROOT/cfg.pm".
+   The local configuration that overwrites the default configuration
+   is specified in file "CVSROOT/cfg_local.pm".
+   For example, to enforce checking for the CVSHeader,
+   then variable CHECK_HEADERS should be set to 1.
+
+ * Adding new files to the CVS configuration repository.
+   If a new file is added to the CVS configuration repository,
+   it should be listed in file "CVSROOT/checkoutlist", unless it
+   is one of the special CVS files.
+
+ * CVS-specific configuration.
+   The CVS-specific configuration is specified inside file "CVSROOT/config".
+
+ * Ignoring files during "cvs update".
+   File "CVSROOT/cvsignore" can be used to specify the default set
+   of files that are to be ignored during "cvs update".
+
+ * Excluding files for header checking.
+   If the CVS tag header checking is enabled (e.g., if variable
+   CHECK_HEADERS is set to 1 inside file "CVSROOT/cfg_local.pm",
+   then file "CVSROOT/exclude" can be used to specify the set
+   of files that should be excluded from such check.
+
+ * Configuring the template that is invoked on commit and import.
+   The template that is invoked by the editor when the user tries
+   to commit changes or import new files is specified in file
+   "CVSROOT/rcstemplate". Note that any changes to this file should
+   by synchronized with the definition of variable "TEMPLATE_HEADERS"
+   inside file "CVSROOT/cfg_local.pm".
+
+ * Restricting tagging the source code.
+   Some tag names are reserved for specific purposes.
+   For example, tag names starting with prefix RELEASE_* are reserved
+   for software releases. Tagging the source code with such tag names
+   is restricted only to the release managers. The access control is
+   configured inside file "CVSROOT/tagcheck".

@@ -1,3 +1,7 @@
+#
+# $XORP: CVSROOT/editinfo,v 1.2 2004/07/30 23:44:51 pavlin Exp $
+# $FreeBSD: CVSROOT-src/editinfo,v 1.8 2001/08/30 21:32:19 joe Exp $
+#
 # The "editinfo" file is used to allow verification of logging
 # information.  It works best when a template (as specified in the
 # rcsinfo file) is provided for the logging procedure.  Given a
@@ -19,3 +23,7 @@
 # One thing that should be noted is the the ALL keyword is not
 # supported.  There can be only one entry that matches a given
 # repository.
+#
+# Note there is no "edit" example script currently available....
+#
+#DEFAULT		$CVSROOT/CVSROOT/edit "%s"

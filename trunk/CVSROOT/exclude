@@ -1,0 +1,23 @@
+#
+# Exclusions list for header checking.
+#
+# $XORP: CVSROOT/exclude,v 1.2 2004/07/30 23:44:51 pavlin Exp $
+# $FreeBSD: CVSROOT-src/exclude,v 1.113 2004/07/28 09:03:12 kan Exp $
+#
+
+# Skip dot files.
+^(.*/)?\.
+
+# A number of files in CVSROOT don't need to be checked.
+^CVSROOT/cvsignore
+^CVSROOT/options
+^CVSROOT/rcstemplate
+
+#^doc/.*\.eps
+#^doc/.*\.png
+#^doc/.*\.scr
+
+# Skip all ports files except for Makefiles.
+#^ports/.*(?<!/Makefile)$
+
+^xorp/contrib/

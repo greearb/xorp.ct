@@ -1,3 +1,6 @@
+#
+# $XORP: CVSROOT/rcsinfo,v 1.3 2004/07/30 23:44:51 pavlin Exp $
+#
 # The "rcsinfo" file is used to control templates with which the editor
 # is invoked on commit and import.
 #
@@ -11,3 +14,5 @@
 #
 # If the name "ALL" appears as a regular expression it is always used
 # in addition to the first matching regex or "DEFAULT".
+#
+ALL			$CVSROOT/CVSROOT/rcstemplate

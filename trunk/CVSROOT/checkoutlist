@@ -1,3 +1,6 @@
+#
+# $XORP: CVSROOT/checkoutlist,v 1.10 2004/08/02 05:50:27 pavlin Exp $
+#
 # The "checkoutlist" file is used to support additional version controlled
 # administrative files in $CVSROOT/CVSROOT, such as template files.
 #
@@ -11,8 +14,42 @@
 #	[<whitespace>]<filename><whitespace><error message><end-of-line>
 #
 # comment lines begin with '#'
+#
+# CVS automatically checks out the following (see src/mkmodules.c):
+#	checkoutlist
+#	commitinfo
+#	config
+#	cvsignore
+#	cvswrappers
+#	editinfo
+#	loginfo
+#	modules
+#	notify
+#	rcsinfo
+#	readers
+#	taginfo
+#	verifymsg
+#	writers
+#
 
-commit_prep
-log_accum
-log_check
+README
+access.core
+access.doc
+approvecheck
+approvers
+avail
+cfg.pm
+cfg_local.pm
+commit_prep.pl
+commitcheck
+cvs_acls.pl
+edithook
+exclude
+log_accum.pl
+logcheck
 options
+rcstemplate
+tagcheck
+unwrap
+verifymsgcheck
+wrap

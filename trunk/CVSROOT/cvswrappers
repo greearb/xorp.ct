@@ -1,3 +1,7 @@
+#
+# $XORP: CVSROOT/cvswrappers,v 1.2 2004/07/30 23:44:51 pavlin Exp $
+# $FreeBSD: CVSROOT-src/cvswrappers,v 1.3 2000/08/28 11:30:59 joe Exp $
+#
 # This file affects handling of files based on their names.
 #
 # The -t/-f options allow one to treat directories of files
@@ -21,3 +25,7 @@
 #  and value is a single-quote delimited value.
 # For example:
 #*.gif -k 'b'
+#*.nib  -f '$CVSROOT/CVSROOT/unwrap %s' -t '$CVSROOT/CVSROOT/wrap %s %s'
+#*.rtfd -f '$CVSROOT/CVSROOT/unwrap %s' -t '$CVSROOT/CVSROOT/wrap %s %s'
+#*.draw -f '$CVSROOT/CVSROOT/unwrap %s' -t '$CVSROOT/CVSROOT/wrap %s %s'
+#*.tiff -m 'COPY'

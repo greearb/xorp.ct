@@ -1,0 +1,29 @@
+#
+# $XORP: CVSROOT/access.core,v 1.1 2004/07/30 22:41:07 pavlin Exp $
+#
+# Please try to keep the list of core developers
+# (www/html_src/people.html) in in sync with this.
+#
+#
+#	KEEP ALPHABETICALLY SORTED!!!
+#	KEEP ALPHABETICALLY SORTED!!!
+#	KEEP ALPHABETICALLY SORTED!!!
+#
+# When adding a new committer to this file, please make sure to
+# include the following information in the commit message:
+#   (1) Who the commit bit was approved by ("Approved by: core").
+#   (2) The full name of the person.
+#   (3) In brief, what they will be working on (a couple of sentences).
+#
+
+atanu		atanu@icir.org
+bms		bms@freebsd.org
+fred		fred@fredbauer.com
+greenhal	adam@hiddennet.net
+hodson		hodson@icir.org
+jcardona	cardona@alari.ch
+kohler		kohler@cs.ucla.edu
+mjh		M.Handley@cs.ucl.ac.uk
+pavlin		pavlin@icir.org
+rizzo		rizzo@iet.unipi.it
+zec		zec@tel.fer.hr

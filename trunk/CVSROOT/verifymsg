@@ -1,3 +1,6 @@
+#
+# $XORP: CVSROOT/verifymsg,v 1.7 2004/07/31 00:44:41 pavlin Exp $
+#
 # The "verifymsg" file is used to allow verification of logging
 # information.  It works best when a template (as specified in the
 # rcsinfo file) is provided for the logging procedure.  Given a
@@ -19,4 +22,6 @@
 # One thing that should be noted is the the ALL keyword is not
 # supported.  There can be only one entry that matches a given
 # repository.
-DEFAULT		$CVSROOT/CVSROOT/log_check %l
+
+#DEFAULT		$CVSROOT/CVSROOT/verifymsgcheck
+DEFAULT		$CVSROOT/CVSROOT/verifymsgcheck %l

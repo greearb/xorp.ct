@@ -1,0 +1,30 @@
+#
+# $XORP: CVSROOT/avail,v 1.10 2004/07/30 22:57:58 pavlin Exp $
+#
+# This can be used to implement finer grain access controls beyond
+# being in access.  Look in cvs_acls.pl for details on this file's
+# syntax.
+#
+
+#
+# Create the groups of users
+#
+group|cvs_managers|atanu,mjh,pavlin
+group|release_managers|atanu,mjh,pavlin
+
+# Pick up the list of core developers from file "CVSROOT/access.core"
+group|core|!access.core
+
+# Pick up the list of documentation commiters from file "CVSROOT/access.doc"
+group|doc|!access.doc
+
+#
+# The access rules
+#
+unavail
+avail|:cvs_managers|CVSROOT
+avail|:core|data
+avail|:core|other
+avail|:core,:doc|www
+avail|:core|xorp
+avail|:core,:doc|xorp/docs

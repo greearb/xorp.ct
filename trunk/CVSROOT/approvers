@@ -1,0 +1,23 @@
+#
+# $XORP: CVSROOT/approvers,v 1.9 2004/08/02 05:27:39 pavlin Exp $
+#
+# Configuration file for checking approvals.
+#
+# If you want to commit to specific module/branch defined in this file,
+# you should get approval from appropriate party.
+#
+# This file is maintained by feedback@xorp.org.
+#
+# Format is tab separated.
+# Use # as first character in a line for comment.
+#
+# You should satisfy all of lines which matching to modules and branches
+# to commit.
+#
+# 1st column is regexp for module name.
+# 2nd column is regexp for branch/tag name.
+# 3rd column is regexp used with "Approved by:[\t ]*" line.
+#
+
+^xorp/		RELEASE_0_[1-5]	(atanu|mjh|pavlin)
+^xorp/		RELEASE_1_[0]	(atanu|mjh|pavlin)

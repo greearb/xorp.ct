@@ -1,3 +1,6 @@
+#
+# $XORP: CVSROOT/notify,v 1.2 2004/07/30 23:44:51 pavlin Exp $
+#
 # The "notify" file controls where notifications from watches set by
 # "cvs watch add" or "cvs edit" are sent.  The first entry on a line is
 # a regular expression which is tested against the directory that the

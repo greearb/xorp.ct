@@ -1,3 +1,7 @@
+#
+# $XORP: CVSROOT/loginfo,v 1.10 2004/07/30 23:44:51 pavlin Exp $
+# $FreeBSD: CVSROOT-src/loginfo,v 1.12 2003/02/28 03:35:48 peter Exp $
+#
 # The "loginfo" file controls where "cvs commit" log information
 # is sent.  The first entry on a line is a regular expression which must match
 # the directory that the change is being made to, relative to the
@@ -24,5 +28,6 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
-
-DEFAULT		$CVSROOT/CVSROOT/log_accum -m xorp-cvs@icir.org -s "%p %s"
+#DEFAULT		$CVSROOT/CVSROOT/log_accum.pl %s
+#DEFAULT		$CVSROOT/CVSROOT/log_accum.pl %r/%p %{s}
+DEFAULT		$CVSROOT/CVSROOT/log_accum.pl %{p} %{s}

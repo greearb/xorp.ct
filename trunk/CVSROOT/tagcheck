@@ -1,0 +1,30 @@
+#! /bin/sh
+#
+# $XORP: CVSROOT/tagcheck,v 1.8 2004/07/30 23:44:51 pavlin Exp $
+# $FreeBSD: CVSROOT-src/tagcheck,v 1.11 2004/05/25 15:49:46 scottl Exp $
+#
+
+# TAG  add/mov/del  repo  files...
+# $1   $2           $3    $4   ...
+
+case "$1" in
+  RELEASE*)
+    ;;
+  *)
+    exit 0	# not reserved, ok.
+    ;;
+esac
+
+USER=`/usr/bin/id -un`
+case "$USER" in
+  atanu | mjh | pavlin)
+    exit 0	# ok
+    ;;
+  *)
+    echo "$USER does not have permission to perform this tag operation!" 1>&2
+    echo "RELEASE* tag operations are reserved for release managers!" 1>&2
+    echo "Use 'cvs add' or 'cvs rm' to add/remove files from branches!" 1>&2
+    echo "$*" | /usr/bin/mail -s "XORP CVS TAG by $USER" "atanu@icir.org, mjh@icir.org, pavlin@icir.org"
+    exit 1
+    ;;
+esac

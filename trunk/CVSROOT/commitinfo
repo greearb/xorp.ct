@@ -1,6 +1,10 @@
+#
+# $XORP: CVSROOT/commitinfo,v 1.7 2004/07/31 00:44:41 pavlin Exp $
+# $FreeBSD: CVSROOT-src/commitinfo,v 1.4 2001/12/13 09:33:45 joe Exp $
+#
 # The "commitinfo" file is used to control pre-commit checks.
-# The filter on the right is invoked with the repository and a list 
-# of files to check.  A non-zero exit of the filter program will 
+# The filter on the right is invoked with the repository and a list
+# of files to check.  A non-zero exit of the filter program will
 # cause the commit to be aborted.
 #
 # The first entry on a line is a regular expression which is tested
@@ -13,5 +17,8 @@
 #
 # If the name "ALL" appears as a regular expression it is always used
 # in addition to the first matching regex or "DEFAULT".
-
-DEFAULT		$CVSROOT/CVSROOT/commit_prep -r %r/%p %{s}
+#
+#
+#ALL			$CVSROOT/CVSROOT/commitcheck
+#DEFAULT		$CVSROOT/CVSROOT/commit_prep -r %r/%p %{s}
+ALL		$CVSROOT/CVSROOT/commitcheck %{r}/%{p} %{s}

@@ -1,3 +1,8 @@
+#
+# The CVS Modules File
+#
+# $XORP: CVSROOT/modules,v 1.3 2004/07/31 00:44:41 pavlin Exp $
+#
 # Three different line formats are valid:
 #	key	-a    aliases...
 #	key [options] directory
@@ -24,3 +29,5 @@
 # character to interpose another module into the current module.  This
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
+#
+
