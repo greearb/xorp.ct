@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrt.hh,v 1.6 2004/04/01 20:15:01 pavlin Exp $
+// $XORP: xorp/mrt/mrt.hh,v 1.7 2004/06/10 22:41:28 hodson Exp $
 
 #ifndef __MRT_MRT_HH__
 #define __MRT_MRT_HH__
@@ -635,8 +635,10 @@ public:
 	// _sg_table.end() and _gs_table.end() in the Mrt, but here
 	// we don't know those values. Sigh...
 	//
+#if 0
 	_sg_key = NULL;
 	_gs_key = NULL;
+#endif
     }
     
     /**
