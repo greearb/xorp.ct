@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.11 2003/08/28 02:33:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.12 2003/08/28 21:21:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,7 +56,7 @@ BGPParameter::set_length(int l)
     if (_data != NULL)
 	delete[] _data;
 
-    assert (l >= 2 && l < 256);
+    XLOG_ASSERT(l >= 2 && l < 256);
     debug_msg("_length set %d\n", l);
     _length = l;
     _data = new uint8_t[_length];
@@ -236,11 +236,17 @@ BGPRefreshCapability(const BGPRefreshCapability& param)
 void
 BGPRefreshCapability::decode()
 {
+    /*
+    ** Note: In the normal case this method is called by
+    ** BGPParameter::create, which has already checked the type,
+    ** length and capability fields. It is therefore safe to have
+    ** asserts in here as a sanity check.
+    */
     _type = static_cast<ParamType>(*_data);
-    assert(_type == PARAMTYPECAP);
+    XLOG_ASSERT(_type == PARAMTYPECAP);
 
     _length = *(_data+1) + 2; // includes 2 byte header
-    assert(_length == 4);
+    XLOG_ASSERT(_length == 4);
 
     _cap_code = static_cast<CapType>(*(_data+2));
     if (_cap_code == CAPABILITYREFRESHOLD) {
@@ -249,7 +255,7 @@ BGPRefreshCapability::decode()
     } else {
 	_old_type_code = false;
     }
-    assert(_cap_code == CAPABILITYREFRESH);
+    XLOG_ASSERT(_cap_code == CAPABILITYREFRESH);
 
     _cap_length = *(_data+3);
     if (_cap_length > 0) {
@@ -330,11 +336,12 @@ void
 BGPMultiProtocolCapability::decode()
 {
     _type = static_cast<ParamType>(*_data);
-    assert(_type == PARAMTYPECAP);
+    XLOG_ASSERT(_type == PARAMTYPECAP);	// See comment in:
+					// BGPRefreshCapability::decode() 
 
     _length = *(_data+1) + 2; // includes 2 byte header
     _cap_code = static_cast<CapType>(*(_data+2));
-    assert(_cap_code == CAPABILITYMULTIPROTOCOL);
+    XLOG_ASSERT(_cap_code == CAPABILITYMULTIPROTOCOL);
 
     _cap_length = *(_data+3);
     _address_family = ntohs(*reinterpret_cast<uint16_t *>(_data+4));
@@ -416,12 +423,13 @@ void
 BGPMultiRouteCapability::decode()
 {
     _type = static_cast<ParamType>(*_data);
-    assert(_type == PARAMTYPECAP);
+    XLOG_ASSERT(_type == PARAMTYPECAP);	// See comment in:
+					// BGPRefreshCapability::decode()
 
     _length = *(_data+1) + 2; // includes 2 byte header
 
     _cap_code = static_cast<CapType>(*(_data+2));
-    assert(_cap_code == CAPABILITYMULTIROUTE);
+    XLOG_ASSERT(_cap_code == CAPABILITYMULTIROUTE);
 
     _cap_length = *(_data+3);
     // _address_family = ntohs((uint16_t &)*(_data+4));
@@ -484,7 +492,8 @@ BGPUnknownCapability::decode()
 {
     debug_msg("decoding unknown capability\n");
     _type = static_cast<ParamType>(*_data);
-    assert(_type == PARAMTYPECAP);
+    XLOG_ASSERT(_type == PARAMTYPECAP);	// See comment in:
+					// BGPRefreshCapability::decode()
 
     _length = (uint8_t)*(_data+1) + 2; // includes 2 byte header
 
