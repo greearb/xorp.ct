@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.10 2004/09/27 01:07:39 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.11 2004/10/13 05:48:49 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -252,7 +252,8 @@ AsyncFileWriter::write(int fd, SelectorMask m)
     ssize_t done = ::writev(_fd, _iov, (int)iov_cnt);
     signal(SIGPIPE, saved_sigpipe);
 
-    debug_msg("Wrote %d of %d bytes\n", done, total_bytes);
+    debug_msg("Wrote %d of %u bytes\n", done,
+	      static_cast<uint32_t>(total_bytes));
 
     if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
 	debug_msg("Write error %d - %s\n", errno, strerror(errno));
