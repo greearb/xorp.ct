@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.21 2003/06/19 00:44:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.22 2003/06/20 18:55:58 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -59,7 +59,8 @@ static char		SUDP_PROTOCOL_NAME[] = "sudp";
 static string		SUDP_PROTOCOL = "sudp/1.0";
 
 static const int	SUDP_REPLY_TIMEOUT_MS = 3000;
-static const ssize_t	SUDP_RECV_BUFFER_BYTES = 32000;
+static const ssize_t	SUDP_RECV_BUFFER_BYTES = 32 * 1024;
+static const ssize_t	SUDP_SEND_BUFFER_BYTES = SUDP_RECV_BUFFER_BYTES / 4;
 
 const char* XrlPFSUDPSender::_protocol   = SUDP_PROTOCOL_NAME;
 const char* XrlPFSUDPListener::_protocol = SUDP_PROTOCOL_NAME;
@@ -217,6 +218,15 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	debug_msg("Creating master socket\n");
 	sender_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sender_fd > 0) {
+	    if (set_socket_sndbuf_bytes(sender_fd, SUDP_SEND_BUFFER_BYTES)
+		< SUDP_SEND_BUFFER_BYTES) {
+		close(sender_fd);
+		sender_fd = 0;
+		xorp_throw(XrlPFConstructorError,
+			   c_format("Could not create master socket: "
+				    "cannot set socket sending buffer to %d\n",
+				    SUDP_SEND_BUFFER_BYTES));
+	    }
 	    _eventloop.add_selector(sender_fd, SEL_RD,
 				    callback(&XrlPFSUDPSender::recv));
 	} else {
@@ -274,7 +284,7 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     string msg = header + xrl;
 
     ssize_t msg_bytes = msg.size();
-    if (msg_bytes > SUDP_RECV_BUFFER_BYTES) {
+    if (msg_bytes > SUDP_SEND_BUFFER_BYTES) {
 	debug_msg("Message sent larger than transport method designed");
     } else if (sendto(sender_fd,
 		      msg.data(), msg.size(), 0,
@@ -503,7 +513,7 @@ XrlPFSUDPListener::send_reply(sockaddr*			sa,
     m.msg_iovlen = sizeof(v) / sizeof(v[0]);
 
     ssize_t v_bytes = v[0].iov_len + v[1].iov_len;
-    if (v_bytes > SUDP_RECV_BUFFER_BYTES ||
+    if (v_bytes > SUDP_SEND_BUFFER_BYTES ||
 	sendmsg(_fd, &m, 0) != v_bytes) {
 	debug_msg("Failed to send reply (%d): %s\n", errno, strerror(errno));
     }
