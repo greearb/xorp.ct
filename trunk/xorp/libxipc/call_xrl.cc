@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.7 2003/03/04 23:41:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.8 2003/03/06 19:54:33 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -66,8 +66,6 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
     try {
 	Xrl x(request);
 
-	fprintf(stderr, "%s\n", x.str().c_str());
-	
 	int tries;
 	bool done, resolve_failed;
 
@@ -90,9 +88,6 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 		e.run();
 	    }
 	}
-	
-	fprintf(stderr, "%s done %d resolve failed %d\n",
-		x.str().c_str(), done, resolve_failed);
 	
 	if (router.connected() == false) {
 	    XLOG_FATAL("Lost connection to finder\n");
