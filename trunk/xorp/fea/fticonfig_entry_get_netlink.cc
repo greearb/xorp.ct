@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.8 2003/09/20 06:48:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.9 2003/09/22 17:40:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -37,7 +37,7 @@
 //
 // Get single-entry information from the unicast forwarding table.
 //
-// The mechanism to obtain the information is netlink sockets.
+// The mechanism to obtain the information is netlink(7) sockets.
 //
 
 

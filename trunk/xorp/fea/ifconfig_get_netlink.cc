@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.5 2003/05/28 21:50:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.1 2003/09/22 05:45:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -37,7 +37,7 @@
 //
 // Get information about network interfaces from the underlying system.
 //
-// The mechanism to obtain the information is netlink sockets.
+// The mechanism to obtain the information is netlink(7) sockets.
 //
 
 IfConfigGetNetlink::IfConfigGetNetlink(IfConfig& ifc)

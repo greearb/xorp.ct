@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.6 2003/09/22 15:44:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.7 2003/09/22 16:56:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -44,7 +44,7 @@ uint16_t NetlinkSocket::_instance_cnt = 0;
 pid_t NetlinkSocket::_pid = getpid();
 
 //
-// Netlink Sockets communication with the kernel
+// Netlink Sockets (see netlink(7)) communication with the kernel
 //
 
 #ifndef HAVE_NETLINK_SOCKETS

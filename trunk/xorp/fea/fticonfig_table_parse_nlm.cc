@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.4 2003/09/20 00:51:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.5 2003/09/20 06:52:56 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -38,7 +38,7 @@
 // the underlying system.
 //
 // The information to parse is in NETLINK format
-// (e.g., obtained by netlink sockets mechanism).
+// (e.g., obtained by netlink(7) sockets mechanism).
 //
 
 #ifndef HAVE_NETLINK_SOCKETS
