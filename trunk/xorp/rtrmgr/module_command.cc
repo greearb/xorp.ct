@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.12 2003/05/30 23:57:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.13 2003/05/31 22:33:27 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -32,6 +32,14 @@ ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
       _execute_done(false)
 {
     assert(cmd_name == "%modinfo");
+}
+
+ModuleCommand::~ModuleCommand()
+{
+    if (_startcommit != NULL)
+	delete _startcommit;
+    if (_endcommit != NULL)
+	delete _endcommit;
 }
 
 void 

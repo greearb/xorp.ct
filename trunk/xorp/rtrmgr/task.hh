@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.15 2003/05/31 06:13:15 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.16 2003/05/31 22:33:28 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -211,6 +211,7 @@ class TaskManager {
 public:
     TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient, 
 			     bool global_do_exec);
+    ~TaskManager();
     void set_do_exec(bool do_exec);
     void reset();
     int add_module(const ModuleCommand& mod_cmd);

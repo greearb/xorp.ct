@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.7 2003/05/30 23:57:09 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.8 2003/05/31 22:33:27 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -27,7 +27,7 @@ public:
     typedef enum {NO_STATUS_METHOD, STATUS_BY_XRL} StatusMethod;
     typedef enum {NO_SHUTDOWN_METHOD, SHUTDOWN_BY_XRL} ShutdownMethod;
     ModuleCommand(const string &cmd_name, TemplateTree& ct);
-    ~ModuleCommand() {}
+    ~ModuleCommand();
     void add_action(const list <string> &action,
 		    const XRLdb& xrldb) throw (ParseError);
     //    void set_path(const string &path);

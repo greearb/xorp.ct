@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.19 2003/05/31 22:33:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.20 2003/06/03 18:40:50 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -773,6 +773,11 @@ TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient,
     : _module_manager(mmgr), _xorp_client(xclient), 
     _global_do_exec(global_do_exec)
 {
+}
+
+TaskManager::~TaskManager()
+{
+    reset();
 }
 
 void 
