@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.2 2003/01/13 20:40:22 pavlin Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -432,7 +432,7 @@ public:
     
 private:
     // The private state
-    friend MribTable;
+    friend class MribTable;
     
     MribLookup	*_parent;	// The parent in the lookup tree
     MribLookup	*_left_child;	// The left child in the lookup tree

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrt.hh,v 1.26 2002/12/09 18:29:22 hodson Exp $
+// $XORP: xorp/mrt/mrt.hh,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
 
 #ifndef __MRT_MRT_HH__
 #define __MRT_MRT_HH__
@@ -201,10 +201,10 @@ public:
     typedef map<MreSgKey, E*>		SgMap;
     typedef map<MreGsKey, E*>		GsMap;
     
-    typedef SgMap::iterator		sg_iterator;
-    typedef GsMap::iterator		gs_iterator;
-    typedef SgMap::const_iterator	const_sg_iterator;
-    typedef GsMap::const_iterator	const_gs_iterator;
+    typedef typename SgMap::iterator	sg_iterator;
+    typedef typename GsMap::iterator	gs_iterator;
+    typedef typename SgMap::const_iterator const_sg_iterator;
+    typedef typename GsMap::const_iterator const_gs_iterator;
     
     /**
      * Remove all multicast routing entries from the table.
@@ -688,14 +688,14 @@ public:
      * 
      * @return the source-group table iterator for this entry.
      */
-    const Mrt<E>::sg_iterator& sg_key() const { return (_sg_key);	}
+    const typename Mrt<E>::sg_iterator& sg_key() const { return (_sg_key); }
     
     /**
      * Get the group-source table iterator.
      * 
      * @return the group-source table for this entry.
      */
-    const Mrt<E>::gs_iterator& gs_key() const { return (_gs_key);	}
+    const typename Mrt<E>::gs_iterator& gs_key() const { return (_gs_key); }
     
     /**
      * Convert this entry from binary form to presentation format.
@@ -710,13 +710,13 @@ public:
     }
     
 protected:
-    friend Mrt<E>;
+    friend class Mrt<E>;
     
 private:
     // Mre state
     const SourceGroup _source_group;	// The source and group addresses
-    Mrt<E>::sg_iterator _sg_key;	// The source-group table iterator
-    Mrt<E>::gs_iterator _gs_key;	// The group-source table iterator
+    typename Mrt<E>::sg_iterator _sg_key; // The source-group table iterator
+    typename Mrt<E>::gs_iterator _gs_key; // The group-source table iterator
 };
 
 //
