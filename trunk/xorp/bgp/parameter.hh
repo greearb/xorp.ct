@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.3 2003/01/29 23:38:12 rizzo Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.4 2003/03/10 23:20:01 hodson Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -28,7 +28,8 @@
 // NLRI = Network Layer Reachability Information
 #define SAFI_NLRI_UNICAST 1
 #define SAFI_NLRI_MULTICAST 2 
-#define SAFI_NLRI_UNICASTMULTICAST 3
+// #define SAFI_NLRI_UNICASTMULTICAST 3 - Removed in:
+//					  draft-ietf-idr-rfc2858bis-03.txt
 
 #include <sys/types.h>
 #include "libxorp/debug.h"
