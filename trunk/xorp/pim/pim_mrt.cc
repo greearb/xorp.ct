@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.5 2004/03/04 01:42:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.6 2004/06/10 22:41:31 hodson Exp $"
 
 //
 // PIM Multicast Routing Table implementation.
@@ -24,6 +24,7 @@
 #include "libxorp/utils.hh"
 #include "pim_mfc.hh"
 #include "pim_mre.hh"
+#include "pim_mre_task.hh"
 #include "pim_mrt.hh"
 #include "pim_node.hh"
 #include "pim_vif.hh"
@@ -64,7 +65,7 @@ PimMrt::PimMrt(PimNode& pim_node)
 
 PimMrt::~PimMrt()
 {
-    
+    clear();
 }
 
 PimMrtSg::PimMrtSg(PimMrt& pim_mrt)
@@ -145,6 +146,18 @@ uint16_t
 PimMrt::pim_register_vif_index() const
 {
     return (pim_node().pim_register_vif_index());
+}
+
+void
+PimMrt::clear()
+{
+    delete_pointers_list(_pim_mre_task_list);
+
+    _pim_mrt_mfc.clear();
+    _pim_mrt_sg.clear();
+    _pim_mrt_sg_rpt.clear();
+    _pim_mrt_g.clear();
+    _pim_mrt_rp.clear();
 }
 
 //
