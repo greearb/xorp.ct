@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.18 2003/06/26 03:12:12 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.19 2003/06/26 16:53:06 atanu Exp $
 #
 
 #
@@ -90,7 +90,18 @@ reset()
 
     bgp_not_established
 
-    sleep 5
+    while pending | grep true
+    do
+	sleep 2
+    done
+
+    # The test_peer has closed its connection to the BGP process.
+    # If the test_peer was injecting a lot of data to the BGP process only
+    # when all the data has been read and processed by the BGP process will it
+    # see the end of the stream. So add an arbitary delay until the BGP process
+    # sees the end of the stream. If we don't do this connection attempts will
+    # be rejected by the the BGP process, causing the tests to fail.
+    sleep 10
 }
 
 bgp_not_established()
@@ -138,13 +149,14 @@ test1()
 
     while pending | grep true
     do
-	sleep 1
+	sleep 2
     done
 
     coord peer2 assert established
 
     # Reset the connection
     reset
+
     
     # Establish the new connection.
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
@@ -306,7 +318,7 @@ TIME_WAIT=`time_wait_seconds`
 if [ $START_PROGRAMS = "yes" ]
 then
 CXRL="$CALLXRL -r 10"
-    ../../utils/runit -v $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/finder
     ../../fea/fea_dummy   = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
