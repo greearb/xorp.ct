@@ -12,14 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.14 2004/04/05 06:18:51 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.15 2004/06/10 22:40:53 hodson Exp $"
 
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "libxorp/ether_compat.h"
 
 // TODO: XXX: PAVPAVPAV: move this include somewhere else!!

@@ -12,13 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.19 2005/02/14 20:35:47 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.20 2005/02/15 02:08:37 pavlin Exp $"
 
 //
 // MFEA test program.
 //
-
 
 #include "mfea_module.h"
 

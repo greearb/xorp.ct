@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.2 2005/01/11 15:56:14 bms Exp $"
+#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.3 2005/01/11 19:29:16 bms Exp $"
 
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
-#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include <sys/param.h>
 #include <sys/socket.h>

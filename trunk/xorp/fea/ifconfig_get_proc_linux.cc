@@ -12,16 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.18 2004/12/01 03:28:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.19 2004/12/03 04:10:47 pavlin Exp $"
 
-#include <cstdio>
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-
-//#define DEBUG_LOGGING
 #include "libxorp/debug.h"
-
 #include "libxorp/ether_compat.h"
 #include "libxorp/ipvx.hh"
 
@@ -30,6 +27,7 @@
 #endif
 
 #include <net/if.h>
+
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
 #include "kernel_utils.hh"

@@ -12,14 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fti.cc,v 1.6 2004/08/03 03:51:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fti.cc,v 1.7 2004/08/03 05:02:55 pavlin Exp $"
 
 #include <list>
 
 #include "fea_module.h"
-#include "config.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "fte.hh"
 
 bool debug = false;

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.18 2005/01/20 00:43:16 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.19 2005/02/01 04:10:19 pavlin Exp $"
 
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"

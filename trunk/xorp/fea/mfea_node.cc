@@ -12,13 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.45 2005/02/24 02:47:40 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.46 2005/02/27 21:32:52 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
 //
-
 
 #include "mfea_module.h"
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.4 2004/04/10 07:56:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.5 2004/06/10 22:40:57 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -27,11 +27,11 @@
 #include <netdb.h>
 #include <sysexits.h>
 
-#include "config.h"
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "ifconfig.hh"
 

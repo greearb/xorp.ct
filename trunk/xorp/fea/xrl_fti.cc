@@ -12,9 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.14 2004/11/18 21:21:02 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.15 2004/12/08 01:41:20 pavlin Exp $"
+
+#include "fea_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "xrl_fti.hh"
+
 
 static const char* FTI_MAX_OPS_HIT =
 "Resource limit on number of operations in a transaction hit.";
@@ -86,6 +93,12 @@ void
 XrlFtiTransactionManager::process_fib_changes(const list<Fte4>& fte_list)
 {
     map<string, FibClient4>::iterator iter;
+
+    list<Fte4>::const_iterator list_iter;
+    for (list_iter = fte_list.begin(); list_iter != fte_list.end(); ++list_iter) {
+	const Fte4& fte4 = *list_iter;
+	XLOG_INFO("process_fib_changes: Fte4 = %s", fte4.str().c_str());
+    }
 
     for (iter = _fib_clients4.begin(); iter != _fib_clients4.end(); ++iter) {
 	FibClient4& fib_client = iter->second;

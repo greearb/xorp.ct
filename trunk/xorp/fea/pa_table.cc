@@ -12,9 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/pa_table.cc,v 1.1 2004/12/10 14:40:16 bms Exp $"
 
 #include <vector>
+
+#include "fea_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "pa_entry.hh"
 #include "pa_table.hh"
 

@@ -12,24 +12,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.7 2004/10/27 01:20:36 bms Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.8 2004/12/09 07:54:35 pavlin Exp $"
 
 #include <sysexits.h>
 
 #include <set>
 
 #include "fea_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 
 #include "libxipc/sockutil.hh"
 #include "libxipc/xrl_std_router.hh"
 
+#include "xrl/interfaces/socket4_xif.hh"
+#include "xrl/targets/test_socket4_base.hh"
+
 #include "xrl_socket_server.hh"
 #include "addr_table.hh"
 
-#include "xrl/interfaces/socket4_xif.hh"
-#include "xrl/targets/test_socket4_base.hh"
 
 static const uint8_t FILLER_VALUE = 0xe7;
 

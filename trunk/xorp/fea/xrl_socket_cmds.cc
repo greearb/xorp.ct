@@ -12,21 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.2 2004/02/19 04:33:12 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.3 2004/06/10 22:40:59 hodson Exp $"
 
 #include "fea_module.h"
 
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/callback.hh"
 #include "libxorp/c_format.hh"
-#include "libxorp/xlog.h"
 
 #include "libxipc/xrl_sender.hh"
+
+#include "xrl/interfaces/socket4_user_xif.hh"
+#include "xrl/interfaces/socket6_user_xif.hh"
 
 #include "xrl_socket_cmds.hh"
 #include "xrl_socket_server.hh"
 
-#include "xrl/interfaces/socket4_user_xif.hh"
-#include "xrl/interfaces/socket6_user_xif.hh"
 
 XrlSocketCommandBase::XrlSocketCommandBase(const string& target)
     : _t(target)

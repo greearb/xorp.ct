@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.9 2005/02/27 21:32:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.10 2005/03/03 07:31:37 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -24,10 +24,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "config.h"
 #include "fea_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
 #include "rawsock4.hh"
 
 /* ------------------------------------------------------------------------- */

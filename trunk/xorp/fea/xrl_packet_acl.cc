@@ -12,23 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.1 2004/12/10 14:40:17 bms Exp $"
 
 #include <map>
 
 #include "fea_module.h"
 
-#include "config.h"
 #include "libxorp/xorp.h"
-
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
-#include "libxorp/xlog.h"
+
+#include "libcomm/comm_api.h"
+
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xuid.hh"
-#include "libcomm/comm_api.h"
 
 #include "pa_entry.hh"
 #include "pa_table.hh"

@@ -12,14 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.20 2004/06/10 22:40:53 hodson Exp $"
-
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.21 2005/01/06 17:49:26 atanu Exp $"
 
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "libxorp/ether_compat.h"
 #include "libxorp/ipvx.hh"
 

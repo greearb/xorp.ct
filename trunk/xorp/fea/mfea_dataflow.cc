@@ -12,15 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_dataflow.cc,v 1.2 2004/06/08 12:33:48 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/mfea_dataflow.cc,v 1.3 2004/06/10 22:40:54 hodson Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) dataflow implementation.
 //
 
-
 #include "mfea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"

@@ -12,16 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.23 2005/02/27 21:32:52 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.24 2005/03/03 07:31:36 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
 //
 
-
 #include "mfea_module.h"
+
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+#include "libxorp/utils.hh"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -42,15 +45,9 @@
 #include <netinet6/in6_var.h>
 #endif
 
-#include "mrt/include/ip_mroute.h"
-
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "libxorp/ipvx.hh"
-#include "libxorp/utils.hh"
-
 #include "libcomm/comm_api.h"
 
+#include "mrt/include/ip_mroute.h"
 #include "mrt/max_vifs.h"
 #include "mrt/multicast_defs.h"
 

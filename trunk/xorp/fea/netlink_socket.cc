@@ -12,15 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.27 2004/12/17 20:42:21 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.28 2005/02/27 21:32:52 pavlin Exp $"
 
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
-#include "libcomm/comm_api.h"
 
 #include <algorithm>
 
@@ -38,6 +36,8 @@
 #ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/rtnetlink.h>
 #endif
+
+#include "libcomm/comm_api.h"
 
 #include "netlink_socket.hh"
 

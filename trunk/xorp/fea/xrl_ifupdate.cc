@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.7 2004/04/10 07:58:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.8 2004/06/10 22:40:58 hodson Exp $"
 
-#include "config.h"
 #include "fea_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
+#include "xrl/interfaces/fea_ifmgr_client_xif.hh"
 
 #include "xrl_ifupdate.hh"
-#include "xrl/interfaces/fea_ifmgr_client_xif.hh"
 
 /******************************************************************************
  *

@@ -12,15 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.20 2005/02/27 21:32:53 pavlin Exp $"
-
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.21 2005/03/03 07:31:37 pavlin Exp $"
 
 #include "fea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
-#include "libcomm/comm_api.h"
 
 #include <algorithm>
 
@@ -30,6 +28,8 @@
 #include <net/if.h>
 #include <net/route.h>
 #include <errno.h>
+
+#include "libcomm/comm_api.h"
 
 #include "routing_socket.hh"
 

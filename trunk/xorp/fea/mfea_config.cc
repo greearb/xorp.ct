@@ -12,15 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.8 2004/06/10 22:40:54 hodson Exp $"
-
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.9 2005/01/28 03:34:18 pavlin Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
 //
 
-
 #include "mfea_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"

@@ -12,9 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.13 2004/04/12 02:01:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.14 2004/06/10 22:40:57 hodson Exp $"
 
+#include "fea_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
 #include "xrl_ifmanager.hh"
 
 static const char* MAX_TRANSACTIONS_HIT =

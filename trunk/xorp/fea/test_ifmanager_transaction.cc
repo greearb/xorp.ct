@@ -12,18 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifmanager_transaction.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/fea/test_ifmanager_transaction.cc,v 1.3 2004/06/10 22:40:57 hodson Exp $"
 
 #include <assert.h>
 #include <deque>
 #include <map>
 
-#include "config.h"
-
 #include "fea_module.h"
-#include "libxorp/xlog.h"
 
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/transaction.hh"
+
 #include "ifmanager_transaction.hh"
 
 // ----------------------------------------------------------------------------

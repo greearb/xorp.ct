@@ -12,18 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.10 2004/08/03 03:51:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.11 2004/12/09 07:54:35 pavlin Exp $"
 
 /* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
-#include "config.h"
 #include "fea_module.h"
-#include "libxorp/debug.h"
+
 #include "libxorp/xorp.h"
-#include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/eventloop.hh"
 #include "libxorp/callback.hh"
+
 #include "libxipc/xrl_std_router.hh"
+
 #include "fte.hh"
 
 typedef void (*func)(const XrlError&, XrlRouter&, const Xrl&,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifmanager.cc,v 1.3 2003/05/02 07:50:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_ifmanager.cc,v 1.5 2004/06/10 22:40:57 hodson Exp $"
 
 #include <algorithm>
 #include <functional>
@@ -21,13 +21,13 @@
 #include <string>
 
 #include "fea_module.h"
-#include "config.h"
 
-#include "libxorp/debug.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include <libxorp/ipvx.hh>
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
 #include "libxorp/mac.hh"
+
 #include "ifmanager.hh"
 #include "ifconfig.hh"
 
