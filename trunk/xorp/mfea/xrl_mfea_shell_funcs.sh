@@ -1,14 +1,14 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.4 2003/03/13 08:53:38 pavlin Exp $
+# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.5 2003/03/25 06:55:07 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running MFEA process.
 #
 
-. ../mfea/xrl_shell_lib.sh
+. ../utils/xrl_shell_lib.sh
 
 # Conditionally set the target name
 MFEA_TARGET=${MFEA_TARGET:="MFEA_4"}

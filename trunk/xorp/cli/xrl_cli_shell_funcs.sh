@@ -1,14 +1,14 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.3 2003/03/13 22:54:26 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.4 2003/03/25 01:21:45 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running CLI process.
 #
 
-. ../mfea/xrl_shell_lib.sh
+. ../utils/xrl_shell_lib.sh
 
 # Conditionally set the target name
 CLI_TARGET=${CLI_TARGET:="CLI"}

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.1 2003/03/22 05:10:34 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.2 2003/03/25 00:46:24 pavlin Exp $
 #
 
 #
@@ -12,7 +12,7 @@
 # TODO: this file is temporary in the "xorp/pim" directory
 #
 
-. ../mfea/xrl_shell_lib.sh
+. ../utils/xrl_shell_lib.sh
 
 # Conditionally set the target name
 RIB_TARGET=${RIB_TARGET:="RIB"}

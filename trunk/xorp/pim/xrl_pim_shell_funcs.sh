@@ -1,14 +1,14 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.8 2003/03/25 06:55:09 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.9 2003/03/27 00:19:04 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running PIM process.
 #
 
-. ../mfea/xrl_shell_lib.sh
+. ../utils/xrl_shell_lib.sh
 
 # Conditionally set the target name
 PIM_TARGET=${PIM_TARGET:="PIMSM_4"}

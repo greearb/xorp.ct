@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_shell_lib.sh,v 1.2 2003/03/24 19:57:06 pavlin Exp $
+# $XORP: xorp/mfea/xrl_shell_lib.sh,v 1.3 2003/03/25 00:45:38 pavlin Exp $
 #
 
 #

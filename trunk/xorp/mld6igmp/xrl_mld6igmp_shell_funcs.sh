@@ -1,14 +1,14 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.4 2003/03/13 08:52:56 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.5 2003/03/25 06:55:08 pavlin Exp $
 #
 
 #
 # Library of functions to sent XRLs to a running MLD6IGMP process.
 #
 
-. ../mfea/xrl_shell_lib.sh
+. ../utils/xrl_shell_lib.sh
 
 # Conditionally set the target name
 MLD6IGMP_TARGET=${MLD6IGMP_TARGET:="IGMP"}

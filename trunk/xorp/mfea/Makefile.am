@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mfea/Makefile.am,v 1.4 2003/03/31 16:10:17 hodson Exp $
+## $XORP: xorp/mfea/Makefile.am,v 1.5 2003/05/07 21:58:09 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -68,7 +68,6 @@ libmfea_a_SOURCES += xrl_mfea_node.cc
 EXTRA_DIST	  = DEVNOTES
 EXTRA_DIST	 += configure_mfea
 EXTRA_DIST	 += xrl_mfea_shell_funcs.sh
-EXTRA_DIST	 += xrl_shell_lib.sh
 
 
 ################################################################
