@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.36 2005/02/24 00:50:15 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.37 2005/03/10 01:13:43 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -67,8 +67,7 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
 
 XrlMld6igmpNode::~XrlMld6igmpNode()
 {
-    Mld6igmpNodeCli::stop();
-    Mld6igmpNode::stop();
+    shutdown();
 }
 
 bool
@@ -83,10 +82,15 @@ XrlMld6igmpNode::startup()
 bool
 XrlMld6igmpNode::shutdown()
 {
-    if (stop_mld6igmp() < 0)
-	return false;
+    bool ret_value = true;
 
-    return true;
+    if (stop_cli() < 0)
+	ret_value = false;
+
+    if (stop_mld6igmp() < 0)
+	ret_value = false;
+
+    return (ret_value);
 }
 
 int
@@ -1704,9 +1708,9 @@ XrlMld6igmpNode::common_0_1_shutdown()
     bool is_error = false;
     string error_msg;
 
-    if (stop_mld6igmp() != XORP_OK) {
+    if (shutdown() != true) {
 	if (! is_error)
-	    error_msg = c_format("Failed to stop %s",
+	    error_msg = c_format("Failed to shutdown %s",
 				 Mld6igmpNode::proto_is_igmp() ?
 				 "IGMP" : "MLD");
 	is_error = true;
