@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.10 2003/09/30 03:07:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.11 2003/10/01 21:10:04 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -127,14 +127,17 @@ private:
  */
 class IfReq : public IfIoctl {
 public:
-    IfReq(int fd, const string& ifname) : IfIoctl(fd) {
+    IfReq(int fd, const string& ifname)
+	: IfIoctl(fd),
+	  _ifname(ifname) {
 	memset(&_ifreq, 0, sizeof(_ifreq));
-	strncpy(_ifreq.ifr_name, ifname.c_str(), sizeof(_ifreq.ifr_name));
+	strncpy(_ifreq.ifr_name, ifname.c_str(), sizeof(_ifreq.ifr_name) - 1);
     }
 
 protected:
-    const char* ifname() const { return _ifreq.ifr_name; }
+    const string& ifname() const { return _ifname; }
 
+    const string _ifname;
     struct ifreq _ifreq;
 };
 
@@ -145,8 +148,7 @@ class IfSetMac : public IfReq {
 public:
     IfSetMac(int fd, const string& ifname, const struct ether_addr& ether_addr)
 	: IfReq(fd, ifname),
-	  _ether_addr(ether_addr) {
-    }
+	  _ether_addr(ether_addr) {}
 
     int execute() const {
 	struct ifreq ifreq_copy;	// A local copy
@@ -194,7 +196,7 @@ private:
  */
 class IfSetMTU : public IfReq {
 public:
-    IfSetMTU(int fd, const string& ifname, size_t mtu)
+    IfSetMTU(int fd, const string& ifname, uint32_t mtu)
 	: IfReq(fd, ifname) {
 	_ifreq.ifr_mtu = mtu;
     }
@@ -219,8 +221,7 @@ public:
 class IfGetFlags : public IfReq {
 public:
     IfGetFlags(int fd, const string& ifname, uint32_t& flags) :
-	IfReq(fd, ifname), _flags(flags) {
-    }
+	IfReq(fd, ifname), _flags(flags) {}
 
     int execute() const {
 	int r = ioctl(fd(), SIOCGIFFLAGS, &_ifreq);
@@ -228,7 +229,7 @@ public:
 	    static_assert(sizeof(_ifreq.ifr_flags) == 2);
 	    _flags = _ifreq.ifr_flags & 0xffff;
 	    debug_msg("%s: Got flags %s (0x%08x)\n",
-		      ifname(),
+		      ifname().c_str(),
 		      IfConfigGet::iff_flags(_flags).c_str(),
 		      _flags);
 	}
@@ -249,7 +250,7 @@ private:
 class IfSetAddr4 : public IfIoctl {
 public:
     IfSetAddr4(int fd, const string& ifname, uint16_t if_index, bool is_p2p,
-	       const IPv4& addr, const IPv4& dst_or_bcast, size_t prefix_len)
+	       const IPv4& addr, const IPv4& dst_or_bcast, uint32_t prefix_len)
 	: IfIoctl(fd),
 	  _ifname(ifname),
 	  _if_index(if_index),
@@ -261,7 +262,7 @@ public:
 		  "(fd = %d, ifname = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 		  fd, ifname.c_str(),
 		  addr.str().c_str(), dst_or_bcast.str().c_str(),
-		  (uint32_t)prefix_len);
+		  prefix_len);
     }
 
     int execute() const {
@@ -272,7 +273,7 @@ public:
 	struct in_aliasreq ifra;
 
 	memset(&ifra, 0, sizeof(ifra));
-	strncpy(ifra.ifra_name, _ifname.c_str(), sizeof(ifra.ifra_name));
+	strncpy(ifra.ifra_name, _ifname.c_str(), sizeof(ifra.ifra_name) - 1);
 	_addr.copy_out(ifra.ifra_addr);
 	if (_is_p2p)
 	    _dst_or_bcast.copy_out(ifra.ifra_dstaddr);
@@ -290,7 +291,7 @@ public:
 	struct ifreq ifreq;
 
 	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, _ifname.c_str(), sizeof(ifreq.ifr_name));
+	strncpy(ifreq.ifr_name, _ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 
 	// Set the address
 	_addr.copy_out(ifreq.ifr_addr);
@@ -321,7 +322,7 @@ private:
     bool	_is_p2p;		// True if point-to-point interface
     IPv4	_addr;			// The local address
     IPv4	_dst_or_bcast;		// The p2p dest addr or the bcast addr
-    size_t	_prefix_len;		// The prefix length
+    uint32_t	_prefix_len;		// The prefix length
 };
 
 /**
@@ -331,7 +332,7 @@ private:
 class IfSetAddr6 : public IfIoctl {
 public:
     IfSetAddr6(int fd, const string& ifname, uint16_t if_index, bool is_p2p,
-	       const IPv6& addr, const IPv6& endpoint, size_t prefix_len)
+	       const IPv6& addr, const IPv6& endpoint, uint32_t prefix_len)
 	: IfIoctl(fd),
 	  _ifname(ifname),
 	  _if_index(if_index),
@@ -342,7 +343,7 @@ public:
 	debug_msg("IfSetAddr6 "
 		  "(fd = %d, ifname = %s, addr = %s, dst %s, prefix_len %u)\n",
 		  fd, ifname.c_str(), addr.str().c_str(),
-		  endpoint.str().c_str(), (uint32_t)prefix_len);
+		  endpoint.str().c_str(), prefix_len);
     }
 
     int execute() const {
@@ -353,7 +354,7 @@ public:
 	struct in6_aliasreq ifra;
 
 	memset(&ifra, 0, sizeof(ifra));
-	strncpy(ifra.ifra_name, _ifname.c_str(), sizeof(ifra.ifra_name));
+	strncpy(ifra.ifra_name, _ifname.c_str(), sizeof(ifra.ifra_name) - 1);
 	_addr.copy_out(ifra.ifra_addr);
 	if (_is_p2p)
 	    _endpoint.copy_out(ifra.ifra_dstaddr);
@@ -401,7 +402,7 @@ private:
     bool	_is_p2p;		// True if point-to-point interface
     IPv6	_addr;			// The local address
     IPv6	_endpoint;		// The p2p dest addr
-    size_t	_prefix_len;		// The prefix length
+    uint32_t	_prefix_len;		// The prefix length
 };
 #endif // HAVE_IPV6
 
@@ -411,10 +412,10 @@ private:
 class IfDelAddr4 : public IfReq {
 public:
     IfDelAddr4(int fd, const string& ifname, uint16_t if_index,
-	       const IPv4& addr, size_t prefix_len)
+	       const IPv4& addr, uint32_t prefix_len)
 	: IfReq(fd, ifname) {
 	addr.copy_out(_ifreq.ifr_addr);
-	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s prefix_len = %d)\n",
+	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s prefix_len = %u)\n",
 		  fd, ifname.c_str(), addr.str().c_str(), prefix_len);
 	UNUSED(if_index);
 	UNUSED(prefix_len);
@@ -432,13 +433,13 @@ private:
 class IfDelAddr6 : public IfIoctl {
 public:
     IfDelAddr6(int fd, const string& ifname, uint16_t if_index,
-	       const IPv6& addr, size_t prefix_len)
+	       const IPv6& addr, uint32_t prefix_len)
 	: IfIoctl(fd),
 	  _ifname(ifname),
 	  _if_index(if_index),
 	  _addr(addr),
 	  _prefix_len(prefix_len) {
-	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s prefix_len = %d)\n",
+	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s prefix_len = %u)\n",
 		  fd, ifname.c_str(), addr.str().c_str(), prefix_len);
     }
 
@@ -448,7 +449,7 @@ public:
 
 	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
 	strncpy(in6_ifreq.ifr_name, _ifname.c_str(),
-		sizeof(in6_ifreq.ifr_name));
+		sizeof(in6_ifreq.ifr_name) - 1);
 	_addr.copy_out(in6_ifreq.ifr_addr);
 
 	return ioctl(fd(), SIOCDIFADDR_IN6, &in6_ifreq);
@@ -475,7 +476,7 @@ private:
     string	_ifname;		// The interface name
     uint16_t	_if_index;		// The interface index
     IPv6	_addr;			// The local address
-    size_t	_prefix_len;		// The prefix length
+    uint32_t	_prefix_len;		// The prefix length
 };
 #endif // HAVE_IPV6
 
@@ -561,7 +562,7 @@ IfConfigSetIoctl::push_if(const IfTreeInterface& i)
 	
 	if (IfSetMTU(_s4, i.ifname(), i.mtu()).execute() < 0) {
 	    ifc().er().interface_error(i.name(),
-				       c_format("Failed to set MTU of %d bytes (%s)",
+				       c_format("Failed to set MTU of %u bytes (%s)",
 						i.mtu(), strerror(errno)));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
