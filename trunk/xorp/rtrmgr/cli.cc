@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.42 2004/06/01 08:12:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.43 2004/06/01 11:49:12 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -511,7 +511,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	//
 	com1->set_dynamic_process_callback(callback(this,
 						    &RouterCLI::op_mode_func));
-	com1->set_can_pipe(true);
+	com1->set_can_pipe(false);
     }
 
     // com1 = com0->add_command("file", "Perform file operations");
