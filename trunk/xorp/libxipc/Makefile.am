@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.35 2004/10/04 19:25:13 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.36 2004/10/15 02:43:33 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -200,6 +200,7 @@ libfinder_a_SOURCES += finder_event_observer_xif.cc
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = bench_ipc.awk
 EXTRA_DIST	+= bench_ipc.sh
+EXTRA_DIST	+= bench_ipc_gnuplot.sh
 
 
 ################################################################
