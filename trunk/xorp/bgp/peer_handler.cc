@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.17 2003/09/04 03:42:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.18 2003/09/05 00:55:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -137,7 +137,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	pa_list4.add_path_attribute(*pa);
 
 	/*
-	** Don't put the IPv4 next hop in here.
+	** Don't put an IPv4 next hop in the IPv6 path attribute list.
 	*/
 	if (NEXT_HOP != pa->type())
 	    pa_list6.add_path_attribute(*pa);
