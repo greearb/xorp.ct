@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.3 2003/08/28 02:33:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.4 2003/08/28 21:22:03 atanu Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
@@ -35,6 +35,28 @@ test_multprotocol(TestInfo& /*info*/)
     assert(multi.length() == recv.length());
 
     assert(memcmp(multi.data(), recv.data(), recv.length()) == 0);
+
+    return true;
+}
+
+bool
+test_multiprotocol_unreach(TestInfo& /*info*/)
+{
+    MPUNReachNLRIAttribute<IPv6> mpunreach;
+
+    mpunreach.encode();
+    assert(6 == mpunreach.wire_size());
+
+    mpunreach.add_withdrawn(IPNet<IPv6>("2000::/3"));
+    mpunreach.encode();
+
+    assert(8 == mpunreach.wire_size());
+
+    MPUNReachNLRIAttribute<IPv6> recv(mpunreach.data());
+
+    assert(mpunreach.wire_size() == recv.wire_size());
+
+    assert(memcmp(mpunreach.data(), recv.data(), recv.wire_size()) == 0);
 
     return true;
 }
@@ -557,6 +579,7 @@ main(int argc, char** argv)
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
 	    {"multiprotocol", callback(test_multprotocol)},
+	    {"multiprotocol_unreach", callback(test_multiprotocol_unreach)},
 	    {"refresh", callback(test_refresh)},
 	    {"simple_open_packet", callback(test_simple_open_packet)},
 	    {"open_packet", callback(test_open_packet_with_capabilities)},
