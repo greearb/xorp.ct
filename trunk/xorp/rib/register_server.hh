@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.2 2003/03/10 23:20:55 hodson Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
@@ -145,7 +145,7 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.
      */
-    NotifyQueueChangedEntry(IPNet<A> net, A nexthop,
+    NotifyQueueChangedEntry(const IPNet<A>& net, const A& nexthop,
 			    uint32_t metric, bool multicast) 
     {
 	_net = net;
@@ -199,8 +199,8 @@ public:
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.  
      */
-    NotifyQueueInvalidateEntry(IPNet<A> net,
-			    bool multicast) {
+    NotifyQueueInvalidateEntry(const IPNet<A>& net,
+			       bool multicast) {
 	_net = net;
 	_multicast = multicast;
     }
@@ -271,13 +271,13 @@ public:
      * RIB.
      */
     virtual void send_route_changed(const string& modname,
-			    IPNet<IPv4> net,
-			    IPv4 nexthop,
-			    uint32_t metric,
-			    bool multicast);
+				    const IPNet<IPv4>& net,
+				    const IPv4& nexthop,
+				    uint32_t metric,
+				    bool multicast);
     virtual void send_invalidate(const string& modname,
-			 IPNet<IPv4> net,
-			 bool multicast);
+				 const IPNet<IPv4>& net,
+				 bool multicast);
 
     /** 
      * send_route_changed is called to communicate to another XRL
@@ -293,10 +293,10 @@ public:
      * RIB.
      */
     virtual void send_route_changed(const string& modname,
-			    IPNet<IPv6> net,
-			    IPv6 nexthop,
-			    uint32_t metric,
-			    bool multicast);
+				    const IPNet<IPv6>& net,
+				    const IPv6& nexthop,
+				    uint32_t metric,
+				    bool multicast);
     /**
      * send_invalidate is called to communicate to another XRL module
      * that routing information in which it had registered an interest
@@ -312,8 +312,8 @@ public:
      * RIB.  
      */
     virtual void send_invalidate(const string& modname,
-			 IPNet<IPv6> net,
-			 bool multicast);
+				 const IPNet<IPv6>& net,
+				 bool multicast);
 
     /**
      * @see NotifyQueue::flush

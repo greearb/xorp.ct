@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_register_server.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/dummy_register_server.hh,v 1.2 2003/03/10 23:20:54 hodson Exp $
 
 #ifndef __RIB_DUMMY_REGISTER_SERVER_HH__
 #define __RIB_DUMMY_REGISTER_SERVER_HH__
@@ -24,26 +24,27 @@ class DummyRegisterServer : public RegisterServer {
 public:
     DummyRegisterServer();
     void send_route_changed(const string& modname,
-			    IPNet<IPv4> net, 
-			    IPv4 nexthop,
+			    const IPNet<IPv4>& net,
+			    const IPv4& nexthop,
 			    uint32_t metric,
 			    bool multicast);
     void send_invalidate(const string& modname,
-			 IPNet<IPv4> net,
+			 const IPNet<IPv4>& net,
 			 bool multicast);
 
     void send_route_changed(const string& modname,
-			    IPNet<IPv6> net, 
-			    IPv6 nexthop,
+			    const IPNet<IPv6>& net, 
+			    const IPv6& nexthop,
 			    uint32_t metric,
 			    bool multicast);
     void send_invalidate(const string& modname,
-			 IPNet<IPv6> net,
+			 const IPNet<IPv6>& net,
 			 bool multicast);
     void flush() {};
     bool verify_invalidated(const string& invalid);
     bool verify_changed(const string& changed);
     bool verify_no_info();
+
 protected:
     set <string> _invalidated;
     set <string> _changed;
