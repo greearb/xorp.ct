@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.18 2003/09/12 17:52:41 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.19 2003/09/16 06:50:53 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -93,7 +93,7 @@ parser_main()
 	while (xrl_router.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	if (timed_out) {
+	if (xrl_router.ready() == false && timed_out) {
 	    cout << "XrlRouter did not become ready." << endl;
 	    return;
 	}
