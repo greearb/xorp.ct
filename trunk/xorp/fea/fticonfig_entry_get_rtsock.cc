@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.10 2003/10/13 23:32:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.11 2003/10/30 07:44:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -266,7 +266,8 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     // Force to receive data from the kernel, and then parse it
     //
     _rs_reader.receive_data(rs, rtm->rtm_seq);
-    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size())
+    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
+			 true)
 	!= true) {
 	return (false);
     }
@@ -388,7 +389,8 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     // Force to receive data from the kernel, and then parse it
     //
     _rs_reader.receive_data(rs, rtm->rtm_seq);
-    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size())
+    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
+			 true)
 	!= true) {
 	return (false);
     }
