@@ -45,9 +45,11 @@ class PeerManager {
     {}
 
     /**
-     * Demultiplex incoming hello packets to the associated peer.
+     * Demultiplex incoming packets to the associated peer. If the
+     * packet contains LSAs send it to the LSA database manager if
+     * appropriate.
      */
-    void incoming_hello(HelloPacket *packet);
+    void incoming_packet(Packet *packet);
 
  private:
     Ospf<A>& _ospf;		// Reference to the controlling class.

@@ -50,13 +50,13 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
 }
 
 /**
- * All packets for OSPF are received through this interface. If the
- * packet is a Hello packet its sent to the peer manager. If the
- * packet is a LSA its sent to the database manager. The packet is
- * decoded in this routine and freed here. If the peer manager or
- * database manager need a permanent copy they must take their own
+ * All packets for OSPF are received through this interface. All good
+ * packets are sent to the peer manager which verifies that the packet
+ * is expected and authenticates the packet if necessary. If the
+ * packet contains LSAs and it is approriate the packet is sent to the
+ * link state database manager. The packet is deleted by the receive
+ * routine so if a copy is required the peer manager should take a
  * copy.
- *
  */
 template <typename A>
 void 
@@ -79,12 +79,7 @@ Ospf<A>::receive(const char* interface, const char *vif,
     debug_msg("%s\n", packet->str().c_str());
     // We have a packet and its good.
 
-    HelloPacket *hp = dynamic_cast<HelloPacket *>(packet);
-    if (hp) {
-	_peer_manager.incoming_hello(hp);
-    } else {
-	_database.incoming_lsa(packet);
-    }
+    _peer_manager.incoming_packet(packet);
 
     delete packet;
 }

@@ -497,6 +497,20 @@ class DataDescriptionPacket : public Packet {
     list<Lsa_header> _lsa_headers;
 };
 
+/**
+ * Link State Request Packet
+ */
+class LinkStateRequestPacket : public Packet {
+ public:
+    LinkStateRequestPacket(OspfTypes::Version version)
+	: Packet(version)
+
+    {}
+
+    OspfTypes::Type get_type() const { return 3; }
+ private:
+};
+
 inline
 uint16_t
 extract_16(uint8_t *ptr)

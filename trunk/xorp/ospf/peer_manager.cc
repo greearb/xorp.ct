@@ -37,7 +37,7 @@
 
 template <typename A>
 void
-PeerManager<A>::incoming_hello(HelloPacket *packet)
+PeerManager<A>::incoming_packet(Packet *packet)
 {
     debug_msg("%s\n", cstring((*packet)));
     XLOG_WARNING("TBD");
