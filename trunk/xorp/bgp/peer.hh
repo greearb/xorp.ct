@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.18 2004/09/21 23:13:06 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.19 2005/03/11 02:01:07 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -81,7 +81,7 @@ public:
      * state machine handlers for the various BGP events
      */
     void event_start();			// EVENTBGPSTART
-    void event_stop();			// EVENTBGPSTOP
+    void event_stop(bool restart=false);// EVENTBGPSTOP
     void event_open();			// EVENTBGPTRANOPEN
     void event_open(const int sock);	// EVENTBGPTRANOPEN
     void event_closed();		// EVENTBGPTRANCLOSED

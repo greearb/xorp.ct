@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.87 2005/03/03 07:29:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.88 2005/03/11 02:01:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -455,7 +455,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
  * stop event. No data associated with the event.
  */
 void
-BGPPeer::event_stop()			// EVENTBGPSTOP
+BGPPeer::event_stop(bool restart)	// EVENTBGPSTOP
 { 
     TIMESPENT();
 
@@ -469,7 +469,7 @@ BGPPeer::event_stop()			// EVENTBGPSTOP
 	/*FALLTHROUGH*/
 
     case STATEACTIVE:
-	set_state(STATEIDLE);
+	set_state(STATEIDLE, restart);
 	break;
 
     case STATEOPENSENT:
@@ -477,14 +477,14 @@ BGPPeer::event_stop()			// EVENTBGPSTOP
     case STATEESTABLISHED: {
 	// Send Notification Message with error code of CEASE.
 	NotificationPacket np(CEASE);
-	send_notification(np, false);
-	set_state(STATESTOPPED);
+	send_notification(np, restart);
+	set_state(STATESTOPPED, restart);
 	break;
     }
     case STATESTOPPED:
 	// a second stop will cause us to give up on sending the CEASE
 	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE);
+	set_state(STATEIDLE, restart);
 	break;
     }
 }
