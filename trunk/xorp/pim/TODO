@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.44 2003/06/26 01:34:41 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.45 2003/06/26 22:21:18 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -1110,37 +1110,16 @@ for the kernel patches as well.
 * SPEC: If OverrideTimer expires, and RPF'(S,G,rpt) != RPF'(*,G)
   it is unclear what exactly the spec suggests.
 
-* Clean-up the usage of is_sg(), is_spt() is_sg_rpt() 
-
-* Whenever processing PimMre entries, always make sure to check
-  whether to delete an entry if it is in NoInfo state.
-
-* When lookup (S,G) and (S,G,rpt) check whether we got the right one
-  because we can have only a single entry for S and G.
-
 * The randomized computation of t_suppressed and t_override should
   be done by a single function
 
-* PimMre:;entry_try_remove() should be called from all set_foo_noinfo_state() 
+* PimMre::entry_try_remove() should be called from all set_foo_noinfo_state() 
   functions
 
 * SPEC: upstream/downstream interface state names are inconistent.
   It should be sth. like:
 		downstream: Join Prune TempPrune (present tense)
 		upstream: Joined NotJoined Pruned NotPruned (past tense)
-
-* When adding comments such as:
-  // Send Join(S,G,rpt) to RPF'(S,G,rpt)
-  always make sure that we specify "to", i.e., where the message is sent to.
-
-* In the state machines, check explicitly for each state.
-
-* PimMre: separate (name-wise) the per-interface state _joined and
-  per entry state: is_joined_state(). Similar for other states.
-
-* The set_foo(bool v) functions in pim_mrt.hh should not have
-  the "bool v" argument. If set_foo(false) is needed,
-  add functions reset_foo().
 
 * IMPL: All constants defined in pim_proto.h should be used as configurable
   variables inside the code.
