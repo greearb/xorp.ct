@@ -31,13 +31,12 @@ class TemplateTree;
 
 class OpInstance {
 public:
-    OpInstance(EventLoop* eventloop, const string& executable,
-	       const string& cmd_line, RouterCLI::OpModeCallback cb,
-	       const OpCommand* op_cmd);
+    OpInstance(EventLoop* eventloop, const string& executable_filename,
+	       const string& command_default_arguments,
+	       const string& command_line, RouterCLI::OpModeCallback cb,
+	       OpCommand* op_command);
     OpInstance(const OpInstance& orig);
     ~OpInstance();
-
-    static const size_t OP_BUF_SIZE = 8192;
 
     void append_data(AsyncFileOperator::Event e, const uint8_t* buffer,
 		     size_t buffer_bytes, size_t offset);
@@ -45,9 +44,12 @@ public:
     bool operator<(const OpInstance& them) const;
 
 private:
-    string		_executable;
-    string		_cmd_line;
-    const OpCommand*	_op_cmd;
+    static const size_t OP_BUF_SIZE = 8192;
+
+    string		_executable_filename;
+    string		_command_default_arguments;
+    string		_command_line;
+    OpCommand*		_op_command;
     AsyncFileReader*	_stdout_file_reader;
     AsyncFileReader*	_stderr_file_reader;
     char		_outbuffer[OP_BUF_SIZE];
@@ -60,31 +62,45 @@ private:
 
 class OpCommand {
 public:
-    OpCommand(const list<string>& parts, const string& command_help);
+    OpCommand(const list<string>& command_parts);
 
-    int add_command_file(const string& cmd_file);
-    int add_module(const string& module);
-    int add_opt_param(const string& opt_param, const string& opt_param_help);
-    string cmd_name() const;
+    const list<string>& command_parts() const { return _command_parts; }
+    const string& command_name() const { return _command_name; }
+    const string& help_string() const { return _help_string; }
+    const string& module() const { return _module; }
+    const string& command_action() const { return _command_action; }
+    void set_help_string(const string& v) { _help_string = v; }
+    void set_module(const string& v) { _module = v; }
+    void set_command_action(const string& v) { _command_action = v; }
+    void set_command_action_filename(const string& v) { _command_action_filename = v; }
+    void set_command_action_arguments(const string& v) { _command_action_arguments = v; }
+    void set_command_executable_filename(const string& v) { _command_executable_filename = v; }
+
+    void add_opt_param(const string& opt_param, const string& opt_param_help);
+    bool has_opt_param(const string& opt_param) const;
     string str() const;
-    void execute(EventLoop* eventloop, const list<string>& cmd_line,
-		 RouterCLI::OpModeCallback cb) const;
+    static string command_parts2command_name(const list<string>& command_parts);
+    void execute(EventLoop* eventloop, const list<string>& command_line,
+		 RouterCLI::OpModeCallback cb);
 
-    bool operator==(const OpCommand& them) const;
     bool prefix_matches(const list<string>& path_parts,
 			SlaveConfigTree* sct) const;
     void get_matches(size_t wordnum, SlaveConfigTree* sct,
 		     map<string, string>& return_matches,
 		     bool& is_executable) const;
-    void remove_instance(OpInstance* instance) const;
+    void remove_instance(OpInstance* instance);
 
 private:
-    list<string>	_cmd_parts;
+    list<string>	_command_parts;
+    string		_command_name;
     string		_help_string;
-    string		_cmd_file;
     string		_module;
+    string		_command_action;
+    string		_command_action_filename;
+    string		_command_action_arguments;
+    string		_command_executable_filename;
     map<string, string>	_opt_params;	// Optional parameters and the CLI help
-    mutable set<OpInstance*> _instances;
+    set<OpInstance*>	_instances;
 };
 
 class OpCommandList {
@@ -94,31 +110,24 @@ public:
     ~OpCommandList();
 
     void set_config_tree(SlaveConfigTree* sct) { _conf_tree = sct; }
-    OpCommand* new_op_command(const list<string>& parts,
-			      const string& help_string);
-    bool check_variable_name(const string& name) const;
-    OpCommand* find(const list<string>& parts);
-    bool prefix_matches(const list<string>& parts) const;
-    void execute(EventLoop* eventloop, const list<string>& parts,
+    bool check_variable_name(const string& variable_name) const;
+    OpCommand* find_op_command(const list<string>& command_parts);
+    OpCommand* add_op_command(const OpCommand& op_command);
+    bool prefix_matches(const list<string>& command_parts) const;
+    void execute(EventLoop* eventloop, const list<string>& command_parts,
 		 RouterCLI::OpModeCallback cb) const;
-    int append_path(const string& path);
-    int push_path();
-    int pop_path();
-    int add_cmd(const string& cmd);
-    int add_cmd_action(const string& cmd, const list<string>& parts);
-    void display_list() const;
     set<string> top_level_commands() const;
     map<string, string> childlist(const string& path,
 				  bool& is_executable) const;
+    bool find_executable_filename(const string& command_filename,
+				  string& executable_filename) const;
 
 private:
-    bool find_executable(const string& filename, string& executable) const;
-
-    list<OpCommand*>	_op_cmds;
+    list<OpCommand*>	_op_commands;
 
     // Below here is temporary storage for use in parsing
     list<string>	_path_segments;
-    OpCommand*		_current_cmd;
+    OpCommand*		_current_command;
     const TemplateTree*	_template_tree;
     SlaveConfigTree*	_conf_tree;
 };

@@ -31,38 +31,44 @@ extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
-OpInstance::OpInstance(EventLoop* eventloop, const string& executable,
-		       const string& cmd_line, RouterCLI::OpModeCallback cb,
-		       const OpCommand* op_cmd)
-    : _executable(executable),
-      _cmd_line(cmd_line),
-      _op_cmd(op_cmd),
+OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
+		       const string& command_default_arguments,
+		       const string& command_line,
+		       RouterCLI::OpModeCallback cb,
+		       OpCommand* op_command)
+    : _executable_filename(executable_filename),
+      _command_default_arguments(command_default_arguments),
+      _command_line(command_line),
+      _op_command(op_command),
       _error(false),
       _last_offset(0),
       _done_callback(cb)
 {
+    FILE *out_stream, *err_stream;
+
     memset(_outbuffer, 0, OP_BUF_SIZE);
     memset(_errbuffer, 0, OP_BUF_SIZE);
 
-    string execute = executable + " " + cmd_line;
-    FILE *out_stream, *err_stream;
+    string execute = executable_filename + " " + command_default_arguments;
+    execute += " " + command_line;
+
     popen2(execute, out_stream, err_stream);
     if (out_stream == NULL) {
-	cb->dispatch(false, "Failed to execute command\n");
+	cb->dispatch(false, "Failed to execute command");
     }
 
     _stdout_file_reader = new AsyncFileReader(*eventloop, fileno(out_stream));
     _stdout_file_reader->add_buffer((uint8_t*)_outbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stdout_file_reader->start()) {
-	cb->dispatch(false, "Failed to execute command\n");
+	cb->dispatch(false, "Failed to execute command");
     }
 
     _stderr_file_reader = new AsyncFileReader(*eventloop, fileno(err_stream));
     _stderr_file_reader->add_buffer((uint8_t*)_errbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stderr_file_reader->start()) {
-	cb->dispatch(false, "Failed to execute command\n");
+	cb->dispatch(false, "Failed to execute command");
     }
 }
 
@@ -147,15 +153,8 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 void
 OpInstance::done(bool success)
 {
-#if 0
-    if (success)
-	printf("command succeeded\n");
-    else
-	printf("command failed\n");
-#endif // 0
-
     _done_callback->dispatch(success, _response);
-    _op_cmd->remove_instance(this);
+    _op_command->remove_instance(this);
     delete this;
 }
 
@@ -169,69 +168,34 @@ OpInstance::operator<(const OpInstance& them) const
 	return false;
 }
 
-OpCommand::OpCommand(const list<string>& parts, const string& help_string)
-    : _cmd_parts(parts),
-      _help_string(help_string)
+OpCommand::OpCommand(const list<string>& command_parts)
+    : _command_parts(command_parts)
 {
-
+    _command_name = command_parts2command_name(command_parts);
 }
 
-int
-OpCommand::add_command_file(const string& cmd_file)
-{
-    if (!_cmd_file.empty()) {
-	string errmsg = "Only one %command allowed per CLI command.";
-	opcmderror(errmsg.c_str());
-	return XORP_ERROR;
-    }
-    _cmd_file = cmd_file;
-    return XORP_OK;
-}
-
-int
-OpCommand::add_module(const string& module)
-{
-    if (!_module.empty()) {
-	string errmsg = "Only one %module allowed per CLI command.";
-	opcmderror(errmsg.c_str());
-	return XORP_ERROR;
-    }
-    _module = module;
-    return XORP_OK;
-}
-
-int
+void
 OpCommand::add_opt_param(const string& opt_param, const string& opt_param_help)
 {
-    if (_opt_params.find(opt_param) != _opt_params.end())
-	return XORP_ERROR;
+    XLOG_ASSERT(_opt_params.find(opt_param) == _opt_params.end());
     _opt_params.insert(make_pair(opt_param, opt_param_help));
-    return XORP_OK;
 }
 
-string
-OpCommand::cmd_name() const
+bool
+OpCommand::has_opt_param(const string& opt_param) const
 {
-    string res;
-
-    list<string>::const_iterator iter;
-    for (iter = _cmd_parts.begin(); iter != _cmd_parts.end(); ++iter) {
-	if (iter != _cmd_parts.begin())
-	    res += " ";
-	res += *iter;
-    }
-    return res;
+    return (_opt_params.find(opt_param) != _opt_params.end());
 }
 
 string
 OpCommand::str() const
 {
-    string res = cmd_name() + "\n";
+    string res = command_name() + "\n";
 
-    if (_cmd_file.empty()) {
-	res += "  No command file specified\n";
+    if (_command_action.empty()) {
+	res += "  No command action specified\n";
     } else {
-	res += "  Command: " + _cmd_file + "\n";
+	res += "  Command: " + _command_action + "\n";
     }
 
     map<string, string>::const_iterator iter;
@@ -243,31 +207,35 @@ OpCommand::str() const
     return res;
 }
 
-void
-OpCommand::execute(EventLoop *eventloop, const list<string>& cmd_line,
-		   RouterCLI::OpModeCallback cb) const
+string
+OpCommand::command_parts2command_name(const list<string>& command_parts)
 {
-#if 0
-    printf("OP_COMMAND EXECUTE: OpCommandNode: %s, CmdLine: ",
-	   cmd_name().c_str());
-#endif // 0
-
-    string cmd_line_str;
+    string res;
 
     list<string>::const_iterator iter;
-    for (iter = cmd_line.begin(); iter != cmd_line.end(); ++iter) {
-	if (iter != cmd_line.begin())
-	    cmd_line_str += " ";
-	cmd_line_str += *iter;
+    for (iter = command_parts.begin(); iter != command_parts.end(); ++iter) {
+	if (iter != command_parts.begin())
+	    res += " ";
+	res += *iter;
     }
-    _instances.insert(new OpInstance(eventloop, _cmd_file, cmd_line_str,
-				     cb, this));
+    return res;
 }
 
-bool
-OpCommand::operator==(const OpCommand& them) const
+void
+OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
+		   RouterCLI::OpModeCallback cb)
 {
-    return (cmd_name() == them.cmd_name());
+    string command_line_str;
+
+    list<string>::const_iterator iter;
+    for (iter = command_line.begin(); iter != command_line.end(); ++iter) {
+	if (iter != command_line.begin())
+	    command_line_str += " ";
+	command_line_str += *iter;
+    }
+    _instances.insert(new OpInstance(eventloop, _command_executable_filename,
+				     _command_action_arguments,
+				     command_line_str, cb, this));
 }
 
 bool
@@ -277,12 +245,12 @@ OpCommand::prefix_matches(const list<string>& path_parts,
     list<string>::const_iterator them, us;
 
     them = path_parts.begin();
-    us = _cmd_parts.begin();
+    us = _command_parts.begin();
     // First go through the fixed parts of the command
     while (true) {
 	if (them == path_parts.end())
 	    return true;
-	if (us == _cmd_parts.end())
+	if (us == _command_parts.end())
 	    break;
 	if ((*us)[0] == '$') {
 	    // Matching against a varname
@@ -328,13 +296,13 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 {
     is_executable = false;
 
-    list<string>::const_iterator ci = _cmd_parts.begin();
+    list<string>::const_iterator ci = _command_parts.begin();
     for (size_t i = 0; i < wordnum; i++) {
 	++ci;
-	if (ci == _cmd_parts.end())
+	if (ci == _command_parts.end())
 	    break;
     }
-    if (ci == _cmd_parts.end()) {
+    if (ci == _command_parts.end()) {
 	// Add all the optional parameters
 	map<string, string>::const_iterator opi;
 	for (opi = _opt_params.begin(); opi != _opt_params.end(); ++opi) {
@@ -346,10 +314,10 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 	if (match[0] == '$') {
 	    XLOG_ASSERT(match[1] == '(');
 	    XLOG_ASSERT(match[match.size() - 1] == ')');
-	    list<string> varmatches;
-	    conf_tree->expand_varname_to_matchlist(match, varmatches);
+	    list<string> var_matches;
+	    conf_tree->expand_varname_to_matchlist(match, var_matches);
 	    list<string>::const_iterator vi;
-	    for (vi = varmatches.begin(); vi != varmatches.end(); ++vi) {
+	    for (vi = var_matches.begin(); vi != var_matches.end(); ++vi) {
 		return_matches.insert(make_pair(*vi, _help_string));
 	    }
 	} else {
@@ -359,9 +327,13 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 }
 
 void
-OpCommand::remove_instance(OpInstance* instance) const
+OpCommand::remove_instance(OpInstance* instance)
 {
-    _instances.erase(_instances.find(instance));
+    set<OpInstance*>::iterator iter;
+
+    iter = _instances.find(instance);
+    XLOG_ASSERT(iter != _instances.end());
+    _instances.erase(iter);
 }
 
 OpCommandList::OpCommandList(const string& config_template_dir,
@@ -372,14 +344,14 @@ OpCommandList::OpCommandList(const string& config_template_dir,
 
     _template_tree = tt;
 
-    struct stat dirdata;
-    if (stat(config_template_dir.c_str(), &dirdata) < 0) {
+    struct stat dir_data;
+    if (stat(config_template_dir.c_str(), &dir_data) < 0) {
 	errmsg = c_format("Error reading config directory %s: %s",
 			  config_template_dir.c_str(), strerror(errno));
 	xorp_throw(InitError, errmsg);
     }
 
-    if ((dirdata.st_mode & S_IFDIR) == 0) {
+    if ((dir_data.st_mode & S_IFDIR) == 0) {
 	errmsg = c_format("Error reading config directory %s: not a directory",
 			  config_template_dir.c_str());
 	xorp_throw(InitError, errmsg);
@@ -428,52 +400,52 @@ OpCommandList::OpCommandList(const string& config_template_dir,
 
 OpCommandList::~OpCommandList()
 {
-    while (!_op_cmds.empty()) {
-	delete _op_cmds.front();
-	_op_cmds.pop_front();
+    while (!_op_commands.empty()) {
+	delete _op_commands.front();
+	_op_commands.pop_front();
     }
 }
 
 bool
-OpCommandList::check_variable_name(const string& name) const
+OpCommandList::check_variable_name(const string& variable_name) const
 {
-    return _template_tree->check_variable_name(name);
+    return _template_tree->check_variable_name(variable_name);
 }
 
 OpCommand*
-OpCommandList::find(const list<string>& parts)
+OpCommandList::find_op_command(const list<string>& command_parts)
 {
-    OpCommand dummy(parts, "dummy");
+    string command_name = OpCommand::command_parts2command_name(command_parts);
 
     list<OpCommand*>::const_iterator iter;
-    for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
-	if (**iter == dummy)
+    for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
+	if ((*iter)->command_name() == command_name)
 	    return *iter;
     }
     return NULL;
 }
 
 bool
-OpCommandList::prefix_matches(const list<string>& parts) const
+OpCommandList::prefix_matches(const list<string>& command_parts) const
 {
     list<OpCommand*>::const_iterator iter;
-    for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
-	if ((*iter)->prefix_matches(parts, _conf_tree))
+    for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
+	if ((*iter)->prefix_matches(command_parts, _conf_tree))
 	    return true;
     }
     return false;
 }
 
 void
-OpCommandList::execute(EventLoop *eventloop, const list<string>& parts,
+OpCommandList::execute(EventLoop *eventloop, const list<string>& command_parts,
 		       RouterCLI::OpModeCallback cb) const
 {
     list<OpCommand*>::const_iterator iter;
-    for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
+    for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	// Find the right command
-	if ((*iter)->prefix_matches(parts, _conf_tree)) {
+	if ((*iter)->prefix_matches(command_parts, _conf_tree)) {
 	    // Execute it
-	    (*iter)->execute(eventloop, parts, cb);
+	    (*iter)->execute(eventloop, command_parts, cb);
 	    // XXX: don't worry about errors - the callback reports them.
 	    return;
 	}
@@ -482,165 +454,64 @@ OpCommandList::execute(EventLoop *eventloop, const list<string>& parts,
 }
 
 OpCommand*
-OpCommandList::new_op_command(const list<string>& parts,
-			      const string& help_string)
+OpCommandList::add_op_command(const OpCommand& op_command)
 {
-    OpCommand *new_cmd, *existing_cmd;
+    OpCommand *new_command;
 
-    existing_cmd = find(parts);
-    if (existing_cmd != NULL) {
-	string errmsg = c_format("Duplicate command: %s",
-				 existing_cmd->cmd_name().c_str());
-	opcmderror(errmsg.c_str());
-	return NULL;
-    }
+    XLOG_ASSERT(find_op_command(op_command.command_parts()) == NULL);
 
-    new_cmd = new OpCommand(parts, help_string);
-    _op_cmds.push_back(new_cmd);
-    return new_cmd;
-}
-
-void
-OpCommandList::display_list() const
-{
-    printf("\nOperational Command List:\n");
-
-    list<OpCommand*>::const_iterator iter;
-    for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
-	printf("  %s\n", (*iter)->str().c_str());
-    }
-    printf("\n");
-}
-
-int
-OpCommandList::append_path(const string& path)
-{
-    if (path[0] == '$') {
-	if (check_variable_name(path) == false) {
-	    string errmsg = c_format("Bad variable name: %s", path.c_str());
-	    opcmderror(errmsg.c_str());
-	    return XORP_ERROR;
-	}
-    }
-
-    _path_segments.push_back(path);
-    return XORP_OK;
-}
-
-int
-OpCommandList::push_path()
-{
-    _current_cmd = new_op_command(_path_segments, "help_cmd");
-    XLOG_ASSERT(_current_cmd != NULL);
-    return XORP_OK;
-}
-
-int
-OpCommandList::pop_path()
-{
-    // In the OpCommand file, we don't currently allow nesting, so just
-    // clear the path.
-    while (!_path_segments.empty()) {
-	_path_segments.pop_front();
-    }
-    return XORP_OK;
-}
-
-int
-OpCommandList::add_cmd(const string& cmd)
-{
-    if (cmd != "%command" && cmd != "%opt_parameter" && cmd != "%module") {
-	string errmsg = c_format("Unknown command: %s", cmd.c_str());
-	opcmderror(errmsg.c_str());
-	return XORP_ERROR;
-    }
-    return XORP_OK;
-}
-
-int
-OpCommandList::add_cmd_action(const string& cmd, const list<string>& parts)
-{
-    // May change this restriction later
-    XLOG_ASSERT(parts.size() == 1);
-
-    if (cmd == "%command") {
-	string executable;
-	if (find_executable(parts.front(), executable)) {
-	    return _current_cmd->add_command_file(executable);
-	} else {
-	    string errmsg = c_format("File not found: %s",
-				     parts.front().c_str());
-	    opcmderror(errmsg.c_str());
-	    return XORP_ERROR;
-	}
-    }
-    if (cmd == "%module") {
-	return _current_cmd->add_module(parts.front());
-    }
-    if (cmd == "%opt_parameter") {
-	return _current_cmd->add_opt_param(parts.front(), "help_param");
-    }
-    string errmsg = c_format("Unknown command %s", cmd.c_str());
-    opcmderror(errmsg.c_str());
-    return XORP_ERROR;
+    new_command = new OpCommand(op_command);
+    _op_commands.push_back(new_command);
+    return new_command;
 }
 
 bool
-OpCommandList::find_executable(const string& filename, string& executable)
+OpCommandList::find_executable_filename(const string& command_filename,
+					string& executable_filename)
     const
 {
     struct stat statbuf;
 
-    printf("find_executable: %s\n", filename.c_str());
-
-    if (filename[0] == '/') {
-	if ((stat(filename.c_str(), &statbuf) == 0)
+    if (command_filename[0] == '/') {
+	// Absolute path name
+	if ((stat(command_filename.c_str(), &statbuf) == 0)
 	    && (statbuf.st_mode & S_IFREG > 0)
 	    && (statbuf.st_mode & S_IXUSR > 0)) {
-	    executable = filename;
-	    printf("found executable: %s\n", executable.c_str());
+	    executable_filename = command_filename;
 	    return true;
 	}
 	return false;
-    } else {
-#if 0	// TODO: XXX: old code
-	char cwd[MAXPATHLEN + 1];
-	getcwd(cwd, MAXPATHLEN);
-#endif
-	string xorp_root_dir = _template_tree->xorp_root_dir();
-
-	list<string> path;
-#if 0	// TODO: XXX: old code
-	path.push_back(string(cwd) + "/");
-	path.push_back(string(cwd) + "/../");
-#endif
-	path.push_back(xorp_root_dir + "/");
-	while (!path.empty()) {
-	    if ((stat((path.front() + filename).c_str(), &statbuf) == 0)
-		&& (statbuf.st_mode & S_IFREG > 0)
-		&& (statbuf.st_mode & S_IXUSR > 0)) {
-		executable = path.front() + filename;
-		printf("found executable: %s\n", executable.c_str());
-		return true;
-	    }
-	    path.pop_front();
-	}
-	return false;
     }
+
+    // Relative path name
+    string xorp_root_dir = _template_tree->xorp_root_dir();
+
+    list<string> path;
+    path.push_back(xorp_root_dir + "/");
+    while (!path.empty()) {
+	if ((stat((path.front() + command_filename).c_str(), &statbuf) == 0)
+	    && (statbuf.st_mode & S_IFREG > 0)
+	    && (statbuf.st_mode & S_IXUSR > 0)) {
+	    executable_filename = path.front() + command_filename;
+	    return true;
+	}
+	path.pop_front();
+    }
+    return false;
 }
 
 set<string>
 OpCommandList::top_level_commands() const
 {
-    set<string> cmds;
+    set<string> commands;
 
     list<OpCommand*>::const_iterator iter;
-    for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
+    for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	// Add the first word of every command
-	list<string> path_parts = split((*iter)->cmd_name(), ' ');
-	cmds.insert(path_parts.front());
+	list<string> path_parts = split((*iter)->command_name(), ' ');
+	commands.insert(path_parts.front());
     }
-    return cmds;
+    return commands;
 }
 
 map<string, string>
@@ -651,7 +522,7 @@ OpCommandList::childlist(const string& path, bool& is_executable) const
 
     is_executable = false;
     list<OpCommand*>::const_iterator iter;
-    for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
+    for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
 	if (op_command->prefix_matches(path_parts, _conf_tree)) {
 	    map<string, string> matches;

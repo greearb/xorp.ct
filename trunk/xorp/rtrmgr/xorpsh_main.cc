@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.21 2004/01/13 01:17:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.22 2004/01/14 08:26:56 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -103,7 +103,6 @@ XorpShell::XorpShell(const string& IPCname,
     } catch (const InitError& e) {
 	xorp_throw(InitError, e.why());
     }
-    _ocl->display_list();
 }
 
 XorpShell::~XorpShell()
@@ -218,7 +217,7 @@ XorpShell::run()
     }
 
     _done = false;
-    _rtrmgr_client.send_unregister_client("rtrmgr",_authtoken,
+    _rtrmgr_client.send_unregister_client("rtrmgr", _authtoken,
 					  callback(this,
 						   &XorpShell::generic_done));
     _mode = MODE_SHUTDOWN;

@@ -34,9 +34,24 @@
 	return COLON;
 	}
 
-\%[a-z][a-z0-9\-_]*	{
-	opcmdlval = strdup(opcmdtext);
-	return COMMAND;
+"%module"	{
+	return CMD_MODULE;
+	}
+
+"%command"	{
+	return CMD_COMMAND;
+	}
+
+"%help"	{
+	return CMD_HELP;
+	}
+
+"%opt_parameter"	{
+	return CMD_OPT_PARAMETER;
+	}
+
+"%tag"	{
+	return CMD_TAG;
 	}
 
 \$\([a-zA-Z@][a-zA-Z0-9\-_\.@\*]*\)	{
@@ -47,6 +62,11 @@
 [a-zA-Z0-9_/\.][a-zA-Z0-9\-_/\.]*	{
 	opcmdlval = strdup(opcmdtext);
 	return LITERAL;
+	}
+
+\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
+	opcmdlval = strdup(opcmdtext);
+	return STRING;
 	}
 
 "/*"			BEGIN(comment);
