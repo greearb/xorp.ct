@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.4 2004/02/14 00:28:22 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.5 2004/02/20 01:22:04 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "libxorp/debug.h"
@@ -119,7 +119,7 @@ XrlPortIO<IPv6>::request_socket_open()
 		_addr,
 		RIP_AF_CONSTANTS<IPv6>::IP_PORT,
 		RIP_AF_CONSTANTS<IPv6>::IP_GROUP(),
-		RIP_TTL,
+		RIP_NG_HOP_COUNT,
 		false,
 		callback(this, &XrlPortIO<IPv6>::socket_open_cb)
 		);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.11 2004/02/14 00:28:22 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.12 2004/02/24 19:39:29 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -66,6 +66,11 @@ static const uint32_t RIP_INFINITY = 16;
 static const uint32_t RIP_TTL = 1;
 
 /**
+ * Hop-Count value that should be used for multicast RIPng packets.
+ */
+static const uint32_t RIP_NG_HOP_COUNT = 255;
+
+/**
  * RIP IPv4 protocol port
  */
 static const uint16_t RIP_PORT = 520;
@@ -90,7 +95,7 @@ struct RIP_AF_CONSTANTS<IPv4>
     static inline const IPv4	 IP_GROUP() { return IPv4::RIP2_ROUTERS(); }
     static const uint16_t	 IP_PORT = RIP_PORT;
     static inline const IPv4Net& DEFAULT_ROUTE() { return IPv4_DEFAULT_ROUTE; }
-    static const uint8_t PACKET_VERSION = 2;
+    static const uint8_t	 PACKET_VERSION = 2;
 };
 
 template <>
@@ -99,7 +104,7 @@ struct RIP_AF_CONSTANTS<IPv6>
     static inline const IPv6&	 IP_GROUP() { return IPv6::RIP2_ROUTERS(); }
     static const uint16_t	 IP_PORT = RIP_NG_PORT;
     static inline const IPv6Net& DEFAULT_ROUTE() { return IPv6_DEFAULT_ROUTE; }
-    static const uint8_t PACKET_VERSION = 1;
+    static const uint8_t	 PACKET_VERSION = 1;
 };
 
 /**
