@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.5 2003/11/04 02:27:20 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.6 2003/11/04 18:20:58 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -78,6 +78,7 @@ class NextTableMap  {
 public:
     typedef NextTableMapIterator<A> iterator;
     NextTableMap() {};
+    ~NextTableMap();
     void insert(BGPRouteTable<A> *next_table,
 		const PeerHandler *ph);
     void erase(iterator& iter);

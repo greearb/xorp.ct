@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.17 2003/11/04 03:38:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.18 2003/11/04 18:20:58 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -44,9 +44,22 @@ TypeName<IPv6>::get()
 
 
 template<class A> 
+NextTableMap<A>::~NextTableMap()
+{
+    typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
+    i = _next_tables.begin();
+    while (i != _next_tables.end()) {
+	delete i->second;
+	_next_tables.erase(i); 
+	i = _next_tables.begin();
+   }
+}
+
+template<class A> 
 void 
 NextTableMap<A>::insert(BGPRouteTable<A> *next_table,
-		     const PeerHandler *ph) {
+		     const PeerHandler *ph) 
+{
     PeerRoutePair<A>* prpair =
 	new PeerRoutePair<A>(next_table, ph);
     _next_tables[next_table] = prpair;
@@ -65,7 +78,8 @@ NextTableMap<A>::insert(BGPRouteTable<A> *next_table,
 
 template<class A> 
 void 
-NextTableMap<A>::erase(iterator& iter) {
+NextTableMap<A>::erase(iterator& iter) 
+{
 #ifdef NEWMAP
     PeerRoutePair<A>* prpair = &(iter.second());
     typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
