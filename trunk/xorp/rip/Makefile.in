@@ -64,19 +64,15 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
-AS = @AS@
 CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-DLLTOOL = @DLLTOOL@
 GMAKE = @GMAKE@
-LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MIBS = @MIBS@
-OBJDUMP = @OBJDUMP@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
 PACKAGE = @PACKAGE@
@@ -122,19 +118,16 @@ $(top_builddir)/libxorp/libxorp.a
 test_packets_LDFLAGS = 
 test_timers_OBJECTS =  test_timers.o
 test_timers_LDADD = $(LDADD)
-test_timers_DEPENDENCIES =  ./librip.a \
-$(top_builddir)/libxorp/libxorp.a
+test_timers_DEPENDENCIES =  ./librip.a $(top_builddir)/libxorp/libxorp.a
 test_timers_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -150,7 +143,7 @@ OBJECTS = $(librip_a_OBJECTS) $(test_auth_OBJECTS) $(test_packets_OBJECTS) $(tes
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cc .lo .o .s
+.SUFFIXES: .S .c .cc .o .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu rip/Makefile
 
@@ -184,22 +177,6 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-.s.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.S.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
-
 librip.a: $(librip_a_OBJECTS) $(librip_a_DEPENDENCIES)
 	-rm -f librip.a
 	$(AR) cru librip.a $(librip_a_OBJECTS) $(librip_a_LIBADD)
@@ -227,8 +204,6 @@ test_timers: $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES)
 	$(CXXLINK) $(test_timers_LDFLAGS) $(test_timers_OBJECTS) $(test_timers_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
-.cc.lo:
-	$(LTCXXCOMPILE) -c $<
 
 tags: TAGS
 
@@ -392,27 +367,24 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-libtool mostlyclean-noinstPROGRAMS \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+		mostlyclean-noinstPROGRAMS mostlyclean-tags \
+		mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-libtool \
-		clean-noinstPROGRAMS clean-tags clean-depend \
-		clean-generic mostlyclean-am
+clean-am:  clean-noinstLIBRARIES clean-compile clean-noinstPROGRAMS \
+		clean-tags clean-depend clean-generic mostlyclean-am
 
 clean: clean-am
 
 distclean-am:  distclean-noinstLIBRARIES distclean-compile \
-		distclean-libtool distclean-noinstPROGRAMS \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
-	-rm -f libtool
+		distclean-noinstPROGRAMS distclean-tags \
+		distclean-depend distclean-generic clean-am
 
 distclean: distclean-am
 
 maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-compile \
 		maintainer-clean-noinstPROGRAMS maintainer-clean-tags \
 		maintainer-clean-depend maintainer-clean-generic \
 		distclean-am
@@ -424,8 +396,7 @@ maintainer-clean: maintainer-clean-am
 .PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
 clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool mostlyclean-noinstPROGRAMS \
+maintainer-clean-compile mostlyclean-noinstPROGRAMS \
 distclean-noinstPROGRAMS clean-noinstPROGRAMS \
 maintainer-clean-noinstPROGRAMS tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \

@@ -10,7 +10,12 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-# - The shared objects
+# This makefile builds all the shared object files in this directory but without
+# using libtool.  This forces us to use some hacks to build the libraries, such
+# as declare them as programs, and override the linker default settings.
+
+# This is the only shared object that needs to be installed (manually, since we
+# are not using libtool)
 
 
 SHELL = @SHELL@
@@ -66,19 +71,15 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
-AS = @AS@
 CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-DLLTOOL = @DLLTOOL@
 GMAKE = @GMAKE@
-LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MIBS = @MIBS@
-OBJDUMP = @OBJDUMP@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
 PACKAGE = @PACKAGE@
@@ -88,9 +89,13 @@ RANLIB = @RANLIB@
 VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
 
-lib_LTLIBRARIES = libnetsnmpxorp.la
+bin_PROGRAMS = libnetsnmpxorp.so
 
-#noinst_LTLIBRARIES = bgp4_mib_1657.la ospf_mib_1850.la xorp_if_mib_module.la 
+# These are the mib modules that will be loaded by the snmp agent.  They need
+# not to be installed. Add the MIB modules that you write to this list.
+# 
+# XXX: using the prefix noinst_ would be preferred, but automake complains...
+sbin_PROGRAMS = bgp4_mib_1657.so ospf_mib_1850.so xorp_if_mib_module.so
 
 # -- Test Programs 
 TESTS = test_xorpevents
@@ -98,52 +103,69 @@ TESTS = test_xorpevents
 noinst_PROGRAMS = $(TESTS)
 
 # -- Compiler and pre compiler flags
-AM_CPPFLAGS = `net-snmp-config --cflags`
-libnetsnmpxorp_la_LIBADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
-libnetsnmpxorp_la_LDFLAGS = -version-info 0:0:0
-test_xorpevents_LDADD = libnetsnmpxorp.la $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+AM_CPPFLAGS = `net-snmp-config --cflags` 
+LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
-# The -module flag is required by libtool when the library name does not start
-# with 'lib'
-#bgp4_mib_1657_LDFLAGS = -module 
-#ospf_mib_1850_LDFLAGS = -module 
-#xorp_if_mib_module_LDFLAGS= -module 
+libnetsnmpxorp_so_LDFLAGS = -shared -fPIC -fpic 
+
+test_xorpevents_LDADD = $(LDADD) -lnetsnmpxorp -L.
+bgp4_mib_1657_so_LDADD = $(LDADD) -lnetsnmpxorp -L. $(top_builddir)/xrl/interfaces/libbgpxif.a
+bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
+
+ospf_mib_1850_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
+ospf_mib_1850_so_LDFLAGS = -shared -fPIC -fpic 
+
+xorp_if_mib_module_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
+xorp_if_mib_module_so_LDFLAGS = -shared -fPIC -fpic 
 
 # -- Test Program Sources
 
 test_xorpevents_SOURCES = test_xorpevents.cc
-libnetsnmpxorp_la_SOURCES = xorpevents.cc xorpevents.hh
+libnetsnmpxorp_so_SOURCES = xorpevents.cc xorpevents.hh
+bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc
+ospf_mib_1850_so_SOURCES = ospf_mib_1850.hh ospf_mib_1850.cc
+xorp_if_mib_module_so_SOURCES = xorp_if_mib_module.hh xorp_if_mib_module.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
-LTLIBRARIES =  $(lib_LTLIBRARIES)
+PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS) $(sbin_PROGRAMS)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-libnetsnmpxorp_la_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
+libnetsnmpxorp_so_OBJECTS =  xorpevents.o
+libnetsnmpxorp_so_LDADD = $(LDADD)
+libnetsnmpxorp_so_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/libcomm/libcomm.a
-libnetsnmpxorp_la_OBJECTS =  xorpevents.lo
-PROGRAMS =  $(noinst_PROGRAMS)
-
 test_xorpevents_OBJECTS =  test_xorpevents.o
-test_xorpevents_DEPENDENCIES =  libnetsnmpxorp.la \
+test_xorpevents_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a
+test_xorpevents_LDFLAGS = 
+bgp4_mib_1657_so_OBJECTS =  bgp4_mib_1657.o bgp4_mib_1657_bgpversion.o
+bgp4_mib_1657_so_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/xrl/interfaces/libbgpxif.a
+ospf_mib_1850_so_OBJECTS =  ospf_mib_1850.o
+ospf_mib_1850_so_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a
+xorp_if_mib_module_so_OBJECTS =  xorp_if_mib_module.o
+xorp_if_mib_module_so_DEPENDENCIES =  \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
-test_xorpevents_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -151,13 +173,15 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/test_xorpevents.P .deps/xorpevents.P
-SOURCES = $(libnetsnmpxorp_la_SOURCES) $(test_xorpevents_SOURCES)
-OBJECTS = $(libnetsnmpxorp_la_OBJECTS) $(test_xorpevents_OBJECTS)
+DEP_FILES =  .deps/bgp4_mib_1657.P .deps/bgp4_mib_1657_bgpversion.P \
+.deps/ospf_mib_1850.P .deps/test_xorpevents.P \
+.deps/xorp_if_mib_module.P .deps/xorpevents.P
+SOURCES = $(libnetsnmpxorp_so_SOURCES) $(test_xorpevents_SOURCES) $(bgp4_mib_1657_so_SOURCES) $(ospf_mib_1850_so_SOURCES) $(xorp_if_mib_module_so_SOURCES)
+OBJECTS = $(libnetsnmpxorp_so_OBJECTS) $(test_xorpevents_OBJECTS) $(bgp4_mib_1657_so_OBJECTS) $(ospf_mib_1850_so_OBJECTS) $(xorp_if_mib_module_so_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cc .lo .o .s
+.SUFFIXES: .S .c .cc .o .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu mibs/Makefile
 
@@ -166,29 +190,63 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-libLTLIBRARIES:
+mostlyclean-binPROGRAMS:
 
-clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-distclean-libLTLIBRARIES:
+distclean-binPROGRAMS:
 
-maintainer-clean-libLTLIBRARIES:
+maintainer-clean-binPROGRAMS:
 
-install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 
-uninstall-libLTLIBRARIES:
+uninstall-binPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
+	list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	done
+
+mostlyclean-noinstPROGRAMS:
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+distclean-noinstPROGRAMS:
+
+maintainer-clean-noinstPROGRAMS:
+
+mostlyclean-sbinPROGRAMS:
+
+clean-sbinPROGRAMS:
+	-test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
+
+distclean-sbinPROGRAMS:
+
+maintainer-clean-sbinPROGRAMS:
+
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(sbindir)
+	@list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(sbindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(sbindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  else :; fi; \
+	done
+
+uninstall-sbinPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(sbindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
 .s.o:
@@ -207,41 +265,27 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-.s.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.S.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
-
-libnetsnmpxorp.la: $(libnetsnmpxorp_la_OBJECTS) $(libnetsnmpxorp_la_DEPENDENCIES)
-	$(CXXLINK) -rpath $(libdir) $(libnetsnmpxorp_la_LDFLAGS) $(libnetsnmpxorp_la_OBJECTS) $(libnetsnmpxorp_la_LIBADD) $(LIBS)
-
-mostlyclean-noinstPROGRAMS:
-
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-
-distclean-noinstPROGRAMS:
-
-maintainer-clean-noinstPROGRAMS:
+libnetsnmpxorp.so: $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_DEPENDENCIES)
+	@rm -f libnetsnmpxorp.so
+	$(CXXLINK) $(libnetsnmpxorp_so_LDFLAGS) $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_LDADD) $(LIBS)
 
 test_xorpevents: $(test_xorpevents_OBJECTS) $(test_xorpevents_DEPENDENCIES)
 	@rm -f test_xorpevents
 	$(CXXLINK) $(test_xorpevents_LDFLAGS) $(test_xorpevents_OBJECTS) $(test_xorpevents_LDADD) $(LIBS)
+
+bgp4_mib_1657.so: $(bgp4_mib_1657_so_OBJECTS) $(bgp4_mib_1657_so_DEPENDENCIES)
+	@rm -f bgp4_mib_1657.so
+	$(CXXLINK) $(bgp4_mib_1657_so_LDFLAGS) $(bgp4_mib_1657_so_OBJECTS) $(bgp4_mib_1657_so_LDADD) $(LIBS)
+
+ospf_mib_1850.so: $(ospf_mib_1850_so_OBJECTS) $(ospf_mib_1850_so_DEPENDENCIES)
+	@rm -f ospf_mib_1850.so
+	$(CXXLINK) $(ospf_mib_1850_so_LDFLAGS) $(ospf_mib_1850_so_OBJECTS) $(ospf_mib_1850_so_LDADD) $(LIBS)
+
+xorp_if_mib_module.so: $(xorp_if_mib_module_so_OBJECTS) $(xorp_if_mib_module_so_DEPENDENCIES)
+	@rm -f xorp_if_mib_module.so
+	$(CXXLINK) $(xorp_if_mib_module_so_LDFLAGS) $(xorp_if_mib_module_so_OBJECTS) $(xorp_if_mib_module_so_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
-.cc.lo:
-	$(LTCXXCOMPILE) -c $<
 
 tags: TAGS
 
@@ -377,7 +421,7 @@ check-am: all-am
 check: check-am
 installcheck-am:
 installcheck: installcheck-am
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-binPROGRAMS install-sbinPROGRAMS
 install-exec: install-exec-am
 
 install-data-am:
@@ -386,14 +430,14 @@ install-data: install-data-am
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-binPROGRAMS uninstall-sbinPROGRAMS
 uninstall: uninstall-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+all-am: Makefile $(PROGRAMS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(libdir)
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(sbindir)
 
 
 mostlyclean-generic:
@@ -405,70 +449,51 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-libLTLIBRARIES mostlyclean-compile \
-		mostlyclean-libtool mostlyclean-noinstPROGRAMS \
+mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-noinstPROGRAMS \
+		mostlyclean-sbinPROGRAMS mostlyclean-compile \
 		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-libLTLIBRARIES clean-compile clean-libtool \
-		clean-noinstPROGRAMS clean-tags clean-depend \
-		clean-generic mostlyclean-am
+clean-am:  clean-binPROGRAMS clean-noinstPROGRAMS clean-sbinPROGRAMS \
+		clean-compile clean-tags clean-depend clean-generic \
+		mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-libLTLIBRARIES distclean-compile \
-		distclean-libtool distclean-noinstPROGRAMS \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
-	-rm -f libtool
+distclean-am:  distclean-binPROGRAMS distclean-noinstPROGRAMS \
+		distclean-sbinPROGRAMS distclean-compile distclean-tags \
+		distclean-depend distclean-generic clean-am
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-libLTLIBRARIES \
-		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-noinstPROGRAMS maintainer-clean-tags \
-		maintainer-clean-depend maintainer-clean-generic \
-		distclean-am
+maintainer-clean-am:  maintainer-clean-binPROGRAMS \
+		maintainer-clean-noinstPROGRAMS \
+		maintainer-clean-sbinPROGRAMS maintainer-clean-compile \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-libLTLIBRARIES distclean-libLTLIBRARIES \
-clean-libLTLIBRARIES maintainer-clean-libLTLIBRARIES \
-uninstall-libLTLIBRARIES install-libLTLIBRARIES mostlyclean-compile \
-distclean-compile clean-compile maintainer-clean-compile \
-mostlyclean-libtool distclean-libtool clean-libtool \
-maintainer-clean-libtool mostlyclean-noinstPROGRAMS \
-distclean-noinstPROGRAMS clean-noinstPROGRAMS \
-maintainer-clean-noinstPROGRAMS tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir mostlyclean-depend \
-distclean-depend clean-depend maintainer-clean-depend check-TESTS \
-info-am info dvi-am dvi check check-am installcheck-am installcheck \
-install-exec-am install-exec install-data-am install-data install-am \
-install uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+.PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
+maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
+mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
+clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
+mostlyclean-sbinPROGRAMS distclean-sbinPROGRAMS clean-sbinPROGRAMS \
+maintainer-clean-sbinPROGRAMS uninstall-sbinPROGRAMS \
+install-sbinPROGRAMS mostlyclean-compile distclean-compile \
+clean-compile maintainer-clean-compile tags mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir \
+mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend check-TESTS info-am info dvi-am dvi check \
+check-am installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
-
-# -- Library Sources (bgp4_mib_1657)
-#bgp4_mib_1657_SOURCES  = bgp4_mib_1657.hh
-#bgp4_mib_1657_SOURCES += bgp4_mib_1657.cc
-#bgp4_mib_1657_SOURCES += bgp4_mib_1657_bgpversion.hh
-#bgp4_mib_1657_SOURCES += bgp4_mib_1657_bgpversion.cc
-
-# -- Library Sources (ospf_mib_1850)
-#ospf_mib_1850_SOURCES  = ospf_mib_1850.hh
-#ospf_mib_1850_SOURCES += ospf_mib_1850.cc
-
-# -- Library Sources (xorp_if_mib_module)
-#xorp_if_mib_module_SOURCES  = xorp_if_mib_module.hh
-#xorp_if_mib_module_SOURCES += xorp_if_mib_module.cc
-
-# magic-script:			magic-script.in
-# 	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
-# 	chmod +x magic-script
 
 ################################################################
 

@@ -65,19 +65,15 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
-AS = @AS@
 CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-DLLTOOL = @DLLTOOL@
 GMAKE = @GMAKE@
-LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MIBS = @MIBS@
-OBJDUMP = @OBJDUMP@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
 PACKAGE = @PACKAGE@
@@ -127,9 +123,8 @@ CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -216,7 +211,6 @@ clean-am:  clean-generic mostlyclean-am
 clean: clean-am
 
 distclean-am:  distclean-generic clean-am
-	-rm -f libtool
 
 distclean: distclean-am
 

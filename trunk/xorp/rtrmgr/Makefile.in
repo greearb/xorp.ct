@@ -66,19 +66,15 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
-AS = @AS@
 CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-DLLTOOL = @DLLTOOL@
 GMAKE = @GMAKE@
-LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MIBS = @MIBS@
-OBJDUMP = @OBJDUMP@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
 PACKAGE = @PACKAGE@
@@ -153,14 +149,12 @@ $(top_builddir)/libxorp/libxorp.a
 test_templates_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in TODO
 
 
@@ -185,7 +179,7 @@ OBJECTS = $(rtrmgr_OBJECTS) $(xorpsh_OBJECTS) $(test_templates_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cc .lo .o .s
+.SUFFIXES: .S .c .cc .o .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu rtrmgr/Makefile
 
@@ -208,8 +202,8 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 
@@ -244,22 +238,6 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-.s.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.S.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
-
 rtrmgr: $(rtrmgr_OBJECTS) $(rtrmgr_DEPENDENCIES)
 	@rm -f rtrmgr
 	$(CXXLINK) $(rtrmgr_LDFLAGS) $(rtrmgr_OBJECTS) $(rtrmgr_LDADD) $(LIBS)
@@ -273,8 +251,6 @@ test_templates: $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES)
 	$(CXXLINK) $(test_templates_LDFLAGS) $(test_templates_OBJECTS) $(test_templates_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
-.cc.lo:
-	$(LTCXXCOMPILE) -c $<
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -510,29 +486,27 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-noinstPROGRAMS \
-		mostlyclean-compile mostlyclean-libtool \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-recursive
 
 clean-am:  clean-binPROGRAMS clean-noinstPROGRAMS clean-compile \
-		clean-libtool clean-tags clean-depend clean-generic \
-		mostlyclean-am
+		clean-tags clean-depend clean-generic mostlyclean-am
 
 clean: clean-recursive
 
 distclean-am:  distclean-binPROGRAMS distclean-noinstPROGRAMS \
-		distclean-compile distclean-libtool distclean-tags \
-		distclean-depend distclean-generic clean-am
-	-rm -f libtool
+		distclean-compile distclean-tags distclean-depend \
+		distclean-generic clean-am
 
 distclean: distclean-recursive
 
 maintainer-clean-am:  maintainer-clean-binPROGRAMS \
 		maintainer-clean-noinstPROGRAMS \
-		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-tags maintainer-clean-depend \
-		maintainer-clean-generic distclean-am
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -543,8 +517,7 @@ maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
 clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool install-data-recursive \
+maintainer-clean-compile install-data-recursive \
 uninstall-data-recursive install-exec-recursive \
 uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
 all-recursive check-recursive installcheck-recursive info-recursive \

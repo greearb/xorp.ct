@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.26 2003/04/20 23:21:37 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.27 2003/04/21 08:20:34 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -42,7 +42,7 @@ dnl XXX: libtool options
 dnl ----------------------------
 dnl AC_DISABLED_STATIC
 dnl AC_DISABLE_SHARED
-AC_PROG_LIBTOOL
+dnl AC_PROG_LIBTOOL
 
 
 dnl ----------------------------
@@ -222,7 +222,7 @@ fi
 
 AC_PROG_INSTALL
 dnl XXX: AUTOMAKE
-AM_PROG_LIBTOOL
+dnl AM_PROG_LIBTOOL
 AC_PROG_LN_S
 AC_PROG_RANLIB
 
