@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.23 2005/02/27 20:46:55 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.24 2005/03/14 22:39:35 pavlin Exp $"
 
 #include "cli_module.h"
 #include "libxorp/xorp.h"
@@ -193,9 +193,11 @@ XrlCliNode::cli_manager_0_1_start_cli()
 XrlCmdError
 XrlCliNode::cli_manager_0_1_stop_cli()
 {
+    string error_msg;
+
     if (stop_cli() != XORP_OK) {
-	string msg = c_format("Failed to stop CLI");
-	return XrlCmdError::COMMAND_FAILED(msg);
+	error_msg = c_format("Failed to stop CLI");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     return XrlCmdError::OKAY();
@@ -206,6 +208,11 @@ XrlCliNode::cli_manager_0_1_add_enable_cli_access_from_subnet4(
     // Input values, 
     const IPv4Net&	subnet_addr)
 {
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     cli_node().add_enable_cli_access_from_subnet(IPvXNet(subnet_addr));
     
     return XrlCmdError::OKAY();
@@ -216,6 +223,11 @@ XrlCliNode::cli_manager_0_1_add_enable_cli_access_from_subnet6(
     // Input values, 
     const IPv6Net&	subnet_addr)
 {
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     cli_node().add_enable_cli_access_from_subnet(IPvXNet(subnet_addr));
     
     return XrlCmdError::OKAY();
@@ -226,11 +238,18 @@ XrlCliNode::cli_manager_0_1_delete_enable_cli_access_from_subnet4(
     // Input values, 
     const IPv4Net&	subnet_addr)
 {
+    string error_msg;
+
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     if (cli_node().delete_enable_cli_access_from_subnet(IPvXNet(subnet_addr))
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete enabled CLI access from subnet %s",
-			      cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(msg);
+	error_msg = c_format("Failed to delete enabled CLI access from subnet %s",
+			     cstring(subnet_addr));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     return XrlCmdError::OKAY();
@@ -241,11 +260,18 @@ XrlCliNode::cli_manager_0_1_delete_enable_cli_access_from_subnet6(
     // Input values, 
     const IPv6Net&	subnet_addr)
 {
+    string error_msg;
+
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     if (cli_node().delete_enable_cli_access_from_subnet(IPvXNet(subnet_addr))
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete enabled CLI access from subnet %s",
-			      cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(msg);
+	error_msg = c_format("Failed to delete enabled CLI access from subnet %s",
+			     cstring(subnet_addr));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     return XrlCmdError::OKAY();
@@ -256,6 +282,11 @@ XrlCliNode::cli_manager_0_1_add_disable_cli_access_from_subnet4(
     // Input values, 
     const IPv4Net&	subnet_addr)
 {
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     cli_node().add_disable_cli_access_from_subnet(IPvXNet(subnet_addr));
     
     return XrlCmdError::OKAY();
@@ -266,6 +297,11 @@ XrlCliNode::cli_manager_0_1_add_disable_cli_access_from_subnet6(
     // Input values, 
     const IPv6Net&	subnet_addr)
 {
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     cli_node().add_disable_cli_access_from_subnet(IPvXNet(subnet_addr));
     
     return XrlCmdError::OKAY();
@@ -276,11 +312,18 @@ XrlCliNode::cli_manager_0_1_delete_disable_cli_access_from_subnet4(
     // Input values, 
     const IPv4Net&	subnet_addr)
 {
+    string error_msg;
+
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     if (cli_node().delete_disable_cli_access_from_subnet(IPvXNet(subnet_addr))
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete disabled CLI access from subnet %s",
-			      cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(msg);
+	error_msg = c_format("Failed to delete disabled CLI access from subnet %s",
+			     cstring(subnet_addr));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     return XrlCmdError::OKAY();
@@ -291,11 +334,18 @@ XrlCliNode::cli_manager_0_1_delete_disable_cli_access_from_subnet6(
     // Input values, 
     const IPv6Net&	subnet_addr)
 {
+    string error_msg;
+
+    //
+    // XXX: we don't need to verify the address family, because we are
+    // handling both IPv4 and IPv6.
+    //
+
     if (cli_node().delete_disable_cli_access_from_subnet(IPvXNet(subnet_addr))
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete disabled CLI access from subnet %s",
-			      cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(msg);
+	error_msg = c_format("Failed to delete disabled CLI access from subnet %s",
+			     cstring(subnet_addr));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     return XrlCmdError::OKAY();
@@ -312,7 +362,7 @@ XrlCliNode::cli_manager_0_1_add_cli_command(
     const string&	command_cd_prompt, 
     const bool&		is_command_processor)
 {
-    string reason;
+    string error_msg;
     
     if (cli_node().add_cli_command(processor_name,
 				   command_name,
@@ -320,9 +370,9 @@ XrlCliNode::cli_manager_0_1_add_cli_command(
 				   is_command_cd,
 				   command_cd_prompt,
 				   is_command_processor,
-				   reason)
+				   error_msg)
 	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(reason);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::OKAY();
 }
@@ -334,13 +384,13 @@ XrlCliNode::cli_manager_0_1_delete_cli_command(
     const string&	command_name
     )
 {
-    string reason;
+    string error_msg;
 
     if (cli_node().delete_cli_command(processor_name,
 				      command_name,
-				      reason)
+				      error_msg)
 	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(reason);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
@@ -399,7 +449,7 @@ XrlCliNode::recv_process_command_output(const XrlError& xrl_error,
 
     //
     // TODO: if the command failed because of transport error,
-    // then we should retransmit it
+    // then we should retransmit it.
     //
     XLOG_ERROR("Failed to process a command with \"%s\": %s",
 	       processor_name->c_str(),
