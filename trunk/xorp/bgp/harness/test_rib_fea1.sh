@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.7 2002/12/10 23:34:28 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -261,8 +261,47 @@ test3()
     config_peers
 }
 
+test4()
+{
+    # 1) Send an update packet on peer1 with a nexthop that is not resolvable.
+    # 2) Make the next hop resolvable by adding a route to the RIB.
+    # 3) Verify that an update packet now pops out of peer2 and peer3.
+
+    echo "TEST4 - Metrics changing for a nexthop"
+
+    config_peers
+
+    PACKET="packet update
+	origin 2
+	aspath $PEER1_AS
+	nexthop 128.16.0.1
+	nlri 10.10.10.0/24"
+
+    # At this point the nexthop should not resolve.
+    coord peer1 send $PACKET
+    
+    # Make sure that update packet has popped out even though the nexthops
+    # are not resolvable.
+    sleep 2
+    coord peer2 trie recv lookup 10.10.10.0/24 not
+    coord peer3 trie recv lookup 10.10.10.0/24 not
+
+    # Lets get it to resolve.
+    add_route4 connected true false 128.16.0.0/16 172.16.1.2 1
+
+    # Try and verify that the correct route has popped out at peer2.
+    sleep 2
+    coord peer2 trie recv lookup 10.10.10.0/24 aspath "$AS,$PEER1_AS"
+    coord peer3 trie recv lookup 10.10.10.0/24 aspath "$PEER1_AS"
+    
+    # Make sure that the connections still exist.
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3'
+TESTS='test1 test2 test3 test4'
 
 # Include command line
 . ./args.sh
