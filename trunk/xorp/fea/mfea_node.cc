@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.11 2003/07/29 01:01:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.12 2003/08/05 05:37:29 pavlin Exp $"
 
 
 //
@@ -331,7 +331,7 @@ MfeaNode::delete_vif(const string& vif_name, string& err)
     
     if (ProtoNode<MfeaVif>::delete_vif(mfea_vif) != XORP_OK) {
 	err = c_format("Cannot delete vif %s: internal error",
-		       mfea_vif->name().c_str());
+		       vif_name.c_str());
 	XLOG_ERROR(err.c_str());
 	delete mfea_vif;
 	return (XORP_ERROR);
@@ -340,6 +340,124 @@ MfeaNode::delete_vif(const string& vif_name, string& err)
     delete mfea_vif;
     
     XLOG_INFO("Deleted vif: %s", vif_name.c_str());
+    
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::enable_vif:
+ * @vif_name: The name of the vif to enable.
+ * @err: The error message (if error).
+ * 
+ * Enable an existing MFEA vif.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::enable_vif(const string& vif_name, string& err)
+{
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+    if (mfea_vif == NULL) {
+	err = c_format("Cannot enable vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mfea_vif->enable();
+    
+    XLOG_INFO("Enabled vif: %s", vif_name.c_str());
+    
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::disable_vif:
+ * @vif_name: The name of the vif to disable.
+ * @err: The error message (if error).
+ * 
+ * Disable an existing MFEA vif.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::disable_vif(const string& vif_name, string& err)
+{
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+    if (mfea_vif == NULL) {
+	err = c_format("Cannot disable vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mfea_vif->disable();
+    
+    XLOG_INFO("Disabled vif: %s", vif_name.c_str());
+    
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::start_vif:
+ * @vif_name: The name of the vif to start.
+ * @err: The error message (if error).
+ * 
+ * Start an existing MFEA vif.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::start_vif(const string& vif_name, string& err)
+{
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+    if (mfea_vif == NULL) {
+	err = c_format("Cannot start vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
+	return (XORP_ERROR);
+    }
+    
+    if (mfea_vif->start() != XORP_OK) {
+	err = c_format("Cannot start vif %s: internal error",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
+	return (XORP_ERROR);
+    }
+    
+    XLOG_INFO("Started vif: %s", vif_name.c_str());
+    
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::stop_vif:
+ * @vif_name: The name of the vif to stop.
+ * @err: The error message (if error).
+ * 
+ * Stop an existing MFEA vif.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::stop_vif(const string& vif_name, string& err)
+{
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+    if (mfea_vif == NULL) {
+	err = c_format("Cannot stop vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
+	return (XORP_ERROR);
+    }
+    
+    if (mfea_vif->stop() != XORP_OK) {
+	err = c_format("Cannot stop vif %s: internal error",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
+	return (XORP_ERROR);
+    }
+    
+    XLOG_INFO("Stopped vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -463,7 +581,7 @@ MfeaNode::delete_all_vifs(void)
 	string vif_name = mfea_vif->name();
 	
 	string err;
-	if (delete_vif(mfea_vif->name(), err) != XORP_OK) {
+	if (delete_vif(vif_name, err) != XORP_OK) {
 	    err = c_format("Cannot delete vif %s: internal error",
 			   vif_name.c_str());
 	    XLOG_ERROR(err.c_str());

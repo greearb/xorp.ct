@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.9 2003/07/16 02:56:55 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.10 2003/08/05 05:37:29 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -328,6 +328,42 @@ public:
      */
     virtual int	send_set_config_all_vifs_done(const string& dst_module_instance_name,
 					      xorp_module_id dst_module_id) = 0;
+    
+    /**
+     * Enable an existing MFEA vif.
+     * 
+     * @param vif_name the name of the vif to enable.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		enable_vif(const string& vif_name, string& err);
+
+    /**
+     * Disable an existing MFEA vif.
+     * 
+     * @param vif_name the name of the vif to disable.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		disable_vif(const string& vif_name, string& err);
+
+    /**
+     * Start an existing MFEA vif.
+     * 
+     * @param vif_name the name of the vif to start.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		start_vif(const string& vif_name, string& err);
+    
+    /**
+     * Stop an existing MFEA vif.
+     * 
+     * @param vif_name the name of the vif to start.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		stop_vif(const string& vif_name, string& err);
     
     /**
      * Start MFEA on all enabled interfaces.

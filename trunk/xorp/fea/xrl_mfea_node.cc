@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.10 2003/06/02 02:01:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.11 2003/07/16 02:56:55 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -2511,15 +2511,10 @@ XrlMfeaNode::mfea_0_1_enable_vif(
     // Input values, 
     const string&	vif_name)
 {
-    MfeaVif *mfea_vif = MfeaNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mfea_vif == NULL) {
-	string msg = c_format("Cannot enable vif %s: no such vif",
-			      vif_name.c_str());
+    if (MfeaNode::enable_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    mfea_vif->enable();
     
     return XrlCmdError::OKAY();
 }
@@ -2529,15 +2524,10 @@ XrlMfeaNode::mfea_0_1_disable_vif(
     // Input values, 
     const string&	vif_name)
 {
-    MfeaVif *mfea_vif = MfeaNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mfea_vif == NULL) {
-	string msg = c_format("Cannot disable vif %s: no such vif",
-			      vif_name.c_str());
+    if (MfeaNode::disable_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    mfea_vif->disable();
     
     return XrlCmdError::OKAY();
 }
@@ -2547,19 +2537,10 @@ XrlMfeaNode::mfea_0_1_start_vif(
     // Input values, 
     const string&	vif_name)
 {
-    MfeaVif *mfea_vif = MfeaNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mfea_vif == NULL) {
-	string msg = c_format("Cannot start vif %s: no such vif",
-			      vif_name.c_str());
+    if (MfeaNode::start_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    if (mfea_vif->start() != XORP_OK) {
-	string msg = c_format("Failed to start vif %s",
-			      vif_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
     
     return XrlCmdError::OKAY();
 }
@@ -2569,19 +2550,10 @@ XrlMfeaNode::mfea_0_1_stop_vif(
     // Input values, 
     const string&	vif_name)
 {
-    MfeaVif *mfea_vif = MfeaNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mfea_vif == NULL) {
-	string msg = c_format("Cannot stop vif %s: no such vif",
-			      vif_name.c_str());
+    if (MfeaNode::stop_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    if (mfea_vif->stop() != XORP_OK) {
-	string msg = c_format("Failed to stop vif %s",
-			      vif_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
     
     return XrlCmdError::OKAY();
 }
