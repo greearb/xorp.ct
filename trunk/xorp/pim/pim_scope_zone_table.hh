@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.3 2003/02/25 01:38:49 pavlin Exp $
+// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.4 2003/03/03 02:07:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_SCOPE_ZONE_TABLE_HH__
@@ -65,7 +65,8 @@ class PimScopeZoneTable {
 public:
     PimScopeZoneTable(PimNode& pim_node);
     virtual ~PimScopeZoneTable();
-    
+
+    list<PimScopeZone>& pim_scope_zone_list() { return (_pim_scope_zone_list); }
     void add_scope_zone(const IPvXNet& scope_zone_prefix, uint16_t vif_index);
     void delete_scope_zone(const IPvXNet& scope_zone_prefix,
 			   uint16_t vif_index);
@@ -88,6 +89,7 @@ public:
     PimScopeZone(const IPvXNet& scope_zone_prefix, const Mifset& scoped_vifs);
     virtual ~PimScopeZone();
     
+    const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
     void set_scoped_vif(uint16_t vif_index, bool v);
     
     bool is_empty() const { return (! _scoped_vifs.any()); }
