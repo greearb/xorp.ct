@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.15 2003/12/10 22:53:07 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.17 2004/02/28 21:14:48 pavlin Exp $"
 
 
 //
@@ -96,6 +96,9 @@ CliNode::~CliNode()
 int
 CliNode::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (ProtoNode<Vif>::start() < 0)
 	return (XORP_ERROR);
     

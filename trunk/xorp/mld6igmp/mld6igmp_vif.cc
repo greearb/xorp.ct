@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.20 2004/02/24 23:49:42 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.21 2004/02/25 02:38:40 pavlin Exp $"
 
 
 //
@@ -168,6 +168,9 @@ Mld6igmpVif::proto_is_ssm() const
 int
 Mld6igmpVif::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (! is_underlying_vif_up())
 	return (XORP_ERROR);
     if (is_loopback())
@@ -260,7 +263,10 @@ int
 Mld6igmpVif::stop()
 {
     int ret_value = XORP_OK;
-    
+
+    if (is_down())
+	return (XORP_OK);
+
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
     

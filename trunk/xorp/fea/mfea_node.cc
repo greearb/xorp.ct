@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.20 2003/12/10 22:06:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.21 2003/12/10 22:13:29 pavlin Exp $"
 
 
 //
@@ -133,6 +133,9 @@ MfeaNode::~MfeaNode()
 int
 MfeaNode::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (ProtoNode<MfeaVif>::start() < 0)
 	return (XORP_ERROR);
 
@@ -180,7 +183,7 @@ MfeaNode::stop()
 	return (XORP_OK);
     }
 
-    if (! is_up())
+    if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
     
     // Stop the vifs

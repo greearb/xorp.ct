@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.4 2003/08/07 01:09:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.5 2003/09/30 18:27:06 pavlin Exp $"
 
 
 //
@@ -98,6 +98,9 @@ RpTable::~RpTable()
 int
 RpTable::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
@@ -118,6 +121,9 @@ RpTable::start()
 int
 RpTable::stop()
 {
+    if (is_down())
+	return (XORP_OK);
+
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
     

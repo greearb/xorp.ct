@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.21 2003/10/28 19:36:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.22 2003/12/10 22:11:28 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -74,6 +74,9 @@ XrlMfeaVifManager::family() const
 int
 XrlMfeaVifManager::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     enable();	// XXX: by default the XrlMfeaVifManager is always enabled
     
     if (ProtoState::start() < 0)
@@ -101,12 +104,13 @@ XrlMfeaVifManager::stop()
     if (is_down())
 	return (XORP_OK);
 
-    if (! is_up())
+    if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 
     clean_out_old_state();
     
-    ProtoState::stop();
+    if (ProtoState::stop() < 0)
+	return (XORP_ERROR);
     
     return (XORP_OK);
 }

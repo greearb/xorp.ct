@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.21 2004/02/25 06:10:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.22 2004/02/26 00:47:45 pavlin Exp $"
 
 
 //
@@ -72,6 +72,12 @@ PimNodeCli::~PimNodeCli()
 int
 PimNodeCli::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
+    if (ProtoUnit::start() < 0)
+	return (XORP_ERROR);
+
     if (add_all_cli_commands() < 0)
 	return (XORP_ERROR);
     
@@ -82,6 +88,12 @@ int
 PimNodeCli::stop()
 {
     int ret_code = XORP_OK;
+
+    if (is_down())
+	return (XORP_OK);
+
+    if (ProtoUnit::stop() < 0)
+	return (XORP_ERROR);
     
     if (delete_all_cli_commands() < 0)
 	ret_code = XORP_ERROR;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.2 2004/02/18 02:46:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.3 2004/02/26 00:47:12 pavlin Exp $"
 
 
 //
@@ -72,6 +72,12 @@ MfeaNodeCli::~MfeaNodeCli()
 int
 MfeaNodeCli::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
+    if (ProtoUnit::start() < 0)
+	return (XORP_ERROR);
+
     if (add_all_cli_commands() < 0)
 	return (XORP_ERROR);
     
@@ -82,7 +88,13 @@ int
 MfeaNodeCli::stop()
 {
     int ret_code = XORP_OK;
-    
+
+    if (is_down())
+	return (XORP_OK);
+
+    if (ProtoUnit::stop() < 0)
+	return (XORP_ERROR);
+
     if (delete_all_cli_commands() < 0)
 	ret_code = XORP_ERROR;
     
