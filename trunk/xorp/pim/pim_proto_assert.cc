@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.4 2003/01/13 20:40:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.5 2003/01/26 04:06:24 pavlin Exp $"
 
 
 //
@@ -136,19 +136,7 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 			   const IPvX& assert_group_addr,
 			   uint32_t group_masklen, AssertMetric *assert_metric)
 {
-    uint32_t	lookup_flags, create_flags;
-    PimMre	*pim_mre;
-    
-    if (assert_metric->rpt_bit_flag())
-	lookup_flags = PIM_MRE_WC;
-    else
-	lookup_flags = PIM_MRE_SG;
-    // TODO: XXX: PAVPAVPAV: should create_flags = 0 instead, and
-    // silently ignore Assert messages if we don't have any state
-    // about the particular (S,G) or (*,G)?
-    // However, make sure that an (S,G) is created if it is
-    // an (S,G) assert and there is (S,G,rpt) PimMre entry
-    create_flags = lookup_flags;
+    PimMre	*pim_mre_sg, *pim_mre_wc;
     
     if (group_masklen != IPvX::addr_bitlen(family())) {
 	XLOG_WARNING("RX %s from %s to %s: "
@@ -160,16 +148,53 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	return (XORP_ERROR);
     }
     
-    pim_mre = pim_mrt().pim_mre_find(assert_source_addr, assert_group_addr,
-				     lookup_flags, create_flags);
-    if (pim_mre == NULL) {
+    if (assert_metric->rpt_bit_flag()) {
+	//
+	// (*,G) Assert received
+	//
+	// First try to apply this assert to the (S,G) assert state machine.
+	// Only if the (S,G) assert state machine is in NoInfo state as
+	// a result of receiving this this message, then apply it to the (*,G)
+	// assert state machine.
+	//
+	pim_mre_sg = pim_mrt().pim_mre_find(assert_source_addr,
+					    assert_group_addr,
+					    PIM_MRE_SG, 0);
+	if (pim_mre_sg != NULL) {
+	    int ret_value = pim_mre_sg->assert_process(this, assert_metric);
+	    if (! pim_mre_sg->is_assert_noinfo_state(vif_index()))
+		return (ret_value);
+	}
+	//
+	// The (S,G) assert state machine is in NoInfo state.
+	// Apply the assert to the (*,G) assert state machine.
+	//
+	pim_mre_wc = pim_mrt().pim_mre_find(assert_source_addr,
+					    assert_group_addr,
+					    PIM_MRE_WC, PIM_MRE_WC);
+	if (pim_mre_wc == NULL) {
+	    XLOG_ERROR("Internal error lookup/creating PIM multicast routing "
+		       "entry for source = %s group = %s",
+		       cstring(assert_source_addr),
+		       cstring(assert_group_addr));
+	    return (XORP_ERROR);
+	}
+	return (pim_mre_wc->assert_process(this, assert_metric));
+    }
+    
+    //
+    // (S,G) Assert received
+    //
+    pim_mre_sg = pim_mrt().pim_mre_find(assert_source_addr, assert_group_addr,
+					PIM_MRE_SG, PIM_MRE_SG);
+    if (pim_mre_sg == NULL) {
 	XLOG_ERROR("Internal error lookup/creating PIM multicast routing "
 		   "entry for source = %s group = %s",
 		   cstring(assert_source_addr), cstring(assert_group_addr));
 	return (XORP_ERROR);
     }
     
-    return (pim_mre->assert_process(this, assert_source_addr, assert_metric));
+    return (pim_mre_sg->assert_process(this, assert_metric));
     
     UNUSED(pim_nbr);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.35 2002/12/09 18:29:27 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -310,13 +310,12 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    && pim_mre->inherited_olist_sg_forward().test(iif_vif_index)) {
 	    // send Assert(S,G) on iif_vif_index
 	    XLOG_ASSERT(pim_mre_sg != NULL);
-	    pim_vif->pim_assert_mre_send(pim_mre_sg,
-					 pim_mre_sg->source_addr());
+	    pim_mre_sg->wrong_iif_data_arrived_sg(pim_vif, src);
 	} else if ((is_sptbit_set == false)
 		   && (pim_mre->inherited_olist_sg_rpt_forward().test(
 		       iif_vif_index))) {
 	    // send Assert(*,G) on iif_vif_index
-	    pim_vif->pim_assert_mre_send(pim_mre, IPvX::ZERO(family()));
+	    pim_mre->wrong_iif_data_arrived_wc(pim_vif, src);
 	}
 	return;		// TODO: XXX: PAVPAVPAV: not in the spec (yet)
     }

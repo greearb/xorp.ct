@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.9 2003/01/23 06:54:49 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.10 2003/01/25 00:44:40 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -546,17 +546,17 @@ public:
     // ASSERT info
     //
     //  Note: applies only for (*,G) and (S,G)
+    bool	is_assert_noinfo_state(uint16_t vif_index) const;
+    //  Note: applies only for (*,G) and (S,G)
     bool	is_i_am_assert_winner_state(uint16_t vif_index) const;
     //  Note: applies only for (*,G) and (S,G)
     bool	is_i_am_assert_loser_state(uint16_t vif_index) const;
     //  Note: applies only for (*,G) and (S,G)
+    void	set_assert_noinfo_state(uint16_t vif_index);
+    //  Note: applies only for (*,G) and (S,G)
     void	set_i_am_assert_winner_state(uint16_t vif_index);
     //  Note: applies only for (*,G) and (S,G)
     void	set_i_am_assert_loser_state(uint16_t vif_index);
-    //  Note: applies only for (*,G) and (S,G)
-    void	set_assert_noinfo_state(uint16_t vif_index);
-    //  Note: applies only for (*,G) and (S,G)
-    bool	is_assert_noinfo_state(uint16_t vif_index) const;
     // TODO: XXX: PAVPAVPAV: clean-up which states apply to:    
     const Mifset& i_am_assert_winner_state() const {
 	return (_i_am_assert_winner_state);
@@ -620,21 +620,19 @@ public:
     AssertMetric *infinite_assert_metric() const;
     AssertMetric *_assert_winner_metrics[MAX_VIFS]; // The Assert winner
 						    // metrics array.
-    int		assert_process(PimVif *pim_vif, const IPvX& assert_source_addr,
-			       AssertMetric *assert_metric);
+    int		assert_process(PimVif *pim_vif, AssertMetric *assert_metric);
     int		assert_process_sg(PimVif *pim_vif,
-				  const IPvX& assert_source_addr,
 				  AssertMetric *assert_metric,
 				  assert_state_t assert_state,
 				  bool i_am_assert_winner_bool);
     int		assert_process_wc(PimVif *pim_vif,
-				  const IPvX& assert_source_addr,
 				  AssertMetric *assert_metric,
 				  assert_state_t state,
 				  bool i_am_assert_winner_bool);
-    
-    int		wrong_iif_data_arrived_sg(PimVif *pim_vif);
-    int		wrong_iif_data_arrived_wc(PimVif *pim_vif);
+    int		wrong_iif_data_arrived_sg(PimVif *pim_vif,
+					  const IPvX& assert_source_addr);
+    int		wrong_iif_data_arrived_wc(PimVif *pim_vif,
+					  const IPvX& assert_source_addr);
     bool	recompute_could_assert_sg(uint16_t vif_index);
     bool	recompute_could_assert_wc(uint16_t vif_index);
     bool	recompute_my_assert_metric_sg(uint16_t vif_index);

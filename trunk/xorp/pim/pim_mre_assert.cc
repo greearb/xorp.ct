@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.3 2003/01/23 08:42:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.4 2003/01/27 09:23:51 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -195,8 +195,7 @@ PimMre::is_i_am_assert_loser_state(uint16_t vif_index) const
 
 // Note: applies only for (*,G) and (S,G) entries
 int
-PimMre::assert_process(PimVif *pim_vif, const IPvX& assert_source_addr,
-		       AssertMetric *assert_metric)
+PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
 {
     uint16_t vif_index = pim_vif->vif_index();
     int ret_value;
@@ -231,13 +230,11 @@ PimMre::assert_process(PimVif *pim_vif, const IPvX& assert_source_addr,
     
     ret_value = XORP_ERROR;
     if (is_sg()) {
-	ret_value = assert_process_sg(pim_vif, assert_source_addr,
-				      assert_metric, assert_state,
+	ret_value = assert_process_sg(pim_vif, assert_metric, assert_state,
 				      i_am_assert_winner_bool);
     }
     if (is_wc()) {
-	ret_value = assert_process_wc(pim_vif, assert_source_addr,
-				      assert_metric, assert_state,
+	ret_value = assert_process_wc(pim_vif, assert_metric, assert_state,
 				      i_am_assert_winner_bool);
     }
     
@@ -246,67 +243,47 @@ PimMre::assert_process(PimVif *pim_vif, const IPvX& assert_source_addr,
 
 int
 PimMre::assert_process_wc(PimVif *pim_vif,
-			  const IPvX& assert_source_addr,
 			  AssertMetric *assert_metric,
 			  assert_state_t assert_state,
 			  bool i_am_assert_winner_bool)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *save_assert_metric;
-    PimMre *pim_mre_sg;
-    bool sg_state_noinfo = true;
     
-    if (! is_wc()) {	// TODO: OK to enable is_wc() only?
+    if (! is_wc())
 	return (XORP_ERROR);
-    }
-    
-    // Compute whether the (S,G) assert state machine is in NONIFO state.
-    if (assert_source_addr.is_unicast()) {
-	pim_mre_sg = pim_mrt().pim_mre_find(assert_source_addr, group_addr(),
-					    PIM_MRE_SG, 0);
-	if (pim_mre_sg != NULL) {
-	    if (! is_assert_noinfo_state(vif_index))
-		sg_state_noinfo = false;
-	}
-    }
     
     switch (assert_state) {
     case ASSERT_STATE_NOINFO:
-	if (sg_state_noinfo) {
-	    if (i_am_assert_winner_bool && assert_metric->rpt_bit_flag()
-		&& could_assert_wc().test(vif_index)) {
-		goto a1;
-	    }
-	    if ( (! i_am_assert_winner_bool)
-		 && assert_metric->rpt_bit_flag()
-		 && assert_tracking_desired_wc().test(vif_index)) {
-		goto a2;
-	    }
+	if (i_am_assert_winner_bool && assert_metric->rpt_bit_flag()
+	    && could_assert_wc().test(vif_index)) {
+	    goto a1;
+	}
+	if ( (! i_am_assert_winner_bool)
+	     && assert_metric->rpt_bit_flag()
+	     && assert_tracking_desired_wc().test(vif_index)) {
+	    goto a2;
 	}
 	break;
 	
     case ASSERT_STATE_WINNER:
-	if (sg_state_noinfo) {
-	    if (i_am_assert_winner_bool) {
-		// Whoever sent the assert is in error
-		goto a3;
-	    } else {
-		// Receive preferred assert
-		goto a2;
-	    }
+	if (i_am_assert_winner_bool) {
+	    // Whoever sent the assert is in error
+	    goto a3;
+	} else {
+	    // Receive preferred assert
+	    goto a2;
 	}
 	break;
 	
     case ASSERT_STATE_LOSER:
-	if (sg_state_noinfo) {
-	    if (!i_am_assert_winner_bool) {
-		goto a2;
-	    }
-	    if (i_am_assert_winner_bool
-		&& (assert_winner_metric_wc(vif_index)->addr()
-		    == assert_metric->addr())) {
-		goto a5;
-	    }
+	if (!i_am_assert_winner_bool) {
+	    goto a2;
+	}
+	if (i_am_assert_winner_bool
+	    && (assert_winner_metric_wc(vif_index)->addr()
+		== assert_metric->addr())) {
+	    goto a5;
 	}
 	break;
 	
@@ -318,7 +295,6 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     
  a1:
     //  * Send Assert(*,G)
-    // TODO: use ipvx_any() or source_addr() in pim_assert_mre_send() below?
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     mifset_timer_start(assert_timers,
@@ -359,7 +335,6 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     
  a3:
     //  * Send Assert(*,G)
-    // TODO: use ipvx_any() or source_addr() in pim_assert_mre_send() below?
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     mifset_timer_start(assert_timers,
@@ -383,7 +358,6 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 
 int
 PimMre::assert_process_sg(PimVif *pim_vif,
-			  const IPvX& , // assert_source_addr
 			  AssertMetric *assert_metric,
 			  assert_state_t assert_state,
 			  bool i_am_assert_winner_bool)
@@ -530,12 +504,11 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	set_spt(true);
     set_i_am_assert_loser_state(vif_index);
     return (XORP_OK);
-    
-    // UNUSED(assert_source_addr);
 }
 
 int
-PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif)
+PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
+				  const IPvX& assert_source_addr)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *save_assert_metric;
@@ -566,8 +539,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif)
 
  a1:
     //  * Send Assert(*,G)
-    // TODO: use ipvx_any() or source_addr() in pim_assert_mre_send() below?
-    pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
+    pim_vif->pim_assert_mre_send(this, assert_source_addr);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     mifset_timer_start(assert_timers,
 		       vif_index,
@@ -588,7 +560,8 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif)
 }
 
 int
-PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif)
+PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
+				  const IPvX& assert_source_addr)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *save_assert_metric;
@@ -596,6 +569,7 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif)
     
     if (! is_sg())
 	return (XORP_ERROR);
+    XLOG_ASSERT(assert_source_addr == source_addr());
     
     if (is_assert_noinfo_state(vif_index))
 	goto assert_noinfo_state_label;
@@ -739,7 +713,6 @@ PimMre::assert_timer_timeout_wc(uint16_t vif_index)
     
  a3:
     //  * Send Assert(*,G)
-    // TODO: use ipvx_any() or source_addr() in pim_assert_mre_send() below?
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()));
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     mifset_timer_start(assert_timers,
