@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.13 2004/03/17 07:50:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.14 2004/03/18 08:10:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -371,7 +371,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     if ( (sa = rti_info[RTAX_IFP]) != NULL) {
 	if (sa->sa_family != AF_LINK) {
 	    // TODO: verify whether this is really an error.
-	    XLOG_ERROR("Ignoring RTM_GET with sa_family = %d", sa->sa_family);
+	    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
+		       sa->sa_family);
 	    return false;
 	}
 	const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
