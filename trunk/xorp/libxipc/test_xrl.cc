@@ -42,7 +42,6 @@ xrl_test(const char* testname, const Xrl& x, const Xrl& y)
 static int
 run_test()
 {
-    const char* s;
     int  failures = 0;
     bool failure = false;
 
@@ -82,8 +81,7 @@ run_test()
 	failure = false;
 	Xrl x("some target", "take an argument");
 	x.args().add(tests[i].arg);
-        s = x.str().c_str();
-        Xrl sx(s);
+        Xrl sx(x.str().c_str());
         failure = xrl_test(tests[i].testname, x, sx);
 	failures += (failure) ? 1 : 0;
     }
@@ -100,21 +98,21 @@ run_test()
 	    if (i == j) {
 		continue;
 	    }
+
+
 	    try {
 		failure = false;
 		Xrl x("some target", "take an argument");
-
 		x.args().add(tests[i].arg);
 		x.args().add(tests[j].arg);
-		string srep = x.str();
 
-		Xrl sx(srep.c_str());
+		Xrl sx(x.str().c_str());
 		string nom = string(tests[i].testname) + string(" + ") +
 		    string(tests[j].testname);
 		failure = xrl_test(nom.c_str(), x, sx);
 		failures += (failure) ? 1 : 0;
 	    } catch (const InvalidString&) {
-		cout << s << "invalid (" << i << ", " << j << ")" << endl;
+		cout << "invalid string (" << i << ", " << j << ")" << endl;
 		failures++;
 		break;
 	    } catch (const XrlArgs::XrlAtomFound&) {
