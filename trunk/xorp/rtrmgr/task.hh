@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.1 2003/05/01 07:55:28 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
 
+#include <map>
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxipc/xrl_router.hh"
@@ -53,7 +54,7 @@ private:
 
 class Task {
 public:
-    typedef XorpCallback1<void, bool>::RefPtr CallBack;
+    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
     Task(const string& name, XorpClient& xorp_client, bool do_exec);
     ~Task();
@@ -96,6 +97,21 @@ private:
     list <TaskXrlItem> _xrls;
     ModuleManager* _mmgr;
     CallBack _task_complete_cb; //the task completion callback
+};
+
+class TaskManager {
+    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+public:
+    TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient);
+    void run(CallBack cb);
+private:
+    void run_task();
+    void task_done(bool success, string errmsg);
+
+    ModuleManager& _mmgr;
+    XorpClient& _xorp_client;
+    map <string, Task> _tasks;
+    CallBack _completion_cb;
 };
 
 #endif // __RTRMGR_TASK_HH__

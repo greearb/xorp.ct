@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.1 2003/05/01 07:55:28 mjh Exp $"
 
 #include "task.hh"
 #include "module_manager.hh"
@@ -221,12 +221,47 @@ void
 Task::step6()
 {
     debug_msg("Task done\n");
-    _task_complete_cb->dispatch(true);
+    _task_complete_cb->dispatch(true, "");
 }
 
 void
 Task::task_fail(string errmsg) 
 {
     debug_msg((errmsg + "\n").c_str());
-    _task_complete_cb->dispatch(false);
+    _task_complete_cb->dispatch(false, errmsg);
+}
+
+
+
+TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient)
+    : _mmgr(mmgr), _xorp_client(xclient)
+{
+}
+
+void
+TaskManager::run(CallBack cb) {
+    _completion_cb = cb;
+    run_task();
+}
+
+void 
+TaskManager::run_task() {
+    if (_tasks.empty()) {
+	_completion_cb->dispatch(true, "");
+	return;
+    }
+    _tasks.begin()->second.run(callback(this, &TaskManager::task_done));
+}
+
+void 
+TaskManager::task_done(bool success, string errmsg) {
+    if (!success) {
+	_completion_cb->dispatch(false, errmsg);
+	while (!_tasks.empty()) {
+	    _tasks.erase(_tasks.begin());
+	}
+	return;
+    }
+    _tasks.erase(_tasks.begin());
+    run_task();
 }
