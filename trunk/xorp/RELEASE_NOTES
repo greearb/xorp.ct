@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.14 2003/06/06 02:24:39 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.15 2003/06/06 02:52:23 mjh Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 0.3 (2003/06/06)
+Release 0.3 (2003/06/09)
 ========================
   ALL:
     - Compilation fixes for GCC3.3 on FreeBSD 4.8R.
