@@ -267,14 +267,29 @@ return the following error responses:
 \item RESOLVE\_FAILED
 \item SEND\_FAILED
 \item REPLY\_TIMED\_OUT
+\item FATAL\_TRANSPORT\_ERROR
 \end{itemize}
 From an application point or view, the first three errors are
 equivalent: the XRL was not communicated to the destination.  We will
 discuss these below using the generic term {\em XRL send failure}.
 
-However, its not clear what can be inferred from a timeout
-response. The reasons for a timeout can be: the peer has died, peer is
-slow to respond, the network cable has been removed. As in all network
+XRLs can be sent over unreliable transports such as UDP or reliable
+transports such as TCP. The type of transport that should be used will
+be specified when defining the interface. In the case of reliable
+transport, the errors above should generally not occur, but in any
+event we need general rules about how to handle them should something
+fail in an unexpectedly way.
+
+In the case of an unreliable transport, REPLY\_TIMED\_OUT may be
+expected, but 
+\newline
+FATAL\_TRANSPORT\_ERROR will never occur.  In the case
+of a reliable transport, FATAL\_TRANSPORT\_ERROR may occur, but
+REPLY\_TIMED\_OUT will never occur.
+
+It's not clear what can be inferred from a timeout response. The
+reasons for a timeout might be: the peer has died, peer is slow to
+respond, the network cable has been removed. As in all network
 communications when a timeout occurs we don't know if the last
 unacknowledged XRL request was received and processed by the peer.
 
@@ -287,17 +302,11 @@ finder to receive notifications of process restarts.  This a process
 SHOULD assume that an XRL transport problem will be transient until it
 receives an explicit confirmation that the destination has failed. 
 
-XRLs can be sent over unreliable transports such as UDP or reliable
-transports such as TCP. The type of transport that should be used will
-be specified when defining the interface. In the case of reliable
-transport, the errors above should generally not occur, but in any
-event we need general rules about how to handle them should something
-fail in an unexpectedly way.
-
-In addition, the way the application uses an XRL interface can by
-pipelined or non-pipelined.  In the pipelined case, multiple requests
-can be outstanding simultaneously; in the non-pipelined case at most
-one request can be outstanding at a time.
+In addition, to an XRL interface being reliable or unreliable, the way
+the application uses an XRL interface can by pipelined or
+non-pipelined.  In the pipelined case, multiple requests can be
+outstanding simultaneously; in the non-pipelined case at most one
+request can be outstanding at a time.
 
 It is useful for us to categorise XRL interfaces along these two axes:
 reliable/unreliable and pipelined/non-pipelined.
@@ -316,25 +325,13 @@ this will not cause a further failure.
 \subsection*{Reliable, Non-pipelined}
 
 If an XRL send failure occurs, the sending application SHOULD
-retransmit the XRL.  In an XRL timeout occurs the sending application
-SHOULD also retransmit the XRL.  Further requests using this interface
+retransmit the XRL.  Further requests using this interface
 MUST be queued until the XRL has successfully been received.
 
-The interface should be written in such a way that if this XRL had
-previously been received, this will not cause a further failure.
-
-An alternative strategy is possible.  If the XRL in question changes
-state at the receiving application, the interface may also support a
-query mechanism.  If the XRL fails with a timeout, the sending
-application may opt not to blindly re-transmit the XRL, but instead
-send a query (retransmitted as necessary) to determine whether the
-state at the remote system is as it would be if the XRL had been
-received.  Only if it the query indicates that the state was not
-received would the original XRL be retransmitted.
-
-This alternative is more complicated, and so it should only be
-prefered when the consequences of receiving the same XRL twice
-outweight the additional complexity.
+If a FATAL\_TRANSPORT\_ERROR occurs, this is an unrecoverable error.
+The application should cause this XRL interface to go dormant, in the
+expectation that it will authoritatively discover from the finder that
+the target has died.
 
 \subsection*{Unreliable, Pipelined}
 
@@ -349,7 +346,8 @@ caused by retransmission will not be a problem.
 \subsection*{Reliable, Pipelined}
 
 Reliable, pipelined interfaces are the most difficult in which to
-handle XRL errors.  Three issues need to be considered:
+handle XRL errors.  In the general case, three issues would need to be
+considered:
 \begin{itemize}
 \item The XRL that failed due to a transport error may be followed by
 pipelined XRLs that succeeded.
@@ -361,12 +359,21 @@ retransmitting that XRL will cause a re-ordering that might leave the
 destination in a different state than it would be if the XRLs had
 arrived in order.
 \end{itemize}
-To avoid all these problems we require that a reliable XRL transport
-fail to deliver all subsequent XRLs in the pipeline if a single XRL
-fails.  Thus the reliable pipelined interface falls back to a
-reliable, non-pipelined interface after a failure.  A subsequent XRL
-that succeeds then permits pipelined operation to resume.
+To avoid the need to consider all these problems we require that a
+reliable XRL transport fail to deliver all subsequent XRLs in the
+pipeline if a single XRL fails.
 
+Thus, in the case of an XRL send error, the reliable pipelined
+interface SHOULD fall back to a reliable, non-pipelined behaviour
+after a failure, and SHOULD retransmit the first XRL that failed until
+either it is successful or the application authoritatively discovers
+from the finder that the target has died.  After the retransmitted XRL
+is successful, the pipelined operation may resume.
+
+If a FATAL\_TRANSPORT\_ERROR occurs, this is an unrecoverable error.
+The application SHOULD cause this XRL interface to go dormant, in the
+expectation that it will authoritatively discover from the finder that
+the target has died.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
