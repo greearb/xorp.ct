@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.105 2004/08/11 06:32:57 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.106 2004/08/22 00:16:05 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -382,6 +382,7 @@ dnl ---------------------------------------------------------------------------
 dnl SNMP
 dnl ---------------------------------------------------------------------------
 
+net_snmp_found=false
 if test "${snmp}" = "yes"; then
     AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
 else
@@ -438,7 +439,7 @@ if test "${net_snmp_found}" = "true";  then
     if test "${ac_cv_net_snmp_usable}" != "yes" ; then
 	AC_MSG_WARN(net-snmp version too old)
     fi
-elif test "${net_snmp_found}" = "no"; then
+elif test "${net_snmp_found}" = "false"; then
     AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
     snmpd="skip_check"
 fi

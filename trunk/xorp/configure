@@ -4214,6 +4214,7 @@ fi
 
 
 
+net_snmp_found=false
 if test "${snmp}" = "yes"; then
     # Extract the first word of "net-snmp-config", so it can be a program name with args.
 set dummy net-snmp-config; ac_word=$2
@@ -4308,7 +4309,7 @@ echo "${ECHO_T}$ac_cv_net_snmp_usable" >&6
 	{ echo "$as_me:$LINENO: WARNING: net-snmp version too old" >&5
 echo "$as_me: WARNING: net-snmp version too old" >&2;}
     fi
-elif test "${net_snmp_found}" = "no"; then
+elif test "${net_snmp_found}" = "false"; then
     { echo "$as_me:$LINENO: WARNING: Net-SNMP not found! MIB modules will not be built" >&5
 echo "$as_me: WARNING: Net-SNMP not found! MIB modules will not be built" >&2;}
     snmpd="skip_check"
