@@ -1,6 +1,11 @@
 #
-# $XORP: xorp/pim/TODO,v 1.75 2004/06/08 22:37:46 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.76 2004/06/22 03:03:34 pavlin Exp $
 #
+
+* IMPL:
+  If a PIM Hello message is received and it contains an unrecognized
+  Hello option, then print a warning, but still accept the sender
+  as a neighbor.
 
 * IMPL:
   Add support for RIB-managed MRIB to test_pim, and remove the support
