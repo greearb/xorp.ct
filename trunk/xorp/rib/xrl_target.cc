@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.47 2004/10/05 01:25:09 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.48 2005/02/01 01:46:45 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,9 +22,12 @@
 #include "rib_module.h"
 
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 
 #include "libxipc/xrl_std_router.hh"
+
 #include "xrl/interfaces/profile_client_xif.hh"
 
 #include "xrl_target.hh"
@@ -320,8 +323,9 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 				 const uint32_t& metric,
 				 const XrlAtomList& policytags)
 {
-    debug_msg("add_route4 protocol: %s unicast: %s multicast: %s network %s "
-	      "nexthop %s metric %u\n", protocol.c_str(),
+    debug_msg("add_route4 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s metric %u\n",
+	      protocol.c_str(),
 	      unicast ? "true" : "false",
 	      multicast ? "true" : "false",
 	      network.str().c_str(),
@@ -368,6 +372,15 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 				 const uint32_t& metric,
 				 const XrlAtomList& policytags)
 {
+    debug_msg("add_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("add %s %s%s %s %s %u",
@@ -410,6 +423,15 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 				     const uint32_t&	metric,
 				     const XrlAtomList& policytags)
 {
+    debug_msg("replace_route4 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("replace %s %s%s %s %s %u",
@@ -448,6 +470,15 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 				     const uint32_t&	metric,
 				     const XrlAtomList& policytags)
 {
+    debug_msg("replace_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("replace %s %s%s %s %s %u",
@@ -517,6 +548,13 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 				    const bool&		multicast,
 				    const IPv6Net&	network)
 {
+    debug_msg("delete_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str());
+
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("delete %s %s%s %s",
@@ -549,10 +587,17 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
 					   const uint32_t&	metric,
 					   const XrlAtomList&	policytags)
 {
-    debug_msg("#### XRL: ADD INTERFACE ROUTE net %s, nexthop: %s "
-	      "ifname: %s vifname: %s\n",
-	      network.str().c_str(), nexthop.str().c_str(),
-	      ifname.c_str(), vifname.c_str());
+    debug_msg("add_interface_route4 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, ifname, vifname, metric,
 			 policytags)
@@ -583,10 +628,17 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
 					   const uint32_t&	metric,
 					   const XrlAtomList&	policytags)
 {
-    debug_msg("#### XRL: ADD INTERFACE ROUTE net %s, nexthop: %s "
-	      "ifname: %s vifname: %s\n",
-	      network.str().c_str(), nexthop.str().c_str(),
-	      ifname.c_str(), vifname.c_str());
+    debug_msg("add_interface_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
 					metric, policytags)
@@ -617,6 +669,17 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 					       const uint32_t&	    metric,
 					       const XrlAtomList&   policytags)
 {
+    debug_msg("replace_interface_route4 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, ifname, vifname,
 			     metric, policytags)
@@ -647,6 +710,17 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
 					       const uint32_t&	    metric,
 					       const XrlAtomList&   policytags)
 {
+    debug_msg("replace_interface_route4 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric));
+
     if (unicast &&
 	_urib6.replace_route(protocol, network, nexthop, ifname, vifname,
 			     metric, policytags)
@@ -940,15 +1014,16 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 					 IPv4&	nexthop,
 					 uint32_t& metric)
 {
-    debug_msg("#### XRL: REGISTER INTEREST addr %s\n",
-	   addr.str().c_str());
+    debug_msg("register_interest4 target = %s addr = %s\n",
+	      target.c_str(), addr.str().c_str());
+
     RouteRegister<IPv4>* rt_reg = _urib4.route_register(addr, target);
     if (rt_reg->route() == NULL) {
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
 	resolves = false;
 	debug_msg("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
-	       rt_reg->valid_subnet().str().c_str());
+		  rt_reg->valid_subnet().str().c_str());
     } else {
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
@@ -1003,11 +1078,16 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 					 IPv6&	nexthop,
 					 uint32_t& metric)
 {
+    debug_msg("register_interest6 target = %s addr = %s\n",
+	      target.c_str(), addr.str().c_str());
+
     RouteRegister<IPv6>* rt_reg = _urib6.route_register(addr, target);
     if (rt_reg->route() == NULL) {
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
 	resolves = false;
+	debug_msg("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
+		  rt_reg->valid_subnet().str().c_str());
     } else {
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
@@ -1055,8 +1135,9 @@ XrlRibTarget::finder_event_observer_0_1_xrl_target_birth(
         const string&	target_class,
 	const string&	target_instance)
 {
-    debug_msg(("Target Birth: " + target_class + " " + target_instance
-	       + "\n").c_str());
+    debug_msg("Target Birth: class = %s instance = %s\n",
+	      target_class.c_str(), target_instance.c_str());
+
     UNUSED(target_class);
     UNUSED(target_instance);
 
@@ -1068,8 +1149,9 @@ XrlRibTarget::finder_event_observer_0_1_xrl_target_death(
 	const string&	target_class,
 	const string&	target_instance)
 {
-    debug_msg(("Target Death: " + target_class + " " + target_instance
-	       + "\n").c_str());
+    debug_msg("Target Death: class = %s instance = %s\n",
+	      target_class.c_str(), target_instance.c_str());
+
     _rib_manager->target_death(target_class, target_instance);
     return XrlCmdError::OKAY();
 }
@@ -1137,7 +1219,8 @@ XrlRibTarget::rib_0_1_reset_policy_redist_tags()
 XrlCmdError
 XrlRibTarget::profile_0_1_enable(const string& pname)
 {
-    debug_msg("profile variable %s\n", pname.c_str());
+    debug_msg("enable profile variable %s\n", pname.c_str());
+
     try {
 	_rib_manager->profile().enable(pname);
     } catch(PVariableUnknown& e) {
@@ -1152,7 +1235,8 @@ XrlRibTarget::profile_0_1_enable(const string& pname)
 XrlCmdError
 XrlRibTarget::profile_0_1_disable(const string&	pname)
 {
-    debug_msg("profile variable %s\n", pname.c_str());
+    debug_msg("disable profile variable %s\n", pname.c_str());
+
     try {
 	_rib_manager->profile().disable(pname);
     } catch(PVariableUnknown& e) {
@@ -1188,7 +1272,8 @@ XrlRibTarget::profile_0_1_get_entries(const string& pname,
 XrlCmdError
 XrlRibTarget::profile_0_1_clear(const string& pname)
 {
-    debug_msg("profile variable %s\n", pname.c_str());
+    debug_msg("clear profile variable %s\n", pname.c_str());
+
     try {
 	_rib_manager->profile().clear(pname);
     } catch(PVariableUnknown& e) {
