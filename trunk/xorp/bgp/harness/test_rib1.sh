@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.14 2004/05/19 19:19:06 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.15 2004/08/14 05:37:48 mjh Exp $
 #
 
 #
@@ -507,6 +507,11 @@ test9()
 
     echo "TEST9 - Check nexthop change on originated route"
     reset_ebgp
+
+    #we won't use this peering, but at least it checks that BGP is
+    #still running
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    sleep 2
 
     originate_route4 10.10.10.0/24 10.69.1.1 true false
 
