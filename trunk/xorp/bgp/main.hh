@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.14 2003/05/29 21:17:13 mjh Exp $
+// $XORP: xorp/bgp/main.hh,v 1.15 2003/06/17 06:44:15 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -314,6 +314,20 @@ public:
      */
     bool processes_ready() {
 	return _process_watch->ready();
+    }
+
+    /**
+     * @return Return the bgp mib name.
+     */
+    string bgp_mib_name() const {
+	return "bgp4_mib";
+    }
+
+    /**
+     * Check to see if the bgp snmp entity is running.
+     */
+    bool do_snmp_trap() const {
+	return _process_watch->process_exists(bgp_mib_name());
     }
 
     /**
