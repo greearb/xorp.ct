@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.3 2003/01/17 18:42:05 mjh Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.4 2003/02/22 00:41:37 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -99,8 +99,7 @@ public:
 		    const XRLdb& xrldb) throw (ParseError);
     void set_path(const string &path);
     void set_depends(const string &depends);
-    int execute(const ConfigTreeNode& ctn, 
-		XorpClient *xclient, uint tid,
+    int execute(XorpClient *xclient, uint tid,
 		ModuleManager *module_manager, 
 		bool no_execute, 
 		bool no_commit) const;

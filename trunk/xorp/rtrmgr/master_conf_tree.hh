@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.22 2002/12/09 18:29:37 hodson Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -67,12 +67,18 @@ public:
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
 		      ConfigTree& deletion_tree);
-#ifdef NOTDEF
-    int module_start_transaction(const string& module, 
-				  uint tid, bool no_commit);
-    int module_end_transaction(const string& module, 
-				uint tid, bool no_commit);
-#endif
+
+    /**
+     * Normally the command to start a new module gets added to the
+     * xorp_client queue as part of the queuing of the configuration
+     * of that module.  However, if the module doesn't need
+     * configuration, but needs starting anyway (to satisfy a
+     * dependency), then it will need to be explicitly started up.
+     * explicit_module_startup does this. 
+     */
+    bool explicit_module_startup(const string& module_name,
+				 uint tid, string& result);
+
     ModuleManager *_module_manager;
     XorpClient *_xclient;
 

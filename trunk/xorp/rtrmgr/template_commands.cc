@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.5 2003/02/22 00:41:37 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.6 2003/02/22 00:46:10 mjh Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -708,8 +708,7 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
 }
 
 int 
-ModuleCommand::execute(const ConfigTreeNode& /*ctn*/, 
-		       XorpClient *xclient, uint tid,
+ModuleCommand::execute(XorpClient *xclient, uint tid,
 		       ModuleManager *module_manager, 
 		       bool no_execute, 
 		       bool no_commit) const {

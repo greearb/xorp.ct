@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.2 2003/01/26 04:06:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.3 2003/02/22 00:41:37 mjh Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_VARIABLES
@@ -432,8 +432,7 @@ ConfigTreeNode::commit_changes(ModuleManager *mm,
 	    = dynamic_cast<const ModuleCommand*>(cmd);
 	if (modcmd != NULL 
 	    && (modcmd->name() == module)) {
-	    modcmd->execute(*this, xclient, tid, mm, 
-			    no_execute, no_commit);
+	    modcmd->execute(xclient, tid, mm, no_execute, no_commit);
 	    if (modcmd->start_transaction(*this, xclient, tid,
 					  no_execute, 
 					  no_commit) != XORP_OK) {

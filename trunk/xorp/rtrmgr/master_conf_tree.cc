@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.29 2002/12/09 18:29:37 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -124,6 +124,19 @@ void MasterConfigTree::execute() {
 	    string err = "Initialization Failed\n" + result;
 	    XLOG_FATAL(err.c_str());
 	}
+
+	if (!_module_manager->find_module(*i)) {
+	    //No config tree node contained a %modinfo command for
+	    //this module, so the ModuleManager is unaware of this
+	    //node.  However, it's needed to satisfy dependencies, so
+	    //we still need to ensure it gets started.
+	    printf("Module %s needs special startup treatment\n",
+		   (*i).c_str());
+	    if (!explicit_module_startup(*i, tid, result)) {
+		string err = "Initialization Failed\n" + result;
+		XLOG_FATAL(err.c_str());
+	    }
+	}
     }
     try {
 	_xclient->end_transaction(tid, callback(this, &MasterConfigTree::config_done));
@@ -230,20 +243,16 @@ MasterConfigTree::find_changed_modules() const {
     if (ordered_modules.empty() && !depends.empty()) {
 	XLOG_FATAL("Module dependencies cannot be satisfied\n");
     }
-    printf("1\n");
     multimap<string,string>::iterator cur, next;
     while (!depends.empty()) {
-    printf("1\n");
 	bool progress_made = false;
 	cur = depends.begin(); 
 	while (cur!= depends.end()) {
-	    printf("2\n");
 	    next = cur;
 	    next++;
 	    printf("searching for dependency for %s on %s\n",
 		   cur->first.c_str(), cur->second.c_str());
 	    if (satisfied.find(cur->second) != satisfied.end()) {
-		printf("3\n");
 		//rule is now satisfied.
 		string module = cur->first;
 		depends.erase(cur);
@@ -251,11 +260,10 @@ MasterConfigTree::find_changed_modules() const {
 		printf("dependency of %s on %s satisfied\n",
 		       module.c_str(), cur->second.c_str());
 		if (depends.find(module) == depends.end()) {
-		    printf("4\n");
 		    //this was the last dependency
 		    satisfied.insert(module);
 		    ordered_modules.push_back(module);
-		    printf("dependencies for %s noe satisfied\n",
+		    printf("dependencies for %s now satisfied\n",
 			   module.c_str());
 		}
 	    }
@@ -299,8 +307,9 @@ MasterConfigTree::commit_changes(string &result,
 	if (_root_node.commit_changes(_module_manager, *i,
 				      _xclient, tid, 
 				      _no_execute, 
-				      /*no_commit*/true, 
-				      0, 0, result) == false) {
+				      /*no_commit = */true, 
+				      0, 0, 
+				      result) == false) {
 	    //something went wrong - return the error message.
 	    return false;
 	}
@@ -321,12 +330,26 @@ MasterConfigTree::commit_changes(string &result,
 	bool success = 
 	    _root_node.commit_changes(_module_manager, *i,
 				      _xclient, tid,
-				      _no_execute, /*no_commit*/false, 
+				      _no_execute, 
+				      /*no_commit = */false, 
 				      0, 0, result);
 	printf("##############################################################\n");
 	if (success == false) {
 	    //abort the commit
 	    return false;
+	}
+
+	if (!_module_manager->find_module(*i)) {
+	    //No config tree node contained a %modinfo command for
+	    //this module, so the ModuleManager is unaware of this
+	    //node.  However, it's needed to satisfy dependencies, so
+	    //we still need to ensure it gets started.
+	    printf("Module %s needs special startup treatment\n",
+		   (*i).c_str());
+	    if (!explicit_module_startup(*i, tid, result)) {
+		string err = "Initialization Failed\n" + result;
+		XLOG_FATAL(err.c_str());
+	    }
 	}
     }
     try {
@@ -672,24 +695,16 @@ MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 
 }
 
-#ifdef NOTDEF
-int MasterConfigTree::module_start_transaction(const string& module, 
-					       uint tid, bool no_commit) {
-    const Module *m = _module_manager->find_module(module);
-    if (m == NULL) {
-	ModuleCommand *cmd = _template_tree->find_module(module);
-	m = _module_manager->new_module(cmd);
-	if (m == NULL)
-	    return XORP_ERROR;
+bool
+MasterConfigTree::explicit_module_startup(const string& module_name,
+					  uint tid, string& result)
+{
+    ModuleCommand *cmd = _template_tree->find_module(module_name);
+    if (cmd == NULL) {
+	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
+	return false;
     }
-    return m->start_transaction(_xclient, tid, _no_execute, no_commit);
+    cmd->execute(_xclient, tid, _module_manager, 
+		 _no_execute, false);
+    return true;
 }
-
-int MasterConfigTree::module_end_transaction(const string& module, 
-					     uint tid, bool no_commit) {
-    Module *m = _module_manager->find_module(module);
-    if (m == NULL)
-	return XORP_ERROR;
-    return m->end_transaction(_xclient, tid, _no_execute, no_commit);
-}
-#endif
