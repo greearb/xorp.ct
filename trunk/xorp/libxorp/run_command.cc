@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/run_command.cc,v 1.1 2004/11/25 03:23:29 pavlin Exp $
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -206,9 +206,9 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 	    debug_msg("len = %u\n", static_cast<uint32_t>(len));
 	    if (!_is_error) {
 		if (buffer == _stdout_buffer)
-		    _stdout_cb->dispatch(string(p, len));
+		    _stdout_cb->dispatch(this, string(p, len));
 		else
-		    _stderr_cb->dispatch(string(p, len));
+		    _stderr_cb->dispatch(this, string(p, len));
 	    } else {
 		_error_msg.append(p, p + len);
 	    }

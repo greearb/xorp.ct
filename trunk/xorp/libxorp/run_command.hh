@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/run_command.hh,v 1.1 2004/11/25 03:23:29 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -30,7 +30,7 @@ class EventLoop;
  */
 class RunCommand {
 public:
-    typedef XorpCallback1<void, const string&>::RefPtr OutputCallback;
+    typedef XorpCallback2<void, RunCommand*, const string&>::RefPtr OutputCallback;
     typedef XorpCallback3<void, RunCommand*, bool, const string&>::RefPtr DoneCallback;
 
     /**

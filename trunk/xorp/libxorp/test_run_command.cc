@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.1 2004/11/25 03:23:29 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -168,14 +168,16 @@ public:
     const string& stderr_msg() const { return _stderr_msg; }
     const string& done_error_msg() const { return _done_error_msg; }
 
-    void command_stdout_cb(const string& output) {
+    void command_stdout_cb(RunCommand* run_command, const string& output) {
 	_is_stdout_received = true;
 	_stdout_msg += output;
+	UNUSED(run_command);
     }
 
-    void command_stderr_cb(const string& output) {
+    void command_stderr_cb(RunCommand* run_command, const string& output) {
 	_is_stderr_received = true;
 	_stderr_msg += output;
+	UNUSED(run_command);
     }
 
     void command_done_cb(RunCommand* run_command, bool success,
