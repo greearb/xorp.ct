@@ -54,5 +54,11 @@ To run the client-side scripts in this directory
 
   export MIBDIRS=+/home/jsmith/xorp/mibs/textual
 
+- And finally, you must tell Net-SNMP about specific MIB modules that you will
+  be using.  The MIBS environment variable can be used for that purpose. For
+  BGP4-MIB you would do:
+
+  export MIBS=+BGP4-MIB
+ 
 
 
