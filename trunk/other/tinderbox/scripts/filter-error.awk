@@ -61,6 +61,12 @@ function dump_error() {
     exit;
 }
 
+/^Connection to .* closed by remote host.$/ {
+	# ssh died prematurely
+	print;
+	next;
+}
+
 // {
     if (depth == 0) print;
     errlog[depth] = (errlog[depth] $0 "\n");
