@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.30 2003/10/28 19:36:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.31 2003/10/28 19:52:50 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -70,6 +70,7 @@ XrlFeaTarget::common_0_1_get_status(
     switch (s) {
     case PROC_FAILED:
     case PROC_SHUTDOWN:
+    case PROC_DONE:
 	status = s;
 	reason = r;
 	return XrlCmdError::OKAY();
@@ -86,6 +87,11 @@ XrlFeaTarget::common_0_1_get_status(
 	abort();
     }
     status = s;
+
+    if (_done) {
+	status = PROC_DONE;	// XXX: the process was shutdown
+	reason = "";
+    }
 
     if (_xifcur.busy()) {
 	status = PROC_NOT_READY;
