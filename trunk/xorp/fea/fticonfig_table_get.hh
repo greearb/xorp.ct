@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.16 2004/11/30 20:08:09 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.17 2004/12/01 03:28:08 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -318,7 +318,6 @@ public:
     virtual bool get_table6(list<Fte6>& fte_list);
     
 private:
-    bool get_table(int family, list<FteX>& fte_list);
 
     ClickSocketReader	_cs_reader;
 };

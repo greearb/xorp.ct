@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_click.cc,v 1.5 2004/12/03 03:52:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_click.cc,v 1.6 2004/12/10 23:12:14 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -96,17 +96,11 @@ FtiConfigTableGetClick::stop(string& error_msg)
 bool
 FtiConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 {
-    list<FteX> ftex_list;
+    const map<IPv4Net, Fte4>& fte_table4 = ftic().ftic_entry_set_click().fte_table4();
+    map<IPv4Net, Fte4>::const_iterator iter;
 
-    // Get the table
-    if (get_table(AF_INET, ftex_list) != true)
-	return false;
-    
-    // Copy the result back to the original list
-    list<FteX>::iterator iter;
-    for (iter = ftex_list.begin(); iter != ftex_list.end(); ++iter) {
-	FteX& ftex = *iter;
-	fte_list.push_back(ftex.get_fte4());
+    for (iter = fte_table4.begin(); iter != fte_table4.end(); ++iter) {
+	fte_list.push_back(iter->second);
     }
     
     return true;
@@ -120,29 +114,13 @@ FtiConfigTableGetClick::get_table6(list<Fte6>& fte_list)
     
     return false;
 #else
-    list<FteX> ftex_list;
-    
-    // Get the table
-    if (get_table(AF_INET6, ftex_list) != true)
-	return false;
-    
-    // Copy the result back to the original list
-    list<FteX>::iterator iter;
-    for (iter = ftex_list.begin(); iter != ftex_list.end(); ++iter) {
-	FteX& ftex = *iter;
-	fte_list.push_back(ftex.get_fte6());
+    const map<IPv6Net, Fte6>& fte_table6 = ftic().ftic_entry_set_click().fte_table6();
+    map<IPv6Net, Fte6>::const_iterator iter;
+
+    for (iter = fte_table6.begin(); iter != fte_table6.end(); ++iter) {
+	fte_list.push_back(iter->second);
     }
     
     return true;
 #endif // HAVE_IPV6
-}
-
-bool
-FtiConfigTableGetClick::get_table(int family, list<FteX>& fte_list)
-{
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    UNUSED(family);
-    UNUSED(fte_list);
-
-    return (false);
 }
