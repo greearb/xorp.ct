@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.8 2004/09/17 07:51:39 pavlin Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.9 2004/09/17 08:10:43 pavlin Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -35,11 +35,11 @@ class IpfwFwRule : public FwRule<N> {
 	friend class IpfwFwProvider;
 protected:
 	IpfwFwRule() {}			// forbid direct instantiation
-#ifdef HAVE_FIREWALL_IPFW
 public:
 	IpfwFwRule(const FwRule<N>&);	// permit copy/new from an FwRule
 	~IpfwFwRule() {}		// destructor ALWAYS public
 protected:
+#ifdef HAVE_FIREWALL_IPFW
 	uint32_t	_idx;	// index, if already assigned
 	struct ip_fw	_ipfw;	// IPFW-specific data
 #endif

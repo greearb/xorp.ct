@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.6 2004/09/16 11:42:28 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.7 2004/09/17 07:52:03 pavlin Exp $
 
 #include "fea/fea_module.h"
 
@@ -261,10 +261,10 @@ IpfwFwProvider::get_num_system_rules4() const
 //
 // Private helper method: retrieve static rule count from kernel.
 //
+#ifdef HAVE_FIREWALL_IPFW
 int
 IpfwFwProvider::get_ipfw_static_rule_count()
 {
-#ifdef HAVE_FIREWALL_IPFW
 	uint32_t	ipfw_rulecount = 0;
 	uint32_t	ipfw_rulecount_size = sizeof(ipfw_rulecount);
 
@@ -273,10 +273,8 @@ IpfwFwProvider::get_ipfw_static_rule_count()
 
 	// Return -1 on error, otherwise, return the rule count.
 	return (ret != -1 ? ipfw_rulecount : ret);
-#else
-	return (0);
-#endif
 }
+#endif
 
 #ifdef HAVE_FIREWALL_IPFW
 //
