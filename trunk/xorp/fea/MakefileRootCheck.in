@@ -124,7 +124,7 @@ distclean-libtool:
 	-rm -f libtool
 $(srcdir)/MakefileRootCheck.in: @MAINTAINER_MODE_TRUE@ MakefileRootCheck.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  fea/MakefileRootCheck
+	  $(AUTOMAKE) --foreign  fea/MakefileRootCheck
 MakefileRootCheck: @MAINTAINER_MODE_TRUE@ $(srcdir)/MakefileRootCheck.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
