@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.5 2003/06/06 09:13:32 pavlin Exp $
+# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.6 2003/06/06 19:09:21 hodson Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -137,6 +137,7 @@ the login shell is csh or tcsh):
    WHEN: Release time
    COMMANDS: On each supported platform:
 	cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
+	cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co data
 	cd xorp
 	script
 	./configure
