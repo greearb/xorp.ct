@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.11 2003/06/17 06:44:16 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.12 2003/06/20 18:55:56 hodson Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -58,7 +58,7 @@ private:
     };
 
     deque <Queued> _xrl_queue;
-    static const size_t FLYING_LIMIT = 100;// XRL's allowed in flight
+    static const size_t FLYING_LIMIT = 1;// XRL's allowed in flight
 					   // at one time.
     size_t _flying; //XRLs currently in flight
     bool _previously_succeeded; //true if we've previously been
