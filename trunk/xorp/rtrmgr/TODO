@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.5 2003/08/01 22:49:52 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.6 2003/09/12 00:53:21 hodson Exp $
 #
 
 Urgent
@@ -11,7 +11,7 @@ Configure Mode
  - Use node locking to prevent two users editing the same node.
  - Templates need %delete commands adding.
  - Can't delete leaf nodes.
-    - Can delete some leaf nodes, but the xorpsh thinks there are still 
+    - Can delete some leaf nodes, but the xorpsh thinks there are still
       uncommitted changes.
  - Implement $(@.DEFAULT) varname.
  - In xorpsh, variable expansion can fail (for example with FEA
@@ -41,6 +41,8 @@ General
  - user database needs proper implementation of capabilities
  - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
    and list all *.cc files there in alphabetical order
+ - When the rtrmgr is running in no-exec mode do not instantiate a
+   finder and XrlRouter.
 
 Configure Mode
 
