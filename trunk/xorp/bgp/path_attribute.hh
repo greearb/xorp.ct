@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.15 2003/08/06 17:24:13 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.16 2003/08/06 17:52:55 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -68,6 +68,8 @@ enum PathAttType {
     ATOMIC_AGGREGATE = 6,
     AGGREGATOR = 7,
     COMMUNITY = 8,
+    MP_REACH_NLRI = 14,
+    MP_UNREACH_NLRI = 15,
 };
 
 class PathAttribute {
