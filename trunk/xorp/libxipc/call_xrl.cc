@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.6 2003/02/26 19:07:56 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.7 2003/03/04 23:41:22 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -66,27 +66,34 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
     try {
 	Xrl x(request);
 
-	// Wait for the finder
-	int i;
-	bool done_flag = false;
-	bool resolve_failed = true;
-	i = 0;
-	while (done_flag == false && router.connected() == true) {
-	    if (resolve_failed) {
-		if (i++ > retry_count)
-		    break;
-		resolve_failed = false;
-		router.send(x,
-			    callback(&response_handler,
-				     &done_flag,
-				     &resolve_failed,
-				     &x));
-		// Retry the request sleep for 1 second between requests.
-		if (1 != i)
-		    sleep(1);
+	fprintf(stderr, "%s\n", x.str().c_str());
+	
+	int tries;
+	bool done, resolve_failed;
+
+	tries = 0;
+	done = false;
+	resolve_failed = true;
+	
+	while (done == false && router.connected() == true &&
+	       tries <= retry_count) {
+
+	    resolve_failed = false;
+	    router.send(x, callback(&response_handler,
+				    &done,
+				    &resolve_failed,
+				    &x));
+
+	    bool to = false;
+	    XorpTimer timeout = e.set_flag_after_ms(1000, &to);
+	    while (to == false && done == false) {
+		e.run();
 	    }
-	    e.run();
 	}
+	
+	fprintf(stderr, "%s done %d resolve failed %d\n",
+		x.str().c_str(), done, resolve_failed);
+	
 	if (router.connected() == false) {
 	    XLOG_FATAL("Lost connection to finder\n");
 	}
@@ -112,7 +119,7 @@ preprocess_file(XrlParserFileInput& xfp)
     }
 }
 
-static void
+static int
 input_file(EventLoop& event_loop,
 	   XrlRouter& router,
 	   XrlParserFileInput& xfp)
@@ -124,15 +131,17 @@ input_file(EventLoop& event_loop,
 	/* if line length is zero or line looks like a preprocessor directive
 	 * continue. */
 	if (l.length() == 0 || l[0] == '#') continue;
-	if (call_xrl(event_loop, router, l.c_str()) < 0) {
+	int err = call_xrl(event_loop, router, l.c_str());
+	if (err) {
 	    cerr << xfp.stack_trace() << endl;
 	    cerr << "Xrl failed: " << l;
-	    return;
+	    return err;
 	}
     }
+    return 0;
 }
 
-static void
+static int
 input_files(EventLoop& e,
 	    XrlRouter& router,
 	    int argc,  char* const argv[], bool pponly)
@@ -144,7 +153,9 @@ input_files(EventLoop& e,
 		if (pponly) {
 		    preprocess_file(xfp);
 		} else {
-		    input_file(e, router, xfp);
+		    int err = input_file(e, router, xfp);
+		    if (err)
+			return err;
 		}
 		usleep(250000);
 	    } while (stdin_forever);
@@ -159,18 +170,21 @@ input_files(EventLoop& e,
 	argc--;
 	argv++;
     } while (argc > 0);
+    return 0;
 }
 
-static void
+static int
 input_cmds(EventLoop& e, XrlRouter& router,
 	   int argc, char* const argv[])
 {
     for (int i = 0; i < argc; i++) {
-	if (call_xrl(e, router, argv[i]) < 0) {
+	int err = call_xrl(e, router, argv[i]);
+	if (err) {
 	    XLOG_ERROR("Bad XRL syntax: %s\nStopping.", argv[i]);
-	    return;
+	    return err;
 	}
     }
+    return 0;
 }
 
 int
@@ -215,6 +229,7 @@ main(int argc, char* const argv[])
 
     EventLoop	 e;
     XrlStdRouter router(e, ROUTER_NAME);
+
     bool	 timeout = false;
     XorpTimer	 to = e.set_flag_after_ms(1000, &timeout);
 
@@ -229,9 +244,13 @@ main(int argc, char* const argv[])
     
     try {
 	if (fileinput) {
-	    input_files(e, router, argc, argv, pponly);
+	    if (input_files(e, router, argc, argv, pponly)) {
+		return -1;
+	    }
 	} else if (argc != 0) {
-	    input_cmds(e, router, argc, argv);
+	    if (input_cmds(e, router, argc, argv)) {
+		return -1;
+	    }
 	} else {
 	    usage();
 	}
