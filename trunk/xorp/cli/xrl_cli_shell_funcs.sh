@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.4 2003/03/25 01:21:45 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.5 2003/06/03 18:52:18 pavlin Exp $
 #
 
 #
@@ -10,8 +10,22 @@
 
 . ../utils/xrl_shell_lib.sh
 
+#
 # Conditionally set the target name
-CLI_TARGET=${CLI_TARGET:="CLI"}
+#
+IP_VERSION=${IP_VERSION:?"IP_VERSION undefined. Must be defined to either IPV4 or IPV6"}
+case "${IP_VERSION}" in
+	IPV4)
+		CLI_TARGET=${CLI_TARGET:="CLI"}
+		;;
+	IPV6)
+		CLI_TARGET=${CLI_TARGET:="CLI"}
+		;;
+	*)
+		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+		exit 1
+esac
+
 
 cli_enable_cli()
 {
