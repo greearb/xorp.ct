@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.32 2003/11/19 00:48:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.33 2003/12/19 01:08:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -364,8 +364,7 @@ XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
 		      XrlStdRouter *xrl_router, BGPMain *bgp)
     : _rib_ipc_handler(rib_ipc_handler),
       _xrl_router(xrl_router), _bgp(bgp),
-      _flying(0), _previously_succeeded(false), _synchronous_mode(false),
-      _errors(0), _interface_failed(false)
+      _flying(0)
 {
 }
 
@@ -374,9 +373,6 @@ void
 XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 			     const IPNet<A>& net, const A& nexthop)
 {
-    if (_interface_failed)
-	return;
-
     Queued q;
 
     q.add = true;
@@ -397,9 +393,6 @@ void
 XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
 				const IPNet<A>& net)
 {
-    if (_interface_failed)
-	return;
-
     Queued q;
 
     q.add = false;
@@ -428,7 +421,7 @@ XrlQueue<A>::sendit()
     for(;;) {
 	debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
 
-	if(_flying >= FLYING_LIMIT || (_flying >= 1 && _synchronous_mode))
+	if(_flying >= FLYING_LIMIT)
 	    return;
 
 	if(_xrl_queue.empty()) {
@@ -561,10 +554,6 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     switch (error.error_code()) {
     case OKAY:
 	{
-	_errors = 0;
-	_synchronous_mode = false;
-	_previously_succeeded = true;
-
 	Queued q = _xrl_queue.front();
 	if (q.id == sequence) {
 	    _xrl_queue.pop_front();
@@ -589,78 +578,25 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 	// We should really be using a reliable transport where
 	// this error cannot happen. But it has so lets retry if we can.
 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-	_errors++;
-	_synchronous_mode = true;
-	delayed_send(1000);
 	break;
 
     case RESOLVE_FAILED:
-	if (!_previously_succeeded) {
-	    //give the other end time to get started.  we shouldn't
-	    //really need to do this if we're started from rtrmgr, but
-	    //it doesn't do any harm, and makes us more robust.
-	    XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-	    _errors++;
-	    _synchronous_mode = true;
-	    delayed_send(1000);
-	}
-	/* FALLTHROUGH */
     case SEND_FAILED:
     case SEND_FAILED_TRANSIENT:
     case NO_SUCH_METHOD:
-	if (_previously_succeeded) {
-	    XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
-	    XLOG_ERROR("Interface is now permanently disabled\n");
-	    //This is fatal for this interface.  Cause the interface to
-	    //fail permanently, and await notification from the finder
-	    //that the RIB has really gone down.
-	    _interface_failed = true;
-	    _rib_ipc_handler
-		->fatal_error("Fatal error talking to RIB: " + string(comment) 
-			  + " " + error.str());
-	}
+	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
 	break;
+
     case NO_FINDER:
 	// XXX - Temporarily code dump if this condition occurs.
 	XLOG_FATAL("NO FINDER");
 	_bgp->finder_death(__FILE__, __LINE__);
 	break;
+
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
 	XLOG_FATAL("callback: %s %s",  comment, error.str().c_str());
 	break;
     }
-
-    if (_errors >= MAX_ERR_RETRIES) {
-	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
-	XLOG_ERROR("Interface is now permanently disabled\n");
-	//This is fatal for this interface.  Cause the interface to
-	//fail permanently, and await notification from the finder
-	//that the RIB has really gone down.
-	_interface_failed = true;
-	_rib_ipc_handler
-	    ->fatal_error("Too many retrys attempting to talk to RIB");
-
-	//Clean up the queue - we can no longer handle these requests.
-	while (!_xrl_queue.empty()) {
-	    _xrl_queue.pop_front();
-	}
-    }
 }
-
-
-template<class A>
-void
-XrlQueue<A>::delayed_send(uint32_t delay_ms) 
-{
-    //don't re-schedule if the timer is already running
-    if (_delayed_send_timer.scheduled())
-	return;
-
-    _delayed_send_timer = eventloop().
-	new_oneoff_after_ms(delay_ms, ::callback(this, 
-						 &XrlQueue<A>::sendit));
-}
-
-

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.17 2003/11/04 02:27:19 mjh Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.18 2003/11/19 01:05:34 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -63,17 +63,9 @@ private:
     static const size_t FLYING_LIMIT = 1;// XRL's allowed in flight
 					   // at one time.
     size_t _flying; //XRLs currently in flight
-    bool _previously_succeeded; //true if we've previously been
-                                //successful in communicating with the RIB.
-    bool _synchronous_mode; //true if we've seen an error and dropped
-                            //back to synchronous operation to give 
-                            //everything else time to recover.
-    uint32_t _errors; //no. of consecutive non-fatal errors where we retried.
-    bool _interface_failed; //we've seen a fatal error
-    XorpTimer _delayed_send_timer; //used to resend after a certain delay.
 
     /**
-     * Start the transimission of XRLs to tbe RIB.
+     * Start the transmission of XRLs to tbe RIB.
      */
     void sendit();
 
@@ -86,8 +78,6 @@ private:
      * @return True if the add/delete was queued.
      */
     bool sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp);
-
-    void delayed_send(uint32_t delay_ms);
 
     inline EventLoop& eventloop() { return _rib_ipc_handler->eventloop(); }
 
