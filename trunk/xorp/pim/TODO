@@ -1,6 +1,11 @@
 #
-# $XORP: xorp/pim/TODO,v 1.72 2004/04/01 02:58:09 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.73 2004/04/10 07:45:58 pavlin Exp $
 #
+
+* IMPL:
+  Get rid of the temporary creation of (S,G,rpt) PimMfc entry
+  just for the sake of computing PruneDesired(S,G,rpt)
+  inside PimMre::recompute_is_prune_desired_sg_rpt_sg()
 
 * PIM SPEC: Replace (*,*) with (*,*,RP) inside section 4.7.2
 
