@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.11 2004/06/15 00:21:01 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.12 2004/06/15 00:31:08 atanu Exp $ */
 
 
 interfaces {
@@ -119,14 +119,14 @@ protocols {
 
 	peer 10.30.30.30 {
 	    local-ip: 10.10.10.10
+	    as: 65000
+	    next-hop: 10.10.10.20
 /*
 	    local-port: 179
 	    peer-port: 179
 */
-	    as: 65000
-	    holdtime: 90
-	    next-hop: 10.10.10.20
-	    /* enabled: true */
+	    /*holdtime: 120*/
+	    /*enabled: true*/
 
 	    /* Optionally enable other AFI/SAFI combinations */
 	    /*enable-ipv4-multicast*/
