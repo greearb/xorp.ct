@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.6 2003/04/18 04:52:08 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.7 2003/04/26 05:58:38 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -41,7 +41,7 @@ struct in_addr;
 class IPv4 {
 public:
     /**
-     * Default constrictor
+     * Default constructor
      * 
      * The address value is initialized to INADDR_ANY.
      */
