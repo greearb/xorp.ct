@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.19 2004/10/21 00:27:32 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.20 2004/10/21 00:44:22 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -58,6 +58,15 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool push_config(const IfTree& config);
+
+    /**
+     * Determine if the interface's underlying provider implements discard
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if discard semantics are emulated.
+     */
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const = 0;
 
 protected:
     /**
@@ -265,6 +274,15 @@ public:
      */
     virtual bool push_config(const IfTree& config);
 
+    /**
+     * Determine if the interface's underlying provider implements discard
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if discard semantics are emulated.
+     */
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
+
 private:
     virtual int config_begin(string& errmsg);
     virtual int config_end(string& errmsg);
@@ -335,7 +353,16 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
+
+    /**
+     * Determine if the interface's underlying provider implements discard
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if discard semantics are emulated.
+     */
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
+
 private:
     virtual int config_begin(string& errmsg);
     virtual int config_end(string& errmsg);
@@ -430,6 +457,15 @@ public:
      */
     virtual int stop();
 
+    /**
+     * Determine if the interface's underlying provider implements discard
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if discard semantics are emulated.
+     */
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
+
 private:
     virtual int config_begin(string& errmsg);
     virtual int config_end(string& errmsg);
@@ -503,6 +539,15 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
+
+    /**
+     * Determine if the interface's underlying provider implements discard
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if discard semantics are emulated.
+     */
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
 
 private:
     virtual int config_begin(string& errmsg);

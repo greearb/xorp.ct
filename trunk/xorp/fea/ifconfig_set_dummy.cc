@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.13 2004/09/15 18:47:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.14 2004/10/21 00:27:32 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -94,6 +94,13 @@ IfConfigSetDummy::config_end(string& errmsg)
     UNUSED(errmsg);
 
     return (XORP_OK);
+}
+
+bool
+IfConfigSetDummy::is_discard_emulated(const IfTreeInterface& i) const
+{
+    return (false);	// TODO: return appropriate value.
+    UNUSED(i);
 }
 
 int

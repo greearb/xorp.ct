@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.29 2004/09/15 18:47:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.30 2004/10/21 00:28:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -138,6 +138,17 @@ IfConfigSetIoctl::stop()
     _is_running = false;
 
     return (XORP_OK);
+}
+
+bool
+IfConfigSetIoctl::is_discard_emulated(const IfTreeInterface& i) const
+{
+#if defined(HOST_OS_BSDI) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_MACOSX) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+    return (true);
+#else
+    return (false);
+#endif
+    UNUSED(i);
 }
 
 #ifndef HAVE_IOCTL_SIOCGIFCONF

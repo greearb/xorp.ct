@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.4 2004/11/10 00:39:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.5 2004/11/12 00:31:05 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -140,6 +140,13 @@ IfConfigSetClick::config_end(string& errmsg)
     ifc().nexthop_port_mapper().notify_observers();
 
     return (XORP_OK);
+}
+
+bool
+IfConfigSetClick::is_discard_emulated(const IfTreeInterface& i) const
+{
+    return (false);	// TODO: return correct value
+    UNUSED(i);
 }
 
 int
