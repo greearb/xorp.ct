@@ -1,14 +1,36 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.8 2004/06/08 01:00:11 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.9 2004/06/10 02:20:03 atanu Exp $ */
 
 
 interfaces {
-    interface fxp0 {
-	description: "control interface"
+    interface dc0 {
+	description: "data interface"
+	enabled: true
 	/* default-system-config */
-	vif fxp0 {
-	    address 192.150.187.100 {
+	vif dc0 {
+	    enabled: true
+	    address 10.10.10.10 {
 		prefix-length: 24
-		broadcast: 192.150.187.255
+		broadcast: 10.10.10.255
+		enabled: true
+	    }
+/*
+	    address 10:10:10:10:10:10:10:10 {
+		prefix-length: 64
+		enabled: true
+	    }
+*/
+	}
+    }
+    interface tun0 {
+	description: "tunnel interface"
+	enabled: true
+	/* default-system-config */
+	vif tun0 {
+	    enabled: true
+	    address 10.10.10.11 {
+		prefix-length: 32
+		destination: 10.20.20.20
+		enabled: true
 	    }
 	}
     }
@@ -20,11 +42,56 @@ fea {
 }
 
 protocols {
+    static {
+	route4 10.20.0.0/16 {
+	    nexthop: 10.10.10.20
+	    metric: 1
+	}
+	mrib-route4 10.20.0.0/16 {
+	    nexthop: 10.10.10.30
+	    metric: 1
+	}
+/*
+	route6 20:20:20:20::/64 {
+	    nexthop: 10:10:10:10:10:10:10:20
+	    metric: 1
+	}
+	mrib-route6 20:20:20:20::/64 {
+	    nexthop: 10:10:10:10:10:10:10:30
+	    metric: 1
+	}
+*/
+    }
+}
+
+protocols {
     rip {
-	interface fxp0 {
-	    vif fxp0 {
-		address 192.150.187.100 {
+/*
+	import connected {
+	    metric: 1
+	    tag: 0
+	}
+*/
+	interface dc0 {
+	    vif dc0 {
+		address 10.10.10.10 {
 		    enabled: true
+/*
+		    metric: 1
+		    horizon: "split-horizon-poison-reverse"
+		    passive: false
+		    accept-non-rip-requests: true
+		    accept-default-route: false
+		    advertise-default-route: false
+		    route-expiry-secs: 180
+		    route-deletion-secs: 120
+		    triggered-update-min-secs: 1
+		    triggered-update-max-secs: 5
+		    table-announce-min-secs: 25
+		    table-announce-max-secs: 35
+		    table-request-secs: 1
+		    interpacket-delay-msecs: 50
+*/
 		}
 	    }
 	}
@@ -34,10 +101,10 @@ protocols {
 /*
 protocols {
     ospf {
-	router-id: 192.150.187.20
+	router-id: 10.10.10.10
 	area 0.0.0.0 {
 	    stub: false
-	    interface xl0 {
+	    interface dc0 {
 		hello-interval: 5
 	    }
 	}
@@ -47,14 +114,18 @@ protocols {
 
 protocols {
     bgp {
-	bgp-id: 192.150.187.100
+	bgp-id: 10.10.10.10
 	local-as: 65002
 
-	peer xorp-c4000 {
-	    local-ip: 192.150.187.100
+	peer 10.30.30.30 {
+	    local-ip: 10.10.10.10
+/*
+	    local-port: 179
+	    peer-port: 179
+*/
 	    as: 65000
 	    holdtime: 90
-	    next-hop: 192.150.187.100
+	    next-hop: 10.10.10.20
 	    enabled: true
 
 	    enable-ipv4-multicast
@@ -63,19 +134,226 @@ protocols {
             enable-ipv6-multicast
 	}
 
-	network4 192.150.187.100/25 {
-	    next-hop: 192.150.187.100
+	network4 10.10.10.0/24 {
+	    next-hop: 10.10.10.10
 	    unicast: true
 	    multicast: true
 	}
 
-	network6 20:20:20:20::/64 {
-	    next-hop: 30:30:30:30:30:30:30:30
+	network6 10:10:10:10::/64 {
+	    next-hop: 10:10:10:10:10:10:10:10
 	    unicast: true
 	    multicast: true
 	}
     }
 }
+
+plumbing {
+    mfea4 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+
+/*
+    mfea6 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+*/
+}
+
+protocols {
+    igmp {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+/*
+    mld {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+	    }
+	}
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+*/
+}
+
+protocols {
+    pimsm4 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+		dr-priority: 1
+		/* alternative-subnet 10.40.0.0/16 */
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		enabled: true
+	    }
+	}
+
+	static-rps {
+	    rp 10.60.0.1 {
+		group-prefix 224.0.0.0/4 {
+		    rp-priority: 192
+		    /* hash-mask-len: 30 */
+		}
+	    }
+	}
+
+	bootstrap {
+	    enabled: true
+	    cand-bsr {
+		scope-zone 224.0.0.0/4 {
+		    is-scope-zone: false
+		    cand-bsr-by-vif-name: "dc0"
+		    bsr-priority: 1
+		    /* hash-mask-len: 30 */
+		}
+	    }
+
+	    cand-rp {
+		group-prefix 224.0.0.0/4 {
+		    is-scope-zone: false
+		    cand-rp-by-vif-name: "dc0"
+		    rp-priority: 192
+		    rp-holdtime: 150
+		}
+	    }
+	}
+
+	switch-to-spt-threshold {
+	    enabled: true
+	    interval-sec: 100
+	    bytes: 102400
+	}
+
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+
+/*
+    pimsm6 {
+	enabled: true
+	interface dc0 {
+	    vif dc0 {
+		enabled: true
+		dr-priority: 1
+		alternative-subnet 40:40:40:40::/64
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		enabled: true
+	    }
+	}
+
+	static-rps {
+	    rp 50:50:50:50:50:50:50:50 {
+		group-prefix ff00::/8 {
+		    rp-priority: 192
+		    hash-mask-len: 126
+		}
+	    }
+	}
+
+	bootstrap {
+	    enabled: true
+	    cand-bsr {
+		scope-zone ff00::/8 {
+		    is-scope-zone: false
+		    cand-bsr-by-vif-name: "dc0"
+		    bsr-priority: 1
+		    hash-mask-len: 30
+		}
+	    }
+
+	    cand-rp {
+		group-prefix ff00::/8 {
+		    is-scope-zone: false
+		    cand-rp-by-vif-name: "dc0"
+		    rp-priority: 192
+		    rp-holdtime: 150
+		}
+	    }
+	}
+
+	switch-to-spt-threshold {
+	    enabled: true
+	    interval-sec: 100
+	    bytes: 102400
+	}
+
+	traceoptions {
+	    flag all {
+		enabled: true
+	    }
+	}
+    }
+*/
+}
+
+/*
+ * Note: fib2mrib is needed for multicast only if the unicast protocols
+ * don't populate the MRIB with multicast-specific routes.
+ */
+protocols {
+    fib2mrib {
+	enabled: true
+    }
+}
+
+
 
 /*
  * See xorp/mibs/snmpdscripts/README on how to configure Net-SNMP in your host
