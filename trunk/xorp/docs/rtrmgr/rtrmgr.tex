@@ -10,13 +10,13 @@
 
 \title{XORP Router Manager Process (rtrmgr) \\
 \vspace{1ex}
-Version 0.3}
+Version 0.4}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 9, 2003}
+\date{August 28, 2003}
 
 %\twocolumn
 \begin{document}
@@ -169,7 +169,7 @@ following annotated version of the template tree:
 protocols ospf {
   %modinfo: provides ospf;
   %modinfo: depends rib;
-  %modinfo: path "../ospfd/xorp/ospfd";
+  %modinfo: path "ospfd/xorp/ospfd";
   router-id {
     %set: xrl "ospf/ospf/0.1/set_router_id?id:u32=$(@)";
     %get: xrl "ospf/ospf/0.1/get_router_id->id:u32";
@@ -186,7 +186,7 @@ specify the ``\%modinfo'' command, which provides information about
 the module providing this functionality.  In this case they specify
 that this functionality is provided by the module called {\tt ospf},
 that this module depends on the module called {\tt rib}, and that the
-software in {\tt ../ospfd/xorp/ospfd} is the software to run to
+software in {\tt ospfd/xorp/ospfd} is the software to run to
 provide this module.
 
 The ``{\tt protocols ospf router-id}'' node carries annotations to set
@@ -273,7 +273,12 @@ parameter, giving a list of the other modules that must
 be running and configured before this module may be started.
 \item {{\tt \%modinfo: path }{\it ProgramPath}}  \\The {\tt path} subcommand takes one additional parameter giving the pathname of the software to be run
 to provide this functionality.  The pathname may be absolute or
-relative.
+relative to the root of the XORP tree. The ordering in computing the root of
+the tree is: (a) the shell environment XORP\_ROOT (if exists); (b) the parent
+directory the rtrmgr is run from (only if it contains the
+etc/templates and the xrl/targets directories); (c) the XORP\_ROOT value as
+defined in config.h (currently this is the installation directory, and
+defaults to ``/usr/local/xorp'').
 \item {{\tt \%modinfo: startcommit }{\it XRL}}  \\The {\tt startcommit} subcommand takes one additional
 parameter, and gives the XRL to call before performing
 any change to the configuration of the module.
@@ -640,8 +645,15 @@ is currently supported.}.  The entire command line typed by the user
 is passed into the command.  Thus the xorpsh might invoke the {\tt
 show\_interface} command using the Unix command line:
 \begin{verbatim}
-    show_interface show interface xl0 brief
+    path/to/show_interface show interface xl0 brief
 \end{verbatim}
+The pathname to a command must be
+relative to the root of the XORP tree. The ordering in computing the root of
+the tree is: (a) the shell environment XORP\_ROOT (if exists); (b) the parent
+directory the xorpsh is run from (only if it contains the
+etc/templates and the xrl/targets directories); (c) the XORP\_ROOT value as
+defined in config.h (currently this is the installation directory, and
+defaults to ``/usr/local/xorp'').
 
 The command {\tt \%module} indicates that this command should only be
 available through the CLI when the router configuration has required
