@@ -147,7 +147,7 @@ SnmpEventLoop::_export_timers()
     alarm_id = snmp_alarm_register_hr(snmp_tv, 0, run_timer_callbacks, NULL);
     if (!alarm_id) snmp_log(LOG_WARNING, "unable to import xorp timout");
     else { 
-	std::map<TimeVal, unsigned int>::value_type al(abs_tv, alarm_id);
+	SnmpEventLoop::AlarmMap::value_type al(abs_tv, alarm_id);
 	_pending_alarms.insert(al);
     }
 }
