@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/debug.h,v 1.2 2003/03/10 23:20:31 hodson Exp $
+ * $XORP: xorp/libxorp/debug.h,v 1.3 2004/03/26 06:21:53 hodson Exp $
  */
 
 #ifndef __LIBXORP_DEBUG_H__
@@ -145,10 +145,12 @@ inline void
 check_args(const char*, ...) {}
 
 #define debug_msg(args...) 						      \
-if (0) { 								      \
+do {                                                                          \
+  if (0) { 								      \
     check_args(args);							      \
     swallow_args(args);							      \
-}
+  }                                                                           \
+} while (0)
 
 #    else
 #	ifdef CPP_SUPPORTS_GNU_VA_ARGS
