@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.21 2004/04/01 19:54:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.22 2004/04/15 16:13:28 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,7 +71,7 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     debug_msg("DT:add_route %s\n", rtmsg.route()->str().c_str());
 
-    //if the nexthop isn't resolvable, don't event consider the route
+    //if the nexthop isn't resolvable, don't even consider the route
     debug_msg("testing resolvability\n");
     if (!resolvable(rtmsg.route()->nexthop())) {
 	cp(5);
