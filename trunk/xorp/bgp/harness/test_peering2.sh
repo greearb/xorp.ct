@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.21 2003/07/02 04:34:45 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.22 2003/07/03 23:52:23 atanu Exp $
 #
 
 #
@@ -116,7 +116,7 @@ bgp_not_established()
     done
 }
 
-bgp_peer_updates_received()
+bgp_peer_unchanged()
 {
     while :
     do
@@ -187,7 +187,7 @@ test2()
 
     # Bring up peer1 and wait for it to receive all the updates
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
-    bgp_peer_updates_received peer1
+    bgp_peer_unchanged peer1
 
     # Bring up another peering to test the dump code.
     for i in 1 2
@@ -207,7 +207,7 @@ test2()
 	coord peer1 assert established
 
 	# Wait for the BGP process to send all the updates to peer1
-	bgp_peer_updates_received peer1
+	bgp_peer_unchanged peer1
     done
 
     # The reset above will have removed state about peer2 from the coordinator
@@ -221,7 +221,7 @@ test2()
     coord peer2 assert established
 
     # Tearing out peer2 will cause all the routes to be withdrawn, wait
-    bgp_peer_updates_received peer1
+    bgp_peer_unchanged peer1
 
     # Make sure that the connections are still established.
     coord peer1 assert established
@@ -257,7 +257,7 @@ test3()
     NOBLOCK=true coord peer2 disconnect
 
     # Wait for the BGP to stabilise
-    bgp_peer_updates_received peer1
+    bgp_peer_unchanged peer1
 
     # Make sure that the peer1 connection is still established
     coord peer1 assert established
