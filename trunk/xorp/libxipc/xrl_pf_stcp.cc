@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.28 2003/09/27 15:47:01 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.29 2003/10/02 18:55:05 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -90,6 +90,8 @@ public:
     // Death related
     void postpone_death();
     void die(const char* reason, bool verbose = true);
+
+    bool response_pending() const;
 
 private:
     XrlPFSTCPListener& _parent;
@@ -334,6 +336,14 @@ STCPRequestHandler::die(const char *reason, bool verbose)
     delete this;
 }
 
+bool
+STCPRequestHandler::response_pending() const
+{
+    return ((_request_payload_bytes > 0)
+	    || (_responses.empty() == false)
+	    || _writer.running());
+}
+
 
 // ----------------------------------------------------------------------------
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
@@ -414,7 +424,15 @@ XrlPFSTCPListener::remove_request_handler(const STCPRequestHandler* rh)
 bool
 XrlPFSTCPListener::response_pending() const
 {
-    return _request_handlers.empty() == false;
+    list<STCPRequestHandler*>::const_iterator ci;
+
+    for (ci = _request_handlers.begin(); ci != _request_handlers.end(); ++ci) {
+	STCPRequestHandler* l = *ci;
+	if (l->response_pending())
+	    return true;
+    }
+
+    return false;
 }
 
 
