@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.6 2003/01/24 19:50:10 rizzo Exp $
+// $XORP: xorp/bgp/main.hh,v 1.7 2003/01/26 01:22:36 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -102,6 +102,16 @@ public:
      * @return true on success
      */
     bool disable_peer(const Iptuple& iptuple);
+
+    /*
+     * Set next hop rewrite filter.
+     *
+     * @param iptuple iptuple.
+     * @param next_hop next hop value zero to clear filter.
+     *
+     * @return true on success
+     */
+    bool next_hop_rewrite_filter(const Iptuple& iptuple, const IPv4& next_hop);
 
     bool get_peer_list_start(uint32_t& token);
 

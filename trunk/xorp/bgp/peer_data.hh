@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.27 2002/12/09 18:28:45 hodson Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -104,6 +104,14 @@ public:
 	return _configured_hold_time;
     }
 
+    void set_next_hop_rewrite(const IPv4& next_hop) { 
+	_next_hop_rewrite = next_hop;
+    }
+
+    const IPv4 get_next_hop_rewrite() const { 
+	return _next_hop_rewrite;
+    }
+
 protected:
 private:
     void add_parameter(const BGPParameter *,  list<const BGPParameter*>& p_list);
@@ -146,6 +154,12 @@ private:
     bool _unsupported_parameters;
     uint8_t _num_parameters;
     uint8_t _param_length;
+
+    /* XXX
+    ** Eventually we will have totally programmable filters. As a
+    ** temporary hack store the re-write value here.
+    */
+    IPv4 _next_hop_rewrite;
 };
 
 #endif // __BGP_PEER_DATA_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.5 2003/01/19 00:59:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.6 2003/01/26 01:22:37 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -213,6 +213,28 @@ XrlBgpTarget::bgp_0_2_disable_peer(
     Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
     if(!_bgp.disable_peer(iptuple))
+	return XrlCmdError::COMMAND_FAILED();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
+	// Input values, 
+	const string&	local_ip, 
+	const uint32_t&	local_port, 
+	const string&	peer_ip, 
+	const uint32_t&	peer_port,
+	const IPv4& 	next_hop)
+{
+    debug_msg("local ip %s local port %d peer ip %s peer port %d "
+	      "next hop %s\n",
+	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	      next_hop.str().c_str());
+
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
+    if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
 	return XrlCmdError::COMMAND_FAILED();
 
     return XrlCmdError::OKAY();

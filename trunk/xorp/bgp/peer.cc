@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.12 2003/01/24 23:52:29 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.13 2003/01/26 04:06:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -806,8 +806,24 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 	restart_hold_timer();
 	// process the packet...
 	debug_msg("Process the packet!!!\n");
-	if (_handler != NULL)
-	    _handler->process_update_packet(p);
+	XLOG_ASSERT(_handler);
+	// XXX - Temporary hack until we get programmable filters.
+	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
+	if (!next_hop.is_zero()) {
+// 	    printf("rewrite\n");
+	    list<PathAttribute*> l = p->pathattribute_list();
+	    list<PathAttribute*>::iterator i;
+	    for (i = l.begin(); i != l.end(); i++) {
+		if (NEXT_HOP == (*i)->type()) {
+		    delete (*i);
+		    (*i) = new NextHopAttribute<IPv4>(next_hop);
+		    break;
+		}
+	    }
+// 	    printf("New packet %s\n", p->str().c_str());
+	}
+	_handler->process_update_packet(p);
+
 	break;
     }
 

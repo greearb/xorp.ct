@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.4 2003/01/19 00:59:26 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.5 2003/01/26 01:25:28 mjh Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -114,6 +114,25 @@ interface bgp/0.2 {
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32
+
+
+	/**
+	 * Set next hop rewrite filter.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param next hop IP value. A value of zero clears filter.
+	 *
+	 */
+	 next_hop_rewrite_filter \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& next_hop:ipv4
 
 	/**
          * Set the peer state enabled or disabled.

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.17 2002/12/09 10:59:36 pavlin Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -47,6 +47,12 @@ disable_peer()
     echo -n "disable_peer" $*
 #    $CALLXRL "finder://bgp/bgp/0.1/disable_peer?peer:txt=$1&as:i32=$2"
     $CALLXRL "finder://bgp/bgp/0.2/disable_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4"
+}
+
+next_hop_rewrite_filter()
+{
+    echo -n "next_hop_rewrite_filter" $*
+    $CALLXRL "finder://bgp/bgp/0.2/next_hop_rewrite_filter?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&next_hop:ipv4=$5"
 }
 
 register_rib()
