@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.18 2004/03/03 18:34:21 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.19 2004/03/04 00:11:15 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -115,7 +115,7 @@ it for each router:
      telnet localhost 12000
 
  - If you want to enable access from other subnets, add the corresponding
-   subnet to the following variable in ``configure_mld6igmp'':
+   subnet to the following variable in ``configure_pim'':
 
 	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
 
