@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_rtsock.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_rtsock.cc,v 1.2 2003/01/17 01:29:57 pavlin Exp $"
 
 #include "fea_module.h"
 #include "config.h"
@@ -34,7 +34,7 @@
 #include "fti.hh"
 #include "fti_rtsock.hh"
 
-static const int HOST_NETMASK = 0xffffffff;
+static const uint32_t HOST_NETMASK = 0xffffffffU;
 
 /* ------------------------------------------------------------------------- */
 /* Helper functions */
@@ -579,7 +579,7 @@ RoutingSocketFti::parse_route(struct rt_msghdr* hdr,
 	*/
 	if (RTF_HOST == (RTF_HOST & hdr->rtm_flags)) {
 	    debug_msg("RTF_HOST\n");
-	    netmask = HOST_NETMASK;
+	    netmask = IPv4(HOST_NETMASK);
 	}
 
 	/*
@@ -720,7 +720,7 @@ RoutingSocketFti::sockaddr(struct sockaddr *sock, IPv4& ipv4)
 {
     switch (sock->sa_family) {
     case AF_INET:
-	ipv4 = ((struct sockaddr_in *)sock)->sin_addr.s_addr;
+	ipv4 = IPv4(*sock);
 	{
 	    struct in_addr in;
 	    in.s_addr = ipv4.addr();

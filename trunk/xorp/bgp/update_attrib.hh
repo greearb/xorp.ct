@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/update_attrib.hh,v 1.3 2003/02/06 04:19:22 rizzo Exp $
+// $XORP: xorp/bgp/update_attrib.hh,v 1.4 2003/02/07 05:53:06 rizzo Exp $
 
 #ifndef __BGP_UPDATE_ATTRIB_HH__
 #define __BGP_UPDATE_ATTRIB_HH__
@@ -39,7 +39,7 @@ public:
     /**
      * construct from an address d and masklength s
      */
-    BGPUpdateAttrib(uint32_t d, uint8_t s) : IPv4Net(d, s)	{}
+    BGPUpdateAttrib(const IPv4& d, uint8_t s) : IPv4Net(d, s) {}
 
     BGPUpdateAttrib(const IPv4Net& p) : IPv4Net(p)		{}
 
