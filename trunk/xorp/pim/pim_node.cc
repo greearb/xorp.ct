@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.16 2003/07/05 19:44:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.17 2003/07/07 18:45:11 pavlin Exp $"
 
 
 //
@@ -1151,8 +1151,7 @@ PimNode::delete_membership(uint16_t vif_index, const IPvX& source,
  * PimNode::is_directly_connected:
  * @ipaddr_test: The address to test.
  * 
- * Note that the underlying interface must be UP to be considered
- * as directly connected.
+ * Note that the MRIB-based RPF info must point toward the same interface.
  * 
  * Return value: True if @ipaddr_test is directly connected to one of
  * my virtual interfaces, otherwise false.
@@ -1179,8 +1178,7 @@ PimNode::is_directly_connected(const IPvX& ipaddr_test) const
  * @pim_vif: The virtual interface to test against.
  * @ipaddr_test: The address to test.
  * 
- * Note that the underlying interface must be UP to be considered
- * as directly connected.
+ * Note that the MRIB-based RPF info must point toward the same interface.
  * 
  * Return value: True if @ipaddr_test is directly connected to @pim_vif,
  * otherwise false.
@@ -1189,8 +1187,11 @@ bool
 PimNode::is_directly_connected(const PimVif& pim_vif,
 			       const IPvX& ipaddr_test) const
 {
-    // XXX: the underlying interface must be UP
-    if (! pim_vif.is_underlying_vif_up())
+    // XXX: the MRIB-based RPF info must point toward the same interface
+    const Mrib *mrib = _pim_mrib_table.find(ipaddr_test);
+    if (mrib == NULL)
+	return (false);
+    if (mrib->next_hop_vif_index() != pim_vif.vif_index())
 	return (false);
     
     return (pim_vif.is_same_subnet(ipaddr_test)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.19 2003/07/03 07:17:18 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.20 2003/07/05 19:44:18 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -660,8 +660,7 @@ public:
      * Test if an address is directly connected to one of my virtual
      * interfaces.
      * 
-     * Note that the underlying interface must be UP to be considered
-     * as directly connected.
+     * Note that the MRIB-based RPF info must point toward the same interface.
      * 
      * @param ipaddr_test the address to test.
      * @return true if @ref ipaddr_test is directly connected to one of
@@ -673,8 +672,7 @@ public:
      * Test if an address is directly connected to a specified virtual
      * interface.
      * 
-     * Note that the underlying interface must be UP to be considered
-     * as directly connected.
+     * Note that the MRIB-based RPF info must point toward the same interface.
      * 
      * @param pim_vif the virtual interface to test against.
      * @param ipaddr_test the address to test.
