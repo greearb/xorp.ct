@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.4 2003/02/25 18:58:50 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.5 2003/03/04 23:41:23 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -182,11 +182,6 @@ finder_main(int argc, char* const argv[])
 	usage();
 	exit(-1);
     }
-
-    //
-    // Add listening address to list of accepted addresses
-    //
-    add_permitted_host(bind_addr);
 
     //
     // Add preferred ipc address on host
