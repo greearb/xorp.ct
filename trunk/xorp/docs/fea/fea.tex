@@ -8,13 +8,13 @@
 
 \title{XORP Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 5, 2003}
 
 \begin{document}
 \maketitle
@@ -30,7 +30,7 @@ or whether the network interfaces are simple, like a PCI Ethernet
 adapter, or are smart and have processing resources, like an Intel IXP
 cards.
 
-The FEA performs a three distinct roles: \emph{interface management},
+The FEA performs three distinct roles: \emph{interface management},
 \emph{forwarding table management}, and \emph{interface specific
 packet I/O}.  Each of these is briefly described here together with a
 description of the normal interaction with other processes.  The
@@ -66,14 +66,13 @@ FEA Interface Management interaction with other XORP processes. \
 
 \subsection{Forwarding Table Management}
 
-The FEA receives forwarding table configuration information from the
-RIB process and potentially from the RouterManager for static route
-entries.  The RIB arbitrates between the routes proposed by the
+The FEA primarily receives forwarding table configuration information from the
+RIB process.  The RIB arbitrates between the routes proposed by the
 different routing processes and propagates the results into the FEA's
 forwarding table interface.  The FEA accepts requests to insert and
 remove routing entries and propagates the necessary changes into the
-forwarding plane.  The FEA also supports queries on the forwarding
-information it contains at a given time.
+forwarding plane.  The FEA also supports queries on the current
+contents of the forwarding table.
 
 \subsection{Interface Specific Packet I/O}
 
@@ -89,7 +88,7 @@ packets through the FEA is straightforward, the routing process simply
 hands the FEA a packet and indicates which interface it should be sent
 on.  The reception of packets is handled through a register-notify
 interface where the routing process registers which types of packets
-and on which interfaces it is interested in.
+on which interfaces it is interested.
 
 \section{Design and Implementation}
 
@@ -107,7 +106,7 @@ transactions for setting configuration state.  The transactions are a
 collection of grouped operations that are queued until committed or
 aborted.  Transactions provide atomic updates to the forwarding plane,
 which has the virtue of ensuring a consistent state at any particular
-instant of time.  In addition, forwarding plane updates may incurr per
+instant of time.  In addition, forwarding plane updates may incur per
 update costs, and grouping operations may help to reduce
 these. Queries of the configuration state happen on the immediate
 state, and are independent of any transactions that are in progress.
@@ -177,7 +176,7 @@ in a hierarchy:
 Each item in the IfTree hierarchy is derived from {\tt IfTreeItem}.
 {\tt IfTreeItem} is a base class to track the state of a configurable
 item. Items may be in one of four states: {\tt CREATED}, {\tt
-DELETED}, {\tt CHANGED}, {\tt NO\_CHANGE}.  So, for example, if an
+DELETED}, {\tt CHANGED}, {\tt NO\_CHANGE}.  For example, if an
 item is added to the tree it will be in the {\tt CREATED} state.  The
 {IfTreeItem::finalize\_state()} method places the item in the {\tt
 NO\_CHANGE} state and items marked as {\tt DELETED} are actually
@@ -277,7 +276,7 @@ This is an essential function since in a XORP router the forwarding
 plane may reside on a different machine to the routing processes, it
 may be distributed across several machines, or may have custom network
 interfaces that require special programming.  At the time of writing,
-on the sending and receiving of raw IPv4 packets is implemented.
+only the sending and receiving of raw IPv4 packets is implemented.
 Support for UDP and IPv6 will follow in future and should follow a
 similar design pattern to the raw IPv4 packet handling.
 
