@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.3 2004/02/18 00:11:57 pavlin Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.4 2004/03/30 08:27:43 pavlin Exp $
 ##
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_static_routes

@@ -13,7 +13,7 @@
 
 @SET_MAKE@
 
-# -- Real Programs
+# Redefine the bin installation directory
 
 SHELL = @SHELL@
 
@@ -22,8 +22,6 @@ top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-
-bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
 datadir = @datadir@
@@ -92,6 +90,9 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
+bindir = $(prefix)/$(subdir)
+
+# -- Real Programs
 bin_PROGRAMS = xorp_static_routes
 
 # -- Test Programs and Scripts

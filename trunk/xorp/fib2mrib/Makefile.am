@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fib2mrib/Makefile.am,v 1.2 2004/03/18 13:17:21 pavlin Exp $
+## $XORP: xorp/fib2mrib/Makefile.am,v 1.3 2004/04/05 09:41:09 pavlin Exp $
 ##
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_fib2mrib
