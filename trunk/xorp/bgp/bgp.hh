@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.29 2004/08/06 07:22:04 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.30 2004/09/17 13:50:53 abittau Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
+#include "libxorp/profile.hh"
 #include "libxipc/xrl_std_router.hh"
 
 #include "socket.hh"
@@ -414,6 +415,11 @@ public:
      */
     void push_routes();
     
+    /**
+     * @return a pointer to the profiler.
+     */
+    Profile& profile() {return _profile;}
+
 protected:
 private:
     /**
@@ -516,6 +522,7 @@ private:
 	void erase(uint32_t& token) {
 	    _tokens.erase(token);
 	}
+
     private:
 	struct WhichTable {
 	    WhichTable() {}
@@ -542,8 +549,8 @@ private:
     XrlStdRouter *_xrl_router;
     static EventLoop _eventloop;
     ProcessWatch *_process_watch;
-
     PolicyFilters _policy_filters;
+    Profile _profile;
 };
 
 template <typename A>

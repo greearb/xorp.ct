@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.31 2004/09/08 01:15:56 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.32 2004/09/17 13:50:53 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -41,6 +41,7 @@ LDADD           += $(top_builddir)/policy/backend/libpolicybackend.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
@@ -105,6 +106,7 @@ libbgp_a_SOURCES += peer_handler.hh
 libbgp_a_SOURCES += peer_list.hh
 libbgp_a_SOURCES += plumbing.hh
 libbgp_a_SOURCES += process_watch.hh
+libbgp_a_SOURCES += profile_vars.hh
 libbgp_a_SOURCES += rib_ipc_handler.hh
 libbgp_a_SOURCES += route_queue.hh
 libbgp_a_SOURCES += route_table_base.hh
@@ -147,6 +149,7 @@ libbgp_a_SOURCES += peer_handler.cc
 libbgp_a_SOURCES += peer_list.cc
 libbgp_a_SOURCES += plumbing.cc
 libbgp_a_SOURCES += process_watch.cc
+libbgp_a_SOURCES += profile_vars.cc
 libbgp_a_SOURCES += rib_ipc_handler.cc
 libbgp_a_SOURCES += route_queue.cc
 libbgp_a_SOURCES += route_table_base.cc

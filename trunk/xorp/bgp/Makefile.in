@@ -111,7 +111,7 @@ noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_
 noinst_LIBRARIES = libbgp.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
@@ -130,7 +130,7 @@ isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filte
 test_peer_data_SOURCES = test_peer_data.cc
 
 # -- Library Sources
-libbgp_a_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh bgp_varrw.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_policy.hh route_table_policy_im.hh route_table_policy_sm.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc bgp_varrw.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_policy.cc route_table_policy_im.cc route_table_policy_sm.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
+libbgp_a_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh bgp_varrw.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh profile_vars.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_policy.hh route_table_policy_im.hh route_table_policy_sm.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc bgp_varrw.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc profile_vars.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_policy.cc route_table_policy_im.cc route_table_policy_sm.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
@@ -154,15 +154,16 @@ am_libbgp_a_OBJECTS = aspath.$(OBJEXT) attribute_manager.$(OBJEXT) \
 	packet.$(OBJEXT) parameter.$(OBJEXT) path_attribute.$(OBJEXT) \
 	peer.$(OBJEXT) peer_data.$(OBJEXT) peer_handler.$(OBJEXT) \
 	peer_list.$(OBJEXT) plumbing.$(OBJEXT) process_watch.$(OBJEXT) \
-	rib_ipc_handler.$(OBJEXT) route_queue.$(OBJEXT) \
-	route_table_base.$(OBJEXT) route_table_cache.$(OBJEXT) \
-	route_table_decision.$(OBJEXT) route_table_deletion.$(OBJEXT) \
-	route_table_dump.$(OBJEXT) route_table_fanout.$(OBJEXT) \
-	route_table_filter.$(OBJEXT) route_table_nhlookup.$(OBJEXT) \
-	route_table_policy.$(OBJEXT) route_table_policy_im.$(OBJEXT) \
-	route_table_policy_sm.$(OBJEXT) route_table_ribin.$(OBJEXT) \
-	route_table_ribout.$(OBJEXT) route_table_reader.$(OBJEXT) \
-	socket.$(OBJEXT) subnet_route.$(OBJEXT) update_attrib.$(OBJEXT) \
+	profile_vars.$(OBJEXT) rib_ipc_handler.$(OBJEXT) \
+	route_queue.$(OBJEXT) route_table_base.$(OBJEXT) \
+	route_table_cache.$(OBJEXT) route_table_decision.$(OBJEXT) \
+	route_table_deletion.$(OBJEXT) route_table_dump.$(OBJEXT) \
+	route_table_fanout.$(OBJEXT) route_table_filter.$(OBJEXT) \
+	route_table_nhlookup.$(OBJEXT) route_table_policy.$(OBJEXT) \
+	route_table_policy_im.$(OBJEXT) route_table_policy_sm.$(OBJEXT) \
+	route_table_ribin.$(OBJEXT) route_table_ribout.$(OBJEXT) \
+	route_table_reader.$(OBJEXT) socket.$(OBJEXT) \
+	subnet_route.$(OBJEXT) update_attrib.$(OBJEXT) \
 	update_packet.$(OBJEXT) xrl_target.$(OBJEXT)
 libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
@@ -181,6 +182,7 @@ aspath_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -201,6 +203,7 @@ isolation_tests_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -214,6 +217,7 @@ test_packet_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -227,6 +231,7 @@ test_packet_coding_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -240,6 +245,7 @@ test_peer_data_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -257,6 +263,7 @@ update_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -270,6 +277,7 @@ xorp_bgp_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -298,6 +306,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/peer_handler_debug.Po \
 @AMDEP_TRUE@	$(DEPDIR)/peer_list.Po $(DEPDIR)/plumbing.Po \
 @AMDEP_TRUE@	$(DEPDIR)/process_watch.Po \
+@AMDEP_TRUE@	$(DEPDIR)/profile_vars.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_ipc_handler.Po \
 @AMDEP_TRUE@	$(DEPDIR)/route_queue.Po \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_base.Po \
@@ -458,6 +467,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/plumbing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_vars.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_ipc_handler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_base.Po@am__quote@

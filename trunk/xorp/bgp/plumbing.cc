@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.54 2004/06/10 22:40:32 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.55 2004/09/17 13:50:53 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,12 +28,14 @@
 
 #include "plumbing.hh"
 #include "bgp.hh"
+#include "profile_vars.hh"
 
 BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
 			 NextHopResolver<IPv4>& next_hop_resolver_ipv4,
 			 NextHopResolver<IPv6>& next_hop_resolver_ipv6,
-			 PolicyFilters& pfs)
+			 PolicyFilters& pfs,
+			 BGPMain& bgp)
     : _rib_handler(ribhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
@@ -43,7 +45,8 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
 		     _next_hop_resolver_ipv4),
       _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
 		     _next_hop_resolver_ipv6),
-      _my_AS_number(AsNum::AS_INVALID)
+      _my_AS_number(AsNum::AS_INVALID),
+      _bgp(bgp)
 {
 }
 
@@ -115,6 +118,9 @@ BGPPlumbing::add_route(const InternalMessage<IPv4> &rtmsg,
 		       PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::add_route IPv4\n");
+    if (main().profile().enabled(profile_route_ribin))
+	main().profile().log(profile_route_ribin, 
+			     c_format("add %s", rtmsg.net().str().c_str()));
     return plumbing_ipv4().add_route(rtmsg, peer_handler);
 }
 
@@ -123,6 +129,9 @@ BGPPlumbing::add_route(const InternalMessage<IPv6> &rtmsg,
 		       PeerHandler* peer_handler)  
 {
     debug_msg("BGPPlumbing::add_route IPv6\n");
+    if (main().profile().enabled(profile_route_ribin))
+	main().profile().log(profile_route_ribin,
+			     c_format("add %s", rtmsg.net().str().c_str()));
     return plumbing_ipv6().add_route(rtmsg, peer_handler);
 }
 
@@ -130,6 +139,9 @@ int
 BGPPlumbing::delete_route(const InternalMessage<IPv4> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
+    if (main().profile().enabled(profile_route_ribin))
+	main().profile().log(profile_route_ribin,
+			     c_format("delete %s", rtmsg.net().str().c_str()));
     return plumbing_ipv4().delete_route(rtmsg, peer_handler);
 }
 
@@ -137,6 +149,9 @@ int
 BGPPlumbing::delete_route(const InternalMessage<IPv6> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
+    if (main().profile().enabled(profile_route_ribin))
+	main().profile().log(profile_route_ribin,
+			     c_format("delete %s", rtmsg.net().str().c_str()));
     return plumbing_ipv6().delete_route(rtmsg, peer_handler);
 }
 

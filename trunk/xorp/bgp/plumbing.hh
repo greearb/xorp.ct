@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.27 2004/06/10 22:40:33 hodson Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.28 2004/09/17 13:50:54 abittau Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -135,7 +135,9 @@ public:
 		RibIpcHandler* rib_handler,
 		NextHopResolver<IPv4>&,
 		NextHopResolver<IPv6>&,
-		PolicyFilters&);
+		PolicyFilters&,
+		BGPMain& bgp);
+
     void set_my_as_number(const AsNum& my_AS_number);
 
     int add_peering(PeerHandler* peer_handler);
@@ -195,6 +197,11 @@ public:
      * @return Safi of this plumb.
      */
     Safi safi() const {return _safi;}
+
+    /**
+     * @return Reference to the main bgp class.
+     */
+    BGPMain& main() const { return _bgp; }
     
     /**
      * Push routes through policy filters for re-filtering.
@@ -211,16 +218,14 @@ private:
 
     const Safi _safi;
 
-
     PolicyFilters& _policy_filters;
 
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
 
-
     AsNum _my_AS_number;
-    
 
+    BGPMain &_bgp;
 };
 
 #endif // __BGP_PLUMBING_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.39 2004/08/14 05:24:50 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.40 2004/09/17 13:50:53 abittau Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -31,6 +31,7 @@
 #include "path_attribute.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
+#include "profile_vars.hh"
 
 // ----------------------------------------------------------------------------
 // Static class members
@@ -65,18 +66,22 @@ BGPMain::BGPMain()
 					_rib_ipc_handler,
 					*_next_hop_resolver_ipv4,
 					*_next_hop_resolver_ipv6,
-					_policy_filters);
+					_policy_filters,
+					*this);
     _plumbing_multicast = new BGPPlumbing(SAFI_MULTICAST,
 					  _rib_ipc_handler,
 					  *_next_hop_resolver_ipv4,
 					  *_next_hop_resolver_ipv6,
-					  _policy_filters);
+					  _policy_filters,
+					  *this);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
 
     _process_watch = new ProcessWatch(_xrl_router, eventloop(),
 				      bgp_mib_name().c_str(),
 				      ::callback(this,
 						 &BGPMain::terminate));
+
+    initialize_profiling_variables(_profile);
 }
 
 BGPMain::~BGPMain()
