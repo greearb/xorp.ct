@@ -204,6 +204,7 @@ template <typename A>
 void
 RouteDB<A>::flush_routes()
 {
+    _uq->flush();
     _routes.erase(_routes.begin(), _routes.end());
 }
 
