@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.1 2004/03/11 00:04:20 hodson Exp $"
 
 #include <vector>
 #include <fstream>
@@ -84,10 +84,10 @@ announce_routes(int fd, vector<RipRoute<IPv4> >* my_routes)
 }
 
 static void
-fake_peer(int fd, vector<RipRoute<IPv4> >& my_routes)
+fake_peer(int fd, uint32_t period, vector<RipRoute<IPv4> >& my_routes)
 {
     EventLoop e;
-    XorpTimer t = e.new_periodic(30 * 1000,
+    XorpTimer t = e.new_periodic(period * 1000,
 				 callback(announce_routes, fd, &my_routes));
 
     announce_routes(fd, &my_routes);
@@ -162,6 +162,7 @@ usage()
     cerr << "  -n <nexthop>     specify nexthop for nets in next <netsfile>."
 	 << endl;
     cerr << "  -o <netsfile>    specify file containing list of nets for announcement." << endl;
+    cerr << "  -p <period>	specify announcement period in seconds (default = 30)." << endl;
     cerr << "  -t <tag>         specify tag for nets in next <netsfile>."
 	 << endl;
     cerr << "  -h               show this information." << endl;
@@ -188,10 +189,11 @@ main(int argc, char* const argv[])
 	// Defaults
 	uint16_t tag	= 0;
 	uint16_t cost	= 1;
+	uint32_t period = 30;
 	IPv4	 nh;
 
 	int ch;
-	while ((ch = getopt(argc, argv, "c:n:i:o:t:h")) != -1) {
+	while ((ch = getopt(argc, argv, "c:n:i:o:p:t:h")) != -1) {
 	    switch(ch) {
 	    case 'c':
 		cost = atoi(optarg);
@@ -204,6 +206,12 @@ main(int argc, char* const argv[])
 		break;
 	    case 'o':
 		originate_routes_from_file(optarg, my_routes, nh, cost, tag);
+		break;
+	    case 'p':
+		period = strtoul(optarg, NULL, 10);
+		if (period == 0) {
+		    period = 30;
+		}
 		break;
 	    case 't':
 		tag = atoi(optarg);
@@ -226,7 +234,7 @@ main(int argc, char* const argv[])
 	    } else {
 		int fd = init_rip_socket(if_addr);
 		if (fd > 0) {
-		    fake_peer(fd, my_routes);
+		    fake_peer(fd, period, my_routes);
 		    close(fd);
 		}
 	    }
