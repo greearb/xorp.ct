@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.1 2004/02/17 19:47:09 hodson Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.2 2004/02/19 20:15:42 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -29,7 +29,8 @@ template<typename A> class XrlRipCommonTarget;
 
 class XrlRipTarget : public XrlRipTargetBase {
 public:
-    XrlRipTarget(XrlRouter& 		xr,
+    XrlRipTarget(EventLoop&		e,
+		 XrlRouter& 		xr,
 		 XrlProcessSpy& 	xps,
 		 XrlPortManager<IPv4>&	xpm,
 		 bool& 			should_exit);
@@ -91,6 +92,16 @@ public:
 				const string&	vifname,
 				const IPv4&	addr,
 				string&		horizon);
+
+    XrlCmdError rip_0_1_set_passive(const string&	ifname,
+				    const string&	vifname,
+				    const IPv4&		addr,
+				    const bool&		passive);
+
+    XrlCmdError rip_0_1_passive(const string&	ifname,
+				const string&	vifname,
+				const IPv4&	addr,
+				bool&		passive);
 
     XrlCmdError
     rip_0_1_set_route_expiry_seconds(const string&	ifname,
@@ -188,6 +199,20 @@ public:
 					   const IPv4&		addr,
 					   uint32_t&		t_msecs);
 
+    XrlCmdError
+    rip_0_1_set_authentication(const string&	ifname,
+			       const string&	vifname,
+			       const IPv4&	addr,
+			       const string&	type,
+			       const string&	password);
+
+    XrlCmdError
+    rip_0_1_authentication(const string&	ifname,
+			   const string&	vifname,
+			   const IPv4&		addr,
+			   string&		type,
+			   string&		password);
+
     XrlCmdError rip_0_1_rip_address_status(const string&	ifname,
 					   const string&	vifname,
 					   const IPv4&		addr,
@@ -218,7 +243,8 @@ public:
 					     const string&	reason);
 
 protected:
-    XrlRipCommonTarget<IPv4>* _ct;
+    EventLoop& 			_e;
+    XrlRipCommonTarget<IPv4>* 	_ct;
 };
 
 #endif // __RIP_XRL_TARGET_RIP_HH__

@@ -70,6 +70,23 @@ interface ripng/0.1 {
 			    -> horizon:txt
 
     /**
+     * Make RIP passive (receive only) on interface/vif/address.
+     */
+    set_passive		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6					\
+			    & passive:bool
+
+    /**
+     * Get value indicating whether RIP is passive (receive only)
+     * on interface/vif/address.
+     */
+    passive		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv6					\
+			    -> passive:bool
+
+    /**
      * Set period that routes associated with reception address will
      * expire in the absence of updates.
      */

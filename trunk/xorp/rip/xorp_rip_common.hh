@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xorp_rip_common.hh,v 1.1 2004/02/20 01:22:04 hodson Exp $
+// $XORP: xorp/rip/xorp_rip_common.hh,v 1.2 2004/02/24 21:56:42 hodson Exp $
 
 #ifndef __RIP_XORP_RIP_COMMON_HH__
 #define __RIP_XORP_RIP_COMMON_HH__
@@ -230,7 +230,7 @@ protected:
 	    XrlPortManager<A> xpm(rip_system, xsr, ixm);
 
 	    bool stop_requested(false);
-	    typename XrlTarget<A>::Type xrlt(xsr, xps, xpm, stop_requested);
+	    typename XrlTarget<A>::Type xrlt(e, xsr, xps, xpm, stop_requested);
 
 	    while (xsr.ready() == false) {
 		e.run();

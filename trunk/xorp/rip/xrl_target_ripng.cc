@@ -27,11 +27,12 @@
 #include "xrl_target_ripng.hh"
 #include "xrl_target_common.hh"
 
-XrlRipngTarget::XrlRipngTarget(XrlRouter&		xr,
+XrlRipngTarget::XrlRipngTarget(EventLoop&		el,
+			       XrlRouter&		xr,
 			       XrlProcessSpy&		xps,
 			       XrlPortManager<IPv6>& 	xpm,
 			       bool&			should_exit)
-    : XrlRipngTargetBase(&xr)
+    : XrlRipngTargetBase(&xr), _e(el)
 {
     _ct = new XrlRipCommonTarget<IPv6>(xps, xpm, should_exit);
 }
@@ -157,6 +158,25 @@ XrlRipngTarget::ripng_0_1_horizon(const string&	ifn,
     return _ct->ripx_0_1_horizon(ifn, vifn, a, horizon);
 }
 
+XrlCmdError
+XrlRipngTarget::ripng_0_1_set_passive(const string&	ifn,
+				      const string&	vifn,
+				      const IPv6&	a,
+				      const bool&	passive)
+{
+    return _ct->ripx_0_1_set_passive(ifn, vifn, a, passive);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_passive(const string&	ifn,
+				  const string&	vifn,
+				  const IPv6&	a,
+				  bool&		passive)
+{
+    return _ct->ripx_0_1_passive(ifn, vifn, a, passive);
+}
+
+
 XrlCmdError
 XrlRipngTarget::ripng_0_1_set_route_expiry_seconds(
 						const string&	ifn,

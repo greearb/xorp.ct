@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.2 2004/02/19 21:38:33 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.3 2004/02/19 22:01:00 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -29,7 +29,8 @@ template<typename A> class XrlRipCommonTarget;
 
 class XrlRipngTarget : public XrlRipngTargetBase {
 public:
-    XrlRipngTarget(XrlRouter& 			xr,
+    XrlRipngTarget(EventLoop&			e,
+		   XrlRouter& 			xr,
 		   XrlProcessSpy& 		xps,
 		   XrlPortManager<IPv6>&	xpm,
 		   bool& 			should_exit);
@@ -91,6 +92,16 @@ public:
 				  const string&	vifname,
 				  const IPv6&	addr,
 				  string&	horizon);
+
+    XrlCmdError ripng_0_1_set_passive(const string&	ifname,
+				      const string&	vifname,
+				      const IPv6&	addr,
+				      const bool&	passive);
+
+    XrlCmdError ripng_0_1_passive(const string&	ifname,
+				  const string&	vifname,
+				  const IPv6&	addr,
+				  bool&		passive);
 
     XrlCmdError
     ripng_0_1_set_route_expiry_seconds(const string&	ifname,
@@ -224,7 +235,8 @@ public:
 					     const string&	reason);
 
 protected:
-    XrlRipCommonTarget<IPv6>* _ct;
+    EventLoop& 			_e;
+    XrlRipCommonTarget<IPv6>* 	_ct;
 };
 
 #endif // __RIP_XRL_TARGET_RIPNG_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.1 2004/02/17 19:47:09 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.1 2004/02/19 20:15:42 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -83,62 +83,72 @@ public:
 			      uint32_t&		cost);
 
     XrlCmdError ripx_0_1_set_horizon(const string&	ifname,
-				    const string&	vifname,
-				    const A&		addr,
-				    const string&	horizon);
+				     const string&	vifname,
+				     const A&		addr,
+				     const string&	horizon);
 
     XrlCmdError ripx_0_1_horizon(const string&	ifname,
-				const string&	vifname,
-				const A&	addr,
-				string&		horizon);
+				 const string&	vifname,
+				 const A&	addr,
+				 string&	horizon);
+
+    XrlCmdError ripx_0_1_set_passive(const string&	ifname,
+				     const string&	vifname,
+				     const A&		addr,
+				     const bool&	passive);
+
+    XrlCmdError ripx_0_1_passive(const string&	ifname,
+				 const string&	vifname,
+				 const A&	addr,
+				 bool&		passive);
 
     XrlCmdError
     ripx_0_1_set_route_expiry_seconds(const string&	ifname,
-				     const string&	vifname,
-				     const A&		addr,
-				     const uint32_t&	t_secs);
-
-    XrlCmdError
-    ripx_0_1_route_expiry_seconds(const string&	ifname,
-				 const string&	vifname,
-				 const A&	addr,
-				 uint32_t&	t_secs);
-
-    XrlCmdError
-    ripx_0_1_set_route_deletion_seconds(const string&	ifname,
-				       const string&	vifname,
-				       const A&		addr,
-				       const uint32_t&	t_secs);
-
-    XrlCmdError
-    ripx_0_1_route_deletion_seconds(const string&	ifname,
-				   const string&	vifname,
-				   const A&		addr,
-				   uint32_t&		t_secs);
-
-    XrlCmdError
-    ripx_0_1_set_table_request_seconds(const string&	ifname,
 				      const string&	vifname,
 				      const A&		addr,
 				      const uint32_t&	t_secs);
 
     XrlCmdError
-    ripx_0_1_table_request_seconds(const string&		ifname,
-				  const string&		vifname,
-				  const A&		addr,
-				  uint32_t&		t_secs);
+    ripx_0_1_route_expiry_seconds(const string&	ifname,
+				  const string&	vifname,
+				  const A&	addr,
+				  uint32_t&	t_secs);
+
+    XrlCmdError
+    ripx_0_1_set_route_deletion_seconds(const string&	ifname,
+					const string&	vifname,
+					const A&	addr,
+					const uint32_t&	t_secs);
+
+    XrlCmdError
+    ripx_0_1_route_deletion_seconds(const string&	ifname,
+				    const string&	vifname,
+				    const A&		addr,
+				    uint32_t&		t_secs);
+
+    XrlCmdError
+    ripx_0_1_set_table_request_seconds(const string&	ifname,
+				       const string&	vifname,
+				       const A&		addr,
+				       const uint32_t&	t_secs);
+
+    XrlCmdError
+    ripx_0_1_table_request_seconds(const string&	ifname,
+				   const string&	vifname,
+				   const A&		addr,
+				   uint32_t&		t_secs);
 
     XrlCmdError
     ripx_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
-						 const string&	vifname,
-						 const A&	addr,
-						 const uint32_t& t_secs);
+						  const string&	vifname,
+						  const A&	addr,
+						  const uint32_t& t_secs);
 
     XrlCmdError
     ripx_0_1_unsolicited_response_min_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const A&		addr,
-					     uint32_t&		t_secs);
+					      const string&	vifname,
+					      const A&		addr,
+					      uint32_t&		t_secs);
 
     XrlCmdError
     ripx_0_1_set_unsolicited_response_max_seconds(
@@ -219,6 +229,19 @@ public:
     XrlCmdError socketx_user_0_1_close_event(const string&	sockid,
 					     const string&	reason);
 
+    /**
+     * Find Port associated with ifname, vifname, addr.
+     *
+     * @return on success the first item in the pair will be a
+     * non-null pointer to the port and the second item with be
+     * XrlCmdError::OKAY().  On failyre the first item in the pair
+     * will be null and the XrlCmdError will signify the reason for
+     * the failure.
+     */
+    pair<Port<A>*,XrlCmdError> find_port(const string&	ifname,
+					 const string&	vifname,
+					 const A&	addr);
+
 protected:
     XrlProcessSpy&	_xps;
     XrlPortManager<A>&	_xpm;
@@ -261,7 +284,7 @@ XrlRipCommonTarget<A>::set_status(ProcessStatus status, const string& note)
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::common_0_1_get_status(uint32_t& status,
-				    string&   reason)
+					     string&   reason)
 {
     status = _status;
     reason = _status_note;
@@ -279,8 +302,10 @@ XrlRipCommonTarget<A>::common_0_1_shutdown()
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::finder_event_observer_0_1_xrl_target_birth(const string& cname,
-							 const string& iname)
+XrlRipCommonTarget<A>::finder_event_observer_0_1_xrl_target_birth(
+							const string& cname,
+							const string& iname
+							)
 {
     _xps.birth_event(cname, iname);
     return XrlCmdError::OKAY();
@@ -288,8 +313,10 @@ XrlRipCommonTarget<A>::finder_event_observer_0_1_xrl_target_birth(const string& 
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::finder_event_observer_0_1_xrl_target_death(const string& cname,
-							 const string& iname)
+XrlRipCommonTarget<A>::finder_event_observer_0_1_xrl_target_death(
+							const string& cname,
+							const string& iname
+							)
 {
     _xps.death_event(cname, iname);
     return XrlCmdError::OKAY();
@@ -297,9 +324,9 @@ XrlRipCommonTarget<A>::finder_event_observer_0_1_xrl_target_death(const string& 
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_add_rip_address(const string& ifname,
-					       const string& vifname,
-					       const A&   addr)
+XrlRipCommonTarget<A>::ripx_0_1_add_rip_address(const string&	ifname,
+					       const string&	vifname,
+					       const A&		addr)
 {
     debug_msg("rip_x_1_add_rip_address %s/%s/%s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
@@ -312,8 +339,8 @@ XrlRipCommonTarget<A>::ripx_0_1_add_rip_address(const string& ifname,
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::ripx_0_1_remove_rip_address(const string& ifname,
-					 const string& vifname,
-					 const A&   addr)
+					 const string&		 vifname,
+					 const A&   		 addr)
 {
     debug_msg("ripx_0_1_remove_rip_address %s/%s/%s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
@@ -323,34 +350,58 @@ XrlRipCommonTarget<A>::ripx_0_1_remove_rip_address(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-static bool s_enabled = false;
+
+// ----------------------------------------------------------------------------
+// Utility methods
+
+template <typename A>
+pair<Port<A>*, XrlCmdError>
+XrlRipCommonTarget<A>::find_port(const string&	ifn,
+				 const string&	vifn,
+				 const A&	addr)
+{
+    Port<A>* p = _xpm.find_port(ifn, vifn, addr);
+    if (p == 0) {
+	string e = c_format("RIP not running on %s/%s/%s",
+			    ifn.c_str(), vifn.c_str(), addr.str().c_str());
+	return make_pair(p, XrlCmdError::COMMAND_FAILED(e));
+    }
+    return make_pair(p, XrlCmdError::OKAY());
+}
+
+
+// ----------------------------------------------------------------------------
+// Port configuration accessors and modifiers
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_rip_address_enabled(const string& ifname,
-					      const string& vifname,
-					      const A&   addr,
-					      const bool&   enabled)
+XrlRipCommonTarget<A>::ripx_0_1_set_rip_address_enabled(const string&	ifn,
+							const string&	vifn,
+							const A&	addr,
+							const bool&	en)
 {
-    debug_msg("ripx_0_1_set_rip_address_enabled %s/%s/%s %s\n",
-	      ifname.c_str(), vifname.c_str(), addr.str().c_str(),
-	      enabled ? "true" : "false");
-    s_enabled = enabled;
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifn, vifn, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    p->set_enabled(en);
     return XrlCmdError::OKAY();
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_rip_address_enabled(const string& ifname,
-					  const string& vifname,
-					  const A&   addr,
-					  bool&		enabled)
+XrlRipCommonTarget<A>::ripx_0_1_rip_address_enabled(const string& ifn,
+						    const string& vifn,
+						    const A&	  addr,
+						    bool&	  en)
 {
-    enabled = s_enabled;
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifn, vifn, addr);
+    if (pp.first == 0)
+	return pp.second;
 
-    debug_msg("ripx_0_1_set_rip_address_enabled %s/%s/%s -> %s\n",
-	      ifname.c_str(), vifname.c_str(), addr.str().c_str(),
-	      enabled ? "true" : "false");
+    Port<A>* p = pp.first;
+    en = p->enabled();
 
     return XrlCmdError::OKAY();
 }
@@ -358,55 +409,57 @@ XrlRipCommonTarget<A>::ripx_0_1_rip_address_enabled(const string& ifname,
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::ripx_0_1_set_cost(const string&	ifname,
-			       const string&	vifname,
-			       const A&	addr,
-			       const uint32_t&	cost)
+			       const string&		vifname,
+			       const A&			addr,
+			       const uint32_t&		cost)
 {
-    Port<A>* p = _xpm.find_port(ifname, vifname, addr);
-    if (p == 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format(
-		"RIP not running on %s/%s/%s",
-		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
-    }
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+
     if (cost > RIP_INFINITY) {
-	return XrlCmdError::COMMAND_FAILED(c_format(
-		"Cost must be less that RIP infinity (%u)",
-		RIP_INFINITY));
+	string e = c_format("Cost must be less that RIP infinity (%u)",
+			    RIP_INFINITY);
+	return XrlCmdError::COMMAND_FAILED(e);
     }
+
     p->set_cost(cost);
+
     return XrlCmdError::OKAY();
 }
 
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::ripx_0_1_cost(const string&	ifname,
-				    const string&	vifname,
-				    const A&		addr,
-				    uint32_t&		cost)
+				     const string&	vifname,
+				     const A&		addr,
+				     uint32_t&		cost)
 {
-    const Port<A>* p = _xpm.find_port(ifname, vifname, addr);
-    if (p == 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format(
-		"RIP not running on %s/%s/%s",
-		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
-    }
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
     cost = p->cost();
+
     return XrlCmdError::OKAY();
 }
 
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::ripx_0_1_set_horizon(const string&	ifname,
-					   const string&	vifname,
-					   const A&		addr,
-					   const string&	horizon)
+					    const string&	vifname,
+					    const A&		addr,
+					    const string&	horizon)
 {
-    Port<A>* p = _xpm.find_port(ifname, vifname, addr);
-    if (p == 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format(
-		"RIP not running on %s/%s/%s",
-		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
-    }
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+
     RipHorizon rh[3] = { NONE, SPLIT, SPLIT_POISON_REVERSE };
     for (uint32_t i = 0; i < 3; ++i) {
 	if (string(rip_horizon_name(rh[i])) == horizon) {
@@ -422,17 +475,48 @@ XrlRipCommonTarget<A>::ripx_0_1_set_horizon(const string&	ifname,
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::ripx_0_1_horizon(const string&	ifname,
-			      const string&		vifname,
-			      const A&			addr,
-			      string&			horizon)
+					const string&	vifname,
+					const A&	addr,
+					string&		horizon)
 {
-    const Port<A>* p = _xpm.find_port(ifname, vifname, addr);
-    if (p == 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format(
-		"RIP not running on %s/%s/%s",
-		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
-    }
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
     horizon = rip_horizon_name(p->horizon());
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_set_passive(const string&	ifname,
+					    const string&	vifname,
+					    const A&		addr,
+					    const bool&		passive)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    p->set_passive(passive);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_passive(const string&	ifname,
+					const string&	vifname,
+					const A&	addr,
+					bool&		passive)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    passive = p->passive();
     return XrlCmdError::OKAY();
 }
 
@@ -442,11 +526,11 @@ XrlRipCommonTarget<A>::ripx_0_1_horizon(const string&	ifname,
 // RIP ports.
 
 #define PORT_TIMER_SET_HANDLER(field, min_val, max_val)			\
-    Port<A>* p = _xpm.find_port(ifname, vifname, addr);		\
-    if (p == 0)								\
-	return XrlCmdError::COMMAND_FAILED(c_format(			\
-	    "RIP not running on %s/%s/%s",				\
-	    ifname.c_str(), vifname.c_str(), addr.str().c_str()));	\
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
+    if (pp.first == 0)							\
+	return pp.second;						\
+    Port<A>* p = pp.first;						\
+									\
     if (t < min_val) 							\
 	return XrlCmdError::COMMAND_FAILED(c_format(			\
 	    "value supplied less than permitted minimum (%u < %u)", 	\
@@ -461,11 +545,10 @@ XrlRipCommonTarget<A>::ripx_0_1_horizon(const string&	ifname,
     return XrlCmdError::OKAY();
 
 #define PORT_TIMER_GET_HANDLER(field)					\
-    Port<A>* p = _xpm.find_port(ifname, vifname, addr);		\
-    if (p == 0)								\
-	return XrlCmdError::COMMAND_FAILED(c_format(			\
-	    "RIP not running on %s/%s/%s",				\
-	    ifname.c_str(), vifname.c_str(), addr.str().c_str()));	\
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
+    if (pp.first == 0)							\
+	return pp.second;						\
+    Port<A>* p = pp.first;						\
     t = p->constants(). field ();					\
     return XrlCmdError::OKAY();
 
@@ -664,15 +747,21 @@ XrlRipCommonTarget<A>::ripx_0_1_interpacket_delay_milliseconds(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_rip_address_status(const string&	ifname,
-						  const string&	vifname,
-						  const A&	addr,
-						  string&	status)
+XrlRipCommonTarget<A>::ripx_0_1_rip_address_status(const string&	ifn,
+						  const string&		vifn,
+						  const A&		addr,
+						  string&		status)
 {
-    status = (s_enabled) ? "running" : "not running";
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifn, vifn, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+
+    status = (p->enabled()) ? "running" : "not running";
 
     debug_msg("ripx_0_1_rip_address_status %s/%s/%s -> %s\n",
-	      ifname.c_str(), vifname.c_str(), addr.str().c_str(),
+	      ifn.c_str(), vifn.c_str(), addr.str().c_str(),
 	      status.c_str());
 
     return XrlCmdError::OKAY();
@@ -681,8 +770,8 @@ XrlRipCommonTarget<A>::ripx_0_1_rip_address_status(const string&	ifname,
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::ripx_0_1_add_static_route(const IPNet<A>& network,
-				       const A& 		nexthop,
-				       const uint32_t& 		cost)
+						 const A& 	 nexthop,
+						 const uint32_t& cost)
 {
     if (cost > RIP_INFINITY) {
 	return XrlCmdError::COMMAND_FAILED(c_format("Bad cost %u", cost));
@@ -713,7 +802,8 @@ XrlRipCommonTarget<A>::socketx_user_0_1_recv_event(
 					const string&		sockid,
 					const A&		src_host,
 					const uint32_t&		src_port,
-					const vector<uint8_t>&	pdata)
+					const vector<uint8_t>&	pdata
+					)
 {
     _xpm.deliver_packet(sockid, src_host, src_port, pdata);
     return XrlCmdError::OKAY();

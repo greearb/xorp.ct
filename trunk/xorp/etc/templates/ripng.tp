@@ -15,6 +15,8 @@ protocols
 		{
 		    cost:			uint	=   1;
 		    horizon:			text    = "split-horizon-poison-reverse" ;
+		    enabled:			bool	= false ;
+		    passive:			bool	= false ;
 		    route_expiry_secs:		uint	= 180 ;
 		    route_deletion_secs:	uint	= 120 ;
 		    triggered_update_min_secs:	uint	=   1 ;
@@ -23,7 +25,6 @@ protocols
 		    table_announce_max_secs:	uint	=  35 ;
 		    table_request_secs:		uint    =   1 ;
 		    interpacket_delay_msecs:	uint	=  50 ;
-		    enabled:			bool	= false ;
 		}
 	    }
 	}
@@ -59,6 +60,10 @@ protocols
 			%allow: $(@) "none" "split-horizon" "split-horizon-poison-reverse" ;
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&horizon:txt=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->horizon:txt" ;
+		    }
+		    passive {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&passive:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->passive:bool" ;
 		    }
 		    route_expiry_secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;

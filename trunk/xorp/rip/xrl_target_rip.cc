@@ -21,17 +21,19 @@
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_router.hh"
 
+#include "auth.hh"
 #include "system.hh"
 #include "xrl_process_spy.hh"
 #include "xrl_port_manager.hh"
 #include "xrl_target_rip.hh"
 #include "xrl_target_common.hh"
 
-XrlRipTarget::XrlRipTarget(XrlRouter&			xr,
+XrlRipTarget::XrlRipTarget(EventLoop&			el,
+			   XrlRouter&			xr,
 			   XrlProcessSpy&		xps,
 			   XrlPortManager<IPv4>& 	xpm,
 			   bool&			should_exit)
-    : XrlRipTargetBase(&xr)
+    : XrlRipTargetBase(&xr), _e(el)
 {
     _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, should_exit);
 }
@@ -158,6 +160,23 @@ XrlRipTarget::rip_0_1_horizon(const string&	ifn,
     return _ct->ripx_0_1_horizon(ifn, vifn, a, horizon);
 }
 
+XrlCmdError
+XrlRipTarget::rip_0_1_set_passive(const string&	ifn,
+				  const string&	vifn,
+				  const IPv4&	a,
+				  const bool&	passive)
+{
+    return _ct->ripx_0_1_set_passive(ifn, vifn, a, passive);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_passive(const string&	ifn,
+			      const string&	vifn,
+			      const IPv4&	a,
+			      bool&		passive)
+{
+    return _ct->ripx_0_1_passive(ifn, vifn, a, passive);
+}
 
 
 XrlCmdError
@@ -331,6 +350,92 @@ XrlRipTarget::rip_0_1_interpacket_delay_milliseconds(
 {
     return _ct->ripx_0_1_set_interpacket_delay_milliseconds(ifn, vifn, a, t);
 }
+
+
+XrlCmdError
+XrlRipTarget::rip_0_1_set_authentication(const string&	ifname,
+					 const string&	vifname,
+					 const IPv4&	addr,
+					 const string&	type,
+					 const string&	password)
+{
+    pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+    Port<IPv4>* p = pp.first;
+
+    PortAFSpecState<IPv4>& pss = p->af_state();
+
+    if (type == NullAuthHandler::auth_type_name()) {
+	AuthHandlerBase* new_ah = new NullAuthHandler();
+	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
+	delete last_ah;
+	return XrlCmdError::OKAY();
+    }
+
+    if (type == PlaintextAuthHandler::auth_type_name()) {
+	PlaintextAuthHandler* new_ah = new PlaintextAuthHandler();
+	new_ah->set_key(password);
+	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
+	delete last_ah;
+	return XrlCmdError::OKAY();
+    }
+
+    if (type == MD5AuthHandler::auth_type_name()) {
+	//
+	// The MD5AuthHandler code supports multiple timed keys, but we're
+	// not exporting this via the xrl interface for time being.
+	//
+	// We create an MD5 authentication handler and add a single
+	// key.  The key has the same start and end time value
+	// indicating that it does not expire.
+	//
+	MD5AuthHandler* new_ah = new MD5AuthHandler(_e);
+	if (new_ah->add_key(0, password, /* start */ 0, /* end */ 0) == 0) {
+	    delete new_ah;
+	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed.");
+	}
+	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
+	delete last_ah;
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED("Unrecognized authentication type");
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_authentication(const string&	ifname,
+				     const string&	vifname,
+				     const IPv4&	addr,
+				     string&		type,
+				     string&		password)
+{
+    pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+    Port<IPv4>* p = pp.first;
+
+    PortAFSpecState<IPv4>& pss = p->af_state();
+    AuthHandlerBase* ah = pss.auth_handler();
+
+    type     = ah->name();
+    password = "";
+
+    if (type == PlaintextAuthHandler::auth_type_name()) {
+	const PlaintextAuthHandler* pah =
+	    dynamic_cast<const PlaintextAuthHandler*>(ah);
+	password = pah->key();
+    }
+
+    if (type == MD5AuthHandler::auth_type_name()) {
+	const MD5AuthHandler* mah = dynamic_cast<const MD5AuthHandler*>(ah);
+	const MD5AuthHandler::KeyChain& kc = mah->key_chain();
+	password = kc.front().key();
+    }
+
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError
 XrlRipTarget::rip_0_1_rip_address_status(const string&	ifn,
