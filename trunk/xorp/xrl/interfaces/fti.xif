@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.2 2003/03/22 03:26:42 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.1 2003/03/29 19:03:12 pavlin Exp $ */
 
 /*
  * Forwarding Table XRL interface (typically used by RIB clients).
@@ -199,4 +199,40 @@ interface fti/0.2 {
 	 * Perhaps we request the forwarding table be dumped to file and then
 	 * transfer the file.
 	 */
+
+	/**
+	 * Test whether the IPv4 unicast forwarding engine is enabled
+	 * or disabled to forward packets.
+	 * 
+	 * @param enabled if true, then the IPv4 unicast forwarding
+	 * is enabled, otherwise is disabled.
+	 */
+	get_unicast_forwarding_enabled4 -> enabled:bool
+
+	/**
+	 * Test whether the IPv6 unicast forwarding engine is enabled
+	 * or disabled to forward packets.
+	 * 
+	 * @param enabled if true, then the IPv6 unicast forwarding
+	 * is enabled, otherwise is disabled.
+	 */
+	get_unicast_forwarding_enabled6 -> enabled:bool
+
+	/**
+	 * Set the IPv4 unicast forwarding engine to enable or disable
+	 * forwarding of packets.
+	 * 
+	 * @param enabled if true, then enable IPv4 unicast forwarding,
+	 * otherwise disable it.
+	 */
+	set_unicast_forwarding_enabled4 ? enabled:bool
+
+	/**
+	 * Set the IPv6 unicast forwarding engine to enable or disable
+	 * forwarding of packets.
+	 * 
+	 * @param enabled if true, then enable IPv6 unicast forwarding,
+	 * otherwise disable it.
+	 */
+	set_unicast_forwarding_enabled6 ? enabled:bool
 }
