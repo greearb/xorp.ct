@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.3 2003/04/23 20:50:48 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.4 2003/04/24 19:32:47 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
@@ -36,22 +36,25 @@ public:
     typedef ref_ptr<FinderXrlCommandBase> Command;
 
 public:
-    FinderXrlCommandQueue(FinderMessengerBase& messenger) :
-	_m(messenger), _pending(false) {}
+    FinderXrlCommandQueue(FinderMessengerBase* messenger) :
+	_m(messenger), _pending(false)
+    {}
 
-    inline FinderMessengerBase& messenger() { return _m; }
+    inline FinderMessengerBase& messenger() { return *_m; }
 
     void enqueue(const Command& cmd);
-
+    
 protected:
     void push();
-
+    EventLoop& eventloop();
+    
 protected:
     friend class FinderXrlCommandBase;
     void crank();
-
+    void kill_messenger();
+    
 private:
-    FinderMessengerBase& _m;
+    FinderMessengerBase* _m;
     list<Command>	 _cmds;
     bool		 _pending;
 };
@@ -71,8 +74,11 @@ public:
 
     void dispatch_cb(const XrlError& e)
     {
-	if (e != XrlCmdError::OKAY())
+	if (e != XrlCmdError::OKAY()) {
 	    XLOG_ERROR("Sent xrl got response %s\n", e.str().c_str());
+	    queue().kill_messenger();
+	    return ;
+	}
 	queue().crank();
     }
 
@@ -95,7 +101,7 @@ public:
 
     bool dispatch()
     {
-	XrlFinderClientV0p1Client client(&(queue().messenger()));
+	XrlFinderClientV0p2Client client(&(queue().messenger()));
 	return client.send_hello(_tgtname.c_str(),
 		  callback(static_cast<FinderXrlCommandBase*>(this),
 			   &FinderXrlCommandBase::dispatch_cb));
@@ -124,7 +130,7 @@ public:
     
     bool dispatch()
     {
-	XrlFinderClientV0p1Client client(&(queue().messenger()));
+	XrlFinderClientV0p2Client client(&(queue().messenger()));
 	return client.send_remove_xrl_from_cache(_tgtname.c_str(), _xrl,
 		  callback(static_cast<FinderXrlCommandBase*>(this),
 			   &FinderXrlCommandBase::dispatch_cb));
@@ -153,7 +159,7 @@ public:
 
     bool dispatch()
     {
-	XrlFinderClientV0p1Client client(&(queue().messenger()));
+	XrlFinderClientV0p2Client client(&(queue().messenger()));
 	return client.send_remove_xrls_for_target_from_cache(_tgtname.c_str(),
 							     _tgtname,
 		  callback(static_cast<FinderXrlCommandBase*>(this),

@@ -1,9 +1,7 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.16 2003/04/23 20:50:45 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.17 2003/05/07 21:58:09 pavlin Exp $
 ##
-
-
 
 # - The library
 noinst_LIBRARIES = libxipc.a libfinder.a
@@ -11,16 +9,21 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 # -- Programs
 bin_PROGRAMS  =	call_xrl finder
 
-finder_SOURCES = finder_main.cc
+# -- Test Programs and scripts
+test_programs  = test_finder_messenger test_finder_msgs test_finder
+test_programs += test_finder_tcp
+test_programs += test_header test_inproc test_lemming test_sudp test_stcp
+test_programs += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
+test_programs += test_xrl_router
 
-# -- Test Programs 
-noinst_PROGRAMS  = test_finder_messenger test_finder_msgs test_finder
-noinst_PROGRAMS += test_finder_tcp
-noinst_PROGRAMS += test_header test_inproc test_lemming test_sudp test_stcp
-noinst_PROGRAMS += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
-noinst_PROGRAMS += test_xrl_router test_xrl_parser
+test_extra_programs = test_xrl_parser test_finder_to
 
-TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
+test_scripts = test_xrl_parser.sh
+
+TESTS = $(test_programs) $(test_scripts)
+
+noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
+noinst_SCRIPTS = $(test_scripts)
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = ./libfinder.a
@@ -34,7 +37,9 @@ finder_LDADD			+= $(top_builddir)/libxorp/libxorp.a
 finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 
 # -- Program Sources
+
 call_xrl_SOURCES		= call_xrl.cc
+finder_SOURCES			= finder_main.cc
 
 test_finder_messenger_SOURCES	= test_finder_messenger.cc
 test_finder_msgs_SOURCES	= test_finder_msgs.cc
@@ -56,6 +61,9 @@ test_xrl_router_LDADD		= libfinder.a $(LDADD)
 
 test_finder_SOURCES		= test_finder.cc
 test_finder_LDADD		= libfinder.a $(LDADD)
+
+test_finder_to_SOURCES		= test_finder_to.cc
+test_finder_to_LDADD		= libfinder.a $(LDADD)
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h
@@ -84,6 +92,7 @@ libxipc_a_SOURCES += xrl_atom_encoding.hh
 libxipc_a_SOURCES += xrl_atom_list.hh
 libxipc_a_SOURCES += xrl_args.hh
 libxipc_a_SOURCES += xrl_cmd_map.hh
+libxipc_a_SOURCES += xrl_dispatcher.hh
 libxipc_a_SOURCES += xrl_pf_factory.hh
 libxipc_a_SOURCES += xrl_pf_inproc.hh
 libxipc_a_SOURCES += xrl_pf_stcp.hh
@@ -117,6 +126,7 @@ libxipc_a_SOURCES += xrl_atom_encoding.cc
 libxipc_a_SOURCES += xrl_atom_list.cc
 libxipc_a_SOURCES += xrl_args.cc
 libxipc_a_SOURCES += xrl_cmd_map.cc
+libxipc_a_SOURCES += xrl_dispatcher.cc
 libxipc_a_SOURCES += xrl_pf_factory.cc
 libxipc_a_SOURCES += xrl_pf_inproc.cc
 libxipc_a_SOURCES += xrl_pf_stcp.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.7 2003/02/26 00:12:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.8 2003/03/10 23:20:28 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -30,7 +30,7 @@
 
 #include "xrl_error.hh"
 #include "xrl_pf_inproc.hh"
-#include "xrl_router.hh"
+#include "xrl_dispatcher.hh"
 
 // ----------------------------------------------------------------------------
 // InProc is "intra-process" - a minimalist and simple direct call transport
@@ -182,7 +182,7 @@ remove_inproc_listener(uint32_t instance_no)
 
 uint32_t XrlPFInProcListener::_next_instance_no;
 
-XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlCmdDispatcher* xr)
+XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr)
     throw (XrlPFConstructorError)
     : XrlPFListener(e, xr)
 {
@@ -206,7 +206,7 @@ XrlPFInProcListener::~XrlPFInProcListener()
 const XrlError
 XrlPFInProcListener::dispatch(const Xrl& request, XrlArgs& reply)
 {
-    const XrlCmdDispatcher* xr = dispatcher();
+    const XrlDispatcher* xr = dispatcher();
     assert(xr != 0);
     return xr->dispatch_xrl(request, reply);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.14 2003/04/23 19:17:55 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.15 2003/04/23 20:50:49 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -22,18 +22,10 @@
 
 #include "xrl.hh"
 #include "xrl_sender.hh"
-#include "xrl_cmd_map.hh"
+#include "xrl_dispatcher.hh"
 #include "xrl_pf.hh"
 
 class DispatchState;
-
-class XrlCmdDispatcher : public XrlCmdMap {
-public:
-    XrlCmdDispatcher(const char* entity_name) : XrlCmdMap(entity_name)
-    {}
-    virtual ~XrlCmdDispatcher() {}
-    virtual XrlError dispatch_xrl(const Xrl& xrl, XrlArgs& ret_vals) const;
-};
 
 class FinderClient;
 class FinderClientXrlTarget;
@@ -41,7 +33,7 @@ class FinderTcpAutoConnector;
 class FinderDBEntry;
 class XrlRouterDispatchState;
 
-class XrlRouter : public XrlCmdDispatcher, public XrlSender {
+class XrlRouter : public XrlDispatcher, public XrlSender {
 public:
     typedef XrlSender::Callback XrlCallback;    
     typedef XrlRouterDispatchState DispatchState;
@@ -61,14 +53,19 @@ public:
     
     bool connected() const;
 
+    bool ready() const;
+    
     bool pending() const;
 
     bool send(const Xrl& xrl, const XrlCallback& cb);
 
     bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
-    EventLoop& eventloop() {return _e;}
+    inline EventLoop& eventloop() { return _e; }
 
+    inline const string& instance_name() const	{ return _instance_name; }
+    inline const string& class_name() const	{ return XrlCmdMap::name(); }
+    
 protected:
     void resolve_callback(const XrlError&		e,
 			  const FinderDBEntry*		dbe,
@@ -86,7 +83,7 @@ protected:
     FinderClient*		_fc;
     FinderClientXrlTarget*	_fxt;
     FinderTcpAutoConnector*	_fac;
-    uint32_t			_id;
+    string			_instance_name;
 
     uint32_t			_rpend, _spend;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.5 2003/03/10 23:20:28 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.6 2003/03/16 08:20:32 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_INPROC_HH__
 #define __LIBXIPC_XRL_PF_INPROC_HH__
@@ -24,7 +24,7 @@
 
 class XrlPFInProcListener : public XrlPFListener {
 public:
-    XrlPFInProcListener(EventLoop& e, XrlCmdDispatcher* xr = 0)
+    XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr = 0)
 	throw (XrlPFConstructorError);
     ~XrlPFInProcListener();
 

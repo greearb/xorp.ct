@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.6 2003/04/23 20:50:48 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.7 2003/05/07 23:15:15 mjh Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_XRL_TARGET_HH__
@@ -43,23 +43,24 @@ public:
      *  support the finder_client interface in order to be able to process
      *  messages from the finder.
      */
-    XrlCmdError finder_0_1_register_finder_client(const string&	target_name,
+    XrlCmdError finder_0_2_register_finder_client(const string&	target_name,
 						  const string&	class_name,
+						  const bool&	singleton,
 						  const string& in_cookie,
 						  string&	out_cookie);  
 
-    XrlCmdError finder_0_1_unregister_finder_client(const string& target_name);
+    XrlCmdError finder_0_2_unregister_finder_client(const string& target_name);
 
-    XrlCmdError finder_0_1_set_finder_client_enabled(const string& target_name,
+    XrlCmdError finder_0_2_set_finder_client_enabled(const string& target_name,
 						     const bool&   en);
 
-    XrlCmdError finder_0_1_finder_client_enabled(const string& target_name,
+    XrlCmdError finder_0_2_finder_client_enabled(const string& target_name,
 						 bool&         en);
 
     /**
      *  Add resolved Xrl into system, fails if xrl is already registered.
      */
-    XrlCmdError finder_0_1_add_xrl(const string& xrl, 
+    XrlCmdError finder_0_2_add_xrl(const string& xrl, 
 				   const string& protocol_name, 
 				   const string& protocol_args, 
 				   string&	 resolved_xrl_method_name);
@@ -67,32 +68,47 @@ public:
     /**
      *  Remove xrl
      */
-    XrlCmdError finder_0_1_remove_xrl(const string&	xrl);
+    XrlCmdError finder_0_2_remove_xrl(const string&	xrl);
 
     /**
      *  Resolve Xrl
      */
-    XrlCmdError finder_0_1_resolve_xrl(const string&	xrl,
+    XrlCmdError finder_0_2_resolve_xrl(const string&	xrl,
 				       XrlAtomList&	resolutions);
     
     /**
      *  Get list of registered Xrl targets
      */
-    XrlCmdError finder_0_1_get_xrl_targets(XrlAtomList&	target_names);
+    XrlCmdError finder_0_2_get_xrl_targets(XrlAtomList&	target_names);
 
     /**
      *  Get list of Xrls registered by target
      */
-    XrlCmdError finder_0_1_get_xrls_registered_by(const string&	target_name, 
+    XrlCmdError finder_0_2_get_xrls_registered_by(const string&	target_name, 
 						  XrlAtomList&	xrls);
 
-    XrlCmdError finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4s);
+    XrlCmdError finder_0_2_get_ipv4_permitted_hosts(XrlAtomList& ipv4s);
 
-    XrlCmdError finder_0_1_get_ipv4_permitted_nets(XrlAtomList&  ipv4nets);
+    XrlCmdError finder_0_2_get_ipv4_permitted_nets(XrlAtomList&  ipv4nets);
 
-    XrlCmdError finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6s);
+    XrlCmdError finder_0_2_get_ipv6_permitted_hosts(XrlAtomList& ipv6s);
 
-    XrlCmdError finder_0_1_get_ipv6_permitted_nets(XrlAtomList&  ipv6nets);
+    XrlCmdError finder_0_2_get_ipv6_permitted_nets(XrlAtomList&  ipv6nets);
+
+    /**
+     * Event notifier interface.
+     */
+    XrlCmdError finder_event_notifier_0_1_register_all_event_interest(
+		    const string& who);
+
+    XrlCmdError finder_event_notifier_0_1_deregister_all_event_interest(
+		    const string& who);
+
+    XrlCmdError finder_event_notifier_0_1_register_class_event_interest(
+		    const string& who, const string& class_name);
+
+    XrlCmdError finder_event_notifier_0_1_deregister_class_event_interest(
+		    const string& who, const string& class_name);
     
 protected:
     Finder& _finder;

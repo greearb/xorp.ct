@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.10 2003/04/23 20:50:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.11 2003/05/07 23:15:14 mjh Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -108,15 +108,18 @@ FinderXrlTarget::common_0_1_get_status(uint32_t& status, string& reason)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
-						     const string& class_name,
-						     const string& in_cookie,
-						     string&	   out_cookie)
+FinderXrlTarget::finder_0_2_register_finder_client(const string& tgt_name,
+						   const string& class_name,
+						   const bool&	 singleton,
+						   const string& in_cookie,
+						   string&	 out_cookie)
 {
-    finder_trace_init("register_finder_client(\"%s\", \"%s\", \"%s\")",
+    finder_trace_init("register_finder_client(target = \"%s\", "
+		      "class = \"%s\", singleton = \"%d\", "
+		      "cookie = \"%s\")",
 		      tgt_name.c_str(), class_name.c_str(),
-		      in_cookie.c_str());
-
+		      singleton, in_cookie.c_str());
+    
     if (in_cookie.empty() == false) {
 	out_cookie = in_cookie;
 	_finder.remove_target_with_cookie(out_cookie);
@@ -124,18 +127,18 @@ FinderXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
 	out_cookie = make_cookie();
     }
 
-    if (_finder.add_target(tgt_name, class_name, out_cookie) == false) {
-	finder_trace_result("failed (already registered)");
-	return XrlCmdError::COMMAND_FAILED(c_format("%s already registered.",
-						    tgt_name.c_str()));
+    if (_finder.add_target(tgt_name, class_name, singleton, out_cookie)) {
+	finder_trace_result("\"%s\" okay",  out_cookie.c_str());
+	return XrlCmdError::OKAY();
     }
 
-    finder_trace_result("\"%s\" okay",  out_cookie.c_str());
-    return XrlCmdError::OKAY();
+    finder_trace_result("failed (already registered)");
+    return XrlCmdError::COMMAND_FAILED(c_format("%s already registered.",
+						tgt_name.c_str()));
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
+FinderXrlTarget::finder_0_2_unregister_finder_client(const string& tgt_name)
 {
     finder_trace_init("unregister_finder_client(\"%s\")", tgt_name.c_str());
 
@@ -151,8 +154,8 @@ FinderXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
-							const bool&   en)
+FinderXrlTarget::finder_0_2_set_finder_client_enabled(const string& tgt_name,
+						      const bool&   en)
 {
     finder_trace_init("set_finder_client_enabled(\"%s\", %s)",
 		      tgt_name.c_str(), (en) ? "true" : "false");
@@ -167,8 +170,8 @@ FinderXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_finder_client_enabled(const string& tgt_name,
-						    bool&         en)
+FinderXrlTarget::finder_0_2_finder_client_enabled(const string& tgt_name,
+						  bool&         en)
 {
     finder_trace_init("finder_client_enabled(\"%s\")",
 		      tgt_name.c_str());
@@ -182,10 +185,10 @@ FinderXrlTarget::finder_0_1_finder_client_enabled(const string& tgt_name,
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_add_xrl(const string& xrl,
-				      const string& protocol_name,
-				      const string& protocol_args,
-				      string&	    resolved_xrl_method_name)
+FinderXrlTarget::finder_0_2_add_xrl(const string& xrl,
+				    const string& protocol_name,
+				    const string& protocol_args,
+				    string&	  resolved_xrl_method_name)
 {
     Xrl u;
 
@@ -222,7 +225,7 @@ FinderXrlTarget::finder_0_1_add_xrl(const string& xrl,
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
+FinderXrlTarget::finder_0_2_remove_xrl(const string&	xrl)
 {
     Xrl u;
 
@@ -252,14 +255,16 @@ FinderXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
-					  XrlAtomList&	resolved_xrls)
+FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
+					XrlAtomList&	resolved_xrls)
 {
     finder_trace_init("resolve_xrl(\"%s\")", xrl.c_str());
 
     Xrl u;
 
+    //
     // Construct Xrl
+    //
     try {
 	u = Xrl(xrl.c_str());
     } catch (InvalidString&) {
@@ -267,9 +272,24 @@ FinderXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
     }
 
-    // Check target exists and is enabled
+    //
+    // Xrl may need resolving by class
+    //
+    const string& instance = _finder.primary_instance(u.target());
+    if (u.target() != instance) {
+	try {
+	    u = Xrl(u.protocol(), instance, u.command());
+	} catch (InvalidString&) {
+	    finder_trace_result("fail (bad class to instance mapping).");
+	    return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
+	}
+    }
+
+    //
+    // Check instance exists and is enabled
+    //
     bool en;
-    if (_finder.target_enabled(u.target(), en) == false) {
+    if (_finder.target_enabled(instance, en) == false) {
 	finder_trace_result("fail (target does not exist).");
 	return XrlCmdError::COMMAND_FAILED("Xrl target does not exist.");
     } else if (en == false) {
@@ -277,8 +297,8 @@ FinderXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 	return XrlCmdError::COMMAND_FAILED("Xrl target is not enabled.");
     }
 
-    const Finder::Resolveables* resolutions = _finder.resolve(u.target(),
-								u.str());
+    const Finder::Resolveables* resolutions = _finder.resolve(instance,
+							      u.str());
     if (0 == resolutions) {
 	finder_trace_result("fail (does not resolve).");
 	return XrlCmdError::COMMAND_FAILED("Xrl does not resolve");
@@ -302,7 +322,7 @@ FinderXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
+FinderXrlTarget::finder_0_2_get_xrl_targets(XrlAtomList& xal)
 {
     list<string> tgts;
 
@@ -320,8 +340,8 @@ FinderXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
-						     XrlAtomList&  xal)
+FinderXrlTarget::finder_0_2_get_xrls_registered_by(const string& tgt,
+						   XrlAtomList&  xal)
 {
     list<string> xrls;
 
@@ -345,7 +365,7 @@ FinderXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
+FinderXrlTarget::finder_0_2_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
 {
     const IPv4Hosts& hl = permitted_ipv4_hosts();
     for (IPv4Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
@@ -355,7 +375,7 @@ FinderXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
+FinderXrlTarget::finder_0_2_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
 {
     const IPv4Nets& nl = permitted_ipv4_nets();
     for (IPv4Nets::const_iterator ci = nl.begin(); ci != nl.end(); ++ci)
@@ -365,7 +385,7 @@ FinderXrlTarget::finder_0_1_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
+FinderXrlTarget::finder_0_2_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
 {
     const IPv6Hosts& hl = permitted_ipv6_hosts();
     for (IPv6Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
@@ -375,11 +395,51 @@ FinderXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_0_1_get_ipv6_permitted_nets(XrlAtomList& ipv6nets)
+FinderXrlTarget::finder_0_2_get_ipv6_permitted_nets(XrlAtomList& ipv6nets)
 {
     const IPv6Nets& nl = permitted_ipv6_nets();
     for (IPv6Nets::const_iterator ci = nl.begin(); ci != nl.end(); ++ci)
 	ipv6nets.append(XrlAtom(*ci));
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::finder_event_notifier_0_1_register_all_event_interest(
+						const string& who
+						)
+{
+    UNUSED(who);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::finder_event_notifier_0_1_deregister_all_event_interest(
+						 const string& who
+						 )
+{
+    UNUSED(who);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::finder_event_notifier_0_1_register_class_event_interest(
+						 const string& who,
+						 const string& class_name
+						 )
+{
+    UNUSED(who);
+    UNUSED(class_name);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::finder_event_notifier_0_1_deregister_class_event_interest(
+						 const string& who,
+						 const string& class_name
+						 )
+{
+    UNUSED(who);
+    UNUSED(class_name);
     return XrlCmdError::OKAY();
 }

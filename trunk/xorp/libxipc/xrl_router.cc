@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.16 2003/04/23 19:17:55 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.17 2003/04/23 20:50:49 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -51,19 +51,6 @@ do {									      \
     if (xrl_trace.on()) XLOG_INFO(string((p) + (x).str()).c_str());	      \
 } while (0)
 
-// ----------------------------------------------------------------------------
-// XrlCmdDispatcher methods (temporary class and location?)
-
-XrlError
-XrlCmdDispatcher::dispatch_xrl(const Xrl& xrl, XrlArgs& response) const
-{
-    const XrlCmdEntry *c = get_handler(xrl.command().c_str());
-    if (c) {
-	return c->callback->dispatch(xrl, &response);	
-    }
-    debug_msg("No handler for %s\n", xrl.command().c_str());
-    return XrlError::NO_SUCH_METHOD();
-}
 
 struct XrlRouterDispatchState {
 public:
@@ -146,11 +133,11 @@ mk_instance_name(EventLoop& e, const char* classname)
 }
 
 XrlRouter::XrlRouter(EventLoop&  e,
-		     const char* entity_name,
+		     const char* class_name,
 		     const char* host,
 		     uint16_t	 port)
     throw (InvalidAddress)
-    : XrlCmdDispatcher(entity_name), _e(e), _rpend(0), _spend(0)
+    : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
 {
     _fc = new FinderClient();
     _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
@@ -160,9 +147,9 @@ XrlRouter::XrlRouter(EventLoop&  e,
     _fac = new FinderTcpAutoConnector(e, *_fc, _fc->commands(),
 					finder_host(host), port);
 
-    string iname = mk_instance_name(e, entity_name);
-    if (_fc->register_xrl_target(entity_name, iname, _id) == false) {
-	XLOG_FATAL("Failed to register target %s\n", entity_name);
+    _instance_name = mk_instance_name(e, class_name);
+    if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
+	XLOG_FATAL("Failed to register target %s\n", class_name);
     }
 }
 
@@ -192,7 +179,13 @@ XrlRouter::dispose(XrlRouterDispatchState* ds)
 bool
 XrlRouter::connected() const
 {
-    return _fc->connected();
+    return _fc && _fc->connected();
+}
+
+bool
+XrlRouter::ready() const
+{
+    return _fc && _fc->ready();
 }
 
 bool
@@ -210,10 +203,11 @@ XrlRouter::add_listener(XrlPFListener* l)
     // Walk list of Xrl in command map and register them with finder client
     XrlCmdMap::CmdMap::const_iterator ci = _cmd_map.begin();
     while (ci != _cmd_map.end()) {
-	Xrl x("finder", name(), ci->first);
+	Xrl x("finder", _instance_name, ci->first);
 	debug_msg("adding handler for %s protocol %s address %s\n",
 		  x.str().c_str(), l->protocol(), l->address());
-	_fc->register_xrl(_id, x.str(), l->protocol(), l->address());
+	_fc->register_xrl(instance_name(), x.str(),
+			  l->protocol(), l->address());
 	++ci;
     }
     
@@ -225,7 +219,7 @@ XrlRouter::finalize()
 {
     // XXX should set a variable here to signal finalize set and no
     // further registrations of commands or xrls will be accepted.
-    _fc->enable_xrls(_id);
+    _fc->enable_xrls(instance_name());
 }
 
 bool
@@ -239,10 +233,11 @@ XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
     list<XrlPFListener*>::const_iterator pli = _listeners.begin();
 
     while (pli != _listeners.end()) {
-	Xrl x("finder", name(), cmd);
+	Xrl x("finder", _instance_name, cmd);
 	debug_msg("adding handler for %s protocol %s address %s\n",
 		  x.str().c_str(), (*pli)->protocol(), (*pli)->address());
-	_fc->register_xrl(_id, x.str(), (*pli)->protocol(), (*pli)->address());
+	_fc->register_xrl(instance_name(), x.str(),
+			  (*pli)->protocol(), (*pli)->address());
 	++pli;
     }
 

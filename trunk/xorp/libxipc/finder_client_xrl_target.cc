@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.2 2003/04/23 20:50:45 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.3 2003/05/07 23:15:14 mjh Exp $"
 
 #include "libxorp/status_codes.h"
 #include "finder_client_xrl_target.hh"
@@ -48,22 +48,36 @@ FinderClientXrlTarget::common_0_1_get_status(uint32_t& status, string& r)
 }
 
 XrlCmdError
-FinderClientXrlTarget::finder_client_0_1_hello()
+FinderClientXrlTarget::finder_client_0_2_hello()
 {
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderClientXrlTarget::finder_client_0_1_remove_xrl_from_cache(const string& xrl)
+FinderClientXrlTarget::finder_client_0_2_remove_xrl_from_cache(const string& x)
 {
-    _client->uncache_xrl(xrl);
+    _client->uncache_xrl(x);
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderClientXrlTarget::finder_client_0_1_remove_xrls_for_target_from_cache(const string& target)
+FinderClientXrlTarget::finder_client_0_2_remove_xrls_for_target_from_cache(
+							const string& target
+							)
 {
     _client->uncache_xrls_from_target(target);
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+FinderClientXrlTarget::finder_client_0_2_dispatch_tunneled_xrl(
+						const string& xrl,
+						uint32_t&     xrl_errno,
+						string&	      xrl_errtxt
+						)
+{
+    XrlCmdError e = _client->dispatch_tunneled_xrl(xrl);
+    xrl_errno  = e.error_code();
+    xrl_errtxt = e.note();
+    return XrlCmdError::OKAY();
+}

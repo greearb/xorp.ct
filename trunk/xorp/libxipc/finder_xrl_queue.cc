@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_queue.cc,v 1.1 2003/02/24 19:39:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_queue.cc,v 1.2 2003/04/23 20:50:48 hodson Exp $"
 
 #include "finder_module.h"
 #include "libxorp/debug.h"
@@ -20,6 +20,12 @@
 #include "libxorp/xlog.h"
 #include "finder_messenger.hh"
 #include "finder_xrl_queue.hh"
+
+inline EventLoop&
+FinderXrlCommandQueue::eventloop()
+{
+    return _m->eventloop();
+}
 
 inline void
 FinderXrlCommandQueue::push()
@@ -47,4 +53,11 @@ FinderXrlCommandQueue::crank()
     _cmds.pop_front();
     _pending = false;
     push();
+}
+
+void
+FinderXrlCommandQueue::kill_messenger()
+{
+    debug_msg("killing messenger\n");
+    delete _m;
 }

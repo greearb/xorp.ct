@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.6 2003/03/16 08:20:27 pavlin Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.7 2003/04/22 23:27:18 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__
@@ -118,7 +118,7 @@ private:
 		      FinderMessengerBase* fmb)
 	    : scb(cb)
 	{
-	    expiry = fmb->eventloop().new_oneoff_after_ms(response_timeout_ms,
+	    expiry = fmb->eventloop().new_oneoff_after_ms(RESPONSE_TIMEOUT_MS,
 			callback(fmb,  &FinderMessengerBase::response_timeout,
 				 seqno));
 	}
@@ -126,7 +126,7 @@ private:
 	SendCallback scb;
 	XorpTimer    expiry;
 
-	static const uint32_t response_timeout_ms = 2000;
+	static const uint32_t RESPONSE_TIMEOUT_MS = 30000;
     };
     typedef map<uint32_t, ResponseState> SeqNoResponseMap;
 

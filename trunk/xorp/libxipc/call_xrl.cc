@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.12 2003/03/10 23:20:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.13 2003/04/22 23:27:17 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -73,9 +73,8 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	done = false;
 	resolve_failed = true;
 	
-	while (done == false && router.connected() == true &&
+	while (done == false && router.ready() == true &&
 	       tries <= retry_count) {
-
 	    resolve_failed = false;
 	    router.send(x, callback(&response_handler,
 				    &done,
@@ -232,12 +231,17 @@ main(int argc, char* const argv[])
 	bool	 timeout = false;
 	XorpTimer	 to = e.set_flag_after_ms(1000, &timeout);
 
-	while (false == timeout && false == router.connected()) {
+	while (false == timeout && false == router.ready()) {
 	    e.run();
 	}
 
 	if (false == router.connected()) {
-	    XLOG_ERROR("Could not connect to finder\n");
+	    XLOG_ERROR("Could not connect to finder.\n");
+	    exit(-1);
+	}
+
+	if (false == router.ready()) {
+	    XLOG_ERROR("Connected to finder, but did not become ready.\n");
 	    exit(-1);
 	}
 

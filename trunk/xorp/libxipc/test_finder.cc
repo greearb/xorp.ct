@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.7 2003/04/23 20:50:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.8 2003/04/24 19:32:47 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -174,7 +174,7 @@ test_main(void)
     FinderClient fc1;
     FinderClientXrlTarget fc1_xrl_handler(&fc1, &fc1.commands());
     FinderTcpAutoConnector fc1_connector(e, fc1, fc1.commands(),
-					   test_host, test_port);
+					 test_host, test_port);
 
     //
     // Start an expiry timer
@@ -187,7 +187,7 @@ test_main(void)
     //
     verbose_log("Establishing connection between first finder client and "
 		"finder...\n");
-    while (!expired && fc1.connected() == false && 
+    while (!expired && fc1.ready() == false && 
 	   finder_box->finder().messengers() == 0)
 	e.run();
 
@@ -200,9 +200,9 @@ test_main(void)
     //
     // Register target
     //
+    string instance_name("test_target");
     verbose_log("Registering target...\n");
-    uint32_t id;
-    if (fc1.register_xrl_target("test_target", "experimental", id) != true) {
+    if (fc1.register_xrl_target(instance_name, "experimental", 0) != true) {
 	verbose_log("failed.\n");
 	return 1;
     }
@@ -215,9 +215,9 @@ test_main(void)
     // Register a set of xrl's
     //
     list<string> xrls;
-    xrls.push_back("finder://test_target/test_command1");
-    xrls.push_back("finder://test_target/test_command2");
-    xrls.push_back("finder://test_target/test_command3");
+    xrls.push_back("finder://" + instance_name + "/test_command1");
+    xrls.push_back("finder://" + instance_name + "/test_command2");
+    xrls.push_back("finder://" + instance_name + "/test_command3");
 
     expired = false;
     t = e.set_flag_after_ms(1000, &expired);
@@ -225,14 +225,14 @@ test_main(void)
     for (list<string>::const_iterator ci = xrls.begin();
 	 ci != xrls.end(); ++ci) {
 	verbose_log("Registering %s...\n", ci->c_str());
-	if (fc1.register_xrl(id, *ci,
+	if (fc1.register_xrl(instance_name, *ci,
 			     "stcp", "localhost:10000") == false) {
 	    verbose_log("failed.\n");
 	    return 1;
 	}
 	verbose_log("succeeded\n");
     }
-    fc1.enable_xrls(id);
+    fc1.enable_xrls(instance_name);
     
     while (!expired)
 	e.run();
@@ -269,14 +269,14 @@ test_main(void)
 					   test_host, test_port);
 
     // Register test client
-    uint32_t id2;
+    string instance_name2("test_client");
     verbose_log("Registering client...\n");
-    if (fc2.register_xrl_target("test_client", "experimental", id2) != true) {
+    if (fc2.register_xrl_target(instance_name2, "experimental", 0) != true) {
 	verbose_log("failed.\n");
 	return 1;
     }
     verbose_log("succeeded.\n");
-    if (fc2.enable_xrls(id2) == false) {
+    if (fc2.enable_xrls(instance_name2) == false) {
 	verbose_log("Failed to enable xrls on test client\n");
 	return 1;
     }
@@ -293,7 +293,7 @@ test_main(void)
     verbose_log("Establishing connection between second finder client and "
 		"finder...\n");
     while (!expired &&
-	   (fc2.connected() == false || 
+	   (fc2.ready() == false || 
 	    finder_box->finder().messengers() < 2))
 	e.run();
 
@@ -371,17 +371,8 @@ usage(const char* progname)
 int
 main(int argc, char * const argv[])
 {
-   int ret_value = 0;
-    
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
+    int ret_value = 0;
+    const char* const argv0 = argv[0];
     
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
@@ -393,16 +384,24 @@ main(int argc, char * const argv[])
         case '?':
         default:
             usage(argv[0]);
-            xlog_stop();
-            xlog_exit();
             if (ch == 'h')
-                return (0);
+                return 0;
             else
-                return (1);
+                return 1;
         }
     }
     argc -= optind;
     argv += optind;
+
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv0, NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
+    // XXX: verbosity of the error messages temporary increased
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
     
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {

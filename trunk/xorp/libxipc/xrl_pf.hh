@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.11 2003/03/16 08:20:32 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.12 2003/04/22 23:27:19 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -35,18 +35,18 @@ public:
     {}
 };
 
-class XrlCmdDispatcher;
+class XrlDispatcher;
 
 class XrlPFListener {
 public:
-    XrlPFListener(EventLoop& e, XrlCmdDispatcher* d = 0)
+    XrlPFListener(EventLoop& e, XrlDispatcher* d = 0)
 	: _eventloop(e), _dispatcher(d) {}
     virtual ~XrlPFListener() {}
     virtual const char*	address() const = 0;
     virtual const char*	protocol() const = 0;
 
-    inline bool set_dispatcher(XrlCmdDispatcher* d);
-    inline const XrlCmdDispatcher* dispatcher() const { return _dispatcher; }
+    inline bool set_dispatcher(XrlDispatcher* d);
+    inline const XrlDispatcher* dispatcher() const { return _dispatcher; }
 
     EventLoop& eventloop() const { return _eventloop; }
 
@@ -61,7 +61,7 @@ public:
     };
 protected:
     EventLoop& _eventloop;
-    const XrlCmdDispatcher* _dispatcher;
+    const XrlDispatcher* _dispatcher;
 };
 
 // ----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ protected:
 // Inline XrlPFListener Methods
 
 inline bool
-XrlPFListener::set_dispatcher(XrlCmdDispatcher* d)
+XrlPFListener::set_dispatcher(XrlDispatcher* d)
 {
     if (_dispatcher == 0) {
 	_dispatcher = d;

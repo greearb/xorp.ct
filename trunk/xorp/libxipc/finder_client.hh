@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.5 2003/03/08 20:56:52 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.6 2003/04/23 20:50:45 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_HH__
@@ -26,31 +26,29 @@
 
 #include "xrl_pf.hh"
 
-struct FinderDBEntry {
-    FinderDBEntry(const string& key)
-	: _key(key) {}
+class FinderClientOp;
 
-    FinderDBEntry(const string& key, const string& value)
-	: _key(key) { _values.push_back(value); }
+struct FinderDBEntry
+{
+    FinderDBEntry(const string& key);
+    FinderDBEntry(const string& key, const string& value);
 
-    inline const string& key() const { return _key; }
-
-    inline const list<string>& values() const { return _values; }
-    inline list<string>& values() { return _values; }
-    inline void clear() { _values.erase(_values.begin(), _values.end()); }
+    inline const string& key() const		{ return _key; }
+    inline const list<string>& values() const	{ return _values; }
+    inline list<string>& values()		{ return _values; }
+    inline void clear();
     
 protected:
     string	 _key;
     list<string> _values;
 };
 
-class FinderClientOp;
-
 class FinderClientXrlCommandInterface
 {
 public:
-    virtual void uncache_xrl(const string& xrl)= 0;
+    virtual void uncache_xrl(const string& xrl) = 0;
     virtual void uncache_xrls_from_target(const string& target) = 0;
+    virtual XrlCmdError dispatch_tunneled_xrl(const string& xrl) = 0;
 };
 
 class FinderClient :
@@ -63,26 +61,28 @@ public:
     typedef ref_ptr<FinderClientOp> Operation;
     typedef list<Operation> OperationQueue;
 
-    typedef map<string, FinderDBEntry> ResolvedTable;
-    typedef map<string, string>        LocalResolvedTable;
-    typedef vector<string>	       TargetIdList;
+    class InstanceInfo;
+    
+    typedef map<string, FinderDBEntry>	ResolvedTable;
+    typedef map<string, string>		LocalResolvedTable;
+    typedef vector<InstanceInfo>	InstanceList;
     
 public:
     FinderClient();
     virtual ~FinderClient();
 
-    bool register_xrl_target(const string& instance_name,
-			     const string& class_name,
-			     uint32_t&     target_id);
+    bool register_xrl_target(const string&	  instance_name,
+			     const string&	  class_name,
+			     const XrlDispatcher* dispatcher);
 
-    bool unregister_xrl_target(uint32_t target_id);
+    bool unregister_xrl_target(const string& instance_name);
     
-    bool register_xrl(uint32_t	    target_id,
+    bool register_xrl(const string& instance_name,
 		      const string& xrl,
 		      const string& pf_name,
 		      const string& pf_args);
 
-    bool enable_xrls(uint32_t target_id);
+    bool enable_xrls(const string& instance_name);
     
     void query(const string&	    key,
 	       const QueryCallback& qcb);
@@ -94,14 +94,23 @@ public:
     
     FinderMessengerBase* messenger();
 
-    inline OperationQueue& todo_list() { return _todo_list; }
-    inline OperationQueue& done_list() { return _done_list; }
+    inline OperationQueue& todo_list()		{ return _todo_list; }
+    inline OperationQueue& done_list()		{ return _done_list; }
     void   notify_done(const FinderClientOp* completed);
     void   notify_failed(const FinderClientOp* completed);
 
-    inline XrlCmdMap& commands() { return _commands; }
+    inline XrlCmdMap& commands()		{ return _commands; }
 
-    inline bool connected() const { return _messenger != 0 && _xrls_registered; }
+    /**
+     * @return true if FinderClient has registered Xrls and is considered
+     * operational.
+     */
+    inline bool ready() const			{ return _xrls_registered; }
+
+    /**
+     * @return true if a connection is established with the Finder.
+     */
+    inline bool connected() const		{ return _messenger != 0; }
     
 protected:
     // FinderMessengerManager interface
@@ -116,17 +125,22 @@ protected:
     // FinderClientXrlCommandInterface
     void uncache_xrl(const string& xrl);
     void uncache_xrls_from_target(const string& target);
+    XrlCmdError dispatch_tunneled_xrl(const string& xrl);
     
 protected:
     void crank();
     void prepare_for_restart();
+
+protected:
+    inline InstanceList::iterator find_instance(const string& instance);
+    inline InstanceList::const_iterator find_instance(const string& instance) const;
     
 protected:
     OperationQueue	_todo_list;
     OperationQueue	_done_list;
     ResolvedTable	_rt;
     LocalResolvedTable  _lrt;
-    TargetIdList	_tids;
+    InstanceList	_ids;
 
     XrlCmdMap		_commands;
     

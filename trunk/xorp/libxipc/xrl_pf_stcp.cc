@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.11 2003/04/22 23:27:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.12 2003/04/23 00:28:38 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -34,7 +34,7 @@
 #include "xrl_error.hh"
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_stcp_ph.hh"
-#include "xrl_router.hh"
+#include "xrl_dispatcher.hh"
 
 static const string STCP_PROTOCOL_NAME ("stcp");
 static const string STCP_PROTOCOL ("stcp/1.0");
@@ -230,7 +230,7 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
     XrlError e;
     XrlArgs response;
 
-    const XrlCmdDispatcher* xr = _parent.dispatcher();
+    const XrlDispatcher* xr = _parent.dispatcher();
     assert(xr != 0);
     
     try {
@@ -330,7 +330,7 @@ STCPRequestHandler::die(const char *reason)
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
 
-XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdDispatcher* x, uint16_t port)
+XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlDispatcher* x, uint16_t port)
     throw (XrlPFConstructorError)
     : XrlPFListener(e, x), _fd(-1), _address_slash_port() {
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.6 2003/03/10 23:20:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.7 2003/04/22 23:27:18 hodson Exp $"
 
 #include <map>
 
@@ -160,7 +160,7 @@ run_test()
 {
     EventLoop eventloop;
 
-    XrlCmdDispatcher cmd_dispatcher("tester");
+    XrlDispatcher cmd_dispatcher("tester");
     cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
     cmd_dispatcher.add_handler("get_int32", callback(int32_recv_handler));
     cmd_dispatcher.add_handler("no_execute",

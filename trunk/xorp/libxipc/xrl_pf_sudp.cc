@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.13 2003/04/22 23:27:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.14 2003/04/23 00:28:39 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,7 +40,7 @@
 #include "header.hh"
 #include "xrl_error.hh"
 #include "xrl_pf_sudp.hh"
-#include "xrl_router.hh"
+#include "xrl_dispatcher.hh"
 #include "sockutil.hh"
 
 // ----------------------------------------------------------------------------
@@ -351,7 +351,7 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 // ----------------------------------------------------------------------------
 // XrlPFUDPListener
 
-XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdDispatcher* xr)
+XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlDispatcher* xr)
     throw (XrlPFConstructorError)
     : XrlPFListener(e, xr)
 {
@@ -430,7 +430,7 @@ XrlPFSUDPListener::recv(int fd, SelectorMask m)
 const XrlError
 XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
 {
-    const XrlCmdDispatcher* d = dispatcher();
+    const XrlDispatcher* d = dispatcher();
     assert(d != 0);
 
     try {

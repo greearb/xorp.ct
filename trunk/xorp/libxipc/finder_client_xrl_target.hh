@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.2 2003/04/23 20:50:45 hodson Exp $
+// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.3 2003/05/07 23:15:14 mjh Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
@@ -24,15 +24,22 @@ class FinderClientXrlCommandInterface;
 class FinderClientXrlTarget : public XrlFinderclientTargetBase {
 public:
     FinderClientXrlTarget(FinderClientXrlCommandInterface* client,
-			    XrlCmdMap* cmds);
+			  XrlCmdMap* cmds);
 
     XrlCmdError common_0_1_get_target_name(string& name);
     XrlCmdError common_0_1_get_version(string& version);
     XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
 
-    XrlCmdError finder_client_0_1_hello();
-    XrlCmdError finder_client_0_1_remove_xrl_from_cache(const string& xrl);
-    XrlCmdError finder_client_0_1_remove_xrls_for_target_from_cache(const string& target);
+    XrlCmdError finder_client_0_2_hello();
+
+    XrlCmdError finder_client_0_2_remove_xrl_from_cache(const string& xrl);
+
+    XrlCmdError finder_client_0_2_remove_xrls_for_target_from_cache(
+							const string& target);
+
+    XrlCmdError finder_client_0_2_dispatch_tunneled_xrl(const string& xrl,
+							uint32_t& xrl_errno,
+							string&   xrl_errtxt);
     
 protected:
     FinderClientXrlCommandInterface* _client;

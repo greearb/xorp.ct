@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.12 2003/03/09 17:50:37 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.13 2003/04/23 20:50:45 hodson Exp $"
+
+#include <functional>
+#include <algorithm>
 
 #include "finder_module.h"
 
@@ -20,13 +23,22 @@
 #include "libxorp/debug.h"
 
 #include "xrl_error.hh"
+#include "xrl_dispatcher.hh"
+
 #include "finder_client.hh"
 #include "finder_xif.hh"
 #include "finder_tcp_messenger.hh"
 
 static const char* finder = "finder";
 
-static class TraceFinder {
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Tracing related
+//
+
+static class TraceFinder
+{
 public:
     TraceFinder() {
 	_do_trace = !(getenv("FINDERCLIENTTRACE") == 0);
@@ -48,7 +60,6 @@ do {									      \
     }									      \
 } while (0)
 
-
 #define finder_trace_init(x...) 					      \
 do {									      \
     if (finder_tracer.on()) finder_tracer.set_context(c_format(x));	      \
@@ -63,10 +74,40 @@ do {									      \
     }									      \
 } while(0)
 
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// FinderDBEntry
+//
+
+FinderDBEntry::FinderDBEntry(const string& key)
+    : _key(key)
+{
+}
+
+FinderDBEntry::FinderDBEntry(const string& key, const string& value)
+    : _key(key)
+{
+    _values.push_back(value);
+}
+
+inline void
+FinderDBEntry::clear()
+{
+    _values.erase(_values.begin(), _values.end());
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Asynchronous FinderClient Operations and supporting classes
+//
+
 /**
  * Base class for operations to be executed by FinderClient.
  */
-class FinderClientOp {
+class FinderClientOp
+{
 public:
     FinderClientOp(FinderClient& fc) : _fc(fc) {}
     virtual ~FinderClientOp() {}
@@ -87,7 +128,8 @@ protected:
  * Base class for operations FinderClient only need execute once,
  * eg resolutions.
  */
-class FinderClientOneOffOp : public FinderClientOp {
+class FinderClientOneOffOp : public FinderClientOp
+{
 public:
     FinderClientOneOffOp(FinderClient& fc) : FinderClientOp(fc) {}
 
@@ -99,7 +141,8 @@ public:
  * register target, register xrl, etc.  Each repeat operation is associated
  * with an enumerated target.
  */
-class FinderClientRepeatOp : public FinderClientOp {
+class FinderClientRepeatOp : public FinderClientOp
+{
 public:
     FinderClientRepeatOp(FinderClient& fc, uint32_t target_id)
 	: FinderClientOp(fc), _tid(target_id) {}
@@ -114,16 +157,17 @@ private:
  * Class that handles resolutions for FinderClient, and puts results
  * into FinderClient's resolved table and notifies the client.
  */
-class FinderClientQuery : public FinderClientOneOffOp {
+class FinderClientQuery : public FinderClientOneOffOp
+{
 public:
     typedef FinderClient::QueryCallback QueryCallback;
     typedef FinderClient::ResolvedTable ResolvedTable;
     
 public:
-    FinderClientQuery(FinderClient&	fc,
-			const string&	key,
-			ResolvedTable&	rt,
-			const QueryCallback& qcb)
+    FinderClientQuery(FinderClient&	   fc,
+		      const string&	   key,
+		      ResolvedTable&	   rt,
+		      const QueryCallback& qcb)
 	: FinderClientOneOffOp(fc), _key(key), _rt(rt), _qcb(qcb)
     {
 	finder_trace("Constructing ClientQuery \"%s\"", _key.c_str());
@@ -138,11 +182,9 @@ public:
     execute(FinderMessengerBase* m)
     {
 	finder_trace_init("executing ClientQuery \"%s\"", _key.c_str());
-	XrlFinderV0p1Client cl(m);
-	if (!cl.send_resolve_xrl(
-			 finder, _key, 
-			 callback(this, &FinderClientQuery::query_callback))
-		) {
+	XrlFinderV0p2Client cl(m);
+	if (!cl.send_resolve_xrl(finder, _key,
+		callback(this, &FinderClientQuery::query_callback))) {
 	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	    XLOG_ERROR("Failed on send_resolve_xrl");
 	    finder_trace_result("failed (send)");
@@ -197,7 +239,8 @@ public:
 
 	for (size_t i = 0; i < al->size(); i++) {
 	    try {
-		debug_msg("Adding resolved \"%s\"\n", al->get(i).text().c_str());
+		debug_msg("Adding resolved \"%s\"\n",
+			  al->get(i).text().c_str());
 		rt_entry->second.values().push_back(al->get(i).text());
 	    } catch (const XrlAtom::NoData&) {
 		_rt.erase(rt_entry);
@@ -233,13 +276,14 @@ protected:
 /**
  * Class that handles the forwarding of Xrl's targetted at the finder.
  */
-class FinderForwardedXrl : public FinderClientOneOffOp {
+class FinderForwardedXrl : public FinderClientOneOffOp
+{
 public:
     typedef XrlPFSender::SendCallback XrlCallback;
 public:
-    FinderForwardedXrl(FinderClient&	fc,
-			 const Xrl& 		xrl,
-			 const XrlCallback&	xcb)
+    FinderForwardedXrl(FinderClient&		fc,
+		       const Xrl& 		xrl,
+		       const XrlCallback&	xcb)
 	: FinderClientOneOffOp(fc), _xrl(xrl), _xcb(xcb)
     {
 	finder_trace("Constructing ForwardedXrl \"%s\"", _xrl.str().c_str());
@@ -290,22 +334,25 @@ protected:
 /**
  * Class to register client with Finder.
  */
-class FinderClientRegisterTarget : public FinderClientRepeatOp {
+class FinderClientRegisterTarget : public FinderClientRepeatOp
+{
 public:
-    FinderClientRegisterTarget(FinderClient& fc,
-				 uint32_t	 target_id,
-				 const string&	 instance_name,
-				 const string&	 class_name)
+    FinderClientRegisterTarget(FinderClient&	fc,
+			       uint32_t		target_id,
+			       const string&	instance_name,
+			       const string&	class_name)
 	: FinderClientRepeatOp(fc, target_id),
 	  _iname(instance_name), _cname(class_name), _cookie("")
-    {}
+    {
+    }
 
     void execute(FinderMessengerBase* m)
     {
 	FinderTcpMessenger *ftm = dynamic_cast<FinderTcpMessenger*>(m);
 	XLOG_ASSERT(ftm != 0);
-	XrlFinderV0p1Client cl(m);
-	if (!cl.send_register_finder_client(finder, _iname, _cname, _cookie,
+	XrlFinderV0p2Client cl(m);
+	if (!cl.send_register_finder_client(finder, _iname, _cname,
+					    false, _cookie,
 		callback(this, &FinderClientRegisterTarget::reg_callback))) {
 	    XLOG_ERROR("Failed on send_register_xrl");
 	    client().notify_failed(this);
@@ -339,24 +386,25 @@ protected:
 /**
  * Class to register an Xrl with the Finder.
  */
-class FinderClientRegisterXrl : public FinderClientRepeatOp {
+class FinderClientRegisterXrl : public FinderClientRepeatOp
+{
 public:
     typedef FinderClient::LocalResolvedTable LocalResolvedTable;
 
 public:
-    FinderClientRegisterXrl(FinderClient&	  fc,
-			      LocalResolvedTable& lrt,
-			      uint32_t	 	  target_id,
-			      const string&	  xrl,
-			      const string&	  pf_name,
-			      const string&	  pf_args)
+    FinderClientRegisterXrl(FinderClient&	fc,
+			    LocalResolvedTable&	lrt,
+			    uint32_t	 	target_id,
+			    const string&	xrl,
+			    const string&	pf_name,
+			    const string&	pf_args)
 	: FinderClientRepeatOp(fc, target_id), _lrt(lrt),
 	  _xrl(xrl), _pf(pf_name), _pf_args(pf_args)
     {}
 
     void execute(FinderMessengerBase* m)
     {
-	XrlFinderV0p1Client cl(m);
+	XrlFinderV0p2Client cl(m);
 	debug_msg("Sending add_xrl(\"%s\", \"%s\", \"%s\")\n",
 		  _xrl.c_str(), _pf.c_str(), _pf_args.c_str());
 	if (!cl.send_add_xrl(finder, _xrl, _pf, _pf_args,
@@ -389,7 +437,8 @@ protected:
     string _pf_args;
 };
 
-class FinderClientEnableXrls : public FinderClientRepeatOp {
+class FinderClientEnableXrls : public FinderClientRepeatOp
+{
 public:
     FinderClientEnableXrls(FinderClient& fc,
 			     uint32_t        target_id,
@@ -412,7 +461,7 @@ public:
 	finder_trace_init("execute EnableXrls \"%s\"", _iname.c_str());
 	FinderTcpMessenger *ftm = dynamic_cast<FinderTcpMessenger*>(m);
 	XLOG_ASSERT(ftm != 0);
-	XrlFinderV0p1Client cl(m);
+	XrlFinderV0p2Client cl(m);
 	if (!cl.send_set_finder_client_enabled(finder, _iname, _en,
 		callback(this, &FinderClientEnableXrls::en_callback))) {
 	    XLOG_ERROR("Failed on send_set_finder_client_enabled");
@@ -444,6 +493,39 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+// FinderClient::InstanceInfo
+//
+
+class FinderClient::InstanceInfo
+{
+public:
+    InstanceInfo(const string&	      instance_name,
+		 const string&	      class_name,
+		 const XrlDispatcher* dispatcher)
+	: _ins_name(instance_name),
+	  _cls_name(class_name),
+	  _dispatcher(dispatcher),
+	  _id(_s_id++)
+    {}
+    inline const string& instance_name() const		{ return _ins_name; }
+    inline const string& class_name() const		{ return _cls_name; }
+    inline const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
+    inline const uint32_t id() const			{ return _id; }
+
+private:
+    string		 _ins_name;
+    string		 _cls_name;
+    const XrlDispatcher* _dispatcher;
+    uint32_t		 _id;
+
+    static uint32_t	 _s_id;
+};
+
+uint32_t FinderClient::InstanceInfo::_s_id = 0;
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
 // FinderClient methods
 //
 
@@ -462,81 +544,97 @@ FinderClient::~FinderClient()
     }
 }
 
-bool
-FinderClient::register_xrl_target(const string& instance_name,
-				    const string& class_name,
-				    uint32_t&	  target_id)
+FinderClient::InstanceList::iterator
+FinderClient::find_instance(const string& instance_name)
 {
-    if (instance_name.empty())
+    InstanceList::iterator i = _ids.begin();
+    for (; i != _ids.end(); i++) {
+	if (i->instance_name() == instance_name)
+	    break;
+    }
+    return i;
+}
+
+FinderClient::InstanceList::const_iterator
+FinderClient::find_instance(const string& instance_name) const
+{
+    InstanceList::const_iterator i = _ids.begin();
+    for (; i != _ids.end(); i++) {
+	if (i->instance_name() == instance_name)
+	    break;
+    }
+    return i;
+}
+
+bool
+FinderClient::register_xrl_target(const string&		instance_name,
+				  const string&		class_name,
+				  const XrlDispatcher*	dispatcher)
+{
+    if (instance_name.empty() || class_name.empty())
 	return false;
 
-    for (size_t i = 0; i < _tids.size(); i++) {
-	if (_tids[i] == instance_name) {
-	    XLOG_WARNING("Attempting to re-register xrl target \"%s\"",
-			 instance_name.c_str());
-	    target_id = i;
-	    return true;
+    const InstanceList::iterator existing = find_instance(instance_name);
+    if (existing != _ids.end()) {
+	if (existing->class_name() != class_name) {
+	    XLOG_FATAL("Re-registering instance with different class (now %s"
+		       " was %s)",
+		       class_name.c_str(),
+		       existing->class_name().c_str());
 	}
+	XLOG_WARNING("Attempting to re-register xrl target \"%s\"",
+		     instance_name.c_str());
+	return true;
     }
-
-    target_id = _tids.size();
-    _tids.push_back(instance_name);
+    
+    _ids.push_back(InstanceInfo(instance_name, class_name, dispatcher));
 
     // We should check whether item exists on queue already.
-    Operation op(new FinderClientRegisterTarget(*this, target_id,
-						  instance_name, class_name));
+    Operation op(new FinderClientRegisterTarget(*this, _ids.back().id(),
+						instance_name, class_name));
     _todo_list.push_back(op);
     crank();
     return true;
 }
 
 bool
-FinderClient::register_xrl(uint32_t target_id,
-			     const string& xrl,
-			     const string& pf_name,
-			     const string& pf_args)
+FinderClient::register_xrl(const string& instance_name,
+			   const string& xrl,
+			   const string& pf_name,
+			   const string& pf_args)
 {
-    if (target_id >= _tids.size() || _tids[target_id].empty())
+    InstanceList::const_iterator ii = find_instance(instance_name);
+    if (ii == _ids.end()) {
 	return false;
+    }
 
-    Operation op(new FinderClientRegisterXrl(*this, _lrt, target_id, xrl,
-					       pf_name, pf_args));
+    Operation op(new FinderClientRegisterXrl(*this, _lrt, ii->id(), xrl,
+					     pf_name, pf_args));
     _todo_list.push_back(op);
     crank();
     return true;
 }
 
 bool
-FinderClient::enable_xrls(uint32_t target_id)
+FinderClient::enable_xrls(const string& instance_name)
 {
-    if (target_id >= _tids.size() || _tids[target_id].empty())
+    InstanceList::const_iterator ii = find_instance(instance_name);
+    if (ii == _ids.end()) {
 	return false;
+    }
 
-    Operation op(new FinderClientEnableXrls(*this, target_id,
-					      _tids[target_id], true,
-					      _xrls_registered));
+    Operation op(new FinderClientEnableXrls(*this, ii->id(),
+					    ii->instance_name(), true,
+					    _xrls_registered));
     _todo_list.push_back(op);
     crank();
     return true;
 }
 
 void
-FinderClient::query(const string& key,
-		      const QueryCallback& qcb)
+FinderClient::query(const string&	 key,
+		    const QueryCallback& qcb)
 {
-#if 0
-    if (!_xrls_registered) {
-	// there is a finder, but we've not finished registering our xrls.
-	// there's a risk that if we allow program to send xrls before
-	// we're done, then we may inadvertantly trigger other processes
-	// to try to invoke xrls on us and we've not finised registering
-	// so they are doomed to fail and may get confused.
-	XLOG_WARNING("Attempting to resolve %s before registration finished\n",
-		     key.c_str());
-	qcb->dispatch(XrlError::NO_FINDER(), 0);
-	return;
-    }
-#endif
     ResolvedTable::const_iterator i = _rt.find(key);
     if (_rt.end() != i) {
 	// Entry exists.
@@ -551,7 +649,7 @@ FinderClient::query(const string& key,
 
 bool
 FinderClient::query_self(const string& incoming_xrl_cmd,
-			   string& local_xrl) const
+			 string&       local_xrl) const
 {
     LocalResolvedTable::const_iterator i = _lrt.find(incoming_xrl_cmd);
     if (_lrt.end() == i)
@@ -561,8 +659,8 @@ FinderClient::query_self(const string& incoming_xrl_cmd,
 }
 
 bool
-FinderClient::forward_finder_xrl(const Xrl&				xrl,
-				   const XrlPFSender::SendCallback& 	scb)
+FinderClient::forward_finder_xrl(const Xrl&			  xrl,
+				 const XrlPFSender::SendCallback& scb)
 {
     Operation op(new FinderForwardedXrl(*this, xrl, scb));
     _todo_list.push_back(op);
@@ -750,4 +848,16 @@ FinderClient::uncache_xrls_from_target(const string& target)
     }
     debug_msg("Uncached %u Xrls relating to target \"%s\"\n",
 	      (uint32_t)n, target.c_str());
+}
+
+XrlCmdError
+FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
+{
+    Xrl xrl;
+    try {
+	xrl = Xrl(xrl_str.c_str());
+    } catch (InvalidString&) {
+	return XrlCmdError::COMMAND_FAILED("Bad Xrl string");
+    }
+    return XrlCmdError::COMMAND_FAILED("Not implemented");
 }
