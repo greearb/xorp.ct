@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.14 2003/08/13 07:34:48 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.15 2003/08/14 01:00:30 pavlin Exp $
 #
 
 #
@@ -10,8 +10,22 @@
 
 . ../utils/xrl_shell_lib.sh
 
+#
 # Conditionally set the target name
-PIM_TARGET=${PIM_TARGET:="PIMSM_4"}
+#
+IP_VERSION=${IP_VERSION:?"IP_VERSION undefined. Must be defined to either IPV4 or IPV6"}
+case "${IP_VERSION}" in
+	IPV4)
+		PIM_TARGET=${PIM_TARGET:="PIMSM_4"}
+		;;
+	IPV6)
+		PIM_TARGET=${PIM_TARGET:="PIMSM_6"}
+		;;
+	*)
+		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+		exit 1
+esac
+
 
 pim_enable_vif()
 {

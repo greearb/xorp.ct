@@ -1,27 +1,34 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.17 2003/07/16 17:46:34 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.18 2003/07/28 19:08:01 pavlin Exp $
 #
 
 #
 # Send configuration commands to a running PIM process.
 #
 
-. ../cli/xrl_cli_shell_funcs.sh
-. ../fea/xrl_mfea_shell_funcs.sh
-. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
-. ../pim/xrl_rib_shell_funcs.sh
-. ../pim/xrl_pim_shell_funcs.sh
-
 MODULE_NAME="PIM-SM"
 HOSTNAME=`hostname`
 
 echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
 
+
 ###############################################################
 # USER CONFIGURATION BEGIN
 ###############################################################
+
+#
+# The IP version. It must be either IPV4 or IPV6
+#
+IP_VERSION=IPV4
+#IP_VERSION=IPV6
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+. ../pim/xrl_rib_shell_funcs.sh
+. ../pim/xrl_pim_shell_funcs.sh
 
 #
 # Select the vifs to enable, and the Candidate-BSR and Candidate-RP vifs.
@@ -180,9 +187,11 @@ fi
 # Configure CLI
 #
 for subnet in ${CLI_ENABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
 	cli_add_enable_cli_access_from_subnet4 ${subnet}
 done
 for subnet in ${CLI_DISABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
 	cli_add_disable_cli_access_from_subnet4 ${subnet}
 done
 
@@ -290,7 +299,17 @@ fi
 #
 if [ "${STATIC_RPS}" != "" ] ; then
 	for rp in ${STATIC_RPS}; do
-		pim_add_config_static_rp4 224.0.0.0/4 ${rp} 192 0
+		case "${IP_VERSION}" in
+			IPV4)
+				pim_add_config_static_rp4 224.0.0.0/4 ${rp} 192 0
+				;;
+			IPV6)
+				pim_add_config_static_rp6 FF00::/8 ${rp} 192 0
+				;;
+			*)
+				echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+				exit 1
+		esac
 	done
 	pim_config_static_rp_done
 fi
@@ -299,13 +318,35 @@ fi
 # Enable and start PIM BSR
 #
 pim_enable_bsr
+
 if [ "${CAND_BSR_VIF}" != "" ] ; then
-	pim_add_config_cand_bsr_by_vif_name4 224.0.0.0/4 false ${CAND_BSR_VIF} 1 30
+	case "${IP_VERSION}" in
+		IPV4)
+			pim_add_config_cand_bsr_by_vif_name4 224.0.0.0/4 false ${CAND_BSR_VIF} 1 30
+			;;
+		IPV6)
+			pim_add_config_cand_bsr_by_vif_name6 FF00::/8 false ${CAND_BSR_VIF} 1 30
+			;;
+		*)
+			echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+			exit 1
+	esac
 fi
+
 if [ "${CAND_RP_VIF}" != "" ] ; then
-	pim_add_config_cand_rp_by_vif_name4 224.0.0.0/4 false ${CAND_RP_VIF} 192 150
-	#pim_add_config_cand_rp_by_vif_name4 226.0.0.0/8 false ${CAND_RP_VIF} 192 150
+	case "${IP_VERSION}" in
+		IPV4)
+			pim_add_config_cand_rp_by_vif_name4 224.0.0.0/4 false ${CAND_RP_VIF} 192 150
+			;;
+		IPV6)
+			pim_add_config_cand_rp_by_vif_name6 FF00::/8 false ${CAND_RP_VIF} 192 150
+			;;
+		*)
+			echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+			exit 1
+	esac
 fi
+
 pim_start_bsr
 
 
