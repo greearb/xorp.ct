@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.4 2003/08/28 17:17:45 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.5 2003/09/02 21:39:01 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -9,8 +9,6 @@ check the results of the decoding against what was encoded.
 
 6) Filling missing throw exceptions.
 	- use exception from BGPPacket.hh, filling the notification codes
-
-11) Rationalise main.cc and bgp.cc, with respect to where main is.
 
 16) Fix open packet operator== method to check parameters, current problem due to received open packets and sent open packets storing data in different places.
 18) Check the validity of the withdrawn routes field in check_update_packet (peer.cc) and the validity of network reachability field.
@@ -43,12 +41,6 @@ that were meant for the previous session. This problem can be
 reproduced by running "test_peering2.sh" with the "-b" flag.
 
 -- added 2003-08-28 by AG
-
-30) An incoming update packet carrying both IPv4 and IPv6 NLRI in the
-current code will always generate a separate IPv4 and IPv6
-packet. This is not good.
-
--- added 2003-09--2 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
@@ -120,6 +112,8 @@ they are left to the sub classes. BGPAuthParameter should have an encode
 method see item 26
 
 5) Implement BGP Capability Advertisement
+
+11) Rationalise main.cc and bgp.cc, with respect to where main is.
 
 ------------------------------ TESTING --------------------------
 
