@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.61 2005/01/19 00:08:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.62 2005/01/22 09:36:37 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -629,7 +629,7 @@ RouterCLI::display_config_mode_users() const
 	}
 	pwent = getpwuid(*iter);
 	if (pwent == NULL)
-	    _cli_client.cli_print(c_format("UID:%d", *iter));
+	    _cli_client.cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
 	else
 	    _cli_client.cli_print(pwent->pw_name);
     }
@@ -1397,7 +1397,7 @@ RouterCLI::new_config_user(uid_t user_id)
     struct passwd* pwent = getpwuid(user_id);
     string username;
     if (pwent == NULL)
-	username = c_format("UID:%d", user_id);
+	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
     else
 	username = pwent->pw_name;
     string alert = c_format("User %s entered configuration mode\n",
@@ -2136,7 +2136,7 @@ RouterCLI::text_entry_func(const string& ,
 		    goto cleanup;
 		}
 		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
-			   _braces.back(),
+			   XORP_UINT_CAST(_braces.back()),
 			   ctn->depth(), ctn->segname().c_str());
 		while (ctn->depth() > _braces.back()) {
 		    //looks like one or more close braces on the same
@@ -2145,7 +2145,7 @@ RouterCLI::text_entry_func(const string& ,
 		    ctn = ctn->parent();
 		    XLOG_TRACE(_verbose, "jumping out one level\n");
 		    XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
-			       _braces.back(),
+			       XORP_UINT_CAST(_braces.back()),
 			       ctn->depth(), ctn->segname().c_str());
 		}
 		// The last brace we entered should match the current depth
@@ -2155,7 +2155,8 @@ RouterCLI::text_entry_func(const string& ,
 		uint32_t new_depth = 0;
 		XLOG_ASSERT(!_braces.empty());
 		new_depth = _braces.back();
-		XLOG_TRACE(_verbose, "new_depth: %u\n", new_depth);
+		XLOG_TRACE(_verbose, "new_depth: %u\n",
+			   XORP_UINT_CAST(new_depth));
 		XLOG_ASSERT(ctn->depth() > new_depth);
 		while (ctn->depth() > new_depth) {
 		    ctn = ctn->parent();

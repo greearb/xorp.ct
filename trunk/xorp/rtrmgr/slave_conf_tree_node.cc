@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.16 2004/12/18 02:08:12 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.17 2005/01/19 00:08:10 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -163,7 +163,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 
     XLOG_TRACE(_verbose, "-------\n***back at %s\n", _path.c_str());
     XLOG_TRACE(_verbose, "***templates_done.size()==%u\n",
-	       static_cast<uint32_t>(templates_done.size()));
+	       XORP_UINT_CAST(templates_done.size()));
     XLOG_TRACE(_verbose, "***templates_done = ");
     if (_verbose) {
 	string debug_output;

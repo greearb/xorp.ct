@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.31 2004/10/06 21:21:06 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.32 2004/12/09 07:54:40 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -49,14 +49,15 @@ public:
 	const string&	protocol_origin)
     {
 	IPv4Net net(addr, prefix_len);
-	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %d "
-	       "new admin_distance: %d new protocol_origin: %s\n",
-	       net.str().c_str(), nexthop.str().c_str(), metric,
-	       admin_distance, protocol_origin.c_str());
+	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %u "
+	       "new admin_distance: %u new protocol_origin: %s\n",
+	       net.str().c_str(), nexthop.str().c_str(),
+	       XORP_UINT_CAST(metric), XORP_UINT_CAST(admin_distance),
+	       protocol_origin.c_str());
 	string s;
 	s = net.str() + " " + nexthop.str();
-	s += " " + c_format("%d", metric);
-	s += " " + c_format("%d", admin_distance);
+	s += " " + c_format("%u", XORP_UINT_CAST(metric));
+	s += " " + c_format("%u", XORP_UINT_CAST(admin_distance));
 	s += " " + c_format("%s", protocol_origin.c_str());
 	_changed.insert(s);
 	callback_flag = true;

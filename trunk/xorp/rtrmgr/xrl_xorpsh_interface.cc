@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.17 2004/12/11 13:36:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.18 2004/12/11 21:30:00 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -97,8 +97,8 @@ XrlXorpshInterface::rtrmgr_client_0_2_config_changed(// Input values,
 						     const string& deletions)
 {
     XLOG_TRACE(_verbose,
-	       "config changed: user_id: %d\nDELTAS:\n%sDELETIONS:\n%s\n",
-	       user_id, deltas.c_str(), deletions.c_str());
+	       "config changed: user_id: %u\nDELTAS:\n%sDELETIONS:\n%s\n",
+	       XORP_UINT_CAST(user_id), deltas.c_str(), deletions.c_str());
     _xorpsh.config_changed(user_id, deltas, deletions);
     return XrlCmdError::OKAY();
 }
@@ -109,8 +109,8 @@ XrlXorpshInterface::rtrmgr_client_0_2_module_status(// Input values,
 						    const uint32_t& status)
 {
     XLOG_TRACE(_verbose,
-	       "module status: %s changed to status %d\n",
-	       modname.c_str(), status);
+	       "module status: %s changed to status %u\n",
+	       modname.c_str(), XORP_UINT_CAST(status));
     _xorpsh.module_status_change(modname, (GenericModule::ModuleStatus)status);
     return XrlCmdError::OKAY();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.42 2005/01/31 06:53:39 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.43 2005/01/31 07:03:18 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -136,7 +136,7 @@ OpInstance::append_data(AsyncFileOperator::Event event,
 	if (offset != _last_offset) {
 	    const char* p   = (const char*)buffer + _last_offset;
 	    size_t 	len = offset - _last_offset;
-	    debug_msg("len = %u\n", static_cast<uint32_t>(len));
+	    debug_msg("len = %u\n", XORP_UINT_CAST(len));
 	    if (!_is_error) {
 		_print_callback->dispatch(string(p, len));
 	    } else {
@@ -304,7 +304,7 @@ OpCommand::select_positional_argument(const list<string>& arguments,
 			     "expected values must be in interval "
 			     "[0, %u]",
 			     position.c_str(),
-			     static_cast<uint32_t>(arguments.size()));
+			     XORP_UINT_CAST(arguments.size()));
 	return string("");
     }
 

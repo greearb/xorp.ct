@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.8 2004/02/11 08:48:45 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.9 2004/06/10 22:41:37 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -40,13 +40,14 @@ DummyRegisterServer::send_route_changed(const string& module_name,
     string s;
     
     if (verbose) {
-	printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d admin_distance=%d protocol_origin=%s",
-	       module_name.c_str(), net.str().c_str(), nexthop.str().c_str(), 
-	       metric, admin_distance, protocol_origin.c_str());
+	printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%u admin_distance=%u protocol_origin=%s",
+	       module_name.c_str(), net.str().c_str(), nexthop.str().c_str(),
+	       XORP_UINT_CAST(metric), XORP_UINT_CAST(admin_distance),
+	       protocol_origin.c_str());
     }
     
     s = module_name + " " + net.str() + " " + nexthop.str();
-    s += " " + c_format("%d", metric);
+    s += " " + c_format("%u", XORP_UINT_CAST(metric));
     if (multicast) {
 	if (verbose)
 	    printf("mcast=true\n");
@@ -95,12 +96,13 @@ DummyRegisterServer::send_route_changed(const string& module_name,
 {
     string s;
     
-    printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d admin_distance=%d protocol_origin=%s",
+    printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%u admin_distance=%u protocol_origin=%s",
 	   module_name.c_str(), net.str().c_str(), nexthop.str().c_str(),
-	   metric, admin_distance, protocol_origin.c_str());
+	   XORP_UINT_CAST(metric), XORP_UINT_CAST(admin_distance),
+	   protocol_origin.c_str());
     
     s = module_name + " " + net.str() + " " + nexthop.str();
-    s += " " + c_format("%d", metric);
+    s += " " + c_format("%u", XORP_UINT_CAST(metric));
     if (multicast) {
 	printf("mcast=true\n");
 	s += " mcast:true";

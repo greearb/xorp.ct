@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.36 2004/12/21 16:16:50 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.37 2004/12/21 23:43:15 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -271,7 +271,7 @@ XorpShell::register_done(const XrlError& e, const string* file,
     if (e == XrlError::OKAY()) {
 	_authfile = *file;
 	_rtrmgr_pid = *pid;
-	XLOG_TRACE(_verbose, "rtrmgr PID=%d\n", _rtrmgr_pid);
+	XLOG_TRACE(_verbose, "rtrmgr PID=%u\n", XORP_UINT_CAST(_rtrmgr_pid));
 	return;
     } else {
 	fprintf(stderr, "Failed to register with router manager process\n");
@@ -465,7 +465,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
     struct passwd *pwent = getpwuid(user_id);
     string username;
     if (pwent == NULL)
-	username = c_format("UID:%d", user_id);
+	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
     else
 	username = pwent->pw_name;
 

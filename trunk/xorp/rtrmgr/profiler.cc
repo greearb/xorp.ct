@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/rtrmgr/profiler.cc,v 1.1 2004/09/21 18:13:42 atanu Exp $"
 
 // Access the profiling support in XORP processes.
 
@@ -74,7 +74,8 @@ class XrlProfilerTarget :  XrlProfilerTargetBase {
     profile_client_0_1_log(const string& pname,	const uint32_t&	sec,
 			   const uint32_t& usec, const string&	comment)
     {
-	printf("%s %d %d %s\n", pname.c_str(), sec, usec, comment.c_str());
+	printf("%s %u %u %s\n", pname.c_str(), XORP_UINT_CAST(sec),
+	       XORP_UINT_CAST(usec), comment.c_str());
 
 	return XrlCmdError::OKAY();
     }

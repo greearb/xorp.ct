@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.4 2004/04/27 17:22:04 hodson Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.5 2004/05/18 21:35:47 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -284,7 +284,7 @@ test_deterministic()
 					&vif, &nh, protocol, 10));
 
     verbose_log("RedistTable index size = %u\n",
-		uint32_t(redist_table.route_index().size()));
+		XORP_UINT_CAST(redist_table.route_index().size()));
 
     // Each route added causes the output block. This timer unblocks the output
     // once per second.
