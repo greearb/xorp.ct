@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.3 2003/02/04 23:06:43 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.4 2003/03/12 20:15:21 pavlin Exp $
 #
 
 Priority:
@@ -50,7 +50,7 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who  Time
 ---------------                                       -------- ---  ----
 * Finish PIM testing (manual)				Done	PR  < 1 month
-* Testing of IGMPv1,2 (manual)				H	PR  1 weeks
+* Testing of IGMPv1,2 (manual)				Done	PR  1 weeks
 * RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
 * Commit PIM patches to FreeBSD				H       PR+LR Jan 2003
 * Framework for regression tests for multicast		H-M	PR+other 1 m
