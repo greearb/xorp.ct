@@ -10,7 +10,7 @@ Input action = 8 Output actions = 36/(*,G)
 Input action = 9 Output actions = 37/(S,G) 13/(S,G,rpt) 14/(S,G)
 Input action = 10 Output actions = 38/(S,G)
 Input action = 11 Output actions = 39/(S,G,rpt) 40/(S,G)
-Input action = 12 Output actions =
+Input action = 12 Output actions = 28/(*,G)
 Input action = 13 Output actions = 28/(*,G) 31/(S,G,rpt)
 Input action = 14 Output actions = 27/(S,G)
 Input action = 15 Output actions =

@@ -112,6 +112,7 @@ Input = INPUT_STATE_RPFP_NBR_SG_RPT_CHANGED
         OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
 
 Input = INPUT_STATE_RECEIVE_JOIN_RP
+        OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC                           (*,G)
 
 Input = INPUT_STATE_RECEIVE_JOIN_WC
         OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC                           (*,G)
