@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.28 2004/11/12 02:44:26 bms Exp $
+# $XORP: xorp/README,v 1.29 2005/03/25 03:25:23 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,12 +49,12 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release-1.0. It is reasonably stable and can be used
+This is XORP Release-1.1RC. It is reasonably stable and can be used
 for routing, but there are known issues.
 
 Supported platforms:
 
-  * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE with:
+  * FreeBSD-4.9-RELEASE and FreeBSD-4.10-RELEASE with:
     - gcc/g++ version 2.95.4 (default), 3.3.4 20040322 (prerelease),
       3.4.2 20040827 (prerelease) [FreeBSD]
     - gmake (GNU make) version 3.79.1
@@ -172,6 +172,8 @@ The content of each of the directories is the following:
   * libcomm : Communication socket library.
     Currently, it is used only by the cli.
 
+  * libfeaclient : Library that is useful to clients of the FEA.
+
   * libproto : Abstract protocol library.
     Used by the following modules/directories: cli, fea, mld6igmp, pim.
 
@@ -220,9 +222,6 @@ limited interest, or are not relevant to the current release:
 
   * devnotes : various notes for the XORP core members.
 
-  * libfeaclient : Library that may be useful to clients of the FEA.
-    Currently, it is not used yet.
-
   * policy : Policy-related library.
     Currently, it is work in progress, and is not used yet.
 
@@ -235,7 +234,6 @@ limited interest, or are not relevant to the current release:
 In the short-term we plan to add:
   * OSPF
   * IS-IS
-  * Click forwarding path
   * Security
   * PIM-SSM
   * IGMPv3
@@ -259,7 +257,8 @@ The core team currently consists of:
   * Eddie Kohler
   * Pavlin Radoslavov
   * Luigi Rizzo
-
+  * Bruce M. Simpson
+  * Marko Zec
 
 7. Acknowledgments
 ==================
