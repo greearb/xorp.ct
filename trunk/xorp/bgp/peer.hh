@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.10 2003/12/11 03:04:36 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.11 2004/04/01 19:54:05 mjh Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -30,7 +30,13 @@ enum FSMState {
     STATEOPENSENT = 4,
     STATEOPENCONFIRM = 5,
     STATEESTABLISHED = 6,
-    STATESTOPPED = 7
+    STATESTOPPED = 7	// This state is not in the protocol specification. 
+			// After sending a notify it is necessary to
+			// close the connection. Data transmission/reception 
+			// is asynchronous, but the close is currently
+			// synchronous. Thus the stopped state allows
+			// us to wait for the notify to be sent to TCP,
+			// before closing the connection.
 };
 
 enum FSMEvent {
