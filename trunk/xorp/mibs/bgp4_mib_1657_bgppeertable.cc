@@ -505,6 +505,8 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     request->delegated--;
 
     switch(table_info->colnum) {
@@ -522,6 +524,8 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
 void 
@@ -572,6 +576,8 @@ get_peer_status_done(const XrlError& e, const uint32_t* state,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
 
@@ -618,6 +624,8 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
 
@@ -662,6 +670,8 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
 
@@ -731,6 +741,8 @@ void get_peer_msg_stats_done(const XrlError& e, const uint32_t * inupd,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
 void 
@@ -781,6 +793,8 @@ get_peer_established_stats(const XrlError& e, const uint32_t * trans,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
 
@@ -864,5 +878,7 @@ get_peer_timer_config_done(const XrlError& e, const uint32_t * retryint,
 	    assert(0);
             return;
     }
+    if (cache->reqinfo->mode == MODE_GETBULK)
+	netsnmp_bulk_to_next_fix_requests(request);
     return;
 }
