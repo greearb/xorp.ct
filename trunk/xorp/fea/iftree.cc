@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.16 2003/10/03 00:13:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.17 2003/10/05 19:07:16 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -52,6 +52,12 @@ IfTreeItem::str() const
 
 /* ------------------------------------------------------------------------- */
 /* IfTree code */
+
+void
+IfTree::clear()
+{
+    _ifs.clear();
+}
 
 bool
 IfTree::add_if(const string& ifname)

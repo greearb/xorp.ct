@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.13 2003/10/03 00:13:23 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.14 2003/10/05 19:07:15 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -104,6 +104,11 @@ class IfTreeAddr6;
 class IfTree : public IfTreeItem {
 public:
     typedef map<const string, IfTreeInterface> IfMap;
+
+    /**
+     * Remove all interface state from the interface tree.
+     */
+    void clear();
 
     /**
      * Create a new interface.
