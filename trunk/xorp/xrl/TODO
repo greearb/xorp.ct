@@ -1,5 +1,8 @@
 #
-# $XORP: xorp/xrl/TODO,v 1.2 2002/12/09 02:56:19 pavlin Exp $
+# $XORP: xorp/xrl/TODO,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $
 #
 
-* Add 'XrlRouter& xrl_router()' and use that one instead of _router ?
+o Add transport preferences to client methods: ordered vs unordered,
+  reliable vs unreliable, etc.
+
+o Add support for enumerations in interface specifications.
