@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.2 2003/10/21 20:20:53 mjh Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.3 2003/10/21 20:39:26 atanu Exp $
 #
 
 #
@@ -262,7 +262,7 @@ test1_ipv6()
 
 test2()
 {
-    echo "TEST2 - This test causes the RIB to core dump"
+    echo "TEST2 - This test used to cause the RIB to core dump"
     # While writing a test for deterministic meds found a problem with the RIB.
 
     #  Route	ASPATH		MED 	IGP DISTANCE
@@ -471,8 +471,8 @@ test4()
     delete_igp_table4 is-is isis isis true false
 }
 
-TESTS_NOT_FIXED='test2 test4'
-TESTS='test1 test1_ipv6 test3'
+TESTS_NOT_FIXED='test4'
+TESTS='test1 test1_ipv6 test2 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
