@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.4 2004/09/23 08:38:54 atanu Exp $"
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.5 2004/09/28 00:43:23 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
