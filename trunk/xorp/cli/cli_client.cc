@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.23 2004/06/12 00:33:57 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.24 2004/06/12 03:35:03 pavlin Exp $"
 
 
 //
@@ -1222,10 +1222,10 @@ CliClient::command_line_help(const char *line, int word_end)
     cli_print(" \b");	// XXX: A hack to delete the '?'
 }
 
-CliCommand *
-CliClient::multi_command_find(const string& command_line)
+bool
+CliClient::is_multi_command_prefix(const string& command_line)
 {
-    return (_current_cli_command->multi_command_find(command_line));
+    return (_current_cli_command->is_multi_command_prefix(command_line));
 }
 
 int

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.9 2004/06/10 22:40:42 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.10 2004/06/12 00:31:44 pavlin Exp $"
 
 
 //
@@ -571,16 +571,18 @@ CliCommand::command_find(const string& token)
     return (NULL);
 }
 
-// Find a multi-level command
-// TODO: consider/ignore the command arguments as appropriate
-CliCommand *
-CliCommand::multi_command_find(const string& command_line)
+//
+// Test if the command line is a prefix for a multi-level command.
+// Note that if there is an exact match, then the return value is false.
+//
+bool
+CliCommand::is_multi_command_prefix(const string& command_line)
 {
     string token;
     string token_line = command_line;
     CliCommand *parent_cli_command = this;
     CliCommand *child_cli_command = NULL;
-    
+
     for (token = pop_token(token_line);
 	 ! token.empty();
 	 token = pop_token(token_line)) {
@@ -589,16 +591,21 @@ CliCommand::multi_command_find(const string& command_line)
 	    parent_cli_command = child_cli_command;
 	    continue;
 	}
-	
-	if (parent_cli_command->has_cli_process_callback()) {
-	    // The parent command has processing function, so the rest
-	    // of the tokens could be arguments for that function
-	    child_cli_command = parent_cli_command;
+
+	// Test if the token is a prefix for a child command
+	list<CliCommand *>::const_iterator iter;
+	for (iter = parent_cli_command->child_command_list().begin();
+	     iter != parent_cli_command->child_command_list().end();
+	     ++iter) {
+	    child_cli_command = *iter;
+	    if (child_cli_command->is_same_prefix(token))
+		return true;
 	}
+
 	break;
     }
-    
-    return (child_cli_command);
+
+    return (false);
 }
 
 // Tests if the string in @token can be a prefix for this command

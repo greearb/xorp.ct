@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.27 2004/06/11 04:52:19 atanu Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.28 2004/06/12 00:33:58 pavlin Exp $"
 
 
 //
@@ -611,9 +611,7 @@ CliClient::preprocess_char(uint8_t val)
 	int tmp_buff_curpos = buff_curpos();
 	char *tmp_line = (char *)command_buffer().data();
 	string command_line = string(tmp_line, tmp_buff_curpos);
-	string token_line = command_line;
-	string token = pop_token(token_line);
-	if (token.empty() || (multi_command_find(command_line) != NULL)) {
+	if (! is_multi_command_prefix(command_line)) {
 	    // Un-bind the "SPACE" to complete-word
 	    // Don't ask why we need six '\' to specify the ASCII value
 	    // of 'SPACE'...

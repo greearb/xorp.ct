@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.9 2004/06/10 22:40:42 hodson Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.10 2004/06/12 00:31:44 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -372,7 +372,7 @@ private:
     bool is_same_prefix(const string& token);
     bool is_same_command(const string& token);
     CliCommand *command_find(const string& token);
-    CliCommand *multi_command_find(const string& command_line);
+    bool is_multi_command_prefix(const string& command_line);
     
     bool find_command_help(const char *line, int word_end, string& ret_string);
     bool allow_cd() { return (_allow_cd); }
