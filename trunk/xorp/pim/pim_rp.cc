@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.10 2005/03/19 23:53:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.11 2005/03/23 09:44:21 pavlin Exp $"
 
 
 //
@@ -407,6 +407,48 @@ RpTable::delete_rp(const IPvX& rp_addr,
     }
     
     return (XORP_ERROR);
+}
+
+//
+// Delete all RP entries for a given RP address
+// Return %XORP_OK on success, otherwise %XORP_ERROR.
+//
+int
+RpTable::delete_all_group_prefixes_rp(
+    const IPvX& rp_addr,
+    PimRp::rp_learned_method_t rp_learned_method)
+{
+    list<pair<IPvX, IPvXNet> > delete_list;
+    list<pair<IPvX, IPvXNet> >::iterator delete_list_iter;
+    int ret_value = XORP_OK;
+
+    //
+    // Find all matching RP entries and add them to the list
+    //
+    list<PimRp *>::iterator iter;
+    for (iter = _rp_list.begin(); iter != _rp_list.end(); ++iter) {
+	PimRp *pim_rp = *iter;
+	if (pim_rp->rp_addr() != rp_addr)
+	    continue;
+	if (pim_rp->rp_learned_method() == rp_learned_method) {
+	    delete_list.push_back(make_pair(pim_rp->rp_addr(),
+					    pim_rp->group_prefix()));
+	}
+    }
+
+    //
+    // Delete all RP entries on the list
+    //
+    for (delete_list_iter = delete_list.begin();
+	 delete_list_iter != delete_list.end();
+	 ++delete_list_iter) {
+	const IPvX& ipvx = delete_list_iter->first;
+	const IPvXNet& ipvxnet = delete_list_iter->second;
+	if (delete_rp(ipvx, ipvxnet, rp_learned_method) != XORP_OK)
+	    ret_value = XORP_ERROR;
+    }
+
+    return (ret_value);
 }
 
 //

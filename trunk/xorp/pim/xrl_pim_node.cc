@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.76 2005/03/19 23:51:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.77 2005/03/23 09:44:21 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -4803,6 +4803,38 @@ XrlPimNode::pim_0_1_delete_config_static_rp6(
     
     if (PimNode::delete_config_static_rp(IPvXNet(group_prefix),
 					 IPvX(rp_addr), error_msg)
+	< 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_all_static_group_prefixes_rp4(
+    // Input values, 
+    const IPv4&		rp_addr)
+{
+    string error_msg;
+    
+    if (PimNode::delete_config_all_static_group_prefixes_rp(IPvX(rp_addr),
+							    error_msg)
+	< 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_config_all_static_group_prefixes_rp6(
+    // Input values, 
+    const IPv6&		rp_addr)
+{
+    string error_msg;
+    
+    if (PimNode::delete_config_all_static_group_prefixes_rp(IPvX(rp_addr),
+							    error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

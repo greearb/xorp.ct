@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.45 2005/03/20 00:21:12 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.46 2005/03/23 09:44:21 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -941,6 +941,8 @@ public:
     int		delete_config_static_rp(const IPvXNet& group_prefix,
 					const IPvX& rp_addr,
 					string& error_msg);
+    int		delete_config_all_static_group_prefixes_rp(const IPvX& rp_addr,
+							   string& error_msg);
     int		delete_config_all_static_rps(string& error_msg);
     int		config_static_rp_done(string& error_msg);
 

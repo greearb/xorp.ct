@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.23 2004/03/02 00:32:33 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.24 2005/03/23 09:44:22 pavlin Exp $
 #
 
 #
@@ -626,6 +626,20 @@ pim_delete_config_static_rp6()
     echo "pim_delete_config_static_rp6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_static_rp6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr"
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
+}
+
+pim_delete_config_all_static_group_prefixes_rp4()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_delete_config_all_static_group_prefixes_rp4 <rp_addr:ipv4>"
+	exit 1
+    fi
+    rp_addr=$1
+    
+    echo "pim_delete_config_all_static_group_prefixes_rp4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_all_static_group_prefixes_rp4"
+    XRL_ARGS="?rp_addr:ipv4=$rp_addr"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

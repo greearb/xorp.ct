@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.16 2004/03/02 00:29:45 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.17 2005/03/23 09:44:22 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -188,6 +188,8 @@ interface pim/0.1 {
 					& rp_addr:ipv4
 	delete_config_static_rp6	? group_prefix:ipv6net		\
 					& rp_addr:ipv6
+	delete_config_all_static_group_prefixes_rp4	? rp_addr:ipv4
+	delete_config_all_static_group_prefixes_rp6	? rp_addr:ipv6
 	delete_config_all_static_rps
 	config_static_rp_done
 
