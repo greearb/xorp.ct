@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.14 2003/05/31 07:03:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.15 2003/07/01 01:01:40 pavlin Exp $"
 
 
 //
@@ -763,7 +763,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_GRAFT_ACK:
     case PIM_BOOTSTRAP:
 	// Source address must be directly connected
-	if (! is_directly_connected(src)) {
+	if (! pim_node().is_directly_connected(*this, src)) {
 	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "source must be directly connected",
 			 PIMTYPE2ASCII(message_type),
