@@ -125,7 +125,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return MACADDR_VALUE;
 	}
 
-[a-z][a-z0-9"\-""_"\.]*	{
+[a-zA-Z][a-zA-Z0-9"\-""_"\.]*	{
 	bootlval = strdup(boottext);
 	return LITERAL;
 	}

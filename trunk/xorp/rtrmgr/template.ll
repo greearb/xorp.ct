@@ -191,7 +191,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return VARDEF;
 	}
 
-\%[a-z][a-z0-9\-_]*	{
+\%[a-zA-Z][a-zA-Z0-9\-_]*	{
 	tpltlval = strdup(tplttext);
 	return COMMAND;
 	}
