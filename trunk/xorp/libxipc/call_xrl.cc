@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.16 2003/06/01 21:37:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.17 2003/06/02 21:26:09 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -27,6 +27,8 @@ static const char* ROUTER_NAME = "call_xrl";
 
 static int retry_count = 0;	// Number of times to resend xrl on error.
 static bool stdin_forever = false;
+
+enum {OK = 0, BADXRL = -1, NOCALLBACK = -2};	// Return values from call_xrl
 
 static void
 response_handler(const XrlError& e,
@@ -95,10 +97,10 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	if (router.connected() == false) {
 	    XLOG_FATAL("Lost connection to finder\n");
 	}
-	return 0;
+	return done == true ? OK : NOCALLBACK;
     } catch(const InvalidString& s) {
 	cerr << s.str() << endl;
-	return -1;
+	return BADXRL;
     }
 }
 
@@ -181,9 +183,17 @@ input_cmds(EventLoop&  e,
 {
     for (int i = 0; i < argc; i++) {
 	int err = call_xrl(e, router, argv[i]);
-	if (err) {
+	switch (err) {
+	case OK:
+	    break;
+	case BADXRL:
 	    XLOG_ERROR("Bad XRL syntax: %s\nStopping.", argv[i]);
 	    return err;
+	    break;
+	case NOCALLBACK:
+	    XLOG_ERROR("No callback: %s\nStopping.", argv[i]);
+	    return err;
+	    break;
 	}
     }
     return 0;
