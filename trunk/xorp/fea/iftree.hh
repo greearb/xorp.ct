@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.6 2003/05/23 22:17:49 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.7 2003/06/17 23:14:28 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -158,6 +158,13 @@ public:
      * we need a method to update the user config from the h/w config that
      * exists after the config push.  We can't just copy the h/w config since
      * the user config is restricted to configuration set by the user.
+     * The alignment works as follows:
+     * - if an item from the local tree is not in the other tree,
+     *   it is deleted in the local tree
+     * - if an item from the local tree is in the other tree,
+     *   its state is copied from the other tree to the local tree.
+     * - if an item from the other tree is not in the local tree, we do NOT
+     *   copy it to the local tree.
      *
      * @param user_config config to align state with.
      * @param do_finalize_state if true, and if there are any items in the
@@ -173,7 +180,18 @@ public:
      * on remaining interfaces, and set state to NO_CHANGE.
      */
     void finalize_state();
-
+    
+    /**
+     * Walk interfaces, vifs, and addresses and ignore state that is duplicated
+     * in the other tree:
+     * - if an item from the local tree is marked as CREATED or CHANGED,
+     *   and exactly same item is on the other tree, it is marked as NO_CHANGE
+     * 
+     * @param o the other tree.
+     * @return return the result local tree.
+     */
+    IfTree& ignore_duplicates(const IfTree& o);
+    
     /**
      * @return string representation of IfTree.
      */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.9 2003/05/23 22:17:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.10 2003/06/17 23:14:28 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -199,6 +199,76 @@ IfTree::align_with(const IfTree& o, bool do_finalize_state)
     // Pass over and remove items marked for deletion
     if (do_finalize_state)
 	finalize_state();
+    
+    return *this;
+}
+
+//
+// Walk interfaces, vifs, and addresses and ignore state that is duplicated
+// in the other tree:
+//  - if an item from the local tree is marked as CREATED or CHANGED,
+//    and exactly same item is on the other tree, it is marked as
+//    NO_CHANGE
+//
+// Return the result local tree.
+//
+IfTree&
+IfTree::ignore_duplicates(const IfTree& o)
+{
+    IfTree::IfMap::iterator ii;
+    for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
+	IfTreeInterface& i = ii->second;
+	IfTree::IfMap::const_iterator oi = o.get_if(i.ifname());
+	
+	if (oi == o.ifs().end())
+	    continue;
+	if ((i.state() == CREATED) || (i.state() == CHANGED)) {
+	    if (i.is_same_state(oi->second))
+		i.mark(NO_CHANGE);
+	}
+	
+	IfTreeInterface::VifMap::iterator vi;
+	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
+	    IfTreeVif& v = vi->second;
+	    IfTreeInterface::VifMap::const_iterator ov
+		= oi->second.get_vif(v.vifname());
+	    
+	    if (ov == oi->second.vifs().end())
+		continue;
+	    if ((v.state() == CREATED) || (v.state() == CHANGED)) {
+		if (v.is_same_state(ov->second))
+		    v.mark(NO_CHANGE);
+	    }
+	    
+	    IfTreeVif::V4Map::iterator ai4;
+	    for (ai4 = v.v4addrs().begin(); ai4 != v.v4addrs().end(); ++ai4) {
+		IfTreeAddr4& a4 = ai4->second;
+		IfTreeVif::V4Map::const_iterator oa4 =
+		    ov->second.get_addr(a4.addr());
+		
+		if (oa4 == ov->second.v4addrs().end())
+		    continue;
+		if ((a4.state() == CREATED) || (a4.state() == CHANGED)) {
+		    if (a4.is_same_state(oa4->second))
+			a4.mark(NO_CHANGE);
+		}
+	    }
+
+	    IfTreeVif::V6Map::iterator ai6;
+	    for (ai6 = v.v6addrs().begin(); ai6 != v.v6addrs().end(); ++ai6) {
+		IfTreeAddr6& a6 = ai6->second;
+		IfTreeVif::V6Map::const_iterator oa6 =
+		    ov->second.get_addr(a6.addr());
+		
+		if (oa6 == ov->second.v6addrs().end())
+		    continue;
+		if ((a6.state() == CREATED) || (a6.state() == CHANGED)) {
+		    if (a6.is_same_state(oa6->second))
+			a6.mark(NO_CHANGE);
+		}
+	    }
+	}
+    }
     
     return *this;
 }
