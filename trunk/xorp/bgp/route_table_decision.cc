@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.23 2004/04/21 23:14:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.24 2004/05/07 11:45:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -21,11 +21,10 @@
 #include "libxorp/xlog.h"
 #include "route_table_decision.hh"
 
-//#define DEBUG_CODEPATH
-#ifdef DEBUG_CODEPATH
-#define cp(x) printf("DecisionCodePath: %2d\n", x)
+#ifdef PARANOID
+#define PARANOID_ASSERT(x) assert(x)
 #else
-#define cp(x) {}
+#define PARANOID_ASSERT(x) {}
 #endif
 
 template<class A>
@@ -35,7 +34,6 @@ DecisionTable<A>::DecisionTable(string table_name,
     : BGPRouteTable<A>("DecisionTable" + table_name, safi),
     _next_hop_resolver(next_hop_resolver)
 {
-    cp(1);
 }
 
 template<class A>
@@ -45,11 +43,10 @@ DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
     debug_msg("DecisionTable<A>::add_parent: %x\n", (u_int)new_parent);
     if (_parents.find(new_parent)!=_parents.end()) {
 	//the parent is already in the set
-	cp(2);
 	return -1;
     }
-    cp(3);
     _parents.insert(make_pair(new_parent, peer_handler));
+    _rev_parents.insert(make_pair(peer_handler, new_parent));
     return 0;
 }
 
@@ -57,8 +54,12 @@ template<class A>
 int
 DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
     debug_msg("DecisionTable<A>::remove_parent: %x\n", (u_int)ex_parent);
-    _parents.erase(_parents.find(ex_parent));
-    cp(4);
+    typename map<BGPRouteTable<A>*, PeerHandler* >::iterator i;
+    i = _parents.find(ex_parent);
+    PeerHandler* peer = i->second;
+    _parents.erase(i);
+    _rev_parents.erase(_rev_parents.find(peer));
+
     return 0;
 }
 
@@ -67,14 +68,13 @@ template<class A>
 int
 DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller) {
-    assert(_parents.find(caller) != _parents.end());
+    PARANOID_ASSERT(_parents.find(caller) != _parents.end());
 
     debug_msg("DT:add_route %s\n", rtmsg.route()->str().c_str());
 
     //if the nexthop isn't resolvable, don't even consider the route
     debug_msg("testing resolvability\n");
     if (!resolvable(rtmsg.route()->nexthop())) {
-	cp(5);
 	debug_msg("route not resolvable\n");
     	return ADD_UNUSED;
     }
@@ -156,7 +156,7 @@ int
 DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
 				const InternalMessage<A> &new_rtmsg, 
 				BGPRouteTable<A> *caller) {
-    assert(_parents.find(caller)!=_parents.end());
+    PARANOID_ASSERT(_parents.find(caller)!=_parents.end());
     assert(old_rtmsg.net()==new_rtmsg.net());
 
     debug_msg("DT:replace_route.\nOld route: %s\nNew Route: %s\n", old_rtmsg.route()->str().c_str(), new_rtmsg.route()->str().c_str());
@@ -264,7 +264,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     debug_msg("delete route: %s\n",
 	      rtmsg.route()->str().c_str());
-    assert(_parents.find(caller) != _parents.end());
+    PARANOID_ASSERT(_parents.find(caller) != _parents.end());
     assert(this->_next_table != NULL);
 
     //find the alternative routes, and the old winner if there was one.
@@ -348,9 +348,9 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 template<class A>
 int
 DecisionTable<A>::push(BGPRouteTable<A> *caller) {
-    assert(_parents.find(caller) != _parents.end());
+    PARANOID_ASSERT(_parents.find(caller) != _parents.end());
+    UNUSED(caller);
 
-    cp(34);
     if (this->_next_table != NULL)
 	return this->_next_table->push((BGPRouteTable<A>*)this);
     return 0;
@@ -438,19 +438,14 @@ DecisionTable<A>::local_pref(const SubnetRoute<A> *route,
      * the route comes from IBGP, it should have been present on the
      * incoming route.  
      */
-    cp(55);
     const PathAttributeList<A> *attrlist = route->attributes();
     list<PathAttribute*>::const_iterator i;
     for(i = attrlist->begin(); i != attrlist->end(); i++) {
 	if(LOCAL_PREF == (*i)->type()) {
-	    cp(56);
 	    return (dynamic_cast<const LocalPrefAttribute *>(*i))->localpref();
-	} else {
-	    cp(57);
 	}
     }
     XLOG_WARNING("No LOCAL_PREF present %s", peer->peername().c_str());
-    cp(58);
 
     return 0;
 }
@@ -463,12 +458,10 @@ DecisionTable<A>::med(const SubnetRoute<A> *route) const
     list<PathAttribute*>::const_iterator i;
     for(i = attrlist->begin(); i != attrlist->end(); i++) {
 	if(MED == (*i)->type()) {
-	    cp(59);
 	    return (dynamic_cast<const MEDAttribute *>(*i))->
 		med();
 	}
     }
-    cp(60);
 
     return 0;
 }
@@ -488,7 +481,6 @@ DecisionTable<A>::resolvable(const A nexthop) const
     if(!_next_hop_resolver.lookup(nexthop, resolvable, metric))
 	XLOG_FATAL("This next hop must be known %s", nexthop.str().c_str());
 
-    cp(61);
     return resolvable;
 }
 
@@ -513,7 +505,6 @@ DecisionTable<A>::igp_distance(const A nexthop) const
 	debug_msg("Decision: IGP distance for %s is unknown\n",
 		  nexthop.str().c_str());
 
-    cp(62);
     return metric;
 }
 
@@ -615,7 +606,6 @@ DecisionTable<A>::route_wins(const SubnetRoute<A> *test_route,
 
     
     if(alternatives.empty()) {
-	cp(66);
 	return true;
     }
 
@@ -1087,16 +1077,10 @@ template<class A>
 bool
 DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     const PeerHandler* peer = dump_iter.current_peer();
-    typename map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
-    for (i = _parents.begin(); i != _parents.end(); i++) {
-	if (i->second == peer)
-	    return i->first->dump_next_route(dump_iter);
-    }
-
-    //we found no matching peer
-    //this shouldn't happen because when a peer goes down, the dump
-    //iterator should move on to other peers
-    XLOG_UNREACHABLE();
+    typename map<PeerHandler*, BGPRouteTable<A>* >::const_iterator i;
+    i = _rev_parents.find(const_cast<PeerHandler*>(peer));
+    XLOG_ASSERT(i != _rev_parents.end());
+    return i->second->dump_next_route(dump_iter);
 }
 
 template<class A>
