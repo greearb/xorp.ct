@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.6 2004/11/03 00:18:56 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.7 2005/01/22 04:53:20 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -242,9 +242,12 @@ test_vif_addr_methods()
 		   "is_my_addr()");
     
     //
-    // Test whether is the same subnet.
+    // Test whether a subnet address is a subset of my subnet address.
     //
     verbose_assert(vif_addr_b.is_same_subnet(IPvXNet("22.22.22.0/24")),
+		   "is_same_subnet(IPvXNet)");
+
+    verbose_assert(vif_addr_b.is_same_subnet(IPvXNet("22.22.22.128/25")),
 		   "is_same_subnet(IPvXNet)");
 
     verbose_assert(! vif_addr_b.is_same_subnet(IPvXNet("22.22.33.0/24")),
@@ -440,6 +443,10 @@ test_vif_manipulate_address()
 		       IPvXNet("11.11.11.0/24"),
 		       IPvX("11.11.11.255"),
 		       IPvX("0.0.0.0"));
+    VifAddr vif_addr_aa(IPvX("11.11.11.11"),
+		       IPvXNet("11.11.11.128/25"),
+		       IPvX("11.11.11.127"),
+		       IPvX("0.0.0.0"));
     VifAddr vif_addr_b(IPvX("22.22.22.22"),
 		       IPvXNet("22.22.22.0/24"),
 		       IPvX("22.22.22.255"),
@@ -529,15 +536,19 @@ test_vif_manipulate_address()
     verbose_assert(! vif1.is_my_vif_addr(vif_addr_c), "is_my_vif_addr()");
     
     //
-    // Test if this vif belongs to a given subnet.
+    // Test if a subnet address is a subset of one of the subnet
+    // addresses of this vif.
     //
     verbose_assert(vif1.is_same_subnet(vif_addr_a.subnet_addr()),
+		   "is_same_subnet(IPvXNet)");
+    verbose_assert(vif1.is_same_subnet(vif_addr_aa.subnet_addr()),
 		   "is_same_subnet(IPvXNet)");
     verbose_assert(! vif1.is_same_subnet(IPvXNet("99.99.99.0/24")),
 		   "is_same_subnet(IPvXNet)");
 
     //
-    // Test if this vif belongs to a given subnet.
+    // Test if an IPvX address belongs to one of the subnet
+    // addresses of this vif.
     //
     verbose_assert(vif1.is_same_subnet(IPvX("11.11.11.22")),
 		   "is_same_subnet(IPvX)");
