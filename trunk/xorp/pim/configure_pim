@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.9 2003/03/13 00:27:10 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.10 2003/03/18 04:16:46 pavlin Exp $
 #
 
 #
@@ -81,9 +81,9 @@ case $HOSTNAME in
 	;;
 
 	possum.icir.org)
-	ENABLE_VIFS="fxp0"
-	CAND_BSR_VIF="fxp0"
-	CAND_RP_VIF="fxp0"
+	ENABLE_VIFS="rl0"
+	CAND_BSR_VIF="rl0"
+	CAND_RP_VIF="rl0"
 	STATIC_RPS=""
 	;;
 
