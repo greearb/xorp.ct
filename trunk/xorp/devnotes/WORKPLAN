@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.17 2003/05/27 22:10:01 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.18 2003/06/04 21:53:45 pavlin Exp $
 #
 
 Priority:
@@ -14,36 +14,36 @@ Who:
  - MH (Mark Handley)
  - OH (Orion Hodson)
  - PR (Pavlin Radoslavov)
+ - FB (Fred Bauer)
 
 ================================ FEA =========================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.3:
-* mfea2fea_merge_plan.txt				Done	PR
-* Route tagging in kernel. So that routes can be	Done	AG
-  withdrawn on startup and controlled shutdown.
+For 0.4:
+* Complete Linux support.				M	FB+PR
+* UDP send/receive interface.				H	OH+PR
 
 For 0.x:
-* Complete Linux support.
+* Equal-cost multipath					L	??
 
 Longer Term tasks
 -----------------
 * TCP connection relay.
-* UDP send/receive interface.
 
 ================================ RIB =========================================
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.3:
-* Handle errors as specified in the error doc		Done	MH
-* Support for pipelining of requests to FEA		Done	AG
-
-For 0.x:
+For 0.4:
 * Add route tag support to routing->RIB interface 	M	MH
   to support policy filtering
+* Equal-cost multipath					M	MH
+* Handle route process death				H	MH/??
+
+For 0.x:
 * Support recursive BGP Lookups				L	MH
 * Add XRL interface to dump routing table state		M	MH
+  (for monitoring/informational purpose: xorpsh, etc).
 
 Longer Term tasks
 -----------------
@@ -52,16 +52,15 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.3:
-* Correct behaviour on error + tests			Done	AG + MH
-* Integration tests 					Done	AG
+For 0.4:
+* Add test for unrecognized optional transitive attributes H	AG
+* IPv6 support						L	AG
+* Monitoring/Instrumentation (show ip bgp, MIB)		H	JC
+  (add a trie iterator to libxorp trie implementation)
+* Finish Kdoc'ing BGP                                   L	as needed
 
 For 0.x:
-* IPv6 support						L	AG
-* Add test for unrecognized optional transitive attributes H	MH
 * Test harness vs Cisco and Zebra to validate tests     L	AG
-* Monitoring/Instrumentation (show ip bgp, MIB)		H	AG + MH
-* Finish Kdoc'ing BGP                                   M	as needed
 
 
 For 1.0:
@@ -81,28 +80,26 @@ Longer Term tasks
 * Confederations
 * Route Reflector
 * Route Refresh
-* TCP MD5
+* TCP MD5 (wait for FreeBSD-5.2(?))
 * TCP connection mediation through FEA
 
 ================================ Multicast ===================================
 
 Immediate Tasks                                       Priority Who  Time
 ---------------                                       -------- ---  ----
-For 0.3:
-* Finish PIM testing (manual)				Done	PR  < 1 month
-* Testing of IGMPv1,2 (manual)				Done	PR  1 weeks
-* FEA and MFEA merging					Done	PR  2w - 1m
+For 0.4:
+* Commit PIM patches to FreeBSD				H       PR  July 2003
+* RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
+* Integration of PIM/MLD/MFEA and RTRMGR		H	PR  2 weeks
+* Finish Kdoc'ing PIM, MLD6IGMP, MFEA			L	PR  background
+
 
 For 0.x:
-* Commit PIM patches to FreeBSD				H       PR+LR June 2003
-* RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
-* Integration of PIM/MLD/MFEA and RTRMGR		M	PR  2 weeks
 * Framework for regression tests for multicast		H-M	PR+other 1 m
 * IPv6 support and tests for PIM/MLD/MFEA		M	PR  1-1.5m
   - Initial support: e.g. no scoping
 * IGMPv3 and MLDv2 implementation			L	PR+other 1-2m
 * PIM-SSM support					L	PR  1 week
-* Finish Kdoc'ing PIM, MLD6IGMP, MFEA			M	PR  background
 
 Longer Term tasks
 -----------------
@@ -113,14 +110,11 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.3:
+For 0.4:
 * Isolation test suite				     PartlyDone	MH
-* Refactoring						Done	MH
-* Rtrmgr error handling					Done(?)	MH
+* Add target name and instance				H	MH+PR
 
 For 0.x:
-* Add target name and instance				H	MH+PR
-* Support for PIM and MLD/IGMP				H	MH+PR
 
 Longer Term tasks
 -----------------
@@ -131,13 +125,14 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
-* General user tutorial					H	MH
-* Protocol-specific user tutorial			H	Everyone
+* BGP user tutorial					H	Everyone
+* FEA user tutorial (vifs, etc)				H	Everyone
+* Task interruption.
+  (make sure that the task is interrupted at the server	H	MH+PR
+   process)
+
 
 For 0.x:
-* Task interruption.
-* More graceful mechanism than current for task timeout.
-* Notification of rtrmgr restart.
 
 Longer Term tasks
 -----------------
@@ -147,67 +142,64 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
 * Switch to reliable XRLs				H	OH
+* Interface specification (reliable/non-reliable)	M	OH
+
+================================ RIP =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.4:
+* Implementation or RIPv2				H	OH
+
+For 0.x:
+* Implementation of RIPng				M	OH
 
 ================================ Other =======================================
+For 1.0:
 * Simulation-like environment for running XORP		H Defer	PR  3-6 months
+
+Longer Term tasks
+-----------------
 * Rewrite CLI						L	PR  2-3 weeks
 
 ================================ SNMP  =======================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.3:
-* Document mib development framework			Done	JC  < 1 week
-* Sample MIB handling (BGP peers, etc)			Done	JC
-* Writing autoconf tests for Net-SNMP			Done	JC    2 weeks
-* Write module to make snmpd responsive to XORP events  Done	JC    2 weeks
-* Write bgp4_mib_1657 tests using Net-SNMP tools	Done	JC    1 week
-* Generate Net-SNMP configuration file for XORP		Done	JC    1 week
-
 For 0.4:
 * Write bgp4_mib_1657 module				Incomplete JC 3 weeks
+* Hide events synchronization				H	JC
+* Fix snmpd termination problem				H	JC
+* Implement SNMP traps					M	JC
 
 ================================ TESTS =======================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.3:
-* Create BGP/RIB/FEA test-router on xorp8		Done(?)	??
+For 0.4:
+* Use BGP/RIB/FEA test-router on xorp8			H	Everyone
+  (think what exactly we want to happen)
 
 ================================ Next Release ================================
-* Next release (xorp-0.3): June 6, 2003
-  - Add second CVSWEB for public (DONE)
-  - Add a pointer from the web page to xorp/RELEASE_NOTES (PR)
-  - Finder supports target failure registration/notification requests (Done)
-  - Defer Finder notifications handling for release-0.4
-  - Code semi-freeze: May 30, 2003
-  - RUN ALL SOFTWARE!!!
-    - Stress testing programs
-  - Add XLOG_UNREACHABLE() (Done)
-        equivalent of XLOG_ASSERT(false)
-  - Add XLOG_UNFINISHED("Message") (Done)
-        similar to XLOG_FATAL, but used in code that needs fixing.
-
-================================ Next-Next Release ===========================
-* Next-next release (xorp-0.4): ?? ??, 2003
+* Next release (xorp-0.4): August 14, 2003
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
- - Need to complete support for error handling as 	H	Everyone
+* Finder notifications handling				H	Everyone
+  (handling death of processes you depend on)
+* Need to complete support for error handling as 	H	Everyone
     specified in error doc.
+* Process name convention: xorp_foo
+* Work-out the conventions for command-line options	M	OH
+* Test programs infrastructure				L	OH+PR
+* Implement everywhere command-line option for the	H	PR+Everyone
+  finder: port number, and host name
+  (see xorp/docs/libxipc/finder_command_line.txt)
+* Add tasks/projects to the web page wishlist		L	Everyone
+  (for other people)
 
-  - Process name convention: xorp_foo, or just foo or something else?
-  - Do we want to allow command-line options? If yes, work-out the
-    conventions.
-  - Add bugzilla
-  - Add automated process running (expect scripts, etc)
-  - Test programs infrastructure
-  - Implement command-line option for the finder: port number, and host name
-    (see xorp/docs/libxipc/finder_command_line.txt)
-  - Write a Web page wishlist of tasks/projects that other people may choose
-    to do (Started, Everyone):
-    - MIBS implementation (each protocol, etc)
-  - Implement everywhere command-line option for the finder:
-    port number, and host name
-    (see xorp/docs/libxipc/finder_command_line.txt)
+================================ Next-Next Release ===========================
+* Next-next release (xorp-0.5): ?? ??, 200?
+* Add bugzilla						L	??
+* Add automated process running for testing xorpsh on	M	FCFS
+  xorp8 (expect scripts, etc)
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
