@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.20 2003/11/12 19:10:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.21 2004/02/18 05:01:26 pavlin Exp $"
 
 
 //
@@ -78,7 +78,6 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
     uint8_t message_type;
     int max_resp_time;
     IPvX group_address(family());
-    struct in6_addr in6_addr;
     uint16_t cksum;
     
     //
@@ -216,8 +215,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
 #if 0
 	// TODO: temporary enable receiving MLD messages from IPv6 addresses
 	// that are not link-local.
-	src.copy_out(in6_addr);
-	if (! IN6_IS_ADDR_LINKLOCAL(&in6_addr)) {
+	if (! src.is_linklocal_unicast()) {
 	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "source is not a link-local address",
 			 proto_message_type2ascii(message_type),
@@ -280,10 +278,10 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
     case MLD_LISTENER_REPORT:
     case MLD_LISTENER_DONE:
 	// Inner multicast address scope check
-	group_address.copy_out(in6_addr);
-	if (IN6_IS_ADDR_MC_NODELOCAL(&in6_addr)) {
+	if (group_address.is_nodelocal_multicast()) {
 	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			 "invalid scope of inner multicast address: %s",
+			 "invalid node-local scope of inner "
+			 "multicast address: %s",
 			 proto_message_type2ascii(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str(),
