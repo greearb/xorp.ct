@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.2 2003/08/05 06:06:01 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.3 2003/08/05 06:55:14 hodson Exp $"
 
 #include <set>
 
@@ -303,7 +303,7 @@ public:
     {
 	if (test_peer_routes_seen() != _tpn.size()) {
 	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
-			test_peer_routes_seen(), _tpn.size());
+			test_peer_routes_seen(), (int32_t)_tpn.size());
 	    return false;
 	}
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
@@ -384,7 +384,7 @@ public:
     {
 	if (test_peer_routes_seen() != _tpn.size()) {
 	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
-			test_peer_routes_seen(), _tpn.size());
+			test_peer_routes_seen(), (int32_t)_tpn.size());
 	    return false;
 	}
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",

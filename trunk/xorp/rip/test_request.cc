@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.2 2003/07/21 18:06:56 hodson Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.3 2003/08/01 04:08:13 hodson Exp $"
 
 #include <set>
 
@@ -350,8 +350,8 @@ public:
 	uint32_t n_entries = buf.size() / sizeof (PacketRouteEntry<IPv4>) - 1;
 
 	if (n_entries > _testnets.size()) {
-	    verbose_log("Got more routes than requested (%d > %d).\n",
-			n_entries, _testnets.size());
+	    verbose_log("Got more routes than requested (%u > %u).\n",
+			n_entries, (uint32_t)_testnets.size());
 	    return false;
 	}
 
