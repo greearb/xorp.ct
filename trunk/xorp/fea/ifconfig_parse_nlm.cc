@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.9 2004/03/17 07:16:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.10 2004/03/20 02:48:21 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -176,8 +176,18 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     // Get the interface name
     //
     if (rta_array[IFLA_IFNAME] == NULL) {
-	XLOG_FATAL("Could not find interface name for interface index %d",
-		   ifinfomsg->ifi_index);
+	//
+	// XXX: The kernel did not provide the interface name.
+	// It could be because this is a wireless event carried to user
+	// space. Such events are encapsulated in the IFLA_WIRELESS field of
+	// a RTM_NEWLINK message.
+	// Unfortunately, there is no easy way to verify whether this is
+	// indeed a wireless event or a problem with the message integrity,
+	// hence we silently ignore it.
+	//
+	debug_msg("Could not find interface name for interface index %d",
+		  ifinfomsg->ifi_index);
+	return;
     }
     caddr_t rta_data = reinterpret_cast<caddr_t>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_IFNAME])));
     if_name = string(reinterpret_cast<char*>(rta_data));
