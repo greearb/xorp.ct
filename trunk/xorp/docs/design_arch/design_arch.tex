@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.7 2003/06/09 20:02:19 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.8 2003/08/28 13:25:50 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Design Overview \\
 \vspace{1ex}
-Version 0.4}
+Version 0.5}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{August 28, 2003}
+\date{November 6, 2003}
 
 \maketitle
 
@@ -105,8 +105,8 @@ example:
 \section{Functionality}
 
 XORP is designed to support both IPv4 and IPv6. However, even though
-most of the code is written to support both, as of Release 0.4
-(August 2003) only IPv4 has been tested in details.
+most of the code is written to support both, as of Release 0.5
+(November 2003) only IPv4 has been tested in details.
 
 Below is our initial target list of protocols and features to be
 supported by XORP. Those in bold are already implemented or supported
@@ -117,7 +117,7 @@ yet.
 \subsubsection*{Unicast Routing Protocols}
 
 \begin{itemize}
-  \item {\bf BGP4+} ({\bf IPv4} and IPv6)
+  \item {\bf BGP4+} ({\bf IPv4} and {\bf IPv6})
   \item OSPF ({\bf IPv4} and IPv6)
   \item RIPv2 (IPv4), RIPng (IPv6)
   \item IS-IS
@@ -297,8 +297,7 @@ For more information about the RIB see \cite{xorp:rib}.
 
 This is the BGP routing daemon. It implements IPv4 and IPv6 unicast
 routing in a single process, as well as MBGP for both IPv4 and IPv6
-multicast RIBs for multicast routing purpose.  As of Release 0.3, only
-IPv4 is working, but most of the support for IPv6 is present.
+multicast RIBs for multicast routing purpose.
 
 For more information about the XORP BGP implementation, see \cite{xorp:bgp}.
 
@@ -318,7 +317,7 @@ OSPF implementation to support both IPv4 and IPv6.
 
 This is the RIP routing daemon. Similarly to OSPF, the IPv4 and IPv6
 daemons will be separate.
-As of August 2003, the RIP implementation is work in progress.
+As of November 2003, the RIP implementation is work in progress.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MLD/IGMP}
@@ -405,6 +404,8 @@ using XRLs.
   \item June 9, 2003: Updated to match XORP version 0.3 release code.
   \item August 28, 2003: Add SNMP to the set of implemented items. Bump-up the
   version to 0.4, and the date.
+  \item November 6, 2003: Updated the BGP status (now it supports
+  IPv6). Bump-up the version to 0.5, and the date.
 
 \end{itemize}
 
