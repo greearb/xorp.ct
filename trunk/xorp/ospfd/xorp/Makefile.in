@@ -84,9 +84,6 @@ bin_PROGRAMS = ospfd ospfd_mon ospfd_browser
 #bin_PROGRAMS +=
 
 AM_CPPFLAGS = -I$(top_builddir) -I../src
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(top_builddir)/ospfd/src/libospfd.a $(top_builddir)/xrl/targets/libospfbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 ospfd_SOURCES = ospf_module.h ospfd_xorp.h os-instance.h tcppkt.h xrl_target.h  ospfd_xorp.C os-instance.C tcppkt.C system.C xrl_target.C
 ospfd_mon_SOURCES = tcppkt.h tcppkt.C lsa_prn.C ospfd_mon.C
@@ -99,6 +96,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I../..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 ospfd_OBJECTS =  ospfd_xorp.o os-instance.o tcppkt.o system.o \
 xrl_target.o

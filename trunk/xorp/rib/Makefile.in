@@ -83,9 +83,6 @@ bin_PROGRAMS = rib main_routemap test_rib_client test_register test_register_xrl
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_register
 
 noinst_LIBRARIES = librib.a
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a
 
 # -- Program Sources
@@ -111,6 +108,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 librib_a_LIBADD = 
 librib_a_OBJECTS =  protocol.o register_server.o rib.o rib_client.o \

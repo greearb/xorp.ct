@@ -82,9 +82,6 @@ RANLIB = @RANLIB@
 bin_PROGRAMS =  test_mld6igmp
 
 noinst_LIBRARIES = libmld6igmp.a
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/mfea/libmfea.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
@@ -99,6 +96,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libmld6igmp_a_LIBADD = 
 libmld6igmp_a_OBJECTS =  igmp_proto.o mld6_proto.o mld6igmp_config.o \

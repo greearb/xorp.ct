@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.12 2003/02/12 20:24:26 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.13 2003/02/27 19:54:13 hodson Exp $
 ##
 
 # -- Subdirectories
@@ -20,7 +20,6 @@ noinst_PROGRAMS = $(TESTS)
 noinst_LIBRARIES = libbgp.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libbgpbase.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a

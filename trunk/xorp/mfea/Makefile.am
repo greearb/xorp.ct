@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mfea/Makefile.am,v 1.2 2003/02/08 09:18:25 pavlin Exp $
+## $XORP: xorp/mfea/Makefile.am,v 1.3 2003/03/05 03:05:24 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ bin_PROGRAMS	+= test_mfea
 noinst_LIBRARIES = libmfea.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 ### MFEA libraries
 LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.2 2003/02/27 19:54:14 hodson Exp $
 ##
 
 if FEA_BUILD_RTSOCK
@@ -55,7 +55,6 @@ demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 noinst_LIBRARIES	 = libfea.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS			 = -all-static
 
 # -- Program Sources
 

@@ -86,7 +86,6 @@ noinst_PROGRAMS =
 noinst_LIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES)
 
 # -- Program Sources
@@ -102,6 +101,7 @@ PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 runit_OBJECTS =  runit.o
 runit_LDADD = $(LDADD)

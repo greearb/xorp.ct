@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.10 2003/03/04 23:41:22 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.11 2003/03/05 01:49:20 pavlin Exp $
 ##
 
 
@@ -30,7 +30,6 @@ noinst_PROGRAMS += test_xrl_router test_xrl_parser
 TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = ./libfinder.a
 LDADD		+= ./libxipc.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a

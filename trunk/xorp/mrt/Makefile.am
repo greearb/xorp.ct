@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mrt/Makefile.am,v 1.16 2002/12/09 12:47:46 pavlin Exp $
+## $XORP: xorp/mrt/Makefile.am,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ bin_PROGRAMS	+= test_mrt test_mtimer test_mrib
 noinst_LIBRARIES = libmrt.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 

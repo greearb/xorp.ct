@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.3 2002/12/18 03:06:07 atanu Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.4 2003/01/21 01:11:07 mjh Exp $
 ##
 
 # - The library
@@ -16,7 +16,6 @@ TESTS		+= test_types test_vif test_test_main
 noinst_PROGRAMS	 = $(TESTS)
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = $(noinst_LIBRARIES)
 
 # -- Program Sources

@@ -101,7 +101,6 @@ demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientb
 noinst_LIBRARIES = libfea.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 
 # -- Program Sources
 
@@ -124,6 +123,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libfea_a_LIBADD = 
 @FEA_BUILD_RTSOCK_FALSE@libfea_a_OBJECTS =  fti_dummy.o \

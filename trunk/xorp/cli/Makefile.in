@@ -84,9 +84,6 @@ SUBDIRS = libtecla .
 bin_PROGRAMS =  test_cli
 
 noinst_LIBRARIES = libcli.a
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
@@ -103,6 +100,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libcli_a_LIBADD = 
 libcli_a_OBJECTS =  cli_client.o cli_command.o cli_command_pipe.o \

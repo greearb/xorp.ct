@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.1 2003/01/30 19:21:10 mjh Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.2 2003/02/13 18:25:26 mjh Exp $
 ##
 
 # -- Real Programs
@@ -15,7 +15,6 @@ bin_PROGRAMS		+= test_policy
 noinst_LIBRARIES	 = libpolicy.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS			 = -all-static
 LDADD			 = $(noinst_LIBRARIES)
 LDADD			+= $(top_builddir)/libxorp/libxorp.a
 

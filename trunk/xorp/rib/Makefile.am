@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.7 2003/03/21 01:25:14 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.8 2003/03/29 19:03:10 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -19,7 +19,6 @@ TESTS 			 = test_rib_direct.sh test_rib_xrls.sh test_register
 noinst_LIBRARIES	 = librib.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS			 = -all-static
 LDADD			 = $(noinst_LIBRARIES)
 LDADD			+= $(top_builddir)/xrl/interfaces/libftixif.a
 LDADD			+= $(top_builddir)/libxipc/libfinder.a

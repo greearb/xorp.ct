@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.3 2003/03/17 23:38:00 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.4 2003/03/29 19:03:09 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ bin_PROGRAMS	+= test_pim
 noinst_LIBRARIES = libpim.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 ### PIM libraries
 LDADD		 = $(noinst_LIBRARIES)
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a

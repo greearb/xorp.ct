@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.3 2003/03/13 00:32:05 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.4 2003/03/31 03:46:47 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ bin_PROGRAMS	+= test_mld6igmp
 noinst_LIBRARIES = libmld6igmp.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 ### MLD6IGMP libraries
 LDADD		 = $(noinst_LIBRARIES)
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a

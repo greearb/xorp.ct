@@ -83,9 +83,6 @@ TESTS = test_peering1.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_ter
 
 noinst_PROGRAMS = 
 noinst_LIBRARIES = 
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/bgp/libbgp.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/targets/libtestpeerbase.a $(top_builddir)/xrl/targets/libcoordbase.a $(top_builddir)/xrl/interfaces/libtestpeerxif.a $(top_builddir)/xrl/interfaces/libdatainxif.a
 
 # -- Program Sources
@@ -102,6 +99,7 @@ PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I../..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 coord_OBJECTS =  bgppp.o command.o coord.o peer.o trie.o
 coord_LDADD = $(LDADD)

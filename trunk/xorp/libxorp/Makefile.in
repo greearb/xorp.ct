@@ -84,7 +84,6 @@ TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_i
 noinst_PROGRAMS = $(TESTS)
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES)
 
 # -- Program Sources
@@ -120,6 +119,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libxorp_a_LIBADD = 
 libxorp_a_OBJECTS =  debug.o xlog.o asyncio.o c_format.o eventloop.o \

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.1 2003/02/24 12:53:48 mjh Exp $
+## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.2 2003/02/27 19:54:15 hodson Exp $
 ##
 
 # -- Real Programs
@@ -16,7 +16,6 @@ bin_PROGRAMS	 = show_interfaces
 #EXTRA_DIST	 = 
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a

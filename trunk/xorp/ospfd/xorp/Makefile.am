@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.2 2003/02/27 19:54:14 hodson Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ bin_PROGRAMS = ospfd ospfd_mon ospfd_browser
 AM_CPPFLAGS  = -I$(top_builddir) -I../src
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS	     = -all-static
 LDADD	     = $(top_builddir)/ospfd/src/libospfd.a
 LDADD	    += $(top_builddir)/xrl/targets/libospfbase.a
 LDADD	    += $(top_builddir)/xrl/interfaces/libribxif.a

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.2 2003/03/19 23:38:22 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ bin_PROGRAMS	 =
 noinst_LIBRARIES = libproto.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = $(noinst_LIBRARIES)
 
 # -- Program Sources

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.2 2002/12/09 09:22:32 pavlin Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 ##
 
 # -- Real Programs
@@ -12,7 +12,6 @@ noinst_PROGRAMS =
 noinst_LIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS		 = -all-static
 LDADD		 = $(noinst_LIBRARIES)
 
 # -- Program Sources

@@ -79,18 +79,6 @@ PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 
 bin_PROGRAMS = show_interfaces
-
-# -- Test Programs
-#bin_PROGRAMS	+=
-
-#TESTS		 = 
-
-#noinst_PROGRAMS = $(TESTS)
-
-#EXTRA_DIST	 = 
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 show_interfaces_SOURCES = show_interfaces.hh show_interfaces.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -101,6 +89,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I../..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 show_interfaces_OBJECTS =  show_interfaces.o
 show_interfaces_LDADD = $(LDADD)

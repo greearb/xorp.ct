@@ -85,9 +85,6 @@ bin_PROGRAMS =  test_policy
 #TESTS 			 = 
 
 noinst_LIBRARIES = libpolicy.a
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
@@ -104,6 +101,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libpolicy_a_LIBADD = 
 libpolicy_a_OBJECTS =  statement.o term.o from.o to.o then.o action.o \

@@ -86,9 +86,6 @@ TESTS = aspath_test packet_coding_test isolation_tests
 
 noinst_PROGRAMS = $(TESTS)
 noinst_LIBRARIES = libbgp.a
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 bgp_SOURCES = bgp.cc main.hh main.cc
 
@@ -110,6 +107,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libbgp_a_LIBADD = 
 libbgp_a_OBJECTS =  md5.o aspath.o attribute_manager.o bgp_trie.o \

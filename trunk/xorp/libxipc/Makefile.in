@@ -87,9 +87,6 @@ bin_PROGRAMS = call_xrl finder
 noinst_PROGRAMS = test_finder_client test_finder_ipc test_finder_ipc2 test_finder_msg test_finder_transport test_header test_finder_msgs test_finder_tcp test_finder_messenger test_finder_ng test_inproc test_lemming test_sudp test_stcp test_xrl_error test_xrl test_xrl_atom test_xrl_args  test_xrl_router test_xrl_parser
 
 TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = ./libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 finder_LDADD =  libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
@@ -147,6 +144,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libxipc_a_LIBADD = 
 libxipc_a_OBJECTS =  hmac_md5.o md5.o finder_client.o finder_ipc.o \

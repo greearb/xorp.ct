@@ -86,7 +86,6 @@ bin_PROGRAMS =
 noinst_LIBRARIES = libproto.a
 
 # -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES)
 libproto_a_SOURCES = libproto_module.h proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -97,6 +96,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libproto_a_LIBADD = 
 libproto_a_OBJECTS =  proto_node_cli.o proto_register.o proto_state.o \

@@ -82,9 +82,6 @@ RANLIB = @RANLIB@
 bin_PROGRAMS =  test_comm
 
 noinst_LIBRARIES = libcomm.a
-
-# -- Libraries and library flags to link the binary programs
-LDFLAGS = -all-static
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
@@ -98,6 +95,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libcomm_a_LIBADD = 
 libcomm_a_OBJECTS =  comm_sock.o comm_user.o
