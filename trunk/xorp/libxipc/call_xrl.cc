@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.21 2003/08/04 23:11:42 atanu Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.22 2003/09/16 21:54:41 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -29,7 +29,10 @@ static int wait_time = 1000;	// Time to wait for the callback in ms.
 static int retry_count = 0;	// Number of times to resend xrl on error.
 static bool stdin_forever = false;
 
-enum {OK = 0, BADXRL = -1, NOCALLBACK = -2};	// Return values from call_xrl
+enum {
+    // Return values from call_xrl
+    OK = 0, BADXRL = -1, NOCALLBACK = -2
+};
 
 static void
 response_handler(const XrlError& e,
@@ -44,7 +47,7 @@ response_handler(const XrlError& e,
 	*resolve_failed = true;
 	return;
     }
-    if (e !=  XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) {
 	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
 		   e.str().c_str(), xrl->str().c_str());
 	exit(-1);
@@ -80,34 +83,44 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	done = false;
 	resolve_failed = true;
 
-	while (done == false && router.ready() == true &&
-	       tries <= retry_count) {
+	while (done == false && tries <= retry_count) {
 	    resolve_failed = false;
 	    router.send(x, callback(&response_handler,
 				    &done,
 				    &resolve_failed,
 				    &x));
-
+	    
 	    bool timed_out = false;
 	    XorpTimer timeout = e.set_flag_after_ms(wait_time, &timed_out);
-	    while (timed_out	  == false	&&
-		   done		  == false	&&
-		   resolve_failed == false) {
+	    while (timed_out == false && done == false) {
+		// NB we don't test for resolve failed here because if
+		// resolved failed we want to wait before retrying.
 		e.run();
 	    }
 	    tries++;
-	    if (timed_out)
+
+	    if (resolve_failed) {
+		continue;
+	    }
+	    
+	    if (timed_out) {
 		XLOG_WARNING("request: %s no response waited %d ms", request,
 			     wait_time);
+		continue;
+	    }
+
+	    if (router.connected() == false) {
+		XLOG_FATAL("Lost connection to finder\n");
+	    }
 	}
 
-	if (router.connected() == false) {
-	    XLOG_FATAL("Lost connection to finder\n");
+	if (resolve_failed) {
+	    XLOG_WARNING("request: %s resolve failed", request);
 	}
-
- 	if (false == done)
-	    XLOG_WARNING("request: %s no response waited %d ms", request,
-			 wait_time);
+	
+ 	if (false == done && true == resolve_failed)
+	    XLOG_WARNING("request: %s failed after %d retries",
+			 request, retry_count);
 	return done == true ? OK : NOCALLBACK;
     } catch(const InvalidString& s) {
 	cerr << s.str() << endl;
