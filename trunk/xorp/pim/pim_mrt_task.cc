@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.14 2004/02/25 00:35:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.15 2004/06/10 22:41:32 hodson Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -60,10 +60,11 @@ PimMrt::add_task(PimMreTask *pim_mre_task)
     // Record if a PimVif is in use by this task
     //
     pim_vif = pim_node().vif_find_by_vif_index(pim_mre_task->vif_index());
-    if (pim_vif == NULL)
-	return;
-    
-    pim_vif->incr_usage_by_pim_mre_task();
+    if (pim_vif != NULL) {
+	pim_vif->incr_usage_by_pim_mre_task();
+    }
+
+    schedule_task();
 }
 
 void
@@ -86,16 +87,42 @@ PimMrt::delete_task(PimMreTask *pim_mre_task)
     // Record if a PimVif is not in use anymore by this task
     //
     pim_vif = pim_node().vif_find_by_vif_index(pim_mre_task->vif_index());
-    if (pim_vif == NULL)
-	return;
-    
-    pim_vif->decr_usage_by_pim_mre_task();
+    if (pim_vif != NULL) {
+	pim_vif->decr_usage_by_pim_mre_task();
+    }
 }
 
+//
+// (Re)schedule the first task to run (again), unless it is scheduled already
+//
 void
-PimMrt::schedule_task(PimMreTask *pim_mre_task)
+PimMrt::schedule_task()
 {
-    pim_mre_task->schedule_task();
+    if (_pim_mre_task_timer.scheduled())
+	return;		// The timer was already scheduled
+
+    if (_pim_mre_task_list.empty())
+	return;		// No tasks to schedule
+
+    _pim_mre_task_timer = pim_node().eventloop().new_oneoff_after(
+	TimeVal(0, 1),
+	callback(this, &PimMrt::pim_mre_task_timer_timeout));
+}
+
+//
+// A timeout handler to process (or continue processing) a task.
+//
+void
+PimMrt::pim_mre_task_timer_timeout()
+{
+    PimMreTask *pim_mre_task;
+
+    if (_pim_mre_task_list.empty())
+	return;		// No more tasks to process
+
+    pim_mre_task = _pim_mre_task_list.front();
+    pim_mre_task->run_task();
+    schedule_task();
 }
 
 void
@@ -111,7 +138,6 @@ PimMrt::add_task_rp_changed(const IPvX& affected_rp_addr)
 	pim_mre_task->set_rp_addr_rp(affected_rp_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -128,7 +154,6 @@ PimMrt::add_task_mrib_changed(const IPvXNet& modified_prefix_addr)
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -139,7 +164,6 @@ PimMrt::add_task_mrib_changed(const IPvXNet& modified_prefix_addr)
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -157,7 +181,6 @@ PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -168,7 +191,6 @@ PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -179,7 +201,6 @@ PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -197,7 +218,6 @@ PimMrt::add_task_nbr_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr)
 	pim_mre_task->set_rp_addr_rp(rp_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -215,7 +235,6 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -227,7 +246,6 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -239,7 +257,6 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -251,7 +268,6 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -263,7 +279,6 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -275,7 +290,6 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -294,7 +308,6 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -306,7 +319,6 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -319,7 +331,6 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task->set_addr_arg(pim_nbr_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -331,7 +342,6 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -344,7 +354,6 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task->set_addr_arg(pim_nbr_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -363,7 +372,6 @@ PimMrt::add_task_assert_rpf_interface_wc(uint16_t old_rpf_interface_rp,
 	pim_mre_task->set_vif_index(old_rpf_interface_rp);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -384,7 +392,6 @@ PimMrt::add_task_assert_rpf_interface_sg(uint16_t old_rpf_interface_s,
 	pim_mre_task->set_vif_index(old_rpf_interface_s);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -403,7 +410,6 @@ PimMrt::add_task_receive_join_rp(uint16_t vif_index, const IPvX& rp_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -421,7 +427,6 @@ PimMrt::add_task_receive_join_wc(uint16_t vif_index, const IPvX& group_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -442,7 +447,6 @@ PimMrt::add_task_receive_join_sg(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -463,7 +467,6 @@ PimMrt::add_task_receive_join_sg_rpt(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -481,7 +484,6 @@ PimMrt::add_task_receive_prune_rp(uint16_t vif_index, const IPvX& rp_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -499,7 +501,6 @@ PimMrt::add_task_receive_prune_wc(uint16_t vif_index, const IPvX& group_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -519,7 +520,6 @@ PimMrt::add_task_see_prune_wc(uint16_t vif_index, const IPvX& group_addr,
 	pim_mre_task->set_addr_arg(target_nbr_addr);	// XXX
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -540,7 +540,6 @@ PimMrt::add_task_receive_prune_sg(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -561,7 +560,6 @@ PimMrt::add_task_receive_prune_sg_rpt(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -580,7 +578,6 @@ PimMrt::add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -599,7 +596,6 @@ PimMrt::add_task_downstream_jp_state_rp(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -618,7 +614,6 @@ PimMrt::add_task_downstream_jp_state_wc(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -639,7 +634,6 @@ PimMrt::add_task_downstream_jp_state_sg(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -660,7 +654,6 @@ PimMrt::add_task_downstream_jp_state_sg_rpt(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -679,7 +672,6 @@ PimMrt::add_task_upstream_jp_state_sg(const IPvX& source_addr,
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -698,7 +690,6 @@ PimMrt::add_task_local_receiver_include_wc(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -719,7 +710,6 @@ PimMrt::add_task_local_receiver_include_sg(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -740,7 +730,6 @@ PimMrt::add_task_local_receiver_exclude_sg(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -758,7 +747,6 @@ PimMrt::add_task_assert_state_wc(uint16_t vif_index, const IPvX& group_addr)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -779,7 +767,6 @@ PimMrt::add_task_assert_state_sg(uint16_t vif_index,
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -797,7 +784,6 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -810,7 +796,6 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -823,7 +808,6 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -841,7 +825,6 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -854,7 +837,6 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -867,7 +849,6 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -885,7 +866,6 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -898,7 +878,6 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -911,7 +890,6 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -928,7 +906,6 @@ PimMrt::add_task_spt_switch_threshold_changed()
 	pim_mre_task->set_source_addr_prefix_mfc(IPvXNet(family()));
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -947,7 +924,6 @@ PimMrt::add_task_keepalive_timer_sg(const IPvX& source_addr,
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -965,7 +941,6 @@ PimMrt::add_task_sptbit_sg(const IPvX& source_addr, const IPvX& group_addr)
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -986,7 +961,6 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -998,7 +972,6 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 
     //
@@ -1013,7 +986,6 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -1026,7 +998,6 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -1039,7 +1010,6 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -1060,7 +1030,6 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -1072,7 +1041,6 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 
     //
@@ -1087,7 +1055,6 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -1100,7 +1067,6 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
     
     do {
@@ -1113,7 +1079,6 @@ PimMrt::add_task_stop_vif(uint16_t vif_index)
 	pim_mre_task->set_vif_index(vif_index);
 	
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -1173,7 +1138,6 @@ PimMrt::add_task_add_pim_mre(PimMre *pim_mre)
 			     input_state);
 	pim_mre_task->add_pim_mre(pim_mre);		// XXX
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -1241,7 +1205,6 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
 	pim_mre_task->add_pim_mre(pim_mre);		// XXX
 	pim_mre_task->add_pim_mre_delete(pim_mre);	// XXX
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }
 
@@ -1285,6 +1248,5 @@ PimMrt::add_task_delete_pim_mfc(PimMfc *pim_mfc)
 	pim_mre_task->add_pim_mfc(pim_mfc);		// XXX
 	pim_mre_task->add_pim_mfc_delete(pim_mfc);	// XXX
 	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
     } while (false);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.9 2004/02/25 00:35:48 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.10 2004/06/10 22:41:31 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -189,7 +189,7 @@ public:
     //
     void	add_task(PimMreTask *pim_mre_task);
     void	delete_task(PimMreTask *pim_mre_task);
-    void	schedule_task(PimMreTask *pim_mre_task);
+    void	schedule_task();
     //
     // The "add_task_*" methods
     //
@@ -266,6 +266,8 @@ public:
     
     
 private:
+    void pim_mre_task_timer_timeout();
+
     PimNode&	_pim_node;	// The PIM node
     
     //
@@ -282,6 +284,9 @@ private:
     
     PimMreTrackState _pim_mre_track_state; // The state-tracking information
     list<PimMreTask *> _pim_mre_task_list; // The list of tasks
+
+    // Timer to schedule the processing for the next task or time slice.
+    XorpTimer	_pim_mre_task_timer;
 };
 
 //

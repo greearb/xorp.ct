@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.8 2003/07/16 02:49:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.10 2004/06/10 22:41:31 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -195,18 +195,6 @@ PimMreTask::family() const
 }
 
 //
-// (Re)schedule the task to run (again).
-// 
-void
-PimMreTask::schedule_task()
-{
-    _time_slice_timer =
-	pim_node().eventloop().new_oneoff_after(
-	    TimeVal(0, 1),
-	    callback(this, &PimMreTask::time_slice_timer_timeout));
-}
-
-//
 // Run the task.
 //
 // Return true if the processing was saved for later because it was taking too
@@ -215,15 +203,17 @@ bool
 PimMreTask::run_task()
 {
     _time_slice.reset();
-    
+
     if (run_task_rp()) {
-	// Time slice has expired. Schedule a new time slice.
-	schedule_task();
+	// The time slice has expired. Keep processing this task.
 	return (true);
     }
-    
+
+    //
+    // The task has been completed, hence delete the task.
+    //
     delete this;	// XXX: should be right before the return
-    
+
     return (false);
 }
 
@@ -1677,13 +1667,4 @@ void
 PimMreTask::add_pim_mfc_delete(PimMfc *pim_mfc)
 {
     _pim_mfc_delete_list.push_back(pim_mfc);
-}
-
-//
-// A timeout handler to continue processing a task.
-//
-void
-PimMreTask::time_slice_timer_timeout()
-{
-    run_task();
 }
