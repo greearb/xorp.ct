@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.12 2003/09/30 03:07:57 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.13 2003/10/03 00:13:23 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -215,6 +215,9 @@ public:
 
     inline const string& ifname() const	{ return _ifname; }
 
+    inline uint16_t pif_index() const	{ return _pif_index; }
+    inline void set_pif_index(uint16_t v) { _pif_index = v; mark(CHANGED); }
+
     inline bool enabled() const		{ return _enabled; }
 
     inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
@@ -264,6 +267,7 @@ public:
      */
     inline void copy_state(const IfTreeInterface& o)
     {
+	set_pif_index(o.pif_index());
 	set_enabled(o.enabled());
 	set_mtu(o.mtu());
 	set_mac(o.mac());
@@ -278,7 +282,8 @@ public:
      */
     inline bool is_same_state(const IfTreeInterface& o)
     {
-	return ((enabled() == o.enabled())
+	return ((pif_index() == o.pif_index())
+		&& (enabled() == o.enabled())
 		&& (mtu() == o.mtu())
 		&& (mac() == o.mac())
 		&& (if_flags() == o.if_flags()));
@@ -290,6 +295,7 @@ public:
 
 protected:
     const string _ifname;
+    uint16_t	 _pif_index;
     bool 	 _enabled;
     uint32_t 	 _mtu;
     Mac 	 _mac;
