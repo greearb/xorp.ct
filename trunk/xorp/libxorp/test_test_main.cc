@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.3 2003/07/03 02:03:18 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,8 +25,7 @@
 bool
 test1(TestInfo& info)
 {
-    if(info.verbose())
-	info.out() << "verbose on\n";
+    DOUT(info) << "verbose on\n";
 
     return true;
 }
@@ -34,8 +33,10 @@ test1(TestInfo& info)
 bool
 test2(TestInfo& info)
 {
-    if(info.verbose())
-	info.out() << "verbose on level = " <<  info.verbose_level() << endl;
+    DOUT(info) << "verbose on level = " <<  info.verbose_level() << endl;
+
+    int level = 100;
+    DOUT_LEVEL(info, level) << "debugging level >= " << level << endl;
 
     return true;
 }
@@ -43,8 +44,7 @@ test2(TestInfo& info)
 bool
 test3(TestInfo& info, bool fail)
 {
-    if(info.verbose())
-	info.out() << info.test_name() << " Test will " <<
+    DOUT(info) << info.test_name() << " Test will " <<
 	    (fail ? "fail" : "succeed") << endl;
 
     if(fail)
@@ -56,8 +56,7 @@ test3(TestInfo& info, bool fail)
 bool
 test4(TestInfo& info, const char *mess)
 {
-    if(info.verbose())
-	info.out() << "verbose on level = " << info.verbose_level() << 
+    DOUT(info) << "verbose on level = " << info.verbose_level() << 
 	    " message = " <<  mess << endl;
 
     return true;
@@ -66,8 +65,7 @@ test4(TestInfo& info, const char *mess)
 bool
 test5(TestInfo& info, bool exception)
 {
-    if(info.verbose())
-	info.out() << info.test_name() << " Test will " <<
+    DOUT(info) << info.test_name() << " Test will " <<
 	    (exception ? "throw exception" : "succeed") << endl;
 
     if(exception)
@@ -79,8 +77,7 @@ test5(TestInfo& info, bool exception)
 bool
 test6(TestInfo& info, bool exception)
 {
-    if(info.verbose())
-	info.out() << info.test_name() << " Test will " <<
+    DOUT(info) << info.test_name() << " Test will " <<
 	    (exception ? "throw exception" : "succeed") << endl;
 
     if(exception)

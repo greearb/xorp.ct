@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.5 2003/07/03 00:19:46 atanu Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.6 2003/07/03 02:03:18 atanu Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -35,6 +35,16 @@
 				   << __LINE__ << ":"		\
 				   << info.test_name() << ": "
 
+
+/**
+ * Only generate debugging output if the verbose_level is equal to or above
+ * threshold.
+ */
+#define DOUT_LEVEL(info, level)						\
+		if(info.verbose() && info.verbose_level() >= level)	\
+			info.out() << __FUNCTION__ << ":"		\
+				   << __LINE__ << ":"			\
+				   << info.test_name() << ": "
 
 /**
  * This class is passed as the first argument to each test function/method.
@@ -85,7 +95,6 @@ private:
     bool _verbose;
     int _verbose_level;
     ostream& _ostream;
-    
 };
 
 /**
