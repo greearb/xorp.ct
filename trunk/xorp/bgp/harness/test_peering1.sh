@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.20 2004/02/20 04:08:55 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.21 2004/02/20 04:38:18 atanu Exp $
 #
 
 #
@@ -154,7 +154,7 @@ test1()
 
 test2()
 {
-    echo "TEST2 - Make a connection and send an update packet"
+    echo "TEST2 - Make a connection and send an update packet before establishing a session"
 
     reset
 
