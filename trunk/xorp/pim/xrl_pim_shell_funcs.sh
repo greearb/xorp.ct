@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.5 2003/02/27 03:11:06 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.6 2003/03/03 02:07:01 pavlin Exp $
 #
 
 #
@@ -10,7 +10,8 @@
 
 . ../mfea/xrl_shell_lib.sh
 
-PIM_TARGET="PIMSM_4"
+# Conditionally set the target name
+PIM_TARGET=${PIM_TARGET:="PIMSM_4"}
 
 pim_enable_vif()
 {
