@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.12 2003/05/28 19:02:30 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.13 2003/05/30 23:57:09 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,7 +39,7 @@ extern string booterrormsg(const char *s);
 
 MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt, 
 				   TaskManager &task_manager) 
-    : ConfigTree(tt), _task_manager(task_manager)
+    : ConfigTree(tt), _task_manager(task_manager), _commit_in_progress(false)
 {
     string configuration;
     string errmsg;
@@ -312,6 +312,7 @@ void
 MasterConfigTree::commit_changes_pass1(CallBack cb) {
     printf("##############################################################\n");
     printf("MasterConfigTree::commit_changes_pass1\n");
+    _commit_in_progress = true;
 
     list <string> changed_modules = find_changed_modules();
     list <string> inactive_modules = find_inactive_modules();
@@ -381,6 +382,8 @@ void
 MasterConfigTree::commit_changes_pass2() {
     printf("##############################################################\n");
     printf("## commit_changes_pass2\n");
+    _commit_in_progress = true;
+
     /*******************************************************************/
     /* Pass 2: implement the changes                                   */
     /*******************************************************************/
@@ -438,6 +441,7 @@ MasterConfigTree::commit_pass2_done(bool success, string result) {
     else
 	printf("## commit failed: %s\n", result.c_str());
     _commit_cb->dispatch(success, result);
+    _commit_in_progress = false;
 }
 
 bool MasterConfigTree::check_commit_status(string &result) {

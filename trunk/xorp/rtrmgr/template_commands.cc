@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.23 2003/05/23 00:02:08 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.24 2003/05/30 04:42:09 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -288,107 +288,6 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
     }
 }
 
-#ifdef NOTDEF
-int
-Action::execute(const ConfigTreeNode& ctn,
-		XorpClient *xclient,  uint tid,
-		bool do_exec, XCCommandCallback cb) const {
-
-    //go through the split command, doing variable substitution
-    //put split words back together, and remove special "\n" characters
-    list<string>::const_iterator ptr = _split_cmd.begin();
-    //    map<string,string>::const_iterator var_iter;
-    string expanded_var;
-    list <string> expanded_cmd;
-    string word;
-    while (ptr != _split_cmd.end()) {
-	string segment = *ptr;
-	//"\n" at start of segment indicates start of a word
-	if (segment[0]=='\n') {
-	    //store the previous word
-	    if (word != "") {
-		expanded_cmd.push_back(word);
-		word = "";
-	    }
-	    //strip the magic "\n" off
-	    segment = segment.substr(1,segment.size()-1);
-	}
-
-	//do variable expansion
-	bool expand_done = false;
-	if (segment[0]=='`') {
-	    expand_done = ctn.expand_expression(segment, expanded_var);
-	    if (expand_done) {
-		int len = expanded_var.length();
-		//remove quotes
-		if (expanded_var[0]=='"' && expanded_var[len-1]=='"')
-		    word += expanded_var.substr(1,len-2);
-		else
-		    word += expanded_var;
-	    } else {
-		fdebug_msg(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
-		exit(1);
-	    }
-	} else if (segment[0]=='$') {
-	    expand_done = ctn.expand_variable(segment, expanded_var);
-	    if (expand_done) {
-		int len = expanded_var.length();
-		//remove quotes
-		if (expanded_var[0]=='"' && expanded_var[len-1]=='"')
-		    word += expanded_var.substr(1,len-2);
-		else
-		    word += expanded_var;
-	    } else {
-		XLOG_FATAL("failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
-	    }
-	} else {
-	    word += segment;
-	}
-	++ptr;
-    }
-    //store the last word
-    if (word != "") 
-	expanded_cmd.push_back(word);
-
-    assert(expanded_cmd.size() >= 1);
-
-    //go through the expanded version and extract some things we want
-    string cmd_str, args[expanded_cmd.size()];
-    ptr = expanded_cmd.begin();
-    int i=0;
-    while (ptr != expanded_cmd.end()) {
-	args[i] = *ptr;
-	if (cmd_str == "")
-	    cmd_str = *ptr;
-	else
-	    cmd_str += " " + *ptr;
-	++ptr;
-	++i;
-    }
-
-    int result;
-    if (args[0] == "xrl") {
-	if (args[1].empty()) {
-	    fdebug_msg(stderr, "Bad XRL command: %s\n", cmd_str.c_str());
-	    return (XORP_ERROR);
-	}
-	if ((args[1])[0]=='"' && args[1][args[1].size()-1]=='"')
-	    args[1] = args[1].substr(1,args[1].size()-2);
-	debug_msg("CALL XRL: %s\n", args[1].c_str());
-	result = xclient.run_command(tid, ctn, args[1], cb, do_exec);
-	if ((i>=4) && !(args[3].empty()))
-	    debug_msg("Need to do something here to get the response back\n");
-    } else {
-	fdebug_msg(stderr, "Bad command: %s\n", args[0].c_str());
-	return (XORP_ERROR);
-    }
-	       
-    debug_msg("action execute returning %d\n", result);
-    return result;
-}
-
-#endif
-
 int
 XrlAction::execute(const ConfigTreeNode& ctn,
 		   TaskManager& task_manager, 
@@ -581,6 +480,7 @@ void
 Command::action_complete(const XrlError& err, 
 			 XrlArgs*,
 			 ConfigTreeNode *ctn) {
+    printf("Command::action_complete\n");
     if (err == XrlError::OKAY()) {
 	ctn->command_status_callback(this, true);
     } else {	

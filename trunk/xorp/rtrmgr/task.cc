@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.16 2003/05/30 18:22:25 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.17 2003/05/30 23:57:10 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -331,6 +331,18 @@ TaskXrlItem::execute(string& errmsg)
 }
 
 void
+TaskXrlItem::unschedule()
+{
+    printf("TaskXrlItem::unschedule()\n");
+    //empty args should be OK here.
+    XrlArgs args;
+
+    //we need to dispatch the callbacks, or the accounting of which
+    //actions were taken will be incorrect.
+    _xrl_callback->dispatch(XrlError::OKAY(), &args);
+}
+
+void
 TaskXrlItem::resend()
 {
     Xrl *xrl = _unexpanded_xrl.expand();
@@ -465,19 +477,12 @@ Task::shutdown_module(const string& modname,
     _stop_module = true;
     _modname = modname;
     _shutdown_validation = validation;
-    
-    //we don't call any XRLs on a module if we are going to shut it
-    //down immediately afterwards.
-    while (!_xrls.empty()) {
-	_xrls.pop_front();
-    }
 }
 
 void
 Task::add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb)
 {
-    if (_stop_module == false)
-	_xrls.push_back(TaskXrlItem(xrl, cb, *this));
+    _xrls.push_back(TaskXrlItem(xrl, cb, *this));
 }
 
 void
@@ -545,13 +550,26 @@ Task::step3_config()
     if (_xrls.empty()) {
 	step4_wait();
     } else {
-	string errmsg;
-	printf("step3: execute\n");
-	if (_xrls.front().execute(errmsg) == false) {
-	    XLOG_WARNING("Failed to execute XRL: %s\n", errmsg.c_str());
-	    task_fail(errmsg, false);
-	    return;
+	if (_stop_module) {
+	    //we don't call any XRLs on a module if we are going to
+	    //shut it down immediately afterwards, but we do need to
+	    //unschedule the XRLs.
+	    while (!_xrls.empty()) {
+		_xrls.front().unschedule();
+		_xrls.pop_front();
+	    }
+	    //skip step4 and go directly to stopping the process
+	    step5_stop();
+	} else {
+	    string errmsg;
+	    printf("step3: execute\n");
+	    if (_xrls.front().execute(errmsg) == false) {
+		XLOG_WARNING("Failed to execute XRL: %s\n", errmsg.c_str());
+		task_fail(errmsg, false);
+		return;
+	    }
 	}
+    
     }
 }
 

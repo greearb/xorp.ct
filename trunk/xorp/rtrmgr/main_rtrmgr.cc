@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.19 2003/05/29 00:01:30 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.20 2003/05/30 23:57:09 mjh Exp $"
 
 #include <signal.h>
 
@@ -291,7 +291,7 @@ main(int argc, char* const argv[])
     ct->delete_entire_config();
 
     //Wait until changes due to deleting config have finished being applied.
-    while (eventloop.timers_pending()) {
+    while (eventloop.timers_pending() && (ct->commit_in_progress())) {
 	eventloop.run();
     }
     delete ct;

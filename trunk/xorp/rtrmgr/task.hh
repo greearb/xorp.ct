@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.13 2003/05/30 18:22:25 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.14 2003/05/30 23:57:10 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -109,6 +109,7 @@ public:
     bool execute(string& errmsg);
     void execute_done(const XrlError& err, XrlArgs* xrlargs);
     void resend();
+    void unschedule();
 private:
     UnexpandedXrl _unexpanded_xrl;
     XrlRouter::XrlCallback _xrl_callback;
