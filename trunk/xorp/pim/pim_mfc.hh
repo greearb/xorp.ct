@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mfc.hh,v 1.19 2002/12/09 18:29:25 hodson Exp $
+// $XORP: xorp/pim/pim_mfc.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
 
 
 #ifndef __PIM_PIM_MFC_HH__
@@ -70,8 +70,12 @@ public:
     void	set_olist_disable_wrongvif(const Mifset& v) {
 	_olist_disable_wrongvif = v;
     }
-    void	set_oif(uint16_t vif_index) { _olist.set(vif_index); }
-    void	reset_oif(uint16_t vif_index) { _olist.reset(vif_index); }
+    void	set_oif(uint16_t vif_index, bool v) {
+	if (v)
+	    _olist.set(vif_index);
+	else
+	    _olist.reset(vif_index);
+    }
     
     void	recompute_rp_mfc();
     void	recompute_iif_olist_mfc();

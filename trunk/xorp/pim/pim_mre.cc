@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.10 2003/01/27 22:47:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.11 2003/01/29 06:13:19 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1127,27 +1127,20 @@ PimMre::could_assert_wc() const
 // ASSERT state (per interface)
 //
 void
-PimMre::set_could_assert_state(uint16_t vif_index)
+PimMre::set_could_assert_state(uint16_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
     
-    if (is_could_assert_state(vif_index))
-	return;			// Nothing changed
-    
-    _could_assert_state.set(vif_index);
-}
-
-void
-PimMre::reset_could_assert_state(uint16_t vif_index)
-{
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return;
-    
-    if (! is_could_assert_state(vif_index))
-	return;			// Nothing changed
-    
-    _could_assert_state.reset(vif_index);
+    if (v) {
+	if (is_could_assert_state(vif_index))
+	    return;			// Nothing changed
+	_could_assert_state.set(vif_index);
+    } else {
+	if (! is_could_assert_state(vif_index))
+	    return;			// Nothing changed
+	_could_assert_state.reset(vif_index);
+    }
 }
 
 bool
@@ -1229,27 +1222,20 @@ PimMre::assert_tracking_desired_wc() const
 }
 
 void
-PimMre::set_assert_tracking_desired_state(uint16_t vif_index)
+PimMre::set_assert_tracking_desired_state(uint16_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
     
-    if (is_assert_tracking_desired_state(vif_index))
-	return;			// Nothing changed
-    
-    _assert_tracking_desired_state.set(vif_index);
-}
-
-void
-PimMre::reset_assert_tracking_desired_state(uint16_t vif_index)
-{
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return;
-    
-    if (! is_assert_tracking_desired_state(vif_index))
-	return;			// Nothing changed
-    
-    _assert_tracking_desired_state.reset(vif_index);
+    if (v) {
+	if (is_assert_tracking_desired_state(vif_index))
+	    return;			// Nothing changed
+	_assert_tracking_desired_state.set(vif_index);
+    } else {
+	if (! is_assert_tracking_desired_state(vif_index))
+	    return;			// Nothing changed
+	_assert_tracking_desired_state.reset(vif_index);
+    }
 }
 
 bool
@@ -1285,7 +1271,7 @@ PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
     if (assert_tracking_desired_sg().test(vif_index))
 	return (false);		// No change in CouldAssert(S,G,I)
     // AssertTrackingDesired(S,G,I) -> FALSE
-    reset_assert_tracking_desired_state(vif_index);
+    set_assert_tracking_desired_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a5;
     
@@ -1321,7 +1307,7 @@ PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
     if (assert_tracking_desired_wc().test(vif_index))
 	return (false);		// No change in CouldAssert(*,G,I)
     // AssertTrackingDesired(*,G,I) -> FALSE
-    reset_assert_tracking_desired_state(vif_index);
+    set_assert_tracking_desired_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a5;
     
@@ -1937,8 +1923,8 @@ PimMre::recompute_stop_vif_rp(uint16_t vif_index)
     mifset_timer_cancel(_downstream_expiry_timers, vif_index);
     
     mifset_timer_cancel(assert_timers, vif_index);
-    reset_assert_tracking_desired_state(vif_index);
-    reset_could_assert_state(vif_index);
+    set_assert_tracking_desired_state(vif_index, false);
+    set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
     delete_assert_winner_metric(vif_index);
     set_assert_noinfo_state(vif_index);
@@ -1964,8 +1950,8 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
     delete_assert_winner_metric_wc(vif_index);
     
     mifset_timer_cancel(assert_timers, vif_index);
-    reset_assert_tracking_desired_state(vif_index);
-    reset_could_assert_state(vif_index);
+    set_assert_tracking_desired_state(vif_index, false);
+    set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
     delete_assert_winner_metric_wc(vif_index);
     set_assert_noinfo_state(vif_index);
@@ -1992,8 +1978,8 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
     set_assert_winner_metric_is_better_than_spt_assert_metric_sg(vif_index, false);
     
     mifset_timer_cancel(assert_timers, vif_index);
-    reset_assert_tracking_desired_state(vif_index);
-    reset_could_assert_state(vif_index);
+    set_assert_tracking_desired_state(vif_index, false);
+    set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
     delete_assert_winner_metric_sg(vif_index);
     set_assert_noinfo_state(vif_index);
@@ -2016,8 +2002,8 @@ PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
     mifset_timer_cancel(_downstream_expiry_timers, vif_index);
     
     mifset_timer_cancel(assert_timers, vif_index);
-    reset_assert_tracking_desired_state(vif_index);
-    reset_could_assert_state(vif_index);
+    set_assert_tracking_desired_state(vif_index, false);
+    set_could_assert_state(vif_index, false);
     // TODO: reset '_asserts_rate_limit'
     delete_assert_winner_metric(vif_index);
     set_assert_noinfo_state(vif_index);

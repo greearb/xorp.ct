@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.2 2002/12/09 18:29:31 hodson Exp $
+// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 
 #ifndef __PIM_PIM_SCOPE_ZONE_TABLE_HH__
@@ -69,8 +69,7 @@ public:
     PimScopeZone(const IPvXNet& scope_zone_prefix, const Mifset& scoped_vifs);
     virtual ~PimScopeZone();
     
-    void set_scoped_vif(uint16_t vif_index);
-    void reset_scoped_vif(uint16_t vif_index);
+    void set_scoped_vif(uint16_t vif_index, bool v);
     
     bool is_set(uint16_t vif_index) const;
     bool is_scoped(const IPvX& addr, uint16_t vif_index) const;

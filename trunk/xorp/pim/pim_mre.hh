@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.10 2003/01/25 00:44:40 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.11 2003/01/29 05:43:59 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -602,16 +602,14 @@ public:
     const Mifset& assert_tracking_desired_sg() const;
     Mifset	_assert_tracking_desired_state;	// To store the
 						// AssertTrackingDesired state
-    void	set_assert_tracking_desired_state(uint16_t vif_index);
-    void	reset_assert_tracking_desired_state(uint16_t vif_index);
+    void	set_assert_tracking_desired_state(uint16_t vif_index, bool v);
     bool	is_assert_tracking_desired_state(uint16_t vif_index) const;
     bool	recompute_assert_tracking_desired_sg(uint16_t vif_index);
     bool	recompute_assert_tracking_desired_wc(uint16_t vif_index);
     const Mifset& could_assert_wc() const;
     const Mifset& could_assert_sg() const;
     bool	is_could_assert_state(uint16_t vif_index) const;
-    void	set_could_assert_state(uint16_t vif_index);
-    void	reset_could_assert_state(uint16_t vif_index);
+    void	set_could_assert_state(uint16_t vif_index, bool v);
     Mifset	_could_assert_state;	// To store the CouldAssert state
     
     AssertMetric *my_assert_metric_sg(uint16_t vif_index) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.4 2003/01/27 09:23:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.5 2003/01/29 05:43:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -637,7 +637,7 @@ PimMre::recompute_could_assert_wc(uint16_t vif_index)
     if (could_assert_wc().test(vif_index))
 	return (false);		// No change in CouldAssert(*,G,I)
     // CouldAssert(*,G,I) -> FALSE
-    reset_could_assert_state(vif_index);
+    set_could_assert_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a4;
     
@@ -677,7 +677,7 @@ PimMre::recompute_could_assert_sg(uint16_t vif_index)
     if (could_assert_sg().test(vif_index))
 	return (false);		// No change in CouldAssert(S,G,I)
     // CouldAssert(S,G,I) -> FALSE
-    reset_could_assert_state(vif_index);
+    set_could_assert_state(vif_index, false);
     set_assert_noinfo_state(vif_index);
     goto a4;
     

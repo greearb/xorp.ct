@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.3 2002/12/09 18:29:31 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -182,28 +182,21 @@ PimScopeZone::~PimScopeZone()
 
 /**
  * PimScopeZone::set_scoped_vif:
- * @vif_index: The vif index of the interface to set.
+ * @vif_index: The vif index of the interface to set or reset.
+ * @v: If true, set the interface as a boundary for this scope zone,
+ * otherwise reset it.
  * 
- * Set an interface as a boundary for this scope zone.
+ * Set or reset an interface as a boundary for this scope zone.
  **/
 void
-PimScopeZone::set_scoped_vif(uint16_t vif_index)
+PimScopeZone::set_scoped_vif(uint16_t vif_index, bool v)
 {
-    if (vif_index <= _scoped_vifs.size())
-	_scoped_vifs.set(vif_index);
-}
-
-/**
- * PimScopeZone::reset_scoped_vif:
- * @vif_index: The vif index of the interface to reset.
- * 
- * Reset/remove an interface as a boundary for this scope zone.
- **/
-void
-PimScopeZone::reset_scoped_vif(uint16_t vif_index)
-{
-    if (vif_index <= _scoped_vifs.size())
-	_scoped_vifs.reset(vif_index);
+    if (vif_index <= _scoped_vifs.size()) {
+	if (v)
+	    _scoped_vifs.set(vif_index);
+	else
+	    _scoped_vifs.reset(vif_index);
+    }
 }
 
 /**
