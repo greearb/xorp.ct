@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.13 2003/02/27 19:54:13 hodson Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.14 2003/03/31 16:10:14 hodson Exp $
 ##
 
 # -- Subdirectories
@@ -66,7 +66,6 @@ isolation_tests_SOURCES		+= peer_handler_debug.cc
 
 # -- Library Sources
 libbgp_a_SOURCES  = bgp_module.h
-libbgp_a_SOURCES += md5.h
 libbgp_a_SOURCES += aspath.hh
 libbgp_a_SOURCES += attribute_manager.hh
 libbgp_a_SOURCES += bgp_trie.hh
@@ -103,7 +102,6 @@ libbgp_a_SOURCES += timer_const.hh
 libbgp_a_SOURCES += update_attrib.hh
 libbgp_a_SOURCES += xrl_target.hh
 
-libbgp_a_SOURCES += md5.c
 libbgp_a_SOURCES += aspath.cc
 libbgp_a_SOURCES += attribute_manager.cc
 libbgp_a_SOURCES += bgp_trie.cc

@@ -35,11 +35,13 @@
  * SUCH DAMAGE.
  */
 
+#include "config.h"
+#include "libxorp/xorp.h"
+
+#include <md5.h>
 #include <string.h>
 
-#include "config.h"
 #include "hmac_md5.h"
-#include "md5.h"
 
 /**
  * hmac_md5:

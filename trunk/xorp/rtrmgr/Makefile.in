@@ -95,7 +95,7 @@ TESTS = test_templates
 noinst_PROGRAMS = $(TESTS)
 EXTRA_DIST = Notes config.boot config.template fea.boot
 LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
-rtrmgr_SOURCES = rtrmgr_module.h md5.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc
+rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc
 rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
 #unexpanded_xrl shouldn't really be needed
 xorpsh_SOURCES = rtrmgr_module.h version.h xorpsh_main.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc y.opcmd_tab.cc lex.opcmd.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc slave_conf_tree_node.cc conf_tree.cc slave_module_manager.cc  slave_conf_tree.cc xorp_client.cc xrldb.cc cli.cc command_tree.cc op_commands.cc popen.cc split.cc xrl_xorpsh_interface.cc unexpanded_xrl.cc

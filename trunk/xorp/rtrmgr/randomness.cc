@@ -12,15 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.2 2003/01/26 04:06:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.3 2003/03/10 23:21:01 hodson Exp $"
+
+#include "config.h"
+#include "libxorp/xorp.h"
 
 #include <fcntl.h>
+#include <md5.h>
+
 #include <string>
-#include "config.h"
+
 #include "libxorp/eventloop.hh"
 #include "randomness.hh"
-#include "md5.h"
-
 
 
 RandomGen::RandomGen() {

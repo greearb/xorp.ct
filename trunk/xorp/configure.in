@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.18 2003/04/12 01:34:51 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.19 2003/04/13 18:45:50 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -303,6 +303,8 @@ AC_LANG_C
 AC_SEARCH_LIBS(socket, socket)
 AC_SEARCH_LIBS(inet_addr, nsl)
 AC_SEARCH_LIBS(dlopen, dl)
+
+AC_SEARCH_LIBS(MD5Init, md5 md)
 
 dnl Replace main with a function in -lc:
 dnl AC_CHECK_LIB(c, main)
