@@ -7,35 +7,48 @@ TIMEOUT=3600
 
 timeout()
 {
-    cat >&2 <<-EOF
-
-****************************************************************************** 
-Suspect process is wedged. Timed out after a wait of ${TIMEOUT} seconds.
-****************************************************************************** 
-EOF
+    echo "-----------------------------------------------------------"
+    echo "Process appears wedged. Timed out after ${TIMEOUT} seconds."
+    echo "-----------------------------------------------------------"
     kill 0
-    exit -1
 }
 
-#
-# set_timeout <seconds>
-#
-set_timeout()
+# A test "process" that can be used to appear wedged.
+funkster()
 {
-    (sleep $1 && timeout ) 2>&1 > /dev/null &
-    TIMEOUT_PID=$!
-}
-
-unset_timeout()
-{
-    kill -9 ${TIMEOUT_PID} 2>&1 > /dev/null
+    iter=0
+    while [ 1 ] ; do
+	printf "."
+	sleep 1
+	iter=`expr $iter + 1`
+	if [ $iter -gt 30 ] ; then
+	    break
+	fi
+    done
 }
 
 ###############################################################################
 
-cd ${ROOTDIR}/xorp
-set_timeout ${TIMEOUT}
-( ./configure 1>&2 ) && ( gmake -k $@ 1>&2 )
-unset_timeout
+XORPDIR=${ROOTDIR}/xorp
+WAKEFILE=".wake-$$"
 
+cd ${XORPDIR}
+rm -f ${WAKEFILE} 2>/dev/null
 
+( ( ./configure 2>&1 && gmake -k $@ 2>&1 ) ; cat /dev/null > ${WAKEFILE} ) &
+#( ( funkster ) ; cat /dev/null > ${WAKEFILE} ) &
+
+expiry=`date "+%s"`
+expiry=`expr $expiry + ${TIMEOUT}`
+while [ ! -f ${WAKEFILE} ] ; do
+    now=`date "+%s"`
+    if [ "$now" -gt "$expiry" ] ; then
+	timeout
+	break
+    fi
+    sleep 10
+done
+
+if [ -f ${WAKEFILE} ] ; then
+    rm -f ${WAKEFILE}
+fi
