@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.34 2004/04/15 16:13:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.35 2004/06/10 22:40:32 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -407,8 +407,8 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
     debug_msg("PeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
     XLOG_ASSERT(_packet != NULL);
 
-    // Check this peer want this NLRI
-    if (!multiprotocol<IPv4>(safi, BGPPeerData::RECEIVED))
+    // Check this peer wants this NLRI
+    if (!multiprotocol<IPv4>(safi, BGPPeerData::NEGOTIATED))
 	return 0;
 
     if (_packet->big_enough()) {
@@ -465,8 +465,8 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
 
-    // Check this peer want this NLRI
-    if (!multiprotocol<IPv6>(safi, BGPPeerData::RECEIVED))
+    // Check this peer wants this NLRI
+    if (!multiprotocol<IPv6>(safi, BGPPeerData::NEGOTIATED))
 	return 0;
 
     if (_packet->big_enough()) {
@@ -530,8 +530,8 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
     debug_msg("PeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
     XLOG_ASSERT(_packet != NULL);
 
-    // Check this peer want this NLRI
-    if (!multiprotocol<IPv4>(safi, BGPPeerData::RECEIVED))
+    // Check this peer wants this NLRI
+    if (!multiprotocol<IPv4>(safi, BGPPeerData::NEGOTIATED))
 	return 0;
 
     if (_packet->big_enough()) {
@@ -566,8 +566,8 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
 
-    // Check this peer want this NLRI
-    if (!multiprotocol<IPv6>(safi, BGPPeerData::RECEIVED))
+    // Check this peer wants this NLRI
+    if (!multiprotocol<IPv6>(safi, BGPPeerData::NEGOTIATED))
 	return 0;
 
     if (_packet->big_enough()) {
