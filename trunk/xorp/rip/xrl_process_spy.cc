@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_process_spy.cc,v 1.2 2004/01/13 20:38:07 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_process_spy.cc,v 1.3 2004/04/22 01:11:52 pavlin Exp $"
 
 #define DEBUG_LOGGING
 
@@ -26,13 +26,15 @@
 #include "libxipc/xrl_router.hh"
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
-#include "xrl_process_spy.hh"
 
-const string XrlProcessSpy::_cname[END_IDX] = { "fea", "rib" };
+#include "xrl_config.hh"
+#include "xrl_process_spy.hh"
 
 XrlProcessSpy::XrlProcessSpy(XrlRouter& rtr)
     : ServiceBase("FEA/RIB Process Watcher"), _rtr(rtr)
 {
+    _cname[FEA_IDX] = xrl_fea_name();
+    _cname[RIB_IDX] = xrl_rib_name();
 }
 
 XrlProcessSpy::~XrlProcessSpy()

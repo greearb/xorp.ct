@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.8 2004/04/02 00:27:57 mjh Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.9 2004/04/22 01:11:51 pavlin Exp $"
 
 #define DEBUG_LOGGING
 
@@ -22,6 +22,7 @@
 #include "libxorp/debug.h"
 
 #include "constants.hh"
+#include "xrl_config.hh"
 #include "xrl_port_io.hh"
 
 #include "libxipc/xrl_router.hh"
@@ -78,7 +79,7 @@ bool
 XrlPortIO<IPv4>::request_socket_server()
 {
     XrlSocket4LocatorV0p1Client cl(&_xr);
-    return cl.send_find_socket_server_for_addr("fea", _addr,
+    return cl.send_find_socket_server_for_addr(xrl_fea_name(), _addr,
 		callback(this, &XrlPortIO<IPv4>::socket_server_cb));
 }
 
@@ -191,7 +192,7 @@ bool
 XrlPortIO<IPv6>::request_socket_server()
 {
     XrlSocket6LocatorV0p1Client cl(&_xr);
-    return cl.send_find_socket_server_for_addr("fea", _addr,
+    return cl.send_find_socket_server_for_addr(xrl_fea_name(), _addr,
 		callback(this, &XrlPortIO<IPv6>::socket_server_cb));
 }
 
