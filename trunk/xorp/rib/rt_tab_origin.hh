@@ -74,7 +74,7 @@ public:
      * Generic @ref RouteTable method that is not used on OriginTable.
      * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { abort(); return XORP_ERROR;}
+    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { XLOG_UNREACHABLE(); return XORP_ERROR;}
 
     /**
      * Delete a route from the OriginTable.
@@ -88,7 +88,7 @@ public:
      * Generic @ref RouteTable method that is not used on OriginTable.
      * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { abort(); return XORP_ERROR; }
+    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { XLOG_UNREACHABLE(); return XORP_ERROR; }
 
     /**
      * Delete all the routes that are in this OriginTable.  The
