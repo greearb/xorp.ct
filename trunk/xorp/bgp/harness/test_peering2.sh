@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.29 2004/02/12 18:50:19 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.30 2004/02/12 19:34:33 atanu Exp $
 #
 
 #
@@ -433,8 +433,70 @@ test6()
     coord peer2 assert established
 }
 
+test7()
+{
+    echo "TEST7 (Simple route propogation test - searching for memory leak):"
+    echo "	1) Bring up peering (peer2) and introduce one route"
+    echo "	2) Bring up a second peering (peer1) check route"
+    echo "	3) Tear down both peerings"
+
+    reset
+
+    # Establish an EBGP peering.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+
+    # Inject a route
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "$PEER2_AS" \
+	nexthop 10.10.10.10 \
+	nlri 10.10.10.0/24
+
+    # Bring up a second peering
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+
+    sleep 1
+
+    coord peer1 assert established
+    coord peer2 assert established
+
+    reset
+}
+
+test8()
+{
+    echo "TEST8 (Simple route propogation test - searching for memory leak):"
+    echo "	1) Bring up peering (peer1)"
+    echo "	2) Bring up a second peering (peer2) and introduce a route"
+    echo "	3) Tear down both peerings"
+
+    reset
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+    coord peer1 assert established
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+
+    # Inject a route
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "$PEER2_AS" \
+	nexthop 10.10.10.10 \
+	nlri 10.10.10.0/24
+
+
+    sleep 1
+
+    coord peer1 assert established
+    coord peer2 assert established
+
+    reset
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3 test4 test5 test6'
+TESTS='test1 test2 test3 test4 test5 test6 test7 test8'
 
 # Include command line
 . ${srcdir}/args.sh
