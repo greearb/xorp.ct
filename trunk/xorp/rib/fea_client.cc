@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.21 2002/12/10 06:56:08 mjh Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
 #include "urib_module.h"
@@ -51,22 +54,33 @@ public:
     // Callback type of callback to be invoked when synchronous command
     // completes
     typedef ref_ptr<XorpCallback0<void> > CompletionCallback;
+    // Callback to get the next add or delete if available.
+    typedef ref_ptr<XorpCallback0<SyncFtiCommand *> > GetNextCallback;
 
-    SyncFtiCommand(XrlRouter& rtr) : _fticlient(&rtr), _started(false) {}
+    typedef ref_ptr<XorpCallback1<void, const XrlError&> >
+    CommandCompleteCallback;
+
+    SyncFtiCommand(XrlRouter& rtr) : _fticlient(&rtr) {}
     virtual ~SyncFtiCommand() {}
 
-    void start(const CompletionCallback& cb);
-    bool started() const { return _started; }
+    void start(const CompletionCallback& cb, const GetNextCallback& gncb);
 
     // Methods to be implemented by actual commands
-    virtual void send_command() = 0;
+    virtual void send_command(uint32_t tid, const CommandCompleteCallback& cb)
+	= 0;
 
 protected:
     void start_complete(const XrlError& e, const uint32_t* tid);
 
+    void command_complete(const XrlError& e);
+
     void commit();
 
     void commit_complete(const XrlError& e);
+
+    SyncFtiCommand *get_next() {
+	return _get_next_cb->dispatch();
+    }
 
     void done() {
 	_completion_cb->dispatch();
@@ -79,19 +93,21 @@ protected:
     XrlFtiV0p1Client	_fticlient;
 
 private:
-    bool		_started;	// start has been called
     uint32_t		_tid;		// transaction id
+    GetNextCallback	_get_next_cb;	// Get the next operation
     CompletionCallback	_completion_cb;	// callback called when done
 };
 
 void
-SyncFtiCommand::start(const CompletionCallback& cb) {
-    _started = true;
+SyncFtiCommand::start(const CompletionCallback& cb,
+		      const GetNextCallback& gncb)
+{
     _completion_cb = cb;
-    _fticlient.send_start_transaction(
-	server, callback(this, &SyncFtiCommand::start_complete)
-	);
-};
+    _get_next_cb = gncb;
+    _fticlient.
+	send_start_transaction(server,
+			       callback(this,&SyncFtiCommand::start_complete));
+}
 
 void
 SyncFtiCommand::start_complete(const XrlError& e, const uint32_t* tid)
@@ -99,34 +115,59 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t* tid)
     debug_msg("start completed\n");
     if (e == XrlError::OKAY()) {
 	_tid = *tid;
-	send_command();
+	send_command(_tid, callback(this, &SyncFtiCommand::command_complete));
 	return;
     }
-    XLOG_ERROR("Could not start Synchronous FEA command: %s.",
-	       e.str().c_str());
+    XLOG_ERROR("Could not start Synchronous FEA command: %s", e.str().c_str());
     done();
 }
 
 void
-SyncFtiCommand::commit() {
-    _fticlient.send_commit_transaction(
-	server, _tid, callback(this, &SyncFtiCommand::commit_complete)
-	);
+SyncFtiCommand::command_complete(const XrlError& e)
+{
+    if(e != XrlError::OKAY()) {
+	XLOG_WARNING("Command failed: %s", e.str().c_str());
+	commit();
+	return;
+    }
+
+    /*
+    ** More commands may have arrived lets check.
+    */
+    SyncFtiCommand *task = get_next();
+    if(task) {
+	task->send_command(_tid,
+			   callback(this, &SyncFtiCommand::command_complete));
+	return;
+    }
+
+    commit();
+}
+
+void
+SyncFtiCommand::commit()
+{
+    debug_msg("commit\n");
+    _fticlient.
+	send_commit_transaction(server,
+				_tid,
+				callback(this,
+					 &SyncFtiCommand::commit_complete));
     debug_msg("Sending Commit\n");
 }
 
 void SyncFtiCommand::commit_complete(const XrlError& e)
 {
+    debug_msg("Commit completed\n");
     if (e != XrlError::OKAY()) {
 	XLOG_ERROR("Could not commit Synchronous FEA command: %s.",
 		   e.str().c_str());
     }
     done();
-    debug_msg("Commit completed\n");
 }
 
 /* ------------------------------------------------------------------------- */
-/* Synchronus AddRoute4 command */
+/* Synchronous AddRoute4 command */
 
 class AddRoute4 : public SyncFtiCommand {
 public:
@@ -139,17 +180,10 @@ public:
 	  _ifname(ifname), _vifname(vifname)
     {}
 
-    void send_command()
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
     {
-	_fticlient.send_add_entry4(server, tid(), _dest, _gw,
-				   _ifname, _vifname,
-				   callback(this,
-					    &AddRoute4::command_completed));
-    }
-
-    void command_completed(const XrlError& /* r */)
-    {
-	commit(); // Signal end of transaction
+	_fticlient.send_add_entry4(server, tid, _dest, _gw,
+				   _ifname, _vifname, cb);
     }
 
 private:
@@ -160,7 +194,7 @@ private:
 };
 
 /* ------------------------------------------------------------------------- */
-/* Synchronus AddRoute4 command */
+/* Synchronous DeleteRoute4 command */
 
 class DeleteRoute4 : public SyncFtiCommand {
 public:
@@ -168,16 +202,9 @@ public:
 	: SyncFtiCommand(rtr), _dest(dest)
     {}
 
-    void send_command()
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
     {
-	_fticlient.send_delete_entry4(server, tid(), _dest,
-				      callback(this,
-					    &DeleteRoute4::command_completed));
-    }
-
-    void command_completed(const XrlError& /* r */)
-    {
-	commit(); // Signal end of transaction
+	_fticlient.send_delete_entry4(server, tid, _dest, cb);
     }
 
 private:
@@ -185,7 +212,7 @@ private:
 };
 
 /* ------------------------------------------------------------------------- */
-/* Synchronus AddRoute6 command */
+/* Synchronous AddRoute6 command */
 
 class AddRoute6 : public SyncFtiCommand {
 public:
@@ -198,17 +225,10 @@ public:
 	  _ifname(ifname), _vifname(vifname)
     {}
 
-    void send_command()
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
     {
-	_fticlient.send_add_entry6(
-	    server, tid(), _dest, _gw, _ifname, _vifname,
-	    callback(this, &AddRoute6::command_completed)
-	    );
-    }
-
-    void command_completed(const XrlError& /* r */)
-    {
-	commit(); // Signal end of transaction
+	_fticlient.send_add_entry6(server, tid, _dest, _gw, _ifname,
+				   _vifname, cb);
     }
 
 private:
@@ -219,7 +239,7 @@ private:
 };
 
 /* ------------------------------------------------------------------------- */
-/* Synchronus AddRoute6 command */
+/* Synchronous DeleteRoute6 command */
 
 class DeleteRoute6 : public SyncFtiCommand {
 public:
@@ -227,16 +247,9 @@ public:
 	: SyncFtiCommand(rtr), _dest(dest)
     {}
 
-    void send_command()
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
     {
-	_fticlient.send_delete_entry6(server, tid(), _dest,
-				      callback(this,
-					    &DeleteRoute6::command_completed));
-    }
-
-    void command_completed(const XrlError& /* r */)
-    {
-	commit(); // Signal end of transaction
+	_fticlient.send_delete_entry6(server, tid, _dest, cb);
     }
 
 private:
@@ -275,8 +288,8 @@ ifname(const IPRouteEntry<A>& re)
 /* ------------------------------------------------------------------------- */
 /* FeaClient */
 
-FeaClient::FeaClient(XrlRouter& rtr)
-    : _xrl_router(rtr)
+FeaClient::FeaClient(XrlRouter& rtr, uint32_t	max_ops)
+    : _xrl_router(rtr), _busy(false), _max_ops(max_ops)
 {}
 
 FeaClient::~FeaClient()
@@ -290,16 +303,14 @@ FeaClient::add_route(const IPv4Net& dest,
 {
     _tasks.push_back(FeaClientTask(new AddRoute4(_xrl_router, dest, gw, 
 						 ifname, vifname)));
-    crank();
+    start();
 }
 
 void
 FeaClient::delete_route(const IPv4Net& dest)
 {
-    _tasks.push_back(
-	FeaClientTask(new DeleteRoute4(_xrl_router, dest))
-	);
-    crank();
+    _tasks.push_back(FeaClientTask(new DeleteRoute4(_xrl_router, dest)));
+    start();
 }
 
 void
@@ -310,14 +321,14 @@ FeaClient::add_route(const IPv6Net& dest,
 {
     _tasks.push_back(FeaClientTask(new AddRoute6(_xrl_router, dest, gw, 
 						 ifname, vifname)));
-    crank();
+    start();
 }
 
 void
 FeaClient::delete_route(const IPv6Net& dest)
 {
     _tasks.push_back(FeaClientTask(new DeleteRoute6(_xrl_router, dest)));
-    crank();
+    start();
 }
 
 void
@@ -353,26 +364,59 @@ FeaClient::tasks_count() const
 bool
 FeaClient::tasks_pending() const
 {
-    assert(_tasks.empty() || _tasks.front()->started());
+    XLOG_ASSERT(_tasks.empty());
     return !_tasks.empty();
 }
 
-void
-FeaClient::task_completed()
+SyncFtiCommand *
+FeaClient::get_next()
 {
+    debug_msg("Get next task count %d op count %d\n", tasks_count(),_op_count);
+
+    XLOG_ASSERT(!_tasks.empty());
+
+    _completed_tasks.push_back(_tasks.front());
     _tasks.erase(_tasks.begin());
-    crank();
+    if(_tasks.empty() || ++_op_count >= _max_ops)
+	return 0;
+
+    debug_msg("Get next found one\n");
+
+    FeaClientTask fct = _tasks.front();
+
+    return &(*fct);
 }
 
 void
-FeaClient::crank()
+FeaClient::transaction_completed()
 {
-    if (_tasks.empty() || _tasks.front()->started()) {
-	// No jobs to do, or job at front of queue is running
-	debug_msg("cranking: nothing to do %s\n",
-		  _tasks.empty() ? "empty" : "running");
+    XLOG_ASSERT(_busy);
+
+    _busy = false;
+
+    while(!_completed_tasks.empty())
+	_completed_tasks.erase(_completed_tasks.begin());
+	
+    if(!_tasks.empty())
+	start();
+}
+
+void
+FeaClient::start()
+{
+    if(_busy) {
+	debug_msg("start: busy\n");
 	return;
     }
-    debug_msg("cranking\n");
-    _tasks.front()->start(callback(this, &FeaClient::task_completed));
+
+    if (_tasks.empty()) {
+	debug_msg("start: empty\n");
+	return;
+    }
+
+    debug_msg("start\n");
+    _busy = true;
+    _op_count = 0;
+    _tasks.front()->start(callback(this, &FeaClient::transaction_completed),
+			  callback(this, &FeaClient::get_next));
 }

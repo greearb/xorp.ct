@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.13 2002/12/10 05:38:33 mjh Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -41,8 +41,9 @@ public:
      *
      * @param xrl_router XRL router instance to use for communication
      * with the FEA
+     * @param max_ops the maximum number of operations in a transaction.
      */
-    FeaClient(XrlRouter& xrl_router);
+    FeaClient(XrlRouter& xrl_router, uint32_t	max_ops = 100);
 
     /**
      * FeaClient destructor
@@ -143,11 +144,27 @@ public:
     bool tasks_pending() const;
 
 protected:
-    void task_completed();
-    void crank();
+    /**
+     * @return The next task or 0 if there isn't one.
+     */
+    SyncFtiCommand *get_next();
+    /**
+     * Called when a transaction has completed.
+     */
+    void transaction_completed();
+    /**
+     * Called to start a transaction.
+     */
+    void start();
 
     XrlRouter& _xrl_router;
-    list<FeaClientTask> _tasks;
+    bool _busy;			// Transaction in progress.
+    list<FeaClientTask> _tasks;	// List of current task.
+    list<FeaClientTask> _completed_tasks;	// Completed tasks are
+						// stored here. For
+						// later deletion.
+    const uint32_t _max_ops;	// Maximum allowed tasks in a transaction.
+    uint32_t _op_count;		// Number of tasks in this transaction.
 };
 
 #endif // __RIB_FEA_CLIENT_HH__
