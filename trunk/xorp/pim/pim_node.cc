@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.12 2003/05/31 17:49:43 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.13 2003/06/02 04:11:08 pavlin Exp $"
 
 
 //
@@ -820,9 +820,9 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
     PimVif *pim_vif = NULL;
     int ret_value = XORP_ERROR;
     
-    debug_msg("Received message from %s to %s: "
+    debug_msg("Received message from %s to %s on vif_index %d: "
 	      "ip_ttl = %d ip_tos = %#x router_alert = %d rcvlen = %u\n",
-	      cstring(src), cstring(dst),
+	      cstring(src), cstring(dst), vif_index,
 	      ip_ttl, ip_tos, router_alert_bool, (uint32_t)rcvlen);
     
     //
@@ -975,10 +975,12 @@ PimNode::signal_message_recv(const string& src_module_instance_name,
 	    break;
 	}
 	
-	XLOG_WARNING("RX signal message with invalid message type = %d: "
-		     "src = %s dst = %s vif_index = %d src_module_name = %s",
-		     message_type, cstring(src), cstring(dst), vif_index,
-		     src_module_instance_name.c_str());
+	XLOG_WARNING("RX unknown signal from %s: "
+		     "vif_index = %d src = %s dst = %s message_type = %d",
+		     src_module_instance_name.c_str(),
+		     vif_index,
+		     cstring(src), cstring(dst),
+		     message_type);
 	return (XORP_ERROR);
     } while (false);
     
