@@ -108,6 +108,7 @@ noinst_LTLIBRARIES = libpim.la
 
 # -- Libraries and library flags to link the binary programs
 ### PIM libraries
+#LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la

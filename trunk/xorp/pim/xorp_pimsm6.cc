@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.7 2004/06/10 22:41:35 hodson Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.8 2004/12/09 07:54:39 pavlin Exp $"
 
 
 //
@@ -28,8 +28,6 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-
-#include "libxipc/xrl_std_router.hh"
 
 #include "xrl_pim_node.hh"
 
@@ -83,7 +81,7 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-pim_main(const char* finder_hostname, uint16_t finder_port)
+pim_main(const string& finder_hostname, uint16_t finder_port)
 {
 #ifdef HAVE_IPV6
     //
@@ -94,18 +92,17 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
     //
     // PIMSM node
     //
-    XrlStdRouter xrl_std_router_pimsm6(eventloop,
-				       xorp_module_name(AF_INET6,
-							XORP_MODULE_PIMSM),
-				       finder_hostname, finder_port);
     XrlPimNode xrl_pimsm_node6(AF_INET6,
 			       XORP_MODULE_PIMSM,
 			       eventloop,
-			       &xrl_std_router_pimsm6,
+			       xorp_module_name(AF_INET6, XORP_MODULE_PIMSM),
+			       finder_hostname,
+			       finder_port,
+			       "finder",
 			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
 			       xorp_module_name(AF_INET6, XORP_MODULE_RIB),
 			       xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm6);
+    wait_until_xrl_router_is_ready(eventloop, xrl_pimsm_node6.xrl_router());
 
     //
     // Startup
@@ -125,7 +122,7 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
 	eventloop.run();
     }
 
-    while (xrl_std_router_pimsm6.pending()) {
+    while (xrl_pimsm_node6.xrl_router().pending()) {
 	eventloop.run();
     }
 #endif // HAVE_IPV6_MULTICAST
@@ -197,7 +194,7 @@ main(int argc, char *argv[])
     // Run everything
     //
     try {
-	pim_main(finder_hostname.c_str(), finder_port);
+	pim_main(finder_hostname, finder_port);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

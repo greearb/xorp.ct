@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.32 2005/01/25 01:47:00 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.33 2005/02/14 20:17:50 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -21,6 +21,7 @@ noinst_LTLIBRARIES = libpim.la
 # -- Libraries and library flags to link the binary programs
 ### PIM libraries
 LDADD		 = $(noinst_LTLIBRARIES)
+#LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la

@@ -12,11 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.60 2005/01/28 03:34:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.61 2005/02/12 08:09:08 pavlin Exp $"
 
 #include "pim_module.h"
-#include "pim_private.hh"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
+
 #include "pim_mfc.hh"
 #include "pim_node.hh"
 #include "pim_node_cli.hh"
@@ -24,34 +29,55 @@
 #include "pim_vif.hh"
 #include "xrl_pim_node.hh"
 
+const TimeVal XrlPimNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
 //
 // XrlPimNode front-end interface
 //
 
-XrlPimNode::XrlPimNode(int family,
-		       xorp_module_id module_id,
-		       EventLoop& eventloop,
-		       XrlRouter* xrl_router,
-		       const string& mfea_target,
-		       const string& rib_target,
-		       const string& mld6igmp_target)
+XrlPimNode::XrlPimNode(int		family,
+		       xorp_module_id	module_id,
+		       EventLoop&	eventloop,
+		       const string&	class_name,
+		       const string&	finder_hostname,
+		       uint16_t		finder_port,
+		       const string&	finder_target,
+		       const string&	mfea_target,
+		       const string&	rib_target,
+		       const string&	mld6igmp_target)
     : PimNode(family, module_id, eventloop),
-      XrlPimTargetBase(xrl_router),
+      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+		   finder_port),
+      XrlPimTargetBase(&xrl_router()),
       PimNodeCli(*static_cast<PimNode *>(this)),
-      _class_name(xrl_router->class_name()),
-      _instance_name(xrl_router->instance_name()),
-      _mrib_transaction_manager(eventloop),
-      _xrl_mfea_client(xrl_router),
-      _xrl_rib_client(xrl_router),
-      _xrl_mld6igmp_client(xrl_router),
-      _xrl_cli_manager_client(xrl_router),
+      _class_name(xrl_router().class_name()),
+      _instance_name(xrl_router().instance_name()),
+      _finder_target(finder_target),
       _mfea_target(mfea_target),
       _rib_target(rib_target),
       _mld6igmp_target(mld6igmp_target),
+      _mrib_transaction_manager(eventloop),
+      _xrl_mfea_client(&xrl_router()),
+      _xrl_rib_client(&xrl_router()),
+      _xrl_mld6igmp_client(&xrl_router()),
+      _xrl_cli_manager_client(&xrl_router()),
+      _xrl_finder_client(&xrl_router()),
+      _is_finder_alive(false),
+      _is_mfea_alive(false),
+      _is_mfea_registered(false),
+      _is_mfea_registering(false),
+      _is_mfea_deregistering(false),
       _is_mfea_add_protocol_registered(false),
       _is_mfea_allow_signal_messages_registered(false),
-      _is_rib_client_registered(false)
+      _is_rib_alive(false),
+      _is_rib_registered(false),
+      _is_rib_registering(false),
+      _is_rib_deregistering(false),
+      _is_rib_redist_transaction_enabled(false),
+      _is_mld6igmp_alive(false),
+      _is_mld6igmp_registered(false),
+      _is_mld6igmp_registering(false),
+      _is_mld6igmp_deregistering(false)
 {
 
 }
@@ -183,60 +209,193 @@ XrlPimNode::stop_bsr()
 }
 
 //
-// Protocol node methods
+// Finder-related events
 //
-
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
-XrlPimNode::mfea_register_startup()
+XrlPimNode::finder_connect_event()
 {
-    if (! _is_mfea_add_protocol_registered) {
-	PimNode::incr_startup_requests_n();
-	// XXX: another incr to wait for network interface information
-	// on startup.
-	PimNode::set_vif_setup_completed(false);
-	PimNode::incr_startup_requests_n();
-    }
-
-    if (! _is_mfea_allow_signal_messages_registered)
-	PimNode::incr_startup_requests_n();
-
-    send_mfea_registration();
+    _is_finder_alive = true;
 }
 
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
-XrlPimNode::mfea_register_shutdown()
+XrlPimNode::finder_disconnect_event()
 {
-    if (_is_mfea_add_protocol_registered)
-	PimNode::incr_shutdown_requests_n();
+    XLOG_ERROR("Finder disconnect event. Exiting immediately...");
 
-    send_mfea_deregistration();
-}
+    _is_finder_alive = false;
 
-void
-XrlPimNode::rib_register_startup()
-{
-    if (! _is_rib_client_registered)
-	PimNode::incr_startup_requests_n();
-
-    send_rib_registration();
-}
-
-void
-XrlPimNode::rib_register_shutdown()
-{
-    if (_is_rib_client_registered)
-	PimNode::incr_shutdown_requests_n();
-
-    send_rib_deregistration();
+    PimNode::set_status(SERVICE_FAILED);
+    PimNode::update_status();
 }
 
 //
 // Register with the MFEA
 //
 void
-XrlPimNode::send_mfea_registration()
+XrlPimNode::mfea_register_startup()
+{
+    bool success;
+
+    _mfea_register_startup_timer.unschedule();
+    _mfea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (_is_mfea_registered)
+	return;		// Already registered
+
+    if (! _is_mfea_registering) {
+	PimNode::incr_startup_requests_n();	// XXX: for add_protocol
+	// XXX: another incr to wait for network interface information
+	// on startup.
+	PimNode::set_vif_setup_completed(false);
+	PimNode::incr_startup_requests_n();
+
+	if (! _is_mfea_allow_signal_messages_registered)
+	    PimNode::incr_startup_requests_n();
+
+	_is_mfea_registering = true;
+    }
+
+    //
+    // Register interest in the MFEA with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _mfea_target,
+	callback(this, &XrlPimNode::finder_register_interest_mfea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_mfea_register_startup_timer =
+	    PimNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::mfea_register_startup));
+	return;
+    }
+}
+
+void
+XrlPimNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
+{
+    // If success, then the MFEA birth event will startup the MFEA registration
+    if (xrl_error == XrlError::OKAY()) {
+	_is_mfea_registering = false;
+	_is_mfea_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _mfea_register_startup_timer.scheduled()) {
+	_mfea_register_startup_timer =
+	    PimNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::mfea_register_startup));
+    }
+}
+
+//
+// De-register with the MFEA
+//
+void
+XrlPimNode::mfea_register_shutdown()
+{
+    bool success;
+
+    _mfea_register_startup_timer.unschedule();
+    _mfea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (! _is_mfea_alive)
+	return;		// The MFEA is not there anymore
+
+    if (! _is_mfea_registered)
+	return;		// Not registered
+
+    if (! _is_mfea_deregistering) {
+	PimNode::incr_shutdown_requests_n();	// XXX: for delete_protocol
+
+	_is_mfea_deregistering = true;
+    }
+
+    //
+    // De-register interest in the MFEA with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _mfea_target,
+	callback(this, &XrlPimNode::finder_deregister_interest_mfea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_mfea_register_shutdown_timer =
+	    PimNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::mfea_register_shutdown));
+	return;
+    }
+
+    send_mfea_delete_protocol();
+}
+
+void
+XrlPimNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_mfea_deregistering = false;
+	_is_mfea_registered = false;
+	return;
+    }
+
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    _is_mfea_deregistering = false;
+    _is_mfea_registered = false;
+
+    PimNode::set_status(SERVICE_FAILED);
+    PimNode::update_status();
+}
+
+//
+// Add protocol with the MFEA
+//
+void
+XrlPimNode::send_mfea_add_protocol()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     //
     // Register the protocol with the MFEA
@@ -268,13 +427,12 @@ XrlPimNode::send_mfea_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
-	XLOG_ERROR("Failed to register with the MFEA. "
+	XLOG_ERROR("Failed to add protocol with the MFEA. "
 		   "Will try again.");
-	_mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlPimNode::send_mfea_registration));
+	_mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::send_mfea_add_protocol));
 	return;
     }
 
@@ -297,14 +455,13 @@ XrlPimNode::send_mfea_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	XLOG_ERROR("Failed to enable the receiving of kernel signal messages "
 		   "with the MFEA. "
 		   "Will try again.");
-	_mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlPimNode::send_mfea_registration));
+	_mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::send_mfea_add_protocol));
 	return;
     }
 }
@@ -315,7 +472,7 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_add_protocol_registered = true;
-	send_mfea_registration();
+	send_mfea_add_protocol();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -324,20 +481,19 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     // If a command failed because the other side rejected it, this is fatal.
     //
     if (xrl_error == XrlError::COMMAND_FAILED()) {
-	XLOG_FATAL("Cannot register with the MFEA: %s",
+	XLOG_FATAL("Cannot add protocol with the MFEA: %s",
 		   xrl_error.str().c_str());
     }
 
     //
     // If an error, then start a timer to try again (unless the timer is
     // already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
-    if (_mfea_registration_timer.scheduled())
+    if (_mfea_add_protocol_timer.scheduled())
 	return;
-    _mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlPimNode::send_mfea_registration));
+    _mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
+	RETRY_TIMEVAL,
+	callback(this, &XrlPimNode::send_mfea_add_protocol));
 }
 
 void
@@ -347,7 +503,7 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_allow_signal_messages_registered = true;
-	send_mfea_registration();
+	send_mfea_add_protocol();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -363,22 +519,24 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     //
     // If an error, then start a timer to try again (unless the timer is
     // already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
-    if (_mfea_registration_timer.scheduled())
+    if (_mfea_add_protocol_timer.scheduled())
 	return;
-    _mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlPimNode::send_mfea_registration));
+    _mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
+	RETRY_TIMEVAL,
+	callback(this, &XrlPimNode::send_mfea_add_protocol));
 }
 
 //
-// De-register with the MFEA
+// Delete protocol with the MFEA
 //
 void
-XrlPimNode::send_mfea_deregistration()
+XrlPimNode::send_mfea_delete_protocol()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_mfea_add_protocol_registered) {
 	if (PimNode::is_ipv4()) {
@@ -407,7 +565,7 @@ XrlPimNode::send_mfea_deregistration()
     }
 
     if (! success) {
-	XLOG_ERROR("Failed to deregister with the MFEA. "
+	XLOG_ERROR("Failed to delete protocol with the MFEA. "
 		   "Will give up.");
 	PimNode::set_status(SERVICE_FAILED);
 	PimNode::update_status();
@@ -425,7 +583,8 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 	return;
     }
 
-    XLOG_ERROR("Failed to deregister with the MFEA: %s. "
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
@@ -437,11 +596,157 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 // Register with the RIB
 //
 void
-XrlPimNode::send_rib_registration()
+XrlPimNode::rib_register_startup()
+{
+    bool success;
+
+    _rib_register_startup_timer.unschedule();
+    _rib_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (_is_rib_registered)
+	return;		// Already registered
+
+    if (! _is_rib_registering) {
+	if (! _is_rib_redist_transaction_enabled)
+	    PimNode::incr_startup_requests_n();
+
+	_is_rib_registering = true;
+    }
+
+    //
+    // Register interest in the RIB with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _rib_target,
+	callback(this, &XrlPimNode::finder_register_interest_rib_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_rib_register_startup_timer =
+	    PimNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::rib_register_startup));
+	return;
+    }
+}
+
+void
+XrlPimNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
+{
+    // If success, then add the RIB tables
+    if (xrl_error == XrlError::OKAY()) {
+	_is_rib_registering = false;
+	_is_rib_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _rib_register_startup_timer.scheduled()) {
+	_rib_register_startup_timer =
+	    PimNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::rib_register_startup));
+    }
+}
+
+//
+// De-register with the RIB
+//
+void
+XrlPimNode::rib_register_shutdown()
+{
+    bool success;
+
+    _rib_register_startup_timer.unschedule();
+    _rib_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (! _is_rib_alive)
+	return;		// The RIB is not there anymore
+
+    if (! _is_rib_registered)
+	return;		// Not registered
+
+    if (! _is_rib_deregistering) {
+	if (_is_rib_redist_transaction_enabled)
+	    PimNode::incr_shutdown_requests_n();
+
+	_is_rib_deregistering = true;
+    }
+
+    //
+    // De-register interest in the RIB with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _rib_target,
+	callback(this, &XrlPimNode::finder_deregister_interest_rib_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_rib_register_shutdown_timer =
+	    PimNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::rib_register_shutdown));
+	return;
+    }
+
+    send_rib_redist_transaction_disable();
+}
+
+void
+XrlPimNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_rib_deregistering = false;
+	_is_rib_registered = false;
+	return;
+    }
+
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    _is_rib_deregistering = false;
+    _is_rib_registered = false;
+
+    PimNode::set_status(SERVICE_FAILED);
+    PimNode::update_status();
+}
+
+//
+// Enable receiving MRIB information from the RIB
+//
+void
+XrlPimNode::send_rib_redist_transaction_enable()
 {
     bool success = true;
 
-    if (! _is_rib_client_registered) {
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (! _is_rib_redist_transaction_enabled) {
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_rib_client.send_redist_transaction_enable4(
 		_rib_target.c_str(),
@@ -472,24 +777,25 @@ XrlPimNode::send_rib_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
-	XLOG_ERROR("Failed to register with the RIB. "
+	XLOG_ERROR("Failed to enable receiving MRIB information from the RIB. "
 		   "Will try again.");
-	_rib_registration_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlPimNode::send_rib_registration));
+	_rib_redist_transaction_enable_timer =
+	    PimNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
 	return;
     }
 }
 
 void
-XrlPimNode::rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_error)
+XrlPimNode::rib_client_send_redist_transaction_enable_cb(
+    const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
-	_is_rib_client_registered = true;
-	send_rib_registration();
+	_is_rib_redist_transaction_enabled = true;
+	send_rib_redist_transaction_enable();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -498,31 +804,34 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_err
     // If a command failed because the other side rejected it, this is fatal.
     //
     if (xrl_error == XrlError::COMMAND_FAILED()) {
-	XLOG_FATAL("Cannot register with the RIB: %s",
+	XLOG_FATAL("Cannot enable receiving MRIB information from the RIB: %s",
 		   xrl_error.str().c_str());
     }
 
     //
     // If an error, then start a timer to try again (unless the timer is
     // already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
-    if (_rib_registration_timer.scheduled())
+    if (_rib_redist_transaction_enable_timer.scheduled())
 	return;
-    _rib_registration_timer = PimNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlPimNode::send_rib_registration));
+    _rib_redist_transaction_enable_timer =
+	PimNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
 }
 
 //
-// De-register with the RIB
+// Disable receiving MRIB information from the RIB
 //
 void
-XrlPimNode::send_rib_deregistration()
+XrlPimNode::send_rib_redist_transaction_disable()
 {
     bool success = true;
 
-    if (_is_rib_client_registered) {
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (_is_rib_redist_transaction_enabled) {
 	if (PimNode::is_ipv4()) {
 	    bool success4;
 	    success4 = _xrl_rib_client.send_redist_transaction_disable4(
@@ -553,7 +862,7 @@ XrlPimNode::send_rib_deregistration()
     }
 
     if (! success) {
-	XLOG_ERROR("Failed to deregister with the RIB. "
+	XLOG_ERROR("Failed to disable receiving MRIB information from the RIB. "
 		   "Will give up.");
 	PimNode::set_status(SERVICE_FAILED);
 	PimNode::update_status();
@@ -561,16 +870,17 @@ XrlPimNode::send_rib_deregistration()
 }
 
 void
-XrlPimNode::rib_client_send_redist_transaction_disable_cb(const XrlError& xrl_error)
+XrlPimNode::rib_client_send_redist_transaction_disable_cb(
+    const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
-	_is_rib_client_registered = false;
+	_is_rib_redist_transaction_enabled = false;
 	PimNode::decr_shutdown_requests_n();
 	return;
     }
 
-    XLOG_ERROR("Failed to deregister with the RIB: %s. "
+    XLOG_ERROR("Failed to disable receiving MRIB information from the RIB: %s."
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
@@ -625,6 +935,9 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 {
     bool success = true;
     PimVif *pim_vif = NULL;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_start_stop_protocol_kernel_vif_queue.empty())
 	return;			// No more changes
@@ -717,7 +1030,6 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to %s protocol vif %s with the MFEA. "
 		   "Will try again.",
@@ -725,7 +1037,7 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		   pim_vif->name().c_str());
     start_timer_label:
 	_start_stop_protocol_kernel_vif_queue_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
     }
 }
@@ -757,10 +1069,9 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& x
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _start_stop_protocol_kernel_vif_queue_timer = PimNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
 }
 
@@ -815,6 +1126,9 @@ XrlPimNode::send_join_leave_multicast_group()
 {
     bool success = true;
     PimVif *pim_vif = NULL;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_join_leave_multicast_group_queue.empty())
 	return;			// No more changes
@@ -912,7 +1226,6 @@ XrlPimNode::send_join_leave_multicast_group()
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
 		   "Will try again.",
@@ -921,7 +1234,7 @@ XrlPimNode::send_join_leave_multicast_group()
 		   pim_vif->name().c_str());
     start_timer_label:
 	_join_leave_multicast_group_queue_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_join_leave_multicast_group));
     }
 }
@@ -953,10 +1266,9 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_e
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _join_leave_multicast_group_queue_timer = PimNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlPimNode::send_join_leave_multicast_group));
 }
 
@@ -996,7 +1308,10 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
     size_t max_vifs_oiflist = mfc.olist().size();
     vector<uint8_t> oiflist_vector(max_vifs_oiflist);
     vector<uint8_t> oiflist_disable_wrongvif_vector(max_vifs_oiflist);
-    
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     mifset_to_vector(mfc.olist(), oiflist_vector);
     mifset_to_vector(mfc.olist_disable_wrongvif(),
 		     oiflist_disable_wrongvif_vector);
@@ -1070,7 +1385,6 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to %s MFC entry for (%s,%s) with the MFEA. "
 		   "Will try again.",
@@ -1079,7 +1393,7 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 		   cstring(mfc.group_addr()));
     start_timer_label:
 	_add_delete_mfc_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
     }
 }
@@ -1176,6 +1490,9 @@ XrlPimNode::send_add_delete_dataflow_monitor(
     bool success = true;
     bool is_add = monitor.is_add();
     bool is_delete_all = monitor.is_delete_all();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     //
     // Check whether we have already registered with the MFEA
@@ -1293,7 +1610,6 @@ XrlPimNode::send_add_delete_dataflow_monitor(
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to %s dataflow entry for (%s,%s) with the MFEA. "
 		   "Will try again.",
@@ -1303,7 +1619,7 @@ XrlPimNode::send_add_delete_dataflow_monitor(
 
     start_timer_label:
 	_add_delete_mfc_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
     }
 }
@@ -1368,11 +1684,10 @@ XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(const XrlError& 
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _add_delete_mfc_dataflow_monitor_queue_timer =
 	PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
 }
 
@@ -1389,6 +1704,7 @@ XrlPimNode::add_protocol_mld6igmp(uint16_t vif_index)
     }
 
     _add_delete_protocol_mld6igmp_queue.push_back(make_pair(vif_index, true));
+    _add_protocol_mld6igmp_vif_index_set.insert(vif_index);
 
     PimNode::incr_startup_requests_n();
 
@@ -1413,6 +1729,7 @@ XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
     }
 
     _add_delete_protocol_mld6igmp_queue.push_back(make_pair(vif_index, false));
+    _add_protocol_mld6igmp_vif_index_set.erase(vif_index);
 
     PimNode::incr_shutdown_requests_n();
 
@@ -1429,6 +1746,9 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 {
     bool success = true;
     PimVif *pim_vif = NULL;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_add_delete_protocol_mld6igmp_queue.empty())
 	return;			// No more changes
@@ -1511,7 +1831,6 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Cannot %s vif %s with the MLD6IGMP. "
 		   "Will try again.",
@@ -1519,7 +1838,7 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		   pim_vif->name().c_str());
     start_timer_label:
 	_add_delete_protocol_mld6igmp_queue_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
     }
 }
@@ -1551,12 +1870,51 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError&
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _add_delete_protocol_mld6igmp_queue_timer = PimNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
 }
+
+//
+// Schedule protocol registration right after MLD/IGMP becomes alive
+//
+void
+XrlPimNode::schedule_add_protocol_mld6igmp()
+{
+    set<uint16_t>::const_iterator set_iter;
+    list<pair<uint16_t, bool> >::const_iterator list_iter;
+
+    //
+    // Create a copy of the set with the vifs to add, so we can edit it later
+    //
+    set<uint16_t> tmp_set = _add_protocol_mld6igmp_vif_index_set;
+
+    //
+    // Remove from the copy those vifs that are already scheduled to be added.
+    //
+    for (list_iter = _add_delete_protocol_mld6igmp_queue.begin();
+	 list_iter != _add_delete_protocol_mld6igmp_queue.end();
+	 ++list_iter) {
+	uint16_t vif_index = list_iter->first;
+	bool is_add = list_iter->second;
+	if (! is_add)
+	    continue;
+	tmp_set.erase(vif_index);
+    }
+
+    //
+    // Add the remaining vifs
+    //
+    for (set_iter = tmp_set.begin(); set_iter != tmp_set.end(); ++set_iter) {
+	uint16_t vif_index = *set_iter;
+	add_protocol_mld6igmp(vif_index);
+    }
+}
+
+//
+// Protocol node methods
+//
 
 /**
  * XrlPimNode::proto_send:
@@ -1593,7 +1951,10 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 {
     bool success = true;
     PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
-    
+
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %d: "
 		   "no such vif",
@@ -1680,6 +2041,9 @@ XrlPimNode::add_cli_command_to_cli_manager(const char *command_name,
 					   bool is_command_processor
     )
 {
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
@@ -1709,6 +2073,9 @@ XrlPimNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error
 int
 XrlPimNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
@@ -1780,6 +2147,82 @@ XrlPimNode::common_0_1_shutdown()
 
     if (is_error)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Announce target birth to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
+ */
+XrlCmdError
+XrlPimNode::finder_event_observer_0_1_xrl_target_birth(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+    if (target_class == _mfea_target) {
+	_is_mfea_alive = true;
+	send_mfea_add_protocol();
+    }
+
+    if (target_class == _rib_target) {
+	_is_rib_alive = true;
+	send_rib_redist_transaction_enable();
+    }
+
+    if (target_class == _mld6igmp_target) {
+	_is_mld6igmp_alive = true;
+
+	send_add_delete_protocol_mld6igmp();
+	schedule_add_protocol_mld6igmp();
+    }
+
+    return XrlCmdError::OKAY();
+    UNUSED(target_instance);
+}
+
+/**
+ *  Announce target death to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
+ */
+XrlCmdError
+XrlPimNode::finder_event_observer_0_1_xrl_target_death(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+
+    bool do_shutdown = false;
+
+    if (target_class == _mfea_target) {
+	XLOG_ERROR("MFEA (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_mfea_alive = false;
+	do_shutdown = true;
+    }
+
+    if (target_class == _rib_target) {
+	XLOG_ERROR("RIB (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_rib_alive = false;
+	do_shutdown = true;
+    }
+
+    if (target_class == _mld6igmp_target) {
+	XLOG_INFO("MLD/IGMP (instance %s) has died.",
+		   target_instance.c_str());
+	_is_mld6igmp_alive = false;
+    }
+
+    if (do_shutdown)
+	stop_pim();
 
     return XrlCmdError::OKAY();
 }

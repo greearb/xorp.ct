@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.38 2004/06/10 22:41:32 hodson Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.39 2005/01/28 03:34:20 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -47,9 +47,12 @@
 // Structures/classes, typedefs and macros
 //
 
-class PimVif;
+class EventLoop;
+class IPvX;
+class IPvXNet;
 class PimMrt;
 class PimNbr;
+class PimVif;
 
 /**
  * @short The PIM node class.

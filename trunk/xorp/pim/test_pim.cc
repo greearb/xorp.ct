@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.48 2005/02/15 02:08:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.49 2005/02/17 01:03:37 pavlin Exp $"
 
 
 //
@@ -321,16 +321,14 @@ pim_main(const string& finder_hostname, uint16_t finder_port,
     //
     // PIMSM node
     //
-    XrlStdRouter xrl_std_router_pimsm4(
-	eventloop,
-	xorp_module_name(AF_INET, XORP_MODULE_PIMSM),
-	finder_hostname.c_str(),
-	finder_port);
     XrlPimNode xrl_pimsm_node4(
 	AF_INET,
 	XORP_MODULE_PIMSM,
 	eventloop,
-	&xrl_std_router_pimsm4,
+	xorp_module_name(AF_INET, XORP_MODULE_PIMSM),
+	finder_hostname,
+	finder_port,
+	"finder",
 	xorp_module_name(AF_INET, XORP_MODULE_MFEA),
 	xorp_module_name(AF_INET, XORP_MODULE_RIB),
 	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
@@ -339,23 +337,21 @@ pim_main(const string& finder_hostname, uint16_t finder_port,
     // xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
     // xrl_pimsm_node4.pim_mrt().track_state_print_actions_num();
     // exit (0);
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm4);
+    wait_until_xrl_router_is_ready(eventloop, xrl_pimsm_node4.xrl_router());
 
 #ifdef HAVE_IPV6
-    XrlStdRouter xrl_std_router_pimsm6(
-	eventloop,
-	xorp_module_name(AF_INET6, XORP_MODULE_PIMSM),
-	finder_hostname.c_str(),
-	finder_port);
     XrlPimNode xrl_pimsm_node6(
 	AF_INET6,
 	XORP_MODULE_PIMSM,
 	eventloop,
-	&xrl_std_router_pimsm6,
+	xorp_module_name(AF_INET6, XORP_MODULE_PIMSM),
+	finder_hostname,
+	finder_port,
+	"finder",
 	xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
 	xorp_module_name(AF_INET6, XORP_MODULE_RIB),
 	xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm6);
+    wait_until_xrl_router_is_ready(eventloop, xrl_pimsm_node6.xrl_router());
 #endif // HAVE_IPV6
 
     //

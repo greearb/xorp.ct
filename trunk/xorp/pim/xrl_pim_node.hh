@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.45 2004/08/03 18:09:14 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.46 2005/01/28 03:34:20 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -22,16 +22,19 @@
 // PIM XRL-aware node definition.
 //
 
-#include <string>
+#include <set>
 
-#include "libxorp/xlog.h"
 #include "libxorp/transaction.hh"
-#include "libxipc/xrl_router.hh"
-#include "xrl/targets/pim_base.hh"
+
+#include "libxipc/xrl_std_router.hh"
+
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/mld6igmp_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
+#include "xrl/targets/pim_base.hh"
+
 #include "pim_node.hh"
 #include "pim_node_cli.hh"
 #include "pim_mfc.hh"
@@ -41,16 +44,20 @@
 // The top-level class that wraps-up everything together under one roof
 //
 class XrlPimNode : public PimNode,
+		   public XrlStdRouter,
 		   public XrlPimTargetBase,
 		   public PimNodeCli {
 public:
-    XrlPimNode(int family,
-	       xorp_module_id module_id,
-	       EventLoop& eventloop,
-	       XrlRouter* xrl_router,
-	       const string& mfea_target,
-	       const string& rib_target,
-	       const string& mld6igmp_target);
+    XrlPimNode(int		family,
+	       xorp_module_id	module_id,
+	       EventLoop&	eventloop,
+	       const string&	class_name,
+	       const string&	finder_hostname,
+	       uint16_t		finder_port,
+	       const string&	finder_target,
+	       const string&	mfea_target,
+	       const string&	rib_target,
+	       const string&	mld6igmp_target);
     virtual ~XrlPimNode();
 
     /**
@@ -66,6 +73,13 @@ public:
      * @return true on success, false on failure.
      */
     bool	shutdown();
+
+    /**
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    XrlRouter&	xrl_router() { return *this; }
 
     //
     // XrlPimNode front-end interface
@@ -110,9 +124,33 @@ protected:
 				      string&	reason);
     
     /**
-     * shutdown cleanly
+     * Shutdown cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Announce target birth to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    /**
+     *  Announce target death to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
 
     /**
      *  Process a CLI command.
@@ -2073,20 +2111,39 @@ private:
     class AddDeleteMfc;
     class AddDeleteDataflowMonitor;
 
-    void mfea_register_startup();
-    void mfea_register_shutdown();
-    void rib_register_startup();
-    void rib_register_shutdown();
+    /**
+     * Called when Finder connection is established.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_connect_event();
 
-    void send_mfea_registration();
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
+
+    void mfea_register_startup();
+    void finder_register_interest_mfea_cb(const XrlError& xrl_error);
+    void mfea_register_shutdown();
+    void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
+
+    void send_mfea_add_protocol();
     void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
     void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
-    void send_mfea_deregistration();
+    void send_mfea_delete_protocol();
     void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
 
-    void send_rib_registration();
+    void rib_register_startup();
+    void finder_register_interest_rib_cb(const XrlError& xrl_error);
+    void rib_register_shutdown();
+    void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
+
+    void send_rib_redist_transaction_enable();
     void rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_error);
-    void send_rib_deregistration();
+    void send_rib_redist_transaction_disable();
     void rib_client_send_redist_transaction_disable_cb(const XrlError& xrl_error);
 
     //
@@ -2135,6 +2192,7 @@ private:
     int delete_protocol_mld6igmp(uint16_t vif_index);
     void send_add_delete_protocol_mld6igmp();
     void mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError& xrl_error);
+    void schedule_add_protocol_mld6igmp();
 
     int	proto_send(const string& dst_module_instance_name,
 		   xorp_module_id dst_module_id,
@@ -2331,20 +2389,47 @@ private:
 
     const string		_class_name;
     const string		_instance_name;
+    const string		_finder_target;
+    const string		_mfea_target;
+    const string		_rib_target;
+    const string		_mld6igmp_target;
 
     TransactionManager		_mrib_transaction_manager;
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlRibV0p1Client		_xrl_rib_client;
     XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
-    const string		_mfea_target;
-    const string		_rib_target;
-    const string		_mld6igmp_target;
+    XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
+
+    static const TimeVal	RETRY_TIMEVAL;
+
+    bool			_is_finder_alive;
+
+    bool			_is_mfea_alive;
+    bool			_is_mfea_registered;
+    bool			_is_mfea_registering;
+    bool			_is_mfea_deregistering;
+    XorpTimer			_mfea_register_startup_timer;
+    XorpTimer			_mfea_register_shutdown_timer;
     bool			_is_mfea_add_protocol_registered;
     bool			_is_mfea_allow_signal_messages_registered;
-    bool			_is_rib_client_registered;
-    XorpTimer			_mfea_registration_timer;
-    XorpTimer			_rib_registration_timer;
+    XorpTimer			_mfea_add_protocol_timer;
+
+    bool			_is_rib_alive;
+    bool			_is_rib_registered;
+    bool			_is_rib_registering;
+    bool			_is_rib_deregistering;
+    XorpTimer			_rib_register_startup_timer;
+    XorpTimer			_rib_register_shutdown_timer;
+    bool			_is_rib_redist_transaction_enabled;
+    XorpTimer			_rib_redist_transaction_enable_timer;
+
+    bool			_is_mld6igmp_alive;
+    bool			_is_mld6igmp_registered;
+    bool			_is_mld6igmp_registering;
+    bool			_is_mld6igmp_deregistering;
+    XorpTimer			_mld6igmp_register_startup_timer;
+    XorpTimer			_mld6igmp_register_shutdown_timer;
 
     list<pair<uint16_t, bool> >	_start_stop_protocol_kernel_vif_queue;
     XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
@@ -2354,6 +2439,9 @@ private:
     XorpTimer			_add_delete_mfc_dataflow_monitor_queue_timer;
     list<pair<uint16_t, bool> >	_add_delete_protocol_mld6igmp_queue;
     XorpTimer			_add_delete_protocol_mld6igmp_queue_timer;
+
+    // The set of vifs to add to MLD6IGMP if it goes away and comes back
+    set<uint16_t>		_add_protocol_mld6igmp_vif_index_set;
 };
 
 #endif // __PIM_XRL_PIM_NODE_HH__

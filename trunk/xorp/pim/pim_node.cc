@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.55 2005/01/28 03:34:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.56 2005/02/12 08:09:08 pavlin Exp $"
 
 
 //
@@ -140,8 +140,16 @@ PimNode::~PimNode()
 int
 PimNode::start()
 {
-    if (is_up() || is_pending_up())
+    //
+    // Test the service status
+    //
+    if ((ServiceBase::status() == SERVICE_STARTING)
+	|| (ServiceBase::status() == SERVICE_RUNNING)) {
 	return (XORP_OK);
+    }
+    if (ServiceBase::status() != SERVICE_READY) {
+	return (XORP_ERROR);
+    }
 
     if (ProtoNode<PimVif>::pending_start() < 0)
 	return (XORP_ERROR);
@@ -160,6 +168,11 @@ PimNode::start()
     // Set the node status
     //
     ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
+
+    //
+    // Update the node status
+    //
+    // TODO: XXX: PAVPAVPAV: remove it?
     update_status();
 
     return (XORP_OK);
@@ -219,11 +232,21 @@ PimNode::final_start()
 int
 PimNode::stop()
 {
-    if (is_down())
+    //
+    // Test the service status
+    //
+    if ((ServiceBase::status() == SERVICE_SHUTDOWN)
+	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
+	|| (ServiceBase::status() == SERVICE_FAILED)) {
 	return (XORP_OK);
-
-    if (! (is_up() || is_pending_up() || is_pending_down()))
+    }
+    if ((ServiceBase::status() != SERVICE_RUNNING)
+	&& (ServiceBase::status() != SERVICE_STARTING)
+	&& (ServiceBase::status() != SERVICE_PAUSING)
+	&& (ServiceBase::status() != SERVICE_PAUSED)
+	&& (ServiceBase::status() != SERVICE_RESUMING)) {
 	return (XORP_ERROR);
+    }
     
     //
     // Perform misc. PIM-specific stop operations
@@ -250,6 +273,10 @@ PimNode::stop()
     // Set the node status
     //
     ProtoNode<PimVif>::set_node_status(PROC_SHUTDOWN);
+
+    //
+    // Update the node status
+    //
     update_status();
 
     return (XORP_OK);
