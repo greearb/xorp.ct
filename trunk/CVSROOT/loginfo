@@ -24,3 +24,8 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+
+#DEFAULT		$CVSROOT/CVSROOT/log_accum -m xorp-cvs@icir.org -s %s
+DEFAULT		$CVSROOT/CVSROOT/log_accum -m hodson@icir.org -s %s
+
+
