@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea.cmds,v 1.3 2004/05/26 04:25:08 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea.cmds,v 1.4 2004/06/02 02:38:41 pavlin Exp $ */
 
 show mfea {
     %command: "" %help: HELP;
@@ -24,8 +24,12 @@ show mfea interface address {
     %tag: HELP "Display information about addresses of MFEA IPv4 interfaces";
 }
 
+/*
+ * Commented-out, because when we run everything through the rtrmgr,
+ * the MFEA is not used to get the routes from the kernel.
 show mfea mrib {
     %command: "cli/tools/send_cli_processor_xrl -t MFEA_4 $0" %help: HELP;
     %module: mfea4;
     %tag: HELP "Display MRIB IPv4 information inside MFEA";
 }
+*/
