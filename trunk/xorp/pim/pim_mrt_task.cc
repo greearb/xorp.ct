@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.8 2003/03/10 23:20:49 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.9 2003/05/21 05:32:54 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -826,9 +826,6 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
     } while (false);
 }
 
-//
-// TODO: not used
-//
 void
 PimMrt::add_task_my_ip_address(uint16_t vif_index)
 {
@@ -873,9 +870,6 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
     } while (false);
 }
 
-//
-// TODO: not used
-//
 void
 PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 {
