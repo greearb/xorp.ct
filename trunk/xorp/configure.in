@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.52 2003/07/16 03:50:56 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.53 2003/07/22 17:05:07 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -477,10 +477,10 @@ CPPFLAGS=${oldCPPFLAGS}
 if test "${net_snmp_container_bug}" = "yes" ; then
 echo "-------------------------------------------------------------   "
 AC_WARN([You should apply the patch xorp/mibs/container.h.patch])
-echo -n "To do that, copy that file to"
+echo -n "To do that, copy that file to "
 echo -n `net-snmp-config --prefix` 
 echo "/include/net-snmp/library"
-echo "and execute (as root) patch < container.h.patch"
+echo "and execute (as root) command 'patch < container.h.patch'"
 echo "-------------------------------------------------------------   "
 fi
 

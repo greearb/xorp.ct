@@ -4549,10 +4549,10 @@ if test "${net_snmp_container_bug}" = "yes" ; then
 echo "-------------------------------------------------------------   "
 { echo "$as_me:$LINENO: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&5
 echo "$as_me: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&2;}
-echo -n "To do that, copy that file to"
+echo -n "To do that, copy that file to "
 echo -n `net-snmp-config --prefix`
 echo "/include/net-snmp/library"
-echo "and execute (as root) patch < container.h.patch"
+echo "and execute (as root) command 'patch < container.h.patch'"
 echo "-------------------------------------------------------------   "
 fi
 
