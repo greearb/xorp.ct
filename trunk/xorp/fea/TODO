@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.12 2003/09/20 00:14:03 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.13 2003/09/23 02:48:36 pavlin Exp $
 #
 
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
@@ -17,15 +17,6 @@
 * Check whether a returned MAC addresses of an interface is an
   Ethernet address before attempting to assign it as an Ethernet
   address.
-
-* When reading data from routing socket or netlink socket
-  (e.g. inside force_read(), make sure that read all dta on that socket
-  even if it is bigger than the pre-allocated buffer).
-  E.g., in case of netlink socket we may need to check
-  the NLM_F_MULTI flag and/or the NLMSG_DONE entry.
-
-* Make sure that we take care of all asynchronous data that pop-up
-  on routing socket or netlink socket.
 
 * Do we need to include <asm/types.h> for Linux, when we include
   <linux/rtnetlink.h> ?
@@ -48,8 +39,6 @@
 * Add UDP interfaces for sending and receiving.
 
 * Resurrect click based FEA.
-
-* Write native Linux (netlink) based FEA.
 
 * The following files inside "fea" are not used?
   click.hh click_glue.hh fti_click.hh ifconfig_click.hh
@@ -85,9 +74,6 @@
   (e.g., "Private functions". Same for all *.hh in other directories:
   mrt, cli, mld6igmp, pim, libproto
 
-* Check the following error:
-[ 2002/06/15 16:57:49  ERROR test_mfea:1199 LIBXORP +193 selector.cc select ] SelectorList::select failed: Invalid argument
-
 * Use start_pim() and stop_pim() as appropriate.
 
 * If a protocol deletes itself from the MFEA, make sure that all
@@ -113,19 +99,13 @@
   is important whether to start accepting info from the MFEA,
   then we must do the above.
 
-* Send delete_vif XRL to all registered protocols when needed.
-* Send delete_vif_addr XRL to all registered protocols when needed.
-
-* Some of the UnixComm::_sndbuf0/1 or _rcvbuf0/1 are not used and/or
+* Some of the ProtoComm::_sndbuf0/1 or _rcvbuf0/1 are not used and/or
   should be much smaller.
 
-* A single UnixComm should be able to handle more than one protocol modules.
+* A single ProtoComm should be able to handle more than one protocol modules.
 
 * 'int proto' (e.g. IPPROTO_IGMP, etc) should be renamed to 'proto_number'
    or sth. like that
-
-* In UnixComm::proto_socket_write() we should copy "databuf" to
-  _sndbuf instead of assigning it to _sndiov[].
 
 * Use if_nametoindex(3) when available
 
@@ -144,11 +124,8 @@
 * If closing the _mrouter_socket, make sure that _proto_socket for
   IGMP or ICMP6 is closed too (??).
 
-* When sending a request using UnixComm, make sure we are using the
+* When sending a request using ProtoComm, make sure we are using the
   right socket (e.g., IOCTL, etc)
-
-* In k_get_vif_flags(int family, char *vif_name, uint32_t *return_value)
-  rename 'return_value' to 'flags' or sth. else
 
 * In function headers, make sure that constants have % in front.
   E.g.: %XORP_OK %XORP_ERROR 
