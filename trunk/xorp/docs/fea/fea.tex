@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.8 2003/11/06 18:31:00 pavlin Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.9 2003/11/06 23:38:10 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2004}
 
 \maketitle
 
@@ -64,12 +64,14 @@ or whether the network interfaces are simple, like a PCI Ethernet
 adapter, or are smart and have processing resources, like an Intel IXP
 cards.
 
-The FEA performs three distinct roles: \emph{interface management},
-\emph{forwarding table management}, and \emph{interface specific
-packet I/O}.  Those are described briefly in
+The FEA performs four distinct roles: \emph{interface management},
+\emph{forwarding table management}, \emph{raw packet I/O},
+and \emph{TCP/UDP socket I/O}.  Those are
+described briefly in
 Section~\ref{sec:introduction:interface_management},
 Section~\ref{sec:introduction:forwarding_table_management},
-and Section~\ref{sec:introduction:interface_specific_packet_io}
+Section~\ref{sec:introduction:raw_packet_io},
+and Section~\ref{sec:introduction:tcp_udp_socket_io}
 respectively.
 Section~\ref{sec:design_and_implementation} presents
 the design and implementation of the FEA components.
@@ -77,8 +79,8 @@ FEA status summary is in Section~\ref{sec:status}.
 
 In a standard XORP system, the Multicast Forwarding Engine Abstraction
 (MFEA) is part of the FEA.  The MFEA is conceptually distinct from
-FEA, but in practice requires access to similar data as the FEA.
-Combining the MFEA with the FEA reduces the load on system.  For
+FEA and is used for multicast-specific abstraction of the underlying system.
+Combining the MFEA with the FEA reduces the load on the system.  For
 information about the MFEA architecture, see \cite{xorp:mfea}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -122,24 +124,40 @@ forwarding table interface.  The FEA accepts requests to insert and
 remove routing entries and propagates the necessary changes into the
 forwarding plane.  The FEA also supports queries on the current
 contents of the forwarding table.
+Finally, processes can register with the FEA to receive update notifications
+about changes to the forwarding table.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Interface Specific Packet I/O}
-\label{sec:introduction:interface_specific_packet_io}
+\subsection{Raw Packet I/O}
+\label{sec:introduction:raw_packet_io}
 
 Routing protocols, such as OSPF, need to be able to send and receive
 packets on specific interfaces in the forwarding plane in order to
-exchange routing information and to determine the liveness of
-connected paths.  Since the forwarding plane may be distributed across
-multiple machines, these routing protocols delegate the I/O operations
-on these packets to the FEA.  The FEA supports sending and receiving
-raw and UDP~\footnote{Currently (November 2003), UDP support
-is not present.}  packets on specific interfaces.  The transmission of
-packets through the FEA is straightforward, the routing process simply
-hands the FEA a packet and indicates which interface it should be sent
-on.  The reception of packets is handled through a register-notify
-interface where the routing process registers which types of packets
-on which interfaces it is interested.
+exchange routing information and to determine the liveness of connected
+paths.  Since the forwarding plane may be distributed across multiple
+machines, these routing protocols delegate the I/O operations on these
+packets to the FEA.  The FEA supports sending and receiving raw packets
+on specific interfaces.
+
+The transmission of raw packets through the FEA is straightforward, the
+routing process simply hands the FEA a raw packet and indicates which
+interface it should be sent on.  The reception of raw packets is handled
+through a register-notify interface where the routing process registers
+which types of packets on which interfaces it is interested.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{TCP/UDP Socket I/O}
+\label{sec:introduction:tcp_udp_socket_io}
+
+Routing protocols, such as BGP or RIP, need to be able to send and receive
+TCP or UDP packets to/from a specific IP address in order to establish
+peering connectivity and to exchange routing information.
+Similar to the raw packet I/O delegation, the FEA can be used to
+delegate the TCP/UDP socket I/O operations.
+
+The handling of TCP or UDP operations is done by simply extending the
+UNIX TCP/UDP socket interface such that all relevant socket operations
+have XRL front-end interface.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Design and Implementation}
@@ -148,12 +166,12 @@ on which interfaces it is interested.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Overview}
 
-The FEA fulfills three discrete roles: Interface Management, Forwarding
-Table Management, and Interface Specific Packet I/O.  The Interface
+The FEA fulfills four discrete roles: Interface Management, Forwarding
+Table Management, Raw Packet I/O, and TCP/UDP Socket I/O.  The Interface
 Management and Forwarding Table Management roles follow a similar
 design pattern since both relate to the setting and getting of
-configuration state.  The Interface Specific Packet I/O has little in
-common with the other two roles.  
+configuration state.  The Raw Packet I/O and TCP/UDP Socket I/O have
+little in common with the other two roles.
 
 The Interface Management and Forwarding Table Management roles use
 transactions for setting configuration state.  The transactions are a
@@ -167,19 +185,22 @@ state, and are independent of any transactions that are in progress.
 
 The FEA, as with other XORP processes, uses the XRL mechanism for
 inter-process communication and each role of the FEA is represented by
-a distinct XRL interface.  The Interface Management and Interface
-Specific Packet I/O roles support the notion of clients that notified
-when event occur and client processes are expected to implement known
-interfaces.  The FEA XRL and FEA XRL client interfaces are shown in
-Table~\ref{tbl:xifs}.
+a distinct XRL interface.  The Interface Management,
+Raw Packet I/O and TCP/UDP Socket I/O roles support the notion of
+clients that notified when event occur and client processes are expected
+to implement known interfaces.  The FEA XRL and FEA XRL client
+interfaces are shown in Table~\ref{tbl:xifs}.
 
 \begin{table}[h]
 \begin{center}
 \begin{tabular}{|l|l|l|}\hline
 Role & XRL Interface file & Client XRL Interface\\ \hline\hline
-Interface Management 		& fea\_ifmgr.xif	& fea\_ifmgr\_client.xif\\
-Forwarding Table Management	& fti.xif 		& \\
-Interface Specific Packet I/O	& fea\_rawpkt.xif 	& fea\_rawpkt\_client.xif\\ \hline
+Interface Management 		& {\tt fea\_ifmgr.xif}	& {\tt
+  fea\_ifmgr\_client.xif} \\
+Forwarding Table Management	& {\tt redist\_transaction\{4,6\}.xif}	& {\tt fea\_fib.xif} \\
+Raw Packet I/O	& {\tt fea\_rawpkt.xif} & {\tt fea\_rawpkt\_client.xif} \\
+TCP/UDP Socket I/O & {\tt socket\{4,6\}.xif} & {\tt socket\{4,6\}\_user.xif} \\
+\hline
 \end{tabular}
 \caption{FEA XRL Interfaces (defined in {\tt \$XORP/xrl/target/fea.tgt})}
 \label{tbl:xifs}
@@ -334,17 +355,30 @@ possible modifier operation on the {\tt Fti} instance.  The {\tt Fti}
 methods {\tt start\_configuration} and {\tt end\_configuration} are
 called at the start and end of the transaction.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Interface Specific Packet I/O}
+Note that the XRL interface for adding/deleting routes is
+{\tt redist\_transaction\{4,6\}} which is a generic XRL interface
+used by the RIB to redistribute routes to interested parties.
 
-The Interface Specific Packet I/O role of the FEA provides a means for
-XORP processes to send and receive packets on particular interfaces.
+The Forwarding Table Management also provides interface for
+processes to register interest in receiving updates whenever
+the Forwarding Information Base changes. The FEA is observing
+all FIB changes within the underlying system (including those triggered
+by the FIB manipulation by the FEA itself). Those changes are propagated
+to all instances of the {\tt FibClient} class (implemented within the
+{\tt XrlFtiTransactionManager} class).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Raw Packet I/O}
+\label{sec:design:raw_packet_io}
+
+The Raw Packet I/O role of the FEA provides a means for
+XORP processes to send and receive raw packets on particular interfaces.
 This is an essential function since in a XORP router the forwarding
 plane may reside on a different machine to the routing processes, it
 may be distributed across several machines, or may have custom network
-interfaces that require special programming.  Currently (November 2003),
+interfaces that require special programming.  Currently (June 2004),
 only the sending and receiving of raw IPv4 packets is implemented.
-Support for UDP and IPv6 will follow in future and should follow a
+Support for IPv6 will be available in future and should follow a
 similar design pattern to the raw IPv4 packet handling.
 
 The raw packet interface is managed by the {\tt XrlRawSocket4Manager}
@@ -357,18 +391,42 @@ and filters attached to parse raw packets as they are received.  The
 associated with the active raw socket.  The filters are each notified
 when a raw packet is received on the raw socket.  The
 XrlRawSocket4Manager allows other XORP processes to receive packets
-via XRL on the basis on filter conditions.  Currently (November 2003),
+via XRL on the basis on filter conditions.  Currently (June 2004),
 the only implemented filter is the {\tt XrlVifInputFilter} which
 allows processes to receive raw packets on the basis of the receiving
 VIF.  In principle, filters could be written to match on any field
 within a packet and perform an action.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{TCP/UDP Socket I/O}
+
+Similar to the Raw Packet I/O (see
+Section~\ref{sec:design:raw_packet_io}), the FEA provides a means for
+XORP processes to perform TCP or UDP socket operations and to send and
+receive TCP/UDP packets.
+This is an essential function since in a XORP router the forwarding
+plane may reside on a different machine to the routing processes, it
+may be distributed across several machines, or may have custom network
+interfaces that require special programming.
+
+The TCP/UDP socket interface is managed by the {\tt XrlSocketServer}
+class.  This manages TCP and UDP IPv4 and IPv6 sockets\footnote{The
+current implementation only works on
+single machine XORP forwarding planes}.  The {\tt XrlSocketServer}
+performs the particular TCP/UDP socket operations on the underlying
+system (opening and closing a socket, bind, send and receive, etc),
+and provides the XRL front-end interface. Note that for simplicity
+some of the socket XRL interface combines several system socket
+operations in one atomic FEA operation. For example, the {\tt
+  socket4/0.0/tcp\_open\_bind} XRL interface creates a TCP socket that
+binds it to a specific local address.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Status}
 \label{sec:status}
 
-Currently (November 2003), two versions of the FEA are supported: {\tt
-fea} and {\tt fea\_dummy}.  The {\tt fea} is a version
+There are two versions of the FEA: {\tt fea} and {\tt fea\_dummy}.
+The {\tt fea} is a version
 of the FEA that contains plug-ins to access the forwarding plane by
 using the following mechanisms:
 
@@ -398,7 +456,7 @@ using the following mechanisms:
 
 \end{itemize}
 
-In other words, currently (November 2003) the {\tt fea} supports FreeBSD,
+In other words, currently (June 2004) the {\tt fea} supports FreeBSD,
 NetBSD, OpenBSD, and Linux (see file {\tt \$XORP/BUILD\_NOTES}
 about the specific OS versions the FEA has been tested on).
 The {\tt fea\_dummy} is a substitute FEA and may be
