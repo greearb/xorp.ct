@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl.cc,v 1.8 2003/06/19 00:44:42 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl.cc,v 1.9 2004/06/10 22:41:08 hodson Exp $"
 
 // test_xrl: String Serialization Tests
 
@@ -36,6 +36,26 @@ xrl_test(const char* testname, const Xrl& x, const Xrl& y)
 	     << endl;
         return 1;
     }
+
+    //
+    // XXX: This doesn't belong here, but gives the XRL packing and unpacking
+    // a pretty good running through (i.e., it found some bugs in the first cut
+    // of the packing code :-)
+    //
+    vector<uint8_t> buffer;
+    buffer.resize(x.packed_bytes());
+
+    x.pack(&buffer[0], buffer.size());
+    Xrl z;
+    if (z.unpack(&buffer[0], buffer.size()) != x.packed_bytes()) {
+ 	cout << "Unpacking failed " << x.str() << " != " << z.str() << endl;
+ 	return 1;
+    }
+    if (z != x) {
+ 	cout << "Unpacking produced bad result " << x.str() << " != " << z.str() << endl;
+ 	return 1;
+    }
+
     return 0;
 }
 
