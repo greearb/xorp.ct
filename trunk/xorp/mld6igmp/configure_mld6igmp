@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.3 2003/03/13 09:19:26 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.4 2003/03/13 09:44:33 pavlin Exp $
 #
 
 #
@@ -56,7 +56,11 @@ case $HOSTNAME in
 	oreo.icir.org)
 	ENABLE_VIFS="wi0"
 	;;
-	
+
+	pie)
+	ENABLE_VIFS="en1"
+	;;
+
 	*)
 	echo "Unknown host : $HOSTNAME"
 	exit 1

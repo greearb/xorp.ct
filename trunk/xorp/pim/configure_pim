@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.8 2003/02/27 03:11:05 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.9 2003/03/13 00:27:10 pavlin Exp $
 #
 
 #
@@ -94,6 +94,13 @@ case $HOSTNAME in
 	STATIC_RPS=""
 	;;
 	
+	pie)
+	ENABLE_VIFS="en1"
+	CAND_BSR_VIF="en1"
+	CAND_RP_VIF="en1"
+	STATIC_RPS=""
+	;;
+
 	*)
 	echo "Unknown host : $HOSTNAME"
 	exit 1
