@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.6 2003/04/01 00:56:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.7 2003/04/22 23:27:24 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -1664,6 +1664,7 @@ PimMreTask::add_pim_mre_delete(PimMre *pim_mre)
 //
 // Add a PimMfc entry to the appropriate list of entries to process
 //
+// TODO: not used. Maybe should be used?
 void
 PimMreTask::add_pim_mfc(PimMfc *pim_mfc)
 {
@@ -1673,6 +1674,7 @@ PimMreTask::add_pim_mfc(PimMfc *pim_mfc)
 //
 // Add a PimMfc entry to the list of entries to delete
 //
+// TODO: not used. Maybe should be used?
 void
 PimMreTask::add_pim_mfc_delete(PimMfc *pim_mfc)
 {
