@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.16 2003/09/25 00:54:10 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.17 2003/09/25 19:16:12 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -144,8 +144,8 @@ XorpShell::run()
 		   _authfile.c_str());
     }
     char buf[256];
-    memset(buf, 0, 256);
-    if (fgets(buf, 255, file) == 0) {
+    memset(buf, 0, sizeof(buf));
+    if (fgets(buf, sizeof(buf) - 1, file) == 0) {
 	fclose(file);
 	XLOG_FATAL("Failed to read authfile %s",
 		   _authfile.c_str());
@@ -456,6 +456,11 @@ main(int argc, char *argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
+    //
+    // Install handler for unexpected exceptions
+    //
+    XorpUnexpectedHandler eh(xorp_unexpected_handler);
 
     //
     // Expand the default variables to include the XORP root path
