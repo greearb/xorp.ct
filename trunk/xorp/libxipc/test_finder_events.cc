@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.12 2004/08/14 20:58:17 atanu Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.13 2004/12/09 07:54:37 pavlin Exp $"
 
 #include <list>
 #include <vector>
@@ -31,8 +31,8 @@
 
 #include "xrl_std_router.hh"
 
-#include "finder_event_notifier_xif.hh"
-#include "test_finder_events_base.hh"
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
+#include "xrl/targets/test_finder_events_base.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.8 2003/06/01 21:37:28 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.9 2004/06/10 22:41:06 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_XRL_QUEUE_HH__
@@ -93,7 +93,7 @@ protected:
     FinderXrlCommandQueue& _queue;
 };
 
-#include "finder_client_xif.hh"
+#include "xrl/interfaces/finder_client_xif.hh"
 
 /**
  * @short Send "hello" Xrl to Client.

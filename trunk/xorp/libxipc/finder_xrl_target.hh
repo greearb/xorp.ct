@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.12 2003/11/13 19:05:48 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.13 2004/06/10 22:41:07 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_XRL_TARGET_HH__
 
-#include "finder_base.hh"
+#include "xrl/targets/finder_base.hh"
 
 class Finder;
 

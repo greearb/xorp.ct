@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.16 2004/11/04 21:54:42 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.17 2004/11/04 22:19:31 pavlin Exp $"
 
 #include <set>
 
@@ -940,7 +940,7 @@ Finder::remove_instance_watch(const string& target,
     return true;
 }
 
-#include "finder_event_observer_xif.hh"
+#include "xrl/interfaces/finder_event_observer_xif.hh"
 
 static void
 dummy_xrl_cb(const XrlError& e)

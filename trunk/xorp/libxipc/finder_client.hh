@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.15 2004/09/22 02:11:11 pavlin Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.16 2004/09/28 21:17:32 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -21,7 +21,7 @@
 #include <map>
 #include <string>
 
-#include "finder_client_base.hh"
+#include "xrl/targets/finder_client_base.hh"
 #include "finder_messenger.hh"
 
 #include "xrl_pf.hh"

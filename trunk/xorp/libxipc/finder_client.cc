@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.25 2004/09/22 02:11:11 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.26 2004/09/28 21:17:32 pavlin Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -27,7 +27,7 @@
 
 #include "finder_client.hh"
 #include "finder_client_observer.hh"
-#include "finder_xif.hh"
+#include "xrl/interfaces/finder_xif.hh"
 #include "finder_tcp_messenger.hh"
 
 static const char* finder = "finder";

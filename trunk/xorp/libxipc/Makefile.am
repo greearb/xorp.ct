@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.40 2004/12/08 17:56:23 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.41 2004/12/09 07:57:38 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -73,25 +73,25 @@ test_finder_SOURCES		 = test_finder.cc
 test_finder_LDADD		 = libfinder.la $(LDADD)
 
 test_finder_events_SOURCES	 = test_finder_events.cc
-test_finder_events_SOURCES	+= test_finder_events_base.hh
-test_finder_events_SOURCES	+= test_finder_events_base.cc
-test_finder_events_SOURCES	+= finder_event_notifier_xif.hh
-test_finder_events_SOURCES	+= finder_event_notifier_xif.cc
+test_finder_events_SOURCES	+= $(top_srcdir)/xrl/targets/test_finder_events_base.hh
+test_finder_events_SOURCES	+= $(top_srcdir)/xrl/targets/test_finder_events_base.cc
+test_finder_events_SOURCES	+= $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.hh
+test_finder_events_SOURCES	+= $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.cc
 test_finder_events_LDADD	 = libfinder.la $(LDADD)
 
 test_finder_to_SOURCES		 = test_finder_to.cc
 test_finder_to_LDADD		 = libfinder.la $(LDADD)
 
 test_xrl_receiver_SOURCES	 = test_xrl_receiver.cc
-test_xrl_receiver_SOURCES	+= test_xrls_base.hh
-test_xrl_receiver_SOURCES	+= test_xrls_base.cc
+test_xrl_receiver_SOURCES	+= $(top_srcdir)/xrl/targets/test_xrls_base.hh
+test_xrl_receiver_SOURCES	+= $(top_srcdir)/xrl/targets/test_xrls_base.cc
 
 test_xrl_sender_SOURCES		 = test_xrl_sender.cc
-test_xrl_sender_SOURCES		+= test_xrls_xif.hh
-test_xrl_sender_SOURCES		+= test_xrls_xif.cc
+test_xrl_sender_SOURCES		+= $(top_srcdir)/xrl/interfaces/test_xrls_xif.hh
+test_xrl_sender_SOURCES		+= $(top_srcdir)/xrl/interfaces/test_xrls_xif.cc
 # XXX: extra source files if both sender and receiver are within same binary
-test_xrl_sender_SOURCES		+= test_xrls_base.hh
-test_xrl_sender_SOURCES		+= test_xrls_base.cc
+test_xrl_sender_SOURCES		+= $(top_srcdir)/xrl/targets/test_xrls_base.hh
+test_xrl_sender_SOURCES		+= $(top_srcdir)/xrl/targets/test_xrls_base.cc
 
 # -- Library Sources (libxipc)
 libxipc_la_SOURCES  = finder_module.h
@@ -170,12 +170,12 @@ libxipc_la_SOURCES += xrl_tokens.cc
 libxipc_la_SOURCES += xuid.cc
 
 # -- Library Sources (libxipc - built sources)
-libxipc_la_SOURCES += common_xif.hh
-libxipc_la_SOURCES += common_xif.cc
-libxipc_la_SOURCES += finder_client_base.hh
-libxipc_la_SOURCES += finder_client_base.cc
-libxipc_la_SOURCES += finder_xif.hh
-libxipc_la_SOURCES += finder_xif.cc
+libxipc_la_SOURCES += $(top_srcdir)/xrl/interfaces/common_xif.hh
+libxipc_la_SOURCES += $(top_srcdir)/xrl/interfaces/common_xif.cc
+libxipc_la_SOURCES += $(top_srcdir)/xrl/targets/finder_client_base.hh
+libxipc_la_SOURCES += $(top_srcdir)/xrl/targets/finder_client_base.cc
+libxipc_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_xif.hh
+libxipc_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_xif.cc
 
 # -- Library Sources (libfinder)
 libfinder_la_SOURCES  = finder.hh
@@ -190,12 +190,12 @@ libfinder_la_SOURCES += finder_xrl_queue.cc
 libfinder_la_SOURCES += finder_xrl_target.cc
 
 # -- Library Sources (libfinder - built sources)
-libfinder_la_SOURCES += finder_base.hh
-libfinder_la_SOURCES += finder_base.cc
-libfinder_la_SOURCES += finder_client_xif.hh
-libfinder_la_SOURCES += finder_client_xif.cc
-libfinder_la_SOURCES += finder_event_observer_xif.hh
-libfinder_la_SOURCES += finder_event_observer_xif.cc
+libfinder_la_SOURCES += $(top_srcdir)/xrl/targets/finder_base.hh
+libfinder_la_SOURCES += $(top_srcdir)/xrl/targets/finder_base.cc
+libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_client_xif.hh
+libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_client_xif.cc
+libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh
+libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = bench_ipc.awk
@@ -211,31 +211,6 @@ EXTRA_DIST	+= bench_ipc_gnuplot.sh
 
 INCLUDES =	-I$(top_srcdir)
 
-# -- Generated Sources used in libxipc and libfinder
-# (see explanation at end of file)
-BUILT_SOURCES  = common_xif.hh
-BUILT_SOURCES += common_xif.cc
-BUILT_SOURCES += finder_base.hh
-BUILT_SOURCES += finder_base.cc
-BUILT_SOURCES += finder_client_base.hh
-BUILT_SOURCES += finder_client_base.cc
-BUILT_SOURCES += finder_client_xif.hh
-BUILT_SOURCES += finder_client_xif.cc
-BUILT_SOURCES += finder_event_notifier_xif.hh
-BUILT_SOURCES += finder_event_notifier_xif.cc
-BUILT_SOURCES += finder_event_observer_xif.hh
-BUILT_SOURCES += finder_event_observer_xif.cc
-BUILT_SOURCES += finder_xif.hh
-BUILT_SOURCES += finder_xif.cc
-BUILT_SOURCES += test_finder_events_base.hh
-BUILT_SOURCES += test_finder_events_base.cc
-BUILT_SOURCES += test_xrls_base.hh
-BUILT_SOURCES += test_xrls_base.cc
-BUILT_SOURCES += test_xrls_xif.hh
-BUILT_SOURCES += test_xrls_xif.cc
-
-CLEANFILES = $(BUILT_SOURCES)
-
 
 ###############################################################################
 #
@@ -244,8 +219,8 @@ CLEANFILES = $(BUILT_SOURCES)
 # build dir.  For all other Xrl senders and targets this happens much
 # later in the build process. But, as FinderClient itself uses and
 # supports an Xrl Interface we need to auto-generate the appropriate
-# files.  They are sym-linked here since we are not using libtool and
-# automake (rightly) dislikes cross directory builds.
+# files.  Therefore, below we describe the auto-generated file dependencies
+# and we generate and compile those files when necessary.
 #
 
 ###############################################################################
@@ -254,61 +229,30 @@ CLEANFILES = $(BUILT_SOURCES)
 #
 ###############################################################################
 
-# Basic build rule for Xrl Target interface files
-%_xif.o: %_xif.cc
-	$(CXXCOMPILE) -c $<
-
-common_xif.%: $(top_srcdir)/xrl/interfaces/common_xif.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
-
 $(top_srcdir)/xrl/interfaces/common_xif.hh				\
 $(top_srcdir)/xrl/interfaces/common_xif.cc:				\
     $(top_srcdir)/xrl/interfaces/common.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
-
-finder_xif.%: $(top_srcdir)/xrl/interfaces/finder_xif.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
 $(top_srcdir)/xrl/interfaces/finder_xif.hh				\
 $(top_srcdir)/xrl/interfaces/finder_xif.cc:				\
     $(top_srcdir)/xrl/interfaces/finder.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
-finder_client_xif.%: $(top_srcdir)/xrl/interfaces/finder_client_xif.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
-
 $(top_srcdir)/xrl/interfaces/finder_client_xif.hh			\
 $(top_srcdir)/xrl/interfaces/finder_client_xif.cc:			\
     $(top_srcdir)/xrl/interfaces/finder_client.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
-
-finder_event_notifier_xif.%:						\
-    $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
 $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.hh		\
 $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.cc:		\
     $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
-finder_event_observer_xif.%:						\
-    $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
-
 $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh		\
 $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc:		\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
-
-test_xrls_xif.%:							\
-    $(top_srcdir)/xrl/interfaces/test_xrls_xif.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
 $(top_srcdir)/xrl/interfaces/test_xrls_xif.hh				\
 $(top_srcdir)/xrl/interfaces/test_xrls_xif.cc:				\
@@ -324,16 +268,9 @@ $(top_srcdir)/xrl/interfaces/test_xrls_xif.cc:				\
 #
 ###############################################################################
 
-# Basic build rule for Xrl Target base files
-%_base.o: %_base.cc
-	$(CXXCOMPILE) -c $<
-
+#
 # Finder base
-
-finder_base.%: $(top_srcdir)/xrl/targets/finder_base.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
-
+#
 $(top_srcdir)/xrl/targets/finder_base.hh				\
 $(top_srcdir)/xrl/targets/finder_base.cc:				\
     $(top_srcdir)/xrl/targets/finder.tgt				\
@@ -342,12 +279,9 @@ $(top_srcdir)/xrl/targets/finder_base.cc:				\
     $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 
+#
 # Finder client base
-
-finder_client_base.%: $(top_srcdir)/xrl/targets/finder_client_base.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
-
+#
 $(top_srcdir)/xrl/targets/finder_client_base.hh				\
 $(top_srcdir)/xrl/targets/finder_client_base.cc:			\
     $(top_srcdir)/xrl/targets/finder_client.tgt				\
@@ -355,13 +289,9 @@ $(top_srcdir)/xrl/targets/finder_client_base.cc:			\
     $(top_srcdir)/xrl/interfaces/finder_client.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 
+#
 # Test Finder events base
-
-test_finder_events_base.%:						\
-    $(top_srcdir)/xrl/targets/test_finder_events_base.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
-
+#
 $(top_srcdir)/xrl/targets/test_finder_events_base.hh			\
 $(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
     $(top_srcdir)/xrl/targets/test_finder_events.tgt			\
@@ -369,13 +299,9 @@ $(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 
+#
 # Test XRLs base
-
-test_xrls_base.%:							\
-    $(top_srcdir)/xrl/targets/test_xrls_base.%
-	$(RM) $(srcdir)/$(notdir $@)
-	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
-
+#
 $(top_srcdir)/xrl/targets/test_xrls_base.hh				\
 $(top_srcdir)/xrl/targets/test_xrls_base.cc:				\
     $(top_srcdir)/xrl/targets/test_xrls.tgt				\
