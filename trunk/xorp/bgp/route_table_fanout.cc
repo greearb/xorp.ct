@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.22 2004/02/25 05:30:11 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.23 2004/02/25 15:20:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -580,7 +580,7 @@ template<class A>
 bool
 FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
 {
-    debug_msg("FanoutTable<A>::get_next_message: %p\n", next_table);
+    debug_msg("next table: %s\n", next_table->tablename().c_str());
     print_queue();
     typename NextTableMap<A>::iterator i;
     i = _next_tables.find(next_table);
