@@ -86,6 +86,28 @@ rip_redist4_delete_route()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+rip_redist4_starting_route_dump()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: rip_redist4_starting_route_dump <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://rip/redist4/0.1/starting_route_dump?cookie:txt=$1"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+rip_redist4_finishing_route_dump()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: rip_redist4_finishing_route_dump <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://rip/redist4/0.1/finishing_route_dump?cookie:txt=$1"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 rip_rip_add_rip_address()
 {
     if [ $# -ne 3 ] ; then

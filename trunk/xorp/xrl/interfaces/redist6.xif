@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.16 2004/03/02 00:29:45 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist6.xif,v 1.4 2004/05/13 08:00:52 pavlin Exp $ */
 
 /*
  * RIB routes redistribution XRL interface.
@@ -27,5 +27,25 @@ interface redist6/0.1 {
 
 	delete_route ? network:ipv6net					\
 		     & cookie:txt
+
+	/**
+	 * When route redistribution begins, the receiver is sent the existing
+	 * list of routes.  This message marks the beginning of the routes
+	 * being sent.
+	 *
+	 * @param cookie value set be requestor to identify redistribution
+	 *        source.  Typical value is the originating protocol name.
+	 */
+	starting_route_dump ? cookie:txt
+
+	/**
+	 * When route redistribution begins, the receiver is sent the existing
+	 * list of routes.  This message marks the end of the existing routes
+	 * being sent.
+	 *
+	 * @param cookie value set be requestor to identify redistribution
+	 *        source.  Typical value is the originating protocol name.
+	 */
+	finishing_route_dump ? cookie:txt
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.9 2004/05/15 03:04:01 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.10 2004/05/18 21:35:47 hodson Exp $"
 
 #include <list>
 #include <string>
@@ -99,6 +99,24 @@ public:
     void dispatch_complete(const XrlError& xe);
 protected:
     IPNet<A>	_net;
+};
+
+template <typename A>
+class StartingRouteDump : public RedistXrlTask<A>
+{
+public:
+    StartingRouteDump(RedistXrlOutput<A>* parent);
+    virtual bool dispatch(XrlRouter& xrl_router);
+    void dispatch_complete(const XrlError& xe);
+};
+
+template <typename A>
+class FinishingRouteDump : public RedistXrlTask<A>
+{
+public:
+    FinishingRouteDump(RedistXrlOutput<A>* parent);
+    virtual bool dispatch(XrlRouter& xrl_router);
+    void dispatch_complete(const XrlError& xe);
 };
 
 template <typename A>
@@ -222,8 +240,120 @@ DeleteRoute<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to redistribute route add for %s",
+	XLOG_ERROR("Failed to redistribute route delete for %s",
 		   _net.str().c_str());
+	this->signal_complete_ok();
+	return;
+    }
+    // XXX For now all errors signalled as fatal
+    XLOG_ERROR("Fatal error during route redistribution \"%s\"",
+	       xe.str().c_str());
+    this->signal_fatal_failure();
+}
+
+
+// ----------------------------------------------------------------------------
+// StartingRouteDump implementation
+
+template <typename A>
+StartingRouteDump<A>::StartingRouteDump(RedistXrlOutput<A>* parent)
+    : RedistXrlTask<A>(parent)
+{
+}
+
+template <>
+bool
+StartingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistXrlOutput<IPv4>* p = this->parent();
+
+    XrlRedist4V0p1Client cl(&xrl_router);
+    return cl.send_starting_route_dump(
+		p->xrl_target_name().c_str(),
+		p->cookie(),
+		callback(this, &StartingRouteDump<IPv4>::dispatch_complete)
+		);
+}
+
+template <>
+bool
+StartingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistXrlOutput<IPv6>* p = this->parent();
+
+    XrlRedist6V0p1Client cl(&xrl_router);
+    return cl.send_starting_route_dump(
+		p->xrl_target_name().c_str(),
+		p->cookie(),
+		callback(this, &StartingRouteDump<IPv6>::dispatch_complete)
+		);
+}
+
+template <typename A>
+void
+StartingRouteDump<A>::dispatch_complete(const XrlError& xe)
+{
+    if (xe == XrlError::OKAY()) {
+	this->signal_complete_ok();
+	return;
+    } else if (xe == XrlError::COMMAND_FAILED()) {
+	XLOG_ERROR("Failed to send starting route dump.");
+	this->signal_complete_ok();
+	return;
+    }
+    // XXX For now all errors signalled as fatal
+    XLOG_ERROR("Fatal error during route redistribution \"%s\"",
+	       xe.str().c_str());
+    this->signal_fatal_failure();
+}
+
+
+// ----------------------------------------------------------------------------
+// FinishingRouteDump implementation
+
+template <typename A>
+FinishingRouteDump<A>::FinishingRouteDump(RedistXrlOutput<A>* parent)
+    : RedistXrlTask<A>(parent)
+{
+}
+
+template <>
+bool
+FinishingRouteDump<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistXrlOutput<IPv4>* p = this->parent();
+
+    XrlRedist4V0p1Client cl(&xrl_router);
+    return cl.send_finishing_route_dump(
+		p->xrl_target_name().c_str(),
+		p->cookie(),
+		callback(this, &FinishingRouteDump<IPv4>::dispatch_complete)
+		);
+}
+
+template <>
+bool
+FinishingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistXrlOutput<IPv6>* p = this->parent();
+
+    XrlRedist6V0p1Client cl(&xrl_router);
+    return cl.send_finishing_route_dump(
+		p->xrl_target_name().c_str(),
+		p->cookie(),
+		callback(this, &FinishingRouteDump<IPv6>::dispatch_complete)
+		);
+}
+
+template <typename A>
+void
+FinishingRouteDump<A>::dispatch_complete(const XrlError& xe)
+{
+    if (xe == XrlError::OKAY()) {
+	this->signal_complete_ok();
+	return;
+    } else if (xe == XrlError::COMMAND_FAILED()) {
+	XLOG_ERROR("Failed to send finishing route dump.");
 	this->signal_complete_ok();
 	return;
     }
@@ -355,12 +485,20 @@ template <typename A>
 void
 RedistXrlOutput<A>::starting_route_dump()
 {
+    enqueue_task(new StartingRouteDump<A>(this));
+    if (task_count() == 1) {
+	start_running_tasks();
+    }
 }
 
 template <typename A>
 void
 RedistXrlOutput<A>::finishing_route_dump()
 {
+    enqueue_task(new FinishingRouteDump<A>(this));
+    if (task_count() == 1) {
+	start_running_tasks();
+    }
 }
 
 template <typename A>

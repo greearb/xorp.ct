@@ -574,6 +574,19 @@ XrlRipTarget::redist4_0_1_delete_route(const IPv4Net&	net,
 }
 
 XrlCmdError
+XrlRipTarget::redist4_0_1_starting_route_dump(const string& /* cookie */)
+{
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRipTarget::redist4_0_1_finishing_route_dump(const string& /* cookie */)
+{
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError
 XrlRipTarget::socket4_user_0_1_recv_event(
 					const string&		sockid,
 					const IPv4&		src_host,

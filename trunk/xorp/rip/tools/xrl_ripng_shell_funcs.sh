@@ -86,6 +86,28 @@ ripng_redist6_delete_route()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+ripng_redist6_starting_route_dump()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: ripng_redist6_starting_route_dump <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/redist6/0.1/starting_route_dump?cookie:txt=$1"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_redist6_finishing_route_dump()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: ripng_redist6_finishing_route_dump <cookie:txt>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/redist6/0.1/finishing_route_dump?cookie:txt=$1"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 ripng_ripng_add_rip_address()
 {
     if [ $# -ne 3 ] ; then

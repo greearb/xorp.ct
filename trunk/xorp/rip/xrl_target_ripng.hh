@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.11 2004/05/06 17:42:57 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.12 2004/05/31 04:06:41 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -290,6 +290,10 @@ public:
 
     XrlCmdError redist6_0_1_delete_route(const IPv6Net&		net,
 					 const string&		cookie);
+
+    XrlCmdError redist6_0_1_starting_route_dump(const string&	cookie);
+
+    XrlCmdError redist6_0_1_finishing_route_dump(const string&	cookie);
 
     XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
 					    const IPv6&		src_host,

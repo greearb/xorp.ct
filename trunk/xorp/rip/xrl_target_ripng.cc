@@ -492,7 +492,19 @@ XrlRipngTarget::redist6_0_1_delete_route(const IPv6Net&	net,
     return _ct->redistx_0_1_delete_route(net, cookie);
 }
 
+XrlCmdError
+XrlRipngTarget::redist6_0_1_starting_route_dump(const string& /* cookie */)
+{
+    return XrlCmdError::OKAY();
+}
 
+XrlCmdError
+XrlRipngTarget::redist6_0_1_finishing_route_dump(const string& /* cookie */)
+{
+    return XrlCmdError::OKAY();
+}
+
+
 XrlCmdError
 XrlRipngTarget::socket6_user_0_1_recv_event(
 					const string&		sockid,
