@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.86 2005/01/31 19:59:52 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.87 2005/03/03 07:29:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -316,7 +316,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 }
 
 void
-BGPPeer::send_notification(const NotificationPacket& p, bool error)
+BGPPeer::send_notification(const NotificationPacket& p, bool restart)
 {
     debug_msg(p.str().c_str());
 
@@ -350,7 +350,7 @@ BGPPeer::send_notification(const NotificationPacket& p, bool error)
     ** This write is async. So we can't free the data now,
     ** we will deal with it in the complete routine.  */
     bool ret =_SocketClient->send_message(buf, ccnt,
-	       callback(this, &BGPPeer::send_notification_complete, error));
+	       callback(this, &BGPPeer::send_notification_complete, restart));
 
     if (!ret) {
 	delete[] buf;
@@ -361,7 +361,7 @@ BGPPeer::send_notification(const NotificationPacket& p, bool error)
 
 void
 BGPPeer::send_notification_complete(SocketClient::Event ev,
-				    const uint8_t* buf, bool error)
+				    const uint8_t* buf, bool restart)
 {
     TIMESPENT();
 
@@ -370,7 +370,7 @@ BGPPeer::send_notification_complete(SocketClient::Event ev,
 	debug_msg("Notification sent\n");
 	XLOG_ASSERT(STATESTOPPED == _state);
 	delete[] buf;
-	set_state(STATEIDLE, error);
+	set_state(STATEIDLE, restart);
 	break;
     case SocketClient::FLUSHING:
 	delete[] buf;
@@ -378,7 +378,7 @@ BGPPeer::send_notification_complete(SocketClient::Event ev,
     case SocketClient::ERROR:
 	debug_msg("Notification not sent\n");
 	XLOG_ASSERT(STATESTOPPED == _state);
-	set_state(STATEIDLE, error);
+	set_state(STATEIDLE, restart);
 	/* Don't free the message here we'll get it in the flush */
 	break;
     }
@@ -400,7 +400,7 @@ BGPPeer::hook_stopped()
     /*
     ** If the original notification was not an error such as sending a
     ** CEASE. If we arrived here due to a timeout, something has gone
-    ** wrong so unconditionally set the error to true.
+    ** wrong so unconditionally set the restart to true.
     */
     set_state(STATEIDLE, true);
 }
@@ -1607,7 +1607,7 @@ BGPPeer::pretty_print_state(FSMState s)
 }
 
 void
-BGPPeer::set_state(FSMState s, bool error)
+BGPPeer::set_state(FSMState s, bool restart)
 {
     TIMESPENT();
 
@@ -1628,7 +1628,7 @@ BGPPeer::set_state(FSMState s, bool error)
 	    clear_all_timers();
 	    // Release resources - which includes a disconnect
 	    release_resources();
-	    if (error) {
+	    if (restart) {
 		// re-start timer = 60;
 		// or exp growth see section 8
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.17 2004/06/10 22:40:32 hodson Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.18 2004/09/21 23:13:06 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -160,15 +160,9 @@ private:
 	    event_openfail();		// Event = EVENTBGPCONNOPENFAIL
     }
 
-#if 0
-    void send_notification(const NotificationPacket& p, bool error = true) {
-	send_notification(&p, error);
-    }
-    void send_notification(const NotificationPacket *p, bool error = true);
-#endif
-    void send_notification(const NotificationPacket& p, bool error = true);
+    void send_notification(const NotificationPacket& p, bool restart = true);
     void send_notification_complete(SocketClient::Event, const uint8_t *buf,
-				    bool error);
+				    bool restart);
     void flush_transmit_queue()		{ _SocketClient->flush_transmit_queue(); }
     void stop_reader()			{ _SocketClient->stop_reader(); }
 
@@ -214,9 +208,9 @@ private:
     /**
      * move to the desired state, plus does some additional
      * work to clean up existing state and possibly retrying to
-     * open/connect if error = true
+     * open/connect if restart = true
      */
-    void set_state(FSMState s, bool error = false);
+    void set_state(FSMState s, bool restart = false);
     static const char *pretty_print_state(FSMState s);
     bool remote_ip_ge_than(const BGPPeer& peer);
 private:
