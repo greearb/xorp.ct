@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.9 2004/06/14 21:46:02 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.10 2004/06/14 23:25:33 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -118,8 +118,8 @@ gmake check
 
   * OS X 10.3.4 (Darwin 7.4.0)
     - gcc version 3.3 20030304 (Apple Computer, Inc. build 1495)
-    - Note: The validation tests pass, but packet forwarding has never
-      been attempted.
+    - Some of the internal tests may fail.
+    - Packet forwarding has never been attempted.
 
 4. Known problems
 =================
