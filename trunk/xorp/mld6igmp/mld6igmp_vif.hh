@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.14 2004/03/01 10:02:41 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.15 2004/06/10 22:41:27 hodson Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -90,6 +90,21 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop(string& error_msg);
+
+    /**
+     * Enable MLD/IGMP on a single virtual interface.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable MLD/IGMP on a single virtual interface.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
 
     /**
      * Receive a protocol message.

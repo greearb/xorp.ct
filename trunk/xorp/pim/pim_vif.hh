@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.27 2004/03/02 00:32:32 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.28 2004/06/10 22:41:34 hodson Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -122,6 +122,21 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop(string& error_msg);
+
+    /**
+     * Enable PIM on a single virtual interface.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable PIM on a single virtual interface.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
     
     /**
      * Receive a protocol message.

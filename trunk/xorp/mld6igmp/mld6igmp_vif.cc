@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.27 2004/04/30 23:07:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.28 2004/06/10 22:41:27 hodson Exp $"
 
 
 //
@@ -334,6 +334,32 @@ Mld6igmpVif::stop(string& error_msg)
     }
     
     return (ret_value);
+}
+
+/**
+ * Enable MLD/IGMP on a single virtual interface.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+Mld6igmpVif::enable()
+{
+    ProtoUnit::enable();
+}
+
+/**
+ * Disable MLD/IGMP on a single virtual interface.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+Mld6igmpVif::disable()
+{
+    string error_msg;
+
+    stop(error_msg);
+    ProtoUnit::disable();
 }
 
 /**

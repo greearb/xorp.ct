@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.6 2004/04/29 23:32:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.7 2004/06/10 22:40:56 hodson Exp $"
 
 
 //
@@ -190,6 +190,32 @@ MfeaVif::stop(string& error_msg)
     }
 
     return (XORP_OK);
+}
+
+/**
+ * Enable MFEA on a single virtual interface.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+MfeaVif::enable()
+{
+    ProtoUnit::enable();
+}
+
+/**
+ * Disable MFEA on a single virtual interface.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+MfeaVif::disable()
+{
+    string error_msg;
+
+    stop(error_msg);
+    ProtoUnit::disable();
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.37 2004/04/30 23:08:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.38 2004/06/10 22:41:34 hodson Exp $"
 
 
 //
@@ -479,6 +479,32 @@ PimVif::final_stop(string& error_msg)
     }
     
     return (ret_value);
+}
+
+/**
+ * Enable PIM on a single virtual interface.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+PimVif::enable()
+{
+    ProtoUnit::enable();
+}
+
+/**
+ * Disable PIM on a single virtual interface.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+PimVif::disable()
+{
+    string error_msg;
+
+    stop(error_msg);
+    ProtoUnit::disable();
 }
 
 /**
