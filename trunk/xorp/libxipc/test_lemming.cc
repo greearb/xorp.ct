@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.6 2003/03/10 23:20:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.7 2003/04/02 22:58:56 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -23,8 +23,6 @@
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
-
-typedef FinderNGServer TestFinderServer;
 
 class verbose_ostream {
 public:
@@ -172,13 +170,13 @@ private:
 // Main body
 
 static bool
-toggle_finder(EventLoop* e, TestFinderServer** ppfs)
+toggle_finder(EventLoop* e, FinderNGServer** ppfs)
 {
     if (*ppfs) {
 	delete *ppfs;
 	*ppfs = 0;
     } else {
-	*ppfs = new TestFinderServer(*e);
+	*ppfs = new FinderNGServer(*e);
     }
     return true;
 }
@@ -195,7 +193,7 @@ lemming_main()
     EventLoop e;
     bool run = true;
 
-    TestFinderServer* pfs = 0;		/* Finder */
+    FinderNGServer* pfs = 0;
 
     toggle_finder(&e, &pfs);
 
