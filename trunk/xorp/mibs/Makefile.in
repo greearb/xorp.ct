@@ -155,7 +155,7 @@ test_xorpevents_SOURCES = test_xorpevents.cc
 libnetsnmpxorp_so_SOURCES = xorpevents.cc xorpevents.hh
 
 # -- Library Sources (bgp4_mib_1657)
-bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc bgp4_mib_1657_bgppeertable.hh bgp4_mib_1657_bgppeertable.cc bgp4_mib_1657_bgp4pathattrtable.hh bgp4_mib_1657_bgp4pathattrtable.cc bgp4_mib_xrl_target.cc
+bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc bgp4_mib_1657_bgplocalas.cc bgp4_mib_1657_bgplocalas.hh bgp4_mib_1657_bgppeertable.hh bgp4_mib_1657_bgppeertable.cc bgp4_mib_1657_bgp4pathattrtable.hh bgp4_mib_1657_bgp4pathattrtable.cc bgp4_mib_xrl_target.cc
 
 # -- Library Sources (ospf_mib_1850)
 ospf_mib_1850_so_SOURCES = ospf_mib_1850.hh ospf_mib_1850.cc
@@ -177,6 +177,7 @@ PROGRAMS = $(noinst_PROGRAMS) $(pkglib_PROGRAMS)
 
 am_bgp4_mib_1657_so_OBJECTS = bgp4_mib_1657.$(OBJEXT) \
 	bgp4_mib_1657_bgpversion.$(OBJEXT) \
+	bgp4_mib_1657_bgplocalas.$(OBJEXT) \
 	bgp4_mib_1657_bgppeertable.$(OBJEXT) \
 	bgp4_mib_1657_bgp4pathattrtable.$(OBJEXT) \
 	bgp4_mib_xrl_target.$(OBJEXT)
@@ -203,6 +204,7 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgp4_mib_1657.Po \
 @AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgp4pathattrtable.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgplocalas.Po \
 @AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgppeertable.Po \
 @AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_1657_bgpversion.Po \
 @AMDEP_TRUE@	$(DEPDIR)/bgp4_mib_xrl_target.Po \
@@ -295,6 +297,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgp4pathattrtable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgplocalas.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgppeertable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_1657_bgpversion.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_xrl_target.Po@am__quote@

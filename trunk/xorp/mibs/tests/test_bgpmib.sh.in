@@ -21,7 +21,7 @@
 set -e
 
 # to debug 
-# set -x
+set -x
 
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
@@ -100,6 +100,9 @@ configure_bgp()
     # Don't try and talk to the rib.
     register_rib ""
 
+    # Assign AS number
+    ${CALLXRL} "finder://bgp/bgp/0.2/set_local_as?as:u32=${AS}"
+
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
@@ -168,10 +171,6 @@ test1()
     BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
 	sed -e 's/.*mib_index:u32=//'`
 	
-
-    
- 
-
     # verify that the BGP mib is loaded
     ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
 
@@ -182,6 +181,15 @@ test1()
     if [ "${bgp_ver}" != '"4"' ]; then exit 1; fi
  
     echo "${bgp_ver}"
+
+    echo -n getting the local AS number...
+    bgp_local_as=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpLocalAs.0 | \
+	sed -e 's/BGP4-MIB::bgpLocalAs\.0 = INTEGER: //'`  
+
+    if [ "${bgp_local_as}" != "${AS}" ]; then exit 1; fi
+ 
+    echo "${bgp_local_as}"
+
 
     echo 'walking through the values of the BGP peer table... '
     snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
