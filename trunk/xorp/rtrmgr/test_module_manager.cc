@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.2 2003/04/25 02:59:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.3 2003/04/25 03:39:03 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree.hh"
@@ -73,6 +73,12 @@ main(int argc, char* const argv[])
     
     printf("shutting down\n");
     mmgr.shutdown();
+    while (eventloop.timers_pending() && (!mmgr.shutdown_complete())) {
+	printf(".");
+	eventloop.run();
+    }
+    printf("module manager has shut down\n");
+    
     printf("bye\n");
     return 0;
 }

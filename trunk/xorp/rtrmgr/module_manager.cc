@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.11 2003/04/25 04:02:18 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.12 2003/04/25 18:19:58 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -63,6 +63,12 @@ Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
 
 Module::~Module() 
 {
+    assert(_status == MODULE_NOT_STARTED);
+}
+
+void
+Module::terminate() 
+{
     if (_verbose)
 	printf("Shutting down %s\n", _name.c_str());
 
@@ -72,21 +78,39 @@ Module::~Module()
     if (_status == MODULE_NOT_STARTED)
 	return;
 
-    if (_status != MODULE_FAILED) {
-	new_status(MODULE_SHUTTING_DOWN);
-	kill(_pid, SIGTERM);
+    if (_status == MODULE_FAILED) {
+	_status = MODULE_NOT_STARTED;
+	return;
     }
 
-    //give the process time to exit
-    for(int i=0;i<3;i++) {
-	sleep(1);
-	if (_status == MODULE_FAILED)
-	    return;
+    printf("sending kill\n");
+    //We need to kill the process
+    new_status(MODULE_SHUTTING_DOWN);
+    kill(_pid, SIGTERM);
+
+    _shutdown_timer =
+	_mmgr.eventloop().new_oneoff_after_ms(2000, 
+             callback(this, &Module::terminate_with_prejudice));
+}
+
+void
+Module::terminate_with_prejudice()
+{
+    printf("terminate_with_prejudice\n");
+    if (_status == MODULE_FAILED) {
+	_status = MODULE_NOT_STARTED;
+	return;
+    }
+    if (_status == MODULE_NOT_STARTED) {
+	return;
     }
 
+    printf("sending kill -9\n");
     //if it still hasn't exited, kill it properly.
     kill(_pid, SIGKILL);
+    _status = MODULE_NOT_STARTED;
 }
+
 
 int Module::set_execution_path(const string &path) 
 {
@@ -359,14 +383,29 @@ void
 ModuleManager::shutdown() 
 {
     debug_msg("ModuleManager::shutdown\n");
-    map<string, Module *>::iterator found, prev;
-    found = _modules.begin(); 
-    while (found != _modules.end()) {
-	delete found->second;
-	prev = found;
-	++found;
-	_modules.erase(prev);
+    map<string, Module *>::iterator i;
+    for (i = _modules.begin(); i != _modules.end(); i++) {
+	i->second->terminate();
     }
+}
+
+bool
+ModuleManager::shutdown_complete() 
+{
+    bool complete = true;
+    map<string, Module *>::iterator i, i2;
+    for (i = _modules.begin(); i != _modules.end();) {
+	if (i->second->status() == MODULE_NOT_STARTED) {
+	    delete i->second;
+	    i2 = i;
+	    i++;
+	    _modules.erase(i2);
+	} else {
+	    complete = false;
+	    i++;
+	}
+    }
+    return complete;
 }
 
 

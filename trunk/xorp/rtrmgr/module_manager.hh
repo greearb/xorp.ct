@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.10 2003/04/25 03:39:02 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.11 2003/04/25 04:02:18 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -70,6 +70,8 @@ public:
     void killed();
     string str() const;
     int status() const {return _status;}
+    void terminate();
+    void terminate_with_prejudice();
 private:
     void new_status(int new_status);
     
@@ -83,6 +85,7 @@ private:
                    //shouldn't actually start any processes
 
     bool _verbose; //verbose output of important events
+    XorpTimer _shutdown_timer;
 };
 
 class ModuleManager {
@@ -97,6 +100,7 @@ public:
     bool module_is_running(const string &name) const;
     bool module_has_started(const string &name) const;
     void shutdown();
+    bool shutdown_complete();
     EventLoop& eventloop() {return _eventloop;}
     void module_status_changed(const string& name, 
 			       int old_status, int new_status);

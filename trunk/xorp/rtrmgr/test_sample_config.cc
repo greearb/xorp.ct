@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.11 2003/04/23 20:50:51 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.1 2003/04/24 20:45:07 mjh Exp $"
 
 #include <signal.h>
 
@@ -99,6 +99,10 @@ main(int argc, char* const argv[])
     }
 
     mmgr.shutdown();
+    while (eventloop.timers_pending() && (!mmgr.shutdown_complete())) {
+	eventloop.run();
+    }
+
     delete tt;
     //
     // Gracefully stop and exit xlog
