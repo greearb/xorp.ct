@@ -12,12 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/libxipc/finder_msgs.hh,v 1.1 2003/01/21 18:51:36 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MSGS_HH__
 #define __LIBXIPC_FINDER_MSGS_HH__
-
-#include "finder_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/exceptions.hh"
