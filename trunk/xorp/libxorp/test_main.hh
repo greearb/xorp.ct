@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.6 2003/07/03 02:03:18 atanu Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.7 2003/07/03 02:48:03 atanu Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -54,6 +54,12 @@ public:
     TestInfo(string myname, bool verbose, int verbose_level, ostream& o) :
 	_myname(myname), _verbose(verbose), _verbose_level(verbose_level),
 	_ostream(o)
+    {
+    }
+
+    TestInfo(const TestInfo& rhs)
+	: _myname(rhs._myname),  _verbose(rhs._verbose),
+	  _verbose_level(rhs._verbose_level), _ostream(rhs._ostream)
     {
     }
 
