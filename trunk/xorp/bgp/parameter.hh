@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.10 2003/10/10 22:42:41 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.11 2003/10/13 23:42:26 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -39,6 +39,7 @@ enum  Safi {
     SAFI_MULTICAST = SAFI_MULTICAST_VAL,
 };
 
+#if	0
 class AfiSafi {
 public:
     static int afi_safi_index(Afi afi, Safi safi) {
@@ -68,6 +69,7 @@ public:
 	return 4;
     }
 };
+#endif
 
 // #define SAFI_NLRI_UNICASTMULTICAST 3 - Removed in:
 //					  draft-ietf-idr-rfc2858bis-03.txt
