@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.13 2003/08/12 15:50:14 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.14 2003/08/13 07:34:48 pavlin Exp $
 #
 
 #
@@ -2487,7 +2487,7 @@ pim_pimstat_bootstrap_messages_received_per_vif()
 pim_pimstat_bootstrap_messages_sent_per_vif()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: pim_pimstat_bootstrap_messages_sent_per_vof <vif_name:txt>"
+	echo "Usage: pim_pimstat_bootstrap_messages_sent_per_vif <vif_name:txt>"
 	exit 1
     fi
     vif_name=$1
