@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.15 2003/05/29 23:34:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.16 2003/06/17 06:44:17 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -173,6 +173,9 @@ XrlBgpTarget::bgp_0_2_add_peer(
 
     if(_awaiting_config)
 	return XrlCmdError::COMMAND_FAILED("BGP Not configured!!!");
+
+    if(!_bgp.processes_ready())
+	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
 
     Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
@@ -486,6 +489,9 @@ XrlBgpTarget::bgp_0_2_add_route(
     if(_awaiting_config)
 	return XrlCmdError::COMMAND_FAILED("BGP Not configured!!!");
 
+    if(!_bgp.processes_ready())
+	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
+
     OriginType ot;
 
     switch(origin) {
@@ -516,6 +522,9 @@ XrlBgpTarget::bgp_0_2_delete_route(
 {
     if(_awaiting_config)
 	return XrlCmdError::COMMAND_FAILED("BGP Not configured!!!");
+
+    if(!_bgp.processes_ready())
+	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
 
     if(!_bgp.delete_route(nlri))
 	return XrlCmdError::COMMAND_FAILED();
