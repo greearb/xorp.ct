@@ -21,7 +21,7 @@
 #include "libxorp/callback.hh"
 
 #include "xrl.hh"
-#include "xrlcmdmap.hh"
+#include "xrl_cmd_map.hh"
 #include "xrl_pf.hh"
 #include "finder_client.hh"
 

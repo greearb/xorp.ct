@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -21,7 +21,7 @@
 
 #include <string>
 #include "xrl.hh"
-#include "xrlcmdmap.hh"
+#include "xrl_cmd_map.hh"
 #include "xuid.hh"
 
 #include "libxorp/eventloop.hh"

@@ -112,7 +112,7 @@ test_xrl_args_SOURCES = test_xrl_args.cc
 test_xrl_parser_SOURCES = test_xrl_parser.cc
 test_xrl_router_SOURCES = test_xrl_router.cc
 test_xrl_error_SOURCES = test_xrl_error.cc
-libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h md5.h finder_client.hh finder_ipc.hh finder_msg.hh finder_server.hh finder_transport.hh header.hh hmac.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrlcmdmap.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c md5.c finder_client.cc finder_ipc.cc finder_msg.cc finder_server.cc finder_transport.cc header.cc hmac.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrlcmdmap.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc
+libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h md5.h finder_client.hh finder_ipc.hh finder_msg.hh finder_server.hh finder_transport.hh header.hh hmac.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c md5.c finder_client.cc finder_ipc.cc finder_msg.cc finder_server.cc finder_transport.cc header.cc hmac.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -126,7 +126,7 @@ libxipc_a_LIBADD =
 libxipc_a_OBJECTS =  hmac_md5.o md5.o finder_client.o finder_ipc.o \
 finder_msg.o finder_server.o finder_transport.o header.o hmac.o \
 sockutil.o xrl.o xrl_parser.o xrl_parser_input.o xrl_tokens.o \
-xrl_atom.o xrl_atom_encoding.o xrl_atom_list.o xrl_args.o xrlcmdmap.o \
+xrl_atom.o xrl_atom_encoding.o xrl_atom_list.o xrl_args.o xrl_cmd_map.o \
 xrl_pf_factory.o xrl_pf_inproc.o xrl_pf_stcp.o xrl_pf_stcp_ph.o \
 xrl_pf_sudp.o xrl_router.o xrl_std_router.o xrl_error.o xuid.o
 PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -246,7 +246,7 @@ DEP_FILES =  .deps/call_xrl.P .deps/finder.P .deps/finder_client.P \
 .deps/xrl_parser_input.P .deps/xrl_pf_factory.P .deps/xrl_pf_inproc.P \
 .deps/xrl_pf_stcp.P .deps/xrl_pf_stcp_ph.P .deps/xrl_pf_sudp.P \
 .deps/xrl_router.P .deps/xrl_std_router.P .deps/xrl_tokens.P \
-.deps/xrlcmdmap.P .deps/xuid.P
+.deps/xrl_cmd_map.P .deps/xuid.P
 SOURCES = $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_client_SOURCES) $(test_finder_ipc_SOURCES) $(test_finder_ipc2_SOURCES) $(test_finder_msg_SOURCES) $(test_finder_transport_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
 OBJECTS = $(libxipc_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_client_OBJECTS) $(test_finder_ipc_OBJECTS) $(test_finder_ipc2_OBJECTS) $(test_finder_msg_OBJECTS) $(test_finder_transport_OBJECTS) $(test_header_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
 
