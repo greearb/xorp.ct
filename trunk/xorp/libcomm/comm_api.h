@@ -214,7 +214,7 @@ extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  *
  * @param mcast_addr the multicast address to join.
  *
- * @param join_if_addr the local unicast interface index to join the multicast
+ * @param join_if_index the local unicast interface index to join the multicast
  * group on. If it is 0, the system will choose the interface each time a
  * datagram is sent.
  *
@@ -226,7 +226,7 @@ extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * @return the new socket on success, otherwise XORP_ERROR.
  */
 extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
-				    uint join_if_addr,
+				    unsigned int join_if_index,
 				    unsigned short my_port,
 				    bool reuse_flag);
 #endif /* HAVE_IPV6 */
