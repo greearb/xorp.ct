@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.4 2004/02/20 06:46:23 atanu Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.5 2004/03/18 13:11:04 pavlin Exp $"
 
 
 //
@@ -243,6 +243,10 @@ StaticRoutesNode::node_status(string& reason_msg)
  * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
+ * @param ifname of the name of the physical interface toward the
+ * destination.
+ * @param vifname of the name of the virtual interface toward the
+ * destination.
  * @param metric the metric distance for this route.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -250,9 +254,11 @@ StaticRoutesNode::node_status(string& reason_msg)
 int
 StaticRoutesNode::add_route4(bool unicast, bool multicast,
 			     const IPv4Net& network, const IPv4& nexthop,
+			     const string& ifname, const string& vifname,
 			     uint32_t metric, string& error_msg)
 {
-    StaticRoute static_route(unicast, multicast, network, nexthop, metric);
+    StaticRoute static_route(unicast, multicast, network, nexthop,
+			     ifname, vifname, metric);
 
     static_route.set_add_route();
 
@@ -269,6 +275,10 @@ StaticRoutesNode::add_route4(bool unicast, bool multicast,
  * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
+ * @param ifname of the name of the physical interface toward the
+ * destination.
+ * @param vifname of the name of the virtual interface toward the
+ * destination.
  * @param metric the metric distance for this route.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -276,9 +286,11 @@ StaticRoutesNode::add_route4(bool unicast, bool multicast,
 int
 StaticRoutesNode::add_route6(bool unicast, bool multicast,
 			     const IPv6Net& network, const IPv6& nexthop,
+			     const string& ifname, const string& vifname,
 			     uint32_t metric, string& error_msg)
 {
-    StaticRoute static_route(unicast, multicast, network, nexthop, metric);
+    StaticRoute static_route(unicast, multicast, network, nexthop,
+			     ifname, vifname, metric);
 
     static_route.set_add_route();
 
@@ -295,6 +307,10 @@ StaticRoutesNode::add_route6(bool unicast, bool multicast,
  * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
+ * @param ifname of the name of the physical interface toward the
+ * destination.
+ * @param vifname of the name of the virtual interface toward the
+ * destination.
  * @param metric the metric distance for this route.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -302,9 +318,11 @@ StaticRoutesNode::add_route6(bool unicast, bool multicast,
 int
 StaticRoutesNode::replace_route4(bool unicast, bool multicast,
 				 const IPv4Net& network, const IPv4& nexthop,
+				 const string& ifname, const string& vifname,
 				 uint32_t metric, string& error_msg)
 {
-    StaticRoute static_route(unicast, multicast, network, nexthop, metric);
+    StaticRoute static_route(unicast, multicast, network, nexthop,
+			     ifname, vifname, metric);
 
     static_route.set_replace_route();
 
@@ -321,6 +339,10 @@ StaticRoutesNode::replace_route4(bool unicast, bool multicast,
  * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
+ * @param ifname of the name of the physical interface toward the
+ * destination.
+ * @param vifname of the name of the virtual interface toward the
+ * destination.
  * @param metric the metric distance for this route.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -328,9 +350,11 @@ StaticRoutesNode::replace_route4(bool unicast, bool multicast,
 int
 StaticRoutesNode::replace_route6(bool unicast, bool multicast,
 				 const IPv6Net& network, const IPv6& nexthop,
+				 const string& ifname, const string& vifname,
 				 uint32_t metric, string& error_msg)
 {
-    StaticRoute static_route(unicast, multicast, network, nexthop, metric);
+    StaticRoute static_route(unicast, multicast, network, nexthop,
+			     ifname, vifname, metric);
 
     static_route.set_replace_route();
 
@@ -354,7 +378,7 @@ StaticRoutesNode::delete_route4(bool unicast, bool multicast,
 				const IPv4Net& network, string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network,
-			     network.masked_addr().ZERO(), 0);
+			     network.masked_addr().ZERO(), "", "", 0);
 
     static_route.set_delete_route();
 
@@ -378,7 +402,7 @@ StaticRoutesNode::delete_route6(bool unicast, bool multicast,
 				const IPv6Net& network, string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network,
-			     network.masked_addr().ZERO(), 0);
+			     network.masked_addr().ZERO(), "", "", 0);
 
     static_route.set_delete_route();
 

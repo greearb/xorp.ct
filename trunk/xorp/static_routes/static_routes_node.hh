@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.1 2004/02/12 20:11:26 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.2 2004/02/14 00:05:03 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -49,12 +49,20 @@ public:
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param metric the metric distance for this route.
      */
-    StaticRoute(bool unicast, bool multicast, const IPv4Net& network,
-		const IPv4& nexthop, uint32_t metric)
+    StaticRoute(bool unicast, bool multicast,
+		const IPv4Net& network, const IPv4& nexthop,
+		const string& ifname, const string& vifname,
+		uint32_t metric)
 	: _unicast(unicast), _multicast(multicast),
-	  _network(network), _nexthop(nexthop), _metric(metric) {}
+	  _network(network), _nexthop(nexthop),
+	  _ifname(ifname), _vifname(vifname),
+	  _metric(metric) {}
 
     /**
      * Constructor for a given IPv6 static route.
@@ -66,12 +74,20 @@ public:
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param metric the metric distance for this route.
      */
-    StaticRoute(bool unicast, bool multicast, const IPv6Net& network,
-		const IPv6& nexthop, uint32_t metric)
+    StaticRoute(bool unicast, bool multicast,
+		const IPv6Net& network, const IPv6& nexthop,
+		const string& ifname, const string& vifname,
+		uint32_t metric)
 	: _unicast(unicast), _multicast(multicast),
-	  _network(network), _nexthop(nexthop), _metric(metric) {}
+	  _network(network), _nexthop(nexthop),
+	  _ifname(ifname), _vifname(vifname),
+	  _metric(metric) {}
 
     /**
      * Test if this is an IPv4 route.
@@ -118,6 +134,20 @@ public:
     const IPvX& nexthop() const { return _nexthop; }
 
     /**
+     * Get the name of the physical interface toward the destination.
+     * 
+     * @return the name of the physical interface toward the destination.
+     */
+    const string& ifname() const { return _ifname; }
+
+    /**
+     * Get the name of the virtual interface toward the destination.
+     * 
+     * @return the name of the virtual interface toward the destination.
+     */
+    const string& vifname() const { return _vifname; }
+
+    /**
      * Get the metric distance for this route.
      * 
      * @return the metric distance for this route.
@@ -161,6 +191,14 @@ public:
     void set_delete_route() { _route_type = DELETE_ROUTE; }
 
     /**
+     * Test if the route is interface-specific (e.g., if the interface
+     * is explicitly specified).
+     * 
+     * @return true if the route is interface-specific, otherwise false.
+     */
+    bool is_interface_route() const { return ! (_ifname.empty()
+						&& _vifname.empty()); }
+    /**
      * Check whether the route entry is valid.
      * 
      * @param error_msg the error message (if error).
@@ -173,6 +211,8 @@ private:
     bool	_multicast;
     IPvXNet	_network;
     IPvX	_nexthop;
+    string	_ifname;
+    string	_vifname;
     uint32_t	_metric;
     enum RouteType { ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
@@ -248,12 +288,17 @@ public:
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param metric the metric distance for this route.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route4(bool unicast, bool multicast,
 		   const IPv4Net& network, const IPv4& nexthop,
+		   const string& ifname, const string& vifname,
 		   uint32_t metric, string& error_msg);
 
     /**
@@ -266,12 +311,17 @@ public:
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param metric the metric distance for this route.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route6(bool unicast, bool multicast,
 		   const IPv6Net& network, const IPv6& nexthop,
+		   const string& ifname, const string& vifname,
 		   uint32_t metric, string& error_msg);
 
     /**
@@ -284,12 +334,17 @@ public:
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param metric the metric distance for this route.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int replace_route4(bool unicast, bool multicast,
 		       const IPv4Net& network, const IPv4& nexthop,
+		       const string& ifname, const string& vifname,
 		       uint32_t metric, string& error_msg);
 
     /**
@@ -302,12 +357,17 @@ public:
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param metric the metric distance for this route.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int replace_route6(bool unicast, bool multicast,
 		       const IPv6Net& network, const IPv6& nexthop,
+		       const string& ifname, const string& vifname,
 		       uint32_t metric, string& error_msg);
 
     /**
