@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.16 2003/11/04 02:27:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.17 2003/11/04 03:38:50 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -47,39 +47,44 @@ template<class A>
 void 
 NextTableMap<A>::insert(BGPRouteTable<A> *next_table,
 		     const PeerHandler *ph) {
-    PeerRoutePair<A>* pair =
+    PeerRoutePair<A>* prpair =
 	new PeerRoutePair<A>(next_table, ph);
-    _next_tables[next_table] = pair;
+    _next_tables[next_table] = prpair;
 
     //we have to choose a sort order so our results are repeatable
     //across different platforms.  we arbitrarily choose to sort on
     //BGP ID because it should be unique.
 
     //check we don't have two peers with the same address
-    XLOG_ASSERT(_next_table_order.find(ph->id().addr())
-		== _next_table_order.end());
+    if (_next_table_order.find(ph->id().addr()) != _next_table_order.end())
+	XLOG_WARNING("BGP: Two peers have same BGP ID: %s\n", 
+		     ph->id().str().c_str());
 
-    _next_table_order[ph->id().addr()] = pair;
+    _next_table_order.insert(make_pair(ph->id().addr(),prpair));
 }
 
 template<class A> 
 void 
 NextTableMap<A>::erase(iterator& iter) {
 #ifdef NEWMAP
-    PeerRoutePair<A>* pair = &(iter.second());
+    PeerRoutePair<A>* prpair = &(iter.second());
     typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
-    i = _next_tables.find(pair->route_table());
+    i = _next_tables.find(prpair->route_table());
     XLOG_ASSERT(i != _next_tables.end());
     _next_tables.erase(i);
 
     typename map <uint32_t, PeerRoutePair<A>* >::iterator j;
-    j = _next_table_order.find(i->second->peer_handler()
-			      ->id().addr());
+    uint32_t id = i->second->peer_handler()->id().addr();
+    j = _next_table_order.find(id);
+    while (j->first == id  && j->second != prpair) {
+	//find the right one.
+	j++;
+    }
     //if it's in _next_table, it must be in _next_table_order too.
     XLOG_ASSERT(j != _next_table_order.end());
-    XLOG_ASSERT(j->second == pair);
+    XLOG_ASSERT(j->second == prpair);
     _next_table_order.erase(j);
-    delete pair;
+    delete prpair;
 #else
     typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
     BGPRouteTable<A>* t = iter.first();
@@ -98,11 +103,17 @@ NextTableMap<A>::find(BGPRouteTable<A> *next_table) {
     i = _next_tables.find(next_table);
     if (i == _next_tables.end())
 	return end();
+    PeerRoutePair<A>* prpair = i->second;
     typename map <uint32_t, PeerRoutePair<A>* >::iterator j;
-    j = _next_table_order.find(i->second->peer_handler()
-			      ->id().addr());
+    uint32_t id = i->second->peer_handler()->id().addr();
+    j = _next_table_order.find(id);
+    while (j->first == id  && j->second != prpair) {
+	//find the right one.
+	j++;
+    }
     //if it's in _next_table, it must be in _next_table_order too.
     XLOG_ASSERT(j != _next_table_order.end());
+    XLOG_ASSERT(j->second == prpair);
     return iterator(j);
 #else
     return iterator(_next_tables.find(next_table));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.4 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.5 2003/11/04 02:27:20 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -31,7 +31,7 @@ class NextTableMapIterator {
 public:
     NextTableMapIterator() {};
 #ifdef NEWMAP
-    NextTableMapIterator(const typename map<uint32_t, PeerRoutePair<A>*>::iterator& iter) {
+    NextTableMapIterator(const typename multimap<uint32_t, PeerRoutePair<A>*>::iterator& iter) {
 	_iter = iter;
     }
     BGPRouteTable<A>* first() {
@@ -59,7 +59,7 @@ public:
     }
 private:
 #ifdef NEWMAP
-    typename map <uint32_t, PeerRoutePair<A>*>::iterator _iter;
+    typename multimap <uint32_t, PeerRoutePair<A>*>::iterator _iter;
 #else
     typename map <BGPRouteTable<A>*, PeerRoutePair<A>*>::iterator _iter;
 #endif
@@ -86,7 +86,7 @@ public:
     iterator end();
 private:
     map<BGPRouteTable<A> *, PeerRoutePair<A>* > _next_tables;
-    map<uint32_t, PeerRoutePair<A>* > _next_table_order;
+    multimap<uint32_t, PeerRoutePair<A>* > _next_table_order;
 };
 
 template<class A>
