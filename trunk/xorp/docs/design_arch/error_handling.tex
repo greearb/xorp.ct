@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.18 2003/04/16 19:31:36 kohler Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.19 2003/04/17 21:14:19 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -71,7 +71,7 @@ In a \xorp router, as with any complex system, errors can occur. These
 errors can range from a \xorp process simply failing, to an attempt to
 install a route into the forwarding engine that already exists. Errors
 need to be dealt with in a consistent manner. The types
-of error that may occur are categorised below.
+of error that may occur are categorized below.
 
 The first type of error is {\em Process failure}.
 
@@ -397,7 +397,7 @@ non-pipelined.  In the pipelined case, multiple requests can be
 outstanding simultaneously; in the non-pipelined case at most one
 request can be outstanding at a time.
 
-It is useful for us to categorise XRL interfaces along these two axes:
+It is useful for us to categorize XRL interfaces along these two axes:
 reliable/unreliable and pipelined/non-pipelined. 
 
 \subsection*{Unreliable, Non-pipelined}
@@ -494,6 +494,52 @@ The most common reason for a route deletion to fail would be that the
 route is no longer present. The FEA should log that it has been asked
 to delete a route that doesn't exist. The RIB should decide if this
 problem should be considered fatal.
+
+\subsubsection{Route Add Failure due to Resource Starvation}
+
+When a routing process sends a route to the RIB, the asynchronous
+nature of XRL handling means that the RIB will typically accept the
+route before it has finished processing the addition, and certainly
+before it attempts to pass the route to the FEA, and hence on into the
+forwarding engine.  It is possible for the route addition to fail due
+to memory exhaustion in either the RIB or in the forwarding engine
+itself.  Should this occur, it is important for the routing protocol
+to be made aware of the event, because the routing information will
+now be out of synchronization with the forwarding information.
+
+If the forwarding engine refuses the route due to resource starvation,
+the FEA will receive the failure.  The FEA will then indicate
+asynchronously to the RIB that the failure occurred.  The RIB will in
+turn delete all state from all routing protocols that contributed
+versions of this route, and asynchronously pass the failure up to
+those routing protocols.  Each of those routing protocols will then
+handle the failure in a protocol specific manner.
+
+If the failure occurs due to resource starvation in the RIB, a similar
+process will be initiated.  It is not currently clear how to reliably
+notify a routing protocol in the case when the router is running out
+of memory for user-space processes.
+
+In the case of BGP, if a route fails to be added due to resource
+starvation, the simplest mechanism is to take down the peering that
+originated the route.  The normal peer reinitialization mechanism
+(after some time delay) will ensure that all the routes are
+re-instantiated after the resource starvation problem goes away.
+
+In the case of RIP, if a route fails to be added due to resource
+starvation, the simplest mechanism is to send our peers an infinite
+metric route for this particular prefix and to delete the state for
+this prefix.  The normal RIP periodic update will ensure that the
+route is re-instantiated after the resource starvation problem goes
+away.
+
+In the case of link-state protocols such as OSPF and IS-IS, there is
+no good way to deal with this situation.  A reasonable solution might
+be to take down all adjacencies to avoid causing a blackhole, then to
+bring up the adjacencies again but not propagate any link-state
+advertisements to our neighbors (so they won't route via us) until all
+the link-state advertisements have been received and we've
+successfully installed all the routes in the kernel.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
