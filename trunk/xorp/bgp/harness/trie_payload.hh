@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.2 2003/09/10 10:15:49 atanu Exp $
+// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.3 2003/09/11 03:38:38 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
 #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
@@ -86,8 +86,8 @@ public:
 
 private:
     TimeVal _tv;
-    TrieData *_first;
-    TrieData *_last;
+    TrieData* &_first;
+    TrieData* &_last;
 
     int _refcnt;
     UpdatePacket *_packet;
