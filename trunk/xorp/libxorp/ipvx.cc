@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.5 2003/09/09 00:40:05 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -37,7 +37,7 @@ IPvX::IPvX(int family) throw (InvalidFamily)
 
 // Construct an IPvX address by copying the raw address from @from_uint8
 // memory.
-IPvX::IPvX(int family, uint8_t *from_uint8) throw (InvalidFamily)
+IPvX::IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily)
 {
     assert(from_uint8 != NULL);
     

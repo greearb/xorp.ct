@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.6 2003/04/18 04:52:09 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.7 2003/09/09 00:40:05 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -54,7 +54,7 @@ public:
      * @param from_uint8 the pointer to the memory to copy the address value
      * from.
      */
-    IPvX(int family, uint8_t *from_uint8) throw (InvalidFamily);
+    IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily);
     
     /**
      * Constructor from an IPv4 address.
