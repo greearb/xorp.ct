@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.4 2004/02/22 04:09:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.5 2004/02/24 21:04:54 pavlin Exp $"
 
 
 //
@@ -94,10 +94,7 @@ int
 PimVif::pim_graft_send(const IPvX& dst, buffer_t *buffer)
 {
     int ret_value;
-    IPvX& src = primary_addr();
-
-    if (dst.is_unicast())
-	src = domain_wide_addr();
+    IPvX src = dst.is_unicast()? domain_wide_addr() : primary_addr();
     
     ret_value = pim_send(src, dst, PIM_GRAFT, buffer);
     
