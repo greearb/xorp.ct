@@ -101,7 +101,7 @@ bin_PROGRAMS = xorp_rib
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_deletion
 
 # -- No-install Programs
-noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_direct test_rib_xrls test_redist test_deletion
+noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_direct test_rib_xrls test_redist test_deletion add_route
 
 # -- No-install Libraries
 noinst_LIBRARIES = librib.a libribxrl.a
@@ -133,6 +133,9 @@ test_deletion_LDADD = $(LDADD)
 
 test_redist_SOURCES = test_redist.cc
 test_redist_LDADD = ./librib.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+
+add_route_SOURCES = add_route.cc
+add_route_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a
 
 # -- Library Sources
 librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
@@ -169,9 +172,33 @@ bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = main_routemap$(EXEEXT) test_register$(EXEEXT) \
 	test_register_xrls$(EXEEXT) test_rib_direct$(EXEEXT) \
 	test_rib_xrls$(EXEEXT) test_redist$(EXEEXT) \
-	test_deletion$(EXEEXT)
+	test_deletion$(EXEEXT) add_route$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
+am_add_route_OBJECTS = add_route.$(OBJEXT)
+add_route_OBJECTS = $(am_add_route_OBJECTS)
+add_route_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a
+add_route_LDFLAGS =
 am_main_routemap_OBJECTS = main_routemap.$(OBJEXT) routemap.$(OBJEXT)
 main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
 main_routemap_DEPENDENCIES = librib.a libribxrl.a \
@@ -361,7 +388,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/dummy_register_server.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/add_route.Po \
+@AMDEP_TRUE@	$(DEPDIR)/dummy_register_server.Po \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/main_rib.Po $(DEPDIR)/main_routemap.Po \
 @AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
@@ -396,10 +424,11 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) \
-	$(main_routemap_SOURCES) $(test_deletion_SOURCES) \
-	$(test_redist_SOURCES) $(test_register_SOURCES) \
-	$(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) \
-	$(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
+	$(add_route_SOURCES) $(main_routemap_SOURCES) \
+	$(test_deletion_SOURCES) $(test_redist_SOURCES) \
+	$(test_register_SOURCES) $(test_register_xrls_SOURCES) \
+	$(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) \
+	$(xorp_rib_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -407,7 +436,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
+SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) $(add_route_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
 
 all: all-recursive
 
@@ -459,6 +488,9 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+add_route$(EXEEXT): $(add_route_OBJECTS) $(add_route_DEPENDENCIES) 
+	@rm -f add_route$(EXEEXT)
+	$(CXXLINK) $(add_route_LDFLAGS) $(add_route_OBJECTS) $(add_route_LDADD) $(LIBS)
 main_routemap$(EXEEXT): $(main_routemap_OBJECTS) $(main_routemap_DEPENDENCIES) 
 	@rm -f main_routemap$(EXEEXT)
 	$(CXXLINK) $(main_routemap_LDFLAGS) $(main_routemap_OBJECTS) $(main_routemap_LDADD) $(LIBS)
@@ -490,6 +522,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/add_route.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_register_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_rib_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rib.Po@am__quote@

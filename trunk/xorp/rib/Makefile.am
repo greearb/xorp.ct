@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.29 2004/09/17 14:00:03 abittau Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.30 2004/09/18 00:59:23 pavlin Exp $
 ##
 
 SUBDIRS = . tools
@@ -26,6 +26,7 @@ noinst_PROGRAMS	+= test_rib_direct
 noinst_PROGRAMS	+= test_rib_xrls
 noinst_PROGRAMS += test_redist
 noinst_PROGRAMS	+= test_deletion
+noinst_PROGRAMS	+= add_route
 
 # -- No-install Libraries
 noinst_LIBRARIES	 = librib.a libribxrl.a
@@ -196,6 +197,10 @@ test_redist_LDADD	 = ./librib.a
 test_redist_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.a
 test_redist_LDADD	+= $(top_builddir)/libxipc/libxipc.a
 test_redist_LDADD	+= $(top_builddir)/libxorp/libxorp.a
+
+add_route_SOURCES	 = add_route.cc
+add_route_LDADD	 	 = $(LDADD)
+add_route_LDADD	 	 += $(top_builddir)/xrl/interfaces/libribxif.a
 
 # -- Library Sources
 librib_a_SOURCES	 = rib_module.h
