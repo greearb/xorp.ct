@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.13 2004/04/29 23:32:20 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.14 2004/05/06 20:14:29 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -688,7 +688,7 @@ private:
     void mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error);
 
     /**
-     * Send to a client to add a configured vif.
+     * Send a message to a client to add a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -704,7 +704,7 @@ private:
 			    uint16_t vif_index);
     
     /**
-     * Send to a client to delete a configured vif.
+     * Send a message to a client to delete a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -718,7 +718,7 @@ private:
 			       const string& vif_name);
     
     /**
-     * Send to a client to add an address to a configured vif.
+     * Send a message to a client to add an address to a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -740,7 +740,7 @@ private:
 				 const IPvX& peer);
     
     /**
-     * Send to a client to delete an address from a configured vif.
+     * Send a message to a client to delete an address from a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -756,7 +756,7 @@ private:
 				    const IPvX& addr);
     
     /**
-     * Send to a client to set the vif flags to a configured vif.
+     * Send a message to a client to set the vif flags of a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -782,7 +782,8 @@ private:
 				  bool is_up);
     
     /**
-     * Send to a client to complete the set of vif configuration changes.
+     * Send a message to a client to complete the set of vif configuration
+     * changes.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.

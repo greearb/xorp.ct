@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.25 2004/04/30 23:09:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.26 2004/05/06 20:14:29 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -587,7 +587,7 @@ XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(const XrlErro
 }
 
 /**
- * Send to a client to add a configured vif.
+ * Send a message to a client to add a configured vif.
  * 
  * @param dst_module_instance_name the name of the protocol
  * instance-destination of the message.
@@ -613,7 +613,7 @@ XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
 }
 
 /**
- * Send to a client to delete a configured vif.
+ * Send a message to a client to delete a configured vif.
  * 
  * @param dst_module_instance_name the name of the protocol
  * instance-destination of the message.
@@ -636,7 +636,7 @@ XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
 }
 
 /**
- * Send to a client to add an address to a configured vif.
+ * Send a message to a client to add an address to a configured vif.
  * 
  * @param dst_module_instance_name the name of the protocol
  * instance-destination of the message.
@@ -691,7 +691,7 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
 }
 
 /**
- * Send to a client to delete an address from a configured vif.
+ * Send a message to a client to delete an address from a configured vif.
  * 
  * @param dst_module_instance_name the name of the protocol
  * instance-destination of the message.
@@ -734,7 +734,7 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
 }
 
 /**
- * Send to a client to set the vif flags to a configured vif.
+ * Send a message to a client to set the vif flags of a configured vif.
  * 
  * @param dst_module_instance_name the name of the protocol
  * instance-destination of the message.
@@ -775,7 +775,8 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
 }
 
 /**
- * Send to a client to complete the set of vif configuration changes.
+ * Send a message to a client to complete the set of vif configuration
+ * changes.
  * 
  * @param dst_module_instance_name the name of the protocol
  * instance-destination of the message.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.19 2004/04/29 23:22:12 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.20 2004/04/30 17:56:21 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -487,7 +487,7 @@ public:
 				       string& error_msg);
     
     /**
-     * Set the pif_index to a configured vif.
+     * Set the pif_index of a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param pif_index the physical interface index.
@@ -499,7 +499,7 @@ public:
 				     string& error_msg);
     
     /**
-     * Set the vif flags to a configured vif.
+     * Set the vif flags of a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param is_pim_register true if the vif is a PIM Register interface.

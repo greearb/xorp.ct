@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.18 2004/05/06 20:14:28 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.19 2004/05/19 19:48:33 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -239,7 +239,7 @@ public:
 				       string& error_msg);
     
     /**
-     * Set the pif_index to a configured vif.
+     * Set the pif_index of a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param pif_index the physical interface index.
@@ -251,7 +251,7 @@ public:
 				     string& error_msg);
     
     /**
-     * Set the vif flags to a configured vif.
+     * Set the vif flags of a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param is_pim_register true if the vif is a PIM Register interface.
@@ -281,7 +281,7 @@ public:
     int		set_config_all_vifs_done(string& error_msg);
     
     /**
-     * Send to a client to add a configured vif.
+     * Send a message to a client to add a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -297,7 +297,7 @@ public:
 				    uint16_t vif_index) = 0;
     
     /**
-     * Send to a client to delete a configured vif.
+     * Send a message to a client to delete a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -311,7 +311,7 @@ public:
 				       const string& vif_name) = 0;
     
     /**
-     * Send to a client to add an address to a configured vif.
+     * Send a message to a client to add an address to a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -333,7 +333,7 @@ public:
 					 const IPvX& peer) = 0;
     
     /**
-     * Send to a client to delete an address from a configured vif.
+     * Send a message to a client to delete an address from a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -349,7 +349,7 @@ public:
 					    const IPvX& addr) = 0;
     
     /**
-     * Send to a client to set the vif flags to a configured vif.
+     * Send a message to a client to set the vif flags of a configured vif.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
@@ -375,7 +375,8 @@ public:
 					  bool is_up) = 0;
     
     /**
-     * Send to a client to complete the set of vif configuration changes.
+     * Send a message to a client to complete the set of vif configuration
+     * changes.
      * 
      * @param dst_module_instance_name the name of the protocol
      * instance-destination of the message.
