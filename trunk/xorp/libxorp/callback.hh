@@ -107,13 +107,17 @@ int main() {
 
     NoArgCallback cb1 = callback(sum, 1, 2);
     cout << "cb1->dispatch() returns " << cb1->dispatch() << endl; // "3"
+    cout << endl;
 
     // Callback to function returning int and taking an integer argument
     typedef XorpCallback1<int,int>::RefPtr OneIntArgCallback;
 
     OneIntArgCallback cb2 = callback(sum, 5);
     cout << "cb2->dispatch(10) returns " << cb2->dispatch(10) << endl; // 15
+    cout << endl;
+
     cout << "cb2->dispatch(20) returns " << cb2->dispatch(20) << endl; // 25
+    cout << endl;
 
     // Callback to function returning int and taking  2 integer arguments
     typedef XorpCallback2<int,int,int>::RefPtr TwoIntArgCallback;
