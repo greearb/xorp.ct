@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_click.cc,v 1.3 2003/03/10 23:20:13 hodson Exp $"
+#ident "$XORP: xorp/fea/fea_click.cc,v 1.5 2003/05/02 07:50:42 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -136,6 +136,21 @@ main(int argc, char *argv[])
     ** Add commands.
     */
     XrlFeaTarget xft(eventloop, &fea, ftic, ifmgr);
+
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (fea.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (fea.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
 
     try {
 	for (;;)
