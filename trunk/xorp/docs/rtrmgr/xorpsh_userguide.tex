@@ -71,8 +71,8 @@ configuration, but currently this is fairly primitive.
 On starting \xorpsh, you will be presented with a command line prompt:
 \vspace{0.1in}
 
-\noindent\fbox{
-\begin{minipage}{4in}
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{\textwidth}
 \begin{alltt}
 Xorp>
 \end{alltt}
@@ -88,8 +88,8 @@ Typing ``?'' at the prompt will list the commands currently available to
 you:
 \vspace{0.1in}
 
-\noindent\fbox{
-\begin{minipage}{6in}
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}[l]{\textwidth}
 \begin{alltt}
 \begin{tabbing}
 Xorp> \textbf{?}\\
@@ -114,8 +114,8 @@ command completions.  For
 example:
 \vspace{0.1in}
 
-\noindent\fbox{
-\begin{minipage}{4in}
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{\textwidth}
 \begin{alltt}
 \begin{tabbing}
 Xorp> \textbf{config?}\\
@@ -133,7 +133,7 @@ If the cursor is after the command, typing ``?'' will list the possible
 parameters for the command:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{4in}
 \begin{alltt}
 \begin{tabbing}
@@ -203,7 +203,7 @@ group.
 
 \newpage
 \section{Operational Mode}
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -231,7 +231,7 @@ router.
 \end{description}
 
 \subsection{Show Command}
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -256,7 +256,7 @@ that is running BGP should provide {\tt show bgp} commands.
 As an example, we show the peers of a BGP router:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -286,7 +286,7 @@ Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 
 \newpage
 \section{Configuration Mode}
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -309,7 +309,7 @@ The command prompt is also usually preceded by a line indicating which
 part of the configuration tree is currently being edited.
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -343,7 +343,7 @@ the configuration can be
 shown with the show command:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -382,7 +382,7 @@ configuration mode.
 For example:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -446,7 +446,7 @@ In the example below, the prefix length (netmask) of address
 not yet been committed.
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -489,7 +489,7 @@ in configuration files.
 For example, to configure a second vif on interface rl0:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -542,7 +542,7 @@ committed.
 \vspace{0.1in}
 
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -589,7 +589,7 @@ XORP> \textbf{show interfaces interface rl0}\\
 \newpage
 \subsection{Committing Changes}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -612,7 +612,7 @@ If two or more users are logged in using configuration mode, and one
 of them changes the configuration, the others will receive a warning:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
@@ -634,7 +634,7 @@ original configuration, or by using the exit command to leave
 configuration mode:
 \vspace{0.1in}
 
-\noindent\fbox{
+\noindent\framebox[\textwidth][l]{
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
