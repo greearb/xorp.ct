@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.17 2004/03/04 03:00:04 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.18 2004/04/02 10:33:13 mjh Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -28,6 +28,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/vif.hh"
+
 #include "proto_unit.hh"
 
 
@@ -35,14 +36,6 @@
 // Protocol node generic functionality
 //
 
-
-//
-// Constants definitions
-//
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class EventLoop;
 class IPvX;
@@ -75,13 +68,6 @@ public:
     virtual ~ProtoNode() {
 	// TODO: free vifs (after they are added, etc.
     }
-    
-#if 0		// TODO: add it later to start/stop all vifs, etc??
-    int		start();
-    int		stop();
-    void	enable();
-    void	disable();
-#endif
     
     /**
      * Map a vif name to a vif index.
@@ -389,7 +375,14 @@ public:
 				    const IPvX& dst,
 				    const uint8_t *sndbuf,
 				    size_t sndlen) = 0;
-    
+
+    /**
+     * Test if the node processing is done.
+     *
+     * @return true if the node processing is done, otherwise false.
+     */
+    bool	is_done() const { return (_node_status == PROC_DONE); }
+
     /**
      * Get the node status (see @ref ProcessStatus).
      * 
@@ -531,6 +524,22 @@ public:
      * @return a reference for the map with configured vifs.
      */
     map<string, Vif>& configured_vifs() { return (_configured_vifs); }
+
+    /**
+     * Get the node status (see @ref ProcessStatus).
+     * 
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the status.
+     * @return the node status (see @ref ProcessStatus).
+     */
+    ProcessStatus	node_status(string& reason_msg);
+    
+protected:
+    void incr_startup_requests_n();
+    void decr_startup_requests_n();
+    void incr_shutdown_requests_n();
+    void decr_shutdown_requests_n();
+    void update_status();
     
 private:
     // TODO: add vifs, etc
@@ -543,16 +552,146 @@ private:
     bool	_is_vif_setup_completed;	// True if the vifs are setup
     
     ProcessStatus	_node_status;		// The node status
+
+    //
+    // Status-related state
+    //
+    size_t		_startup_requests_n;
+    size_t		_shutdown_requests_n;
     
     //
     // Config-related state
     //
-    map<string, Vif>		_configured_vifs;	// Configured vifs
+    map<string, Vif>	_configured_vifs;	// Configured vifs
 };
 
 //
 // Deferred definitions
 //
+
+template<class V>
+ProcessStatus
+ProtoNode<V>::node_status(string& reason_msg)
+{
+    ProcessStatus status = _node_status;
+
+    // Set the return message with the reason
+    reason_msg = "";
+    switch (status) {
+    case PROC_NULL:
+	// Can't be running and in this state
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_STARTUP:
+	// Get the message about the startup progress
+	reason_msg = c_format("Waiting for %u startup events",
+			      static_cast<uint32_t>(_startup_requests_n));
+	break;
+    case PROC_NOT_READY:
+	// XXX: this state is unused
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_READY:
+	reason_msg = c_format("Node is READY");
+	break;
+    case PROC_SHUTDOWN:
+	// Get the message about the shutdown progress
+	reason_msg = c_format("Waiting for %u shutdown events",
+			      static_cast<uint32_t>(_shutdown_requests_n));
+	break;
+    case PROC_FAILED:
+	// XXX: this state is unused
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_DONE:
+	// Process has completed operation
+	break;
+    default:
+	// Unknown status
+	XLOG_UNREACHABLE();
+	break;
+    }
+    
+    return (status);
+}
+
+template<class V>
+inline void
+ProtoNode<V>::incr_startup_requests_n()
+{
+    _startup_requests_n++;
+    XLOG_ASSERT(_startup_requests_n > 0);
+}
+
+template<class V>
+inline void
+ProtoNode<V>::decr_startup_requests_n()
+{
+    XLOG_ASSERT(_startup_requests_n > 0);
+    _startup_requests_n--;
+
+    update_status();
+}
+
+template<class V>
+inline void
+ProtoNode<V>::incr_shutdown_requests_n()
+{
+    _shutdown_requests_n++;
+    XLOG_ASSERT(_shutdown_requests_n > 0);
+}
+
+template<class V>
+inline void
+ProtoNode<V>::decr_shutdown_requests_n()
+{
+    XLOG_ASSERT(_shutdown_requests_n > 0);
+    _shutdown_requests_n--;
+
+    update_status();
+}
+
+template<class V>
+inline void
+ProtoNode<V>::update_status()
+{
+    //
+    // Test if the startup process has completed
+    //
+    if (ServiceBase::status() == STARTING) {
+	if (_startup_requests_n > 0)
+	    return;
+
+	// The startup process has completed
+	ServiceBase::set_status(RUNNING);
+	_node_status = PROC_READY;
+	return;
+    }
+
+    //
+    // Test if the shutdown process has completed
+    //
+    if (ServiceBase::status() == SHUTTING_DOWN) {
+	if (_shutdown_requests_n > 0)
+	    return;
+
+	// The shutdown process has completed
+	ServiceBase::set_status(SHUTDOWN);
+	// Set the node status
+	_node_status = PROC_DONE;
+	return;
+    }
+
+    //
+    // Test if we have failed
+    //
+    if (ServiceBase::status() == FAILED) {
+	// Set the node status
+	_node_status = PROC_DONE;
+	return;
+    }
+}
+
 template<class V>
 inline uint16_t
 ProtoNode<V>::vif_name2vif_index(const string& vif_name) const
@@ -767,8 +906,7 @@ ProtoNode<V>::start_config(string& error_msg)
 	set_node_status(PROC_NOT_READY);
 	break;	// OK, start a set of configuration changes
     case PROC_STARTUP:
-	error_msg = "invalid start config in PROC_STARTUP state";
-	return (XORP_ERROR);
+	break;	// OK, we are still in the startup state
     case PROC_SHUTDOWN:
 	error_msg = "invalid start config in PROC_SHUTDOWN state";
 	return (XORP_ERROR);
@@ -797,11 +935,9 @@ ProtoNode<V>::end_config(string& error_msg)
 	set_node_status(PROC_READY);
 	break;	// OK, end a set of configuration changes
     case PROC_READY:
-	error_msg = "invalid end config in PROC_READY state";
-	return (XORP_ERROR);
+	break;	// OK, maybe we got into PROC_READY directly from PROC_STARTUP
     case PROC_STARTUP:
-	error_msg = "invalid end config in PROC_STARTUP state";
-	return (XORP_ERROR);
+	break;	// OK, we are still in the startup state
     case PROC_SHUTDOWN:
 	error_msg = "invalid end config in PROC_SHUTDOWN state";
 	return (XORP_ERROR);
