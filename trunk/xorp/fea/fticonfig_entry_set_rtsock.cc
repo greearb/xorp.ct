@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.26 2005/03/05 01:41:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.27 2005/03/25 02:53:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,6 +21,9 @@
 #include "libxorp/debug.h"
 
 #include <net/route.h>
+#ifdef HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
 
 #include "fticonfig.hh"
 #include "fticonfig_entry_set.hh"
@@ -134,9 +137,15 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     char		buffer[buffer_size];
     struct rt_msghdr	*rtm;
-    struct sockaddr_in	*sin_dst, *sin_nexthop, *sin_netmask;
+    struct sockaddr_in	*sin_dst, *sin_netmask, *sin_last;
+    struct sockaddr_in	*sin_nexthop = NULL;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
+#ifdef AF_LINK
+    struct sockaddr_dl*	sdl = NULL;
+#endif
+    bool		is_nexthop_sockaddr_dl = false;
+    bool		is_interface_route = false;
 
     debug_msg("add_entry "
 	      "(network = %s nexthop = %s)",
@@ -159,7 +168,23 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     
     if (fte.is_connected_route())
 	return true;	// XXX: don't add/remove directly-connected routes
-    
+
+    if (! fte.ifname().empty())
+	is_interface_route = true;
+
+#ifdef AF_LINK
+#ifdef HOST_OS_MACOSX
+    //
+    // XXX: If we want to add an interface-specific route,
+    // then in case of Mac OS X the nexthop (RTA_GATEWAY) must be
+    // "struct sockaddr_dl" with the interface information.
+    //
+    if (is_interface_route && (fte.nexthop() == IPvX::ZERO(family))) {
+	is_nexthop_sockaddr_dl = true;
+    }
+#endif // HOST_OS_MACOSX
+#endif // AF_LINK
+
     //
     // Set the request
     //
@@ -168,21 +193,45 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     
     switch (family) {
     case AF_INET:
-	rtm->rtm_msglen = sizeof(*rtm) + 3 * sizeof(struct sockaddr_in);
+	rtm->rtm_msglen = sizeof(*rtm) + 2 * sizeof(struct sockaddr_in);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	sin_nexthop = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
-				  struct sockaddr_in *);
-	sin_netmask = ADD_POINTER(sin_nexthop, sizeof(struct sockaddr_in),
-				  struct sockaddr_in *);
+	if (is_nexthop_sockaddr_dl) {
+#ifdef AF_LINK
+	    sdl = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
+			      struct sockaddr_dl *);
+	    sin_netmask = ADD_POINTER(sdl, sizeof(struct sockaddr_dl),
+				      struct sockaddr_in *);
+	    rtm->rtm_msglen += sizeof(struct sockaddr_dl);
+#endif // AF_LINK
+	} else {
+	    sin_nexthop = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
+				      struct sockaddr_in *);
+	    sin_netmask = ADD_POINTER(sin_nexthop, sizeof(struct sockaddr_in),
+				      struct sockaddr_in *);
+	    rtm->rtm_msglen += sizeof(struct sockaddr_in);
+	}
+	sin_last = sin_netmask;
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	rtm->rtm_msglen = sizeof(*rtm) + 3 * sizeof(struct sockaddr_in6);
+	rtm->rtm_msglen = sizeof(*rtm) + 2 * sizeof(struct sockaddr_in6);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	sin_nexthop = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
-				  struct sockaddr_in *);
-	sin_netmask = ADD_POINTER(sin_nexthop, sizeof(struct sockaddr_in6),
-				  struct sockaddr_in *);
+	if (is_nexthop_sockaddr_dl) {
+#ifdef AF_LINK
+	    sdl = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
+			      struct sockaddr_dl *);
+	    sin_netmask = ADD_POINTER(sdl, sizeof(struct sockaddr_dl),
+				      struct sockaddr_in *);
+	    rtm->rtm_msglen += sizeof(struct sockaddr_dl);
+#endif // AF_LINK
+	} else {
+	    sin_nexthop = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
+				      struct sockaddr_in *);
+	    sin_netmask = ADD_POINTER(sin_nexthop, sizeof(struct sockaddr_in6),
+				      struct sockaddr_in *);
+	    rtm->rtm_msglen += sizeof(struct sockaddr_in6);
+	}
+	sin_last = sin_netmask;
 	break;
 #endif // HAVE_IPV6
     default:
@@ -195,7 +244,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     rtm->rtm_addrs = (RTA_DST | RTA_GATEWAY | RTA_NETMASK);
     if (fte.is_host_route())
 	rtm->rtm_flags |= RTF_HOST;
-    if (fte.nexthop() != IPvX::ZERO(family))
+    if ((fte.nexthop() != IPvX::ZERO(family)) && (! is_nexthop_sockaddr_dl))
 	rtm->rtm_flags |= RTF_GATEWAY;
     rtm->rtm_flags |= RTF_PROTO1;	// XXX: mark this as a XORP route
     rtm->rtm_flags |= RTF_UP;		// XXX: mark this route as UP
@@ -204,13 +253,60 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 
     // Copy the destination, the nexthop, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
-    fte.nexthop().copy_out(*sin_nexthop);
-    if (fte.nexthop() == IPvX::ZERO(family)) {
-	// TODO: XXX: PAVPAVPAV: set the interface index, etc:
-	// nexthop_dl.sdl_family = AF_LINK;
-	// nexthop_dl.sdl_index = ifindex(fte.vifname());
-    }
+    if (sin_nexthop != NULL)
+	fte.nexthop().copy_out(*sin_nexthop);
     fte.net().netmask().copy_out(*sin_netmask);
+
+    if (is_interface_route) {
+	//
+	// This is an interface-specific route.
+	// Set the interface-related information.
+	//
+
+#ifdef AF_LINK
+	if (sdl == NULL) {
+	    //
+	    // Add extra space for data-link sockaddr_dl for the RTA_IFP flag
+	    //
+	    rtm->rtm_msglen += sizeof(struct sockaddr_dl);
+	    rtm->rtm_addrs |= RTA_IFP;
+	    switch (family) {
+	    case AF_INET:
+		sdl = ADD_POINTER(sin_last, sizeof(struct sockaddr_in),
+				  struct sockaddr_dl *);
+		sin_last = reinterpret_cast<struct sockaddr_in *>(sdl);
+		break;
+#ifdef HAVE_IPV6
+	    case AF_INET6:
+		sdl = ADD_POINTER(sin_last, sizeof(struct sockaddr_in6),
+				  struct sockaddr_dl*);
+		sin_last = reinterpret_cast<struct sockaddr_in *>(sdl);
+		break;
+#endif // HAVE_IPV6
+	    default:
+		XLOG_UNREACHABLE();
+		break;
+	    }
+	}
+
+	sdl->sdl_family = AF_LINK;
+	sdl->sdl_len = sizeof(struct sockaddr_dl);
+	IfTree& it = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+	if (ii == it.ifs().end()) {
+	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
+	    return false;
+	}
+	sdl->sdl_index = ii->second.pif_index();
+	strncpy(sdl->sdl_data, fte.ifname().c_str(), sizeof(sdl->sdl_data));
+	if (fte.ifname().size() < sizeof(sdl->sdl_data)) {
+	    sdl->sdl_nlen = fte.ifname().size();
+	    sdl->sdl_data[sizeof(sdl->sdl_data) - 1] = '\0';
+	} else {
+	    sdl->sdl_nlen = sizeof(sdl->sdl_data);
+	}
+#endif // AF_LINK
+    }
 
     do {
 	//
