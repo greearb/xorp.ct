@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.17 2004/09/01 18:17:01 pavlin Exp $"
-
-#define PROC_LINUX_FILE_V4 "/proc/net/dev"
-#define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.18 2004/12/01 03:28:10 pavlin Exp $"
 
 #include <cstdio>
 #include "fea_module.h"
@@ -36,6 +33,10 @@
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
 #include "kernel_utils.hh"
+
+
+const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V4 = "/proc/net/dev";
+const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V6 = "/proc/net/if_inet6";
 
 //
 // Get information about network interfaces from the underlying system.
@@ -109,12 +110,15 @@ IfConfigGetProcLinux::read_config(IfTree& )
 
 #else // HAVE_PROC_LINUX
 
-static char *get_name(char *name, char *p);
-static bool proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family);
-static bool if_fetch_linux_v4(IfConfig& ifc, IfTree& it);
+static char* get_proc_linux_iface_name(char* name, char* p);
+static bool proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family,
+				   const string& proc_linux_net_device_file);
+static bool if_fetch_linux_v4(IfConfig& ifc, IfTree& it,
+			      const string& proc_linux_net_device_file);
 
 #ifdef HAVE_IPV6
-static bool if_fetch_linux_v6(IfConfig& ifc, IfTree& it);
+static bool if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
+			      const string& proc_linux_net_device_file);
 #endif
 
 bool
@@ -127,7 +131,9 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     // The IPv4 information
     //
     if (ifc().have_ipv4()) {
-	if (proc_read_ifconf_linux(ifc(), iftree, AF_INET) != true)
+	if (proc_read_ifconf_linux(ifc(), iftree, AF_INET,
+				   PROC_LINUX_NET_DEVICES_FILE_V4)
+	    != true)
 	    return false;
     }
     
@@ -136,7 +142,9 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     // The IPv6 information
     //
     if (ifc().have_ipv6()) {
-	if (proc_read_ifconf_linux(ifc(), iftree, AF_INET6) != true)
+	if (proc_read_ifconf_linux(ifc(), iftree, AF_INET6,
+				   PROC_LINUX_NET_DEVICES_FILE_V6)
+	    != true)
 	    return false;
     }
 #endif // HAVE_IPV6
@@ -149,14 +157,15 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
 //
 
 static bool
-proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family)
+proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family,
+		       const string& proc_linux_net_device_file)
 {
     switch (family) {
     case AF_INET:
 	//
 	// The IPv4 information
 	//
-	if_fetch_linux_v4(ifc, iftree);
+	if_fetch_linux_v4(ifc, iftree, proc_linux_net_device_file);
 	break;
 
 #ifdef HAVE_IPV6
@@ -164,7 +173,7 @@ proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family)
 	// The IPv6 information
 	//
     case AF_INET6:
-	if_fetch_linux_v6(ifc, iftree);
+	if_fetch_linux_v6(ifc, iftree, proc_linux_net_device_file);
 	break;
 #endif // HAVE_IPV6
 
@@ -176,11 +185,14 @@ proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family)
     return true;
 }
 
-static char *
-get_name(char *name, char *p)
+static char*
+get_proc_linux_iface_name(char* name, char* p)
 {
     while (xorp_isspace(*p))
 	p++;
+    if (*p == '\0')
+	return (NULL);
+
     while (*p) {
 	if (xorp_isspace(*p))
 	    break;
@@ -194,14 +206,14 @@ get_name(char *name, char *p)
 		name = dotname;
 	    }
 	    if (*p == '\0')
-		return NULL;
+		return (NULL);
 	    p++;
 	    break;
 	}
 	*name++ = *p++;
     }
     *name++ = '\0';
-    return p;
+    return (p);
 }
 
 // 
@@ -225,43 +237,46 @@ get_name(char *name, char *p)
 // both mechanisms. Enjoy!
 //
 static bool
-if_fetch_linux_v4(IfConfig& ifc, IfTree& it)
+if_fetch_linux_v4(IfConfig& ifc, IfTree& it,
+		  const string& proc_linux_net_device_file)
 {
     FILE *fh;
     char buf[512];
     char *s, ifname[IFNAMSIZ];
 
-    fh = fopen(PROC_LINUX_FILE_V4, "r");
+    fh = fopen(proc_linux_net_device_file.c_str(), "r");
     if (fh == NULL) {
 	XLOG_FATAL("Cannot open file %s for reading: %s",
-		   PROC_LINUX_FILE_V4, strerror(errno)); 
+		   proc_linux_net_device_file.c_str(), strerror(errno)); 
 	return false;
     }
-    fgets(buf, sizeof buf, fh);		// lose starting 2 lines of comments
-    s = get_name(ifname, buf);
+    fgets(buf, sizeof(buf), fh);	// lose starting 2 lines of comments
+    s = get_proc_linux_iface_name(ifname, buf);
     if (strcmp(ifname, "Inter-|") != 0) {
-	XLOG_ERROR("%s: improper file contents", PROC_LINUX_FILE_V4);
+	XLOG_ERROR("%s: improper file contents",
+		   proc_linux_net_device_file.c_str());
 	fclose(fh);
 	return false;
     }
-    fgets(buf, sizeof buf, fh);
-    s = get_name(ifname, buf);    
+    fgets(buf, sizeof(buf), fh);
+    s = get_proc_linux_iface_name(ifname, buf);    
     if (strcmp(ifname, "face") != 0) {
-	XLOG_ERROR("%s: improper file contents", PROC_LINUX_FILE_V4);
+	XLOG_ERROR("%s: improper file contents",
+		   proc_linux_net_device_file.c_str());
 	fclose(fh);
 	return false;
     }
     
-    while (fgets(buf, sizeof buf, fh) != NULL) {
+    while (fgets(buf, sizeof(buf), fh) != NULL) {
 	struct ifreq ifreq;
 	
 	//
 	// Get the interface name
 	//
-	s = get_name(ifname, buf);
+	s = get_proc_linux_iface_name(ifname, buf);
 	if (s == NULL) {
 	    XLOG_ERROR("%s: cannot get interface name for line %s",
-		       PROC_LINUX_FILE_V4, buf);
+		       proc_linux_net_device_file.c_str(), buf);
 	    continue;
 	}
 	
@@ -277,7 +292,8 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it)
 	    reinterpret_cast<const uint8_t *>(&ifreq), sizeof(ifreq));
     }
     if (ferror(fh)) {
-	XLOG_ERROR("%s read failed: %s", PROC_LINUX_FILE_V4, strerror(errno));
+	XLOG_ERROR("%s read failed: %s",
+		   proc_linux_net_device_file.c_str(), strerror(errno));
     }
     
     // Clean up
@@ -304,7 +320,8 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it)
 //
 #ifdef HAVE_IPV6
 static bool
-if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
+if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
+		  const string& proc_linux_net_device_file)
 {
     FILE *fh;
     char devname[IFNAMSIZ+20+1];
@@ -313,10 +330,10 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
     struct ifreq ifreq;
     int sock;
     
-    fh = fopen(PROC_LINUX_FILE_V6, "r");
+    fh = fopen(proc_linux_net_device_file.c_str(), "r");
     if (fh == NULL) {
 	XLOG_FATAL("Cannot open file %s for reading: %s",
-		   PROC_LINUX_FILE_V6, strerror(errno)); 
+		   proc_linux_net_device_file.c_str(), strerror(errno)); 
 	return false;
     }
     
@@ -497,7 +514,8 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
     }
     
     if (ferror(fh)) {
-	XLOG_ERROR("%s read failed: %s", PROC_LINUX_FILE_V6, strerror(errno));
+	XLOG_ERROR("%s read failed: %s",
+		   proc_linux_net_device_file.c_str(), strerror(errno));
     }
     
     close(sock);

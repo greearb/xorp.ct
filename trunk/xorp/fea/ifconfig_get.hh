@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.17 2004/11/30 20:08:09 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.18 2004/12/01 03:28:10 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -309,6 +309,9 @@ public:
     
 private:
     bool read_config(IfTree& it);
+
+    static const string PROC_LINUX_NET_DEVICES_FILE_V4;
+    static const string PROC_LINUX_NET_DEVICES_FILE_V6;
 };
 
 class IfConfigGetNetlink : public IfConfigGet,
