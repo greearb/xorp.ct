@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.33 2005/03/14 18:59:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.34 2005/03/19 23:52:39 pavlin Exp $"
 
 
 //
@@ -141,7 +141,9 @@ PimBsr::start()
 	}
 	config_bsr_zone->start_candidate_rp_advertise_timer();
     }
-    
+
+    XLOG_INFO("Bootstrap mechanism started");
+
     return (XORP_OK);
 }
 
@@ -283,8 +285,38 @@ PimBsr::stop()
     // because it is a one-time only timers that is used to
     // synchronize internal state.
     //
+
+    XLOG_INFO("Bootstrap mechanism stopped");
     
     return (XORP_OK);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+PimBsr::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("Bootstrap mechanism enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+PimBsr::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("Bootstrap mechanism disabled");
 }
 
 // Unicast the Bootstrap message(s) to a (new) neighbor

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.65 2005/03/19 23:58:29 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.66 2005/03/20 00:21:12 pavlin Exp $"
 
 
 //
@@ -229,6 +229,8 @@ PimNode::final_start()
     if (_pim_bsr.start() < 0)
 	return (XORP_ERROR);
 
+    XLOG_INFO("Protocol started");
+
     return (XORP_OK);
 }
 
@@ -307,7 +309,37 @@ PimNode::final_stop()
     if (ProtoNode<PimVif>::stop() < 0)
 	return (XORP_ERROR);
 
+    XLOG_INFO("Protocol stopped");
+
     return (XORP_OK);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+PimNode::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("Protocol enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+PimNode::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("Protocol disabled");
 }
 
 void
@@ -404,7 +436,7 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 	return (XORP_ERROR);
     } while (false);
 
-    XLOG_INFO("New vif: %s", pim_vif->str().c_str());
+    XLOG_INFO("Interface added: %s", pim_vif->str().c_str());
     
     return (XORP_OK);
 }
@@ -474,7 +506,7 @@ PimNode::delete_vif(const string& vif_name, string& error_msg)
     
     delete pim_vif;
     
-    XLOG_INFO("Deleted vif: %s", vif_name.c_str());
+    XLOG_INFO("Interface deleted: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -526,7 +558,7 @@ PimNode::set_vif_flags(const string& vif_name,
 	_pim_register_vif_index = pim_vif->vif_index();
     
     if (is_changed)
-	XLOG_INFO("Vif flags changed: %s", pim_vif->str().c_str());
+	XLOG_INFO("Interface flags changed: %s", pim_vif->str().c_str());
     
     return (XORP_OK);
 }
@@ -587,7 +619,8 @@ PimNode::add_vif_addr(const string& vif_name,
 
     if (node_vif_addr != NULL) {
 	// Update the address
-	XLOG_INFO("Updated existing address on vif %s: old is %s new is %s",
+	XLOG_INFO("Updated existing address on interface %s: "
+		  "old is %s new is %s",
 		  pim_vif->name().c_str(), node_vif_addr->str().c_str(),
 		  vif_addr.str().c_str());
 	*node_vif_addr = vif_addr;
@@ -595,7 +628,7 @@ PimNode::add_vif_addr(const string& vif_name,
 	// Add a new address
 	pim_vif->add_address(vif_addr);
 	
-	XLOG_INFO("Added new address to vif %s: %s",
+	XLOG_INFO("Added new address to interface %s: %s",
 		  pim_vif->name().c_str(), vif_addr.str().c_str());
     }
 
@@ -678,7 +711,7 @@ PimNode::delete_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Deleted address on vif %s: %s",
+    XLOG_INFO("Deleted address on interface %s: %s",
 	      pim_vif->name().c_str(), vif_addr.str().c_str());
 
     //

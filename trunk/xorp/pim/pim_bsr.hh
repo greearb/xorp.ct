@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.10 2004/06/10 22:41:30 hodson Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.11 2005/03/14 18:59:10 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -58,8 +58,36 @@ public:
      * Clear the entry.
      */
     void	clear();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int		start();
+
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int		stop();
+
+    /**
+     * Enable operation.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable operation.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
+
     PimNode&	pim_node()		{ return (_pim_node); }
     
     int		unicast_pim_bootstrap(PimVif *pim_vif,

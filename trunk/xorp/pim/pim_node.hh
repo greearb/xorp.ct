@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.46 2005/03/23 09:44:21 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.47 2005/03/23 10:49:58 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -126,6 +126,21 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop();
+
+    /**
+     * Enable node operation.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable node operation.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
 
     /**
      * Install a new PIM vif.

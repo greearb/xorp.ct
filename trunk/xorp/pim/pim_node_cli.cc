@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.32 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.33 2005/03/19 23:52:40 pavlin Exp $"
 
 
 //
@@ -87,6 +87,8 @@ PimNodeCli::start()
 
     if (add_all_cli_commands() < 0)
 	return (XORP_ERROR);
+
+    XLOG_INFO("CLI started");
     
     return (XORP_OK);
 }
@@ -104,8 +106,38 @@ PimNodeCli::stop()
     
     if (delete_all_cli_commands() < 0)
 	ret_code = XORP_ERROR;
-    
+
+    XLOG_INFO("CLI stopped");
+
     return (ret_code);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+PimNodeCli::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("CLI enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+PimNodeCli::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("CLI disabled");
 }
 
 int

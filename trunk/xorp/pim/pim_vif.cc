@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.45 2005/03/20 00:21:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.46 2005/03/22 04:34:42 pavlin Exp $"
 
 
 //
@@ -308,9 +308,6 @@ PimVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("STARTING %s%s",
-	      this->str().c_str(), flags_string().c_str());
-    
     if (! is_pim_register()) {    
 	//
 	// Join the appropriate multicast groups: ALL-PIM-ROUTERS
@@ -336,6 +333,9 @@ PimVif::start(string& error_msg)
     pim_node().pim_mrt().add_task_start_vif(vif_index());
     pim_node().pim_mrt().add_task_my_ip_address(vif_index());
     pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+
+    XLOG_INFO("Interface started: %s%s",
+	      this->str().c_str(), flags_string().c_str());
     
     return (XORP_OK);
 }
@@ -370,7 +370,7 @@ PimVif::stop(string& error_msg)
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
-    
+
     //
     // Add the tasks to take care of the PimMre processing
     //
@@ -400,9 +400,6 @@ PimVif::stop(string& error_msg)
     }
     
     _dr_addr = IPvX::ZERO(family());
-    
-    XLOG_INFO("PENDING STOP %s%s",
-	      this->str().c_str(), flags_string().c_str());
     
     return (ret_value);
 }
@@ -469,7 +466,7 @@ PimVif::final_stop(string& error_msg)
 	ret_value = XORP_ERROR;
     }
     
-    XLOG_INFO("STOPPED %s%s",
+    XLOG_INFO("Interface stopped: %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
     //
@@ -496,7 +493,8 @@ PimVif::enable()
 {
     ProtoUnit::enable();
 
-    XLOG_INFO("Enabled vif: %s", name().c_str());
+    XLOG_INFO("Interface enabled: %s%s",
+	      this->str().c_str(), flags_string().c_str());
 }
 
 /**
@@ -513,7 +511,8 @@ PimVif::disable()
     stop(error_msg);
     ProtoUnit::disable();
 
-    XLOG_INFO("Disabled vif: %s", name().c_str());
+    XLOG_INFO("Interface disabled: %s%s",
+	      this->str().c_str(), flags_string().c_str());
 }
 
 /**
