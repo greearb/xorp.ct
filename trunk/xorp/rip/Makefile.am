@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.15 2003/08/04 23:46:44 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.16 2003/11/04 23:39:58 hodson Exp $
 ##
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_rip4 xorp_rip6
