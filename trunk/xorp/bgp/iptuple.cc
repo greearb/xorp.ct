@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.6 2004/12/05 16:14:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.7 2004/12/14 19:56:24 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -59,27 +59,6 @@ Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
     if (_local_sock->sa_family != _peer_sock->sa_family)
 	xorp_throw(AddressFamilyMismatch,
 		   c_format("mismatch %s %s",local_interface, peer_interface));
-}
-
-Iptuple::Iptuple(const IPv4& local_ip,  uint16_t local_port,
-		 const IPv4& peer_ip, uint16_t peer_port)
-    : _local_port(local_port),
-      _peer_port(peer_port)
-{
-    _local_sock = reinterpret_cast<struct sockaddr *>(_local_buffer);
-    _local_sock_len = sizeof(_local_buffer);
-    _bind_sock = reinterpret_cast<struct sockaddr *>(_bind_buffer);
-    _bind_sock_len = sizeof(_bind_buffer);
-    _peer_sock = reinterpret_cast<struct sockaddr *>(_peer_buffer);
-    _peer_sock_len = sizeof(_peer_buffer);
-
-    fill_address(local_ip.str().c_str(), local_port, _local_sock,
-		 _local_sock_len, _local_address);
-    string bind_address; // We don't care about this address
-    fill_address(local_ip.str().c_str(), 0, _bind_sock, _bind_sock_len,
-		 bind_address);
-    fill_address(peer_ip.str().c_str(), peer_port, _peer_sock,
-		 _peer_sock_len, _peer_address);
 }
 
 Iptuple::Iptuple(const Iptuple& rhs)

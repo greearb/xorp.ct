@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/iptuple.hh,v 1.4 2004/06/10 22:40:30 hodson Exp $
+// $XORP: xorp/bgp/iptuple.hh,v 1.5 2004/12/05 16:14:35 atanu Exp $
 
 #ifndef __BGP_IPTUPLE_HH__
 #define __BGP_IPTUPLE_HH__
@@ -62,9 +62,6 @@ public:
     Iptuple(const char *local_interface, uint16_t local_port,
 	    const char *peer_interface, uint16_t peer_port)
 	throw(UnresolvableHost,AddressFamilyMismatch);
-
-    Iptuple(const IPv4& local_up,  uint16_t local_port,
-	    const IPv4& peer_up, uint16_t peer_port);
 
     Iptuple(const Iptuple&);
     Iptuple operator=(const Iptuple&);
