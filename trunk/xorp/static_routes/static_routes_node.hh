@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.4 2004/04/05 09:32:46 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.5 2004/04/10 20:05:46 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -62,8 +62,8 @@ public:
 	: _unicast(unicast), _multicast(multicast),
 	  _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric), _route_type(IDLE_ROUTE),
-	  _is_ignored(false) {}
+	  _metric(metric),
+	  _route_type(IDLE_ROUTE), _is_ignored(false) {}
 
     /**
      * Constructor for a given IPv6 static route.
@@ -88,8 +88,8 @@ public:
 	: _unicast(unicast), _multicast(multicast),
 	  _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric), _route_type(IDLE_ROUTE),
-	  _is_ignored(false) {}
+	  _metric(metric),
+	  _route_type(IDLE_ROUTE), _is_ignored(false) {}
 
     /**
      * Equality Operator
@@ -236,7 +236,6 @@ public:
      * @return true if the route is to be ignored, otherwise false.
      */
     bool is_ignored() const { return _is_ignored; }
-
 
     /**
      * Set whether the route is to be ignored.
