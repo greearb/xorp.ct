@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.28 2004/06/11 03:48:19 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.29 2004/06/11 06:30:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -195,9 +195,10 @@ OpInstance::terminate()
 {
     debug_msg("\n");
 
-    // Kill the process
+    // Kill the process group
     if (0 != _pid)
-	kill(_pid, SIGTERM);
+	killpg(_pid, SIGTERM);
+
     if (_stdout_file_reader != NULL) {
 	delete _stdout_file_reader;
 	_stdout_file_reader = NULL;

@@ -23,7 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.6 2004/06/10 22:41:52 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.7 2004/06/11 06:30:40 atanu Exp $"
 
 #include <sys/param.h>
 #include <sys/wait.h>
@@ -145,6 +145,8 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
 	    (void)close(fileno(p->fp_out));
 	    (void)close(fileno(p->fp_err));
 	}
+	// Set the process as a group leader
+	setpgid(0, 0);
 	execve(_PATH_BSHELL, const_cast<char**>(argv), environ);
 	exit(127);
 	/* NOTREACHED */
