@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.9 2003/04/28 18:13:03 jcardona Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.10 2003/04/28 22:05:08 jcardona Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -79,8 +79,7 @@ BGPPeerList::add_peer(BGPPeer *p)
 	    return;
 	}
     }
-    // if we have not exited by now, there is a design error 
-    assert(false);
+    XLOG_UNREACHABLE();
 }
 
 void
