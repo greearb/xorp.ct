@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.35 2003/05/22 18:11:20 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.36 2003/05/23 04:10:04 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ dnl ----------------------------
 dnl --without-snmp
 dnl ----------------------------
 AC_ARG_WITH(snmp, 
-	    [ --without-snmp            Do not build XORP MIBS for Net-SNMP],
+	    [ --without-snmp            Do not build XORP MIBs for Net-SNMP],
 	    [snmp="no";], [snmp="yes";] 
 )
 
@@ -379,20 +379,20 @@ if test ${net_snmp_found} = "true";  then
 	    net_snmp_too_old=true
 	fi
 	if test $net_snmp_too_old != "true"; then
-	    MIBS="mibs"	
 	    ac_cv_net_snmp_usable=yes
 	else
 	    ac_cv_net_snmp_usable=no
+	    snmpd="skip_check"
 	fi
     )
     if test ${ac_cv_net_snmp_usable} != "yes" ; then
-	AC_MSG_WARN(net-snmp version too old. MIB modules will not be built) 
+	AC_MSG_WARN(net-snmp version too old) 
     fi
 elif test ${net_snmp_found} = "no"; then
     AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
+    snmpd="skip_check"
 fi
 
-AC_SUBST(MIBS)
 
 if test ${snmpd} = "not_found"; then
     AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/local/sbin)
@@ -414,11 +414,19 @@ else
     # use the dlmod directive to see if the agent was compiled with dynamic
     # MIB support.  dummy MIB modules will only generate warnings
     echo 'dlmod dummy doubledummy' > conftestsnmp.conf
-    ${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:51515&
-    pid=$!
-    sleep 1
-    if ( ps | grep ${pid} > /dev/null ); then
-	kill ${pid} 
+    test_ports='51510 51520 51530 51540 51550'
+    for p in ${test_ports}; do
+	${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:$p&
+	pid=$!
+	sleep 1
+	if ( ps | grep ${pid} > /dev/null ); then
+	    kill ${pid} 
+	    snmpd_valid=yes
+	    break
+	fi	
+	kill ${pid}
+    done
+    if test ${snmpd_valid} = "yes" ; then
 	# Verify that dlmod directive was recognized
 	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
 	    echo "-------------------------------------------------------------"
@@ -430,27 +438,33 @@ else
 	    echo -n "to apply this patch: "
 	    echo "http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694"
 	    echo ""
-	    echo "Or ./configure --without-snmp and XORP MIBs will not be built"
+	    echo "If you don't know how to resolve the problem and do not want to "
+	    echo "see this message again, run ./configure --without-snmp          "
 	    echo "-------------------------------------------------------------"
-	    exit 1
+	    snmpd_valid="no"
 	fi
         AC_MSG_RESULT(yes)
     else
-        mv conftestsnmp.log snmp_error.log
         AC_MSG_RESULT(no)
-        echo "-------------------------------------------------------------"
-        echo "Unable to start snmpd.  See if the file snmp_error.log gives "
-        echo "a hint to solve the problem.  Possible error:"
+        echo "-------------------------------------------------------------   "
+        echo "Unable to start snmpd. This is the snmpd log file:              "
+	echo
+	cat conftestsnmp.log 
 	echo ""
-	echo "Error opening specified endpoint \"udp:localhost:51515\""
-    	echo "Solution: the UDP port 51515 is being used by another application"
-	echo "    Close that app, or modify xorp/mibs/tests to use another port"
-	echo ""
-	echo "Or run ./configure --without-snmp and XORP MIBs will not be built"
-        echo "-------------------------------------------------------------"
-        exit 1
+	echo "If you don't know how to resolve the problem and do not want to "
+	echo "see this message again, run ./configure --without-snmp          "
+        echo "-------------------------------------------------------------   "
     fi
 fi
+
+if test "XXX${snmpd_valid}" = "XXXyes" ; then
+    MIBS="mibs"	
+else
+    AC_MSG_WARN(XORP MIBs will not be built)
+    MIBS=""
+fi
+
+AC_SUBST(MIBS)
 
 dnl ---------------------------------------------------------------------------
 dnl Check for libraries

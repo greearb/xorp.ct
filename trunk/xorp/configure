@@ -856,7 +856,7 @@ Optional Features:
   --with-openssl=DIR      specify root of OpenSSL installation
  --with-path-to-snmpd     Path to the snmpd executable
  --with-path-to-snmpd     Path to the net-snmpd source tree
- --without-snmp            Do not build XORP MIBS for Net-SNMP
+ --without-snmp            Do not build XORP MIBs for Net-SNMP
 
 Some influential environment variables:
   CC          C compiler command
@@ -4315,24 +4315,24 @@ else
 	    net_snmp_too_old=true
 	fi
 	if test $net_snmp_too_old != "true"; then
-	    MIBS="mibs"
 	    ac_cv_net_snmp_usable=yes
 	else
 	    ac_cv_net_snmp_usable=no
+	    snmpd="skip_check"
 	fi
 
 fi
 echo "$as_me:$LINENO: result: $ac_cv_net_snmp_usable" >&5
 echo "${ECHO_T}$ac_cv_net_snmp_usable" >&6
     if test ${ac_cv_net_snmp_usable} != "yes" ; then
-	{ echo "$as_me:$LINENO: WARNING: net-snmp version too old. MIB modules will not be built" >&5
-echo "$as_me: WARNING: net-snmp version too old. MIB modules will not be built" >&2;}
+	{ echo "$as_me:$LINENO: WARNING: net-snmp version too old" >&5
+echo "$as_me: WARNING: net-snmp version too old" >&2;}
     fi
 elif test ${net_snmp_found} = "no"; then
     { echo "$as_me:$LINENO: WARNING: Net-SNMP not found! MIB modules will not be built" >&5
 echo "$as_me: WARNING: Net-SNMP not found! MIB modules will not be built" >&2;}
+    snmpd="skip_check"
 fi
-
 
 
 if test ${snmpd} = "not_found"; then
@@ -4439,11 +4439,19 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
     # use the dlmod directive to see if the agent was compiled with dynamic
     # MIB support.  dummy MIB modules will only generate warnings
     echo 'dlmod dummy doubledummy' > conftestsnmp.conf
-    ${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:51515&
-    pid=$!
-    sleep 1
-    if ( ps | grep ${pid} > /dev/null ); then
+    test_ports='51510 51520 51530 51540 51550'
+    for p in ${test_ports}; do
+	${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:$p&
+	pid=$!
+	sleep 1
+	if ( ps | grep ${pid} > /dev/null ); then
+	    kill ${pid}
+	    snmpd_valid=yes
+	    break
+	fi
 	kill ${pid}
+    done
+    if test ${snmpd_valid} = "yes" ; then
 	# Verify that dlmod directive was recognized
 	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
 	    echo "-------------------------------------------------------------"
@@ -4455,29 +4463,36 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
 	    echo -n "to apply this patch: "
 	    echo "http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694"
 	    echo ""
-	    echo "Or ./configure --without-snmp and XORP MIBs will not be built"
+	    echo "If you don't know how to resolve the problem and do not want to "
+	    echo "see this message again, run ./configure --without-snmp          "
 	    echo "-------------------------------------------------------------"
-	    exit 1
+	    snmpd_valid="no"
 	fi
         echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
     else
-        mv conftestsnmp.log snmp_error.log
         echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-        echo "-------------------------------------------------------------"
-        echo "Unable to start snmpd.  See if the file snmp_error.log gives "
-        echo "a hint to solve the problem.  Possible error:"
+        echo "-------------------------------------------------------------   "
+        echo "Unable to start snmpd. This is the snmpd log file:              "
+	echo
+	cat conftestsnmp.log
 	echo ""
-	echo "Error opening specified endpoint \"udp:localhost:51515\""
-    	echo "Solution: the UDP port 51515 is being used by another application"
-	echo "    Close that app, or modify xorp/mibs/tests to use another port"
-	echo ""
-	echo "Or run ./configure --without-snmp and XORP MIBs will not be built"
-        echo "-------------------------------------------------------------"
-        exit 1
+	echo "If you don't know how to resolve the problem and do not want to "
+	echo "see this message again, run ./configure --without-snmp          "
+        echo "-------------------------------------------------------------   "
     fi
 fi
+
+if test "XXX${snmpd_valid}" = "XXXyes" ; then
+    MIBS="mibs"
+else
+    { echo "$as_me:$LINENO: WARNING: XORP MIBs will not be built" >&5
+echo "$as_me: WARNING: XORP MIBs will not be built" >&2;}
+    MIBS=""
+fi
+
+
 
 
 ac_ext=c
@@ -8980,9 +8995,9 @@ s,@ac_ct_GMAKE@,$ac_ct_GMAKE,;t t
 s,@PYTHON@,$PYTHON,;t t
 s,@PY_BUILD@,$PY_BUILD,;t t
 s,@net_snmp_found@,$net_snmp_found,;t t
-s,@MIBS@,$MIBS,;t t
 s,@snmpd@,$snmpd,;t t
 s,@snmpd2@,$snmpd2,;t t
+s,@MIBS@,$MIBS,;t t
 s,@OSPFD@,$OSPFD,;t t
 s,@OSPFD_OS@,$OSPFD_OS,;t t
 CEOF
