@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.8 2003/09/12 23:44:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.9 2003/09/16 04:37:33 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -423,7 +423,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 {
     int enabled = 0;
     
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_FORWARDING)
     {
 	size_t sz = sizeof(enabled);
 	int mib[4];
@@ -498,7 +498,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
     
     int enabled = 0;
     
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_FORWARDING)
     {
 	size_t sz = sizeof(enabled);
 	int mib[4];
@@ -575,7 +575,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
     
     int enabled = 0;
     
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_ACCEPT_RTADV)
     {
 	size_t sz = sizeof(enabled);
 	int mib[4];
@@ -632,7 +632,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
     if (old_value == v)
 	return (XORP_OK);	// Nothing changed
     
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_FORWARDING)
     {
 	size_t sz = sizeof(enable);
 	int mib[4];
@@ -714,7 +714,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
     if (set_accept_rtadv_enabled6(!v, error_msg) < 0)
 	return (XORP_ERROR);
     
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_FORWARDING)
     {
 	size_t sz = sizeof(enable);
 	int mib[4];
@@ -807,7 +807,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
     if (old_value == v)
 	return (XORP_OK);	// Nothing changed
     
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_ACCEPT_RTADV)
     {
 	size_t sz = sizeof(enable);
 	int mib[4];
