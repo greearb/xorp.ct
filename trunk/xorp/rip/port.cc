@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.32 2004/03/24 19:14:09 atanu Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.33 2004/04/02 00:27:56 mjh Exp $"
 
 #include "rip_module.h"
 
@@ -169,7 +169,9 @@ Port<A>::unsolicited_response_timeout()
     // Fast forward triggered updater because we're about to dump entire
     // table.
     //
-    _tu_out->ffwd();
+    if (_tu_out->running()) {
+	_tu_out->ffwd();
+    }
 
     //
     // Check if unsolicited response process already exists and kill
@@ -206,7 +208,7 @@ Port<A>::triggered_update_timeout()
 
     // Table dump is running, we should not be doing triggered updates.
     if (_ur_out->running())
-	    goto reschedule;
+	goto reschedule;
 
     //
     // Push triggered updater along.  It wont be running if we've just
