@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.16 2003/05/15 03:47:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.17 2003/05/24 23:35:26 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -112,7 +112,9 @@ RibManager::stop(void)
     _vif_manager.stop();
     
     ProtoState::stop();
-    
+ 
+    _status_code = PROC_SHUTDOWN;
+    status_updater();
     return (XORP_OK);
 }
 
@@ -162,8 +164,11 @@ RibManager::status_updater()
 	}
     }
     
-    _status_code = s;
-    _status_reason = "Ready";
+    //SHUTDOWN state is persistent unless there's a failure.
+    if (_status_code != PROC_SHUTDOWN) {
+	_status_code = s;
+	_status_reason = "Ready";
+    }
     return true;
 }
 
