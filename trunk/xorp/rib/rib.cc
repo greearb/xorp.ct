@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.48 2005/02/25 03:43:31 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.49 2005/02/25 05:14:26 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -1091,12 +1091,27 @@ RIB<A>::add_origin_table(const string& tablename,
     // Check if table exists and check type if so
     RouteTable<A>* rt = find_table(tablename);
     if (rt != NULL) {
-	if (dynamic_cast<OriginTable<A>* >(rt) == NULL) {
+	OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(rt);
+	if (ot == NULL) {
 	    XLOG_ERROR("add_origin_table: table \"%s\" already exists, but is "
 		       "not is an OriginTable.", tablename.c_str());
 	    return XORP_ERROR;
 	} else {
-	    return XORP_OK; 	    // table already exists, use that
+	    //
+	    // Table already exists, hence use it.
+	    //
+
+	    //
+	    // Store the XRL target instance, so we know which OriginTable to
+	    // shutdown if the routing protocol dies.
+	    //
+	    if (!target_instance.empty()) {
+		_rib_manager.register_interest_in_target(target_class);
+		_routing_protocol_instances[tablename + " "
+					    + target_class + " "
+					    + target_instance] = ot;
+	    }
+	    return XORP_OK;
 	}
     }
 
