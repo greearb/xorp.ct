@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.6 2003/06/09 20:02:20 pavlin Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.7 2003/08/28 13:55:18 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 0.4}
+Version 0.5}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{August 28, 2003}
+\date{November 6, 2003}
 
 \maketitle
 
@@ -132,7 +132,7 @@ exchange routing information and to determine the liveness of
 connected paths.  Since the forwarding plane may be distributed across
 multiple machines, these routing protocols delegate the I/O operations
 on these packets to the FEA.  The FEA supports sending and receiving
-raw and UDP~\footnote{Currently (August 2003), UDP support
+raw and UDP~\footnote{Currently (November 2003), UDP support
 is not present.}  packets on specific interfaces.  The transmission of
 packets through the FEA is straightforward, the routing process simply
 hands the FEA a packet and indicates which interface it should be sent
@@ -341,7 +341,7 @@ XORP processes to send and receive packets on particular interfaces.
 This is an essential function since in a XORP router the forwarding
 plane may reside on a different machine to the routing processes, it
 may be distributed across several machines, or may have custom network
-interfaces that require special programming.  Currently (August 2003),
+interfaces that require special programming.  Currently (November 2003),
 only the sending and receiving of raw IPv4 packets is implemented.
 Support for UDP and IPv6 will follow in future and should follow a
 similar design pattern to the raw IPv4 packet handling.
@@ -356,7 +356,7 @@ and filters attached to parse raw packets as they are received.  The
 associated with the active raw socket.  The filters are each notified
 when a raw packet is received on the raw socket.  The
 XrlRawSocket4Manager allows other XORP processes to receive packets
-via XRL on the basis on filter conditions.  Currently (August 2003),
+via XRL on the basis on filter conditions.  Currently (November 2003),
 the only implemented filter is the {\tt XrlVifInputFilter} which
 allows processes to receive raw packets on the basis of the receiving
 VIF.  In principle, filters could be written to match on any field
@@ -366,7 +366,7 @@ within a packet and perform an action.
 \section{Status}
 \label{sec:status}
 
-Currently (August 2003), two versions of the FEA are supported: {\tt
+Currently (November 2003), two versions of the FEA are supported: {\tt
 fea} and {\tt fea\_dummy}.  The {\tt fea} is a version
 of the FEA that contains plug-ins to access the forwarding plane by
 using the following mechanisms:
@@ -374,30 +374,32 @@ using the following mechanisms:
 \begin{itemize}
 
   \item {\it getifaddrs(3)}, {\it sysctl(3)}, {\it ioctl(3)},
-   and {Linux /proc} to obtain interface-specific information.
+   {\it Linux netlink(7) sockets} and {\it Linux /proc} to obtain
+   interface-specific information.
 
-  \item {\it ioctl(3)} to set interface-specific information.
-
-  \item {\it routing sockets} for observing changes in the
+  \item {\it ioctl(3)} and {\it Linux netlink(7) sockets} to set
   interface-specific information.
 
-  \item {\it routing sockets} and {\it netlink sockets} to lookup
+  \item {\it BSD routing sockets} and {\it Linux netlink(7) sockets} for
+  observing changes in the interface-specific information.
+
+  \item {\it BSD routing sockets} and {\it Linux netlink(7) sockets} to lookup
   a single forwarding entry in the forwarding plane.
 
-  \item {\it sysctl(3)} and {\it netlink sockets} to obtain the whole
+  \item {\it sysctl(3)} and {\it Linux netlink(7) sockets} to obtain the whole
   forwarding table from the forwarding plane.
 
-  \item {\it routing sockets} to set a single forwarding entry or the
-  whole table in the forwarding plane.
+  \item {\it BSD routing sockets} and {\it Linux netlink(7) sockets} to set a
+  single forwarding entry or the whole table in the forwarding plane.
 
-  \item {\it routing sockets} to observe changes in the forwarding
-  table.
+  \item {\it BSD routing sockets} and {\it Linux netlink(7) sockets} to
+  observe changes in the forwarding table.
 
 \end{itemize}
 
-In other words, currently (August 2003) the {\tt fea} supports FreeBSD for
-reading and writing to the forwarding plane, and Linux for reading only (so
-far it has been tested on FreeBSD-4.x and Linux-2.4.20).
+In other words, currently (November 2003) the {\tt fea} supports FreeBSD,
+NetBSD, OpenBSD, and Linux (see file {\tt \$XORP/BUILD\_NOTES}
+about the specific OS versions the FEA has been tested on).
 The {\tt fea\_dummy} is a substitute FEA and may be
 used for development testing purposes.  The {\tt fea\_dummy}
 represents an idealized form of FEA, other FEA's may differ in their
@@ -406,9 +408,8 @@ interact with the FEA should regard {\tt fea\_dummy} interactions as
 indicative, but not definitive.
 
 The FEA's are still a work in progress and no doubt have some bugs.
-Any contributions or bug fixes are welcome.  Completing the FEA support
-for Linix is work-in-progress. FEA support for Click is yet to
-be written, and FEA's for any other architecture would
+Any contributions or bug fixes are welcome. FEA support for Click is
+yet to be written, and FEA's for any other architecture would
 be welcomed.  There is a now defunct Click FEA in the {\tt \$XORP/fea}
 directory that should be possible to resurrect.
 
