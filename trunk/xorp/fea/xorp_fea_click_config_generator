@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.7 2004/12/11 10:57:10 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.8 2004/12/17 04:55:53 pavlin Exp $
 #
 
 #
@@ -152,13 +152,22 @@ function generate_click_config_header()
 function generate_click_shared_ip_input()
 {
     check_ip_header = "CheckIPHeader(INTERFACES";
+    local_ip_routes = "";
+    is_first_address = 1;
 
     for (ii = 0; ii < iftree_interfaces_max; ii++) {
 	for (vi = 0; vi < iftree_interfaces_vifs_max[ii]; vi++) {
 	    for (ai4 = 0; ai4 < iftree_interfaces_vifs_addresses4_max[ii,vi]; ai4++) {
 		addr4 = iftree_interfaces_vifs_addresses4_addr[ii,vi,ai4];
 		prefix4 = iftree_interfaces_vifs_addresses4_prefix[ii,vi,ai4];
-		check_ip_header = check_ip_header " " addr4 "/"prefix4;
+		check_ip_header = check_ip_header " " addr4 "/" prefix4;
+		route = addr4 "/" ipv4_addr_bitlen " " max_xorp_rt_port;
+		if (is_first_address) {
+		    local_ip_routes = route;
+		    is_first_address = 0;
+		} else {
+		    local_ip_routes = local_ip_routes ", " route;
+		}
 	    }
 	}
     }
@@ -168,7 +177,7 @@ function generate_click_shared_ip_input()
     printf("// Shared IP input path and routing table\n");
     printf("%s :: Strip(14)\n", xorp_ip);
     printf("    -> %s\n", check_ip_header);
-    printf("    -> %s :: LinearIPLookup();\n", xorp_rt);
+    printf("    -> %s :: LinearIPLookup(%s);\n", xorp_rt, local_ip_routes);
 }
 
 function generate_click_arp_responses()
