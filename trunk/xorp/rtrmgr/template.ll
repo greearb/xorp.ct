@@ -206,7 +206,7 @@ RE_MACADDR [a-fA-F0-9]{1,2}(:[a-fA-F0-9]{1,2}){5}
 	return LITERAL;
 	}
 
-\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
+\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`'{}<>? \t]*\"	{
 	tpltlval = strdup(tplttext);
 	return STRING;
 	}

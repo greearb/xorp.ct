@@ -69,7 +69,7 @@
 	return LITERAL;
 	}
 
-\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
+\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`'{}<>? \t]*\"	{
 	opcmdlval = strdup(opcmdtext);
 	return STRING;
 	}
