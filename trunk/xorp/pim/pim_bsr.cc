@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.13 2003/03/04 05:25:56 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.14 2003/03/06 07:48:56 pavlin Exp $"
 
 
 //
@@ -271,7 +271,7 @@ PimBsr::stop(void)
 int
 PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const
 {
-    list<BsrZone *>::const_iterator bsr_zone_iter;
+    list<BsrZone *>::const_iterator iter_zone;
     
     if (pim_vif->pim_nbr_find(nbr_addr) == NULL)
 	return (XORP_ERROR);
@@ -282,20 +282,20 @@ PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const
     // so if somehow there is overlapping, the active BSR zones will
     // override the expiring BSR zones.
     //
-    for (bsr_zone_iter = _expire_bsr_zone_list.begin();
-	 bsr_zone_iter != _expire_bsr_zone_list.end();
-	 ++bsr_zone_iter) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
+    for (iter_zone = _expire_bsr_zone_list.begin();
+	 iter_zone != _expire_bsr_zone_list.end();
+	 ++iter_zone) {
+	BsrZone *bsr_zone = *iter_zone;
 	pim_vif->pim_bootstrap_send(nbr_addr, *bsr_zone);
     }
     
     //
     // Unicast the messages with the active BSR zones
     //
-    for (bsr_zone_iter = _active_bsr_zone_list.begin();
-	 bsr_zone_iter != _active_bsr_zone_list.end();
-	 ++bsr_zone_iter) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
+    for (iter_zone = _active_bsr_zone_list.begin();
+	 iter_zone != _active_bsr_zone_list.end();
+	 ++iter_zone) {
+	BsrZone *bsr_zone = *iter_zone;
 	BsrZone::bsr_zone_state_t bsr_zone_state = bsr_zone->bsr_zone_state();
 	if ((bsr_zone_state == BsrZone::STATE_CANDIDATE_BSR)
 	    || (bsr_zone_state == BsrZone::STATE_ELECTED_BSR)
@@ -356,19 +356,19 @@ PimBsr::add_active_bsr_zone(const BsrZone& bsr_zone, string& error_msg)
     // Start (or restart) the Cand-RR Expiry Timer in 'active_bsr_zone'
     // for all RPs that were in 'bsr_zone'.
     //
-    list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
-    for (group_prefix_iter = bsr_zone.bsr_group_prefix_list().begin();
-	 group_prefix_iter != bsr_zone.bsr_group_prefix_list().end();
-	 ++group_prefix_iter) {
-	BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
+    list<BsrGroupPrefix *>::const_iterator iter_prefix;
+    for (iter_prefix = bsr_zone.bsr_group_prefix_list().begin();
+	 iter_prefix != bsr_zone.bsr_group_prefix_list().end();
+	 ++iter_prefix) {
+	BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
 	BsrGroupPrefix *active_bsr_group_prefix = active_bsr_zone->find_bsr_group_prefix(bsr_group_prefix->group_prefix());
 	if (active_bsr_zone == NULL)
 	    continue;
-	list<BsrRp *>::const_iterator rp_iter;
-	for (rp_iter = bsr_group_prefix->rp_list().begin();
-	     rp_iter != bsr_group_prefix->rp_list().end();
-	     ++rp_iter) {
-	    BsrRp *bsr_rp = *rp_iter;
+	list<BsrRp *>::const_iterator iter_rp;
+	for (iter_rp = bsr_group_prefix->rp_list().begin();
+	     iter_rp != bsr_group_prefix->rp_list().end();
+	     ++iter_rp) {
+	    BsrRp *bsr_rp = *iter_rp;
 	    BsrRp *active_bsr_rp = active_bsr_group_prefix->find_rp(bsr_rp->rp_addr());
 	    if (active_bsr_rp == NULL)
 		continue;
@@ -389,22 +389,11 @@ PimBsr::add_active_bsr_zone(const BsrZone& bsr_zone, string& error_msg)
 BsrZone *
 PimBsr::add_expire_bsr_zone(const BsrZone& bsr_zone)
 {
-    list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
-    
-    if (bsr_zone.bsr_group_prefix_list().empty())
-	return (NULL);	// XXX: don't add if no prefixes
+    list<BsrGroupPrefix *>::const_iterator iter_prefix;
     
     //
-    // Remove all the old RPs for same prefixes.
+    // Create an expire BSR zone that is a copy of the original zone
     //
-    for (group_prefix_iter = bsr_zone.bsr_group_prefix_list().begin();
-	 group_prefix_iter != bsr_zone.bsr_group_prefix_list().end();
-	 ++group_prefix_iter) {
-	const BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
-	delete_expire_bsr_zone_prefix(bsr_group_prefix->group_prefix(),
-				      bsr_group_prefix->is_scope_zone());
-    }
-    
     BsrZone *expire_bsr_zone = new BsrZone(*this, bsr_zone);
     expire_bsr_zone->set_expire_bsr_zone(true);
     
@@ -417,16 +406,28 @@ PimBsr::add_expire_bsr_zone(const BsrZone& bsr_zone)
     expire_bsr_zone->candidate_rp_advertise_timer().cancel();
     
     //
-    // Delete all prefixes that have no RPs
+    // Don't keep prefixes that have no RPs, or incomplete set of RPs.
     //
-    for (group_prefix_iter = expire_bsr_zone->bsr_group_prefix_list().begin();
-	 group_prefix_iter != expire_bsr_zone->bsr_group_prefix_list().end();
+    for (iter_prefix = expire_bsr_zone->bsr_group_prefix_list().begin();
+	 iter_prefix != expire_bsr_zone->bsr_group_prefix_list().end();
 	) {
-	BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
-	++group_prefix_iter;
-	if (bsr_group_prefix->rp_list().empty())
+	BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
+	++iter_prefix;
+	if ((bsr_group_prefix->rp_list().empty())
+	    || 	(bsr_group_prefix->received_rp_count()
+		 < bsr_group_prefix->expected_rp_count())) {
 	    expire_bsr_zone->delete_bsr_group_prefix(bsr_group_prefix);
+	    continue;
+	}
+	
+	//
+	// Remove the old RPs for same prefix
+	//
+	delete_expire_bsr_zone_prefix(bsr_group_prefix->group_prefix(),
+				      bsr_group_prefix->is_scope_zone());
+	
     }
+    
     if (expire_bsr_zone->bsr_group_prefix_list().empty()) {
 	// No prefixes, hence don't add
 	delete expire_bsr_zone;
@@ -504,15 +505,15 @@ void
 PimBsr::delete_expire_bsr_zone_prefix(const IPvXNet& group_prefix,
 				      bool is_scope_zone)
 {
-    list<BsrZone *>::iterator bsr_zone_iter, old_bsr_zone_iter;
+    list<BsrZone *>::iterator iter_zone, old_iter_zone;
     
     // Delete the group prefixes
-    for (bsr_zone_iter = _expire_bsr_zone_list.begin();
-	 bsr_zone_iter != _expire_bsr_zone_list.end();
+    for (iter_zone = _expire_bsr_zone_list.begin();
+	 iter_zone != _expire_bsr_zone_list.end();
 	) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
-	old_bsr_zone_iter = bsr_zone_iter;
-	++bsr_zone_iter;
+	BsrZone *bsr_zone = *iter_zone;
+	old_iter_zone = iter_zone;
+	++iter_zone;
 	BsrGroupPrefix *bsr_group_prefix;
 	if (bsr_zone->zone_id().is_scope_zone() != is_scope_zone)
 	    continue;
@@ -521,7 +522,7 @@ PimBsr::delete_expire_bsr_zone_prefix(const IPvXNet& group_prefix,
 	    bsr_zone->delete_bsr_group_prefix(bsr_group_prefix);
 	    // Delete the expiring BSR zone if no more prefixes
 	    if (bsr_zone->bsr_group_prefix_list().empty()) {
-		_expire_bsr_zone_list.erase(old_bsr_zone_iter);
+		_expire_bsr_zone_list.erase(old_iter_zone);
 		delete bsr_zone;
 	    }
 	}
@@ -722,19 +723,19 @@ pim_bsr_rp_table_apply_rp_changes_timeout(void *data_pointer)
 void
 PimBsr::clean_expire_bsr_zones()
 {
-    list<BsrZone *>::iterator bsr_zone_iter;
-    list<BsrGroupPrefix *>::const_iterator bsr_group_prefix_iter;
+    list<BsrZone *>::iterator iter_zone;
+    list<BsrGroupPrefix *>::const_iterator iter_prefix;
     
-    for (bsr_zone_iter = _expire_bsr_zone_list.begin();
-	 bsr_zone_iter != _expire_bsr_zone_list.end();
+    for (iter_zone = _expire_bsr_zone_list.begin();
+	 iter_zone != _expire_bsr_zone_list.end();
 	) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
-	++bsr_zone_iter;
-	for (bsr_group_prefix_iter = bsr_zone->bsr_group_prefix_list().begin();
-	     bsr_group_prefix_iter != bsr_zone->bsr_group_prefix_list().end();
+	BsrZone *bsr_zone = *iter_zone;
+	++iter_zone;
+	for (iter_prefix = bsr_zone->bsr_group_prefix_list().begin();
+	     iter_prefix != bsr_zone->bsr_group_prefix_list().end();
 	    ) {
-	    BsrGroupPrefix *bsr_group_prefix = *bsr_group_prefix_iter;
-	    ++bsr_group_prefix_iter;
+	    BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
+	    ++iter_prefix;
 	    if (! bsr_group_prefix->rp_list().empty())
 		continue;
 	    bsr_zone->delete_bsr_group_prefix(bsr_group_prefix);
@@ -1012,7 +1013,7 @@ PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
 {
     PimVif *pim_vif = pim_node().vif_find_by_name(vif_name);
     int ret_value = XORP_ERROR;
-    list<BsrZone *>::iterator bsr_zone_iter;
+    list<BsrZone *>::iterator iter_zone;
     
     if (pim_vif == NULL) {
 	ret_value = XORP_ERROR;
@@ -1022,10 +1023,10 @@ PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
     //
     // Send the Bootstrap messages
     //
-    for (bsr_zone_iter = _test_bsr_zone_list.begin();
-	 bsr_zone_iter != _test_bsr_zone_list.end();
-	 ++bsr_zone_iter) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
+    for (iter_zone = _test_bsr_zone_list.begin();
+	 iter_zone != _test_bsr_zone_list.end();
+	 ++iter_zone) {
+	BsrZone *bsr_zone = *iter_zone;
 	if (pim_vif->pim_bootstrap_send(dest_addr, *bsr_zone)
 	    < 0) {
 	    ret_value = XORP_ERROR;
@@ -1045,27 +1046,27 @@ PimBsr::send_test_cand_rp_adv()
 {
     PimVif *pim_vif = NULL;
     int ret_value = XORP_ERROR;
-    list<BsrZone *>::iterator bsr_zone_iter;
+    list<BsrZone *>::iterator iter_zone;
     
     //
     // Check that all Cand-RP addresses are mine
     //
-    for (bsr_zone_iter = _test_bsr_zone_list.begin();
-	 bsr_zone_iter != _test_bsr_zone_list.end();
-	 ++bsr_zone_iter) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
+    for (iter_zone = _test_bsr_zone_list.begin();
+	 iter_zone != _test_bsr_zone_list.end();
+	 ++iter_zone) {
+	BsrZone *bsr_zone = *iter_zone;
 	
-	list<BsrGroupPrefix *>::const_iterator bsr_group_prefix_iter;
-	for (bsr_group_prefix_iter = bsr_zone->bsr_group_prefix_list().begin();
-	     bsr_group_prefix_iter != bsr_zone->bsr_group_prefix_list().end();
-	     ++bsr_group_prefix_iter) {
-	    BsrGroupPrefix *bsr_group_prefix = *bsr_group_prefix_iter;
+	list<BsrGroupPrefix *>::const_iterator iter_prefix;
+	for (iter_prefix = bsr_zone->bsr_group_prefix_list().begin();
+	     iter_prefix != bsr_zone->bsr_group_prefix_list().end();
+	     ++iter_prefix) {
+	    BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
 	    
-	    list<BsrRp *>::const_iterator bsr_rp_iter;
-	    for (bsr_rp_iter = bsr_group_prefix->rp_list().begin();
-		 bsr_rp_iter != bsr_group_prefix->rp_list().end();
-		 ++bsr_rp_iter) {
-		BsrRp *bsr_rp = *bsr_rp_iter;
+	    list<BsrRp *>::const_iterator iter_rp;
+	    for (iter_rp = bsr_group_prefix->rp_list().begin();
+		 iter_rp != bsr_group_prefix->rp_list().end();
+		 ++iter_rp) {
+		BsrRp *bsr_rp = *iter_rp;
 		if (! pim_node().is_my_addr(bsr_rp->rp_addr())) {
 		    ret_value = XORP_ERROR;
 		    goto ret_label;
@@ -1094,10 +1095,10 @@ PimBsr::send_test_cand_rp_adv()
     //
     // Send the Cand-RP-Adv messages
     //
-    for (bsr_zone_iter = _test_bsr_zone_list.begin();
-	 bsr_zone_iter != _test_bsr_zone_list.end();
-	 ++bsr_zone_iter) {
-	BsrZone *bsr_zone = *bsr_zone_iter;
+    for (iter_zone = _test_bsr_zone_list.begin();
+	 iter_zone != _test_bsr_zone_list.end();
+	 ++iter_zone) {
+	BsrZone *bsr_zone = *iter_zone;
 	if (pim_vif->pim_cand_rp_adv_send(bsr_zone->bsr_addr(), *bsr_zone)
 	    < 0) {
 	    ret_value = XORP_ERROR;
@@ -1301,11 +1302,11 @@ BsrZone::is_consistent(string& error_msg) const
 	    return (false);
 	}
 	
-	list<BsrRp *>::const_iterator rp_iter;
-	for (rp_iter = bsr_group_prefix->rp_list().begin();
-	     rp_iter != bsr_group_prefix->rp_list().end();
-	     ++rp_iter) {
-	    BsrRp *bsr_rp = *rp_iter;
+	list<BsrRp *>::const_iterator iter_rp;
+	for (iter_rp = bsr_group_prefix->rp_list().begin();
+	     iter_rp != bsr_group_prefix->rp_list().end();
+	     ++iter_rp) {
+	    BsrRp *bsr_rp = *iter_rp;
 	    
 	    if (! bsr_rp->rp_addr().is_unicast()) {
 		error_msg = c_format("invalid RP address: %s",
@@ -1499,6 +1500,27 @@ BsrZone::merge_rp_set(const BsrZone& bsr_zone)
 					 bsr_rp->rp_holdtime());
 	}
     }
+    
+    //
+    // Remove the old RPs for a received prefix, but only if
+    // all RPs for that prefix are received.
+    //
+    if (is_active_bsr_zone()) {
+	list<BsrGroupPrefix *>::const_iterator iter_prefix;
+	for (iter_prefix = bsr_group_prefix_list().begin();
+	     iter_prefix != bsr_group_prefix_list().end();
+	     ++iter_prefix) {
+	    const BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
+	    
+	    if (bsr_group_prefix->received_rp_count()
+		< bsr_group_prefix->expected_rp_count()) {
+		continue;
+	    }
+	    pim_bsr().delete_expire_bsr_zone_prefix(
+		bsr_group_prefix->group_prefix(),
+		bsr_group_prefix->is_scope_zone());
+	}
+    }
 }
 
 //
@@ -1541,16 +1563,23 @@ BsrZone::store_rp_set(const BsrZone& bsr_zone)
     _unicast_message_src = bsr_zone.unicast_message_src();
     
     //
-    // Remove all the old RPs for same new prefixes
+    // Remove the old RPs for a received prefix, but only if
+    // all RPs for that prefix are received.
     //
     if (is_active_bsr_zone()) {
-	list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
-	for (group_prefix_iter = bsr_group_prefix_list().begin();
-	     group_prefix_iter != bsr_group_prefix_list().end();
-	     ++group_prefix_iter) {
-	    const BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
-	    pim_bsr().delete_expire_bsr_zone_prefix(bsr_group_prefix->group_prefix(),
-						    bsr_group_prefix->is_scope_zone());
+	list<BsrGroupPrefix *>::const_iterator iter_prefix;
+	for (iter_prefix = bsr_group_prefix_list().begin();
+	     iter_prefix != bsr_group_prefix_list().end();
+	     ++iter_prefix) {
+	    const BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
+	    
+	    if (bsr_group_prefix->received_rp_count()
+		< bsr_group_prefix->expected_rp_count()) {
+		continue;
+	    }
+	    pim_bsr().delete_expire_bsr_zone_prefix(
+		bsr_group_prefix->group_prefix(),
+		bsr_group_prefix->is_scope_zone());
 	}
     }
 }
