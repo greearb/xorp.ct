@@ -96,7 +96,7 @@ EXTRA_DIST = Notes config.boot config.template fea.boot
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 rtrmgr_SOURCES = rtrmgr_module.h md5.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc
 rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
 #unexpanded_xrl shouldn't really be needed
@@ -120,8 +120,8 @@ module_manager.o xorp_client.o xrldb.o split.o userdb.o \
 xrl_rtrmgr_interface.o randomness.o unexpanded_xrl.o
 rtrmgr_DEPENDENCIES =  $(top_builddir)/xrl/targets/librtrmgrbase.a \
 $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
-$(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 rtrmgr_LDFLAGS = 
 xorpsh_OBJECTS =  xorpsh_main.o y.tplt_tab.o lex.tplt.o y.boot_tab.o \
 lex.boot.o y.opcmd_tab.o lex.opcmd.o template_tree.o \
@@ -134,15 +134,16 @@ $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/cli/libtecla/libtecla.a \
 $(top_builddir)/xrl/interfaces/librtrmgrxif.a \
 $(top_builddir)/xrl/targets/libxorpshbase.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
-$(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 xorpsh_LDFLAGS = 
 test_templates_OBJECTS =  test_templates.o y.tplt_tab.o lex.tplt.o \
 template_tree.o template_tree_node.o template_commands.o xrldb.o \
 unexpanded_xrl.o conf_tree_node.o command_tree.o xorp_client.o \
 module_manager.o split.o
-test_templates_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+test_templates_DEPENDENCIES =  $(top_builddir)/libxipc/libfinder.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 test_templates_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)

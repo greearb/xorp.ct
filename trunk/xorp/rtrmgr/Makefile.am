@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.3 2003/02/24 12:53:47 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.4 2003/02/27 19:54:15 hodson Exp $
 ##
 
 # -- Subdirectories
@@ -21,7 +21,8 @@ EXTRA_DIST	 = config.template config.boot
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = -all-static
-LDADD		 = $(top_builddir)/libxipc/libxipc.a
+LDADD		 = $(top_builddir)/libxipc/libfinder.a
+LDADD		+= $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
