@@ -1,6 +1,12 @@
 #
-# $XORP: xorp/pim/TODO,v 1.39 2003/06/17 02:09:25 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.40 2003/06/23 18:59:24 pavlin Exp $
 #
+
+* PIM SPEC: Add the text for the new Hello option that includes the number
+  of addresses per interface.
+
+* PIM SPEC: Fix the description of the PIM Null Register messages
+  (e.g., what the mandatory fields are, checksum, etc).
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
   to PIM mailing list from 15 May 2003
