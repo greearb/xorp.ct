@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.22 2004/06/10 03:32:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.23 2004/06/10 22:40:54 hodson Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -432,7 +432,7 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
-      _enabled(false), _mtu(0), _if_flags(0)
+      _enabled(false), _discard(false), _mtu(0), _if_flags(0)
 {}
 
 bool
