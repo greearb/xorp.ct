@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.12 2003/11/20 20:31:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.13 2004/01/05 23:37:14 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -25,8 +25,8 @@
 #include "util.hh"
 
 extern int init_bootfile_parser(const char* configuration,
-				const char* filename, ConfigTree* c);
-extern int parse_bootfile();
+				const char* filename, ConfigTree* ct);
+extern void parse_bootfile() throw (ParseError);
 extern int booterror(const char* s) throw (ParseError);
 
 /*************************************************************************
@@ -53,11 +53,18 @@ ConfigTree::operator=(const ConfigTree& orig_tree)
 }
 
 bool
-ConfigTree::parse(const string& configuration, const string& config_file)
+ConfigTree::parse(const string& configuration, const string& config_file,
+		  string& errmsg)
 {
-    init_bootfile_parser(configuration.c_str(), config_file.c_str(), this);
-    parse_bootfile();
-    return true;
+    try {
+	init_bootfile_parser(configuration.c_str(), config_file.c_str(), this);
+	parse_bootfile();
+	return true;
+    } catch (const ParseError& pe) {
+	errmsg = pe.why();
+    }
+
+    return false;
 }
 
 void ConfigTree::add_default_children()
@@ -195,7 +202,6 @@ ConfigTree::add_node(const string& segment) throw (ParseError)
 	TemplateTreeNode* ttn = find_template(path_segments);
 	if (ttn == NULL) {
 	    booterror("No template found in template map");
-	    exit(1);
 	}
 
 	string path = current_path_as_string();
@@ -210,7 +216,7 @@ ConfigTree::add_node(const string& segment) throw (ParseError)
 }
 
 void
-ConfigTree::terminal_value(char* value, int type)
+ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 {
     string path(current_path_as_string());
     string svalue(value);
@@ -290,22 +296,20 @@ ConfigTree::terminal_value(char* value, int type)
 	    break;
 	default:
 	    // Did we forget to add a new type?
-	    XLOG_FATAL("Unexpected type %d received\n", ctn->type());
+	    XLOG_FATAL("Unexpected type %d received", ctn->type());
 	}
     } else if (ctn->type() != type) {
 	string err = "\"" + path + "\" has type " + ctn->typestr() +
 	    ", and value " + svalue + " is not a valid " + ctn->typestr();
 	booterror(err.c_str());
-	exit(1);
     }
     ctn->set_value(svalue, /* userid */ 0);
     return;
 
-    parse_error:
+ parse_error:
     string err = "\"" + path + "\" has type " + ctn->typestr() +
 	", and value " + svalue + " is not a valid " + ctn->typestr();
     booterror(err.c_str());
-    exit(1);
 }
 
 const ConfigTreeNode*
@@ -394,15 +398,8 @@ ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
 #endif
 
     ConfigTree delta_tree(_template_tree);
-    try {
-	 delta_tree.parse(deltas, "");
-    } catch (ParseError& pe) {
-	response = pe.why();
-#ifdef DEBUG_CONFIG_CHANGE
-	printf("apply deltas failed, response = %s\n", response.c_str());
-#endif
+    if (delta_tree.parse(deltas, "", response) == false)
 	return false;
-    }
 
 #ifdef DEBUG_CONFIG_CHANGE
     printf("Delta tree:\n");
@@ -424,12 +421,8 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
 #endif
 
     ConfigTree deletion_tree(_template_tree);
-    try {
-	deletion_tree.parse(deletions, "");
-    } catch (ParseError &pe) {
-	response = pe.why();
+    if (deletion_tree.parse(deletions, "", response) == false)
 	return false;
-    }
 
 #ifdef DEBUG_CONFIG_CHANGE
     printf("Deletion tree:\n");

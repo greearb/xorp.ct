@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.8 2003/11/20 06:49:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.9 2004/01/05 23:37:14 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -25,7 +25,7 @@
 #include "conf_tree_node.hh"
 #include "module_manager.hh"
 #include "xorp_client.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 
 class TemplateTree;
 class CommandTree;
@@ -37,12 +37,13 @@ public:
     ~ConfigTree();
 
     ConfigTree& operator=(const ConfigTree& orig_tree);
-    bool parse(const string& configuration, const string& config_file);
+    bool parse(const string& configuration, const string& config_file,
+	       string& errmsg);
     void push_path();
     void extend_path(const string& segment);
     void pop_path();
     void add_node(const string& nodename) throw (ParseError);
-    void terminal_value(char* value, int type);
+    void terminal_value(char* value, int type) throw (ParseError);
     list<string> path_as_segments() const;
     TemplateTreeNode* find_template(const list<string>& path_segments);
     ConfigTreeNode& root_node() { return _root_node; }
