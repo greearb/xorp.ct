@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.24 2003/07/14 21:55:18 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.25 2003/08/01 23:07:29 pavlin Exp $"
 
 #include <signal.h>
 
@@ -126,14 +126,14 @@ string
 find_exec_path_name(const char *progname)
 {
     char *b, *p;
-    
+
     // Check if we have already specified a path to the program
     do {
 	char max_path[MAXPATHLEN + 1];
-	
+
 	strncpy(max_path, progname,  sizeof(max_path) - 1);
 	max_path[sizeof(max_path) - 1] = '\0';
-	
+
 	p = strrchr(max_path, '/');
 	if ( p != NULL) {
 	    // We have specified a path to the program; return that path
@@ -143,23 +143,23 @@ find_exec_path_name(const char *progname)
 	    return (string(max_path));
 	}
     } while (false);
-    
+
     //
     // Go through the PATH environment variable and find the program location
     //
     char* exec_path = getenv("PATH");
     if (exec_path == NULL)
 	return (string(""));
-    
+
     char buff[strlen(exec_path)];
     strncpy(buff, exec_path, sizeof(buff) - 1);
     buff[sizeof(buff) - 1] = '\0';
-    
+
     b = buff;
     do {
 	if ((b == NULL) || (*b == '\0'))
 	    break;
-	
+
 	// Cut-off the next directory name
 	p = strchr(b, ':');
 	if (p != NULL) {
@@ -170,13 +170,13 @@ find_exec_path_name(const char *progname)
 	    b[strlen(b) - 1] = '\0';
 	string prefix_name = string(b);
 	string abs_progname = prefix_name + string("/") + string(progname);
-	
+
 	if (access(abs_progname.c_str(), X_OK) == 0) {
 	    return (prefix_name);	// Found
 	}
 	b = p;
     } while (true);
-    
+
     return (string(""));
 }
 
@@ -196,7 +196,7 @@ main(int argc, char* const argv[])
     xlog_start();
 
     running = true;
-    
+
     RandomGen randgen;
 
     //
@@ -214,7 +214,7 @@ main(int argc, char* const argv[])
 	    default_xorp_root_dir = p;
 	    break;
 	}
-	
+
 	// Try the parent directory
 	string s = find_exec_path_name(argv[0]);
 	if (strlen(s.c_str()) > 0) {
@@ -230,14 +230,14 @@ main(int argc, char* const argv[])
 		break;
 	    }
 	}
-	
+
 	// The XORP_ROOT value
 	default_xorp_root_dir = DEFAULT_XORP_ROOT_DIR;
 	break;
     } while (false);
 
     //
-    // Expand the default variables to include the XORP root path    
+    // Expand the default variables to include the XORP root path
     //
     default_config_boot = default_xorp_root_dir + "/" + default_config_boot;
     default_config_template_dir = default_xorp_root_dir + "/"
@@ -249,7 +249,6 @@ main(int argc, char* const argv[])
     string	config_boot         = default_config_boot;
 
     bool do_exec = default_do_exec;
-
 
     list<IPv4>	bind_addrs;
     uint16_t	bind_port = FINDER_DEFAULT_PORT;
@@ -310,7 +309,8 @@ main(int argc, char* const argv[])
     // read the router config template files
     TemplateTree *tt;
     try {
-	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
+	tt = new TemplateTree(default_xorp_root_dir,
+			      config_template_dir,
 			      xrl_dir);
     } catch (const XorpException&) {
 	printf("caught exception\n");
@@ -320,19 +320,19 @@ main(int argc, char* const argv[])
     tt->display_tree();
 #endif
 
-    //signal handlers so we can clean up when we're killed
+    // signal handlers so we can clean up when we're killed
     signal(SIGTERM, signalhandler);
     signal(SIGINT, signalhandler);
-    //    signal(SIGBUS, signalhandler);
-    //    signal(SIGSEGV, signalhandler);
+    // XXX signal(SIGBUS, signalhandler);
+    // XXX signal(SIGSEGV, signalhandler);
 
-    //initialize the event loop
+    // initialize the event loop
     EventLoop eventloop;
     randgen.add_eventloop(&eventloop);
 
-    //Start the finder.
-    //These are dynamically created so we have control over the
-    //deletion order.
+    // Start the finder.
+    // These are dynamically created so we have control over the
+    // deletion order.
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     FinderServer* fs;
     try {
@@ -355,24 +355,50 @@ main(int argc, char* const argv[])
 	exit(-1);
     }
 
-    //start the module manager
+    // start the module manager
     ModuleManager mmgr(eventloop, /*verbose = */true, default_xorp_root_dir);
 
     UserDB userdb;
     userdb.load_password_file();
 
-    //initialize the IPC mechanism
+    // initialize the IPC mechanism
     XrlStdRouter xrlrouter(eventloop, "rtrmgr", fs->addr(), fs->port());
     XorpClient xclient(eventloop, xrlrouter);
 
-    //initialize the Task Manager
+    // initialize the Task Manager
     TaskManager taskmgr(mmgr, xclient, do_exec);
 
-    MasterConfigTree* ct;
     try {
-	//read the router startup configuration file,
-	//start the processes required, and initialize them
-	ct = new MasterConfigTree(config_boot, tt, taskmgr);
+	// read the router startup configuration file,
+	// start the processes required, and initialize them
+	MasterConfigTree* ct = new MasterConfigTree(config_boot, tt, taskmgr);
+	XrlRtrmgrInterface xrt(xrlrouter, userdb, *ct, eventloop, randgen);
+
+	// For testing purposes, rtrmgr can terminate itself after some time.
+	XorpTimer quit_timer;
+	if (quit_time > 0) {
+	    quit_timer =
+		eventloop.new_oneoff_after_ms(quit_time*1000,
+					      callback(signalhandler, 0));
+	}
+
+	// loop while handling configuration events and signals
+	while (running) {
+	    fflush(stdout);
+	    eventloop.run();
+	}
+
+	// Shutdown everything
+
+	// Delete the configuration.
+	ct->delete_entire_config();
+
+	// Wait until changes due to deleting config have finished
+	// being applied.
+	while (eventloop.timers_pending() && (ct->commit_in_progress())) {
+	    eventloop.run();
+	}
+	delete ct;
     } catch (InitError& e) {
 	XLOG_ERROR("rtrmgr shutting down due to error\n");
 	fprintf(stderr, "rtrmgr shutting down due to error\n");
@@ -380,41 +406,11 @@ main(int argc, char* const argv[])
 	running = false;
     }
 
-    XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
-				     *ct, eventloop, randgen);
-
-    //For testing purposes, rtrmgr can terminate itself after some time.
-    XorpTimer quit_timer;
-    if (quit_time > 0) {
-	quit_timer =
-	    eventloop.new_oneoff_after_ms(quit_time*1000,
-					  callback(signalhandler, 0));
-    }
-
-    //loop while handling configuration events and signals
-    while (running) {
-	fflush(stdout);
-	eventloop.run();
-    }
-
-    /***********************************************************************/
-    /** shutdown everything                                               **/
-    /***********************************************************************/
-
-    //Delete the configuration.
-    ct->delete_entire_config();
-
-    //Wait until changes due to deleting config have finished being applied.
-    while (eventloop.timers_pending() && (ct->commit_in_progress())) {
-	eventloop.run();
-    }
-    delete ct;
-
     //Shut down child processes that haven't already been shutdown.
     mmgr.shutdown();
 
     //Wait until child processes have terminated
-    while ((!mmgr.shutdown_complete()) && eventloop.timers_pending()) {
+    while (mmgr.shutdown_complete() == false && eventloop.timers_pending()) {
 	eventloop.run();
     }
 
