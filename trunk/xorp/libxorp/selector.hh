@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.6 2003/04/06 04:19:04 jcardona Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.7 2003/05/21 21:18:14 hodson Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -42,7 +42,36 @@ enum SelectorMask {
 typedef XorpCallback2<void,int,SelectorMask>::RefPtr SelectorCallback;
 
 class SelectorTag;
+
 typedef ref_ptr<SelectorTag> Selector;
+
+/**
+ * @short Abstract class used to receive SelectorList notifications 
+ *
+ * A SelectorObserverBase abstract class can be subtyped to create classes that
+ * will receive @ref SelectorList events. 
+ * All methods in this class are private, since they must only be invoked by
+ * the friend class SelectorList
+ */
+class SelectorObserverBase {
+private:
+    /**
+     * This function will get called when a new file descriptor is added to the
+     * SelectorList  
+     */
+    virtual void notify_added(int fd, const SelectorMask& mask) const = 0;
+
+    /**
+     * This function will get called when a new file descriptor is removed from
+     * the SelectorList 
+     */
+    virtual void notify_removed(int fd, const SelectorMask& mask) const = 0;
+
+    friend class SelectorList;
+
+public:
+    void unused() {};  // public method provided to silence compiler warnings 
+};
 
 /**
  * @short A class to provide an interface to I/O multiplexing.
@@ -135,11 +164,25 @@ public:
      void get_fd_set(SelectorMask selected_mask, fd_set& fds) const;
 
      /**
-     * Get a the value of the largets monitored file descriptor
+     * Get a the value of the largest monitored file descriptor
      *
      * @return the maximum fd.
      */
     int get_max_fd() const;
+
+     /**
+     * Set the SelectorObserver object that will receive notifications
+     *
+     * @return void
+     */
+     void set_observer(const SelectorObserverBase& obs);
+
+     /**
+     * Remove the SelectorObserver object that receives notifications
+     *
+     * @return void
+     */
+     void remove_observer();
 
 
 protected:
@@ -169,6 +212,8 @@ private:
     fd_set		_fds[SEL_MAX_IDX];
     int			_maxfd;
     size_t		_descriptor_count;
+
+    SelectorObserverBase const * _observer;
 };
 
 #endif // __LIBXORP_SELECTOR_HH__

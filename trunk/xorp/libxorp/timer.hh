@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.12 2003/04/02 18:12:52 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.13 2003/04/06 04:32:13 jcardona Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -36,6 +36,35 @@ typedef XorpCallback0<void>::RefPtr OneoffTimerCallback;
 typedef XorpCallback0<bool>::RefPtr PeriodicTimerCallback; 
 
 typedef XorpCallback1<void, XorpTimer&>::RefPtr BasicTimerCallback;
+
+
+/**
+ * @short Abstract class used to receive TimerList notifications 
+ *
+ * TimerObserverBase is a class that can be subtyped to receive notifications on
+ * when timers are created or expired.  All the methods in this class are
+ * private, since they must only be invoked by the friend class, TimerList 
+ * 
+ * @see TimerList
+ */
+class TimerObserverBase {
+public:
+    void unused() {};  // public method provided to silence compiler warnings 
+
+private:
+    /**
+     * This function will get called when a timer is scheduled.  Periodic timers
+     * will produce periodic notifications.
+     */
+    virtual void notify_scheduled(const TimeVal&) const = 0;
+
+   /**
+     * This function will get called when a timer is unscheduled.
+     */
+    virtual void notify_unscheduled(const TimeVal&) const = 0;
+
+    friend class TimerList;
+};
 
 /**
  * @short XorpTimer class
@@ -318,18 +347,33 @@ public:
      * time.
      */
     static void system_gettimeofday(TimeVal *tv);	// default time querier
-    
+
+    /**
+     * Register an observer object with this class
+     * 
+     * @param obs an observer object derived from @ref TimerObserverBase 
+     */
+    void set_observer(TimerObserverBase& obs);      
+
+    /**
+     * Unregister the current observer
+     */
+    void remove_observer();                          
+
 private:
     void schedule_node(TimerNode* t);	// Put node in time ordered list pos.
     void unschedule_node(TimerNode* t); // Remove node from list.
+    
 
     void acquire_lock() const		{ /* nothing, for now */ }
     bool attempt_lock() const		{ return true; }
     void release_lock() const		{ /* nothing, for now */ }
 
     query_current_time _current_time_proc;	// called to get time
+    TimerObserverBase const * _observer;
 
     friend class TimerNode;
+    friend class TimerObserverBase;
 
     static TimerNode _dummy_timer_node;
 };
@@ -479,7 +523,7 @@ XorpTimer::clear()
 
 TimerList::TimerList(query_current_time q)
     : Heap(OFFSET_OF(_dummy_timer_node, _pos_in_heap)),
-      _current_time_proc(q)
+      _current_time_proc(q), _observer(NULL)
 {
 }
 

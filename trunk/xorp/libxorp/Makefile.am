@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.7 2003/04/02 20:03:35 hodson Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.8 2003/05/07 21:58:09 pavlin Exp $
 ##
 
 # - The library
@@ -10,9 +10,9 @@ noinst_LIBRARIES = libxorp.a
 TESTS		 = test_asyncio test_callback test_config_param
 TESTS		+= test_ipnet test_ipv4 test_ipv4net
 TESTS		+= test_ipv6 test_ipv6net test_ipvx test_ipvxnet
-TESTS		+= test_mac test_ref_ptr test_ref_trie test_test_main
-TESTS		+= test_time_slice test_timer test_timeval test_trie 
-TESTS		+= test_types test_vif 
+TESTS		+= test_mac test_observers test_ref_ptr test_ref_trie 
+TESTS		+= test_test_main test_time_slice test_timer test_timeval 
+TESTS		+= test_trie test_types test_vif 
 
 noinst_PROGRAMS	 = $(TESTS)
 
@@ -31,6 +31,7 @@ test_ipv6net_SOURCES	= test_ipv6net.cc
 test_ipvx_SOURCES	= test_ipvx.cc
 test_ipvxnet_SOURCES	= test_ipvxnet.cc
 test_mac_SOURCES	= test_mac.cc
+test_observers_SOURCES  = test_observers.cc
 test_ref_ptr_SOURCES	= test_ref_ptr.cc
 test_ref_trie_SOURCES	= test_ref_trie.cc
 test_test_main_SOURCES	= test_test_main.cc

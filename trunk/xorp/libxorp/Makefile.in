@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 noinst_LIBRARIES = libxorp.a
 
 # -- Test Programs
-TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_ref_ptr test_ref_trie test_test_main test_time_slice test_timer test_timeval test_trie  test_types test_vif 
+TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie  test_test_main test_time_slice test_timer test_timeval  test_trie test_types test_vif 
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -113,6 +113,7 @@ test_ipv6net_SOURCES = test_ipv6net.cc
 test_ipvx_SOURCES = test_ipvx.cc
 test_ipvxnet_SOURCES = test_ipvxnet.cc
 test_mac_SOURCES = test_mac.cc
+test_observers_SOURCES = test_observers.cc
 test_ref_ptr_SOURCES = test_ref_ptr.cc
 test_ref_trie_SOURCES = test_ref_trie.cc
 test_test_main_SOURCES = test_test_main.cc
@@ -153,10 +154,11 @@ noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_config_param$(EXEEXT) test_ipnet$(EXEEXT) \
 	test_ipv4$(EXEEXT) test_ipv4net$(EXEEXT) test_ipv6$(EXEEXT) \
 	test_ipv6net$(EXEEXT) test_ipvx$(EXEEXT) test_ipvxnet$(EXEEXT) \
-	test_mac$(EXEEXT) test_ref_ptr$(EXEEXT) test_ref_trie$(EXEEXT) \
-	test_test_main$(EXEEXT) test_time_slice$(EXEEXT) \
-	test_timer$(EXEEXT) test_timeval$(EXEEXT) test_trie$(EXEEXT) \
-	test_types$(EXEEXT) test_vif$(EXEEXT)
+	test_mac$(EXEEXT) test_observers$(EXEEXT) test_ref_ptr$(EXEEXT) \
+	test_ref_trie$(EXEEXT) test_test_main$(EXEEXT) \
+	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
+	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
+	test_vif$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
@@ -214,6 +216,11 @@ test_mac_OBJECTS = $(am_test_mac_OBJECTS)
 test_mac_LDADD = $(LDADD)
 test_mac_DEPENDENCIES = libxorp.a
 test_mac_LDFLAGS =
+am_test_observers_OBJECTS = test_observers.$(OBJEXT)
+test_observers_OBJECTS = $(am_test_observers_OBJECTS)
+test_observers_LDADD = $(LDADD)
+test_observers_DEPENDENCIES = libxorp.a
+test_observers_LDFLAGS =
 am_test_ref_ptr_OBJECTS = test_ref_ptr.$(OBJEXT)
 test_ref_ptr_OBJECTS = $(am_test_ref_ptr_OBJECTS)
 test_ref_ptr_LDADD = $(LDADD)
@@ -279,6 +286,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_ipv4net.Po $(DEPDIR)/test_ipv6.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ipv6net.Po $(DEPDIR)/test_ipvx.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ipvxnet.Po $(DEPDIR)/test_mac.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_observers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ref_ptr.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ref_trie.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_test_main.Po \
@@ -306,12 +314,13 @@ DIST_SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) \
 	$(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) \
 	$(test_ipvxnet_SOURCES) $(test_mac_SOURCES) \
-	$(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) \
-	$(test_test_main_SOURCES) $(test_time_slice_SOURCES) \
-	$(test_timer_SOURCES) $(test_timeval_SOURCES) \
-	$(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+	$(test_observers_SOURCES) $(test_ref_ptr_SOURCES) \
+	$(test_ref_trie_SOURCES) $(test_test_main_SOURCES) \
+	$(test_time_slice_SOURCES) $(test_timer_SOURCES) \
+	$(test_timeval_SOURCES) $(test_trie_SOURCES) \
+	$(test_types_SOURCES) $(test_vif_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -370,6 +379,9 @@ test_ipvxnet$(EXEEXT): $(test_ipvxnet_OBJECTS) $(test_ipvxnet_DEPENDENCIES)
 test_mac$(EXEEXT): $(test_mac_OBJECTS) $(test_mac_DEPENDENCIES) 
 	@rm -f test_mac$(EXEEXT)
 	$(CXXLINK) $(test_mac_LDFLAGS) $(test_mac_OBJECTS) $(test_mac_LDADD) $(LIBS)
+test_observers$(EXEEXT): $(test_observers_OBJECTS) $(test_observers_DEPENDENCIES) 
+	@rm -f test_observers$(EXEEXT)
+	$(CXXLINK) $(test_observers_LDFLAGS) $(test_observers_OBJECTS) $(test_observers_LDADD) $(LIBS)
 test_ref_ptr$(EXEEXT): $(test_ref_ptr_OBJECTS) $(test_ref_ptr_DEPENDENCIES) 
 	@rm -f test_ref_ptr$(EXEEXT)
 	$(CXXLINK) $(test_ref_ptr_LDFLAGS) $(test_ref_ptr_OBJECTS) $(test_ref_ptr_LDADD) $(LIBS)
@@ -428,6 +440,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ipvx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ipvxnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mac.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_observers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ref_ptr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ref_trie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_test_main.Po@am__quote@

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.14 2003/05/21 21:18:14 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.15 2003/06/03 09:50:53 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -123,7 +123,7 @@ SelectorList::Node::is_empty()
 // SelectorList implementation
 
 SelectorList::SelectorList()
-    : _maxfd(0), _descriptor_count(0)
+    : _maxfd(0), _descriptor_count(0), _observer(NULL)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
@@ -161,6 +161,7 @@ SelectorList::add_selector(int			   fd,
     for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i)) {
 	    FD_SET(fd, &_fds[i]);
+	    if (_observer) _observer->notify_added(fd, mask);
 	}
     }
 
@@ -175,9 +176,11 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
 	return;
     }
 
-    for (int i = 0; i < SEL_MAX_IDX; i++) {
-	if (mask & (1 << i)) {
+for (int i = 0; i < SEL_MAX_IDX; i++) {
+	if (mask & (1 << i) && FD_ISSET(fd, &_fds[i])) {
 	    FD_CLR(fd, &_fds[i]);
+	    if (_observer) 
+		_observer->notify_removed(fd, ((SelectorMask) (1 << i)));
 	}
     }
     _selector_entries[fd].clear(mask);
@@ -320,4 +323,19 @@ SelectorList::callback_bad_descriptors()
     }
     /* Assert should only fail if OS checks stat struct before fd (??) */
     assert(bc != 0);
+}
+
+
+void 
+SelectorList::set_observer(const SelectorObserverBase& obs)
+{
+    _observer = &obs;
+    return;
+}
+
+void 
+SelectorList::remove_observer()
+{
+    _observer = NULL;
+    return;
 }

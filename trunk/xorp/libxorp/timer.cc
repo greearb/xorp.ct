@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.8 2003/04/02 17:10:38 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.9 2003/04/06 04:38:33 jcardona Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -360,6 +360,7 @@ TimerList::schedule_node(TimerNode* n)
     acquire_lock();
     push(n->expiry(), n);
     release_lock();
+    if (_observer) _observer->notify_scheduled(n->expiry());
 }
 
 void
@@ -368,5 +369,17 @@ TimerList::unschedule_node(TimerNode *n)
     acquire_lock();
     pop_obj((void *)n);
     release_lock();
+    if (_observer) _observer->notify_unscheduled(n->expiry());
 }
 
+void 
+TimerList::set_observer(TimerObserverBase& obs)
+{
+    _observer=&obs;
+}
+
+void 
+TimerList::remove_observer()
+{
+    _observer=NULL;
+}
