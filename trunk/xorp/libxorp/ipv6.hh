@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.2 2003/01/16 19:09:28 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -314,7 +314,20 @@ public:
      * of 4 unsigned 32-bit integers.
      */
     const uint32_t *addr() const { return _addr; }
-    
+
+    /**
+     * Copy the IPv6 raw address to specified memory location.
+     *
+     * @param: dst the pointer to the memory to copy the address to
+     * @return the number of copied octets.
+     * Assume the pointer is valid and properly aligned.
+     */
+    size_t copy_out(uint8_t *dst) const {
+        memcpy(dst, _addr, 16);
+        return 16;
+    }
+
+
     /**
      * Set the address value.
      * 
