@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libfeaclient/Makefile.am,v 1.3 2003/08/28 00:08:54 hodson Exp $
+## $XORP: xorp/libfeaclient/Makefile.am,v 1.4 2003/09/03 23:20:17 hodson Exp $
 ##
 
 # -- Real Programs
@@ -27,11 +27,11 @@ libfeaclient_a_SOURCES += xrl_ifmgr_mirror.cc
 
 # -- Test Programs
 TESTS			= test_local_copy
-#__TESTS		       += test_remote_copy
+TESTS		       += test_remote_copy
 
 # -- No-install Programs
 noinst_PROGRAMS		= test_local_copy
-#__noinst_PROGRAMS	       += test_remote_copy
+noinst_PROGRAMS	       += test_remote_copy
 
 # -- Libraries and library flags to link the binary programs
 LDADD			= ./libfeaclient.a
@@ -43,9 +43,12 @@ LDADD		       += $(top_builddir)/libxorp/libxorp.a
 # -- Program Sources
 test_local_copy_SOURCES = test_local_copy.cc
 
-# XXX Not yet
-#__test_remote_copy_SOURCES = test_remote_copy.cc
-#__test_remote_copy_LDADD	= $(top_builddir)/libxipc/libfinder.a $(LDADD)
+test_remote_copy_SOURCES = test_remote_copy.cc
+test_remote_copy_LDADD	= $(LDADD)
+test_remote_copy_LDADD	+= $(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.a
+test_remote_copy_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+test_remote_copy_LDADD  += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
+test_remote_copy_LDADD	+= $(top_builddir)/libxipc/libfinder.a
 
 ################################################################
 ##

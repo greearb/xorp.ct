@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.1 2003/09/03 23:18:51 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 #define __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 
+#include "ifmgr_atoms.hh"
 #include "ifmgr_cmd_base.hh"
 #include "ifmgr_cmd_queue.hh"
 
@@ -94,6 +95,80 @@ protected:
 
     IfMgrCommandFifoQueue _queue;
     bool		  _pending;
+};
+
+
+class IfMgrXrlReplicatorManager;
+
+/**
+ * @short An IfMgrXrlReplicator managed by an IfMgrXrlReplicatorManager.
+ *
+ * This class implements the functionality of an IfMgrXrlReplicator,
+ * and is used by an IfMgrXrlReplicatorManager.  Instances of
+ * IfMGrXrlReplicatorManager contain a set of these objects.  When an
+ * error occurs with IPC the objects request removal from the manager,
+ * which causes their destruction.
+ */
+class IfMgrManagedXrlReplicator : public IfMgrXrlReplicator {
+public:
+    IfMgrManagedXrlReplicator(IfMgrXrlReplicatorManager& manager,
+			      XrlSender&		 sender,
+			      const string&		 target_name);
+
+protected:
+    void xrl_error_event(const XrlError& e);
+
+private:
+    IfMgrXrlReplicatorManager&	_mgr;
+};
+
+
+class XrlRouter;
+
+/**
+ * @short Class that builds and maintains replicator state for
+ * multiple remote targets.
+ */
+class IfMgrXrlReplicatorManager : public IfMgrCommandSinkBase {
+public:
+    typedef IfMgrCommandSinkBase::Cmd Cmd;
+
+public:
+    IfMgrXrlReplicatorManager(XrlRouter& rtr);
+
+    ~IfMgrXrlReplicatorManager();
+
+    /**
+     * Add a remote mirror.  The name of the mirror is added to list
+     * of known targets and immediately sent a copy of the
+     * configuration tree.
+     *
+     * @param xrl_target_name target to be added.
+     * @return true on success, false if target already exists.
+     */
+    bool add_mirror(const string& xrl_target_name);
+
+    /**
+     * Remove remote mirror.
+     * @param xrl_target_name target to be removed.
+     */
+    bool remove_mirror(const string& xrl_target_name);
+
+    /**
+     * Apply command to local configuration tree and forward Xrls to
+     * targets to replicate state remotely if application to local tree
+     * succeeds.
+     */
+    void push(const Cmd& c);
+
+    inline const IfMgrIfTree& iftree() const		{ return _iftree; }
+
+private:
+    typedef list<IfMgrManagedXrlReplicator*> Outputs;
+
+    IfMgrIfTree _iftree;
+    XrlRouter&	_rtr;
+    Outputs	_outputs;
 };
 
 #endif // __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__

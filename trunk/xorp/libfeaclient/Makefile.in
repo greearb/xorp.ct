@@ -100,12 +100,10 @@ noinst_LIBRARIES = libfeaclient.a
 libfeaclient_a_SOURCES = libfeaclient_module.h ifmgr_atoms.hh ifmgr_cmd_base.hh ifmgr_cmds.hh ifmgr_cmd_queue.hh ifmgr_xrl_replicator.hh xrl_ifmgr_mirror.hh ifmgr_atoms.cc ifmgr_cmds.cc ifmgr_cmd_queue.cc ifmgr_xrl_replicator.cc xrl_ifmgr_mirror.cc
 
 # -- Test Programs
-TESTS = test_local_copy
-#__TESTS		       += test_remote_copy
+TESTS = test_local_copy test_remote_copy
 
 # -- No-install Programs
-noinst_PROGRAMS = test_local_copy
-#__noinst_PROGRAMS	       += test_remote_copy
+noinst_PROGRAMS = test_local_copy test_remote_copy
 
 # -- Libraries and library flags to link the binary programs
 LDADD = ./libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
@@ -113,10 +111,9 @@ LDADD = ./libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $
 # -- Program Sources
 test_local_copy_SOURCES = test_local_copy.cc
 
+test_remote_copy_SOURCES = test_remote_copy.cc
+test_remote_copy_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/libxipc/libfinder.a
 
-# XXX Not yet
-#__test_remote_copy_SOURCES = test_remote_copy.cc
-#__test_remote_copy_LDADD	= $(top_builddir)/libxipc/libfinder.a $(LDADD)
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -133,7 +130,7 @@ am_libfeaclient_a_OBJECTS = ifmgr_atoms.$(OBJEXT) ifmgr_cmds.$(OBJEXT) \
 	xrl_ifmgr_mirror.$(OBJEXT)
 libfeaclient_a_OBJECTS = $(am_libfeaclient_a_OBJECTS)
 bin_PROGRAMS =
-noinst_PROGRAMS = test_local_copy$(EXEEXT)
+noinst_PROGRAMS = test_local_copy$(EXEEXT) test_remote_copy$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_local_copy_OBJECTS = test_local_copy.$(OBJEXT)
@@ -145,6 +142,18 @@ test_local_copy_DEPENDENCIES = ./libfeaclient.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_local_copy_LDFLAGS =
+am_test_remote_copy_OBJECTS = test_remote_copy.$(OBJEXT)
+test_remote_copy_OBJECTS = $(am_test_remote_copy_OBJECTS)
+test_remote_copy_DEPENDENCIES = ./libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/libxipc/libfinder.a
+test_remote_copy_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -157,6 +166,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/ifmgr_cmds.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifmgr_xrl_replicator.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_local_copy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_remote_copy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_ifmgr_mirror.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -169,9 +179,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libfeaclient_a_SOURCES) $(test_local_copy_SOURCES)
+DIST_SOURCES = $(libfeaclient_a_SOURCES) $(test_local_copy_SOURCES) \
+	$(test_remote_copy_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in
-SOURCES = $(libfeaclient_a_SOURCES) $(test_local_copy_SOURCES)
+SOURCES = $(libfeaclient_a_SOURCES) $(test_local_copy_SOURCES) $(test_remote_copy_SOURCES)
 
 all: all-am
 
@@ -222,6 +233,9 @@ clean-noinstPROGRAMS:
 test_local_copy$(EXEEXT): $(test_local_copy_OBJECTS) $(test_local_copy_DEPENDENCIES) 
 	@rm -f test_local_copy$(EXEEXT)
 	$(CXXLINK) $(test_local_copy_LDFLAGS) $(test_local_copy_OBJECTS) $(test_local_copy_LDADD) $(LIBS)
+test_remote_copy$(EXEEXT): $(test_remote_copy_OBJECTS) $(test_remote_copy_DEPENDENCIES) 
+	@rm -f test_remote_copy$(EXEEXT)
+	$(CXXLINK) $(test_remote_copy_LDFLAGS) $(test_remote_copy_OBJECTS) $(test_remote_copy_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -234,6 +248,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmgr_cmds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmgr_xrl_replicator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_local_copy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_remote_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_ifmgr_mirror.Po@am__quote@
 
 distclean-depend:

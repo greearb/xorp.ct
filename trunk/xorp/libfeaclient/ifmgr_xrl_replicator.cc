@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.1 2003/09/03 23:18:51 hodson Exp $"
 
 #include "config.h"
 
@@ -22,11 +22,11 @@
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 
-#include "libxipc/xrl_sender.hh"
+#include "libxipc/xrl_router.hh"
 #include "ifmgr_xrl_replicator.hh"
 
-IfMgrXrlReplicator::IfMgrXrlReplicator(XrlSender& sender,
-		   const string& xrl_target_name)
+IfMgrXrlReplicator::IfMgrXrlReplicator(XrlSender&	sender,
+				       const string&	xrl_target_name)
     : _s(sender), _tgt(xrl_target_name), _pending(false)
 {
 }
@@ -37,10 +37,10 @@ IfMgrXrlReplicator::push(const Cmd& cmd)
     if (_queue.empty()) {
 	XLOG_ASSERT(_pending == false);
 	_queue.push(cmd);
+	crank();
     } else {
 	XLOG_ASSERT(_pending == true);
 	_queue.push(cmd);
-	crank();
     }
 }
 
@@ -91,4 +91,82 @@ void
 IfMgrXrlReplicator::xrl_error_event(const XrlError& err)
 {
     XLOG_ERROR("%s", err.str().c_str());
+}
+
+
+
+IfMgrManagedXrlReplicator::IfMgrManagedXrlReplicator
+(
+ IfMgrXrlReplicatorManager&	m,
+ XrlSender&			s,
+ const string&			n
+ )
+    : IfMgrXrlReplicator(s,n), _mgr(m)
+{
+}
+
+void
+IfMgrManagedXrlReplicator::xrl_error_event(const XrlError& /* e */)
+{
+    XLOG_INFO("An error occurred sending an Xrl to \"%s\".  Target is being "
+	      "removed from list of interface update receivers.",
+	      xrl_target_name().c_str());
+    _mgr.remove_mirror(xrl_target_name());
+}
+
+
+
+IfMgrXrlReplicatorManager::IfMgrXrlReplicatorManager(XrlRouter& r)
+    : _rtr(r)
+{
+}
+
+IfMgrXrlReplicatorManager::~IfMgrXrlReplicatorManager()
+{
+    while (_outputs.empty() == false) {
+	delete _outputs.front();
+	_outputs.pop_front();
+    }
+}
+
+bool
+IfMgrXrlReplicatorManager::add_mirror(const string& target_name)
+{
+    Outputs::const_iterator ci = _outputs.begin();
+    while (ci != _outputs.end()) {
+	if ((*ci)->xrl_target_name() == target_name)
+	    return false;
+	++ci;
+    }
+    _outputs.push_back(new
+		       IfMgrManagedXrlReplicator(*this, _rtr, target_name));
+
+    IfMgrIfTreeToCommands config_commands(_iftree);
+    config_commands.convert(*_outputs.back());
+    return true;
+}
+
+bool
+IfMgrXrlReplicatorManager::remove_mirror(const string& target_name)
+{
+    for (Outputs::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	if ((*i)->xrl_target_name() == target_name) {
+	    _outputs.erase(i);
+	    return true;
+	}
+    }
+    return false;
+}
+
+void
+IfMgrXrlReplicatorManager::push(const Cmd& cmd)
+{
+    if (cmd->execute(_iftree) == false) {
+	XLOG_ERROR("Apply bad command.");
+	return;
+    }
+
+    for (Outputs::iterator i = _outputs.begin(); _outputs.end() != i; ++i) {
+	(*i)->push(cmd);
+    }
 }

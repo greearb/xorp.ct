@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.3 2003/08/28 00:08:54 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.4 2003/09/03 23:20:17 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -1074,4 +1074,58 @@ IfMgrIPv6SetEndpoint::str() const
 {
     return ipv6_str_begin(this, "SetEndpoint") + ", " +
 	oaddr().str() + ipv6_str_end();
+}
+
+
+// ----------------------------------------------------------------------------
+//
+// 	 		   H I N T   C O M M A N D S
+//
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// IfMgrHintCommandBase
+
+bool
+IfMgrHintCommandBase::execute(IfMgrIfTree&) const
+{
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrHintTreeComplete
+
+bool
+IfMgrHintTreeComplete::forward(XrlSender&		sender,
+			       const string&		xrl_target,
+			       const IfMgrXrlSendCB&	xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_hint_tree_complete(xt, xcb);
+}
+
+string
+IfMgrHintTreeComplete::str() const
+{
+    return "IfMgrHintTreeComplete";
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrHintUpdatesMade
+
+bool
+IfMgrHintUpdatesMade::forward(XrlSender&		sender,
+			       const string&		xrl_target,
+			       const IfMgrXrlSendCB&	xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_hint_updates_made(xt, xcb);
+}
+
+string
+IfMgrHintUpdatesMade::str() const
+{
+    return "IfMgrHintUpdatesMade";
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/xrl_ifmgr_mirror.hh,v 1.1 2003/08/26 19:04:39 hodson Exp $
+// $XORP: xorp/libfeaclient/xrl_ifmgr_mirror.hh,v 1.2 2003/08/28 00:08:55 hodson Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -41,10 +41,23 @@ public:
 };
 
 /**
+ * @short Base for classes that are interested in configuration event
+ * hint commands.
+ */
+class IfMgrHintObserver {
+public:
+    virtual ~IfMgrHintObserver() = 0;
+    virtual void tree_complete() = 0;
+    virtual void updates_made() = 0;
+};
+
+/**
  * @short Maintainer of a local mirror of central IfMgr configuration
  * state via Xrls sent by the IfMgr.
  */
-class XrlIfMgrMirror : protected XrlIfMgrMirrorRouterObserver {
+class XrlIfMgrMirror
+    : protected XrlIfMgrMirrorRouterObserver, protected IfMgrHintObserver
+{
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
 
@@ -103,11 +116,32 @@ public:
 
     Status status() const;
 
+    /**
+     * Attach an observer interested in receiving IfMgr hints.
+     * @param o observer to be attached.
+     * @return true on success, false if observer is already registered.
+     */
+    bool attach_hint_observer(IfMgrHintObserver* o);
+
+    /**
+     * Detach a party interested in receiving IfMgr hints.
+     * @param o observer to be detached.
+     * @return true on success, false if observer was not registered.
+     */
+    bool detach_hint_observer(IfMgrHintObserver* o);
+
 protected:
     void finder_ready_event();
     void finder_disconnect_event();
-
     void register_with_ifmgr();
+
+protected:
+    void tree_complete();
+    void updates_made();
+
+protected:
+    void set_status(Status s);
+    void register_cb(const XrlError& e);
 
 protected:
     EventLoop&			_e;
@@ -115,8 +149,9 @@ protected:
     IfMgrIfTree	   		_iftree;
     IfMgrCommandDispatcher	_dispatcher;
     XrlIfMgrMirrorTarget*	_xrl_tgt;
-    const char*			_rtarget;	// registration target (ifmgr)
+    string			_rtarget;	// registration target (ifmgr)
     Status			_status;
+    list<IfMgrHintObserver*>	_hint_observers;
 
     XorpTimer			_reg_timer;	// registration timer
 };

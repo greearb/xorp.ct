@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.3 2003/08/26 19:04:39 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.4 2003/09/03 23:20:17 hodson Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -53,36 +53,70 @@ protected:
     IfMgrCommandSinkBase& _o2;
 };
 
+
 /**
- * @short 2-way IfMgr Command Tee class.  Instances push commands
+ * @short N-way IfMgr Command Tee class.  Instances push commands
  * pushed into them into two object derived from @ref IfMgrCommandSinkBase.
  */
+template <typename SinkType = IfMgrCommandSinkBase>
 class IfMgrNWayCommandTee : public IfMgrCommandSinkBase {
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
+    typedef list<SinkType*> SinkList;
 
 public:
     void push(const Cmd& cmd);
 
     /**
      * Add an additional output for pushed commands.
-     * @param output receiver for commands pushed into instance.
-     * @return true if output is successfully added, false otherwise.
+     * @param sink receiver for commands pushed into instance.
+     * @return true if sink is successfully added, false otherwise.
      */
-    bool add_output(IfMgrCommandSinkBase* output);
+    bool add_sink(SinkType* sink);
 
     /**
-     * Remove an output for pushed commands.
-     * @param output receiver for commands pushed into instance.
-     * @return true if output is successfully remove, false otherwise.
+     * Remove an sink for pushed commands.
+     * @param sink receiver for commands pushed into instance.
+     * @return true if sink is successfully remove, false otherwise.
      */
-    bool remove_output(IfMgrCommandSinkBase* output);
+    bool remove_sink(SinkType* sink);
 
 protected:
-    typedef list<IfMgrCommandSinkBase*> OutputList;
-    OutputList _outputs;
+    SinkList _sinks;
 };
 
+template <typename SinkType>
+void
+IfMgrNWayCommandTee<SinkType>::push(const Cmd& cmd)
+{
+    typename SinkList::iterator i;
+    for (i = _sinks.begin(); i != _sinks.end(); ++i) {
+	(*i)->push(cmd);
+    }
+}
+
+template <typename SinkType>
+bool
+IfMgrNWayCommandTee<SinkType>::add_sink(SinkType* o)
+{
+    if (find(_sinks.begin(), _sinks.end(), o) != _sinks.end())
+	return false;
+    _sinks.push_back(o);
+    return true;
+}
+
+template <typename SinkType>
+bool
+IfMgrNWayCommandTee<SinkType>::remove_sink(SinkType* o)
+{
+    typename SinkList::iterator i = find(_sinks.begin(), _sinks.end(), o);
+    if (i == _sinks.end())
+	return false;
+    _sinks.erase(i);
+    return true;
+}
+
+
 /**
  * @short Class to dispatch Interface Manager Commands.
  *

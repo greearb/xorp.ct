@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.1 2003/08/22 23:19:02 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.2 2003/09/03 23:20:17 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -757,4 +757,53 @@ protected:
     IPv6 _oaddr;
 };
 
+
+/**
+ * @short Base class for configuration events.
+ *
+ * These commands serve as hints to remote command recipients, eg complete
+ * config tree sent, changes made.
+ */
+class IfMgrHintCommandBase : public IfMgrCommandBase {
+public:
+    /**
+     * Apply command to local tree.  This is a no-op for this class
+     * and its derivatives.
+     *
+     * @return success indication, always true.
+     */
+    bool execute(IfMgrIfTree& tree) const;
+};
+
+class IfMgrHintTreeComplete : public IfMgrHintCommandBase {
+public:
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+    string str() const;
+};
+
+class IfMgrHintUpdatesMade : public IfMgrHintCommandBase {
+public:
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+    string str() const;
+};
+
 #endif // __LIBFEACLIENT_IFMGR_CMDS_HH__
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

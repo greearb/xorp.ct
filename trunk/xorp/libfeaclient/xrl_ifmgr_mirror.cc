@@ -12,15 +12,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.2 2003/08/27 17:13:55 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.3 2003/08/28 00:08:55 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 
 #include "libxipc/xrl_std_router.hh"
-
+#include "xrl/interfaces/fea_ifmgr_replicator_xif.hh"
 #include "ifmgr_cmds.hh"
 #include "xrl_ifmgr_mirror.hh"
+
+//----------------------------------------------------------------------------
+// XrlIfMgrMirrorRouterObserver
+
+XrlIfMgrMirrorRouterObserver::~XrlIfMgrMirrorRouterObserver()
+{
+}
+
+//----------------------------------------------------------------------------
+// IfMgrHintObserver
+
+IfMgrHintObserver::~IfMgrHintObserver()
+{
+}
 
 // ----------------------------------------------------------------------------
 // XrlIfMgrMirrorTarget
@@ -35,6 +49,9 @@
 class XrlIfMgrMirrorTarget : protected XrlFeaIfmgrMirrorTargetBase {
 public:
     XrlIfMgrMirrorTarget(XrlRouter& rtr, IfMgrCommandDispatcher& dispatcher);
+
+    bool attach(IfMgrHintObserver* o);
+    bool detach(IfMgrHintObserver* o);
 
 protected:
     XrlCmdError common_0_1_get_target_name(
@@ -222,6 +239,10 @@ protected:
 	const IPv6&	addr,
 	const IPv6&	oaddr);
 
+    XrlCmdError fea_ifmgr_mirror_0_1_hint_tree_complete();
+
+    XrlCmdError fea_ifmgr_mirror_0_1_hint_updates_made();
+
 protected:
     // Not implemented
     XrlIfMgrMirrorTarget();
@@ -231,6 +252,7 @@ protected:
 protected:
     XrlRouter&		    _rtr;
     IfMgrCommandDispatcher& _dispatcher;
+    IfMgrHintObserver*	    _hint_observer;
 };
 
 // ----------------------------------------------------------------------------
@@ -240,7 +262,8 @@ static const char* DISPATCH_FAILED = "Local dispatch error";
 
 XrlIfMgrMirrorTarget::XrlIfMgrMirrorTarget(XrlRouter&		 rtr,
 					   IfMgrCommandDispatcher& dispatcher)
-    : XrlFeaIfmgrMirrorTargetBase(&rtr), _rtr(rtr), _dispatcher(dispatcher)
+    : XrlFeaIfmgrMirrorTargetBase(&rtr), _rtr(rtr), _dispatcher(dispatcher),
+      _hint_observer(0)
 {
 }
 
@@ -670,6 +693,42 @@ XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
     return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
 }
 
+bool
+XrlIfMgrMirrorTarget::attach(IfMgrHintObserver* ho)
+{
+    if (_hint_observer != 0) {
+	return false;
+    }
+    _hint_observer = ho;
+    return true;
+}
+
+bool
+XrlIfMgrMirrorTarget::detach(IfMgrHintObserver* ho)
+{
+    if (_hint_observer != ho) {
+	return false;
+    }
+    _hint_observer = 0;
+    return true;
+}
+
+XrlCmdError
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_hint_tree_complete()
+{
+    if (_hint_observer)
+	_hint_observer->tree_complete();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlIfMgrMirrorTarget::fea_ifmgr_mirror_0_1_hint_updates_made()
+{
+    if (_hint_observer)
+	_hint_observer->updates_made();
+    return XrlCmdError::OKAY();
+}
+
 
 // ----------------------------------------------------------------------------
 // XrlIfMgrMirrorRouter
@@ -754,36 +813,43 @@ const char* XrlIfMgrMirror::DEFAULT_REGISTRATION_TARGET = "XXX tbd";
 
 XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 			       const char*	rtarget)
-    : _e(e), _dispatcher (_iftree), _rtarget(rtarget)
+    : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
 {
     _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME);
     _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
+
     _rtr->attach(this);
+    _xrl_tgt->attach(this);
 }
 
 XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 			       IPv4		finder_addr,
 			       const char*	rtarget)
-    : _e(e), _dispatcher (_iftree), _rtarget(rtarget)
+    : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
 {
     _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME, finder_addr);
     _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
+
     _rtr->attach(this);
+    _xrl_tgt->attach(this);
 }
 
 XrlIfMgrMirror::XrlIfMgrMirror(EventLoop&	e,
 			       IPv4		finder_addr,
 			       uint16_t		finder_port,
 			       const char*	rtarget)
-    : _e(e), _dispatcher (_iftree), _rtarget(rtarget)
+    : _e(e), _dispatcher(_iftree), _rtarget(rtarget), _status(NO_FINDER)
 {
     _rtr = new XrlIfMgrMirrorRouter(e, CLSNAME, finder_addr, finder_port);
     _xrl_tgt = new XrlIfMgrMirrorTarget(*_rtr, _dispatcher);
+
     _rtr->attach(this);
+    _xrl_tgt->attach(this);
 }
 
 XrlIfMgrMirror::~XrlIfMgrMirror()
 {
+    _xrl_tgt->detach(this);
     _rtr->detach(this);
     delete _xrl_tgt;
     delete _rtr;
@@ -792,7 +858,7 @@ XrlIfMgrMirror::~XrlIfMgrMirror()
 void
 XrlIfMgrMirror::finder_disconnect_event()
 {
-    _status = NO_FINDER;
+    set_status(NO_FINDER);
     _iftree.clear();
 }
 
@@ -803,6 +869,81 @@ XrlIfMgrMirror::finder_ready_event()
 }
 
 void
+XrlIfMgrMirror::tree_complete()
+{
+    set_status(READY);
+    list<IfMgrHintObserver*>::const_iterator ci;
+    for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
+	IfMgrHintObserver* ho = *ci;
+	ho->tree_complete();
+    }
+}
+
+void
+XrlIfMgrMirror::updates_made()
+{
+    list<IfMgrHintObserver*>::const_iterator ci;
+    for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
+	IfMgrHintObserver* ho = *ci;
+	ho->updates_made();
+    }
+}
+
+bool
+XrlIfMgrMirror::attach_hint_observer(IfMgrHintObserver* o)
+{
+    if (find(_hint_observers.begin(), _hint_observers.end(), o)
+	!= _hint_observers.end()) {
+	return false;
+    }
+    _hint_observers.push_back(o);
+    return true;
+}
+
+bool
+XrlIfMgrMirror::detach_hint_observer(IfMgrHintObserver* o)
+{
+    list<IfMgrHintObserver*>::iterator i;
+    i = find(_hint_observers.begin(), _hint_observers.end(), o);
+    if (i == _hint_observers.end()) {
+	return false;
+    }
+    _hint_observers.erase(i);
+    return true;
+}
+
+void
 XrlIfMgrMirror::register_with_ifmgr()
 {
+    XrlIfmgrReplicatorV0p1Client c(_rtr);
+    if (c.send_register_ifmgr_mirror(_rtarget.c_str(),
+				     _rtr->instance_name(),
+				     callback(this,
+					      &XrlIfMgrMirror::register_cb))
+	== false) {
+	XLOG_FATAL("Failed to send registration to ifmgr");
+    }
+    set_status(REGISTERING_WITH_FEA);
+}
+
+void
+XrlIfMgrMirror::register_cb(const XrlError& e)
+{
+    if (e == XrlError::OKAY()) {
+	set_status(WAITING_FOR_TREE_IMAGE);
+    } else {
+	XLOG_FATAL("Failed to register with ifmgr: \"%s\"", e.str().c_str());
+    }
+}
+
+XrlIfMgrMirror::Status
+XrlIfMgrMirror::status() const
+{
+    return _status;
+}
+
+void
+XrlIfMgrMirror::set_status(Status s)
+{
+    _status = s;
 }
