@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.19 2004/05/28 22:27:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.20 2004/06/01 11:46:51 pavlin Exp $"
 
 
 #include <glob.h>
@@ -627,7 +627,7 @@ OpCommandList::top_level_commands() const
 	}
 
 	// TODO: XXX: Get rid of this hard-coded "help" string!!
-	commands.insert(make_pair(top_command, "help"));
+	commands.insert(make_pair(top_command, string("help")));
     }
     return commands;
 }
