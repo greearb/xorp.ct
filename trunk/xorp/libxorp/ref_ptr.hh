@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.5 2003/04/02 04:41:11 hodson Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.6 2003/04/02 04:44:16 hodson Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -109,6 +109,8 @@ public:
 template <class _Tp> 
 class ref_ptr {
 public:
+    typedef ref_ptr<const _Tp> const_ref_ptr;
+public:
     /**
      * Construct a reference pointer for object.
      *
@@ -119,7 +121,7 @@ public:
     ref_ptr(_Tp* __p = 0) 
         : _M_ptr(__p), 
 	_M_counter(ref_counter_pool::instance().new_counter())
-	{}
+    {}
 
     /**
      * Copy Constructor
@@ -220,7 +222,22 @@ public:
 	unref();
     }
 
-private:
+    inline operator const_ref_ptr()
+    {
+	const_ref_ptr crp(get(), /*_M_counter*/ counter());
+	return crp;
+    }
+
+    ref_ptr(_Tp* data, int32_t counter) : _M_ptr(data), _M_counter(counter)
+    {
+	ref_counter_pool::instance().incr_counter(_M_counter);
+    }
+    
+protected:
+    inline int32_t counter() const {
+	return _M_counter;
+    }
+    
     /**
      * Add reference.
      */
@@ -244,6 +261,16 @@ private:
     mutable _Tp*    _M_ptr;
     mutable int32_t _M_counter;	// index in ref_counter_pool
 };
+
+#if 0
+template <typename _Tp>
+ref_ptr<const _Tp>::
+ref_ptr(const ref_ptr<_Tp>& __r)
+	: _M_ptr(0), _M_counter(_r->_M_counter)
+{
+    ref_counter_pool::instance().incr_counter(_M_counter);
+}
+#endif
 
 /**
  * @short class for maintaining the storage of counters used by cref_ptr.
