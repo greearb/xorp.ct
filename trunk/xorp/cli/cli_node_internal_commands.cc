@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.8 2004/06/10 22:40:42 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.9 2005/01/31 23:59:12 pavlin Exp $"
 
 
 //
@@ -21,7 +21,11 @@
 
 
 #include "cli_module.h"
-#include "cli_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+
 #include "cli_node.hh"
 #include "cli_client.hh"
 #include "cli_command.hh"

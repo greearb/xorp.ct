@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_private.hh,v 1.3 2004/02/27 12:10:25 mjh Exp $
+// $XORP: xorp/cli/cli_private.hh,v 1.4 2004/06/10 22:40:43 hodson Exp $
 
 
 #ifndef __CLI_CLI_PRIVATE_HH__
@@ -22,12 +22,6 @@
 //
 // CLI implementation-specific definitions.
 //
-
-
-#include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "libxorp/ipvx.hh"
 
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.24 2004/06/12 03:35:03 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.25 2004/07/26 03:46:10 pavlin Exp $"
 
 
 //
@@ -21,15 +21,19 @@
 
 
 #include "cli_module.h"
-#include "cli_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/token.hh"
 #include "libxorp/utils.hh"
+
 #include "libcomm/comm_api.h"
+
 #include "cli_client.hh"
 #include "cli_command_pipe.hh"
-
-
+#include "cli_private.hh"
 
 
 //
