@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.11 2003/06/23 18:56:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.12 2003/09/30 18:27:06 pavlin Exp $"
 
 
 //
@@ -694,8 +694,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 int
 PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 {
-    // const size_t max_packet_size = PIM_MAXPACKET(family());
-    const size_t max_packet_size = 500;
+    const size_t max_packet_size = PIM_MAXPACKET(family());
     IPvX source_addr(family());
     PimJpHeader jp_header(pim_node());
     list<PimJpGroup *>::iterator iter;
@@ -736,7 +735,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		
 		if (pim_mre_sg->is_spt()) {
 		    // Note: If receiving (S,G) on the SPT, we only prune off
-		    // the shared tree if the rpf neighbors differ, i.e.
+		    // the shared tree if the RPF neighbors differ, i.e.
 		    // if ( RPF'(*,G) != RPF'(S,G) )
 		    if (pim_mre_wc->rpfp_nbr_wc() != pim_mre_sg->rpfp_nbr_sg())
 			goto add_prune_sg_rpt_label1;
@@ -760,7 +759,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    for (iter3 = iter3_begin; iter3 != iter3_end; ++iter3) {
 		PimMre *pim_mre_sg_rpt = iter3->second;
 		if (pim_mre_sg_rpt->inherited_olist_sg_rpt().none()) {
-		    // Note: all (*,G) olist interfaces sent rpt prunes
+		    // Note: all (*,G) olist interfaces received RPT prunes
 		    // for (S,G).
 		    goto add_prune_sg_rpt_label2;
 		} else if (pim_mre_wc->rpfp_nbr_wc()
@@ -781,7 +780,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    PimMre *pim_mre_sg = pim_mre_sg_rpt->sg_rpt_entry();
 		    if ((pim_mre_sg != NULL) && (pim_mre_sg->is_spt())) {
 			// Note: If receiving (S,G) on the SPT, we only prune
-			// off the shared tree if the rpf neighbors differ,
+			// off the shared tree if the RPF neighbors differ,
 			// i.e. if ( RPF'(*,G) != RPF'(S,G) )
 			if (pim_mre_wc->rpfp_nbr_wc()
 			    != pim_mre_sg->rpfp_nbr_sg())
