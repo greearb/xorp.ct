@@ -49,6 +49,11 @@ protocols {
 
 	%mandatory:	targetname;
 
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+
 	interface @ {
 	    vif @ {
 		address @ {
