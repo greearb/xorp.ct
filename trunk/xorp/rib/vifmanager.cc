@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.17 2003/05/23 23:24:08 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.18 2003/05/27 04:27:29 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -354,10 +354,7 @@ VifManager::xrl_result_get_configured_interface_names(
 							ifname, cb);
 	    _interfaces_remaining++;
 	}
-	if (alist->size() == 0) {
-	    //if there were no configured interfaces, we're done.
-	    update_state();
-	}
+	update_state();
 	return;
     }
     

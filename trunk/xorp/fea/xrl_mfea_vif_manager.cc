@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.10 2003/05/23 09:50:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.11 2003/05/23 23:35:01 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -282,7 +282,6 @@ XrlMfeaVifManager::xrl_result_register_all_interfaces_client(const XrlError& e)
 	// entries that are already there. First, find out the set of
 	// all interfaces.
 	//
-	debug_msg("Vif manager registration completed\n");
 	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
 	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_interface_names);
 	_ifmgr_client.send_get_all_interface_names(_fea_target_name.c_str(),
@@ -328,6 +327,7 @@ XrlMfeaVifManager::xrl_result_get_all_interface_names(
 						 ifname, cb);
 	    _interfaces_remaining++;
 	}
+	update_state();
 	return;
     }
     
