@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# $XORP: other/testbed/tools/xtreset.py,v 1.1.1.1 2002/12/11 23:55:14 hodson Exp $
+# $XORP: other/testbed/tools/xtreset.py,v 1.2 2003/02/12 22:08:03 atanu Exp $
 
 import os
 import getopt
@@ -73,8 +73,8 @@ def snmpget(mibinfo, host, community, objectid):
     Just map this call onto net-snmp
     """
 
-    com = cmdstring("snmpget")
-    for i in [mibinfo, host, community, objectid]:
+    com = cmdstring("snmpget -v 1")
+    for i in [mibinfo, "-c", community, host, objectid]:
         com += " " + i
 
     print com
@@ -97,8 +97,8 @@ def snmpset(mibinfo, host, community, objectid, type, value):
     Just map this call onto net-snmp
     """
 
-    com = cmdstring("snmpset")
-    for i in [mibinfo, host, community, objectid, type, value]:
+    com = cmdstring("snmpset -v 1")
+    for i in [mibinfo, "-c", community, host, objectid, type, value]:
         com += " " + i
 
     print com
