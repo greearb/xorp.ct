@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.18 2004/09/01 18:12:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.19 2004/09/09 19:01:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -207,6 +207,18 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	// nexthop_dl.sdl_index = ifindex(fte.vifname());
     }
     fte.net().netmask().copy_out(*sin_netmask);
+
+#ifdef notyet
+    // Handle discard routes. The nexthop *must* be a loopback interface,
+    // or the IP address of one. If it is not, display a warning.
+    if (fte.is_discard()) {
+	if (!fte.nexthop().is_loopback())
+	    XLOG_WARNING(
+"Nexthop of a blackhole route is not loopback; overwriting it.");
+	IPvX::LOOPBACK(family).copy_out(*sin_nexthop);
+	rtm->rtm_flags |= RTF_BLACKHOLE;
+    }
+#endif
 
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));

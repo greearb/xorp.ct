@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.11 2004/09/01 18:12:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.12 2004/09/09 19:00:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -274,6 +274,18 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	fte.nexthop().copy_out(data);
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
+
+#ifdef notyet
+    // Handle discard routes. These use a separate route type in
+    // netlink land. Unlike BSD, they should not need to point to
+    // a loopback interface.
+    if (fte.is_discard()) {
+	if (!fte.nexthop().is_loopback())
+	    XLOG_WARNING(
+"Nexthop of a blackhole route is not loopback; overwriting it.");
+	rtmsg->rtm_type = RTN_BLACKHOLE;
+    }
+#endif
 
     // Get the interface index
     if_index = 0;
