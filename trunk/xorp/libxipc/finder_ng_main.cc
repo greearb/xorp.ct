@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.5 2003/03/04 23:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.6 2003/03/05 02:28:33 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -34,22 +34,6 @@
 #include "finder_tcp_messenger.hh"
 #include "finder_ng_xrl_target.hh"
 #include "permits.hh"
-
-static jmp_buf tidy_exit;
-
-static void
-trigger_exit(int signo)
-{
-    fprintf(stderr, "Finder caught signal: %d\n", signo);
-    longjmp(tidy_exit, -1);
-}
-
-static void
-install_signal_traps(sig_t func)
-{
-    signal(SIGINT, func);
-    signal(SIGTERM, func);
-}
 
 static bool
 print_twirl()
@@ -188,24 +172,19 @@ finder_main(int argc, char* const argv[])
     //
     add_permitted_host(if_get_preferred());
     
-    install_signal_traps(trigger_exit);
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	EventLoop		 e;
-	FinderNG	  	 finder;
-	FinderNGTcpListener	 finder_tcp4_source(e,
-						    finder, finder.commands(),
-						    bind_addr, bind_port);
-	FinderNGXrlTarget finder_xrl_target(finder);
+	EventLoop e;
+	FinderNG f;
+	FinderNGTcpListener s(e, f, f.commands(), bind_addr, bind_port);
+	FinderNGXrlTarget x(f);
 	
 	XorpTimer twirl;
 	if (run_verbose)
 	    twirl = e.new_periodic(250, callback(print_twirl));
 	
-	if (setjmp(tidy_exit) == 0) {
-	    for (;;) {
-		e.run();
-	    }
+	for (;;) {
+	    e.run();
 	}
     } catch (const InvalidPort& i) {
 	fprintf(stderr, "%s: a finder may already be running.\n",
@@ -213,7 +192,6 @@ finder_main(int argc, char* const argv[])
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
-    install_signal_traps(SIG_DFL);
 }
 
 int
