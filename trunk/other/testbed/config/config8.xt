@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/config7.xt,v 1.3 2002/12/19 01:36:50 pavlin Exp $
+# $XORP: other/testbed/config/config8.xt,v 1.1 2003/01/08 00:24:46 pavlin Exp $
 #
 # Shared testbed configuration:
 #
@@ -48,7 +48,7 @@ router = xorp2
 vlan[net 10.1.0.0/24] = xorp0.t0[10.1.0.1], xorp1.t2[10.1.0.2]
 vlan[net 10.2.0.0/24] = xorp1.t0[10.2.0.1], xorp2.t1[10.2.0.2], xorp3.t3[10.2.0.3], xorp4.t6[10.2.0.4]
 vlan[net 10.3.0.0/24] = xorp2.t0[10.3.0.1], xorp3.t2[10.3.0.2]
-vlan[net 10.4.0.0/24] = xorp3.t0[10.4.0.1], xorp7.t0[10.4.0.2], xorp2.t2[10.4.0.3]
+vlan[net 10.4.0.0/24] = xorp3.t0[10.4.0.1], xorp7.t0[10.4.0.2], xorp3.t2[10.4.0.3]
 vlan[net 10.5.0.0/24] = xorp6.t0[10.5.0.1], xorp4.t1[10.5.0.2]
 vlan[net 10.6.0.0/24] = xorp6.t1[10.6.0.1], xorp1.t3[10.6.0.2]
 vlan[net 10.7.0.0/24] = xorp4.t0[10.7.0.1], xorp7.t1[10.7.0.2]
