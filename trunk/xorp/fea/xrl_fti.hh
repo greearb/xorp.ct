@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.4 2003/05/02 07:50:49 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.5 2004/03/15 23:33:42 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -195,12 +195,9 @@ private:
 
     private:
 	EventLoop& eventloop() { return _xftm.ftic().eventloop(); }
-	bool	is_ipv4() const;
-	bool	is_ipv6() const;
 	void	send_fib_client_route_change();
 
-	typedef pair<bool, F>	AddDeleteFte;
-	list<AddDeleteFte>	_inform_fib_client_queue;
+	list<F>			_inform_fib_client_queue;
 	XorpTimer		_inform_fib_client_queue_timer;
 
 	string			_target_name;	// Target name of the client

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.3 2003/03/18 01:01:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.4 2004/03/15 23:33:42 pavlin Exp $"
 
 #include "xrl_fti.hh"
 
@@ -323,11 +323,11 @@ template<class F>
 void
 XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
 {
-    // Create the queue with the "add" commands
+    // Create the queue with the entries to add
     typename list<F>::const_iterator iter;
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const F& fte = *iter;
-	_inform_fib_client_queue.push_back(make_pair(true, fte));
+	_inform_fib_client_queue.push_back(fte);
     }
 
     // Start the timer to send all FIB entries
@@ -345,14 +345,12 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
     if (_inform_fib_client_queue.empty())
 	return;		// No more route changes to send
 
-    AddDeleteFte& add_delete_fte = _inform_fib_client_queue.front();
-    bool is_add = add_delete_fte.first;
-    F& fte = add_delete_fte.second;
+    F& fte = _inform_fib_client_queue.front();
 
     //
     // Send the appropriate XRLs
     //
-    if (is_add) {
+    if (! fte.is_deleted()) {
 	// Add a route
 	success = _xftm.send_fib_client_add_route(_target_name, fte);
     } else {
