@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.9 2004/02/12 07:00:49 atanu Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.10 2004/02/24 03:16:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -22,7 +22,33 @@
 #include "bgp_trie.hh"
 
 class EventLoop;
-
+/**
+ * @short DeletionTable is a temporary route table used to delete
+ * routes when a peer goes down
+ * 
+ * When a peer goes down, all the routes stored in a RibIn need to be
+ * deleted.  However, this can take some time, so it cannot occur in
+ * one atomic operation, so it must be done route-by-route as a
+ * background task.  This is complicated by the fact that the peering
+ * may come back up while this background deletion is occuring, and
+ * new routes may appear.  To handle the background deletion while
+ * keeping the RibIn simple, we simply create a new DeletionTable
+ * route table, plumb it in directly after the RibIn, and pass the
+ * RibIn's entire route trie to the DeletionTable.  RibIn can now
+ * forget these routes ever existed, and DeletionTable can get on with
+ * the background deletion task, unplumbing and deleting itself when
+ * no routes remain.
+ *
+ * Care must be taken to ensure that the downstream routing tables see
+ * consistent information.  For example, if there is a route for
+ * subnet X in the DeletionTable that has not yet been deleted, and an
+ * add_route for X comes downstream from rthe RibIn, then this would
+ * need to be propagated downstream as a replace_route.
+ *
+ * Note that if a peering flaps multiple times, multiple
+ * DeletionTables may be plumbed in, one after another, behind a
+ * RibInTable.
+ */
 template<class A>
 class DeletionTable : public BGPRouteTable<A>  {
 public:
