@@ -27,12 +27,16 @@ interface socket4/0.1 {
      *
      * @param local_port the port to bind socket to.
      *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
      * @param sockid return parameter that contains unique socket id when
      *        socket instantiation is successful.
      */
     tcp_open_and_bind		? creator:txt				\
 				& local_addr:ipv4			\
 				& local_port:u32			\
+				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -45,12 +49,16 @@ interface socket4/0.1 {
      *
      * @param local_port the port to bind socket to.
      *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
      * @param sockid return parameter that contains unique socket id when
      *        socket instantiation is successful.
      */
     udp_open_and_bind		? creator:txt				\
 				& local_addr:ipv4			\
 				& local_port:u32			\
+				& is_blocking:bool			\
 				-> sockid:txt
 
 
@@ -70,6 +78,9 @@ interface socket4/0.1 {
      *
      * @param reuse allow other sockets to bind to same multicast group.
      *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
      * @param sockid return parameter that contains unique socket id when
      *        socket instantiation is successful.
      */
@@ -79,6 +90,7 @@ interface socket4/0.1 {
 				& mcast_addr:ipv4			\
 				& ttl:u32				\
 				& reuse:bool				\
+				& is_blocking:bool			\
 				-> sockid:txt
 
 
@@ -96,6 +108,9 @@ interface socket4/0.1 {
      *
      * @param remote_port the remote port to connect to.
      *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
      * @param sockid return parameter that contains unique socket id when
      *        socket instantiation is successful.
      */
@@ -104,6 +119,7 @@ interface socket4/0.1 {
 				& local_port:u32			\
 				& remote_addr:ipv4			\
 				& remote_port:u32			\
+				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -120,6 +136,9 @@ interface socket4/0.1 {
      *
      * @param remote_port the remote port to connect to.
      *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
      * @param sockid return parameter that contains unique socket id when
      *        socket instantiation is successful.
      */
@@ -128,6 +147,7 @@ interface socket4/0.1 {
 				& local_port:u32			\
 				& remote_addr:ipv4			\
 				& remote_port:u32			\
+				& is_blocking:bool			\
 				-> sockid:txt
 
 

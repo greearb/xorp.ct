@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.5 2004/04/22 01:11:50 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.6 2004/06/10 22:40:59 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -95,11 +95,13 @@ public:
     XrlCmdError socket4_0_1_tcp_open_and_bind(const string&	creator,
 					      const IPv4&	local_addr,
 					      const uint32_t&	local_port,
+					      const bool&	is_blocking,
 					      string&		sockid);
 
     XrlCmdError socket4_0_1_udp_open_and_bind(const string&	creator,
 					      const IPv4&	local_addr,
 					      const uint32_t&	local_port,
+					      const bool&	is_blocking,
 					      string&		sockid);
 
     XrlCmdError socket4_0_1_udp_open_bind_join(const string&	creator,
@@ -108,6 +110,7 @@ public:
 					       const IPv4&	mcast_addr,
 					       const uint32_t&	ttl,
 					       const bool&	reuse,
+					       const bool&	is_blocking,
 					       string&		sockid);
 
     XrlCmdError socket4_0_1_tcp_open_bind_connect(const string&	creator,
@@ -115,6 +118,7 @@ public:
 						  const uint32_t& local_port,
 						  const IPv4&	remote_addr,
 						  const uint32_t& remote_port,
+						  const bool&	is_blocking,
 						  string&	sockid);
 
     XrlCmdError socket4_0_1_udp_open_bind_connect(const string&	creator,
@@ -122,6 +126,7 @@ public:
 						  const uint32_t& local_port,
 						  const IPv4&	remote_addr,
 						  const uint32_t& remote_port,
+						  const bool&	is_blocking,
 						  string&	sockid);
 
     XrlCmdError socket4_0_1_udp_join_group(const string&	sockid,
@@ -178,11 +183,13 @@ public:
     XrlCmdError socket6_0_1_tcp_open_and_bind(const string&	creator,
 					      const IPv6&	local_addr,
 					      const uint32_t&	local_port,
+					      const bool&	is_blocking,
 					      string&		sockid);
 
     XrlCmdError socket6_0_1_udp_open_and_bind(const string&	creator,
 					      const IPv6&	local_addr,
 					      const uint32_t&	local_port,
+					      const bool&	is_blocking,
 					      string&		sockid);
 
     XrlCmdError socket6_0_1_udp_open_bind_join(const string&	creator,
@@ -191,6 +198,7 @@ public:
 					       const IPv6&	mcast_addr,
 					       const uint32_t&	ttl,
 					       const bool&	reuse,
+					       const bool&	is_blocking,
 					       string&		sockid);
 
     XrlCmdError socket6_0_1_tcp_open_bind_connect(const string&	creator,
@@ -198,6 +206,7 @@ public:
 						  const uint32_t& local_port,
 						  const IPv6&	remote_addr,
 						  const uint32_t& remote_port,
+						  const bool&	is_blocking,
 						  string&	sockid);
 
     XrlCmdError socket6_0_1_udp_open_bind_connect(const string&	creator,
@@ -205,6 +214,7 @@ public:
 						  const uint32_t& local_port,
 						  const IPv6&	remote_addr,
 						  const uint32_t& remote_port,
+						  const bool&	is_blocking,
 						  string&	sockid);
 
     XrlCmdError socket6_0_1_udp_join_group(const string&	sockid,
