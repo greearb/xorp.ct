@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.6 2003/05/22 22:31:43 mjh Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.7 2003/05/22 22:57:08 mjh Exp $
  */
 
 
@@ -326,7 +326,7 @@ do {									\
 } while (0)
 
 /**
- * A marker that can be used in code that should never be executed.
+ * A marker that can be used to indicate code that should never be executed.
  * 
  * Note that it cannot be conditionally disabled and logs error through
  * the standard XLOG mechanism.
@@ -335,18 +335,21 @@ do {									\
 #define XLOG_UNREACHABLE()						\
 do {									\
 	XLOG_FATAL("Internal fatal error: unreachable code reached");	\
-        exit(1); /*keep the compiler happy*/				\
+	exit(1);	/* unreached: keep the compiler happy */	\
 } while (0)
 
 /**
  * A marker that can be used to indicate code that is not yet
  * implemented and hence should not be run.
+ * 
+ * Note that it cannot be conditionally disabled and logs error through
+ * the standard XLOG mechanism.
  * Always calls XLOG_FATAL.
  */
 #define XLOG_UNFINISHED()						\
 do {									\
 	XLOG_FATAL("Internal fatal error: unfinished code reached");	\
-        exit(1); /*keep the compiler happy*/				\
+	exit(1);	/* unreached: keep the compiler happy */	\
 } while (0)
 
 
