@@ -856,6 +856,7 @@ Optional Features:
   --with-openssl=DIR      specify root of OpenSSL installation
  --with-path-to-snmpd     Path to the snmpd executable
  --with-path-to-snmpd     Path to the net-snmpd source tree
+ --without-snmp            Do not build XORP MIBS for Net-SNMP
 
 Some influential environment variables:
   CC          C compiler command
@@ -1834,6 +1835,7 @@ if test "${with_path_to_snmpd+set}" = set; then
   snmpd=${withval}/snmpd;
 else
   snmpd="not_found";
+
 fi;
 
 
@@ -1843,6 +1845,17 @@ if test "${with_path_to_net_snmp_src+set}" = set; then
   path_to_net_snmp_src=${withval};
 else
   path_to_net_snmp_src="no";
+
+fi;
+
+
+# Check whether --with-snmp or --without-snmp was given.
+if test "${with_snmp+set}" = set; then
+  withval="$with_snmp"
+  snmp="no";
+else
+  snmp="yes";
+
 fi;
 
 
@@ -4241,7 +4254,9 @@ else
 fi
 
 
-# Extract the first word of "net-snmp-config", so it can be a program name with args.
+
+if test ${snmp} = "yes"; then
+    # Extract the first word of "net-snmp-config", so it can be a program name with args.
 set dummy net-snmp-config; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
@@ -4276,12 +4291,16 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-if test "${net_snmp_found}" = "true" ;  then
+else
+    net_snmp_found="skip_check"
+    snmpd="skip_check"
+fi
+
+if test ${net_snmp_found} = "true";  then
     net_snmp_v=`net-snmp-config --version`
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
     net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.`
-    net_snmp_v=`net-snmp-config --version`
     echo "$as_me:$LINENO: checking if net-snmp version equal or newer than 5.0.6" >&5
 echo $ECHO_N "checking if net-snmp version equal or newer than 5.0.6... $ECHO_C" >&6
 if test "${ac_cv_net_snmp_usable+set}" = set; then
@@ -4306,17 +4325,17 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_net_snmp_usable" >&5
 echo "${ECHO_T}$ac_cv_net_snmp_usable" >&6
     if test ${ac_cv_net_snmp_usable} != "yes" ; then
-	{ echo "$as_me:$LINENO: WARNING: \"net-snmp version too old.  MIB modules will not be built\"" >&5
-echo "$as_me: WARNING: \"net-snmp version too old.  MIB modules will not be built\"" >&2;}
+	{ echo "$as_me:$LINENO: WARNING: net-snmp version too old. MIB modules will not be built" >&5
+echo "$as_me: WARNING: net-snmp version too old. MIB modules will not be built" >&2;}
     fi
-else
-    { echo "$as_me:$LINENO: WARNING: \"net-snmp not found.  MIB modules will not be built\"" >&5
-echo "$as_me: WARNING: \"net-snmp not found.  MIB modules will not be built\"" >&2;}
+elif test ${net_snmp_found} = "no"; then
+    { echo "$as_me:$LINENO: WARNING: Net-SNMP not found! MIB modules will not be built" >&5
+echo "$as_me: WARNING: Net-SNMP not found! MIB modules will not be built" >&2;}
 fi
 
 
 
-if test ${snmpd} = "not_found" ; then
+if test ${snmpd} = "not_found"; then
     # Extract the first word of "snmpd", so it can be a program name with args.
 set dummy snmpd; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -4360,7 +4379,7 @@ fi
 
 fi
 
-if test ${snmpd} = "not_found" ; then
+if test ${snmpd} = "not_found";  then
     echo "checking again for snmpd in another directory"
     # Extract the first word of "snmpd", so it can be a program name with args.
 set dummy snmpd; ac_word=$2
@@ -4409,6 +4428,55 @@ fi
 if test ${snmpd} = "not_found" ; then
     { echo "$as_me:$LINENO: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&5
 echo "$as_me: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&2;}
+elif test ${snmpd} = "skip_check"; then
+    echo "$as_me:$LINENO: checking if snmpd can be started" >&5
+echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
+    echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6
+else
+    echo "$as_me:$LINENO: checking if snmpd can be started" >&5
+echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
+    # use the dlmod directive to see if the agent was compiled with dynamic
+    # MIB support.  dummy MIB modules will only generate warnings
+    echo 'dlmod dummy doubledummy' > conftestsnmp.conf
+    ${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:51515&
+    pid=$!
+    sleep 1
+    if ( ps | grep ${pid} > /dev/null ); then
+	kill ${pid}
+	# Verify that dlmod directive was recognized
+	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
+	    echo "-------------------------------------------------------------"
+	    echo "It looks like your Net-SNMP agent was not compiled with      "
+	    echo "support for shared libraries.  This is option is enabled by  "
+	    echo "default if your platform supports it.  You may try to recom- "
+	    echo "compile Net-SNMP with the option --enable-shared.            "
+            echo "If you are running Linux and Net-SNMP v 5.0.8 you may have   "
+	    echo -n "to apply this patch: "
+	    echo "http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694"
+	    echo ""
+	    echo "Or ./configure --without-snmp and XORP MIBs will not be built"
+	    echo "-------------------------------------------------------------"
+	    exit 1
+	fi
+        echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+    else
+        mv conftestsnmp.log snmp_error.log
+        echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+        echo "-------------------------------------------------------------"
+        echo "Unable to start snmpd.  See if the file snmp_error.log gives "
+        echo "a hint to solve the problem.  Possible error:"
+	echo ""
+	echo "Error opening specified endpoint \"udp:localhost:51515\""
+    	echo "Solution: the UDP port 51515 is being used by another application"
+	echo "    Close that app, or modify xorp/mibs/tests to use another port"
+	echo ""
+	echo "Or run ./configure --without-snmp and XORP MIBs will not be built"
+        echo "-------------------------------------------------------------"
+        exit 1
+    fi
 fi
 
 
@@ -8233,7 +8301,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile fea/Makefile libcomm/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mfea/Makefile mibs/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile libxipc/test_xrl_parser.sh mibs/tests/test_bgpmib.sh rib/test_rib_direct.sh rib/test_rib_xrls.sh"
+ac_config_files="$ac_config_files Makefile bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile fea/Makefile libcomm/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mfea/Makefile mibs/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile libxipc/test_xrl_parser.sh mibs/tests/test_bgpmib.sh rib/test_rib_direct.sh rib/test_rib_xrls.sh"
 ac_config_commands="$ac_config_commands default"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8744,6 +8812,7 @@ do
   "libxorp/Makefile" ) CONFIG_FILES="$CONFIG_FILES libxorp/Makefile" ;;
   "mfea/Makefile" ) CONFIG_FILES="$CONFIG_FILES mfea/Makefile" ;;
   "mibs/Makefile" ) CONFIG_FILES="$CONFIG_FILES mibs/Makefile" ;;
+  "mibs/tests/Makefile" ) CONFIG_FILES="$CONFIG_FILES mibs/tests/Makefile" ;;
   "mld6igmp/Makefile" ) CONFIG_FILES="$CONFIG_FILES mld6igmp/Makefile" ;;
   "mrt/Makefile" ) CONFIG_FILES="$CONFIG_FILES mrt/Makefile" ;;
   "ospfd/Makefile" ) CONFIG_FILES="$CONFIG_FILES ospfd/Makefile" ;;

@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.34 2003/05/22 11:52:20 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.35 2003/05/22 18:11:20 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -182,14 +182,24 @@ dnl ----------------------------
 dnl --with-path-to-snmpd
 dnl ----------------------------
 AC_ARG_WITH(path-to-snmpd, [ --with-path-to-snmpd     Path to the snmpd executable],
-	    [snmpd=${withval}/snmpd;], [snmpd="not_found";] )
+	    [snmpd=${withval}/snmpd;], [snmpd="not_found";] 
+)
 
 dnl ----------------------------
 dnl --with-path-to-net-snmp-src
 dnl ----------------------------
 AC_ARG_WITH(path-to-net-snmp-src, 
 	    [ --with-path-to-snmpd     Path to the net-snmpd source tree],
-	    [path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";] )
+	    [path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";] 
+)
+
+dnl ----------------------------
+dnl --without-snmp
+dnl ----------------------------
+AC_ARG_WITH(snmp, 
+	    [ --without-snmp            Do not build XORP MIBS for Net-SNMP],
+	    [snmp="no";], [snmp="yes";] 
+)
 
 
 
@@ -342,13 +352,22 @@ dnl ---------------------------------------------------------------------------
 dnl Check for programs 
 dnl ---------------------------------------------------------------------------
 
-AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
-if test "${net_snmp_found}" = "true" ;  then
+dnl ---------------------------------------------------------------------------
+dnl SNMP
+dnl ---------------------------------------------------------------------------
+
+if test ${snmp} = "yes"; then
+    AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
+else 
+    net_snmp_found="skip_check"
+    snmpd="skip_check"
+fi
+
+if test ${net_snmp_found} = "true";  then
     net_snmp_v=`net-snmp-config --version`
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.` 
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.` 
     net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.` 
-    net_snmp_v=`net-snmp-config --version`
     AC_CACHE_CHECK(if net-snmp version equal or newer than 5.0.6,
     ac_cv_net_snmp_usable,
 	net_snmp_too_old=false
@@ -367,19 +386,19 @@ if test "${net_snmp_found}" = "true" ;  then
 	fi
     )
     if test ${ac_cv_net_snmp_usable} != "yes" ; then
-	AC_MSG_WARN("net-snmp version too old.  MIB modules will not be built") 
+	AC_MSG_WARN(net-snmp version too old. MIB modules will not be built) 
     fi
-else
-    AC_MSG_WARN("net-snmp not found.  MIB modules will not be built")
+elif test ${net_snmp_found} = "no"; then
+    AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
 fi
 
 AC_SUBST(MIBS)
 
-if test ${snmpd} = "not_found" ; then
+if test ${snmpd} = "not_found"; then
     AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/local/sbin)
 fi
 
-if test ${snmpd} = "not_found" ; then
+if test ${snmpd} = "not_found";  then
     echo "checking again for snmpd in another directory"
     AC_PATH_PROG(snmpd2, snmpd, "not_found", /usr/sbin)
     snmpd=$snmpd2
@@ -387,6 +406,50 @@ fi
 
 if test ${snmpd} = "not_found" ; then
     AC_MSG_WARN("snmpd not found:  snmp test scripts will not work")
+elif test ${snmpd} = "skip_check"; then
+    AC_MSG_CHECKING(if snmpd can be started)   
+    AC_MSG_RESULT(skipped)
+else
+    AC_MSG_CHECKING(if snmpd can be started)   
+    # use the dlmod directive to see if the agent was compiled with dynamic
+    # MIB support.  dummy MIB modules will only generate warnings
+    echo 'dlmod dummy doubledummy' > conftestsnmp.conf
+    ${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:51515&
+    pid=$!
+    sleep 1
+    if ( ps | grep ${pid} > /dev/null ); then
+	kill ${pid} 
+	# Verify that dlmod directive was recognized
+	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
+	    echo "-------------------------------------------------------------"
+	    echo "It looks like your Net-SNMP agent was not compiled with      "
+	    echo "support for shared libraries.  This is option is enabled by  "
+	    echo "default if your platform supports it.  You may try to recom- "
+	    echo "compile Net-SNMP with the option --enable-shared.            "
+            echo "If you are running Linux and Net-SNMP v 5.0.8 you may have   "
+	    echo -n "to apply this patch: "
+	    echo "http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694"
+	    echo ""
+	    echo "Or ./configure --without-snmp and XORP MIBs will not be built"
+	    echo "-------------------------------------------------------------"
+	    exit 1
+	fi
+        AC_MSG_RESULT(yes)
+    else
+        mv conftestsnmp.log snmp_error.log
+        AC_MSG_RESULT(no)
+        echo "-------------------------------------------------------------"
+        echo "Unable to start snmpd.  See if the file snmp_error.log gives "
+        echo "a hint to solve the problem.  Possible error:"
+	echo ""
+	echo "Error opening specified endpoint \"udp:localhost:51515\""
+    	echo "Solution: the UDP port 51515 is being used by another application"
+	echo "    Close that app, or modify xorp/mibs/tests to use another port"
+	echo ""
+	echo "Or run ./configure --without-snmp and XORP MIBs will not be built"
+        echo "-------------------------------------------------------------"
+        exit 1
+    fi
 fi
 
 dnl ---------------------------------------------------------------------------
@@ -1140,6 +1203,7 @@ AC_OUTPUT(
 	libxorp/Makefile
 	mfea/Makefile
 	mibs/Makefile
+        mibs/tests/Makefile
 	mld6igmp/Makefile 
 	mrt/Makefile
 	ospfd/Makefile

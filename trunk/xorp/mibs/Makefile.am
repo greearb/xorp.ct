@@ -10,6 +10,8 @@
 # default settings.
 #
 
+SUBDIRS = tests
+
 #
 # This is the only shared object that needs to be installed.
 # By default it will be installed in directory @pkglibdir@ which
