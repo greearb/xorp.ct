@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.23 2005/03/05 01:41:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.24 2005/03/15 01:16:48 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -948,6 +948,7 @@ ProtoComm::close_proto_socket()
 		    // XXX: the control over the socket passed
 		    // to the MfeaMrouter
 		    //
+		    _proto_socket = -1;
 		    return (XORP_OK);
 	    }
 	}
