@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.12 2004/10/27 21:45:42 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.13 2004/11/30 20:08:09 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -424,6 +424,9 @@ private:
     bool delete_entry(const FteX& fte);
 
     ClickSocketReader _cs_reader;
+
+    map<IPv4Net, Fte4>	_fte_table4;
+    map<IPv6Net, Fte6>	_fte_table6;
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_SET_HH__

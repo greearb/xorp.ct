@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.5 2004/11/12 01:36:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.6 2004/11/12 07:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -92,41 +92,101 @@ FtiConfigEntrySetClick::stop()
 bool
 FtiConfigEntrySetClick::add_entry4(const Fte4& fte)
 {
+    bool ret_value;
+
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
-    return (add_entry(ftex));
+    ret_value = add_entry(ftex);
+
+    // Add the entry to the local copy of the forwarding table
+    if (ret_value) {
+	map<IPv4Net, Fte4>::iterator iter;
+
+	// Erase the entry with the same key (if exists)
+	iter = _fte_table4.find(fte.net());
+	if (iter != _fte_table4.end())
+	    _fte_table4.erase(iter);
+
+	_fte_table4.insert(make_pair(fte.net(), fte));
+    }
+
+    return (ret_value);
 }
 
 bool
 FtiConfigEntrySetClick::delete_entry4(const Fte4& fte)
 {
+    bool ret_value;
+
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
-    return (delete_entry(ftex));
+    ret_value = delete_entry(ftex);
+
+    // Delete the entry from the local copy of the forwarding table
+    if (ret_value) {
+	map<IPv4Net, Fte4>::iterator iter;
+
+	// Erase the entry with the same key (if exists)
+	iter = _fte_table4.find(fte.net());
+	if (iter != _fte_table4.end())
+	    _fte_table4.erase(iter);
+    }
+
+    return (ret_value);
 }
 
 bool
 FtiConfigEntrySetClick::add_entry6(const Fte6& fte)
 {
+    bool ret_value;
+
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
-    return (add_entry(ftex));
+    ret_value = add_entry(ftex);
+
+    // Add the entry to the local copy of the forwarding table
+    if (ret_value) {
+	map<IPv6Net, Fte6>::iterator iter;
+
+	// Erase the entry with the same key (if exists)
+	iter = _fte_table6.find(fte.net());
+	if (iter != _fte_table6.end())
+	    _fte_table6.erase(iter);
+
+	_fte_table6.insert(make_pair(fte.net(), fte));
+    }
+
+    return (ret_value);
 }
 
 bool
 FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
 {
+    bool ret_value;
+
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
-    return (delete_entry(ftex));
+    ret_value = delete_entry(ftex);
+
+    // Delete the entry from the local copy of the forwarding table
+    if (ret_value) {
+	map<IPv6Net, Fte6>::iterator iter;
+
+	// Erase the entry with the same key (if exists)
+	iter = _fte_table6.find(fte.net());
+	if (iter != _fte_table6.end())
+	    _fte_table6.erase(iter);
+    }
+
+    return (ret_value);
 }
 
 bool
