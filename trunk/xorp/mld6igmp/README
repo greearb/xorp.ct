@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.7 2003/11/06 23:18:06 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.8 2003/11/06 23:34:13 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -31,7 +31,7 @@ program (as a root).
 After ``test_mld6igmp'' is started, the MFEA and MLD/IGMP are
 disabled by default. To start them, and to configure their operation,
 as well as the MLD/IGMP operation, run script ``configure_mld6igmp''.
-Note that it MUST be run from the ``$(XORP)/mld6igmp'' directory.
+Note that it MUST be run from the ``${XORP}/mld6igmp'' directory.
 
 However, before running ``configure_mld6igmp'', you must configure
 it for each router:
@@ -83,10 +83,10 @@ Documentation
 =============
 
 The MLD/IGMP design architecture and code structure are described in:
-	$(XORP)/docs/mld6igmp/
+	${XORP}/docs/mld6igmp/
 
 The programming documentation is in:
-	$(XORP)/docs/kdoc/html/mld6igmp/
+	${XORP}/docs/kdoc/html/mld6igmp/
 
 Testing
 =======

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/README,v 1.6 2003/08/28 14:56:18 pavlin Exp $
+# $XORP: xorp/cli/README,v 1.7 2003/11/06 22:46:35 pavlin Exp $
 #
 
 Command-Line Interface Implementation
@@ -11,7 +11,7 @@ Startup
 =======
 
 Typically, the CLI is used as part of the "xorpsh" process
-(inside $XORP/rtrmgr/), but for debugging purpose any process
+(inside ${XORP}/rtrmgr/), but for debugging purpose any process
 may enable direct CLI access.
 
 After a process that provides direct CLI access is started, if you want

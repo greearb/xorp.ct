@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.6 2003/08/28 14:56:18 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.7 2003/11/06 23:08:01 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -106,10 +106,10 @@ Documentation
 =============
 
 The MFEA design architecture and code structure are described in:
-	$(XORP)/docs/mfea/
+	${XORP}/docs/mfea/
 
 The programming documentation is in:
-	$(XORP)/docs/kdoc/html/fea/
+	${XORP}/docs/kdoc/html/fea/
 
 Testing
 =======

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/README,v 1.5 2003/08/27 23:30:42 atanu Exp $
+# $XORP: xorp/bgp/README,v 1.6 2003/08/28 17:06:22 atanu Exp $
 #
 
 Border Gateway Protocol (BGP) Implementation
@@ -33,10 +33,10 @@ Documentation
 =============
 
 The BGP design architecture and code structure are described in:
-	$(XORP)/docs/bgp/
+	${XORP}/docs/bgp/
 
 The programming documentation is in:
-	$(XORP)/docs/kdoc/html/bgp/
+	${XORP}/docs/kdoc/html/bgp/
 
 Testing
 =======

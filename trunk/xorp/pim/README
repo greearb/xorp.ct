@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.10 2003/08/28 14:55:13 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.11 2003/11/06 23:31:40 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -40,7 +40,7 @@ program (as a root).
 After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
 disabled by default. To start them, and to configure their operation,
 as well as the PIM-SM operation, run script ``./configure_pim''.
-Note that it MUST be run from the ``$(XORP)/pim'' directory.
+Note that it MUST be run from the ``${XORP}/pim'' directory.
 
 However, before running ``./configure_pim'', you must configure
 it for each router:
@@ -115,17 +115,17 @@ Documentation
 =============
 
 The PIM-SM design architecture and code structure are described in:
-	$(XORP)/docs/pim/
+	${XORP}/docs/pim/
 
 The programming documentation is in:
-	$(XORP)/docs/kdoc/html/pim/
+	${XORP}/docs/kdoc/html/pim/
 
 Testing
 =======
 
 Currently, the PIM-SM testing is performed manually, by starting
 PIM-SM on a number of testbed machines. All tests performed so far are
-described in $(XORP)/docs/pim_testsuite/pim_testsuite.ps
+described in ${XORP}/docs/pim_testsuite/pim_testsuite.ps
 
 In the future, automated testing will be added, similar to
 the BGP testing framework.
@@ -142,7 +142,7 @@ on the specification in the following documents:
 The only major features not implemented yet are SSM support and security.
 
 Many detailed tests have been performed so far
-(see the "XORP PIM-SM Test Suite" document in $(XORP)/docs/pim_testsute/ or
+(see the "XORP PIM-SM Test Suite" document in ${XORP}/docs/pim_testsute/ or
 http://www.xorp.org/releases/current/docs/index.html), and the code appears
 to be spec-compliant and robust, but no guarantees it is bug-free of course.
 Further, even though IPv6 support for PIM-SM has been implemented as well,

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.17 2003/11/06 22:31:20 atanu Exp $
+# $XORP: xorp/README,v 1.18 2003/11/06 22:35:21 atanu Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -31,7 +31,7 @@ access.
 User-level XORP uses multi-process architecture with one process per
 routing protocol, and a novel inter-process communication mechanism
 called XRL (XORP Resource Locator). XRLs can be used across the network,
-therefore XORP can in principle run in distributed fashion.  For
+therefore XORP can in principle run in distributed fashion. For
 example, we can have a distributed router with the forwarding engine
 running on one machine, and each of the routing protocols that update
 the forwarding engine is running on a separate machine.
@@ -65,7 +65,7 @@ Supported platforms:
   * Linux RedHat-7.3 (kernel 2.4-20) with:
     - gcc/g++ version 2.96 (default)
 
-See $XORP/BUILD_NOTES for the list of additional platforms this
+See ${XORP}/BUILD_NOTES for the list of additional platforms this
 release of XORP may compile or work on.
 
 Currently, XORP implements the following protocols:
@@ -86,7 +86,7 @@ Currently, XORP implements the following protocols:
   * MLD v1 (not tested yet):
     - RFC 2710
 
-For description of the changes in each release, see $XORP/RELEASE_NOTES.
+For description of the changes in each release, see ${XORP}/RELEASE_NOTES.
 
 
 3. Compilation, configuration and startup
@@ -98,14 +98,14 @@ run the following commands in the top-level directory:
 ./configure
 gmake
 
-See $XORP/BUILD_NOTES for additional information of building XORP.
+See ${XORP}/BUILD_NOTES for additional information of building XORP.
 
 At this stage you should not expect to use the XORP code for other
 purposes than studying its architecture and running simple tests.
 
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
-refer to the rtrmgr documentation in the first place ($XORP/docs/rtrmgr/),
+refer to the rtrmgr documentation in the first place (${XORP}/docs/rtrmgr/),
 and then the documentation of the individual modules.
 
 
@@ -121,19 +121,19 @@ following places:
 
   * a high level architecture overview, available in
 
-	$XORP/docs/<modulename>/
+	${XORP}/docs/<modulename>/
 
   * kdoc-generated documentation, created with the script
 
-	$XORP/docs/kdoc/gen-kdoc.sh
+	${XORP}/docs/kdoc/gen-kdoc.sh
 
     whose output goes into
 
-	$XORP/docs/kdoc/html/<modulename>/
+	${XORP}/docs/kdoc/html/<modulename>/
 
     with top-level index file in
 
-	$XORP/docs/kdoc/html/index.html
+	${XORP}/docs/kdoc/html/index.html
 
 The content of each of the directory is the following:
 
@@ -151,7 +151,7 @@ The content of each of the directory is the following:
     The FEA implements the interface between XORP and the underlying
     forwarding engine (e.g., the UNIX kernel). It is used both for
     unicast and multicast. Note that the multicast-specific
-    documentation is in $XORP/docs/mfea.
+    documentation is in ${XORP}/docs/mfea.
 
   * libcomm : Communication socket library.
     Currently, it is used only by the cli.
@@ -168,7 +168,7 @@ The content of each of the directory is the following:
   * mibs : XORP MIB modules.
     XORP uses the Net-SNMP package (http://www.net-snmp.org/) as an SNMP
     agent, and implements only the necessary MIB modules.
-    The documentation is in $XORP/docs/snmp/.
+    The documentation is in ${XORP}/docs/snmp/.
 
   * mld6igmp : Multicast Listen Discovery/Internet Group Management
     Protocol (MLD/IGMP) implementation.

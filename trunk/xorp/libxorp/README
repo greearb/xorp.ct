@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxorp/README,v 1.6 2002/12/09 15:25:06 pavlin Exp $
+# $XORP: xorp/libxorp/README,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
 #
 
 	LIBXORP: XORP Common Library
@@ -11,10 +11,10 @@ Documentation
 =============
 
 Overview material is present in:
-	$(XORP)/docs/libxorp 
+	${XORP}/docs/libxorp 
 
 The programming documentation is in:
-	$(XORP)/docs/kdoc/html/libxorp
+	${XORP}/docs/kdoc/html/libxorp
 
 Status
 ======

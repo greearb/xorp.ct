@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README,v 1.4 2003/11/06 22:58:37 pavlin Exp $
+# $XORP: xorp/fea/README,v 1.5 2003/11/06 23:34:14 pavlin Exp $
 #
 
 Forwarding Engine Abstraction
@@ -20,9 +20,9 @@ The FEA is intended to fulfill several roles:
 Documentation
 =============
 
-The FEA architecture is described in $(XORP)/docs/fea.
+The FEA architecture is described in ${XORP}/docs/fea.
 For information about the multicast-related MFEA see README.mfea
-The MFEA architecture is described in $(XORP)/docs/mfea.
+The MFEA architecture is described in ${XORP}/docs/mfea.
 
 Status
 ======
@@ -33,6 +33,6 @@ it has plug-ins for systems implementing BSD's routing socket interface,
 and for Linux's netlink socket interface.
 It has been developed and tested on FreeBSD versions 4.5--4.7, and
 Linux RedHat-7.2, but it may work on NetBSD and OpenBSD as well
-(see $(XORP)/BUILD_NOTES for a complete list of all OS versions).
+(see ${XORP}/BUILD_NOTES for a complete list of all OS versions).
 Program ``fea_dummy'' is a functional FEA substitute for other systems.
 Neither FEA version is extensively tested.
