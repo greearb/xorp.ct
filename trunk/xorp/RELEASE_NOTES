@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.59 2005/01/21 20:48:25 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.60 2005/01/24 21:03:00 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,26 @@ This file contains XORP release notes (most recent releases first).
 Release 1.1 (2005/??/??)
 =========================
   ALL:
-    - 
+    - All "enabled: true/false" XORP configuration flags are now
+      renamed to "disable: false/true".
+
+    - Change the syntax for configuring the IPv4/IPv6 forwarding:
+      OLD:
+      fea {
+          enable-unicast-forwarding4: true
+          enable-unicast-forwarding6: true
+      }
+
+      NEW:
+      fea {
+          unicast-forwarding4 {
+              disable: false
+          }
+
+          unicast-forwarding6 {
+              disable: false
+          }
+      }
 
   LIBXORP:
     - Bug fix in ordering events scheduled at exactly the same time
