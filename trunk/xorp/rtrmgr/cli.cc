@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.45 2004/06/02 01:23:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.46 2004/06/02 03:57:31 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -1954,7 +1954,7 @@ RouterCLI::text_entry_func(const string& ,
 	}
     }
 
-    path_segments = splitpath(path);
+    path_segments = split(path, ' ');
 
     //
     // Push argv onto the list of path segments - there's no
@@ -2185,7 +2185,7 @@ RouterCLI::text_entry_func(const string& ,
     }
 
     // Preserve state for next time, and set up the command prompts
-    _path = splitpath(brace_ctn->path());
+    _path = split(brace_ctn->path(), ' ');
     if (_braces.size() == 1) {
 	// We're finishing text_entry mode
 	_braces.pop_front();
@@ -2835,23 +2835,4 @@ RouterCLI::makepath(const list<string>& parts) const
     }
 
     return path;
-}
-
-list <string>
-RouterCLI::splitpath(const string& origpath) const
-{
-    string path = origpath;
-    list <string> path_segments;
-
-    while (! path.empty()) {
-	string::size_type ix = path.find(' ');
-	if (ix == string::npos) {
-	    path_segments.push_back(path);
-	    break;
-	}
-	path_segments.push_back(path.substr(0, ix));
-	path = path.substr(ix + 1, path.size() - ix + 1);
-    }
-
-    return path_segments;
 }
