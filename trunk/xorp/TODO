@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/TODO,v 1.2 2003/04/16 07:45:54 pavlin Exp $
+# $XORP: xorp/TODO,v 1.3 2003/12/02 22:05:12 pavlin Exp $
 #
+
+* Standardize the version string format return by the
+  common_0_1_get_version XRL across all targets.
 
 * Add "-ansi" and "-pedantic" flags to the gcc/g++ compilation flags
 
