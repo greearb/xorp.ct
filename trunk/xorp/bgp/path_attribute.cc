@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.33 2003/09/05 01:02:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.34 2003/09/05 01:54:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -510,7 +510,7 @@ MPReachNLRIAttribute<IPv6>::encode()
     const_iterator i;
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	len += 1;
-	len += (i->prefix_len() + 8) / 8;
+	len += (i->prefix_len() + 7) / 8;
     }
 
     uint8_t *d = set_header(len);
@@ -538,7 +538,7 @@ MPReachNLRIAttribute<IPv6>::encode()
     *d++ = 0;	// Number of SNPAs
 
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
-	int bytes = (i->prefix_len() + 8)/ 8;
+	int bytes = (i->prefix_len() + 7)/ 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv6::addr_size()];
 	i->masked_addr().copy_out(buf);
@@ -647,8 +647,12 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     */
     while(data < end) {
 	uint8_t prefix_length = *data++;
-	int bytes = (prefix_length + 8)/ 8;
-	uint8_t buf[16];
+	size_t bytes = (prefix_length + 7)/ 8;
+	if(bytes > IPv6::addr_size())
+	    xorp_throw(CorruptMessage,
+		       c_format("prefix length too long %d", prefix_length),
+		       UPDATEMSGERR, OPTATTR);
+	uint8_t buf[IPv6::addr_size()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv6 nlri;
@@ -696,7 +700,7 @@ MPUNReachNLRIAttribute<IPv6>::encode()
     const_iterator i;
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	len += 1;
-	len += i->prefix_len() / 8;
+	len += (i->prefix_len() + 7)/ 8;
     }
 
     uint8_t *d = set_header(len);
@@ -710,11 +714,12 @@ MPUNReachNLRIAttribute<IPv6>::encode()
     *d++ = _safi;		// SAFIs
     
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
-	int bytes = i->prefix_len() / 8;
+	int bytes = (i->prefix_len() + 7)/ 8;
+	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv6::addr_size()];
 	i->masked_addr().copy_out(buf);
 
-	*d++ = bytes;
+	*d++ = i->prefix_len();
 	memcpy(d, buf, bytes);
 	d += bytes;
     }
@@ -768,8 +773,15 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     */
     while(data < end) {
 	uint8_t prefix_length = *data++;
-	int bytes = prefix_length / 8;
-	uint8_t buf[16];
+	debug_msg("decode prefix length = %d\n", prefix_length);
+	size_t bytes = (prefix_length + 7)/ 8;
+	if(bytes > IPv6::addr_size())
+	    xorp_throw(CorruptMessage,
+		       c_format("prefix length too long %d", prefix_length),
+		       UPDATEMSGERR, OPTATTR);
+	debug_msg("decode bytes = %d\n", bytes);
+	uint8_t buf[IPv6::addr_size()];
+	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv6 nlri;
 	nlri.set_addr(buf);
@@ -784,7 +796,7 @@ template <class A>
 string
 MPUNReachNLRIAttribute<A>::str() const
 {
-    string s = c_format("Multiprotocol UNReachable NLRI AFI = %d SAFI =%d\n",
+    string s = c_format("Multiprotocol UNReachable NLRI AFI = %d SAFI = %d\n",
 			_afi, _safi);
     typename list<IPNet<A> >::const_iterator i = wr_list().begin();
     for(; i != wr_list().end(); i++)
