@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.55 2004/09/17 13:50:53 abittau Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.56 2004/09/21 18:05:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -159,6 +159,9 @@ int
 BGPPlumbing::delete_route(const IPNet<IPv4>& net,
 			  PeerHandler* peer_handler) 
 {
+    if (main().profile().enabled(profile_route_ribin))
+	main().profile().log(profile_route_ribin,
+			     c_format("delete %s", net.str().c_str()));
     return plumbing_ipv4().delete_route(net, peer_handler);
 }
 
@@ -166,6 +169,9 @@ int
 BGPPlumbing::delete_route(const IPNet<IPv6>& net,
 			  PeerHandler* peer_handler) 
 {
+    if (main().profile().enabled(profile_route_ribin))
+	main().profile().log(profile_route_ribin,
+			     c_format("delete %s", net.str().c_str()));
     return plumbing_ipv6().delete_route(net, peer_handler);
 }
 
