@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.13 2003/06/26 01:39:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.14 2003/06/26 22:12:08 pavlin Exp $"
 
 
 //
@@ -390,28 +390,28 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
 
 // Return true if I am better metric
 bool
-AssertMetric::is_better(AssertMetric *a)
+AssertMetric::operator>(const AssertMetric& other) const
 {
     // The RPT flag: smaller is better
-    if ( (! rpt_bit_flag()) && a->rpt_bit_flag())
+    if ( (! rpt_bit_flag()) && other.rpt_bit_flag())
 	return (true);
-    if (rpt_bit_flag() && (! a->rpt_bit_flag()))
+    if (rpt_bit_flag() && (! other.rpt_bit_flag()))
 	return (false);
     
     // The metric preference: smaller is better
-    if (metric_preference() < a->metric_preference())
+    if (metric_preference() < other.metric_preference())
 	return (true);
-    if (metric_preference() > a->metric_preference())
+    if (metric_preference() > other.metric_preference())
 	return (false);
     
     // The route metric: smaller is better
-    if (metric() < a->metric())
+    if (metric() < other.metric())
 	return (true);
-    if (metric() > a->metric())
+    if (metric() > other.metric())
 	return (false);
     
     // The IP address: bigger is better
-    if (addr() > a->addr())
+    if (addr() > other.addr())
 	return (true);
     
     return (false);

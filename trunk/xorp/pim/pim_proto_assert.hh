@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_assert.hh,v 1.2 2003/01/13 20:40:23 pavlin Exp $
+// $XORP: xorp/pim/pim_proto_assert.hh,v 1.3 2003/03/10 23:20:50 hodson Exp $
 
 
 #ifndef __PIM_PIM_PROTO_ASSERT_HH__
@@ -39,15 +39,15 @@
 class AssertMetric {
 public:
     AssertMetric(const IPvX& addr) : _addr(addr) {}
-    bool	rpt_bit_flag() { return (_rpt_bit_flag); }
+    bool	rpt_bit_flag() const { return (_rpt_bit_flag); }
     void	set_rpt_bit_flag(bool v) { _rpt_bit_flag = v; }
-    uint32_t	metric_preference() { return (_metric_preference); }
+    uint32_t	metric_preference() const { return (_metric_preference); }
     void	set_metric_preference(uint32_t v) { _metric_preference = v; }
-    uint32_t	metric() { return (_metric); }
+    uint32_t	metric() const { return (_metric); }
     void	set_metric(uint32_t v) { _metric = v; }
-    const IPvX&	addr() { return (_addr); }
+    const IPvX&	addr() const { return (_addr); }
     void	set_addr(const IPvX& v) { _addr = v; }
-    bool	is_better(AssertMetric *a);
+    bool	operator>(const AssertMetric& other) const;
     
 private:
     bool	_rpt_bit_flag;		// The SPT/RPT bit

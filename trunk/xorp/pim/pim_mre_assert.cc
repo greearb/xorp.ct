@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.22 2003/06/26 22:17:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.23 2003/06/26 22:52:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -429,7 +429,7 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
 			 metric_s()
 			 : metric_rp());
     
-    i_am_assert_winner_bool = my_metric.is_better(assert_metric);
+    i_am_assert_winner_bool = (my_metric > *assert_metric);
     
     assert_state = ASSERT_STATE_NOINFO;
     do {
@@ -493,7 +493,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_LOSER:
-	if (assert_metric->is_better(assert_winner_metric_wc(vif_index))) {
+	if (*assert_metric > *assert_winner_metric_wc(vif_index)) {
 	    // Receive preferred assert
 	    goto a2;
 	}
@@ -611,7 +611,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_LOSER:
-	if (assert_metric->is_better(assert_winner_metric_sg(vif_index))) {
+	if (*assert_metric > *assert_winner_metric_sg(vif_index)) {
 	    // Receive preferred assert
 	    goto a2;
 	}
@@ -1340,7 +1340,7 @@ PimMre::set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v)
 	bool set_value = false;
 	if (v != NULL) {
 	    AssertMetric *assert_metric = spt_assert_metric(vif_index);
-	    if ((assert_metric == NULL) || (v->is_better(assert_metric))) {
+	    if ((assert_metric == NULL) || (*v > *assert_metric)) {
 		set_value = true;
 	    }
 	}
@@ -1855,7 +1855,7 @@ PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
     XLOG_ASSERT(my_assert_metric != NULL);
     XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
     // Test if my metric has become better
-    if (! my_assert_metric->is_better(winner_metric))
+    if (! (*my_assert_metric > *winner_metric))
 	return (false);
     goto a5;
     
@@ -1894,7 +1894,7 @@ PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
     XLOG_ASSERT(my_assert_metric != NULL);
     XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
     // Test if my metric has become better
-    if (! my_assert_metric->is_better(winner_metric))
+    if (! (*my_assert_metric > *winner_metric))
 	return (false);
     goto a5;
     

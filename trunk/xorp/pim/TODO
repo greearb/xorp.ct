@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.45 2003/06/26 22:21:18 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.46 2003/06/27 02:47:33 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -1091,30 +1091,13 @@ for the kernel patches as well.
 
 * AssertMetric::is_better(AssertMetric a) : replace with > and/or < operator
 
-* PimMre->rp_entry should return reference instead of pointer?
-  Or change all address return functions to return a pointer instead??
-
-* Some of the return values are useless (e.g. in pim_mrt.cc re. the
-  assert processing).
-
-* When "wrong iif" signal arrives, if it is not on one of
+* IMPL: When "wrong iif" signal arrives, if it is not on one of
   our oifs, and if we don't care about it,
   disable the "wrong iif" signal from the kernel for that (S,G) state
   (assuming the kernel supports that API).
 
-* When initializing PimMre, set all pointers to NULL!!!
-
-* When sending a J/P message toward a neighbor (e.g, an upstream), make
-  sure that nbr is non-NULL.
-
 * SPEC: If OverrideTimer expires, and RPF'(S,G,rpt) != RPF'(*,G)
   it is unclear what exactly the spec suggests.
-
-* The randomized computation of t_suppressed and t_override should
-  be done by a single function
-
-* PimMre::entry_try_remove() should be called from all set_foo_noinfo_state() 
-  functions
 
 * SPEC: upstream/downstream interface state names are inconistent.
   It should be sth. like:
