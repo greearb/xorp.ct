@@ -329,25 +329,19 @@ interface ripng/0.1 {
 					&  counter_values:list		\
 					&  peer_last_active:u32
 
-    /**
-     * Add a static route.
-     *
-     * @param network route target.
-     * @param nexthop path to direct packets for @ref network to.
-     * @param cost RIP cost [0--15].
-     */
-    add_static_route ? network:ipv6net					\
-		     & nexthop:ipv6					\
-		     & cost:u32
+     /**
+      * Configure protocol route import.
+      *
+      * @param protocol_name name of protocol to import routes from.
+      * @param cost RIP cost metric to assign to protocol routes.
+      * @param tag RIP tag to associate with protocol routes.
+      */
+     import_protocol_routes ? protocol_name:txt & cost:u32 & tag:u32
 
-    /**
-     * Remove static route.
-     *
-     * @param network route target.
-     *
-     * This method will fail if network was not previously added with
-     * add_static_route.
-     */
-     delete_static_route ? network:ipv6net
-
+     /**
+      * Remove protocol route import.
+      *
+      * @param protocol_name name of protocol to stop import of routes from.
+      */
+     no_import_protocol_routes ? protocol_name:txt
 }
