@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.17 2004/02/11 08:48:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.18 2004/03/04 17:49:56 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -237,12 +237,12 @@ RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
     print();
     XLOG_ASSERT(caller == _parent);
 
-    if (_next_table != NULL)
-	_next_table->add_route(route, this);
+    if (next_table() != NULL)
+	next_table()->add_route(route, this);
 
     notify_relevant_modules(true /* it's an add */, route);
 
-    debug_msg("Add route called on register table %s\n", _tablename.c_str());
+    debug_msg("Add route called on register table %s\n", tablename().c_str());
     return XORP_OK;
 }
 
@@ -256,8 +256,8 @@ RegisterTable<A>::delete_route(const IPRouteEntry<A>* route,
     print();
     XLOG_ASSERT(caller == _parent);
 
-    if (_next_table != NULL)
-	_next_table->delete_route(route, this);
+    if (next_table() != NULL)
+	next_table()->delete_route(route, this);
 
     notify_relevant_modules(false /* it's a delete */, *route);
     debug_msg("Delete route called on register table\n");
@@ -437,12 +437,12 @@ RegisterTable<A>::str() const
 {
     string s;
 
-    s = "-------\nRegisterTable: " + _tablename + "\n";
-    s += "parent = " + _parent -> tablename() + "\n";
-    if (_next_table == NULL)
+    s = "-------\nRegisterTable: " + tablename() + "\n";
+    s += "parent = " + _parent->tablename() + "\n";
+    if (next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + _next_table->tablename() + "\n";
+	s += "next table = " + next_table()->tablename() + "\n";
     return s;
 }
 

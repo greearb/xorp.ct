@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.6 2003/05/29 17:59:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.3 2004/02/11 08:48:48 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -97,8 +97,8 @@ template<typename A> string
 LogTable<A>::str() const
 {
     string s;
-    s = "-------\nLogTable: " + _tablename + "\n";
-    s += "parent = " + _parent -> tablename() + "\n";
+    s = "-------\nLogTable: " + tablename() + "\n";
+    s += "parent = " + _parent->tablename() + "\n";
     return s;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.7 2003/09/28 13:10:41 mjh Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.11 2004/02/11 08:48:47 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -154,7 +154,7 @@ template<class A>
 class RouteTable {
 public:
     RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
-    virtual ~RouteTable() {}
+    virtual ~RouteTable();
 
     virtual int add_route(const IPRouteEntry<A>& route,
 			  RouteTable*		 caller) = 0;
@@ -168,19 +168,21 @@ public:
 
     virtual RouteRange<A>* lookup_route_range(const A& addr) const = 0;
 
-    void set_next_table(RouteTable* next_table) { _next_table = next_table; }
-    RouteTable* next_table() { return _next_table; }
+    virtual void set_next_table(RouteTable* next_table);
 
     // parent is only supposed to be called on single-parent tables
     virtual RouteTable* parent() { XLOG_UNREACHABLE(); return NULL; }
 
     virtual TableType type() const = 0;
-    const string& tablename() const { return _tablename; }
     virtual void replumb(RouteTable* old_parent, RouteTable* new_parent) = 0;
     virtual string str() const = 0;
     virtual void flush() {}
 
-protected:
+    inline const string& tablename() const	{ return _tablename; }
+    inline RouteTable* next_table()		{ return _next_table; }
+    inline const RouteTable* next_table() const	{ return _next_table; }
+
+private:
     string	_tablename;
     RouteTable*	_next_table;
 };

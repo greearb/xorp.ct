@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.2 2003/09/27 22:32:46 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.4 2004/02/11 08:48:48 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -36,8 +36,8 @@ DeletionTable<A>::DeletionTable<A>(const string& tablename,
       _ip_route_table(ip_route_trie)
 {
     XLOG_ASSERT(_parent != NULL);
-    _next_table = _parent->next_table();
-    _next_table->replumb(parent, this);
+    set_next_table(_parent->next_table());
+    next_table()->replumb(parent, this);
     parent->set_next_table(this);
 
     // Callback immediately, but after network events or expired timers
@@ -47,7 +47,7 @@ DeletionTable<A>::DeletionTable<A>(const string& tablename,
 }
 
 template<class A>
-DeletionTable<A>::~DeletionTable<A>() 
+DeletionTable<A>::~DeletionTable<A>()
 {
     // Delete all the routes in the trie.
     delete_all_routes();
@@ -55,15 +55,15 @@ DeletionTable<A>::~DeletionTable<A>()
 }
 
 template<class A>
-int 
-DeletionTable<A>::add_route(const IPRouteEntry<A>& route, 
+int
+DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 			    RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(route.net());
-    if (iter !=  _ip_route_table->end()) {
+    if (iter != _ip_route_table->end()) {
 	//
 	// We got an add route for a route that was waiting to be
 	// deleted.  Process this now - pass the deletion downstream,
@@ -72,16 +72,16 @@ DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 	//
 	const IPRouteEntry<A>* our_route = iter.payload();
 	_ip_route_table->erase(route.net());
-	_next_table->delete_route(our_route, this);
+	next_table()->delete_route(our_route, this);
 	delete our_route;
     }
 
-    return _next_table->add_route(route, this);
+    return next_table()->add_route(route, this);
 }
 
 template<class A>
-int 
-DeletionTable<A>::delete_route(const IPRouteEntry<A>* route, 
+int
+DeletionTable<A>::delete_route(const IPRouteEntry<A>* route,
 			       RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
@@ -91,12 +91,12 @@ DeletionTable<A>::delete_route(const IPRouteEntry<A>* route,
     iter = _ip_route_table->lookup_node(route->net());
     XLOG_ASSERT(iter == _ip_route_table->end());
 
-    return _next_table->delete_route(route, this);
+    return next_table()->delete_route(route, this);
 }
 
 template<class A>
 void
-DeletionTable<A>::delete_all_routes() 
+DeletionTable<A>::delete_all_routes()
 {
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     for (iter = _ip_route_table->begin();
@@ -202,7 +202,7 @@ DeletionTable<A>::lookup_route_range(const A& addr) const
     return rr;
 }
 
-template<class A> 
+template<class A>
 void
 DeletionTable<A>::background_deletion_pass()
 {
@@ -215,7 +215,7 @@ DeletionTable<A>::background_deletion_pass()
     iter = _ip_route_table->begin();
     const IPRouteEntry<A>* our_route = iter.payload();
     _ip_route_table->erase(our_route->net());
-    _next_table->delete_route(our_route, this);
+    next_table()->delete_route(our_route, this);
     delete our_route;
 
     // Callback immediately, but after network events or expired timers
@@ -224,12 +224,12 @@ DeletionTable<A>::background_deletion_pass()
 	callback(this, &DeletionTable<A>::background_deletion_pass));
 }
 
-template<class A> 
+template<class A>
 void
 DeletionTable<A>::unplumb_self()
 {
-    _parent->set_next_table(_next_table);
-    _next_table->replumb(this, _parent);
+    _parent->set_next_table(next_table());
+    next_table()->replumb(this, _parent);
     delete this;
 }
 
@@ -247,11 +247,11 @@ DeletionTable<A>::str() const
 {
     string s;
 
-    s = "-------\nDeletionTable: " + _tablename + "\n";
-    if (_next_table == NULL)
+    s = "-------\nDeletionTable: " + tablename() + "\n";
+    if (next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + _next_table->tablename() + "\n";
+	s += "next table = " + next_table()->tablename() + "\n";
     return s;
 }
 

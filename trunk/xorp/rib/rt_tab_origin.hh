@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.10 2004/02/06 22:44:12 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.11 2004/02/11 08:48:49 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -37,14 +37,14 @@
 template<class A>
 class OriginTable : public RouteTable<A> {
 public:
-    /** 
+    /**
      * OriginTable constructor.
      *
      * @param tablename typically the name of the routing protcol that
      * supplies routes to this origin table, or "connected" for the
      * OriginTable that holds directly connected routes, or "static"
      * for the OriginTable that holds locally configured static
-     * routes.  
+     * routes.
      * @param admin_distance the default administrative distance for
      * routes in this table.
      * @param protocol_type the routing protocol type (@ref ProtocolType).
@@ -129,7 +129,7 @@ public:
      * length) route in the OriginTable that matches this address,
      * along with the RouteRange information for this address and
      * route.
-     * 
+     *
      * @see RouteRange
      * @param addr the IP address to look up.
      * @return a pointer to a RouteRange class instance containing the

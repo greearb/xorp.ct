@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.4 2004/02/06 22:44:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.5 2004/02/11 08:48:48 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -107,7 +107,7 @@ ExpectTable<A>::ExpectTable<A>(const string&   tablename,
     _parent->set_next_table(this);
 
     // There's no downstream table
-    _next_table = NULL;
+    set_next_table(NULL);
 }
 
 template<class A>
@@ -136,7 +136,7 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			  RouteTable<A>* 		caller)
 {
     XLOG_ASSERT(caller == _parent);
-    debug_msg("DT[%s]: Adding route %s\n", _tablename.c_str(),
+    debug_msg("DT[%s]: Adding route %s\n", tablename().c_str(),
 	      route.str().c_str());
     if (_expected.empty()) {
 	XLOG_FATAL("ExpectTable: unexpected add_route received");
@@ -158,7 +158,7 @@ ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 			  RouteTable<A>* 		caller)
 {
     XLOG_ASSERT(caller == _parent);
-    debug_msg("DT[%s]: Deleting route %s\n", _tablename.c_str(),
+    debug_msg("DT[%s]: Deleting route %s\n", tablename().c_str(),
 	      route->str().c_str());
     if (_expected.empty()) {
 	XLOG_FATAL("ExpectTable: unexpected delete_route received");
@@ -208,8 +208,8 @@ template<class A> string
 ExpectTable<A>::str() const
 {
     string s;
-    s = "-------\nExpectTable: " + _tablename + "\n";
-    s += "parent = " + _parent -> tablename() + "\n";
+    s = "-------\nExpectTable: " + tablename() + "\n";
+    s += "parent = " + _parent->tablename() + "\n";
     return s;
 }
 

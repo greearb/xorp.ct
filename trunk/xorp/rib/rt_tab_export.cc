@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.11 2003/05/23 00:02:07 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.13 2004/02/11 08:48:48 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -43,7 +43,7 @@ ExportTable<A>::~ExportTable<A>()
 template<class A>
 int
 ExportTable<A>::add_route(const IPRouteEntry<A>& route,
-			  RouteTable<A>* caller) 
+			  RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
@@ -52,7 +52,7 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 	debug_msg("Add route called for connected route\n");
 	return XORP_OK;
     }
-    
+
     //
     // Add the route to all RIB clients
     //
@@ -61,15 +61,15 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 	RibClient* rib_client = *iter;
 	rib_client->add_route(route);
     }
-    
-    debug_msg("Add route called on export table %s\n", + _tablename.c_str());
+
+    debug_msg("Add route called on export table %s\n", + tablename().c_str());
     return XORP_OK;
 }
 
 template<class A>
 int
 ExportTable<A>::delete_route(const IPRouteEntry<A>* route,
-			     RouteTable<A>* caller) 
+			     RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
@@ -94,7 +94,7 @@ ExportTable<A>::delete_route(const IPRouteEntry<A>* route,
 
 template<class A>
 void
-ExportTable<A>::flush() 
+ExportTable<A>::flush()
 {
     // TODO: XXX: NOT IMPLEMENTED!!!
     debug_msg("Flush called on ExportTable\n");
@@ -102,14 +102,14 @@ ExportTable<A>::flush()
 
 template<class A>
 const IPRouteEntry<A>*
-ExportTable<A>::lookup_route(const IPNet<A>& net) const 
+ExportTable<A>::lookup_route(const IPNet<A>& net) const
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
 const IPRouteEntry<A>*
-ExportTable<A>::lookup_route(const A& addr) const 
+ExportTable<A>::lookup_route(const A& addr) const
 {
     return _parent->lookup_route(addr);
 }
@@ -117,7 +117,7 @@ ExportTable<A>::lookup_route(const A& addr) const
 template<class A>
 void
 ExportTable<A>::replumb(RouteTable<A>* old_parent,
-			RouteTable<A>* new_parent) 
+			RouteTable<A>* new_parent)
 {
     debug_msg("ExportTable::replumb\n");
     if (_parent == old_parent) {
@@ -130,21 +130,21 @@ ExportTable<A>::replumb(RouteTable<A>* old_parent,
 
 template<class A>
 RouteRange<A>*
-ExportTable<A>::lookup_route_range(const A& addr) const 
+ExportTable<A>::lookup_route_range(const A& addr) const
 {
     return _parent->lookup_route_range(addr);
 }
 
 template<class A> string
-ExportTable<A>::str() const 
+ExportTable<A>::str() const
 {
     string s;
-    s = "-------\nExportTable: " + _tablename + "\n";
-    s += "parent = " + _parent -> tablename() + "\n";
-    if (_next_table == NULL)
+    s = "-------\nExportTable: " + tablename() + "\n";
+    s += "parent = " + _parent->tablename() + "\n";
+    if (next_table() == NULL)
 	s += "no next table\n";
     else
-	s += "next table = " + _next_table->tablename() + "\n";
+	s += "next table = " + next_table()->tablename() + "\n";
     return s;
 }
 
