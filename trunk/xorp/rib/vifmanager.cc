@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.15 2003/05/23 05:48:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.16 2003/05/23 09:51:37 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -262,7 +262,7 @@ VifManager::clean_out_old_state()
 	return;
     
     //
-    // We call unregister_client first, to cause the FEA to remove any
+    // We try to unregister first, to cause the FEA to remove any
     // registrations left over from previous incarnations of the RIB.
     //
     XorpCallback1<void, const XrlError&>::RefPtr cb;
