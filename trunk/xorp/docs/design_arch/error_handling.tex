@@ -4,12 +4,15 @@
 \usepackage{psfig}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\newcommand{\xorp} {{\em XORP}\@\xspace}
 \newcommand{\module} {{\em module}\@\xspace}
 \newcommand{\modules} {{\em modules}\@\xspace}
 \newcommand{\finder} {{\em Finder}\@\xspace}
 \newcommand{\xorpsh} {{\em Xorpsh}\@\xspace}
 \newcommand{\cm} {{\em CM}\@\xspace}
 \newcommand{\xrl} {{\em XRL}\@\xspace}
+\newcommand{\rtrmgr} {{\em RTRMGR}\@\xspace}
+
 \textwidth 6.5in
 \topmargin 0.0in
 \textheight 8.5in
@@ -28,23 +31,25 @@
 \maketitle                            
 \section{Introduction}
 
-A xorp router is made up of a number processes that communicate via
-XRLS [REF] (a messaging system developed for XORP). In this document
-we will focus on how to deal with errors that are generated directly
-or indirectly by \xrl calls. As well as dealing with process failure
-and restarts. Most XORP processes share routing state that must remain
-synchronised. The BGP process sends the result of its decision process
-to the RIB. If the RIB fails then BGP has lost the ability to
-manipulate the FIB. BGP should either withdraw all routes or more
-catastrophically drop all peerings until the RIB restarts.
+A \xorp router is made up of a number processes that communicate via
+XRLs \cite{xorp:xrl} (a messaging system developed for \xorp). In this
+document we will focus on how to deal with errors that are generated
+directly or indirectly by \xrl calls. As well as dealing with process
+failure and restarts. Most \xorp processes share routing state that
+must remain synchronised. For example, the BGP process sends the
+result of its decision process to the RIB. If the RIB fails then BGP
+has lost the ability to manipulate the FIB. BGP should either withdraw
+all routes or more catastrophically drop all peerings until the RIB
+restarts.
 
-A critical component of the \xrl infrastructure is the \finder. The
-\finder is the rendezous point for the \xrl system.  As the \finder is
-the rendezous point for \xrl communication it is able to detect
-process failures and restarts.
+A critical component if the system is the \rtrmgr which is responsible
+for starting and stopping routing processes. When a process is started
+by the \rtrmgr or dies the \finder is notified. If a process has an
+interest in the status of another process it can register interest
+with the \finder.
 
-In any complex system such as a xorp router errors can occur. The
-errors can range from a xorp process failing to an attempt to install
+In any complex system such as a \xorp router errors can occur. The
+errors can range from a \xorp process failing to an attempt to install
 a route that already exists. Errors will occur and need to be dealt
 with in a consistent manor. The types of error that may occur are
 categorised below.
@@ -56,24 +61,22 @@ message that was being sent may have been lost in transit.
 
 The second type of error {\em Execution Error} is when an an XRL call
 returns an error due to some underlying interaction failure. The most
-fundamental example of this type of error is a route add failing. Lets
-consider what interactions occur when a route is passed from BGP to
-RIB to FEA. BGP receives an update packet, the update packet will
-contain one or both of withdraws and nlris. These components of the
-update packet may cause the BGP decision process to be rerun. A
-consequence of the running of the decision process may be the addition
-or deletion of a route.
+fundamental example of this type of error is a route add failing. The
+attempt to add a route may fail for many reasons. The route may
+already be present or a different route may be installed. The error
+may occur due to a bug in the router code or because routing state has
+been manipulated by non \xorp processes.
 
 The third type of error {\em Type Error} is when an XRL call fails
 because the arguments passed to an XRL are invalid. This error will
-most likely be due to a version mismatch between xorp processes. If
-all the processes in a XORP router have been built from the source
+most likely be due to a version mismatch between \xorp processes. If
+all the processes in a \xorp router have been built from the source
 same tree this error should not occur. As we are building an
 extensbile router it may be the case that a process built from a
 different source tree may encounter compatibility problems.
 
 \subsection{XRL Error Handling}
-Interprocess communication in XORP is achieved using XRLs. In this
+Interprocess communication in \xorp is achieved using XRLs. In this
 section we will consider what should be done when an XRL call fails
 due to a communication error.
 
@@ -186,25 +189,23 @@ fails.  Thus the reliable pipelined interface falls back to a
 reliable, non-pipelined interface after a failure.  A subsequent XRL
 that succeeds then permits pipelined operation to resume.
 
-\subsection{BGP}
-
 \section{\label{pfailure}Process Failure}
 
-A XORP router is made up of a number of distinct processes. There are
+A \xorp router is made up of a number of distinct processes. There are
 dependencies between these processes. We define the critical
 dependencies and what action to take on detecting failure.
 
-The most critical component of a XORP router is the Rtrmgr/\finder
+The most critical component of a \xorp router is the Rtrmgr/\finder
 process. One of the functions of this component is to start/re-start
 processes. If process A is dependent on the status (alive, dead,
 restarted) of process B, then process A registers this interest with
 the \finder. This dependency on the Rtrmgr/\finder for managing and
-monitoring process state mean that a XORP router cannot survive the
-failure of this process. A XORP process on detecting the loss of the
+monitoring process state mean that a \xorp router cannot survive the
+failure of this process. A \xorp process on detecting the loss of the
 \finder must exit. There is one exception to this rule the \xorpsh
 process, this will be discussed later [REF].
 
-Each process in a XORP router is described and how it should behave
+Each process in a \xorp router is described and how it should behave
 when another process in the system fails. Processes can explicitly
 register interest in the status of other processes through the
 \finder. If process A is dependent on the state of process B then
@@ -268,11 +269,16 @@ XORPSH        &  Restart       & -        & -    & -    & -    & -       & -    
 \caption{\label{failure_table}Action to take on detecting process failure}
 \end{table}
 
+\subsection{\rtrmgr/\finder - Router manager}
 
-\subsection{RTRMGR/\finder - Router manager}
+If the \rtrmgr/\finder dies then all bets are off and all processes
+should exit apart from the \xorpsh.
 
+If a \xorp process exits unexpectedly the \rtrmgr/\finder should
+attempt to restart the process.
 
 \subsection{FEA - Forwarding Engine Abstraction}
+
 The FEA primarily excepts routes from the RIB and places them in the
 kernel. The FEA should tag all routes that it has installed in the
 kernel. The FEA on restart should remove all routes that a previous
@@ -281,39 +287,63 @@ exiting it should attempt remove all routes that it has installed in
 the kernel.
 
 The FEA process should register interest in the RIB. If the RIB fails
-the FEA should withdraw all routes that the RIB has sent it.
+the FEA should withdraw all routes that the RIB has sent to it.
+
+\subsection{MFEA - Multicast Forwarding Engine Abstraction}
+
+TBD
 
 \subsection{RIB - Routing Information Base}
+
 Routes from the routing processes are sent to the RIB the winners are
 sent to the FEA.
 
 The RIB should register interest in the FEA. If the FEA fails the RIB
-needs to notify all the routing processs that are feeding it routes
-that it can no longer accept routes. The simplest way to do this may
-be for the RIB to exit. Another solution may be an upcall to the
-routing processes saying control plane gone.
+should exit. All routing processes that interact with the RIB should
+on detecting the shutdown of the RIB also terminate gracefully.
 
+\subsection{IGMP}
 
-\subsection{RIP}
-
-\subsection{IS-IS}
-
-\subsection{OSPF}
+TBD
 
 \subsection{PIM}
 
+TBD
+
 \subsection{BGP}
-The major interaction that the BGP process has is with the RIB. At the
-time of writing the BGP process creates and manages its own TCP
-connections (In the future it may be the case that the TCP connections
-are mediated through the FEA). 
 
-The BGP process should register interest in status changes of the RIB.
-If the BGP process detects that the RIB has failed then it should
-withdraw all routes that have been sent to its peers and wait for the
-RIB to restart. A more drastic solution would be to tear out all
-peerings and wait for the RIB to restart.
+Currently the only other process in the system that the RIB interacts
+with is the RIB. If the BGP process detects that the RIB has died then
+it should gracefully terminate its sessions and exit.
 
+In the future the TCP connections that BGP makes will be mediated
+through FEA. At which time the BGP process should also register
+interest in the state of the FEA. If the BGP process detects the death
+of the FEA it should exit immediately.
+
+\subsection{RIP}
+
+The RIP process should register interest in the FEA and the RIB. If
+the RIB dies then the RIP process should attempt to exit gracefully.
+If the FEA dies the RIP process should exit immediately.
+
+\subsection{IS-IS}
+
+The IS-IS process should register interest in the FEA and the RIB. If
+the RIB dies then the IS-IS process should attempt to exit gracefully.
+If the FEA dies the IS-IS process should exit immediately.
+
+\subsection{OSPF}
+
+The OSPF process should register interest in the FEA and the RIB. If
+the RIB dies then the OSPF process should attempt to exit gracefully.
+If the FEA dies the OSPF process should exit immediately.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{../tex/xorp}
 \bibliographystyle{plain}
-\bibliography{xorp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
