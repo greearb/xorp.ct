@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.8 2003/06/20 21:44:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.9 2003/09/16 02:24:05 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -81,11 +81,12 @@ main(int /*argc*/, char **argv)
 	** get a response. It would be better if we could poll to
 	** discover when our response had been sent.
 	*/
+#if 0
 	bool wait_one = false;
 	XorpTimer t = bgp.eventloop().set_flag_after_ms(1000, &wait_one);
 	while ( wait_one == false)
 	    bgp.eventloop().run();
-
+#endif
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
