@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.3 2003/04/18 19:42:38 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.4 2003/04/23 17:06:48 hodson Exp $
 
 #ifndef __RIP_PACKETS_HH__
 #define __RIP_PACKETS_HH__
@@ -102,7 +102,7 @@ static const size_t RIPv2_MAX_PACKET_BYTES = 4 + 20 * RIPv2_ROUTES_PER_PACKET;
  */
 struct PacketRouteEntry<IPv4> {
 protected:
-    uint16_t _af;	
+    uint16_t _af;
     uint16_t _tag;
     uint32_t _addr;
     uint32_t _mask;
@@ -176,7 +176,7 @@ public:
 	memset(_pw, 0, sizeof(_pw));
 	s.copy(_pw, 16);
     }
-    
+
     static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 2;
 };
@@ -227,7 +227,7 @@ public:
 			   uint8_t  key_id,
 			   uint8_t  auth_bytes,
 			   uint32_t seqno);
-    
+
     static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 3;
 };
