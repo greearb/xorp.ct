@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.20 2004/02/22 03:02:36 pavlin Exp $
+# $XORP: xorp/README,v 1.21 2004/03/04 00:07:16 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,13 +49,14 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is alpha release, which means that it should be used for
-nothing more than source code browsing, compilation, and simple testing.
+This is a release candidate. It is expected to work, but there are
+known issues.
 
 Supported platforms:
 
   * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE with:
-    - gcc/g++ version 2.95.4 (default), 3.2.1, or 3.3.1
+    - gcc/g++ version 2.95.4 (default), 3.3.4 20040322 (prerelease),
+      3.4.0 20040310 (prerelease)
     - gmake (GNU make) version 3.79.1
     - autoconf version 2.53
     - automake version 1.5
@@ -68,10 +69,15 @@ Supported platforms:
 See ${XORP}/BUILD_NOTES for the list of additional platforms this
 release of XORP may compile or work on.
 
+See ${XORP}/ERRATA for the list of known problems.
+
 Currently, XORP implements the following protocols:
 
+  * RIP and RIPng:
+    - 
+
   * BGP4:
-   - draft-ietf-idr-bgp4-22.txt (A Border Gateway Protocol 4 (BGP-4))
+   - draft-ietf-idr-bgp4-23.txt (A Border Gateway Protocol 4 (BGP-4))
    - RFC 3392 (Capabilities Advertisement with BGP-4)
    - draft-ietf-idr-rfc2858bis-03.txt (Multiprotocol Extensions for BGP-4)
    - RFC 2545 (Use of Multiprotocol Extensions for IPv6 Inter-Domain Routing)
@@ -99,9 +105,6 @@ run the following commands in the top-level directory:
 gmake
 
 See ${XORP}/BUILD_NOTES for additional information of building XORP.
-
-At this stage you should not expect to use the XORP code for other
-purposes than studying its architecture and running simple tests.
 
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
@@ -135,7 +138,7 @@ following places:
 
 	${XORP}/docs/kdoc/html/index.html
 
-The content of each of the directory is the following:
+The content of each of the directories is the following:
 
   * bgp : BGP implementation.
 
@@ -152,6 +155,13 @@ The content of each of the directory is the following:
     forwarding engine (e.g., the UNIX kernel). It is used both for
     unicast and multicast. Note that the multicast-specific
     documentation is in ${XORP}/docs/mfea.
+
+  * fib2mrib : Forwarding Information Base to the Multicast Routing
+    Information Base route propagator.
+    It uses the FEA to obtain the FIB information from the underlying system,
+    and propagates it to the MRIB, so it can be used by multicast routing
+    protocols such as PIM-SM. Typically, it is needed only if the unicast
+    routing protocols run within XORP do not inject routes in the MRIB.
 
   * libcomm : Communication socket library.
     Currently, it is used only by the cli.
@@ -182,8 +192,13 @@ The content of each of the directory is the following:
   * rib : Routing Information Base.
     It is used to store the routing information from various protocols.
 
+  * rip: Routing Information Protocol implementation.
+
   * rtrmgr : Router Manager.
     It is used to manage and configure all XORP components.
+
+  * static_routes : Static routes management.
+    It is used to configure static routes.
 
   * xrl : XRL (XORP Resource Locator) interface.
 
@@ -192,19 +207,18 @@ limited interest, or are not relevant to the current release:
 
   * config : autoconf/automake related files.
 
+  * contrib : various contributed code.
+
+  * contrib/ospfd : John Moy's OSPFd implementation (http://www.ospf.org/).
+    Not supported with this release.
+
   * devnotes : various notes for the XORP core members.
 
   * libfeaclient : Library that may be useful to clients of the FEA.
     Currently, it is not used yet.
 
-  * ospfd : John Moy's OSPFd implementation (http://www.ospf.org/).
-    Not supported with this release.
-
   * policy : Policy-related library.
     Currently, it is work in progress, and is not used yet.
-
-  * rip: Routing Information Protocol.
-    Currently, it is work in progress.
 
   * utils : Various XORP-related utilities.
 
@@ -213,9 +227,7 @@ limited interest, or are not relevant to the current release:
 ===============
 
 In the short-term we plan to add:
-  * IPv6 support
   * OSPF
-  * RIP
   * IS-IS
   * Click forwarding path
   * Security
@@ -268,6 +280,7 @@ The core team currently consists of:
   * Source code and CVS access: see XORP web site.
 
   * XORP users mailing list: xorp-users@xorp.org
+    This list is for general XORP discussion.
 
     To subscribe, send email to xorp-users-request@xorp.org with
     the word "subscribe" (no quotes!) in the subject or the body
@@ -276,11 +289,21 @@ The core team currently consists of:
     http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-users
 
   * XORP hackers mailing list: xorp-hackers@xorp.org
+    This list is for XORP development discussion.
 
     To subscribe, send email to xorp-hackers-request@xorp.org with
     the word "subscribe" (no quotes!) in the subject or the body
     of the email. For more subscription options, send the command
     "help" instead, or use the following URL:
     http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-hackers
+
+  * XORP announcements mailing list:  xorp-announce@xorp.org
+    This list is for XORP release and milestone announcements.
+
+    To subscribe, send email to xorp-announce-request@xorp.org with
+    the word "subscribe" (no quotes!) in the subject or the body
+    of the email. For more subscription options, send the command
+    "help" instead, or use the following URL:
+    http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-announce
 
   * Feedback: feedback@xorp.org
