@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_table_set_click.cc,v 1.1 2004/10/26 23:58:29 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -24,9 +24,6 @@
 #include "fticonfig_table_set.hh"
 
 
-// TODO: XXX: PAVPAVPAV: temporary here
-// #define DEBUG_CLICK
-
 //
 // Set whole-table information into the unicast forwarding table.
 //
@@ -36,12 +33,10 @@
 
 
 FtiConfigTableSetClick::FtiConfigTableSetClick(FtiConfig& ftic)
-    : FtiConfigTableSet(ftic)
+    : FtiConfigTableSet(ftic),
+      ClickSocket(ftic.eventloop()),
+      _cs_reader(*(ClickSocket *)this)
 {
-#ifdef DEBUG_CLICK      // TODO: XXX: PAVPAVPAV
-    register_ftic_secondary();
-    ClickSocket::enable_user_click(true);
-#endif
 }
 
 FtiConfigTableSetClick::~FtiConfigTableSetClick()
@@ -55,6 +50,14 @@ FtiConfigTableSetClick::start()
     if (_is_running)
 	return (XORP_OK);
 
+    if (! ClickSocket::is_enabled())
+	return (XORP_ERROR);	// XXX: Not enabled
+
+    register_ftic_secondary();
+
+    if (ClickSocket::start() < 0)
+	return (XORP_ERROR);
+
     delete_all_entries4();
     delete_all_entries6();
 
@@ -66,15 +69,19 @@ FtiConfigTableSetClick::start()
 int
 FtiConfigTableSetClick::stop()
 {
+    int ret_value = XORP_OK;
+
     if (! _is_running)
 	return (XORP_OK);
 
     delete_all_entries4();
     delete_all_entries6();
 
+    ret_value = ClickSocket::stop();
+
     _is_running = false;
 
-    return (XORP_OK);
+    return (ret_value);
 }
 
 bool

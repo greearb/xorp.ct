@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.52 2004/11/02 14:33:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.53 2004/11/05 03:37:14 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -123,6 +123,252 @@ XrlCmdError
 XrlFeaTarget::common_0_1_shutdown()
 {
     _done = true;
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Enable/disable Click FEA support.
+ *
+ *  @param enable if true, then enable the Click FEA support, otherwise
+ *  disable it.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_enable_click(
+    // Input values,
+    const bool&	enable)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.enable_click(enable);
+    ftic.enable_click(enable);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Start Click FEA support.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_start_click()
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+    string error_msg;
+
+    if (ifc.start_click(error_msg) < 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (ftic.start_click(error_msg) < 0) {
+	string dummy_msg;
+	ifc.stop_click(error_msg);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Stop Click FEA support.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_stop_click()
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+    string error_msg1, error_msg2;
+
+    if (ifc.stop_click(error_msg1) < 0) {
+	ftic.stop_click(error_msg2);
+	return XrlCmdError::COMMAND_FAILED(error_msg1);
+    }
+    if (ftic.stop_click(error_msg2) < 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg2);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the external program to generate the Click configuration.
+ *
+ *  @param click_config_generator_file the name of the external program to
+ *  generate the Click configuration.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_click_config_generator_file(
+    // Input values,
+    const string&	click_config_generator_file)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_click_config_generator_file(click_config_generator_file);
+    ftic.set_click_config_generator_file(click_config_generator_file);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Enable/disable kernel-level Click FEA support.
+ *
+ *  @param enable if true, then enable the kernel-level Click FEA support,
+ *  otherwise disable it.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_enable_kernel_click(
+    // Input values,
+    const bool&	enable)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.enable_kernel_click(enable);
+    ftic.enable_kernel_click(enable);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Enable/disable user-level Click FEA support.
+ *
+ *  @param enable if true, then enable the user-level Click FEA support,
+ *  otherwise disable it.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_enable_user_click(
+    // Input values,
+    const bool&	enable)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.enable_user_click(enable);
+    ftic.enable_user_click(enable);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the user-level Click command file.
+ *
+ *  @param user_click_command_file the name of the user-level Click command
+ *  file.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_command_file(
+    // Input values,
+    const string&	user_click_command_file)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_command_file(user_click_command_file);
+    ftic.set_user_click_command_file(user_click_command_file);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the extra arguments to the user-level Click command.
+ *
+ *  @param user_click_command_extra_arguments the extra arguments to the
+ *  user-level Click command.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_command_extra_arguments(
+    // Input values,
+    const string&	user_click_command_extra_arguments)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
+    ftic.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify whether to execute on startup the user-level Click command.
+ *
+ *  @param user_click_command_execute_on_startup if true, then execute the
+ *  user-level Click command on startup.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_command_execute_on_startup(
+    // Input values,
+    const bool&	user_click_command_execute_on_startup)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
+    ftic.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the address to use for control access to the user-level
+ *  Click.
+ *
+ *  @param user_click_control_address the address to use for
+ *  control access to the user-level Click.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_control_address(
+    // Input values,
+    const IPv4&	user_click_control_address)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_control_address(user_click_control_address);
+    ftic.set_user_click_control_address(user_click_control_address);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the socket port to use for control access to the user-level
+ *  Click.
+ *
+ *  @param user_click_control_socket_port the socket port to use for
+ *  control access to the user-level Click.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_control_socket_port(
+    // Input values,
+    const uint32_t&	user_click_control_socket_port)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_control_socket_port(user_click_control_socket_port);
+    ftic.set_user_click_control_socket_port(user_click_control_socket_port);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the configuration file to be used by user-level Click on
+ *  startup.
+ *
+ *  @param user_click_startup_config_file the name of the configuration
+ *  file to be used by user-level Click on startup.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
+    // Input values,
+    const string&	user_click_startup_config_file)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_user_click_startup_config_file(user_click_startup_config_file);
+    ftic.set_user_click_startup_config_file(user_click_startup_config_file);
 
     return XrlCmdError::OKAY();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.2 2004/10/26 22:22:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.3 2004/10/27 21:43:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -24,9 +24,6 @@
 #include "ifconfig_set.hh"
 #include "nexthop_port_mapper.hh"
 
-
-// TODO: XXX: PAVPAVPAV: temporary here
-// #define DEBUG_CLICK
 
 //
 // Set information about network interfaces configuration with the
@@ -41,10 +38,6 @@ IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
       ClickSocket(ifc.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
-#ifdef DEBUG_CLICK	// TODO: XXX: PAVPAVPAV
-    register_ifc_secondary();
-    ClickSocket::enable_user_click(true);
-#endif
 }
 
 IfConfigSetClick::~IfConfigSetClick()
@@ -58,9 +51,10 @@ IfConfigSetClick::start()
     if (_is_running)
 	return (XORP_OK);
 
-#ifndef DEBUG_CLICK	// TODO: XXX: PAVPAVPAV
+    if (! ClickSocket::is_enabled())
+	return (XORP_ERROR);	// XXX: Not enabled
+
     register_ifc_secondary();
-#endif
 
     if (ClickSocket::start() < 0)
 	return (XORP_ERROR);

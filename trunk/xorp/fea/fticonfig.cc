@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.29 2004/10/26 23:58:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.30 2004/11/05 00:47:43 bms Exp $"
 
 
 #include "fea_module.h"
@@ -448,6 +448,234 @@ FtiConfig::stop()
     _is_running = false;
 
     return (ret_value);
+}
+
+/**
+ * Enable/disable Click support.
+ *
+ * @param enable if true, then enable Click support, otherwise disable it.
+ */
+void
+FtiConfig::enable_click(bool enable)
+{
+    _ftic_entry_get_click.enable_click(enable);
+    _ftic_entry_set_click.enable_click(enable);
+    _ftic_table_get_click.enable_click(enable);
+    _ftic_table_set_click.enable_click(enable);
+}
+
+/**
+ * Start Click support.
+ *
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::start_click(string& error_msg)
+{
+    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the start() methods below
+    if (_ftic_entry_get_click.start() < 0) {
+	error_msg = "Cannot start the mechanism to get single-entry "
+	    "information from the unicast forwarding table from Click";
+	return (XORP_ERROR);
+    }
+    if (_ftic_entry_set_click.start() < 0) {
+	_ftic_entry_get_click.stop();
+	error_msg = "Cannot start the mechanism to set single-entry "
+	    "information into the unicast forwarding table for Click";
+	return (XORP_ERROR);
+    }
+    if (_ftic_table_get_click.start() < 0) {
+	_ftic_entry_get_click.stop();
+	_ftic_entry_set_click.stop();
+	error_msg = "Cannot start the mechanism to get the whole table "
+	    "information from the unicast forwarding table from Click";
+	return (XORP_ERROR);
+    }
+    if (_ftic_table_set_click.start() < 0) {
+	_ftic_entry_get_click.stop();
+	_ftic_entry_set_click.stop();
+	_ftic_table_get_click.stop();
+	error_msg = "Cannot start the mechanism to set the whole table "
+	    "information into the unicast forwarding table for Click";
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Stop Click support.
+ *
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::stop_click(string& error_msg)
+{
+    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the stop() methods below
+    if (_ftic_entry_get_click.stop() < 0) {
+	_ftic_entry_set_click.stop();
+	_ftic_table_get_click.stop();
+	_ftic_table_set_click.stop();
+	error_msg = "Cannot stop the mechanism to get single-entry "
+	    "information from the unicast forwarding table from Click";
+	return (XORP_ERROR);
+    }
+    if (_ftic_entry_set_click.stop() < 0) {
+	_ftic_table_get_click.stop();
+	_ftic_table_set_click.stop();
+	error_msg = "Cannot stop the mechanism to set single-entry "
+	    "information into the unicast forwarding table for Click";
+	return (XORP_ERROR);
+    }
+    if (_ftic_table_get_click.stop() < 0) {
+	_ftic_table_set_click.stop();
+	error_msg = "Cannot stop the mechanism to get the whole table "
+	    "information from the unicast forwarding table from Click";
+	return (XORP_ERROR);
+    }
+    if (_ftic_table_set_click.stop() < 0) {
+	error_msg = "Cannot stop the mechanism to set the whole table "
+	    "information into the unicast forwarding table for Click";
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Specify the external program to generate the Click configuration.
+ *
+ * @param v the name of the external program to generate the Click
+ * configuration.
+ */
+void
+FtiConfig::set_click_config_generator_file(const string& v)
+{
+    _ftic_entry_get_click.set_click_config_generator_file(v);
+    _ftic_entry_set_click.set_click_config_generator_file(v);
+    _ftic_table_get_click.set_click_config_generator_file(v);
+    _ftic_table_set_click.set_click_config_generator_file(v);
+}
+
+/**
+ * Enable/disable kernel-level Click support.
+ *
+ * @param enable if true, then enable the kernel-level Click support,
+ * otherwise disable it.
+ */
+void
+FtiConfig::enable_kernel_click(bool enable)
+{
+    _ftic_entry_get_click.enable_kernel_click(enable);
+    _ftic_entry_set_click.enable_kernel_click(enable);
+    _ftic_table_get_click.enable_kernel_click(enable);
+    _ftic_table_set_click.enable_kernel_click(enable);
+}
+
+/**
+ * Enable/disable user-level Click support.
+ *
+ * @param enable if true, then enable the user-level Click support,
+ * otherwise disable it.
+ */
+void
+FtiConfig::enable_user_click(bool enable)
+{
+    _ftic_entry_get_click.enable_user_click(enable);
+    _ftic_entry_set_click.enable_user_click(enable);
+    _ftic_table_get_click.enable_user_click(enable);
+    _ftic_table_set_click.enable_user_click(enable);
+}
+
+/**
+ * Specify the user-level Click command file.
+ *
+ * @param v the name of the user-level Click command file.
+ */
+void
+FtiConfig::set_user_click_command_file(const string& v)
+{
+    _ftic_entry_get_click.set_user_click_command_file(v);
+    _ftic_entry_set_click.set_user_click_command_file(v);
+    _ftic_table_get_click.set_user_click_command_file(v);
+    _ftic_table_set_click.set_user_click_command_file(v);
+}
+
+/**
+ * Specify the extra arguments to the user-level Click command.
+ *
+ * @param v the extra arguments to the user-level Click command.
+ */
+void
+FtiConfig::set_user_click_command_extra_arguments(const string& v)
+{
+    _ftic_entry_get_click.set_user_click_command_extra_arguments(v);
+    _ftic_entry_set_click.set_user_click_command_extra_arguments(v);
+    _ftic_table_get_click.set_user_click_command_extra_arguments(v);
+    _ftic_table_set_click.set_user_click_command_extra_arguments(v);
+}
+
+/**
+ * Specify whether to execute on startup the user-level Click command.
+ *
+ * @param v if true, then execute the user-level Click command on startup.
+ */
+void
+FtiConfig::set_user_click_command_execute_on_startup(bool v)
+{
+    _ftic_entry_get_click.set_user_click_command_execute_on_startup(v);
+    _ftic_entry_set_click.set_user_click_command_execute_on_startup(v);
+    _ftic_table_get_click.set_user_click_command_execute_on_startup(v);
+    _ftic_table_set_click.set_user_click_command_execute_on_startup(v);
+}
+
+/**
+ * Specify the address to use for control access to the user-level
+ * Click.
+ *
+ * @param v the address to use for control access to the user-level Click.
+ */
+void
+FtiConfig::set_user_click_control_address(const IPv4& v)
+{
+    _ftic_entry_get_click.set_user_click_control_address(v);
+    _ftic_entry_set_click.set_user_click_control_address(v);
+    _ftic_table_get_click.set_user_click_control_address(v);
+    _ftic_table_set_click.set_user_click_control_address(v);
+}
+
+/**
+ * Specify the socket port to use for control access to the user-level
+ * Click.
+ *
+ * @param v the socket port to use for control access to the user-level
+ * Click.
+ */
+void
+FtiConfig::set_user_click_control_socket_port(uint32_t v)
+{
+    _ftic_entry_get_click.set_user_click_control_socket_port(v);
+    _ftic_entry_set_click.set_user_click_control_socket_port(v);
+    _ftic_table_get_click.set_user_click_control_socket_port(v);
+    _ftic_table_set_click.set_user_click_control_socket_port(v);
+}
+
+/**
+ * Specify the configuration file to be used by user-level Click on
+ * startup.
+ *
+ * @param v the name of the configuration file to be used by user-level
+ * Click on startup.
+ */
+void
+FtiConfig::set_user_click_startup_config_file(const string& v)
+{
+    _ftic_entry_get_click.set_user_click_startup_config_file(v);
+    _ftic_entry_set_click.set_user_click_startup_config_file(v);
+    _ftic_table_get_click.set_user_click_startup_config_file(v);
+    _ftic_table_set_click.set_user_click_startup_config_file(v);
 }
 
 bool

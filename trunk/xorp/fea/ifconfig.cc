@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.32 2004/10/21 00:44:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.33 2004/10/25 23:27:56 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -314,6 +314,184 @@ IfConfig::test_have_ipv6() const
     close(s);
     return (true);
 #endif // HAVE_IPV6
+}
+
+/**
+ * Enable/disable Click support.
+ *
+ * @param enable if true, then enable Click support, otherwise disable it.
+ */
+void
+IfConfig::enable_click(bool enable)
+{
+    _ifc_get_click.enable_click(enable);
+    _ifc_set_click.enable_click(enable);
+}
+
+/**
+ * Start Click support.
+ *
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+IfConfig::start_click(string& error_msg)
+{
+    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the start() methods below
+    if (_ifc_get_click.start() < 0) {
+	error_msg = "Cannot start the mechanism to get information about "
+	    "network interfaces from Click";
+	return (XORP_ERROR);
+    }
+    if (_ifc_set_click.start() < 0) {
+	_ifc_get_click.stop();
+	error_msg = "Cannot start the mechanism to set information about "
+	    "network interfaces with Click";
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Stop Click support.
+ *
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+IfConfig::stop_click(string& error_msg)
+{
+    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the stop() methods below
+    if (_ifc_get_click.stop() < 0) {
+	_ifc_set_click.stop();
+	error_msg = "Cannot stop the mechanism to get information about "
+	    "network interfaces from Click";
+	return (XORP_ERROR);
+    }
+    if (_ifc_set_click.stop() < 0) {
+	error_msg = "Cannot stop the mechanism to set information about "
+	    "network interfaces with Click";
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Specify the external program to generate the Click configuration.
+ *
+ * @param v the name of the external program to generate the Click
+ * configuration.
+ */
+void
+IfConfig::set_click_config_generator_file(const string& v)
+{
+    _ifc_get_click.set_click_config_generator_file(v);
+    _ifc_set_click.set_click_config_generator_file(v);
+}
+
+/**
+ * Enable/disable kernel-level Click support.
+ *
+ * @param enable if true, then enable the kernel-level Click support,
+ * otherwise disable it.
+ */
+void
+IfConfig::enable_kernel_click(bool enable)
+{
+    _ifc_get_click.enable_kernel_click(enable);
+    _ifc_set_click.enable_kernel_click(enable);
+}
+
+/**
+ * Enable/disable user-level Click support.
+ *
+ * @param enable if true, then enable the user-level Click support,
+ * otherwise disable it.
+ */
+void
+IfConfig::enable_user_click(bool enable)
+{
+    _ifc_get_click.enable_user_click(enable);
+    _ifc_set_click.enable_user_click(enable);
+}
+
+/**
+ * Specify the user-level Click command file.
+ *
+ * @param v the name of the user-level Click command file.
+ */
+void
+IfConfig::set_user_click_command_file(const string& v)
+{
+    _ifc_get_click.set_user_click_command_file(v);
+    _ifc_set_click.set_user_click_command_file(v);
+}
+
+/**
+ * Specify the extra arguments to the user-level Click command.
+ *
+ * @param v the extra arguments to the user-level Click command.
+ */
+void
+IfConfig::set_user_click_command_extra_arguments(const string& v)
+{
+    _ifc_get_click.set_user_click_command_extra_arguments(v);
+    _ifc_set_click.set_user_click_command_extra_arguments(v);
+}
+
+/**
+ * Specify whether to execute on startup the user-level Click command.
+ *
+ * @param v if true, then execute the user-level Click command on startup.
+ */
+void
+IfConfig::set_user_click_command_execute_on_startup(bool v)
+{
+    _ifc_get_click.set_user_click_command_execute_on_startup(v);
+    _ifc_set_click.set_user_click_command_execute_on_startup(v);
+}
+
+/**
+ * Specify the address to use for control access to the user-level
+ * Click.
+ *
+ * @param v the address to use for control access to the user-level Click.
+ */
+void
+IfConfig::set_user_click_control_address(const IPv4& v)
+{
+    _ifc_get_click.set_user_click_control_address(v);
+    _ifc_set_click.set_user_click_control_address(v);
+}
+
+/**
+ * Specify the socket port to use for control access to the user-level
+ * Click.
+ *
+ * @param v the socket port to use for control access to the user-level
+ * Click.
+ */
+void
+IfConfig::set_user_click_control_socket_port(uint32_t v)
+{
+    _ifc_get_click.set_user_click_control_socket_port(v);
+    _ifc_set_click.set_user_click_control_socket_port(v);
+}
+
+/**
+ * Specify the configuration file to be used by user-level Click on
+ * startup.
+ *
+ * @param v the name of the configuration file to be used by user-level
+ * Click on startup.
+ */
+void
+IfConfig::set_user_click_startup_config_file(const string& v)
+{
+    _ifc_get_click.set_user_click_startup_config_file(v);
+    _ifc_set_click.set_user_click_startup_config_file(v);
 }
 
 bool

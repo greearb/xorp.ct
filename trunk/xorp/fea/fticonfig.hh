@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.22 2004/10/26 23:58:29 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.23 2004/11/05 00:47:43 bms Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -137,7 +137,101 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int stop();
+
+    /**
+     * Enable/disable Click support.
+     *
+     * @param enable if true, then enable Click support, otherwise disable it.
+     */
+    void enable_click(bool enable);
+
+    /**
+     * Start Click support.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start_click(string& error_msg);
+
+    /**
+     * Stop Click support.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int stop_click(string& error_msg);
+
+    /**
+     * Specify the external program to generate the Click configuration.
+     *
+     * @param v the name of the external program to generate the Click
+     * configuration.
+     */
+    void set_click_config_generator_file(const string& v);
+
+    /**
+     * Enable/disable kernel-level Click support.
+     *
+     * @param enable if true, then enable the kernel-level Click support,
+     * otherwise disable it.
+     */
+    void enable_kernel_click(bool enable);
     
+    /**
+     * Enable/disable user-level Click support.
+     *
+     * @param enable if true, then enable the user-level Click support,
+     * otherwise disable it.
+     */
+    void enable_user_click(bool enable);
+
+    /**
+     * Specify the user-level Click command file.
+     *
+     * @param v the name of the user-level Click command file.
+     */
+    void set_user_click_command_file(const string& v);
+
+    /**
+     * Specify the extra arguments to the user-level Click command.
+     *
+     * @param v the extra arguments to the user-level Click command.
+     */
+    void set_user_click_command_extra_arguments(const string& v);
+
+    /**
+     * Specify whether to execute on startup the user-level Click command.
+     *
+     * @param v if true, then execute the user-level Click command on startup.
+     */
+    void set_user_click_command_execute_on_startup(bool v);
+
+    /**
+     * Specify the address to use for control access to the user-level
+     * Click.
+     *
+     * @param v the address to use for control access to the user-level Click.
+     */
+    void set_user_click_control_address(const IPv4& v);
+
+    /**
+     * Specify the socket port to use for control access to the user-level
+     * Click.
+     *
+     * @param v the socket port to use for control access to the user-level
+     * Click.
+     */
+    void set_user_click_control_socket_port(uint32_t v);
+
+    /**
+     * Specify the configuration file to be used by user-level Click on
+     * startup.
+     *
+     * @param v the name of the configuration file to be used by user-level
+     * Click on startup.
+     */
+    void set_user_click_startup_config_file(const string& v);
+
     /**
      * Start a configuration interval. All modifications must be
      * within a marked "configuration" interval.

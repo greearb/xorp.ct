@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.39 2004/10/02 03:42:10 atanu Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.40 2004/11/05 03:37:14 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -63,6 +63,119 @@ public:
      * Shutdown FEA cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Enable/disable Click FEA support.
+     *
+     *  @param enable if true, then enable the Click FEA support, otherwise
+     *  disable it.
+     */
+    XrlCmdError fea_click_0_1_enable_click(
+	// Input values,
+	const bool&	enable);
+
+    /**
+     *  Start Click FEA support.
+     */
+    XrlCmdError fea_click_0_1_start_click();
+
+    /**
+     *  Stop Click FEA support.
+     */
+    XrlCmdError fea_click_0_1_stop_click();
+
+    /**
+     *  Specify the external program to generate the Click configuration.
+     *
+     *  @param click_config_generator_file the name of the external program to
+     *  generate the Click configuration.
+     */
+    XrlCmdError fea_click_0_1_set_click_config_generator_file(
+	// Input values,
+	const string&	click_config_generator_file);
+
+    /**
+     *  Enable/disable kernel-level Click FEA support.
+     *
+     *  @param enable if true, then enable the kernel-level Click FEA support,
+     *  otherwise disable it.
+     */
+    XrlCmdError fea_click_0_1_enable_kernel_click(
+	// Input values,
+	const bool&	enable);
+
+    /**
+     *  Enable/disable user-level Click FEA support.
+     *
+     *  @param enable if true, then enable the user-level Click FEA support,
+     *  otherwise disable it.
+     */
+    XrlCmdError fea_click_0_1_enable_user_click(
+	// Input values,
+	const bool&	enable);
+
+    /**
+     *  Specify the user-level Click command file.
+     *
+     *  @param user_click_command_file the name of the user-level Click command
+     *  file.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_command_file(
+	// Input values,
+	const string&	user_click_command_file);
+
+    /**
+     *  Specify the extra arguments to the user-level Click command.
+     *
+     *  @param user_click_command_extra_arguments the extra arguments to the
+     *  user-level Click command.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_command_extra_arguments(
+	// Input values,
+	const string&	user_click_command_extra_arguments);
+
+    /**
+     *  Specify whether to execute on startup the user-level Click command.
+     *
+     *  @param user_click_command_execute_on_startup if true, then execute the
+     *  user-level Click command on startup.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_command_execute_on_startup(
+	// Input values,
+	const bool&	user_click_command_execute_on_startup);
+
+    /**
+     *  Specify the socket port to use for control access to the user-level
+     *  Click.
+     *
+     *  @param user_click_control_socket_port the socket port to use for
+     *  control access to the user-level Click.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_control_socket_port(
+	// Input values,
+	const uint32_t&	user_click_control_socket_port);
+
+    /**
+     *  Specify the address to use for control access to the user-level
+     *  Click.
+     *
+     *  @param user_click_control_address the address to use for
+     *  control access to the user-level Click.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_control_address(
+	// Input values,
+	const IPv4&	user_click_control_address);
+
+    /**
+     *  Specify the configuration file to be used by user-level Click on
+     *  startup.
+     *
+     *  @param user_click_startup_config_file the name of the configuration
+     *  file to be used by user-level Click on startup.
+     */
+    XrlCmdError fea_click_0_1_set_user_click_startup_config_file(
+	// Input values,
+	const string&	user_click_startup_config_file);
 
     /**
      *  Add a FIB client.

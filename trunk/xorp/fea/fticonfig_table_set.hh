@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.10 2004/10/21 00:10:25 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.11 2004/10/26 23:58:29 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -338,7 +338,8 @@ private:
     
 };
 
-class FtiConfigTableSetClick : public FtiConfigTableSet {
+class FtiConfigTableSetClick : public FtiConfigTableSet,
+			       public ClickSocket {
 public:
     FtiConfigTableSetClick(FtiConfig& ftic);
     virtual ~FtiConfigTableSetClick();
@@ -394,7 +395,7 @@ public:
     virtual bool delete_all_entries6();
     
 private:
-    
+    ClickSocketReader	_cs_reader;
 };
 
 #endif // __FEA_FTICONFIG_TABLE_SET_HH__
