@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.35 2005/02/24 00:29:42 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.36 2005/02/24 00:50:15 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -255,6 +255,7 @@ XrlMld6igmpNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -266,7 +267,6 @@ XrlMld6igmpNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -363,6 +363,7 @@ XrlMld6igmpNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -375,7 +376,6 @@ XrlMld6igmpNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -478,6 +478,7 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -489,7 +490,6 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -585,6 +585,7 @@ XrlMld6igmpNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -597,7 +598,6 @@ XrlMld6igmpNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -810,6 +810,7 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -827,7 +828,6 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1051,6 +1051,7 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1068,7 +1069,6 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1298,6 +1298,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1309,7 +1310,6 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1467,6 +1467,7 @@ XrlMld6igmpNode::mfea_client_send_protocol_message_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1479,7 +1480,6 @@ XrlMld6igmpNode::mfea_client_send_protocol_message_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1552,6 +1552,7 @@ XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1564,7 +1565,6 @@ XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1626,6 +1626,7 @@ XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1638,7 +1639,6 @@ XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:

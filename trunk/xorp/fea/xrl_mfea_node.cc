@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.38 2005/02/24 00:50:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.39 2005/02/27 21:32:53 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -256,6 +256,7 @@ XrlMfeaNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -267,7 +268,6 @@ XrlMfeaNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -368,6 +368,7 @@ XrlMfeaNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -380,7 +381,6 @@ XrlMfeaNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -531,6 +531,7 @@ XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -542,7 +543,6 @@ XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -687,6 +687,7 @@ XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -698,7 +699,6 @@ XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -971,6 +971,7 @@ XrlMfeaNode::mfea_client_client_send_new_vif_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -982,7 +983,6 @@ XrlMfeaNode::mfea_client_client_send_new_vif_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1028,6 +1028,7 @@ XrlMfeaNode::mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1039,7 +1040,6 @@ XrlMfeaNode::mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1085,6 +1085,7 @@ XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1096,7 +1097,6 @@ XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1143,6 +1143,7 @@ XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1154,7 +1155,6 @@ XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1201,6 +1201,7 @@ XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1212,7 +1213,6 @@ XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1259,6 +1259,7 @@ XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1270,7 +1271,6 @@ XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1390,6 +1390,7 @@ XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1401,7 +1402,6 @@ XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1474,6 +1474,7 @@ XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1486,7 +1487,6 @@ XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1548,6 +1548,7 @@ XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1560,7 +1561,6 @@ XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:

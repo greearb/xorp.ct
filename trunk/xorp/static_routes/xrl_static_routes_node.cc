@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.27 2005/02/24 00:50:16 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.28 2005/02/28 19:53:09 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -178,6 +178,7 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -189,7 +190,6 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -291,6 +291,7 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -303,7 +304,6 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -399,6 +399,7 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -410,7 +411,6 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -511,6 +511,7 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -523,7 +524,6 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -632,6 +632,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -643,7 +644,6 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -696,6 +696,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -707,7 +708,6 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -810,6 +810,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -822,7 +823,6 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -874,6 +874,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -886,7 +887,6 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1605,6 +1605,7 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1622,7 +1623,6 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:

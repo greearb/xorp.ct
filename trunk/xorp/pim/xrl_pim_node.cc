@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.65 2005/02/24 00:50:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.66 2005/02/28 19:53:09 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -310,6 +310,7 @@ XrlPimNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -321,7 +322,6 @@ XrlPimNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -418,6 +418,7 @@ XrlPimNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -430,7 +431,6 @@ XrlPimNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -562,6 +562,7 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -573,7 +574,6 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -626,6 +626,7 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -637,7 +638,6 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -734,6 +734,7 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -747,7 +748,6 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -841,6 +841,7 @@ XrlPimNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -852,7 +853,6 @@ XrlPimNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -950,6 +950,7 @@ XrlPimNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -962,7 +963,6 @@ XrlPimNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1067,6 +1067,7 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1078,7 +1079,6 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1179,6 +1179,7 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1191,7 +1192,6 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1404,6 +1404,7 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1421,7 +1422,6 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -1645,6 +1645,7 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -1662,7 +1663,6 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -2103,6 +2103,7 @@ XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -2114,7 +2115,6 @@ XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -2326,6 +2326,7 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -2343,7 +2344,6 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -2539,6 +2539,7 @@ XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -2551,7 +2552,6 @@ XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -2624,6 +2624,7 @@ XrlPimNode::cli_manager_client_send_add_cli_command_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -2636,7 +2637,6 @@ XrlPimNode::cli_manager_client_send_add_cli_command_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
@@ -2698,6 +2698,7 @@ XrlPimNode::cli_manager_client_send_delete_cli_command_cb(
 
     case NO_FINDER:
     case RESOLVE_FAILED:
+    case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
 	// (e.g., by tracking the status of the finder and the other targets).
@@ -2710,7 +2711,6 @@ XrlPimNode::cli_manager_client_send_delete_cli_command_cb(
 
     case BAD_ARGS:
     case NO_SUCH_METHOD:
-    case SEND_FAILED:
     case INTERNAL_ERROR:
 	//
 	// An error that should happen only if there is something unusual:
