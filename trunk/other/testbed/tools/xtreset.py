@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# $XORP: other/testbed/tools/xtreset.py,v 1.3 2003/04/14 23:45:46 atanu Exp $
+# $XORP: other/testbed/tools/xtreset.py,v 1.4 2003/07/23 02:18:02 atanu Exp $
 
 import os
 import getopt
@@ -13,7 +13,7 @@ Reset testbed machines. Using NET-SNMP.
 All configuration is hardcoded in here.
 """
 
-APCMIBLOC="-M /usr/local/xorp/mibs:/usr/local/share/snmp/mibs/ -m PowerNet-MIB"
+APCMIBLOC="-M /usr/local/xorp_tools/mibs:/usr/local/share/snmp/mibs/ -m PowerNet-MIB"
 
 dict = { "xorp0" : \
            [APCMIBLOC, "xorppwr1", "public", "private", "sPDUOutletCtl.1"],
