@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.13 2004/05/03 23:08:09 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.14 2004/06/06 02:06:48 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -252,6 +252,25 @@ XrlPortManager<A>::updates_made()
 {
     debug_msg("XrlPortManager<IPv%d>::updates_made notification\n",
 	      A::ip_version());
+
+    // Scan ports and enable/disable underlying i/o handler
+    // according to fea state
+    typename PortManagerBase<A>::PortList::iterator pi;
+    for (pi = this->ports().begin(); pi != this->ports().end(); ++pi) {
+	Port<A>* p = *pi;
+	XrlPortIO<A>* xio = dynamic_cast<XrlPortIO<A>*>(p->io_handler());
+	if (xio == 0)
+	    continue;
+	bool fea_en = address_enabled(_ifm.iftree(), xio->ifname(),
+				      xio->vifname(), xio->address());
+	if (fea_en != xio->enabled()) {
+	    XLOG_INFO("Detected iftree change on %s %s %s setting transport enabled %s",
+		      xio->ifname().c_str(), xio->vifname().c_str(),
+		      xio->address().str().c_str(),
+		      (fea_en ? "true" : "false"));
+	    xio->set_enabled(fea_en);
+	}
+    }
 }
 
 template <typename A>
