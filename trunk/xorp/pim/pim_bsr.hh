@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.3 2003/02/26 19:59:39 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.4 2003/02/27 03:11:05 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -321,6 +321,13 @@ public:
     BsrRp	*find_rp(const IPvX& rp_addr) const;
     bool is_completed() const { return (_expected_rp_count == _received_rp_count); }
     
+    // Removal related methods
+    void	schedule_bsr_group_prefix_remove();
+    const Timer& const_bsr_group_prefix_remove_timer() const {
+	return (_bsr_group_prefix_remove_timer);
+    }
+    
+    
 private:
     BsrZone&	_bsr_zone;		// The BSR zone I belong to
     
@@ -330,6 +337,9 @@ private:
     uint8_t	_expected_rp_count;	// Expected number of RPs
     uint8_t	_received_rp_count;	// Received number of RPs so far
     list<BsrRp *> _rp_list;		// The list of received RPs
+    
+    // Misc. state
+    Timer	_bsr_group_prefix_remove_timer;	// Timer to remove empty prefix
 };
 
 class BsrRp {

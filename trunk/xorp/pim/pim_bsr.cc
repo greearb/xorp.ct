@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.10 2003/02/28 03:00:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.11 2003/03/02 06:46:31 pavlin Exp $"
 
 
 //
@@ -58,6 +58,7 @@ static void bsr_zone_bsr_timer_timeout(void *data_pointer);
 static void bsr_zone_scope_zone_expiry_timer_timeout(void *data_pointer);
 static void bsr_rp_candidate_rp_expiry_timer_timeout(void *data_pointer);
 static void bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer);
+static void bsr_group_prefix_remove_timer_timeout(void *data_pointer);
 
 
 /**
@@ -383,13 +384,14 @@ PimBsr::add_active_bsr_zone(const BsrZone& bsr_zone, string& error_msg)
 BsrZone *
 PimBsr::add_expire_bsr_zone(const BsrZone& bsr_zone)
 {
+    list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
+    
     if (bsr_zone.bsr_group_prefix_list().empty())
 	return (NULL);	// XXX: don't add if no prefixes
     
     //
     // Remove all the old RPs for same prefixes.
     //
-    list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
     for (group_prefix_iter = bsr_zone.bsr_group_prefix_list().begin();
 	 group_prefix_iter != bsr_zone.bsr_group_prefix_list().end();
 	 ++group_prefix_iter) {
@@ -408,6 +410,23 @@ PimBsr::add_expire_bsr_zone(const BsrZone& bsr_zone)
     expire_bsr_zone->bsr_timer().cancel();
     expire_bsr_zone->scope_zone_expiry_timer().cancel();
     expire_bsr_zone->candidate_rp_advertise_timer().cancel();
+    
+    //
+    // Delete all prefixes that have no RPs
+    //
+    for (group_prefix_iter = expire_bsr_zone->bsr_group_prefix_list().begin();
+	 group_prefix_iter != expire_bsr_zone->bsr_group_prefix_list().end();
+	) {
+	BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
+	++group_prefix_iter;
+	if (bsr_group_prefix->rp_list().empty())
+	    expire_bsr_zone->delete_bsr_group_prefix(bsr_group_prefix);
+    }
+    if (expire_bsr_zone->bsr_group_prefix_list().empty()) {
+	// No prefixes, hence don't add
+	delete expire_bsr_zone;
+	return (NULL);
+    }
     
     // Add the zone to the list of expiring zones
     _expire_bsr_zone_list.push_back(expire_bsr_zone);
@@ -2306,6 +2325,16 @@ BsrGroupPrefix::BsrGroupPrefix(BsrZone& bsr_zone,
 	BsrRp *bsr_rp_copy = new BsrRp(*this, *bsr_rp);
 	_rp_list.push_back(bsr_rp_copy);
     }
+
+    // Conditionally set the timer to remove this group prefix
+    if (bsr_group_prefix.const_bsr_group_prefix_remove_timer().is_set()) {
+	struct timeval left_timeval;
+	bsr_group_prefix.const_bsr_group_prefix_remove_timer().left_timeval(&left_timeval);
+	_bsr_group_prefix_remove_timer.start(TIMEVAL_SEC(&left_timeval),
+					     TIMEVAL_USEC(&left_timeval),
+					     bsr_group_prefix_remove_timer_timeout,
+					     this);
+    }
 }
 
 BsrGroupPrefix::~BsrGroupPrefix()
@@ -2352,10 +2381,16 @@ BsrGroupPrefix::delete_rp(BsrRp *bsr_rp)
 	 ++iter) {
 	if (bsr_rp != *iter)
 	    continue;
-	// Entry found. Remove it.
-	set_received_rp_count(received_rp_count() - 1);
+	// Entry found. Remove the RP entry, and adjust the RP count values.
+	// Also, if necessary, schedule the group prefix for removal.
 	_rp_list.erase(iter);
-
+	set_received_rp_count(received_rp_count() - 1);
+	if (bsr_zone().i_am_bsr() && bsr_zone().is_active_bsr_zone()) {
+	    set_expected_rp_count(expected_rp_count() - 1);
+	    if (expected_rp_count() == 0)
+		schedule_bsr_group_prefix_remove();
+	}
+	
 	//
 	// Schedule the task to clean the expiring bsr zones
 	//
@@ -2400,6 +2435,36 @@ BsrGroupPrefix::find_rp(const IPvX& rp_addr) const
     
     return (NULL);
 }
+
+void
+BsrGroupPrefix::schedule_bsr_group_prefix_remove()
+{
+    _bsr_group_prefix_remove_timer.start(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT,
+					 0,
+					 bsr_group_prefix_remove_timer_timeout,
+					 this);
+}
+
+static void
+bsr_group_prefix_remove_timer_timeout(void *data_pointer)
+{
+    BsrGroupPrefix *bsr_group_prefix = (BsrGroupPrefix *)data_pointer;
+    
+    //
+    // Timeout this entry only if I am the BSR, this is an active BSR zone,
+    // and there are no more RPs.
+    //
+    if (! bsr_group_prefix->bsr_zone().i_am_bsr())
+	return;
+    if (! bsr_group_prefix->bsr_zone().is_active_bsr_zone())
+	return;
+    if (! bsr_group_prefix->rp_list().empty())
+	return;
+    
+    // Delete the prefix
+    bsr_group_prefix->bsr_zone().delete_bsr_group_prefix(bsr_group_prefix);
+}
+
 
 BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const IPvX& rp_addr,
 	     uint8_t rp_priority, uint16_t rp_holdtime)
