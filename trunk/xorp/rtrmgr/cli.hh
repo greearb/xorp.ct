@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.16 2004/05/28 22:27:55 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.17 2004/05/31 02:32:16 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -88,7 +88,7 @@ public:
 		  uint32_t ,
 		  const string& command_global_name,
 		  const vector<string>& argv);
-    map <string, string> text_entry_children_func(const string& path,
+    map<string, string> text_entry_children_func(const string& path,
 						  bool& is_executable) const;
     int text_entry_func(const string& ,
 			const string& ,
@@ -141,10 +141,10 @@ public:
     void load_communicated(const XrlError& e);
     void load_done(bool success, string errmsg);
 
-    map <string, string> op_mode_help(const string& path,
-				      bool& is_executable) const;
-    map <string, string> configure_mode_help(const string& path,
-					     bool& is_executable) const;
+    map<string, string> op_mode_help(const string& path,
+				     bool& is_executable) const;
+    map<string, string> configure_mode_help(const string& path,
+					    bool& is_executable) const;
     typedef XorpCallback2<void, bool, const string&>::RefPtr OpModeCallback;
     void op_mode_cmd_done(bool success, const string& result);
 
@@ -207,6 +207,7 @@ private:
 				const CLI_PROCESS_CALLBACK& cb,
 				const string& path);
 #endif
+
     void add_text_entry_commands();
 
     void add_edit_subtree();
@@ -226,7 +227,7 @@ private:
     string get_help_c(const string& s) const;
 
     string makepath(const list<string>& parts) const;
-    list <string> splitpath(const string& path) const;
+    list<string> splitpath(const string& path) const;
 
     const TemplateTree*	template_tree() const;
     SlaveConfigTree*	config_tree();
