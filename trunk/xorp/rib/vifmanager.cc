@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.32 2004/06/10 22:41:42 hodson Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.33 2004/06/11 21:17:17 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -358,6 +358,8 @@ VifManager::updates_made()
 
 	    //
 	    // Update or set the vif flags
+	    // XXX: discard property needs to be inherited from
+	    // the parent interface, once it has been marshaled.
 	    //
 	    if (old_ifmgr_vif_ptr != NULL) {
 		if (_rib_manager->set_vif_flags(ifmgr_vif_name,

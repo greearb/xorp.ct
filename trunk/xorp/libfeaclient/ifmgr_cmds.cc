@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.7 2003/10/15 19:19:25 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.9 2004/06/10 22:41:02 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -221,6 +221,43 @@ IfMgrIfSetEnabled::str() const
     return if_str_begin(this, "SetEnabled")
 	+ "\", " + bool2str(en()) + if_str_end();
 }
+
+// ----------------------------------------------------------------------------
+// IfMgrIfSetDiscard
+
+#ifdef notyet
+bool
+IfMgrIfSetDiscard::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& ifs = t.ifs();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i != ifs.end()) {
+	IfMgrIfAtom& interface = i->second;
+	interface.set_discard(discard());
+	return true;
+    }
+    return false;
+}
+
+bool
+IfMgrIfSetDiscard::forward(XrlSender&		 sender,
+			   const string&	 xrl_target,
+			   const IfMgrXrlSendCB& xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_interface_set_discard(xt, ifname(), discard(), xcb);
+}
+
+string
+IfMgrIfSetDiscard::str() const
+{
+    return if_str_begin(this, "SetDiscard")
+	+ "\", " + bool2str(discard()) + if_str_end();
+}
+#endif
 
 // ----------------------------------------------------------------------------
 // IfMgrIfSetMtu

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.5 2003/09/30 03:07:57 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.7 2004/06/10 22:41:02 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -95,6 +95,31 @@ public:
 protected:
     bool _en;
 };
+
+#ifdef notyet
+/**
+ * @short Command to set discard condition on interface.
+ */
+class IfMgrIfSetDiscard : public IfMgrIfCommandBase {
+public:
+    inline IfMgrIfSetDiscard(const string& ifname, bool discard)
+	: IfMgrIfCommandBase(ifname), _discard(discard)
+    {}
+
+    inline bool discard() const				{ return _discard; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    bool _discard;
+};
+#endif
 
 /**
  * @short Command to set MTU of interface.
