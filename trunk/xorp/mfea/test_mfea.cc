@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.14 2003/04/23 20:50:50 hodson Exp $"
+#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.15 2003/05/22 20:37:54 hodson Exp $"
 
 
 //
@@ -22,6 +22,9 @@
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
+
+#include <netdb.h>
+
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/callback.hh"
@@ -86,10 +89,10 @@ usage(const char *argv0, int exit_value)
     else
 	output = stderr;
     
-    fprintf(output, "Usage: %s [-f <finder_hostname>]\n",
+    fprintf(output, "Usage: %s [-f <finder_hostname>[/<finder_port>]]\n",
 	    progname);
-    fprintf(output, "           -f <finder_hostname>  : finder hostname\n");
-    fprintf(output, "           -h                    : usage (this message)\n");
+    fprintf(output, "           -f <finder_hostname>[/<finder_port>]  : finder hostname and port\n");
+    fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
     fprintf(output, "Module name:    %s\n", XORP_MODULE_NAME);
@@ -104,8 +107,10 @@ int
 main(int argc, char *argv[])
 {
     int ch;
-    const char *finder_hostname = "localhost";		// XXX: default
     const char *argv0 = argv[0];
+    char *finder_hostname_port = NULL;
+    IPv4 finder_addr = IPv4::ZERO();
+    uint16_t finder_port = 0;		// XXX: host order
     
     //
     // Initialize and start xlog
@@ -123,8 +128,8 @@ main(int argc, char *argv[])
     while ((ch = getopt(argc, argv, "f:h")) != -1) {
 	switch (ch) {
 	case 'f':
-	    // Finder hostname
-	    finder_hostname = optarg;
+	    // Finder hostname and port
+	    finder_hostname_port = optarg;
 	    break;
 	case 'h':
 	case '?':
@@ -142,6 +147,52 @@ main(int argc, char *argv[])
 	usage(argv0, 1);
 	// NOTREACHED
     }
+
+    //
+    // Get the finder hostname and port
+    //
+    if (finder_hostname_port != NULL) {
+	char buf[1024];
+	char *p;
+	struct hostent *h;
+	
+	// Get the finder address
+	strcpy(buf, finder_hostname_port);
+	p = strrchr(buf, '/');
+	if (p != NULL)
+	    *p = '\0';
+	h = gethostbyname(buf);
+	if (h == NULL) {
+	    fprintf(stderr, "Can't resolve IP address for %s: %s\n",
+		    buf, hstrerror(h_errno));
+	    usage(argv0, 1);
+	}
+	
+	try {
+	    IPvX addr(h->h_addrtype, (uint8_t *)h->h_addr_list[0]);
+	    finder_addr = addr.get_ipv4();
+	} catch (const InvalidFamily&) {
+	    fprintf(stderr, "Invalid finder address family: %d\n",
+		    h->h_addrtype);
+	    usage(argv0, 1);
+	} catch (const InvalidCast&) {
+	    fprintf(stderr, "Invalid finder address family: %d (expected IPv4)\n",
+		    h->h_addrtype);
+	    usage(argv0, 1);
+	}
+	
+	// Get the finder port
+	strcpy(buf, finder_hostname_port);
+	p = strrchr(buf, '/');
+	if (p != NULL) {
+	    p++;
+	    finder_port = static_cast<uint16_t>(atoi(p));
+	    if (finder_port == 0) {
+		fprintf(stderr, "Invalid finder port: %d\n", finder_port);
+		usage(argv0, 1);
+	    }
+	}
+    }
     
     //
     // The main body
@@ -156,10 +207,15 @@ main(int argc, char *argv[])
 	// Finder
 	//
 	FinderServer *finder = NULL;
-	try {
-	    finder = new FinderServer(eventloop);
-	} catch (const InvalidPort&) {
-	    XLOG_FATAL("Could not start in-process Finder");
+	if (finder_hostname_port == NULL) {
+	    // Start our own finder
+	    try {
+		finder = new FinderServer(eventloop);
+	    } catch (const InvalidPort&) {
+		XLOG_FATAL("Could not start in-process Finder");
+	    }
+	    finder_addr = finder->addr();
+	    finder_port = finder->port();
 	}
 	
 	//
@@ -187,11 +243,11 @@ main(int argc, char *argv[])
 	//
 #if DO_IPV4
 	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
-					 finder->addr(), finder->port());
+					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
 #else
 	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
-					 finder->addr(), finder->port());
+					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
 #endif // ! DO_IPV4
 	
@@ -202,8 +258,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mfea4(eventloop,
 					  xorp_module_name(AF_INET,
 							   XORP_MODULE_MFEA),
-					  finder->addr(), finder->port()
-					  );
+					  finder_addr, finder_port);
 	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
 				   eventloop,
 				   &xrl_std_router_mfea4
@@ -212,8 +267,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mfea6(eventloop,
 					  xorp_module_name(AF_INET6,
 							   XORP_MODULE_MFEA),
-					  finder->addr(), finder->port()
-					  );
+					  finder_addr, finder_port);
 	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 				   eventloop,
 				   &xrl_std_router_mfea6);
