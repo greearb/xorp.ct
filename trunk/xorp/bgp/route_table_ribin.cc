@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.13 2003/05/23 00:02:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.14 2003/09/05 02:43:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -93,7 +93,7 @@ int
 RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			 BGPRouteTable<A> *caller)
 {
-    debug_msg("RibInTable<%s>::add_route\n", NameOf<A>::get());
+    debug_msg("RibInTable<%s>::add_route\n", A::ip_version_str().c_str());
 
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;

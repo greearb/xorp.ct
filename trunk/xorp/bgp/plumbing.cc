@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.22 2003/09/05 02:39:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.23 2003/09/05 02:55:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -469,7 +469,7 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<%s>::stop_peering: peer %#x not found",
-		NameOf<A>::get(), (u_int)peer_handler);
+		A::ip_version_str().c_str(), (u_int)peer_handler);
     rt = iter->second;
     prevrt = rt;
     while (rt != _fanout_table) {
@@ -484,7 +484,7 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
 	    //doing an ALLSTOP.
 	    XLOG_WARNING("BGPPlumbingAF<%s>::stop_peering: "
 			 "NULL parent table in stop_peering",
-			 NameOf<A>::get());
+			 A::ip_version_str().c_str());
 	    return 0;
 	}
     }
@@ -642,7 +642,7 @@ int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<%s>::add_route\n", NameOf<A>::get());
+    debug_msg("BGPPlumbingAF<%s>::add_route\n", A::ip_version_str().c_str());
 
     int result = 0;
     RibInTable<A> *rib_in;
@@ -651,7 +651,7 @@ BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg,
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<%s>: "
 		   "add_route called for a PeerHandler "
-		   "that has no associated RibIn", NameOf<A>::get());
+		   "that has no associated RibIn", A::ip_version_str().c_str());
 
     rib_in = iter->second;
 
@@ -726,9 +726,10 @@ template <class A>
 void
 BGPPlumbingAF<A>::push(PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<%s>::push\n", NameOf<A>::get());
+    debug_msg("BGPPlumbingAF<%s>::push\n", A::ip_version_str().c_str());
     if (_awaits_push == false) {
-	XLOG_WARNING("push <%s> when none needed", NameOf<A>::get());
+	XLOG_WARNING("push <%s> when none needed",
+		     A::ip_version_str().c_str());
 	return;
     }
     RibInTable<A> *rib_in;
