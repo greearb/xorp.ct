@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.2 2003/02/22 23:57:13 mjh Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -81,6 +81,12 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 {
     if ((const char *)buffer == _errbuffer) {
 	if (_error == false) {
+	    //We hadn't previously seen any error output
+	    if (e == AsyncFileOperator::END_OF_FILE) {
+		//We just got EOF on stderr - ignore this and wait for
+		//EOF on stdout
+		return;
+	    }
 	    _error = true;
 	    //reset for reading error response
 	    _response = "";
@@ -131,6 +137,8 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	}
     } else {
 	//something bad happened
+	//XXX ideally we'd figure out what.
+	_response += "\nsomething bad happened\n";
 	done(false);
     }
 }
