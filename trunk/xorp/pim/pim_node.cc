@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.44 2004/05/15 23:58:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.45 2004/05/17 23:50:09 pavlin Exp $"
 
 
 //
@@ -915,17 +915,35 @@ PimNode::disable_all_vifs()
 void
 PimNode::delete_all_vifs()
 {
-    // XXX: here we must use proto_vifs().size() to end the iteration,
-    // because the proto_vifs() array may be modified when a vif
-    // is deleted.
-    for (uint16_t i = 0; i < proto_vifs().size(); i++) {
-	PimVif *pim_vif = vif_find_by_vif_index(i);
-	if (pim_vif == NULL)
-	    continue;
-	delete pim_vif;
+    list<string> vif_names;
+    vector<PimVif *>::iterator iter;
+
+    //
+    // Create the list of all vif names to delete
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	PimVif *pim_vif = (*iter);
+	if (pim_vif != NULL) {
+	    string vif_name = pim_vif->name();
+	    vif_names.push_back(pim_vif->name());
+	}
     }
-    
-    proto_vifs().clear();
+
+    //
+    // Delete all vifs
+    //
+    list<string>::iterator vif_names_iter;
+    for (vif_names_iter = vif_names.begin();
+	 vif_names_iter != vif_names.end();
+	 ++vif_names_iter) {
+	const string& vif_name = *vif_names_iter;
+	string err;
+	if (delete_vif(vif_name, err) != XORP_OK) {
+	    err = c_format("Cannot delete vif %s: internal error",
+			   vif_name.c_str());
+	    XLOG_ERROR(err.c_str());
+	}
+    }
 }
 
 /**

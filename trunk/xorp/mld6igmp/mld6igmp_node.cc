@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.25 2004/05/06 20:22:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.26 2004/05/15 23:58:40 pavlin Exp $"
 
 
 //
@@ -825,17 +825,35 @@ Mld6igmpNode::disable_all_vifs()
 void
 Mld6igmpNode::delete_all_vifs()
 {
-    // XXX: here we must use proto_vifs().size() to end the iteration,
-    // because the proto_vifs() array may be modified when a vif
-    // is deleted.
-    for (size_t i = 0; i < proto_vifs().size(); i++) {
-	Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(i);
-	if (mld6igmp_vif == NULL)
-	    continue;
-	delete mld6igmp_vif;
+    list<string> vif_names;
+    vector<Mld6igmpVif *>::iterator iter;
+
+    //
+    // Create the list of all vif names to delete
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	Mld6igmpVif *mld6igmp_vif = (*iter);
+	if (mld6igmp_vif != NULL) {
+	    string vif_name = mld6igmp_vif->name();
+	    vif_names.push_back(mld6igmp_vif->name());
+	}
     }
-    
-    proto_vifs().clear();
+
+    //
+    // Delete all vifs
+    //
+    list<string>::iterator vif_names_iter;
+    for (vif_names_iter = vif_names.begin();
+	 vif_names_iter != vif_names.end();
+	 ++vif_names_iter) {
+	const string& vif_name = *vif_names_iter;
+	string err;
+	if (delete_vif(vif_name, err) != XORP_OK) {
+	    err = c_format("Cannot delete vif %s: internal error",
+			   vif_name.c_str());
+	    XLOG_ERROR(err.c_str());
+	}
+    }
 }
 
 /**

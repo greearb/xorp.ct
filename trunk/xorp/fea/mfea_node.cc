@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.30 2004/05/06 21:48:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.31 2004/05/15 23:58:39 pavlin Exp $"
 
 
 //
@@ -1063,15 +1063,28 @@ MfeaNode::disable_all_vifs()
 void
 MfeaNode::delete_all_vifs()
 {
+    list<string> vif_names;
     vector<MfeaVif *>::iterator iter;
-    
+
+    //
+    // Create the list of all vif names to delete
+    //
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
-	if (mfea_vif == NULL)
-	    continue;
-	
-	string vif_name = mfea_vif->name();
-	
+	if (mfea_vif != NULL) {
+	    string vif_name = mfea_vif->name();
+	    vif_names.push_back(mfea_vif->name());
+	}
+    }
+
+    //
+    // Delete all vifs
+    //
+    list<string>::iterator vif_names_iter;
+    for (vif_names_iter = vif_names.begin();
+	 vif_names_iter != vif_names.end();
+	 ++vif_names_iter) {
+	const string& vif_name = *vif_names_iter;
 	string err;
 	if (delete_vif(vif_name, err) != XORP_OK) {
 	    err = c_format("Cannot delete vif %s: internal error",
