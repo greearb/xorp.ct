@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.3 2003/04/16 04:39:27 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.4 2003/04/20 22:29:15 pavlin Exp $
 dnl
 
 dnl
@@ -35,7 +35,7 @@ main()
 }
 ],
   [
-   dnl AC_DEFINE(HAVE_IPV6)
+   dnl AC_DEFINE(HAVE_IPV6, 1, [Define to 1 if you have IPv6])
    AC_MSG_RESULT(yes)
    ipv6=yes],
   [AC_MSG_RESULT(no)
@@ -65,7 +65,8 @@ main()
   return (0);
 }
 ],
-  [AC_DEFINE(HAVE_RFC2292BIS)
+  [AC_DEFINE(HAVE_RFC2292BIS, 1,
+		[Define to 1 if you have newer IPv6 advanced API])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
@@ -86,7 +87,7 @@ for i in KAME; do
 yes
 #endif],
     [ipv6type=$i;
-    AC_DEFINE(IPV6_STACK_KAME)])
+    AC_DEFINE(IPV6_STACK_KAME, 1, [Define to 1 if you have KAME IPv6 stack])])
     ;;
   esac
   if test "$ipv6type" != "unknown"; then
@@ -115,7 +116,8 @@ static struct sockaddr_in6 sockaddr_in6;
 int sin_len = sizeof(sockaddr_in6.sin6_len);
 ],
 [AC_MSG_RESULT(yes)
- AC_DEFINE(HAVE_SIN6_LEN)],
+ AC_DEFINE(HAVE_SIN6_LEN, 1,
+		[Define to 1 if your struct sockaddr_in6 has field sin6_len])],
  AC_MSG_RESULT(no))
 
 dnl ----------------------------
@@ -132,5 +134,6 @@ AC_TRY_COMPILE([
 size_t size = sizeof(struct mld_hdr);
 ],
 [AC_MSG_RESULT(yes)
- AC_DEFINE(HAVE_MLD_HDR)],
+ AC_DEFINE(HAVE_MLD_HDR, 1,
+		[Define to 1 if you have struct mld_hdr in netinet/icmp6.h])],
  AC_MSG_RESULT(no))

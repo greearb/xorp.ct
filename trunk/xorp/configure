@@ -1562,15 +1562,15 @@ exec 5>>./config.log
 
 
 case "${host_os}" in
-    solaris* )
-	cat >> confdefs.h <<\EOF
-#define HOST_OS_SOLARIS 1
-EOF
-
-    ;;
     bsdi* )
 	cat >> confdefs.h <<\EOF
 #define HOST_OS_BSDI 1
+EOF
+
+    ;;
+    darwin* )
+	cat >> confdefs.h <<\EOF
+#define HOST_OS_MACOSX 1
 EOF
 
     ;;
@@ -1580,9 +1580,9 @@ EOF
 EOF
 
     ;;
-    openbsd* )
+    linux* )
 	cat >> confdefs.h <<\EOF
-#define HOST_OS_OPENBSD 1
+#define HOST_OS_LINUX 1
 EOF
 
     ;;
@@ -1592,15 +1592,15 @@ EOF
 EOF
 
     ;;
-    linux* )
+    openbsd* )
 	cat >> confdefs.h <<\EOF
-#define HOST_OS_LINUX 1
+#define HOST_OS_OPENBSD 1
 EOF
 
     ;;
-    darwin* )
+    solaris* )
 	cat >> confdefs.h <<\EOF
-#define HOST_OS_MACOSX 1
+#define HOST_OS_SOLARIS 1
 EOF
 
     ;;
@@ -3988,8 +3988,8 @@ fi
 rm -f conftest*
 
 
-echo $ac_n "checking whether struct sockaddr has a sa_len field""... $ac_c" 1>&6
-echo "configure:3993: checking whether struct sockaddr has a sa_len field" >&5
+echo $ac_n "checking whether struct sockaddr has field sa_len""... $ac_c" 1>&6
+echo "configure:3993: checking whether struct sockaddr has field sa_len" >&5
 cat > conftest.$ac_ext <<EOF
 #line 3995 "configure"
 #include "confdefs.h"
@@ -4020,8 +4020,8 @@ fi
 rm -f conftest*
 
 
-echo $ac_n "checking whether struct sockaddr_in has a sin_len field""... $ac_c" 1>&6
-echo "configure:4025: checking whether struct sockaddr_in has a sin_len field" >&5
+echo $ac_n "checking whether struct sockaddr_in has field sin_len""... $ac_c" 1>&6
+echo "configure:4025: checking whether struct sockaddr_in has field sin_len" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4027 "configure"
 #include "confdefs.h"
@@ -4052,8 +4052,8 @@ fi
 rm -f conftest*
 
 
-echo $ac_n "checking whether struct sockaddr_un has a sun_len field""... $ac_c" 1>&6
-echo "configure:4057: checking whether struct sockaddr_un has a sun_len field" >&5
+echo $ac_n "checking whether struct sockaddr_un has field sun_len""... $ac_c" 1>&6
+echo "configure:4057: checking whether struct sockaddr_un has field sun_len" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4059 "configure"
 #include "confdefs.h"
@@ -4110,8 +4110,8 @@ rm -f conftest*
 
 
 
-echo $ac_n "checking whether mfcctl2 is defined""... $ac_c" 1>&6
-echo "configure:4115: checking whether mfcctl2 is defined" >&5
+echo $ac_n "checking whether struct mfcctl2 is defined""... $ac_c" 1>&6
+echo "configure:4115: checking whether struct mfcctl2 is defined" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4117 "configure"
 #include "confdefs.h"
@@ -4144,8 +4144,8 @@ else
 fi
 rm -f conftest*
 
-echo $ac_n "checking whether mfcctl2 has mfcc_flags field""... $ac_c" 1>&6
-echo "configure:4149: checking whether mfcctl2 has mfcc_flags field" >&5
+echo $ac_n "checking whether struct mfcctl2 has field mfcc_flags""... $ac_c" 1>&6
+echo "configure:4149: checking whether struct mfcctl2 has field mfcc_flags" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4151 "configure"
 #include "confdefs.h"
@@ -4179,8 +4179,8 @@ else
 fi
 rm -f conftest*
 
-echo $ac_n "checking whether mfcctl2 has mfcc_rp field""... $ac_c" 1>&6
-echo "configure:4184: checking whether mfcctl2 has mfcc_rp field" >&5
+echo $ac_n "checking whether struct mfcctl2 has field mfcc_rp""... $ac_c" 1>&6
+echo "configure:4184: checking whether struct mfcctl2 has field mfcc_rp" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4186 "configure"
 #include "confdefs.h"
@@ -4214,8 +4214,8 @@ else
 fi
 rm -f conftest*
 
-echo $ac_n "checking whether mf6cctl2 is defined""... $ac_c" 1>&6
-echo "configure:4219: checking whether mf6cctl2 is defined" >&5
+echo $ac_n "checking whether struct mf6cctl2 is defined""... $ac_c" 1>&6
+echo "configure:4219: checking whether struct mf6cctl2 is defined" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4221 "configure"
 #include "confdefs.h"
@@ -4248,8 +4248,8 @@ else
 fi
 rm -f conftest*
 
-echo $ac_n "checking whether mf6cctl2 has mf6cc_flags field""... $ac_c" 1>&6
-echo "configure:4253: checking whether mf6cctl2 has mf6cc_flags field" >&5
+echo $ac_n "checking whether struct mf6cctl2 has field mf6cc_flags""... $ac_c" 1>&6
+echo "configure:4253: checking whether struct mf6cctl2 has field mf6cc_flags" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4255 "configure"
 #include "confdefs.h"
@@ -4283,8 +4283,8 @@ else
 fi
 rm -f conftest*
 
-echo $ac_n "checking whether mf6cctl2 has mf6cc_rp field""... $ac_c" 1>&6
-echo "configure:4288: checking whether mf6cctl2 has mf6cc_rp field" >&5
+echo $ac_n "checking whether struct mf6cctl2 has field mf6cc_rp""... $ac_c" 1>&6
+echo "configure:4288: checking whether struct mf6cctl2 has field mf6cc_rp" >&5
 cat > conftest.$ac_ext <<EOF
 #line 4290 "configure"
 #include "confdefs.h"
@@ -4591,7 +4591,7 @@ EOF
 if { (eval echo configure:4592: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
-      echo "$ac_t""yes" 1>&6
+   echo "$ac_t""yes" 1>&6
    ipv6=yes
 else
   echo "configure: failed program was:" >&5
