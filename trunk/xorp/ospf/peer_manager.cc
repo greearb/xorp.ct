@@ -22,6 +22,7 @@
 #include <map>
 #include <list>
 #include <set>
+#include <queue>
 
 #include "ospf_module.h"
 
