@@ -1,16 +1,26 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.29 2004/12/17 00:19:34 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.30 2005/01/20 00:45:36 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
-    enable-unicast-forwarding4:	bool;
-    enable-unicast-forwarding6:	bool;
+
+    unicast-forwarding4 {
+	disable:		toggle = false;
+    }
+    enable-unicast-forwarding4:	bool;		/* %deprecated */
+
+    unicast-forwarding6 {
+	disable:		toggle = false;
+    }
+    enable-unicast-forwarding6:	bool;		/* %deprecated */
 
     click {
-	enabled:			bool = false;
+	disable:			toggle = false;
+	enabled:			bool;	/* %deprecated */
 	duplicate-routes-to-kernel:	bool = false;
 
 	kernel-click {
-	    enabled:				bool = false;
+	    disable:				bool = false;
+	    enabled:				bool;	/* %deprecated */
 	    install-on-startup:	bool = false;
 	    kernel-click-modules:		txt = "/usr/local/click/linuxmodule/proclikefs.o:/usr/local/click/linuxmodule/click.o";
 	    mount-directory:	txt = "/click";
@@ -18,7 +28,8 @@ fea {
 	}
 
 	user-click {
-	    enabled:			bool = false;
+	    disable:			bool = false;
+	    enabled:			bool;	/* %deprecated */
 	    command-file:		txt = "/usr/local/bin/click";
 	    command-extra-arguments:	txt = "-R";
 	    command-execute-on-startup:	bool = true;
@@ -44,13 +55,33 @@ fea {
 	%set:;
     }
 
+    unicast-forwarding4 {
+	%help:		short "Configure IPv4 unicast forwarding";
+	disable {
+	    %help:	short "Disable IPv4 unicast forwarding";
+	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(@)`";
+	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
+	}
+    }
+
     enable-unicast-forwarding4 {
+	%deprecated: "Statement 'enable-unicast-forwarding4: true/false' is replaced with 'unicast-forwarding4 { disable: false/true }'";
 	%help:		short "Enable IPv4 unicast forwarding";
 	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
 	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
     }
 
+    unicast-forwarding6 {
+	%help:		short "Configure IPv6 unicast forwarding";
+	disable {
+	    %help:	short "Disable IPv6 unicast forwarding";
+	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(@)`";
+	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
+	}
+    }
+
     enable-unicast-forwarding6 {
+	%deprecated: "Statement 'enable-unicast-forwarding6: true/false' is replaced with 'unicast-forwarding6 { disable: false/true }'";
 	%help:		short "Enable IPv6 unicast forwarding";
 	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$(@)";
 	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
@@ -60,10 +91,17 @@ fea {
 	%help:		short "Configure Click FEA support";
 	%activate:	xrl "$(fea.targetname)/fea_click/0.1/start_click";
 
+	disable {
+	    %help:	short "Disable Click FEA support";
+	    %set:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=`~$(@)`";
+	    %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=`~$(DEFAULT)`";
+	}
+
 	enabled {
+	    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 	    %help:	short "Enable Click FEA support";
 	    %set:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(@)";
-	    %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(DEFAULT)";
+	    /* %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(DEFAULT)"; */
 	}
 
 	duplicate-routes-to-kernel {
@@ -73,10 +111,17 @@ fea {
 	}
 
 	kernel-click {
+	    disable {
+		%help:	short "Disable kernel-level Click FEA support";
+		%set:		xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=`~$(@)`";
+		%delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=`~$(DEFAULT)`";
+	    }
+
 	    enabled {
+		%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		%help:	short "Enable kernel-level Click FEA support";
 		%set:		xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=$(@)";
-		%delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=$(DEFAULT)";
+		/* %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_kernel_click?enable:bool=$(DEFAULT)"; */
 	    }
 
 	    install-on-startup {
@@ -104,10 +149,17 @@ fea {
 	}
 
 	user-click {
+	    disable {
+		%help:	short "Disable user-level Click FEA support";
+		%set:		xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=`~$(@)`";
+		%delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=`~$(DEFAULT)`";
+	    }
+
 	    enabled {
+		%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		%help:	short "Enable user-level Click FEA support";
 		%set:		xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=$(@)";
-		%delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=$(DEFAULT)";
+		/* %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_user_click?enable:bool=$(DEFAULT)"; */
 	    }
 
 	    command-file {

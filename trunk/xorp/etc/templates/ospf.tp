@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospf.tp,v 1.14 2004/06/07 18:16:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospf.tp,v 1.15 2004/06/12 05:41:55 pavlin Exp $ */
 
 protocols {
     ospf {
@@ -21,7 +21,8 @@ protocols {
 	    stub-summaries:		bool = false;
 
 	    interface @: txt {
-		enabled:		toggle = true;
+		disable:		toggle = false;
+		enabled:		bool;		/* %deprecated */
 		hello-interval:		u32 = 30;
 		dead-interval:		u32 = 95;
 		poll-interval:		u32;

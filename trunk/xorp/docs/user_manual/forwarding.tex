@@ -40,46 +40,50 @@ enabled for multicast.
 xx\=xx\=xx\=xx\=xx\=\kill
 fea \{\\
 \>targetname: {\it txt}\\
-\>enable-unicast-forwarding4: {\it bool}\\
-\>enable-unicast-forwarding6: {\it bool}\\
+\>unicast-forwarding4 \{\\
+\>\>disable: {\it bool}\\
+\>\}\\
+\>unicast-forwarding6 \{\\
+\>\>disable: {\it bool}\\
+\>\}\\
 \}
 \\
 plumbing \{\\
 \>mfea4 \{\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
 \\
 \>mfea6 \{\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
 \>\>\>flag \{\\
 \>\>\>\>all \{\\
-\>\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>\>disable: {\it bool}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -101,12 +105,22 @@ plumbing \{\\
   forwarding engine abstraction.  It defaults to ``{\stt fea}'', and
   it is strongly recommended that this default is {\it not} overridden
   under normal usage scenarios.
-\item{\stt enable-unicast-forwarding4}: this takes the value {\stt
-  true} or {\stt false}, and determines whether the router will
-  forward unicast IPv4 packets.
-\item{\stt enable-unicast-forwarding6}: this takes the value {\stt
-  true} or {\stt false}, and determines whether the router will
-  forward unicast IPv4 packets.
+\end{description}
+\item{\stt unicast-forwarding4}: this directive is used to configure the IPv4
+  forwarding~\footnote{Note that prior to XORP Release-1.1, the
+  {\tt enable-unicast-forwarding4} flag was used instead to enable or disable
+  the IPv4 forwarding.}. Possible parameters are:
+\begin{description}
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables all IPv4 unicast forwarding on the router.
+\end{description}
+\item{\stt unicast-forwarding6}: this directive is used to configure the IPv6
+  forwarding~\footnote{Note that prior to XORP Release-1.1, the
+  {\tt enable-unicast-forwarding6} flag was used instead to enable or disable
+  the IPv6 forwarding.}. Possible parameters are:
+\begin{description}
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables all IPv6 unicast forwarding on the router.
 \end{description}
 \item{\stt plumbing}: this delimits a part of the router configuration
   used for the plumbing together of packet forwarding functionality.
@@ -116,9 +130,11 @@ plumbing \{\\
 
   The following multicast forwarding parameters can be configured:
 \begin{description}
-\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
-  and enables or disables all IPv4 multicast forwarding on the router.
-  The default is {\stt true}.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables all IPv4 multicast forwarding on the
+  router~\footnote{Note that prior to XORP Release-1.1, the {\tt enable}
+  flag was used instead of {\tt disable}.}.
+  The default is {\stt false}.
 \item{\stt interface}: this specifies an interface to be used for
   multicast IPv4 forwarding.  Each interface to be used for multicast
   forwarding needs to be explicitly listed.
@@ -136,9 +152,11 @@ plumbing \{\\
 
   Each vif can take the following parameter:
 \begin{description}
-\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
-  and enables or disables multicast forwarding on this vif.
-  The default is {\stt true}.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables multicast forwarding on this vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  The default is {\stt false}.
 \end{description}
 \end{description}
 \item{\stt traceoptions}: this directive delimits the configuration of
@@ -150,8 +168,10 @@ plumbing \{\\
 \item{\stt all}: this directive specifies that all tracing
   options should be enabled.  Possible parameters are:
 \begin{description}
-\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
-  and enables or disables tracing. The default is {\stt true}.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}. The default is {\stt false}.
 \end{description}
 \end{description}
 \end{description}
@@ -170,41 +190,45 @@ plumbing \{\\
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 fea \{\\
-\>enable-unicast-forwarding4: true\\
-\>enable-unicast-forwarding6: false\\
+\>unicast-forwarding4 \{\\
+\>\>disable: false\\
+\>\}\\
+\>unicast-forwarding6 \{\\
+\>\>disable: true\\
+\>\}\\
 \}
 plumbing \{\\
 \>mfea4 \{\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
 \>\>\>\>/* Note: this vif should be always enabled */\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
 \\
 \>mfea6 \{\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
 \>\>\>\>/* Note: this vif should be always enabled */\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -218,9 +242,9 @@ plumbing \{\\
 The configuration above enables unicast IPv4 forwarding, but disables
 IPv6 unicast forwarding.
 
-In addition it enables multicast forwarding for IPv4 and IPv6 on
+In addition, it enables multicast forwarding for IPv4 and IPv6 on
 interface/vif {\stt dc0/dc0}, and enables the register vif for use by
-PIM SM multicast routing.
+PIM-SM multicast routing.
 
 \section{Monitoring the Forwarding Engine}
 

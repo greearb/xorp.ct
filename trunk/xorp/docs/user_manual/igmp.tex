@@ -66,15 +66,15 @@ xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>igmp \{\\
 \>\>targetname: {\it text}\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text}\{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -83,15 +83,15 @@ protocols \{\\
 protocols \{\\
 \>mld \{\\
 \>\>targetname: {\it text}\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -112,9 +112,12 @@ protocols \{\\
 \item{\tt targetname} this is the name for this instance of IGMP.  It
   defaults to ``{\stt IGMP}'', and it is not recommended that this
   default is overridden under normal usage scenarios.
-\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
-  and determines whether IGMP as a whole is enabled on this router.
-  The default value is {\stt true}.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether IGMP as a whole is enabled on this
+  router~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  The default value is {\stt false}.
 \item{\stt interface}: this specifies an interface to be monitored by
   IGMP for the presence of multicast receivers.  Each interface to be
   monitored by IGMP needs to be explicitly listed. The value is the
@@ -132,9 +135,11 @@ protocols \{\\
  
   Each vif takes the following optional parameter:
 \begin{description}
-\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
-  and determines whether IGMP is enabled on this vif.
-  The default value is {\stt true}.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether IGMP is disabled on this vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  The default value is {\stt false}.
 \end{description}
 \end{description}
 \item{\stt traceoptions}: this directive delimits the configuration of
@@ -146,8 +151,10 @@ protocols \{\\
 \item{\stt all}: this directive specifies that all tracing
   options should be enabled.  Possible parameters are:
 \begin{description}
-\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
-  and enables or disables tracing. The default is {\stt false}.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}. The default is {\stt false}.
 \end{description}
 \end{description}
 \end{description}
@@ -178,15 +185,15 @@ protocols \{\\
 \\
 protocols \{\\
 \>mld \{\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\

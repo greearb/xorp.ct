@@ -341,11 +341,11 @@ XORP> \textbf{show interfaces}\\
 \>\>\>address 192.150.187.108 \{\\
 \>\>\>\>prefix-length: 25\\
 \>\>\>\>broadcast: 192.150.187.255\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
 \>targetname: "fea"\\
 \end{tabbing}
@@ -384,9 +384,9 @@ XORP> \textbf{show}\\
 \>address 192.150.187.108 \{\\
 \>\>prefix-length: 25\\
 \>\>broadcast: 192.150.187.255\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
-\>enabled: true\\
+\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0 vif rl0]\\
 XORP> \textbf{up}\\
@@ -449,11 +449,11 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 25\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
-\>enabled: true\\
+\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
@@ -466,9 +466,9 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 >\>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
 \end{tabbing}
 \end{alltt}
@@ -514,20 +514,20 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
-\>enabled: true\\
+\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{create vif rl0b \{}\\
 \>\>>\> \textbf{address 10.0.0.1 \{}\\
 \>\>>\>\> \textbf{prefix-length 16}\\
 \>\>>\>\> \textbf{broadcast 10.0.255.255}\\
-\>\>>\>\> \textbf{enabled true}\\
+\>\>>\>\> \textbf{disable false}\\
 \>\>>\>\> \textbf{\}}\\
-\>\>>\>\> \textbf{enabled true}\\
+\>\>>\> \textbf{disable false}\\
 \>\>>\> \textbf{\}}\\
 OK. Use "commit" to apply these changes.\\
 \\
@@ -538,19 +538,19 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
 > vif rl0b \{\\
 >\>\> address 10.0.0.1 \{\\
 >\>\>\> prefix-length: 16\\
 >\>\>\> broadcast: 10.0.255.255\\
->\>\>\> enabled: true\\
+>\>\>\> disable: false\\
 >\>\>\}\\
->\>\>enabled: true\\
+>\>\>disable: false\\
 >\>\}\\
-\>enabled: true\\
+\>disable: false\\
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -576,19 +576,19 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
 \>vif rl0b \{\\
 \>\> address 10.0.0.1 \{\\
 \>\>\> prefix-length: 16\\
 \>\>\> broadcast: 10.0.255.255\\
-\>\>\> enabled: true\\
+\>\>\> disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
-\>enabled: true\\
+\>disable: false\\
 \\
 \noindent[edit]\\
 XORP> \textbf{delete interfaces interface rl0 vif rl0b}\\
@@ -596,7 +596,7 @@ Deleting:\\
 \>address 10.0.0.1 \{\\
 \>\>prefix-length: 16\\
 \>\>broadcast: 10.0.255.255\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
 \\
 OK\\
@@ -608,11 +608,11 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\}\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\}\\
-\>enabled: true
+\>disable: false
 \end{tabbing}
 \end{alltt}
 \end{minipage}

@@ -1,20 +1,23 @@
-/* $XORP: xorp/etc/templates/mfea4.tp,v 1.7 2004/06/04 04:47:04 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea4.tp,v 1.8 2004/06/07 18:16:25 pavlin Exp $ */
 
 plumbing {
     mfea4 {
 	targetname:		txt = "MFEA_4";
-	enabled:		bool = true;
+	disable:		toggle = false;
+	enabled:		bool;		/* %deprecated */
 
 	interface @: txt {
 	    vif @: txt {
-		enabled:	bool = true;
+		disable:	toggle = false;
+		enabled:	bool;		/* %deprecated */
 	    }
 	}
 
 	traceoptions {
 	    flag {
 		all {
-		    enabled:	bool = false;
+		    disable:	toggle = false;
+		    enabled:	bool;		/* %deprecated */
 		}
 	    }
 	}
@@ -41,11 +44,19 @@ plumbing {
 	    %set:;
 	}
 
+	disable {
+	    %help:	short "Disable the IPv4 MFEA";
+	    %create:;
+	    %set:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=`~$(@)`";
+	    %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=`~$(DEFAULT)`";
+	}
+
 	enabled {
+	    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 	    %help:	short "Enable the IPv4 MFEA";
 	    %create:;
 	    %set:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(@)";
-	    %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(DEFAULT)";
+	    /* %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(DEFAULT)"; */
 	}
 
 	interface @ {
@@ -54,7 +65,14 @@ plumbing {
 		%help:	short "Configure IPv4 MFEA on a virtual interface";
 		%activate: xrl "$(mfea4.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
 
+		disable {
+		    %help:	short "Disable IPv4 MFEA on an interface";
+		    %set:	xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(@)`";
+		    %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
 		enabled {
+		    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		    %help:	short "Enable IPv4 MFEA on an interface";
 		    %set:	xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
 		    %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
@@ -68,7 +86,15 @@ plumbing {
 		%help:	short "Configure the tracing operation to perform";
 		all {
 		    %help:	short "Configure all tracing operations";
+
+		    disable {
+			%help:	short "Disable all tracing operations";
+			%set:	xrl "$(mfea4.targetname)/mfea/0.1/log_trace_all?enable:bool=`~$(@)`";
+			%delete: xrl "$(mfea4.targetname)/mfea/0.1/log_trace_all?enable:bool=`~$(DEFAULT)`";
+		    }
+
 		    enabled {
+			%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 			%help:	short "Enable all tracing operations";
 			%set:	xrl "$(mfea4.targetname)/mfea/0.1/log_trace_all?enable:bool=$(@)";
 		    }

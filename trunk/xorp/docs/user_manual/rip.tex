@@ -69,7 +69,7 @@ XORP RIP complies with the following standards:
 To run RIP it is sufficient to specify the set of interfaces, vifs and
 addresses ({\stt interface}, {\stt vif} and {\stt address}) on which
 RIP is enabled.  Each {\stt address} to be used by RIP must be
-explicitly enabled, and typically a metric will also be configured.
+explicitly configured, and typically a metric will also be configured.
 
 In addition, to originate routes via RIP, it is necessary to use the
 {\stt export} command to export routes from the router's routing table
@@ -99,7 +99,7 @@ protocols \{\\
 \>\>\>\>address {\it IPv4} \{\\
 \>\>\>\>\>metric: {\it uint}\\
 \>\>\>\>\>horizon: {\it text}\\
-\>\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>\>disable: {\it bool}\\
 \>\>\>\>\>passive: {\it bool}\\
 \>\>\>\>\>accept-non-rip-requests: {\it bool}\\
 \>\>\>\>\>accept-default-route: {\it bool}\\
@@ -161,7 +161,7 @@ protocols \{\\
 \end{description}
 \item{\tt interface}: this specifies a network interface that should
   be used by RIP for routing.  See Chapter \ref{interfaces} for
-  details of interfaces.  The interface must be configured and enabled
+  details of interfaces.  The interface must be configured
   in the {\stt interfaces} part of the router configuration.
 
   Each interface can have multiple vifs configured:
@@ -186,9 +186,12 @@ protocols \{\\
   split-horizon-poison-reverse}'', ``{\stt split-horizon}'', and ``{\stt
   none}''.  The default is {\stt split-horizon-poison-reverse} and under
   normal circumstances should be left unchanged.
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and determines whether RIP will exchange routes via this
-  vif/address.  Setting this to {\stt false} allows routes received
+  vif/address~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  Setting this to {\stt true} allows routes received
   via an address to be temporarily removed without deleting the
   configuration.  The default is {\stt false}.
 \item{\tt passive}: this takes the value {\stt true} or {\stt false},
@@ -303,7 +306,7 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>address 10.10.10.10 \{\\
-\>\>\>\>\>enabled: true\\
+\>\>\>\>\>disable: false\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\

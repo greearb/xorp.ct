@@ -48,7 +48,7 @@ xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>static \{\\
 \>\>targetname: {\it text}\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>route4 {\it IPv4-addr}/{\it int(1..32)} \{\\
 \>\>\>nexthop: {\it IPv4-addr}\\
 \>\>\>metric: {\it uint}\\
@@ -87,9 +87,11 @@ The configuration parameters are used as follows:
   static\_routes.  It defaults to ``{\stt static\_routes}'', and it is
   not recommended that this default is overridden under normal usage
   scenarios.
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
-  and determines whether any static routes are installed or not.
-  Setting it to {\stt false} has the same effect as deleting the whole
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether any static routes are installed or not~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  Setting it to {\stt true} has the same effect as deleting the whole
   static routes configuration, but without losing what the old
   configuration actually was.
 \item{\tt route4}: this specifies an IPv4 unicast route to be

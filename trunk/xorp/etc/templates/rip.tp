@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.17 2004/10/29 01:23:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.18 2005/02/10 03:51:58 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -12,7 +12,8 @@ protocols {
 		address @: ipv4 {
 		    metric:			u32	=   1;
 		    horizon:			txt	= "split-horizon-poison-reverse" ;
-		    enabled:			bool	= false ;
+		    disable:			toggle	= false ;
+		    enabled:			bool;	/* %deprecated */
 		    passive:			bool	= false ;
 		    accept-non-rip-requests:	bool	= true ;
 		    accept-default-route:	bool	= false ;
@@ -85,7 +86,13 @@ protocols {
 		    %create: xrl "$(rip.targetname)/rip/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)" ;
 		    %delete: xrl "$(rip.targetname)/rip/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)" ;
 
+		    disable {
+			%help: short "Disable RIP on address." ;
+			%set: xrl "$(rip.targetname)/rip/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=`~$(@)`" ;
+		    }
+
 		    enabled {
+			%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 			%set: xrl "$(rip.targetname)/rip/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=$(@)" ;
 			%get: xrl "$(rip.targetname)/rip/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->enabled:bool" ;
 			%help: short "Enable RIP on address." ;

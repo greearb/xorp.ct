@@ -1,20 +1,23 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.7 2004/06/04 04:47:04 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.8 2004/06/07 18:16:25 pavlin Exp $ */
 
 protocols {
     igmp {
 	targetname:		txt = "IGMP";
-	enabled:		bool = true;
+	disable:		toggle = false;
+	enabled:		bool;		/* %deprecated */
 
 	interface @: txt {
 	    vif @: txt {
-		enabled:	bool = true;
+		disable:	toggle = false;
+		enabled:	bool;		/* %deprecated */
 	    }
 	}
 
 	traceoptions {
 	    flag {
 		all {
-		    enabled:	bool = false;
+		    disable:	toggle = false;
+		    enabled:	bool;		/* %deprecated */
 		}
 	    }
 	}
@@ -39,11 +42,19 @@ protocols {
 	    %set:;
 	}
 
+	disable {
+	    %help:	short "Disable the IGMP protocol";
+	    %create:;
+	    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=`~$(@)`";
+	    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=`~$(DEFAULT)`";
+	}
+
 	enabled {
+	    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 	    %help:	short "Enable the IGMP protocol";
 	    %create:;
 	    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(@)";
-	    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(DEFAULT)";
+	    /* %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(DEFAULT)"; */
 	}
 
 	interface @ {
@@ -52,7 +63,14 @@ protocols {
 		%help:	short "Configure IGMP on a virtual interface";
 		%activate: xrl "$(igmp.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
 
+		disable {
+		    %help:	short "Disable IGMP on an interface";
+		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(@)`";
+		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
 		enabled {
+		    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		    %help:	short "Enable IGMP on an interface";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
@@ -66,7 +84,15 @@ protocols {
 		%help:	short "Configure the tracing operation to perform";
 		all {
 		    %help:	short "Configure all tracing operations";
+
+		    disable {
+			%help:	short "Disable all tracing operations";
+			%set:	xrl "$(igmp.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=`~$(@)`";
+			%delete: xrl "$(igmp.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=`~$(DEFAULT)`";
+		    }
+
 		    enabled {
+			%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 			%help:	short "Enable all tracing operations";
 			%set:	xrl "$(igmp.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(@)";
 		    }

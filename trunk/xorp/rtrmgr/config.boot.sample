@@ -1,60 +1,66 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.21 2005/01/20 00:45:37 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.22 2005/01/22 06:59:42 pavlin Exp $ */
 
 
 interfaces {
     interface dc0 {
 	description: "data interface"
-	enabled: true
+	disable: false
 	/* default-system-config */
 	vif dc0 {
-	    enabled: true
+	    disable: false
 	    address 10.10.10.10 {
 		prefix-length: 24
 		broadcast: 10.10.10.255
-		enabled: true
+		disable: false
 	    }
 /*
 	    address 10:10:10:10:10:10:10:10 {
 		prefix-length: 64
-		enabled: true
+		disable: false
 	    }
 */
 	}
     }
     interface tun0 {
 	description: "tunnel interface"
-	enabled: true
+	disable: false
 	/* default-system-config */
 	vif tun0 {
-	    enabled: true
+	    disable: false
 	    address 10.10.10.11 {
 		prefix-length: 32
 		destination: 10.20.20.20
-		enabled: true
+		disable: false
 	    }
 	}
     }
 
     interface discard0 {
 	description: "discard interface"
-	enabled: true
+	disable: false
 	discard: true
 	vif discard0 {
-	    enabled: true
+	    disable: false
 	    address 127.127.0.1 {
 		prefix-length: 32
-		enabled: true
+		disable: false
 	    }
 	}
     }
 }
 
 fea {
-    enable-unicast-forwarding4: true
-    /* enable-unicast-forwarding6: true */
+    unicast-forwarding4 {
+	disable: false
+    }
+/*
+    unicast-forwarding6 {
+	disable: false
+    }
+*/
 
     click {
-	enabled: true
+	disable: false
 
 	/*
 	 * Set duplicate-routes-to-kernel to true if the XORP routes
@@ -71,7 +77,7 @@ fea {
 	 * Click or for user-level Click.
 	 */
 	kernel-click {
-	    enabled: false
+	    disable: true
 	    install-on-startup:	true
 	    kernel-click-modules: "/path/to/proclikefs.o:/path/to/click.o"
 	    /* XXX: On FreeBSD we need only module click.ko */
@@ -81,7 +87,7 @@ fea {
 	}
 
 	user-click {
-	    enabled: true
+	    disable: false
 	    command-file: "/usr/local/bin/click"
 	    /*
 	     * Note: don't add "-p <port>" as an extra argument, because it
@@ -141,7 +147,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		address 10.10.10.10 {
-		    enabled: true
+		    disable: false
 		}
 	    }
 	}
@@ -177,7 +183,7 @@ protocols {
 	    peer-port: 179
 */
 	    /* holdtime: 120 */
-	    /* enabled: true */
+	    /* disable: false */
 
 	    /* Optionally enable other AFI/SAFI combinations */
 	    /* ipv4-multicast: true */
@@ -208,41 +214,41 @@ protocols {
 
 plumbing {
     mfea4 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	interface register_vif {
 	    vif register_vif {
 		/* Note: this vif should be always enabled */
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
 
 /*
     mfea6 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	interface register_vif {
 	    vif register_vif {
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
@@ -251,29 +257,29 @@ plumbing {
 
 protocols {
     igmp {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
 /*
     mld {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
@@ -282,10 +288,10 @@ protocols {
 
 protocols {
     pimsm4 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 		/* dr-priority: 1 */
 		/* alternative-subnet 10.40.0.0/16 */
 	    }
@@ -293,7 +299,7 @@ protocols {
 	interface register_vif {
 	    vif register_vif {
 		/* Note: this vif should be always enabled */
-		enabled: true
+		disable: false
 	    }
 	}
 
@@ -307,7 +313,7 @@ protocols {
 	}
 
 	bootstrap {
-	    enabled: true
+	    disable: false
 	    cand-bsr {
 		scope-zone 224.0.0.0/4 {
 		    /* is-scope-zone: false */
@@ -329,31 +335,31 @@ protocols {
 
 	switch-to-spt-threshold {
 	    /* approx. 1K bytes/s (10Kbps) threshold */
-	    enabled: true
+	    disable: false
 	    interval-sec: 100
 	    bytes: 102400
 	}
 
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
 
 /*
     pimsm6 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 		dr-priority: 1
 		alternative-subnet 40:40:40:40::/64
 	    }
 	}
 	interface register_vif {
 	    vif register_vif {
-		enabled: true
+		disable: false
 	    }
 	}
 
@@ -367,7 +373,7 @@ protocols {
 	}
 
 	bootstrap {
-	    enabled: true
+	    disable: false
 	    cand-bsr {
 		scope-zone ff00::/8 {
 		    is-scope-zone: false
@@ -388,14 +394,14 @@ protocols {
 	}
 
 	switch-to-spt-threshold {
-	    enabled: true
+	    disable: false
 	    interval-sec: 100
 	    bytes: 102400
 	}
 
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
@@ -408,7 +414,7 @@ protocols {
  */
 protocols {
     fib2mrib {
-	enabled: true
+	disable: false
     }
 }
 

@@ -1,13 +1,15 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.12 2004/06/11 03:43:46 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.13 2004/08/13 00:36:10 pavlin Exp $ */
 
 protocols {
     pimsm4 {
 	targetname:			txt = "PIMSM_4";
-	enabled:			bool = true;
+	disable:			toggle = false;
+	enabled:			bool;		/* %deprecated */
 
 	interface @: txt {
 	    vif @: txt {
-		enabled:		bool = true;
+		disable:		toggle = false;
+		enabled:		bool;		/* %deprecated */
 		dr-priority:		u32 = 1;
 		alternative-subnet @: ipv4net {
 		}
@@ -24,7 +26,8 @@ protocols {
 	}
 
 	bootstrap {
-	    enabled:			bool = true;
+	    disable:			toggle = false;
+	    enabled:			bool;		/* %deprecated */
 
 	    cand-bsr {
 		scope-zone @: ipv4net {
@@ -46,7 +49,8 @@ protocols {
 	}
 
 	switch-to-spt-threshold {
-	    enabled:			bool = false;
+	    disable:			toggle = false;
+	    enabled:			bool;		/* %deprecated */
 	    interval-sec:		u32 = 100;
 	    bytes:			u32 = 0;
 	}
@@ -54,7 +58,8 @@ protocols {
 	traceoptions {
 	    flag {
 		all {
-		    enabled:		bool = false;
+		    disable:		toggle = false;
+		    enabled:		bool;		/* %deprecated */
 		}
 	    }
 	}
@@ -81,11 +86,19 @@ protocols {
 	    %set:;
 	}
 
+	disable {
+	    %help:	short "Disable the IPv4 PIM-SM protocol";
+	    %create:;
+	    %set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=`~$(@)`";
+	    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=`~$(DEFAULT)`";
+	}
+
 	enabled {
+	    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 	    %help:	short "Enable the IPv4 PIM-SM protocol";
 	    %create:;
 	    %set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(@)";
-	    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(DEFAULT)";
+	    /* %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(DEFAULT)"; */
 	}
 
 	interface @ {
@@ -94,7 +107,14 @@ protocols {
 		%help:	short "Configure IPv4 PIM-SM on a virtual interface";
 		%activate: xrl "$(pimsm4.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
 
+		disable {
+		    %help:	short "Disable IPv4 PIM-SM on an interface";
+		    %set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(@)`";
+		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
 		enabled {
+		    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		    %help:	short "Enable IPv4 PIM-SM on an interface";
 		    %set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
@@ -144,11 +164,19 @@ protocols {
 	    %help:	short "Configure the IPv4 Bootstrap mechanism";
 	    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
 
+	    disable {
+		%help:	short "Disable the IPv4 Bootstrap mechanism";
+		%create: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(@)`";
+		%set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(@)`";
+		%delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=`~$(DEFAULT)`";
+	    }
+
 	    enabled {
+		%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		%help:	short "Enable the IPv4 Bootstrap mechanism";
 		%create: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
 		%set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
-		%delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(DEFAULT)";
+		/* %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(DEFAULT)"; */
 	    }
 
 	    cand-bsr {
@@ -220,10 +248,16 @@ protocols {
 
 	switch-to-spt-threshold {
 	    %help:	short "Configure the shortest-path switch threshold";
-	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enabled)&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
+	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
 	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/reset_switch_to_spt_threshold";
 
+	    disable {
+		%help:	short "Disable the shortest-path switching";
+		%set:;
+	    }
+
 	    enabled {
+		%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 		%help:	short "Enable the shortest-path switching";
 		%set:;
 	    }
@@ -246,7 +280,15 @@ protocols {
 		%help:	short "Configure the tracing operation to perform";
 		all {
 		    %help:	short	"Configure all tracing operations";
+
+		    disable {
+			%help:	short	"Disable all tracing operations";
+			%set:	xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(@)`";
+			%delete: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(@)`";
+		    }
+
 		    enabled {
+			%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
 			%help:	short	"Enable all tracing operations";
 			%set:	xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=$(@)";
 		    }

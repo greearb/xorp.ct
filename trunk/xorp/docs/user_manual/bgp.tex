@@ -120,7 +120,7 @@ protocols \{\\
 \>\>\>local-port: {\it int(1..65535)}\\
 \>\>\>peer-port: {\it int(1..65535)}\\
 \>\>\>holdtime: {\it uint}\\
-\>\>\>enabled: {\it bool}\\
+\>\>\>disable: {\it bool}\\
 \>\>\>enable-ipv4-multicast\\
 \>\>\>enable-ipv6-unicast\\
 \>\>\>enable-ipv6-multicast\\
@@ -212,10 +212,11 @@ The configuration parameters are used as follows:
   negotiating the connection with this peer.  If no message is
   received from a BGP peer during the negotiated holdtime, the
   peering will be shut down.
-\item{\tt enabled}: This takes the value {\stt true} or {\stt false},
-  and indicates whether the peering is currently enabled.  This allows
+\item{\tt disable}: This takes the value {\stt true} or {\stt false},
+  and indicates whether the peering is currently disabled.  This allows
   a peering to be taken down temporarily without removing the
-  configuration.
+  configuration~\footnote{Note that prior to XORP Release-1.1, the {\tt
+  enable} flag was used instead of {\tt disable}.}.
 \item{\tt enable-ipv4-multicast}: this specifies that BGP should
   negotiate multiprotocol support with this peer to allow separate
   routes to be used for IPv4 unicast and IPv4 multicast.  Normally

@@ -70,19 +70,19 @@ interfaces \{\\
 \>\>mac: {\it macaddr}\\
 \>\>mtu: {\it uint}\\
 \>\>default-system-config\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>vif {\it text} \{\\
-\>\>\>enabled: {\it bool}\\
+\>\>\>disable: {\it bool}\\
 \>\>\>address {\it IPv4-addr} \{\\
 \>\>\>\>prefix-length: {\it int(1..32}\\
 \>\>\>\>broadcast: {\it IPv4-addr}\\
 \>\>\>\>destination: {\it IPv4-addr}\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\>address {\it IPv6-addr} \{\\
 \>\>\>\>prefix-length: {\it int(1..128)}\\
 \>\>\>\>destination: {\it IPv6-addr}\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -126,8 +126,10 @@ interfaces \{\\
   configuration for this interface by reading the existing
   configuration back from the forwarding engine rather than by
   configuring the forwarding engine.
-\item{\tt enabled}: this flag enables or disables the interface for
-  routing and forwarding.  It takes the value {\stt true} or {\stt
+\item{\tt disable}: this flag disables or enables the interface for
+  routing and forwarding~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.  It takes the value {\stt true} or {\stt
   false}.  Configuring an interface to be disabled has the same effect
   as removing its configuration, but without losing what the
   configuration used to be.
@@ -139,8 +141,10 @@ interfaces \{\\
 
   For each vif, the following configuration is possible:
 \begin{description}
-\item{\tt enabled}: this flag enables or disables the vif for
-  routing and forwarding.  It takes the value {\stt true} or {\stt
+\item{\tt disable}: this flag disables or enables the vif for
+  routing and forwarding~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.  It takes the value {\stt true} or {\stt
   false}.  Configuring a vif to be disabled has the same effect
   as removing its configuration, but without losing what the
   configuration used to be.
@@ -167,8 +171,11 @@ interfaces \{\\
 \item{\tt destination}: this specifies the destination IP address.  It
   is only relevant for point-to-point interfaces, where the IP addresses
   at each end of the link need not share an IP subnet.
-\item{\tt enabled}: this flag enables or disables this IP address on
-  this vif.  It takes the value {\stt true} or {\stt false}.
+\item{\tt disable}: this flag disables or enables this IP address on
+  this vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  It takes the value {\stt true} or {\stt false}.
   Configuring an IP address to be disabled has the same effect as removing its
   configuration, but without losing what the configuration used to be.
 \end{description}
@@ -195,18 +202,18 @@ xx\=xx\=xx\=xx\=xx\=\kill
 interfaces \{\\
 \>interface dc0 \{\\
 \>\>description: "ethernet interface"\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>vif dc0 \{\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\>address 10.10.10.10 \{\\
 \>\>\>\>prefix-length: 24\\
 \>\>\>\>broadcast: 10.10.10.255\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\>\\
 \>\>\>address 10:10:10:10:10:10:10:10 \{\\
 \>\>\>\>prefix-length: 64\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\>\\
 \>\>\}\\
@@ -253,7 +260,7 @@ xx\=xx\=xx\=xx\=xx\=\kill
 interfaces \{\\
 \>interface dc0 \{\\
 \>\>description: "data interface"\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>default-system-config\\
 \>\}\\
 \}

@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.9 2004/12/18 02:03:21 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.10 2005/02/25 04:38:43 pavlin Exp $
 #
 
 #
@@ -497,9 +497,10 @@ function process_statement(statement)
 		# TODO: check that the interface name is valid
 		v = tokens[i];
 		iftree_interfaces_max++;
-		iftree_interfaces_ifname[iftree_interfaces_max - 1] = v;
+		p = iftree_interfaces_max - 1;
+		iftree_interfaces_ifname[p] = v;
 		# XXX: by default each interface is enabled
-		iftree_interfaces_enabled[iftree_interfaces_max - 1] = 1;
+		iftree_interfaces_enabled[p] = 1;
 		continue;
 	    }
 	    syntax_error("Invalid keyword");
@@ -507,15 +508,16 @@ function process_statement(statement)
 
 
 	if (is_level0_interfaces && (config_level == 2)) {
-	    if (tokens[i] == "enabled:") {
+	    if (tokens[i] == "disable:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
+		p = iftree_interfaces_max - 1;
 		if (v == "true")
-		    iftree_interfaces_enabled[iftree_interfaces_max - 1] = 1;
+		    iftree_interfaces_enabled[p] = 0;
 		else
-		    iftree_interfaces_enabled[iftree_interfaces_max - 1] = 0;
+		    iftree_interfaces_enabled[p] = 1;
 		continue;
 	    }
 
@@ -524,7 +526,8 @@ function process_statement(statement)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
-		iftree_interfaces_discard[iftree_interfaces_max - 1] = v;
+		p = iftree_interfaces_max - 1;
+		iftree_interfaces_discard[p] = v;
 		continue;
 	    }
 
@@ -533,13 +536,14 @@ function process_statement(statement)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
+		p = iftree_interfaces_max - 1;
 		while (! is_end_of_string(v)) {
 		    if (i == tokens_n)
 			syntax_error("Missing end-of-string");
 		    i++;
 		    v = v " " tokens[i];
 		}
-		iftree_interfaces_description[iftree_interfaces_max - 1] = v;
+		iftree_interfaces_description[p] = v;
 		continue;
 	    }
 
@@ -548,8 +552,9 @@ function process_statement(statement)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
-		iftree_interfaces_mac[iftree_interfaces_max - 1] = v;
-		iftree_interfaces_has_mac[iftree_interfaces_max - 1] = 1;
+		p = iftree_interfaces_max - 1;
+		iftree_interfaces_mac[p] = v;
+		iftree_interfaces_has_mac[p] = 1;
 		continue;
 	    }
 
@@ -558,8 +563,9 @@ function process_statement(statement)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
-		iftree_interfaces_mtu[iftree_interfaces_max - 1] = v;
-		iftree_interfaces_has_mtu[iftree_interfaces_max - 1] = 1;
+		p = iftree_interfaces_max - 1;
+		iftree_interfaces_mtu[p] = v;
+		iftree_interfaces_has_mtu[p] = 1;
 		continue;
 	    }
 
@@ -581,7 +587,7 @@ function process_statement(statement)
 	}
 
 	if (is_level0_interfaces && (config_level == 3)) {
-	    if (tokens[i] == "enabled:") {
+	    if (tokens[i] == "disable:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
@@ -589,9 +595,9 @@ function process_statement(statement)
 		p = iftree_interfaces_max - 1;
 		q = iftree_interfaces_vifs_max[p] - 1;
 		if (v == "true")
-		    iftree_interfaces_vifs_enabled[p,q] = 1;
-		else
 		    iftree_interfaces_vifs_enabled[p,q] = 0;
+		else
+		    iftree_interfaces_vifs_enabled[p,q] = 1;
 		continue;
 	    }
 
@@ -615,11 +621,15 @@ function process_statement(statement)
 		    iftree_interfaces_vifs_addresses4_max[p,q]++;
 		    r = iftree_interfaces_vifs_addresses4_max[p,q] - 1;
 		    iftree_interfaces_vifs_addresses4_addr[p,q,r] = v;
+		    # XXX: by default each address is enabled
+		    iftree_interfaces_vifs_addresses4_enabled[p,q,r] = 1;
 		}
 		if (is_ipv6_address) {
 		    iftree_interfaces_vifs_addresses6_max[p,q]++;
 		    r = iftree_interfaces_vifs_addresses6_max[p,q] - 1;
 		    iftree_interfaces_vifs_addresses6_addr[p,q,r] = v;
+		    # XXX: by default each address is enabled
+		    iftree_interfaces_vifs_addresses6_enabled[p,q,r] = 1;
 		}
 		continue;
 	    }
@@ -734,7 +744,7 @@ function process_statement(statement)
 		continue;
 	    }
 
-	    if (tokens[i] == "enabled:") {
+	    if (tokens[i] == "disable:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
@@ -744,16 +754,16 @@ function process_statement(statement)
 		if (is_ipv4_address) {
 		    r = iftree_interfaces_vifs_addresses4_max[p,q] - 1;
 		    if (v == "true")
-			iftree_interfaces_vifs_addresses4_enabled[p,q,r] = 1;
-		    else
 			iftree_interfaces_vifs_addresses4_enabled[p,q,r] = 0;
+		    else
+			iftree_interfaces_vifs_addresses4_enabled[p,q,r] = 1;
 		}
 		if (is_ipv6_address) {
 		    r = iftree_interfaces_vifs_addresses6_max[p,q] - 1;
 		    if (v == "true")
-			iftree_interfaces_vifs_addresses6_enabled[p,q,r] = 1;
-		    else
 			iftree_interfaces_vifs_addresses6_enabled[p,q,r] = 0;
+		    else
+			iftree_interfaces_vifs_addresses6_enabled[p,q,r] = 1;
 		}
 		continue;
 	    }
@@ -778,6 +788,8 @@ function process_statement(statement)
 		is_level0_fea_level1_click = 1;
 		is_level0_fea_level1_click_level2_kernel_click = 0;
 		is_level0_fea_level1_click_level2_user_click = 0;
+		# XXX: by default Click is enabled
+		is_click_enabled = 1;
 		continue;
 	    }
 
@@ -788,27 +800,31 @@ function process_statement(statement)
 	if (is_level0_fea && is_level0_fea_level1_click &&
 	    (config_level == 2)) {
 
-	    if (tokens[i] == "enabled:") {
+	    if (tokens[i] == "disable:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
 		if (v == "true")
-		    is_click_enabled = 1;
-		else
 		    is_click_enabled = 0;
+		else
+		    is_click_enabled = 1;
 		continue;
 	    }
 
 	    if (tokens[i] == "kernel-click") {
 		is_level0_fea_level1_click_level2_kernel_click = 1;
 		is_level0_fea_level1_click_level2_user_click = 0;
+		# XXX: by default kernel-level Click is enabled
+		is_kernel_click = 1;
 		continue;
 	    }
 
 	    if (tokens[i] == "user-click") {
 		is_level0_fea_level1_click_level2_kernel_click = 0;
 		is_level0_fea_level1_click_level2_user_click = 1;
+		# XXX: by default user-level Click is enabled
+		is_user_click = 1;
 		continue;
 	    }
 
@@ -819,15 +835,15 @@ function process_statement(statement)
 	if (is_level0_fea && is_level0_fea_level1_click &&
 	    is_level0_fea_level1_click_level2_kernel_click &&
 	    (config_level == 3)) {
-	    if (tokens[i] == "enabled:") {
+	    if (tokens[i] == "disable:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
 		if (v == "true") {
-		    is_kernel_click = 1;
-		} else {
 		    is_kernel_click = 0;
+		} else {
+		    is_kernel_click = 1;
 		}
 		continue;
 	    }
@@ -839,15 +855,15 @@ function process_statement(statement)
 	if (is_level0_fea && is_level0_fea_level1_click &&
 	    is_level0_fea_level1_click_level2_user_click &&
 	    (config_level == 3)) {
-	    if (tokens[i] == "enabled:") {
+	    if (tokens[i] == "disable:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
 		if (v == "true") {
-		    is_user_click = 1;
-		} else {
 		    is_user_click = 0;
+		} else {
+		    is_user_click = 1;
 		}
 		continue;
 	    }

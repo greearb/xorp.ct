@@ -253,17 +253,17 @@ xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>pimsm4 \{\\
 \>\>targetname: {\it text}\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
 \>\>\>\>alternative-subnet {\it IPv4}/{\it int(1..32)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \\
@@ -277,7 +277,7 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>bootstrap \{\\
-\>\>\>enabled: {\it bool}\\
+\>\>\>disable: {\it bool}\\
 \>\>\>cand-bsr \{\\
 \>\>\>\>scope-zone  {\it IPv4Mcast}/{\it int(4..32)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
@@ -298,7 +298,7 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>switch-to-spt-threshold \{\\
-\>\>\>enabled: {\it bool}\\
+\>\>\>disable: {\it bool}\\
 \>\>\>interval-sec: {\it uint}\\
 \>\>\>bytes: {\it uint}\\
 \>\>\}\\
@@ -317,7 +317,7 @@ protocols \{\\
 xx\=xx\=xx\=xx\=xx\=\kill
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -326,17 +326,17 @@ xx\=xx\=xx\=xx\=xx\=\kill
 \\
 protocols \{\\
 \>pimsm6 \{\\
-\>\>enabled: {\it bool}\\
+\>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
 \>\>\>\>alternative-subnet  {\it IPv6}/{\it int(1..128)}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \\
@@ -350,7 +350,7 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>bootstrap \{\\
-\>\>\>enabled: {\it bool}\\
+\>\>\>disable: {\it bool}\\
 \>\>\>cand-bsr \{\\
 \>\>\>\>scope-zone {\it IPv6Mcast}/{\it int(8..128)} \{\\
 \>\>\>\>\>is-scope-zone: {\it bool}\\
@@ -371,14 +371,14 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>switch-to-spt-threshold \{\\
-\>\>\>enabled: {\it bool}\\
+\>\>\>disable: {\it bool}\\
 \>\>\>interval-sec: {\it uint}\\
 \>\>\>bytes: {\it uint}\\
 \>\>\}\\
 \\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>disable: {\it bool}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -399,9 +399,12 @@ protocols \{\\
 \item{\tt targetname} this is the name for this instance of PIM-SM for
   IPv4.  It defaults to ``{\stt PIMSM\_4}'', and it is not recommended
   that this default is overridden under normal usage scenarios.
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and indicates whether PIM-SM IPv4 multicast routing is currently
-  enabled.  This allows multicast to be taken down temporarily without
+  disabled~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  This allows multicast to be taken down temporarily without
   removing the configuration.
 \item{\tt interface}: this directive specifies that this {\stt
   interface} is to be used for PIM-SM IPv4 multicast routing.  The
@@ -422,9 +425,11 @@ protocols \{\\
 
   Each {\stt vif} can take the following optional parameters:
 \begin{description}
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and indicates whether PIM-SM IPv4 multicast routing is currently
-  enabled on this interface/vif.
+  disabled on this interface/vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
 \item{\tt dr-priority}: this directive takes a non-negative integer as
   its parameter giving this router's Designated Router (DR) priority
   for this interface/vif.  The default is 1.  The PIM router on this
@@ -495,9 +500,11 @@ protocols \{\\
   Under the {\stt bootstrap} directive, the following additional
   information can be configured.
 \begin{description}
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and determines whether or not the router will run the {\stt
-  bootstrap} mechanism.  The default is {\stt true}.
+  bootstrap} mechanism~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.  The default is {\stt false}.
 \item{\tt cand-bsr}: this directive specifies that this router is to
   be a candidate to be the BootStrap Router (BSR) for this PIM-SM domain.
   It will become the BSR only if it wins the BSR election process.
@@ -588,9 +595,11 @@ protocols \{\\
   for switching from the RP Tree to the Shortest-Path Tree.  The
   following parameters can be specified:
 \begin{description}
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and determines whether bitrate-based switching to the shortest
-  path tree is enabled.  The default is false.
+  path tree is disabled~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.  The default is false.
 \item{\tt interval-sec}: this specifies the measurement interval in
   seconds for measuring the bitrate of traffic from a  multicast
   sender.  The measurement interval should normally not be set too
@@ -612,8 +621,10 @@ protocols \{\\
 \item{\tt all}: this directive specifies that all tracing
   options should be enabled.  Possible parameters are:
 \begin{description}
-\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
-  and enables or disables tracing. The default is {\stt true}.
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}. The default is {\stt false}.
 \end{description}
 \end{description}
 \end{description}
@@ -643,10 +654,10 @@ for IPv4, except for the following:
 xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>pimsm4 \{\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
 \>\>\>\}\\
@@ -654,7 +665,7 @@ protocols \{\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
 \>\>\>\>/* Note: this vif should be always enabled */\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \\
@@ -668,7 +679,7 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>bootstrap \{\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\>cand-bsr \{\\
 \>\>\>\>scope-zone 224.0.0.0/4 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
@@ -690,7 +701,7 @@ protocols \{\\
 \\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\>interval-sec: 100\\
 \>\>\>bytes: 102400\\
 \>\>\}\\
@@ -709,7 +720,7 @@ protocols \{\\
 xx\=xx\=xx\=xx\=xx\=\kill
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -718,10 +729,10 @@ xx\=xx\=xx\=xx\=xx\=\kill
 \\
 protocols \{\\
 \>pimsm6 \{\\
-\>\>enabled: true\\
+\>\>disable: false\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* alternative-subnet 40:40:40:40::/64 */\\
 \>\>\>\}\\
@@ -729,7 +740,7 @@ protocols \{\\
 \>\>interface register\_vif \{\\
 \>\>\>vif register\_vif \{\\
 \>\>\>\>/* Note: this vif should be always enabled */\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \\
@@ -743,7 +754,7 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>bootstrap \{\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\>cand-bsr \{\\
 \>\>\>\>scope-zone ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
@@ -765,14 +776,14 @@ protocols \{\\
 \\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
-\>\>\>enabled: true\\
+\>\>\>disable: false\\
 \>\>\>interval-sec: 100\\
 \>\>\>bytes: 102400\\
 \>\>\}\\
 \\
 \>\>traceoptions \{\\
 \>\>\>flag all \{\\
-\>\>\>\>enabled: true\\
+\>\>\>\>disable: false\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.18 2005/02/25 05:27:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.19 2005/03/05 01:41:25 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -823,8 +823,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	config += preamble + c_format("interface %s {\n",
 				      fi.ifname().c_str());
 	preamble = "\t";
-	config += preamble + c_format("enabled: %s\n",
-				      fi.enabled() ? "true" : "false");
+	config += preamble + c_format("disable: %s\n",
+				      (! fi.enabled()) ? "true" : "false");
 	config += preamble + c_format("discard: %s\n",
 				      fi.discard() ? "true" : "false");
 	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
@@ -834,8 +834,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	    preamble = "\t";
 	    config += preamble + c_format("vif %s {\n", fv.vifname().c_str());
 	    preamble = "\t    ";
-	    config += preamble + c_format("enabled: %s\n",
-					  fv.enabled() ? "true" : "false");
+	    config += preamble + c_format("disable: %s\n",
+					  (! fv.enabled()) ? "true" : "false");
 	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
 		const IfTreeAddr4& fa4 = ai4->second;
 		preamble = "\t    ";
@@ -858,8 +858,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 					      fa4.point_to_point() ? "true" : "false");
 		config += preamble + c_format("loopback: %s\n",
 					      fa4.loopback() ? "true" : "false");
-		config += preamble + c_format("enabled: %s\n",
-					      fa4.enabled() ? "true" : "false");
+		config += preamble + c_format("disable: %s\n",
+					      (! fa4.enabled()) ? "true" : "false");
 		preamble = "\t    ";
 		config += preamble + c_format("}\n");
 	    }
@@ -881,8 +881,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 					      fa6.point_to_point() ? "true" : "false");
 		config += preamble + c_format("loopback: %s\n",
 					      fa6.loopback() ? "true" : "false");
-		config += preamble + c_format("enabled: %s\n",
-					      fa6.enabled() ? "true" : "false");
+		config += preamble + c_format("disable: %s\n",
+					      (! fa6.enabled()) ? "true" : "false");
 		preamble = "\t    ";
 		config += preamble + c_format("}\n");
 	    }
@@ -916,14 +916,14 @@ IfConfigSetClick::regenerate_xorp_fea_click_config() const
 	config += preamble + c_format("click {\n");
 	do {
 	    preamble = "\t";
-	    config += preamble + c_format("enabled: %s\n",
-					  ClickSocket::is_enabled() ?
+	    config += preamble + c_format("disable: %s\n",
+					  (! ClickSocket::is_enabled()) ?
 					  "true" : "false");
 	    do {
 		config += preamble + c_format("kernel-click {\n");
 		preamble = "\t    ";
-		config += preamble + c_format("enabled: %s\n",
-					      ClickSocket::is_kernel_click() ?
+		config += preamble + c_format("disable: %s\n",
+					      (! ClickSocket::is_kernel_click()) ?
 					      "true" : "false");
 		preamble = "\t";
 		config += preamble + c_format("}\n");
@@ -931,8 +931,8 @@ IfConfigSetClick::regenerate_xorp_fea_click_config() const
 	    do {
 		config += preamble + c_format("user-click {\n");
 		preamble = "\t    ";
-		config += preamble + c_format("enabled: %s\n",
-					      ClickSocket::is_user_click() ?
+		config += preamble + c_format("disable: %s\n",
+					      (! ClickSocket::is_user_click()) ?
 					      "true" : "false");
 		preamble = "\t";
 		config += preamble + c_format("}\n");
