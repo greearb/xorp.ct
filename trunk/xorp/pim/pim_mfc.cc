@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.19 2004/05/30 09:57:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.20 2004/05/30 10:06:04 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -59,8 +59,12 @@ PimMfc::PimMfc(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
 
 PimMfc::~PimMfc()
 {
-    // TODO: should we always call delete_mfc_from_kernel()?
-    delete_mfc_from_kernel();
+    //
+    // XXX: don't trigger any communications with the kernel
+    // if PimNode's destructor is invoked.
+    //
+    if (pim_node().node_status() != PROC_NULL)
+	delete_mfc_from_kernel();
     
     //
     // Remove this entry from the RP table.
@@ -179,7 +183,8 @@ PimMfc::recompute_iif_olist_mfc()
 	new_iif_vif_index = pim_mre->rpf_interface_rp();
     }
     new_olist = pim_mre->inherited_olist_sg();
-    new_olist.reset(new_iif_vif_index);
+    if (new_iif_vif_index != Vif::VIF_INDEX_INVALID)
+	new_olist.reset(new_iif_vif_index);
     
     // XXX: this check should be even if the iif and oifs didn't change
     // TODO: track the reason and explain it.
@@ -445,10 +450,6 @@ PimMfc::delete_mfc_from_kernel()
     // XXX: we don't call delete_all_dataflow_monitor(), because
     // the deletion of the MFC entry itself will remove all associated
     // dataflow monitors.
-    // In addition, due to the output queueing of the add/delete
-    // dataflow or MFC commands, the "delete MFC" command may
-    // actually reach the MFEA before the "delete dataflow" command,
-    // which is an (ignorable) error.
     //
     if (pim_node().delete_mfc_from_kernel(*this) < 0)
 	return (XORP_ERROR);
