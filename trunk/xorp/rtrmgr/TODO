@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.7 2003/10/02 00:14:49 hodson Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.8 2003/10/02 16:49:51 pavlin Exp $
 #
 
 Urgent
@@ -29,7 +29,9 @@ Other
  - Fix test_router_manager, because even if the path to the xorp_finder
    binary is incorrect, it doesn't report an error.
 
- - Restart code is broken, currently exits because of an Xrl failure
+ - Assuming the following paragraph refers to the xorpsh this may be fixed.
+
+   Restart code is broken, currently exits because of an Xrl failure
    when xorp_rtrmgr goes away.  Want to stick around, announce absence
    of xorp_rtrmgr and gracefully re-connect when it restarts.
 
