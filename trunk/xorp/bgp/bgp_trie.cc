@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.9 2004/04/01 19:54:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.10 2004/04/12 22:12:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -61,7 +61,7 @@ template<class A>
 BgpTrie<A>::~BgpTrie()
 {
     if (_trie.begin() != _trie.end()) {
-	XLOG_WARNING("BgpTrie being deleted while still containing data\n");
+	XLOG_FATAL("BgpTrie being deleted while still containing data\n");
     }
 }
 
