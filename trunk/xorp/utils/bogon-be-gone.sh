@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/bogon-be-gone.sh,v 1.4 2002/12/09 11:13:07 pavlin Exp $
+# $XORP: xorp/utils/bogon-be-gone.sh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 #
 
 #
@@ -32,7 +32,7 @@ SED_SCRIPT=`echo "$DEBOGON_SCRIPT" | sed -e 's@sh$@sed@'`
 
 if [ ! -f $SED_SCRIPT ] ; then
     echo "Could not find sed script." >2
-    echo 1
+    exit 1
 fi
 
 if [ $# -eq 0 ] ; then
