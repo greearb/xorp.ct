@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.3 2002/12/14 23:42:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.4 2002/12/15 04:09:29 mjh Exp $"
 
 #include "fcntl.h"
 
@@ -337,17 +337,6 @@ DummyPeerHandler::DummyPeerHandler(const string &init_peername,
 {
 }
 
-int 
-DummyPeerHandler::add_route(const InternalMessage<IPv4> & /*rtmsg*/) {
-    printf("DummyPeerHandler[%x]::add_route IPv4\n", (u_int)this);
-    return 0;
-}
-
-int 
-DummyPeerHandler::add_route(const InternalMessage<IPv6> &/*rtmsg*/) {
-    printf("DummyPeerHandler::add_route IPv6\n");
-    return 0;
-}
 
 /* **************** main *********************** */
 

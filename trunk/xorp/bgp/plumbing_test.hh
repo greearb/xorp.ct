@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing_test.hh,v 1.12 2002/12/09 18:28:46 hodson Exp $
+// $XORP: xorp/bgp/plumbing_test.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PLUMBING_TEST_HH__
 #define __BGP_PLUMBING_TEST_HH__
@@ -31,8 +31,6 @@ class DummyPeerHandler : public PeerHandler {
 public:
     DummyPeerHandler(const string &peername, 
 		     BGPPeer *peer, BGPPlumbing *plumbing);
-    int add_route(const InternalMessage<IPv4> &rtmsg);
-    int add_route(const InternalMessage<IPv6> &rtmsg);
 };
 
 class PlumbingTest : public BGPPlumbing {
