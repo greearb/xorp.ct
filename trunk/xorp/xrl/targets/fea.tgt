@@ -1,13 +1,15 @@
-/* $XORP: xorp/xrl/targets/fea.tgt,v 1.4 2003/08/08 18:17:11 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/fea.tgt,v 1.5 2003/08/28 00:08:53 hodson Exp $ */
 
 #include "common.xif"
 #include "fea_ifmgr.xif"
 #include "fea_ifmgr_replicator.xif"
 #include "fti.xif"
 #include "fea_rawpkt.xif"
+#include "socket4_locator.xif"
 
 target fea implements common/0.1,					\
 		      ifmgr/0.1,					\
 		      ifmgr_replicator/0.1,				\
 		      fti/0.2,						\
-		      raw_packet/0.1
+		      raw_packet/0.1,					\
+		      socket4_locator/0.1
