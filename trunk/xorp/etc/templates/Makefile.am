@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.8 2003/07/30 23:43:30 pavlin Exp $
+## $XORP: xorp/etc/templates/Makefile.am,v 1.1 2003/07/31 00:34:25 pavlin Exp $
 ##
 
 # Redefine the data installation directory
@@ -12,6 +12,7 @@ data_DATA	 += fea.cmds fea.tp
 data_DATA	 += ospf.tp
 data_DATA	 += rib.tp
 data_DATA	 += snmp.tp
+data_DATA	 += static_routes.tp
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = $(data_DATA)
