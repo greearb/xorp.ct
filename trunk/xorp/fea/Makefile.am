@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.37 2004/05/21 08:08:02 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.38 2004/09/08 08:32:44 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -162,6 +162,8 @@ demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 libfea_a_SOURCES	 = fea_module.h
 libfea_a_SOURCES	+= mfea_module.h
 libfea_a_SOURCES	+= addr_table.hh
+libfea_a_SOURCES	+= firewall.hh
+libfea_a_SOURCES	+= firewall_dummy.hh
 libfea_a_SOURCES	+= fte.hh
 libfea_a_SOURCES	+= fti.hh
 libfea_a_SOURCES	+= fti_transaction.hh
