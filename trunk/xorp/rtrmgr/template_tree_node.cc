@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.14 2004/01/06 02:55:28 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.15 2004/01/13 01:12:42 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -305,16 +305,38 @@ TemplateTreeNode::expand_variable(const string& varname, string& value) const
 }
 
 bool
-TemplateTreeNode::expand_expression(const string& expr, string& value) const
+TemplateTreeNode::expand_expression(const string& expression,
+				    string& value) const
 {
-    //
-    // XXX: for now we cannot expand expressions like "~$(@)" using
-    // the template tree only.
-    //
-    UNUSED(expr);
-    UNUSED(value);
+    if ((expression[0] != '`') || (expression[expression.size() - 1] != '`'))
+	return false;
 
-    return false;
+    // Trim the back-quotes
+    string tmp_expr = expression.substr(1, expression.size() - 2);
+
+    //
+    // XXX: for now the only expression we can expand is the "~" boolean
+    // negation operator.
+    //
+    if (tmp_expr[0] != '~')
+	return false;
+
+    // Trim the operator
+    tmp_expr = tmp_expr.substr(1, expression.size() - 1);
+
+    // Expand the variable
+    string tmp_value;
+    if (expand_variable(tmp_expr, tmp_value) != true)
+	return false;
+
+    if (tmp_value == "false")
+	value = "true";
+    else if (tmp_value == "true")
+	value = "false";
+    else
+	return false;
+
+    return true;
 }
 
 string

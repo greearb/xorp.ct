@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.32 2004/01/13 00:37:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.33 2004/01/14 21:36:06 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -1186,32 +1186,6 @@ ConfigTreeNode::find_node(list<string>& path)
     return NULL;
 }
 
-bool
-ConfigTreeNode::expand_expression(const string& expr, string& value) const
-{
-    if ((expr[0] != '`') || (expr[expr.size() - 1] != '`'))
-	return false;
-
-    // Trim the back-quotes
-    string expression = expr.substr(1, expr.size() - 2);
-
-    // XXX: quick and very dirty hack
-    if (expression != "~$(@)")
-	return false;
-    string tmpvalue;
-    if (expand_variable("$(@)", tmpvalue)) {
-	if (tmpvalue == "false")
-	    value = "true";
-	else if (tmpvalue == "true")
-	    value = "false";
-	else
-	    return false;
-    } else {
-	return false;
-    }
-    return true;
-}
-
 const string&
 ConfigTreeNode::named_value(const string& varname) const
 {
@@ -1263,6 +1237,41 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
     }
     }
     XLOG_UNREACHABLE();
+}
+
+bool
+ConfigTreeNode::expand_expression(const string& expression,
+				  string& value) const
+{
+    if ((expression[0] != '`') || (expression[expression.size() - 1] != '`'))
+	return false;
+
+    // Trim the back-quotes
+    string tmp_expr = expression.substr(1, expression.size() - 2);
+
+    //
+    // XXX: for now the only expression we can expand is the "~" boolean
+    // negation operator.
+    //
+    if (tmp_expr[0] != '~')
+	return false;
+
+    // Trim the operator
+    tmp_expr = tmp_expr.substr(1, expression.size() - 1);
+
+    // Expand the variable
+    string tmp_value;
+    if (expand_variable(tmp_expr, tmp_value) != true)
+	return false;
+
+    if (tmp_value == "false")
+	value = "true";
+    else if (tmp_value == "true")
+	value = "false";
+    else
+	return false;
+
+    return true;
 }
 
 const ConfigTreeNode* 
