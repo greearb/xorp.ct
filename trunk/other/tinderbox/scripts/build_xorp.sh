@@ -3,32 +3,13 @@
 CONFIG="$(dirname $0)/config"
 . $CONFIG
 
-#
-# Handler for SIGTERM.  Exits with supplied exit code.
-#
-sigterm_handler()
-{
-    exit ${1}
-}
-
-#
-# Send SIGTERM to all processes in group and exit with errorcode
-# supplied in argument 1.
-#
-tidy_exit()
-{
-    errcode=$1
-    trap "sigterm_handler $errcode" TERM
-    kill 0
-}
-
 timeout()
 {
     local err bar
     err="Process appears wedged. Timed out after ${TIMEOUT} seconds."
     bar=`echo $err | sed 's/./=/g'`
     printf "\n${bar}\n${err}\n${bar}\n"
-    tidy_exit 1
+    kill 0
 }
 
 # A test "process" that can be used to appear wedged.
@@ -78,7 +59,7 @@ done
 if [ -f ${WAKEFILE} ] ; then
     err=`cat ${WAKEFILE}`
     rm -f ${WAKEFILE}
-    tidy_exit $err
+    exit $err
 fi
 
-tidy_exit 100
+exit 100
