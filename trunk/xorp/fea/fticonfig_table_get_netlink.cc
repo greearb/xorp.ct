@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.19 2004/08/17 02:20:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.20 2004/09/01 18:12:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -240,7 +240,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
-	XLOG_ERROR("error writing to netlink socket: %s",
+	XLOG_ERROR("Error writing to netlink socket: %s",
 		   strerror(errno));
 	return false;
     }
@@ -254,7 +254,12 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     // doesn't set the NLM_F_MULTI flag for the multipart messages.
     //
     ns_ptr->set_multipart_message_read(true);
-    _ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq);
+    string errmsg;
+    if (_ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq, errmsg) != XORP_OK) {
+	ns_ptr->set_multipart_message_read(false);
+	XLOG_ERROR("Error reading from netlink socket: %s", errmsg.c_str());
+	return false;
+    }
     // XXX: reset the multipart message read hackish flag
     ns_ptr->set_multipart_message_read(false);
     if (parse_buffer_nlm(family, fte_list, _ns_reader.buffer(),
