@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.20 2003/09/18 19:08:00 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.21 2003/09/26 21:34:34 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -82,6 +82,10 @@ public:
 
     inline const string& address() const		{ return _address; }
     inline EventLoop& eventloop() const			{ return _eventloop; }
+
+private:
+    XrlPFSender(const XrlPFSender&);			// Not implemented
+    XrlPFSender& operator=(const XrlPFSender&);		// Not implemented
 
 protected:
     EventLoop& _eventloop;
