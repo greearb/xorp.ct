@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.10 2003/05/21 21:26:52 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.11 2003/05/22 12:21:17 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -154,5 +154,14 @@ run cd cli/libtecla
 autoconf_options=`program_flags autoconf 2.50 "--include=../../config" "-l ../../config"`
 run autoconf ${autoconf_options}
 run cd ../..
+
+# Clean-up autom4te.cache directories
+echo "Removing autom4te.cache directories..."
+remove_dirs="./autom4te.cache cli/libtecla/autom4te.cache"
+for dir in ${remove_dirs} ; do
+    if [ -d  ${dir} ] ; then
+	run rm -rf ${dir}
+    fi
+done
 
 exit 0
