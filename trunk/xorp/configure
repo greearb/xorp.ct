@@ -8513,7 +8513,6 @@ echo "${ECHO_T}no" >&6
 ;;
 esac
 
-
 echo "$as_me:$LINENO: checking whether the system has netlink sockets (AF_NETLINK)" >&5
 echo $ECHO_N "checking whether the system has netlink sockets (AF_NETLINK)... $ECHO_C" >&6
 
@@ -8561,6 +8560,16 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_NETLINK_SOCKETS 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN 1
 _ACEOF
 
    echo "$as_me:$LINENO: result: yes" >&5

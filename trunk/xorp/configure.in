@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.69 2003/10/02 15:10:57 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.70 2003/10/02 23:43:17 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1004,7 +1004,17 @@ esac
 dnl ------------------------------------
 dnl Check for netlink sockets (AF_NETLINK)
 dnl ------------------------------------
-
+dnl
+dnl Note that if we have netlink sockets, then we unconditionally set
+dnl HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN and
+dnl HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN to 1.
+dnl The reason is because if we attempt to set the MTU or the interface
+dnl flags on a Linux system (e.g., Linux RedHat-7.x with kernel 2.4-x),
+dnl this is a no-op: nothing happens, but the kernel doesn't return
+dnl an error. The test whether we can really set the MTU and the interface
+dnl flags in the kernel is rather complicated, and would require root
+dnl privileges. Enjoy... :-(
+dnl
 AC_MSG_CHECKING(whether the system has netlink sockets (AF_NETLINK))
 AC_LANG_SAVE
 AC_LANG_C
@@ -1025,6 +1035,10 @@ main()
 ],
   [AC_DEFINE(HAVE_NETLINK_SOCKETS, 1,
 	[Define to 1 if you have Linux-style netlink sockets (AF_NETLINK)])
+   AC_DEFINE(HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN, 1,
+	[Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they cannot be used to set the MTU on an interface])
+   AC_DEFINE(HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN, 1,
+	[Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they cannot be used to set the flags on an interface])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])

@@ -133,6 +133,14 @@
 /* Define to 1 if you have Linux-style netlink sockets (AF_NETLINK) */
 #undef HAVE_NETLINK_SOCKETS
 
+/* Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they
+   cannot be used to set the flags on an interface */
+#undef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
+
+/* Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they
+   cannot be used to set the MTU on an interface */
+#undef HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN
+
 /* Define to 1 if you have the <net/ethernet.h> header file. */
 #undef HAVE_NET_ETHERNET_H
 
