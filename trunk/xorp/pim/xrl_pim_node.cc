@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.72 2005/03/17 19:44:52 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.73 2005/03/18 00:04:38 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -475,9 +475,7 @@ XrlPimNode::send_mfea_add_delete_protocol()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_xrl_tasks_queue.empty())
-	return;		// No more changes
-
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     MfeaAddDeleteProtocol* entry;
 
@@ -565,6 +563,7 @@ XrlPimNode::send_mfea_add_delete_protocol()
 void
 XrlPimNode::mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     MfeaAddDeleteProtocol* entry;
 
@@ -657,9 +656,7 @@ XrlPimNode::send_mfea_allow_signal_messages()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_xrl_tasks_queue.empty())
-	return;		// No more changes
-
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     MfeaAllowSignalMessages* entry;
 
@@ -695,6 +692,7 @@ void
 XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     MfeaAllowSignalMessages* entry;
 
@@ -1290,9 +1288,7 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_xrl_tasks_queue.empty())
-	return;			// No more changes
-
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     StartStopProtocolKernelVif* entry;
 
@@ -1394,6 +1390,7 @@ void
 XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
     const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     StartStopProtocolKernelVif* entry;
 
@@ -1516,9 +1513,7 @@ XrlPimNode::send_join_leave_multicast_group()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_xrl_tasks_queue.empty())
-	return;			// No more changes
-
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     JoinLeaveMulticastGroup* entry;
 
@@ -1627,6 +1622,7 @@ void
 XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
     const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     JoinLeaveMulticastGroup* entry;
 
@@ -1731,9 +1727,7 @@ XrlPimNode::send_add_delete_mfc()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_xrl_tasks_queue.empty())
-	return;		// No more changes
-
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteMfc* entry;
 
@@ -1836,6 +1830,7 @@ void
 XrlPimNode::mfea_client_send_add_delete_mfc_cb(
     const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteMfc* entry;
 
@@ -1976,9 +1971,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_xrl_tasks_queue.empty())
-	return;		// No more changes
-
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteDataflowMonitor* entry;
 
@@ -2118,6 +2111,7 @@ void
 XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
     const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteDataflowMonitor* entry;
 
