@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.16 2004/01/16 19:24:26 hodson Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.17 2004/02/19 05:48:07 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -29,6 +29,7 @@ LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.a
 ### MFEA libraries
 LDADD		+= $(top_builddir)/fea/libfea.a
 # FEA-specific begin
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a

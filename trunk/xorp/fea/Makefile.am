@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.31 2004/01/15 19:12:22 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.32 2004/02/19 04:33:12 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -35,6 +35,7 @@ xorp_fea_SOURCES	 = fea.cc
 xorp_fea_LDADD		 = $(noinst_LIBRARIES)
 
 ### FEA XRL libraries
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
@@ -72,6 +73,7 @@ xorp_fea_dummy_SOURCES	 = fea_dummy.cc
 xorp_fea_dummy_LDADD	 = $(noinst_LIBRARIES)
 
 ### FEA XRL libraries
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libfeabase.a
@@ -109,6 +111,7 @@ test_mfea_SOURCES	 = test_mfea.cc
 test_mfea_LDADD		 = $(noinst_LIBRARIES)
 
 # FEA-specific begin
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
