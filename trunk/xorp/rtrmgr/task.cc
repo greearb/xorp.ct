@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.44 2005/02/10 05:14:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.45 2005/02/12 08:09:11 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -448,7 +448,8 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 // Startup implementation
 
 Startup::Startup(const string& module_name, bool verbose)
-    : _module_name(module_name, verbose)
+    : _module_name(module_name),
+      _verbose(verbose)
 {
 }
 
