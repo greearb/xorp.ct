@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_callback.cc,v 1.2 2003/03/10 23:20:34 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_callback.cc,v 1.3 2003/12/20 00:26:58 hodson Exp $"
 
 //
 // Callback test program
@@ -92,17 +92,29 @@ main()
     // dispatches upon object
     int counter = 0;
     const int stop_point = 5;
-    SafeWidget *sw = new SafeWidget(&counter);
+    SafeWidget* sw = new SafeWidget(&counter);
     cbm = callback(sw, &SafeWidget::notify);
     for (int i = 0; i < 10; ++i) {
 	if (i == stop_point)
 	    delete sw;
 	cbm->dispatch(i);
     }
+
     if (counter != stop_point) {
 	printf("ERROR: safe callback executed after object deletion\n");
 	return -1;
     }
+
+    // Test destructor of callback correctly interacts with
+    // CallbackSafeObject correctly.
+    int counter2 = 0;
+    sw = new SafeWidget(&counter2);
+    {
+	cbm = callback(sw, &SafeWidget::notify);
+	cbm->dispatch(0);
+	TestCallback cbm2 = cbm;
+    }
+    delete sw;
 
     return (0);
 }
