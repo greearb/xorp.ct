@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.13 2003/04/15 16:37:48 hodson Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.14 2003/04/16 08:05:09 hodson Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -68,7 +68,6 @@ enum PathAttType {
     ATOMIC_AGGREGATE = 6,
     AGGREGATOR = 7,
     COMMUNITY = 8,
-    UNKNOWN = 255
 };
 
 class PathAttribute {
@@ -128,6 +127,11 @@ public:
      * @return the flags for the attribute
      */
     Flags flags() const				{ return (Flags)_flags; }
+
+    /**
+     * Set the partial flag
+     */
+    void set_partial() { _data[0] |= Partial;_flags |= Partial; }
 
     /**
      * comparison operators are used to sort attributes.
