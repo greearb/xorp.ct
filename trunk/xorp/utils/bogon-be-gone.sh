@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/bogon-be-gone.sh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+# $XORP: xorp/utils/bogon-be-gone.sh,v 1.2 2003/09/25 15:58:34 hodson Exp $
 #
 
 #
@@ -24,13 +24,18 @@
 # may interfere with other people's pending commits.
 #
 
-SCRIPT_NAME="bogon-be-gone.sh"
-DEBOGON_SCRIPT=$PWD/$0
+SCRIPTDIR=`dirname $0`
+SCRIPTNAME=`basename $0`
+if [ "${SCRIPTDIR}" = "${SCRIPTNAME}" ] ; then
+    SCRIPTDIR=.
+fi
+
+DEBOGON_SCRIPT=${SCRIPTDIR}/${SCRIPTNAME}
 
 # Shell script name ends in "sh", invoked sed script name ends in "sed"
 SED_SCRIPT=`echo "$DEBOGON_SCRIPT" | sed -e 's@sh$@sed@'`
 
-if [ ! -f $SED_SCRIPT ] ; then
+if [ ! -f ${SED_SCRIPT} ] ; then
     echo "Could not find sed script." >2
     exit 1
 fi
