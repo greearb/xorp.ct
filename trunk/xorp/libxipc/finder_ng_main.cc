@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.2 2003/01/28 00:42:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.3 2003/02/24 19:39:18 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -33,6 +33,7 @@
 #include "finder_ng.hh"
 #include "finder_tcp_messenger.hh"
 #include "finder_ng_xrl_target.hh"
+#include "permits.hh"
 
 static jmp_buf tidy_exit;
 
@@ -108,9 +109,6 @@ finder_main(int argc, char* const argv[])
     IPv4	bind_addr = IPv4::ANY();
     uint16_t	bind_port = FINDER_TCP_DEFAULT_PORT;
 
-    FinderNGTcpListener::Addr4List	permitted_addrs;
-    FinderNGTcpListener::Net4List	permitted_nets;
-
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
 	switch (ch) {
@@ -120,7 +118,7 @@ finder_main(int argc, char* const argv[])
 	    // connections from.
 	    //
 	    try {
-		permitted_addrs.push_back(IPv4(optarg));
+		add_permitted_host(IPv4(optarg));
 	    } catch (const InvalidString&) {
 		fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
 		usage();
@@ -152,7 +150,7 @@ finder_main(int argc, char* const argv[])
 	    // connections from.
 	    //
 	    try {
-		permitted_nets.push_back(IPv4Net(optarg));
+		add_permitted_net(IPv4Net(optarg));
 	    } catch (const InvalidString&) {
 		fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
 		usage();
@@ -187,7 +185,7 @@ finder_main(int argc, char* const argv[])
     //
     // Add listening address to list of accepted addresses
     //
-    permitted_addrs.push_back(bind_addr);
+    add_permitted_host(bind_addr);
     
     install_signal_traps(trigger_exit);
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -200,8 +198,6 @@ finder_main(int argc, char* const argv[])
 
 	//	FinderNGXrlTarget finder_xrl_target(finder);
 
-	finder_tcp4_source.add_permitted_addrs(permitted_addrs);
-	finder_tcp4_source.add_permitted_nets(permitted_nets);
 	
 	XorpTimer twirl;
 	if (run_verbose)

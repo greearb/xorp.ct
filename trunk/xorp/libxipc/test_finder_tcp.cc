@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.2 2003/01/24 02:03:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.3 2003/01/24 02:47:25 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -22,6 +22,7 @@
 
 #include "sockutil.hh"
 #include "finder_tcp.hh"
+#include "permits.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -102,7 +103,7 @@ public:
 	throw (InvalidPort)
 	: FinderTcpListenerBase(e, interface, port), _connection(0)
     {
-	add_permitted_addr(interface);
+	add_permitted_host(interface);
     }
 
     ~DummyFinder()

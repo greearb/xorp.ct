@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.4 2003/01/28 00:42:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.5 2003/02/24 19:39:20 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -23,6 +23,7 @@
 #include "libcomm/comm_api.h"
 
 #include "finder_tcp_messenger.hh"
+#include "permits.hh"
 #include "sockutil.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -204,7 +205,7 @@ test_main(void)
 				 finder, finder.commands(),
 				 ipc_addr, 12222);
 
-    listener.add_permitted_addr(ipc_addr);
+    add_permitted_host(ipc_addr);
 
     DummyFinderClient finder_client;
     FinderNGTcpAutoConnector connector(e,

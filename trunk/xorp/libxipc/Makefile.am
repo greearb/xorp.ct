@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.7 2003/01/28 00:42:23 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.8 2003/02/24 19:39:18 hodson Exp $
 ##
 
 # - The library
@@ -79,6 +79,7 @@ libxipc_a_SOURCES += finder_transport.hh
 libxipc_a_SOURCES += finder_tcp.hh
 libxipc_a_SOURCES += header.hh
 libxipc_a_SOURCES += hmac.hh
+libxipc_a_SOURCES += permits.hh
 libxipc_a_SOURCES += sockutil.hh
 libxipc_a_SOURCES += xrl.hh
 libxipc_a_SOURCES += xrl_parser.hh
@@ -117,6 +118,7 @@ libxipc_a_SOURCES += finder_tcp_messenger.cc
 libxipc_a_SOURCES += finder_transport.cc
 libxipc_a_SOURCES += header.cc
 libxipc_a_SOURCES += hmac.cc
+libxipc_a_SOURCES += permits.cc
 libxipc_a_SOURCES += sockutil.cc
 libxipc_a_SOURCES += xrl.cc
 libxipc_a_SOURCES += xrl_parser.cc

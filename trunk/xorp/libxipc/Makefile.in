@@ -121,7 +121,7 @@ test_xrl_error_SOURCES = test_xrl_error.cc
 
 test_finder_ng_SOURCES = test_finder_ng.cc
 test_finder_ng_LDADD = libfinder.a $(LDADD)
-libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h md5.h finder_client.hh finder_ipc.hh finder_messenger.hh finder_msg.hh finder_msgs.hh finder_ng_client.hh finder_ng_client_xrl_target.hh finder_server.hh finder_tcp_messenger.hh finder_transport.hh finder_tcp.hh header.hh hmac.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c md5.c finder_client.cc finder_ipc.cc finder_messenger.cc finder_msg.cc finder_msgs.cc finder_ng_client.cc finder_ng_client_xrl_target.cc finder_server.cc finder_tcp.cc finder_tcp_messenger.cc finder_transport.cc header.cc hmac.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
+libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h md5.h finder_client.hh finder_ipc.hh finder_messenger.hh finder_msg.hh finder_msgs.hh finder_ng_client.hh finder_ng_client_xrl_target.hh finder_server.hh finder_tcp_messenger.hh finder_transport.hh finder_tcp.hh header.hh hmac.hh permits.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c md5.c finder_client.cc finder_ipc.cc finder_messenger.cc finder_msg.cc finder_msgs.cc finder_ng_client.cc finder_ng_client_xrl_target.cc finder_server.cc finder_tcp.cc finder_tcp_messenger.cc finder_transport.cc header.cc hmac.cc permits.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
 libfinder_a_SOURCES = finder_ng.hh  finder_ng_xrl_queue.hh finder_ng_xrl_target.hh finder_base.cc finder_ng.cc finder_ng_xrl_queue.cc finder_ng_xrl_target.cc finder_base.hh finder_base.cc finder_client_xif.hh finder_client_xif.cc
 BUILT_SOURCES =  common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_xif.hh finder_xif.cc
 
@@ -153,9 +153,9 @@ libxipc_a_LIBADD =
 libxipc_a_OBJECTS =  hmac_md5.o md5.o finder_client.o finder_ipc.o \
 finder_messenger.o finder_msg.o finder_msgs.o finder_ng_client.o \
 finder_ng_client_xrl_target.o finder_server.o finder_tcp.o \
-finder_tcp_messenger.o finder_transport.o header.o hmac.o sockutil.o \
-xrl.o xrl_parser.o xrl_parser_input.o xrl_tokens.o xrl_atom.o \
-xrl_atom_encoding.o xrl_atom_list.o xrl_args.o xrl_cmd_map.o \
+finder_tcp_messenger.o finder_transport.o header.o hmac.o permits.o \
+sockutil.o xrl.o xrl_parser.o xrl_parser_input.o xrl_tokens.o \
+xrl_atom.o xrl_atom_encoding.o xrl_atom_list.o xrl_args.o xrl_cmd_map.o \
 xrl_pf_factory.o xrl_pf_inproc.o xrl_pf_stcp.o xrl_pf_stcp_ph.o \
 xrl_pf_sudp.o xrl_router.o xrl_std_router.o xrl_error.o xuid.o \
 common_xif.o finder_client_base.o finder_xif.o
@@ -304,7 +304,7 @@ DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder.P \
 .deps/finder_ng_xrl_target.P .deps/finder_server.P .deps/finder_tcp.P \
 .deps/finder_tcp_messenger.P .deps/finder_transport.P \
 .deps/finder_xif.P .deps/header.P .deps/hmac.P .deps/hmac_md5.P \
-.deps/md5.P .deps/sockutil.P .deps/test_finder_client.P \
+.deps/md5.P .deps/permits.P .deps/sockutil.P .deps/test_finder_client.P \
 .deps/test_finder_ipc.P .deps/test_finder_ipc2.P \
 .deps/test_finder_messenger.P .deps/test_finder_msg.P \
 .deps/test_finder_msgs.P .deps/test_finder_ng.P .deps/test_finder_tcp.P \

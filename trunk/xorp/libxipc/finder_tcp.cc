@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.5 2003/01/24 02:47:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.6 2003/02/24 19:39:19 hodson Exp $"
 
 #include <functional>
 
@@ -28,6 +28,7 @@
 
 #include "sockutil.hh"
 #include "finder_tcp.hh"
+#include "permits.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 // FinderTcpBase
@@ -95,7 +96,7 @@ FinderTcpBase::write_data(const uint8_t* data, uint32_t data_bytes)
 	XLOG_WARNING("Attempting to write data on closed socket");
 	return false;
     }
-    
+
     // Write 4-byte header containing length
     _osize = htonl(data_bytes);
     _writer.add_buffer(reinterpret_cast<uint8_t*>(&_osize), sizeof(_osize),
@@ -302,42 +303,6 @@ FinderTcpListenerBase::enabled() const
     return _en;
 }
 
-bool
-FinderTcpListenerBase::add_permitted_addr(const IPv4& addr)
-{
-    if (_ok_addrs.end() == find(_ok_addrs.begin(), _ok_addrs.end(), addr)) {
-	_ok_addrs.push_back(addr);
-	return true;
-    }
-    return false;
-}
-
-bool
-FinderTcpListenerBase::add_permitted_addrs(const AddrList& addrs)
-{
-    for (AddrList::const_iterator i = addrs.begin(); i != addrs.end(); ++i)
-	add_permitted_addr(*i);
-    return true;
-}
-
-bool
-FinderTcpListenerBase::add_permitted_net(const IPv4Net& net)
-{
-    if (_ok_nets.end() == find(_ok_nets.begin(), _ok_nets.end(), net)) {
-	_ok_nets.push_back(net);
-	return true;
-    }
-    return false;
-}
-
-bool
-FinderTcpListenerBase::add_permitted_nets(const NetList& nets)
-{
-    for (NetList::const_iterator i = nets.begin(); i != nets.end(); ++i)
-	add_permitted_net(*i);
-    return true;
-}
-
 void
 FinderTcpListenerBase::connect_hook(int fd, SelectorMask m)
 {
@@ -358,19 +323,7 @@ FinderTcpListenerBase::connect_hook(int fd, SelectorMask m)
     }
 
     IPv4 peer(name);
-    bool accept(false);
-    if (find(_ok_addrs.begin(), _ok_addrs.end(), peer) != _ok_addrs.end()) {
-	accept = true;
-    }
-
-    for (NetList::const_iterator n = _ok_nets.begin();
-	 n != _ok_nets.end(); ++n) {
-	if (n->contains(peer)) {
-	    accept = true;
-	}
-    }
-
-    if (accept) {
+    if (is_host_permitted(peer)) {
 	int fl = fcntl(fd, F_GETFL);
 	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 	    XLOG_WARNING("Failed to set socket non-blocking.");
