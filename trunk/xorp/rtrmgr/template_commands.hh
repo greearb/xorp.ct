@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.16 2003/12/02 09:38:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.17 2004/01/05 23:43:04 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -24,7 +24,7 @@
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
 #include "libxorp/callback.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 #include "conf_tree_node.hh"
 
 
@@ -32,18 +32,6 @@ class TemplateTree;
 class TemplateTreeNode;
 class XorpClient;
 class XRLdb;
-
-class UnexpandedVariable {
-public:
-    UnexpandedVariable(const string& varname, const string& node)
-	: _varname(varname), _node(node) {};
-    string str() { return "Unexpanded variable " + _varname +
-		       " on node " + _node + "."; }
-
-private:
-    string _varname;
-    string _node;
-};
 
 class Action {
 public:
@@ -53,9 +41,11 @@ public:
     string str() const;
     TemplateTreeNode& template_tree_node() { return _template_tree_node; }
     const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
+    bool check_referred_variables(string& errmsg) const;
 
 protected:
     list<string> _split_cmd;
+    list<string> _referred_variables;
 
 private:
     TemplateTreeNode& _template_tree_node;
@@ -68,14 +58,16 @@ public:
 
     int execute(const ConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
-    template<class TreeNode> string expand_xrl_variables(const TreeNode& tn) const throw (UnexpandedVariable);
+    template<class TreeNode> int expand_xrl_variables(const TreeNode& tn,
+						      string& result,
+						      string& errmsg) const;
     string xrl_return_spec() const { return _response; }
-    string affected_module(const ConfigTreeNode& ctn) const;
+    string affected_module() const;
     inline const string& request() const { return _request; }
 
 private:
-    void check_xrl_is_valid(const list<string>& action,
-			    const XRLdb& xrldb) const throw (ParseError);
+    bool check_xrl_is_valid(const list<string>& action,
+			    const XRLdb& xrldb, string& errmsg);
     list<string>	_split_request;
     string		_request;
     list<string>	_split_response;
@@ -90,11 +82,12 @@ public:
     void add_action(const list<string>& action, const XRLdb& xrldb);
     int execute(ConfigTreeNode& ctn, TaskManager& task_manager) const;
     void action_complete(const XrlError& err, XrlArgs* xrl_args,
-			 ConfigTreeNode* ctn);
-    set<string> affected_xrl_modules(const ConfigTreeNode& ctn) const;
-    bool affects_module(const ConfigTreeNode& ctn, const string& module) const;
+			 ConfigTreeNode* ctn) const;
+    set<string> affected_xrl_modules() const;
+    bool affects_module(const string& module) const;
     virtual string str() const;
     TemplateTreeNode& template_tree_node() { return _template_tree_node; }
+    bool check_referred_variables(string& errmsg) const;
 
 protected:
     string		_cmd_name;
@@ -109,8 +102,8 @@ public:
     AllowCommand(TemplateTreeNode& template_tree_node, const string& cmd_name);
 
     void add_action(const list<string>& action) throw (ParseError);
-    int execute(const ConfigTreeNode& ctn) const throw (ParseError);
-    const list<string>& allowed_values() const { return _allowed_values; }
+    bool verify_variable_value(const ConfigTreeNode& ctn,
+			       string& errmsg) const;
 
     string str() const;
 
