@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.3 2003/03/10 23:20:36 hodson Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.4 2003/03/27 23:29:59 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -63,20 +63,16 @@ public:
      */
     TimeVal(const double& d)
 	: _sec((uint32_t)d),
-	  _usec((uint32_t)((d - ((double)_sec)) * ONE_MILLION + 1.0e-7)) {}
-
-    /**
-     * Copy the time to a timeval structure.
-     * 
-     * @param timeval the storage to copy the time to.
-     * @return the number of copied octets.
-     */
-    size_t copy_out(struct timeval& timeval) {
-	timeval.tv_sec = _sec;
-	timeval.tv_usec = _usec;
-	return (sizeof(_sec) + sizeof(_usec));
+	  _usec((uint32_t)((d - ((double)_sec)) * ONE_MILLION + 1.0e-7)) {
+	//
+	// Adjust
+	//
+	if (_usec >= ONE_MILLION) {
+	    _sec += _usec / ONE_MILLION;
+	    _usec %= ONE_MILLION;
+	}
     }
-    
+
     /**
      * Get the number of seconds.
      * 
@@ -92,12 +88,69 @@ public:
     uint32_t usec() const	{ return _usec; }
     
     /**
+     * Copy the time to a timeval structure.
+     * 
+     * @param timeval the storage to copy the time to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(struct timeval& timeval) {
+	timeval.tv_sec = _sec;
+	timeval.tv_usec = _usec;
+	return (sizeof(_sec) + sizeof(_usec));
+    }
+    
+    /**
      * Convert a TimeVal value to a double-float value.
      * 
      * @return the double-float value of this TimeVal time.
      */
     double get_double() const {
-	return _sec * 1.0 + _usec * 1.0e-6;
+	return (_sec * 1.0 + _usec * 1.0e-6);
+    }
+    
+    /**
+     * Apply uniform randomization on the time value of this object.
+     * 
+     * The randomized time value is chosen randomly uniform in the interval
+     * ( curr_value - factor*curr_value, curr_value + factor*curr_value ).
+     * For example, if the current time value is 10 seconds,
+     * and @param factor is 0.2, the randomized time value is uniformly
+     * chosen in the interval (8, 12) seconds (10 +- 0.2*10).
+     * If the value of @param factor is larger than 1.0, the minimum
+     * time value after the randomization is zero (sec, usec), even though
+     * the beginning of the interval to randomize within has a negative value.
+     * 
+     * @param factor the randomization factor to apply.
+     * @return the randomized time value.
+     */
+    TimeVal& randomize_uniform(const double& factor) {
+	TimeVal delta(factor * get_double());
+	uint32_t random_sec = delta.sec();
+	uint32_t random_usec = delta.usec();
+	
+	// Randomize the offset
+	if (random_sec != 0)
+	    random_sec = random() % random_sec;
+	if (random_usec != 0)
+	    random_usec = random() % random_usec;
+	TimeVal random_delta(random_sec, random_usec);
+	
+	// Either add or substract the randomized offset
+	if (random() % 2) {
+	    // Add
+	    *this += random_delta;
+	} else {
+	    // Substract
+	    if (random_delta < *this) {
+		*this -= random_delta;
+	    } else {
+		// The offset is too large. Set the result to zero.
+		_sec = 0;
+		_usec = 0;
+	    }
+	}
+	
+	return (*this);
     }
     
     /**
