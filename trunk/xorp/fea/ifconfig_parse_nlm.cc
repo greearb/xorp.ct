@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.10 2004/03/20 02:48:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.11 2004/03/23 11:33:16 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -427,7 +427,20 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     IPvX peer_addr = IPvX::ZERO(family);
     bool has_broadcast_addr = false;
     bool has_peer_addr = false;
-    
+    bool is_ifa_address_reassigned = false;
+
+    //
+    // XXX: re-assign IFA_ADDRESS to IFA_LOCAL (and vice-versa).
+    // This tweak is needed according to the iproute2 source code.
+    //
+    if (rta_array[IFA_LOCAL] == NULL) {
+	rta_array[IFA_LOCAL] = rta_array[IFA_ADDRESS];
+    }
+    if (rta_array[IFA_ADDRESS] == NULL) {
+	rta_array[IFA_ADDRESS] = rta_array[IFA_LOCAL];
+	is_ifa_address_reassigned = true;
+    }
+
     // Get the IP address
     if (rta_array[IFA_LOCAL] != NULL) {
 	const uint8_t* data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFA_LOCAL])));
@@ -477,7 +490,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     
     // Get the p2p address
     if (fv->point_to_point()) {
-	if (rta_array[IFA_ADDRESS] != NULL) {
+	if ((rta_array[IFA_ADDRESS] != NULL) && !is_ifa_address_reassigned) {
 	    const uint8_t* data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFA_ADDRESS])));
 	    if (RTA_PAYLOAD(rta_array[IFA_ADDRESS])
 		!= IPvX::addr_size(family)) {
