@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.10 2003/05/28 04:02:58 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.11 2003/05/30 02:42:57 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -29,6 +29,7 @@ class TaskManager;
 class XorpClient;
 class ModuleManager;
 class TaskManager;
+class ModuleCommand;
 
 class Validation {
 public:
@@ -125,22 +126,25 @@ public:
     const string& name() const {return _name;}
     EventLoop& eventloop() const;
 protected:
-    void step1();
+    void step1_start();
     void step1_done(bool success);
 
-    void step2();
+    void step2_wait();
     void step2_done(bool success);
 
-    void step3();
+    void step3_config();
     void step3_done(bool success);
 
-    void step4();
-    void step4_done();
+    void step4_wait();
+    void step4_done(bool success);
 
-    void step5();
-    void step5_done(bool success);
+    void step5_stop();
+    void step5_done();
 
-    void step6();
+    void step6_wait();
+    void step6_done(bool success);
+
+    void step7_report();
     void task_fail(string errmsg, bool fatal);
 private:
     string _name; //the name of the task
@@ -148,9 +152,14 @@ private:
     string _modname; //the name of the module to start and stop
     bool _start_module;
     bool _stop_module;
-    Validation* _validation; // the validation mechanism for the module 
-                             // start or module stop
+    Validation* _start_validation; // the validation mechanism for the module 
+                                   // start
+    Validation* _ready_validation; // the validation mechanism for the module 
+                                   // reconfiguration
+    Validation* _stop_validation;  // the validation mechanism for the module 
+                                   // stop
     list <TaskXrlItem> _xrls;
+    bool _config_done; //true if we changed the module's config
     CallBack _task_complete_cb; //the task completion callback
 };
 
@@ -161,8 +170,7 @@ public:
 			     bool global_do_exec);
     void set_do_exec(bool do_exec);
     void reset();
-    int add_module(const string& modname, const string& modpath,
-		   Validation *validation);
+    int add_module(const ModuleCommand& mod_cmd);
     void add_xrl(const string& modname, const UnexpandedXrl& xrl, 
 		 XrlRouter::XrlCallback& cb);
     void run(CallBack cb);
@@ -199,6 +207,8 @@ private:
 
     //_tasklist maintains the execution order
     list <Task*> _tasklist;
+
+    map <string, const ModuleCommand*> _module_commands;
 
     CallBack _completion_cb;
 };

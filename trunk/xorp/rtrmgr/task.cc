@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.13 2003/05/28 04:02:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.14 2003/05/30 02:42:57 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 #include "task.hh"
 #include "module_manager.hh"
+#include "module_command.hh"
 #include "xorp_client.hh"
 
 #define MAX_STATUS_RETRIES 30
@@ -58,6 +59,7 @@ void
 XrlStatusValidation::validate(CallBack cb)
 {
     _cb = cb;
+    printf("validate\n");
     if (_task_manager.do_exec()) {
 	Xrl xrl(_target, "common/0.1/get_status");
 	printf("XRL: >%s<\n", xrl.str().c_str());
@@ -348,14 +350,20 @@ TaskXrlItem::execute_done(const XrlError& err,
 
 Task::Task(const string& name, TaskManager& taskmgr) 
     : _name(name), _taskmgr(taskmgr),
-      _start_module(false), _stop_module(false)
+      _start_module(false), _stop_module(false), 
+      _start_validation(NULL), _ready_validation(NULL), 
+      _stop_validation(NULL), _config_done(false)
 {
 }
 
 Task::~Task()
 {
-    if (_validation != NULL)
-	delete _validation;
+    if (_start_validation != NULL)
+	delete _start_validation;
+    if (_ready_validation != NULL)
+	delete _ready_validation;
+    if (_stop_validation != NULL)
+	delete _stop_validation;
 }
 
 void 
@@ -366,7 +374,7 @@ Task::add_start_module(const string& modname,
     assert(_stop_module == false);
     _start_module = true;
     _modname = modname;
-    _validation = validation;
+    _start_validation = validation;
 }
 
 void 
@@ -377,7 +385,7 @@ Task::add_stop_module(const string& modname,
     assert(_stop_module == false);
     _start_module = true;
     _modname = modname;
-    _validation = validation;
+    _stop_validation = validation;
 }
 
 void
@@ -391,11 +399,11 @@ Task::run(CallBack cb)
 {
     printf("Task::run %s\n", _modname.c_str());
     _task_complete_cb = cb;
-    step1();
+    step1_start();
 }
 
 void
-Task::step1() 
+Task::step1_start() 
 {
     printf("step1\n");
     if (_start_module) {
@@ -403,7 +411,7 @@ Task::step1()
 	    .start_module(_modname, do_exec(), 
 			   callback(this, &Task::step1_done));
     } else {
-	step2();
+	step2_wait();
     }
 }
 
@@ -412,19 +420,19 @@ Task::step1_done(bool success)
 {
     printf("step1_done\n");
     if (success)
-	step2();
+	step2_wait();
     else
 	task_fail("Can't start process " + _modname, false);
 }
 
 void
-Task::step2()
+Task::step2_wait()
 {
     printf("step2\n");
-    if (_start_module && (_validation != NULL)) {
-	_validation->validate(callback(this, &Task::step2_done));
+    if (_start_module && (_start_validation != NULL)) {
+	_start_validation->validate(callback(this, &Task::step2_done));
     } else {
-	step3();
+	step3_config();
     }
 }
 
@@ -433,17 +441,17 @@ Task::step2_done(bool success)
 {
     printf("step2_done\n");
     if (success)
-	step3();
+	step3_config();
     else
 	task_fail("Can't validate start of process " + _modname, true);
 }
 
 void 
-Task::step3()
+Task::step3_config()
 {
     printf("step3\n");
     if (_xrls.empty()) {
-	step4();
+	step4_wait();
     } else {
 	string errmsg;
 	printf("step3: execute\n");
@@ -461,56 +469,79 @@ Task::xrl_done(bool success, bool fatal, string errmsg)
     printf("xrl_done\n");
     if (success) {
 	_xrls.pop_front();
-	step3();
+	_config_done = true;
+	step3_config();
     } else {
 	task_fail(errmsg, fatal);
     }
 }
 
 void
-Task::step4()
+Task::step4_wait()
 {
     printf("step4\n");
-    if (_stop_module) {
-	_taskmgr.module_manager()
-	    .stop_module(_modname, callback(this, &Task::step4_done));
+    if (_ready_validation && _config_done) {
+	_ready_validation->validate(callback(this, &Task::step4_done));
     } else {
-	step5();
+	step5_stop();
     }
 }
 
 void
-Task::step4_done() 
+Task::step4_done(bool success) 
 {
-    printf("step4_done\n");
-    step5();
+    if (success) {
+	step5_stop();
+    } else {
+	task_fail("Reconfig of process " + _modname + 
+		  " caused process to fail.", true);
+    }
 }
 
 void
-Task::step5() 
+Task::step5_stop()
 {
     printf("step5\n");
-    if (_stop_module && (_validation != NULL)) {
-	_validation->validate(callback(this, &Task::step5_done));
+    if (_stop_module) {
+	_taskmgr.module_manager()
+	    .stop_module(_modname, callback(this, &Task::step5_done));
     } else {
-	step6();
+	step6_wait();
     }
 }
 
 void
-Task::step5_done(bool success) 
+Task::step5_done() 
+{
+    printf("step5_done\n");
+    step6_wait();
+}
+
+void
+Task::step6_wait() 
+{
+    printf("step5\n");
+    if (_stop_module && (_stop_validation != NULL)) {
+	_stop_validation->validate(callback(this, &Task::step6_done));
+    } else {
+	step7_report();
+    }
+}
+
+void
+Task::step6_done(bool success) 
 {
     printf("step5_done\n");
     if (success)
-	step6();
+	step7_report();
     else
 	task_fail("Can't validate stop of process " + _modname, false);
 }
 
 void 
-Task::step6()
+Task::step7_report()
 {
-    printf("step6\n");
+    printf("step7\n");
     debug_msg("Task done\n");
     _task_complete_cb->dispatch(true, "");
 }
@@ -569,9 +600,10 @@ TaskManager::reset() {
 }
 
 int
-TaskManager::add_module(const string& modname, const string& modpath,
-			Validation *validation)
+TaskManager::add_module(const ModuleCommand& module_command)
 {
+    string modname = module_command.name();
+    string modpath = module_command.path();
     if (_tasks.find(modname) == _tasks.end()) {
 	Task* newtask = new Task(modname, *this);
 	_tasks[modname] = newtask;
@@ -589,7 +621,10 @@ TaskManager::add_module(const string& modname, const string& modpath,
 	}
     }
 
+    Validation *validation = module_command.startup_validation(*this);
     find_task(modname).add_start_module(modname, validation);
+    
+    _module_commands[modname] = &module_command;
     return XORP_OK;
 }
 

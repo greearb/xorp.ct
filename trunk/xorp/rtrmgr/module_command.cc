@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.8 2003/05/28 17:40:26 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.9 2003/05/30 02:42:57 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -123,50 +123,16 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 int 
 ModuleCommand::execute(TaskManager& taskmgr) const 
 {
-#if 0
-    debug_msg("ModuleCommand::execute %s (do_exec %d, do_commit %d)\n",
-	      _modname.c_str(), taskmgr.do_exec(), do_commit);
-    if (do_commit) {
-	debug_msg("do_commit == true\n");
-	//OK, we're actually going to do the commit
-	//find or create the module in the module manager
-	if (module_manager.module_exists(_modname)) {
-	    if (module_manager.module_has_started(_modname))
-		return XORP_OK;
-	} else {
-	    if (!module_manager.new_module(_modname, _modpath))
-		return XORP_ERROR;
-	}
+    return taskmgr.add_module(*this);
+}
 
-	debug_msg("Starting module\n");
-	XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
-					&ModuleCommand::exec_complete);
-	int r = xclient.start_module(tid, module_manager, _modname, cb,
-				      do_exec);
-
-	XrlAction* xrl_procready = dynamic_cast<XrlAction*>(_procready);
-	if (xrl_procready) {
-	    debug_msg("proc ready xrl \"%s\"\n",
-		      xrl_procready->request().c_str());
-	    int r2 = xclient.send_xrl(tid,
-				      UnexpandedXrl(0, xrl_procready),
-				      0, do_exec, 30, 250);
-	    debug_msg("Send Xrl okay %d\n", r2 == XORP_OK);
-	}
-	return r;
-    } else {
-	//this is just the verification pass, if this is successful
-	//then a commit pass will occur.
-	return XORP_OK;
-    }
-#endif
+Validation*
+ModuleCommand::startup_validation(TaskManager &taskmgr) const
+{
     if (_status_method == STATUS_BY_XRL) {
-	StatusReadyValidation* sv =
-	    new StatusReadyValidation(_modname, taskmgr);
-	return taskmgr.add_module(_modname, _modpath, sv);
+	return new StatusConfigMeValidation(_modname, taskmgr);
     } else {
-	DelayValidation* dv = new DelayValidation(taskmgr.eventloop(), 2000);
-	return taskmgr.add_module(_modname, _modpath, dv);
+	return new DelayValidation(taskmgr.eventloop(), 2000);
     }
 }
 
@@ -231,14 +197,6 @@ ModuleCommand::exec_complete(const XrlError& /*err*/,
 {
     debug_msg("ModuleCommand::exec_complete\n");
     _execute_done = true;
-#ifdef NOTDEF
-    if (err == XrlError::OKAY()) {
-	//XXX does this make sense?
-	ctn->command_status_callback(this, true);
-    } else {	
-	ctn->command_status_callback(this, false);
-    }
-#endif
 }
 
 void 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.6 2003/04/23 22:52:07 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.7 2003/05/02 22:33:53 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -30,6 +30,7 @@ class RouterCLI;
 class CommandTree;
 class TemplateTreeNode;
 class Command;
+class TaskManager;
 
 class ConfigTreeNode {
 public:
