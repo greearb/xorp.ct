@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.2 2003/07/09 00:11:02 hodson Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -244,22 +244,13 @@ template <typename A>
 struct RtPtrComparitor {
     bool operator() (const RouteEntry<A>* a, const RouteEntry<A>* b) const
     {
-	const A& ma = a->net().masked_addr();
-	const A& mb = b->net().masked_addr();
-	if (ma < mb) {
-	    return -1;
-	} else if (ma > mb) {
-	    return +1;
-	}
-
-	size_t pla = a->net().prefix_len();
-	size_t plb = b->net().prefix_len();
-	if (pla < plb) {
-	    return -1;
-	} else if (pla > plb) {
-	    return +1;
-	}
-	return 0;
+	const IPNet<A>& l = a->net();
+	const IPNet<A>& r = b->net();
+	if (l.prefix_len() < r.prefix_len())
+	    return true;
+	if (l.prefix_len() > r.prefix_len())
+	    return false;
+	return l.masked_addr() < r.masked_addr();
     }
 };
 
