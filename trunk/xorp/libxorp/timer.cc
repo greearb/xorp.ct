@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.10 2003/06/11 19:15:19 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.11 2003/06/12 23:58:15 jcardona Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -79,7 +79,7 @@ TimerNode::add_ref()
 void
 TimerNode::release_ref()
 {
-    if (--_ref_cnt <= 0)
+    if (--_ref_cnt == 0)
 	delete this;
 }
 
