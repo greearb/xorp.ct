@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.17 2004/03/24 18:57:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.18 2004/06/10 22:40:55 hodson Exp $"
 
 
 //
@@ -1518,8 +1518,8 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	ip->ip_ttl	= ip_ttl;
 	ip->ip_tos	= ip_tos;
 	
-	src.copy_out(ip->ip_src);
-	dst.copy_out(ip->ip_dst);
+	src.copy_out(static_cast<struct in_addr&>(ip->ip_src));
+	dst.copy_out(static_cast<struct in_addr&>(ip->ip_dst));
 	ip->ip_len = (ip->ip_hl << 2) + datalen;
 #ifdef IPV4_RAW_OUTPUT_IS_RAW
 	ip->ip_len = htons(ip->ip_len);

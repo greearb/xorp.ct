@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.33 2004/08/13 00:26:37 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.34 2004/08/13 00:55:16 pavlin Exp $
 #
 
 #
@@ -159,7 +159,7 @@ else
 	ALTERNATIVE_SUBNETS6=""
 	;;
 
-	koala.icir.org)
+	koala.icir.org | fedora)
 	ENABLE_VIFS="eth0"
 	CAND_BSR_VIF="eth0"
 	CAND_RP_VIF="eth0"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.14 2004/04/01 19:54:11 mjh Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.15 2004/06/10 22:41:33 hodson Exp $"
 
 
 //
@@ -657,8 +657,8 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	ip4_header.ip_p		= IPPROTO_PIM;
 	ip4_header.ip_len	= htons(sizeof(ip4_header));
 	ip4_header.ip_ttl	= 0;
-	source_addr.copy_out(ip4_header.ip_src);
-	group_addr.copy_out(ip4_header.ip_dst);
+	source_addr.copy_out(static_cast<struct in_addr&>(ip4_header.ip_src));
+	group_addr.copy_out(static_cast<struct in_addr&>(ip4_header.ip_dst));
 	// XXX: on older Linux 'ip->ip_sum' was named 'ip->ip_csum'.
 	// Later someone has realized that it is not a smart move,
 	// so now Linux is in sync with the rest of the UNIX-es.
