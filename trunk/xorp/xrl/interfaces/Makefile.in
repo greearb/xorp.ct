@@ -97,7 +97,7 @@ snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
 
-# BGP Client Interface 
+# BGP Client Interface
 
 # Command-Line Interface Manager Interface
 
@@ -153,14 +153,20 @@ snmpd2 = @snmpd2@
 
 # RTRMGR Client Interface
 
+# IPv4 Socket Interface
+
+# IPv4 Socket Locator Interface
+
+# IPv4 Socket User Interface
+
 # Test Peer Interface
 
 # XORP MIBS Interface
 
 #
-# Sample Test Client Interface 
+# Sample Test Client Interface
 #
-noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -190,6 +196,9 @@ libribxif_a_SOURCES = rib_xif.hh rib_xif.cc
 libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
 librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
 librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
+libsocket4xif_a_SOURCES = socket4_xif.hh socket4_xif.cc
+libsocket4locatorxif_a_SOURCES = socket4_locator_xif.hh socket4_locator_xif.cc
+libsocket4userxif_a_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
 libxorpifmibxif_a_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
@@ -332,6 +341,18 @@ librtrmgrxif_a_AR = $(AR) cru
 librtrmgrxif_a_LIBADD =
 am_librtrmgrxif_a_OBJECTS = rtrmgr_xif.$(OBJEXT)
 librtrmgrxif_a_OBJECTS = $(am_librtrmgrxif_a_OBJECTS)
+libsocket4locatorxif_a_AR = $(AR) cru
+libsocket4locatorxif_a_LIBADD =
+am_libsocket4locatorxif_a_OBJECTS = socket4_locator_xif.$(OBJEXT)
+libsocket4locatorxif_a_OBJECTS = $(am_libsocket4locatorxif_a_OBJECTS)
+libsocket4userxif_a_AR = $(AR) cru
+libsocket4userxif_a_LIBADD =
+am_libsocket4userxif_a_OBJECTS = socket4_user_xif.$(OBJEXT)
+libsocket4userxif_a_OBJECTS = $(am_libsocket4userxif_a_OBJECTS)
+libsocket4xif_a_AR = $(AR) cru
+libsocket4xif_a_LIBADD =
+am_libsocket4xif_a_OBJECTS = socket4_xif.$(OBJEXT)
+libsocket4xif_a_OBJECTS = $(am_libsocket4xif_a_OBJECTS)
 libtestpeerxif_a_AR = $(AR) cru
 libtestpeerxif_a_LIBADD =
 am_libtestpeerxif_a_OBJECTS = test_peer_xif.$(OBJEXT)
@@ -371,7 +392,10 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_xif.Po $(DEPDIR)/ospf_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_xif.Po $(DEPDIR)/rib_client_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_xif.Po $(DEPDIR)/rtrmgr_client_xif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_xif.Po $(DEPDIR)/test_peer_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket4_locator_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket4_user_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket4_xif.Po $(DEPDIR)/test_peer_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xif.Po $(DEPDIR)/xorp_if_mib_xif.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -401,10 +425,12 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) \
 	$(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) \
 	$(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) \
+	$(libsocket4locatorxif_a_SOURCES) \
+	$(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) \
 	$(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) \
 	$(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -538,6 +564,18 @@ librtrmgrxif.a: $(librtrmgrxif_a_OBJECTS) $(librtrmgrxif_a_DEPENDENCIES)
 	-rm -f librtrmgrxif.a
 	$(librtrmgrxif_a_AR) librtrmgrxif.a $(librtrmgrxif_a_OBJECTS) $(librtrmgrxif_a_LIBADD)
 	$(RANLIB) librtrmgrxif.a
+libsocket4locatorxif.a: $(libsocket4locatorxif_a_OBJECTS) $(libsocket4locatorxif_a_DEPENDENCIES) 
+	-rm -f libsocket4locatorxif.a
+	$(libsocket4locatorxif_a_AR) libsocket4locatorxif.a $(libsocket4locatorxif_a_OBJECTS) $(libsocket4locatorxif_a_LIBADD)
+	$(RANLIB) libsocket4locatorxif.a
+libsocket4userxif.a: $(libsocket4userxif_a_OBJECTS) $(libsocket4userxif_a_DEPENDENCIES) 
+	-rm -f libsocket4userxif.a
+	$(libsocket4userxif_a_AR) libsocket4userxif.a $(libsocket4userxif_a_OBJECTS) $(libsocket4userxif_a_LIBADD)
+	$(RANLIB) libsocket4userxif.a
+libsocket4xif.a: $(libsocket4xif_a_OBJECTS) $(libsocket4xif_a_DEPENDENCIES) 
+	-rm -f libsocket4xif.a
+	$(libsocket4xif_a_AR) libsocket4xif.a $(libsocket4xif_a_OBJECTS) $(libsocket4xif_a_LIBADD)
+	$(RANLIB) libsocket4xif.a
 libtestpeerxif.a: $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_DEPENDENCIES) 
 	-rm -f libtestpeerxif.a
 	$(libtestpeerxif_a_AR) libtestpeerxif.a $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_LIBADD)
@@ -586,6 +624,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_client_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_locator_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_user_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_xif.Po@am__quote@

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.10 2003/08/22 23:18:13 hodson Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.11 2003/08/28 00:08:50 hodson Exp $
 ##
 
 ###############################################################################
@@ -11,7 +11,7 @@
 noinst_LIBRARIES = libbgpmibtrapsxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 
-# BGP Client Interface 
+# BGP Client Interface
 noinst_LIBRARIES += libbgpxif.a
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 
@@ -129,7 +129,19 @@ librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
 # RTRMGR Client Interface
 noinst_LIBRARIES += librtrmgr_clientxif.a
 librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
- 
+
+# IPv4 Socket Interface
+noinst_LIBRARIES += libsocket4xif.a
+libsocket4xif_a_SOURCES = socket4_xif.hh socket4_xif.cc
+
+# IPv4 Socket Locator Interface
+noinst_LIBRARIES += libsocket4locatorxif.a
+libsocket4locatorxif_a_SOURCES = socket4_locator_xif.hh socket4_locator_xif.cc
+
+# IPv4 Socket User Interface
+noinst_LIBRARIES += libsocket4userxif.a
+libsocket4userxif_a_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
+
 # Test Peer Interface
 noinst_LIBRARIES += libtestpeerxif.a
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
@@ -139,7 +151,7 @@ noinst_LIBRARIES += libxorpifmibxif.a
 libxorpifmibxif_a_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
 
 #
-# Sample Test Client Interface 
+# Sample Test Client Interface
 #
 noinst_LIBRARIES += libtestxif.a
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
