@@ -93,7 +93,7 @@ snmpd2 = @snmpd2@
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS = xorp_pim
+bin_PROGRAMS = xorp_pimsm4 xorp_pimsm6
 
 # -- Test Programs
 TESTS = 
@@ -121,7 +121,8 @@ noinst_LIBRARIES = libpim.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.a $(top_builddir)/xrl/targets/libpimbase.a $(top_builddir)/mld6igmp/libmld6igmp.a $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/rib/librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeafibclientxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-xorp_pim_SOURCES = xorp_pim.cc
+xorp_pimsm4_SOURCES = xorp_pimsm4.cc
+xorp_pimsm6_SOURCES = xorp_pimsm6.cc
 
 test_pim_SOURCES = test_pim.cc $(top_builddir)/rib/rib_manager.hh $(top_builddir)/rib/rib_manager.cc $(top_builddir)/rib/xrl_target.hh $(top_builddir)/rib/xrl_target.cc
 
@@ -162,7 +163,7 @@ am_libpim_a_OBJECTS = pim_bsr.$(OBJEXT) pim_config.$(OBJEXT) \
 	pim_rp.$(OBJEXT) pim_scope_zone_table.$(OBJEXT) \
 	pim_vif.$(OBJEXT) xrl_pim_node.$(OBJEXT)
 libpim_a_OBJECTS = $(am_libpim_a_OBJECTS)
-bin_PROGRAMS = xorp_pim$(EXEEXT)
+bin_PROGRAMS = xorp_pimsm4$(EXEEXT) xorp_pimsm6$(EXEEXT)
 noinst_PROGRAMS = test_pim$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
@@ -210,10 +211,10 @@ test_pim_DEPENDENCIES = libpim.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/targets/libsocketserverbase.a
 test_pim_LDFLAGS =
-am_xorp_pim_OBJECTS = xorp_pim.$(OBJEXT)
-xorp_pim_OBJECTS = $(am_xorp_pim_OBJECTS)
-xorp_pim_LDADD = $(LDADD)
-xorp_pim_DEPENDENCIES = libpim.a \
+am_xorp_pimsm4_OBJECTS = xorp_pimsm4.$(OBJEXT)
+xorp_pimsm4_OBJECTS = $(am_xorp_pimsm4_OBJECTS)
+xorp_pimsm4_LDADD = $(LDADD)
+xorp_pimsm4_DEPENDENCIES = libpim.a \
 	$(top_builddir)/xrl/interfaces/libmld6igmpxif.a \
 	$(top_builddir)/xrl/targets/libpimbase.a \
 	$(top_builddir)/mld6igmp/libmld6igmp.a \
@@ -245,7 +246,43 @@ xorp_pim_DEPENDENCIES = libpim.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
-xorp_pim_LDFLAGS =
+xorp_pimsm4_LDFLAGS =
+am_xorp_pimsm6_OBJECTS = xorp_pimsm6.$(OBJEXT)
+xorp_pimsm6_OBJECTS = $(am_xorp_pimsm6_OBJECTS)
+xorp_pimsm6_LDADD = $(LDADD)
+xorp_pimsm6_DEPENDENCIES = libpim.a \
+	$(top_builddir)/xrl/interfaces/libmld6igmpxif.a \
+	$(top_builddir)/xrl/targets/libpimbase.a \
+	$(top_builddir)/mld6igmp/libmld6igmp.a \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
+	$(top_builddir)/rib/librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/targets/libribbase.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/fea/libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_pimsm6_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -278,8 +315,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/pim_rp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_scope_zone_table.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_vif.Po $(DEPDIR)/rib_manager.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_pim.Po $(DEPDIR)/xorp_pim.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_pim_node.Po $(DEPDIR)/xrl_target.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_pim.Po $(DEPDIR)/xorp_pimsm4.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_pimsm6.Po $(DEPDIR)/xrl_pim_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -292,9 +330,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libpim_a_SOURCES) $(test_pim_SOURCES) \
-	$(xorp_pim_SOURCES)
+	$(xorp_pimsm4_SOURCES) $(xorp_pimsm6_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libpim_a_SOURCES) $(test_pim_SOURCES) $(xorp_pim_SOURCES)
+SOURCES = $(libpim_a_SOURCES) $(test_pim_SOURCES) $(xorp_pimsm4_SOURCES) $(xorp_pimsm6_SOURCES)
 
 all: all-am
 
@@ -347,9 +385,12 @@ xrl_target.$(OBJEXT): $(top_builddir)/rib/xrl_target.cc
 test_pim$(EXEEXT): $(test_pim_OBJECTS) $(test_pim_DEPENDENCIES) 
 	@rm -f test_pim$(EXEEXT)
 	$(CXXLINK) $(test_pim_LDFLAGS) $(test_pim_OBJECTS) $(test_pim_LDADD) $(LIBS)
-xorp_pim$(EXEEXT): $(xorp_pim_OBJECTS) $(xorp_pim_DEPENDENCIES) 
-	@rm -f xorp_pim$(EXEEXT)
-	$(CXXLINK) $(xorp_pim_LDFLAGS) $(xorp_pim_OBJECTS) $(xorp_pim_LDADD) $(LIBS)
+xorp_pimsm4$(EXEEXT): $(xorp_pimsm4_OBJECTS) $(xorp_pimsm4_DEPENDENCIES) 
+	@rm -f xorp_pimsm4$(EXEEXT)
+	$(CXXLINK) $(xorp_pimsm4_LDFLAGS) $(xorp_pimsm4_OBJECTS) $(xorp_pimsm4_LDADD) $(LIBS)
+xorp_pimsm6$(EXEEXT): $(xorp_pimsm6_OBJECTS) $(xorp_pimsm6_DEPENDENCIES) 
+	@rm -f xorp_pimsm6$(EXEEXT)
+	$(CXXLINK) $(xorp_pimsm6_LDFLAGS) $(xorp_pimsm6_OBJECTS) $(xorp_pimsm6_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -390,7 +431,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_vif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_pim.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_pim.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_pimsm4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_pimsm6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pim_node.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.4 2004/04/22 01:14:29 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pim.cc,v 1.1 2004/04/30 02:39:25 pavlin Exp $"
 
 
 //
@@ -124,24 +124,9 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
 			       xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm4);
 
-#ifdef HAVE_IPV6
-    XrlStdRouter xrl_std_router_pimsm6(eventloop,
-				       xorp_module_name(AF_INET6,
-							XORP_MODULE_PIMSM),
-				       finder_hostname, finder_port);
-    XrlPimNode xrl_pimsm_node6(AF_INET6,
-			       XORP_MODULE_PIMSM,
-			       eventloop,
-			       &xrl_std_router_pimsm6,
-			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
-			       xorp_module_name(AF_INET6, XORP_MODULE_RIB),
-			       xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm6);
-#endif // HAVE_IPV6
-
     // Startup
+    xrl_pimsm_node4.enable_pim();
     xrl_pimsm_node4.startup();
-    // xrl_pimsm_node6.startup();
 
     //
     // Main loop
