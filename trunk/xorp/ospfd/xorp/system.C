@@ -219,7 +219,7 @@ void XorpOspfd::leave(InAddr group, int phyint)
 
 {
     debug_msg("----\nleave\n");
-#if HAVE_ST_IP_MREQN
+#ifdef HAVE_ST_IP_MREQN
     ip_mreqn mreq;
 #else
     ip_mreq mreq;
@@ -230,7 +230,7 @@ void XorpOspfd::leave(InAddr group, int phyint)
     if ((phyp->flags & IFF_MULTICAST) == 0)
 	return;
     mreq.imr_multiaddr.s_addr = hton32(group);
-#if HAVE_ST_IP_MREQN
+#ifdef HAVE_ST_IP_MREQN
     mreq.imr_ifindex = phyint;
     mreq.imr_address.s_addr = 0;
 #else
