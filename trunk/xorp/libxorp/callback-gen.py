@@ -14,7 +14,7 @@ main build system this is not an issue.
 The notion of having a script to generate templates was borrowed from
 David Mazieres callback.h file (in the async lib distributed with
 sfs).  The code generated bears strong similarities to David's work, but
-was largely written independently of it. 
+was largely written independently of it.
 
 """
 
@@ -151,7 +151,7 @@ def output_header(args, dbg):
 #include "config.h"
 #include "libxorp/callback.hh"
 
-static void hello_world() { 
+static void hello_world() {
     cout << "Hello World" << endl;
 }
 
@@ -162,7 +162,7 @@ int main() {
 
     // Create XorpCallback object using callback()
     SimpleCallback cb = callback(hello_world);
-    
+
     // Invoke callback, results in call to hello_world.
     cb->dispatch();
     return 0;
@@ -182,7 +182,7 @@ int main() {
 
 class Foo {
 public:
-    void hello_world() { 
+    void hello_world() {
 	cout << "Foo::Hello World" << endl;
     }
 };
@@ -224,13 +224,17 @@ int main() {
 
     NoArgCallback cb1 = callback(sum, 1, 2);
     cout << "cb1->dispatch() returns " << cb1->dispatch() << endl; // "3"
+    cout << endl;
 
     // Callback to function returning int and taking an integer argument
     typedef XorpCallback1<int,int>::RefPtr OneIntArgCallback;
 
     OneIntArgCallback cb2 = callback(sum, 5);
     cout << "cb2->dispatch(10) returns " << cb2->dispatch(10) << endl; // 15
+    cout << endl;
+
     cout << "cb2->dispatch(20) returns " << cb2->dispatch(20) << endl; // 25
+    cout << endl;
 
     // Callback to function returning int and taking  2 integer arguments
     typedef XorpCallback2<int,int,int>::RefPtr TwoIntArgCallback;
@@ -257,7 +261,7 @@ cb2->dispatch(10) returns 15
  *
 <pre>
 sum(x = 20, y = 5)
-cb2->dispatch(10) returns 25
+cb2->dispatch(20) returns 25
 </pre>
  *
  * for the one bound argument cases.
@@ -286,7 +290,7 @@ XorpCallback1<double, int>::RefPtr
  * arguments and %d dispatch arguments.
  *
  * @sect Ref Pointer Helpers
- * 
+ *
  * Callback objects may be set to NULL, since they use reference pointers
  * to store the objects.  Callbacks may be unset using the ref_ptr::release()
  * method:
@@ -326,7 +330,7 @@ if (! cb.is_empty()) {
 #  define callback(...) dbg_callback(__FILE__,__LINE__,__VA_ARGS__)
 #endif
 """
-        
+
 def output_trailer():
     print "#endif /* __XORP_CALLBACK_HH__ */"
 
@@ -370,7 +374,7 @@ def output_base(l_types, dbg):
         print "    int line() const\t\t\t{ return _line; }"
         print "private:"
         print "    const char* _file;"
-        print "    int         _line;"        
+        print "    int         _line;"
     print "};\n"
 
 def output_rest(l_types, b_types, dbg):
@@ -383,7 +387,7 @@ def output_rest(l_types, b_types, dbg):
                                  ("int", "line"))
     else:
         debug_args = (())
-        
+
     output_kdoc_class("functions", nl, nb)
 
     o = "template <class R%s>\n" % \
@@ -406,7 +410,7 @@ def output_rest(l_types, b_types, dbg):
         o += "    %s;\n" % ba
     o += "};\n\n"
     print o
-    
+
     output_kdoc_factory("function", nl, nb)
     o  = "template <class R%s>\n" % joining_csv(class_args(l_types + b_types))
     o += "typename XorpCallback%d<R%s>::RefPtr\n" % (nl, joining_csv(l_types))
@@ -501,7 +505,7 @@ def main():
     nb = 4
     nl = 4
     dbg = 1
-    
+
     for o, a in opts:
         if (o in ("-h", "--help")):
             usage()
@@ -514,7 +518,7 @@ def main():
             dbg = 0
 
     output_header(sys.argv[:], dbg)
-    
+
     cb_gen(nb + 1, nl + 1, dbg)
 
     output_trailer()

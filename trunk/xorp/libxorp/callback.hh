@@ -5,7 +5,7 @@
  * This file is PROGRAMMATICALLY GENERATED.
  * 
  * This instance was generated with:
- *      /home/tigger/u0/atanu/xorp/xorp/libxorp/callback-gen.py -b 6 -l 13 
+ *      /home/puma/u0/hodson/src/xorp/libxorp/callback-gen.py -b 6 -l 13 
  */
 
 /**
@@ -34,7 +34,7 @@
 #include "config.h"
 #include "libxorp/callback.hh"
 
-static void hello_world() { 
+static void hello_world() {
     cout << "Hello World" << endl;
 }
 
@@ -45,7 +45,7 @@ int main() {
 
     // Create XorpCallback object using callback()
     SimpleCallback cb = callback(hello_world);
-    
+
     // Invoke callback, results in call to hello_world.
     cb->dispatch();
     return 0;
@@ -65,7 +65,7 @@ int main() {
 
 class Foo {
 public:
-    void hello_world() { 
+    void hello_world() {
 	cout << "Foo::Hello World" << endl;
     }
 };
@@ -140,7 +140,7 @@ cb2->dispatch(10) returns 15
  *
 <pre>
 sum(x = 20, y = 5)
-cb2->dispatch(10) returns 25
+cb2->dispatch(20) returns 25
 </pre>
  *
  * for the one bound argument cases.
@@ -169,7 +169,7 @@ XorpCallback1<double, int>::RefPtr
  * arguments and %d dispatch arguments.
  *
  * @sect Ref Pointer Helpers
- * 
+ *
  * Callback objects may be set to NULL, since they use reference pointers
  * to store the objects.  Callbacks may be unset using the ref_ptr::release()
  * method:
