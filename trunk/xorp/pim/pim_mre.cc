@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.9 2003/01/25 00:44:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.10 2003/01/27 22:47:39 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1940,6 +1940,7 @@ PimMre::recompute_stop_vif_rp(uint16_t vif_index)
     reset_assert_tracking_desired_state(vif_index);
     reset_could_assert_state(vif_index);
     // TODO: reset '_asserts_rate_limit'
+    delete_assert_winner_metric(vif_index);
     set_assert_noinfo_state(vif_index);
     
     set_local_receiver_include(vif_index, false);
@@ -1966,6 +1967,7 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
     reset_assert_tracking_desired_state(vif_index);
     reset_could_assert_state(vif_index);
     // TODO: reset '_asserts_rate_limit'
+    delete_assert_winner_metric_wc(vif_index);
     set_assert_noinfo_state(vif_index);
     
     set_local_receiver_include(vif_index, false);
@@ -1993,6 +1995,7 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
     reset_assert_tracking_desired_state(vif_index);
     reset_could_assert_state(vif_index);
     // TODO: reset '_asserts_rate_limit'
+    delete_assert_winner_metric_sg(vif_index);
     set_assert_noinfo_state(vif_index);
     
     set_local_receiver_include(vif_index, false);
@@ -2016,6 +2019,7 @@ PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
     reset_assert_tracking_desired_state(vif_index);
     reset_could_assert_state(vif_index);
     // TODO: reset '_asserts_rate_limit'
+    delete_assert_winner_metric(vif_index);
     set_assert_noinfo_state(vif_index);
     
     set_local_receiver_include(vif_index, false);
