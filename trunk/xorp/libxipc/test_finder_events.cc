@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.7 2003/06/13 19:29:51 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.8 2004/06/10 22:41:07 hodson Exp $"
 
 #include <list>
 #include <vector>
@@ -161,9 +161,10 @@ public:
 	return wi->second.instance_names.size();
     }
 
-    const Watches& watches() const { return _watches; }
+    const Watches& watches() const	{ return _watches; }
 
-    XrlRouter* router() { return &_xrl_router; }
+    XrlRouter* router()			{ return &_xrl_router; }
+    const XrlRouter* router() const	{ return &_xrl_router; }
 
 protected:
     Watches	 _watches;
@@ -239,7 +240,13 @@ public:
     {
 	_feo.router()->finalize();
     }
+
     inline FinderEventObserver& observer()		{ return _feo; }
+
+    bool xrl_router_connected() const	{ return _feo.router()->connected(); }
+    bool xrl_router_ready() const	{ return _feo.router()->ready(); }
+    bool xrl_router_failed() const	{ return _feo.router()->failed(); }
+
 protected:
     FinderEventObserver 	 _feo;
     FinderEventObserverXrlTarget _feoxt;
@@ -279,6 +286,11 @@ private:
 //
 
 static void
+no_op()
+{
+}
+
+static void
 create_observer(EventLoop*		     e,
 		FinderEventObserverPackage** pp,
 		IPv4			     addr,
@@ -304,9 +316,7 @@ assert_observer_ready(FinderEventObserverPackage** pp)
     verbose_log("Checking observer is ready.\n");
     FinderEventObserverPackage* p = *pp;
     XLOG_ASSERT(p != 0);
-    XLOG_ASSERT((p)->observer().router());
-    XLOG_ASSERT((p)->observer().router()->connected());
-    XLOG_ASSERT((p)->observer().router()->ready());
+    XLOG_ASSERT(p->xrl_router_ready());
 }
 
 static void
@@ -417,17 +427,36 @@ assert_xrl_target_count(list<AnXrlTarget*>* store,
     XLOG_ASSERT(n == cnt);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
 //
-// test main
+// Method to dispatch list of callbacks with each dispatch separated
+// by at least a fixed interval (tstep).
 //
+// Rationale: Originally this test just created a list of timers and
+// dispatched them but when the machine is loaded, the timer expiries
+// group together as the process plays catch-up when it gets some CPU
+// cycles.
+//
+static void
+drip_run(EventLoop& e, list<OneoffTimerCallback>& locb)
+{
+    static const uint32_t tstep = 500;
 
-static int
-test_main(IPv4		 finder_addr,
-	  uint16_t	 finder_port,
-	  const uint32_t burst_cnt,
-	  bool		 use_internal_finder)
+    while (locb.empty() == false) {
+	XorpTimer pause = e.new_oneoff_after_ms(tstep, callback(&no_op));
+	while (pause.scheduled()) {
+	    e.run();
+	}
+	locb.front()->dispatch();
+	locb.pop_front();
+    }
+}
+
+
+static void
+test1(IPv4		finder_addr,
+      uint16_t	 	finder_port,
+      const uint32_t	/* burst_cnt */,
+      bool		use_internal_finder)
 {
     EventLoop e;
 
@@ -439,40 +468,56 @@ test_main(IPv4		 finder_addr,
     }
 
     FinderEventObserverPackage* pfeo = 0;
-
     list<AnXrlTarget*> tgt_store;
 
-    uint32_t t0 = 1000;
-
-    static uint32_t tstep = 500;
-
-    vector<XorpTimer> timers;
-
-#define SPACED_EVENT(cb_args...)					\
-	timers.push_back(e.new_oneoff_after_ms(t0, callback(cb_args)));	\
-    	t0 += tstep;
+    // -- End cut-and-paste header --
 
     //
     // Test 1
     //
     // Create observer, clean up observer
     //
+    create_observer(&e, &pfeo, finder_addr, finder_port);
 
-    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
+    while (pfeo->xrl_router_ready() == false &&
+	   pfeo->xrl_router_failed() == false) {
+	e.run();
+    }
 
-    SPACED_EVENT(assert_observer_ready, &pfeo);
+    list<OneoffTimerCallback> locb;
+    locb.push_back(callback(assert_observer_ready, &pfeo));
+    locb.push_back(callback(add_watch_to_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_watching, &pfeo, "class_a"));
+    locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
+    locb.push_back(callback(destroy_observer, &pfeo));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
 
-    SPACED_EVENT(add_watch_to_observer, &pfeo, "class_a");
+    drip_run(e, locb);
 
-    SPACED_EVENT(assert_observer_watching, &pfeo, "class_a");
+    // -- Begin cut-and-paste footer --
+    if (fs) delete fs;
+}
 
-    SPACED_EVENT(remove_watch_from_observer, &pfeo, "class_a");
+static void
+test2(IPv4		finder_addr,
+      uint16_t	 	finder_port,
+      const uint32_t	burst_cnt,
+      bool		use_internal_finder)
+{
+    EventLoop e;
 
-    SPACED_EVENT(assert_observer_not_watching, &pfeo, "class_a");
+    FinderServer* fs = 0;
+    if (use_internal_finder) {
+	fs = new FinderServer(e, finder_port, finder_addr);
+    } else {
+	verbose_log("Using external Finder\n");
+    }
 
-    SPACED_EVENT(destroy_observer, &pfeo);
+    FinderEventObserverPackage* pfeo = 0;
+    list<AnXrlTarget*> tgt_store;
 
-    SPACED_EVENT(assert_xrl_target_count, &tgt_store, 0u);
+    // -- End cut-and-paste header --
 
     //
     // Test 2
@@ -481,41 +526,64 @@ test_main(IPv4		 finder_addr,
     // observables, spawn an observable, clean it up, repeat over,
     // over then clean up observer.
     //
-    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
+    list<OneoffTimerCallback> locb;
 
-    SPACED_EVENT(assert_observer_ready, &pfeo);
-
-    SPACED_EVENT(add_watch_to_observer, &pfeo, "class_a");
-
-    SPACED_EVENT(assert_observer_watching,&pfeo, "class_a");
-
-    for (uint32_t i = 0; i < burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
-		     "class_a", &tgt_store);
-
-	SPACED_EVENT(assert_observer_class_instance_count,
-		     &pfeo, "class_a", 1u);
-
-	SPACED_EVENT(remove_oldest_xrl_target, &tgt_store);
-
-	SPACED_EVENT(assert_observer_class_instance_count,
-		     &pfeo, "class_a", 0u);
+    create_observer(&e, &pfeo, finder_addr, finder_port);
+    while (pfeo->xrl_router_ready() == false &&
+	   pfeo->xrl_router_failed() == false) {
+	e.run();
     }
 
-    SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
-			  "class_b", &tgt_store);
+    locb.push_back(callback(assert_observer_ready, &pfeo));
+    locb.push_back(callback(add_watch_to_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_watching,&pfeo, "class_a"));
 
-    SPACED_EVENT(assert_observer_class_instance_count, &pfeo, "class_b", 0u);
+    for (uint32_t i = 0; i < burst_cnt; i++) {
+	locb.push_back(callback(create_xrl_target, &e,
+				finder_addr, finder_port,
+				"class_a", &tgt_store));
+	locb.push_back(callback(assert_observer_class_instance_count,
+		     &pfeo, "class_a", 1u));
+	locb.push_back(callback(remove_oldest_xrl_target, &tgt_store));
+	locb.push_back(callback(assert_observer_class_instance_count,
+		     &pfeo, "class_a", 0u));
+    }
 
-    SPACED_EVENT(remove_oldest_xrl_target, &tgt_store);
+    locb.push_back(callback(create_xrl_target, &e, finder_addr, finder_port,
+			  "class_b", &tgt_store));
+    locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
+			    "class_b", 0u));
+    locb.push_back(callback(remove_oldest_xrl_target, &tgt_store));
+    locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
+    locb.push_back(callback(destroy_observer, &pfeo));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
 
-    SPACED_EVENT(remove_watch_from_observer, &pfeo, "class_a");
+    drip_run(e, locb);
 
-    SPACED_EVENT(assert_observer_not_watching, &pfeo, "class_a");
+    // -- Begin cut-and-paste footer --
+    if (fs) delete fs;
+}
 
-    SPACED_EVENT(destroy_observer, &pfeo);
+static void
+test3(IPv4		finder_addr,
+      uint16_t	 	finder_port,
+      const uint32_t	burst_cnt,
+      bool		use_internal_finder)
+{
+    EventLoop e;
 
-    SPACED_EVENT(assert_xrl_target_count, &tgt_store, 0u);
+    FinderServer* fs = 0;
+    if (use_internal_finder) {
+	fs = new FinderServer(e, finder_port, finder_addr);
+    } else {
+	verbose_log("Using external Finder\n");
+    }
+
+    FinderEventObserverPackage* pfeo = 0;
+    list<AnXrlTarget*> tgt_store;
+
+    // -- End cut-and-paste header --
 
     //
     // Test 3
@@ -523,38 +591,63 @@ test_main(IPv4		 finder_addr,
     // Start an observer, spawn a group of observables, clean up
     // group of observables, clean up observer.
     //
-    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
+    list<OneoffTimerCallback> locb;
 
-    SPACED_EVENT(assert_observer_ready, &pfeo);
+    create_observer(&e, &pfeo, finder_addr, finder_port);
+    while (pfeo->xrl_router_ready() == false &&
+	   pfeo->xrl_router_failed() == false) {
+	e.run();
+    }
 
-    SPACED_EVENT(add_watch_to_observer, &pfeo, "class_a");
-
-    SPACED_EVENT(assert_observer_watching,&pfeo, "class_a");
+    locb.push_back(callback(assert_observer_ready, &pfeo));
+    locb.push_back(callback(add_watch_to_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_watching, &pfeo, "class_a"));
 
     for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
-		     "class_a", &tgt_store);
-
-	SPACED_EVENT(assert_observer_class_instance_count, &pfeo,
-		     "class_a", i);
+	locb.push_back(callback(create_xrl_target, &e, finder_addr,
+				finder_port, "class_a", &tgt_store));
+	locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
+		     "class_a", i));
     }
 
     for (uint32_t i = 1; i <= burst_cnt ; i++) {
-	SPACED_EVENT(remove_any_xrl_target, &tgt_store);
-
-	SPACED_EVENT(assert_observer_class_instance_count, &pfeo,
-		     "class_a", burst_cnt - i);
+	locb.push_back(callback(remove_any_xrl_target, &tgt_store));
+	locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
+		     "class_a", burst_cnt - i));
     }
-    SPACED_EVENT(assert_observer_class_instance_count, &pfeo, "class_a", 0u);
+    locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
+			    "class_a", 0u));
+    locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
+    locb.push_back(callback(destroy_observer, &pfeo));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
 
-    SPACED_EVENT(remove_watch_from_observer, &pfeo, "class_a");
+    drip_run(e, locb);
 
-    SPACED_EVENT(assert_observer_not_watching, &pfeo, "class_a");
+    // -- Begin cut-and-paste footer --
+    if (fs) delete fs;
+}
 
-    SPACED_EVENT(destroy_observer, &pfeo);
+static void
+test4(IPv4		finder_addr,
+      uint16_t	 	finder_port,
+      const uint32_t	burst_cnt,
+      bool		use_internal_finder)
+{
+    EventLoop e;
 
-    SPACED_EVENT(assert_xrl_target_count, &tgt_store, 0u);
+    FinderServer* fs = 0;
+    if (use_internal_finder) {
+	fs = new FinderServer(e, finder_port, finder_addr);
+    } else {
+	verbose_log("Using external Finder\n");
+    }
 
+    FinderEventObserverPackage* pfeo = 0;
+    list<AnXrlTarget*> tgt_store;
+    // -- End cut-and-paste header --
+
+    list<OneoffTimerCallback> locb;
     //
     // Test 4
     //
@@ -564,51 +657,66 @@ test_main(IPv4		 finder_addr,
     //
 
     for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
-		     "class_a", &tgt_store);
+	locb.push_back(callback(create_xrl_target, &e, finder_addr,
+				finder_port, "class_a", &tgt_store));
     }
 
-    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
+    drip_run(e, locb);
 
-    SPACED_EVENT(assert_observer_ready, &pfeo);
-
-    SPACED_EVENT(add_watch_to_observer, &pfeo, "class_a");
-
-    SPACED_EVENT(assert_observer_watching,&pfeo, "class_a");
-
-    SPACED_EVENT(assert_observer_class_instance_count, &pfeo,
-		 "class_a", burst_cnt);
-
-    SPACED_EVENT(add_watch_to_observer, &pfeo, "class_b");
-
-    SPACED_EVENT(assert_observer_watching,&pfeo, "class_b");
-
-    for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
-		     "class_b", &tgt_store);
-    }
-
-    SPACED_EVENT(assert_observer_class_instance_count, &pfeo,
-		 "class_b", burst_cnt);
-
-    for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(remove_any_xrl_target, &tgt_store);
-    }
-
-    SPACED_EVENT(destroy_observer, &pfeo);
-
-    for (uint32_t i = 1; i <= burst_cnt ; i++) {
-	SPACED_EVENT(remove_any_xrl_target, &tgt_store);
-    }
-    SPACED_EVENT(assert_xrl_target_count, &tgt_store, 0u);
-
-    bool end_flag = false;
-    XorpTimer the_end = e.set_flag_after_ms(t0, &end_flag);
-
-    while (end_flag == false) {
+    create_observer(&e, &pfeo, finder_addr, finder_port);
+    while (pfeo->xrl_router_ready() == false &&
+	   pfeo->xrl_router_failed() == false) {
 	e.run();
     }
+
+    locb.push_back(callback(assert_observer_ready, &pfeo));
+    locb.push_back(callback(add_watch_to_observer, &pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_watching,&pfeo, "class_a"));
+    locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
+		 "class_a", burst_cnt));
+    locb.push_back(callback(add_watch_to_observer, &pfeo, "class_b"));
+    locb.push_back(callback(assert_observer_watching,&pfeo, "class_b"));
+    for (uint32_t i = 1; i <= burst_cnt; i++) {
+	locb.push_back(callback(create_xrl_target, &e, finder_addr,
+				finder_port, "class_b", &tgt_store));
+    }
+
+    locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
+			    "class_b", burst_cnt));
+
+    for (uint32_t i = 1; i <= burst_cnt; i++) {
+	locb.push_back(callback(remove_any_xrl_target, &tgt_store));
+    }
+
+    locb.push_back(callback(destroy_observer, &pfeo));
+
+    for (uint32_t i = 1; i <= burst_cnt ; i++) {
+	locb.push_back(callback(remove_any_xrl_target, &tgt_store));
+    }
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
+
+    drip_run(e, locb);
+
+    // -- Begin cut-and-paste footer --
     if (fs) delete fs;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// test main
+//
+
+static int
+test_main(IPv4		 finder_addr,
+	  uint16_t	 finder_port,
+	  const uint32_t burst_cnt,
+	  bool		 use_internal_finder)
+{
+    test1(finder_addr, finder_port, burst_cnt, use_internal_finder);
+    test2(finder_addr, finder_port, burst_cnt, use_internal_finder);
+    test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
+    test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
+
     return 0;
 }
 
