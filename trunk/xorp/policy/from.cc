@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/policy/from.cc,v 1.1 2003/02/13 00:51:03 mjh Exp $"
 
 #include "from.hh"
+
 
 template <class A>
 PolicyFrom<A>::PolicyFrom<A>()
 {
+    // TODO: implement it
 }
 
 
@@ -26,4 +28,6 @@ template <class A>
 bool 
 PolicyFrom<A>::matches(const PolicyRoute<A>& in_route)
 {
+    // TODO: implement it
+    return false;
 }
