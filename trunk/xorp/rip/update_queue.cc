@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.11 2004/04/04 18:34:53 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.12 2004/06/10 22:41:47 hodson Exp $"
 
 #include <vector>
 #include <list>
@@ -314,8 +314,9 @@ public:
 	XLOG_ASSERT(_readers[id] != 0);
 
 	ReaderPos* rp = _readers[id];
-	debug_msg("Reading from %d %u/%u\n", id, rp->position(),
-		  static_cast<uint32_t>(rp->block()->count()));
+	debug_msg("Reading from %u %u/%u\n",
+		  XORP_UINT_CAST(id), XORP_UINT_CAST(rp->position()),
+		  XORP_UINT_CAST(rp->block()->count()));
 
 	// Reader may have reached end of last block and stopped, but
 	// more data may now have been added.
