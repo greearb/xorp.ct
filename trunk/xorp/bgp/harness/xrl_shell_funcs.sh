@@ -1,12 +1,11 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.9 2002/12/09 10:59:38 pavlin Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 CALLXRL=../../libxipc/call_xrl
 BASE=${BASE:-test_peer} # Set BASE in callers environment.
-
 
 #
 # Command to the coordinator.
@@ -16,11 +15,19 @@ coord()
     echo -n "Coord $* "
     $CALLXRL "finder://coord/coord/0.1/command?command:txt=$*"
 
-    while $CALLXRL "finder://coord/coord/0.1/pending" | grep true > /dev/null
+    # Only try five times for the operation to complete.
+    local i
+    for i in 1 2 3 4 5
     do
-	echo "Checking for pending again"
+	if ! $CALLXRL "finder://coord/coord/0.1/pending" |grep true > /dev/null
+	then
+	    return
+	fi
+	echo "Operation in coordinator still pending try number: $i"
 	sleep 1
     done
+
+    return -1
 }
 
 pending()
