@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.16 2004/02/27 22:07:52 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.17 2004/03/01 19:53:57 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -295,6 +295,11 @@ public:
     inline const PortCounters& counters() const		{ return _counters; }
 
     /**
+     *  Get counters associated with Port.
+     */
+    inline PortCounters& counters()			{ return _counters; }
+
+    /**
      * Get Peer identified by address.
      *
      * @return pointer to Peer on success, 0 otherwise.
@@ -354,11 +359,6 @@ protected:
     void kill_peer_routes();
 
 protected:
-    /**
-     *  Get counters associated with Port.
-     */
-    inline PortCounters& counters()			{ return _counters; }
-
     /**
      * Get Peer identified by address.
      * @return pointer to Peer on success, 0 otherwise.

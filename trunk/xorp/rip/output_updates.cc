@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.5 2004/02/06 00:27:26 hodson Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.6 2004/02/20 01:22:03 hodson Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -75,6 +75,7 @@ OutputUpdates<A>::output_packet()
     } else {
 	_pkt_queue.enqueue_packet(pkt);
 	_port.push_packets();
+	_port.counters().incr_triggered_updates();
 	incr_packets_sent();
     }
 

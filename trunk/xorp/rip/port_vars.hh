@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/port_vars.hh,v 1.2 2004/02/14 00:28:22 hodson Exp $
 
 #ifndef __RIP_PORT_VARS_HH__
 #define __RIP_PORT_VARS_HH__
@@ -25,7 +25,8 @@
 struct PortCounters {
 public:
     PortCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
-		     _tr_sent(0), _tr_recv(), _triggered_updates(0)
+		     _tr_sent(0), _tr_recv(), _triggered_updates(0),
+		     _unsol_updates(0), _nr_req_recv(0)
     {}
 
     /**
@@ -70,6 +71,16 @@ public:
     inline void incr_triggered_updates() 	{ _triggered_updates++; }
 
     /**
+     * Get the number of unsolicited updates sent.
+     */
+    inline uint32_t unsolicited_updates() const	{ return _unsol_updates; }
+
+    /**
+     * Increment the number of unsolicited updates sent.
+     */
+    inline void incr_unsolicited_updates() 	{ _unsol_updates++; }
+
+    /**
      * Get the number of table requests sent.
      */
     inline uint32_t table_requests_sent() const	{ return _tr_sent; }
@@ -89,13 +100,25 @@ public:
      */
     inline void incr_table_requests_recv() 	{ _tr_recv++; }
 
+    /**
+     * Get number of non-RIP request packets received.
+     */
+    inline uint32_t non_rip_requests_recv() const { return _nr_req_recv; }
+
+    /**
+     * Increment the number of non-RIP request packets received.
+     */
+    inline void incr_non_rip_requests_recv() { _nr_req_recv++; }
+
 protected:
     uint32_t _packets_recv;
     uint32_t _bad_routes;
     uint32_t _bad_packets;
-    uint32_t _tr_sent;			// table requests sent
-    uint32_t _tr_recv;			// table requests received
+    uint32_t _tr_sent;
+    uint32_t _tr_recv;
     uint32_t _triggered_updates;
+    uint32_t _unsol_updates;
+    uint32_t _nr_req_recv;
 };
 
 

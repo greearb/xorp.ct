@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.23 2004/02/27 22:07:52 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.24 2004/03/01 19:53:57 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -320,8 +320,10 @@ Port<A>::start_peer_gc_timer()
 {
     XLOG_ASSERT(_peers.empty() == false);
 
+    // Set peer garbage collection timeout to 180 seconds since for RIP
+    // MIB we need to keep track of quiescent peers for this long.
     EventLoop& e = _pm.eventloop();
-    _gc_timer = e.new_periodic(5000,
+    _gc_timer = e.new_periodic(180 * 1000,
 			       callback(this, &Port<A>::peer_gc_timeout));
 }
 
@@ -690,8 +692,6 @@ Port<A>::port_io_receive(const A&	src_address,
     if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	p = peer(src_address);
     } else {
-	// If we're from a non-RIP port and we're not accepting non-RIP
-	// requests discard ASAP.
 	if (accept_non_rip_requests() == false) {
 	    return;
 	}
@@ -773,6 +773,11 @@ Port<A>::port_io_receive(const A&	src_address,
 	parse_response(src_address, src_port, entries, n_entries);
     } else {
 	XLOG_ASSERT(ph->command == RipPacketHeader::REQUEST);
+	if (src_port == RIP_PORT) {
+	    counters().incr_table_requests_recv();
+	} else {
+	    counters().incr_non_rip_requests_recv();
+	}
 	parse_request(src_address, src_port, entries, n_entries);
     }
 }
