@@ -1,0 +1,33 @@
+#
+# $XORP: xorp/README,v 1.2 2002/12/12 00:46:36 hodson Exp $
+#
+
+		XORP RELEASE NOTES
+
+This file contains XORP release notes (most recent releases first).
+
+
+* Release 0.2 (2003/??/??)
+  ALL:
+    - Source code compiles under GCC 3.2.1 and on Mac OS X 10.2.x (GCC 3.1)
+      in addition to GCC 2.95.x and 2.96.
+
+  LIBXIPC:
+    - 
+
+  RTRMGR:
+    -
+
+  BGP:
+    - 
+
+  PIM-SM:
+    - Detailed testing of the basic protocol completed and documented
+      in the XORP PIM-SM Test Suite document.
+    - PIM-SM Bootstrap mechanism reimplemented (not tested in details yet).
+      Note that the Bootstrap-related configuration commands in
+      pim/configure_pim have changed slightly.
+
+* Release 0.1 (2002/12/11)
+  - XORP Release 0.1 source code released.
+  - CVS repository opened to the world.
