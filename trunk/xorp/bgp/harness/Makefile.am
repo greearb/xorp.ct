@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.10 2003/07/30 23:43:27 pavlin Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.11 2003/08/01 02:11:47 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -12,6 +12,7 @@ TESTS		+= test_peering2.sh
 TESTS		+= test_routing1.sh
 TESTS		+= test_rib1.sh
 TESTS		+= test_rib_fea1.sh
+TESTS		+= test_path_attribute1.sh
 TESTS		+= test_terminate.sh
 
 # -- No-install Programs

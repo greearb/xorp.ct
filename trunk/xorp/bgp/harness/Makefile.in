@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_peering1.sh test_peering2.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_terminate.sh
+TESTS = test_peering1.sh test_peering2.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
 
 # -- No-install Programs
 noinst_PROGRAMS = coord test_peer
@@ -172,7 +172,7 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(coord_SOURCES) $(test_peer_SOURCES)
-DIST_COMMON = Makefile.am Makefile.in
+DIST_COMMON = Makefile.am Makefile.in TODO
 SOURCES = $(coord_SOURCES) $(test_peer_SOURCES)
 
 all: all-am
