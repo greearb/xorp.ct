@@ -162,7 +162,7 @@ demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientb
 
 # -- Library Sources
 #libfea_a_SOURCES	+= firewall_iptables.cc
-libfea_a_SOURCES = fea_module.h mfea_module.h addr_table.hh firewall.hh firewall_dummy.hh firewall_ipf.hh firewall_ipfw.hh firewall_iptables.hh fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_addr_table.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh libfeaclient_bridge.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh profile_vars.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_firewall.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_rawsock4.hh xrl_socket_cmds.hh xrl_socket_server.hh xrl_target.hh addr_table.cc firewall.cc firewall_ipf.cc firewall_ipfw.cc fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_netlink.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_netlink.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_netlink.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_netlink.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_addr_table.cc ifconfig_get.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_netlink.cc ifconfig_get_proc_linux.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_netlink.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_nlm.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifconfig_set_netlink.cc ifmanager_transaction.cc iftree.cc libfeaclient_bridge.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc profile_vars.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_firewall.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_rawsock4.cc xrl_socket_cmds.cc xrl_socket_server.cc xrl_target.cc
+libfea_a_SOURCES = fea_module.h mfea_module.h addr_table.hh click_socket.hh firewall.hh firewall_dummy.hh firewall_ipf.hh firewall_ipfw.hh firewall_iptables.hh fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_addr_table.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh libfeaclient_bridge.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh profile_vars.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_firewall.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_rawsock4.hh xrl_socket_cmds.hh xrl_socket_server.hh xrl_target.hh addr_table.cc click_socket.cc firewall.cc firewall_ipf.cc firewall_ipfw.cc fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_netlink.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_netlink.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_netlink.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_netlink.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_addr_table.cc ifconfig_get.cc ifconfig_get_click.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_netlink.cc ifconfig_get_proc_linux.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_netlink.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_nlm.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_click.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifconfig_set_netlink.cc ifmanager_transaction.cc iftree.cc libfeaclient_bridge.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc profile_vars.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_firewall.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_rawsock4.cc xrl_socket_cmds.cc xrl_socket_server.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = DEVNOTES.mfea command_mfea configure_mfea test_xrls.sh xrl_mfea_shell_funcs.sh
@@ -178,10 +178,10 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libfea_a_AR = $(AR) cru
 libfea_a_LIBADD =
-am_libfea_a_OBJECTS = addr_table.$(OBJEXT) firewall.$(OBJEXT) \
-	firewall_ipf.$(OBJEXT) firewall_ipfw.$(OBJEXT) \
-	fti_transaction.$(OBJEXT) fticonfig.$(OBJEXT) \
-	fticonfig_entry_get.$(OBJEXT) \
+am_libfea_a_OBJECTS = addr_table.$(OBJEXT) click_socket.$(OBJEXT) \
+	firewall.$(OBJEXT) firewall_ipf.$(OBJEXT) \
+	firewall_ipfw.$(OBJEXT) fti_transaction.$(OBJEXT) \
+	fticonfig.$(OBJEXT) fticonfig_entry_get.$(OBJEXT) \
 	fticonfig_entry_get_dummy.$(OBJEXT) \
 	fticonfig_entry_get_netlink.$(OBJEXT) \
 	fticonfig_entry_get_rtsock.$(OBJEXT) \
@@ -210,29 +210,30 @@ am_libfea_a_OBJECTS = addr_table.$(OBJEXT) firewall.$(OBJEXT) \
 	fticonfig_table_set_netlink.$(OBJEXT) \
 	fticonfig_table_set_rtsock.$(OBJEXT) ifconfig.$(OBJEXT) \
 	ifconfig_addr_table.$(OBJEXT) ifconfig_get.$(OBJEXT) \
-	ifconfig_get_dummy.$(OBJEXT) ifconfig_get_getifaddrs.$(OBJEXT) \
-	ifconfig_get_ioctl.$(OBJEXT) ifconfig_get_netlink.$(OBJEXT) \
+	ifconfig_get_click.$(OBJEXT) ifconfig_get_dummy.$(OBJEXT) \
+	ifconfig_get_getifaddrs.$(OBJEXT) ifconfig_get_ioctl.$(OBJEXT) \
+	ifconfig_get_netlink.$(OBJEXT) \
 	ifconfig_get_proc_linux.$(OBJEXT) ifconfig_get_sysctl.$(OBJEXT) \
 	ifconfig_observer.$(OBJEXT) ifconfig_observer_dummy.$(OBJEXT) \
 	ifconfig_observer_netlink.$(OBJEXT) \
 	ifconfig_observer_rtsock.$(OBJEXT) \
 	ifconfig_parse_ifaddrs.$(OBJEXT) ifconfig_parse_ifreq.$(OBJEXT) \
 	ifconfig_parse_nlm.$(OBJEXT) ifconfig_parse_rtm.$(OBJEXT) \
-	ifconfig_set.$(OBJEXT) ifconfig_set_dummy.$(OBJEXT) \
-	ifconfig_set_ioctl.$(OBJEXT) ifconfig_set_netlink.$(OBJEXT) \
-	ifmanager_transaction.$(OBJEXT) iftree.$(OBJEXT) \
-	libfeaclient_bridge.$(OBJEXT) mfea_config.$(OBJEXT) \
-	mfea_dataflow.$(OBJEXT) mfea_mrouter.$(OBJEXT) \
-	mfea_node.$(OBJEXT) mfea_node_cli.$(OBJEXT) \
-	mfea_proto_comm.$(OBJEXT) mfea_vif.$(OBJEXT) \
-	netlink_socket.$(OBJEXT) netlink_socket_utils.$(OBJEXT) \
-	profile_vars.$(OBJEXT) rawsock4.$(OBJEXT) \
-	routing_socket.$(OBJEXT) routing_socket_utils.$(OBJEXT) \
-	xrl_firewall.$(OBJEXT) xrl_fti.$(OBJEXT) \
-	xrl_ifmanager.$(OBJEXT) xrl_ifupdate.$(OBJEXT) \
-	xrl_mfea_node.$(OBJEXT) xrl_rawsock4.$(OBJEXT) \
-	xrl_socket_cmds.$(OBJEXT) xrl_socket_server.$(OBJEXT) \
-	xrl_target.$(OBJEXT)
+	ifconfig_set.$(OBJEXT) ifconfig_set_click.$(OBJEXT) \
+	ifconfig_set_dummy.$(OBJEXT) ifconfig_set_ioctl.$(OBJEXT) \
+	ifconfig_set_netlink.$(OBJEXT) ifmanager_transaction.$(OBJEXT) \
+	iftree.$(OBJEXT) libfeaclient_bridge.$(OBJEXT) \
+	mfea_config.$(OBJEXT) mfea_dataflow.$(OBJEXT) \
+	mfea_mrouter.$(OBJEXT) mfea_node.$(OBJEXT) \
+	mfea_node_cli.$(OBJEXT) mfea_proto_comm.$(OBJEXT) \
+	mfea_vif.$(OBJEXT) netlink_socket.$(OBJEXT) \
+	netlink_socket_utils.$(OBJEXT) profile_vars.$(OBJEXT) \
+	rawsock4.$(OBJEXT) routing_socket.$(OBJEXT) \
+	routing_socket_utils.$(OBJEXT) xrl_firewall.$(OBJEXT) \
+	xrl_fti.$(OBJEXT) xrl_ifmanager.$(OBJEXT) \
+	xrl_ifupdate.$(OBJEXT) xrl_mfea_node.$(OBJEXT) \
+	xrl_rawsock4.$(OBJEXT) xrl_socket_cmds.$(OBJEXT) \
+	xrl_socket_server.$(OBJEXT) xrl_target.$(OBJEXT)
 libfea_a_OBJECTS = $(am_libfea_a_OBJECTS)
 bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
 noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT) \
@@ -382,6 +383,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/addr_table.Po \
+@AMDEP_TRUE@	$(DEPDIR)/click_socket.Po \
 @AMDEP_TRUE@	$(DEPDIR)/demo_fea_ifmgr_client.Po $(DEPDIR)/fea.Po \
 @AMDEP_TRUE@	$(DEPDIR)/firewall.Po $(DEPDIR)/firewall_ipf.Po \
 @AMDEP_TRUE@	$(DEPDIR)/firewall_ipfw.Po \
@@ -417,6 +419,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_addr_table.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_get.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_click.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_dummy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_getifaddrs.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_ioctl.Po \
@@ -432,6 +435,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_parse_nlm.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_parse_rtm.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_set.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_set_click.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_set_dummy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_set_ioctl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifconfig_set_netlink.Po \
@@ -559,6 +563,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/addr_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/click_socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/demo_fea_ifmgr_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/firewall.Po@am__quote@
@@ -597,6 +602,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_addr_table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_click.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_getifaddrs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_ioctl.Po@am__quote@
@@ -612,6 +618,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_parse_nlm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_parse_rtm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set_click.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set_dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set_ioctl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set_netlink.Po@am__quote@

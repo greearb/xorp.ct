@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.28 2004/09/01 18:18:31 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.29 2004/09/13 20:37:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -254,6 +254,14 @@ private:
     IfConfigGetNetlink		_ifc_get_netlink;
 
     //
+    // The secondary mechanisms to get interface-related information
+    // from the underlying system.
+    //
+    // XXX: Ordering is not important.
+    //
+    IfConfigGetClick		_ifc_get_click;
+
+    //
     // The primary mechanisms to set interface-related information
     // within the underlying system.
     //
@@ -263,6 +271,14 @@ private:
     IfConfigSetDummy		_ifc_set_dummy;
     IfConfigSetIoctl		_ifc_set_ioctl;
     IfConfigSetNetlink		_ifc_set_netlink;
+
+    //
+    // The secondary mechanisms to get interface-related information
+    // from the underlying system.
+    //
+    // XXX: Ordering is not important.
+    //
+    IfConfigSetClick		_ifc_set_click;
 
     //
     // The primary mechanisms to observe whether the interface-related

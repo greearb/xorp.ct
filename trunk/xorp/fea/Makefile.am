@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.41 2004/10/02 03:42:09 atanu Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.42 2004/10/02 04:09:16 atanu Exp $
 ##
 
 # Redefine the bin installation directory
@@ -166,6 +166,7 @@ demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 libfea_a_SOURCES	 = fea_module.h
 libfea_a_SOURCES	+= mfea_module.h
 libfea_a_SOURCES	+= addr_table.hh
+libfea_a_SOURCES	+= click_socket.hh
 libfea_a_SOURCES	+= firewall.hh
 libfea_a_SOURCES	+= firewall_dummy.hh
 libfea_a_SOURCES	+= firewall_ipf.hh
@@ -216,6 +217,7 @@ libfea_a_SOURCES	+= xrl_socket_server.hh
 libfea_a_SOURCES	+= xrl_target.hh
 
 libfea_a_SOURCES	+= addr_table.cc
+libfea_a_SOURCES	+= click_socket.cc
 libfea_a_SOURCES	+= firewall.cc
 libfea_a_SOURCES	+= firewall_ipf.cc
 libfea_a_SOURCES	+= firewall_ipfw.cc
@@ -253,6 +255,7 @@ libfea_a_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_a_SOURCES	+= ifconfig.cc
 libfea_a_SOURCES	+= ifconfig_addr_table.cc
 libfea_a_SOURCES	+= ifconfig_get.cc
+libfea_a_SOURCES	+= ifconfig_get_click.cc
 libfea_a_SOURCES	+= ifconfig_get_dummy.cc
 libfea_a_SOURCES	+= ifconfig_get_getifaddrs.cc
 libfea_a_SOURCES	+= ifconfig_get_ioctl.cc
@@ -268,6 +271,7 @@ libfea_a_SOURCES	+= ifconfig_parse_ifreq.cc
 libfea_a_SOURCES	+= ifconfig_parse_nlm.cc
 libfea_a_SOURCES	+= ifconfig_parse_rtm.cc
 libfea_a_SOURCES	+= ifconfig_set.cc
+libfea_a_SOURCES	+= ifconfig_set_click.cc
 libfea_a_SOURCES	+= ifconfig_set_dummy.cc
 libfea_a_SOURCES	+= ifconfig_set_ioctl.cc
 libfea_a_SOURCES	+= ifconfig_set_netlink.cc

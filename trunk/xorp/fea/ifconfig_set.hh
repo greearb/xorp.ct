@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.18 2004/09/15 18:47:26 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.19 2004/10/21 00:27:32 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -482,6 +482,83 @@ private:
 				   string& errmsg);
 
     NetlinkSocketReader	_ns_reader;
+};
+
+class IfConfigSetClick : public IfConfigSet,
+			 public ClickSocket {
+public:
+    IfConfigSetClick(IfConfig& ifc);
+    virtual ~IfConfigSetClick();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+private:
+    virtual int config_begin(string& errmsg);
+    virtual int config_end(string& errmsg);
+    virtual int add_interface(const string& ifname,
+			      uint16_t if_index,
+			      string& errmsg);
+    virtual int add_vif(const string& vifname,
+			const string& vifname,
+			uint16_t if_index,
+			string& errmsg);
+    virtual int config_interface(const string& ifname,
+				 uint16_t if_index,
+				 uint32_t flags,
+				 bool is_up,
+				 bool is_deleted,
+				 string& errmsg);
+    virtual int config_vif(const string& ifname,
+			   const string& vifname,
+			   uint16_t if_index,
+			   uint32_t flags,
+			   bool is_up,
+			   bool is_deleted,
+			   bool broadcast,
+			   bool loopback,
+			   bool point_to_point,
+			   bool multicast,
+			   string& errmsg);
+    virtual int set_interface_mac_address(const string& ifname,
+					  uint16_t if_index,
+					  const struct ether_addr& ether_addr,
+					  string& errmsg);
+    virtual int set_interface_mtu(const string& ifname,
+				  uint16_t if_index,
+				  uint32_t mtu,
+				  string& errmsg);
+    virtual int add_vif_address(const string& ifname,
+				const string& vifname,
+				uint16_t if_index,
+				bool is_broadcast,
+				bool is_p2p,
+				const IPvX& addr,
+				const IPvX& dst_or_bcast,
+				uint32_t prefix_len,
+				string& errmsg);
+    virtual int delete_vif_address(const string& ifname,
+				   const string& vifname,
+				   uint16_t if_index,
+				   const IPvX& addr,
+				   uint32_t prefix_len,
+				   string& errmsg);
+
+    virtual string generate_config();
+
+    ClickSocketReader	_cs_reader;
+    IfTree		_iftree;
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

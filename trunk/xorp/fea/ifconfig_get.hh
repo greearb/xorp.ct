@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.14 2004/09/01 18:22:37 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.15 2004/10/21 00:27:32 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -21,6 +21,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
 
+#include "click_socket.hh"
 #include "netlink_socket.hh"
 
 class IfConfig;
@@ -330,6 +331,40 @@ private:
     bool read_config(IfTree& it);
 
     NetlinkSocketReader	_ns_reader;
+};
+
+class IfConfigGetClick : public IfConfigGet,
+			 public ClickSocket {
+public:
+    IfConfigGetClick(IfConfig& ifc);
+    virtual ~IfConfigGetClick();
+    
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
+    virtual bool pull_config(IfTree& config);
+    
+private:
+    bool read_config(IfTree& it);
+
+    ClickSocketReader	_cs_reader;
 };
 
 #endif // __FEA_IFCONFIG_GET_HH__
