@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/fea/TODO,v 1.3 2003/05/10 00:06:38 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.4 2003/05/14 09:37:55 pavlin Exp $
 #
+
+* Make sure that the XrlMfeaVifManager works for IPv6 as well.
+  Also, apply the fixes to the RIB as well!!
 
 * Do we need file test_ifconfig_rtsock.cc ??
 
