@@ -755,3 +755,21 @@ LinkStateRequestPacket::str() const
 
     return output;
 }
+
+/* Link State Update Packet */
+
+Packet *
+LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
+{
+    
+}
+
+bool
+LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
+{
+}
+
+string
+LinkStateUpdatePacket::str() const
+{
+
