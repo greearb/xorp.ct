@@ -170,11 +170,12 @@ main(int argc, char * const argv[])
     uint32_t exec_secs;
     uint16_t port;
 
-    argv0 = argv[0];
-    pre_block_secs = 0;
-    block_secs = 0;
+    argv0 	    = argv[0];
+    pre_block_secs  = 0;
+    block_secs 	    = 0;
     post_block_secs = 0;
-    exec_secs = 0;
+    exec_secs 	    = 0;
+    port 	    = FINDER_DEFAULT_PORT;
 
     int ch;
     while ((ch = getopt(argc, argv, "b:hp:vx:")) != -1) {
@@ -204,8 +205,6 @@ main(int argc, char * const argv[])
 	usage(argv0);
     } else if (argc == 1) {
 	port = strtoul(argv[0], 0, 10);
-    } else {
-	port = FINDER_DEFAULT_PORT;
     }
 
     if (exec_secs < pre_block_secs + block_secs) {
