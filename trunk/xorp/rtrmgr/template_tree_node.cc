@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.11 2003/12/02 09:38:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.12 2003/12/19 20:30:20 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -78,6 +78,7 @@ TemplateTreeNode::add_child(TemplateTreeNode* child)
 
 void
 TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
+    throw (ParseError)
 {
     Command* command;
     map<string, Command*>::iterator iter;
