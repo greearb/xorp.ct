@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.41 2003/09/17 03:36:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.42 2003/09/18 04:36:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -740,7 +740,7 @@ Peer::assertX(const string& line, const vector<string>& words)
 
 void
 mrtd_traffic_dump(const uint8_t *buf, const size_t len , const TimeVal tv,
-	  const string fname)
+		  const string fname)
 {
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
@@ -771,8 +771,7 @@ mrtd_traffic_dump(const uint8_t *buf, const size_t len , const TimeVal tv,
 template <class A>
 void
 mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
-		     const TimeVal tv, const string fname, 
-		     const int sequence)
+		   const TimeVal tv, const string fname, const int sequence)
 {
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
@@ -797,7 +796,7 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     uint8_t viewbuf[18 + A::addr_size()], *ptr;
 
     mrt_header header;
-    header.time = htonl(tv.sec());
+    header.time = /*htonl(tv.sec())*/0;
     header.type = htons(12);
     if(4 == A::ip_version())
 	header.subtype = htons(1);
@@ -835,7 +834,7 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     ptr += 1;
 
     // Uptime
-    *reinterpret_cast<uint32_t *>(ptr) = 0;
+    *reinterpret_cast<uint32_t *>(ptr) = htonl(tv.sec());
     ptr += 4;
 
     // Peer address
