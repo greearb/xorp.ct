@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.12 2003/11/20 06:05:05 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.13 2003/11/21 19:35:55 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -50,6 +50,8 @@ public:
     void commit_pass2_done(bool success, string errmsg);
 
     bool commit_in_progress() const { return _commit_in_progress; }
+    bool config_failed() const { return _config_failed; }
+    const string& config_failed_msg() const { return _config_failed_msg; }
     bool check_commit_status(string& response);
     string discard_changes();
     string mark_subtree_for_deletion(const list<string>& path_segments, 
@@ -85,6 +87,8 @@ private:
     TaskManager		_task_manager;
     CallBack		_commit_cb;
     bool		_commit_in_progress;
+    bool		_config_failed;
+    string		_config_failed_msg;
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_HH__

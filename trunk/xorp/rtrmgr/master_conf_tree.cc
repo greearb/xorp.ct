@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.23 2003/11/21 19:35:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.24 2003/12/02 09:38:55 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -45,7 +45,8 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
 				   bool global_do_exec)
     : ConfigTree(tt),
       _task_manager(*this, mmgr, xclient, global_do_exec),
-      _commit_in_progress(false)
+      _commit_in_progress(false),
+      _config_failed(false)
 {
     string configuration;
     string errmsg;
@@ -148,18 +149,24 @@ MasterConfigTree::config_done(bool success, string errmsg)
     else
 	printf("fail: %s\n", errmsg.c_str());
 
+    _config_failed = !success;
+
     if (!success) {
 	string msg = "Startup failed (" + errmsg + ")\n";
 	XLOG_ERROR(msg.c_str());
 	fprintf(stderr, msg.c_str());
-	xorp_throw0(InitError);
+	_config_failed = true;
+	_config_failed_msg = errmsg;
+	return;
     }
 
     string errmsg2;
     if (check_commit_status(errmsg2) == false) {
 	XLOG_ERROR(errmsg2.c_str());
 	fprintf(stderr, errmsg2.c_str());
-	xorp_throw0(InitError);
+	_config_failed = true;
+	_config_failed_msg = errmsg2;
+	return;
     }
     printf("MasterConfigTree::config_done returning\n");
 }
