@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/harness/args.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/args.sh,v 1.2 2003/08/02 00:40:01 atanu Exp $
 #
 
 #
@@ -19,7 +19,7 @@ RESTART="yes"
 # -a (All) Run all the tests including the ones that trigger bugs.
 # -b (Bugs) Run only the tests that trigger bugs.
 # -c (Configure) In (Single) mode BGP and the RIB are not configured. 
-#                Force configuation.
+#                Force configuration.
 # -l (Leave) Leave the ancillary programs running between tests.
 
 while getopts "qvsbt:abcl" args
