@@ -44,15 +44,36 @@ struct OspfTypes {
     typedef IPv4 AreaID;
 
     /**
+     * Link Type
+     */
+    enum LinkType {
+	BROADCAST,
+	NBMA,
+	PointToMultiPoint,
+	VirtualLink
+    };
+
+    /**
      * Authentication type: OSPF V2 standard header.
      */
     typedef uint16_t AuType;
+
+    /**
+     * Area Type
+     */
+    enum AreaType {
+	BORDER,		// Area Border Router
+	STUB,		// Stub Area
+	NSSA,		// Not-So-Stubby Area
+    };
 };
 
 #include "io.hh"
 #include "exceptions.hh"
 #include "lsa.hh"
 #include "packet.hh"
+#include "transmit.hh"
+#include "peer.hh"
 #include "peer_manager.hh"
 #include "ls_database_manager.hh"
 
@@ -75,9 +96,7 @@ class Ospf {
      * The callback method that is called when data arrives on the IO
      * interface.
      */
-    void receive(const char* interface, const char *vif,
-		 const char *src,
-		 const char *dst,
+    void receive(const string& interface, const string& vif,
 		 uint8_t* data, uint32_t len);
 
     /**

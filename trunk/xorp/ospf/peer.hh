@@ -18,6 +18,10 @@
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
 
+#include <queue>
+
+template <typename A> class Ospf;
+
 /**
  * In OSPF terms this class represents an interface/link; interface is
  * too overloaded a term. The Peer class is also associated with an area. In
@@ -34,16 +38,12 @@
 template <typename A>
 class Peer {
  public:
-    enum LinkType {
-	BROADCAST,
-	NBMA,
-	PointToMultiPoint,
-	VirtualLink
-    };
 
-    Peer(Ospf<A>& ospf, LinkType linktype, Area area)
-	: _ospf(ospf), _linktype(linktype), _area(area)
-    {}
+    Peer(Ospf<A>& ospf, OspfTypes::LinkType linktype, OspfTypes::AreaID area)
+	: _ospf(ospf), _linktype(linktype)
+    {
+	_area.push_back(area);
+    }
 
     /**
      * True if:
@@ -65,9 +65,9 @@ class Peer {
     bool received(/* XXX */);
 
  private:
-    Ospf<A>& _ospf;		// Reference to the controlling class.
-    LinkType _linktype;		// Type of this link.
-    Area _area;			// Area: That is represented.
+    Ospf<A>& _ospf;			// Reference to the controlling class.
+    OspfTypes::LinkType _linktype;	// Type of this link.
+    list<OspfTypes::AreaID> _area;	// Area: That is represented.
 
     // In order to maintain the requirement for an interpacket gap,
     // all outgoing packets are appended to this queue. Then they are
