@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.11 2003/11/06 03:00:31 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.12 2004/06/10 22:41:10 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -465,7 +465,7 @@ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
 const string
 XrlAtom::value() const
 {
-    static char tmp[32];
+    char tmp[32];
     tmp[0] = '\0';
 
     switch (_type) {
