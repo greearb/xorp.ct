@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.5 2003/04/18 19:57:04 mjh Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.6 2003/04/22 19:20:18 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -112,13 +112,24 @@ public:
     */
     bool delete_static_route(const IPNet<IPv4>& nlri);
     EventLoop& eventloop() {return _eventloop;}
+
+    /*
+    ** Indicate to the RIB IPC handler that the Xrl interface to the
+    ** RIB has suffered a fatal error 
+    */
+    void fatal_error(const string& reason);
+    bool status(string& reason) const;
 private:
+    bool unregister_rib();
+
     string _ribname;
     XrlStdRouter *_xrl_router;
     EventLoop& _eventloop;
 
     bool _ibgp; //did the current update message originate in IBGP?
-    bool unregister_rib();
+
+    bool _interface_failed; //we've seen a fatal error
+    string _failure_reason;
 
     XrlQueue<IPv4> _v4_queue;
     XrlQueue<IPv6> _v6_queue;

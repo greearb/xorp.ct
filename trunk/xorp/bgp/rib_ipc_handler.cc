@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.11 2003/04/18 19:57:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.12 2003/04/22 19:20:18 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,6 +29,7 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop)
     : PeerHandler("RIBIpcHandler", NULL, NULL), 
     _ribname(""),
     _xrl_router(xrl_router), _eventloop(eventloop),
+    _interface_failed(false),
     _v4_queue(this, xrl_router),
     _v6_queue(this, xrl_router)
 {
@@ -322,6 +323,24 @@ RibIpcHandler::delete_static_route(const IPNet<IPv4>& nlri)
     return true;
 }
 
+void 
+RibIpcHandler::fatal_error(const string& reason)
+{
+    _interface_failed = true;
+    _failure_reason = reason;
+}
+
+bool 
+RibIpcHandler::status(string& reason) const
+{
+    if (_interface_failed) {
+	reason = _failure_reason;
+	return false;
+    } else {
+	return true;
+    }
+}
+
 template<class A>
 XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
 		      XrlStdRouter *xrl_router) 
@@ -473,30 +492,35 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 	_previously_succeeded = true;
 	_xrl_queue.pop();
 	sendit();
-    } else if (error == XrlError::SEND_FAILED()) {
+    } else if (error == XrlError::SEND_FAILED()
+	       || error == XrlError::NO_FINDER()
+	       || error == XrlError::NO_SUCH_METHOD()
+	       || (error == XrlError::RESOLVE_FAILED() 
+		   && _previously_succeeded)) {
+	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
+	XLOG_ERROR("Interface is now permanently disabled\n");
+	//This is fatal for this interface.  Cause the interface to
+	//fail permanently, and await notification from the finder
+	//that the RIB has really gone down.
+	_interface_failed = true;
+	_rib_ipc_handler
+	    ->fatal_error("Fatal error talking to RIB: " + string(comment) 
+			  + " " + error.str());
+    } else if (error == XrlError::RESOLVE_FAILED() && !_previously_succeeded) {
+	//give the other end time to get started.  we shouldn't
+	//really need to do this if we're started from rtrmgr, but
+	//it doesn't do any harm, and makes us more robust.
 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
 	_errors++;
 	_synchronous_mode = true;
 	delayed_send(1000);
-    } else if (error == XrlError::RESOLVE_FAILED()
-	       || error == XrlError::NO_FINDER()) {
-	if (_previously_succeeded) {
-	    //This is fatal for this interface.
-	    _errors = MAX_ERR_RETRIES;
-	} else {
-	    //give the other end time to get started.  we shouldn't
-	    //really need to do this if we're started from rtrmgr, but
-	    //it doesn't do any harm, and makes us more robust.
-	    XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-	    _errors++;
-	    _synchronous_mode = true;
-	    delayed_send(1000);
-	}
     } else {
+	//XXX need to handle other errors correctly
 	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
 	//XXX to be replaced with exit in production code
 	abort();
     }
+
     if (_errors >= MAX_ERR_RETRIES) {
 	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
 	XLOG_ERROR("Interface is now permanently disabled\n");
@@ -504,6 +528,8 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 	//fail permanently, and await notification from the finder
 	//that the RIB has really gone down.
 	_interface_failed = true;
+	_rib_ipc_handler
+	    ->fatal_error("Too many retrys attempting to talk to RIB");
 
 	//Clean up the queue - we can no longer handle these requests.
 	while (!_xrl_queue.empty()) {

@@ -12,10 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.11 2003/03/10 23:19:59 hodson Exp $
+// $XORP: xorp/bgp/main.hh,v 1.12 2003/04/22 19:20:16 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
+
+#include "libxorp/eventloop.hh"
+#include "libxorp/status_codes.h"
+#include "libxipc/xrl_std_router.hh"
 
 #include "socket.hh"
 #include "packet.hh"
@@ -24,8 +28,6 @@
 #include "peer_list.hh"
 #include "plumbing.hh"
 #include "iptuple.hh"
-#include "libxipc/xrl_std_router.hh"
-#include "libxorp/eventloop.hh"
 #include "path_attribute.hh"
 #include "peer_handler.hh"
 
@@ -35,6 +37,11 @@ class BGPMain {
 public:
     BGPMain();
     ~BGPMain();
+
+    /**
+     * Get the process status
+     */
+    ProcessStatus status(string& reason);
 
     /**
      * Set the local configuration.
