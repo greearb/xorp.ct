@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.1 2003/01/23 11:14:23 pavlin Exp $
 #
 
 #
@@ -47,7 +47,7 @@ cli_stop_cli()
 cli_add_enable_cli_access_from_subnet4()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_add_enable_cli_access_from_subnet4 <subnet_addr>"
+	echo "Usage: cli_add_enable_cli_access_from_subnet4 <subnet_addr:ipv4net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -61,7 +61,7 @@ cli_add_enable_cli_access_from_subnet4()
 cli_add_enable_cli_access_from_subnet6()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_add_enable_cli_access_from_subnet6 <subnet_addr>"
+	echo "Usage: cli_add_enable_cli_access_from_subnet6 <subnet_addr:ipv6net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -75,7 +75,7 @@ cli_add_enable_cli_access_from_subnet6()
 cli_delete_enable_cli_access_from_subnet4()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_delete_enable_cli_access_from_subnet4 <subnet_addr>"
+	echo "Usage: cli_delete_enable_cli_access_from_subnet4 <subnet_addr:ipv4net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -89,7 +89,7 @@ cli_delete_enable_cli_access_from_subnet4()
 cli_delete_enable_cli_access_from_subnet6()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_delete_enable_cli_access_from_subnet6 <subnet_addr>"
+	echo "Usage: cli_delete_enable_cli_access_from_subnet6 <subnet_addr:ipv6net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -103,7 +103,7 @@ cli_delete_enable_cli_access_from_subnet6()
 cli_add_disable_cli_access_from_subnet4()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_add_disable_cli_access_from_subnet4 <subnet_addr>"
+	echo "Usage: cli_add_disable_cli_access_from_subnet4 <subnet_addr:ipv4net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -117,7 +117,7 @@ cli_add_disable_cli_access_from_subnet4()
 cli_add_disable_cli_access_from_subnet6()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_add_disable_cli_access_from_subnet6 <subnet_addr>"
+	echo "Usage: cli_add_disable_cli_access_from_subnet6 <subnet_addr:ipv6net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -131,7 +131,7 @@ cli_add_disable_cli_access_from_subnet6()
 cli_delete_disable_cli_access_from_subnet4()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_delete_disable_cli_access_from_subnet4 <subnet_addr>"
+	echo "Usage: cli_delete_disable_cli_access_from_subnet4 <subnet_addr:ipv4net>"
 	exit 1
     fi
     subnet_addr=$1
@@ -145,7 +145,7 @@ cli_delete_disable_cli_access_from_subnet4()
 cli_delete_disable_cli_access_from_subnet6()
 {
     if [ $# -lt 1 ] ; then
-	echo "Usage: cli_delete_disable_cli_access_from_subnet6 <subnet_addr>"
+	echo "Usage: cli_delete_disable_cli_access_from_subnet6 <subnet_addr:ipv6net>"
 	exit 1
     fi
     subnet_addr=$1
