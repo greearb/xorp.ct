@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.12 2004/02/24 21:02:00 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.13 2004/02/25 02:38:40 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -78,16 +78,18 @@ public:
     /**
      *  Start MLD/IGMP on a single virtual interface.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start();
+    int		start(string& error_msg);
     
     /**
      *  Stop MLD/IGMP on a single virtual interface.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop();
+    int		stop(string& error_msg);
 
     /**
      * Receive a protocol message.
@@ -145,9 +147,10 @@ public:
      * The primary address should be a link-local unicast address, and
      * is used for transmitting the multicast control packets on the LAN.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		update_primary_address();
+    int		update_primary_address(string& error_msg);
     
     /**
      * Get the MLD/IGMP querier address.

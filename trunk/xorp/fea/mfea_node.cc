@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.21 2003/12/10 22:13:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.22 2004/02/29 22:57:01 pavlin Exp $"
 
 
 //
@@ -529,9 +529,9 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (mfea_vif->start() != XORP_OK) {
-	error_msg = c_format("Cannot start vif %s: internal error",
-			     vif_name.c_str());
+    if (mfea_vif->start(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot start vif %s: %s",
+			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -561,9 +561,9 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (mfea_vif->stop() != XORP_OK) {
-	error_msg = c_format("Cannot stop vif %s: internal error",
-			     vif_name.c_str());
+    if (mfea_vif->stop(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot stop vif %s: %s",
+			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -587,13 +587,18 @@ MfeaNode::start_all_vifs()
 {
     int n = 0;
     vector<MfeaVif *>::iterator iter;
+    string error_msg;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	if (mfea_vif->start() == XORP_OK)
+	if (mfea_vif->start(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot start vif %s: %s",
+		       mfea_vif->name().c_str(), error_msg.c_str());
+	} else {
 	    n++;
+	}
     }
     
     return (n);
@@ -613,13 +618,18 @@ MfeaNode::stop_all_vifs()
 {
     int n = 0;
     vector<MfeaVif *>::iterator iter;
+    string error_msg;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	MfeaVif *mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	if (mfea_vif->stop() == XORP_OK)
+	if (mfea_vif->stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot stop vif %s: %s",
+		       mfea_vif->name().c_str(), error_msg.c_str());
+	} else {
 	    n++;
+	}
     }
     
     return (n);

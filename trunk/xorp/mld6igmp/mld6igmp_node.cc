@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.20 2004/02/25 02:42:47 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.21 2004/02/29 22:58:01 pavlin Exp $"
 
 
 //
@@ -578,11 +578,13 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
     // Update the primary address
     // If the vif has no more primary address, then stop it.
     //
-    mld6igmp_vif->update_primary_address();
+    mld6igmp_vif->update_primary_address(error_msg);
     if (mld6igmp_vif->is_up()) {
 	// Check the primary address
 	if (mld6igmp_vif->primary_addr() == IPvX::ZERO(family())) {
-	    mld6igmp_vif->stop();
+	    XLOG_ERROR("Cannot update primary address: %s",
+		       error_msg.c_str());
+	    mld6igmp_vif->stop(error_msg);
 	}
     }
 
@@ -663,9 +665,9 @@ Mld6igmpNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->start() != XORP_OK) {
-	error_msg = c_format("Cannot start vif %s: internal error",
-			     vif_name.c_str());
+    if (mld6igmp_vif->start(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot start vif %s: %s",
+			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -695,9 +697,9 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->stop() != XORP_OK) {
-	error_msg = c_format("Cannot stop vif %s: internal error",
-			     vif_name.c_str());
+    if (mld6igmp_vif->stop(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot stop vif %s: %s",
+			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -721,13 +723,18 @@ Mld6igmpNode::start_all_vifs()
 {
     int n = 0;
     vector<Mld6igmpVif *>::iterator iter;
+    string error_msg;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	if (mld6igmp_vif->start() == XORP_OK)
+	if (mld6igmp_vif->start(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot start vif %s: %s",
+		       mld6igmp_vif->name().c_str(), error_msg.c_str());
+	} else {
 	    n++;
+	}
     }
     
     return (n);
@@ -747,13 +754,18 @@ Mld6igmpNode::stop_all_vifs()
 {
     int n = 0;
     vector<Mld6igmpVif *>::iterator iter;
+    string error_msg;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	if (mld6igmp_vif->stop() == XORP_OK)
+	if (mld6igmp_vif->stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot stop vif %s: %s",
+		       mld6igmp_vif->name().c_str(), error_msg.c_str());
+	} else {
 	    n++;
+	}
     }
     
     return (n);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.21 2004/02/25 02:38:40 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.22 2004/02/29 22:58:01 pavlin Exp $"
 
 
 //
@@ -91,7 +91,9 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
  **/
 Mld6igmpVif::~Mld6igmpVif()
 {
-    stop();
+    string error_msg;
+
+    stop(error_msg);
     
     // Remove all members entries
     list<MemberQuery *>::iterator iter;
@@ -159,30 +161,34 @@ Mld6igmpVif::proto_is_ssm() const
 
 /**
  * Mld6igmpVif::start:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Start MLD or IGMP on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::start()
+Mld6igmpVif::start(string& error_msg)
 {
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (! is_underlying_vif_up())
+    if (! is_underlying_vif_up()) {
+	error_msg = "underlying vif is not UP";
 	return (XORP_ERROR);
-    if (is_loopback())
+    }
+    if (! (is_multicast_capable() && (! is_loopback()))) {
+	error_msg = "the interface is not multicast capable";
 	return (XORP_ERROR);
-    if (! is_multicast_capable())
+    }
+
+    if (update_primary_address(error_msg) < 0)
 	return (XORP_ERROR);
 
-    if (update_primary_address() < 0)
+    if (ProtoUnit::start() < 0) {
+	error_msg = "internal error";
 	return (XORP_ERROR);
-
-    if (ProtoUnit::start() < 0)
-	return (XORP_ERROR);
+    }
 
     // On startup, assume I am the MLD6IGMP Querier
     _querier_addr = primary_addr();
@@ -192,8 +198,8 @@ Mld6igmpVif::start()
     // Start the vif with the kernel
     //
     if (mld6igmp_node().start_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	XLOG_ERROR("Error starting protocol vif %s with the kernel",
-		   name().c_str());
+	error_msg = c_format("cannot start protocol vif %s with the kernel",
+			     name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -206,13 +212,13 @@ Mld6igmpVif::start()
     const IPvX group1 = IPvX::MULTICAST_ALL_SYSTEMS(family());
     const IPvX group2 = IPvX::MULTICAST_ALL_ROUTERS(family());
     if (mld6igmp_node().join_multicast_group(vif_index(), group1) != XORP_OK) {
-	XLOG_ERROR("Error joining group %s on vif %s",
-		   cstring(group1), name().c_str());
+	error_msg = c_format("cannot join group %s on vif %s",
+			     cstring(group1), name().c_str());
 	return (XORP_ERROR);
     }
     if (mld6igmp_node().join_multicast_group(vif_index(), group2) != XORP_OK) {
-	XLOG_ERROR("Error joining group %s on vif %s",
-		   cstring(group2), name().c_str());
+	error_msg = c_format("cannot join group %s on vif %s",
+			     cstring(group2), name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -253,39 +259,45 @@ Mld6igmpVif::start()
 
 /**
  * Mld6igmpVif::stop:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Stop MLD or IGMP on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::stop()
+Mld6igmpVif::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
     if (is_down())
 	return (XORP_OK);
 
-    if (! (is_up() || is_pending_up() || is_pending_down()))
+    if (! (is_up() || is_pending_up() || is_pending_down())) {
+	error_msg = "the vif state is not UP or PENDING_UP or PENDING_DOWN";
 	return (XORP_ERROR);
+    }
     
     //
     // Leave the appropriate multicast groups: ALL-SYSTEMS and ALL-ROUTERS
     //
     const IPvX group1 = IPvX::MULTICAST_ALL_SYSTEMS(family());
     const IPvX group2 = IPvX::MULTICAST_ALL_ROUTERS(family());
-    if (mld6igmp_node().leave_multicast_group(vif_index(), group1) != XORP_OK) {
+    if (mld6igmp_node().leave_multicast_group(vif_index(), group1)
+	!= XORP_OK) {
 	XLOG_ERROR("Error leaving group %s on vif %s",
 		   cstring(group1), name().c_str());
     }
-    if (mld6igmp_node().leave_multicast_group(vif_index(), group2) != XORP_OK) {
+    if (mld6igmp_node().leave_multicast_group(vif_index(), group2)
+	!= XORP_OK) {
 	XLOG_ERROR("Error leaving group %s on vif %s",
 		   cstring(group2), name().c_str());
     }
     
-    if (ProtoUnit::stop() < 0)
+    if (ProtoUnit::stop() < 0) {
+	error_msg = "internal error";
 	ret_value = XORP_ERROR;
+    }
     
     _proto_flags &= ~MLD6IGMP_VIF_QUERIER;
     _querier_addr = IPvX(family());			// XXX: ANY
@@ -308,8 +320,8 @@ Mld6igmpVif::stop()
     // Stop the vif with the kernel
     //
     if (mld6igmp_node().stop_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	XLOG_ERROR("Error stopping protocol vif %s with the kernel",
-		   name().c_str());
+	error_msg = c_format("cannot stop protocol vif %s with the kernel",
+			     name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -467,7 +479,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 
 /**
  * Mld6igmpVif::update_primary_address:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Update the primary address.
  * 
@@ -477,7 +489,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::update_primary_address()
+Mld6igmpVif::update_primary_address(string& error_msg)
 {
     IPvX primary_a(IPvX::ZERO(family()));
     IPvX domain_wide_a(IPvX::ZERO(family()));
@@ -510,8 +522,10 @@ Mld6igmpVif::update_primary_address()
     // Check that the interface has a primary address.
     // addresses.
     //
-    if (primary_a == IPvX::ZERO(family()))
+    if (primary_a == IPvX::ZERO(family())) {
+	error_msg = "invalid primary address";
 	return (XORP_ERROR);
+    }
     
     set_primary_addr(primary_a);
     
