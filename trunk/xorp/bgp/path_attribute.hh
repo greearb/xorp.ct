@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.24 2003/09/05 00:39:13 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.25 2003/09/05 01:02:25 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -424,9 +424,9 @@ public:
     string str() const;
 
     const A& nexthop() const		{ return _nexthop; }
-    void set_nexthop(const A& nexthop)	{ _nexthop = nexthop; }
+    void set_nexthop(const A& nexthop)	{ _nexthop = nexthop; encode(); }
 
-    void add_nlri(const IPNet<A>& nlri) {_nlri.push_back(nlri); }
+    void add_nlri(const IPNet<A>& nlri) {_nlri.push_back(nlri);encode(); }
     const list<IPNet<A> >& nlri_list() const { return _nlri;}
 
     // IPv6 specific
@@ -464,7 +464,8 @@ public:
 
     string str() const;
 
-    void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.push_back(nlri); }
+    void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.push_back(nlri);
+    encode();}
     const list<IPNet<A> >& wr_list() const { return _withdrawn;}
 
     void encode();

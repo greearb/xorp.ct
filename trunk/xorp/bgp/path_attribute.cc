@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.36 2003/09/11 08:10:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.37 2003/09/19 03:09:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -563,8 +563,17 @@ template <class A>
 PathAttribute *
 MPReachNLRIAttribute<A>::clone() const
 {
-    // Cheat go through the wire format to make the copy.
-    return new MPReachNLRIAttribute(data());
+    MPReachNLRIAttribute<A> *mp = new MPReachNLRIAttribute();
+
+    mp->_afi = _afi;
+    mp->_safi = _safi;
+    mp->_nexthop = _nexthop;
+    for(const_iterator i = _nlri.begin(); i != _nlri.end(); i++)
+	mp->_nlri.push_back(*i);
+
+    mp->encode();
+
+    return mp;
 }
 
 template <>
@@ -739,8 +748,16 @@ template <class A>
 PathAttribute *
 MPUNReachNLRIAttribute<A>::clone() const
 {
-    // Cheat go through the wire format to make the copy.
-    return new MPUNReachNLRIAttribute(data());
+    MPUNReachNLRIAttribute<A> *mp = new MPUNReachNLRIAttribute();
+
+    mp->_afi = _afi;
+    mp->_safi = _safi;
+    for(const_iterator i = _withdrawn.begin(); i != _withdrawn.end(); i++)
+	mp->_withdrawn.push_back(*i);
+
+    mp->encode();
+
+    return mp;
 }
 
 template <>
