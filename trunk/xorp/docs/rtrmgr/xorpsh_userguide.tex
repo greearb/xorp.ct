@@ -18,7 +18,7 @@
 \title{XORP Command Line Interface User Guide\\
 Part 1: Command Structure \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0RC}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
@@ -97,7 +97,7 @@ Po\=ssible compl\=etions:\\
 \>configure       \>Switch to configuration mode\\
 \>help            \>Provide help with commands\\
 \>quit            \>Quit this command session\\
-\>show            \>help
+\>show            \>Display information about the system
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -141,7 +141,6 @@ Xorp> \textbf{configure ?}\\
 Po\=ssible compl\=etions:\\
 \><[Enter]>       \>Execute this command\\
 \>exclusive       \>Switch to configuration mode, locking out other users\\
-\>|               \>Pipe through a command\\
 Xorp> \textbf{configure}
 \end{tabbing}
 \end{alltt}
@@ -212,7 +211,7 @@ Po\=ssible compl\=etions:\\
 \>configure       \>Switch to configuration mode\\
 \>help            \>Provide help with commands\\
 \>quit            \>Quit this command session\\
-\>show            \>help
+\>show            \>Display information about the system
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -223,9 +222,8 @@ The main commands in operational mode are:
 \begin{description}
 \item{\bf configure}: switches from operational mode to configuration
 mode.
-\item{\bf help}: provides online help (not yet implemented)
-\item{\bf quit}: quit from xorpsh.  (not yet implemented - use
-control-d instead).
+\item{\bf help}: provides online help.
+\item{\bf quit}: quit from xorpsh.
 \item{\bf show}: displays many aspects of the running state of the
 router.
 \end{description}
@@ -237,9 +235,18 @@ router.
 \begin{tabbing}
 Xorp> \textbf{show ?}\\
 Po\=ssible compl\=etions:\\
-\>  bgp             \>help\\
-\>  interface       \>help\\
-\>  vif             \>help\\
+\>  <[Enter]>       \>Execute this command\\
+\>  bgp             \>Display information about BGP\\
+\>  host            \>Display information about the host\\
+\>  igmp            \>Display information about IGMP\\
+\>  interfaces      \>Show network interface information\\
+\>  mfea            \>Display information about IPv4 MFEA\\
+\>  mfea6           \>Display information about IPv6 MFEA\\
+\>  mld             \>Display information about MLD\\
+\>  pim             \>Display information about IPv4 PIM\\
+\>  pim6            \>Display information about IPv6 PIM\\
+\>  rip             \>Display information about RIP\\
+\>  route           \>Show route table\\
 Xorp> \textbf{show}
 \end{tabbing}
 \end{alltt}
@@ -248,10 +255,12 @@ Xorp> \textbf{show}
 \vspace{0.1in}
 
 \noindent
-The show command is used to display many aspects of the running state
+The \emph{show} command is used to display many aspects of the running state
 of the router.  We don't describe the sub-commands here, because they
 depend on the running state of the router.  For example, only a router
-that is running BGP should provide {\tt show bgp} commands.  
+that is running BGP should provide {\tt show bgp} commands\footnote{Note that
+currently all possible commands are shown, even if the router is not
+running a particular protocol.}.
 
 As an example, we show the peers of a BGP router:
 \vspace{0.1in}
@@ -316,20 +325,20 @@ part of the configuration tree is currently being edited.
 [edit]\\
 XORP> \textbf{?}\\
 Po\=ssible completi\=ons:\\
-\>delete  \>    Delete a configuration element\\
-\>edit    \>    Edit a sub-element\\
-\>exit    \>    Exit from this configuration level\\
-\>help    \>    Provide help with commands\\
-\>interfaces\>help\\
-\>load    \>    Load configuration from a file\\
-\>protocols\> help\\
-\>quit    \>    Quit from this level\\
-\>run     \>    Run an operational-mode command\\
-\>save    \>    Save configuration to a file\\
-\>set     \>    Set the value of a parameter\\
-\>show    \>    Show the value of a parameter\\
-\>top     \>    Exit to top level of configuration\\
-\>up      \>    Exit one level of configuration
+\>  create          \>Create a sub-element\\
+\>  delete          \>Delete a configuration element\\
+\>  edit            \>Edit a sub-element\\
+\>  exit            \>Exit from this configuration level\\
+\>  help            \>Provide help with commands\\
+\>  load            \>Load configuration from a file\\
+\>  quit            \>Quit from this level\\
+\>  run             \>Run an operational-mode command\\
+\>  save            \>Save configuration to a file\\
+\>  set             \>Set the value of a parameter\\
+\>  show            \>Show the value of a parameter\\
+\>  top             \>Exit to top level of configuration\\
+\>  up              \>Exit one level of configuration\\
+XORP> 
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -340,7 +349,7 @@ Po\=ssible completi\=ons:\\
 The router configuration has a tree form similar to the directory
 structure on a Unix filesystem.  The current configuration or parts of
 the configuration can be
-shown with the show command:
+shown with the \emph{show} command:
 \vspace{0.1in}
 
 \noindent\framebox[\textwidth][l]{
@@ -356,9 +365,13 @@ XORP> \textbf{show interfaces}\\
 \>\>\>address 192.150.187.108 \{\\
 \>\>\>\>prefix-length: 25\\
 \>\>\>\>broadcast: 192.150.187.255\\
+\>\>\>\>enabled: true\\
 \>\>\>\}\\
+\>\>\>enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
+\>targetname: "fea"\\
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -367,12 +380,11 @@ XORP> \textbf{show interfaces}\\
 
 \subsection{Moving around the Configuration Tree}
 You can change the current location in the configuration tree using
-the edit, up, top and exit commands.
+the \emph{edit}, \emph{exit}, \emph{quit}, \emph{top} and \emph{up} commands.
 \begin{itemize}
 \item \textbf{edit $<$\textit{element name}$>$}:       Edit a sub-element
 \item \textbf{exit}:       Exit from this configuration level, or if
-at top level, exit
-configuration mode.
+at top level, exit configuration mode.
 \item \textbf{quit}:       Quit from this level
 \item \textbf{top}:        Exit to top level of configuration
 \item \textbf{up}:         Exit one level of configuration
@@ -395,7 +407,9 @@ XORP> \textbf{show}\\
 \>address 192.150.187.108 \{\\
 \>\>prefix-length: 25\\
 \>\>broadcast: 192.150.187.255\\
+\>\>enabled: true\\
 \>\}\\
+\>enabled: true\\
 \\
 \noindent[edit interfaces interface rl0 vif rl0]\\
 XORP> \textbf{up}\\
@@ -435,9 +449,9 @@ discarding the currently running configuration.
 $<$\textit{value}$>$}: set the value of the specified configuration
 node.
 \end{itemize}
-The set command is used to set or change the value of a configuration
+The \emph{set} command is used to set or change the value of a configuration
 option.  The change does not actually take effect immediately - the
-commit command must be used to apply this and any other uncommitted
+\emph{commit} command must be used to apply this and any other uncommitted
 changes.
 
 In the example below, the prefix length (netmask) of address
@@ -458,8 +472,11 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 25\\
 \>\>\>broadcast: 192.150.187.255\\
+\>\>\>enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
+\>enabled: true\\
 \\
 \noindent[edit interfaces interface rl0]\\
 XORP> \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
@@ -470,9 +487,11 @@ XORP> \textbf{show}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
->\>\> prefix-length: 24\\
+>\>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
+\>\>\>enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
 \end{tabbing}
 \end{alltt}
@@ -481,8 +500,24 @@ XORP> \textbf{show}\\
 
 \newpage
 \subsection{Adding New Configuration}
-New configuration can simply be typed at the command line while in
-configuration mode. The user interface for this is currently rather
+\begin{itemize}
+
+\item \textbf{create $<$\textit{path to new config node}$>$}
+: create new configuration node.
+\item \textbf{create $<$\textit{path to new config node}$>$ \{}
+: create new configuration node and start editing it.
+
+\end{itemize}
+
+New configuration can be added by the \emph{create} command.
+If we type \emph{create} followed by the path to a new configuration node,
+the node will be created. All parameters within that node will be assigned
+their default values (if exist). After that the node can be edited with the
+\emph{edit} command.
+If we type \emph{\{} after the path to the new configuration node,
+the node will be created, the default values will be assigned, and we can
+directly start editing that node.
+The user interface for this is currently rather
 primitive and doesn't permit the more free-form configuration allowed
 in configuration files.
 
@@ -501,15 +536,20 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
+\>\>\>enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
+\>enabled: true\\
 \\
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{vif rl0b \{}\\
+XORP> \textbf{create vif rl0b \{}\\
 \>\>>\> \textbf{address 10.0.0.1 \{}\\
 \>\>>\>\> \textbf{prefix-length 16}\\
 \>\>>\>\> \textbf{broadcast 10.0.255.255}\\
+\>\>>\>\> \textbf{enabled true}\\
 \>\>>\>\> \textbf{\}}\\
+\>\>>\>\> \textbf{enabled true}\\
 \>\>>\> \textbf{\}}\\
 OK. Use "commit" to apply these changes.\\
 \\
@@ -520,14 +560,19 @@ XORP> \textbf{show}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
+\>\>\>enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
 > vif rl0b \{\\
 >\>\> address 10.0.0.1 \{\\
 >\>\>\> prefix-length: 16\\
 >\>\>\> broadcast: 10.0.255.255\\
+>\>\>\> enabled: true\\
 >\>\>\}\\
+>\>\>enabled: true\\
 >\>\}\\
+\>enabled: true\\
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -535,9 +580,9 @@ XORP> \textbf{show}\\
 
 \subsection{Deleting Parts of the Configuration}
 
-The delete command can be used to delete subtrees from the
+The \emph{delete} command can be used to delete subtrees from the
 configuration.  The deletion will be visible in the results of the
-show command, but will not actually take place until the changes are
+\emph{show} command, but will not actually take place until the changes are
 committed.
 \vspace{0.1in}
 
@@ -553,14 +598,19 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
+\>\>\>enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
 \>vif rl0b \{\\
 \>\> address 10.0.0.1 \{\\
 \>\>\> prefix-length: 16\\
 \>\>\> broadcast: 10.0.255.255\\
+\>\>\> enabled: true\\
 \>\>\}\\
+\>\>enabled: true\\
 \>\}\\
+\>enabled: true\\
 \\
 \noindent[edit]\\
 XORP> \textbf{delete interfaces interface rl0 vif rl0b}\\
@@ -568,6 +618,7 @@ Deleting:\\
 \>address 10.0.0.1 \{\\
 \>\>prefix-length: 16\\
 \>\>broadcast: 10.0.255.255\\
+\>\>enabled: true\\
 \>\}\\
 \\
 OK\\
@@ -579,8 +630,11 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\>address 192.150.187.108 \{\\
 \>\>\>prefix-length: 24\\
 \>\>\>broadcast: 192.150.187.255\\
+\>\>\>enabled: true\\
 \>\>\}\\
-\>\}
+\>\>enabled: true\\
+\>\}\\
+\>enabled: true
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -602,7 +656,7 @@ OK
 }
 \vspace{0.1in}
 
-The commit command commits all the current configuration changes.
+The \emph{commit} command commits all the current configuration changes.
 This can take a number of seconds before the response is given.
 
 {\it If xorpsh was built with debugging enabled, the response can be
@@ -630,7 +684,7 @@ XORP>
 \subsection{Discarding Changes}
 
 The user can discard a batch of changes by editing them back to their
-original configuration, or by using the exit command to leave
+original configuration, or by using the \emph{exit} command to leave
 configuration mode:
 \vspace{0.1in}
 
@@ -640,7 +694,7 @@ configuration mode:
 \begin{tabbing}
 \noindent[edit]\\
 XORP> \textbf{exit}\\
-Error: There are uncommitted changes\\
+ERROR: There are uncommitted changes\\
 Use "commit" to commit the changes, or "exit discard" to discard them\\
 \\
 XORP> \textbf{exit discard}\\
