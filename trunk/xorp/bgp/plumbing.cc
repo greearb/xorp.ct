@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.51 2004/05/15 19:50:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.52 2004/05/22 23:24:02 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -422,6 +422,26 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     _tables.insert(cache_in);
     _tables.insert(nexthop_in);
 
+    /*
+     * Start things up on the input branch
+     */
+
+    const AsNum& his_AS_number = peer_handler->AS_number();
+    const AsNum& my_AS_number = _master.my_AS_number();
+
+    /* 1. configure the loop filters */
+    filter_in->add_simple_AS_filter(my_AS_number);
+
+    /* 2. Configure local preference filter.
+       Add LOCAL_PREF on receipt from EBGP peer.  */
+    if (ibgp == false) {
+	filter_in->add_localpref_insertion_filter(
+	  LocalPrefAttribute::default_value() );
+    }
+
+    /* 3. cause all the other peerings to know about this one */
+    rib_in->ribin_peering_came_up();
+    
     
     /*
      * Plumb the output branch
@@ -457,14 +477,10 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 
     
     /*
-     * Start things up
+     * Start things up on the output branch
      */
 
-    const AsNum& his_AS_number = peer_handler->AS_number();
-    const AsNum& my_AS_number = _master.my_AS_number();
-
     /* 1. configure the loop filters */
-    filter_in->add_simple_AS_filter(my_AS_number);
     filter_out->add_simple_AS_filter(his_AS_number);
 
     /* 2. configure as_prepend filters for EBGP peers*/
@@ -490,12 +506,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     }
 
     /* 5. Configure local preference filter.
-          Add LOCAL_PREF on receipt from EBGP peer. 
-	  Remove it on transmission to EBGP peers. */
+	  Remove LOCAL_PREF on transmission to EBGP peers. */
     if (ibgp == false) {
-	filter_in->add_localpref_insertion_filter(
-	  LocalPrefAttribute::default_value() );
-
 	filter_out->add_localpref_removal_filter();
     }
 
@@ -518,9 +530,6 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     if(_awaits_push)
 	push(peer_handler);
 
-    /* 11. cause all the other peerings to know about this one */
-    rib_in->ribin_peering_came_up();
-    
     return 0;
 }
 
