@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.1 2003/05/19 03:15:18 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.2 2003/05/19 06:54:07 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -30,6 +30,7 @@
 
 class EventLoop;
 class MfeaNode;
+class Vif;
 class XrlRouter;
 
 /**
@@ -156,11 +157,11 @@ public:
 			 const uint32_t& event);
 
     /**
-     * Update the IPv4 address of a virtual interface.
+     * Update the IPv6 address of a virtual interface.
      * 
      * This method is called when receiving an XRL from the FEA
      * indicating that a virtual interface has undergone an address
-     * change.  An IPv6 address (and associated prefix length) has
+     * change. An IPv6 address (and associated prefix length) has
      * been added, deleted, or reconfigured on this VIF.
      *
      * @param ifname the name of the interface containing the VIF.
@@ -256,7 +257,7 @@ private:
     size_t		_addrs_remaining;
     
     // The maps with the interfaces and vifs
-    map<string, Vif *> _vifs_by_name;
+    map<string, Vif *>	_vifs_by_name;
     multimap<string, Vif *> _vifs_by_interface;
     
     string _fea_target_name;	// The FEA target name
