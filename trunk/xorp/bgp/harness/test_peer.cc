@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.23 2004/05/24 01:22:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.24 2004/05/28 05:00:33 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -155,6 +155,23 @@ XrlTestPeerTarget::test_peer_0_1_listen(const string& address,
 }
 
 XrlCmdError
+XrlTestPeerTarget::test_peer_0_1_bind(const string& address,
+				      const uint32_t& port)
+{
+    debug_msg("\n");
+
+    if(_trace)
+	printf("bind(%s,%u)\n", address.c_str(), port);
+
+    string error_string;
+    if(!_test_peer.bind(address, port, error_string)) {
+	return XrlCmdError::COMMAND_FAILED(error_string);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_send(const vector<uint8_t>& data)
 {
     debug_msg("\n");
@@ -224,7 +241,8 @@ TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
     : _eventloop(eventloop), _xrlrouter(xrlrouter), _server(server),
       _verbose(verbose),
      _done(false),
-      _s(UNCONNECTED), _async_writer(0), _listen(UNCONNECTED),
+      _s(UNCONNECTED),  _listen(UNCONNECTED), _bind(UNCONNECTED),
+      _async_writer(0),
       _bgp(false),
       _flying(0),
      _bgp_bytes(0)
@@ -283,6 +301,11 @@ TestPeer::connect(const string& host, const uint32_t& port,
 
     if(UNCONNECTED != _listen) {
 	error_string = "Peer is currently listening";
+	return false;
+    }
+
+    if(UNCONNECTED != _bind) {
+	error_string = "Peer is currently bound";
 	return false;
     }
 
@@ -350,8 +373,13 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
+    if(UNCONNECTED != _bind) {
+	error_string = "Peer is currently bound";
+	return false;
+    }
+
     if(UNCONNECTED != _s) {
-	error_string = "Peer is already connected";
+	error_string = "Peer is currently connected";
 	return false;
     }
 
@@ -387,7 +415,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 
     if(-1 == ::listen(s, 1)) {
 	::close(s);
-	error_string = c_format("Bind failed: %s", strerror(errno));
+	error_string = c_format("Listen failed: %s", strerror(errno));
 	return false;
     }
 
@@ -399,6 +427,62 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
     _listen = s;
+
+    return true;
+}
+
+bool
+TestPeer::bind(const string& host, const uint32_t& port,
+	       string& error_string)
+{
+    debug_msg("\n");
+
+    if(UNCONNECTED != _listen) {
+	error_string = "Peer is currently listening";
+	return false;
+    }
+
+    if(UNCONNECTED != _bind) {
+	error_string = "Peer is already bound";
+	return false;
+    }
+
+    if(UNCONNECTED != _s) {
+	error_string = "Peer is currently connected";
+	return false;
+    }
+
+    int s = ::socket(PF_INET, SOCK_STREAM, 0);
+    if(-1 == s) {
+	error_string = c_format("socket call failed: %s", strerror(errno));
+	return false;
+    }
+
+    struct sockaddr_in local;
+    try {
+	Socket::init_sockaddr(&local,
+			      Iptuple::get_addr(host.c_str()),
+			      htons(port));
+    } catch(UnresolvableHost e) {
+	::close(s);
+	error_string = e.why();
+	return false;
+    }
+
+    int opt = 1;
+    if(-1 == ::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+	error_string = c_format("setsockopt failed: %s\n", strerror(errno));
+	return false;
+    }
+
+    if(-1 == ::bind(s, reinterpret_cast<struct sockaddr *>(&local),
+		  sizeof(local))) {
+	::close(s);
+	error_string = c_format("Bind failed: %s", strerror(errno));
+	return false;
+    }
+
+    _bind = s;
 
     return true;
 }
@@ -500,6 +584,7 @@ TestPeer::reset()
 
     ZAP(_s);
     ZAP(_listen);
+    ZAP(_bind);
 }
 
 bool

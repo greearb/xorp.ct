@@ -441,6 +441,13 @@ never be used directly and is documented here for completeness.
 
   Listen for connections on this address and port.
 
+\item Bind("address", "port")
+
+  Bind on this address and port. This command exists solely to test
+  that the entity under test does not block in connect. It is not a
+  requirement to make a call to ``bind'' before the ``connect'' or
+  ``listen'' commands. 
+
 \item Send("Data")
   
   Send data on the TCP connection.        

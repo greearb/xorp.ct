@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.8 2003/06/26 19:41:48 atanu Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.9 2003/06/27 22:08:54 atanu Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -32,8 +32,10 @@ public:
     bool packetisation(const string& protocol);
     bool connect(const string& host, const uint32_t& port, 
 		 string& error_string);
-    bool listen(const string& host, const uint32_t& port, 
-		 string& error_string);
+    bool listen(const string& host, const uint32_t& port,
+		string& error_string);
+    bool bind(const string& host, const uint32_t& port,
+	      string& error_string);
     bool send(const vector<uint8_t>& data, string& error_string);
     void send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
 		       const size_t buf_bytes, const size_t offset);
@@ -68,8 +70,9 @@ private:
     static const int UNCONNECTED = -1;
     bool _done;
     int _s;
-    AsyncFileWriter *_async_writer;
     int _listen;
+    int _bind;
+    AsyncFileWriter *_async_writer;
     string _coordinator;
     uint32_t _genid;
 
@@ -160,6 +163,18 @@ public:
     XrlCmdError test_peer_0_1_listen(
 	// Input values, 
 	const string&	address, 
+	const uint32_t&	port);
+
+    /**
+     *  Bind the port but don't perform the listen or accept.
+     *
+     *  @param address local address.
+     *
+     *  @param port local port number.
+     */
+    XrlCmdError test_peer_0_1_bind(
+	// Input values,
+	const string&	address,
 	const uint32_t&	port);
 
     /**
