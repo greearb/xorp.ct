@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.4 2003/04/23 17:06:48 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.5 2003/06/05 02:11:21 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -26,8 +26,10 @@
 #include "packets.hh"
 
 #include "auth.hh"
+#include "peer.hh"
 #include "port.hh"
 #include "port_manager.hh"
+#include "update_queue.hh"
 
 // ----------------------------------------------------------------------------
 // PortTimerConstants Implementation
@@ -127,7 +129,7 @@ public:
 
 protected:
     void push_queue();
-    
+
 protected:
     Port<A>&	_port;
     XorpTimer	_pkt_timer;
@@ -224,7 +226,11 @@ PortPacketQueue<A>::buffered_bytes() const
 
 template <typename A>
 Port<A>::Port(PortManagerBase<A>& pm)
-    : _pm(pm), _en(false), _cost(1), _horizon(SPLIT_POISON_REVERSE),
+    :  _pm(pm),
+       _update_queue(pm.system().route_db().update_queue()),
+       _en(false),
+       _cost(1),
+       _horizon(SPLIT_POISON_REVERSE),
       _advertise(false)
 {
     _packet_queue = new PortPacketQueue<A>(*this);
@@ -358,10 +364,10 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 {
     static_assert(sizeof(RipPacketHeader) == 4);
     static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
-    
+
     Peer<IPv4>* p = peer(src_address);
     record_packet(p);
-		  
+
     if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
 	record_bad_packet(c_format("Packet size less than minimum (%u < %u)",
 				   uint32_t(rip_packet_bytes),
@@ -369,7 +375,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 			  src_address, src_port, p);
 	return;
     }
-    
+
     const RipPacketHeader *ph =
 	reinterpret_cast<const RipPacketHeader*>(rip_packet);
 
@@ -403,7 +409,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     //
     // Authenticate packet (actually we should check what packet wants
     // before authenticating - we may not care in all cases...)
-    // 
+    //
     if (auth_handler() == NULL) {
 	XLOG_FATAL("Received packet on interface without an authentication "
 		   "handler.");
@@ -427,12 +433,12 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 	// No entries in packet, nothing further to do.
 	return;
     }
-    
+
     if (src_port == RIP_PORT) {
-	
+
     } else {
 	// Expecting an unsolicited query
-	
+
     }
 }
 

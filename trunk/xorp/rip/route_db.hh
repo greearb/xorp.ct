@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.2 2003/04/23 17:06:49 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.3 2003/07/08 16:57:20 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -20,13 +20,11 @@
 #include "libxorp/ref_ptr.hh"
 #include "libxorp/trie.hh"
 #include "route_entry.hh"
-#include "peer.hh"
 
 class EventLoop;
 
 template <typename A>
 class UpdateQueue;
-
 template <typename A>
 class PacketRouteEntry;
 
@@ -41,7 +39,7 @@ public:
     typedef ref_ptr<const RouteEntry<A> >	ConstDBRouteEntry;
     typedef Trie<A, DBRouteEntry>		RouteTrie;
     typedef PacketRouteEntry<A>			PacketizedRoute;
-    typedef Peer<A>				RipPeer;
+
 public:
     RouteDB(EventLoop& e);
     ~RouteDB();
@@ -54,9 +52,10 @@ public:
      *
      * @param net the network route being updated.
      * @param nexthop the corresponding nexthop address.
-     * @param cost the corresponding metric value as received from the peer.
+     * @param cost the corresponding metric value as received from the
+     *	      route originator.
      * @param tag the corresponding route tag.
-     * @param peer the peer proposing update.
+     * @param origin the route originator proposing update.
      *
      * @return true if an update occurs, false otherwise.
      */
@@ -64,7 +63,7 @@ public:
 		      const Addr&  nexthop,
 		      uint32_t	   cost,
 		      uint32_t	   tag,
-		      RipPeer*	   peer);
+		      RouteOrigin* origin);
 
     /**
      * Flatten routing table representation from Trie to Vector.
@@ -85,7 +84,16 @@ public:
      */
     bool resolve_and_reference(const Net& net, ConstDBRouteEntry& cdbe);
 
+    /**
+     * Accessor.
+     * @return reference to UpdateQueue.
+     */
     UpdateQueue<A>& update_queue();
+
+    /**
+     * Accessor.
+     * @return const reference to UpdateQueue.
+     */
     const UpdateQueue<A>& update_queue() const;
 
 protected:

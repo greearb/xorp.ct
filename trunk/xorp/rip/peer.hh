@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/peer.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/peer.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -86,7 +86,7 @@ class Peer : public RouteEntryOrigin<A>
 public:
     typedef A Addr;
     typedef Port<A> RipPort;
-    
+
 public:
     Peer(RipPort& p, const Addr& addr) : _port(p), _addr(addr) {}
 
@@ -94,7 +94,7 @@ public:
      * Get address of Peer.
      */
     inline const Addr& address() const			{ return _addr; }
-    
+
     /**
      * Get counters associated with Peer.
      */
@@ -124,7 +124,11 @@ public:
      * Get last active time.
      */
     inline const TimeVal& last_active() const	     { return _last_active; }
-    
+
+    uint32_t expiry_secs() const;
+
+    uint32_t deletion_secs() const;
+
 protected:
     RipPort&		_port;
     Addr		_addr;

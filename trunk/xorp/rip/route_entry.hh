@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -59,12 +59,12 @@ public:
      * destruction.
      */
     ~RouteEntry();
-    
+
     /**
      * Get network.
      */
     inline const IPNet<A>& net() const { return _net; }
-    
+
     /**
      * Set next hop.
      *
@@ -147,14 +147,14 @@ public:
      * Get Timer associated with route.
      */
     inline const XorpTimer& timer() const { return _timer; }
-    
+
 protected:
     RouteEntry(const RouteEntry&);			// Not implemented.
     RouteEntry& operator=(const RouteEntry&);		// Not implemented.
 
     inline void dissociate();
     inline void associate(Origin* o);
-    
+
 protected:
     Net		_net;
     Addr	_nh;
@@ -183,11 +183,42 @@ public:
     RouteEntryOrigin();
     virtual ~RouteEntryOrigin();
 
+    /**
+     * Associate route with this RouteEntryOrigin.
+     * @param r route to be stored.
+     * @return true on success, false if route is already associated.
+     */
     bool associate(const Route* r);
+
+    /**
+     * Dissociate route from this RouteEntryOrigin.
+     * @param r route to be dissociated.
+     * @return true on success, false if route is not associated.
+     */
     bool dissociate(const Route* r);
 
+    /**
+     * @return number of routes associated with this RouteEntryOrigin.
+     */
     size_t route_count() const;
+
+    /**
+     * Dump associated routes into a vector (debugging use only).
+     */
     void dump_routes(vector<const Route*>& routes) const;
+
+    /**
+     * Retrieve number of seconds before routes associated with this
+     * RouteEntryOrigin should be marked as expired.  A return value of 0
+     * indicates routes are of infinite duration, eg static routes.
+     */
+    virtual uint32_t expiry_secs() const = 0;
+
+    /**
+     * Retrieve number of seconds before route should be deleted after
+     * expiry.
+     */
+    virtual uint32_t deletion_secs() const = 0;
 
 private:
     RouteEntryOrigin(const RouteEntryOrigin& reo);		// Not impl

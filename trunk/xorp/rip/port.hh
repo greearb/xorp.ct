@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.3 2003/04/18 19:42:39 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.4 2003/04/23 17:06:48 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -24,6 +24,7 @@
 
 #include "constants.hh"
 #include "port_io.hh"
+#include "update_queue.hh"
 
 /**
  * @short Container of timer constants associated with a RIP port.
@@ -95,7 +96,7 @@ public:
      * Get the interpacket packet delay in milliseconds.
      */
     inline uint32_t	interpacket_delay_ms() const;
-    
+
 protected:
     uint32_t _expiry_secs;
     uint32_t _deletion_secs;
@@ -154,7 +155,7 @@ public:
      * Increment the number of triggered updates sent.
      */
     inline void incr_triggered_updates() 	{ _triggered_updates++; }
-    
+
 protected:
     uint32_t _packets_recv;
     uint32_t _bad_routes;
@@ -168,7 +169,7 @@ protected:
  *
  * A class completely for specialization for RIP address families that place
  * authentication information within the RIP payload (RIPv2 and not RIPng).
- * 
+ *
  */
 template <typename A>
 struct AuthManager
@@ -192,7 +193,7 @@ public:
      * @return pointer to former handler.
      */
     AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
-    
+
     /**
      * Get authentication handler.
      */
@@ -260,7 +261,7 @@ public:
      * Get enabled state.
      */
     inline bool enabled() const				{ return _en; }
-    
+
     /**
      * Get cost metric associated with Port.
      */
@@ -334,7 +335,7 @@ public:
      * Get the current number of bytes buffered in RIP packets.
      */
     uint32_t packet_buffer_bytes() const;
-    
+
 protected:
     /**
      *  Get counters associated with Port.
@@ -361,7 +362,7 @@ protected:
     /**
      * Record bad packet.
      *
-     * @param why reason packet marked 
+     * @param why reason packet marked
      */
     void record_bad_packet(const string&	why,
 			   const Addr&		addr,
@@ -377,7 +378,7 @@ protected:
 		       uint16_t		src_port,
 		       const uint8_t*	rip_request,
 		       size_t		rip_request_bytes);
-    
+
 protected:
     /**
      * Send completion notification.  Called by PortIO instance when a
@@ -416,6 +417,10 @@ protected:
     PeerList		_peers;			// Peers on Port
     XorpTimer		_us_timer;		// Unsolicited update timer
     XorpTimer		_tu_timer;		// Triggered update timer
+
+    UpdateQueue<A>&		 _update_queue; // RIP instance update queue
+    UpdateQueue<A>::ReadIterator _uq_iter;
+
     bool		_en;			// Enabled state
     uint32_t		_cost;			// Cost metric of peer
     RipHorizon		_horizon;		// Port Horizon type

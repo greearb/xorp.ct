@@ -100,7 +100,7 @@ test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
 test_timers_SOURCES = test_timers.cc
 
-librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh route_db.hh route_entry.hh update_queue.hh auth.cc port.cc route_db.cc route_entry.cc update_queue.cc
+librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh update_queue.hh auth.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
 
 
 ################################################################
@@ -113,8 +113,9 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 librip_a_AR = $(AR) cru
 librip_a_LIBADD =
-am_librip_a_OBJECTS = auth.$(OBJEXT) port.$(OBJEXT) route_db.$(OBJEXT) \
-	route_entry.$(OBJEXT) update_queue.$(OBJEXT)
+am_librip_a_OBJECTS = auth.$(OBJEXT) peer.$(OBJEXT) port.$(OBJEXT) \
+	redist.$(OBJEXT) route_db.$(OBJEXT) route_entry.$(OBJEXT) \
+	update_queue.$(OBJEXT)
 librip_a_OBJECTS = $(am_librip_a_OBJECTS)
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
 	test_timers$(EXEEXT)
@@ -141,7 +142,8 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/auth.Po $(DEPDIR)/port.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/auth.Po $(DEPDIR)/peer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/port.Po $(DEPDIR)/redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/route_db.Po $(DEPDIR)/route_entry.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_packets.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po $(DEPDIR)/update_queue.Po
@@ -201,7 +203,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/auth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/port.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_entry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_auth.Po@am__quote@

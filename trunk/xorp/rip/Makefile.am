@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.6 2003/04/21 15:39:36 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.7 2003/05/07 21:58:12 pavlin Exp $
 ##
 
 noinst_LIBRARIES	 = librip.a
@@ -26,12 +26,15 @@ librip_a_SOURCES	+= peer.hh
 librip_a_SOURCES	+= port.hh
 librip_a_SOURCES	+= port_io.hh
 librip_a_SOURCES	+= port_manager.hh
+librip_a_SOURCES	+= redist.hh
 librip_a_SOURCES	+= route_db.hh
 librip_a_SOURCES	+= route_entry.hh
 librip_a_SOURCES	+= update_queue.hh
 
 librip_a_SOURCES	+= auth.cc
+librip_a_SOURCES	+= peer.cc
 librip_a_SOURCES	+= port.cc
+librip_a_SOURCES	+= redist.cc
 librip_a_SOURCES	+= route_db.cc
 librip_a_SOURCES	+= route_entry.cc
 librip_a_SOURCES	+= update_queue.cc

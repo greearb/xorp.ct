@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.2 2003/07/08 16:57:20 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -22,8 +22,6 @@
 #include "libxorp/xlog.h"
 
 #include "constants.hh"
-#include "peer.hh"
-#include "port.hh"
 #include "route_db.hh"
 #include "update_queue.hh"
 
@@ -60,11 +58,11 @@ template <typename A>
 void
 RouteDB<A>::set_deletion_timer(Route* r)
 {
-    Peer<A>* p = reinterpret_cast<Peer<A>*>(r->origin());
-    uint32_t expire_ms = p->port().constants().deletion_secs() * 1000;
+    RouteOrigin* o = r->origin();
+    uint32_t deletion_ms = o->deletion_secs() * 1000;
 
-    XorpTimer t = _eventloop.new_oneoff_after_ms(expire_ms,
-			callback(this, &RouteDB<A>::delete_route, r));
+    XorpTimer t = _eventloop.new_oneoff_after_ms(deletion_ms,
+				callback(this, &RouteDB<A>::delete_route, r));
 
     r->set_timer(t);
 }
@@ -73,8 +71,8 @@ template <typename A>
 void
 RouteDB<A>::expire_route(Route* r)
 {
-    Peer<A>* p = reinterpret_cast<Peer<A>*>(r->origin());
-    if (!update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(), p)) {
+    if (false == update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
+			      r->origin())) {
 	XLOG_ERROR("Expire route failed.");
     }
 }
@@ -83,12 +81,15 @@ template <typename A>
 void
 RouteDB<A>::set_expiry_timer(Route* r)
 {
-    Peer<A>* p = reinterpret_cast<Peer<A>*>(r->origin());
-    uint32_t expire_ms = p->port().constants().expiry_secs() * 1000;
+    RouteOrigin* o = r->origin();
 
-    XorpTimer t = _eventloop.new_oneoff_after_ms(expire_ms,
-			callback(this, &RouteDB<A>::expire_route, r));
+    XorpTimer t;
+    uint32_t expire_ms = o->expiry_secs() * 1000;
 
+    if (expire_ms) {
+	t = _eventloop.new_oneoff_after_ms(expire_ms,
+			   callback(this, &RouteDB<A>::expire_route, r));
+    }
     r->set_timer(t);
 }
 
@@ -98,7 +99,7 @@ RouteDB<A>::update_route(const Net&	net,
 			 const Addr&	nexthop,
 			 uint32_t	cost,
 			 uint32_t	tag,
-			 RipPeer*	peer)
+			 RouteOrigin*	o)
 {
     if (tag > 0xffff) {
 	// Ingress sanity checks should take care of this
@@ -109,8 +110,6 @@ RouteDB<A>::update_route(const Net&	net,
     if (cost > RIP_INFINITY) {
 	cost = RIP_INFINITY;
     }
-
-    RouteOrigin* o = static_cast<RouteOrigin*>(peer);
 
     //
     // Update steps, based on RFC2453 pp. 26-28
