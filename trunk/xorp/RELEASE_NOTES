@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.57 2005/01/19 00:14:51 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.58 2005/01/20 00:39:54 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -55,7 +55,8 @@ Release 1.1 (2005/??/??)
     - 
 
   STATIC_ROUTES:
-    - 
+    -  Addition of configuration support for interface-specific static
+       routes.
 
   MLD/IGMP:
     - 
