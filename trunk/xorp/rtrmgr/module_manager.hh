@@ -12,16 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.17 2003/12/10 22:31:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.18 2003/12/13 00:16:39 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
 
+#include <vector>
 #include <map>
 #include "libxorp/xorp.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/callback.hh"
 
+#define NO_SETUID_ON_EXEC 0
 
 class ModuleCommand;
 class ModuleManager;
@@ -56,8 +58,10 @@ public:
 	// The process has not been started
 	MODULE_NOT_STARTED	= 6
     };
-
+ 
     int set_execution_path(const string& path);
+    void set_argv(const vector<string>& argv);
+    void set_userid(uid_t userid);
     int run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb);
     void module_run_done(bool success);
     void set_stalled();
@@ -76,6 +80,9 @@ private:
     string	_name;
     string	_path;		// relative path
     string	_expath;	// absolute path
+    vector <string> _argv;        // command line arguments
+    uid_t       _userid;        /* userid to execute process as, zero
+				   for current user */
     pid_t	_pid;
     ModuleStatus _status;
     bool	_do_exec;	// false indicates we're running in debug mode,
@@ -86,6 +93,8 @@ private:
 };
 
 class ModuleManager {
+    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+    
 public:
     ModuleManager(EventLoop& eventloop, bool verbose,
 		  const string& xorp_root_dir);
@@ -108,6 +117,21 @@ public:
 			       Module::ModuleStatus new_status);
     const string& xorp_root_dir() const { return _xorp_root_dir; }
 
+    /**
+     * @short shell_execute is used to start external processes.
+     *
+     * shell_execute is used to start external processes, running them
+     * in a shell.  It is NOT used to start regular XORP processes,
+     * but rather for background maintenance tasks.  This is
+     * ModuleManager functionality primarily because it simplifies the
+     * handling of SIGCHILD.
+     *
+     * @param userid the UID of the user to run the task as.
+     * @param argv the command and arguements to run
+     * @param callback callback to call when the child process terminates
+     */
+    int shell_execute(uid_t userid, const vector<string>& argv, 
+		      ModuleManager::CallBack cb, bool do_exec);
 private:
     Module* find_module(const string& module_name);
     const Module* const_find_module(const string& module_name) const;

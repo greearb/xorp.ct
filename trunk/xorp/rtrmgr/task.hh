@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.21 2003/12/10 22:36:37 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.22 2003/12/13 00:16:39 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
 
 #include <map>
+#include <vector>
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/status_codes.h"
@@ -261,6 +262,20 @@ public:
      * @param module_name the module name of the process to be killed.  
      */
     void kill_process(const string& module_name);
+
+    /**
+     * @short shell_execute is used to start external processes.
+     *
+     * shell_execute is used to start external processes, running them
+     * in a shell.  It is NOT used to start regular XORP processes,
+     * but rather for background maintenance tasks.
+     *
+     * @param userid the UID of the user to run the task as.
+     * @param argv the command and arguements to run
+     * @param callback callback to call when the child process terminates
+     */
+    int shell_execute(uid_t userid, const vector<string>& argv, 
+		      TaskManager::CallBack cb);
 
 private:
     void reorder_tasks();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.26 2003/12/13 00:16:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.27 2004/01/14 03:00:35 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -125,6 +125,7 @@ child_handler(int x)
 Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
     : _mmgr(mmgr),
       _name(name),
+      _userid(NO_SETUID_ON_EXEC),
       _pid(0),
       _status(MODULE_NOT_STARTED),
       _do_exec(false),
@@ -268,8 +269,9 @@ Module::set_execution_path(const string& path)
 	return XORP_ERROR;
     }
 
-    if (path[0] == '~') {
-	// The path to the module starts from the user home directory
+    if (path[0] == '~' || path[0] == '/') {
+	// The path to the module starts from the user home directory,
+	// or it's an absolute path
 	_path = path;
     } else {
 	// Add the XORP root path to the front
@@ -329,6 +331,19 @@ Module::set_execution_path(const string& path)
     return XORP_OK;
 }
 
+void 
+Module::set_argv(const vector<string>& argv) {
+    _argv = argv;
+}
+
+void
+Module::set_userid(uid_t userid) {
+    //don't call thiss if you don't want to setuid.
+    XLOG_ASSERT(userid != NO_SETUID_ON_EXEC);
+
+    _userid = userid;
+}
+
 int
 Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 {
@@ -378,11 +393,38 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	signal(SIGCHLD, child_handler);
 	_pid = fork();
 	if (_pid == 0) {
+
+	    //set userid as required.
+	    if (_userid != NO_SETUID_ON_EXEC) {
+		if (setuid(_userid) != 0) {
+		    fprintf(stderr, "Failed to setuid(%d) on exec\n",
+			    _userid);
+		    exit(1);
+		}
+	    }
+
 	    // Detach from the controlling terminal.
 	    setsid();
-	    if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
-		fprintf(stderr, "Execution of %s failed\n", _expath.c_str());
-		exit(1);
+	    if (_argv.empty()) {
+		if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
+		    fprintf(stderr, "Execution of %s failed\n", _expath.c_str());
+		    exit(1);
+		}
+	    } else {
+		//convert argv from strings to char*
+		const char* argv[_argv.size() + 1];
+		size_t i;
+		for (i = 0; i < _argv.size(); i++) {
+		    argv[i] = _argv[i].c_str();
+		}
+		argv[i] = NULL;
+		
+		if (execv(_expath.c_str(), 
+			  const_cast<char*const*>(argv)) < 0) {
+		    fprintf(stderr, "Execution of %s failed\n", 
+			    _expath.c_str());
+		    exit(1);
+		}
 	    }
 	}
 	if (_verbose)
@@ -651,4 +693,25 @@ ModuleManager::shutdown_complete()
 	}
     }
     return complete;
+}
+
+
+int 
+ModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
+			     ModuleManager::CallBack cb, bool do_exec)
+{
+    if (!new_module(argv[0], argv[0])) {
+	return XORP_ERROR;
+    }
+    Module *module = find_module(argv[0]);
+    module->set_userid(userid);
+    module->set_argv(argv);
+    XorpCallback1<void, bool>::RefPtr run_cb 
+	= callback(module, &Module::module_run_done);
+    if (module->run(do_exec, run_cb)<0) {
+	cb->dispatch(false, "Failed to execute" + argv[0]);
+	return XORP_ERROR;
+    }
+    cb->dispatch(true, "");
+    return XORP_OK;
 }

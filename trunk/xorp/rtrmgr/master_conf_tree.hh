@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.17 2004/03/09 05:51:52 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.18 2004/05/10 14:41:10 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -87,7 +87,22 @@ private:
 
     XorpClient& xorp_client() const { return _task_manager.xorp_client(); }
 
-    void run_save_hook(const string& save_hook, const string& filename) const;
+    /**
+     * @short run_save_hook is executed after the config file has been saved.
+     *
+     * run_save_hook is executed after the config file has been saved.
+     * The main purpose is to allow files saved to a memory filesystem
+     * to be preserved on persistent storage, such as when running
+     * from a LiveCD, but wishing to preserve saved config files onto
+     * a floppy disk. 
+     */
+    void run_save_hook(uid_t userid, 
+		       const string& save_hook, const string& filename);
+
+    /**
+     * @short callback when save hook completes.
+     */
+    void save_hook_complete(bool success, const string errmsg) const;
 
     TaskManager		_task_manager;
     CallBack		_commit_cb;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.32 2004/01/14 21:36:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.33 2004/02/26 16:02:49 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -1240,4 +1240,11 @@ void
 TaskManager::null_callback()
 {
 
+}
+
+int 
+TaskManager::shell_execute(uid_t userid, const vector<string>& argv, 
+			   TaskManager::CallBack cb)
+{
+    return _module_manager.shell_execute(userid, argv, cb, do_exec());
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.29 2004/01/13 00:44:09 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.30 2004/05/10 14:41:09 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -766,7 +766,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	return false;
     }
 
-    run_save_hook(save_hook, filename);
+    run_save_hook(user_id, save_hook, filename);
 
     errmsg += "Save complete\n";
     seteuid(orig_uid);
@@ -776,12 +776,27 @@ MasterConfigTree::save_to_file(const string& filename,
 }
 
 void
-MasterConfigTree::run_save_hook(const string& save_hook,
-				const string& filename) const
+MasterConfigTree::run_save_hook(uid_t userid, const string& save_hook,
+				const string& filename)
 {
     if (save_hook.empty())
 	return;
     printf("run_save_hook: %s %s\n", save_hook.c_str(), filename.c_str());
+    vector<string> argv;
+    argv.reserve(2);
+    argv.push_back(save_hook);
+    argv.push_back(filename);
+    _task_manager.shell_execute(userid, argv, 
+           callback(this, &MasterConfigTree::save_hook_complete));
+}
+
+void
+MasterConfigTree::save_hook_complete(bool success, const string errmsg) const
+{
+    if (success)
+	printf("save hook completed successfully\n");
+    else
+	printf("save hook completed with error %s\n", errmsg.c_str());
 }
 
 bool

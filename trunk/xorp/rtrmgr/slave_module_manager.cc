@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.13 2003/12/10 22:32:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.14 2003/12/13 00:16:39 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -70,4 +70,15 @@ ModuleManager::module_has_started(const string& module_name) const
 {
     UNUSED(module_name);
     return false;
+}
+
+int 
+ModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
+			     ModuleManager::CallBack cb, bool do_exec)
+{
+    UNUSED(userid);
+    UNUSED(argv);
+    UNUSED(cb);
+    UNUSED(do_exec);
+    return XORP_ERROR;
 }
