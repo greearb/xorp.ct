@@ -259,16 +259,15 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder_base.P \
-.deps/finder_client_base.P .deps/finder_client_xif.P \
-.deps/finder_messenger.P .deps/finder_msgs.P .deps/finder.P \
-.deps/finder_client.P .deps/finder_client_xrl_target.P \
-.deps/finder_main.P .deps/finder_xrl_queue.P \
-.deps/finder_xrl_target.P .deps/finder_tcp.P \
-.deps/finder_tcp_messenger.P .deps/finder_xif.P .deps/header.P \
+DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder.P \
+.deps/finder_base.P .deps/finder_client.P .deps/finder_client_base.P \
+.deps/finder_client_xif.P .deps/finder_client_xrl_target.P \
+.deps/finder_main.P .deps/finder_messenger.P .deps/finder_msgs.P \
+.deps/finder_tcp.P .deps/finder_tcp_messenger.P .deps/finder_xif.P \
+.deps/finder_xrl_queue.P .deps/finder_xrl_target.P .deps/header.P \
 .deps/hmac.P .deps/hmac_md5.P .deps/permits.P .deps/sockutil.P \
-.deps/test_finder_messenger.P .deps/test_finder_msgs.P \
-.deps/test_finder.P .deps/test_finder_tcp.P .deps/test_header.P \
+.deps/test_finder.P .deps/test_finder_messenger.P \
+.deps/test_finder_msgs.P .deps/test_finder_tcp.P .deps/test_header.P \
 .deps/test_inproc.P .deps/test_lemming.P .deps/test_stcp.P \
 .deps/test_sudp.P .deps/test_xrl.P .deps/test_xrl_args.P \
 .deps/test_xrl_atom.P .deps/test_xrl_error.P .deps/test_xrl_parser.P \
