@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.8 2003/11/20 06:05:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.9 2003/12/02 09:38:55 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -28,7 +28,7 @@
 #include "popen.hh"
 
 extern int init_opcmd_parser(const char *filename, OpCommandList *o);
-extern int parse_opcmd();
+extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
 OpInstance::OpInstance(EventLoop* eventloop, const string& executable,
@@ -359,7 +359,7 @@ OpCommand::remove_instance(OpInstance* instance) const
 }
 
 OpCommandList::OpCommandList(const string &config_template_dir,
-			     const TemplateTree *tt)
+			     const TemplateTree *tt) throw (InitError)
 {
     _template_tree = tt;
     list<string> files;
@@ -408,16 +408,16 @@ OpCommandList::OpCommandList(const string &config_template_dir,
 	}
 	try {
 	    parse_opcmd();
-	} catch (ParseError &pe) {
-	    opcmderror(pe.why().c_str());
+	} catch (const ParseError& pe) {
 	    globfree(&pglob);
-	    exit(1);
+	    xorp_throw(InitError, pe.why());
 	}
 	if (_path_segments.size() != 0) {
-	    fprintf(stderr, "Error: file %s is not terminated properly\n",
-		    pglob.gl_pathv[i]);
 	    globfree(&pglob);
-	    exit(1);
+	    string errmsg;
+	    errmsg = c_format("Error: file %s is not terminated properly",
+		    pglob.gl_pathv[i]);
+	    xorp_throw(InitError, errmsg);
 	}
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.4 2003/11/20 06:05:05 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.5 2003/12/02 09:38:55 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -21,7 +21,7 @@
 #include <set>
 #include "libxorp/xorp.h"
 #include "libxorp/asyncio.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 #include "cli.hh"
 
 
@@ -85,7 +85,8 @@ private:
 
 class OpCommandList {
 public:
-    OpCommandList(const string& config_template_dir, const TemplateTree* tt);
+    OpCommandList(const string& config_template_dir, const TemplateTree* tt)
+	throw (InitError);
     ~OpCommandList();
 
     void set_config_tree(SlaveConfigTree* sct) { _conf_tree = sct; }
