@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.8 2004/04/23 19:31:01 hodson Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.9 2004/04/26 23:03:04 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
@@ -48,6 +48,10 @@ struct RedistNetCmp {
  * It keeps track of nets it hears add and deletes for so when route
  * @ref Redistributor objects are added to the RedistTable they can
  * announce the existing routes at startup.
+ *
+ * Design note: RedistTable uses a set of IPNet's to cache routes - this
+ * should be route entry pointers with an appropriate comparitor (not pointer
+ * value based).
  */
 template<class A>
 class RedistTable : public RouteTable<A> {

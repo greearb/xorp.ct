@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.15 2004/04/26 23:03:04 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.16 2004/04/27 00:33:33 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -394,6 +394,8 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	r->redist_event().did_add(route);
     }
 
+    if (this->next_table())
+	return this->next_table()->add_route(route, this);
     return XORP_OK;
 }
 
@@ -430,6 +432,9 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
 	i++;	// XXX for safety increment iterator before prodding output
 	r->redist_event().did_delete(route);
     }
+
+    if (this->next_table())
+	return this->next_table()->delete_route(r, this);
 
     return XORP_OK;
 }
