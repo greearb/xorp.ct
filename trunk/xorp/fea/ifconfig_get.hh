@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.8 2003/09/22 05:45:57 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.9 2003/10/13 23:32:41 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -51,18 +51,81 @@ public:
      */
     virtual int stop() = 0;
 
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config) = 0;
     
-    static string iff_flags(uint32_t flags);
-    int sock(int family);
-
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in "struct ifaddrs" format
+     * (e.g., obtained by getifaddrs(3) mechanism).
+     * 
+     * @param it the IfTree storage to store the parsed information.
+     * @param ifap a linked list of the network interfaces on the
+     * local machine.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
     bool parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap);
+
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param it the IfTree storage to store the parsed information.
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
     bool parse_buffer_rtm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
+
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in "struct ifreq" format
+     * (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
+     * 
+     * @param it the IfTree storage to store the parsed information.
+     * @param family the address family to consider only (e.g., AF_INET
+     * or AF_INET6 for IPv4 and IPv6 respectively).
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
     bool parse_buffer_ifreq(IfTree& it, int family, const uint8_t *buf,
 			    size_t buf_bytes);
+
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in NETLINK format
+     * (e.g., obtained by netlink(7) sockets mechanism).
+     * 
+     * @param it the IfTree storage to store the parsed information.
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
     bool parse_buffer_nlm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
     
 protected:
+    static string iff_flags(uint32_t flags);
+    int sock(int family);
+
     int	_s4;
     int _s6;
     
@@ -88,7 +151,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config);
     
 private:
@@ -113,13 +182,17 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config);
-    
-    virtual bool read_config(IfTree& it);
-    
+
 private:
-    
+    bool read_config(IfTree& it);
 };
 
 class IfConfigGetSysctl : public IfConfigGet {
@@ -140,12 +213,17 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config);
-    virtual bool read_config(IfTree& it);
     
 private:
-    
+    bool read_config(IfTree& it);
 };
 
 class IfConfigGetIoctl : public IfConfigGet {
@@ -166,11 +244,17 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
-    virtual bool read_config(IfTree& it);
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config);
     
 private:
+    bool read_config(IfTree& it);
 };
 
 class IfConfigGetProcLinux : public IfConfigGet {
@@ -191,11 +275,17 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
-    virtual bool read_config(IfTree& it);
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config);
     
 private:
+    bool read_config(IfTree& it);
 };
 
 class IfConfigGetNetlink : public IfConfigGet,
@@ -219,10 +309,17 @@ public:
      */
     virtual int stop();
 
-    virtual bool read_config(IfTree& it);
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
     virtual bool pull_config(IfTree& config);
 
 private:
+    bool read_config(IfTree& it);
+
     NetlinkSocketReader	_ns_reader;
 };
 
