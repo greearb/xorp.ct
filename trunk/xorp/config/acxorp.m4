@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acxorp.m4,v 1.2 2003/04/21 08:20:35 pavlin Exp $
+dnl $XORP: xorp/config/acxorp.m4,v 1.3 2003/05/31 07:34:32 pavlin Exp $
 dnl
 
 dnl
@@ -12,7 +12,7 @@ AC_DEFUN([XR_TYPE_SIG_T],
 	 AC_EGREP_HEADER(sig_t, signal.h, 
 	  xr_cv_type_sig_t=yes, xr_cv_type_sig_t=no)
 	])
-	if test "X${xr_cv_type_sig_t}" = "Xyes"
+	if test "${xr_cv_type_sig_t}" = "yes"
 	then
 		AC_DEFINE(HAVE_SIG_T, 1, [Define to 1 if you have sig_t])
 	fi

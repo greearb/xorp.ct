@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.40 2003/05/29 19:03:13 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.41 2003/05/31 07:34:31 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -143,14 +143,14 @@ dnl ----------------------------
 TRY_USE_SIM=false
 AC_ARG_ENABLE(sim,
 	[  --enable-sim            Enable simulator],
-  if test "X${enable_sim}" = "Xyes"; then
+  if test "${enable_sim}" = "yes"; then
     TRY_USE_SIM=true;
   else
     TRY_USE_SIM=false;
   fi
   ,
 )
-AM_CONDITIONAL(TRY_USE_SIM, test "X${enable_sim}" = "Xyes")
+AM_CONDITIONAL(TRY_USE_SIM, test "${enable_sim}" = "yes")
 
 dnl ----------------------------
 dnl --enable-advanced-mcast-api
@@ -158,7 +158,7 @@ dnl ----------------------------
 AC_ARG_ENABLE(advanced-mcast-api,
 	[  --enable-advanced-mcast-api   Enable advanced multicast API ],
 )
-if test "X${enable_advanced_mcast_api}" = "Xyes" ; then
+if test "${enable_advanced_mcast_api}" = "yes" ; then
 	AC_DEFINE(ENABLE_ADVANCED_MCAST_API, 1,
 			[Define to 1 to enable advanced multicast API])
 fi
@@ -247,7 +247,7 @@ AC_CACHE_CHECK(
 		xorp_cv_cpp_gnu_va_args=no
 	)
 )
-if test "X${xorp_cv_cpp_gnu_va_args}" = "Xyes" ; then
+if test "${xorp_cv_cpp_gnu_va_args}" = "yes" ; then
 	AC_DEFINE(CPP_SUPPORTS_GNU_VA_ARGS, 1,
  [Define to 1 if the preprocessor supports GNU style variable argument macros])
 fi
@@ -261,7 +261,7 @@ AC_PROG_RANLIB
 AC_CHECK_TOOL(AR, ar)
 
 AC_CHECK_TOOL(GMAKE, gmake, :)
-if test "X${GMAKE}" != "Xgmake" ; then
+if test "${GMAKE}" != "gmake" ; then
    echo "The default XORP build process requires GNU make installed."
    exit
 fi
@@ -290,7 +290,7 @@ if test "${PYTHON}" != "NO_PYTHON" ; then
 fi
 
 PY_BUILD="#"
-if test "X${xorp_python_good}" = "Xyes" ; then
+if test "${xorp_python_good}" = "yes" ; then
    PY_BUILD=''
 fi
 AC_SUBST(PY_BUILD)
@@ -307,7 +307,7 @@ fail_openssl()
 	exit 1
 }
 
-if test "X${xr_openssl_prefix}" = "X" ; then
+if test "${xr_openssl_prefix}" = "" ; then
 # User has not specified an OpenSSL prefix, may be in cache, otherwise take
 # a guess
     AC_CACHE_CHECK(
@@ -321,7 +321,7 @@ if test "X${xr_openssl_prefix}" = "X" ; then
 		fi
 	    done
 	])
-elif test "X${xr_openssl_prefix}" != "X${xr_cv_openssl_prefix}"; then
+elif test "${xr_openssl_prefix}" != "${xr_cv_openssl_prefix}"; then
 
     # User has specified a new OpenSSL prefix, flush cache state of
     # header files and libraries that we care about to force a
@@ -356,14 +356,14 @@ dnl ---------------------------------------------------------------------------
 dnl SNMP
 dnl ---------------------------------------------------------------------------
 
-if test "X${snmp}" = "Xyes"; then
+if test "${snmp}" = "yes"; then
     AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
 else 
     net_snmp_found="skip_check"
     snmpd="skip_check"
 fi
 
-if test "X${net_snmp_found}" = "Xtrue";  then
+if test "${net_snmp_found}" = "true";  then
     net_snmp_v=`net-snmp-config --version`
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.` 
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.` 
@@ -378,35 +378,35 @@ if test "X${net_snmp_found}" = "Xtrue";  then
 	elif test "6" -gt $net_snmp_rev ; then
 	    net_snmp_too_old=true
 	fi
-	if test "X${net_snmp_too_old}" != "Xtrue"; then
+	if test "${net_snmp_too_old}" != "true"; then
 	    ac_cv_net_snmp_usable=yes
 	else
 	    ac_cv_net_snmp_usable=no
 	    snmpd="skip_check"
 	fi
     )
-    if test "X${ac_cv_net_snmp_usable}" != "Xyes" ; then
+    if test "${ac_cv_net_snmp_usable}" != "yes" ; then
 	AC_MSG_WARN(net-snmp version too old) 
     fi
-elif test "X${net_snmp_found}" = "Xno"; then
+elif test "${net_snmp_found}" = "no"; then
     AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
     snmpd="skip_check"
 fi
 
 
-if test "X${snmpd}" = "Xnot_found"; then
+if test "${snmpd}" = "not_found"; then
     AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/local/sbin)
 fi
 
-if test "X${snmpd}" = "Xnot_found";  then
+if test "${snmpd}" = "not_found";  then
     echo "checking again for snmpd in another directory"
     AC_PATH_PROG(snmpd2, snmpd, "not_found", /usr/sbin)
     snmpd=$snmpd2
 fi
 
-if test "X${snmpd}" = "Xnot_found" ; then
+if test "${snmpd}" = "not_found" ; then
     AC_MSG_WARN("snmpd not found:  snmp test scripts will not work")
-elif test "X${snmpd}" = "Xskip_check"; then
+elif test "${snmpd}" = "skip_check"; then
     AC_MSG_CHECKING(if snmpd can be started)   
     AC_MSG_RESULT(skipped)
 else
@@ -426,7 +426,7 @@ else
 	fi	
 	kill ${pid} > /dev/null
     done
-    if test "X${snmpd_valid}" = "Xyes" ; then
+    if test "${snmpd_valid}" = "yes" ; then
 	# Verify that dlmod directive was recognized
 	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
 	    echo "-------------------------------------------------------------"
@@ -457,7 +457,7 @@ else
     fi
 fi
 
-if test "X${snmpd_valid}" = "Xyes" ; then
+if test "${snmpd_valid}" = "yes" ; then
     MIBS="mibs"	
 else
     AC_MSG_WARN(XORP MIBs will not be built)
@@ -505,15 +505,15 @@ dnl XXX ether_addr is defined in one of the following header files:
 dnl sys/ethernet.h, net/ethernet.h or net/if_ether.h
 dnl
 AC_CHECK_HEADERS(sys/ethernet.h net/ethernet.h net/if_ether.h)
-if test "X${ac_cv_header_sys_ethernet_h}" = "Xyes"
+if test "${ac_cv_header_sys_ethernet_h}" = "yes"
 then
 	xr_cv_ether_header="sys/ethernet.h"
 fi
-if test "X${ac_cv_header_net_ethernet_h}" = "Xyes"
+if test "${ac_cv_header_net_ethernet_h}" = "yes"
 then
 	xr_cv_ether_header="net/ethernet.h"
 fi
-if test "X${ac_cv_header_net_if_ether_h}" = "Xyes"
+if test "${ac_cv_header_net_if_ether_h}" = "yes"
 then
 	xr_cv_ether_header="net/if_ether.h"
 fi
@@ -528,7 +528,7 @@ AC_CACHE_CHECK(for ether_ntoa in $xr_cv_ether_header,
 			       xr_cv_have_ether_ntoa=yes,
 			       xr_cv_have_ether_ntoa=no)
 )
-if test "X${xr_cv_have_ether_ntoa}" = "Xno" ; then
+if test "${xr_cv_have_ether_ntoa}" = "no" ; then
    AC_DEFINE(NEED_ETHER_NTOA, 1,
 		[Define to 1 if the C library is missing ether_ntoa(3)])
 fi
@@ -543,7 +543,7 @@ AC_CACHE_CHECK(for ether_aton in $xr_cv_ether_header,
 			       xr_cv_have_ether_aton=yes,
 			       xr_cv_have_ether_aton=no)
 )
-if test "X${xr_cv_have_ether_aton}" = "Xno" ; then
+if test "${xr_cv_have_ether_aton}" = "no" ; then
    AC_DEFINE(NEED_ETHER_ATON, 1,
 		[Define to 1 if the C library is missing ether_aton(3)])
 fi
@@ -562,7 +562,7 @@ AC_CACHE_CHECK(for uint8_t in <stdint.h>, xorp_cv_uint8_t_in_stdint_h,
                         stdint.h,
                         xorp_cv_uint8_t_in_stdint_h=yes,
                         xorp_cv_uint8_t_in_stdint_h=no))
-if test "X${xorp_cv_uint8_t_in_stdint_h}" = "Xno"
+if test "${xorp_cv_uint8_t_in_stdint_h}" = "no"
 then
          AC_CHECK_TYPE(uint8_t,  unsigned char)
 fi
@@ -572,7 +572,7 @@ AC_CACHE_CHECK(for uint16_t in <stdint.h>, xorp_cv_uint16_t_in_stdint_h,
                         stdint.h,
                         xorp_cv_uint16_t_in_stdint_h=yes,
                         xorp_cv_uint16_t_in_stdint_h=no))
-if test "X${xorp_cv_uint16_t_in_stdint_h}" = "Xno"
+if test "${xorp_cv_uint16_t_in_stdint_h}" = "no"
 then
          AC_CHECK_TYPE(uint16_t,  unsigned short)
 fi
@@ -582,7 +582,7 @@ AC_CACHE_CHECK(for uint32_t in <stdint.h>, xorp_cv_uint32_t_in_stdint_h,
                         stdint.h,
                         xorp_cv_uint32_t_in_stdint_h=yes,
                         xorp_cv_uint32_t_in_stdint_h=no))
-if test "X${xorp_cv_uint32_t_in_stdint_h}" = "Xno"
+if test "${xorp_cv_uint32_t_in_stdint_h}" = "no"
 then
          AC_CHECK_TYPE(uint32_t,  unsigned int)
 fi
@@ -827,7 +827,7 @@ dnl-----------------------------
 dnl Check for IPv6
 dnl-----------------------------
 AC_MSG_CHECKING(whether the system has IPv6 stack)
-if test "X${enable_ipv6}" = "Xno"; then
+if test "${enable_ipv6}" = "no"; then
   AC_MSG_RESULT(disabled)
 else
   AC_LANG_SAVE
@@ -857,14 +857,14 @@ fi
 dnl
 dnl Misc. IPv6-specific checks
 dnl
-if test "X${ipv6}" = "Xyes"; then
+if test "${ipv6}" = "yes"; then
   builtin(include, config/acipv6.m4)
 fi
 
 dnl
 dnl Final word on having IPv6
 dnl
-if test "X${ipv6}" = "Xyes"; then
+if test "${ipv6}" = "yes"; then
   AC_DEFINE(HAVE_IPV6, 1, [Define to 1 if you have IPv6])
 fi
 
@@ -1079,7 +1079,7 @@ AC_CACHE_CHECK(ospfd platform, xorp_cv_ospfd_os,
 ])
 
 OSPFD_OS=${xorp_cv_ospfd_os}
-if test "X${OSPFD_OS}" != "Xunsupported" ; then
+if test "${OSPFD_OS}" != "unsupported" ; then
     OSPFD="ospfd"
 else
     echo "OSPFD will not be built."
@@ -1127,7 +1127,7 @@ dnl ---------------------------------------------------------------------------
 dnl Debug flags
 dnl ---------------------------------------------------------------------------
 
-if test "X${enable_debug_msgs}" = "Xyes" ; then
+if test "${enable_debug_msgs}" = "yes" ; then
 	AC_DEFINE(DEBUG_LOGGING_GLOBAL, 1,
 		[Define to 1 to enable globally debug messages output])
 fi
@@ -1140,7 +1140,7 @@ dnl ----------------------------
 dnl GCC-specific warning flags
 dnl ----------------------------
 
-if test "X${GCC}" = "Xyes" ; then
+if test "${GCC}" = "yes" ; then
 	dnl
 	dnl TODO: add -ansi -pedantic
 	dnl XXX: Flag -Wtraditional is not recommended for C, because:
@@ -1157,14 +1157,14 @@ if test "X${GCC}" = "Xyes" ; then
 	dnl
 	dnl If debugging is disabled, filter-out the "-g" flag
 	dnl
-	if test "X${enable_debug}" = "Xno" ; then
+	if test "${enable_debug}" = "no" ; then
 		CFLAGS=`echo $CFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
 		CXXFLAGS=`echo $CXXFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
 	fi
 		
 	dnl default compiler flags have optimization turned on which
 	dnl can cause helpful debugging info to be optimized out.
-	if test "X${enable_optimize}" != "Xyes" ; then
+	if test "${enable_optimize}" != "yes" ; then
 		dnl Could just append -O0, but two -O args are icky
 		dnl We make assumption change is O2 because extended regex's
 		dnl are not portable...
@@ -1173,11 +1173,11 @@ if test "X${GCC}" = "Xyes" ; then
 		CXXFLAGS=`echo $CXXFLAGS | sed 's/-O2//g'`
 		changequote([, ])dnl
 	fi
-	if test "X${enable_profile}" = "Xyes" ; then
+	if test "${enable_profile}" = "yes" ; then
 		CFLAGS="${CFLAGS} -pg"
 		CXXFLAGS="${CXXFLAGS} -pg"
 	fi
-	if test "X${enable_debug_fnames}" = "Xyes" ; then
+	if test "${enable_debug_fnames}" = "yes" ; then
 		AC_DEFINE(DEBUG_PRINT_FUNCTION_NAME, 1,
 			[Define to 1 to enable printing function name in debug messages])
 	fi
@@ -1251,7 +1251,7 @@ dnl ---------------------------------------------------------------------------
 dnl Warn if default make is not gmake
 dnl ---------------------------------------------------------------------------
 
-if test "X${DEFAULT_GMAKE}" != "Xyes" ; then
+if test "${DEFAULT_GMAKE}" != "yes" ; then
    echo
    echo "=============================================================================="
    echo "The default \"make\" on this machine is not GNU make, but \"gmake\" exists"

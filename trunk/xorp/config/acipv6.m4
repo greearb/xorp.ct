@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.5 2003/04/21 08:20:35 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.6 2003/05/31 07:34:32 pavlin Exp $
 dnl
 
 dnl
@@ -11,7 +11,7 @@ dnl Check whether the system IPv6 stack implementation is reasonable
 dnl XXX: The check is very primitive. Add more checks as needed.
 dnl ------------------------------------
 AC_MSG_CHECKING(whether the system IPv6 stack implementation is reasonable)
-if test "X${enable_ipv6}" = "Xno"; then
+if test "${enable_ipv6}" = "no"; then
   AC_MSG_RESULT(disabled)
 else
   AC_LANG_SAVE
@@ -90,7 +90,7 @@ yes
     AC_DEFINE(IPV6_STACK_KAME, 1, [Define to 1 if you have KAME IPv6 stack])])
     ;;
   esac
-  if test "X${ipv6type}" != "Xunknown"; then
+  if test "${ipv6type}" != "unknown"; then
     break
   fi
 done
