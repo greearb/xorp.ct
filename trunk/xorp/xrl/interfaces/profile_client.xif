@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/profile_client.xif,v 1.1 2004/09/21 18:09:12 atanu Exp $ */
 
 /*
 ** Profiling client
@@ -12,7 +12,7 @@ interface profile_client/0.1 {
 	 * @param sec absolute time in seconds that this entry was created.
 	 * @param usec absolute time in micro seconds that this entry was
 	 * created.
-	 * @param comment
+	 * @param comment a comment to be appended to this entry.
 	 */
 	log ? \
 		pname:txt \
