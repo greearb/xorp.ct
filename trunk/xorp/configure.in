@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.71 2003/10/07 19:22:26 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.72 2003/10/17 01:44:28 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1314,6 +1314,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_OUTPUT(
 	Makefile
+	MakefileRootCheck
 	bgp/Makefile
 	bgp/harness/Makefile
 	bgp/tools/Makefile
@@ -1336,6 +1337,7 @@ AC_OUTPUT(
 	etc/Makefile
 	etc/templates/Makefile
 	fea/Makefile
+	fea/MakefileRootCheck
 	libcomm/Makefile
 	libfeaclient/Makefile
 	libproto/Makefile
