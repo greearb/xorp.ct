@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.7 2003/10/13 23:32:40 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.8 2004/03/16 21:45:51 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -84,11 +84,12 @@ public:
      * @param fte_list the list with the Fte entries to store the result.
      * @param buf the buffer with the data to parse.
      * @param buf_bytes the size of the data in the buffer.
+     * @param is_rtm_get_only if true, consider only the RTM_GET entries.
      * @return true on success, otherwise false.
      * @see FteX.
      */
     bool parse_buffer_rtm(int family, list<FteX>& fte_list, const uint8_t *buf,
-			  size_t buf_bytes);
+			  size_t buf_bytes, bool is_rtm_get_only);
 
     /**
      * Parse information about routing table information received from
@@ -102,11 +103,13 @@ public:
      * @param fte_list the list with the Fte entries to store the result.
      * @param buf the buffer with the data to parse.
      * @param buf_bytes the size of the data in the buffer.
+     * @param is_nlm_get_only if true, consider only the entries obtained
+     * by RTM_GETROUTE.
      * @return true on success, otherwise false.
      * @see FteX.
      */
     bool parse_buffer_nlm(int family, list<FteX>& fte_list, const uint8_t* buf,
-			  size_t buf_bytes);
+			  size_t buf_bytes, bool is_nlm_get_only);
     
 protected:
     int sock(int family);
