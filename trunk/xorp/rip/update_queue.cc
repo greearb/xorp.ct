@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.8 2004/02/20 01:22:04 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.9 2004/03/21 01:13:24 hodson Exp $"
 
 #include <vector>
 #include <list>
@@ -346,7 +346,7 @@ public:
 
     uint32_t updates_queued() const
     {
-	UpdateBlockList::const_iterator ci = _update_blocks.begin();
+	typename UpdateBlockList::const_iterator ci = _update_blocks.begin();
 	uint32_t total = 0;
 	while (ci != _update_blocks.end()) {
 	    total += ci->count();
