@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.17 2004/02/27 07:52:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.18 2004/03/04 01:41:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -130,16 +130,18 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
 	return (XORP_ERROR);
     }
     
+    //
     // XXX: If we want to be pedantic, here we might want to lookup
     // the PimMfc entries and check whether the PIM Register vif is
     // in the list of outgoing interfaces.
     // However, this is probably an overkill, because the olist of
     // the kernel MFC should be exactly same, hence we don't do it.
+    //
     
     //
     // Send a PIM Register to the RP
     //
-    pim_vif = pim_node().vif_find_same_subnet_or_p2p(src);
+    pim_vif = pim_node().vif_find_by_vif_index(vif_index);
     if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
 	XLOG_WARNING("RX WHOLEPKT signal from %s: vif_index = %d "
 		     "src = %s dst = %s: "
