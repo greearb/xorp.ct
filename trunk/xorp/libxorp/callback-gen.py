@@ -318,6 +318,10 @@ if (! cb.is_empty()) {
 """
 
     print """
+#ifndef INCLUDED_FROM_CALLBACK_HH
+#error "This file should be included through libxorp/callback.hh"
+#endif
+
 #ifndef __XORP_CALLBACK_HH__
 #define __XORP_CALLBACK_HH__
 

@@ -12,17 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/libxorp/callback.hh,v 1.13 2004/03/05 22:12:49 hodson Exp $
 
-#ifndef LIBXORP_CALLBACK_HH__
-#define LIBXORP_CALLBACK_HH__
+#ifndef __LIBXORP_CALLBACK_HH__
+#define __LIBXORP_CALLBACK_HH__
+
+#define INCLUDED_FROM_CALLBACK_HH
 
 #include "config.h"
-
 #ifdef DEBUG_CALLBACKS
 #include "callback_debug.hh"
 #else
 #include "callback_nodebug.hh"
 #endif
 
-#endif // LIBXORP_CALLBACK_HH__
+#undef INCLUDED_FROM_CALLBACK_HH
+
+#endif // __LIBXORP_CALLBACK_HH__
