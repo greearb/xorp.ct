@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.41 2005/02/24 02:47:41 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.42 2005/03/14 19:08:50 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -278,7 +278,14 @@ public:
      * Delete all PIM vifs.
      */
     void	delete_all_vifs();
-    
+
+    /**
+     * A method called when a vif has completed its shutdown.
+     * 
+     * @param vif_name the name of the vif that has completed its shutdown.
+     */
+    void	vif_shutdown_completed(const string& vif_name);
+
     /**
      * Receive a protocol message.
      * 

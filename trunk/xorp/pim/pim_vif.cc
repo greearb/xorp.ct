@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.41 2005/02/27 20:49:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.42 2005/02/27 21:32:55 pavlin Exp $"
 
 
 //
@@ -479,6 +479,11 @@ PimVif::final_stop(string& error_msg)
     
     XLOG_INFO("STOPPED %s%s",
 	      this->str().c_str(), flags_string().c_str());
+
+    //
+    // Inform the node that the vif has completed the shutdown
+    //
+    pim_node().vif_shutdown_completed(name());
 
     //
     // Remove the shutdown operation of this vif as a shutdown task

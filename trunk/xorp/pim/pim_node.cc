@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.62 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.63 2005/03/14 19:08:50 pavlin Exp $"
 
 
 //
@@ -308,16 +308,6 @@ PimNode::final_stop()
 
     if (ProtoNode<PimVif>::stop() < 0)
 	return (XORP_ERROR);
-
-    //
-    // De-register with the RIB
-    //
-    rib_register_shutdown();
-
-    //
-    // De-register with the MFEA
-    //
-    mfea_register_shutdown();
 
     return (XORP_OK);
 }
@@ -1000,6 +990,41 @@ PimNode::delete_all_vifs()
 	    XLOG_ERROR(err.c_str());
 	}
     }
+}
+
+/**
+ * A method called when a vif has completed its shutdown.
+ * 
+ * @param vif_name the name of the vif that has completed its shutdown.
+ */
+void
+PimNode::vif_shutdown_completed(const string& vif_name)
+{
+    vector<PimVif *>::iterator iter;
+
+    //
+    // If all vifs have completed the shutdown, then de-register with
+    // the RIB and the MFEA.
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	PimVif *pim_vif = *iter;
+	if (pim_vif == NULL)
+	    continue;
+	if (! pim_vif->is_down())
+	    return;
+    }
+
+    //
+    // De-register with the RIB
+    //
+    rib_register_shutdown();
+
+    //
+    // De-register with the MFEA
+    //
+    mfea_register_shutdown();
+
+    UNUSED(vif_name);
 }
 
 /**
