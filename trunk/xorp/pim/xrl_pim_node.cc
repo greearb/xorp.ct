@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.68 2005/03/15 00:34:14 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.69 2005/03/15 00:52:22 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -1236,6 +1236,8 @@ XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
     
     _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, true));
 
+    PimNode::incr_startup_requests_n();
+
     // If the queue was empty before, start sending the changes
     if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
 	send_start_stop_protocol_kernel_vif();
@@ -1256,6 +1258,8 @@ XrlPimNode::stop_protocol_kernel_vif(uint16_t vif_index)
     }
     
     _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, false));
+
+    PimNode::incr_shutdown_requests_n();
 
     // If the queue was empty before, start sending the changes
     if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
@@ -1309,10 +1313,8 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		PimNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1324,10 +1326,8 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		PimNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     } else {
 	// Stop a vif with the MFEA
@@ -1340,10 +1340,8 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		PimNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1355,10 +1353,8 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		PimNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     }
 
@@ -1469,6 +1465,8 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
     _join_leave_multicast_group_queue.push_back(
 	JoinLeaveMulticastGroup(vif_index, multicast_group, true));
 
+    PimNode::incr_startup_requests_n();
+
     // If the queue was empty before, start sending the changes
     if (_join_leave_multicast_group_queue.size() == 1) {
 	send_join_leave_multicast_group();
@@ -1491,6 +1489,8 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
     
     _join_leave_multicast_group_queue.push_back(
 	JoinLeaveMulticastGroup(vif_index, multicast_group, false));
+
+    PimNode::incr_shutdown_requests_n();
 
     // If the queue was empty before, start sending the changes
     if (_join_leave_multicast_group_queue.size() == 1) {
@@ -1546,10 +1546,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		PimNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1562,10 +1560,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		PimNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     } else {
 	// Leave a multicast group on a vif with the MFEA
@@ -1579,10 +1575,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		PimNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1595,10 +1589,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		PimNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     }
 

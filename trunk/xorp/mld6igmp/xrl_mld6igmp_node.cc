@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.38 2005/03/15 00:34:39 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.39 2005/03/15 00:52:22 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -642,6 +642,8 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
     
     _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, true));
 
+    Mld6igmpNode::incr_startup_requests_n();
+
     // If the queue was empty before, start sending the changes
     if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
 	send_start_stop_protocol_kernel_vif();
@@ -662,6 +664,8 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
     }
     
     _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, false));
+
+    Mld6igmpNode::incr_shutdown_requests_n();
 
     // If the queue was empty before, start sending the changes
     if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
@@ -715,10 +719,8 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		Mld6igmpNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -730,10 +732,8 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		Mld6igmpNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     } else {
 	// Stop a vif with the MFEA
@@ -746,10 +746,8 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -761,10 +759,8 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    if (success) {
-		Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     }
 
@@ -875,6 +871,8 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
     _join_leave_multicast_group_queue.push_back(
 	JoinLeaveMulticastGroup(vif_index, multicast_group, true));
 
+    Mld6igmpNode::incr_startup_requests_n();
+
     // If the queue was empty before, start sending the changes
     if (_join_leave_multicast_group_queue.size() == 1) {
 	send_join_leave_multicast_group();
@@ -897,6 +895,8 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
     
     _join_leave_multicast_group_queue.push_back(
 	JoinLeaveMulticastGroup(vif_index, multicast_group, false));
+
+    Mld6igmpNode::incr_shutdown_requests_n();
 
     // If the queue was empty before, start sending the changes
     if (_join_leave_multicast_group_queue.size() == 1) {
@@ -952,10 +952,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		Mld6igmpNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -968,10 +966,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		Mld6igmpNode::incr_startup_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     } else {
 	// Leave a multicast group on a vif with the MFEA
@@ -985,10 +981,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -1001,10 +995,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    if (success) {
-		Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success)
 		return;
-	    }
 	}
     }
 
