@@ -172,7 +172,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     // If we got this far create_peerid did not throw an exception so
     // this interface/vif is unique.
 
-    _peers[peerid] = new Peer<A>(_ospf, linktype, area);
+    _peers[peerid] = new Peer<A>(_ospf, interface, vif, linktype, area);
 
     area_router->add_peer(peerid);
 

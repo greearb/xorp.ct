@@ -39,8 +39,10 @@ template <typename A>
 class Peer {
  public:
 
-    Peer(Ospf<A>& ospf, OspfTypes::LinkType linktype, OspfTypes::AreaID area)
-	: _ospf(ospf), _linktype(linktype), _running(false);
+    Peer(Ospf<A>& ospf, const string interface, const string vif, 
+	 OspfTypes::LinkType linktype, OspfTypes::AreaID area)
+	: _ospf(ospf), _interface(interface), _vif(vif), 
+	  _linktype(linktype), _running(false)
     {
 	_area.push_back(area);
     }
@@ -79,6 +81,10 @@ class Peer {
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
+
+    const string _interface;	   	// The interface and vif this peer is
+    const string _vif;			// responsible for.
+
     OspfTypes::LinkType _linktype;	// Type of this link.
 
     list<OspfTypes::AreaID> _area;	// Areas we 
