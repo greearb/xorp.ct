@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.40 2004/09/17 13:50:53 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.41 2004/09/21 18:05:08 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -772,11 +772,14 @@ BGPMain::stop_server(const Iptuple& iptuple)
 void
 BGPMain::stop_all_servers()
 {
+    debug_msg("stop_all_servers\n");
+
     list<Server>::iterator i;
-    for (i = _serverfds.begin(); i != _serverfds.end(); i++) {
+    for (i = _serverfds.begin(); i != _serverfds.end();) {
+	debug_msg("%s\n", i->str().c_str());
 	eventloop().remove_selector(i->_serverfd);
 	::close(i->_serverfd);
-	i = _serverfds.erase(i);
+	_serverfds.erase(i++);
     }
 }
 
