@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.22 2003/10/01 21:20:02 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.23 2003/11/18 23:03:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -74,24 +74,41 @@ XrlStatusValidation::validate(CallBack cb)
     _cb = cb;
     printf("validate\n");
     if (_task_manager.do_exec()) {
-	const ConfigTreeNode* ctn = _task_manager.config_tree().find_config_module(_module_name);
-	if (ctn == NULL) {
-	    XLOG_ERROR("Cannot find module %s that needs validation",
-		       _module_name.c_str());
+	string xrl_request;
+	Xrl* xrl = NULL;
+	do {
+	    // Try to expand using the configuration tree
+	    const ConfigTreeNode* ctn;
+	    ctn = _task_manager.config_tree().find_config_module(_module_name);
+	    if (ctn != NULL) {
+		xrl_request = _xrl_action.expand_xrl_variables(*ctn);
+		break;
+	    }
+	    // Try to expand using the template tree
+	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
+	    xrl_request = _xrl_action.expand_xrl_variables(ttn);
+	    break;
+	} while (false);
+	if (xrl_request.empty()) {
+	    XLOG_ERROR("Cannot expand XRL validation action %s for module %s",
+		       _xrl_action.str().c_str(), _module_name.c_str());
 	    return;
 	}
 
-	UnexpandedXrl unexpanded_xrl(*ctn, _xrl_action);
-	Xrl* xrl = unexpanded_xrl.expand();
-	if (xrl == NULL) {
-	    XLOG_ERROR("Cannot expand XRL %s", unexpanded_xrl.str().c_str());
-	    return;
+	// Create the XRL
+	try {
+	    xrl = new Xrl(xrl_request.c_str());
+	} catch (const InvalidString& e) {
+	    XLOG_ERROR("Invalid XRL validation action %s for module %s",
+		       xrl_request.c_str(), _module_name.c_str());
 	}
+
 	printf("XRL: >%s<\n", xrl->str().c_str());
 	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().
 	    send_now(*xrl, callback(this, &XrlStatusValidation::xrl_done),
 		     response, true);
+	delete xrl;
     } else {
 	//when we're running with do_exec == false, we want to
 	//exercise most of the same machinery, but we want to ensure
@@ -359,24 +376,41 @@ XrlShutdown::shutdown(CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
-	const ConfigTreeNode* ctn = _task_manager.config_tree().find_config_module(_module_name);
-	if (ctn == NULL) {
-	    XLOG_ERROR("Cannot find module %s that needs shutdown",
-		       _module_name.c_str());
+	string xrl_request;
+	Xrl* xrl = NULL;
+	do {
+	    // Try to expand using the configuration tree
+	    const ConfigTreeNode* ctn;
+	    ctn = _task_manager.config_tree().find_config_module(_module_name);
+	    if (ctn != NULL) {
+		xrl_request = _xrl_action.expand_xrl_variables(*ctn);
+		break;
+	    }
+	    // Try to expand using the template tree
+	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
+	    xrl_request = _xrl_action.expand_xrl_variables(ttn);
+	    break;
+	} while (false);
+	if (xrl_request.empty()) {
+	    XLOG_ERROR("Cannot expand XRL shutdown action %s for module %s",
+		       _xrl_action.str().c_str(), _module_name.c_str());
 	    return;
 	}
-	UnexpandedXrl unexpanded_xrl(*ctn, _xrl_action);
-	Xrl* xrl = unexpanded_xrl.expand();
-	if (xrl == NULL) {
-	    XLOG_ERROR("Cannot expand XRL %s", unexpanded_xrl.str().c_str());
-	    return;
+
+	// Create the XRL
+	try {
+	    xrl = new Xrl(xrl_request.c_str());
+	} catch (const InvalidString& e) {
+	    XLOG_ERROR("Invalid XRL shutdown action %s for module %s",
+		       xrl_request.c_str(), _module_name.c_str());
 	}
+
 	printf("XRL: >%s<\n", xrl->str().c_str());
-	// string response = "";
 	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().
 	    send_now(*xrl, callback(this, &XrlShutdown::shutdown_done),
 		     response, true);
+	delete xrl;
     } else {
 	//when we're running with do_exec == false, we want to
 	//exercise most of the same machinery, but we want to ensure
