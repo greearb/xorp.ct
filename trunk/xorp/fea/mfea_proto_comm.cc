@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.18 2004/06/10 22:40:55 hodson Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.19 2004/08/25 06:23:51 pavlin Exp $"
 
 
 //
@@ -1517,9 +1517,16 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	ip->ip_p	= _ipproto;
 	ip->ip_ttl	= ip_ttl;
 	ip->ip_tos	= ip_tos;
-	
-	src.copy_out(static_cast<struct in_addr&>(ip->ip_src));
-	dst.copy_out(static_cast<struct in_addr&>(ip->ip_dst));
+
+	//
+	// XXX: we need to use a temporary in_addr storage as a work-around
+	// if "struct ip" is __packed
+	//
+	struct in_addr in_addr_tmp;
+	src.copy_out(in_addr_tmp);
+	ip->ip_src = in_addr_tmp;
+	dst.copy_out(in_addr_tmp);
+	ip->ip_dst = in_addr_tmp;
 	ip->ip_len = (ip->ip_hl << 2) + datalen;
 #ifdef IPV4_RAW_OUTPUT_IS_RAW
 	ip->ip_len = htons(ip->ip_len);

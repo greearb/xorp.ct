@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.15 2004/06/10 22:41:33 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.16 2004/08/25 06:23:52 pavlin Exp $"
 
 
 //
@@ -657,8 +657,18 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	ip4_header.ip_p		= IPPROTO_PIM;
 	ip4_header.ip_len	= htons(sizeof(ip4_header));
 	ip4_header.ip_ttl	= 0;
-	source_addr.copy_out(static_cast<struct in_addr&>(ip4_header.ip_src));
-	group_addr.copy_out(static_cast<struct in_addr&>(ip4_header.ip_dst));
+
+	//
+	// XXX: we need to use a temporary in_addr storage as a work-around
+	// if "struct ip" is __packed
+	//
+	struct in_addr in_addr_tmp;
+	source_addr.copy_out(in_addr_tmp);
+	ip4_header.ip_src = in_addr_tmp;
+	group_addr.copy_out(in_addr_tmp);
+	ip4_header.ip_dst = in_addr_tmp;
+
+	//
 	// XXX: on older Linux 'ip->ip_sum' was named 'ip->ip_csum'.
 	// Later someone has realized that it is not a smart move,
 	// so now Linux is in sync with the rest of the UNIX-es.
@@ -666,6 +676,7 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	// something more decent. If you are stubborn and you don't want
 	// to upgrade, then change 'ip_sum' to 'ip_csum' below, but
 	// you should know that in the future you will get what you deserve :)
+	//
 	ip4_header.ip_sum	= 0;
 	ip4_header.ip_sum	= INET_CKSUM(&ip4_header, sizeof(ip4_header));
 	
