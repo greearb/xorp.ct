@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.19 2004/01/28 00:34:14 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.20 2004/02/27 12:10:25 mjh Exp $"
 
 
 //
@@ -384,8 +384,13 @@ CliClient::start_connection(void)
     gl_configure_getline(_gl, "bind ^W backward-delete-word", NULL, NULL);
 
     // Print the welcome message
-    char hostname[255];
-    gethostname(hostname, 254);
+    char hostname[MAXHOSTNAMELEN];
+    if (gethostname(hostname, sizeof(hostname)) < 0) {
+	XLOG_ERROR("gethostname() failed: %s", strerror(errno));
+	// XXX: if gethostname() fails, then default to "xorp"
+	strncpy(hostname, "xorp", sizeof(hostname) - 1);
+    }
+    hostname[sizeof(hostname) - 1] = '\0';
     cli_print(c_format("%s%s\n", XORP_CLI_WELCOME, hostname));
 
     // Show the prompt

@@ -501,9 +501,9 @@ main(int argc, char *argv[])
     //
     char hostname[MAXHOSTNAMELEN];
     if (gethostname(hostname, sizeof(hostname)) < 0) {
-	XLOG_FATAL("gethostname failed: %s", strerror(errno));
+	XLOG_FATAL("gethostname() failed: %s", strerror(errno));
     }
-    hostname[MAXHOSTNAMELEN - 1] = '\0';
+    hostname[sizeof(hostname) - 1] = '\0';
 
     try {
 	string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
