@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.18 2003/10/05 19:08:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.19 2004/04/05 06:36:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -411,7 +411,11 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the p2p address
-	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
+	    // XXX: note that unlike IPv4, here we check whether the
+	    // address family of the destination address is valid.
+	    if (fv.point_to_point()
+		&& (ifa->ifa_dstaddr != NULL)
+		&& (ifa->ifa_dstaddr->sa_family == AF_INET6)) {
 		const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(ifa->ifa_dstaddr);
 		peer_addr.copy_in(sin6->sin6_addr);
 		has_peer_addr = true;
