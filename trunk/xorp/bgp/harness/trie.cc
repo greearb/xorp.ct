@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.9 2003/09/11 03:38:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.10 2003/09/11 03:46:25 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -210,7 +210,7 @@ Trie::tree_walk_table(const TreeWalker_ipv6& tw) const
 }
 
 void
-Trie::update_walk(const UpdateWalker uw) const
+Trie::replay_walk(const ReplayWalker uw) const
 {
     for(const TrieData *p = _first; p; p = p->next())
 	uw->dispatch(p->data(), p->tv());

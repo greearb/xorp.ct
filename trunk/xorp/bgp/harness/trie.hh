@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.7 2003/09/10 03:19:26 atanu Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.8 2003/09/11 03:38:38 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
@@ -54,9 +54,15 @@ public:
     void tree_walk_table(const TreeWalker_ipv6& tw) const;
 
     typedef XorpCallback2<void, const UpdatePacket*,
-			  const TimeVal&>::RefPtr UpdateWalker;
+			  const TimeVal&>::RefPtr ReplayWalker;
     
-    void update_walk(const UpdateWalker uw) const;
+    /**
+     * Generate the set of update packets that would totally populate
+     * this trie.
+     *
+     * @param uw The callback function that is called.
+     */
+    void replay_walk(const ReplayWalker uw) const;
 
     uint32_t update_count() {
 	return _update_cnt;
