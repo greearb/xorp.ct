@@ -202,6 +202,7 @@ cmd:		LITERAL list_of_cmd_strings {
 		}
 		| LITERAL {
 			append_cmd($1);
+			end_cmd();
 		}
 		;
 

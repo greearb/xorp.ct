@@ -285,7 +285,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 224 "template.yy"
+#line 225 "template.yy"
 
 extern char *lstr;
 extern char *vstr;
@@ -829,27 +829,28 @@ case 56:
 #line 203 "template.yy"
 {
 			append_cmd(yyvsp[0]);
+			end_cmd();
 		}
 break;
 case 57:
-#line 209 "template.yy"
+#line 210 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
 case 58:
-#line 212 "template.yy"
+#line 213 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
 case 59:
-#line 217 "template.yy"
+#line 218 "template.yy"
 {
 			tplterror("syntax error");
 		}
 break;
-#line 853 "y.tplt_tab.c"
+#line 854 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
