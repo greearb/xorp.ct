@@ -12,17 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.10 2003/05/19 00:25:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.3 2003/05/19 17:54:02 pavlin Exp $"
 
 #include "rib_module.h"
-#include "config.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+#include "libxorp/status_codes.h"
+
+#include "libxipc/xrl_router.hh"
 
 #include "rib_manager.hh"
 #include "vifmanager.hh"
 
-VifManager::VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
-		       RibManager *rib_manager)
+VifManager::VifManager(XrlRouter& xrl_router,
+		       EventLoop& eventloop,
+		       RibManager* rib_manager)
     : _xrl_router(xrl_router),
       _eventloop(eventloop),
       _rib_manager(rib_manager),
@@ -30,21 +36,27 @@ VifManager::VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
 {
     _no_fea = false;
     _state = INITIALIZING;
-    _register_retry_counter = 0;
     _interfaces_remaining = 0;
     _vifs_remaining = 0;
     _addrs_remaining = 0;
+
+    _fea_target_name = "fea";		// XXX
     
-    enable();		// XXX: by default the VifManager is always enabled
+    enable();	// XXX: by default the VifManager is always enabled
 }
 
-VifManager::~VifManager() 
+VifManager::~VifManager()
 {
     stop();
     
-    map <string, Vif*>::iterator i;
-    for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); ++i) {
-	delete i->second;
+    // Remove all Vif entries
+    map <string, Vif*>::iterator iter;
+    for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
+	delete iter->second;
+    }
+    for (iter = _saved_vifs_by_name.begin();
+	 iter != _saved_vifs_by_name.end(); ++iter) {
+	delete iter->second;
     }
 }
 
@@ -58,7 +70,7 @@ VifManager::~VifManager()
 int
 VifManager::start()
 {
-    enable();		// XXX: by default the VifManager is always enabled
+    enable();	// XXX: by default the VifManager is always enabled
     
     if (ProtoState::start() < 0)
 	return (XORP_ERROR);
@@ -75,7 +87,7 @@ VifManager::start()
 /**
  * Stop operation.
  * 
- * Gracefully stop the VifManager.
+ * Gracefully stop operation.
  * 
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -93,166 +105,404 @@ VifManager::stop()
 }
 
 void
-VifManager::clean_out_old_state() 
+VifManager::update_state()
+{
+    switch (_state) {
+    case INITIALIZING:
+	if ((_interfaces_remaining == 0)
+	    && (_vifs_remaining == 0)
+	    && (_addrs_remaining == 0)) {
+	    _state = READY;
+	}
+	break;
+    default:
+	break;
+    }
+    
+    // Time to set the vif state
+    if (_state == READY) {
+	if ((_interfaces_remaining == 0)
+	    && (_vifs_remaining == 0)
+	    && (_addrs_remaining == 0)) {
+	    set_vif_state();
+	}
+    }
+}
+
+void
+VifManager::set_vif_state()
+{
+    map<string, Vif *>::const_iterator iter, vif_iter;
+    string err;
+    
+    //
+    // Remove vifs that don't exist anymore
+    //
+    for (vif_iter = _saved_vifs_by_name.begin();
+	 vif_iter != _saved_vifs_by_name.end();
+	) {
+	Vif* node_vif = vif_iter->second;
+	++vif_iter;
+	if (node_vif->is_pim_register())
+	    continue;		// XXX: don't delete the PIM Register vif
+	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
+	    // Delete the interface
+	    string vif_name = node_vif->name();
+	    _rib_manager->delete_vif(vif_name, err);
+	    _saved_vifs_by_name.erase(node_vif->name());
+	    delete node_vif;
+	    continue;
+	}
+    }
+    
+    //
+    // Add new vifs, and update existing ones
+    //
+    for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
+	Vif* vif = iter->second;
+	Vif* node_vif = NULL;
+	
+	vif_iter = _saved_vifs_by_name.find(vif->name());
+	if (vif_iter != _saved_vifs_by_name.end())
+	    node_vif = vif_iter->second;
+	
+	//
+	// Add a new vif
+	//
+	if (node_vif == NULL) {
+	    _rib_manager->new_vif(vif->name(), *vif, err);
+	    node_vif = new Vif(*vif);
+	    _saved_vifs_by_name.insert(pair<string, Vif*>(vif->name(),
+							  node_vif));
+	    continue;
+	}
+	
+	//
+	// Update the vif flags
+	//
+	// TODO: if necessary, we should update the vif flags inside the RIB
+	node_vif->set_p2p(vif->is_p2p());
+	node_vif->set_loopback(vif->is_loopback());
+	node_vif->set_multicast_capable(vif->is_multicast_capable());
+	node_vif->set_broadcast_capable(vif->is_broadcast_capable());
+	node_vif->set_underlying_vif_up(vif->is_underlying_vif_up());
+	
+	//
+	// Delete vif addresses that don't exist anymore
+	//
+	{
+	    list<IPvX> delete_addresses_list;
+	    list<VifAddr>::const_iterator vif_addr_iter;
+	    for (vif_addr_iter = node_vif->addr_list().begin();
+		 vif_addr_iter != node_vif->addr_list().end();
+		 ++vif_addr_iter) {
+		const VifAddr& vif_addr = *vif_addr_iter;
+		if (vif->find_address(vif_addr.addr()) == NULL)
+		    delete_addresses_list.push_back(vif_addr.addr());
+	    }
+	    // Delete the addresses
+	    list<IPvX>::iterator ipvx_iter;
+	    for (ipvx_iter = delete_addresses_list.begin();
+		 ipvx_iter != delete_addresses_list.end();
+		 ++ipvx_iter) {
+		const IPvX& ipvx = *ipvx_iter;
+		if (ipvx.is_ipv4()) {
+		    _rib_manager->delete_vif_addr(node_vif->name(),
+						  ipvx.get_ipv4(),
+						  err);
+		}
+		if (ipvx.is_ipv6()) {
+		    _rib_manager->delete_vif_addr(node_vif->name(),
+						  ipvx.get_ipv6(),
+						  err);
+		}
+		node_vif->delete_address(ipvx);
+	    }
+	}
+	
+	//
+	// Add new vif addresses, and update existing ones
+	//
+	{
+	    list<VifAddr>::const_iterator vif_addr_iter;
+	    for (vif_addr_iter = vif->addr_list().begin();
+		 vif_addr_iter != vif->addr_list().end();
+		 ++vif_addr_iter) {
+		const VifAddr& vif_addr = *vif_addr_iter;
+		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
+		if (node_vif_addr == NULL) {
+		    if (vif_addr.addr().is_ipv4()) {
+			_rib_manager->add_vif_addr(node_vif->name(),
+						   vif_addr.addr().get_ipv4(),
+						   vif_addr.subnet_addr().get_ipv4net(),
+						   err);
+		    }
+		    if (vif_addr.addr().is_ipv6()) {
+			_rib_manager->add_vif_addr(node_vif->name(),
+						   vif_addr.addr().get_ipv6(),
+						   vif_addr.subnet_addr().get_ipv6net(),
+						   err);
+		    }
+		    node_vif->add_address(vif_addr);
+		    continue;
+		}
+		// Update the address
+		// TODO: if necessary, we should update the address inside
+		// the RIB
+		*node_vif_addr = vif_addr;
+	    }
+	}
+    }
+}
+
+void
+VifManager::clean_out_old_state()
 {
     if (_no_fea)
 	return;
     
-    // we call unregister_client first, to cause the FEA to remove any
-    // registrations left over from previous incarnations of the RIB
+    //
+    // We call unregister_client first, to cause the FEA to remove any
+    // registrations left over from previous incarnations of the RIB.
+    //
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &VifManager::clean_out_old_state_done);
-    _ifmgr_client.send_unregister_client("fea", _xrl_router.name(), cb);
+    cb = callback(this, &VifManager::xrl_result_unregister_client);
+    _ifmgr_client.send_unregister_client(_fea_target_name.c_str(),
+					 _xrl_router.name(), cb);
 }
 
 void
-VifManager::clean_out_old_state_done(const XrlError& e) 
+VifManager::xrl_result_unregister_client(const XrlError& e)
 {
     UNUSED(e);
-    // We really don't care here if the request succeeded or failed.
-    // It's normal to fail with COMMAND_FAILED if there was no state
-    // left behind from a previous incarnation.  Any other errors would
+    
+    //
+    // XXX: We really don't care here if the request succeeded or failed.
+    // It is normal to fail with COMMAND_FAILED if there was no state
+    // left behind from a previous incarnation. Any other errors would
     // also show up in register_if_spy, so we'll let that deal with
     // them.
+    //
     // register_if_spy();
 }
 
 void
-VifManager::register_if_spy() 
+VifManager::register_if_spy()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &VifManager::register_if_spy_done);
-    _ifmgr_client.send_register_client("fea", _xrl_router.name(), cb);
+    cb = callback(this, &VifManager::xrl_result_register_client);
+    _ifmgr_client.send_register_client(_fea_target_name.c_str(),
+				       _xrl_router.name(), cb);
 }
 
 void
-VifManager::register_if_spy_done(const XrlError& e) 
+VifManager::xrl_result_register_client(const XrlError& e)
 {
-    if (e == XrlError::OKAY()) {
-	// The registration was successful.  Now we need to query the
-	// entries that are already there.  First, find out the set of
-	// configured interfaces.
-	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
-	cb = callback(this, &VifManager::interface_names_done);
-	_ifmgr_client.send_get_configured_interface_names("fea", cb);
-	return;
-    }
-
     if (_no_fea) {
 	_state = READY;
 	return;
     }
-
-    //
-    // If the resolve failed, it could be that we got going too quickly
-    // for the FEA.  Retry every two seconds.  If after ten seconds we
-    // still can't register, give up.  It's a higher level issue as to
-    // whether failing to register is a fatal error.
-    //
-    if (e == XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
-	debug_msg("Register Interface Spy: RESOLVE_FAILED\n");
-	_register_retry_counter++;
-	OneoffTimerCallback cb;
-	cb = callback(this, &VifManager::register_if_spy);
-	_register_retry_timer = _eventloop.new_oneoff_after_ms(2000, cb);
+    
+    if (e == XrlError::OKAY()) {
+	//
+	// The registration was successful. Now we need to query the
+	// entries that are already there. First, find out the set of
+	// all interfaces.
+	//
+	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+	cb = callback(this, &VifManager::xrl_result_get_configured_interface_names);
+	_ifmgr_client.send_get_configured_interface_names(_fea_target_name.c_str(),
+							  cb);
 	return;
     }
+    
+    //
+    // If the resolve failed, it could be that we got going too quickly
+    // for the FEA. Retry every two seconds.
+    //
+    if (e == XrlError::RESOLVE_FAILED()) {
+	debug_msg("Register Interface Spy: RESOLVE_FAILED\n");
+	OneoffTimerCallback cb;
+	cb = callback(this, &VifManager::register_if_spy);
+	_register_retry_timer = _eventloop.new_oneoff_after(TimeVal(2, 0), cb);
+	return;
+    }
+    
+    // Permanent error
     _state = FAILED;
     XLOG_ERROR("Register Interface Spy: Permanent Error");
 }
 
 void
-VifManager::interface_names_done(const XrlError& e, const XrlAtomList* alist) 
+VifManager::xrl_result_get_configured_interface_names(
+    const XrlError& e,
+    const XrlAtomList* alist)
 {
-    printf("interface_names_done\n");
     if (e == XrlError::OKAY()) {
-	printf("OK\n");
 	for (size_t i = 0; i < alist->size(); i++) {
+	    //
 	    // Spin through the list of interfaces, and fire off
-	    // requests in parallel for all the Vifs on each interface
+	    // requests in parallel for all the Vifs on each interface.
+	    //
 	    XrlAtom atom = alist->get(i);
 	    string ifname = atom.text();
-	    XorpCallback2<void, const XrlError&,
-		const XrlAtomList*>::RefPtr cb;
-	    printf("got interface name: %s\n", ifname.c_str());
-	    cb = callback(this, &VifManager::vif_names_done, ifname);
-	    _ifmgr_client.send_get_configured_vif_names("fea", ifname, cb);
+	    debug_msg("got interface name: %s\n", ifname.c_str());
+	    
+	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+	    cb = callback(this, &VifManager::xrl_result_get_configured_vif_names, ifname);
+	    _ifmgr_client.send_get_configured_vif_names(_fea_target_name.c_str(),
+							ifname, cb);
 	    _interfaces_remaining++;
 	}
 	return;
     }
+    
+    // Permanent error
     _state = FAILED;
     XLOG_ERROR("Get Interface Names: Permanent Error");
 }
 
 void
-VifManager::vif_names_done(const XrlError& e, const XrlAtomList* alist,
-			   string ifname) 
+VifManager::xrl_result_get_configured_vif_names(
+    const XrlError& e,
+    const XrlAtomList* alist,
+    string ifname)
 {
-    printf("vif_names_done\n");
-    UNUSED(ifname);
-    if (e==XrlError::OKAY()) {
+    if (_interfaces_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_vif_names for interface %s",
+		     ifname.c_str());
+	return;
+    }
+    
+    _interfaces_remaining--;
+    
+    if (e == XrlError::OKAY()) {
 	for (size_t i = 0; i < alist->size(); i++) {
+	    //
 	    // Spin through all the Vifs on this interface, and fire
-	    // off requests in parallel for all the addresses on each
-	    // Vif.
+	    // off requests in parallel for all the addresses on each Vif.
+	    //
 	    XrlAtom atom = alist->get(i);
 	    string vifname = atom.text();
 	    vif_created(ifname, vifname);
-	    XorpCallback2<void, const XrlError&,
-		const XrlAtomList*>::RefPtr cb;
-	    cb = callback(this, &VifManager::get_all_vifaddr4_done,
-			  ifname, vifname);
-	    _ifmgr_client.send_get_configured_vif_addresses4("fea", ifname,
-							   vifname, cb);
-	    _vifs_remaining++;
+	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+	    {
+		// Get IPv4 addresses
+		cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses4,
+			      ifname, vifname);
+		_ifmgr_client.send_get_configured_vif_addresses4(_fea_target_name.c_str(),
+								 ifname,
+								 vifname,
+								 cb);
+		_vifs_remaining++;
+	    }
+	    {
+		// Get IPv6 addresses
+		cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses6,
+			      ifname, vifname);
+		_ifmgr_client.send_get_configured_vif_addresses6(_fea_target_name.c_str(),
+								 ifname,
+								 vifname,
+								 cb);
+		_vifs_remaining++;
+	    }
 	}
-	_interfaces_remaining--;
-    } else if (e == XrlError::COMMAND_FAILED()) {
-	// perhaps the interface went away.
-	_interfaces_remaining--;
-    } else {
-	_state = FAILED;
-	XLOG_ERROR("Get VIF Names: Permanent Error");
+	update_state();
 	return;
     }
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0) {
-	_state = READY;
+    
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the interface went away
+	update_state();
+	return;
     }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Get VIF Names: Permanent Error");
 }
 
 void
-VifManager::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
-				  string ifname, string vifname) 
+VifManager::xrl_result_get_configured_vif_addresses4(
+    const XrlError& e,
+    const XrlAtomList* alist,
+    string ifname,
+    string vifname)
 {
+    if (_vifs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_vif_addresses4 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _vifs_remaining--;
+    
     if (e == XrlError::OKAY()) {
 	for (size_t i = 0; i < alist->size(); i++) {
 	    XrlAtom atom = alist->get(i);
 	    IPv4 addr = atom.ipv4();
 	    vifaddr4_created(ifname, vifname, addr);
 	}
-	_vifs_remaining--;
-    } else if (e == XrlError::COMMAND_FAILED()) {
-	// perhaps the vif went away?
-	_vifs_remaining--;
-    } else {
-	_state = FAILED;
-	XLOG_ERROR("Get VIF Names: Permanent Error");
+	update_state();
 	return;
     }
-
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0) {
-	_state = READY;
+    
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
+	update_state();
+	return;
     }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Get VIF addresses: Permanent Error");
+}
+
+void
+VifManager::xrl_result_get_configured_vif_addresses6(
+    const XrlError& e,
+    const XrlAtomList* alist,
+    string ifname,
+    string vifname)
+{
+    if (_vifs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_vif_addresses6 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _vifs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	for (size_t i = 0; i < alist->size(); i++) {
+	    XrlAtom atom = alist->get(i);
+	    IPv6 addr = atom.ipv6();
+	    vifaddr6_created(ifname, vifname, addr);
+	}
+	update_state();
+	return;
+    }
+    
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Get VIF addresses: Permanent Error");
 }
 
 void
 VifManager::interface_update(const string& ifname,
-			     const uint32_t& event) 
+			     const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -265,12 +515,15 @@ VifManager::interface_update(const string& ifname,
     case IF_EVENT_CHANGED:
 	// doesn't directly affect vifs
 	break;
+    default:
+	XLOG_WARNING("interface_update invalid event: %u", event);
+	break;
     }
 }
 
 void
-VifManager::vif_update(const string& ifname,
-		       const string& vifname, const uint32_t& event) 
+VifManager::vif_update(const string& ifname, const string& vifname,
+		       const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -282,6 +535,9 @@ VifManager::vif_update(const string& ifname,
     case IF_EVENT_CHANGED:
 	// doesn't directly affect us
 	break;
+    default:
+	XLOG_WARNING("vif_update invalid event: %u", event);
+	break;
     }
 }
 
@@ -289,7 +545,7 @@ void
 VifManager::vifaddr4_update(const string& ifname,
 			    const string& vifname,
 			    const IPv4& addr,
-			    const uint32_t& event) 
+			    const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -299,8 +555,9 @@ VifManager::vifaddr4_update(const string& ifname,
 	vifaddr4_deleted(ifname, vifname, addr);
 	break;
     case IF_EVENT_CHANGED:
-	// shouldn't happen
-	abort();
+	// FALLTHROUGH
+    default:
+	XLOG_WARNING("vifaddr4_update invalid event: %u", event);
 	break;
     }
 }
@@ -309,7 +566,7 @@ void
 VifManager::vifaddr6_update(const string& ifname,
 			    const string& vifname,
 			    const IPv6& addr,
-			    const uint32_t& event) 
+			    const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -319,220 +576,546 @@ VifManager::vifaddr6_update(const string& ifname,
 	vifaddr6_deleted(ifname, vifname, addr);
 	break;
     case IF_EVENT_CHANGED:
-	// shouldn't happen
-	abort();
+	// FALLTHROUGH
+    default:
+	XLOG_WARNING("vifaddr6_update invalid event: %u", event);
 	break;
     }
 }
 
 void
-VifManager::interface_deleted(const string& ifname) 
+VifManager::interface_deleted(const string& ifname)
 {
-    multimap<string, Vif*>::iterator i;
-    i = _vifs_by_interface.find(ifname);
-    if (i != _vifs_by_interface.end()) {
-	vif_deleted(ifname, i->second->name());
+    // Reomve all vifs for the same interface name
+    multimap<string, Vif*>::iterator iter;
+    iter = _vifs_by_interface.find(ifname);
+    for (; iter != _vifs_by_interface.end(); ++iter) {
+	if (iter->first != ifname)
+	    break;
+	vif_deleted(ifname, iter->second->name());
     }
 }
 
 void
-VifManager::vif_deleted(const string& ifname, const string& vifname) 
+VifManager::vif_deleted(const string& ifname, const string& vifname)
 {
-    Vif *vif;
-    printf("vif_deleted %s %s\n", ifname.c_str(), vifname.c_str());
+    debug_msg("vif_deleted %s %s\n", ifname.c_str(), vifname.c_str());
+    
     map<string, Vif*>::iterator vi = _vifs_by_name.find(vifname);
-    if (vi != _vifs_by_name.end()) {
-	vif = vi->second;
-	_vifs_by_name.erase(vi);
-	multimap<string, Vif*>::iterator ii = _vifs_by_interface.find(ifname);
-	assert(ii != _vifs_by_interface.end());
-	while (ii != _vifs_by_interface.end() &&
-	       ii->first == ifname) {
-	    if (ii->second == vif) {
-		_vifs_by_interface.erase(ii);
-		break;
-	    }
-	    ii++;
-	    assert(ii != _vifs_by_interface.end());
-	}
-
-	// now process the deletion...
-	string err;
-	_rib_manager->delete_vif(vifname, err);
-	delete vif;
-    } else {
+    if (vi == _vifs_by_name.end()) {
 	XLOG_ERROR("vif_deleted: vif %s not found", vifname.c_str());
+	return;
     }
+    
+    //
+    // Remove the vif from the local maps
+    //
+    Vif* vif = vi->second;
+    _vifs_by_name.erase(vi);
+    multimap<string, Vif*>::iterator ii = _vifs_by_interface.find(ifname);
+    XLOG_ASSERT(ii != _vifs_by_interface.end());
+    while (ii != _vifs_by_interface.end() && ii->first == ifname) {
+	if (ii->second == vif) {
+	    _vifs_by_interface.erase(ii);
+	    break;
+	}
+	++ii;
+	XLOG_ASSERT(ii != _vifs_by_interface.end());
+    }
+    delete vif;
+    
+    update_state();
 }
 
 void
-VifManager::vif_created(const string& ifname, const string& vifname) 
+VifManager::vif_created(const string& ifname, const string& vifname)
 {
-    printf("vif_created: %s\n", vifname.c_str());
+    debug_msg("vif_created: %s\n", vifname.c_str());
+    
     if (_vifs_by_name.find(vifname) != _vifs_by_name.end()) {
 	XLOG_ERROR("vif_created: vif %s already exists", vifname.c_str());
 	return;
     }
+    
+    //
+    // Create a new vif
+    //
     Vif *vif = new Vif(vifname, ifname);
     _vifs_by_name[vifname] = vif;
     _vifs_by_interface.insert(pair<string, Vif*>(ifname, vif));
-
-    // now process the addition
-    string err;
-    _rib_manager->new_vif(vifname, *vif, err);
+    
+    update_state();
 }
 
 void
-VifManager::vifaddr4_created(const string& ifname, const string& vifname,
-			     const IPv4& addr) 
+VifManager::vifaddr4_created(const string& ifname,
+			     const string& vifname,
+			     const IPv4& addr)
 {
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr4_created on unknown vif: %s", vifname.c_str());
 	return;
     }
-    XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-    cb = callback(this, &VifManager::vifaddr4_done, ifname, vifname, addr);
-    _ifmgr_client.send_get_configured_prefix4("fea", ifname, vifname, addr, cb);
-    _addrs_remaining++;
+    
+    {
+	// Get the address flags
+	XorpCallback6<void, const XrlError&, const bool*, const bool*,
+	    const bool*, const bool*, const bool*>::RefPtr cb;
+	cb = callback(this, &VifManager::xrl_result_get_configured_address_flags4,
+		      ifname, vifname, addr);
+	_ifmgr_client.send_get_configured_address_flags4(_fea_target_name.c_str(),
+							 ifname, vifname, addr, cb);
+	_addrs_remaining++;
+    }
+    
+    {
+	// Get the prefix length
+	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
+	cb = callback(this, &VifManager::xrl_result_get_configured_prefix4,
+		      ifname, vifname, addr);
+	_ifmgr_client.send_get_configured_prefix4(_fea_target_name.c_str(), ifname,
+						  vifname, addr, cb);
+	_addrs_remaining++;
+    }
 }
 
 void
-VifManager::vifaddr4_done(const XrlError& e, const uint32_t* prefix_len,
-			  string ifname, string vifname,
-			  IPv4 addr) 
+VifManager::vifaddr6_created(const string& ifname,
+			     const string& vifname,
+			     const IPv6& addr)
 {
-    UNUSED(ifname);
+    if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	XLOG_ERROR("vifaddr6_created on unknown vif: %s", vifname.c_str());
+	return;
+    }
+    
+    {
+	// Get the address flags
+	XorpCallback5<void, const XrlError&, const bool*,
+	    const bool*, const bool*, const bool*>::RefPtr cb;
+	cb = callback(this, &VifManager::xrl_result_get_configured_address_flags6,
+		      ifname, vifname, addr);
+	_ifmgr_client.send_get_configured_address_flags6(_fea_target_name.c_str(),
+							 ifname, vifname, addr, cb);
+	_addrs_remaining++;
+    }
+    
+    {
+	// Get the prefix length
+	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
+	cb = callback(this, &VifManager::xrl_result_get_configured_prefix6,
+		      ifname, vifname, addr);
+	_ifmgr_client.send_get_configured_prefix6(_fea_target_name.c_str(), ifname,
+						  vifname, addr, cb);
+	_addrs_remaining++;
+    }
+}
 
+void
+VifManager::xrl_result_get_configured_address_flags4(const XrlError& e,
+						     const bool* enabled,
+						     const bool* broadcast,
+						     const bool* loopback,
+						     const bool* point_to_point,
+						     const bool* multicast,
+						     string ifname,
+						     string vifname,
+						     IPv4 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_address_flags4 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
     if (e == XrlError::OKAY()) {
-
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	printf("adding address %s prefix_len %d to vif %s\n",
-	       addr.str().c_str(), *prefix_len, vifname.c_str());
-	vif->add_address(addr, IPvXNet(addr, *prefix_len),
-			 IPvX("0.0.0.0"), IPvX("0.0.0.0"));
-	string err;
-	if (_rib_manager->add_vif_addr(vifname, addr, 
-				       IPv4Net(addr, *prefix_len),
-				       err) != XORP_OK) {
-	    XLOG_ERROR(c_format("failed to add address %s/%d to vif %s",
-				addr.str().c_str(), *prefix_len,
-				vifname.c_str()).c_str());
-	}
-    } else if (e != XrlError::COMMAND_FAILED()) {
-	_addrs_remaining--;
-    } else {
-	XLOG_ERROR("Failed to get prefix_len for address %s",
-		   addr.str().c_str());
-	_addrs_remaining--;
-    }
+	debug_msg("setting flags for address %s to vif %s\n",
+		  addr.str().c_str(), vifname.c_str());
+	vif->set_underlying_vif_up(*enabled);
+	vif->set_broadcast_capable(*broadcast);
+	vif->set_loopback(*loopback);
+	vif->set_p2p(*point_to_point);
+	vif->set_multicast_capable(*multicast);
 
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0
-	&& _state == INITIALIZING) {
-	_state = READY;
+	if (*broadcast) {
+	    // Get the broadcast address
+	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
+	    cb = callback(this, &VifManager::xrl_result_get_configured_broadcast4,
+			  ifname, vifname, addr);
+	    _ifmgr_client.send_get_configured_broadcast4(_fea_target_name.c_str(),
+							 ifname, vifname, addr, cb);
+	    _addrs_remaining++;
+	}
+	
+	if (*point_to_point) {
+	    // Get the endpoint address
+	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
+	    cb = callback(this, &VifManager::xrl_result_get_configured_endpoint4,
+			  ifname, vifname, addr);
+	    _ifmgr_client.send_get_configured_endpoint4(_fea_target_name.c_str(),
+							ifname, vifname, addr, cb);
+	    _addrs_remaining++;
+	}
+	
+	update_state();
+	return;
     }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get flags for address %s: Permanent Error",
+	       addr.str().c_str());
 }
 
+void
+VifManager::xrl_result_get_configured_address_flags6(const XrlError& e,
+						     const bool* enabled,
+						     const bool* loopback,
+						     const bool* point_to_point,
+						     const bool* multicast,
+						     string ifname,
+						     string vifname,
+						     IPv6 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_address_flags6 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("setting flags for address %s to vif %s\n",
+		  addr.str().c_str(), vifname.c_str());
+	vif->set_underlying_vif_up(*enabled);
+	vif->set_loopback(*loopback);
+	vif->set_p2p(*point_to_point);
+	vif->set_multicast_capable(*multicast);
+	
+	{
+	    // Get the broadcast address
+	    // XXX: IPv6 doesn't have broadcast addresses, hence we don't do it
+	}
+	
+	if (*point_to_point) {
+	    // Get the endpoint address
+	    XorpCallback2<void, const XrlError&, const IPv6*>::RefPtr cb;
+	    cb = callback(this, &VifManager::xrl_result_get_configured_endpoint6,
+			  ifname, vifname, addr);
+	    _ifmgr_client.send_get_configured_endpoint6(_fea_target_name.c_str(),
+							ifname, vifname, addr, cb);
+	    _addrs_remaining++;
+	}
+	
+	update_state();
+	return;
+    }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get flags for address %s: Permanent Error",
+	       addr.str().c_str());
+}
 
 void
-VifManager::vifaddr4_deleted(const string& ifname, const string& vifname,
-			     const IPv4& addr) 
+VifManager::xrl_result_get_configured_prefix4(const XrlError& e,
+					      const uint32_t* prefix_len,
+					      string ifname, string vifname,
+					      IPv4 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_prefix4 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("adding address %s prefix_len %d to vif %s\n",
+		  addr.str().c_str(), *prefix_len, vifname.c_str());
+	VifAddr* vif_addr = vif->find_address(IPvX(addr));
+	if (vif_addr == NULL) {
+	    vif->add_address(IPvX(addr));
+	    vif_addr = vif->find_address(IPvX(addr));
+	}
+	XLOG_ASSERT(vif_addr != NULL);
+	vif_addr->set_subnet_addr(IPvXNet(IPvX(addr), *prefix_len));
+	update_state();
+	return;
+    }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get prefix_len for address %s: Permanent Error",
+	       addr.str().c_str());
+}
+
+void
+VifManager::xrl_result_get_configured_prefix6(const XrlError& e,
+					      const uint32_t* prefix_len,
+					      string ifname, string vifname,
+					      IPv6 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_prefix6 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif *vif = _vifs_by_name[vifname];
+	debug_msg("adding address %s prefix_len %d to vif %s\n",
+		  addr.str().c_str(), *prefix_len, vifname.c_str());
+	VifAddr* vif_addr = vif->find_address(IPvX(addr));
+	if (vif_addr == NULL) {
+	    vif->add_address(IPvX(addr));
+	    vif_addr = vif->find_address(IPvX(addr));
+	}
+	XLOG_ASSERT(vif_addr != NULL);
+	vif_addr->set_subnet_addr(IPvXNet(IPvX(addr), *prefix_len));
+	update_state();
+	return;
+    }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get prefix_len for address %s",
+	       addr.str().c_str());
+}
+
+void
+VifManager::xrl_result_get_configured_broadcast4(const XrlError& e,
+						 const IPv4* broadcast,
+						 string ifname, string vifname,
+						 IPv4 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_broadcast4 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("adding address %s broadcast %s to vif %s\n",
+		  addr.str().c_str(), broadcast->str().c_str(), vifname.c_str());
+	VifAddr* vif_addr = vif->find_address(IPvX(addr));
+	if (vif_addr == NULL) {
+	    vif->add_address(IPvX(addr));
+	    vif_addr = vif->find_address(IPvX(addr));
+	}
+	XLOG_ASSERT(vif_addr != NULL);
+	vif_addr->set_broadcast_addr(IPvX(*broadcast));
+	update_state();
+	return;
+    }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get broadcast addr for address %s: Permanent Error",
+	       addr.str().c_str());
+}
+
+void
+VifManager::xrl_result_get_configured_endpoint4(const XrlError& e,
+						const IPv4* endpoint,
+						string ifname, string vifname,
+						IPv4 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_endpoint4 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("adding address %s endpoint %s to vif %s\n",
+		  addr.str().c_str(), endpoint->str().c_str(), vifname.c_str());
+	VifAddr* vif_addr = vif->find_address(IPvX(addr));
+	if (vif_addr == NULL) {
+	    vif->add_address(IPvX(addr));
+	    vif_addr = vif->find_address(IPvX(addr));
+	}
+	XLOG_ASSERT(vif_addr != NULL);
+	vif_addr->set_peer_addr(IPvX(*endpoint));
+	update_state();
+	return;
+    }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get endpoint addr for address %s: Permanent Error",
+	       addr.str().c_str());
+}
+
+void
+VifManager::xrl_result_get_configured_endpoint6(const XrlError& e,
+						const IPv6* endpoint,
+						string ifname, string vifname,
+						IPv6 addr)
+{
+    if (_addrs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_configured_endpoint6 for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _addrs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("adding address %s endpoint %s to vif %s\n",
+		  addr.str().c_str(), endpoint->str().c_str(), vifname.c_str());
+	VifAddr* vif_addr = vif->find_address(IPvX(addr));
+	if (vif_addr == NULL) {
+	    vif->add_address(IPvX(addr));
+	    vif_addr = vif->find_address(IPvX(addr));
+	}
+	XLOG_ASSERT(vif_addr != NULL);
+	vif_addr->set_peer_addr(IPvX(*endpoint));
+	update_state();
+	return;
+    }
+    
+    if (e != XrlError::COMMAND_FAILED()) {
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get endpoint addr for address %s: Permanent Error",
+	       addr.str().c_str());
+}
+
+void
+VifManager::vifaddr4_deleted(const string& ifname,
+			     const string& vifname,
+			     const IPv4& addr)
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
-     Vif *vif = _vifs_by_name[vifname];
-     vif->delete_address(addr);
-
-     string err;
-     if (_rib_manager->delete_vif_addr(vifname, addr, err) != XORP_OK) {
-	 XLOG_ERROR(c_format("failed to delete address %s from vif %s",
-			     addr.str().c_str(), vifname.c_str()).c_str());
-     }
+    Vif *vif = _vifs_by_name[vifname];
+    vif->delete_address(addr);
+    
+    update_state();
 }
 
 void
-VifManager::vifaddr6_created(const string& ifname, const string& vifname,
-			     const IPv6& addr) 
-{
-    if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR("vifaddr6_created on unknown vif: %s", vifname.c_str());
-	return;
-    }
-    XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-    cb = callback(this, &VifManager::vifaddr6_done, ifname, vifname, addr);
-    _ifmgr_client.send_get_configured_prefix6("fea", ifname, vifname, addr, cb);
-    _addrs_remaining++;
-}
-
-void
-VifManager::vifaddr6_done(const XrlError& e, const uint32_t* prefix_len,
-			  string ifname, string vifname,
-			  IPv6 addr) 
-{
-    UNUSED(ifname);
-
-    if (e == XrlError::OKAY()) {
-
-	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	    // silently ignore - the vif could have been deleted while we
-	    // were waiting for the answer.
-	    return;
-	}
-	Vif *vif = _vifs_by_name[vifname];
-	printf("adding address %s prefix_len %d to vif %s\n",
-	       addr.str().c_str(), *prefix_len, vifname.c_str());
-	vif->add_address(addr, IPvXNet(addr, *prefix_len),
-			 IPvX("0.0.0.0"), IPvX("0.0.0.0"));
-	string err;
-	if (_rib_manager->add_vif_addr(vifname, addr, 
-				       IPv6Net(addr,*prefix_len),
-				       err) != XORP_OK) {
-	    XLOG_ERROR("failed to add address %s/%d to vif %s",
-		       addr.str().c_str(), *prefix_len,
-		       vifname.c_str());
-	}
-    } else if (e != XrlError::COMMAND_FAILED()) {
-	_addrs_remaining--;
-    } else {
-	XLOG_ERROR("Failed to get prefix_len for address %s",
-		   addr.str().c_str());
-	_addrs_remaining--;
-    }
-
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0
-	&& _state == INITIALIZING) {
-	_state = READY;
-    }
-}
-
-
-void
-VifManager::vifaddr6_deleted(const string& ifname, const string& vifname,
-			     const IPv6& addr) 
+VifManager::vifaddr6_deleted(const string& ifname,
+			     const string& vifname,
+			     const IPv6& addr)
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
-     Vif *vif = _vifs_by_name[vifname];
-     vif->delete_address(addr);
-
-     string err;
-     if (_rib_manager->delete_vif_addr(vifname, addr, err) != XORP_OK) {
-	 XLOG_ERROR("failed to delete address %s from vif %s",
-		    addr.str().c_str(), vifname.c_str());
-     }
+    Vif *vif = _vifs_by_name[vifname];
+    vif->delete_address(addr);
+    
+    update_state();
 }
-
