@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.19 2004/02/25 00:35:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.20 2004/02/25 05:55:51 pavlin Exp $"
 
 
 //
@@ -1181,6 +1181,17 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 			       pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
 			       pim_nbr->hello_holdtime(),
 			       nbr_timeout_sec_string.c_str()));
+	    // Print the secondary addresses
+	    list<IPvX>::const_iterator list_iter;
+	    for (list_iter = pim_nbr->secondary_addr_list().begin();
+		 list_iter != pim_nbr->secondary_addr_list().end();
+		 ++list_iter) {
+		const IPvX& secondary_addr = *list_iter;
+		cli_print(c_format("%-16s%11s %-16s\n",
+				   "",
+				   "",
+				   cstring(secondary_addr)));
+	    }
 	}
     }
     
