@@ -1,11 +1,13 @@
-/* $XORP: xorp/xrl/targets/ripng.tgt,v 1.2 2004/03/10 18:32:37 hodson Exp $ */
+/* $XORP: xorp/xrl/targets/ripng.tgt,v 1.3 2004/04/10 07:41:42 pavlin Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"
+#include "redist6.xif"
 #include "ripng.xif"
 #include "socket6_user.xif"
 
-target ripng implements	common/0.1,					\
+target ripng implements common/0.1,					\
 			finder_event_observer/0.1,			\
+			redist6/0.1,					\
 			ripng/0.1,					\
 			socket6_user/0.1
