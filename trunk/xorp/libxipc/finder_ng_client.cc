@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.3 2003/02/27 01:58:24 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.4 2003/03/04 23:41:23 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -83,10 +83,10 @@ public:
     typedef FinderNGClient::ResolvedTable ResolvedTable;
     
 public:
-    FinderNGClientQuery(FinderNGClient& fc,
-			  const string& key,
-			  ResolvedTable& rt,
-			  const QueryCallback& qcb)
+    FinderNGClientQuery(FinderNGClient&	fc,
+			const string&	key,
+			ResolvedTable&	rt,
+			const QueryCallback& qcb)
 	: FinderNGClientOneOffOp(fc), _key(key), _rt(rt), _qcb(qcb)
     {}
 
@@ -166,6 +166,50 @@ protected:
     string	   _key;
     ResolvedTable& _rt;
     QueryCallback  _qcb;
+};
+
+/**
+ * Class that handles the forwarding of Xrl's targetted at the finder.
+ */
+class FinderNGForwardedXrl : public FinderNGClientOneOffOp {
+public:
+    typedef XrlPFSender::SendCallback XrlCallback;
+public:
+    FinderNGForwardedXrl(FinderNGClient&	fc,
+			 const Xrl& 		xrl,
+			 const XrlCallback&	xcb)
+	: FinderNGClientOneOffOp(fc), _xrl(xrl), _xcb(xcb)
+    {}
+
+    void
+    execute(FinderMessengerBase* m)
+    {
+	if (m->send(_xrl,
+		    callback(this, &FinderNGForwardedXrl::execute_callback))) {
+	    return;
+	}
+	_xcb->dispatch(XrlError::SEND_FAILED(), _xrl, 0);
+	XLOG_ERROR("Failed to send forwarded Xrl to Finder.");
+	client().notify_failed(this);
+	return;
+    }
+
+    void
+    execute_callback(const XrlError& e, XrlArgs* args)
+    {
+	_xcb->dispatch(e, _xrl, args);
+	client().notify_done(this);
+    }
+
+    void force_failure(const XrlError& e)
+    {
+	_xcb->dispatch(e, _xrl, 0);
+    }
+
+    
+protected:
+    Xrl		_xrl;
+    XrlCallback	_xcb;
 };
 
 /**
@@ -357,6 +401,16 @@ FinderNGClient::query_self(const string& incoming_xrl_cmd,
     if (_lrt.end() == i)
 	return false;
     local_xrl = i->second;
+    return true;
+}
+
+bool
+FinderNGClient::forward_finder_xrl(const Xrl&				xrl,
+				   const XrlPFSender::SendCallback& 	scb)
+{
+    Operation op(new FinderNGForwardedXrl(*this, xrl, scb));
+    _todo_list.push_back(op);
+    crank();
     return true;
 }
 
