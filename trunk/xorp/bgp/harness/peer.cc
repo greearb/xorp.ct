@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.57 2005/02/01 10:21:04 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.58 2005/03/09 02:48:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -256,7 +256,7 @@ void
 Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
 	throw(InvalidString)
 {
-    /* Connect the test peer to the target BGP */
+    /* Disconnect the test peer from the target BGP */
     debug_msg("About to disconnect from: %s\n", _peername.c_str());
     _busy++;
     XrlTestPeerV0p1Client test_peer(_xrlrouter);
