@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.43 2004/03/09 05:51:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.44 2004/05/10 14:41:09 mjh Exp $"
 
 #include <signal.h>
 
@@ -208,8 +208,7 @@ Rtrmgr::run()
 	    _bind_addrs.pop_front();
 	}
     } catch (const InvalidPort& i) {
-	fprintf(stderr, "%s: a finder may already be running.\n",
-		i.why().c_str());
+	XLOG_ERROR("%s: a finder may already be running.", i.why().c_str());
 	delete tt;
 	return (1);
     } catch (...) {
@@ -227,7 +226,7 @@ Rtrmgr::run()
     //
     // Start the module manager
     //
-    ModuleManager mmgr(eventloop, /*verbose = */true, xorp_binary_root_dir());
+    ModuleManager mmgr(eventloop, /*verbose = */false, xorp_binary_root_dir());
 
     try {
 	//

@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.30 2004/05/10 14:41:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.31 2004/05/11 16:50:57 mjh Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -106,7 +109,7 @@ MasterConfigTree::parse(const string& configuration,
 	return false;
 
     string s = show_tree();
-    printf("== MasterConfigTree::parse yields ==\n%s\n"
+    debug_msg("== MasterConfigTree::parse yields ==\n%s\n"
 	   "====================================\n", s.c_str());
 
     return true;
@@ -115,18 +118,18 @@ MasterConfigTree::parse(const string& configuration,
 void
 MasterConfigTree::execute()
 {
-    printf("##############################################################\n");
-    printf("MasterConfigTree::execute\n");
+    debug_msg("##############################################################\n");
+    debug_msg("MasterConfigTree::execute\n");
 
     list<string> changed_modules = find_changed_modules();
     list<string>::const_iterator iter;
-    printf("Changed Modules:\n");
+    debug_msg("Changed Modules:\n");
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
-	printf("%s ", (*iter).c_str());
+	debug_msg("%s ", (*iter).c_str());
     }
-    printf("\n");
+    debug_msg("\n");
 
     _commit_cb = callback(this, &MasterConfigTree::config_done);
     commit_changes_pass2();
@@ -135,19 +138,18 @@ MasterConfigTree::execute()
 void
 MasterConfigTree::config_done(bool success, string errmsg)
 {
-    printf("MasterConfigTree::config_done: ");
+    debug_msg("MasterConfigTree::config_done: ");
 
     if (success)
-	printf("success\n");
+	debug_msg("success\n");
     else
-	printf("fail: %s\n", errmsg.c_str());
+	XLOG_ERROR("fail: %s", errmsg.c_str());
 
     _config_failed = !success;
 
     if (!success) {
 	string msg = "Startup failed (" + errmsg + ")\n";
 	XLOG_ERROR(msg.c_str());
-	fprintf(stderr, msg.c_str());
 	_config_failed = true;
 	_config_failed_msg = errmsg;
 	return;
@@ -156,18 +158,17 @@ MasterConfigTree::config_done(bool success, string errmsg)
     string errmsg2;
     if (check_commit_status(errmsg2) == false) {
 	XLOG_ERROR(errmsg2.c_str());
-	fprintf(stderr, errmsg2.c_str());
 	_config_failed = true;
 	_config_failed_msg = errmsg2;
 	return;
     }
-    printf("MasterConfigTree::config_done returning\n");
+    debug_msg("MasterConfigTree::config_done returning\n");
 }
 
 list<string>
 MasterConfigTree::find_changed_modules() const
 {
-    printf("Find changed modules\n");
+    debug_msg("Find changed modules\n");
 
     set<string> changed_modules;
     _root_node.find_changed_modules(changed_modules);
@@ -181,7 +182,7 @@ MasterConfigTree::find_changed_modules() const
 list<string>
 MasterConfigTree::find_active_modules() const
 {
-    printf("Find active modules\n");
+    debug_msg("Find active modules\n");
 
     set<string> active_modules;
     _root_node.find_active_modules(active_modules);
@@ -195,18 +196,18 @@ MasterConfigTree::find_active_modules() const
 list<string>
 MasterConfigTree::find_inactive_modules() const
 {
-    printf("Find inactive modules\n");
+    debug_msg("Find inactive modules\n");
 
     set<string> all_modules;
     list<string> ordered_all_modules;
 
-    printf("All modules:\n");
+    debug_msg("All modules:\n");
     _root_node.find_all_modules(all_modules);
     order_module_list(all_modules, ordered_all_modules);
 
     set<string> active_modules;
     list<string> ordered_active_modules;
-    printf("Active modules:\n");
+    debug_msg("Active modules:\n");
     _root_node.find_active_modules(active_modules);
     order_module_list(active_modules, ordered_active_modules);
 
@@ -225,14 +226,14 @@ MasterConfigTree::find_inactive_modules() const
 	XLOG_ASSERT(iter != ordered_all_modules.end());
     }
 
-    printf("Inactive Module Order: ");
+    debug_msg("Inactive Module Order: ");
     list<string>::const_iterator final_iter;
     for (final_iter = ordered_all_modules.begin();
 	 final_iter != ordered_all_modules.end();
 	 ++final_iter) {
-	printf("%s ", final_iter->c_str());
+	debug_msg("%s ", final_iter->c_str());
     }
-    printf("\n");
+    debug_msg("\n");
 
     return ordered_all_modules;
 }
@@ -263,7 +264,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 
 	if (mc == NULL) {
 	    no_info.insert(*iter);
-	    printf("%s has no module info\n", (*iter).c_str());
+	    debug_msg("%s has no module info\n", (*iter).c_str());
 	    continue;
 	}
 	if (mc->depends().empty()) {
@@ -273,12 +274,12 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	    //
 	    ordered_modules.push_back(*iter);
 	    satisfied.insert(*iter);
-	    printf("%s has no dependencies\n", (*iter).c_str());
+	    debug_msg("%s has no dependencies\n", (*iter).c_str());
 	    continue;
 	}
 	list<string>::const_iterator di;
 	for (di = mc->depends().begin(); di != mc->depends().end(); ++di) {
-	    printf("%s depends on %s\n", iter->c_str(), di->c_str());
+	    debug_msg("%s depends on %s\n", iter->c_str(), di->c_str());
 	    depends.insert(pair<string,string>(*iter, *di));
 	    // Check that the dependency is already in our list of modules.
 	    if (module_set.find(*di)==module_set.end()) {
@@ -288,14 +289,14 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	}
     }
 
-    printf("doing additional modules\n");
+    debug_msg("doing additional modules\n");
     // Figure out the dependencies for all the additional modules
     set<string> additional_done;
     while (!additional_modules.empty()) {
 	iter = additional_modules.begin();
 	ModuleCommand* mc = _template_tree->find_module(*iter);
 	if (mc == NULL) {
-	    printf("%s has no info\n", (*iter).c_str());
+	    debug_msg("%s has no info\n", (*iter).c_str());
 	    additional_done.insert(*iter);
 	    additional_modules.erase(iter);
 	    ordered_modules.push_back(*iter);
@@ -303,7 +304,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	    continue;
 	}
 	if (mc->depends().empty()) {
-	    printf("%s has no dependencies\n", (*iter).c_str());
+	    debug_msg("%s has no dependencies\n", (*iter).c_str());
 	    additional_done.insert(*iter);
 	    additional_modules.erase(iter);
 	    ordered_modules.push_back(*iter);
@@ -314,7 +315,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	list<string>::const_iterator di;
 	for (di = mc->depends().begin(); di != mc->depends().end(); ++di) {
 	    depends.insert(pair<string,string>(*iter, *di));
-	    printf("%s depends on %s\n", iter->c_str(), di->c_str());
+	    debug_msg("%s depends on %s\n", iter->c_str(), di->c_str());
 	    // Check that the dependency is already in our list of modules.
 	    if (module_set.find(*di) == module_set.end()
 		&& additional_modules.find(*di) == additional_modules.end()
@@ -326,7 +327,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	additional_done.insert(*iter);
 	additional_modules.erase(iter);
     }
-    printf("done additional modules\n");
+    debug_msg("done additional modules\n");
 
     multimap<string,string>::iterator curr_iter, next_iter;
     while (!depends.empty()) {
@@ -335,20 +336,20 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	while (curr_iter != depends.end()) {
 	    next_iter = curr_iter;
 	    ++next_iter;
-	    printf("searching for dependency for %s on %s\n",
+	    debug_msg("searching for dependency for %s on %s\n",
 		   curr_iter->first.c_str(), curr_iter->second.c_str());
 	    if (satisfied.find(curr_iter->second) != satisfied.end()) {
 		// Rule is now satisfied.
 		string module = curr_iter->first;
 		depends.erase(curr_iter);
 		progress_made = true;
-		printf("dependency of %s on %s satisfied\n",
+		debug_msg("dependency of %s on %s satisfied\n",
 		       module.c_str(), curr_iter->second.c_str());
 		if (depends.find(module) == depends.end()) {
 		    // This was the last dependency
 		    satisfied.insert(module);
 		    ordered_modules.push_back(module);
-		    printf("dependencies for %s now satisfied\n",
+		    debug_msg("dependencies for %s now satisfied\n",
 			   module.c_str());
 		}
 	    }
@@ -364,14 +365,14 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	ordered_modules.push_back(*iter);
     }
 
-    printf("Module Order: ");
+    debug_msg("Module Order: ");
     list<string>::const_iterator final_iter;
     for (final_iter = ordered_modules.begin();
 	 final_iter != ordered_modules.end();
 	 ++final_iter) {
-	printf("%s ", final_iter->c_str());
+	debug_msg("%s ", final_iter->c_str());
     }
-    printf("\n");
+    debug_msg("\n");
 }
 
 void
@@ -379,21 +380,21 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 {
     string result;
 
-    printf("##############################################################\n");
-    printf("MasterConfigTree::commit_changes_pass1\n");
+    debug_msg("##############################################################\n");
+    debug_msg("MasterConfigTree::commit_changes_pass1\n");
 
     _commit_in_progress = true;
 
     list<string> changed_modules = find_changed_modules();
     list<string> inactive_modules = find_inactive_modules();
     list<string>::const_iterator iter;
-    printf("Changed Modules:\n");
+    debug_msg("Changed Modules:\n");
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
-	printf("%s ", (*iter).c_str());
+	debug_msg("%s ", (*iter).c_str());
     }
-    printf("\n");
+    debug_msg("\n");
 
     //
     // Two passes: the first checks for errors.  If no errors are
@@ -447,8 +448,8 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 void
 MasterConfigTree::commit_pass1_done(bool success, string result)
 {
-    printf("##############################################################\n");
-    printf("## commit_pass1_done\n");
+    debug_msg("##############################################################\n");
+    debug_msg("## commit_pass1_done\n");
 
     if (success) {
 	commit_changes_pass2();
@@ -464,8 +465,8 @@ MasterConfigTree::commit_changes_pass2()
 {
     string result;
 
-    printf("##############################################################\n");
-    printf("## commit_changes_pass2\n");
+    debug_msg("##############################################################\n");
+    debug_msg("## commit_changes_pass2\n");
 
     _commit_in_progress = true;
 
@@ -519,13 +520,13 @@ MasterConfigTree::commit_changes_pass2()
 void
 MasterConfigTree::commit_pass2_done(bool success, string result)
 {
-    printf("##############################################################\n");
-    printf("## commit_pass2_done\n");
+    debug_msg("##############################################################\n");
+    debug_msg("## commit_pass2_done\n");
 
     if (success)
-	printf("## commit seems successful\n");
+	debug_msg("## commit seems successful\n");
     else
-	printf("## commit failed: %s\n", result.c_str());
+	XLOG_ERROR("## commit failed: %s", result.c_str());
 
     _commit_cb->dispatch(success, result);
     _commit_in_progress = false;
@@ -539,9 +540,9 @@ MasterConfigTree::check_commit_status(string& result)
 
     if (success) {
 	// If the commit was successful, clear all the temporary state.
-	printf("commit was successful, finalizing...\n");
+	debug_msg("commit was successful, finalizing...\n");
 	_root_node.finalize_commit();
-	printf("finalizing done\n");
+	debug_msg("finalizing done\n");
     }
     return success;
 }
@@ -549,10 +550,10 @@ MasterConfigTree::check_commit_status(string& result)
 string
 MasterConfigTree::discard_changes()
 {
-    printf("##############################################################\n");
-    printf("MasterConfigTree::discard_changes\n");
+    debug_msg("##############################################################\n");
+    debug_msg("MasterConfigTree::discard_changes\n");
     string result = _root_node.discard_changes(0, 0);
-    printf("##############################################################\n");
+    debug_msg("##############################################################\n");
     return result;
 }
 
@@ -781,7 +782,7 @@ MasterConfigTree::run_save_hook(uid_t userid, const string& save_hook,
 {
     if (save_hook.empty())
 	return;
-    printf("run_save_hook: %s %s\n", save_hook.c_str(), filename.c_str());
+    debug_msg("run_save_hook: %s %s\n", save_hook.c_str(), filename.c_str());
     vector<string> argv;
     argv.reserve(2);
     argv.push_back(save_hook);
@@ -794,9 +795,9 @@ void
 MasterConfigTree::save_hook_complete(bool success, const string errmsg) const
 {
     if (success)
-	printf("save hook completed successfully\n");
+	debug_msg("save hook completed successfully\n");
     else
-	printf("save hook completed with error %s\n", errmsg.c_str());
+	XLOG_ERROR("save hook completed with error %s", errmsg.c_str());
 }
 
 bool
@@ -907,20 +908,20 @@ MasterConfigTree::diff_configs(const ConfigTree& new_tree,
     deletion_tree.retain_different_nodes(new_tree, false);
     delta_tree.retain_different_nodes(*((ConfigTree*)(this)), true);
 
-    printf("=========================================================\n");
-    printf("ORIG:\n");
+    debug_msg("=========================================================\n");
+    debug_msg("ORIG:\n");
     print();
-    printf("=========================================================\n");
-    printf("NEW:\n");
+    debug_msg("=========================================================\n");
+    debug_msg("NEW:\n");
     new_tree.print();
-    printf("=========================================================\n");
-    printf("=========================================================\n");
-    printf("DELTAS:\n");
+    debug_msg("=========================================================\n");
+    debug_msg("=========================================================\n");
+    debug_msg("DELTAS:\n");
     delta_tree.print();
-    printf("=========================================================\n");
-    printf("DELETIONS:\n");
+    debug_msg("=========================================================\n");
+    debug_msg("DELETIONS:\n");
     deletion_tree.print();
-    printf("=========================================================\n");
+    debug_msg("=========================================================\n");
 
 }
 

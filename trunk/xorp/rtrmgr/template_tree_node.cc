@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.19 2004/05/16 02:52:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.20 2004/05/18 01:06:50 pavlin Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -253,7 +256,7 @@ TemplateTreeNode::s() const
 void
 TemplateTreeNode::print() const
 {
-    printf("%s\n", s().c_str());
+    debug_msg("%s\n", s().c_str());
 
     list<TemplateTreeNode*>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {

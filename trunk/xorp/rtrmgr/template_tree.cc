@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.17 2004/03/11 22:31:45 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.18 2004/05/18 01:06:49 pavlin Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -72,7 +75,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     }
 
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
-	printf("Loading template file %s\n", pglob.gl_pathv[i]);
+	debug_msg("Loading template file %s\n", pglob.gl_pathv[i]);
 	if (init_template_parser(pglob.gl_pathv[i], this) < 0) {
 	    globfree(&pglob);
 	    errmsg = c_format("Failed to open template file: %s",
@@ -328,7 +331,7 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	}
 	if (matches.size() > 1) {
 	    // This shouldn't be possible
-	    fprintf(stderr, "Multiple match at node %s\n", (*iter).c_str());
+	    XLOG_ERROR("Multiple match at node %s\n", (*iter).c_str());
 	    XLOG_UNREACHABLE();
 	}
 

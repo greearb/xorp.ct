@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.9 2003/12/03 00:17:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.10 2004/01/13 00:20:52 pavlin Exp $"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -144,7 +144,7 @@ RandomGen::RandomGen()
 	    read_fd(file);
 	    pclose(file);
 	} else {
-	    fprintf(stderr, "popen of \"netstat -i\" failed\n");
+	    XLOG_ERROR("popen of \"netstat -i\" failed");
 	}
 
 	//

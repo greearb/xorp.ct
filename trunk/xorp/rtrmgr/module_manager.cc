@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.27 2004/01/14 03:00:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.28 2004/05/11 16:50:57 mjh Exp $"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,21 +40,21 @@ static multimap<string, Module*> module_paths;
 static void
 child_handler(int x)
 {
-    printf("child_handler: %d\n", x);
+    debug_msg("child_handler: %d\n", x);
     pid_t pid;
     int child_wait_status;
     map<pid_t, string>::iterator pid_iter;
     multimap<string, Module*>::iterator path_iter, path_iter_next;
 
     pid = waitpid(-1, &child_wait_status, WUNTRACED);
-    printf("pid=%d, wait status=%d\n", pid, child_wait_status);
+    debug_msg("pid=%d, wait status=%d\n", pid, child_wait_status);
 
     XLOG_ASSERT(pid > 0);
     pid_iter = module_pids.find(pid);
     XLOG_ASSERT(pid_iter != module_pids.end());
 
     if (WIFEXITED(child_wait_status)) {
-	printf("process exited with value %d\n",
+	debug_msg("process exited with value %d\n",
 	       WEXITSTATUS(child_wait_status));
 	//
 	// Set the status for all appropriate modules, and at the same
@@ -84,7 +87,7 @@ child_handler(int x)
 	}
 	module_pids.erase(pid_iter);
     } else if (WIFSIGNALED(child_wait_status)) {
-	printf("process was killed with signal %d\n",
+	debug_msg("process was killed with signal %d\n",
 	       WTERMSIG(child_wait_status));
 	//
 	// Set the status for all appropriate modules, and at the same
@@ -104,7 +107,7 @@ child_handler(int x)
 	}
 	module_pids.erase(pid_iter);
     } else if (WIFSTOPPED(child_wait_status)) {
-	printf("process stopped\n");
+	debug_msg("process stopped\n");
 	//
 	// Set the status for all appropriate modules.
 	//
@@ -202,7 +205,7 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 	return;
     }
 
-    printf("sending kill to pid %d\n", _pid);
+    debug_msg("sending kill to pid %d\n", _pid);
     // We need to kill the process
     new_status(MODULE_SHUTTING_DOWN);
     kill(_pid, SIGTERM);
@@ -217,7 +220,7 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
     map<pid_t, string>::iterator pid_iter;
     multimap<string, Module*>::iterator path_iter;
 
-    printf("terminate_with_prejudice\n");
+    debug_msg("terminate_with_prejudice\n");
 
     if (_status == MODULE_NOT_STARTED) {
 	cb->dispatch();
@@ -251,7 +254,7 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
     XLOG_ASSERT(pid_iter != module_pids.end());
     module_pids.erase(pid_iter);
 
-    printf("sending kill -9\n");
+    debug_msg("sending kill -9\n");
     // If it still hasn't exited, kill it properly.
     kill(_pid, SIGKILL);
     new_status(MODULE_NOT_STARTED);
@@ -397,8 +400,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    //set userid as required.
 	    if (_userid != NO_SETUID_ON_EXEC) {
 		if (setuid(_userid) != 0) {
-		    fprintf(stderr, "Failed to setuid(%d) on exec\n",
-			    _userid);
+		    XLOG_ERROR("Failed to setuid(%d) on exec\n", _userid);
 		    exit(1);
 		}
 	    }
@@ -407,7 +409,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    setsid();
 	    if (_argv.empty()) {
 		if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
-		    fprintf(stderr, "Execution of %s failed\n", _expath.c_str());
+		    XLOG_ERROR("Execution of %s failed\n", _expath.c_str());
 		    exit(1);
 		}
 	    } else {
@@ -419,10 +421,8 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 		}
 		argv[i] = NULL;
 		
-		if (execv(_expath.c_str(), 
-			  const_cast<char*const*>(argv)) < 0) {
-		    fprintf(stderr, "Execution of %s failed\n", 
-			    _expath.c_str());
+		if (execv(_expath.c_str(),const_cast<char*const*>(argv)) < 0) {
+		    XLOG_ERROR("Execution of %s failed\n", _expath.c_str());
 		    exit(1);
 		}
 	    }
@@ -446,7 +446,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 void
 Module::module_run_done(bool success)
 {
-    printf("module_run_done\n");
+    debug_msg("module_run_done\n");
 
     // Do we think we managed to start it?
     if (success == false) {
