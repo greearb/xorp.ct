@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.27 2004/01/05 23:40:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.28 2004/01/06 02:56:24 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -22,17 +22,14 @@
 #include <sys/stat.h>
 #include <grp.h>
 
-// #define DEBUG_LOGGING
-
 #include "master_conf_tree.hh"
 #include "template_tree_node.hh"
 #include "template_commands.hh"
 #include "module_command.hh"
 #include "template_tree.hh"
 #include "util.hh"
-#include "main_rtrmgr.hh"
+#include "rtrmgr_error.hh"
 
-extern string booterrormsg(const char* s) throw (ParseError);
 
 /*************************************************************************
  * Master Config Tree class
@@ -51,12 +48,12 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     string configuration;
     string errmsg;
 
-    if (! read_file(configuration, config_file, errmsg)) {
-	XLOG_ERROR(errmsg.c_str());
-	xorp_throw0(InitError);
+    if (read_file(configuration, config_file, errmsg) != true) {
+	xorp_throw(InitError, errmsg);
     }
-    if (! parse(configuration, config_file)) {
-	xorp_throw0(InitError);
+
+    if (parse(configuration, config_file, errmsg) != true) {
+	xorp_throw(InitError, errmsg);
     }
 
     //
@@ -102,19 +99,16 @@ MasterConfigTree::read_file(string& configuration,
 
 bool
 MasterConfigTree::parse(const string& configuration,
-			const string& config_file)
+			const string& config_file,
+			string& errmsg)
 {
-    try {
-	ConfigTree::parse(configuration, config_file);
-	string s = show_tree();
-	printf("== MasterConfigTree::parse yields ==\n%s\n"
-	       "====================================\n", s.c_str());
-    } catch (ParseError &pe) {
-	printf("caught ParseError: %s\n", pe.why().c_str());
-	booterrormsg(pe.why().c_str());
-	printf("caught ParseError 2\n");
+    if (ConfigTree::parse(configuration, config_file, errmsg) != true)
 	return false;
-    }
+
+    string s = show_tree();
+    printf("== MasterConfigTree::parse yields ==\n%s\n"
+	   "====================================\n", s.c_str());
+
     return true;
 }
 
@@ -361,7 +355,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	    curr_iter = next_iter;
 	}
 	if (progress_made == false) {
-	    XLOG_FATAL("Module dependencies cannot be satisfied\n");
+	    XLOG_FATAL("Module dependencies cannot be satisfied");
 	}
     }
 
@@ -447,12 +441,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 	_task_manager.shutdown_module(*iter);
     }
 
-    try {
-	_task_manager.run(callback(this,
-				   &MasterConfigTree::commit_pass1_done));
-    } catch (UnexpandedVariable& uvar) {
-	// TODO: XXX: Ignore this?
-    }
+    _task_manager.run(callback(this, &MasterConfigTree::commit_pass1_done));
 }
 
 void
@@ -481,7 +470,7 @@ MasterConfigTree::commit_changes_pass2()
     _commit_in_progress = true;
 
     if (_root_node.check_config_tree(result) == false) {
-	XLOG_ERROR("Commit failed in deciding startups\n");
+	XLOG_ERROR("Commit failed in deciding startups");
 	_commit_cb->dispatch(false, result);
 	return;
     }
@@ -503,7 +492,7 @@ MasterConfigTree::commit_changes_pass2()
 	 iter != changed_modules.end();
 	 ++iter) {
 	if (!module_config_start(*iter, result)) {
-	    XLOG_ERROR("Commit failed in deciding startups\n");
+	    XLOG_ERROR("Commit failed in deciding startups");
 	    _commit_cb->dispatch(false, result);
 	    return;
 	}
@@ -513,7 +502,7 @@ MasterConfigTree::commit_changes_pass2()
 				   /* do_commit = */ true,
 				   0, 0, result)) {
 	// Abort the commit
-	XLOG_ERROR("Commit failed in config tree\n");
+	XLOG_ERROR("Commit failed in config tree");
 	_commit_cb->dispatch(false, result);
 	return;
     }
@@ -524,15 +513,7 @@ MasterConfigTree::commit_changes_pass2()
 	_task_manager.shutdown_module(*iter);
     }
 
-    try {
-	_task_manager.run(callback(this,
-				   &MasterConfigTree::commit_pass2_done));
-    } catch (UnexpandedVariable& uvar) {
-	result = uvar.str();
-	XLOG_ERROR("Commit failed due to unexpanded variable\n");
-	_commit_cb->dispatch(false, result);
-	return;
-    }
+    _task_manager.run(callback(this, &MasterConfigTree::commit_pass2_done));
 }
 
 void
@@ -815,7 +796,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     gid_t gid, orig_gid;
     orig_gid = getgid();
     gid = grp->gr_gid;
-    if (setegid(gid)<0) {
+    if (setegid(gid) < 0) {
 	errmsg = c_format("Failed to seteuid to group \"xorp\", gid %d\n",
 			  gid);
 	return false;
@@ -846,13 +827,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // parse errors before we reconfigure ourselves with the new config.
     //
     ConfigTree new_tree(_template_tree);
-    try {
-	new_tree.parse(configuration, filename);
-    } catch (ParseError &pe) {
-	printf("caught ParseError\n");
-	errmsg = booterrormsg(pe.why().c_str());
+    if (new_tree.parse(configuration, filename, errmsg) != true)
 	return false;
-    }
 
     //
     // Ok, so the new config parses.  Now we need to figure out how it
@@ -935,7 +911,7 @@ MasterConfigTree::module_config_start(const string& module_name,
     return true;
 }
 
-#if 0
+#if 0	// TODO
 bool
 MasterConfigTree::module_shutdown(const string& module_name,
 				  string& result)

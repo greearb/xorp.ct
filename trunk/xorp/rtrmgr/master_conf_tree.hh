@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.14 2003/12/15 22:31:24 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.15 2004/01/05 23:40:07 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -23,9 +23,8 @@
 
 #include "libxorp/xorp.h"
 
-#include "main_rtrmgr.hh"
+#include "rtrmgr_error.hh"
 #include "task.hh"
-#include "parse_error.hh"
 #include "conf_tree.hh"
 
 
@@ -43,7 +42,8 @@ public:
 
     bool read_file(string& configuration, const string& config_file,
 		   string& errmsg);
-    bool parse(const string& configuration, const string& config_file);
+    bool parse(const string& configuration, const string& config_file,
+	       string& errmsg);
     void execute();
     void config_done(bool success, string errmsg);
 
