@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.43 2004/05/28 22:27:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.44 2004/05/31 02:32:16 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -955,7 +955,7 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	is_a_tag = is_tag();
 
     for (int i = 0; i < indent; i++) 
-	my_in += " ";
+	my_in += "  ";
 
     if (is_a_tag && show_me) {
 	new_indent = indent;
@@ -966,9 +966,9 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	    } else {
 		if (annotate) {
 		    if ((*iter)->existence_committed())
-			s += "  ";
+			s += "    ";
 		    else
-			s += "> ";
+			s += ">   ";
 		}
 		s += my_in + _segname + " " +
 		    (*iter)->show_subtree(depth, indent, false, annotate);
@@ -984,9 +984,9 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	// annotate modified config lines
 	if (annotate) {
 	    if ((_has_value && !_value_committed) || (!_existence_committed))
-		s2 = "> ";
+		s2 = ">   ";
 	    else
-		s2 = "  ";
+		s2 = "    ";
 	}
 
 	if (do_indent) {
