@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.42 2004/09/28 00:36:59 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.43 2004/09/28 03:52:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -335,7 +335,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 	_mrib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
 	!= XORP_OK) {
 	string err = c_format("Could not add IPv4 route "
-			      "net %s, nexthop: %s to multiast RIB",
+			      "net %s, nexthop: %s to multicast RIB",
 			      network.str().c_str(), nexthop.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
