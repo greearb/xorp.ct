@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.55 2004/09/17 13:50:54 abittau Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.56 2004/09/22 01:41:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,7 +50,7 @@ RibIpcHandler::~RibIpcHandler()
 
     set_plumbing(NULL, NULL);
 
-    if("" != _ribname)
+    if (!_ribname.empty())
 	XLOG_WARNING("Deleting RibIpcHandler while still registered with RIB");
     /*
     ** If would be great to de-register from the RIB here. The problem
@@ -65,7 +65,7 @@ RibIpcHandler::register_ribname(const string& r)
     if (_ribname == r)
 	return true;
 
-    if ("" == r) {
+    if (r.empty()) {
 	_ribname.erase();
 	return unregister_rib();
     }
@@ -186,7 +186,7 @@ RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv4) %x\n", (u_int)(&rt));
 
-    if("" == _ribname)
+    if (_ribname.empty())
 	return 0;
 
     _v4_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(),
@@ -200,7 +200,7 @@ RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
 
-    if ("" == _ribname)
+    if (_ribname.empty())
 	return 0;
 
     _v6_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop(),
@@ -236,7 +236,7 @@ RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
 
-    if("" == _ribname)
+    if (_ribname.empty())
 	return 0;
 
     _v4_queue.queue_delete_route(_ribname, _ibgp, safi, rt.net());
@@ -249,7 +249,7 @@ RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
     UNUSED(rt);
-    if("" == _ribname)
+    if (_ribname.empty())
 	return 0;
 
     _v6_queue.queue_delete_route(_ribname, _ibgp, safi, rt.net());
