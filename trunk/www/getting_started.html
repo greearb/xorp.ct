@@ -1,10 +1,10 @@
-<!-- $XORP$ -->
+<!-- $XORP: www/getting_started.html,v 1.1 2004/04/21 17:25:21 mjh Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <HEAD>
 <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
-<TITLE>Getting Started with XOrp</TITLE>
+<TITLE>Getting Started with XORP</TITLE>
 </HEAD>
 <BODY BGCOLOR="white">
 <p>
@@ -13,7 +13,7 @@
 
 This short guide is aimed at people new to XORP understand what XORP
 does and how to use it.  It's a work in progress - please let us know
-what additionnal help you would find useful.
+what additional help you would find useful.
 <P>
 <UL>
 <LI><a href="#what">What exactly is XORP?</a>
@@ -45,9 +45,10 @@ At the present time, XORP doesn't provide it's own forwarding path,
 but rather relies on the forwarding capabilities of the underlying
 operating system.  This means that although the control plane is
 nicely extensible, the forwarding path isn't.  We have plans to
-address this in the future using the Click modular router code, but
-intend to keep the option of using native forwarding for those that
-prefer it.
+address this in the future using the <a
+href="http://www.pdos.lcs.mit.edu/click/">Click</a> modular router
+code, but intend to keep the option of using native forwarding for
+those that prefer it.
 <P>
 XORP does provide routing protocols (BGP, RIP, PIM Sparse Mode),
 support protocols (IGMPv2, MLDv1), and management mechanisms (command
@@ -60,7 +61,7 @@ deployed in production environments.  Thus it's really important to us
 that XORP is stable and secure.  While we have an extensive set of
 internal <a href="#validating">test suites</a>, these can only test so
 much.  True stability will only come from real-world testing - if you
-try XORP, and it doesn't do what you expect or hope, please let me
+try XORP, and it doesn't do what you expect or hope, please let us
 know, either through email to feedback at xorp.org or <a
 href="http://www.xorp.org/bugzilla/index.cgi">bugzilla</a>.
 </td></tr></table><P>
@@ -147,7 +148,7 @@ Note: gmake may be installed as make on some platforms.  Then go away
 and have a coffee or two.
 <P>
 This will build XORP "in place".  That is, the bgp binary (xorp_bgp)
-will be left in the bgp subdirectory, the xorp shell binary (xorpsh)
+will be left in the bgp subdirectory, the XORP shell binary (xorpsh)
 will be left in the rtrmgr directory, and so on.  This default can be
 overridden (for example, if you're cross-compiling multiple platforms
 from the same source), but there's no need to if you're just starting
@@ -204,12 +205,12 @@ width="100%" bgcolor="#b0b0b0">
 XORP tries to hide from the operator the internal structure of the
 software, so that the operator only needs to know the right commands
 to use to configure the router.  The operator should not need to know
-that xorp is internally composed of multiple processes, nor what those
+that XORP is internally composed of multiple processes, nor what those
 processes do.  All the operator needs to see is a single router
 configuration file that determines the startup configuration, and a
 single command line interface that can be used to configure XORP.
 <P>
-There is a single xorp process that manages the whole XORP router -
+There is a single XORP process that manages the whole XORP router -
 this is called <B>xorp_rtrmgr</B> (short for XORP Router Manager).  If
 you built XORP from source using the defaults, the xorp_rtrmgr binary
 will be in the rtrmgr subdirectory.
@@ -223,7 +224,7 @@ but to not actually start any processes.  This can be used to check
 configuration files.  
 <P>
 Typically xorp_rtrmgr must be run as root.  This is because it starts
-up all processes that need priviledged access to insert routes into
+up all processes that need privileged access to insert routes into
 the forwarding path in the kernel.
 <P>
 If you are using the live CD, then xorp_rtrmgr should start by default
@@ -281,7 +282,7 @@ that you have a compatible C++ compiler.  All recent versions of gcc
 should work, but we don't yet know about other compilers.
 <P>
 The goal is for all of the system dependencies to be in the Forwarding
-Engine Abstration process.  To port XORP to a new platform, either an
+Engine Abstraction process.  To port XORP to a new platform, either an
 existing FEA must be ported to that platform, or a new bottom end to
 FEA will need to be written.  FreeBSD and Linux use different bottom
 ends to the FEA.
@@ -301,9 +302,7 @@ time this is not true of all routing protocols.
 <address>feedback&#64;xorp&#46;org</address>
 <!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
 <!-- hhmts start -->
-<small>
-Last modified: $Date$.
-</small>
+Last modified: Wed Apr 21 11:29:03 PDT 2004
 <!-- hhmts end -->
 
   </body>
