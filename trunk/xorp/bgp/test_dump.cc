@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.42 2004/10/06 06:42:32 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.43 2005/03/18 08:15:04 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -497,28 +497,22 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    printf("---------------peering up\n");
     ribin_table3->ribin_peering_came_up();
     fanout_table->add_next_table(debug_table3, &handler3, 
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
-    printf("---------------dump_entire\n");
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
-    printf("---------------remove_next_table\n");
     fanout_table->remove_next_table(debug_table2);
     debug_table1->write_comment("XXXX");
-    printf("---------------peering_down\n");
     ribin_table2->ribin_peering_went_down();
     debug_table1->write_separator();
-    printf("---------------eventloop run\n");
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
-    printf("---------------eventloop done\n");
 
     //delete the routes
     debug_table1->write_separator();
