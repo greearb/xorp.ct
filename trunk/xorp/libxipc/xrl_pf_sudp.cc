@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.30 2003/09/26 21:34:34 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.31 2003/11/06 03:00:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -125,7 +125,9 @@ status_to_xrlerror(const string& status)
     uint32_t error_code = 0;
 
     string::const_iterator si = status.begin();
-    while (xorp_isdigit(*si)) {
+    while (si != status.end()) {
+	if (xorp_isdigit(*si) == false)
+	    break;
 	error_code *= 10;
 	error_code += *si - '0';
 	si++;
