@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.41 2003/08/27 02:30:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.42 2003/08/27 02:45:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,6 +28,8 @@
 #include "main.hh"
 
 #define DEBUG_BGPPeer
+
+inline void trap_callback(const XrlError& error, const char *comment);
 
 BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
 		 BGPMain *m)
@@ -1418,7 +1420,6 @@ BGPPeer::set_state(FSMState s, bool error)
 	 string last_error = NotificationPacket::pretty_print_error_code(
 						       _last_error[0],
 						       _last_error[1]);
-	 inline void trap_callback(const XrlError& error, const char *comment);
 	 if (STATEESTABLISHED == _state && STATEESTABLISHED != previous_state){
 	    snmp.send_send_bgp_established_trap(m->bgp_mib_name().c_str(),
 						last_error,_state,
