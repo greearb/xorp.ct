@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.8 2002/12/09 18:28:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
 
 /*
 ** BGP Pretty Print
@@ -34,11 +34,9 @@ bgppp(const uint8_t *buf, const size_t len)
 
     const fixed_header *header = 
 	reinterpret_cast<const struct fixed_header *>(buf);
-    struct fixed_header fh = *header;
-    fh._length = ntohs(header->_length);
 
     try {
-	switch(fh._type) {
+	switch(header->type) {
 	case MESSAGETYPEOPEN: {
 	    OpenPacket pac(buf, len);
 	    pac.decode();
@@ -67,7 +65,7 @@ bgppp(const uint8_t *buf, const size_t len)
 	    /*
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
-	    result = c_format("Unknown packet type %d\n", header->_type);
+	    result = c_format("Unknown packet type %d\n", header->type);
 	    XLOG_WARNING(result.c_str());
 	}
     } catch(CorruptMessage c) {

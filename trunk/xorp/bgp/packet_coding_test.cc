@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.5 2003/01/17 05:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.6 2003/01/21 16:56:59 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -119,12 +119,7 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
 
     // We want to test all the constructors for NotificationPacket
     NotificationPacket *notificationpacket;
-    if (esc == 0 && d == NULL) 
-	notificationpacket = new NotificationPacket(ec);
-    else if (d==NULL)
-	notificationpacket = new NotificationPacket(ec, esc);
-    else
-	notificationpacket = new NotificationPacket(d, ec, esc, l);
+    notificationpacket = new NotificationPacket(ec, esc, d, l);
     
     const uint8_t *buf;
     int len;

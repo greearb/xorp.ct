@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.3 2003/01/16 23:18:57 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.4 2003/01/21 16:56:59 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -43,10 +43,12 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/debug.h"
 
-#define MESSAGETYPEOPEN		1
-#define MESSAGETYPEUPDATE	2
-#define MESSAGETYPENOTIFICATION	3
-#define	MESSAGETYPEKEEPALIVE	4
+enum BgpPacketType {
+    MESSAGETYPEOPEN =		1,
+    MESSAGETYPEUPDATE =		2,
+    MESSAGETYPENOTIFICATION =	3,
+    MESSAGETYPEKEEPALIVE =	4
+};
 
 /**
  * Notification message error codes with associated subcodes.
@@ -81,28 +83,30 @@ enum Notify {
     CEASE = 6			// Cease
 };
 
-#define BGP_COMMON_HEADER_LEN			19
-#define BGP_NOTIFY_HEADER_LEN			2
-#define BGP_UPDATE_WITHDRAWN_ROUTES_LEN		2
-#define BGP_UPDATE_TOTAL_PATH_ATTR_LEN		2
-
 #define	MARKER_SIZE		16
-
-#define MINPACKETSIZE		BGP_COMMON_HEADER_LEN
-#define MAXPACKETSIZE		4096
-#define MINOPENPACKET		29
-#define MINUPDATEPACKET		23
-#define MINKEEPALIVEPACKET	BGP_COMMON_HEADER_LEN
-#define MINNOTIFICATIONPACKET	(BGP_COMMON_HEADER_LEN + BGP_NOTIFY_HEADER_LEN)
-
 /**
- * Overlay for the BGP common header.
+ * Overlay for the BGP common header (on the wire)
  */
 struct fixed_header {
-    uint8_t _marker[MARKER_SIZE];
-    uint16_t _length;
-    uint8_t _type;
+    uint8_t	marker[MARKER_SIZE];	// normally all bits are ones.
+    uint16_t	length;			// this is in network format 
+    uint8_t	type;			// enum BgpPacketType
 };
+
+// size of fixed_header
+#define BGP_COMMON_HEADER_LEN			19
+
+/* 
+ * Various min and max packet size, accounting for the basic
+ * information in the packet itself
+ */
+#define MINPACKETSIZE		BGP_COMMON_HEADER_LEN
+#define MAXPACKETSIZE		4096
+
+#define MINOPENPACKET		(BGP_COMMON_HEADER_LEN + 10)
+#define MINUPDATEPACKET		(BGP_COMMON_HEADER_LEN + 2 + 2)
+#define MINKEEPALIVEPACKET	BGP_COMMON_HEADER_LEN
+#define MINNOTIFICATIONPACKET	(BGP_COMMON_HEADER_LEN + 2)
 
 /**
  * This exception is thrown when a bad input message is received.
@@ -260,10 +264,8 @@ private:
 class NotificationPacket : public BGPPacket {
 public:
     NotificationPacket(const uint8_t *d, uint16_t l) throw(InvalidPacket);
-    NotificationPacket(const uint8_t *d, uint8_t ec, uint8_t esc,
-			  uint16_t l);
-    NotificationPacket(uint8_t ec, uint8_t esc);
-    NotificationPacket(uint8_t ec);
+    NotificationPacket(uint8_t ec, uint8_t esc = 0,
+		const uint8_t *d = 0, size_t l=0);
     NotificationPacket();
     ~NotificationPacket();
     uint8_t error_code() const { return _error_code; }

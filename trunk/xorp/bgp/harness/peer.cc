@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.5 2002/12/16 22:39:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.6 2003/01/21 16:56:59 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -409,8 +409,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
     while(0 != (buf = mrtd_traffic_send(fp, len))) {
 	const fixed_header *header = 
 	    reinterpret_cast<const struct fixed_header *>(buf);
-	struct fixed_header fh = *header;
-	if(MESSAGETYPEUPDATE == header->_type) {
+	if(MESSAGETYPEUPDATE == header->type) {
 	    _smcb = ::callback(this, &Peer::send_dump_callback,
 			       fp,
 			       "mrtd_traffic_send");
@@ -629,7 +628,7 @@ mrtd_traffic_dump(const uint8_t *buf, const size_t len , const timeval tv,
     const fixed_header *header = 
 	reinterpret_cast<const struct fixed_header *>(buf);
     struct fixed_header fh = *header;
-    if(MESSAGETYPEUPDATE != header->_type)
+    if(MESSAGETYPEUPDATE != header->type)
 	return;
     }
 #endif
@@ -943,14 +942,12 @@ Peer::datain(const bool& status, const timeval& tv,
 
     const fixed_header *header = 
 	reinterpret_cast<const struct fixed_header *>(buf);
-    struct fixed_header fh = *header;
-    fh._length = ntohs(header->_length);
 
-    if(!_traffic_recv.is_empty())
+    if (!_traffic_recv.is_empty())
 	_traffic_recv->dispatch(buf, length, tv);
 
     try {
-	switch(fh._type) {
+	switch(header->type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
@@ -1013,7 +1010,7 @@ Peer::datain(const bool& status, const timeval& tv,
 	    /*
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
-	    XLOG_ERROR("Unknown packet type %d", header->_type);
+	    XLOG_ERROR("Unknown packet type %d", header->type);
 	}
     } catch(CorruptMessage c) {
 	/*
@@ -1112,10 +1109,9 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 					    line.c_str()));
 			
 		    buf[i] = (uint8_t)value;
-		    pac = new NotificationPacket(buf, 
-						 atoi(words[index+1].c_str()),
+		    pac = new NotificationPacket(atoi(words[index+1].c_str()),
 						 atoi(words[index+2].c_str()),
-						 errlen);
+						 buf, errlen);
 		}
 	    }
 	}

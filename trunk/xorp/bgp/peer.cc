@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.5 2003/01/21 03:33:18 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.6 2003/01/21 16:56:59 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -98,7 +98,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     ** Put the marker authentication code here.
     */
     try {
-	switch (header->_type) {
+	switch (header->type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
@@ -158,7 +158,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    /*
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
-	    XLOG_ERROR("Unknown packet type %d", header->_type);
+	    XLOG_ERROR("Unknown packet type %d", header->type);
 	    action(EVENTBGPTRANFATALERR, MSGHEADERERR, BADMESSTYPE);
 	    return false;
 	}
@@ -408,13 +408,8 @@ BGPPeer::action(FSMEvent Event,
     ** peer send a notification of the error.
     */
     if (is_connected()) {
-	if (0 == data || 0 == len)
-	    send_notification(NotificationPacket(error, subcode));
-	else
-	    send_notification(NotificationPacket(data, len, error,
-						    subcode));
+	send_notification(NotificationPacket(error, subcode, data, len));
 	set_state(STATESTOPPED, true);
-
 	return;
     }
 
@@ -1079,10 +1074,8 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	    default:
 		if ((*i)->well_known()) {
 		    // unrecognized well_known attribute.
-		    return new NotificationPacket((*i)->get_data(),
-						  UPDATEMSGERR,
-						  UNRECOGWATTR,
-						  (*i)->get_size());
+		    return new NotificationPacket(UPDATEMSGERR, UNRECOGWATTR,
+					(*i)->get_data(), (*i)->get_size());
 		}
 	    }
 	}
@@ -1090,14 +1083,14 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	if (origin_attr == NULL) {
 	    debug_msg("Missing ORIGIN\n");
 	    uint8_t data = ORIGIN;
-	    return new NotificationPacket(&data, UPDATEMSGERR, MISSWATTR, 1);
+	    return new NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
 	}
 
 	// The AS Path attribute is mandatory
 	if (as_path_attr == NULL) {
 	    debug_msg("Missing AS_PATH\n");
 	    uint8_t data = AS_PATH;
-	    return new NotificationPacket(&data, UPDATEMSGERR, MISSWATTR, 1);
+	    return new NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
 	}
 
 	if (!ibgp()) {
@@ -1116,8 +1109,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	if (next_hop_attr == NULL) {
 	    debug_msg("Missing NEXT_HOP\n");
 	    uint8_t data = NEXT_HOP;
-	    return new NotificationPacket(&data, UPDATEMSGERR,
-					  MISSWATTR, 1);
+	    return new NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
 	}
 
 	// XXX need also to check that the nexthop address is not

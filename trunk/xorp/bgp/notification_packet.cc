@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.4 2003/01/16 23:18:57 pavlin Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.5 2003/01/21 16:56:58 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -23,50 +23,28 @@
 
 /* **************** BGPNotificationPacket *********************** */
 
-NotificationPacket::NotificationPacket(uint8_t ec)
-{
-    debug_msg("Error code %d\n", ec);
-
-    _Length = MINNOTIFICATIONPACKET;
-    _Type = MESSAGETYPENOTIFICATION;
-    _error_code = ec;
-    _error_subcode = 0;
-    _Data = NULL;
-    _error_data = NULL;
-
-    debug_msg(str().c_str());
-}
-
-NotificationPacket::NotificationPacket(uint8_t ec, uint8_t esc)
-{
-
-    debug_msg("Error code %d sub code %d\n", ec, esc);
-
-    _Length = MINNOTIFICATIONPACKET;
-    _Type = MESSAGETYPENOTIFICATION;
-    _error_code = ec;
-    _error_subcode = esc;
-    _Data = NULL;
-    _error_data = NULL;
-
-    debug_msg(str().c_str());
-}
-
-NotificationPacket::NotificationPacket(const uint8_t *ed, uint8_t ec,
-				       uint8_t esc, uint16_t elen)
+NotificationPacket::NotificationPacket(uint8_t ec, uint8_t esc = 0,
+		const uint8_t *ed = 0, size_t elen = 0)
 {
     debug_msg("Error code %d sub code %d data %#x len %d\n", ec, esc,
 	      (int)ed, elen);
 
+    if (elen == 0)
+	ed = 0;
+    if (ed == 0)
+	elen = 0;
     // elen is the length of the error_data to carry
     _Length = MINNOTIFICATIONPACKET + elen;
 
     _Type = MESSAGETYPENOTIFICATION;
     _error_code = ec;
     _error_subcode = esc;
-    uint8_t *error_data = new uint8_t[elen];
-    memcpy(error_data, ed, elen);
-    _error_data = error_data;
+    if (ed) {
+	uint8_t *error_data = new uint8_t[elen];
+	memcpy(error_data, ed, elen);
+	_error_data = error_data;
+    } else
+	_error_data = 0;
     _Data = NULL;
 
     debug_msg(str().c_str());
@@ -80,7 +58,7 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
     _Length = l;
     _Type = MESSAGETYPENOTIFICATION;
     int data_len = _Length;
-    if (data_len < BGP_NOTIFY_HEADER_LEN) {
+    if (data_len < MINNOTIFICATIONPACKET) {
 	xorp_throw(InvalidPacket, "Truncated Notification Message");
     }
     uint8_t *data = new uint8_t[data_len];

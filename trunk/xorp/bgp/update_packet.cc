@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.4 2003/01/16 23:18:59 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.5 2003/01/17 05:51:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -290,21 +290,14 @@ UpdatePacket::decode()
     urlength = ntohs((uint16_t &)(*data));
 
     //check unreachable routes length is feasible
-    nlength = _Length
-	- BGP_COMMON_HEADER_LEN 
-	- BGP_UPDATE_WITHDRAWN_ROUTES_LEN
-	- BGP_UPDATE_TOTAL_PATH_ATTR_LEN;
+    nlength = _Length - MINUPDATEPACKET;
     if (nlength < urlength)
 	xorp_throw(CorruptMessage,
 		   c_format("Unreachable routes length is bogus %d < %d",
 			    nlength, urlength),
 		   UPDATEMSGERR, ATTRLEN);
     
-    nlength = _Length 
-	- BGP_COMMON_HEADER_LEN 
-	- BGP_UPDATE_WITHDRAWN_ROUTES_LEN
-	- BGP_UPDATE_TOTAL_PATH_ATTR_LEN
-	- urlength; 
+    nlength = _Length - MINUPDATEPACKET - urlength;
 
     data = data + sizeof(uint16_t); // move passed unreachable routes length field
     size_t urrlength = 0; // Length of a single unreachable route
