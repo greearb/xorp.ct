@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.28 2004/06/25 12:32:08 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.29 2004/09/17 13:50:54 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -517,9 +517,9 @@ DecisionTable<A>::igp_distance(const A nexthop) const
 	XLOG_FATAL("This next hop must be known %s", nexthop.str().c_str());
 
     if (resolvable)
-	debug_msg("Decision: IGP distance for %s is %d\n",
+	debug_msg("Decision: IGP distance for %s is %u\n",
 		  nexthop.str().c_str(),
-		  metric);
+		  XORP_UINT_CAST(metric));
     else
 	debug_msg("Decision: IGP distance for %s is unknown\n",
 		  nexthop.str().c_str());
