@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.29 2003/07/29 18:41:45 pavlin Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.30 2003/08/27 01:29:32 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -925,8 +925,15 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
 // 		  iptuple.str().c_str());
 // 	peerdata = const_cast<BGPPeerData *const>(peer->peerdata());
 // 	peerdata->add_sent_parameter( new BGPRefreshCapability() );
+    } else  if (strcmp(parameter.c_str(),"MultiProtocolIPv6") == 0) {
+ 	debug_msg("Setting Multiprotocol IPv6 for peer %s.",
+		  iptuple.str().c_str());
+ 	BGPPeerData *peerdata =
+	    const_cast<BGPPeerData *const>(peer->peerdata());
+ 	peerdata->add_sent_parameter(
+	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
     } else {
-	XLOG_WARNING("Unable to set unknown parameter: %s.",
+	XLOG_WARNING("Unable to set unknown parameter: <%s>.",
 		     parameter.c_str());
 	return false;
     }
