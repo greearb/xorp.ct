@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.8 2003/06/11 13:21:01 hodson Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.9 2004/06/10 22:41:07 hodson Exp $"
 
 #include "config.h"
 
@@ -537,7 +537,7 @@ in_addr if_get_preferred()
 
     for (uint32_t i = 1; i <= n; i++) {
 	if (if_probe(i, name, addr, flags) &&
-	    (flags & ~IFF_LOOPBACK) &&
+	    (flags & IFF_LOOPBACK) &&
 	    (flags & IFF_UP)) {
 	    goto done;
 	}
