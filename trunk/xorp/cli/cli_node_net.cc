@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.25 2004/06/08 16:24:11 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.26 2004/06/10 22:40:43 hodson Exp $"
 
 
 //
@@ -384,7 +384,7 @@ CliClient::start_connection()
 		cli_print(c_format("Invalid window width (%u); "
 				   "window width unchanged (%u)\n",
 				   new_window_width,
-				   reinterpret_cast<uint32_t>(window_width())));
+				   static_cast<uint32_t>(window_width())));
 	    }
 	    if (new_window_height > 0) {
 		set_window_height(new_window_height);
@@ -392,7 +392,7 @@ CliClient::start_connection()
 		cli_print(c_format("Invalid window height (%u); "
 				   "window height unchanged (%u)\n",
 				   new_window_height,
-				   reinterpret_cast<uint32_t>(window_height())));
+				   static_cast<uint32_t>(window_height())));
 	    }
 
 	    gl_terminal_size(gl(), window_width(), window_height());
@@ -692,7 +692,7 @@ CliClient::process_telnet_option(int val)
 			cli_print(c_format("Invalid window width (%u); "
 					   "window width unchanged (%u)\n",
 					   new_window_width,
-					   reinterpret_cast<uint32_t>(window_width())));
+					   static_cast<uint32_t>(window_width())));
 		    }
 		    if (new_window_height > 0) {
 			set_window_height(new_window_height);
@@ -700,14 +700,14 @@ CliClient::process_telnet_option(int val)
 			cli_print(c_format("Invalid window height (%u); "
 					   "window height unchanged (%u)\n",
 					   new_window_height,
-					   reinterpret_cast<uint32_t>(window_height())));
+					   static_cast<uint32_t>(window_height())));
 		    }
 
 		    gl_terminal_size(gl(), window_width(), window_height());
 		    debug_msg("Client window size changed to width = %u "
 			      "height = %u\n",
-			      reinterpret_cast<uint32_t>(window_width()),
-			      reinterpret_cast<uint32_t>(window_height()));
+			      static_cast<uint32_t>(window_width()),
+			      static_cast<uint32_t>(window_height()));
 		}
 		break;
 	    default:
