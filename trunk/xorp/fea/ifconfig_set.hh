@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.22 2004/11/29 11:28:22 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.23 2004/11/30 13:02:31 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -37,6 +37,7 @@ public:
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
     virtual bool is_secondary() const { return !_is_primary; }
+    virtual bool is_running() const { return _is_running; }
 
     /**
      * Start operation.
@@ -549,6 +550,13 @@ public:
      * @return true if discard semantics are emulated.
      */
     virtual bool is_discard_emulated(const IfTreeInterface& i) const;
+
+    /**
+     * Get a reference to the @see IfTree instance.
+     *
+     * @return a reference to the @see IfTree instance.
+     */
+    const IfTree& iftree() const { return _iftree; }
 
 private:
     virtual int config_begin(string& errmsg);
