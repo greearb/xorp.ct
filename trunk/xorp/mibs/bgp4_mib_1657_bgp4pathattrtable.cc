@@ -512,7 +512,7 @@ get_v4_route_list_next_done(const XrlError& e,
                             const vector<uint8_t>* attr_unknown,
 			    const bool* valid)
 {
-    if (e != XrlError::OKAY() || false == valid) {
+    if (e != XrlError::OKAY() || false == (*valid)) {
 	// Done updating the local table.  Time to remove old routes 
         DEBUGMSGTL((BgpMib::the_instance().name(),
 	    "received last route of bgp4PathAttrTable... %ud\n",

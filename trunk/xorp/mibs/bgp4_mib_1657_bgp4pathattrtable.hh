@@ -90,7 +90,7 @@ extern size_t bgp4PathAttrTable_oid_len;
 #define bgp4PathAttrTable_COL_MIN 1
 #define bgp4PathAttrTable_COL_MAX 14
 
-#define UPDATE_REST_INTERVAL_ms 5000
+#define UPDATE_REST_INTERVAL_ms 30000
 
 #ifdef __cplusplus
 };
