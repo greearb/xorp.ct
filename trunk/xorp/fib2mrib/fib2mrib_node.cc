@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.8 2004/05/05 07:34:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.9 2004/05/06 19:32:24 pavlin Exp $"
 
 
 //
@@ -305,12 +305,12 @@ Fib2mribNode::tree_complete()
 void
 Fib2mribNode::updates_made()
 {
-    list<Fib2mribRoute>::const_iterator route_iter;
+    map<IPvXNet, Fib2mribRoute>::const_iterator route_iter;
 
     for (route_iter = _fib2mrib_routes.begin();
 	 route_iter != _fib2mrib_routes.end();
 	 ++route_iter) {
-	const Fib2mribRoute& fib2mrib_route = *route_iter;
+	const Fib2mribRoute& fib2mrib_route = route_iter->second;
 	bool is_old_interface_up = false;
 	bool is_new_interface_up = false;
 
@@ -665,13 +665,12 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Check if the route was added already
     //
-    list<Fib2mribRoute>::iterator iter;
-    for (iter = _fib2mrib_routes.begin();
-	 iter != _fib2mrib_routes.end();
-	 ++iter) {
-	Fib2mribRoute& tmp_route = *iter;
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter;
+    iter = _fib2mrib_routes.find(fib2mrib_route.network());
+    for ( ; iter != _fib2mrib_routes.end(); ++iter) {
+	Fib2mribRoute& tmp_route = iter->second;
 	if (tmp_route.network() != fib2mrib_route.network())
-	    continue;
+	    break;
 	if ((tmp_route.ifname() != fib2mrib_route.ifname())
 	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
 	    continue;
@@ -685,7 +684,8 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Add the route
     //
-    _fib2mrib_routes.push_back(fib2mrib_route);
+    _fib2mrib_routes.insert(make_pair(fib2mrib_route.network(),
+				      fib2mrib_route));
 
     //
     // Inform the RIB about the change
@@ -716,6 +716,8 @@ int
 Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 			    string& error_msg)
 {
+    bool is_route_replaced = false;
+
     //
     // Check the entry
     //
@@ -729,48 +731,65 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Find the route and replace it
     //
-    list<Fib2mribRoute>::iterator iter;
-    for (iter = _fib2mrib_routes.begin();
-	 iter != _fib2mrib_routes.end();
-	 ++iter) {
-	Fib2mribRoute& tmp_route = *iter;
-	// XXX: we may need to test the ifname and the vifname, but
-	// this may not be appropriate. E.g., if we check the ifname/vifname,
-	// then we cannot replace a route that changes its ifname/vifname.
-	// On the other hand, we may have more than one network entries
-	// (e.g., in case of IPv6 with the same subnet address pre interface.
-	if (tmp_route.network() != fib2mrib_route.network()) {
+    map<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
+    iter = _fib2mrib_routes.find(fib2mrib_route.network());
+    if (iter == _fib2mrib_routes.end()) {
+	//
+	// Coudn't find the route to replace
+	//
+	error_msg = c_format("Cannot replace route for %s: "
+			     "no such route",
+			     fib2mrib_route.network().str().c_str());
+	return XORP_ERROR;
+    }
+
+    //
+    // First check if there is a route with the same ifname and vifname.
+    // If there is such route, then update its value. Otherwise,
+    // update the first route for the same subnet.
+    //
+    for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
+	Fib2mribRoute& tmp_route = iter2->second;
+	if (tmp_route.network() != fib2mrib_route.network())
+	    break;
+	if ((tmp_route.ifname() != fib2mrib_route.ifname())
+	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
 	    continue;
 	}
+
 	//
 	// Route found. Overwrite its value.
 	//
 	tmp_route = fib2mrib_route;
+	is_route_replaced = true;
+	break;
+    }
 
+    if (! is_route_replaced) {
 	//
-	// Inform the RIB about the change
+	// No route found with the same ifname and vifname.
+	// Update the first route for the same subnet.
 	//
-	if (fib2mrib_route.is_interface_route()) {
-	    const IfMgrVifAtom* vif_atom;
-	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
-					fib2mrib_route.vifname());
-	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		inform_rib_route_change(fib2mrib_route);
-	} else {
-	    if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
-		inform_rib_route_change(fib2mrib_route);
-	}
+	Fib2mribRoute& tmp_route = iter->second;
 
-	return XORP_OK;
+	tmp_route = fib2mrib_route;
     }
 
     //
-    // Coudn't find the route to replace
+    // Inform the RIB about the change
     //
-    error_msg = c_format("Cannot replace route for %s: "
-			 "no such route",
-			 fib2mrib_route.network().str().c_str());
-    return XORP_ERROR;
+    if (fib2mrib_route.is_interface_route()) {
+	const IfMgrVifAtom* vif_atom;
+	vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
+				    fib2mrib_route.vifname());
+	if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    inform_rib_route_change(fib2mrib_route);
+    } else {
+	if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
+	    inform_rib_route_change(fib2mrib_route);
+    }
+
+    return XORP_OK;
 }
 
 /**
@@ -798,13 +817,12 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Find the route and delete it
     //
-    list<Fib2mribRoute>::iterator iter;
-    for (iter = _fib2mrib_routes.begin();
-	 iter != _fib2mrib_routes.end();
-	 ++iter) {
-	Fib2mribRoute& tmp_route = *iter;
+    map<IPvXNet, Fib2mribRoute>::iterator iter;
+    iter = _fib2mrib_routes.find(fib2mrib_route.network());
+    for ( ; iter != _fib2mrib_routes.end(); ++iter) {
+	Fib2mribRoute& tmp_route = iter->second;
 	if (tmp_route.network() != fib2mrib_route.network())
-	    continue;
+	    break;
 	if ((tmp_route.ifname() != fib2mrib_route.ifname())
 	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
 	    continue;

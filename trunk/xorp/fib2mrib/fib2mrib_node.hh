@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.6 2004/04/29 23:25:22 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.7 2004/05/06 19:32:24 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -641,7 +641,14 @@ private:
     ProcessStatus	_node_status;		// The node/process status
     const string	_protocol_name;		// The protocol name
 
-    list<Fib2mribRoute>	_fib2mrib_routes;	// The routes
+    //
+    // The routes are stored in a multimap, because we allow more than one
+    // route for same subnet destination, but with different interface/vif
+    // name.
+    // E.g., in case of IPv6 we may have the same (link-local) subnet
+    // address pre interface.
+    //
+    multimap<IPvXNet, Fib2mribRoute>	_fib2mrib_routes;
 
     //
     // Status-related state
