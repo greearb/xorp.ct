@@ -61,6 +61,9 @@
 /* Define to 1 if you have an IPTABLES build environment */
 #undef HAVE_FIREWALL_IPTABLES
 
+/* Define to 1 if you have a PF build environment */
+#undef HAVE_FIREWALL_PF
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
