@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.22 2004/10/25 16:52:28 bms Exp $
+# $XORP: xorp/fea/TODO,v 1.23 2004/11/05 03:23:09 bms Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -62,6 +62,9 @@
   Refactor them?
 
 * Fix spleling mistakes in xrl_target.[ch][ch].
+
+* Parse and pass up Linux RTN_UNREACHABLE messages using the new resolve
+  upcall mechanism.
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
