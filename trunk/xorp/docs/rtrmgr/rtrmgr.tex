@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.13 2004/01/13 02:05:48 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.14 2004/01/15 00:29:05 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -282,7 +282,7 @@ The variable {\tt \$(ospf.targetname)} means the value of node
 ``{\tt protocols ospf targetname}''.
 The variable {\tt \$(@)} means the value of the current node.
 Hence, if the targetname is set in the configuration tree to (or had a default
-value in the template tree of) {\tt "ospf"}, and router ID node in the
+value in the template tree of) {\tt "ospf"}, and the router ID node in the
 configuration tree had the value 1.2.3.4, then the XRL to call would be:
 
 \begin{verbatim}
@@ -462,6 +462,9 @@ which indicates an XRL should be called.
 call to create the new configuration tree instance of this template
 tree node.
 
+Note that if a node has no {\tt \%create} command, then the {\tt \%set}
+command (if exists) for that node is used instead (see below).
+
 \end{itemize}
 
 \subsubsection{The {\tt \%activate} Command.}
@@ -548,6 +551,10 @@ call to set the value of configuration tree instance of this template
 tree node.
 
 \end{itemize}
+
+Note that when a new instance of a node in the configuration tree is created,
+if that node has no {\tt \%create} command, then the {\tt \%set}
+command (if exists) for that node is used instead.
 
 \subsubsection{The {\tt \%unset} Command.}
 {\tt \%unset} is called to unset the value of a leaf node in the
