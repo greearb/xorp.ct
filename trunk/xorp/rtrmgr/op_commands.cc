@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.11 2004/01/14 03:00:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.12 2004/01/15 08:51:58 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -169,9 +169,11 @@ OpInstance::operator<(const OpInstance& them) const
 	return false;
 }
 
-OpCommand::OpCommand(const list<string>& parts)
+OpCommand::OpCommand(const list<string>& parts, const string& help_string)
+    : _cmd_parts(parts),
+      _help_string(help_string)
 {
-    _cmd_parts = parts;
+
 }
 
 int
@@ -199,9 +201,11 @@ OpCommand::add_module(const string& module)
 }
 
 int
-OpCommand::add_opt_param(const string& op_param)
+OpCommand::add_opt_param(const string& opt_param, const string& opt_param_help)
 {
-    _opt_params.push_back(op_param);
+    if (_opt_params.find(opt_param) != _opt_params.end())
+	return XORP_ERROR;
+    _opt_params.insert(make_pair(opt_param, opt_param_help));
     return XORP_OK;
 }
 
@@ -230,9 +234,11 @@ OpCommand::str() const
 	res += "  Command: " + _cmd_file + "\n";
     }
 
-    list<string>::const_iterator iter;
+    map<string, string>::const_iterator iter;
     for (iter = _opt_params.begin(); iter != _opt_params.end(); ++iter) {
-	res += "  Optional Parameter: " + *iter + "\n";
+	res += "  Optional Parameter: " + iter->first;
+	res += "  (Parameter Help: )" + iter->second;
+	res += "\n";
     }
     return res;
 }
@@ -265,16 +271,16 @@ OpCommand::operator==(const OpCommand& them) const
 }
 
 bool
-OpCommand::prefix_matches(const list<string>& pathparts,
-			  SlaveConfigTree* conf_tree)
+OpCommand::prefix_matches(const list<string>& path_parts,
+			  SlaveConfigTree* conf_tree) const
 {
     list<string>::const_iterator them, us;
 
-    them = pathparts.begin();
+    them = path_parts.begin();
     us = _cmd_parts.begin();
     // First go through the fixed parts of the command
     while (true) {
-	if (them == pathparts.end())
+	if (them == path_parts.end())
 	    return true;
 	if (us == _cmd_parts.end())
 	    break;
@@ -298,12 +304,12 @@ OpCommand::prefix_matches(const list<string>& pathparts,
 	++them;
 	++us;
     }
-    // no more fixed parts, try optional parameters
-    while (them != pathparts.end()) {
-	list<string>::const_iterator opi;
+    // No more fixed parts, try optional parameters
+    while (them != path_parts.end()) {
+	map<string, string>::const_iterator opi;
 	bool ok = false;
 	for (opi = _opt_params.begin(); opi != _opt_params.end(); ++opi) {
-	    if (*opi == *them) {
+	    if (opi->first == *them) {
 		ok = true;
 		break;
 	    }
@@ -315,25 +321,25 @@ OpCommand::prefix_matches(const list<string>& pathparts,
     return true;
 }
 
-set<string>
-OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree)
+map<string, string>
+OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree) const
 {
-    set<string> matches;
+    map<string, string> matches;
 
     list<string>::const_iterator ci = _cmd_parts.begin();
-    for (size_t i = 1; i <= wordnum; i++) {
+    for (size_t i = 0; i < wordnum; i++) {
 	++ci;
 	if (ci == _cmd_parts.end())
 	    break;
     }
     if (ci == _cmd_parts.end()) {
 	// Add all the optional parameters
-	list<string>::const_iterator opi;
+	map<string, string>::const_iterator opi;
 	for (opi = _opt_params.begin(); opi != _opt_params.end(); ++opi) {
 	    matches.insert(*opi);
 	}
 	// Add empty string to imply hitting enter is also OK
-	matches.insert("");
+	matches.insert(make_pair("", ""));
     } else {
 	string match = *ci;
 	if (match[0] == '$') {
@@ -343,10 +349,10 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree)
 	    conf_tree->expand_varname_to_matchlist(match, varmatches);
 	    list<string>::const_iterator vi;
 	    for (vi = varmatches.begin(); vi != varmatches.end(); ++vi) {
-		matches.insert(*vi);
+		matches.insert(make_pair(*vi, _help_string));
 	    }
 	} else {
-	    matches.insert(match);
+	    matches.insert(make_pair(match, _help_string));
 	}
     }
     return matches;
@@ -437,7 +443,7 @@ OpCommandList::check_variable_name(const string& name) const
 OpCommand*
 OpCommandList::find(const list<string>& parts)
 {
-    OpCommand dummy(parts);
+    OpCommand dummy(parts, "dummy");
 
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
@@ -476,7 +482,8 @@ OpCommandList::execute(EventLoop *eventloop, const list<string>& parts,
 }
 
 OpCommand*
-OpCommandList::new_op_command(const list<string>& parts)
+OpCommandList::new_op_command(const list<string>& parts,
+			      const string& help_string)
 {
     OpCommand *new_cmd, *existing_cmd;
 
@@ -488,7 +495,7 @@ OpCommandList::new_op_command(const list<string>& parts)
 	return NULL;
     }
 
-    new_cmd = new OpCommand(parts);
+    new_cmd = new OpCommand(parts, help_string);
     _op_cmds.push_back(new_cmd);
     return new_cmd;
 }
@@ -523,7 +530,7 @@ OpCommandList::append_path(const string& path)
 int
 OpCommandList::push_path()
 {
-    _current_cmd = new_op_command(_path_segments);
+    _current_cmd = new_op_command(_path_segments, "help_cmd");
     XLOG_ASSERT(_current_cmd != NULL);
     return XORP_OK;
 }
@@ -571,7 +578,7 @@ OpCommandList::add_cmd_action(const string& cmd, const list<string>& parts)
 	return _current_cmd->add_module(parts.front());
     }
     if (cmd == "%opt_parameter") {
-	return _current_cmd->add_opt_param(parts.front());
+	return _current_cmd->add_opt_param(parts.front(), "help_param");
     }
     string errmsg = c_format("Unknown command %s", cmd.c_str());
     opcmderror(errmsg.c_str());
@@ -630,29 +637,33 @@ OpCommandList::top_level_commands() const
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
 	// Add the first word of every command
-	cmds.insert(split((*iter)->cmd_name(), ' ').front());
+	list<string> path_parts = split((*iter)->cmd_name(), ' ');
+	cmds.insert(path_parts.front());
     }
     return cmds;
 }
 
-set<string>
+map<string, string>
 OpCommandList::childlist(const string& path, bool& make_executable) const
 {
-    set<string> children;
-    list<string> pathparts = split(path, ' ');
+    map<string, string> children;
+    list<string> path_parts = split(path, ' ');
 
     make_executable = false;
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
-	if ((*iter)->prefix_matches(pathparts, _conf_tree)) {
-	    set<string> matches = (*iter)->get_matches(pathparts.size(),
-						       _conf_tree);
-	    set<string>::iterator mi;
+	const OpCommand* op_command = *iter;
+	if (op_command->prefix_matches(path_parts, _conf_tree)) {
+	    map<string, string> matches;
+	    matches = op_command->get_matches(path_parts.size(), _conf_tree);
+	    map<string, string>::iterator mi;
 	    for (mi = matches.begin(); mi != matches.end(); ++mi) {
-		if (*mi == "") {
+		string command_string = mi->first;
+		string help_string = mi->second;
+		if (command_string == "") {
 		    make_executable = true;
 		} else {
-		    children.insert(*mi);
+		    children.insert(make_pair(command_string, help_string));
 		}
 	    }
 	}

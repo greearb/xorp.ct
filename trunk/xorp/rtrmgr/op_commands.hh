@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.6 2004/01/13 00:22:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.7 2004/01/14 03:00:35 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -60,26 +60,29 @@ private:
 
 class OpCommand {
 public:
-    OpCommand(const list<string>& parts);
+    OpCommand(const list<string>& parts, const string& command_help);
 
     int add_command_file(const string& cmd_file);
     int add_module(const string& module);
-    int add_opt_param(const string& op_param);
+    int add_opt_param(const string& opt_param, const string& opt_param_help);
     string cmd_name() const;
     string str() const;
     void execute(EventLoop* eventloop, const list<string>& cmd_line,
 		 RouterCLI::OpModeCallback cb) const;
 
     bool operator==(const OpCommand& them) const;
-    bool prefix_matches(const list<string>& pathparts, SlaveConfigTree* sct);
-    set<string> get_matches(size_t wordnum, SlaveConfigTree* sct);
+    bool prefix_matches(const list<string>& path_parts,
+			SlaveConfigTree* sct) const;
+    map<string, string> get_matches(size_t wordnum,
+				    SlaveConfigTree* sct) const;
     void remove_instance(OpInstance* instance) const;
 
 private:
     list<string>	_cmd_parts;
+    string		_help_string;
     string		_cmd_file;
     string		_module;
-    list<string>	_opt_params;
+    map<string, string>	_opt_params;	// Optional parameters and the CLI help
     mutable set<OpInstance*> _instances;
 };
 
@@ -90,7 +93,8 @@ public:
     ~OpCommandList();
 
     void set_config_tree(SlaveConfigTree* sct) { _conf_tree = sct; }
-    OpCommand* new_op_command(const list<string>& parts);
+    OpCommand* new_op_command(const list<string>& parts,
+			      const string& help_string);
     bool check_variable_name(const string& name) const;
     OpCommand* find(const list<string>& parts);
     bool prefix_matches(const list<string>& parts) const;
@@ -103,7 +107,8 @@ public:
     int add_cmd_action(const string& cmd, const list<string>& parts);
     void display_list() const;
     set<string> top_level_commands() const;
-    set<string> childlist(const string& path, bool& make_executable) const;
+    map<string, string> childlist(const string& path,
+				  bool& make_executable) const;
 
 private:
     bool find_executable(const string& filename, string& executable) const;
