@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/firewall.tp,v 1.1 2004/08/31 17:31:18 bms Exp $ */
 
 /*
  Example: Drop all traffic with an RFC1918 source address; default
@@ -54,12 +54,12 @@ firewall {
 	%modinfo:	provides		firewall;
 	%modinfo:	depends			fea;
 	%modinfo:	path			"fea/xorp_fea";
-	%modinfo:	default_targetname	"fea";
+	%modinfo:	default_targetname	"firewall"; /* XXX */
 
 	/* status_method? */
 	/* shutdown_method? */
 
-	%mandatory	targetname;
+	%mandatory:	targetname;
 
 	targetname {
 		%help:	short "Set the target name";
@@ -69,23 +69,23 @@ firewall {
 	/* XXX: Default is 'false' */
 	enable {
 		%help:		short "Enable IP filtering";
-		%set:		xrl "$(fea.targetname)/firewall/0.1/set_fw_enabled?enabled:bool=$(@)";
-		%delete:	xrl "$(fea.targetname)/firewall/0.1/set_fw_enabled?enabled:bool=`~$(DEFAULT)`";
+		%set:		xrl "$(firewall.targetname)/firewall/0.1/set_fw_enabled?enabled:bool=$(@)";
+		%delete:	xrl "$(firewall.targetname)/firewall/0.1/set_fw_enabled?enabled:bool=`~$(DEFAULT)`";
 	}
 
 	/* XXX: Default is 'false' */
 	default-drop {
 		%help:		short "Drop unmatched packets by default";
-		%set:		xrl "$(fea.targetname)/firewall/0.1/set_fw_default_drop?drop:bool=$(@)";
-		%delete:	xrl "$(fea.targetname)/firewall/0.1/set_fw_default_drop?drop:bool=`~$(DEFAULT)`";
+		%set:		xrl "$(firewall.targetname)/firewall/0.1/set_fw_default_drop?drop:bool=$(@)";
+		%delete:	xrl "$(firewall.targetname)/firewall/0.1/set_fw_default_drop?drop:bool=`~$(DEFAULT)`";
 	}
 
 	/* XXX: Default is 'default', i.e. whatever the host platform prefers */
 	provider {
 		%help:		short "Set IP filtering provider name";
 		%allow:		$(@) "default" "dummy" "ipf" "ipfw" "iptables" "pf";
-		%set:		xrl "$(fea.targetname)/firewall/0.1/set_fw_provider?provider:txt=$(@)";
-		%delete:	xrl "$(fea.targetname)/firewall/0.1/set_fw_provider?provider:txt=`~$(DEFAULT)`";
+		%set:		xrl "$(firewall.targetname)/firewall/0.1/set_fw_provider?provider:txt=$(@)";
+		%delete:	xrl "$(firewall.targetname)/firewall/0.1/set_fw_provider?provider:txt=`~$(DEFAULT)`";
 	}
 
 	rule4 {
