@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.24 2003/08/28 00:08:54 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.25 2003/09/12 23:44:45 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1089,10 +1089,14 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_register_client(const string& client)
 {
+    if (_xifcur.has_reportee(client)) {
+	XLOG_WARNING("Registering again client %s", client.c_str());
+	return XrlCmdError::OKAY();
+    }
     if (_xifcur.add_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
-				       string(" already registered."));
+				       string(" cannot be registered."));
 }
 
 XrlCmdError
@@ -1107,10 +1111,14 @@ XrlFeaTarget::ifmgr_0_1_unregister_client(const string& client)
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_register_all_interfaces_client(const string& client)
 {
+    if (_xifcur.has_all_interfaces_reportee(client)) {
+	XLOG_WARNING("Registering again client %s", client.c_str());
+	return XrlCmdError::OKAY();
+    }
     if (_xifcur.add_all_interfaces_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
-				       string(" already registered."));
+				       string(" cannot be registered."));
 }
 
 XrlCmdError
