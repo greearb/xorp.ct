@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.13 2003/05/20 00:43:17 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.14 2003/05/20 17:31:28 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -379,48 +379,11 @@ VifManager::xrl_result_get_configured_vif_names(
     _interfaces_remaining--;
     
     if (e == XrlError::OKAY()) {
-	//
-	// Spin through all the Vifs on this interface, and fire
-	// off requests in parallel to get the flags and all the addresses
-	// on each Vif.
-	//
+	// Spin through all the Vifs on this interface, and create them.
 	for (size_t i = 0; i < alist->size(); i++) {
 	    XrlAtom atom = alist->get(i);
 	    string vifname = atom.text();
 	    vif_created(ifname, vifname);
-	    
-	    {
-		// Get the vif flags
-		XorpCallback6<void, const XrlError&, const bool*, const bool*,
-		    const bool*, const bool*, const bool*>::RefPtr cb;
-		cb = callback(this, &VifManager::xrl_result_get_configured_vif_flags,
-			      ifname, vifname);
-		_ifmgr_client.send_get_configured_vif_flags(_fea_target_name.c_str(),
-							    ifname, vifname, cb);
-		_vifs_remaining++;
-	    }
-	    
-	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
-	    {
-		// Get IPv4 addresses
-		cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses4,
-			      ifname, vifname);
-		_ifmgr_client.send_get_configured_vif_addresses4(_fea_target_name.c_str(),
-								 ifname,
-								 vifname,
-								 cb);
-		_vifs_remaining++;
-	    }
-	    {
-		// Get IPv6 addresses
-		cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses6,
-			      ifname, vifname);
-		_ifmgr_client.send_get_configured_vif_addresses6(_fea_target_name.c_str(),
-								 ifname,
-								 vifname,
-								 cb);
-		_vifs_remaining++;
-	    }
 	}
 	update_state();
 	return;
@@ -712,6 +675,43 @@ VifManager::vif_created(const string& ifname, const string& vifname)
     Vif *vif = new Vif(vifname, ifname);
     _vifs_by_name[vifname] = vif;
     _vifs_by_interface.insert(pair<string, Vif*>(ifname, vif));
+    
+    //
+    // Fire off requests in parallel to get the flags and all the
+    // addresses on each Vif.
+    //
+    {
+	// Get the vif flags
+	XorpCallback6<void, const XrlError&, const bool*, const bool*,
+	    const bool*, const bool*, const bool*>::RefPtr cb;
+	cb = callback(this, &VifManager::xrl_result_get_configured_vif_flags,
+		      ifname, vifname);
+	_ifmgr_client.send_get_configured_vif_flags(_fea_target_name.c_str(),
+						    ifname, vifname, cb);
+	_vifs_remaining++;
+    }
+    
+    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+    {
+	// Get IPv4 addresses
+	cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses4,
+		      ifname, vifname);
+	_ifmgr_client.send_get_configured_vif_addresses4(_fea_target_name.c_str(),
+							 ifname,
+							 vifname,
+							 cb);
+	_vifs_remaining++;
+    }
+    {
+	// Get IPv6 addresses
+	cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses6,
+		      ifname, vifname);
+	_ifmgr_client.send_get_configured_vif_addresses6(_fea_target_name.c_str(),
+							 ifname,
+							 vifname,
+							 cb);
+	_vifs_remaining++;
+    }
     
     update_state();
 }
