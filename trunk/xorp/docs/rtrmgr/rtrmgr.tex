@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.26 2005/03/09 22:50:38 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.27 2005/03/20 02:26:43 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -34,13 +34,13 @@
 
 \title{XORP Router Manager Process (rtrmgr) \\
 \vspace{1ex}
-Version 1.0}
+Version 1.1}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{July 8, 2004}
+\date{April 7, 2005}
 
 %\twocolumn
 \begin{document}
@@ -997,7 +997,7 @@ by the {\tt \%opt\_parameter} commands.
 
 The {\tt \%command} command indicates the program or script (and its
 arguments) to be
-executed to implement this command - the script should return
+executed to implement this operational command - the script should return
 human-readable output preceded by a MIME content type indicating
 whether the text is structured or not\footnote{Only {\tt text/plain}
 is currently supported.}.
@@ -1024,9 +1024,11 @@ etc/templates and the xrl/targets directories); (c) the XORP\_ROOT value as
 defined in config.h (currently this is the installation directory, and
 defaults to ``/usr/local/xorp'').
 
-The command {\tt \%module} indicates that this command should only be
-available through the CLI when the router configuration has required
+The command {\tt \%module} indicates that this operational command should
+only be available through the CLI when the router configuration has required
 that the named module has been started.
+If the {\tt \%module} command is missing, then this operational command
+is always enabled.
 
 The command {\tt \%help} is used to specify the CLI help for each
 CLI command or the optional parameters.
