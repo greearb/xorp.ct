@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.10 2004/05/07 11:45:06 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.11 2004/05/14 21:34:57 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -42,7 +42,8 @@ public:
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
     int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
 

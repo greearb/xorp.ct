@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.10 2004/04/01 19:54:08 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.11 2004/05/06 13:45:44 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -369,6 +369,11 @@ public:
 	if (_route)
 	    _route->bump_refcount(1);
     }
+    SubnetRouteRef(const SubnetRouteRef<A>& ref)
+    {
+	_route = ref._route;
+	_route->bump_refcount(1);
+    }
     ~SubnetRouteRef() {
 	if (_route)
 	    _route->bump_refcount(-1);
@@ -395,6 +400,11 @@ public:
     {
 	if (_route)
 	    _route->bump_refcount(1);
+    }
+    SubnetRouteConstRef(const SubnetRouteConstRef<A>& ref)
+    {
+	_route = ref._route;
+	_route->bump_refcount(1);
     }
     ~SubnetRouteConstRef() {
 	if (_route)

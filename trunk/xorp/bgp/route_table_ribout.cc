@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.16 2004/04/01 19:54:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.17 2004/04/15 16:13:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -397,9 +397,9 @@ RibOutTable<A>::output_no_longer_busy()
 
 template<class A>
 const SubnetRoute<A>*
-RibOutTable<A>::lookup_route(const IPNet<A> &net) const 
+RibOutTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
 {
-    return this->_parent->lookup_route(net);
+    return this->_parent->lookup_route(net, genid);
 }
 
 template<class A>

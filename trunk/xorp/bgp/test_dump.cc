@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.35 2004/05/13 20:31:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.36 2004/05/15 11:06:57 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -115,9 +115,9 @@ test_dump(TestInfo& /*info*/)
     ribin_table3->set_next_table(cache_table3);
     cache_table3->set_next_table(decision_table);
 
-    decision_table->add_parent(cache_table1, &handler1);
-    decision_table->add_parent(cache_table2, &handler2);
-    decision_table->add_parent(cache_table3, &handler3);
+    decision_table->add_parent(cache_table1, &handler1, ribin_table1->genid());
+    decision_table->add_parent(cache_table2, &handler2, ribin_table2->genid());
+    decision_table->add_parent(cache_table3, &handler3, ribin_table3->genid());
 
     FanoutTable<IPv4> *fanout_table
 	= new FanoutTable<IPv4>("FANOUT", SAFI_UNICAST, decision_table);

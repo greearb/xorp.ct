@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.7 2004/02/24 03:16:56 atanu Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.8 2004/04/14 19:17:53 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -179,7 +179,8 @@ public:
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
     int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return FILTER_TABLE;}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.9 2003/07/31 23:37:14 jcardona Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.10 2004/02/24 03:16:56 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -73,7 +73,8 @@ public:
     int delete_route(const InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
     
     virtual void RIB_lookup_done(const A& nexthop, 

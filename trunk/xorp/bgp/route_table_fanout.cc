@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.31 2004/05/14 21:34:57 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.32 2004/05/15 11:06:57 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -399,9 +399,9 @@ FanoutTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-FanoutTable<A>::lookup_route(const IPNet<A> &net) const 
+FanoutTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
 {
-    return this->_parent->lookup_route(net);
+    return this->_parent->lookup_route(net, genid);
 }
 
 template<class A>

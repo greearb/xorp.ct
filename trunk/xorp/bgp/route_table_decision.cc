@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.24 2004/05/07 11:45:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.25 2004/05/13 19:58:36 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,14 +39,16 @@ DecisionTable<A>::DecisionTable(string table_name,
 template<class A>
 int
 DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
-			     PeerHandler *peer_handler) {
+			     PeerHandler *peer_handler,
+			     uint32_t genid) {
     debug_msg("DecisionTable<A>::add_parent: %x\n", (u_int)new_parent);
     if (_parents.find(new_parent)!=_parents.end()) {
 	//the parent is already in the set
 	return -1;
     }
-    _parents.insert(make_pair(new_parent, peer_handler));
-    _rev_parents.insert(make_pair(peer_handler, new_parent));
+    PeerTableInfo<A> *pti = new PeerTableInfo<A>(new_parent, peer_handler, genid);
+    _parents[new_parent] = pti;
+    _rev_parents[peer_handler] = pti;
     return 0;
 }
 
@@ -54,12 +56,13 @@ template<class A>
 int
 DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
     debug_msg("DecisionTable<A>::remove_parent: %x\n", (u_int)ex_parent);
-    typename map<BGPRouteTable<A>*, PeerHandler* >::iterator i;
+    typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::iterator i;
     i = _parents.find(ex_parent);
-    PeerHandler* peer = i->second;
+    PeerTableInfo<A> *pti = i->second;
+    const PeerHandler* peer = pti->peer_handler();
     _parents.erase(i);
-    _rev_parents.erase(_rev_parents.find(peer));
-
+    _rev_parents.erase(_rev_parents.find(const_cast<PeerHandler*>(peer)));
+    delete pti;
     return 0;
 }
 
@@ -68,6 +71,7 @@ template<class A>
 int
 DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller) {
+
     PARANOID_ASSERT(_parents.find(caller) != _parents.end());
 
     debug_msg("DT:add_route %s\n", rtmsg.route()->str().c_str());
@@ -92,7 +96,8 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
     
     RouteData<A> *new_winner = NULL;
-    RouteData<A> new_route(rtmsg.route(), caller, rtmsg.origin_peer());
+    RouteData<A> new_route(rtmsg.route(), caller, 
+			   rtmsg.origin_peer(), rtmsg.genid());
     if (!alternatives.empty()) {
 	//add the new route to the pool of possible winners.
 	alternatives.push_back(new_route);
@@ -114,7 +119,7 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//the winner did change, so send a delete for the old winner
 	InternalMessage<A> old_rt_msg(old_winner_clone->route(), 
 				      old_winner_clone->peer_handler(), 
-				      GENID_UNKNOWN);
+				      old_winner_clone->genid());
 	this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
 
 	//the old winner is no longer the winner
@@ -133,7 +138,7 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//this can happen due to MED wierdness.
 	InternalMessage<A> new_rt_msg(new_winner->route(), 
 				      new_winner->peer_handler(), 
-				      GENID_UNKNOWN);
+				      new_winner->genid());
 	if (rtmsg.push())
 	    new_rt_msg.set_push();
 	result = this->_next_table->add_route(new_rt_msg, 
@@ -157,7 +162,7 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 				const InternalMessage<A> &new_rtmsg, 
 				BGPRouteTable<A> *caller) {
     PARANOID_ASSERT(_parents.find(caller)!=_parents.end());
-    assert(old_rtmsg.net()==new_rtmsg.net());
+    XLOG_ASSERT(old_rtmsg.net()==new_rtmsg.net());
 
     debug_msg("DT:replace_route.\nOld route: %s\nNew Route: %s\n", old_rtmsg.route()->str().c_str(), new_rtmsg.route()->str().c_str());
 
@@ -171,7 +176,8 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     } else if (old_rtmsg.route()->is_winner()) {
 	//the route being deleted was the old winner
 	old_winner_clone = new RouteData<A>(old_rtmsg.route(), caller,
-					    old_rtmsg.origin_peer());
+					    old_rtmsg.origin_peer(),
+					    old_rtmsg.genid());
     }
     
     if (old_winner_clone == NULL) {
@@ -181,7 +187,8 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     }
 
     RouteData<A> *new_winner = NULL;
-    RouteData<A> new_route(new_rtmsg.route(), caller, new_rtmsg.origin_peer());
+    RouteData<A> new_route(new_rtmsg.route(), caller, new_rtmsg.origin_peer(),
+			   new_rtmsg.genid());
     if (!alternatives.empty()) {
 	//add the new route to the pool of possible winners.
 	alternatives.push_back(new_route);
@@ -216,7 +223,7 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     } else {
 	old_rtmsg_p = new InternalMessage<A>(old_winner_clone->route(), 
 					     old_winner_clone->peer_handler(), 
-					     GENID_UNKNOWN);
+					     old_winner_clone->genid());
 	old_winner_clone->set_is_not_winner();
     }
 
@@ -229,7 +236,7 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     } else {
 	new_rtmsg_p = new InternalMessage<A>(new_winner->route(), 
 					     new_winner->peer_handler(), 
-					     GENID_UNKNOWN);
+					     new_winner->genid());
 	if (new_rtmsg.push())
 	    const_cast<InternalMessage<A>*>(new_rtmsg_p)->set_push();
     }
@@ -281,7 +288,8 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     } else if (rtmsg.route()->is_winner()) {
 	//the route being deleted was the old winner
 	old_winner_clone = new RouteData<A>(rtmsg.route(), caller,
-					    rtmsg.origin_peer());
+					    rtmsg.origin_peer(), 
+					    rtmsg.genid());
     }
     
     RouteData<A> *new_winner = NULL;
@@ -310,7 +318,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	if (old_winner_clone->route() != rtmsg.route()) {
 	    InternalMessage<A> old_rt_msg(old_winner_clone->route(), 
 					  old_winner_clone->peer_handler(), 
-					  GENID_UNKNOWN);
+					  old_winner_clone->genid());
 	    if (rtmsg.push() && new_winner == NULL)
 		old_rt_msg.set_push();
 	    this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
@@ -333,7 +341,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	int result;
 	InternalMessage<A> new_rt_msg(new_winner->route(), 
 				      new_winner->peer_handler(), 
-				      GENID_UNKNOWN);
+				      new_winner->genid());
 	//	if (rtmsg.push())
 	//	    new_rt_msg.set_push();
 	result = this->_next_table->add_route(new_rt_msg, 
@@ -387,14 +395,17 @@ DecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 
 template<class A>
 const SubnetRoute<A>*
-DecisionTable<A>::lookup_route(const IPNet<A> &net) const
+DecisionTable<A>::lookup_route(const IPNet<A> &net,
+			       uint32_t& genid) const
 {
     list <RouteData<A> > alternatives;
     RouteData<A>* winner = find_alternative_routes(NULL, net, alternatives);
     if (winner == NULL)
 	return NULL;
-    else
+    else {
+	genid = winner->genid();
 	return winner->route();
+    }
 }
 
 
@@ -406,17 +417,21 @@ DecisionTable<A>::find_alternative_routes(
     list <RouteData<A> >& alternatives) const 
 {
     RouteData<A>* previous_winner = NULL;
-    typename map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
+    typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::const_iterator i;
     const SubnetRoute<A>* found_route;
     for (i = _parents.begin();  i != _parents.end();  i++) {
 	//We don't need to lookup the route in the parent that the new
 	//route came from - if this route replaced an earlier route
 	//from the same parent we'd see it as a replace, not an add
  	if (i->first != caller) {
-	    found_route = i->first->lookup_route(net);
+	    uint32_t found_genid;
+	    found_route = i->first->lookup_route(net, found_genid);
 	    if (found_route != NULL) {
+		PeerTableInfo<A> *pti = i->second;
 		alternatives.push_back(RouteData<A>(found_route, 
-						    i->first, i->second));
+						    pti->route_table(),
+						    pti->peer_handler(),
+						    found_genid));
 		if (found_route->is_winner()) {
 		    assert(previous_winner == NULL);
 		    previous_winner = &(alternatives.back());
@@ -1077,10 +1092,10 @@ template<class A>
 bool
 DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     const PeerHandler* peer = dump_iter.current_peer();
-    typename map<PeerHandler*, BGPRouteTable<A>* >::const_iterator i;
+    typename map<PeerHandler*, PeerTableInfo<A>* >::const_iterator i;
     i = _rev_parents.find(const_cast<PeerHandler*>(peer));
     XLOG_ASSERT(i != _rev_parents.end());
-    return i->second->dump_next_route(dump_iter);
+    return i->second->route_table()->dump_next_route(dump_iter);
 }
 
 template<class A>
@@ -1096,7 +1111,7 @@ template<class A>
 void
 DecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
-    typename map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
+    typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::const_iterator i;
     for (i = _parents.begin(); i != _parents.end(); i++) {
 	i->first->igp_nexthop_changed(bgp_nexthop);
     }
@@ -1107,10 +1122,11 @@ void
 DecisionTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 				    BGPRouteTable<A> *caller) {
     XLOG_ASSERT(this->_next_table != NULL);
-    typename map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
+    typename map <BGPRouteTable<A>*, PeerTableInfo<A>*>::const_iterator i;
     i = _parents.find(caller);
     XLOG_ASSERT(i !=_parents.end());
-    XLOG_ASSERT(i->second == peer);
+    XLOG_ASSERT(i->second->peer_handler() == peer);
+    XLOG_ASSERT(i->second->genid() == genid);
 
     this->_next_table->peering_went_down(peer, genid, this);
 }
@@ -1121,10 +1137,10 @@ DecisionTable<A>::peering_down_complete(const PeerHandler *peer,
 					uint32_t genid,
 					BGPRouteTable<A> *caller) {
     XLOG_ASSERT(this->_next_table != NULL);
-    typename map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
+    typename map <BGPRouteTable<A>*, PeerTableInfo<A>*>::const_iterator i;
     i = _parents.find(caller);
     XLOG_ASSERT(i !=_parents.end());
-    XLOG_ASSERT(i->second == peer);
+    XLOG_ASSERT(i->second->peer_handler() == peer);
 
     this->_next_table->peering_down_complete(peer, genid, this);
 }
@@ -1134,10 +1150,12 @@ void
 DecisionTable<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
 				  BGPRouteTable<A> *caller) {
     XLOG_ASSERT(this->_next_table != NULL);
-    typename map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
+    typename map <BGPRouteTable<A>*, PeerTableInfo<A>*>::iterator i;
     i = _parents.find(caller);
     XLOG_ASSERT(i !=_parents.end());
-    XLOG_ASSERT(i->second == peer);
+    XLOG_ASSERT(i->second->peer_handler() == peer);
+
+    i->second->set_genid(genid);
 
     this->_next_table->peering_came_up(peer, genid, this);
 }

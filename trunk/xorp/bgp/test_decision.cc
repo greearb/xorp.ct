@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.24 2004/02/24 03:16:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.25 2004/04/01 19:54:08 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -78,17 +78,17 @@ test_decision(TestInfo& /*info*/)
     RibInTable<IPv4>* ribin_table1
 	= new RibInTable<IPv4>("RIB-IN1", SAFI_UNICAST, &handler1);
     ribin_table1->set_next_table(decision_table);
-    decision_table->add_parent(ribin_table1, &handler1);
+    decision_table->add_parent(ribin_table1, &handler1, ribin_table1->genid());
 
     RibInTable<IPv4>* ribin_table2
 	= new RibInTable<IPv4>("RIB-IN2", SAFI_UNICAST, &handler2);
     ribin_table2->set_next_table(decision_table);
-    decision_table->add_parent(ribin_table2, &handler2);
+    decision_table->add_parent(ribin_table2, &handler2, ribin_table2->genid());
 
     RibInTable<IPv4>* ribin_table3
 	= new RibInTable<IPv4>("RIB-IN3", SAFI_UNICAST, &handler3);
     ribin_table3->set_next_table(decision_table);
-    decision_table->add_parent(ribin_table3, &handler3);
+    decision_table->add_parent(ribin_table3, &handler3, ribin_table3->genid());
 
     debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);

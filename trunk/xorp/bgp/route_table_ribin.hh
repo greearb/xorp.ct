@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.15 2004/05/07 03:09:45 atanu Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.16 2004/05/15 11:06:57 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -51,7 +51,8 @@ public:
 
     int push(BGPRouteTable<A> *caller);
     int delete_add_routes();
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net, 
+				       uint32_t& genid) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     BGPRouteTable<A> *parent() { return NULL; }

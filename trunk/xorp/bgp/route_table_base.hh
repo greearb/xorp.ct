@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.5 2004/02/24 03:16:55 atanu Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.6 2004/05/07 11:45:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -61,8 +61,10 @@ public:
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer);
     virtual int push(BGPRouteTable<A> *caller) = 0;
+
     virtual const 
-    SubnetRoute<A> *lookup_route(const IPNet<A> &net) const = 0;
+    SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				 uint32_t& genid) const = 0;
 
     virtual void route_used(const SubnetRoute<A>* /*route*/, 
 			    bool /*in_use*/){

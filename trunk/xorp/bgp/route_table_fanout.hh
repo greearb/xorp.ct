@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.12 2004/05/14 21:34:57 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.13 2004/05/15 11:06:57 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -93,7 +93,8 @@ public:
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
     int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
 
     RouteTableType type() const {return FANOUT_TABLE;}
     string str() const;

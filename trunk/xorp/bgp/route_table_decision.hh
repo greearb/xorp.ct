@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.11 2004/05/07 11:45:06 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.12 2004/05/13 19:58:36 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -21,15 +21,17 @@
 #include "route_table_base.hh"
 #include "peer_handler.hh"
 #include "next_hop_resolver.hh"
+#include "peer_route_pair.hh"
 
 template<class A>
 class RouteData {
 public:
     RouteData(const SubnetRoute<A>* route, 
 	      BGPRouteTable<A>* parent_table,
-	      const PeerHandler* peer_handler) 
+	      const PeerHandler* peer_handler,
+	      uint32_t genid) 
 	: _route(route), _parent_table(parent_table), 
-	  _peer_handler(peer_handler) {}
+	  _peer_handler(peer_handler), _genid(genid) {}
 
     inline void set_is_not_winner() {
 	_parent_table->route_used(_route, false);
@@ -48,11 +50,14 @@ public:
     inline BGPRouteTable<A>* parent_table() const {
 	return _parent_table;
     }
+    inline uint32_t genid() const {
+	return _genid;
+    }
 private:
     const SubnetRoute<A>* _route;
     BGPRouteTable<A>* _parent_table;
     const PeerHandler* _peer_handler;
-    
+    uint32_t _genid;
 };
 
 template<class A>
@@ -62,7 +67,8 @@ public:
 		  Safi safi,
 		  NextHopResolver<A>& next_hop_resolver);
     int add_parent(BGPRouteTable<A> *parent,
-		   PeerHandler *peer_handler);
+		   PeerHandler *peer_handler,
+		   uint32_t genid);
     int remove_parent(BGPRouteTable<A> *parent);
 
     int add_route(const InternalMessage<A> &rtmsg,
@@ -76,7 +82,8 @@ public:
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *peer);
     int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
 
     //don't call this on a DecisionTable - it's meaningless
     BGPRouteTable<A> *parent() { abort(); return NULL; }
@@ -129,8 +136,8 @@ private:
 		    const PeerHandler *test_peer,
 		    list<RouteData<A> >& alternatives) const;
     RouteData<A>* find_winner(list<RouteData<A> >& alternatives) const;
-    map<BGPRouteTable<A>*, PeerHandler* > _parents;
-    map<PeerHandler*, BGPRouteTable<A>* > _rev_parents;
+    map<BGPRouteTable<A>*, PeerTableInfo<A>* > _parents;
+    map<PeerHandler*, PeerTableInfo<A>* > _rev_parents;
 
     NextHopResolver<A>& _next_hop_resolver;
 };

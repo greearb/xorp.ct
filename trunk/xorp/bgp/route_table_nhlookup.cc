@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.10 2004/02/24 03:16:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.11 2004/04/01 19:54:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -304,14 +304,14 @@ NhLookupTable<A>::push(BGPRouteTable<A> *caller)
 
 template <class A>
 const SubnetRoute<A> *
-NhLookupTable<A>::lookup_route(const IPNet<A> &net) const 
+NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
 {
     // Are we still waiting for the old_rtmsg to resolve?
     const MessageQueueEntry<A>* mqe = NULL;
     typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
-	return this->_parent->lookup_route(net);
+	return this->_parent->lookup_route(net, genid);
     } else {
 	// we found an entry in the lookup pool
 	mqe = &(i.payload());
@@ -324,7 +324,8 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net) const
 	return NULL;
     case MessageQueueEntry<A>::REPLACE:
 	// although there is a route, we don't know the true nexthop
-	// for it yet, so we act as though we only know the old answer
+	// for it yet, so we act as though we only know the old answer.
+	genid = mqe->delete_msg()->genid();
 	return mqe->deleted_route();
     }
     XLOG_UNREACHABLE();

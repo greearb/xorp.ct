@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.19 2004/04/14 19:17:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.20 2004/04/15 16:13:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -663,19 +663,21 @@ FilterTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-FilterTable<A>::lookup_route(const IPNet<A> &net) const
+FilterTable<A>::lookup_route(const IPNet<A> &net,
+			     uint32_t& genid) const
 {
     //We should never get called with a route that gets modified by
     //our filters, because there's no persistent storage to return as
     //the result.  But we can get called with a route that gets
     //dropped by our filters.
     const SubnetRoute<A> *found_route;
-    found_route = this->_parent->lookup_route(net);
+    uint32_t found_genid;
+    found_route = this->_parent->lookup_route(net, found_genid);
 
     if (found_route == NULL)
 	return NULL;
 
-    InternalMessage<A> msg(found_route, NULL, GENID_UNKNOWN);
+    InternalMessage<A> msg(found_route, NULL, found_genid);
     const InternalMessage<A> *filtered_msg = apply_filters(&msg);
     
     if (filtered_msg == NULL)
@@ -684,7 +686,7 @@ FilterTable<A>::lookup_route(const IPNet<A> &net) const
     //the filters MUST NOT modify the route
     XLOG_ASSERT(!filtered_msg->changed());
     XLOG_ASSERT(filtered_msg == &msg);
-    
+    genid = found_genid;
     return found_route;
 }
 

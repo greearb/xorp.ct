@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.25 2004/05/05 18:35:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.26 2004/05/06 00:29:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,7 +35,7 @@ CacheTable<A>::CacheTable(string table_name,
       _peer(peer)
 {
     this->_parent = parent_table;
-    _route_table = new RefTrie<A, const SubnetRoute<A> >;
+    _route_table = new RefTrie<A, const CacheRoute<A> >;
 }
 
 template<class A>
@@ -54,7 +54,7 @@ CacheTable<A>::flush_cache()
     debug_msg("%s\n", this->tablename().c_str());
 //     _route_table->delete_all_nodes();
     new DeleteAllNodes<A>(this->_peer, _route_table);
-    _route_table = new RefTrie<A, const SubnetRoute<A> >;
+    _route_table = new RefTrie<A, const CacheRoute<A> >;
 }
 
 template<class A>
@@ -88,8 +88,11 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//can rely on rtmsg.route() not to go away.
 	const SubnetRoute<A> *msg_route = rtmsg.route();
 	//store it locally
-	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
-	ti = _route_table->insert(msg_route->net(), *msg_route);
+	typename RefTrie<A, const CacheRoute<A> >::iterator ti;
+	ti = _route_table->insert(msg_route->net(), 
+				  CacheRoute<A>(msg_route, rtmsg.genid()));
+
+	assert(ti.payload().route() == msg_route);
 	debug_msg("Cache Table: %s\n", this->tablename().c_str());
 	debug_msg("Caching route: %p net: %s atts: %p  %s\n", msg_route,
 	       msg_route->net().str().c_str(), 
@@ -97,7 +100,8 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	       msg_route->str().c_str());
 
 	//progogate downstream
-	InternalMessage<A> new_rt_msg(&(ti.payload()), rtmsg.origin_peer(),
+	InternalMessage<A> new_rt_msg(ti.payload().route(), 
+				      rtmsg.origin_peer(),
 				      rtmsg.genid());
 	if (rtmsg.push()) new_rt_msg.set_push();
 	int result = this->_next_table->add_route(new_rt_msg, 
@@ -107,7 +111,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 	switch (result) {
 	case ADD_USED:
-	    ti.payload().set_in_use(true);
+	    ti.payload().route()->set_in_use(true);
 #ifdef DUMP_FROM_CACHE
 	    //Our cached copy was used, but we need to tell upstream
 	    //that their unmodified version was unused.
@@ -118,7 +122,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	    return ADD_USED;
 #endif
 	case ADD_UNUSED:
-	    ti.payload().set_in_use(false);
+	    ti.payload().route()->set_in_use(false);
 	    return ADD_UNUSED;
 	default:
 	    //In the case of a failure, we don't know what to believe.
@@ -163,7 +167,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     //do we have the old route cached?
     if (old_rtmsg.changed()==true) {
-	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
+	typename RefTrie<A, const CacheRoute<A> >::iterator iter;
 	iter = _route_table->lookup_node(net);
 	if (iter == _route_table->end()) {
 	    //We don't flush the cache, so this should not happen
@@ -173,12 +177,12 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    // the route being immediately deleted when it's erased
 	    // from the RefTrie.  Deletion will occur later when the
 	    // reference is deleted.
-	    const SubnetRoute<A> *old_route = &(iter.payload());
+	    const SubnetRoute<A> *old_route = iter.payload().route();
 	    old_route_reference = new SubnetRouteConstRef<A>(old_route);
 
 	    old_rtmsg_ptr = new InternalMessage<A>(old_route,
 						   old_rtmsg.origin_peer(),
-						   old_rtmsg.genid());
+						   iter.payload().genid());
 
 	    //delete it from our cache, 
 	    _route_table->erase(old_rtmsg.net());
@@ -203,8 +207,9 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//can rely on rtmsg.route() not to go away.
 	const SubnetRoute<A> *new_route = new_rtmsg.route();
 	//store it locally
-	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
-	ti = _route_table->insert(net, *new_route);
+	typename RefTrie<A, const CacheRoute<A> >::iterator ti;
+	ti = _route_table->insert(net, CacheRoute<A>(new_route, 
+						     new_rtmsg.genid()));
 	debug_msg("Caching route2: %p net: %s atts: %p  %s\n", new_route,
 	       new_route->net().str().c_str(), 
 	       (new_route->attributes()), 
@@ -212,7 +217,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 
 	//progogate downstream
-	InternalMessage<A> new_rtmsg_copy(&(ti.payload()),
+	InternalMessage<A> new_rtmsg_copy(ti.payload().route(),
 					  new_rtmsg.origin_peer(),
 					  new_rtmsg.genid());
 	if (new_rtmsg.push()) new_rtmsg_copy.set_push();
@@ -223,16 +228,16 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 	switch (result) {
 	case ADD_USED:
-	    ti.payload().set_in_use(true);
+	    ti.payload().route()->set_in_use(true);
 	    break;
 	case ADD_UNUSED:
-	    ti.payload().set_in_use(false);
+	    ti.payload().route()->set_in_use(false);
 	    break;
 	default:
 	    //In the case of a failure, we don't know what to believe.
 	    //To be safe we set in_use to true, although it may reduce
 	    //efficiency.
-	    ti.payload().set_in_use(true);
+	    ti.payload().route()->set_in_use(true);
 	}
     }
 
@@ -263,10 +268,12 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     IPNet<A> net = rtmsg.net();
 
     //do we already have this cached?
-    typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
+    typename RefTrie<A, const CacheRoute<A> >::iterator iter;
     iter = _route_table->lookup_node(net);
     if (iter != _route_table->end()) {
-	const SubnetRoute<A> *existing_route = &(iter.payload());
+	const SubnetRoute<A> *existing_route = iter.payload().route();
+	uint32_t existing_genid = iter.payload().genid();
+	XLOG_ASSERT(rtmsg.genid() == existing_genid);
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 
 	//Delete it from our cache trie.  The actual deletion will
@@ -276,7 +283,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 	InternalMessage<A> old_rt_msg(existing_route,
 				      rtmsg.origin_peer(),
-				      rtmsg.genid());
+				      existing_genid);
 	if (rtmsg.push()) old_rt_msg.set_push();
 
 	result = this->_next_table->delete_route(old_rt_msg, 
@@ -318,9 +325,10 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	//Check we've got it cached.  Clear the changed bit so we
 	//don't confuse anyone downstream.
 	IPNet<A> net = rtmsg.route()->net();
-	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
+	typename RefTrie<A, const CacheRoute<A> >::iterator iter;
 	iter = _route_table->lookup_node(net);
 	XLOG_ASSERT(iter != _route_table->end());
+	XLOG_ASSERT(rtmsg.genid() == iter.payload().genid());
 
 	//It's the responsibility of the recipient of a changed route
 	//to store or delete it.  We don't need it anymore (we found
@@ -330,7 +338,7 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	//the message we pass on needs to contain our cached
 	//route, because the MED info in it may not be in the original
 	//version of the route.
-	InternalMessage<A> new_msg(&(iter.payload()), rtmsg.origin_peer(),
+	InternalMessage<A> new_msg(iter.payload().route(), rtmsg.origin_peer(),
 				   rtmsg.genid());
 	return this->_next_table->route_dump(new_msg, (BGPRouteTable<A>*)this, 
 				       dump_peer);
@@ -346,15 +354,18 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-CacheTable<A>::lookup_route(const IPNet<A> &net) const
+CacheTable<A>::lookup_route(const IPNet<A> &net,
+			    uint32_t& genid) const
 {
     //return our cached copy if there is one, otherwise ask our parent
-    typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
+    typename RefTrie<A, const CacheRoute<A> >::iterator iter;
     iter = _route_table->lookup_node(net);
-    if (iter != _route_table->end())
-	return &(iter.payload());
-    else
-	return this->_parent->lookup_route(net);
+    if (iter != _route_table->end()) {
+	genid = iter.payload().genid();
+	return iter.payload().route();
+    } else {
+	return this->_parent->lookup_route(net, genid);
+    }
 }
 
 template<class A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.7 2003/10/23 03:10:06 atanu Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.8 2004/02/24 03:16:57 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -44,7 +44,8 @@ public:
 		     BGPRouteTable<A> *caller);
 
     int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
 
     RouteTableType type() const {return RIB_OUT_TABLE;}
     string str() const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.12 2004/05/06 00:29:55 atanu Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.13 2004/05/14 18:30:07 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -23,6 +23,19 @@
 #include "libxorp/ref_trie.hh"
 #include "peer_handler.hh"
 
+template<class A>
+class CacheRoute {
+public:
+    CacheRoute(const SubnetRoute<A>* route, uint32_t genid) 
+	: _routeref(route), _genid(genid) {}
+    inline const SubnetRoute<A>* route() const {return _routeref.route();}
+    inline uint32_t genid() const {return _genid;}
+private:
+    SubnetRouteConstRef<A> _routeref;
+    uint32_t _genid;
+};
+
+#ifdef NOTDEF
 /**
  * Specialize Trie so that the SubnetRoute payload is deleted using
  * the SubnetRoute's unref method, which permits delayed deletion.
@@ -43,6 +56,7 @@ RefTrieNode<IPv6, const SubnetRoute<IPv6> >
 {
     p->unref();
 }
+#endif
 
 class EventLoop;
 
@@ -65,7 +79,8 @@ public:
 		   const PeerHandler *dump_peer);
 
     void flush_cache();
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return CACHE_TABLE;}
@@ -81,7 +96,7 @@ public:
     EventLoop& eventloop() const;
 
 private:
-    RefTrie<A, const SubnetRoute<A> > *_route_table;
+    RefTrie<A, const CacheRoute<A> > *_route_table;
     const PeerHandler *_peer;
 };
 
@@ -91,11 +106,11 @@ private:
 template<class A>
 class DeleteAllNodes {
 public:
-    typedef RefTrie<A, const SubnetRoute<A> > RouteTable;
+    typedef RefTrie<A, const CacheRoute<A> > RouteTable;
     typedef queue<RouteTable *> RouteTables;
 
     DeleteAllNodes(const PeerHandler *peer, 
-		   RefTrie<A, const SubnetRoute<A> > *route_table)
+		   RefTrie<A, const CacheRoute<A> > *route_table)
 	: _peer(peer) {
 
 	    bool empty = _route_tables.empty();

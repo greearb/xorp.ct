@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.47 2004/05/07 03:09:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.48 2004/05/15 11:06:57 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -305,7 +305,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     cache_in->set_next_table(nexthop_in);
 
     nexthop_in->set_next_table(_decision_table);
-    _decision_table->add_parent(nexthop_in, _master.rib_handler());
+    _decision_table->add_parent(nexthop_in, _master.rib_handler(),
+				_ipc_rib_in_table->genid());
 
     _tables.insert(filter_in);
     _tables.insert(cache_in);
@@ -412,7 +413,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     cache_in->set_next_table(nexthop_in);
 
     nexthop_in->set_next_table(_decision_table);
-    _decision_table->add_parent(nexthop_in, peer_handler);
+    _decision_table->add_parent(nexthop_in, peer_handler, rib_in->genid());
 
     _tables.insert(rib_in);
     _tables.insert(filter_in);
@@ -836,7 +837,8 @@ PeerHandler that has no associated RibIn");
 
     rib_in = iter->second;
 
-    const SubnetRoute<A> *found_route = rib_in->lookup_route(net);
+    uint32_t genid;
+    const SubnetRoute<A> *found_route = rib_in->lookup_route(net, genid);
     if (found_route == NULL) {
 	XLOG_WARNING("Attempt to delete non existent route %s",
 		     net.str().c_str());
@@ -892,7 +894,8 @@ BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const
     //lookup_route returns the route currently being told to the RIB.
     //It's possible this differs from the route we tell a peer,
     //because of output filters that may modify attributes.
-    return _ipc_rib_out_table->lookup_route(net);
+    uint32_t genid;
+    return _ipc_rib_out_table->lookup_route(net, genid);
 }
 
 const IPv4& 

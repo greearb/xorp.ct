@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_debug.hh,v 1.5 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_debug.hh,v 1.6 2003/07/31 23:37:13 jcardona Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DEBUG_HH__
 #define __BGP_ROUTE_TABLE_DEBUG_HH__
@@ -36,7 +36,8 @@ public:
     int route_dump(const InternalMessage<A> &rtmsg, 
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *peer);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net) const;
+    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				       uint32_t& genid) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return DEBUG_TABLE;}

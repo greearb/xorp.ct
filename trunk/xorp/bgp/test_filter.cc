@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.23 2004/02/24 03:16:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.24 2004/03/25 17:52:05 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -274,7 +274,8 @@ test_filter(TestInfo& /*info*/)
     debug_table->write_separator();
     debug_table->write_comment("LOOKUP ROUTE");
     const SubnetRoute<IPv4> *found_route;
-    found_route = filter_table->lookup_route(net1);
+    uint32_t genid;
+    found_route = filter_table->lookup_route(net1, genid);
     assert(found_route != NULL);
     assert(found_route->net() == net1);
     assert(*(found_route->attributes()) == *palist1);
@@ -305,7 +306,7 @@ test_filter(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LOOKUP ROUTE");
-    found_route = filter_table->lookup_route(net1);
+    found_route = filter_table->lookup_route(net1, genid);
     // route should not be found because it was filtered
     assert(found_route == NULL);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.14 2004/04/15 16:13:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.15 2004/05/14 18:30:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -155,7 +155,8 @@ DeletionTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-DeletionTable<A>::lookup_route(const IPNet<A> &net) const
+DeletionTable<A>::lookup_route(const IPNet<A> &net, 
+			       uint32_t& genid) const
 {
     // Even though the peering has gone down, we still need to answer
     // lookup requests.  This is because we need to be internally
@@ -163,9 +164,10 @@ DeletionTable<A>::lookup_route(const IPNet<A> &net) const
     // explicitly tell the downstream tables that it has been deleted.
     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
     if (iter != _route_table->end()) {
+	genid = _genid;
 	return &(iter.payload());
     } else
-	return this->_parent->lookup_route(net);
+	return this->_parent->lookup_route(net, genid);
 }
 
 template<class A>

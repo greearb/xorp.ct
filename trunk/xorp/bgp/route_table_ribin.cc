@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.27 2004/05/07 11:45:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.28 2004/05/13 20:31:46 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -121,7 +121,8 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(_peer_is_up);
     XLOG_ASSERT(this->_next_table != NULL);
 
-    existing_route = lookup_route(rtmsg.net());
+    uint32_t dummy;
+    existing_route = lookup_route(rtmsg.net(), dummy);
     int response;
     if (existing_route != NULL) {
 	XLOG_ASSERT(existing_route->net() == rtmsg.net());
@@ -204,7 +205,8 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(_peer_is_up);
 
     const SubnetRoute<A> *existing_route;
-    existing_route = lookup_route(rtmsg.net());
+    uint32_t dummy;
+    existing_route = lookup_route(rtmsg.net(), dummy);
 
     if (existing_route != NULL) {
 	// Preserve the route.  Taking a reference will prevent the
@@ -252,7 +254,7 @@ RibInTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-RibInTable<A>::lookup_route(const IPNet<A> &net) const
+RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
 {
     if (_peer_is_up == false)
 	return NULL;
@@ -260,6 +262,7 @@ RibInTable<A>::lookup_route(const IPNet<A> &net) const
     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
     if (iter != _route_table->end()) {
 	// assert(iter.payload().net() == net);
+	genid = _genid;
 	return &(iter.payload());
     } else
 	return NULL;
@@ -276,7 +279,8 @@ RibInTable<A>::route_used(const SubnetRoute<A>* used_route, bool in_use)
     if (_peer_is_up == false)
 	return;
     const SubnetRoute<A> *rt;
-    rt = lookup_route(used_route->net());
+    uint32_t dummy;
+    rt = lookup_route(used_route->net(), dummy);
     XLOG_ASSERT(rt != NULL);
     rt->set_in_use(in_use);
 }

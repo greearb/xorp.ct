@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.7 2004/02/24 03:16:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.8 2004/04/01 19:54:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -139,8 +139,8 @@ DebugTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-DebugTable<A>::lookup_route(const IPNet<A> &net) const {
-    return this->_parent->lookup_route(net);
+DebugTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const {
+    return this->_parent->lookup_route(net, genid);
 }
 
 template<class A>
