@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.8 2004/11/02 22:46:05 bms Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.9 2005/01/22 04:53:20 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -126,21 +126,23 @@ public:
     bool  is_my_addr(const IPvX& ipvx_addr) const { return (addr() == ipvx_addr); }
     
     /**
-     * Test whether is the same subnet.
+     * Test if a given subnet address is a subset of my subnet address.
      * 
-     * @param ipvxnet the subnet address to test whether is the
-     * same as my subnet address.
+     * @param ipvxnet the subnet address to test whether is a subset of
+     * my subnet address.
      * 
-     * @return true if @ref ipvxnet is same as my subnet address,
+     * @return true if @ref ipvxnet is a subset of my subnet address,
      * otherwise false.
      */
     bool  is_same_subnet(const IPvXNet& ipvxnet) const;
     
     /**
-     * Test whether an address belongs to my subnet.
+     * Test whether an address belongs to my subnet address.
      * 
-     * @param ipvx_addr the address to test whether it belongs to my subnet.
-     * @return true if @ref ipvx_addr belongs to my subnet, otherwise false.
+     * @param ipvx_addr the address to test whether it belongs to my subnet
+     * address.
+     * @return true if @ref ipvx_addr belongs to my subnet address,
+     * otherwise false.
      */
     bool  is_same_subnet(const IPvX& ipvx_addr) const;
     
@@ -467,20 +469,22 @@ public:
     bool is_my_vif_addr(const VifAddr& vif_addr) const;
     
     /**
-     * Test if this vif belongs to a given subnet.
+     * Test if a given subnet address is a subset of one of the subnet
+     * addresses of this vif.
      * 
      * @param ipvxnet the subnet address to test against.
-     * @return true if this vif has an address that belongs to
-     * subnet @ref ipvxnet, otherwise false.
+     * @return true if @ref ipvxnet is a subset of one of the subnet
+     * addresses of this vif, otherwise false.
      */
     bool is_same_subnet(const IPvXNet& ipvxnet) const;
     
     /**
-     * Test if a given address belongs to the same subnet as this vif.
+     * Test if a given address belongs to one of the subnet addresses
+     * of this vif.
      * 
      * @param ipvx_addr the address to test against.
-     * @return true if @ref ipvx_addr belongs to the same subnet as this
-     * vif, otherwise false.
+     * @return true if @ref ipvx_addr belongs to one of the subnet addresses
+     * of this vif, otherwise false.
      */
     bool is_same_subnet(const IPvX& ipvx_addr) const;
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.13 2004/11/04 09:01:39 bms Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.14 2005/01/22 04:53:20 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -42,15 +42,13 @@ VifAddr::VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
 bool
 VifAddr::is_same_subnet(const IPvXNet& ipvxnet) const
 {
-    return (_subnet_addr == ipvxnet);
+    return (_subnet_addr.contains(ipvxnet));
 }
 
 bool
 VifAddr::is_same_subnet(const IPvX& ipvx_addr) const
 {
-    IPvXNet ipvx_net(ipvx_addr, subnet_addr().prefix_len());
-    
-    return (ipvx_net.masked_addr() == subnet_addr().masked_addr());
+    return (_subnet_addr.contains(ipvx_addr));
 }
 
 //
