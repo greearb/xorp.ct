@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.6 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.7 2003/08/07 01:09:10 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -60,7 +60,8 @@ PimNbr::PimNbr(PimVif& pim_vif, const IPvX& addr, int proto_version)
       _pim_vif(pim_vif),
       _addr(addr),
       _proto_version(proto_version),
-      _jp_header(pim_vif.pim_node())
+      _jp_header(pim_vif.pim_node()),
+      _startup_time(TimeVal::MAXIMUM())
 {
     reset_received_options();
 }

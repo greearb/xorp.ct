@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.4 2003/04/01 00:56:22 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.5 2003/06/16 22:48:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -110,6 +110,9 @@ public:
 	return (_neighbor_liveness_timer);
     }
     
+    const TimeVal& startup_time() const { return _startup_time; }
+    void	set_startup_time(const TimeVal& v) { _startup_time = v; }
+    
     list<PimMre *>& pim_mre_rp_list()	{ return (_pim_mre_rp_list); }
     list<PimMre *>& pim_mre_wc_list()	{ return (_pim_mre_wc_list); }
     list<PimMre *>& pim_mre_sg_list()	{ return (_pim_mre_sg_list); }
@@ -160,6 +163,8 @@ private:
     XorpTimer	_jp_send_timer;		// Timer to send the accumulated JP msg
     
     PimJpHeader _jp_header;
+    
+    TimeVal	_startup_time;		// Start-up time of this neighbor
     
     //
     // The lists of all related PimMre entries.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.23 2003/08/12 15:50:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.24 2003/08/13 22:13:36 pavlin Exp $"
 
 
 //
@@ -1361,6 +1361,11 @@ PimVif::pim_nbr_find(const IPvX& nbr_addr)
 void
 PimVif::add_pim_nbr(PimNbr *pim_nbr)
 {
+    TimeVal now;
+    
+    TimerList::system_gettimeofday(&now);
+    pim_nbr->set_startup_time(now);
+    
     _pim_nbrs.push_back(pim_nbr);
 }
 
