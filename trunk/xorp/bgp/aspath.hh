@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.6 2003/01/26 17:03:18 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.7 2003/01/26 17:55:48 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -198,6 +198,9 @@ private:
  */
 class AsPath {
 public:
+    typedef list <AsSegment>::const_iterator const_iterator;
+    typedef list <AsSegment>::iterator iterator;
+
     AsPath() : _num_segments(0), _path_len(0)		{}
 
     /**
@@ -224,7 +227,7 @@ public:
     size_t path_length() const				{ return _path_len; }
 
     bool contains(const AsNum& as_num) const		{
-	list <AsSegment>::const_iterator i = _segments.begin();
+	const_iterator i = _segments.begin();
 	for (; i != _segments.end(); ++i)
 	    if ((*i).contains(as_num))
 		return true;
@@ -241,7 +244,7 @@ public:
 
     const AsSegment& segment(size_t n) const		{
 	if (n < _num_segments) {
-	    list <AsSegment>::const_iterator iter = _segments.begin();
+	    const_iterator iter = _segments.begin();
 	    for (u_int i = 0; i<n; i++)
 		++iter;
 	    return (*iter);

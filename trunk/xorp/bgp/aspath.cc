@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.6 2003/01/26 04:06:17 pavlin Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.7 2003/01/26 17:03:18 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -295,7 +295,7 @@ string
 AsPath::str() const
 {
     string s = "AsPath:";
-    list <AsSegment>::const_iterator iter = _segments.begin();
+    const_iterator iter = _segments.begin();
     while(iter != _segments.end()) {
 	s.append(" ");
 	s.append((*iter).str());
@@ -312,7 +312,7 @@ AsPath::encode(size_t &len) const
     size_t i, lengths[_num_segments];
 
     assert(_num_segments == _segments.size());	// XXX expensive
-    list <AsSegment>::const_iterator iter = _segments.begin();
+    const_iterator iter = _segments.begin();
     for (i=0; iter != _segments.end(); ++iter, ++i) {
 	bufs[i] = (*iter)._encode(lengths[i]);
 	len += lengths[i];
@@ -349,7 +349,7 @@ AsPath::add_AS_in_sequence(const AsNum &asn)
 	assert(_segments.front().type() == AS_SEQUENCE);
 	_segments.front().prepend_as(asn);
     }
-    _path_len++;
+    _path_len++;	// in both cases the length increases by one.
 }
 
 bool
@@ -357,12 +357,12 @@ AsPath::operator==(const AsPath& him) const
 {
     if (_num_segments != him._num_segments) 
 	return false;
-    list <AsSegment>::const_iterator my_i = _segments.begin();
-    list <AsSegment>::const_iterator his_i = him._segments.begin();
+    const_iterator my_i = _segments.begin();
+    const_iterator his_i = him._segments.begin();
     for (;my_i != _segments.end(); my_i++, his_i++)
 	if (*my_i != *his_i)
 	    return false;
-	return true;
+    return true;
 }
 
 bool
@@ -372,8 +372,8 @@ AsPath::operator<(const AsPath& him) const
 	return true;
     if (_num_segments > him._num_segments)
 	return false;
-    list <AsSegment>::const_iterator my_i = _segments.begin();
-    list <AsSegment>::const_iterator his_i = him._segments.begin();
+    const_iterator my_i = _segments.begin();
+    const_iterator his_i = him._segments.begin();
     for (;my_i != _segments.end(); my_i++, his_i++) {
 	if (*my_i < *his_i)
 	    return true;
@@ -387,7 +387,7 @@ AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
 {
     //See RFC 1657, Page 15 for the encoding.
     int buf_size = 0;
-    list <AsSegment>::const_iterator i = _segments.begin();
+    const_iterator i = _segments.begin();
     for(i = _segments.begin(); i != _segments.end(); i++) {
 	buf_size += 2 + (i->as_size() * 2);
     }
