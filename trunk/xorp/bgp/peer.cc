@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.48 2003/09/27 03:42:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.49 2003/10/11 03:17:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -979,6 +979,25 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
     debug_msg("check_open_packet says it's OK with us\n");
 }
 
+inline
+bool
+check_multiprotocol_nlri(const UpdatePacket *p, PathAttribute *pa, bool neg)
+{
+    if(pa && !neg) {
+#if	1
+	// We didn't advertise this capability, so strip this sucker out.
+	PathAttributeList<IPv4>& tmp = 
+	    const_cast<PathAttributeList<IPv4>&>(p->pa_list());
+	tmp.remove_attribute_by_pointer(pa);
+#else
+	// We didn't advertise this capability, drop peering.
+ 	return false;
+#endif
+    }
+
+    return true;
+}
+
 NotificationPacket *
 BGPPeer::check_update_packet(const UpdatePacket *p)
 {
@@ -993,12 +1012,29 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     // 9 - Optional Attribute Error
     // 10 - Invalid Network Field
     // 11 - Malformed AS_PATH
+
     /*
-    ** First check for the mandatory fields:
-    ** ORIGIN
-    ** AS_PATH
-    ** NEXT_HOP
+    ** Check for multiprotocol parameters that haven't been sent.
     */
+    if(p->mpreach_ipv6(SAFI_UNICAST) &&
+       !peerdata()->unicast_ipv6(BGPPeerData::SENT)) {
+#if	1
+	// We didn't advertise this capability, so strip this sucker out.
+	PathAttributeList<IPv4>& tmp = 
+	    const_cast<PathAttributeList<IPv4>&>(p->pa_list());
+	tmp.remove_attribute_by_pointer(p->mpreach_ipv6(SAFI_UNICAST));
+#else
+	// We didn't advertise this capability, drop peering.
+ 	return new NotificationPacket(UPDATEMSGERR, OPTATTR);
+#endif
+    }
+
+    BGPPeerData::Direction dir = BGPPeerData::SENT;
+//     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
+    if(!check_multiprotocol_nlri(p, p->mpreach_ipv6(SAFI_UNICAST),
+				 peerdata()->unicast_ipv6(dir)))
+	return new NotificationPacket(UPDATEMSGERR, OPTATTR);
+       
 
     // if the path attributes list is empty then no network
     // layer reachability information should be present.
@@ -1056,7 +1092,12 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	    }
 	}
 
-	// Only if NLRI is present are the following mandatory.
+	/*
+	** If NLRI is present check for the following mandatory fields:
+	** ORIGIN
+	** AS_PATH
+	** NEXT_HOP
+	*/
 	if ( p->nlri_list().empty() == false )	{
 	    // The ORIGIN Path attribute is mandatory 
 	    if (origin_attr == NULL) {
