@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.2 2003/07/12 16:18:22 hodson Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.3 2003/07/15 19:05:47 hodson Exp $"
 
 #include <set>
 
@@ -118,6 +118,31 @@ make_nets(set<IPv4Net>& nets, uint32_t n)
     }
 }
 
+static void
+make_nets(set<IPv6Net>& nets, uint32_t n)
+{
+    uint32_t fails = 0;
+    // attempt at deterministic nets sequence
+    while (nets.size() != n) {
+	uint32_t x[4];
+	x[0] = htonl(fake_random());
+	x[1] = x[0];
+	x[2] = x[0];
+	x[3] = x[0];
+	IPv6 addr(x);
+	IPv6Net net = IPv6Net(addr, 1 + n % 23 + fake_random() % 8);
+	if (nets.find(net) == nets.end()) {
+	    nets.insert(net);
+	    fails = 0;
+	} else {
+	    // Does not occur with test parameters in practice
+	    if (++fails == 5) {
+		verbose_log("Failed to generate nets.\n");
+	    }
+	}
+    }
+}
+
 
 // ----------------------------------------------------------------------------
 // Type specific helpers
@@ -131,7 +156,7 @@ template <>
 IPv4 DefaultPeer<IPv4>::get() { return IPv4("10.0.0.1"); }
 
 template <>
-IPv6 DefaultPeer<IPv6>::get() { return IPv6("10:1"); }
+IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 
 // ----------------------------------------------------------------------------
 // Spoof Port Manager instance support a single Spoof Port which in turn
@@ -232,6 +257,7 @@ public:
     {
 	const uint32_t n_routes = 20000;
 
+	verbose_log("Testing IPv%u\n", A::ip_version());
 	verbose_log("Generating nets\n");
 	set<IPNet<A> > nets;
 	make_nets(nets, n_routes);
@@ -386,8 +412,10 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	RouteWalkTester<IPv4> rwt;
-	rval = rwt.run_test();
+	RouteWalkTester<IPv4> rwt4;
+	rval = rwt4.run_test();
+	RouteWalkTester<IPv6> rwt6;
+	rval |= rwt6.run_test();
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
