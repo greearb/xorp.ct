@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.19 2002/12/11 08:38:55 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
 
 #ifndef __LINXORP_ASYNCIO_HH__
 #define __LINXORP_ASYNCIO_HH__
@@ -99,12 +99,12 @@ public:
     /**
      * @return true if asynchronous I/O is started.
      */
-    inline bool		running() 		{ return _running; }
+    inline bool		running() const 	{ return _running; }
 
     /**
      * @return file descriptor undergoing asynchronous operation.
      */
-    inline int		fd()			{ return _fd; }
+    inline int		fd() const		{ return _fd; }
 
 protected:
     AsyncFileOperator(EventLoop& e, int fd)
