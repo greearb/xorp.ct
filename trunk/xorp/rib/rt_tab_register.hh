@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.11 2004/06/10 22:41:42 hodson Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.12 2004/07/24 01:01:53 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -204,7 +204,7 @@ public:
      * the ModuleData as needing nitification.  
      */
     void mark_modules() const {
-	    set<const ModuleData* >::iterator i;
+	    set<const ModuleData*, ModuleCmp>::iterator i;
 	    for (i = _modules.begin(); i != _modules.end(); ++i)
 		(*i)->set();
     }
@@ -231,7 +231,7 @@ public:
      */
     list<string> module_names() const {
 	list<string> names;
-	set<const ModuleData* , ModuleCmp>::const_iterator i;
+	set<const ModuleData*, ModuleCmp>::const_iterator i;
 	for (i = _modules.begin(); i != _modules.end(); ++i)
 	    names.push_back((*i)->name());
 	return names;
@@ -243,7 +243,7 @@ public:
     string str() const;
 
 private:
-    set<const ModuleData* , ModuleCmp> _modules;
+    set<const ModuleData*, ModuleCmp> _modules;
 
     // _net duplicates the storage of this in the RegisterTable map -
     // not very efficient
