@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.11 2004/06/10 22:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.12 2004/11/02 22:46:05 bms Exp $"
 
 #include <functional>
 #include <string>
@@ -179,6 +179,7 @@ Vif::operator==(const Vif& other) const
 	    && (is_pim_register() == other.is_pim_register())
 	    && (is_p2p() == other.is_p2p())
 	    && (is_loopback() == other.is_loopback())
+	    && (is_discard() == other.is_discard())
 	    && (is_multicast_capable() == other.is_multicast_capable())
 	    && (is_broadcast_capable() == other.is_broadcast_capable())
 	    && (is_underlying_vif_up() == other.is_underlying_vif_up()));
