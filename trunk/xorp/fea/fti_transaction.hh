@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.2 2003/01/17 01:29:57 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.3 2003/03/10 23:20:14 hodson Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -25,36 +25,40 @@
 #include "libxorp/ipv6net.hh"
 #include "libxorp/transaction.hh"
 
-#include "fti.hh"
+#include "fticonfig.hh"
 
 /**
  * Base class for operations that can occur during an FTI transaction.
  */
 class FtiTransactionOperation : public TransactionOperation {
 public:
-    FtiTransactionOperation(Fti& fti) : _fti(fti) {}
+    FtiTransactionOperation(FtiConfig& ftic) : _ftic(ftic) {}
     virtual ~FtiTransactionOperation() {}
 
 protected:
-    Fti& fti() { return _fti; }
+    FtiConfig& ftic() { return _ftic; }
 
 private:
-    Fti& _fti;
+    FtiConfig& _ftic;
 };
 
 /**
- * Class to store request to add routing entry to FTI and dispatch it later.
+ * Class to store request to add routing entry to FtiConfig and
+ * dispatch it later.
  */
 class FtiAddEntry4 : public FtiTransactionOperation {
 public:
-    FtiAddEntry4(Fti&		fti,
-		 IPv4Net	net,
-		 IPv4		gw,
+    FtiAddEntry4(FtiConfig&	ftic,
+		 const IPv4Net&	net,
+		 const IPv4&	gateway,
 		 const string&	ifname,
-		 const string&	vifname)
-	: FtiTransactionOperation(fti), _fte(net, gw, ifname, vifname) {}
+		 const string&	vifname,
+		 uint32_t	metric,
+		 uint32_t	admin_distance)
+	: FtiTransactionOperation(ftic), _fte(net, gateway, ifname, vifname,
+					      metric, admin_distance) {}
 
-    bool dispatch() { return fti().add_entry4(_fte); }
+    bool dispatch() { return ftic().add_entry4(_fte); }
 
     string str() const { return string("AddEntry4: ") + _fte.str(); }
 
@@ -63,14 +67,15 @@ private:
 };
 
 /**
- * Class to store request to delete routing entry to FTI and dispatch it later.
+ * Class to store request to delete routing entry to FtiConfig and
+ * dispatch it later.
  */
 class FtiDeleteEntry4 : public FtiTransactionOperation {
 public:
-    FtiDeleteEntry4(Fti& fti, const IPv4Net& net)
-	: FtiTransactionOperation(fti), _fte(net) {}
+    FtiDeleteEntry4(FtiConfig& ftic, const IPv4Net& net)
+	: FtiTransactionOperation(ftic), _fte(net) {}
 
-    bool dispatch() { return fti().delete_entry4(_fte); }
+    bool dispatch() { return ftic().delete_entry4(_fte); }
 
     string str() const { return string("DeleteEntry4: ") + _fte.str();  }
 
@@ -79,31 +84,35 @@ private:
 };
 
 /**
- * Class to store request to delete all routing entries to FTI and dispatch
- * it later.
+ * Class to store request to delete all routing entries to FtiConfig and
+ * dispatch it later.
  */
 class FtiDeleteAllEntries4 : public FtiTransactionOperation {
 public:
-    FtiDeleteAllEntries4(Fti& fti) : FtiTransactionOperation(fti) {}
+    FtiDeleteAllEntries4(FtiConfig& ftic) : FtiTransactionOperation(ftic) {}
 
-    bool dispatch() { return fti().delete_all_entries4(); }
+    bool dispatch() { return ftic().delete_all_entries4(); }
 
     string str() const { return string("DeleteAllEntries4");  }
 };
 
 /**
- * Class to store request to add routing entry to FTI and dispatch it later.
+ * Class to store request to add routing entry to FtiConfig and
+ * dispatch it later.
  */
 class FtiAddEntry6 : public FtiTransactionOperation {
 public:
-    FtiAddEntry6(Fti&		fti,
+    FtiAddEntry6(FtiConfig&	ftic,
 		 const IPv6Net&	net,
-		 const IPv6&	gw,
+		 const IPv6&	gateway,
 		 const string&  ifname,
-		 const string&	vifname)
-	: FtiTransactionOperation(fti), _fte(net, gw, ifname, vifname) {}
+		 const string&	vifname,
+		 uint32_t	metric,
+		 uint32_t	admin_distance)
+	: FtiTransactionOperation(ftic), _fte(net, gateway, ifname, vifname,
+					      metric, admin_distance) {}
 
-    bool dispatch() { return fti().add_entry6(_fte); }
+    bool dispatch() { return ftic().add_entry6(_fte); }
 
     string str() const { return string("AddEntry6: ") + _fte.str(); }
 
@@ -112,14 +121,15 @@ private:
 };
 
 /**
- * Class to store request to delete routing entry to FTI and dispatch it later.
+ * Class to store request to delete routing entry to FtiConfig
+ * and dispatch it later.
  */
 class FtiDeleteEntry6 : public FtiTransactionOperation {
 public:
-    FtiDeleteEntry6(Fti& fti, const IPv6Net& net)
-	: FtiTransactionOperation(fti), _fte(net) {}
+    FtiDeleteEntry6(FtiConfig& ftic, const IPv6Net& net)
+	: FtiTransactionOperation(ftic), _fte(net) {}
 
-    bool dispatch() { return fti().delete_entry6(_fte); }
+    bool dispatch() { return ftic().delete_entry6(_fte); }
 
     string str() const { return string("DeleteEntry6: ") + _fte.str();  }
 
@@ -128,28 +138,28 @@ private:
 };
 
 /**
- * Class to store request to delete all routing entries to FTI and dispatch
- * it later.
+ * Class to store request to delete all routing entries to FtiConfig
+ * and dispatch it later.
  */
 class FtiDeleteAllEntries6 : public FtiTransactionOperation {
 public:
-    FtiDeleteAllEntries6(Fti& fti) : FtiTransactionOperation(fti) {}
+    FtiDeleteAllEntries6(FtiConfig& ftic) : FtiTransactionOperation(ftic) {}
 
-    bool dispatch() { return fti().delete_all_entries6(); }
+    bool dispatch() { return ftic().delete_all_entries6(); }
 
     string str() const { return string("DeleteAllEntries6");  }
 };
 
 /**
- * Class to store request to delete all routing entries to FTI and dispatch
- * it later.
+ * Class to store request to delete all routing entries to FtiConfig
+ * and dispatch it later.
  */
 class FtiDeleteAllEntries : public FtiTransactionOperation {
 public:
-    FtiDeleteAllEntries(Fti& fti) : FtiTransactionOperation(fti) {}
+    FtiDeleteAllEntries(FtiConfig& ftic) : FtiTransactionOperation(ftic) {}
 
     bool dispatch() {
-	return fti().delete_all_entries4() & fti().delete_all_entries6();
+	return ftic().delete_all_entries4() & ftic().delete_all_entries6();
     }
 
     string str() const { return string("DeleteAllEntries");  }
@@ -167,11 +177,12 @@ public:
 
     enum { TIMEOUT_MS = 5000 };
 
-    FtiTransactionManager(EventLoop& e, Fti& fti, uint32_t max_pending = 10)
-	: TransactionManager(e, TIMEOUT_MS, max_pending), _fti(fti)
+    FtiTransactionManager(EventLoop& e, FtiConfig& ftic,
+			  uint32_t max_pending = 10)
+	: TransactionManager(e, TIMEOUT_MS, max_pending), _ftic(ftic)
     {}
 
-    Fti& fti() { return _fti; }
+    FtiConfig& ftic() { return _ftic; }
 
     /**
      * @return string representing first error during commit.  If string is
@@ -189,7 +200,7 @@ protected:
     void operation_result(bool success, const TransactionOperation& op);
 
 protected:
-    Fti& _fti;
+    FtiConfig& _ftic;
     string _error;
 };
 

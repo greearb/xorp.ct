@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.2 2002/12/14 23:42:51 hodson Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.3 2003/03/10 23:20:18 hodson Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
@@ -176,8 +176,9 @@ inline XrlCmdError
 XrlInterfaceManager::pull_config_get_if(const string&	ifname,
 			    const IfTreeInterface*&	fi) const
 {
-    IfTree local;
-    const IfTree& it = ifconfig().pull_config(local);
+    IfTree it;
+    
+    ifconfig().pull_config(it);
     return get_if_from_config(it, ifname, fi);
 }
 
@@ -186,8 +187,9 @@ XrlInterfaceManager::pull_config_get_vif(const string&	ifname,
 				     const string&	vif,
 				     const IfTreeVif*&	fv) const
 {
-    IfTree local;
-    const IfTree& it = ifconfig().pull_config(local);
+    IfTree it;
+    
+    ifconfig().pull_config(it);
     return get_vif_from_config(it, ifname, vif, fv);
 }
 
@@ -197,8 +199,9 @@ XrlInterfaceManager::pull_config_get_addr(const string&	ifname,
 				      const IPv4&	addr,
 				      const IfTreeAddr4*&	fa) const
 {
-    IfTree local;
-    const IfTree& it = ifconfig().pull_config(local);
+    IfTree it;
+    
+    ifconfig().pull_config(it);
     return get_addr_from_config(it, ifname, vif, addr, fa);
 }
 
@@ -208,8 +211,9 @@ XrlInterfaceManager::pull_config_get_addr(const string&	ifname,
 				      const IPv6&	addr,
 				      const IfTreeAddr6*&	fa) const
 {
-    IfTree local;
-    const IfTree& it = ifconfig().pull_config(local);
+    IfTree it;
+    
+    ifconfig().pull_config(it);
     return get_addr_from_config(it, ifname, vif, addr, fa);
 }
 

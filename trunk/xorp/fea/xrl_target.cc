@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.7 2003/03/29 19:03:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.8 2003/04/11 22:26:08 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -29,11 +29,11 @@
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   XrlRouter&		 	r,
-			   Fti&       		 	fti,
+			   FtiConfig&  		 	ftic,
 			   InterfaceManager&	 	ifmgr,
 			   XrlIfConfigUpdateReporter&	xifcur,
 			   XrlRawSocket4Manager*	xrsm)
-    : XrlFeaTargetBase(&r), _xftm(e, fti), _xifmgr(e, ifmgr),
+    : XrlFeaTargetBase(&r), _xftm(e, ftic), _xifmgr(e, ifmgr),
       _xifcur(xifcur), _xrsm(xrsm)
 {
 }
@@ -61,9 +61,9 @@ XrlFeaTarget::ifmgr_0_1_get_all_interface_names(
 						// Output values,
 						XrlAtomList&	ifnames)
 {
-    IfTree local;
-    const IfTree& it = _xifmgr.ifconfig().pull_config(local);
-
+    IfTree it;
+    
+    _xifmgr.ifconfig().pull_config(it);
     for (IfTree::IfMap::const_iterator ii = it.ifs().begin();
 	 ii != it.ifs().end(); ++ii) {
 	ifnames.append(XrlAtom(ii->second.ifname()));
@@ -340,15 +340,11 @@ XrlFeaTarget::ifmgr_0_1_get_address_flags4(
     if (e != XrlCmdError::OKAY())
 	return e;
 
-    uint32_t flags = fa->flags();
-
-    XLOG_ASSERT(!(flags & IFF_POINTOPOINT) || !(flags & IFF_BROADCAST));
-
-    up = flags & IFF_UP;
-    broadcast = flags & IFF_BROADCAST;
-    loopback = flags & IFF_LOOPBACK;
-    point_to_point = flags & IFF_POINTOPOINT;
-    multicast = flags & IFF_MULTICAST;
+    up = fa->enabled();
+    broadcast = fa->broadcast();
+    loopback = fa->loopback();
+    point_to_point = fa->point_to_point();
+    multicast = fa->multicast();
 
     return XrlCmdError::OKAY();
 }
@@ -370,11 +366,10 @@ XrlFeaTarget::ifmgr_0_1_get_address_flags6(
     if (e != XrlCmdError::OKAY())
 	return e;
 
-    uint32_t flags = fa->flags();
-    up = flags & IFF_UP;
-    loopback = flags & IFF_LOOPBACK;
-    point_to_point = flags & IFF_POINTOPOINT;
-    multicast = flags & IFF_MULTICAST;
+    up = fa->enabled();
+    loopback = fa->loopback();
+    point_to_point = fa->point_to_point();
+    multicast = fa->multicast();
 
     return XrlCmdError::OKAY();
 }
@@ -767,7 +762,7 @@ XrlFeaTarget::fti_0_2_add_entry4(
 	// Input values,
 	const uint32_t&	tid,
 	const IPv4Net&	dst,
-	const IPv4&	gw,
+	const IPv4&	gateway,
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	metric,
@@ -775,12 +770,11 @@ XrlFeaTarget::fti_0_2_add_entry4(
 	const string&	protocol_origin)
 {
     // TODO: use those arguments
-    UNUSED(metric);
-    UNUSED(admin_distance);
     UNUSED(protocol_origin);
     
     FtiTransactionManager::Operation op(
-	new FtiAddEntry4(_xftm.fti(), dst, gw, ifname, vifname)
+	new FtiAddEntry4(_xftm.ftic(), dst, gateway, ifname, vifname, metric,
+			 admin_distance)
 	);
     return _xftm.add(tid, op);
 }
@@ -790,7 +784,7 @@ XrlFeaTarget::fti_0_2_add_entry6(
 	// Input values,
 	const uint32_t&	tid,
 	const IPv6Net&	dst,
-	const IPv6&	gw,
+	const IPv6&	gateway,
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	metric,
@@ -798,14 +792,13 @@ XrlFeaTarget::fti_0_2_add_entry6(
 	const string&	protocol_origin)
 {
     // TODO: use those arguments
-    UNUSED(metric);
-    UNUSED(admin_distance);
     UNUSED(protocol_origin);
     
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiAddEntry6(_xftm.fti(), dst, gw, ifname, vifname)
+	new FtiAddEntry6(_xftm.ftic(), dst, gateway, ifname, vifname, metric,
+			 admin_distance)
 	);
 
     return _xftm.add(tid, op);
@@ -820,7 +813,7 @@ XrlFeaTarget::fti_0_2_delete_entry4(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry4(_xftm.fti(), dst)
+	new FtiDeleteEntry4(_xftm.ftic(), dst)
 	);
     return _xftm.add(tid, op);
 }
@@ -834,7 +827,7 @@ XrlFeaTarget::fti_0_2_delete_entry6(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry6(_xftm.fti(), dst)
+	new FtiDeleteEntry6(_xftm.ftic(), dst)
 	);
 
     return _xftm.add(tid, op);
@@ -849,7 +842,7 @@ XrlFeaTarget::fti_0_2_delete_all_entries(
     // memory here is handed it to to manage.
 
     FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries(_xftm.fti())
+	new FtiDeleteAllEntries(_xftm.ftic())
 	);
     return _xftm.add(tid, op);
 }
@@ -863,7 +856,7 @@ XrlFeaTarget::fti_0_2_delete_all_entries4(
     // memory here is handed it to to manage.
 
     FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries4(_xftm.fti())
+	new FtiDeleteAllEntries4(_xftm.ftic())
 	);
     return _xftm.add(tid, op);
 }
@@ -877,7 +870,7 @@ XrlFeaTarget::fti_0_2_delete_all_entries6(
     // memory here is handed it to to manage.
 
     FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries6(_xftm.fti())
+	new FtiDeleteAllEntries6(_xftm.ftic())
 	);
 
     return _xftm.add(tid, op);
@@ -897,7 +890,7 @@ XrlFeaTarget::fti_0_2_lookup_route4(
 	string&		protocol_origin)
 {
     Fte4 fte;
-    if (_xftm.fti().lookup_route4(dst, fte)) {
+    if (_xftm.ftic().lookup_route4(dst, fte)) {
 	netmask = fte.net();
 	gateway = fte.gateway();
 	ifname = fte.ifname();
@@ -926,7 +919,7 @@ XrlFeaTarget::fti_0_2_lookup_route6(
 	string&		protocol_origin)
 {
     Fte6 fte;
-    if (_xftm.fti().lookup_route6(dst, fte)) {
+    if (_xftm.ftic().lookup_route6(dst, fte)) {
 	netmask = fte.net();
 	gateway = fte.gateway();
 	ifname = fte.ifname();
@@ -954,7 +947,7 @@ XrlFeaTarget::fti_0_2_lookup_entry4(
 	string&		protocol_origin)
 {
     Fte4 fte;
-    if (_xftm.fti().lookup_entry4(dst, fte)) {
+    if (_xftm.ftic().lookup_entry4(dst, fte)) {
 	gateway = fte.gateway();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
@@ -981,7 +974,7 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 	string&		protocol_origin)
 {
     Fte6 fte;
-    if (_xftm.fti().lookup_entry6(dst, fte)) {
+    if (_xftm.ftic().lookup_entry6(dst, fte)) {
 	gateway = fte.gateway();
 	ifname = fte.ifname();
 	vifname = fte.vifname();

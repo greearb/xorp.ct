@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.2 2002/12/14 23:42:51 hodson Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.3 2003/03/10 23:20:17 hodson Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -28,20 +28,19 @@
  * and does some extra checking not in the FtiTransactionManager
  * class.
  */
-class XrlFtiTransactionManager
-{
+class XrlFtiTransactionManager {
 public:
     /**
      * Constructor
      *
      * @param e the EventLoop.
-     * @param fti the ForwardingTableInterface object.
+     * @param ftic the ForwardingTableInterface configuration object.
      * @param max_ops the maximum number of operations pending.
      */
     XrlFtiTransactionManager(EventLoop&	e,
-			     Fti&	fti,
+			     FtiConfig&	ftic,
 			     uint32_t	max_ops = 200)
-	: _ftm(e, fti), _max_ops(max_ops)
+	: _ftm(e, ftic), _max_ops(max_ops)
     {}
 
     XrlCmdError start_transaction(uint32_t& tid);
@@ -52,7 +51,7 @@ public:
 
     XrlCmdError add(uint32_t tid, const FtiTransactionManager::Operation& op);
 
-    inline Fti& fti() { return _ftm.fti(); }
+    FtiConfig& ftic() { return _ftm.ftic(); }
 
 protected:
     FtiTransactionManager  _ftm;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.3 2003/03/18 01:01:30 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -188,9 +188,9 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 
 	// Align with device configuration, so that any stuff that failed
 	// in push is not held over in config
-	IfTree tmp_config;
-	const IfTree& dev_config = ifconfig().pull_config(tmp_config);
-
+	IfTree dev_config;
+	
+	ifconfig().pull_config(dev_config);
 	debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
 	debug_msg("LOCAL CONFIG %s\n", local_config.str().c_str());
 	
@@ -204,7 +204,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	// information being held.
 	
 	// XXX restore
-	// if (ifconfig().push_config(backup_config) == false) {
+	// if (ifconfig().push_config(backup_config) < 0) {
 	    // Argh! Die, Die, Die, Die Again
 	// }
 	return XrlCmdError::COMMAND_FAILED(ifconfig().push_error());

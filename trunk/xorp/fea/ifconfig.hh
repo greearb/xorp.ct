@@ -12,15 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
 
+#include "ifconfig_get.hh"
+#include "ifconfig_set.hh"
+#include "ifconfig_observer.hh"
 #include "iftree.hh"
 
+class EventLoop;
+class IfConfigGet;
+class IfConfigSet;
+class IfConfigObserver;
+class IfConfigErrorReporterBase;
 class IfConfigUpdateReporterBase;
-class SimpleIfConfigErrorReporter;
+
 
 /**
  * Base class for pushing and pulling interface configurations down to
@@ -31,46 +39,84 @@ public:
     /**
      * Constructor.
      *
+     * @param eventloop the event loop.
      * @param ur update reporter that receives updates through when
      *           configurations are pushed down and when triggered
      *		 spontaneously on the underlying platform.
-     *
      * @param er error reporter that errors are propagated through when
      *           configurations are pushed down.
      */
-    IfConfig(IfConfigUpdateReporterBase&  ur,
-	     SimpleIfConfigErrorReporter& er)
-	: _ur(ur), _er(er) {}
+    IfConfig(EventLoop& eventloop, IfConfigUpdateReporterBase& ur,
+	     IfConfigErrorReporterBase& er);
 
+    /**
+     * Virtual destructor (in case this class is used as base class).
+     */
     virtual ~IfConfig() {}
+    
+    EventLoop& eventloop() { return _eventloop; }
+    
+    /**
+     * Get error reporter associated with IfConfig.
+     */
+    inline IfConfigErrorReporterBase&	er() { return _er; }
 
+    IfTree& live_config() { return (_live_config); }
+    
+    
+    int register_ifc_get(IfConfigGet *ifc_get);
+    int register_ifc_set(IfConfigSet *ifc_set);
+    int register_ifc_observer(IfConfigObserver *ifc_observer);
+
+    IfConfigGet&	ifc_get() { return *_ifc_get; }
+    IfConfigSet&	ifc_set() { return *_ifc_set; }
+    IfConfigObserver&	ifc_observer() { return *_ifc_observer; }
+    
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int stop();
+    
     /**
      * Push IfTree structure down to platform.  Errors are reported
      * via the constructor supplied ErrorReporter instance.
      *
      * @param config the configuration to be pushed down.
      *
-     * @return true on success, false if errors occurred.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool push_config(const IfTree& config) = 0;
-
+    int push_config(const IfTree& config);
+    
     /**
      * Pull up current config from platform.
      *
      * @param config an IfTree item that can be used to write the
-     * config to, if the underlying platform does maintain it's own
-     * copy of the config.
+     * config to.
      *
-     * @return the platform IfTree.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual const IfTree& pull_config(IfTree& config) = 0;
-
+    int pull_config(IfTree& config);
+    
+    void flush_config() { _live_config = IfTree(); }
+    
+    IfTreeInterface *get_if(IfTree& it, const string& ifname);
+    IfTreeVif *get_vif(IfTree& it, const string& ifname,
+		       const string& vifname);
+    
     /**
      * Get error message associated with push operation.
      */
     const string& push_error() const;
     
-protected:
     /**
      * Check IfTreeInterface and report updates to IfConfigUpdateReporter.
      */
@@ -101,14 +147,50 @@ protected:
      */
     void   report_updates(const IfTree& it);
 
-    /**
-     * Get error reporter associated with IfConfig.
-     */
-    inline SimpleIfConfigErrorReporter&	er() { return _er; }
-
+    void map_ifindex(uint32_t index, const string& name);
+    void unmap_ifindex(uint32_t index);    
+    const char* get_ifname(uint32_t index);
+    
 private:
-    IfConfigUpdateReporterBase&		_ur;
-    SimpleIfConfigErrorReporter&	_er;
+    
+    EventLoop&			_eventloop;
+    IfConfigUpdateReporterBase&	_ur;
+    IfConfigErrorReporterBase&	_er;
+    
+    // A cache of associative array of interface names to interface index.
+    // Needed because the RTM_IFANNOUNCE upcall is called after the interface
+    // name is deleted from the kernel.
+    typedef map<uint32_t, string> IfIndex2NameMap;
+    IfIndex2NameMap	_ifnames;
+    
+    IfTree		_live_config;
+    
+    IfConfigGet		*_ifc_get;
+    IfConfigSet		*_ifc_set;
+    IfConfigObserver	*_ifc_observer;
+    
+    //
+    // The mechanisms to get interface-related information
+    // from the underlying system.
+    // Ordering is important: the last that is supported is the one to use.
+    //
+    IfConfigGetIoctl	_ifc_get_ioctl;
+    IfConfigGetSysctl	_ifc_get_sysctl;
+    IfConfigGetGetifaddrs _ifc_get_getifaddrs;
+    
+    //
+    // The mechanisms to set interface-related information
+    // within the underlying system.
+    // Ordering is important: the last that is supported is the one to use.
+    //
+    IfConfigSetIoctl	_ifc_set_ioctl;
+    
+    //
+    // The mechanisms to observe whether the interface-related information
+    // within the underlying system has changed.
+    // Ordering is important: the last that is supported is the one to use.
+    //
+    IfConfigObserverRs	_ifc_observer_rs;
 };
 
 /**
@@ -151,6 +233,7 @@ public:
  */
 class IfConfigErrorReporterBase {
 public:
+    IfConfigErrorReporterBase() : _error_cnt(0) {}
     virtual ~IfConfigErrorReporterBase() {}
 
     virtual void interface_error(const string& ifname,
@@ -169,15 +252,52 @@ public:
 			       const string& vifname,
 			       const IPv6&   addr,
 			       const string& error_msg) = 0;
+    
+    /**
+     * @return error message of first error encountered.
+     */
+    inline const string& first_error() const	{ return _first_error; }
+    
+    /**
+     * @return error message of last error encountered.
+     */
+    inline const string& last_error() const	{ return _last_error; }
+    
+    /**
+     * @return number of errors reported.
+     */
+    inline uint32_t error_count() const		{ return _error_cnt; }
+    
+    /**
+     * Reset error count and error message.
+     */
+    inline void reset() {
+	_first_error.erase();
+	_last_error.erase();
+	_error_cnt = 0;
+    }
+    
+    inline void	log_error(const string& s) {
+	if (0 == _error_cnt)
+	    _first_error = s;
+	_last_error = s;
+	_error_cnt++;
+    }
+    
+private:
+    string	_last_error;	// last error reported	
+    string	_first_error;	// first error reported
+
+    uint32_t	_error_cnt;	// number of errors reported
 };
 
 /**
  * @short Class for propagating error information during IfConfig operations.
  *
  */
-class SimpleIfConfigErrorReporter : public IfConfigErrorReporterBase {
+class IfConfigErrorReporter : public IfConfigErrorReporterBase {
 public:
-    SimpleIfConfigErrorReporter();
+    IfConfigErrorReporter();
 
     void interface_error(const string& ifname,
 			 const string& error_msg);
@@ -196,42 +316,7 @@ public:
 		       const IPv6&   addr,
 		       const string& error_msg);
 
-    /**
-     * @return error message of first error encountered.
-     */
-    inline const string& first_error() const	{ return _first_error; }
-
-    /**
-     * @return error message of last error encountered.
-     */
-    inline const string& last_error() const	{ return _last_error; }
-
-    /**
-     * @return number of errors reported.
-     */
-    inline uint32_t error_count() const			{ return _error_cnt; }
-
-    /**
-     * Reset error count and error message.
-     */
-    inline void reset() {
-	_first_error.erase();
-	_last_error.erase();
-	_error_cnt = 0;
-    }
-
-protected:
-    inline void	log_error(const string& s) {
-	if (0 == _error_cnt)
-	    _first_error = s;
-	_last_error = s;
-	_error_cnt++;
-    }
-
-    string	_last_error;	// last error reported	
-    string	_first_error;	// first error reported
-
-    uint32_t	_error_cnt;	// number of errors reported
+private:
 };
 
 #endif // __FEA_IFCONFIG_HH__

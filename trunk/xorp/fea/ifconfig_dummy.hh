@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_dummy.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/ifconfig_dummy.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_DUMMY_HH__
 #define __FEA_IFCONFIG_DUMMY_HH__
 
-#include <vector>
-#include <net/if.h>
+#error "OBSOLETE FILE"
 
 #include "ifconfig.hh"
+#include "iftree.hh"
 
 /**
  * Dummy platform interface.  Accepts any IfTree supplied and as a

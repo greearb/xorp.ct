@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/ifmanager.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
 
 #ifndef __FEA_IFMANAGER_HH__
 #define __FEA_IFMANAGER_HH__
@@ -28,7 +28,7 @@ public:
     InterfaceManager(IfConfig& ifc) : _ifc(ifc) {}
 
     IfConfig&  ifc() const				{ return _ifc; }
-    IfTree& iftree()	 				{ return _it; }
+    IfTree& iftree()					{ return _it; }
 
 protected:
     IfConfig&	_ifc;

@@ -12,7 +12,9 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_dummy.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_dummy.cc,v 1.2 2003/03/10 23:20:14 hodson Exp $"
+
+#error "OBSOLETE FILE"
 
 #include "fea_module.h"
 #include "config.h"
@@ -24,7 +26,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
-#include "fti.hh"
+#include "fticonfig.hh"
 #include "fti_dummy.hh"
 
 bool

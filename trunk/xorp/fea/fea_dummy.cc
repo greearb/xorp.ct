@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_dummy.cc,v 1.2 2002/12/14 23:42:50 hodson Exp $"
+#ident "$XORP: xorp/fea/fea_dummy.cc,v 1.3 2003/03/10 23:20:13 hodson Exp $"
+
+#error "OBSOLETE FILE"
 
 #include "config.h"
 #include "fea_module.h"

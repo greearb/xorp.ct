@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_click.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_click.cc,v 1.2 2003/03/10 23:20:14 hodson Exp $"
 
 #include <unistd.h>
 #include <cstdio>
@@ -24,11 +24,11 @@
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-#include "fti.hh"
+#include "fticonfig.hh"
 #include "fti_click.hh"
 #include "click_glue.hh"
 
-FtiClick::FtiClick() throw (FtiError)
+FtiClick::FtiClick() throw (FtiConfigError)
 {
     _click_proc = "/click/rt";
 #if 0
@@ -38,11 +38,11 @@ FtiClick::FtiClick() throw (FtiError)
 		"FtiClick::FtiClick: accessing forwarding element %s: %s",
 		_click_proc,
 		strerror(errno));
-	throw FtiError(buf);
+	throw FtiConfigError(buf);
     }
 #else
     if (!Click::is_loaded()) {
-	xorp_throw(FtiError, "Click is not loaded");
+	xorp_throw(FtiConfigError, "Click is not loaded");
     }
 #endif
 }

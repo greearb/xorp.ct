@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rtsock.hh,v 1.2 2003/01/17 01:29:57 pavlin Exp $
+// $XORP: xorp/fea/rtsock.hh,v 1.3 2003/03/10 23:20:16 hodson Exp $
+
+#error "OBSOLETE FILE"
 
 #ifndef __FEA_RTSOCK_HH__
 #define __FEA_RTSOCK_HH__
@@ -21,7 +23,6 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-#include "fti.hh"
 
 class RoutingSocketObserver;
 struct RoutingSocketPlumber;
@@ -33,11 +34,26 @@ struct RoutingSocketPlumber;
  */
 class RoutingSocket {
 public:
-    RoutingSocket(EventLoop& e, int af = AF_UNSPEC) throw(FtiError);
+    RoutingSocket(EventLoop& e);
     ~RoutingSocket();
 
-    /* RoutingSocket may fail to open routing socket during construction. */
-    inline bool is_open() const { return _fd != -1; }
+    /**
+     * Start the routing socket operation.
+     * 
+     * @param af the address family.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start(int af = AF_UNSPEC);
+
+    /**
+     * Stop the routing socket operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int stop();
+
+    // RoutingSocket may fail to open routing socket during construction.
+    inline bool is_open() const { return _fd >= 0; }
 
     /**
      * Write data to routing socket.  Update sequence number associated
@@ -78,8 +94,8 @@ private:
 
     void shutdown();
 
-    RoutingSocket& operator=(const RoutingSocket&);	/* Not implemented */
-    RoutingSocket(const RoutingSocket&);		/* Not implemented */
+    RoutingSocket& operator=(const RoutingSocket&);	// Not implemented
+    RoutingSocket(const RoutingSocket&);		// Not implemented
 
 private:
     static const size_t RTSOCK_BYTES = 4096; // Guess at largest sock message
@@ -89,8 +105,8 @@ private:
     int		 _fd;
     ObserverList _ol;
 
-    uint16_t 	 _seqno;	/* Seqno of next write() */
-    uint16_t	 _instance_no;  /* Instance number of this routing socket */
+    uint16_t 	 _seqno;	// Seqno of next write()
+    uint16_t	 _instance_no;  // Instance number of this routing socket
 
     uint8_t	 _buffer[RTSOCK_BYTES];
 

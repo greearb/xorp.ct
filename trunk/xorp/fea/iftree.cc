@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.2 2003/03/10 23:20:16 hodson Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -191,7 +191,7 @@ IfTree::align_with(const IfTree& o)
 /* IfTreeInterface code */
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
-    : IfTreeItem(), _ifname(ifname), _en(false), _mtu(0)
+    : IfTreeItem(), _ifname(ifname), _enabled(false), _if_flags(0), _mtu(0)
 {}
 
 bool
@@ -240,9 +240,9 @@ IfTreeInterface::finalize_state()
 string
 IfTreeInterface::str() const
 {
-    return c_format("Interface %s { enabled := %s } { mtu := %d } "
-		    "{ mac := %s }",
-		    _ifname.c_str(), true_false(_en), _mtu,
+    return c_format("Interface %s { enabled := %s } { flags := 0x%02x } "
+		    "{ mtu := %d } { mac := %s }",
+		    _ifname.c_str(), true_false(_enabled), _if_flags, _mtu,
 		    _mac.str().c_str()) + string(" ") + IfTreeItem::str();
 }
 
@@ -250,7 +250,9 @@ IfTreeInterface::str() const
 /* IfTreeVif code */
 
 IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
-    : IfTreeItem(), _ifname(ifname), _vifname(vifname), _en(false)
+    : IfTreeItem(), _ifname(ifname), _vifname(vifname), _enabled(false),
+      _broadcast(false), _loopback(false), _point_to_point(false),
+      _multicast(false), _vif_flags(0)
 {}
 
 bool
@@ -335,8 +337,13 @@ IfTreeVif::finalize_state()
 string
 IfTreeVif::str() const
 {
-    return c_format("VIF %s { enabled := %s }",
-		    _vifname.c_str(), true_false(_en))
+    return c_format("VIF %s { enabled := %s } { broadcast := %s } "
+		    "{ loopback := %s } { point_to_point := %s } "
+		    "{ multicast := %s } { flags := 0x%02x }",
+		    _vifname.c_str(), true_false(_enabled),
+		    true_false(_broadcast), true_false(_loopback),
+		    true_false(_point_to_point), true_false(_multicast),
+		    _vif_flags)
 	+ string(" ") + IfTreeItem::str();
 }
 
@@ -357,9 +364,10 @@ IfTreeAddr4::set_prefix(uint32_t prefix)
 void
 IfTreeAddr4::set_bcast(const IPv4& baddr)
 {
-    _flags &= ~(IFF_POINTOPOINT | IFF_BROADCAST);
+    set_broadcast(false);
+    set_point_to_point(false);
     if (baddr != IPv4::ZERO())
-	_flags |= IFF_BROADCAST;
+	set_broadcast(true);
     _oaddr = baddr;
     mark(CHANGED);
 }
@@ -367,7 +375,7 @@ IfTreeAddr4::set_bcast(const IPv4& baddr)
 IPv4
 IfTreeAddr4::bcast() const
 {
-    if (_flags & IFF_BROADCAST)
+    if (broadcast())
 	return _oaddr;
     return IPv4::ZERO();
 }
@@ -375,9 +383,10 @@ IfTreeAddr4::bcast() const
 void
 IfTreeAddr4::set_endpoint(const IPv4& eaddr)
 {
-    _flags &= ~(IFF_BROADCAST | IFF_POINTOPOINT);
+    set_broadcast(false);
+    set_point_to_point(false);
     if (eaddr != IPv4::ZERO())
-	_flags |= IFF_POINTOPOINT;
+	set_point_to_point(true);
     _oaddr = eaddr;
     mark(CHANGED);
 }
@@ -385,7 +394,7 @@ IfTreeAddr4::set_endpoint(const IPv4& eaddr)
 IPv4
 IfTreeAddr4::endpoint() const
 {
-    if (_flags & IFF_POINTOPOINT)
+    if (point_to_point())
 	return _oaddr;
     return IPv4::ZERO();
 }
@@ -399,13 +408,17 @@ IfTreeAddr4::finalize_state()
 string
 IfTreeAddr4::str() const
 {
-    string r = c_format("V4Addr %s { enabled := %s } { flags := 0x%02x } "
+    string r = c_format("V4Addr %s { enabled := %s } { broadcast := %s } "
+			"{ loopback := %s } { point_to_point := %s } "
+			"{ multicast := %s } { flags := 0x%02x }"
 			"{ prefix := %d }",
-			_addr.str().c_str(), true_false(_en),
-			_flags, _prefix);
-    if (_flags & IFF_POINTOPOINT)
+			_addr.str().c_str(), true_false(_enabled),
+			true_false(_broadcast), true_false(_loopback),
+			true_false(_point_to_point), true_false(_multicast),
+			_addr_flags, _prefix);
+    if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
-    if (_flags & IFF_BROADCAST)
+    if (_broadcast)
 	r += c_format(" { broadcast := %s }", _oaddr.str().c_str());
     r += string(" ") + IfTreeItem::str();
     return r;
@@ -429,9 +442,9 @@ IfTreeAddr6::set_prefix(uint32_t prefix)
 void
 IfTreeAddr6::set_endpoint(const IPv6& eaddr)
 {
-    _flags &= ~(IFF_BROADCAST | IFF_POINTOPOINT);
+    set_point_to_point(false);
     if (eaddr != IPv6::ZERO())
-	_flags |= IFF_POINTOPOINT;
+	set_point_to_point(true);
     _oaddr = eaddr;
     mark(CHANGED);
 }
@@ -439,7 +452,7 @@ IfTreeAddr6::set_endpoint(const IPv6& eaddr)
 IPv6
 IfTreeAddr6::endpoint() const
 {
-    if (_flags & IFF_BROADCAST)
+    if (point_to_point())
 	return _oaddr;
     return IPv6::ZERO();
 }
@@ -453,13 +466,16 @@ IfTreeAddr6::finalize_state()
 string
 IfTreeAddr6::str() const
 {
-    string r = c_format("V6Addr %s { enabled := %s } { flags := 0x%02x } "
+    string r = c_format("V6Addr %s { enabled := %s } "
+			"{ loopback := %s } { point_to_point := %s } "
+			"{ multicast := %s } { flags := 0x%02x } "
 			"{ prefix := %d }",
-			_addr.str().c_str(), true_false(_en),
-			_flags, _prefix);
-    if (_flags & IFF_POINTOPOINT)
+			_addr.str().c_str(), true_false(_enabled),
+			true_false(_loopback),
+			true_false(_point_to_point), true_false(_multicast),
+			_addr_flags, _prefix);
+    if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
-
     r += string(" ") + IfTreeItem::str();
     return r;
 }

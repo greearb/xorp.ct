@@ -12,19 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/click.hh,v 1.2 2003/03/10 23:20:13 hodson Exp $
 
 #ifndef __FEA_CLICK_HH__
 #define __FEA_CLICK_HH__
 
 #include <string>
-#include "fti.hh"
+#include "fticonfig.hh"
 
 class Click {
 public:
     Click();
     Click(const char *config_file, const char *click_module,
-	  const char *fea_module) throw(FtiError);
+	  const char *fea_module) throw(FtiConfigError);
 
     static bool load();
     static void unload();

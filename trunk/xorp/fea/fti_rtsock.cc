@@ -12,7 +12,9 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_rtsock.cc,v 1.3 2003/02/26 00:14:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/fti_rtsock.cc,v 1.4 2003/03/10 23:20:14 hodson Exp $"
+
+#error "OBSOLETE FILE"
 
 #include "fea_module.h"
 #include "config.h"
@@ -31,10 +33,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4.hh"
-#include "fti.hh"
+#include "fticonfig.hh"
 #include "fti_rtsock.hh"
-
-static const uint32_t HOST_NETMASK = 0xffffffffU;
 
 /* ------------------------------------------------------------------------- */
 /* Helper functions */
@@ -84,7 +84,7 @@ RoutingSocketFti::RoutingSocketFti(RoutingSocket& rs)
     ** Open routing socket.
     */
     if (rs.is_open() == false) {
-	xorp_throw(FtiError,
+	xorp_throw(FtiConfigError,
 		   c_format("RoutingSocketFti::RoutingSocketFti: "
 			    "opening routing socket %s",
 			    strerror(errno)));
@@ -96,7 +96,7 @@ RoutingSocketFti::RoutingSocketFti(RoutingSocket& rs)
     size_t enable = 1;
     if (-1 == sysctlbyname("net.inet.ip.forwarding",
 			  0, 0, &enable, sizeof(enable))) {
-	xorp_throw(FtiError,
+	xorp_throw(FtiConfigError,
 		   c_format("RoutingSocketFti::RoutingSocketFti: "
 			    "unable to enable forwarding %s",
 			    strerror(errno)));
@@ -123,69 +123,6 @@ RoutingSocketFti::end_configuration()
 {
     // Nothing particular to do at start of configuration, just label start.
     return mark_configuration_end();
-}
-
-bool
-RoutingSocketFti::delete_all_entries4()
-{
-    if (in_configuration() == false)
-	return false;
-    
-    list<Fte4> rt;
-
-    make_routing_list(rt);
-    for (list<Fte4>::iterator e = rt.begin(); e != rt.end(); e++) {
-	delete_entry4(*e);
-    }
-    return true;
-}
-
-bool
-RoutingSocketFti::delete_entry4(const Fte4& f)
-{
-    if (in_configuration() == false)
-	return false;
-
-    /* XXX
-    ** It is a requirement that all the sockaddr's are on a four byte
-    ** boundary. We happen to know that sockaddr_in's are a multiple
-    ** of four bytes. If this ever changes this code will break.
-    */
-    struct request {
-	struct rt_msghdr hdr;
-	struct sockaddr_in dst;
-	struct sockaddr_in netmask;
-    } req;
-
-    size_t reqsz = sizeof(req);
-    memset(&req, 0, reqsz);
-
-    if (f.host_route()) {
-	/* No netmask */
-	reqsz -= sizeof(req.netmask);
-    } else {
-	req.hdr.rtm_addrs |= RTA_NETMASK;
-	req.netmask.sin_len = sizeof(req.netmask);
-	req.netmask.sin_family = AF_INET;
-	req.netmask.sin_addr.s_addr = f.net().netmask().addr();
-    }
-    req.hdr.rtm_msglen = reqsz;
-    req.hdr.rtm_version = RTM_VERSION;
-    req.hdr.rtm_type = RTM_DELETE;
-    req.hdr.rtm_addrs = RTA_DST;
-    req.dst.sin_len = sizeof(req.dst);
-    req.dst.sin_family = AF_INET;
-    req.dst.sin_addr.s_addr = f.net().masked_addr().addr();
-
-    RoutingSocket& rs = routing_socket();
-
-    if ((ssize_t)reqsz != rs.write(&req, reqsz)) {
-	XLOG_ERROR("write failed %s Attempting to delete %s",
-		   strerror(errno),
-	      f.str().c_str());
-	return false;
-    }
-    return true;
 }
 
 bool
@@ -220,7 +157,7 @@ RoutingSocketFti::add_entry4(const Fte4& f)
     req.hdr.rtm_type = RTM_ADD;
     req.hdr.rtm_index = /*ifname(f.ifname)*/0;
     if (f.gateway() != IPv4::ZERO()) {
-	if (f.host_route())
+	if (f.is_host_route())
 	    req.hdr.rtm_flags = RTF_HOST;
 	else
 	    req.hdr.rtm_flags = RTF_GATEWAY;
@@ -251,6 +188,69 @@ RoutingSocketFti::add_entry4(const Fte4& f)
 	return false;
     }
     /* XXX We could use trawl routing socket output to check on success. */
+    return true;
+}
+
+bool
+RoutingSocketFti::delete_entry4(const Fte4& f)
+{
+    if (in_configuration() == false)
+	return false;
+
+    /* XXX
+    ** It is a requirement that all the sockaddr's are on a four byte
+    ** boundary. We happen to know that sockaddr_in's are a multiple
+    ** of four bytes. If this ever changes this code will break.
+    */
+    struct request {
+	struct rt_msghdr hdr;
+	struct sockaddr_in dst;
+	struct sockaddr_in netmask;
+    } req;
+
+    size_t reqsz = sizeof(req);
+    memset(&req, 0, reqsz);
+
+    if (f.is_host_route()) {
+	/* No netmask */
+	reqsz -= sizeof(req.netmask);
+    } else {
+	req.hdr.rtm_addrs |= RTA_NETMASK;
+	req.netmask.sin_len = sizeof(req.netmask);
+	req.netmask.sin_family = AF_INET;
+	req.netmask.sin_addr.s_addr = f.net().netmask().addr();
+    }
+    req.hdr.rtm_msglen = reqsz;
+    req.hdr.rtm_version = RTM_VERSION;
+    req.hdr.rtm_type = RTM_DELETE;
+    req.hdr.rtm_addrs = RTA_DST;
+    req.dst.sin_len = sizeof(req.dst);
+    req.dst.sin_family = AF_INET;
+    req.dst.sin_addr.s_addr = f.net().masked_addr().addr();
+
+    RoutingSocket& rs = routing_socket();
+
+    if ((ssize_t)reqsz != rs.write(&req, reqsz)) {
+	XLOG_ERROR("write failed %s Attempting to delete %s",
+		   strerror(errno),
+	      f.str().c_str());
+	return false;
+    }
+    return true;
+}
+
+bool
+RoutingSocketFti::delete_all_entries4()
+{
+    if (in_configuration() == false)
+	return false;
+    
+    list<Fte4> rt;
+
+    make_routing_list(rt);
+    for (list<Fte4>::iterator e = rt.begin(); e != rt.end(); e++) {
+	delete_entry4(*e);
+    }
     return true;
 }
 
@@ -579,7 +579,7 @@ RoutingSocketFti::parse_route(struct rt_msghdr* hdr,
 	*/
 	if (RTF_HOST == (RTF_HOST & hdr->rtm_flags)) {
 	    debug_msg("RTF_HOST\n");
-	    netmask = IPv4(HOST_NETMASK);
+	    netmask = IPv4::ALL_ONES();
 	}
 
 	/*
@@ -664,8 +664,12 @@ RoutingSocketFti::parse_route(struct rt_msghdr* hdr,
 
     if (name.empty())
 	name = ifname(hdr->rtm_index);
-
-    fte = Fte4(IPv4Net(dst, netmask.prefix_length()), gateway, name, name);
+    
+    //
+    // TODO: define default routing metric and admin distance instead of ~0
+    //
+    fte = Fte4(IPv4Net(dst, netmask.prefix_length()), gateway, name, name,
+	       ~0, ~0);
 
     debug_msg("sock processing %s\n", fte.vifname().c_str());
 

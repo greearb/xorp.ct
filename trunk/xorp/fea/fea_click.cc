@@ -25,10 +25,9 @@
 #include "libxorp/mac.hh"
 #include "libxorp/ipvx.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "fti.hh"
+#include "fticonfig.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"
-#include "ifconfig_dummy.hh"
 #include "ifconfig_click.hh"
 #include "ifconfig_freebsd.hh"
 #include "click_glue.hh"
@@ -109,7 +108,7 @@ main(int argc, char *argv[])
 	    return 0;
 	}
 	fe = new ClickForwardingEngine(eventloop);
-    } catch(FtiError& xe) {
+    } catch(FtiConfigError& xe) {
 	XLOG_ERROR(c_format("%s from %s -> %s",
 			    xe.what().c_str(),
 			    xe.where().c_str(),
@@ -121,7 +120,7 @@ main(int argc, char *argv[])
     }
 
     Ifconfig& ifc = fe->ifconfig();
-    Fti& fti = fe->fti();
+    FtiConfig& ftic = fe->ftic();
 
     /*
     ** Attach to our ifmgr.
@@ -136,7 +135,7 @@ main(int argc, char *argv[])
     /*
     ** Add commands.
     */
-    XrlFeaTarget xft(eventloop, &fea, fti, ifmgr);
+    XrlFeaTarget xft(eventloop, &fea, ftic, ifmgr);
 
     try {
 	for (;;)

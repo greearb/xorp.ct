@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/click.cc,v 1.2 2003/03/10 23:20:13 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -30,7 +30,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "click.hh"
-#include "fti.hh"
+#include "fticonfig.hh"
 
 const char *Click::MOUNT_POINT = "/click";
 const char *Click::_config_file;
@@ -44,7 +44,7 @@ Click::Click()
 }
 
 Click::Click(const char *config_file, const char *click_module,
-	     const char *fea_module) throw(FtiError)
+	     const char *fea_module) throw(FtiConfigError)
 {
     _config_file = config_file;
     _click_module = click_module;

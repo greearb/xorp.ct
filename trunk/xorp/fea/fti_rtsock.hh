@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_rtsock.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/fti_rtsock.hh,v 1.2 2003/03/10 23:20:14 hodson Exp $
 
 #ifndef	__FEA_FTI_RTSOCK_HH__
 #define __FEA_FTI_RTSOCK_HH__
@@ -20,6 +20,8 @@
 #include <list>
 #include "libxorp/xorp.h"
 #include "rtsock.hh"
+
+#error "OBSOLETE FILE"
 
 class RoutingSocketFti : public Fti, public RoutingSocketObserver {
 public:

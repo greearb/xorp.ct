@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.2 2003/03/10 23:20:16 hodson Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
 
+#include "libxorp/xorp.h"
+
 #include <map>
 #include <string>
-
-#include "config.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -62,11 +62,11 @@ public:
 	if (bits(st) > 1) {
 	    return false;
 	}
-	if (st & (CREATED|DELETED)) {
+	if (st & (CREATED | DELETED)) {
 	    _st = st;
 	    return true;
 	}
-	if (_st & (CREATED|DELETED)) {
+	if (_st & (CREATED | DELETED)) {
 	    return true;
 	}
 	_st = st;
@@ -104,8 +104,7 @@ class IfTreeAddr6;
 /**
  * Container class for Fea Interface objects in a system.
  */
-class IfTree : public IfTreeItem
-{
+class IfTree : public IfTreeItem {
 public:
     typedef map<const string, IfTreeInterface> IfMap;
 
@@ -188,35 +187,34 @@ protected:
 /**
  * Fea class for holding physical interface state.
  */
-class IfTreeInterface : public IfTreeItem
-{
+class IfTreeInterface : public IfTreeItem {
 public:
     typedef map<const string, IfTreeVif> VifMap;
 
     IfTreeInterface(const string& ifname);
 
-    inline const string& name() const
-	{ return _ifname; }
+    inline const string& name() const	{ return _ifname; }
 
-    inline const string& ifname() const
-	{ return _ifname; }
+    inline const string& ifname() const	{ return _ifname; }
 
-    inline void set_enabled(bool en)
-	{ _en = en; mark(CHANGED); }
+    inline bool enabled() const		{ return _enabled; }
 
-    inline bool enabled() const
-	{ return _en; }
+    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
 
-    inline void set_mtu(uint32_t mtu) { _mtu = mtu; mark(CHANGED); }
+    inline uint32_t if_flags() const	{ return _if_flags; }
 
-    inline uint32_t mtu() const { return _mtu; }
+    inline void set_if_flags(uint32_t v) { _if_flags = v; }
 
-    inline void set_mac(const Mac& mac) { _mac = mac; mark(CHANGED); }
+    inline uint32_t mtu() const		{ return _mtu; }
 
-    inline const Mac& mac() const { return _mac; }
+    inline void set_mtu(uint32_t mtu)	{ _mtu = mtu; mark(CHANGED); }
 
-    inline const VifMap& vifs() const { return _vifs; }
-    inline VifMap& vifs() { return _vifs; }
+    inline const Mac& mac() const	{ return _mac; }
+
+    inline void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
+
+    inline const VifMap& vifs() const	{ return _vifs; }
+    inline VifMap& vifs()		{ return _vifs; }
 
     bool add_vif(const string& vifname);
 
@@ -234,6 +232,7 @@ public:
     inline void copy_state(const IfTreeInterface& o)
     {
 	set_enabled(o.enabled());
+	set_if_flags(o.if_flags());
 	set_mtu(o.mtu());
 	set_mac(o.mac());
     }
@@ -244,7 +243,8 @@ public:
 
 protected:
     const string _ifname;
-    bool 	 _en;
+    bool 	 _enabled;
+    uint32_t	 _if_flags;
     uint32_t 	 _mtu;
     Mac 	 _mac;
     VifMap	 _vifs;
@@ -260,23 +260,31 @@ public:
 
     IfTreeVif(const string& ifname, const string& vifname);
 
-    const string& ifname() const
-	{ return _ifname; }
+    const string& ifname() const	{ return _ifname; }
 
-    const string& vifname() const
-	{ return _vifname; }
+    const string& vifname() const	{ return _vifname; }
 
-    inline bool enabled() const
-	{ return _en; }
+    inline bool enabled() const		{ return _enabled; }
+    inline bool broadcast() const	{ return _broadcast; }
+    inline bool loopback() const	{ return _loopback; }
+    inline bool point_to_point() const	{ return _point_to_point; }
+    inline bool multicast() const	{ return _multicast; }
 
-    inline void set_enabled(bool en)
-	{ _en = en; mark(CHANGED); }
+    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
+    inline void set_broadcast(bool v)	{ _broadcast = v; mark(CHANGED); }
+    inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
+    inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
+    inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
 
-    inline const V4Map& v4addrs() const { return _v4addrs; }
-    inline V4Map& v4addrs() { return _v4addrs; }
+    inline uint32_t vif_flags() const	{ return _vif_flags; }
+
+    inline void set_vif_flags(uint32_t v) { _vif_flags = v; }
+
+    inline const V4Map& v4addrs() const	{ return _v4addrs; }
+    inline V4Map& v4addrs()		{ return _v4addrs; }
 
     inline const V6Map& v6addrs() const	{ return _v6addrs; }
-    inline V6Map& v6addrs() { return _v6addrs; }
+    inline V6Map& v6addrs()		{ return _v6addrs; }
 
     inline V4Map::iterator get_addr(const IPv4& a) { return _v4addrs.find(a); }
 
@@ -330,6 +338,11 @@ public:
     inline void copy_state(const IfTreeVif& o)
     {
 	set_enabled(o.enabled());
+	set_broadcast(o.broadcast());
+	set_loopback(o.loopback());
+	set_point_to_point(o.point_to_point());
+	set_multicast(o.multicast());
+	set_vif_flags(o.vif_flags());
     }
 
     void finalize_state();
@@ -339,7 +352,14 @@ public:
 protected:
     const string _ifname;
     const string _vifname;
-    bool 	 _en;
+
+    bool 	 _enabled;
+    bool	 _broadcast;
+    bool	 _loopback;
+    bool	 _point_to_point;
+    bool	 _multicast;
+    uint32_t	 _vif_flags;
+
     V4Map	 _v4addrs;
     V6Map	 _v6addrs;
 };
@@ -347,21 +367,36 @@ protected:
 /**
  * Class for holding an IPv4 interface address and address related items.
  */
-class IfTreeAddr4 : public IfTreeItem
-{
+class IfTreeAddr4 : public IfTreeItem {
 public:
     IfTreeAddr4(const IPv4& addr)
-	: IfTreeItem(), _addr(addr), _en(false), _flags(0), _prefix(0)
+	: IfTreeItem(), _addr(addr), _enabled(false), _broadcast(false),
+	  _loopback(false), _point_to_point(false), _multicast(false),
+	  _addr_flags(0), _prefix(0)
     {}
 
-    inline const IPv4& addr() const
-	{ return _addr; }
+    inline const IPv4& addr() const	{ return _addr; }
 
-    inline void set_enabled(bool en)
-	{ _en = en; mark(CHANGED); }
+    inline bool enabled() const		{ return _enabled; }
+    inline bool broadcast() const	{ return _broadcast; }
+    inline bool loopback() const	{ return _loopback; }
+    inline bool point_to_point() const	{ return _point_to_point; }
+    inline bool multicast() const	{ return _multicast; }
 
-    inline bool enabled() const
-	{ return _en; }
+    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
+    inline void set_broadcast(bool v)	{ _broadcast = v; mark(CHANGED); }
+    inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
+    inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
+    inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
+
+    inline uint32_t addr_flags() const	{ return _addr_flags; }
+
+    inline void set_addr_flags(uint32_t v) { _addr_flags = v; }
+
+    /**
+     * Get prefix associates with interface.
+     */
+    inline uint32_t prefix() const	{ return _prefix; }
 
     /**
      * Set prefix associate with interface.
@@ -370,16 +405,11 @@ public:
     bool set_prefix(uint32_t prefix);
 
     /**
-     * Get prefix associates with interface.
+     * Get the broadcast address.
+     * @return the broadcast address or IPv4::ZERO() if there is no
+     * broadcast address set.
      */
-    inline uint32_t prefix() const
-	{ return _prefix; }
-
-    /**
-     * Get flags associated with interface.
-     */
-    inline uint32_t flags() const
-	{ return _flags; }
+    IPv4 bcast() const;
 
     /**
      * Set the broadcast address.
@@ -392,7 +422,7 @@ public:
      * @return the broadcast address or IPv4::ZERO() if there is no
      * broadcast address set.
      */
-    IPv4 bcast() const;
+    IPv4 endpoint() const;
 
     /**
      * Set the endpoint address of a point-to-point link.
@@ -400,22 +430,21 @@ public:
      */
     void set_endpoint(const IPv4& eaddr);
 
-    /**
-     * Get the broadcast address.
-     * @return the broadcast address or IPv4::ZERO() if there is no
-     * broadcast address set.
-     */
-    IPv4 endpoint() const;
-
     void finalize_state();
 
     string str() const;
 
 protected:
     IPv4	_addr;
+
+    bool 	_enabled;
+    bool	_broadcast;
+    bool	_loopback;
+    bool	_point_to_point;
+    bool	_multicast;
+    uint32_t	_addr_flags;
+
     IPv4	_oaddr;	  /* Other address - p2p endpoint or bcast addr */
-    bool 	_en;
-    uint32_t	_flags;
     uint32_t	_prefix;
 };
 
@@ -426,14 +455,31 @@ class IfTreeAddr6 : public IfTreeItem
 {
 public:
     IfTreeAddr6(const IPv6& addr)
-	: IfTreeItem(), _addr(addr), _en(false), _flags(0), _prefix(0)
+	: IfTreeItem(), _addr(addr), _enabled(false),
+	  _loopback(false), _point_to_point(false), _multicast(false),
+	  _addr_flags(0), _prefix(0)
     {}
 
-    const IPv6& addr() const { return _addr; }
+    const IPv6& addr() const		{ return _addr; }
 
-    inline void set_enabled(bool en)		{ _en = en; mark(CHANGED); }
+    inline bool enabled() const		{ return _enabled; }
+    inline bool loopback() const	{ return _loopback; }
+    inline bool point_to_point() const	{ return _point_to_point; }
+    inline bool multicast() const	{ return _multicast; }
 
-    inline bool enabled() const			{ return _en; }
+    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
+    inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
+    inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
+    inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
+
+    inline uint32_t addr_flags() const	{ return _addr_flags; }
+
+    inline void set_addr_flags(uint32_t v) { _addr_flags = v; }
+
+    /**
+     * Get prefix associated with address.
+     */
+    inline uint32_t prefix() const	{ return _prefix; }
 
     /**
      * Set prefix associate with interface.
@@ -441,19 +487,9 @@ public:
      */
     bool set_prefix(uint32_t prefix);
 
-    /**
-     * Get prefix associated with address.
-     */
-    inline uint32_t prefix() const		{ return _prefix; }
-
-    /**
-     * Get flags associated with address.
-     */
-    inline uint32_t flags() const		{ return _flags; }
+    IPv6 endpoint() const;
 
     void set_endpoint(const IPv6& oaddr);
-
-    IPv6 endpoint() const;
 
     void finalize_state();
 
@@ -461,9 +497,14 @@ public:
 
 protected:
     IPv6	_addr;
+
+    bool 	_enabled;
+    bool	_loopback;
+    bool	_point_to_point;
+    bool	_multicast;
+    uint32_t	_addr_flags;
+
     IPv6	_oaddr;	  /* Other address - p2p endpoint */
-    bool 	_en;
-    uint32_t	_flags;
     uint32_t	_prefix;
 };
 

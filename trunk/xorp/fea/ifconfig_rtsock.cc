@@ -12,11 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.4 2003/02/24 04:37:42 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
 
-#define DEBUG_LOGGING
-
-#include "config.h"
+#error "OBSOLETE FILE"
 
 #include "fea_module.h"
 #include "libxorp/xlog.h"
@@ -24,34 +22,38 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ether_compat.h"
 
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/sysctl.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 #include <net/if.h>
 #include <net/if_dl.h>
 #include <net/if_var.h>
 #include <netinet/in.h>
 #include <netinet/in_var.h>
-#include <sys/sysctl.h>
-#include <sys/ioctl.h>
 
 #include <map>
 
 #include "iftree.hh"
 #include "ifconfig_rtsock.hh"
 
-/*
- * We are assuming a bsd style interface, per W. Richard Stevens Unix
- * Network Programming Volume 1 (2nd Edition).  The underlying
- * interface information might be described as incongruous to what
- * XORP uses and may be incongruous to other Unix systems.
- */
+//
+// We are assuming a bsd style interface, per W. Richard Stevens Unix
+// Network Programming Volume 1 (2nd Edition).  The underlying
+// interface information might be described as incongruous to what
+// XORP uses and may be incongruous to other Unix systems.
+//
 
-/* ------------------------------------------------------------------------- */
-/* Debug helpers */
+// -------------------------------------------------------------------------
+// Debug helpers
 
 /**
  * @param m message type from routing socket message
  * @return human readable form.
  */
-static const char*
+static string
 rtm_msg_type(uint32_t m)
 {
     struct {
@@ -59,57 +61,57 @@ rtm_msg_type(uint32_t m)
 	const char*	name;
     } rtm_msg_types[] = {
 #define RTM_MSG_ENTRY(X) { X, #X }
-#if defined(RTM_ADD)
+#ifdef RTM_ADD
 	RTM_MSG_ENTRY(RTM_ADD),
-#endif /* RTM_ADD */
-#if defined(RTM_DELETE)
+#endif
+#ifdef RTM_DELETE
 	RTM_MSG_ENTRY(RTM_DELETE),
-#endif /* RTM_DELETE */
-#if defined(RTM_CHANGE)
+#endif
+#ifdef RTM_CHANGE
 	RTM_MSG_ENTRY(RTM_CHANGE),
-#endif /* RTM_CHANGE */
-#if defined(RTM_GET)
+#endif
+#ifdef RTM_GET
 	RTM_MSG_ENTRY(RTM_GET),
-#endif /* RTM_GET */
-#if defined(RTM_LOSING)
+#endif
+#ifdef RTM_LOSING
 	RTM_MSG_ENTRY(RTM_LOSING),
-#endif /* RTM_LOSING */
-#if defined(RTM_REDIRECT)
+#endif
+#ifdef RTM_REDIRECT
 	RTM_MSG_ENTRY(RTM_REDIRECT),
-#endif /* RTM_REDIRECT */
-#if defined(RTM_MISS)
+#endif
+#ifdef RTM_MISS
 	RTM_MSG_ENTRY(RTM_MISS),
-#endif /* RTM_MISS */
-#if defined(RTM_LOCK)
+#endif
+#ifdef RTM_LOCK
 	RTM_MSG_ENTRY(RTM_LOCK),
-#endif /* RTM_LOCK */
-#if defined(RTM_OLDADD)
+#endif
+#ifdef RTM_OLDADD
 	RTM_MSG_ENTRY(RTM_OLDADD),
-#endif /* RTM_OLDADD */
-#if defined(RTM_OLDDEL)
+#endif
+#ifdef RTM_OLDDEL
 	RTM_MSG_ENTRY(RTM_OLDDEL),
-#endif /* RTM_OLDDEL */
-#if defined(RTM_RESOLVE)
+#endif
+#ifdef RTM_RESOLVE
 	RTM_MSG_ENTRY(RTM_RESOLVE),
-#endif /* RTM_RESOLVE */
-#if defined(RTM_NEWADDR)
+#endif
+#ifdef RTM_NEWADDR
 	RTM_MSG_ENTRY(RTM_NEWADDR),
-#endif /* RTM_NEWADDR */
-#if defined(RTM_DELADDR)
+#endif
+#ifdef RTM_DELADDR
 	RTM_MSG_ENTRY(RTM_DELADDR),
-#endif /* RTM_DELADDR */
-#if defined(RTM_IFINFO)
+#endif
+#ifdef RTM_IFINFO
 	RTM_MSG_ENTRY(RTM_IFINFO),
-#endif /* RTM_IFINFO */
-#if defined(RTM_NEWMADDR)
+#endif
+#ifdef RTM_NEWMADDR
 	RTM_MSG_ENTRY(RTM_NEWMADDR),
-#endif /* RTM_NEWMADDR */
-#if defined(RTM_DELMADDR)
+#endif
+#ifdef RTM_DELMADDR
 	RTM_MSG_ENTRY(RTM_DELMADDR),
-#endif /* RTM_DELMADDR */
-#if defined(RTM_IFANNOUNCE)
+#endif
+#ifdef RTM_IFANNOUNCE
 	RTM_MSG_ENTRY(RTM_IFANNOUNCE),
-#endif /* RTM_IFANNOUNCE */
+#endif
 	{ ~0, "Unknown" }
     };
     const size_t n_rtm_msgs = sizeof(rtm_msg_types) / sizeof(rtm_msg_types[0]);
@@ -127,66 +129,66 @@ rtm_msg_type(uint32_t m)
  * @param flags interface flags value from routing socket message.
  * @return ifconfig like flags string
  */
-static
-string iff_flags(uint32_t flags)
+static string
+iff_flags(uint32_t flags)
 {
     struct {
 	uint32_t 	value;
 	const char*	name;
     } iff_fl[] = {
 #define IFF_FLAG_ENTRY(X) { IFF_##X, #X }
-#if defined(IFF_UP)
+#ifdef IFF_UP
 	IFF_FLAG_ENTRY(UP),
-#endif /* IFF_UP */
-#if defined(IFF_BROADCAST)
+#endif
+#ifdef IFF_BROADCAST
 	IFF_FLAG_ENTRY(BROADCAST),
-#endif /* IFF_BROADCAST */
-#if defined(IFF_DEBUG)
+#endif
+#ifdef IFF_DEBUG
 	IFF_FLAG_ENTRY(DEBUG),
-#endif /* IFF_DEBUG */
-#if defined(IFF_LOOPBACK)
+#endif
+#ifdef IFF_LOOPBACK
 	IFF_FLAG_ENTRY(LOOPBACK),
-#endif /* IFF_LOOPBACK */
-#if defined(IFF_POINTOPOINT)
+#endif
+#ifdef IFF_POINTOPOINT
 	IFF_FLAG_ENTRY(POINTOPOINT),
-#endif /* IFF_POINTOPOINT */
-#if defined(IFF_SMART)
+#endif
+#ifdef IFF_SMART
 	IFF_FLAG_ENTRY(SMART),
-#endif /* IFF_SMART */
-#if defined(IFF_RUNNING)
+#endif
+#ifdef IFF_RUNNING
 	IFF_FLAG_ENTRY(RUNNING),
-#endif /* IFF_RUNNING */
-#if defined(IFF_NOARP)
+#endif
+#ifdef IFF_NOARP
 	IFF_FLAG_ENTRY(NOARP),
-#endif /* IFF_NOARP */
-#if defined(IFF_PROMISC)
+#endif
+#ifdef IFF_PROMISC
 	IFF_FLAG_ENTRY(PROMISC),
-#endif /* IFF_PROMISC */
-#if defined(IFF_ALLMULTI)
+#endif
+#ifdef IFF_ALLMULTI
 	IFF_FLAG_ENTRY(ALLMULTI),
-#endif /* IFF_ALLMULTI */
-#if defined(IFF_OACTIVE)
+#endif
+#ifdef IFF_OACTIVE
 	IFF_FLAG_ENTRY(OACTIVE),
-#endif /* IFF_OACTIVE */
-#if defined(IFF_SIMPLEX)
+#endif
+#ifdef IFF_SIMPLEX
 	IFF_FLAG_ENTRY(SIMPLEX),
-#endif /* IFF_SIMPLEX */
-#if defined(IFF_LINK0)
+#endif
+#ifdef IFF_LINK0
 	IFF_FLAG_ENTRY(LINK0),
-#endif /* IFF_LINK0 */
-#if defined(IFF_LINK1)
+#endif
+#ifdef IFF_LINK1
 	IFF_FLAG_ENTRY(LINK1),
-#endif /* IFF_LINK1 */
-#if defined(IFF_LINK2)
+#endif
+#ifdef IFF_LINK2
 	IFF_FLAG_ENTRY(LINK2),
-#endif /* IFF_LINK2 */
-#if defined(IFF_ALTPHYS)
+#endif
+#ifdef IFF_ALTPHYS
 	IFF_FLAG_ENTRY(ALTPHYS),
-#endif /* IFF_ALTPHYS */
-#if defined(IFF_MULTICAST)
+#endif
+#ifdef IFF_MULTICAST
 	IFF_FLAG_ENTRY(MULTICAST),
-#endif /* IFF_MULTICAST */
-	{ 0, "" }  /* for nitty compilers that don't like trailing "," */
+#endif
+	{ 0, "" }  // for nitty compilers that don't like trailing ","
     };
     const size_t n_iff_fl = sizeof(iff_fl) / sizeof(iff_fl[0]);
 
@@ -204,11 +206,12 @@ string iff_flags(uint32_t flags)
     return ret;
 }
 
-/* ------------------------------------------------------------------------- */
-/* We cache our own associative array of interface names to interface index
- * because the genius who implemented RTM_IFANNOUNCE calls RTM_IFANNOUNCE
- * after deleting the interface name from the kernel.
- */
+// -------------------------------------------------------------------------
+//
+// We cache our own associative array of interface names to interface index
+// because the genius who implemented RTM_IFANNOUNCE calls RTM_IFANNOUNCE
+// after deleting the interface name from the kernel.
+//
 
 static class Index2IfnameResolver {
     typedef map<uint32_t, string> IfIndex2NameMap;
@@ -249,17 +252,20 @@ protected:
 IfConfigRoutingSocket::IfConfigRoutingSocket(RoutingSocket&		  rs,
 					     IfConfigUpdateReporterBase&  ur,
 					     SimpleIfConfigErrorReporter& er)
-    : RoutingSocketObserver(rs), IfConfig(ur, er)
+    : RoutingSocketObserver(rs), IfConfig(ur, er),
+      _s4(-1), _s6(-1)
 {
     _s4 = socket(AF_INET, SOCK_DGRAM, 0);
     if (_s4 < 0) {
-	XLOG_FATAL("Could not initizialize socket for IPv4 configuration.");
+	XLOG_FATAL("Could not initialize socket for IPv4 configuration.");
     }
 
+#ifdef HAVE_IPV6
     _s6 = socket(AF_INET6, SOCK_DGRAM, 0);
     if (_s6 < 0) {
-	XLOG_FATAL("Could not initizialize socket for IPv6 configuration.");
+	XLOG_FATAL("Could not initialize socket for IPv6 configuration.");
     }
+#endif // HAVE_IPV6
 
     read_config(_live_config);
     _live_config.finalize_state();
@@ -270,9 +276,9 @@ IfConfigRoutingSocket::IfConfigRoutingSocket(RoutingSocket&		  rs,
 
 IfConfigRoutingSocket::~IfConfigRoutingSocket()
 {
-    if (_s4 > 0)
+    if (_s4 >= 0)
 	close(_s4);
-    if (_s6 > 0)
+    if (_s6 >= 0)
 	close(_s6);
 }
 
@@ -314,24 +320,27 @@ IfConfigRoutingSocket::read_config(IfTree& it)
 
     mib[0] = CTL_NET;
     mib[1] = PF_ROUTE;
-    mib[2] = 0;			/* protocol number - always 0 */
-    mib[3] = 0;			/* Address family */
+    mib[2] = 0;			// protocol number - always 0
+    mib[3] = PF_UNSPEC;		// Address family: any (XXX: always true?)
     mib[4] = NET_RT_IFLIST;
-    mib[5] = 0;			/* no flags */
+    mib[5] = 0;			// no flags
 
+    // Get the table size
     size_t sz;
-    if (0 != sysctl(mib, 6, NULL, &sz, NULL , 0)) {
+    if (0 != sysctl(mib, sizeof(mib)/sizeof(mib[0]), NULL, &sz, NULL , 0)) {
 	XLOG_ERROR("sysctl failed: %s", strerror(errno));
 	return false;
     }
 
     uint8_t ifdata[sz];
 
-    if (0 != sysctl(mib, 6, ifdata, &sz, NULL , 0)) {
+    // Get the data
+    if (0 != sysctl(mib, sizeof(mib)/sizeof(mib[0]), ifdata, &sz, NULL , 0)) {
 	XLOG_ERROR("sysctl failed: %s", strerror(errno));
 	return false;
     }
 
+    // Parse the result
     parse_buffer(it, ifdata, sz);
 
     return true;
@@ -370,7 +379,7 @@ static void
 rtm_ifinfo_to_fea_cfg(const if_msghdr*  ifm,
 		      IfTree&	it)
 {
-    assert(RTM_IFINFO == ifm->ifm_type);
+    XLOG_ASSERT(RTM_IFINFO == ifm->ifm_type);
 
     debug_msg("%p index %d RTM_IFINFO\n", ifm, ifm->ifm_index);
 
@@ -409,7 +418,7 @@ rtm_ifinfo_to_fea_cfg(const if_msghdr*  ifm,
     const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(sock);
 
     string ifname;
-    if (sdl->sdl_nlen) {
+    if (sdl->sdl_nlen > 0) {
 	ifname = string(sdl->sdl_data, sdl->sdl_nlen);
 	if_resolver.map_ifindex(ifm->ifm_index, ifname);
 	/* XXX At this point we should give up and re-read everything from
@@ -433,10 +442,9 @@ rtm_ifinfo_to_fea_cfg(const if_msghdr*  ifm,
     ii->second.set_enabled(ifm->ifm_flags && IFF_UP);
     debug_msg("%s flags %s\n",
 	      ifname.c_str(), iff_flags(ifm->ifm_flags).c_str());
-    /* vifname == ifname on this platform */
+    // XXX: vifname == ifname on this platform
     ii->second.add_vif(ifname);
-    IfTreeInterface::VifMap::iterator vi =
-	ii->second.get_vif(ifname);
+    IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(ifname);
     vi->second.set_enabled(true);
 }
 
@@ -518,7 +526,7 @@ rtm_addr_to_fea_cfg(const if_msghdr*	ifm,
 	fv->add_addr(a);
 
 	IfTreeVif::V4Map::iterator ai = fv->get_addr(a);
-	ai->second.set_enabled(true);	/* XXX check flags for UP? */
+	ai->second.set_enabled(true);	// XXX check flags for UP?
 
 	if (rti_info[RTAX_NETMASK]) {
 	    // Special case netmask 0 can have zero length
@@ -537,26 +545,27 @@ rtm_addr_to_fea_cfg(const if_msghdr*	ifm,
 	    } else if (ifa->ifam_flags & IFF_POINTOPOINT) {
 		ai->second.set_endpoint(o);
 	    } else {
-		/* We end up here, which is confusing on FBSD 4.6.2 */
+		// We end up here, which is confusing on FBSD 4.6.2
 		debug_msg("Assuming this %s with flags 0x%08x is bcast\n",
 			  o.str().c_str(), ifa->ifam_flags);
 		ai->second.set_bcast(o);
 	    }
 	}
 
-	/* Mark as deleted if necessary */
+	// Mark as deleted if necessary
 	if (RTM_DELADDR == ifa->ifam_type)
 	    ai->second.mark(IfTreeItem::DELETED);
 
 	return;
     }
 
+#ifdef HAVE_IPV6
     if (AF_INET6 == rti_info[RTAX_IFA]->sa_family) {
 	IPv6 a(*rti_info[RTAX_IFA]);
 	fv->add_addr(a);
 
 	IfTreeVif::V6Map::iterator ai = fv->get_addr(a);
-	ai->second.set_enabled(true);	/* XXX check flags for UP? */
+	ai->second.set_enabled(true);	// XXX check flags for UP?
 
 	if (rti_info[RTAX_NETMASK]) {
 	    IPv6 netmask(*rti_info[RTAX_NETMASK]);
@@ -579,9 +588,10 @@ rtm_addr_to_fea_cfg(const if_msghdr*	ifm,
 
 	return;
     }
+#endif // HAVE_IPV6
 }
 
-#if defined(RTM_IFANNOUNCE)
+#ifdef RTM_IFANNOUNCE
 void
 rtm_announce_to_fea_cfg(const if_msghdr* ifm, IfTree& it)
 {
@@ -591,7 +601,30 @@ rtm_announce_to_fea_cfg(const if_msghdr* ifm, IfTree& it)
     debug_msg("RTM_IFANNOUNCE %s\n",
 	      (ifan->ifan_what == IFAN_DEPARTURE) ? "DEPARTURE" : "ARRIVAL");
 
-    if (IFAN_DEPARTURE == ifan->ifan_what) {
+    switch (ifan->ifan_what) {
+    case IFAN_ARRIVAL:
+    {
+	//
+	// Add interface
+	//
+	debug_msg("Mapping %d -> %s\n", ifan->ifan_index, ifan->ifan_name);
+	if_resolver.map_ifindex(ifan->ifan_index, ifan->ifan_name);
+
+	it.add_if(ifan->ifan_name);
+	IfTreeInterface* fi = get_if(it, ifan->ifan_name);
+	if (fi) {
+	    fi->add_vif(ifan->ifan_name);
+	} else {
+	    debug_msg("Could not add interface/vif %s\n", ifan->ifan_name);
+	}
+	break;
+    }
+	
+    case IFAN_DEPARTURE:
+    {
+	//
+	// Delete interface
+	//
 	debug_msg("Deleting interface and vif named: %s\n", ifan->ifan_name);
 	IfTreeInterface* fi = get_if(it, ifan->ifan_name);
 	if (fi) {
@@ -608,20 +641,15 @@ rtm_announce_to_fea_cfg(const if_msghdr* ifm, IfTree& it)
 		      ifan->ifan_name);
 	}
 	if_resolver.unmap_ifindex(ifan->ifan_index);
-    } else if (IFAN_ARRIVAL == ifan->ifan_what) {
-	debug_msg("Mapping %d -> %s\n", ifan->ifan_index, ifan->ifan_name);
-	if_resolver.map_ifindex(ifan->ifan_index, ifan->ifan_name);
-
-	it.add_if(ifan->ifan_name);
-	IfTreeInterface* fi = get_if(it, ifan->ifan_name);
-	if (fi) {
-	    fi->add_vif(ifan->ifan_name);
-	} else {
-	    debug_msg("Could not add interface/vif %s\n", ifan->ifan_name);
-	}
+	break;
+    }
+	
+    default:
+	debug_msg("Unknown RTM_IFANNOUNCE message type %d\n", ifan->ifan_what);
+	break;
     }
 }
-#endif /* RTM_IFANNOUNCE */
+#endif // RTM_IFANNOUNCE
 
 bool
 IfConfigRoutingSocket::parse_buffer(IfTree&	   it,
@@ -653,12 +681,12 @@ IfConfigRoutingSocket::parse_buffer(IfTree&	   it,
 	    rtm_addr_to_fea_cfg(ifm, it);
 	    recognized = true;
 	    break;
-#if defined(RTM_IFANNOUNCE)
+#ifdef RTM_IFANNOUNCE
 	case RTM_IFANNOUNCE:
 	    rtm_announce_to_fea_cfg(ifm, it);
 	    recognized = true;
 	    break;
-#endif /* RTM_IFANNOUNCE */
+#endif // RTM_IFANNOUNCE
 	case RTM_ADD:
 	case RTM_MISS:
 	case RTM_CHANGE:
@@ -668,8 +696,9 @@ IfConfigRoutingSocket::parse_buffer(IfTree&	   it,
 	    break;
 	default:
 	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
-		      rtm_msg_type(ifm->ifm_type), ifm->ifm_type,
+		      rtm_msg_type(ifm->ifm_type).c_str(), ifm->ifm_type,
 		      ifm->ifm_msglen);
+	    break;
 	}
     }
     return recognized;
@@ -781,20 +810,6 @@ protected:
 };
 
 /**
- * helper function to dump IPv4 address into sockaddr.
- */
-inline void
-ipv4_to_sockaddr(const IPv4& ipv4, sockaddr& sa)
-{
-    sockaddr_in& sin = reinterpret_cast<sockaddr_in&>(sa);
-
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_len = sizeof(sockaddr_in);
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = ipv4.addr();
-}
-
-/**
  * @short class to set IPv4 interface addresses
  */
 class IfSetAddr4 : public IfIoctl {
@@ -803,9 +818,9 @@ public:
 	       const IPv4& addr, const IPv4& dst_or_bcast, size_t prefix)
 	: IfIoctl(fd) {
 	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	ipv4_to_sockaddr(addr, _ifra.ifra_addr);
-	ipv4_to_sockaddr(dst_or_bcast, _ifra.ifra_broadaddr);
-	ipv4_to_sockaddr(IPv4::make_prefix(prefix), _ifra.ifra_mask);
+	addr.copy_out(_ifra.ifra_addr);
+	dst_or_bcast.copy_out(_ifra.ifra_broadaddr);
+	IPv4::make_prefix(prefix).copy_out(_ifra.ifra_mask);
 	debug_msg("IfSetAddr4 "
 		  "(fd = %d, ifname = %s, addr = %s, dst %s, prefix %d)\n",
 		  fd, ifname.c_str(),
@@ -826,7 +841,7 @@ public:
     IfDelAddr4(int fd, const string& ifname, const IPv4& addr)
 	: IfIoctl(fd) {
 	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	ipv4_to_sockaddr(addr, _ifra.ifra_addr);
+	addr.copy_out(_ifra.ifra_addr);
 	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s)\n",
 		  fd, ifname.c_str(), addr.str().c_str());
     }
@@ -838,26 +853,6 @@ protected:
 };
 
 /**
- * helper function to dump IPv6 address into sockaddr.
- */
-inline void
-ipv6_to_sockaddr6(const IPv6& ipv6, sockaddr_in6& sin6)
-{
-    memset(&sin6, 0, sizeof(sin6));
-#ifdef HAVE_SIN6_LEN
-    sin6.sin6_len = sizeof(sin6);
-#endif /* HAVE_SIN6_LEN */
-    sin6.sin6_family = AF_INET6;
-    memcpy(&sin6.sin6_addr.s6_addr, ipv6.addr(), 16);
-}
-
-inline void
-ipv6_to_sockaddr(const IPv6& ipv6, sockaddr& sa)
-{
-    ipv6_to_sockaddr6(ipv6, reinterpret_cast<sockaddr_in6&>(sa));
-}
-
-/**
  * @short class to set IPv6 interface addresses
  */
 class IfSetAddr6 : public IfIoctl {
@@ -867,12 +862,12 @@ public:
 	: IfIoctl(fd) {
 	memset(&_ifra, 0, sizeof(_ifra));
 	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	ipv6_to_sockaddr6(addr, _ifra.ifra_addr);
+	addr.copy_out(_ifra.ifra_addr);
 
 	if (IPv6::ZERO() != endpoint)
-	    ipv6_to_sockaddr6(endpoint, _ifra.ifra_dstaddr);
+	    endpoint.copy_out(_ifra.ifra_dstaddr);
 
-	ipv6_to_sockaddr6(IPv6::make_prefix(prefix), _ifra.ifra_prefixmask);
+	IPv6::make_prefix(prefix).copy_out(_ifra.ifra_prefixmask);
 
 	// the following should use ND6_INFINITE_LIFETIME
 	_ifra.ifra_lifetime.ia6t_vltime = _ifra.ifra_lifetime.ia6t_pltime = ~0;
@@ -898,7 +893,7 @@ class IfDelAddr6 : public IfIoctl {
 public:
     IfDelAddr6(int fd, const string& ifname, const IPv6& addr) : IfIoctl(fd) {
 	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	ipv6_to_sockaddr(addr, _ifra.ifra_addr);
+	addr.copy_out(_ifra.ifra_addr);
 	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s)\n",
 		  fd, ifname.c_str(), addr.str().c_str());
     }
@@ -1192,12 +1187,15 @@ IfConfigRoutingSocket::push_config(const IfTree& it)
 		    push_addr(i, v, a);
 	    }
 
+#ifdef HAVE_IPV6
 	    IfTreeVif::V6Map::const_iterator a6i;
 	    for (a6i = v.v6addrs().begin(); a6i != v.v6addrs().end(); ++a6i) {
 		const IfTreeAddr6& a = a6i->second;
 		if (a.state() != IfTreeItem::NO_CHANGE)
 		    push_addr(i, v, a);
 	    }
+#endif // HAVE_IPV6
+
 	    push_vif(i, v);
 	}
 	push_if(i);

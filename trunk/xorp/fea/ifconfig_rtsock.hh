@@ -12,10 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_rtsock.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/ifconfig_rtsock.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_RTSOCK_HH__
 #define __FEA_IFCONFIG_RTSOCK_HH__
+
+#error "OBSOLETE FILE"
 
 #include "rtsock.hh"
 #include "ifconfig.hh"

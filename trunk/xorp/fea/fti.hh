@@ -12,10 +12,12 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/fti.hh,v 1.2 2003/03/10 23:20:13 hodson Exp $
 
 #ifndef	__FEA_FTI_HH__
 #define __FEA_FTI_HH__
+
+#error "OBSOLETE FILE"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -27,39 +29,45 @@
 /**
  * @short Forwarding Table Entry.
  *
- * Representation of a routing table entry.
+ * Representation of a forwarding table entry.
  */
-
 template<typename A>
-class Fte
-{
+class Fte {
 public:
     Fte() { zero(); }
     Fte(const IPNet<A>&	net,
-	const A&	gw,
+	const A&	gateway,
 	const string&	ifname,
-	const string&	vifname) :
-	_net(net), _gw(gw), _ifname(ifname), _vifname(vifname) {}
+	const string&	vifname,
+	uint32_t	metric,
+	uint32_t	admin_distance) :
+	_net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
+	_metric(metric), _admin_distance(admin_distance) {}
     Fte(IPNet<A> net) : _net(net) {}
 
-    inline const IPNet<A>& net() const		{ return _net; }
-    inline const A& gateway() const 		{ return _gw; }
-    inline const string& ifname() const		{ return _ifname; }
-    inline const string& vifname() const	{ return _vifname; }
+    const IPNet<A>& net() const		{ return _net; }
+    const A& gateway() const 		{ return _gateway; }
+    const string& ifname() const	{ return _ifname; }
+    const string& vifname() const	{ return _vifname; }
+    uint32_t metric() const		{ return _metric; }
+    uint32_t admin_distance() const	{ return _admin_distance; }
 
     /**
      * reset all members
      */
     void zero() {
 	_net = IPNet<A>(A::ZERO(), 0);
-	_gw = A::ZERO();
+	_gateway = A::ZERO();
+	_ifname.erase();
 	_vifname.erase();
+	_metric = 0;
+	_admin_distance = 0;
     }
 
     /**
      * @return true if this is a host route.
      */
-    inline bool host_route() const {
+    inline bool is_host_route() const {
  	return _net.prefix_len() == A::addr_bitlen();
     }
 
@@ -69,15 +77,20 @@ public:
      * dst = 127.0.0.1 gateway = 127.0.0.1 netmask = 255.255.255.255 if = lo0
      */
     string str() const {
-	return string("net = " + _net.str() + " gateway = " + _gw.str() +
-		      " ifname = " + _ifname + " vifname = " + _vifname);
+	return c_format("net = %s gateway = %s ifname = %s vifname = %s "
+			"metric = %u admin_distance = %u",
+			_net.str().c_str(), _gateway.str().c_str(),
+			_ifname.c_str(), _vifname.c_str(),
+			_metric, _admin_distance);
     }
 
 private:
     IPNet<A>	_net;		// Network
-    A		_gw; 		// Gateway address
+    A		_gateway; 	// Gateway address
     string	_ifname;
     string	_vifname;
+    uint32_t	_metric;
+    uint32_t	_admin_distance;
 };
 
 typedef Fte<IPv4> Fte4;
@@ -189,6 +202,14 @@ public:
     virtual bool delete_entry6(const Fte6& fte) = 0;
 
     /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true if the routing table has been emptied.
+     */
+    virtual bool delete_all_entries6() = 0;
+
+    /**
      * Lookup a route.
      *
      * @param dst address to resolve.
@@ -206,14 +227,6 @@ public:
      * @return true if lookup suceeded.
      */
     virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte) = 0;
-
-    /**
-     * Delete all entries in the routing table. Must be within a
-     * configuration interval.
-     *
-     * @return true if the routing table has been emptied.
-     */
-    virtual bool delete_all_entries6() = 0;
 
 protected:
     /**
@@ -240,8 +253,8 @@ protected:
 	    return true;
 	}
 	return false;
-    }    
-	
+    }
+    
     inline bool in_configuration() const { return _in_configuration; }
 
 private:
@@ -251,8 +264,8 @@ private:
 class FtiError :  public XorpReasonedException {
 public:
     FtiError(const char* file, size_t line, const string init_why)
- 	: XorpReasonedException("FtiError", file, line, init_why)
-    {}
+	: XorpReasonedException("FtiError", file, line, init_why)
+	{}
 };
 
 #endif	// __FEA_FTI_HH__

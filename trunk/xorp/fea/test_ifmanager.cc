@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifmanager.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/fea/test_ifmanager.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
 
 #include <algorithm>
 #include <functional>
@@ -30,8 +30,6 @@
 #include "libxorp/mac.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"
-#include "ifconfig_dummy.hh"
-#include "ifconfig_rtsock.hh"
 
 const char ipv6_address[] = "::280:c8ff:feb9:3f5d";
 

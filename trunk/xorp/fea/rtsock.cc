@@ -12,7 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rtsock.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/rtsock.cc,v 1.2 2003/03/10 23:20:16 hodson Exp $"
+
+#error "OBSOLETE FILE"
+
+#include "fea_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include <algorithm>
 
@@ -22,38 +29,54 @@
 #include <net/if.h>
 #include <net/route.h>
 #include <errno.h>
-#include <sys/filio.h>
 
-#include "config.h"
-#include "fea_module.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
 #include "rtsock.hh"
-#include "fti.hh"
+
 
 uint16_t RoutingSocket::_instance_cnt = 0;
 pid_t RoutingSocket::_pid = getpid();
 
-/* ------------------------------------------------------------------------- */
-/* Routing Socket related */
+//
+// Routing Sockets communication with the kernel
+//
 
-RoutingSocket::RoutingSocket(EventLoop& e, int af) throw(FtiError) :
-    _e(e), _seqno(0),
-    _instance_no(_instance_cnt++)
+#ifndef HAVE_ROUTING_SOCKETS
+
+RoutingSocket::RoutingSocket(EventLoop& e)
+    : _e(e),
+      _fd(-1),
+      _seqno(0),
+      _instance_no(_instance_cnt++)
 {
-    _fd = socket(PF_ROUTE, SOCK_RAW, af);
-    if (_fd < 0) {
-	xorp_throw(FtiError,
-		   c_format("Could not open routing socket: %s",
-			    strerror(errno)));
-    }
+    
+}
 
-    if (e.add_selector(_fd, SEL_RD,
-		       callback(this, &RoutingSocket::select_hook)) == false) {
-	XLOG_ERROR("Failed to add routing socket to EventLoop");
-	close(_fd);
-	_fd = -1;
-    }
+RoutingSocket::~RoutingSocket()
+{
+    
+}
+
+int
+RoutingSocket::start(int )
+{
+    return (XORP_ERROR);
+}
+
+int
+RoutingSocket::stop()
+{
+    return (XORP_ERROR);
+}
+
+#else // HAVE_ROUTING_SOCKETS
+
+RoutingSocket::RoutingSocket(EventLoop& e)
+    : _e(e),
+      _fd(-1),
+      _seqno(0),
+      _instance_no(_instance_cnt++)
+{
+    
 }
 
 RoutingSocket::~RoutingSocket()
@@ -62,10 +85,50 @@ RoutingSocket::~RoutingSocket()
     assert(_ol.empty());
 }
 
+int
+RoutingSocket::start(int af)
+{
+    if (_fd >= 0) {
+	XLOG_ERROR("Cound not start routing socket operation: "
+		   "already started");
+	return (XORP_ERROR);
+    }
+
+    //
+    // Open the socket
+    //
+    _fd = socket(AF_ROUTE, SOCK_RAW, af);
+    if (_fd < 0) {
+	XLOG_ERROR("Could not open routing socket: %s", strerror(errno));
+	return (XORP_ERROR);
+    }
+    
+    //
+    // Add the socket to the event loop
+    //
+    if (_e.add_selector(_fd, SEL_RD,
+			callback(this, &RoutingSocket::select_hook))
+	== false) {
+	XLOG_ERROR("Failed to add routing socket to EventLoop");
+	close(_fd);
+	_fd = -1;
+    }
+    
+    return (XORP_OK);
+}
+
+int
+RoutingSocket::stop()
+{
+    shutdown();
+    
+    return (XORP_OK);
+}
+
 void
 RoutingSocket::shutdown()
 {
-    if (_fd != -1) {
+    if (_fd >= 0) {
 	_e.remove_selector(_fd, SEL_ALL);
 	close(_fd);
 	_fd = -1;
@@ -82,18 +145,37 @@ RoutingSocket::write(const void* data, size_t nbytes)
 void
 RoutingSocket::force_read()
 {
-    ssize_t got = read(_fd, _buffer, RTSOCK_BYTES);
-    if (got < 0) {
-	    XLOG_ERROR("Routing socket read error.");
+    ssize_t got = 0;
+    
+    for ( ; ; ) {
+	got = read(_fd, _buffer, RTSOCK_BYTES);
+	if (got < 0) {
+	    if (errno == EINTR)
+		continue;
+	    XLOG_ERROR("Routing socket read error: %s", strerror(errno));
 	    shutdown();
 	    return;
+	}
+	if (got < (ssize_t)sizeof(struct if_msghdr)) {
+	    XLOG_ERROR("Routing socket read failed: message truncated : "
+		       "received %d bytes instead of (at least) %u bytes",
+		       got, (uint32_t)sizeof(struct if_msghdr));
+	    shutdown();
+	    return;
+	}
+	
+	//
+	// Received message (probably) OK
+	//
+	const if_msghdr* mh = reinterpret_cast<if_msghdr*>(_buffer);
+	XLOG_ASSERT(mh->ifm_msglen <= RTSOCK_BYTES);
+	XLOG_ASSERT(mh->ifm_msglen == got);
+	break;
     }
-
-    const if_msghdr* mh = reinterpret_cast<if_msghdr*>(_buffer);
-    assert(mh->ifm_msglen <= RTSOCK_BYTES);
-    assert(mh->ifm_msglen == got);
-
+    
+    //
     // Notify observers
+    //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
 	(*i)->rtsock_data(_buffer, got);
     }
@@ -107,8 +189,11 @@ RoutingSocket::select_hook(int fd, SelectorMask m)
     force_read();
 }
 
-/* ------------------------------------------------------------------------- */
-/* Plumbing */
+#endif // HAVE_ROUTING_SOCKETS
+
+//
+// Observe routing sockets activity
+//
 
 struct RoutingSocketPlumber {
     typedef RoutingSocket::ObserverList ObserverList;
@@ -135,9 +220,6 @@ struct RoutingSocketPlumber {
     }
 };
 
-/* ------------------------------------------------------------------------- */
-/* Routing Socket Observer */
-
 RoutingSocketObserver::RoutingSocketObserver(RoutingSocket& rs)
     : _rs(rs)
 {
@@ -154,3 +236,4 @@ RoutingSocketObserver::routing_socket()
 {
     return _rs;
 }
+

@@ -1,14 +1,41 @@
 #
-# $XORP: xorp/fea/TODO,v 1.12 2002/12/09 12:47:45 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
 #
 
-o Add UDP interfaces for sending and receiving.
+* Rename rtsock.hh and rtsock.cc to routing_socket.hh and routing_socket.cc
+  respectively.
 
-o Resurrect click based FEA.
+* When obtaining the forwarding table from the kernel,
+  do we need to take special care of the
+  (rtm->rtm_flags & RTF_LLINFO) entries? (see the mfea code for that).
 
-o Write native Linux (netlink) based FEA.
+* Explicitly enable forwarding with sysctlbyname("net.inet.ip.forwarding"),
+  or whatever other mechanism exists:
+    size_t enable = 1;
+    sysctlbyname("net.inet.ip.forwarding", 0, 0, &enable, sizeof(enable))
 
-o The following files inside "fea" are not used?
+* Remove FEA_BUILD_RTSOCK from top-level configure.in
+
+* Make sure that the interfaces in the interface tree are deleted properly
+  whenever the underlying interfaces in the kernel change. E.g.,
+  especially be careful in case an interface disappears, and immediately
+  after that a new interface with different name but same interface index
+  appears. In that case, we need to update properly the local cache
+  that maps interface names to indexes.
+
+* Use bool to return error: true if no error, otherwise false. (??)
+
+* Write a test program.
+
+* Add dummy mechanisms to get/set/observe interface information.
+
+* Add UDP interfaces for sending and receiving.
+
+* Resurrect click based FEA.
+
+* Write native Linux (netlink) based FEA.
+
+* The following files inside "fea" are not used?
   click.hh click_glue.hh fti_click.hh ifconfig_click.hh
   click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
   Keep them or remove?

@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.5 2003/03/29 19:03:09 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.6 2003/04/11 22:26:08 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
 
 #include "xrl/targets/fea_base.hh"
 
-#include "fti.hh"
+#include "fticonfig.hh"
 
 #include "xrl_fti.hh"
 #include "xrl_ifmanager.hh"
@@ -30,7 +30,7 @@ class XrlFeaTarget : public XrlFeaTargetBase {
 public:
     XrlFeaTarget(EventLoop&			e,
 		 XrlRouter&			rtr,
-		 Fti& 				fti,
+		 FtiConfig& 			ftic,
 		 InterfaceManager& 		ifmgr,
 		 XrlIfConfigUpdateReporter&	ifupd,
 		 XrlRawSocket4Manager*		xrsm = 0);

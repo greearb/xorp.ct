@@ -14,7 +14,7 @@
 
 #ident "$XORP: xorp/fea/test_fea.cc,v 1.3 2003/03/10 23:20:17 hodson Exp $"
 
-/* XXX THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
+/* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
 #include "config.h"
 #include "fea_module.h"
