@@ -1730,6 +1730,7 @@ AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
+[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -2084,6 +2085,7 @@ Local Preference Attribute - 300
 
 
 [ADD]
+PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
@@ -2372,7 +2374,6 @@ Local Preference Attribute - 200
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.1 BECOMES RESOLVABLE
-[PUSH]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -2382,6 +2383,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
+[PUSH]
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
