@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.35 2003/08/12 18:24:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.36 2003/08/13 07:34:47 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -4690,6 +4690,9 @@ XrlPimNode::pim_0_1_pimstat_neighbors4(
 	}
     } while (false);
     
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
+    
     nbrs_number = 0;
     
     for (uint16_t i = 0; i < PimNode::maxvifs(); i++) {
@@ -4709,20 +4712,24 @@ XrlPimNode::pim_0_1_pimstat_neighbors4(
 	    nbrs_number++;
 	    vifs.append(XrlAtom(pim_vif->name()));
 	    addresses.append(XrlAtom(pim_vif->addr_ptr()->get_ipv4()));
-	    pim_versions.append(XrlAtom(pim_nbr->proto_version()));
+	    pim_versions.append(XrlAtom((int32_t)pim_nbr->proto_version()));
 	    if (pim_nbr->is_dr_priority_present())
-		dr_priorities.append(XrlAtom(pim_nbr->dr_priority()));
+		dr_priorities.append(XrlAtom((int32_t)pim_nbr->dr_priority()));
 	    else
-		dr_priorities.append(XrlAtom(-1));
-	    holdtimes.append(XrlAtom(pim_nbr->hello_holdtime()));
+		dr_priorities.append(XrlAtom((int32_t)-1));
+	    holdtimes.append(XrlAtom((int32_t)pim_nbr->hello_holdtime()));
 	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
 		TimeVal tv_left;
 		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
-		timeouts.append(XrlAtom(tv_left.sec()));
+		timeouts.append(XrlAtom((int32_t)tv_left.sec()));
 	    } else {
-		timeouts.append(XrlAtom(-1));
+		timeouts.append(XrlAtom((int32_t)-1));
 	    }
-	    uptimes.append(XrlAtom(-1));
+	    
+	    TimeVal startup_time = pim_nbr->startup_time();
+	    TimeVal delta_time = now - startup_time;
+	    
+	    uptimes.append(XrlAtom((int32_t)delta_time.sec()));
 	}
     }
     
@@ -4761,7 +4768,10 @@ XrlPimNode::pim_0_1_pimstat_neighbors6(
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     } while (false);
-
+    
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
+    
     nbrs_number = 0;
     
     for (uint16_t i = 0; i < PimNode::maxvifs(); i++) {
@@ -4781,20 +4791,24 @@ XrlPimNode::pim_0_1_pimstat_neighbors6(
 	    nbrs_number++;
 	    vifs.append(XrlAtom(pim_vif->name()));
 	    addresses.append(XrlAtom(pim_vif->addr_ptr()->get_ipv6()));
-	    pim_versions.append(XrlAtom(pim_nbr->proto_version()));
+	    pim_versions.append(XrlAtom((int32_t)pim_nbr->proto_version()));
 	    if (pim_nbr->is_dr_priority_present())
-		dr_priorities.append(XrlAtom(pim_nbr->dr_priority()));
+		dr_priorities.append(XrlAtom((int32_t)pim_nbr->dr_priority()));
 	    else
-		dr_priorities.append(XrlAtom(-1));
-	    holdtimes.append(XrlAtom(pim_nbr->hello_holdtime()));
+		dr_priorities.append(XrlAtom((int32_t)-1));
+	    holdtimes.append(XrlAtom((int32_t)pim_nbr->hello_holdtime()));
 	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
 		TimeVal tv_left;
 		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
-		timeouts.append(XrlAtom(tv_left.sec()));
+		timeouts.append(XrlAtom((int32_t)tv_left.sec()));
 	    } else {
-		timeouts.append(XrlAtom(-1));
+		timeouts.append(XrlAtom((int32_t)-1));
 	    }
-	    uptimes.append(XrlAtom(-1));
+	    
+	    TimeVal startup_time = pim_nbr->startup_time();
+	    TimeVal delta_time = now - startup_time;
+	    
+	    uptimes.append(XrlAtom((int32_t)delta_time.sec()));
 	}
     }
     
@@ -4973,9 +4987,9 @@ XrlPimNode::pim_0_1_pimstat_rps4(
 	
 	addresses.append(XrlAtom(pim_rp->rp_addr().get_ipv4()));
 	types.append(XrlAtom(rp_type));
-	priorities.append(XrlAtom(pim_rp->rp_priority()));
-	holdtimes.append(XrlAtom(holdtime));
-	timeouts.append(XrlAtom(left_sec));
+	priorities.append(XrlAtom((int32_t)pim_rp->rp_priority()));
+	holdtimes.append(XrlAtom((int32_t)holdtime));
+	timeouts.append(XrlAtom((int32_t)left_sec));
 	group_prefixes.append(XrlAtom(pim_rp->group_prefix().get_ipv4net()));
     }
 	 
@@ -5060,9 +5074,9 @@ XrlPimNode::pim_0_1_pimstat_rps6(
 	
 	addresses.append(XrlAtom(pim_rp->rp_addr().get_ipv6()));
 	types.append(XrlAtom(rp_type));
-	priorities.append(XrlAtom(pim_rp->rp_priority()));
-	holdtimes.append(XrlAtom(holdtime));
-	timeouts.append(XrlAtom(left_sec));
+	priorities.append(XrlAtom((int32_t)pim_rp->rp_priority()));
+	holdtimes.append(XrlAtom((int32_t)holdtime));
+	timeouts.append(XrlAtom((int32_t)left_sec));
 	group_prefixes.append(XrlAtom(pim_rp->group_prefix().get_ipv6net()));
     }
     
