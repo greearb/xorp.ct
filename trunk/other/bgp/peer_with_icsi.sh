@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: other/bgp/peer_with_icsi.sh,v 1.2 2003/08/27 21:04:02 atanu Exp $
+# $XORP: other/bgp/peer_with_icsi.sh,v 1.3 2003/08/27 22:43:36 atanu Exp $
 #
 
 #
@@ -43,8 +43,8 @@ MY_NAME=$LOCALHOST
 MY_PORT=9000
 NEXT_HOP=$MY_IP
 
-BORDER_ROUTER_NAME=xorp-c4000.icir.org
-BORDER_ROUTER_AS=65000
+BORDER_ROUTER_NAME=router3-fast1-0-0
+BORDER_ROUTER_AS=64999
 BORDER_ROUTER_PORT=179
 
 TEST_PEER_AS=65001

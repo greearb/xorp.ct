@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: other/bgp/collect.sh,v 1.1 2003/01/31 03:45:27 atanu Exp $
+# $XORP: other/bgp/collect.sh,v 1.2 2003/09/17 03:36:51 atanu Exp $
 #
 
 #
@@ -24,7 +24,7 @@ else
     exit 2
 fi
 
-BORDER_ROUTER_NAME=xorp-c4000.icir.org
+BORDER_ROUTER_NAME=router3-fast1-0-0
 BORDER_ROUTER_PORT=179
 
 TRAFFIC=/tmp/xorp_bgp_traffic.mrtd
@@ -38,7 +38,7 @@ TREETOP=${PWD}/../../xorp
 start_processes()
 {
     (cd $TREETOP 
-    for i in libxipc/finder "bgp/harness/test_peer -s peer1 -v" \
+    for i in libxipc/xorp_finder "bgp/harness/test_peer -s peer1" \
 		bgp/harness/coord
     do
 	xterm -e $i &
@@ -57,7 +57,7 @@ test_peer()
     $TEST_FUNCS coord target $BORDER_ROUTER_NAME $BORDER_ROUTER_PORT
     $TEST_FUNCS coord initialise attach peer1
     
-    $TEST_FUNCS coord peer1 establish AS $MY_AS holdtime 0 id 192.150.187.100
+#    $TEST_FUNCS coord peer1 establish AS $MY_AS holdtime 0 id 192.150.187.100
 
     $TEST_FUNCS coord peer1 dump recv mrtd ipv4 traffic $TRAFFIC
     $TEST_FUNCS coord peer1 dump sent mrtd ipv4 traffic $TRAFFIC
