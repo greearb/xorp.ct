@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.12 2003/12/19 20:30:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.13 2004/01/05 23:45:42 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -27,11 +27,6 @@
 #include "command_tree.hh"
 #include "util.hh"
 
-// #define DEBUG_TEMPLATE_PARSER
-
-extern int init_template_parser(const char* filename, TemplateTree* c);
-extern int parse_template();
-extern void tplterror(const char* s);
 
 TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
 				   TemplateTreeNode* parent,
