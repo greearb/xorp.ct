@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.56 2004/12/14 22:43:11 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.57 2004/12/17 01:07:33 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -200,6 +200,7 @@ libfea_la_SOURCES	+= netlink_socket_utils.hh
 libfea_la_SOURCES	+= nexthop_port_mapper.hh
 libfea_la_SOURCES	+= pa_backend.hh
 libfea_la_SOURCES	+= pa_backend_dummy.hh
+libfea_la_SOURCES	+= pa_backend_ipfw2.hh
 libfea_la_SOURCES	+= pa_entry.hh
 libfea_la_SOURCES	+= pa_table.hh
 libfea_la_SOURCES	+= pa_transaction.hh
@@ -292,6 +293,7 @@ libfea_la_SOURCES	+= netlink_socket.cc
 libfea_la_SOURCES	+= netlink_socket_utils.cc
 libfea_la_SOURCES	+= nexthop_port_mapper.cc
 libfea_la_SOURCES	+= pa_backend_dummy.cc
+libfea_la_SOURCES	+= pa_backend_ipfw2.cc
 libfea_la_SOURCES	+= pa_entry.cc
 libfea_la_SOURCES	+= pa_table.cc
 libfea_la_SOURCES	+= pa_transaction.cc

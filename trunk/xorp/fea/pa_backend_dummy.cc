@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/pa_backend_dummy.cc,v 1.1 2004/12/10 14:40:16 bms Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -70,7 +70,7 @@ PaDummyBackend::delete_all_entries4()
 }
 
 const PaBackend::Snapshot4*
-PaDummyBackend::create_snapshot4() const
+PaDummyBackend::create_snapshot4()
 {
     return (new PaDummyBackend::Snapshot4());
 }

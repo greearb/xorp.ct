@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/pa_backend_dummy.hh,v 1.1 2004/12/10 14:40:16 bms Exp $
 
 #ifndef __FEA_PA_BACKEND_DUMMY_HH__
 #define __FEA_PA_BACKEND_DUMMY_HH__
@@ -73,7 +73,7 @@ public:
 
     bool push_entries4(const PaSnapshot4* snap);
     bool delete_all_entries4();
-    const PaBackend::Snapshot4* create_snapshot4() const;
+    const PaBackend::Snapshot4* create_snapshot4();
     bool restore_snapshot4(const PaBackend::Snapshot4* snap);
 
 #ifdef notyet
@@ -82,7 +82,7 @@ public:
 
     bool push_entries6(const PaSnapshot6* snap);
     bool delete_all_entries6();
-    const PaBackend::Snapshot6* create_snapshot6() const;
+    const PaBackend::Snapshot6* create_snapshot6();
     bool restore_snapshot6(const PaBackend::Snapshot6* snap);
 #endif
 };
