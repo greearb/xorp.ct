@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.38 2004/09/08 08:32:44 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.39 2004/09/08 10:15:30 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -164,6 +164,9 @@ libfea_a_SOURCES	+= mfea_module.h
 libfea_a_SOURCES	+= addr_table.hh
 libfea_a_SOURCES	+= firewall.hh
 libfea_a_SOURCES	+= firewall_dummy.hh
+libfea_a_SOURCES	+= firewall_ipf.hh
+libfea_a_SOURCES	+= firewall_ipfw.hh
+libfea_a_SOURCES	+= firewall_iptables.hh
 libfea_a_SOURCES	+= fte.hh
 libfea_a_SOURCES	+= fti.hh
 libfea_a_SOURCES	+= fti_transaction.hh
@@ -208,6 +211,10 @@ libfea_a_SOURCES	+= xrl_socket_server.hh
 libfea_a_SOURCES	+= xrl_target.hh
 
 libfea_a_SOURCES	+= addr_table.cc
+libfea_a_SOURCES	+= firewall.cc
+libfea_a_SOURCES	+= firewall_ipf.cc
+libfea_a_SOURCES	+= firewall_ipfw.cc
+#libfea_a_SOURCES	+= firewall_iptables.cc
 libfea_a_SOURCES	+= fti_transaction.cc
 libfea_a_SOURCES	+= fticonfig.cc
 libfea_a_SOURCES	+= fticonfig_entry_get.cc
