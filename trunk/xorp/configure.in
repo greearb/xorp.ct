@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.13 2003/04/02 22:58:53 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.17 2003/04/12 01:22:57 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -189,12 +189,6 @@ dnl ----------------------------
 
 builtin(include, config/acxorp.m4)
  
-dnl --------------------------------------
-dnl  Get macro to compare program versions 
-dnl --------------------------------------
-
-builtin(include, config/acversion.m4)
-
 dnl ---------------------------------------------------------------------------
 dnl Additional tool probes
 dnl ---------------------------------------------------------------------------
