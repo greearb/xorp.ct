@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.7 2003/05/30 03:12:07 mjh Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.8 2003/06/02 21:57:48 atanu Exp $
 #
 
 #
@@ -95,7 +95,43 @@ bgp_not_established()
 {
     while ../tools/print_peers -v | grep 'Peer State: ESTABLISHED'
     do
-	:
+	sleep 1
+    done
+}
+
+bgp_updates_received()
+{
+    ../tools/print_peers  -v |
+    grep "Updates Received" | awk "NR == $1 {print \$3}"  | sed 's/,//'
+}
+
+bgp_all_updates_received()
+{
+    rec1=a
+    rec2=b
+    until [ $rec1 == $rec2 ]
+    do
+	rec1=$(bgp_updates_received $1)
+	sleep 1
+	rec2=$(bgp_updates_received $1)
+    done
+}
+
+bgp_updates_sent()
+{
+    ../tools/print_peers  -v |
+    grep "Updates Sent" | awk "NR == $1 {print \$6}"
+}
+
+bgp_all_updates_sent()
+{
+    rec1=a
+    rec2=b
+    until [ $rec1 == $rec2 ]
+    do
+	rec1=$(bgp_updates_sent $1)
+	sleep 1
+	rec2=$(bgp_updates_sent $1)
     done
 }
 
@@ -137,7 +173,6 @@ test2()
     # Reset the peers
     reset
     
-    sleep 5
     # Establish the EBGP peering.
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
     coord peer2 assert established
@@ -145,10 +180,14 @@ test2()
     # send in the saved file
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
+    # Wait for the file to be transmitted by the test peer.
     while pending | grep true
     do
 	sleep 1
     done
+
+    # Wait for the BGP process to receive all the updates
+    bgp_all_updates_received 2
 
     # Bring up another peering to test the dump code.
     for i in 1 2
@@ -156,20 +195,19 @@ test2()
 	coord reset
 	coord target $HOST $PORT1
 	coord initialise attach peer1
-	sleep 5
+
 	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
 	coord peer1 assert established
 
-	sleep 10
+	# Wait for the BGP process to send all the updates
+	bgp_all_updates_sent 1
     done
 
     coord target $HOST $PORT2
     coord initialise attach peer2
-    sleep 5
+
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
     coord peer2 assert established
-
-    sleep 60
 
     # Make sure that the connections are still established.
     coord peer1 assert established
