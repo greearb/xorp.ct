@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.7 2003/06/05 02:39:36 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.8 2003/10/13 23:32:40 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -324,16 +324,6 @@ private:
      * @return true on success, otherwise false.
      */
     virtual bool lookup_route(const IPvX& dst, FteX& fte);
-
-    /**
-     * Lookup entry.
-     *
-     * @param dst network address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
-     */
-    virtual bool lookup_entry(const IPvXNet& dst, FteX& fte);
 
     NetlinkSocketReader	_ns_reader;
 };

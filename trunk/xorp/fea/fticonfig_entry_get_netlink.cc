@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.11 2003/10/13 02:05:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.12 2003/10/13 23:32:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -125,16 +125,21 @@ FtiConfigEntryGetNetlink::lookup_route4(const IPv4& dst, Fte4& fte)
 bool
 FtiConfigEntryGetNetlink::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 {
-    FteX ftex(dst.af());
-    bool ret_value = false;
-    
-    ret_value = lookup_entry(IPvXNet(dst), ftex);
-    
-    fte = Fte4(ftex.net().get_ipv4net(), ftex.gateway().get_ipv4(),
-	       ftex.ifname(), ftex.vifname(), ftex.metric(),
-	       ftex.admin_distance(), ftex.xorp_route());
-    
-    return (ret_value);
+    list<Fte4> fte_list4;
+
+    if (ftic().get_table4(fte_list4) != true)
+	return (false);
+
+    list<Fte4>::iterator iter4;
+    for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) {
+	Fte4& fte4 = *iter4;
+	if (fte4.net() == dst) {
+	    fte = fte4;
+	    return (true);
+	}
+    }
+
+    return (false);
 }
 
 /**
@@ -171,28 +176,27 @@ FtiConfigEntryGetNetlink::lookup_route6(const IPv6& dst, Fte6& fte)
 bool
 FtiConfigEntryGetNetlink::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 { 
-    FteX ftex(dst.af());
-    bool ret_value = false;
-    
-    ret_value = lookup_entry(IPvXNet(dst), ftex);
-    
-    fte = Fte6(ftex.net().get_ipv6net(), ftex.gateway().get_ipv6(),
-	       ftex.ifname(), ftex.vifname(), ftex.metric(),
-	       ftex.admin_distance(), ftex.xorp_route());
-    
-    return (ret_value);
+    list<Fte6> fte_list6;
+
+    if (ftic().get_table6(fte_list6) != true)
+	return (false);
+
+    list<Fte6>::iterator iter6;
+    for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) {
+	Fte6& fte6 = *iter6;
+	if (fte6.net() == dst) {
+	    fte = fte6;
+	    return (true);
+	}
+    }
+
+    return (false);
 }
 
 #ifndef HAVE_NETLINK_SOCKETS
 
 bool
 FtiConfigEntryGetNetlink::lookup_route(const IPvX& , FteX& )
-{
-    return false;
-}
-
-bool
-FtiConfigEntryGetNetlink::lookup_entry(const IPvXNet& , FteX& )
 {
     return false;
 }
@@ -302,22 +306,6 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
 	return (false);
     }
     return (true);
-}
-
-/**
- * Lookup entry.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
-FtiConfigEntryGetNetlink::lookup_entry(const IPvXNet& dst, FteX& fte)
-{
-    // TODO: XXX: PAVPAVPAV: implement it if Linux supports
-    // lookup by network prefix, otherwise just use "lookup_route()"
-    return (lookup_route(dst.masked_addr(), fte));
 }
 
 #endif // HAVE_NETLINK_SOCKETS
