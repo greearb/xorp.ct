@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.12 2004/05/28 22:28:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.13 2004/06/10 22:41:56 hodson Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -42,7 +42,7 @@ public:
 		       RandomGen& randgen, Rtrmgr& rtrmgr);
     ~XrlRtrmgrInterface();
 
-    void set_conf_tree(MasterConfigTree* v) { _conf_tree = v; }
+    void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
 
     XrlCmdError common_0_1_get_target_name(// Output values,
 					   string& name);
@@ -174,7 +174,7 @@ private:
     multimap<uint32_t, UserInstance*> _users;
     multimap<uint32_t, UserInstance*> _config_users;
     UserDB&		_userdb;
-    MasterConfigTree*	_conf_tree;
+    MasterConfigTree*	_master_config_tree;
     EventLoop&		_eventloop;
     RandomGen&		_randgen;
     Rtrmgr&             _rtrmgr;

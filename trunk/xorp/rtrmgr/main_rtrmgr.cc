@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.49 2004/05/28 22:27:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.50 2004/06/10 22:41:52 hodson Exp $"
 
 #include <signal.h>
 
@@ -267,10 +267,10 @@ Rtrmgr::run()
 				    _verbose);
 	//
 	// XXX: note that theoretically we may receive an XRL before
-	// we call XrlRtrmgrInterface::set_conf_tree().
+	// we call XrlRtrmgrInterface::set_master_config_tree().
 	// For now we ignore that possibility...
 	//
-	xrt.set_conf_tree(_mct);
+	xrt.set_master_config_tree(_mct);
 
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
