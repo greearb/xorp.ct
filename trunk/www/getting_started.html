@@ -463,11 +463,13 @@ protocols {
 	    /* holdtime: 120 */
 	    /* disable: false */
 
-	    /* Optionally enable other AFI/SAFI combinations */
-	    /* enable-ipv4-multicast */
+	    /* IPv4 unicast is enabled by default */
+	    /* ipv4-unicast: true */
 
-            /* enable-ipv6-unicast */
-            /* enable-ipv6-multicast */
+	    /* Optionally enable other AFI/SAFI combinations */
+	    /* ipv4-multicast: true */
+            /* ipv6-unicast: true */
+            /* ipv6-multicast: true */
 	}
 
 	/* Originate IPv4 Routes */
@@ -844,7 +846,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.10 2005/02/24 00:04:48 atanu Exp $.
-<br>Generated on 24/Mar/2005 at 20:37:13.</em>
+<br>Generated on 24/Mar/2005 at 21:08:08.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
