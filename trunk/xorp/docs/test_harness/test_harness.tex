@@ -102,10 +102,11 @@ might be sent from a test script to a \coordinator. It is assumed that
 before the script is sent that all the processes are already running.
 One important point to note is that due to the asynchronous nature of
 XRLs a command returning does not necessarily mean that it has
-completed successfully. In the XORP test scripts there are delays
-between certain operations. This example show the \coordinator being
-{\em reset}, then its given the hostname and port number of the BGP
-process under test. Then the \coordinator attaches to the two
+completed successfully. A {\em pending} method is available that can
+be used to test if all outstanding commands have completed. This
+example show the \coordinator being {\em reset}, then its given the
+hostname and port number of the BGP process under test. Then the
+\coordinator attaches to the two
 \testpeers peer1 and peer2, these are the XRL target names by which the
 \testpeers are known. The majority of the commands are sent to the
 \testpeers themselves. In order to send a command to a \testpeer the
@@ -179,8 +180,7 @@ peer1 assert queue 0
 
 Each {\em peer} has two tries associated with it, a sent and a
 received trie. Each update packet that is sent to, or received from,
-the BGP process is passed to the appropriate trie. The update packet
-is processed and saved if it contains any NLRI's. Update packets
+the BGP process is passed to the appropriate trie.  Update packets
 containing only WITHDRAWs are not saved at this time. At this time two
 types of {\em lookups} can be performed on a trie (Figure
 \ref{prog:trie_lookup}). If a {\em lookup} fails then an error is
@@ -356,7 +356,7 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   Verify that a session has actually been established. Some tests can pass
   without a BGP process being present. These tests require this interface.
 
-\item {\sf dump $<$recv/sent$>$ $<$mtrd/text$>$ $<$traffic/routeview/current/debug$>$ $<$filename$>$}
+\item {\sf dump $<$recv/sent$>$ $<$mtrd/text$>$ $<$ipv4/ipv6$>$ $<$traffic/routeview/replay/debug$>$ $<$filename$>$}
 
   A mechanism for saving conversations or dumping routing tables. The
   received and sent cases can be dealt with independently. Four types
@@ -374,13 +374,11 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
 
         The current state of the routing table.
 
-        \item Current.
+        \item Replay
 
         Trawls through the routing table and dumps all the update
         packets that have caused entries in the routing table. The
-        packets are dumped in the order in which they arrived. This is
-        only an approximation as update packets containing only
-        withdraws will not be saved.
+        packets are dumped in the order in which they arrived.
 
         \item Debug.
 
@@ -476,7 +474,6 @@ the test peer.
 
 \begin{itemize}
 \item Constructing corrupted packets.
-\item Dumping current and routeviews.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
