@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.10 2003/03/08 20:56:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.11 2003/03/09 02:01:17 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -143,7 +143,7 @@ public:
 			 finder, _key, 
 			 callback(this, &FinderNGClientQuery::query_callback))
 		) {
-	    _qcb->dispatch(XrlError::SEND_FAILED(), 0);
+	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	    XLOG_ERROR("Failed on send_resolve_xrl");
 	    finder_trace_result("failed (send)");
 	    client().notify_failed(this);
