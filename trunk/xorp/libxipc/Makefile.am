@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.39 2004/11/23 22:43:44 bms Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.40 2004/12/08 17:56:23 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -139,7 +139,6 @@ libxipc_la_SOURCES += hmac_md5.c
 libxipc_la_SOURCES += finder_client.cc
 libxipc_la_SOURCES += finder_client_observer.cc
 libxipc_la_SOURCES += finder_client_xrl_target.cc
-libxipc_la_SOURCES += finder_constants.cc
 libxipc_la_SOURCES += finder_messenger.cc
 libxipc_la_SOURCES += finder_msgs.cc
 libxipc_la_SOURCES += finder_tcp.cc
@@ -186,7 +185,6 @@ libfinder_la_SOURCES += finder_xrl_queue.hh
 libfinder_la_SOURCES += finder_xrl_target.hh
 
 libfinder_la_SOURCES += finder.cc
-libfinder_la_SOURCES += finder_constants.cc
 libfinder_la_SOURCES += finder_server.cc
 libfinder_la_SOURCES += finder_xrl_queue.cc
 libfinder_la_SOURCES += finder_xrl_target.cc
