@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.26 2003/06/26 00:26:17 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.27 2003/09/10 18:06:03 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -133,8 +133,11 @@ mk_instance_name(EventLoop& e, const char* classname)
 
 
 
+
 // ----------------------------------------------------------------------------
 // XrlRouter code
+
+uint32_t XrlRouter::_icnt = 0;
 
 void
 XrlRouter::initialize(const char* class_name,
@@ -153,6 +156,9 @@ XrlRouter::initialize(const char* class_name,
     if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
 	XLOG_FATAL("Failed to register target %s\n", class_name);
     }
+    if (_icnt == 0)
+	XrlPFSenderFactory::startup();
+    _icnt++;
 }
 
 XrlRouter::XrlRouter(EventLoop&  e,
@@ -162,7 +168,6 @@ XrlRouter::XrlRouter(EventLoop&  e,
     throw (InvalidAddress)
     : XrlDispatcher(class_name), _e(e)
 {
-
     IPv4 finder_ip = finder_addr ? finder_host(finder_addr)
 	: FINDER_DEFAULT_HOST;
     if (0 == finder_port)
@@ -190,7 +195,7 @@ XrlRouter::~XrlRouter()
     _fac->set_enabled(false);
 
     while (_senders.empty() == false) {
-	delete _senders.front();
+	XrlPFSenderFactory::destroy_sender(_senders.front());
 	_senders.pop_front();
     }
 
@@ -202,6 +207,10 @@ XrlRouter::~XrlRouter()
     delete _fac;
     delete _fxt;
     delete _fc;
+    _icnt--;
+    if (_icnt == 0)
+	XrlPFSenderFactory::shutdown();
+
 }
 
 bool
@@ -275,14 +284,15 @@ XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
 void
 XrlRouter::send_callback(const XrlError& e,
 			 XrlArgs*	 reply,
-			 XrlPFSender*	 sender,
+			 XrlPFSender*	 s,
 			 XrlCallback	 user_callback)
 {
-    list<XrlPFSender*>::iterator i;
-    i = find(_senders.begin(), _senders.end(), sender);
+    list<XrlPFSender*>::iterator i = find(_senders.begin(), _senders.end(), s);
     XLOG_ASSERT(i != _senders.end());
     _senders.erase(i);
-    delete sender;
+
+    XrlPFSenderFactory::destroy_sender(s);
+
     user_callback->dispatch(e, reply);
 }
 
@@ -293,9 +303,9 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 {
     try {
 	Xrl x(dbe->values().front().c_str());
-	XrlPFSender* s = XrlPFSenderFactory::create(_e,
-						    x.protocol().c_str(),
-						    x.target().c_str());
+	XrlPFSender* s = XrlPFSenderFactory::create_sender(
+				_e, x.protocol().c_str(), x.target().c_str()
+				);
 	Xrl tmp(xrl);
 	x.args().swap(tmp.args());
 	if (s) {
@@ -319,7 +329,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     list<XrlRouterDispatchState*>::iterator i;
     i = find(_dsl.begin(), _dsl.end(), ds);
     _dsl.erase(i);
-    
+
     if (e == XrlError::OKAY()) {
 	send_resolved(ds->xrl(), dbe, ds->cb());
     } else {

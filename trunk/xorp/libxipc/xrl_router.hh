@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.22 2003/06/26 00:26:17 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.23 2003/09/10 21:42:05 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -154,9 +154,11 @@ protected:
     FinderTcpAutoConnector*	_fac;
     string			_instance_name;
 
-    list<XrlPFListener*>	_listeners;
-    list<XrlRouterDispatchState*> _dsl;
-    list<XrlPFSender*>		_senders;
+    list<XrlPFListener*>	_listeners;		// listeners
+    list<XrlRouterDispatchState*> _dsl;			// dispatch state
+    list<XrlPFSender*>		_senders;		// active senders
+
+    static uint32_t		_icnt;			// instance count
 };
 
 #endif // __LIBXIPC_XRL_ROUTER_HH__
