@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.13 2003/05/29 21:17:15 mjh Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.14 2003/05/31 06:45:57 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -961,8 +961,8 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
 	
 	if (is_invalid_family) {
 	    // Invalid address family
-	    string msg = string("Received protocol message with invalid "
-				"address family: IPv4");
+	    string msg = c_format("Received protocol message with invalid "
+				  "address family: IPv4");
 	    return XrlCmdError::COMMAND_FAILED(msg);
 	}
     } while (false);
@@ -1028,8 +1028,8 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
 	
 	if (is_invalid_family) {
 	    // Invalid address family
-	    string msg = string("Received protocol message with invalid "
-				"address family: IPv6");
+	    string msg = c_format("Received protocol message with invalid "
+				  "address family: IPv6");
 	    return XrlCmdError::COMMAND_FAILED(msg);
 	}
     } while (false);
@@ -1364,8 +1364,8 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 	
 	if (is_invalid_family) {
 	    // Invalid address family
-	    string msg = string("Received protocol message with invalid "
-				"address family: IPv4");
+	    string msg = c_format("Received protocol message with invalid "
+				  "address family: IPv4");
 	    return XrlCmdError::COMMAND_FAILED(msg);
 	}
     } while (false);
@@ -1450,8 +1450,8 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 	
 	if (is_invalid_family) {
 	    // Invalid address family
-	    string msg = string("Received protocol message with invalid "
-				"address family: IPv6");
+	    string msg = c_format("Received protocol message with invalid "
+				  "address family: IPv6");
 	    return XrlCmdError::COMMAND_FAILED(msg);
 	}
     } while (false);
@@ -1532,8 +1532,8 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
 	
 	if (is_invalid_family) {
 	    // Invalid address family
-	    string msg = string("Received protocol message with invalid "
-				"address family: IPv4");
+	    string msg = c_format("Received protocol message with invalid "
+				  "address family: IPv4");
 	    return XrlCmdError::COMMAND_FAILED(msg);
 	}
     } while (false);
@@ -1588,8 +1588,8 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
 	
 	if (is_invalid_family) {
 	    // Invalid address family
-	    string msg = string("Received protocol message with invalid "
-				"address family: IPv6");
+	    string msg = c_format("Received protocol message with invalid "
+				  "address family: IPv6");
 	    return XrlCmdError::COMMAND_FAILED(msg);
 	}
     } while (false);
