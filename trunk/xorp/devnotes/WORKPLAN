@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/devnotes/WORKPLAN,v 1.1 2002/12/13 01:35:45 pavlin Exp $
 #
 
 Priority:
@@ -71,3 +71,6 @@ Longer Term tasks
 * Simulation-like environment for running XORP		H Defer	PR  3-6 months
 * Rewrite CLI						L	PR  2-3 weeks
 
+================================ Next Release ==============================
+* Next release: February-March, 2003
+  - gcc-3.x support
