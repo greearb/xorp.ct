@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.7 2003/09/11 23:36:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.8 2003/09/12 23:44:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -430,7 +430,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	
 	mib[0] = CTL_NET;
 	mib[1] = AF_INET;
-	mib[2] = IPPROTO_IP;	
+	mib[2] = IPPROTO_IP;
 	mib[3] = IPCTL_FORWARDING;
 	
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
@@ -639,7 +639,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	
 	mib[0] = CTL_NET;
 	mib[1] = AF_INET;
-	mib[2] = IPPROTO_IP;	
+	mib[2] = IPPROTO_IP;
 	mib[3] = IPCTL_FORWARDING;
 	
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
@@ -720,8 +720,8 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	int mib[4];
 	
 	mib[0] = CTL_NET;
-	mib[1] = AF_INET;
-	mib[2] = IPPROTO_IP;	
+	mib[1] = AF_INET6;
+	mib[2] = IPPROTO_IPV6;
 	mib[3] = IPV6CTL_FORWARDING;
 	
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
@@ -813,8 +813,8 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	int mib[4];
 	
 	mib[0] = CTL_NET;
-	mib[1] = AF_INET;
-	mib[2] = IPPROTO_IP;	
+	mib[1] = AF_INET6;
+	mib[2] = IPPROTO_IPV6;
 	mib[3] = IPV6CTL_ACCEPT_RTADV;
 	
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
