@@ -60,6 +60,7 @@ Input = INPUT_STATE_MRIB_S_CHANGED
         OUTPUT_STATE_MRIB_S_SG_RPT                                (S,G,rpt)
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_S                              (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_NOT_ASSERT                           (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
@@ -94,6 +95,7 @@ Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED
         OUTPUT_STATE_UPDATE_SPTBIT_MFC                                (MFC)
 
 Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_S                              (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_NOT_ASSERT                           (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)

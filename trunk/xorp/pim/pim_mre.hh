@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.36 2004/06/10 22:41:30 hodson Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.37 2004/07/26 08:40:20 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -216,6 +216,7 @@ public:
     void	recompute_rpfp_nbr_wc_not_assert_changed();
     void	recompute_rpfp_nbr_wc_gen_id_changed();
     // (S,G)-related upstream changes
+    void	recompute_nbr_mrib_next_hop_s_changed();
     void	recompute_rpfp_nbr_sg_assert_changed();
     void	recompute_rpfp_nbr_sg_not_assert_changed();
     void	recompute_rpfp_nbr_sg_gen_id_changed();

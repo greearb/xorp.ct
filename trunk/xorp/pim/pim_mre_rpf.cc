@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.28 2004/07/26 08:40:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.29 2004/08/07 08:56:44 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -946,6 +946,27 @@ PimMre::recompute_nbr_mrib_next_hop_rp_wc_changed()
 	return;				// Nothing changed
 
     set_nbr_mrib_next_hop_rp(new_pim_nbr);
+}
+
+//
+// The NBR(RPF_interface(S), MRIB.next_hop(S)) has changed.
+// Take the appropriate action.
+// Note: applies only for (S,G) entries
+//
+void
+PimMre::recompute_nbr_mrib_next_hop_s_changed()
+{
+    PimNbr *old_pim_nbr, *new_pim_nbr;
+    
+    if (! is_sg())
+	return;
+
+    old_pim_nbr = nbr_mrib_next_hop_s();
+    new_pim_nbr = compute_nbr_mrib_next_hop_s();
+    if (old_pim_nbr == new_pim_nbr)
+	return;				// Nothing changed
+
+    set_nbr_mrib_next_hop_s(new_pim_nbr);
 }
 
 //
