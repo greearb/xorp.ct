@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.1 2003/10/15 04:10:20 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.2 2003/11/05 08:15:33 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -56,7 +56,11 @@ gmake check
 ===========
 
   * NetBSD-1.6.1:
-    - The code compiles, but some of the internal tests fail.
+    - The code compiles, and the internal tests appear to succeed.
+    - If the compilation fails with the following error:
+      "/usr/pkg/bin/bash: Undefined PLT symbol "read" (reloc type = 7, symnum = 92)"
+      then just run "gmake" again, and the compilation should continue from
+      the point it has failed.
 
 
 3.3. OpenBSD
