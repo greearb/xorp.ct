@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.9 2003/10/25 00:42:03 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.10 2003/10/25 08:40:22 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -116,21 +116,67 @@ public:
 	ARRAY_SIZE = 3
     };
 
-    bool unicast_ipv4(Direction d = NEGOTIATED) const {
-	return _unicast_ipv4[d];
+    /**
+     * Which multiprotocol parameters did we send,receive and negotiate
+     *
+     * @param safi - Subsequent address family identifier
+     * @param d - direction, SENT, RECEIVED or NEGOTIATED
+     *
+     * @return true if this parameter was set
+     */
+    template <class A> bool multiprotocol(Safi safi,
+					  Direction d = NEGOTIATED) const {
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv4_unicast));
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv4_multicast));
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv6_unicast));
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv6_multicast));
+
+	switch(A::ip_version()) {
+	case 4:
+	    switch(safi) {
+	    case SAFI_UNICAST:
+		return _ipv4_unicast[d];
+		break;
+	    case SAFI_MULTICAST:
+		return _ipv4_multicast[d];
+		break;
+	    }
+	    break;
+	case 6:
+	    switch(safi) {
+	    case SAFI_UNICAST:
+		return _ipv6_unicast[d];
+		break;
+	    case SAFI_MULTICAST:
+		return _ipv6_multicast[d];
+		break;
+	    }
+	    break;
+	default:
+	    XLOG_FATAL("Unknown IP version %d", A::ip_version());
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return false;
     }
 
-    bool unicast_ipv6(Direction d = NEGOTIATED) const {
-	return _unicast_ipv6[d];
+#if	0
+    bool ipv4_unicast(Direction d = NEGOTIATED) const {
+	return _ipv4_unicast[d];
+    }
+
+    bool ipv6_unicast(Direction d = NEGOTIATED) const {
+	return _ipv6_unicast[d];
     } 
 
-    bool multicast_ipv4(Direction d = NEGOTIATED) const {
-	return _multicast_ipv4[d];
+    bool ipv4_multicast(Direction d = NEGOTIATED) const {
+	return _ipv4_multicast[d];
     }
 
-    bool multicast_ipv6(Direction d = NEGOTIATED) const {
-	return _multicast_ipv6[d];
+    bool ipv6_multicast(Direction d = NEGOTIATED) const {
+	return _ipv6_multicast[d];
     }
+#endif
 
     void set_v4_local_addr(const IPv4& addr) { _nexthop_ipv4 = addr; }
     void set_v6_local_addr(const IPv6& addr) { _nexthop_ipv6 = addr; }
@@ -216,10 +262,10 @@ private:
     /**
      * The set of different topologies that we support.
      */
-    bool _unicast_ipv4[ARRAY_SIZE];
-    bool _unicast_ipv6[ARRAY_SIZE];
-    bool _multicast_ipv4[ARRAY_SIZE];
-    bool _multicast_ipv6[ARRAY_SIZE];
+    bool _ipv4_unicast[ARRAY_SIZE];
+    bool _ipv6_unicast[ARRAY_SIZE];
+    bool _ipv4_multicast[ARRAY_SIZE];
+    bool _ipv6_multicast[ARRAY_SIZE];
 
     /* XXX
     ** Eventually we will have totally programmable filters. As a

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.51 2003/10/28 00:48:10 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.52 2003/10/28 21:01:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1044,23 +1044,29 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     BGPPeerData::Direction dir = BGPPeerData::SENT;
     bool bad_nlri = false;
     if(!check_multiprotocol_nlri(p, p->mpreach<IPv4>(SAFI_MULTICAST),
-				 peerdata()->multicast_ipv4(dir)))
+				 peerdata()->
+				 multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
     if(!check_multiprotocol_nlri(p, p->mpunreach<IPv4>(SAFI_MULTICAST),
-				 peerdata()->multicast_ipv4(dir)))
+				 peerdata()->
+				 multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
 
     if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_UNICAST),
-				 peerdata()->unicast_ipv6(dir)))
+				 peerdata()->
+				 multiprotocol<IPv6>(SAFI_UNICAST, dir)))
 	bad_nlri = true;
     if(!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_UNICAST),
-				 peerdata()->unicast_ipv6(dir)))
+				 peerdata()->
+				 multiprotocol<IPv6>(SAFI_UNICAST, dir)))
 	bad_nlri = true;
     if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_MULTICAST),
-				 peerdata()->multicast_ipv6(dir)))
+				 peerdata()->
+				 multiprotocol<IPv6>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
     if(!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_MULTICAST),
-				 peerdata()->multicast_ipv6(dir)))
+				 peerdata()->
+				 multiprotocol<IPv6>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
 #ifndef	REMOVE_UNNEGOTIATED_NLRI
     if(bad_nlri)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.2 2003/10/13 23:42:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.3 2003/10/25 00:42:03 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -69,12 +69,12 @@ test2(TestInfo& info)
     Iptuple iptuple;
     BGPPeerData pd(iptuple, AsNum(12), IPv4("10.10.10.10"), 0);
 
-    if(!pd.unicast_ipv4()) {
+    if(!pd.multiprotocol<IPv4>(SAFI_UNICAST)) {
 	DOUT(info) << "We should offer unicast IPv4 by default\n";
 	return false;
     }
 
-    if(pd.unicast_ipv6()) {
+    if(pd.multiprotocol<IPv6>(SAFI_UNICAST)) {
 	DOUT(info) << "We should not offer unicast IPv6 by default\n";
 	return false;
     }
@@ -103,7 +103,7 @@ test2(TestInfo& info)
     */
     pd.open_negotiation();
 
-    if(!pd.unicast_ipv4()) {
+    if(!pd.multiprotocol<IPv4>(SAFI_UNICAST)) {
 	DOUT(info) << "We should still be offering unicast IPv4\n";
 	return false;
     }
@@ -111,7 +111,7 @@ test2(TestInfo& info)
     /*
     ** We should have decided that unicast IPv6 is a go.
     */
-    if(!pd.unicast_ipv6()) {
+    if(!pd.multiprotocol<IPv6>(SAFI_UNICAST)) {
 	DOUT(info) << "We did not manage to negotiate IPv6\n";
 	return false;
     }

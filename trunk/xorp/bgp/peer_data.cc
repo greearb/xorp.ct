@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.12 2003/10/13 23:42:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.13 2003/10/25 00:42:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,19 +29,19 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
     : _iptuple(iptuple), _as(as)
 {
     // For the time being always enable unicast IPv4
-    _unicast_ipv4[SENT] = true;
-    _unicast_ipv4[RECEIVED] = true;
-    _unicast_ipv4[NEGOTIATED] = true;
+    _ipv4_unicast[SENT] = true;
+    _ipv4_unicast[RECEIVED] = true;
+    _ipv4_unicast[NEGOTIATED] = true;
 
     // These values need to be negotiated.
-    _unicast_ipv6[SENT] = _multicast_ipv4[SENT] 
-	= _multicast_ipv6[SENT] = false;
+    _ipv6_unicast[SENT] = _ipv4_multicast[SENT] 
+	= _ipv6_multicast[SENT] = false;
 
-    _unicast_ipv6[RECEIVED] = _multicast_ipv4[RECEIVED] 
-	= _multicast_ipv6[RECEIVED] = false;
+    _ipv6_unicast[RECEIVED] = _ipv4_multicast[RECEIVED] 
+	= _ipv6_multicast[RECEIVED] = false;
 
-    _unicast_ipv6[NEGOTIATED] = _multicast_ipv4[NEGOTIATED] 
-	= _multicast_ipv6[NEGOTIATED] = false;
+    _ipv6_unicast[NEGOTIATED] = _ipv4_multicast[NEGOTIATED] 
+	= _ipv6_multicast[NEGOTIATED] = false;
 
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
@@ -178,6 +178,7 @@ BGPPeerData::open_negotiation()
     ** have sent, received and negotiated (the union of sent and
     ** received).
     */
+    XLOG_ASSERT(SENT < ARRAY_SIZE);
     for(iter_sent = _sent_parameters.begin(); 
 	iter_sent != _sent_parameters.end(); iter_sent++) {
 	ParameterNode& pn = *iter_sent;
@@ -189,25 +190,26 @@ BGPPeerData::open_negotiation()
 	    case AFI_IPV4:
 		switch(safi) {
 		case SAFI_UNICAST:
-		    _unicast_ipv4[SENT] = true;
+		    _ipv4_unicast[SENT] = true;
 		    break;
 		case SAFI_MULTICAST:
-		    _multicast_ipv4[SENT] = true;
+		    _ipv4_multicast[SENT] = true;
 		    break;
 		}
 	    case AFI_IPV6:
 		switch(safi) {
 		case SAFI_UNICAST:
-		    _unicast_ipv6[SENT] = true;
+		    _ipv6_unicast[SENT] = true;
 		    break;
 		case SAFI_MULTICAST:
-		    _multicast_ipv6[SENT] = true;
+		    _ipv6_multicast[SENT] = true;
 		    break;
 		}
 	    }
 	}
     }
 
+    XLOG_ASSERT(RECEIVED < ARRAY_SIZE);
     for(iter_recv = _recv_parameters.begin(); 
 	iter_recv != _recv_parameters.end(); iter_recv++) {
 	ParameterNode& pn = *iter_recv;
@@ -219,25 +221,26 @@ BGPPeerData::open_negotiation()
 	    case AFI_IPV4:
 		switch(safi) {
 		case SAFI_UNICAST:
-		    _unicast_ipv4[RECEIVED] = true;
+		    _ipv4_unicast[RECEIVED] = true;
 		    break;
 		case SAFI_MULTICAST:
-		    _multicast_ipv4[RECEIVED] = true;
+		    _ipv4_multicast[RECEIVED] = true;
 		    break;
 		}
 	    case AFI_IPV6:
 		switch(safi) {
 		case SAFI_UNICAST:
-		    _unicast_ipv6[RECEIVED] = true;
+		    _ipv6_unicast[RECEIVED] = true;
 		    break;
 		case SAFI_MULTICAST:
-		    _multicast_ipv6[RECEIVED] = true;
+		    _ipv6_multicast[RECEIVED] = true;
 		    break;
 		}
 	    }
 	}
     }
 
+    XLOG_ASSERT(NEGOTIATED < ARRAY_SIZE);
     ParameterList::iterator iter_negotiated;
     for(iter_negotiated = _negotiated_parameters.begin(); 
 	iter_negotiated != _negotiated_parameters.end(); iter_negotiated++) {
@@ -250,19 +253,19 @@ BGPPeerData::open_negotiation()
 	    case AFI_IPV4:
 		switch(safi) {
 		case SAFI_UNICAST:
-		    _unicast_ipv4[NEGOTIATED] = true;
+		    _ipv4_unicast[NEGOTIATED] = true;
 		    break;
 		case SAFI_MULTICAST:
-		    _multicast_ipv4[NEGOTIATED] = true;
+		    _ipv4_multicast[NEGOTIATED] = true;
 		    break;
 		}
 	    case AFI_IPV6:
 		switch(safi) {
 		case SAFI_UNICAST:
-		    _unicast_ipv6[NEGOTIATED] = true;
+		    _ipv6_unicast[NEGOTIATED] = true;
 		    break;
 		case SAFI_MULTICAST:
-		    _multicast_ipv6[NEGOTIATED] = true;
+		    _ipv6_multicast[NEGOTIATED] = true;
 		    break;
 		}
 	    }
