@@ -28,54 +28,40 @@ public:
     XrlRedist6V0p1Client(XrlSender* s) : _sender(s) {}
     virtual ~XrlRedist6V0p1Client() {}
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr AddRoute6CB;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr AddRouteCB;
 
-    bool send_add_route6(
+    bool send_add_route(
 	const char*	target_name,
 	const IPv6Net&	network,
 	const IPv6&	nexthop,
 	const uint32_t&	global_metric,
 	const string&	cookie,
-	const AddRoute6CB&	cb
+	const AddRouteCB&	cb
     );
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr DeleteRoute6CB;
+    typedef XorpCallback1<void, const XrlError&>::RefPtr DeleteRouteCB;
 
-    bool send_delete_route6(
+    bool send_delete_route(
 	const char*	target_name,
 	const IPv6Net&	network,
 	const string&	cookie,
-	const DeleteRoute6CB&	cb
-    );
-
-    typedef XorpCallback1<void, const XrlError&>::RefPtr DeleteAllRoutes6CB;
-
-    bool send_delete_all_routes6(
-	const char*	target_name,
-	const string&	cookie,
-	const DeleteAllRoutes6CB&	cb
+	const DeleteRouteCB&	cb
     );
 
 protected:
     XrlSender* _sender;
 
 private:
-    void unmarshall_add_route6(
+    void unmarshall_add_route(
 	const XrlError&	e,
 	XrlArgs*	a,
-	AddRoute6CB		cb
+	AddRouteCB		cb
     );
 
-    void unmarshall_delete_route6(
+    void unmarshall_delete_route(
 	const XrlError&	e,
 	XrlArgs*	a,
-	DeleteRoute6CB		cb
-    );
-
-    void unmarshall_delete_all_routes6(
-	const XrlError&	e,
-	XrlArgs*	a,
-	DeleteAllRoutes6CB		cb
+	DeleteRouteCB		cb
     );
 
 };

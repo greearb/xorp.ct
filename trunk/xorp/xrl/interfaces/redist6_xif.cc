@@ -12,30 +12,30 @@
 #include "redist6_xif.hh"
 
 bool
-XrlRedist6V0p1Client::send_add_route6(
+XrlRedist6V0p1Client::send_add_route(
 	const char*	the_tgt,
 	const IPv6Net&	network,
 	const IPv6&	nexthop,
 	const uint32_t&	global_metric,
 	const string&	cookie,
-	const AddRoute6CB&	cb
+	const AddRouteCB&	cb
 )
 {
-    Xrl x(the_tgt, "redist6/0.1/add_route6");
+    Xrl x(the_tgt, "redist6/0.1/add_route");
     x.args().add("network", network);
     x.args().add("nexthop", nexthop);
     x.args().add("global_metric", global_metric);
     x.args().add("cookie", cookie);
-    return _sender->send(x, callback(this, &XrlRedist6V0p1Client::unmarshall_add_route6, cb));
+    return _sender->send(x, callback(this, &XrlRedist6V0p1Client::unmarshall_add_route, cb));
 }
 
 
-/* Unmarshall add_route6 */
+/* Unmarshall add_route */
 void
-XrlRedist6V0p1Client::unmarshall_add_route6(
+XrlRedist6V0p1Client::unmarshall_add_route(
 	const XrlError&	e,
 	XrlArgs*	a,
-	AddRoute6CB		cb
+	AddRouteCB		cb
 )
 {
     if (e != XrlError::OKAY()) {
@@ -50,58 +50,26 @@ XrlRedist6V0p1Client::unmarshall_add_route6(
 }
 
 bool
-XrlRedist6V0p1Client::send_delete_route6(
+XrlRedist6V0p1Client::send_delete_route(
 	const char*	the_tgt,
 	const IPv6Net&	network,
 	const string&	cookie,
-	const DeleteRoute6CB&	cb
+	const DeleteRouteCB&	cb
 )
 {
-    Xrl x(the_tgt, "redist6/0.1/delete_route6");
+    Xrl x(the_tgt, "redist6/0.1/delete_route");
     x.args().add("network", network);
     x.args().add("cookie", cookie);
-    return _sender->send(x, callback(this, &XrlRedist6V0p1Client::unmarshall_delete_route6, cb));
+    return _sender->send(x, callback(this, &XrlRedist6V0p1Client::unmarshall_delete_route, cb));
 }
 
 
-/* Unmarshall delete_route6 */
+/* Unmarshall delete_route */
 void
-XrlRedist6V0p1Client::unmarshall_delete_route6(
+XrlRedist6V0p1Client::unmarshall_delete_route(
 	const XrlError&	e,
 	XrlArgs*	a,
-	DeleteRoute6CB		cb
-)
-{
-    if (e != XrlError::OKAY()) {
-	cb->dispatch(e);
-	return;
-    } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
-	cb->dispatch(XrlError::BAD_ARGS());
-	return;
-    }
-    cb->dispatch(e);
-}
-
-bool
-XrlRedist6V0p1Client::send_delete_all_routes6(
-	const char*	the_tgt,
-	const string&	cookie,
-	const DeleteAllRoutes6CB&	cb
-)
-{
-    Xrl x(the_tgt, "redist6/0.1/delete_all_routes6");
-    x.args().add("cookie", cookie);
-    return _sender->send(x, callback(this, &XrlRedist6V0p1Client::unmarshall_delete_all_routes6, cb));
-}
-
-
-/* Unmarshall delete_all_routes6 */
-void
-XrlRedist6V0p1Client::unmarshall_delete_all_routes6(
-	const XrlError&	e,
-	XrlArgs*	a,
-	DeleteAllRoutes6CB		cb
+	DeleteRouteCB		cb
 )
 {
     if (e != XrlError::OKAY()) {

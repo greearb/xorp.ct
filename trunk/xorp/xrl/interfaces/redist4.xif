@@ -1,13 +1,11 @@
 interface redist4/0.1 {
 
-	add_route4 ? network:ipv4net					\
-		   & nexthop:ipv4					\
-		   & global_metric:u32					\
-		   & cookie:txt
+	add_route ? network:ipv4net					\
+		  & nexthop:ipv4					\
+		  & global_metric:u32					\
+		  & cookie:txt
 
-	delete_route4 ? network:ipv4net					\
-		      & cookie:txt
-
-	delete_all_routes4 ? cookie:txt
+	delete_route ? network:ipv4net					\
+		     & cookie:txt
 }
 
