@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.3 2003/01/26 04:06:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.4 2003/02/05 19:13:16 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -203,7 +203,7 @@ SelectorList::select(timeval* timeout)
     // Build list of all possible file descriptors
     static vector<int> fdtable;
 
-    if (fdtable.size() < _maxfd + 1)
+    if (fdtable.size() < (size_t)_maxfd + 1)
 	fdtable.resize(_maxfd + 1);
     size_t sz = _maxfd + 1;
     for (size_t i = 0; i < sz; i++) {
