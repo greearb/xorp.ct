@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.38 2004/05/12 21:59:34 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.39 2004/05/13 06:06:26 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2106,6 +2106,8 @@ protected:
 	uint32_t&	value);
 
 private:
+    class AddDeleteMfc;
+    class AddDeleteDataflowMonitor;
 
     void mfea_register_startup();
     void mfea_register_shutdown();
@@ -2139,9 +2141,7 @@ private:
 
     int add_mfc_to_kernel(const PimMfc& pim_mfc);
     int delete_mfc_from_kernel(const PimMfc& pim_mfc);
-    void send_add_delete_mfc();
-    void mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error);
-
+    void send_add_delete_mfc(const AddDeleteMfc& mfc);
     int add_dataflow_monitor(const IPvX& source_addr,
 			     const IPvX& group_addr,
 			     uint32_t threshold_interval_sec,
@@ -2164,8 +2164,9 @@ private:
 				bool is_leq_upcall);
     int delete_all_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr);
-    void send_add_delete_dataflow_monitor();
-    void mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error);
+    void send_add_delete_dataflow_monitor(const AddDeleteDataflowMonitor& dataflow_monitor);
+    void send_add_delete_mfc_dataflow_monitor();
+    void mfea_client_send_add_delete_mfc_dataflow_monitor_cb(const XrlError& xrl_error);
 
     int add_protocol_mld6igmp(uint16_t vif_index);
     int delete_protocol_mld6igmp(uint16_t vif_index);
@@ -2215,6 +2216,38 @@ private:
 	uint16_t	_vif_index;
 	IPvX		_multicast_group;
 	bool		_is_join;
+    };
+
+    /**
+     * Class for handling the queue of Add/Delete MFC requests
+     */
+    class AddDeleteMfc {
+    public:
+	AddDeleteMfc(const PimMfc& pim_mfc, bool is_add)
+	    : _source_addr(pim_mfc.source_addr()),
+	      _group_addr(pim_mfc.group_addr()),
+	      _rp_addr(pim_mfc.rp_addr()),
+	      _iif_vif_index(pim_mfc.iif_vif_index()),
+	      _olist(pim_mfc.olist()),
+	      _olist_disable_wrongvif(pim_mfc.olist_disable_wrongvif()),
+	      _is_add(is_add) {}
+
+	const IPvX& source_addr() const { return _source_addr; }
+	const IPvX& group_addr() const { return _group_addr; }
+	const IPvX& rp_addr() const { return _rp_addr; }
+	uint16_t iif_vif_index() const { return _iif_vif_index; }
+	const Mifset& olist() const { return _olist; }
+	const Mifset& olist_disable_wrongvif() const { return _olist_disable_wrongvif; }
+	bool is_add() const { return _is_add; }
+
+    private:
+	IPvX		_source_addr;
+	IPvX		_group_addr;
+	IPvX		_rp_addr;
+	uint16_t	_iif_vif_index;
+	Mifset		_olist;
+	Mifset		_olist_disable_wrongvif;
+	bool		_is_add;
     };
 
     /**
@@ -2289,35 +2322,48 @@ private:
     };
 
     /**
-     * Class for handling the queue of Add/Delete MFC requests
+     * Class for handling the queue of Add/Delete MFC and dataflow monitor
+     * requests
      */
-    class AddDeleteMfc {
+    class AddDeleteMfcDataflowMonitor {
     public:
-	AddDeleteMfc(const PimMfc& pim_mfc, bool is_add)
-	    : _source_addr(pim_mfc.source_addr()),
-	      _group_addr(pim_mfc.group_addr()),
-	      _rp_addr(pim_mfc.rp_addr()),
-	      _iif_vif_index(pim_mfc.iif_vif_index()),
-	      _olist(pim_mfc.olist()),
-	      _olist_disable_wrongvif(pim_mfc.olist_disable_wrongvif()),
-	      _is_add(is_add) {}
+	AddDeleteMfcDataflowMonitor(const AddDeleteMfc& mfc) {
+	    _mfc = new AddDeleteMfc(mfc);
+	    _dataflow_monitor = NULL;
+	}
+	AddDeleteMfcDataflowMonitor(const AddDeleteDataflowMonitor& dataflow_monitor) {
+	    _mfc = NULL;
+	    _dataflow_monitor = new AddDeleteDataflowMonitor(dataflow_monitor);
+	}
+	AddDeleteMfcDataflowMonitor(const AddDeleteMfcDataflowMonitor& o) {
+	    if (o._mfc != NULL)
+		_mfc = new AddDeleteMfc(*o._mfc);
+	    else
+		_mfc = NULL;
+	    if (o._dataflow_monitor != NULL)
+		_dataflow_monitor = new AddDeleteDataflowMonitor(*o._dataflow_monitor);
+	    else
+		_dataflow_monitor = NULL;
+	}
+	~AddDeleteMfcDataflowMonitor() {
+	    if (_mfc != NULL) {
+		delete _mfc;
+		_mfc = NULL;
+	    }
+	    if (_dataflow_monitor != NULL) {
+		delete _dataflow_monitor;
+		_dataflow_monitor = NULL;
+	    }
+	}
 
-	const IPvX& source_addr() const { return _source_addr; }
-	const IPvX& group_addr() const { return _group_addr; }
-	const IPvX& rp_addr() const { return _rp_addr; }
-	uint16_t iif_vif_index() const { return _iif_vif_index; }
-	const Mifset& olist() const { return _olist; }
-	const Mifset& olist_disable_wrongvif() const { return _olist_disable_wrongvif; }
-	bool is_add() const { return _is_add; }
+	const AddDeleteMfc* mfc() const { return _mfc; }
+	const AddDeleteDataflowMonitor* dataflow_monitor() const {
+	    return _dataflow_monitor;
+	}
 
     private:
-	IPvX		_source_addr;
-	IPvX		_group_addr;
-	IPvX		_rp_addr;
-	uint16_t	_iif_vif_index;
-	Mifset		_olist;
-	Mifset		_olist_disable_wrongvif;
-	bool		_is_add;
+	AddDeleteMfc*			_mfc;
+	AddDeleteDataflowMonitor*	_dataflow_monitor;
     };
 
     const string		_class_name;
@@ -2342,10 +2388,8 @@ private:
     XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
     list<JoinLeaveMulticastGroup> _join_leave_multicast_group_queue;
     XorpTimer			_join_leave_multicast_group_queue_timer;
-    list<AddDeleteMfc>		_add_delete_mfc_queue;
-    XorpTimer			_add_delete_mfc_queue_timer;
-    list<AddDeleteDataflowMonitor> _add_delete_dataflow_monitor_queue;
-    XorpTimer			_add_delete_dataflow_monitor_queue_timer;
+    list<AddDeleteMfcDataflowMonitor> _add_delete_mfc_dataflow_monitor_queue;
+    XorpTimer			_add_delete_mfc_dataflow_monitor_queue_timer;
     list<pair<uint16_t, bool> >	_add_delete_protocol_mld6igmp_queue;
     XorpTimer			_add_delete_protocol_mld6igmp_queue_timer;
 };

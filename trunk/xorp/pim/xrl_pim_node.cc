@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.52 2004/05/30 03:41:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.53 2004/06/02 18:33:25 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -1040,11 +1040,12 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_e
 int
 XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 {
-    _add_delete_mfc_queue.push_back(AddDeleteMfc(pim_mfc, true));
+    _add_delete_mfc_dataflow_monitor_queue.push_back(
+	AddDeleteMfcDataflowMonitor(AddDeleteMfc(pim_mfc, true)));
 
     // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_queue.size() == 1) {
-	send_add_delete_mfc();
+    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
+	send_add_delete_mfc_dataflow_monitor();
     }
 
     return (XORP_OK);
@@ -1053,27 +1054,22 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 int
 XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 {
-    _add_delete_mfc_queue.push_back(AddDeleteMfc(pim_mfc, false));
+    _add_delete_mfc_dataflow_monitor_queue.push_back(
+	AddDeleteMfcDataflowMonitor(AddDeleteMfc(pim_mfc, false)));
 
     // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_queue.size() == 1) {
-	send_add_delete_mfc();
+    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
+	send_add_delete_mfc_dataflow_monitor();
     }
 
     return (XORP_OK);
 }
 
 void
-XrlPimNode::send_add_delete_mfc()
+XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 {
     bool success = true;
-
-    if (_add_delete_mfc_queue.empty())
-	return;			// No more changes
-
-    const AddDeleteMfc& mfc = _add_delete_mfc_queue.front();
     bool is_add = mfc.is_add();
-
     size_t max_vifs_oiflist = mfc.olist().size();
     vector<uint8_t> oiflist_vector(max_vifs_oiflist);
     vector<uint8_t> oiflist_disable_wrongvif_vector(max_vifs_oiflist);
@@ -1103,7 +1099,7 @@ XrlPimNode::send_add_delete_mfc()
 		oiflist_disable_wrongvif_vector,
 		max_vifs_oiflist,
 		mfc.rp_addr().get_ipv4(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 	    if (success)
 		return;
 	}
@@ -1119,7 +1115,7 @@ XrlPimNode::send_add_delete_mfc()
 		oiflist_disable_wrongvif_vector,
 		max_vifs_oiflist,
 		mfc.rp_addr().get_ipv6(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 	    if (success)
 		return;
 	}
@@ -1131,7 +1127,7 @@ XrlPimNode::send_add_delete_mfc()
 		my_xrl_target_name(),
 		mfc.source_addr().get_ipv4(),
 		mfc.group_addr().get_ipv4(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 	    if (success)
 		return;
 	}
@@ -1142,7 +1138,7 @@ XrlPimNode::send_add_delete_mfc()
 		my_xrl_target_name(),
 		mfc.source_addr().get_ipv6(),
 		mfc.group_addr().get_ipv6(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 	    if (success)
 		return;
 	}
@@ -1159,46 +1155,10 @@ XrlPimNode::send_add_delete_mfc()
 		   cstring(mfc.source_addr()),
 		   cstring(mfc.group_addr()));
     start_timer_label:
-	_add_delete_mfc_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_add_delete_mfc_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
-	    callback(this, &XrlPimNode::send_add_delete_mfc));
+	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
     }
-}
-
-void
-XrlPimNode::mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error)
-{
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
-	_add_delete_mfc_queue.pop_front();
-	send_add_delete_mfc();
-	return;
-    }
-
-    //
-    // If a command failed because the other side rejected it,
-    // then send the next one.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
-	const AddDeleteMfc& mfc = _add_delete_mfc_queue.front();
-	bool is_add = mfc.is_add();
-
-	XLOG_ERROR("Cannot %s a multicast group with the MFEA: %s",
-		   (is_add)? "add" : "delete",
-		   xrl_error.str().c_str());
-
-	_add_delete_mfc_queue.pop_front();
-	send_add_delete_mfc();
-	return;
-    }
-
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _add_delete_mfc_queue_timer = PimNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlPimNode::send_add_delete_mfc));
 }
 
 int
@@ -1213,22 +1173,23 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
 				 bool is_geq_upcall,
 				 bool is_leq_upcall)
 {
-    _add_delete_dataflow_monitor_queue.push_back(AddDeleteDataflowMonitor(
-						     source_addr,
-						     group_addr,
-						     threshold_interval_sec,
-						     threshold_interval_usec,
-						     threshold_packets,
-						     threshold_bytes,
-						     is_threshold_in_packets,
-						     is_threshold_in_bytes,
-						     is_geq_upcall,
-						     is_leq_upcall,
-						     true));
+    _add_delete_mfc_dataflow_monitor_queue.push_back(
+	AddDeleteMfcDataflowMonitor(
+	    AddDeleteDataflowMonitor(source_addr,
+				     group_addr,
+				     threshold_interval_sec,
+				     threshold_interval_usec,
+				     threshold_packets,
+				     threshold_bytes,
+				     is_threshold_in_packets,
+				     is_threshold_in_bytes,
+				     is_geq_upcall,
+				     is_leq_upcall,
+				     true)));
 
     // If the queue was empty before, start sending the changes
-    if (_add_delete_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_dataflow_monitor();
+    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
+	send_add_delete_mfc_dataflow_monitor();
     }
 
     return (XORP_OK);
@@ -1246,22 +1207,23 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
 				    bool is_geq_upcall,
 				    bool is_leq_upcall)
 {
-    _add_delete_dataflow_monitor_queue.push_back(AddDeleteDataflowMonitor(
-						     source_addr,
-						     group_addr,
-						     threshold_interval_sec,
-						     threshold_interval_usec,
-						     threshold_packets,
-						     threshold_bytes,
-						     is_threshold_in_packets,
-						     is_threshold_in_bytes,
-						     is_geq_upcall,
-						     is_leq_upcall,
-						     false));
+    _add_delete_mfc_dataflow_monitor_queue.push_back(
+	AddDeleteMfcDataflowMonitor(
+	    AddDeleteDataflowMonitor(source_addr,
+				     group_addr,
+				     threshold_interval_sec,
+				     threshold_interval_usec,
+				     threshold_packets,
+				     threshold_bytes,
+				     is_threshold_in_packets,
+				     is_threshold_in_bytes,
+				     is_geq_upcall,
+				     is_leq_upcall,
+				     false)));
 
     // If the queue was empty before, start sending the changes
-    if (_add_delete_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_dataflow_monitor();
+    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
+	send_add_delete_mfc_dataflow_monitor();
     }
 
     return (XORP_OK);
@@ -1271,27 +1233,24 @@ int
 XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 					const IPvX& group_addr)
 {
-    _add_delete_dataflow_monitor_queue.push_back(AddDeleteDataflowMonitor(
-						     source_addr,
-						     group_addr));
+    _add_delete_mfc_dataflow_monitor_queue.push_back(
+	AddDeleteMfcDataflowMonitor(
+	    AddDeleteDataflowMonitor(source_addr,
+				     group_addr)));
 
     // If the queue was empty before, start sending the changes
-    if (_add_delete_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_dataflow_monitor();
+    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
+	send_add_delete_mfc_dataflow_monitor();
     }
 
     return (XORP_OK);
 }
 
 void
-XrlPimNode::send_add_delete_dataflow_monitor()
+XrlPimNode::send_add_delete_dataflow_monitor(
+    const AddDeleteDataflowMonitor& monitor)
 {
     bool success = true;
-
-    if (_add_delete_dataflow_monitor_queue.empty())
-	return;			// No more changes
-
-    const AddDeleteDataflowMonitor& monitor = _add_delete_dataflow_monitor_queue.front();
     bool is_add = monitor.is_add();
     bool is_delete_all = monitor.is_delete_all();
 
@@ -1311,7 +1270,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		my_xrl_target_name(),
 		monitor.source_addr().get_ipv4(),
 		monitor.group_addr().get_ipv4(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 	    if (success)
 		return;
 	}
@@ -1322,7 +1281,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		my_xrl_target_name(),
 		monitor.source_addr().get_ipv6(),
 		monitor.group_addr().get_ipv6(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 	    if (success)
 		return;
 	}
@@ -1343,7 +1302,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_threshold_in_bytes(),
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 		if (success)
 		    return;
 	    }
@@ -1362,7 +1321,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_threshold_in_bytes(),
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 		if (success)
 		    return;
 	    }
@@ -1382,7 +1341,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_threshold_in_bytes(),
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 		if (success)
 		    return;
 	    }
@@ -1401,7 +1360,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_threshold_in_bytes(),
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
 		if (success)
 		    return;
 	    }
@@ -1420,19 +1379,33 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		   cstring(monitor.group_addr()));
 
     start_timer_label:
-	_add_delete_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_add_delete_mfc_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
-	    callback(this, &XrlPimNode::send_add_delete_dataflow_monitor));
+	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
     }
 }
 
 void
-XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error)
+XrlPimNode::send_add_delete_mfc_dataflow_monitor()
+{
+    if (_add_delete_mfc_dataflow_monitor_queue.empty())
+	return;			// No more changes
+
+    const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
+	_add_delete_mfc_dataflow_monitor_queue.front();
+    if (mfc_dataflow_monitor.mfc() != NULL)
+	send_add_delete_mfc(*mfc_dataflow_monitor.mfc());
+    if (mfc_dataflow_monitor.dataflow_monitor() != NULL)
+	send_add_delete_dataflow_monitor(*mfc_dataflow_monitor.dataflow_monitor());
+}
+
+void
+XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(const XrlError& xrl_error)
 {
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
-	_add_delete_dataflow_monitor_queue.pop_front();
-	send_add_delete_dataflow_monitor();
+	_add_delete_mfc_dataflow_monitor_queue.pop_front();
+	send_add_delete_mfc_dataflow_monitor();
 	return;
     }
 
@@ -1441,18 +1414,32 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_
     // then send the next one.
     //
     if (xrl_error == XrlError::COMMAND_FAILED()) {
-	const AddDeleteDataflowMonitor& monitor = _add_delete_dataflow_monitor_queue.front();
-	bool is_add = monitor.is_add();
-	bool is_delete_all = monitor.is_delete_all();
+	const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
+	    _add_delete_mfc_dataflow_monitor_queue.front();
+	if (mfc_dataflow_monitor.mfc() != NULL) {
+	    const AddDeleteMfc& mfc = *mfc_dataflow_monitor.mfc();
+	    bool is_add = mfc.is_add();
 
-	XLOG_ERROR("Cannot %s with the MFEA: %s",
-		   (is_add)? "add a dataflow monitor"
-		   : (is_delete_all)? "delete multiple dataflow monitors"
-		   : "delete a dataflow monitor",
-		   xrl_error.str().c_str());
+	    XLOG_ERROR("Cannot %s a multicast group with the MFEA: %s",
+		       (is_add)? "add" : "delete",
+		       xrl_error.str().c_str());
+	}
 
-	_add_delete_dataflow_monitor_queue.pop_front();
-	send_add_delete_dataflow_monitor();
+	if (mfc_dataflow_monitor.dataflow_monitor() != NULL) {
+	    const AddDeleteDataflowMonitor& monitor =
+		*mfc_dataflow_monitor.dataflow_monitor();
+	    bool is_add = monitor.is_add();
+	    bool is_delete_all = monitor.is_delete_all();
+
+	    XLOG_ERROR("Cannot %s with the MFEA: %s",
+		       (is_add)? "add a dataflow monitor"
+		       : (is_delete_all)? "delete multiple dataflow monitors"
+		       : "delete a dataflow monitor",
+		       xrl_error.str().c_str());
+	}
+
+	_add_delete_mfc_dataflow_monitor_queue.pop_front();
+	send_add_delete_mfc_dataflow_monitor();
 	return;
     }
 
@@ -1460,9 +1447,10 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_
     // If an error, then start a timer to try again
     // TODO: XXX: the timer value is hardcoded here!!
     //
-    _add_delete_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
-	callback(this, &XrlPimNode::send_add_delete_dataflow_monitor));
+    _add_delete_mfc_dataflow_monitor_queue_timer =
+	PimNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
 }
 
 int
