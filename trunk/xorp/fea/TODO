@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.17 2004/06/09 19:30:47 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.18 2004/06/10 14:17:07 pavlin Exp $
 #
 
 * Refactor IfTree::align_with() when updating the FEA local config
@@ -50,8 +50,6 @@
   after that a new interface with different name but same interface index
   appears. In that case, we need to update properly the local cache
   that maps interface names to indexes.
-
-* Add UDP interfaces for sending and receiving.
 
 * Resurrect click based FEA.
 
