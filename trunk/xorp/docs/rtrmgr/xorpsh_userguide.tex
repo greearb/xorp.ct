@@ -54,11 +54,11 @@ rtrmgr process, and to run \xorpsh directly from the Unix command line.
 \xorpsh should normally be run as a regular user; it is neither
 necessary or desirable to run it as root.  If the user is to be
 permitted to make changes to the running router configuration, they
-need to be in the Unix group {\tt xorp}.  The choice of GID of group
+need to be in the Unix group {\tt xorp}.  The choice of GID for group
 xorp is not important.
 
 \xorpsh needs to be able to communicate with the rtrmgr using the local
-file system.  If the rtrmgr cannot write files in /tmp that the \xorpsh
+file system.  If the rtrmgr cannot write files in /tmp that \xorpsh
 can read, then \xorpsh will not be able to authenticate the user to the
 rtrmgr.
 
@@ -84,7 +84,7 @@ Xorp>
 You can exit \xorpsh at any time by trying Control-d.
 
 \noindent
-Typing ``?'' at the prompt will list the current command available to
+Typing ``?'' at the prompt will list the commands currently available to
 you:
 \vspace{0.1in}
 
@@ -162,7 +162,7 @@ command line.
 \item The {\bf right-arrow} or {\bf control-f} move forward along the
 command line.
 \item {\bf control-a} moves to the beginning of the command line.
-\item {\bf control-e} moves to the beginning of the command line.
+\item {\bf control-e} moves to the end of the command line.
 \item {\bf control-d} deletes the character directly under the cursor.
 \item {\bf control-t} toggles (swaps) the character under the cursor with
 the character immediately preceding it.
@@ -198,7 +198,7 @@ fine-grained access control, so that some users can be given
 permission to change only subsets of the router configuration.  At the
 present time though, there is no fine-grained access control.
 
-A user can only enter configuration mode if they are in the xorp Unix
+A user can only enter configuration mode if they are in the {\tt xorp} Unix
 group.
 
 \newpage
@@ -251,7 +251,7 @@ Xorp> \textbf{show}
 The show command is used to display many aspects of the running state
 of the router.  We don't describe the sub-commands here, because they
 depend on the running state of the router.  For example, only a router
-that is running BGP should support {\tt show bgp}.  
+that is running BGP should provide {\tt show bgp} commands.  
 
 As an example, we show the peers of a BGP router:
 \vspace{0.1in}
@@ -293,6 +293,9 @@ Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 Xorp> \textbf{configure}\\
 Entering configuration mode.\\
 There are no other users in configuration mode.\\
+\\
+\noindent[edit]\\
+XORP>
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -353,11 +356,8 @@ XORP> \textbf{show interfaces}\\
 \>\>\>address 192.150.187.108 \{\\
 \>\>\>\>prefix-length: 25\\
 \>\>\>\>broadcast: 192.150.187.255\\
-\>\>\>\>disable: false\\
 \>\>\>\}\\
-\>\>\>disable: false\\
 \>\>\}\\
-\>\>disable: false\\
 \>\}\\
 \end{tabbing}
 \end{alltt}
@@ -395,9 +395,7 @@ XORP> \textbf{show}\\
 \>address 192.150.187.108 \{\\
 \>\>prefix-length: 25\\
 \>\>broadcast: 192.150.187.255\\
-\>\>disable: false\\
 \>\}\\
-\>disable: false\\
 \\
 \noindent[edit interfaces interface rl0 vif rl0]\\
 XORP> \textbf{up}\\
@@ -443,7 +441,7 @@ commit command must be used to apply this and any other uncommitted
 changes.
 
 In the example below, the prefix length (netmask) of address
-192.150.187.108 on vif xl0 is changed, but not yet committed.  The
+192.150.187.108 on vif rl0 is changed, but not yet committed.  The
 ``{\tt >}'' indicates parts of the configuration that have changed but
 not yet been committed.
 \vspace{0.1in}
