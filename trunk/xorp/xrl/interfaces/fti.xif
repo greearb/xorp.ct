@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.1 2003/03/29 19:03:12 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.2 2003/08/15 23:59:52 pavlin Exp $ */
 
 /*
  * Forwarding Table XRL interface (typically used by RIB clients).
@@ -199,6 +199,22 @@ interface fti/0.2 {
 	 * Perhaps we request the forwarding table be dumped to file and then
 	 * transfer the file.
 	 */
+
+	/**
+	 * Test if the underlying system supports IPv4.
+	 * 
+	 * @param result true if the underlying system supports IPv4,
+	 * otherwise false.
+	 */
+	have_ipv4 -> result:bool
+
+	/**
+	 * Test if the underlying system supports IPv6.
+	 * 
+	 * @param result true if the underlying system supports IPv4,
+	 * otherwise false.
+	 */
+	have_ipv6 -> result:bool
 
 	/**
 	 * Test whether the IPv4 unicast forwarding engine is enabled
