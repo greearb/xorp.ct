@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.7 2004/06/10 22:41:14 hodson Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.9 2004/09/24 04:52:21 pavlin Exp $
 
 #ifndef __LINXORP_ASYNCIO_HH__
 #define __LINXORP_ASYNCIO_HH__
@@ -23,11 +23,13 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 
+struct iovec;
+
 // Asynchronous file transfer classes.  These utilize XORP EventLoop
 // and it's SelectorList to read / write files asynchronously.  The
 // user creates and AsyncFile{Reader,Writer} and adds a buffer for
 // reading / writing with add_buffer().  A callback is provided with
-// each buffer is called every time I/O happens on the buffer.  
+// each buffer is called every time I/O happens on the buffer.
 //
 // Reading/Writing only begins when start() is called, and normally
 // continues until there are no buffers left.
@@ -47,7 +49,7 @@ public:
     enum Event {
 	DATA = 1,		// I/O occured
 	FLUSHING = 2,		// Buffer is being flushed
-	ERROR_CHECK_ERRNO = 4,	// I/O Error has occurred, check errno 
+	ERROR_CHECK_ERRNO = 4,	// I/O Error has occurred, check errno
 	END_OF_FILE = 8		// End of file reached (applies to read only)
     };
 
@@ -57,11 +59,11 @@ public:
      * invoked any time some I/O is performed.  The offset field
      * refers to the offset of the last byte read, or written, from
      * the start of the buffer.
-     * 
+     *
      * Callback has arguments:
-     * 		ErrorCode	e, 
-     *		uint8_t*	buffer, 
-     * 		size_t 		buffer_bytes, 
+     * 		ErrorCode	e,
+     *		uint8_t*	buffer,
+     * 		size_t 		buffer_bytes,
      *          size_t 		offset
      */
 
@@ -79,7 +81,7 @@ public:
 
     /**
      * Start asynchronous operation.
-     * 
+     *
      * @return true on success, false if no buffers are available.
      */
     virtual bool	start() = 0;
@@ -91,7 +93,7 @@ public:
 
     /**
      * Resume stopped asynchronous operation.
-     * 
+     *
      * @return true on success, false if no buffers are available.
      */
     inline bool		resume()		{ return start(); }
@@ -133,7 +135,7 @@ public:
 
     /**
      * Add an additional buffer for reading to.
-     * 
+     *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param cb Callback object to invoke when I/O is performed.
@@ -142,7 +144,7 @@ public:
 
     /**
      * Add an additional buffer for reading to.
-     * 
+     *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param offset starting point for read operation.
@@ -153,7 +155,7 @@ public:
 
     /**
      * Start asynchronous operation.
-     * 
+     *
      * @return true on success, false if no buffers are available.
      */
     bool start();
@@ -172,13 +174,13 @@ public:
      * Stop asynchronous operation and clear list of buffers.
      */
     void flush_buffers();
-    
+
 protected:
     struct BufferInfo {
 	BufferInfo(uint8_t* b, size_t bb, Callback cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
-	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb) 
-	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {} 
+	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb)
+	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {}
 	inline void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
@@ -203,14 +205,16 @@ public:
     /**
      * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor marked as non-blocking to write to.
+     * @param coalese the number of buffers to coalese for each write()
+     *        system call.
      */
-    AsyncFileWriter(EventLoop& e, int fd) : AsyncFileOperator(e, fd) {}
+    AsyncFileWriter(EventLoop& e, int fd, uint32_t coalesce = 1);
 
-    ~AsyncFileWriter() { stop(); }
+    ~AsyncFileWriter();
 
     /**
      * Add an additional buffer for writing from.
-     * 
+     *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param cb Callback object to invoke when I/O is performed.
@@ -221,7 +225,7 @@ public:
 
     /**
      * Add an additional buffer for writing from.
-     * 
+     *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param offset the starting point to write from in the buffer.
@@ -234,7 +238,7 @@ public:
 
     /**
      * Start asynchronous operation.
-     * 
+     *
      * @return true on success, false if no buffers are available.
      */
     bool start();
@@ -253,15 +257,21 @@ public:
      * Stop asynchronous operation and clear list of buffers.
      */
     void flush_buffers();
-    
+
+private:
+    AsyncFileWriter();					// Not Implemented
+    AsyncFileWriter(const AsyncFileWriter&);		// Not Implemented
+    AsyncFileWriter& operator=(const AsyncFileWriter&);	// Not Implemented
+
 protected:
     struct BufferInfo {
-	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb) 
+	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
-	BufferInfo(const uint8_t* b, size_t bb, size_t off, 
-		   const Callback& cb) 
+	BufferInfo(const uint8_t* b, size_t bb, size_t off,
+		   const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb)
 	{}
+
 	inline void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
@@ -275,7 +285,10 @@ protected:
     void write(int, SelectorMask);
     void complete_transfer(ssize_t done);
 
-    list<BufferInfo> _buffers;
+    uint32_t		_coalesce;
+    struct iovec* 	_iov;
+    ref_ptr<int>	_dtoken;
+    list<BufferInfo> 	_buffers;
 };
 
 #endif // __LIBXORP_ASYNCIO_HH__

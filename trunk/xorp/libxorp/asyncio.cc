@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.9 2004/09/24 04:52:21 pavlin Exp $"
-
-#include <signal.h>
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.10 2004/09/27 01:07:39 pavlin Exp $"
 
 #include "libxorp_module.h"
-#include "config.h"
 #include "xorp.h"
+
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
@@ -162,88 +165,181 @@ AsyncFileReader::flush_buffers() {
 // ----------------------------------------------------------------------------
 // AsyncFileWriter write method and entry hook
 
+#ifndef MAX_IOVEC
+#define MAX_IOVEC 16
+#endif
+
+AsyncFileWriter::AsyncFileWriter(EventLoop& e, int fd, uint32_t coalesce)
+    : AsyncFileOperator(e, fd)
+{
+    static const uint32_t max_coalesce = 16;
+    _coalesce = (coalesce > MAX_IOVEC) ? MAX_IOVEC : coalesce;
+    if (_coalesce > max_coalesce) {
+	_coalesce = max_coalesce;
+    }
+    _iov = new iovec[_coalesce];
+    _dtoken = new int;
+}
+
+AsyncFileWriter::~AsyncFileWriter()
+{
+    stop();
+
+    delete[] _iov;
+}
+
 void
-AsyncFileWriter::add_buffer(const uint8_t*	b, 
-			    size_t		b_bytes, 
-			    const Callback&	cb) 
+AsyncFileWriter::add_buffer(const uint8_t*	b,
+			    size_t		b_bytes,
+			    const Callback&	cb)
 {
     assert(b_bytes != 0);
     _buffers.push_back(BufferInfo(b, b_bytes, cb));
 }
 
 void
-AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b, 
-					size_t		b_bytes, 
+AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
+					size_t		b_bytes,
 					size_t		off,
-					const Callback&	cb) 
+					const Callback&	cb)
 {
     assert(off < b_bytes);
     _buffers.push_back(BufferInfo(b, b_bytes, off, cb));
 }
 
-static int write_call = 0;
+//
+// Different platforms have different iov.iov_base types which
+// we can fix at compile time.  The general idea of writev doesn't
+// change much across platforms
+//
+template <typename T, typename U>
+static void
+iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
+{
+    static_assert(sizeof(T*) == sizeof(uint8_t*));
+    iov_base = reinterpret_cast<T*>(data);
+    iov_len  = data_len;
+}
 
 void
-AsyncFileWriter::write(int fd, SelectorMask m) 
+AsyncFileWriter::write(int fd, SelectorMask m)
 {
-    write_call++;
     assert(_buffers.empty() == false);
     assert(m == SEL_WR);
     assert(fd == _fd);
-    BufferInfo& head = _buffers.front();
-
-    size_t out_bytes = head._buffer_bytes - head._offset;
- retry:
 
     sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
-    ssize_t done = ::write(_fd, head._buffer + head._offset, out_bytes);
+
+    // Coalesce buffers into a group
+    uint32_t iov_cnt = 0;
+    size_t   total_bytes = 0;
+    list<BufferInfo>::iterator i = _buffers.begin();
+    while (i != _buffers.end()) {
+	BufferInfo bi = *i;
+
+	uint8_t* u = const_cast<uint8_t*>(bi._buffer + bi._offset);
+	size_t   u_bytes = bi._buffer_bytes - bi._offset;
+	iov_place(_iov[iov_cnt].iov_base, _iov[iov_cnt].iov_len, u, u_bytes);
+
+	total_bytes += u_bytes;
+	assert(total_bytes != 0);
+	iov_cnt++;
+	if (iov_cnt == _coalesce)
+	    break;
+	++i;
+    }
+
+    ssize_t done = ::writev(_fd, _iov, (int)iov_cnt);
     signal(SIGPIPE, saved_sigpipe);
+
+    debug_msg("Wrote %d of %d bytes\n", done, total_bytes);
+
     if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
+	debug_msg("Write error %d - %s\n", errno, strerror(errno));
 	errno = 0;
 	return;
     }
-    if (done < 0 && errno == ENOBUFS) {
-	out_bytes /= 2;
-	if (out_bytes > 0)
-	    goto retry;
-	else {
-	    return;
-	}
-    }
-
     complete_transfer(done);
 }
 
 // transfer_complete() invokes callbacks if necessary and updates buffer
 // variables and buffer list.
 void
-AsyncFileWriter::complete_transfer(ssize_t done) 
+AsyncFileWriter::complete_transfer(ssize_t sdone)
 {
-    // XXX careful after callback is invoked: "this" maybe deleted, so do
-    // not reference any object state after callback.
-
-    if (done >= 0) {
-	BufferInfo& head = _buffers.front();
-	head._offset += done;
-	if (head._offset == head._buffer_bytes) {
-	    BufferInfo copy = head; 		// copy head
-	    _buffers.erase(_buffers.begin());	// remove head
-	    if (_buffers.empty()) {
-		stop();
-	    }
-	    copy.dispatch_callback(DATA);
-	} else {
-	    head.dispatch_callback(DATA);
-	}
-    } else {
+    if (sdone < 0) {
+	XLOG_ERROR("Write error %d - %s", errno, strerror(errno));
 	stop();
 	BufferInfo& head = _buffers.front();
 	head.dispatch_callback(ERROR_CHECK_ERRNO);
+	return;
+    }
+
+    size_t notified = 0;
+    size_t done = (size_t)sdone;
+
+    //
+    // This is a trick to detect if the instance of the current object is
+    // deleted mid-callback.  If so the method should not touch any part of
+    // the instance state afterwards and should just return.  Okay, so how
+    // to tell if the current AsyncFileWriter instance is deleted?
+    //
+    // The key observation is that _dtoken is a reference counted object
+    // associated with the current instance.  Another reference is made to it
+    // here bumping the reference count from 1 to 2.  If after invoking
+    // a callback the instance count is no longer 2 then the AsyncFileWriter
+    // instance was deleted in the callback.
+    //
+    ref_ptr<int> stack_token = _dtoken;
+
+    while (notified != done) {
+	assert(notified <= done);
+	assert(_buffers.empty() == false);
+
+	BufferInfo& head = _buffers.front();
+	assert(head._buffer_bytes >= head._offset);
+
+	size_t bytes_needed = head._buffer_bytes - head._offset;
+
+	if (done - notified >= bytes_needed) {
+	    //
+	    // All data in this buffer has been written
+	    //
+	    head._offset += bytes_needed;
+	    assert(head._offset == head._buffer_bytes);
+
+	    // Copy, then detach head buffer and update state
+	    BufferInfo copy = head;
+	    _buffers.pop_front();
+	    if (_buffers.empty()) {
+		stop();
+	    }
+
+	    assert(stack_token.is_only() == false);
+
+	    copy.dispatch_callback(DATA);
+	    if (stack_token.is_only() == true) {
+		// "this" instance of AsyncFileWriter was deleted by the
+		// calback, return immediately.
+		return;
+	    }
+	    notified += bytes_needed;
+	    continue;
+	} else {
+	    //
+	    // Not enough data has been written
+	    //
+	    head._offset += (done - notified);
+	    assert(head._offset < head._buffer_bytes);
+
+	    return;
+	}
     }
 }
 
-bool 
-AsyncFileWriter::start() {
+bool
+AsyncFileWriter::start()
+{
     if (_running)
 	return true;
 
@@ -253,16 +349,18 @@ AsyncFileWriter::start() {
     }
 
     EventLoop& e = _eventloop;
-    if (e.add_selector(_fd, SEL_WR, 
+    if (e.add_selector(_fd, SEL_WR,
 		       callback(this, &AsyncFileWriter::write)) == false) {
 	XLOG_ERROR("Async reader failed to add_selector.");
     }
     _running = true;
+    debug_msg("%p start\n", this);
     return _running;
 }
 
 void
 AsyncFileWriter::stop() {
+    debug_msg("%p stop\n", this);
     _eventloop.remove_selector(_fd, SEL_WR);
     _running = false;
 }
