@@ -40,33 +40,31 @@ AM_CPPFLAGS = `net-snmp-config --cflags`
 
 # -- Libraries and library flags to link the binary programs
 
-LDADD  = $(top_builddir)/libxipc/libfinder.a
-LDADD += $(top_builddir)/libxipc/libxipc.a
-LDADD += $(top_builddir)/libxorp/libxorp.a
-LDADD += $(top_builddir)/libcomm/libcomm.a
- 
-libnetsnmpxorp_so_LDFLAGS = -shared -fPIC -fpic 
+# -Wl,--no-whole-archive must appear after the libraries, and that does not fit
+# into the standard Automake link model.  This is why we must use the LINK
+# directive
+libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+    $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@               \
+    $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a    \
+    $(top_builddir)/libcomm/libcomm.a -Wl,--no-whole-archive
 
-test_xorpevents_LDADD  = $(LDADD) -lnetsnmpxorp -L${top_builddir}/mibs
+test_xorpevents_LDADD  = $(top_builddir)/libxipc/libfinder.a
+test_xorpevents_LDADD += -lnetsnmpxorp -L${top_builddir}/mibs
 
 bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs
 bgp4_mib_1657_so_LDADD += -lbgp4mibbase -L$(top_builddir)/xrl/targets
 bgp4_mib_1657_so_LDADD += $(top_builddir)/xrl/interfaces/libbgpxif.a
-bgp4_mib_1657_so_LDADD += $(LDADD)
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
 bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
- 
 
-ospf_mib_1850_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs $(LDADD) 
+ospf_mib_1850_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs  
 ospf_mib_1850_so_LDFLAGS = -shared -fPIC -fpic 
 ospf_mib_1850_so_DEPENDENCIES = libnetsnmpxorp.so
 
 xorp_if_mib_module_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs
 xorp_if_mib_module_so_LDADD += -lxorpifmibbase -L$(top_builddir)/xrl/targets 
-xorp_if_mib_module_so_LDADD += $(LDADD) 
 xorp_if_mib_module_so_LDFLAGS = -shared -fPIC -fpic 
 xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
-
 
 # -- Test Program Sources
 
@@ -103,5 +101,4 @@ xorp_if_mib_module_so_SOURCES += xorp_if_mib_xrl_target.hh
 ## to anybody else
 ##
 
-INCLUDES =	-I$(top_srcdir)
-
+INCLUDES =      -I$(top_srcdir)

@@ -121,23 +121,28 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH="$(top_builddir)/mibs"
 # -- Compiler and pre compiler flags
 AM_CPPFLAGS = `net-snmp-config --cflags` 
 
-
 # -- Libraries and library flags to link the binary programs
-LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
-libnetsnmpxorp_so_LDFLAGS = -shared -fPIC -fpic 
+# -Wl,--no-whole-archive must appear after the libraries, and that does not fit
+# into the standard Automake link model.  This is why we must use the LINKER
+# directive
+libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+    $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@               \
+    $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a    \
+    $(top_builddir)/libcomm/libcomm.a -Wl,--no-whole-archive
 
-test_xorpevents_LDADD = $(LDADD) -lnetsnmpxorp -L${top_builddir}/mibs
 
-bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lbgp4mibbase -L$(top_builddir)/xrl/targets $(top_builddir)/xrl/interfaces/libbgpxif.a $(LDADD)
+test_xorpevents_LDADD = $(top_builddir)/libxipc/libfinder.a -lnetsnmpxorp -L${top_builddir}/mibs
+
+bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lbgp4mibbase -L$(top_builddir)/xrl/targets $(top_builddir)/xrl/interfaces/libbgpxif.a
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
 bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
 
-ospf_mib_1850_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs $(LDADD) 
+ospf_mib_1850_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs  
 ospf_mib_1850_so_LDFLAGS = -shared -fPIC -fpic 
 ospf_mib_1850_so_DEPENDENCIES = libnetsnmpxorp.so
 
-xorp_if_mib_module_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lxorpifmibbase -L$(top_builddir)/xrl/targets  $(LDADD) 
+xorp_if_mib_module_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lxorpifmibbase -L$(top_builddir)/xrl/targets 
 xorp_if_mib_module_so_LDFLAGS = -shared -fPIC -fpic 
 xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
 
@@ -177,18 +182,13 @@ bgp4_mib_1657_so_OBJECTS = $(am_bgp4_mib_1657_so_OBJECTS)
 am_libnetsnmpxorp_so_OBJECTS = xorpevents.$(OBJEXT)
 libnetsnmpxorp_so_OBJECTS = $(am_libnetsnmpxorp_so_OBJECTS)
 libnetsnmpxorp_so_LDADD = $(LDADD)
-libnetsnmpxorp_so_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/libcomm/libcomm.a
+libnetsnmpxorp_so_DEPENDENCIES =
+libnetsnmpxorp_so_LDFLAGS =
 am_ospf_mib_1850_so_OBJECTS = ospf_mib_1850.$(OBJEXT)
 ospf_mib_1850_so_OBJECTS = $(am_ospf_mib_1850_so_OBJECTS)
 am_test_xorpevents_OBJECTS = test_xorpevents.$(OBJEXT)
 test_xorpevents_OBJECTS = $(am_test_xorpevents_OBJECTS)
-test_xorpevents_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/libcomm/libcomm.a
+test_xorpevents_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a
 test_xorpevents_LDFLAGS =
 am_xorp_if_mib_module_so_OBJECTS = xorp_if_mib_module.$(OBJEXT) \
 	xorp_if_mib_xrl_target.$(OBJEXT)
@@ -274,7 +274,7 @@ bgp4_mib_1657.so$(EXEEXT): $(bgp4_mib_1657_so_OBJECTS) $(bgp4_mib_1657_so_DEPEND
 	$(CXXLINK) $(bgp4_mib_1657_so_LDFLAGS) $(bgp4_mib_1657_so_OBJECTS) $(bgp4_mib_1657_so_LDADD) $(LIBS)
 libnetsnmpxorp.so$(EXEEXT): $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_DEPENDENCIES) 
 	@rm -f libnetsnmpxorp.so$(EXEEXT)
-	$(CXXLINK) $(libnetsnmpxorp_so_LDFLAGS) $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_LDADD) $(LIBS)
+	$(libnetsnmpxorp_so_LINK) $(libnetsnmpxorp_so_LDFLAGS) $(libnetsnmpxorp_so_OBJECTS) $(libnetsnmpxorp_so_LDADD) $(LIBS)
 ospf_mib_1850.so$(EXEEXT): $(ospf_mib_1850_so_OBJECTS) $(ospf_mib_1850_so_DEPENDENCIES) 
 	@rm -f ospf_mib_1850.so$(EXEEXT)
 	$(CXXLINK) $(ospf_mib_1850_so_LDFLAGS) $(ospf_mib_1850_so_OBJECTS) $(ospf_mib_1850_so_LDADD) $(LIBS)

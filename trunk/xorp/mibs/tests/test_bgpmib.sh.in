@@ -126,13 +126,16 @@ test1()
     # verify that the BGP mib is loaded
     ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
 
-    # testing the BGP version
+    echo -n getting the BGP version...
     bgp_ver=`snmpget localhost  BGP4-MIB::bgpVersion.0 | sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
     
     if [ "${bgp_ver}" != '"4"' ]; then exit 1; fi
+ 
+    echo "${bgp_ver}"
 
-    # walk the values of the BGP peer table one by one using get next
+    echo 'walking through the values of the BGP peer table... '
     snmpwalk localhost  BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
+    cat bgpPeerTable1.tmp
 
     # confirm that we have established a connection with the real peer
     tmp=`grep established < bgpPeerTable1.tmp | wc -l` 
@@ -141,10 +144,12 @@ test1()
 	echo "too many established connections reported"; exit 1 
     fi
 
-    # read the BGP peer table using getnext for the entire table
-    snmptable -CB -CH -Cf "," localhost  BGP4-MIB::bgpPeerTable > bgpPeerTable2.tmp
- 
-    # walk the values again to check the variables that change with time
+    echo 'reading the entire BGP peer table at once... '
+    snmptable -CB -CH -Cf "," localhost  BGP4-MIB::bgpPeerTable \
+        > bgpPeerTable2.tmp
+    cat bgpPeerTable2.tmp
+
+    echo -n 'read again to check the variables that change with time... '
     snmpwalk localhost  BGP4-MIB::bgpPeerTable > bgpPeerTable3.tmp
 
     # verify that only one peer has bgpPeerFsmEstablishedTime is changing 
@@ -166,6 +171,7 @@ test1()
 	echo "bgpPeerInUpdateElapsedTime not changing"; exit 1 
     fi
 
+    echo OK
     # Reset the connection
     reset
 }
