@@ -15,7 +15,7 @@
 	  <tr>
   	    <td bgcolor="#BEEAE0"> <pre>
 
-	$ cvs -d :pserver:xorpcvs@cvs.xorp.org:/usr/local/www/data/cvs co other/kdoc
+	$ cvs -d :pserver:xorpcvs@cvs.xorp.org:/cvs co other/kdoc
 
 	       </pre></td>
 	  </tr>
