@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.3 2004/02/26 00:47:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.4 2004/02/29 22:57:01 pavlin Exp $"
 
 
 //
@@ -183,7 +183,7 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-16s%-16s\n",
+    cli_print(c_format("%-39s %-39s\n",
 		       "Group", "Source"));
     
     //
@@ -200,10 +200,10 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	MfeaDfeLookup *mfea_dfe_lookup = iter_dft->second;
 	list<MfeaDfe *>::const_iterator iter;
 	
-	cli_print(c_format("%-16s%-16s\n",
+	cli_print(c_format("%-39s %-39s\n",
 			   cstring(mfea_dfe_lookup->group_addr()),
 			   cstring(mfea_dfe_lookup->source_addr())));
-	cli_print(c_format("    %-30s%-5s%-30s%7s\n",
+	cli_print(c_format("  %-29s %-4s %-30s %-6s\n",
 			   "Measured(Start|Packets|Bytes)",
 			   "Type",
 			   "Thresh(Interval|Packets|Bytes)",
@@ -269,7 +269,7 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 				    (uint32_t)delta.usec());
 	    }
 	    
-	    cli_print(c_format("    %-30s%-5s%-30s%7s\n",
+	    cli_print(c_format("  %-29s %-6s %-30s %-6s\n",
 			       measured_s.c_str(), type_s.c_str(), 
 			       thresh_s.c_str(), remain_s.c_str()));
 	}
@@ -299,7 +299,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-16s%-9s%14s %-16s%-1s\n",
+    cli_print(c_format("%-14s %-8s %12s %-15s %-1s\n",
 		       "Interface", "State", "Vif/PifIndex", "Addr", "Flags"));
     for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
@@ -355,7 +355,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 	list<VifAddr>::const_iterator iter = mfea_vif->addr_list().begin();
 	string dd = c_format("%d/%d", mfea_vif->vif_index(),
 			     mfea_vif->pif_index());
-	cli_print(c_format("%-16s%-9s%14s %-16s%-1s\n",
+	cli_print(c_format("%-14s %-8s %12s %-15s %-1s\n",
 			   mfea_vif->name().c_str(),
 			   mfea_vif->state_string(),
 			   dd.c_str(),
@@ -388,10 +388,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 	}
     }
     
-    // XXX: the first field width should be 16 (for consistency with other
-    // "show foo interface" commands, but this makes the line too long
-    // to fit into 80 width-terminal.
-    cli_print(c_format("%-14s%-16s%-19s%-16s%-15s\n",
+    cli_print(c_format("%-14s %-15s %-18s %-15s %-15s\n",
 		       "Interface", "Addr", "Subnet", "Broadcast", "P2Paddr"));
     for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
@@ -410,7 +407,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 	// Print the first address
 	//
 	list<VifAddr>::const_iterator iter = mfea_vif->addr_list().begin();
-	cli_print(c_format("%-14s%-16s%-19s%-16s%-15s\n",
+	cli_print(c_format("%-14s %-15s %-18s %-15s %-15s\n",
 			   mfea_vif->name().c_str(),
 			   (iter != mfea_vif->addr_list().end())?
 			   cstring((*iter).addr()): "",
@@ -426,7 +423,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 	if (iter != mfea_vif->addr_list().end())
 	    ++iter;
 	for ( ; iter != mfea_vif->addr_list().end(); ++iter) {
-	    cli_print(c_format("%-14s%-16s%-19s%-16s%-15s\n",
+	    cli_print(c_format("%-14s %-15s %-18s %-15s %-15s\n",
 			       " ",
 			       cstring((*iter).addr()),
 			       cstring((*iter).subnet_addr()),
@@ -470,14 +467,14 @@ MfeaNodeCli::cli_show_mfea_mrib(const vector<string>& argv)
 			       dest_address_name.c_str()));
 	    return (XORP_ERROR);
 	}
-	cli_print(c_format("%-19s%-16s%-8s%-9s%17s%7s\n",
+	cli_print(c_format("%-18s %-15s %-7s %-8s %10s %6s\n",
 			   "DestPrefix", "NextHopRouter", "VifName", 
-			   "VifIndex", "MetricPreference", "Metric"));
+			   "VifIndex", "MetricPref", "Metric"));
 	string vif_name = "UNKNOWN";
 	Vif *vif = mfea_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
-	cli_print(c_format("%-19s%-16s%-8s%-9d%17d%7d\n",
+	cli_print(c_format("%-18s %-15s %-7s %-8d %10d %6d\n",
 			   cstring(mrib->dest_prefix()),
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
@@ -487,9 +484,9 @@ MfeaNodeCli::cli_show_mfea_mrib(const vector<string>& argv)
 	return (XORP_OK);
     }
     
-    cli_print(c_format("%-19s%-16s%-8s%-9s%17s%7s\n",
+    cli_print(c_format("%-18s %-15s %-7s %-8s %10s %6s\n",
 		       "DestPrefix", "NextHopRouter", "VifName", "VifIndex",
-		       "MetricPreference", "Metric"));
+		       "MetricPref", "Metric"));
     MribTable::iterator iter;
     for (iter = mfea_node().mrib_table().begin();
 	 iter != mfea_node().mrib_table().end();
@@ -502,7 +499,7 @@ MfeaNodeCli::cli_show_mfea_mrib(const vector<string>& argv)
 	Vif *vif = mfea_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
-	cli_print(c_format("%-19s%-16s%-8s%-9d%17d%7d\n",
+	cli_print(c_format("%-18s %-15s %-7s %-8d %10d %6d\n",
 			   cstring(mrib->dest_prefix()),
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),

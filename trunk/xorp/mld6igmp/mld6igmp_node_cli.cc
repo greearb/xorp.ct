@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.8 2004/02/25 05:54:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.9 2004/02/29 22:58:01 pavlin Exp $"
 
 
 //
@@ -154,7 +154,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-16s%-9s%-16s%8s%8s%8s\n",
+    cli_print(c_format("%-14s %-8s %-15s %7s %7s %6s\n",
 		       "Interface", "State", "Querier",
 		       "Timeout", "Version", "Groups"));
     for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
@@ -180,7 +180,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface(const vector<string>& argv)
 	    querier_timeout_sec_string = "None";
 	}
 	
-	cli_print(c_format("%-16s%-9s%-16s%8s%8d%8u\n",
+	cli_print(c_format("%-14s %-8s %-15s %7s %7d %6u\n",
 			   mld6igmp_vif->name().c_str(),
 			   mld6igmp_vif->state_string(),
 			   cstring(mld6igmp_vif->querier_addr()),
@@ -213,10 +213,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface_address(const vector<string>& argv)
 	}
     }
     
-    // XXX: the first field width should be 16 (for consistency with other
-    // "show foo interface" commands, but this makes the line too long
-    // to fit into 80 width-terminal.
-    cli_print(c_format("%-14s%-16s%-19s\n",
+    cli_print(c_format("%-14s %-15s %-15s\n",
 		       "Interface", "PrimaryAddr", "SecondaryAddr"));
     for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
@@ -244,7 +241,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface_address(const vector<string>& argv)
 		continue;
 	    secondary_addr_list.push_back(vif_addr.addr());
 	}
-	cli_print(c_format("%-14s%-16s%-19s\n",
+	cli_print(c_format("%-14s %-15s %-15s\n",
 			   mld6igmp_vif->name().c_str(),
 			   cstring(mld6igmp_vif->primary_addr()),
 			   (secondary_addr_list.size())?
@@ -261,7 +258,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface_address(const vector<string>& argv)
 	     secondary_addr_iter != secondary_addr_list.end();
 	     ++secondary_addr_iter) {
 	    IPvX& secondary_addr = *secondary_addr_iter;
-	    cli_print(c_format("%-14s%-16s%-19s\n",
+	    cli_print(c_format("%-14s %-39s %-39s\n",
 			       " ",
 			       " ",
 			       cstring(secondary_addr)));
@@ -304,9 +301,9 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-16s%-16s%-16s%-16s%8s\n",
+    cli_print(c_format("%-14s %-15s %-15s %-12s %7s\n",
 		       "Interface", "Group", "Source",
-		       "Last Reported", "Timeout"));
+		       "LastReported", "Timeout"));
     for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
@@ -330,7 +327,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	    if (! do_print)
 		continue;
 	    
-	    cli_print(c_format("%-16s%-16s%-16s%-16s%8d\n",
+	    cli_print(c_format("%-14s %-15s %-15s %-12s %7d\n",
 			       mld6igmp_vif->name().c_str(),
 			       cstring(member_query->group()),
 			       cstring(member_query->source()),
@@ -341,4 +338,3 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
     
     return (XORP_OK);
 }
-
