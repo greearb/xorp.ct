@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.68 2004/02/25 00:35:48 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.69 2004/02/25 01:29:32 pavlin Exp $
 #
 
 * IMPL:
@@ -321,11 +321,6 @@ probably should be replaced with
 * IMPL: Add dont_fragment:bool to the send_protocol_message[4,6] XRLs
   from protocol modules to the MFEA. If set, the IP_DF bit will
   be set (applies only for IPv4).
-
-* IMPL: add the equivalent of altnet from pimd.conf : e.g.,
-  non-local senders appear as senders connected to the same subnet.
-  Needed as a work-around solution when there are uni-directional
-  interfaces for sending and receiving traffic (e.g., satellite links).
 
 * BSR SPEC: If the DR reboots (e.g., its GenID changes), then
   the neighbor that should unicast to it the Bootstrap message should
