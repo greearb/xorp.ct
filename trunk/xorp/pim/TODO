@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.59 2003/08/28 00:34:36 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.60 2003/10/24 22:51:39 pavlin Exp $
 #
 
 * IMPL: If a PimVif interface fails to start/stop/etc, then
@@ -401,11 +401,6 @@ other than a Hello with version greater than 2, and log a warning."
 
 * SPEC+IMPL: what to do if message with unrecognized Type or Version is
 received?
-
-* IMPL: When processing PimMfc actions, and need to add or delete the PimMfc,
-  put it in a list of entries to add/remove, and then the removing task
-  will take care of it. I.e., PimMreTask::add_pim_mfc() and
-  PimMreTask::add_pim_mfc_delete() are not used.
 
 * IMPL: the following ConfigParam in PimVif don't have XRL config interface:
   - join_prune_holdtime (indirectly set from join_prune_period)
