@@ -1,7 +1,7 @@
-LIVEDIR=/home/vulture/u0/mjh/xorp/other/LiveCD
+LIVEDIR=/usr/local/livecd
 CHROOTDIR=/usr/tmp/live_root
 LIVEISODIR=/usr/tmp
-XORPSRCDIR=/home/vulture/u0/mjh/xorp/xorp
+XORPSRCDIR=/home/echidna/u0/mjh/xorp/xorp
 CDRW=/dev/acd0c
 KERNELDIR=/usr/src/sys/i386/conf
 COMPILEDIR=/usr/src/sys/compile/LIVECD

@@ -475,7 +475,7 @@ create_iso() {
 # Burns the CD Image.
 burn_cd() {
 
-    burncd -f $CDRW -s 2 -e data $LIVEISODIR/LiveCD.iso fixate >> $LIVEDIR/log || aviso
+    burncd -f $CDRW -s max -e data $LIVEISODIR/LiveCD.iso fixate >> $LIVEDIR/log || aviso
     dialog --title "XORP LiveCD" --msgbox "Burning process done." 5 60
 
     done_f="[*]"
