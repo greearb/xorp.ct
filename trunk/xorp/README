@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.25 2004/06/15 20:56:52 hodson Exp $
+# $XORP: xorp/README,v 1.26 2004/06/21 22:46:37 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -56,7 +56,7 @@ Supported platforms:
 
   * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE with:
     - gcc/g++ version 2.95.4 (default), 3.3.4 20040322 (prerelease),
-      3.4.0 20040310 (prerelease)
+      3.4.2 20040827 (prerelease) [FreeBSD]
     - gmake (GNU make) version 3.79.1
     - autoconf version 2.53
     - automake version 1.5
