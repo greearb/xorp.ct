@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.9 2003/07/12 01:05:19 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.10 2003/08/06 18:51:17 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -94,50 +94,51 @@ public:
     /**
      * Test if there is an unit that is in PENDING_DOWN state.
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * information about the unit that is in PENDING_DOWN state (if any).
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the unit that is in PENDING_DOWN
+     * state (if any).
      * @return true if there is an unit that is in PENDING_DOWN state,
      * otherwise false.
      */
-    bool	has_pending_down_units(string& reason);
+    bool	has_pending_down_units(string& reason_msg);
     
     /**
      * Get the node status (see @ref ProcessStatus).
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * information about the status.
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the status.
      * @return the node status (see @ref ProcessStatus).
      */
-    ProcessStatus	node_status(string& reason);
+    ProcessStatus	node_status(string& reason_msg);
     
     /**
      * Install a new MLD/IGMP vif.
      * 
      * @param vif vif information about new Mld6igmpVif to install.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const Vif& vif, string& err);
+    int		add_vif(const Vif& vif, string& error_msg);
     
     /**
      * Install a new MLD/IGMP vif.
      * 
      * @param vif_name the name of the new vif.
      * @param vif_index the vif index of the new vif.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_vif(const string& vif_name, uint32_t vif_index,
-			string& err);
+			string& error_msg);
     
     /**
      * Delete an existing MLD/IGMP vif.
      * 
      * @param vif_name the name of the vif to delete.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_vif(const string& vif_name, string& err);
+    int		delete_vif(const string& vif_name, string& error_msg);
     
     /**
      * Set flags to a vif.
@@ -149,14 +150,14 @@ public:
      * @param is_multicast true if the vif is multicast-capable.
      * @param is_broadcast true if the vif is broadcast-capable.
      * @param is_up true if the vif is UP and running.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_vif_flags(const string& vif_name,
 			      bool is_pim_register, bool is_p2p,
 			      bool is_loopback, bool is_multicast,
 			      bool is_broadcast, bool is_up,
-			      string& err);
+			      string& error_msg);
     
     /**
      * Add an address to a vif.
@@ -166,7 +167,7 @@ public:
      * @param subnet_addr the subnet address to add.
      * @param broadcast_addr the broadcast address (when applicable).
      * @param peer_addr the peer address (when applicable).
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_vif_addr(const string& vif_name,
@@ -174,55 +175,55 @@ public:
 			     const IPvXNet& subnet_addr,
 			     const IPvX& broadcast_addr,
 			     const IPvX& peer_addr,
-			     string& err);
+			     string& error_msg);
     
     /**
      * Delete an address from a vif.
      * 
      * @param vif_name the name of the vif.
      * @param addr the unicast address to delete.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_vif_addr(const string& vif_name,
 				const IPvX& addr,
-				string& err);
+				string& error_msg);
     
     /**
      * Enable an existing MLD6IGMP vif.
      * 
      * @param vif_name the name of the vif to enable.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		enable_vif(const string& vif_name, string& err);
+    int		enable_vif(const string& vif_name, string& error_msg);
 
     /**
      * Disable an existing MLD6IGMP vif.
      * 
      * @param vif_name the name of the vif to disable.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		disable_vif(const string& vif_name, string& err);
+    int		disable_vif(const string& vif_name, string& error_msg);
 
     /**
      * Start an existing MLD6IGMP vif.
      * 
      * @param vif_name the name of the vif to start.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_vif(const string& vif_name, string& err);
+    int		start_vif(const string& vif_name, string& error_msg);
     
     /**
      * Stop an existing MLD6IGMP vif.
      * 
      * @param vif_name the name of the vif to start.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_vif(const string& vif_name, string& err);
+    int		stop_vif(const string& vif_name, string& error_msg);
     
     /**
      * Start MLD/IGMP on all enabled interfaces.
@@ -528,25 +529,41 @@ public:
     //
     // Configuration methods
     //
+
+    /**
+     * Get the protocol version on an interface.
+     * 
+     * @param vif_name the name of the vif to get the protocol version of.
+     * @param proto_version the return-by-reference protocol version.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		get_vif_proto_version(const string& vif_name,
+				      int& proto_version,
+				      string& error_msg);
     
     /**
      * Set the protocol version on an interface.
      * 
      * @param vif_name the name of the vif to set the protocol version of.
      * @param proto_version the new protocol version.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_vif_proto_version(const string& vif_name,
-				      int proto_version);
+				      int proto_version,
+				      string& error_msg);
     
     /**
      * Reset the protocol version on an interface to its default value.
      * 
      * @param vif_name the name of the vif to reset the protocol version of
      * to its default value.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		reset_vif_proto_version(const string& vif_name);
+    int		reset_vif_proto_version(const string& vif_name,
+					string& error_msg);
     
     //
     // Debug-related methods
