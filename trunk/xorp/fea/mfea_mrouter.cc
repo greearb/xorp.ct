@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.2 2003/05/16 00:35:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.3 2003/05/16 19:23:17 pavlin Exp $"
 
 
 //
@@ -224,7 +224,11 @@ MfeaMrouter::start(void)
 					 pim_register_vif_addr.addr_bitlen()),
 				 pim_register_vif_addr,
 				 IPvX::ZERO(family()));
-	mfea_node().add_vif(register_vif);
+	string err;
+	if (mfea_node().add_vif(register_vif, err) < 0) {
+	    XLOG_ERROR("Cannot add Register vif: %s", err.c_str());
+	    return (XORP_ERROR);
+	}
     }
     
     // Check if we have the necessary permission
