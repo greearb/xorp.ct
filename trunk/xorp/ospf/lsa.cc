@@ -248,7 +248,7 @@ RouterLink::length() const
 }
 
 RouterLink
-RouterLink::decode(uint8_t *ptr, size_t& len) throw(BadPacket)
+RouterLink::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
 {
     if (len < length())
 	xorp_throw(BadPacket,
@@ -265,8 +265,8 @@ RouterLink::decode(uint8_t *ptr, size_t& len) throw(BadPacket)
 
     switch (version) {
     case OspfTypes::V2:
-	set_link_id(extract_32(&ptr[0]));
-	set_link_data(extract_32(&ptr[4]));
+	link.set_link_id(extract_32(&ptr[0]));
+	link.set_link_data(extract_32(&ptr[4]));
 
 	type = ptr[8];
 	switch (type) {

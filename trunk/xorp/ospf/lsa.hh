@@ -340,7 +340,7 @@ class RouterLink {
      * @return A RouterLink.
      */
     RouterLink
-    decode(uint8_t *ptr, size_t& len) throw(BadPacket);
+    decode(uint8_t *ptr, size_t& len) const throw(BadPacket);
     
     /**
      * Copy a wire format representation to the pointer provided.
