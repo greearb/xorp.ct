@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.2 2003/03/10 23:20:16 hodson Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.3 2003/05/02 07:50:48 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -58,8 +58,9 @@ IfTree::add_if(const string& ifname)
 {
     IfMap::iterator ii = get_if(ifname);
     if (ii != ifs().end()) {
-	ii->second.mark(CREATED);
-	return false;
+	// ii->second.mark(CREATED);
+	// return false;
+	return true;
     }
     _ifs.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
     return true;
@@ -199,8 +200,9 @@ IfTreeInterface::add_vif(const string& vifname)
 {
     VifMap::iterator vi = get_vif(vifname);
     if (vi != _vifs.end()) {
-	vi->second.mark(CREATED);
-	return false;
+	// vi->second.mark(CREATED);
+	// return false;
+	return true;
     }
     _vifs.insert(VifMap::value_type(vifname, IfTreeVif(name(), vifname)));
     return true;
@@ -260,8 +262,9 @@ IfTreeVif::add_addr(const IPv4& v4addr)
 {
     V4Map::iterator ai = get_addr(v4addr);
     if (ai != v4addrs().end()) {
-	ai->second.mark(CREATED);
-	return false;
+	// ai->second.mark(CREATED);
+	// return false;
+	return true;
     }
     _v4addrs.insert(V4Map::value_type(v4addr, IfTreeAddr4(v4addr)));
     return true;
@@ -282,8 +285,9 @@ IfTreeVif::add_addr(const IPv6& v6addr)
 {
     V6Map::iterator ai = get_addr(v6addr);
     if (ai != v6addrs().end()) {
-	ai->second.mark(CREATED);
-	return false;
+	// ai->second.mark(CREATED);
+	// return false;
+	return true;
     }
     _v6addrs.insert(V6Map::value_type(v6addr, IfTreeAddr6(v6addr)));
     return true;
