@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/ifconfig_get_click.cc,v 1.1 2004/10/21 00:44:22 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -20,10 +20,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "libcomm/comm_api.h"
-
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
+
 
 // TODO: XXX: PAVPAVPAV: temporary here
 // #define DEBUG_CLICK
