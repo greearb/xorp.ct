@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.4 2003/05/29 18:37:23 pavlin Exp $"
+#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.5 2003/05/29 22:37:01 mjh Exp $"
 
 #include <time.h>
 #include <vector>
@@ -157,16 +157,19 @@ XrlOspfTarget::common_0_1_get_status(// Output values,
 				     uint32_t& status,
 				     string& reason)
 {
-    //XXX placeholder only
-    status = PROC_READY;
-    reason = "Ready";
+    if (ospf()->shutting_down()) {
+	status = PROC_SHUTDOWN;
+	reason = "Shutting down";
+    } else {
+	status = PROC_READY;
+	reason = "Ready";
+    }
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlOspfTarget::common_0_1_shutdown()
 {
-    //XXXX need to log correct status
     //give ospf 30 seconds to shut down
     ospf()->shutdown(30);
     return XrlCmdError::OKAY();

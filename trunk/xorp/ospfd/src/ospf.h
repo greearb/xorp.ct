@@ -208,7 +208,6 @@ class OSPF : public ConfigItem {
     void free_orig_buffer(LShdr *);
     inline int mospf_enabled();
     inline bool	mc_abr();
-    inline bool	shutting_down();
     inline int donotage();
     inline InAddr my_addr();
 
@@ -354,6 +353,7 @@ class OSPF : public ConfigItem {
     InAddr ip_source(InAddr dest);
     InAddr if_addr(int phyint);
     void shutdown(int seconds);
+    inline bool	shutting_down();
     void hitless_restart(int seconds, byte reason);
     void logflush();
     inline rtid_t my_id();
