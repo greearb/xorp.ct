@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.15 2004/12/08 01:41:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.16 2005/03/05 01:41:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -93,12 +93,6 @@ void
 XrlFtiTransactionManager::process_fib_changes(const list<Fte4>& fte_list)
 {
     map<string, FibClient4>::iterator iter;
-
-    list<Fte4>::const_iterator list_iter;
-    for (list_iter = fte_list.begin(); list_iter != fte_list.end(); ++list_iter) {
-	const Fte4& fte4 = *list_iter;
-	XLOG_INFO("process_fib_changes: Fte4 = %s", fte4.str().c_str());
-    }
 
     for (iter = _fib_clients4.begin(); iter != _fib_clients4.end(); ++iter) {
 	FibClient4& fib_client = iter->second;
