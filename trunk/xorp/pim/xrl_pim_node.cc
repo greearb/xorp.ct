@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.3 2003/01/13 20:11:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.4 2003/01/13 20:40:23 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -1445,7 +1445,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
 			ip_ttl,
 			ip_tos,
 			is_router_alert,
-			(const uint8_t *)(protocol_message.begin()),
+			&protocol_message[0],
 			protocol_message.size());
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
@@ -1516,7 +1516,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
 			ip_ttl,
 			ip_tos,
 			is_router_alert,
-			(const uint8_t *)protocol_message.begin(),
+			&protocol_message[0],
 			protocol_message.size());
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
@@ -1579,7 +1579,7 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
 				 vif_index,
 				 IPvX(source_address),
 				 IPvX(dest_address),
-				 (const uint8_t *)(protocol_message.begin()),
+				 &protocol_message[0],
 				 protocol_message.size());
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
@@ -1646,7 +1646,7 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
 				 vif_index,
 				 IPvX(source_address),
 				 IPvX(dest_address),
-				 (const uint8_t *)(protocol_message.begin()),
+				 &protocol_message[0],
 				 protocol_message.size());
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
