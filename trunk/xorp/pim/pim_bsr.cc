@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.8 2003/02/27 03:11:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.9 2003/02/27 19:42:23 pavlin Exp $"
 
 
 //
@@ -1602,8 +1602,9 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
 	    // TODO: XXX: PAVPAVPAV: for testing purpose, the interval
 	    // is shorter: 1/10th	(XXX: before was 1/30th)
 	    // (Not in the spec).
+	    // TODO: XXX: PAVPAVPAV: temp. the interval is not shorter.
 	    _bsr_timer.start_random(
-		PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT / 10,
+		PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT / 1,
 		0,
 		bsr_zone_bsr_timer_timeout,
 		this,
