@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.6 2003/08/22 04:23:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.7 2003/09/20 00:23:36 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -308,39 +308,19 @@ protected:
 /**
  * @short class to set IPv4 interface addresses
  */
-// TODO: XXX: PAVPAVPAV: this won't work on Linux!!
-#ifndef HOST_OS_LINUX
-class IfDelAddr4 : public IfIoctl {
+class IfDelAddr4 : public IfReq {
 public:
     IfDelAddr4(int fd, const string& ifname, const IPv4& addr)
-	: IfIoctl(fd) {
-	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	addr.copy_out(_ifra.ifra_addr);
+	: IfReq(fd, ifname) {
+	addr.copy_out(_ifreq.ifr_addr);
 	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s)\n",
 		  fd, ifname.c_str(), addr.str().c_str());
     }
 
-    int execute() const { return ioctl(_fd, SIOCDIFADDR, &_ifra); }
-
-protected:
-    struct ifaliasreq _ifra;
-};
-#else
-class IfDelAddr4 : public IfIoctl {
-public:
-    IfDelAddr4(int fd, const string& ifname, const IPv4& addr)
-	: IfIoctl(fd) {
-	UNUSED(ifname);
-	UNUSED(addr);
-	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s)\n",
-		  fd, ifname.c_str(), addr.str().c_str());
-    }
-
-    int execute() const { return -1; }
+    int execute() const { return ioctl(_fd, SIOCDIFADDR, &_ifreq); }
 
 protected:
 };
-#endif // HOST_OS_LINUX
 
 /**
  * @short class to set IPv6 interface addresses
