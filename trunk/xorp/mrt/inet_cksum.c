@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/mrt/inet_cksum.c,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
+#ident "$XORP: xorp/mrt/inet_cksum.c,v 1.2 2003/03/10 23:20:44 hodson Exp $"
 
 
 /*
@@ -116,7 +116,7 @@ inet_cksum(uint16_t *addr, u_int len)
 int
 inet_cksum_add(uint16_t sum1, uint16_t sum2)
 {
-	register int sum = sum1 + sum2;
+	register int sum = (uint16_t)~sum1 + (uint16_t)~sum2;
 	uint16_t answer;
 	
 	/*
@@ -124,7 +124,6 @@ inet_cksum_add(uint16_t sum1, uint16_t sum2)
 	 */
 	sum = (sum >> 16) + (sum & 0xffff);	/* add hi 16 to low 16 */
 	sum += (sum >> 16);			/* add carry */
-	answer = sum;				/* truncate to 16 bits */
-						/* without 1's complement */
+	answer = ~sum;				/* truncate to 16 bits */
 	return (answer);
 }
