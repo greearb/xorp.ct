@@ -33,16 +33,22 @@ protocols {
       %delete: xrl "bgp/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       %activate: xrl "bgp/bgp/0.2/enable_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       peer-port {
+	%set:; /*the no-op set is to indicate that this node can be set, but 	           not changed*/
       }
       local-port {
+	%set:;
       }
       local-ip {
+	%set:;
       }
       as {
+	%set:;
       }
       holdtime {
+	%set:;
       }
       next-hop {
+	%set:;
       }
       disable {
         %set: xrl "bgp/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
