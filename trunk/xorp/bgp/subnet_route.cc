@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.4 2003/02/07 05:35:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.5 2003/02/07 22:55:20 mjh Exp $"
 
 #include "bgp_module.h"
 #include "subnet_route.hh"
@@ -38,8 +38,9 @@ SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone)
     _attributes = _att_mgr.add_attribute_list(atts);
 
     _flags = route_to_clone._flags;
-    //zero our reference count
+    //set our reference count to one (our own self-reference)
     _flags ^= (_flags & SRF_REFCOUNT);
+
     //update parent refcount
     if (_parent_route)
 	_parent_route->bump_refcount(1);
@@ -120,6 +121,33 @@ SubnetRoute<A>::~SubnetRoute<A>() {
     _parent_route = (const SubnetRoute<A>*)0xbad;
     _attributes = (const PathAttributeList<A>*)0xbad;
     _flags = 0xffffffff;
+}
+
+template<class A>
+void 
+SubnetRoute<A>::unref() const {
+    if ((_flags & SRF_DELETED) != 0) {
+	fprintf(stderr, "SubnetRoute %p: multiple unref's\n", this);
+	abort();
+    }
+    
+    if (refcount() == 0) 
+	delete this;
+    else {
+	_flags |= SRF_DELETED;
+    }
+}
+
+template<class A>
+void 
+SubnetRoute<A>::set_parent_route(const SubnetRoute<A> *parent) 
+{
+    assert(parent != this);
+    if (_parent_route)
+	_parent_route->bump_refcount(-1);
+    _parent_route = parent;
+    if (_parent_route)
+	_parent_route->bump_refcount(1);
 }
 
 template<class A>

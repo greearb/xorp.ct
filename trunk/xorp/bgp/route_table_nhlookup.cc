@@ -12,20 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.3 2002/12/17 22:06:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.4 2003/01/16 23:18:58 pavlin Exp $"
 
 #include "route_table_nhlookup.hh"
 
 template <class A>
 MessageQueueEntry<A>::MessageQueueEntry(const InternalMessage<A>* add_msg,
-					const InternalMessage<A>* delete_msg) 
+					const InternalMessage<A>* delete_msg) :
+    _added_route_ref(add_msg->route()), 
+    _deleted_route_ref(delete_msg ? delete_msg->route() : NULL)
 {
     copy_in(add_msg, delete_msg);
 }
 
 template <class A>
-MessageQueueEntry<A>::MessageQueueEntry(const MessageQueueEntry<A>& them)
-{
+MessageQueueEntry<A>::MessageQueueEntry(const MessageQueueEntry<A>& them) :
+    _added_route_ref(them.add_msg()->route()),
+    _deleted_route_ref(them.delete_msg() ? them.delete_msg()->route() : NULL)
+{ 
     copy_in(them.add_msg(), them.delete_msg());
 }
 
@@ -34,17 +38,14 @@ void
 MessageQueueEntry<A>::copy_in(const InternalMessage<A>* add_msg,
 			      const InternalMessage<A>* delete_msg) 
 {
-    assert(add_msg != NULL);
+    /* Note: this all depends on _added_route_ref and
+       _deleted_route_ref, whose pupose is to maintain the reference
+       count on the SubnetRoutes from the add and delete message, so
+       that the original won't go away before we've finished using it */
 
+    assert(add_msg != NULL);
     debug_msg("MessageQueueEntry: add_msg: %p\n%s\n", add_msg, add_msg->str().c_str());
 
-    // Clone the route.  But we also need to store the original route
-    // in the _add_msg.  We should use the clone, except when
-    // propagating downstream, because the original route pointer may
-    // be invalid if the data changes while we're waiting for an
-    // answer.  But when propagating downstream, we need to propagate
-    // the original so that flags can be set on it.
-    _cloned_added_route = new SubnetRoute<A>(*(add_msg->route()));
     // Copy the add_msg.  We can't assume it will still be around.
     _add_msg = new InternalMessage<A>(add_msg->route(),
 				      add_msg->origin_peer(),
@@ -53,16 +54,10 @@ MessageQueueEntry<A>::copy_in(const InternalMessage<A>* add_msg,
     // plumbing has to ensure that there's a cache upstream.
     assert(add_msg->changed() == false);
 
-
     if (delete_msg == NULL) {
 	_delete_msg = NULL;
-	_cloned_deleted_route = NULL;
     } else {
-	// we need to clone the subnet route from the delete message
-	// because it otherwise there's a good chance the pointer will
-	// become invalid.
-	_cloned_deleted_route = new SubnetRoute<A>(*(delete_msg->route()));
-	_delete_msg = new InternalMessage<A>(_cloned_deleted_route,
+	_delete_msg = new InternalMessage<A>(delete_msg->route(),
 					     delete_msg->origin_peer(),
 					     delete_msg->genid());
     }
@@ -72,9 +67,7 @@ template <class A>
 MessageQueueEntry<A>::~MessageQueueEntry() 
 {
     delete _add_msg;
-    delete _cloned_added_route;
     if (_delete_msg != NULL) {
-	delete _cloned_deleted_route;
 	delete _delete_msg;
     }
 }
@@ -86,7 +79,6 @@ MessageQueueEntry<A>::str() const
     string s;
     s += c_format("add_msg: %p\n", _add_msg);
     s += c_format("delete_msg: %p\n", _delete_msg);
-    s += c_format("clone: %p\n", _cloned_deleted_route);
     return s;
 }
 
@@ -172,7 +164,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 					 mqe->delete_msg()->origin_peer(),
 					 mqe->delete_msg()->genid());
 	    if (mqe->delete_msg()->changed())
-		preserve_msg->set_changed();
+	    	preserve_msg->set_changed();
 	    real_old_msg = preserve_msg;
 	} else if (mqe->type() == MessageQueueEntry<A>::ADD) {
 	    // there was an ADD queued.  No-one downstream heard this
@@ -210,7 +202,6 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	const MessageQueueEntry<A>* mqe = &(inserted.payload());
 	_queue_by_nexthop.insert(make_pair(new_rtmsg.nexthop(), mqe));
 	if (real_old_msg != &old_rtmsg) {
-	    delete real_old_msg->route();
 	    delete real_old_msg;
 	}
 	return ADD_USED;
@@ -223,7 +214,6 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 						 new_rtmsg, this);
 	}
 	if (real_old_msg != &old_rtmsg) {
-	    delete real_old_msg->route();
 	    delete real_old_msg;
 	}
 	return success;

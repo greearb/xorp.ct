@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.8 2003/02/07 06:23:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.9 2003/02/07 22:55:20 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -343,7 +343,7 @@ FanoutTable<A>::add_to_queue(RouteQueueOp operation,
     debug_msg("FanoutTable<A>::add_to_queue, op=%d, net=%s\n", 
 	      operation, rtmsg.net().str().c_str());
     RouteQueueEntry<A> *queue_entry;
-    queue_entry = new RouteQueueEntry<A>(*(rtmsg.route()), operation);
+    queue_entry = new RouteQueueEntry<A>(rtmsg.route(), operation);
     queue_entry->set_origin_peer(rtmsg.origin_peer());
     queue_entry->set_genid(rtmsg.genid());
     _output_queue.push_back(queue_entry);
@@ -365,7 +365,7 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
     // replace entails two queue entries, but they're always paired up
     // in the order OLD then NEW
     RouteQueueEntry<A> *queue_entry;
-    queue_entry = new RouteQueueEntry<A>(*(old_rtmsg.route()),
+    queue_entry = new RouteQueueEntry<A>(old_rtmsg.route(),
 					 RTQUEUE_OP_REPLACE_OLD);
     queue_entry->set_origin_peer(old_rtmsg.origin_peer());
     queue_entry->set_genid(old_rtmsg.genid());
@@ -374,7 +374,7 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
     // set queue positions now, before we add the second queue entry
     set_queue_positions(queued_peers);
 
-    queue_entry = new RouteQueueEntry<A>(*(new_rtmsg.route()),
+    queue_entry = new RouteQueueEntry<A>(new_rtmsg.route(),
 					 RTQUEUE_OP_REPLACE_NEW);
     queue_entry->set_origin_peer(new_rtmsg.origin_peer());
     queue_entry->set_genid(new_rtmsg.genid());
@@ -466,8 +466,8 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     switch ((*queue_ptr)->op()) {
     case RTQUEUE_OP_ADD: {
 	debug_msg("OP_ADD, net=%s\n", 
-		  (*queue_ptr)->route().net().str().c_str());
-	InternalMessage<A> rtmsg(&((*queue_ptr)->route()),
+		  (*queue_ptr)->route()->net().str().c_str());
+	InternalMessage<A> rtmsg((*queue_ptr)->route(),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -475,7 +475,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
     case RTQUEUE_OP_DELETE: {
 	debug_msg("OP_DELETE\n");
-	InternalMessage<A> rtmsg(&((*queue_ptr)->route()),
+	InternalMessage<A> rtmsg((*queue_ptr)->route(),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -483,14 +483,14 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
     case RTQUEUE_OP_REPLACE_OLD: {
 	debug_msg("OP_REPLACE_OLD\n");
-	InternalMessage<A> old_rtmsg(&((*queue_ptr)->route()),
+	InternalMessage<A> old_rtmsg((*queue_ptr)->route(),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	if (queue_ptr == _output_queue.begin())
 	    discard_possible = true;
 	queue_ptr++;
 	assert(queue_ptr != _output_queue.end());
-	InternalMessage<A> new_rtmsg(&((*queue_ptr)->route()),
+	InternalMessage<A> new_rtmsg((*queue_ptr)->route(),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	next_table->replace_route(old_rtmsg, new_rtmsg,

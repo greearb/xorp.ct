@@ -12,13 +12,33 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.2 2002/12/17 22:06:05 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
 
 #include "route_table_base.hh"
 #include "libxorp/trie.hh"
+
+/**
+ * Specialize Trie so that the SubnetRoute payload is deleted using
+ * the SubnetRoute's unref method, which permits delayed deletion.
+ */
+template<>
+void
+TrieNode<IPv4, const SubnetRoute<IPv4> >
+::delete_payload(const SubnetRoute<IPv4>* p) 
+{
+    p->unref();
+}
+
+template<>
+void
+TrieNode<IPv6, const SubnetRoute<IPv6> >
+::delete_payload(const SubnetRoute<IPv6>* p) 
+{
+    p->unref();
+}
 
 template<class A>
 class CacheTable : public BGPRouteTable<A>  {

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.4 2002/12/18 03:06:06 atanu Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.5 2003/01/30 04:06:33 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -38,19 +38,24 @@ public:
 	abort();
     }
     const InternalMessage<A>* add_msg() const {return _add_msg;}
-    const SubnetRoute<A>* added_route() const {return _cloned_added_route;}
+    const SubnetRoute<A>* added_route() const {return _add_msg->route();}
 
     const InternalMessage<A>* delete_msg() const {return _delete_msg;}
-    const SubnetRoute<A>* deleted_route() const {return _cloned_deleted_route;}
-    const IPNet<A>& net() const {return _cloned_added_route->net();}
+    const SubnetRoute<A>* deleted_route() const {return _delete_msg->route();}
+    const IPNet<A>& net() const {return _add_msg->route()->net();}
     string str() const;
 private:
     void copy_in(const InternalMessage<A>* add_msg,
 		 const InternalMessage<A>* delete_msg);
+
     InternalMessage<A>* _add_msg;
     InternalMessage<A>* _delete_msg;
-    const SubnetRoute<A>* _cloned_added_route;
-    const SubnetRoute<A>* _cloned_deleted_route;
+
+    //These references are to ensure that the SubnetRoutes from the
+    //add and delete messages don't get deleted before we're done with
+    //them.
+    SubnetRouteConstRef<A> _added_route_ref;
+    SubnetRouteConstRef<A> _deleted_route_ref;
 };
 
 template<class A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.4 2003/01/22 00:07:23 mjh Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.5 2003/02/07 05:35:37 mjh Exp $
 
 #ifndef __BGP_TRIE_HH__
 #define __BGP_TRIE_HH__
@@ -42,8 +42,6 @@ public:
 
     ChainedSubnetRoute(const ChainedSubnetRoute& csr);
 
-    ~ChainedSubnetRoute()	{}
-
     const ChainedSubnetRoute<A> *prev() const { return _prev; }
     const ChainedSubnetRoute<A> *next() const { return _next; }
 
@@ -61,6 +59,12 @@ protected:
     ChainedSubnetRoute& operator=(const ChainedSubnetRoute& csr); // Not impl.
 
 private:
+    //The destructor is private because it's not supposed to be called
+    //directly. Instead, unref() should be used which will only delete
+    //the SubnetRoute when the reference count reaches zero.
+    friend class SubnetRoute<A>; //shut the compiler up.
+    ~ChainedSubnetRoute() {}
+
     // it looks odd to have these be mutable and the methods to set
     // them be const, but that's because the chaining is really
     // conceptually part of the container, not the payload.  It these

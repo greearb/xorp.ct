@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.3 2003/01/26 16:57:45 rizzo Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.4 2003/01/31 23:39:40 mjh Exp $"
 
 #include "bgp_trie.hh"
 
@@ -60,21 +60,23 @@ BgpTrie<A>::insert(const IPNet& net, const SubnetRoute<A>& route)
 {
     typename PathmapType::iterator pmi = _pathmap.find(route.attributes());
     const ChainedSubnetRoute* found = (pmi == _pathmap.end()) ? NULL : pmi->second;
-    ChainedSubnetRoute chained_rt(route, found);
+    ChainedSubnetRoute* chained_rt 
+	= new ChainedSubnetRoute(route, found);
 
     debug_msg("storing route for %s with attributes %p", net.str().c_str(),
 	   route.attributes());
 
     // The trie will copy chained_rt.  The copy constructor will insert
     // the copy into the chain after chained_rt.
-    iterator iter = _trie.insert(net, chained_rt);
+    iterator iter = _trie.insert(net, *chained_rt);
 
     if (found == NULL) {
 	debug_msg(" on new chain");
 	_pathmap[route.attributes()] = &(iter.payload());
     }
     debug_msg("\n");
-    chained_rt.unchain();
+    chained_rt->unchain();
+    chained_rt->unref();
     return iter;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.4 2003/02/07 05:35:37 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.5 2003/02/07 22:55:21 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -51,7 +51,6 @@ public:
 		const PathAttributeList<A> *attributes,
 		const SubnetRoute<A>* parent_route,
 		uint32_t igp_metric);
-    ~SubnetRoute();
     bool operator==(const SubnetRoute<A>& them) const;
     const IPNet<A>& net() const {return _net;}
     const A& nexthop() const {return _attributes->nexthop();}
@@ -88,29 +87,21 @@ public:
     }
 
 
-    void unref() const {
-	if (refcount() == 0)
-	    delete this;
-	else {
-	    _flags |= SRF_DELETED;
-	}
-    }
+    void unref() const;
 
-    void set_parent_route(const SubnetRoute<A> *parent) 
-    {
-	assert(parent != this);
-	if (_parent_route)
-	    _parent_route->bump_refcount(-1);
-	_parent_route = parent;
-	if (_parent_route)
-	    _parent_route->bump_refcount(1);
-    }
+    void set_parent_route(const SubnetRoute<A> *parent);
 
     inline uint16_t refcount() const {
 	return (_flags & SRF_REFCOUNT)>>16;
     }
 protected:
+    //The destructor is protected because you are not supposed to
+    //directly delete a SubnetRoute.  Instead you should call unref()
+    //and the SubnetRoute will be deleted when it's reference count
+    //reaches zero.
+    ~SubnetRoute();
 private:
+
     inline void bump_refcount(int delta) const {
 	assert(delta == 1 || delta == -1);
 	uint8_t refs = refcount();
@@ -150,8 +141,9 @@ private:
        Currently this is only used for RIB-IN routes that are filtered
        in the inbound filter bank */
 
-    /* SRF_TOKEN is a byte taken from the flags field which is used
-       for runtime data structure consistency checks */
+    /* SRF_REFCOUNT (16 bits) maintains a reference count of the
+       number of objects depending on this SubnetRoute instance.
+       Deletion will be delayed until the reference count reaches zero */
     mutable uint32_t _flags;
 
     /* If the route is a winner (SRF_WINNER is set), then
@@ -164,32 +156,38 @@ template<class A>
 class SubnetRouteRef
 {
 public:
-    SubnetRouteRef(SubnetRoute<A>& route) : _route(route)
+    SubnetRouteRef(SubnetRoute<A>* route) : _route(route)
     {
-	_route.bump_refcount(1);
+	if (_route)
+	    _route->bump_refcount(1);
     }
     ~SubnetRouteRef() {
-	_route.bump_refcount(-1);
+	if (_route)
+	    _route->bump_refcount(-1);
     }
-    SubnetRoute<A>& route() const {return _route;}
+    SubnetRoute<A>* route() const {return _route;}
 private:
-    SubnetRoute<A>& _route;
+    //_route can be NULL
+    SubnetRoute<A>* _route;
 };
 
 template<class A>
 class SubnetRouteConstRef 
 {
 public:
-    SubnetRouteConstRef(const SubnetRoute<A>& route) : _route(route)
+    SubnetRouteConstRef(const SubnetRoute<A>* route) : _route(route)
     {
-	_route.bump_refcount(1);
+	if (_route)
+	    _route->bump_refcount(1);
     }
     ~SubnetRouteConstRef() {
-	_route.bump_refcount(-1);
+	if (_route)
+	    _route->bump_refcount(-1);
     }
-    const SubnetRoute<A>& route() const {return _route;}
+    const SubnetRoute<A>* route() const {return _route;}
 private:
-    const SubnetRoute<A>& _route;
+    //_route can be NULL
+    const SubnetRoute<A>* _route;
 };
 
 #endif // __BGP_SUBNET_ROUTE_HH__

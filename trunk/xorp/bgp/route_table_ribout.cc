@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.5 2003/02/07 06:23:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.6 2003/02/07 22:55:20 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -122,7 +122,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
 	// just add the route to the queue.
-	entry = new RouteQueueEntry<A>(*(rtmsg.route()), RTQUEUE_OP_ADD);
+	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_ADD);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
@@ -133,7 +133,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 				       RTQUEUE_OP_REPLACE_OLD);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
-	entry = new RouteQueueEntry<A>(*(rtmsg.route()), 
+	entry = new RouteQueueEntry<A>(rtmsg.route(), 
 				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
@@ -144,7 +144,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	i++;
 	queued_entry = *i;
 	assert(queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
-	entry = new RouteQueueEntry<A>(*(rtmsg.route()), 
+	entry = new RouteQueueEntry<A>(rtmsg.route(), 
 				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.insert(i, entry);
@@ -204,7 +204,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
 	// add the route delete operation to the queue.
-	entry = new RouteQueueEntry<A>(*(rtmsg.route()), RTQUEUE_OP_DELETE);
+	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
@@ -316,21 +316,21 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
 		debug_msg("* Announce\n");
 		// the sanity checking was done in add_route...
-		_peer->add_route((*i)->route());
+		_peer->add_route(*((*i)->route()));
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
 		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
-		_peer->delete_route((*i)->route());
+		_peer->delete_route(*((*i)->route()));
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
 		debug_msg("* Replace\n");
-		const SubnetRoute<A> *old_route = &((*i)->route());
+		const SubnetRoute<A> *old_route = (*i)->route();
 		const RouteQueueEntry<A> *old_queue_entry = (*i);
 		i++;
 		assert(i != tmp_queue.end());
 		assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
-		const SubnetRoute<A> *new_route = &((*i)->route());
+		const SubnetRoute<A> *new_route = (*i)->route();
 		_peer->replace_route(*old_route, *new_route);
 		delete old_queue_entry;
 		delete (*i);
