@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.3 2003/03/27 01:51:57 hodson Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.4 2003/03/27 07:51:18 hodson Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -108,7 +108,7 @@ public:
     /**
      * Add a new one-off timer to the EventLoop.
      * 
-     * @param wait time to wait relative to now from when the timer expires.
+     * @param wait the relative time as a timeval when the timer expires.
      * @param ocb callback object that is invoked when timer expires.
      * @return a @ref XorpTimer object that must be assigned to remain 
      * scheduled.
@@ -153,6 +153,20 @@ public:
      */
     XorpTimer set_flag_at(const struct timeval& when, bool* flag_ptr);
 
+    /**
+     * Add a flag setting timer to the EventLoop.
+     * 
+     * @param wait the relative time as a timeval when the timer expires.
+     * 
+     * @param flag_ptr pointer to a boolean variable that is set to
+     * false when this function is called and will be set to true when
+     * the @ref XorpTimer expires.
+     * 
+     * @return a @ref XorpTimer object that must be assigned to remain 
+     * scheduled.
+     */
+    XorpTimer set_flag_after(const timeval& wait, bool* flag_ptr);
+    
     /**
      * Add a flag setting timer to the EventLoop.
      * 
@@ -242,13 +256,13 @@ private:
 // Deferred definitions
 
 inline XorpTimer
-EventLoop::new_timer(const BasicTimerCallback &cb)
+EventLoop::new_timer(const BasicTimerCallback& cb)
 {
     return _timer_list.new_timer(cb);
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_at(const timeval &tv, const OneoffTimerCallback& ocb)
+EventLoop::new_oneoff_at(const timeval& tv, const OneoffTimerCallback& ocb)
 {
     return _timer_list.new_oneoff_at(tv, ocb);
 }
@@ -273,9 +287,15 @@ EventLoop::new_periodic(int period_ms, const PeriodicTimerCallback& pcb)
 }
 
 inline XorpTimer
-EventLoop::set_flag_at(const timeval &tv, bool *flag_ptr)
+EventLoop::set_flag_at(const timeval& tv, bool *flag_ptr)
 {
     return _timer_list.set_flag_at(tv, flag_ptr);
+}
+
+inline XorpTimer
+EventLoop::set_flag_after(const timeval& wait, bool *flag_ptr)
+{
+    return _timer_list.set_flag_after(wait, flag_ptr);
 }
 
 inline XorpTimer

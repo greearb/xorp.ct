@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.5 2003/03/27 01:51:57 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.6 2003/03/27 07:51:19 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -231,6 +231,19 @@ public:
      */
     XorpTimer set_flag_at(const timeval& when, bool* flag_ptr);
 
+    /**
+     * Create a XorpTimer to set a flag.
+     *
+     * @param interval the relative time as a timeval when the timer expires.  
+     *
+     * @param flag_ptr pointer to a boolean variable that is set to
+     * false when this function is called and will be set to true when
+     * the @ref XorpTimer expires.
+     *
+     * @return the @ref XorpTimer created.
+     */
+    XorpTimer set_flag_after(const timeval& interval, bool* flag_ptr);
+    
     /**
      * Create a XorpTimer to set a flag.
      *

@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.3 2003/03/10 23:20:36 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.4 2003/03/27 07:51:19 hodson Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -185,7 +185,7 @@ private:
 // XorpTimer factories
 
 XorpTimer
-TimerList::new_oneoff_at(const timeval &tv, const OneoffTimerCallback& cb)
+TimerList::new_oneoff_at(const timeval& tv, const OneoffTimerCallback& cb)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
     n->schedule_at(tv);
@@ -225,11 +225,19 @@ set_flag_hook(bool* flag_ptr)
 }
 
 XorpTimer
-TimerList::set_flag_at(const timeval &tv, bool *flag_ptr)
+TimerList::set_flag_at(const timeval& tv, bool *flag_ptr)
 {
     assert(flag_ptr);
     *flag_ptr = false;
     return new_oneoff_at(tv, callback(set_flag_hook, flag_ptr));
+}
+
+XorpTimer
+TimerList::set_flag_after(const timeval& interval, bool *flag_ptr)
+{
+    assert(flag_ptr);
+    *flag_ptr = false;
+    return new_oneoff_after(interval, callback(set_flag_hook, flag_ptr));
 }
 
 XorpTimer
@@ -284,7 +292,7 @@ TimerList::size() const
 }
 
 bool
-TimerList::get_next_delay(timeval &tv) const
+TimerList::get_next_delay(timeval& tv) const
 {
     acquire_lock();
     struct heap_entry *t = top();
