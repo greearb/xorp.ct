@@ -5068,6 +5068,17 @@ else
 	    ac_cv_net_snmp_usable=no
 	    snmpd="skip_check"
 	fi
+	if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -le "1"; then
+	   { echo "$as_me:$LINENO: WARNING: net-snmp version has broken inlining defines" >&5
+echo "$as_me: WARNING: net-snmp version has broken inlining defines" >&2;}
+	   cat >>confdefs.h <<\_ACEOF
+#define HAVE_BROKEN_NETSNMP_INLINE 1
+_ACEOF
+
+	   ac_cv_net_snmp_broken_inline=yes
+	else
+	   ac_cv_net_snmp_broken_inline=no
+	fi
 
 fi
 echo "$as_me:$LINENO: result: $ac_cv_net_snmp_usable" >&5
@@ -5245,6 +5256,174 @@ fi
 oldCPPFLAGS=${CPPFLAGS}
 while test "${net_snmp_found}" = "true"; do
     NETSNMPCFLAGS=`net-snmp-config --cflags`
+
+    # Some versions of net-snmp are broken with respect to the use of
+    # the 'inline' keyword and various C++ compilers, so can't be
+    # explicitly told not to inline.
+    # It is OK to say -DNETSNMP_NO_INLINE to net-snmp >= 5.2.1,
+    # but not < 5.1.0.
+    if test "${ac_cv_net_snmp_broken_inline}" = "no"; then
+	NETSNMPCFLAGS="${NETSNMPCFLAGS} -DNETSNMP_NO_INLINE"
+	for ac_flag in "-DNETSNMP_NO_INLINE"
+  do
+      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+
+
+  _save_flags="$CFLAGS"
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  CFLAGS="$CFLAGS $ac_flag"
+  echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
+echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
+  if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+return (0);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "ac_cv_prog_c_compiler_$ac_safe=yes"
+
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+eval "ac_cv_prog_c_compiler_$ac_safe=no"
+
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+
+fi
+
+  CFLAGS="$_save_flags"
+  ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+  if eval "test \"`echo '$ac_cv_prog_c_compiler_'$ac_safe`\" = yes"; then
+    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+    CFLAGS="$CFLAGS $ac_flag"
+  else
+    echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  fi
+
+  done
+
+	for ac_flag in "-DNETSNMP_NO_INLINE"
+  do
+      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+
+
+  _save_flags="$CXXFLAGS"
+  ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+  CXXFLAGS="$CXXFLAGS $ac_flag"
+  echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
+echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
+  if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+return (0);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
+
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
+
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+
+fi
+
+  CXXFLAGS="$_save_flags"
+  ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+  if eval "test \"`echo '$ac_cv_prog_cxx_compiler_'$ac_safe`\" = yes"; then
+    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+    CXXFLAGS="$CXXFLAGS $ac_flag"
+  else
+    echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  fi
+
+  done
+
+    fi
+
     # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
     # the default compiler cannot compile.
       ac_safe=`echo "${NETSNMPCFLAGS}" | sed 'y%./+- %__p__%'`

@@ -36,7 +36,13 @@ check_PROGRAMS			 = $(TESTS)
 
 # -- Compiler and pre compiler flags
 
-AM_CPPFLAGS			 = `net-snmp-config --cflags` -UPACKAGE
+AM_CPPFLAGS			 = `net-snmp-config --cflags`
+AM_CPPFLAGS			+= -UPACKAGE		\
+				   -UPACKAGE_BUGREPORT	\
+				   -UPACKAGE_NAME	\
+				   -UPACKAGE_STRING	\
+				   -UPACKAGE_TARNAME	\
+				   -UPACKAGE_VERSION
 
 # -- Linker flags for all targets in this directory
 

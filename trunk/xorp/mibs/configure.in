@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.1 2004/11/19 05:19:09 bms Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.2 2004/11/20 01:27:24 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -298,6 +298,13 @@ if test "${net_snmp_found}" = "true";  then
 	    ac_cv_net_snmp_usable=no
 	    snmpd="skip_check"
 	fi
+	if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -le "1"; then
+	   AC_MSG_WARN(net-snmp version has broken inlining defines)
+	   AC_DEFINE(HAVE_BROKEN_NETSNMP_INLINE, 1, [])
+	   ac_cv_net_snmp_broken_inline=yes
+	else
+	   ac_cv_net_snmp_broken_inline=no
+	fi
     )
     if test "${ac_cv_net_snmp_usable}" != "yes" ; then
 	AC_MSG_WARN(net-snmp version too old)
@@ -384,6 +391,18 @@ fi
 oldCPPFLAGS=${CPPFLAGS}
 while test "${net_snmp_found}" = "true"; do
     NETSNMPCFLAGS=`net-snmp-config --cflags`
+
+    # Some versions of net-snmp are broken with respect to the use of
+    # the 'inline' keyword and various C++ compilers, so can't be
+    # explicitly told not to inline.
+    # It is OK to say -DNETSNMP_NO_INLINE to net-snmp >= 5.2.1,
+    # but not < 5.1.0.
+    if test "${ac_cv_net_snmp_broken_inline}" = "no"; then
+	NETSNMPCFLAGS="${NETSNMPCFLAGS} -DNETSNMP_NO_INLINE"
+	XR_TRY_ADD_CFLAGS("-DNETSNMP_NO_INLINE")
+	XR_TRY_ADD_CXXFLAGS("-DNETSNMP_NO_INLINE")
+    fi
+
     # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
     # the default compiler cannot compile.
     XR_CHECK_CFLAG(${NETSNMPCFLAGS}, snmpd_flags_valid=yes, snmpd_flags_valid=no)
