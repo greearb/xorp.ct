@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.5 2004/03/16 21:43:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.6 2004/03/18 13:09:46 pavlin Exp $"
 
 #include "xrl_fti.hh"
 
@@ -261,7 +261,7 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
 	fte.ifname(),
 	fte.vifname(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_delete_route6_cb,
+		 &XrlFtiTransactionManager::send_fib_client_delete_route4_cb,
 		 target_name));
 
     if (success)
