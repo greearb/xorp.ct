@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.2 2004/02/14 00:05:03 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.3 2004/03/30 03:23:18 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -198,6 +198,7 @@ public:
      */
     bool is_interface_route() const { return ! (_ifname.empty()
 						&& _vifname.empty()); }
+
     /**
      * Check whether the route entry is valid.
      * 
