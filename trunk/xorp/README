@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.19 2003/11/07 00:00:10 pavlin Exp $
+# $XORP: xorp/README,v 1.20 2004/02/22 03:02:36 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -83,7 +83,7 @@ Currently, XORP implements the following protocols:
   * IGMP v1 and v2:
     - RFC 2236
 
-  * MLD v1 (not tested yet):
+  * MLD v1:
     - RFC 2710
 
 For description of the changes in each release, see ${XORP}/RELEASE_NOTES.
@@ -219,7 +219,6 @@ In the short-term we plan to add:
   * IS-IS
   * Click forwarding path
   * Security
-  * MLD
   * PIM-SSM
   * IGMPv3
   * Bi-directional PIM-SM
