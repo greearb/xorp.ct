@@ -4466,16 +4466,22 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
     # MIB support.  dummy MIB modules will only generate warnings
     echo 'dlmod dummy doubledummy' > conftestsnmp.conf
     test_ports='51510 51520 51530 51540 51550'
-    for p in ${test_ports}; do
-	${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:$p&
-	pid=$!
-	sleep 3
-	if ( ps | grep ${pid} > /dev/null ); then
-	    kill ${pid} >& /dev/null
-	    snmpd_valid=yes
-	    break
-	fi
-	kill ${pid} >& /dev/null
+    snmpd_base_args="-f -r -l conftestsnmp.log -c conftestsnmp.conf"
+    # On Linux snmpd seems to need the "-p" flag.
+    for args in "" "-p"
+    do
+	for p in ${test_ports}
+	do
+		${snmpd} ${snmpd_base_args} ${args} udp:localhost:$p&
+		pid=$!
+		sleep 3
+		if ps -p ${pid} > /dev/null
+		then
+			kill ${pid}
+			snmpd_valid=yes
+			break 2
+		fi
+	done
     done
     if test "${snmpd_valid}" = "yes" ; then
 	# Verify that dlmod directive was recognized
