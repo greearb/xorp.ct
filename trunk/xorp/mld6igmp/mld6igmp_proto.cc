@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.4 2003/04/16 04:53:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.5 2003/04/22 23:27:22 hodson Exp $"
 
 
 //
@@ -62,6 +62,13 @@ void
 Mld6igmpVif::other_querier_timer_timeout()
 {
     IPvX ipaddr_zero(family());		// XXX: ANY
+    
+    if (addr_ptr() == NULL) {
+	// XXX: the vif address is unknown; this cannot happen if the
+	// vif status is UP.
+	XLOG_ASSERT(! is_up());
+	return;
+    }
     
     set_querier_addr(*addr_ptr());
     _proto_flags |= MLD6IGMP_VIF_QUERIER;

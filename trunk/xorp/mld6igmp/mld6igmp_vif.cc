@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.11 2003/07/15 00:45:49 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.12 2003/07/16 02:56:56 pavlin Exp $"
 
 
 //
@@ -335,6 +335,8 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
+    
+    XLOG_ASSERT(addr_ptr() != NULL);
     
     //
     // Prepare the MLD or IGMP header.
