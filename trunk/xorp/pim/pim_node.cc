@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.2 2003/01/26 04:06:23 pavlin Exp $"
 
 
 //
@@ -630,7 +630,7 @@ PimNode::delete_all_vifs(void)
     // XXX: here we must use proto_vifs().size() to end the iteration,
     // because the proto_vifs() array may be modified when a vif
     // is deleted.
-    for (size_t i = 0; i < proto_vifs().size(); i++) {
+    for (uint16_t i = 0; i < proto_vifs().size(); i++) {
 	PimVif *pim_vif = vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -1097,8 +1097,8 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
 PimNbr *
 PimNode::pim_nbr_find(const IPvX& nbr_addr)
 {
-    for (uint16_t vif_index = 0; vif_index < maxvifs(); vif_index++) {
-	PimVif *pim_vif = vif_find_by_vif_index(vif_index);
+    for (uint16_t i = 0; i < maxvifs(); i++) {
+	PimVif *pim_vif = vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
 	PimNbr *pim_nbr = pim_vif->pim_nbr_find(nbr_addr);
@@ -1133,7 +1133,7 @@ PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
     if (pim_nbr == NULL) {
 	// Find the first vif
 	PimVif *pim_vif = NULL;
-	for (size_t i = 0; i < maxvifs(); i++) {
+	for (uint16_t i = 0; i < maxvifs(); i++) {
 	    pim_vif = vif_find_by_vif_index(i);
 	    if (pim_vif != NULL)
 		break;

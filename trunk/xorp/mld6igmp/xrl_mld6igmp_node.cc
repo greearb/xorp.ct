@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.2 2003/01/16 19:32:21 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -1016,7 +1016,7 @@ XrlMld6igmpNode::mfea_client_0_1_set_all_vifs_done(
     // If the protocol node is running, probably time to start the vifs as well
     //
     if (Mld6igmpNode::is_up()) {
-	for (size_t i = 0; i < Mld6igmpNode::maxvifs(); i++) {
+	for (uint16_t i = 0; i < Mld6igmpNode::maxvifs(); i++) {
 	    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(i);
 	    if (mld6igmp_vif == NULL)
 		continue;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.7 2003/02/06 01:39:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.8 2003/02/10 23:30:21 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -223,7 +223,7 @@ PimMfc::add_mfc_to_kernel()
 {
     do {
 	string res;
-	for (size_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else
@@ -248,7 +248,7 @@ PimMfc::delete_mfc_from_kernel()
 {
     do {
 	string res;
-	for (size_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else

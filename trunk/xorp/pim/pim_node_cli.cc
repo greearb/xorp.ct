@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.4 2003/01/14 20:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.5 2003/01/26 04:06:23 pavlin Exp $"
 
 
 //
@@ -458,7 +458,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
     cli_print(c_format("%-16s%-9s%-7s%2s %-9s%9s %-16s%10s\n",
 	       "Interface", "State", "Mode", "V", "PIMstate",
 	       "Priority", "DRaddr", "Neighbors"));
-    for (size_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -929,7 +929,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
     cli_print(c_format("%-16s%11s %-16s%2s %-7s%9s%8s\n",
 	       "Interface", "DRpriority", "NeighborAddr", "V", "Mode",
 	       "Holdtime", "Timeout"));
-    for (size_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.2 2003/01/26 04:06:22 pavlin Exp $"
 
 
 //
@@ -128,7 +128,7 @@ Mld6igmpNodeCli::cli_show_igmp_interface(const vector<string>& argv)
     cli_print(c_format("%-16s%-9s%-16s%8s%8s%8s\n",
 		       "Interface", "State", "Querier",
 		       "Timeout", "Version", "Groups"));
-    for (size_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
+    for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
@@ -197,7 +197,7 @@ Mld6igmpNodeCli::cli_show_igmp_group(const vector<string>& argv)
     cli_print(c_format("%-16s%-16s%-16s%-16s%8s\n",
 		       "Interface", "Group", "Source",
 		       "Last Reported", "Timeout"));
-    for (size_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
+    for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
