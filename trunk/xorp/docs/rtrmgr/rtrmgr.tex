@@ -10,13 +10,13 @@
 
 \title{XORP Router Manager Process (rtrmgr) \\
 \vspace{1ex}
-Version 0.2}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 10, 2003}
+\date{June 6, 2003}
 
 %\twocolumn
 \begin{document}
@@ -265,23 +265,34 @@ commands that the rtrmgr supports.
 \subsubsection{The {\tt \%modinfo} Command.}
 The sub-commands to the {\tt \%modinfo} command are:
 \begin{description}
-\item {{\tt \%modinfo provides }{\it ModuleName}}  \\The {\tt provides} subcommand takes one additional
+\item {{\tt \%modinfo: provides }{\it ModuleName}}  \\The {\tt provides} subcommand takes one additional
 parameter, which gives the name of the module providing the
 functionality rooted at this node.  
-\item {{\tt \%modinfo depends }{\it list of modules}}  \\The {\tt depends} subcommand takes at least one additional
+\item {{\tt \%modinfo: depends }{\it list of modules}}  \\The {\tt depends} subcommand takes at least one additional
 parameter, giving a list of the other modules that must
 be running and configured before this module may be started.
-\item {{\tt \%modinfo path }{\it ProgramPath}}  \\The {\tt path} subcommand takes one additional parameter giving the pathname of the software to be run
+\item {{\tt \%modinfo: path }{\it ProgramPath}}  \\The {\tt path} subcommand takes one additional parameter giving the pathname of the software to be run
 to provide this functionality.  The pathname may be absolute or
 relative.
-\item {{\tt \%modinfo startcommit }{\it XRL}}  \\The {\tt startcommit} subcommand takes one additional
+\item {{\tt \%modinfo: startcommit }{\it XRL}}  \\The {\tt startcommit} subcommand takes one additional
 parameter, and gives the XRL to call before performing
 any change to the configuration of the module.
-\item {{\tt \%modinfo endcommit }{\it XRL}}  \\The {\tt endcommit} subcommand takes one additional
+\item {{\tt \%modinfo: endcommit }{\it XRL}}  \\The {\tt endcommit} subcommand takes one additional
 parameter, and gives the XRL to call to complete any
 change to the configuration of the module.  startcommit and
 endcommit are optional.  They provide a way to make batch changes to a
 module configuration as an atomic operation.
+\item {{\tt \%modinfo: statusmethod }{\it method}}  \\The {\tt
+statusmethod} subcommand indicates the mechanism to be used to
+discover the status of the module.  The only method current supported
+is {\tt xrl} which indicates usage of the common interface {\tt
+get\_status} XRL.
+\item {{\tt \%modinfo: shutdownmethod }{\it method}}  \\The {\tt
+shutdownmethod} subcommand indicates the mechanism to be used to
+gracefully shutdown the module.  The only method current supported
+is {\tt xrl} which indicates usage of the common interface {\tt
+shutdown} XRL.  If the process does not then transition to {\tt
+PROC\_SHUTDOWN} state, the rtrmgr will then kill the process.
 \end{description}
 \subsubsection{The {\tt \%create} Command.}
 {\tt \%create} is used to create a new instance of an interior node in
