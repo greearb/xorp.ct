@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.72 2004/05/29 19:55:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.73 2004/05/30 06:32:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -152,8 +152,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    try {
 		NotificationPacket pac(buf, length);
 		// All decode errors should throw an InvalidPacket
-		_last_error[0] = pac.error_code();	// used for the MIB(?)
-		_last_error[1] = pac.error_subcode();
 		debug_msg(pac.str().c_str());
 		event_recvnotify(pac);
 	    } catch (InvalidPacket& err) {
@@ -167,8 +165,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		// catchall error code.
 		// XXX we should rather use a 'bad notification' error code?
 		NotificationPacket pac(CEASE);
-		_last_error[0] = pac.error_code();	// used for the MIB(?)
-		_last_error[1] = pac.error_subcode();
 		event_recvnotify(pac);
 	    }
 	    TIMESPENT_CHECK();
@@ -912,6 +908,9 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 		 this->str().c_str(),
 		 pretty_print_state(_state),
 		 p.str().c_str());
+
+    _last_error[0] = p.error_code();
+    _last_error[1] = p.error_subcode();
 
     switch(_state) {
     case STATEIDLE:
