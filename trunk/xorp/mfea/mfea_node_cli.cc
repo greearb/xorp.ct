@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.2 2003/01/13 20:40:21 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.3 2003/02/05 23:23:57 pavlin Exp $"
 
 
 //
@@ -257,7 +257,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
     
     cli_print(c_format("%-16s%-9s%14s %-16s%-1s\n",
 		       "Interface", "State", "Vif/PifIndex", "Addr", "Flags"));
-    for (size_t i = 0; i < mfea_node().maxvifs(); i++) {
+    for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
 	// Test if we should print this entry
 	bool do_print = true;
@@ -347,7 +347,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
     // to fit into 80 width-terminal.
     cli_print(c_format("%-14s%-16s%-19s%-16s%-15s\n",
 		       "Interface", "Addr", "Subnet", "Broadcast", "P2Paddr"));
-    for (size_t i = 0; i < mfea_node().maxvifs(); i++) {
+    for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
 	// Test if we should print this entry
 	bool do_print = true;

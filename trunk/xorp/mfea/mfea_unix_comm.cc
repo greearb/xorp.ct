@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.2 2003/01/26 04:06:22 pavlin Exp $"
 
 
 //
@@ -206,7 +206,7 @@ UnixComm::start(void)
 	    // whether the underlying address has changed).
 	    //
 	    IPvX pim_register_vif_addr(IPvX::ZERO(family()));
-	    for (size_t i = 0; i < mfea_node().maxvifs(); i++) {
+	    for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 		MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
 		if (mfea_vif == NULL)
 		    continue;
@@ -1611,8 +1611,6 @@ UnixComm::add_mfc(const IPvX& source, const IPvX& group,
 		  uint8_t *oifs_flags,
 		  const IPvX& rp_addr)
 {
-    uint16_t vif_index;
-    
     if (iif_vif_index >= mfea_node().maxvifs())
 	return (XORP_ERROR);
     
@@ -1631,10 +1629,10 @@ UnixComm::add_mfc(const IPvX& source, const IPvX& group,
 	source.copy_out(mc.mfcc_origin);
 	group.copy_out(mc.mfcc_mcastgrp);
 	mc.mfcc_parent = iif_vif_index;
-	for (vif_index = 0; vif_index < mfea_node().maxvifs(); vif_index++) {
-	    mc.mfcc_ttls[vif_index] = oifs_ttl[vif_index];
+	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+	    mc.mfcc_ttls[i] = oifs_ttl[i];
 #if defined(HAVE_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MCAST_API)
-	    mc.mfcc_flags[vif_index] = oifs_flags[vif_index];
+	    mc.mfcc_flags[i] = oifs_flags[i];
 #endif
 	}
 #if defined(HAVE_MFCC_RP) && defined(ENABLE_ADVANCED_MCAST_API)
@@ -1664,11 +1662,11 @@ UnixComm::add_mfc(const IPvX& source, const IPvX& group,
 	source.copy_out(mc.mf6cc_origin);
 	group.copy_out(mc.mf6cc_mcastgrp);
 	mc.mf6cc_parent = iif_vif_index;
-	for (vif_index = 0; vif_index < mfea_node().maxvifs(); vif_index++) {
-	    if (oifs_ttl[vif_index] > 0)
-		IF_SET(vif_index, &mc.mf6cc_ifset);
+	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+	    if (oifs_ttl[i] > 0)
+		IF_SET(i, &mc.mf6cc_ifset);
 #if defined(HAVE_MF6CC_FLAGS) && defined(ENABLE_ADVANCED_MCAST_API)
-	    mc.mf6cc_flags[vif_index] = oifs_flags[vif_index];
+	    mc.mf6cc_flags[i] = oifs_flags[i];
 #endif
 	}
 #if defined(HAVE_MF6CC_RP) && defined(ENABLE_ADVANCED_MCAST_API)
