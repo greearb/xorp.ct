@@ -25,7 +25,8 @@
 template <typename A>
 class AreaRouter {
  public:
-    AreaRouter(Ospf<A>& ospf, Area area, OspfTypes::AreaType area_type) 
+    AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
+	       OspfTypes::AreaType area_type) 
 	: _ospf(ospf), _area(area), _area_type(area_type)
     {}
 
@@ -55,13 +56,14 @@ class AreaRouter {
      * Receive LSA
      * Callback registered with the peer manager.
      */
-    void receive_lsa(PeerID peer, LsaRef lsa);
+    void receive_lsa(PeerID peer, Lsa::LsaRef lsa);
  private:
-    Ospf<A>& _ospf;		// Reference to the controlling class.
-    Area _area;			// Area: That is represented.
-    OspfTypes::AreaType _area_type;
+    Ospf<A>& _ospf;			// Reference to the controlling class.
 
-    set<PeerID>	_peers;		// Peers that this area is associated with.
+    OspfTypes::AreaID _area;		// Area: That is represented.
+    OspfTypes::AreaType _area_type;	// Type of this area.
+
+    set<PeerID>	_peers;			// Peers of this area.
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__

@@ -14,3 +14,43 @@
 // legally binding.
 
 #ident "$XORP$"
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
+
+#include "config.h"
+#include <map>
+#include <list>
+#include <set>
+
+#include "ospf_module.h"
+
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+
+#include "ospf.hh"
+#include "area_router.hh"
+
+template <typename A>
+void
+AreaRouter<A>::add_peer(PeerID peerid)
+{
+    debug_msg("PeerID %u\n", peerid);
+    XLOG_UNFINISHED();
+}
+
+template <typename A>
+void
+AreaRouter<A>::delete_peer(PeerID peerid)
+{
+    debug_msg("PeerID %u\n", peerid);
+    XLOG_UNFINISHED();
+}
+
+template class AreaRouter<IPv4>;
+template class AreaRouter<IPv6>;
+
