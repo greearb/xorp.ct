@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.9 2004/02/21 05:59:34 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.10 2004/02/24 23:50:52 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -519,12 +519,12 @@ test_ipv4_address_type()
 		       "is_linklocal_multicast()");
 
     //
-    // Test if this address is a valid loopback multicast address.
+    // Test if this address is a valid loopback address.
     //
     verbose_assert(IPv4("127.255.0.1").is_loopback(), "is_loopback()");
 
     //
-    // Test if this address is a valid loopback multicast address.
+    // Test if this address is a valid loopback address.
     //
     verbose_assert(IPv4("126.255.0.127").is_loopback() == false,
 		   "is_loopback()");
