@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/pim/TODO,v 1.21 2003/02/06 00:37:42 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.22 2003/02/06 02:09:26 pavlin Exp $
 #
+
+* IMPL: if the interface address changes, add a task to recompute all
+  PimMre::set_directly_connected_s().
 
 * SPEC+IMPL: Take care of the
   (*,*,RP) Joins and AssertTrackingDesired(S,G,I) problem.
