@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.29 2004/03/10 18:43:48 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.30 2004/03/20 17:49:49 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -109,14 +109,16 @@ Port<A>::Port(PortManagerBase<A>& pm)
 template <typename A>
 Port<A>::~Port()
 {
-    while (_peers.empty() == false) {
-	delete _peers.front();
-	_peers.pop_front();
-    }
+    stop_output_processing();
 
     delete _ur_out;
     delete _su_out;
     delete _tu_out;
+
+    while (_peers.empty() == false) {
+	delete _peers.front();
+	_peers.pop_front();
+    }
 
     delete _packet_queue;
 }
@@ -329,10 +331,11 @@ Port<A>::peer_gc_timeout()
     typename PeerList::iterator i = _peers.begin();
     while (i != _peers.end()) {
 	Peer<A>* pp = *i;
+
 	if (pp->route_count() == 0) {
-	    _peers.erase(++i);
+	    _peers.erase(i++);
 	} else {
-	    i++;
+	    ++i;
 	}
     }
 
