@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.5 2003/12/02 09:38:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.6 2004/05/22 18:14:30 mjh Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -183,4 +183,22 @@ xorp_basename(const char* argv0)
 	return p + 1;
     }
     return argv0;
+}
+
+string&
+unquote(string& s)
+{
+    if (s.length() >= 2 && s[0] == '"' && s[s.size() - 1] == '"') {
+	s = s.substr(1, s.size() - 2);
+    }
+    return s;
+}
+
+string
+unquote(const string& s)
+{
+    if (s.length() >= 2 && s[0] == '"' && s[s.size() - 1] == '"') {
+	return s.substr(1, s.size() - 2);
+    }
+    return s;
 }

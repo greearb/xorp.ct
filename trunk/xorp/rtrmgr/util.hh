@@ -110,4 +110,18 @@ string xorp_boot_file();
  */
 const char* xorp_basename(const char* argv0);
 
+/**
+ * Remove enclosing quotes from string.
+ * @param s string that may have enclosing quotes.
+ * @return string with quotes removed.
+ */
+string& unquote(string& s);
+
+/**
+ * Remove enclosing quotes from string value.
+ * @param s string that may have enclosing quotes.
+ * @return copy of string with quotes removed.
+ */
+string unquote(const string& s);
+
 #endif // __RTRMGR_UTIL_HH__
