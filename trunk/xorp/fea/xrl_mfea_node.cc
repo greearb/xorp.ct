@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.33 2005/02/14 20:35:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.34 2005/02/15 02:08:37 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -40,7 +40,7 @@ XrlMfeaNode::XrlMfeaNode(int		family,
 			 const string&	finder_hostname,
 			 uint16_t	finder_port,
 			 const string&	finder_target,
-			 const string& fea_target)
+			 const string&	fea_target)
     : MfeaNode(family, module_id, eventloop),
       XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
@@ -89,6 +89,76 @@ XrlMfeaNode::shutdown()
 	return false;
 
     return true;
+}
+
+int
+XrlMfeaNode::enable_cli()
+{
+    MfeaNodeCli::enable();
+    
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::disable_cli()
+{
+    MfeaNodeCli::disable();
+    
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::start_cli()
+{
+    if (MfeaNodeCli::start() < 0)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::stop_cli()
+{
+    if (MfeaNodeCli::stop() < 0)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::enable_mfea()
+{
+    MfeaNode::enable();
+    
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::disable_mfea()
+{
+    MfeaNode::disable();
+    
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::start_mfea()
+{
+    if (MfeaNode::start() < 0)
+	return (XORP_ERROR);
+
+    return (XORP_OK);
+}
+
+int
+XrlMfeaNode::stop_mfea()
+{
+    int ret_code = XORP_OK;
+
+    if (MfeaNode::stop() < 0)
+	return (XORP_ERROR);
+    
+    return (ret_code);
 }
 
 //
@@ -242,76 +312,6 @@ XrlMfeaNode::finder_deregister_interest_fea_cb(
 
     MfeaNode::set_status(SERVICE_FAILED);
     MfeaNode::update_status();
-}
-
-int
-XrlMfeaNode::enable_cli()
-{
-    MfeaNodeCli::enable();
-    
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::disable_cli()
-{
-    MfeaNodeCli::disable();
-    
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::start_cli()
-{
-    if (MfeaNodeCli::start() < 0)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::stop_cli()
-{
-    if (MfeaNodeCli::stop() < 0)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::enable_mfea()
-{
-    MfeaNode::enable();
-    
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::disable_mfea()
-{
-    MfeaNode::disable();
-    
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::start_mfea()
-{
-    if (MfeaNode::start() < 0)
-	return (XORP_ERROR);
-
-    return (XORP_OK);
-}
-
-int
-XrlMfeaNode::stop_mfea()
-{
-    int ret_code = XORP_OK;
-
-    if (MfeaNode::stop() < 0)
-	return (XORP_ERROR);
-    
-    return (ret_code);
 }
 
 //
@@ -1065,7 +1065,7 @@ XrlMfeaNode::finder_event_observer_0_1_xrl_target_death(
 
     bool do_shutdown = false;
 
-    if (_fea_target == target_class) {
+    if (target_class == _fea_target) {
 	XLOG_ERROR("FEA (instance %s) has died, shutting down.",
 		   target_instance.c_str());
 	_is_fea_alive = false;
