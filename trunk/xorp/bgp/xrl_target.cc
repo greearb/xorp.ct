@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.27 2004/08/06 01:41:17 bms Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.28 2004/09/17 13:50:56 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,6 +31,7 @@
 #include "bgp.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
+#include "profile_vars.hh"
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	: XrlBgpTargetBase(r),
@@ -787,7 +788,6 @@ XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_invalid6(
     return XrlCmdError::OKAY();
 }
 
- 
 XrlCmdError XrlBgpTarget::bgp_0_2_set_parameter(
 				  // Input values,
 				  const string&	local_ip, 
@@ -835,18 +835,6 @@ XrlBgpTarget::finder_event_observer_0_1_xrl_target_death(
     return XrlCmdError::OKAY();
 }
 
-bool 
-XrlBgpTarget::waiting()
-{
-    return _awaiting_config;
-}
-
-bool 
-XrlBgpTarget::done()
-{
-    return _done;
-}
-
 XrlCmdError
 XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter, 
 					   const string& conf) {
@@ -875,7 +863,6 @@ XrlBgpTarget::policy_backend_0_1_push_routes() {
     _bgp.push_routes();
     return XrlCmdError::OKAY();
 }
-
 
 XrlCmdError 
 XrlBgpTarget::policy_redist4_0_1_add_route4(
@@ -926,3 +913,88 @@ XrlBgpTarget::policy_redist6_0_1_delete_route6(
     return XrlCmdError::OKAY();
 }	
 
+XrlCmdError
+XrlBgpTarget::profile_0_1_enable(const string& pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_bgp.profile().enable(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::profile_0_1_disable(const string&	pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_bgp.profile().disable(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::profile_0_1_get_entries(const string& pname,
+				      const string& instance_name)
+{
+    debug_msg("profile variable %s instance %s\n", pname.c_str(),
+	      instance_name.c_str());
+
+    // Lock and initialize.
+    try {
+	_bgp.profile().lock_log(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    profile_transmit_log(pname,
+			 _bgp.get_router(), instance_name, &_bgp.profile());
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::profile_0_1_clear(const string& pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_bgp.profile().clear(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::profile_0_1_list(string& info)
+{
+    debug_msg("\n");
+    
+    info = _bgp.profile().list();
+    return XrlCmdError::OKAY();
+}
+
+bool 
+XrlBgpTarget::waiting()
+{
+    return _awaiting_config;
+}
+
+bool 
+XrlBgpTarget::done()
+{
+    return _done;
+}

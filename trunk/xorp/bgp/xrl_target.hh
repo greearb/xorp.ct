@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.23 2004/08/06 01:41:17 bms Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.24 2004/09/17 13:50:56 abittau Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -348,7 +348,6 @@ public:
 	const string&	target_class,
 	const string&	target_instance);
 
-
     XrlCmdError policy_backend_0_1_configure(
         // Input values,
         const uint32_t& filter,
@@ -359,7 +358,6 @@ public:
         const uint32_t& filter);
 
     XrlCmdError policy_backend_0_1_push_routes();
-
 
     XrlCmdError policy_redist4_0_1_add_route4(
         // Input values,
@@ -390,6 +388,27 @@ public:
         const IPv6Net&  network,
         const bool&     unicast,
         const bool&     multicast);
+
+    XrlCmdError profile_0_1_enable(
+	// Input values,
+	const string&	pname);
+
+    XrlCmdError profile_0_1_disable(
+	// Input values,
+	const string&	pname);
+
+    XrlCmdError profile_0_1_get_entries(
+	// Input values,
+	const string&	pname,
+	const string&	instance_name);
+
+    XrlCmdError profile_0_1_clear(
+	// Input values,
+	const string&	pname);
+
+    XrlCmdError profile_0_1_list(
+	// Output values,
+	string&	info);
 
     bool waiting();
     bool done();
