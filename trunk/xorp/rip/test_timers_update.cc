@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/test_timers_update.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -149,8 +149,8 @@ test_main()
     }
 
     if (peer->route_count() != n_routes) {
-	verbose_log("Routes lost (count %d != %d)\n",
-		    peer->route_count(), n_routes);
+	verbose_log("Routes lost (count %u != %u)\n",
+		    (uint32_t)peer->route_count(), n_routes);
 	return 1;
     }
 
@@ -200,7 +200,7 @@ test_main()
 
     while (timeout == false) {
 	size_t route_count = peer->route_count();
-	verbose_log("Route count = %d\n", route_count);
+	verbose_log("Route count = %u\n", (uint32_t)route_count);
 	if (route_count == 0)
 	    break;
 	e.run();
