@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.9 2003/05/31 17:45:06 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.10 2003/08/12 15:10:16 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -376,6 +376,9 @@ interface pim/0.1 {
 	/**
 	 * Statistics-related counters and values
 	 */
+	clear_pim_statistics
+	clear_pim_statistics_per_vif	? vif_name:txt
+
 	pimstat_hello_messages_received			-> value:u32
 	pimstat_hello_messages_sent			-> value:u32
 	pimstat_hello_messages_rx_errors		-> value:u32
