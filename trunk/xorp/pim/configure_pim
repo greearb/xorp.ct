@@ -1,13 +1,14 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.2 2002/12/19 01:55:22 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.3 2003/01/13 19:49:16 pavlin Exp $
 #
 
 #
 # Send configuration commands to a running PIM process.
 #
 
+. ../cli/xrl_cli_shell_funcs.sh
 . ../mfea/xrl_mfea_shell_funcs.sh
 . ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
 . ../pim/xrl_pim_shell_funcs.sh
@@ -37,6 +38,7 @@ case $HOSTNAME in
 
 	xorp2)
 	ENABLE_VIFS="dc1 dc2 dc4"
+	ENABLE_VIFS="dc1 dc2"
 	CAND_BSR_VIF="dc1"
 	CAND_RP_VIF="dc1"
 	CAND_BSR_VIF="dc4"
@@ -48,8 +50,8 @@ case $HOSTNAME in
 	;;
 
 	xorp3)
-	ENABLE_VIFS="dc0 dc1 dc2"
 	ENABLE_VIFS="dc0 dc1 dc2 dc3"
+	ENABLE_VIFS="dc0 dc1 dc2"
 	CAND_BSR_VIF=""
 	CAND_RP_VIF=""
 	CAND_BSR_VIF="dc0"
@@ -94,8 +96,8 @@ case $HOSTNAME in
 	;;
 	
 	*)
-		echo "Unknown host : $HOSTNAME"
-		exit 1
+	echo "Unknown host : $HOSTNAME"
+	exit 1
 	;;
 esac
 
@@ -105,6 +107,13 @@ esac
 MFEA_ENABLE_LOG_TRACE=yes
 MLD6IGMP_ENABLE_LOG_TRACE=yes
 PIM_ENABLE_LOG_TRACE=yes
+
+#
+# The subnets to enable/disable CLI access
+#
+CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
+
 
 ###############################################################
 # USER CONFIGURATION END
@@ -128,6 +137,22 @@ fi
 if [ "$PIM_ENABLE_LOG_TRACE" != "yes" ] ; then
 	pim_disable_log_trace
 fi
+
+#
+# Configure CLI
+#
+for subnet in $CLI_ENABLE_SUBNETS; do
+	cli_add_enable_cli_access_from_subnet4 $subnet
+done
+for subnet in $CLI_DISABLE_SUBNETS; do
+	cli_add_disable_cli_access_from_subnet4 $subnet
+done
+
+#
+# Enable and start CLI
+#
+cli_enable_cli
+cli_start_cli
 
 #
 # Enable and start MFEA CLI

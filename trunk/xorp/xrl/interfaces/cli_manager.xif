@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.6 2002/10/29 18:31:25 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * CLI manager XRL interface.
@@ -6,6 +6,73 @@
 
 
 interface cli_manager/0.1 {
+	/**
+	 * Enable/disable/start/stop the CLI.
+	 * 
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_cli			-> fail:bool & reason:txt
+	disable_cli			-> fail:bool & reason:txt
+	start_cli			-> fail:bool & reason:txt
+	stop_cli			-> fail:bool & reason:txt
+
+	/**
+	 * Add a subnet address to the list of subnet addresses enabled
+	 * for CLI access.
+	 * This method can be called more than once to add a number of
+	 * subnet addresses.
+	 *
+	 * @param subnet_addr the subnet address to add.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	add_enable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
+						-> fail:bool & reason:txt
+	add_enable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
+						-> fail:bool & reason:txt
+
+	/**
+	 * Delete a subnet address from the list of subnet addresses enabled
+	 * for CLI access.
+	 *
+	 * @param subnet_addr the subnet address to delete.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	delete_enable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
+						-> fail:bool & reason:txt
+	delete_enable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
+						-> fail:bool & reason:txt
+
+	/**
+	 * Add a subnet address to the list of subnet addresses disabled
+	 * for CLI access.
+	 * This method can be called more than once to add a number of
+	 * subnet addresses.
+	 *
+	 * @param subnet_addr the subnet address to add.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	add_disable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
+						-> fail:bool & reason:txt
+	add_disable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
+						-> fail:bool & reason:txt
+
+	/**
+	 * Delete a subnet address from the list of subnet addresses disabled
+	 * for CLI access.
+	 *
+	 * @param subnet_addr the subnet address to delete.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	delete_disable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
+						-> fail:bool & reason:txt
+	delete_disable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
+						-> fail:bool & reason:txt
+
 	/**
 	 * Add a CLI command to the CLI manager
 	 *
@@ -19,7 +86,7 @@ interface cli_manager/0.1 {
 	 * the string that will replace the CLI prompt after we
 	 * "cd" to that level of the CLI command-tree.
 	 * @param is_command_processor if true, this is a processing command
-	 * that would be performed by @processor_name.
+	 * that would be performed by processor_name.
 	 * @param fail true if failure has occured.
 	 * @param reason contains failure reason if it occured.
 	 */	

@@ -1,0 +1,157 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+#
+
+#
+# Library of functions to sent XRLs to a running CLI process.
+#
+
+. ../mfea/xrl_shell_lib.sh
+
+CLI_TARGET="CLI"
+
+cli_enable_cli()
+{
+    echo "cli_enable_cli" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/enable_cli"
+    XRL_ARGS=""
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_disable_cli()
+{
+    echo "cli_disable_cli" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/disable_cli"
+    XRL_ARGS=""
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_start_cli()
+{
+    echo "cli_start_cli" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/start_cli"
+    XRL_ARGS=""
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_stop_cli()
+{
+    echo "cli_stop_cli" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/stop_cli"
+    XRL_ARGS=""
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_add_enable_cli_access_from_subnet4()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_add_enable_cli_access_from_subnet4 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_add_enable_cli_access_from_subnet4" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/add_enable_cli_access_from_subnet4"
+    XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_add_enable_cli_access_from_subnet6()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_add_enable_cli_access_from_subnet6 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_add_enable_cli_access_from_subnet6" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/add_enable_cli_access_from_subnet6"
+    XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_delete_enable_cli_access_from_subnet4()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_delete_enable_cli_access_from_subnet4 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_delete_enable_cli_access_from_subnet4" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_enable_cli_access_from_subnet4"
+    XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_delete_enable_cli_access_from_subnet6()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_delete_enable_cli_access_from_subnet6 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_delete_enable_cli_access_from_subnet6" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_enable_cli_access_from_subnet6"
+    XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_add_disable_cli_access_from_subnet4()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_add_disable_cli_access_from_subnet4 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_add_disable_cli_access_from_subnet4" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/add_disable_cli_access_from_subnet4"
+    XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_add_disable_cli_access_from_subnet6()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_add_disable_cli_access_from_subnet6 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_add_disable_cli_access_from_subnet6" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/add_disable_cli_access_from_subnet6"
+    XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_delete_disable_cli_access_from_subnet4()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_delete_disable_cli_access_from_subnet4 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_delete_disable_cli_access_from_subnet4" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_disable_cli_access_from_subnet4"
+    XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+cli_delete_disable_cli_access_from_subnet6()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_delete_disable_cli_access_from_subnet6 <subnet_addr>"
+	exit 1
+    fi
+    subnet_addr=$1
+    
+    echo "cli_delete_disable_cli_access_from_subnet6" $*
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_disable_cli_access_from_subnet6"
+    XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
+    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}

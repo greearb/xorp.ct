@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/cli_processor.xif,v 1.4 2002/04/30 18:50:43 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/cli_processor.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * CLI processor XRL interface.
@@ -6,6 +6,21 @@
 
 
 interface cli_processor/0.1 {
+	/**
+	 * Process a CLI command.
+	 * 
+	 * @param processor_name the processor name for this command.
+	 * @param cli_term_name the terminal name the command was entered from.
+	 * @param cli_session_id the CLI session ID the command was entered
+	 * from.
+	 * @param command_name the command name to process.
+	 * @param command_args the command arguments to process.
+	 * @param ret_processor_name the processor name to return back to
+	 * the CLI.
+	 * @param ret_cli_term_name the terminal name to return back.
+	 * @param ret_cli_session_id the CLI session ID to return back.
+	 * @param ret_command_output the command output to return back.
+	 */
 	process_command	? processor_name:txt				\
 			& cli_term_name:txt				\
 			& cli_session_id:u32				\

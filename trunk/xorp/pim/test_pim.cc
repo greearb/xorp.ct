@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.2 2002/12/14 23:43:09 hodson Exp $"
 
 
 //
@@ -56,7 +56,6 @@
 //
 // Local functions prototypes
 //
-static	bool wakeup_hook(void *);
 static	void usage(const char *argv0, int exit_value);
 
 /**
@@ -258,8 +257,8 @@ main(int argc, char *argv[])
 	// Start the nodes
 	//
 	
-	cli_node4.enable();
-	cli_node4.start();
+	// cli_node4.enable();
+	// cli_node4.start();
 	//
 	// cli_node6.enable();
 	// cli_node6.start();
@@ -307,10 +306,6 @@ main(int argc, char *argv[])
 	// xrl_pim_node6.start_all_vifs();
 	
 	
-	// Test timer
-	XorpTimer wakeywakey = event_loop.new_periodic(1000, wakeup_hook);    
-	
-	
 	//
 	// Main loop
 	//
@@ -347,7 +342,7 @@ main(int argc, char *argv[])
 	// xrl_mfea_node6.stop_mfea();
 	// xrl_mfea_node6.stop_cli();
 	
-	cli_node4.stop();
+	// cli_node4.stop();
 	//
 	// cli_node6.stop();
 	
@@ -366,13 +361,4 @@ main(int argc, char *argv[])
     xlog_exit();
     
     exit (0);
-}
-
-static bool
-wakeup_hook(void *)
-{
-    // fprintf(stdout, "%s\n", xlog_localtime2string());
-    fflush(stdout);
-    
-    return (true);
 }

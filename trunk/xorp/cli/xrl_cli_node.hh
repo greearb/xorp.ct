@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.12 2002/12/09 18:28:54 hodson Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -32,17 +32,181 @@ class XrlCliNode : public XrlCliTargetBase, public XrlCliProcessorV0p1Client {
 public:
     XrlCliNode(XrlRouter* r, CliNode& cli_node);
     virtual ~XrlCliNode() {}
+
+    //
+    // XrlCliNode front-end interface
+    //
+    int enable_cli();
+    int disable_cli();
+    int start_cli();
+    int stop_cli();
     
 protected:
+    //
     // Methods to be implemented by derived classes supporting this interface.
+    //
+
+    /**
+     *  Get name of Xrl Target
+     */
     virtual XrlCmdError common_0_1_get_target_name(
 	// Output values, 
 	string&	name);
 
+    /**
+     *  Get version string from Xrl Target
+     */
     virtual XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
 
+    /**
+     *  Enable/disable/start/stop the CLI.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    virtual XrlCmdError cli_manager_0_1_enable_cli(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_disable_cli(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_start_cli(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_stop_cli(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Add a subnet address to the list of subnet addresses enabled for CLI
+     *  access. This method can be called more than once to add a number of
+     *  subnet addresses.
+     *  
+     *  @param subnet_addr the subnet address to add.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    virtual XrlCmdError cli_manager_0_1_add_enable_cli_access_from_subnet4(
+	// Input values, 
+	const IPv4Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_add_enable_cli_access_from_subnet6(
+	// Input values, 
+	const IPv6Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Delete a subnet address from the list of subnet addresses enabled for
+     *  CLI access.
+     *  
+     *  @param subnet_addr the subnet address to delete.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    virtual XrlCmdError cli_manager_0_1_delete_enable_cli_access_from_subnet4(
+	// Input values, 
+	const IPv4Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_delete_enable_cli_access_from_subnet6(
+	// Input values, 
+	const IPv6Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Add a subnet address to the list of subnet addresses disabled for CLI
+     *  access. This method can be called more than once to add a number of
+     *  subnet addresses.
+     *  
+     *  @param subnet_addr the subnet address to add.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    virtual XrlCmdError cli_manager_0_1_add_disable_cli_access_from_subnet4(
+	// Input values, 
+	const IPv4Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_add_disable_cli_access_from_subnet6(
+	// Input values, 
+	const IPv6Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Delete a subnet address from the list of subnet addresses disabled for
+     *  CLI access.
+     *  
+     *  @param subnet_addr the subnet address to delete.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    virtual XrlCmdError cli_manager_0_1_delete_disable_cli_access_from_subnet4(
+	// Input values, 
+	const IPv4Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError cli_manager_0_1_delete_disable_cli_access_from_subnet6(
+	// Input values, 
+	const IPv6Net&	subnet_addr, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Add a CLI command to the CLI manager
+     *  
+     *  @param processor_name the name of the module that will process that
+     *  command.
+     *  
+     *  @param command_name the name of the command to add.
+     *  
+     *  @param command_help the help for the command to add.
+     *  
+     *  @param is_command_cd is true, the string that will replace the CLI
+     *  prompt after we "cd" to that level of the CLI command-tree.
+     *  
+     *  @param command_cd_prompt if
+     *  
+     *  @param is_command_processor if true, this is a processing command that
+     *  would be performed by processor_name.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
     virtual XrlCmdError cli_manager_0_1_add_cli_command(
 	// Input values, 
 	const string&	processor_name, 
@@ -55,6 +219,17 @@ protected:
 	bool&	fail, 
 	string&	reason);
 
+    /**
+     *  Delete a CLI command from the CLI manager
+     *  
+     *  @param processor_name the name of the module that sends the request.
+     *  
+     *  @param command_name the name of the command to delete.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
     virtual XrlCmdError cli_manager_0_1_delete_cli_command(
 	// Input values, 
 	const string&	processor_name, 

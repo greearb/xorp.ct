@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.3 2003/01/13 20:11:22 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.4 2003/01/13 20:40:23 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -211,6 +211,27 @@ protected:
 	// Output values, 
 	string&	version);
     
+    /**
+     *  Process a CLI command.
+     *  
+     *  @param processor_name the processor name for this command.
+     *  
+     *  @param cli_term_name the terminal name the command was entered from.
+     *  
+     *  @param cli_session_id the CLI session ID the command was entered from.
+     *  
+     *  @param command_name the command name to process.
+     *  
+     *  @param command_args the command arguments to process.
+     *  
+     *  @param ret_processor_name the processor name to return back to the CLI.
+     *  
+     *  @param ret_cli_term_name the terminal name to return back.
+     *  
+     *  @param ret_cli_session_id the CLI session ID to return back.
+     *  
+     *  @param ret_command_output the command output to return back.
+     */
     XrlCmdError cli_processor_0_1_process_command(
 	// Input values, 
 	const string&	processor_name, 

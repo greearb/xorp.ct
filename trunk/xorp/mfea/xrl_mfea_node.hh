@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.43 2002/12/09 18:29:19 hodson Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -198,6 +198,27 @@ protected:
 	// Output values, 
 	string&	version);
 
+    /**
+     *  Process a CLI command.
+     *  
+     *  @param processor_name the processor name for this command.
+     *  
+     *  @param cli_term_name the terminal name the command was entered from.
+     *  
+     *  @param cli_session_id the CLI session ID the command was entered from.
+     *  
+     *  @param command_name the command name to process.
+     *  
+     *  @param command_args the command arguments to process.
+     *  
+     *  @param ret_processor_name the processor name to return back to the CLI.
+     *  
+     *  @param ret_cli_term_name the terminal name to return back.
+     *  
+     *  @param ret_cli_session_id the CLI session ID to return back.
+     *  
+     *  @param ret_command_output the command output to return back.
+     */
     XrlCmdError cli_processor_0_1_process_command(
 	// Input values, 
 	const string&	processor_name, 
