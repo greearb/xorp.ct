@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.37 2003/05/23 19:08:29 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.38 2003/05/28 18:47:21 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -420,11 +420,11 @@ else
 	pid=$!
 	sleep 1
 	if ( ps | grep ${pid} > /dev/null ); then
-	    kill ${pid} 
+	    kill ${pid} > /dev/null
 	    snmpd_valid=yes
 	    break
 	fi	
-	kill ${pid}
+	kill ${pid} > /dev/null
     done
     if test ${snmpd_valid} = "yes" ; then
 	# Verify that dlmod directive was recognized
