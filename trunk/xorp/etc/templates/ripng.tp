@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.16 2004/09/17 14:14:24 abittau Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.17 2004/10/28 09:24:14 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -52,7 +52,11 @@ protocols {
     ripng {
 	%modinfo:	provides		ripng;
 	%modinfo:	depends			rib;
-	%modinfo:	depends			policy;
+	/*
+	 * TODO: temporary comment-out the policy stuff until the
+	 * policy-based config is fixed.
+	 */
+	/* %modinfo:	depends			policy; */
 	%modinfo:	path			"rip/xorp_ripng";
 	%modinfo:	default_targetname	"ripng";
 	%modinfo:	status_method xrl	"$(ripng.targetname)/common/0.1/get_status->status:u32&reason:txt";

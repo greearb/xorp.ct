@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.11 2004/08/12 07:34:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.12 2004/09/17 14:14:24 abittau Exp $ */
 
 protocols {
     static {
@@ -34,7 +34,11 @@ protocols {
 	%help:		short	"Configure static routes";
 	%modinfo:	provides	static_routes;
 	%modinfo:	depends		rib;
-	%modinfo:	depends		policy;
+	/*
+	 * TODO: temporary comment-out the policy stuff until the
+	 * policy-based config is fixed.
+	 */
+	/* %modinfo:	depends		policy; */
 	%modinfo:	path		"static_routes/xorp_static_routes";
 	%modinfo:	default_targetname "static_routes";
 	%modinfo:	status_method	xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
