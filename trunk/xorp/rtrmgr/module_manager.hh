@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.24 2004/12/06 00:31:05 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.25 2004/12/06 01:15:59 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -92,7 +92,6 @@ public:
     bool module_has_started(const string& module_name) const;
     void shutdown();
     bool shutdown_complete();
-    EventLoop& eventloop() { return _eventloop; }
     void module_status_changed(const string& module_name, 
 			       Module::ModuleStatus old_status,
 			       Module::ModuleStatus new_status);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.23 2004/08/19 02:00:21 pavlin Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.1 2004/12/06 00:31:42 mjh Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
@@ -82,6 +82,8 @@ public:
     virtual bool module_has_started(const string& module_name) const;
     virtual int shell_execute(uid_t userid, const vector<string>& argv, 
 			      GenericModuleManager::CallBack cb, bool do_exec);
+    EventLoop& eventloop() { return _eventloop; }
+
 protected:
     EventLoop&	_eventloop;
 private:
