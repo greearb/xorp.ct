@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.32 2003/09/30 18:52:21 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.1 2004/02/12 20:11:26 pavlin Exp $
 
-#ifndef __STATICROUTES_XRL_STATIC_ROUTES_NODE_HH__
-#define __STATICROUTES_XRL_STATIC_ROUTES_NODE_HH__
+#ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
+#define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 
 
 //
@@ -214,4 +214,4 @@ private:
     XorpTimer		_rib_igp_table_registration_timer;
 };
 
-#endif // __STATICROUTES_XRL_STATIC_ROUTES_NODE_HH__
+#endif // __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
