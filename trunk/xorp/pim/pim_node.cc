@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.48 2004/06/09 11:22:14 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.49 2004/06/10 22:41:32 hodson Exp $"
 
 
 //
@@ -1382,6 +1382,7 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr)
 PimNbr *
 PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
 {
+    bool is_same_subnet = false;
     PimNbr *pim_nbr = NULL;
     
     //
@@ -1394,22 +1395,42 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
     // Find the vif toward the destination address
     //
     PimVif *pim_vif = vif_find_by_vif_index(mrib->next_hop_vif_index());
-    
+
+    //
+    // Test if the destination is on the same subnet.
+    //
+    // Note that we need to capture the case if the next-hop router
+    // address toward a destination on the same subnet is set to one
+    // of the addresses of the interface for that subnet.
+    //
+    do {
+	if (mrib->next_hop_router_addr() == IPvX::ZERO(family())) {
+	    is_same_subnet = true;
+	    break;
+	}
+	if ((pim_vif != NULL)
+	    && pim_vif->is_my_addr(mrib->next_hop_router_addr())) {
+	    is_same_subnet = true;
+	    break;
+	}
+	break;
+    } while (false);
+
     //
     // Search for the neighbor router
     //
-    if (mrib->next_hop_router_addr() != IPvX::ZERO(family())) {
-	// Not a destination on the same subnet
-	if (pim_vif != NULL)
-	    pim_nbr = pim_vif->pim_nbr_find(mrib->next_hop_router_addr());
-    } else {
-	// Probably a destination on the same subnet
+    if (is_same_subnet) {
+	// A destination on the same subnet
 	if (pim_vif != NULL)
 	    pim_nbr = pim_vif->pim_nbr_find(dst_addr);
 	else
 	    pim_nbr = pim_nbr_find(dst_addr);
+    } else {
+	// Not a destination on the same subnet
+	if (pim_vif != NULL)
+	    pim_nbr = pim_vif->pim_nbr_find(mrib->next_hop_router_addr());
     }
-    
+
     return (pim_nbr);
 }
 
