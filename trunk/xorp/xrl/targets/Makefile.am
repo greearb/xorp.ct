@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.53 2005/02/15 02:08:38 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.54 2005/02/17 00:58:23 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -237,6 +237,7 @@ libpimbase_la_SOURCES = pim_base.hh pim_base.cc
 $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/redist_transaction4.xif		\
 		$(INTERFACES_DIR)/redist_transaction6.xif		\

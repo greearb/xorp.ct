@@ -881,6 +881,7 @@ $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/redist_transaction4.xif		\
 		$(INTERFACES_DIR)/redist_transaction6.xif		\
