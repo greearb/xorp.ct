@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.31 2004/04/15 16:13:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.32 2004/06/10 22:40:39 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,7 +27,7 @@
 void
 dump_bytes(const uint8_t *d, size_t l)
 {
-        printf("DEBUG_BYTES FN : %p %u\n", d, (uint32_t)l);
+        printf("DEBUG_BYTES FN : %p %u\n", d, XORP_UINT_CAST(l));
 	for (u_int i=0;i<l;i++)
 	    printf("%x ",*((const char *)d + i));
 	printf("\n");
@@ -82,8 +82,8 @@ UpdatePacket::big_enough() const
 
     //quick and dirty check
     if (((_wr_list.size() + _nlri_list.size())* 4) > 2048) {
-	debug_msg("withdrawn size = %u\n", (uint32_t)_wr_list.size());
-	debug_msg("nlri size = %u\n", (uint32_t)_wr_list.size());
+	debug_msg("withdrawn size = %u\n", XORP_UINT_CAST(_wr_list.size()));
+	debug_msg("nlri size = %u\n", XORP_UINT_CAST(_wr_list.size()));
 	return true;
     }
     return false;
@@ -113,8 +113,10 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
 	XLOG_FATAL("Attempt to encode a packet that is too big");
 
     debug_msg("Path Att: %u Withdrawn Routes: %u Net Reach: %u length: %u\n",
-	      (uint32_t)pa_list().size(), (uint32_t)_wr_list.size(),
-	      (uint32_t)_nlri_list.size(), (uint32_t)len);
+	      XORP_UINT_CAST(pa_list().size()),
+	      XORP_UINT_CAST(_wr_list.size()),
+	      XORP_UINT_CAST(_nlri_list.size()),
+	      XORP_UINT_CAST(len));
     d = basic_encode(len, d);	// allocate buffer and fill header
 
     // fill withdraw list length (bytes)
@@ -157,15 +159,16 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     if (MINUPDATEPACKET + wr_len > l)
 	xorp_throw(CorruptMessage,
 		   c_format("Unreachable routes length is bogus %u > %u",
-			    (uint32_t)wr_len, (uint32_t)(l - MINUPDATEPACKET)),
+			    XORP_UINT_CAST(wr_len),
+			    XORP_UINT_CAST(l - MINUPDATEPACKET)),
 		   UPDATEMSGERR, ATTRLEN);
     
     size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
     if (MINUPDATEPACKET + pa_len + wr_len > l)
 	xorp_throw(CorruptMessage,
 		   c_format("Pathattr length is bogus %u > %u",
-			    (uint32_t)pa_len,
-			    (uint32_t)(l - wr_len - MINUPDATEPACKET)),
+			    XORP_UINT_CAST(pa_len),
+			    XORP_UINT_CAST(l - wr_len - MINUPDATEPACKET)),
 		UPDATEMSGERR, ATTRLEN);
 
     size_t nlri_len = l - MINUPDATEPACKET - pa_len - wr_len;
@@ -181,7 +184,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     while (pa_len > 0) {
 	size_t used = 0;
         PathAttribute *pa = PathAttribute::create(d, pa_len, used);
-	debug_msg("attribute size %u\n", (uint32_t)used);
+	debug_msg("attribute size %u\n", XORP_UINT_CAST(used));
 	if (used == 0)
 	    xorp_throw(CorruptMessage,
 		   c_format("failed to read path attribute"),
@@ -197,9 +200,10 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     _nlri_list.decode(d, nlri_len);
     /* End of decoding of Network Reachability */
     debug_msg("No of withdrawn routes %u. No of path attributes %u. "
-		"No of networks %u.\n",
-		  (uint32_t)_wr_list.size(), (uint32_t)pa_list().size(),
-		  (uint32_t)_nlri_list.size());
+	      "No of networks %u.\n",
+	      XORP_UINT_CAST(_wr_list.size()),
+	      XORP_UINT_CAST(pa_list().size()),
+	      XORP_UINT_CAST(_nlri_list.size()));
 }
 
 string
@@ -208,8 +212,9 @@ UpdatePacket::str() const
     string s = "Update Packet\n";
     debug_msg("No of withdrawn routes %u. No of path attributes %u. "
 		"No of networks %u.\n",
-	      (uint32_t)_wr_list.size(), (uint32_t)pa_list().size(),
-	      (uint32_t)_nlri_list.size());
+	      XORP_UINT_CAST(_wr_list.size()),
+	      XORP_UINT_CAST(pa_list().size()),
+	      XORP_UINT_CAST(_nlri_list.size()));
 
     s += _wr_list.str("Withdrawn");
 
