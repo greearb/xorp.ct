@@ -845,18 +845,18 @@ Optional Features:
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --enable-maintainer-mode enable make rules and dependencies not useful
                           (and sometimes confusing) to the casual installer
-  --disable-debug         Disable debug messages
-  --enable-debug-msgs     Enable debug messages
-  --enable-debug-fnames   Enable function names in debug messages (requires GCC)
-  --enable-optimize       Enable compiler optimizations
-  --enable-profile        Turn on profiling
-  --disable-ipv6          Disable IPv6 support
-  --enable-sim            Enable simulator
-  --enable-advanced-mcast-api   Enable advanced multicast API
+  --disable-debug         disable debug messages
+  --enable-debug-msgs     enable debug messages
+  --enable-debug-fnames   enable function names in debug messages (requires GCC)
+  --enable-optimize       enable compiler optimizations
+  --enable-profile        turn on profiling
+  --disable-ipv6          disable IPv6 support
+  --enable-sim            enable simulator (not implemented yet)
+  --enable-advanced-mcast-api enable advanced multicast API
   --with-openssl=DIR      specify root of OpenSSL installation
- --with-path-to-snmpd     Path to the snmpd executable
- --with-path-to-snmpd     Path to the net-snmpd source tree
- --without-snmp            Do not build XORP MIBs for Net-SNMP
+  --with-path-to-snmpd=DIR specify path to the snmpd executable
+  --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree
+  --without-snmp          do not build XORP MIBs for Net-SNMP
 
 Some influential environment variables:
   CC          C compiler command
