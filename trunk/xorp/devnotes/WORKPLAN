@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.2 2003/01/15 00:31:34 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.3 2003/02/04 23:06:43 pavlin Exp $
 #
 
 Priority:
@@ -49,7 +49,7 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who  Time
 ---------------                                       -------- ---  ----
-* Finish PIM testing (manual)				H	PR  < 1 month
+* Finish PIM testing (manual)				Done	PR  < 1 month
 * Testing of IGMPv1,2 (manual)				H	PR  1 weeks
 * RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
 * Commit PIM patches to FreeBSD				H       PR+LR Jan 2003
@@ -72,14 +72,8 @@ Longer Term tasks
 * Rewrite CLI						L	PR  2-3 weeks
 
 ================================ Next Release ================================
-* Next release (xorp-0.2): February 27, 2003
-  - Add file with release notes (to xorp repository and Web page)
-  - Update current status web page
-  - gcc-3.x support
-  - new XRL finder
-  - Complete PIM-SM testing
-  - Complete IGMPv1,2 testing (if time)
-  - More Kdoc-ing of PIM-SM and IGMP (if time)
+* Next release (xorp-0.3): ?? ??, 2003
+  - Complete IGMPv1,2 testing
+  - Kdoc-ing of PIM-SM and IGMP
   - Kdoc BGP
-  - Read the documentation and make sure it is consistent with the code;
-    if necessary, edit it as appropriate.
+  - ??
