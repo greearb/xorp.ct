@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_firewall.cc,v 1.1 2004/09/08 08:29:51 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_firewall.cc,v 1.2 2004/09/08 10:09:15 bms Exp $"
 
 #include "fea_module.h"
 
@@ -186,20 +186,11 @@ XrlFirewallTarget::firewall_0_1_set_fw_provider(
 	const string&	provider)
 {
 
-#ifdef notyet
-    if (NULL != _fw._fwp) {
-	if (_fw._fwp->set_new_provider(provider) == true)
-	    return XrlCmdError::OKAY();
-	else
-	    return XrlCmdError::COMMAND_FAILED(
+    if (_fw.set_fw_provider(provider.c_str()) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(
 "Failed to instantiate new provider.");
-    }
 
-    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
-#else
-    UNUSED(provider);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
-#endif
+    return XrlCmdError::OKAY();
 }
 
 /**
