@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.2 2003/03/06 01:47:04 jcardona Exp $
 %
 
 \documentclass[11pt]{article}
@@ -43,7 +43,7 @@ Version 0.2}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 5, 2003}
 
 \maketitle
 
@@ -113,6 +113,10 @@ components (in alphabetical order):
   \item \emph{ref\_ptr.hh: template class ref\_ptr}: Reference counted
   pointer class.
 
+  \item \emph{ref\_trie.hh: Implementation of a trie to support route
+  lookups.  Based on trie.hh, but with reference-counted storage
+  supporting delayed deletion.
+
   \item \emph{selector.hh}: I/O multiplexing interface.
 
   \item \emph{time\_slice.hh: class TimeSlice}: A class for computing
@@ -166,11 +170,11 @@ which are unsigned 32-bit numbers.
 
 This file contains 
 asynchronous file transfer classes.  These utilize XORP EventLoop
-and it's SelectorList to read / write files asynchronously.  The
+and it's SelectorList to read or write files asynchronously.  The
 user creates an AsyncFile{Reader,Writer} and adds a buffer for
-reading / writing with add\_buffer().  A callback provided with
+reading or writing with add\_buffer().  A callback provided with
 each buffer is called every time I/O happens on the buffer.
-Reading/Writing only begins when start() is called, and normally
+Reading or writing only begins when start() is called, and normally
 continues until there are no buffers left.
 
 From the developer's point of view, the following classes are of
@@ -342,6 +346,26 @@ At the time of writing the only supported memory management is
 through the new and delete operators.  At a future date, this class
 should support the STL allocator classes or an equivalent to
 provide greater flexibility.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ref_trie.hh}
+
+This file implements a trie to support route lookups.  The
+implementation is template-based, and is based on the code in
+trie.hh. From deleloper's point of view, templates RefTrie, RefTrieNode, and
+RefTrieIterator are the most important. Those templates should be invoked
+with two classes, the basetype ``A'' for the search Key (which is a
+subnet, \verb=IPNet<A>=), and the Payload.
+
+RefTrie differs from Trie (and it's associated classes) in that the
+RefTrieNode includes a reference count of how many RefTrieIterators
+are pointing at it.  If a RefTrieNode is deleted, but has a non-zero
+reference count, deletion will be delayed until the reference count
+becomes zero.  In this way, additions and deletions to the RefTrie
+cannot cause a RefTrieIterator to reference invalid memory, although a
+deletion and subsequent addition can cause the payload data referenced
+by a RefTrieIterator to change.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{selector.hh}
@@ -610,6 +634,7 @@ be output.
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
+  \item March 5, 2003: Add information about RefTrie.  Version 0.2.
 
 \end{itemize}
 
