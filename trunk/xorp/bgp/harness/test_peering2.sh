@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.6 2003/05/29 18:56:27 hodson Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.7 2003/05/30 03:12:07 mjh Exp $
 #
 
 #
@@ -86,7 +86,17 @@ reset()
     coord target $HOST $PORT2
     coord initialise attach peer2
 
+    bgp_not_established
+
     sleep 5
+}
+
+bgp_not_established()
+{
+    while ../tools/print_peers -v | grep 'Peer State: ESTABLISHED'
+    do
+	:
+    done
 }
 
 test1()
@@ -113,7 +123,6 @@ test1()
     # Reset the connection
     reset
     
-    sleep 5
     # Establish the new connection.
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
     coord peer2 assert established
