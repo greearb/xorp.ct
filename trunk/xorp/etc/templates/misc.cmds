@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/misc.cmds,v 1.1 2004/07/20 23:03:00 mjh Exp $ */
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.2 2004/12/17 10:59:25 atanu Exp $ */
 
 ping {
     %command: "" %help: "Ping a hostname or IP address";
@@ -13,6 +13,11 @@ traceroute {
 }
 
 traceroute <host> {
-    %command: "traceroute $2" %help: "Give a hostname or IP address to traceroute to.";
+    /*
+     * XXX: redirect the stderr to stdout, because traceroute's initial
+     * banner output "traceroute to ..." is printed to stderr.
+     * Otherwise, we cannot run traceroute inside xorpsh, because
+     * a command is considered failed if it has any output on stderr.
+     */
+    %command: "traceroute $2 2>&1" %help: "Give a hostname or IP address to traceroute to.";
 }
-
