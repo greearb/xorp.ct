@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/snmp.tp,v 1.4 2003/11/17 22:10:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.5 2003/11/18 23:03:58 pavlin Exp $ */
 
 protocols {
   snmp {
@@ -22,8 +22,7 @@ protocols {
     }
     mib-module @ {
       %create: xrl "$(snmp.targetname)/xorp_if_mib/0.1/load_mib?mod_name:txt=$(@)&abs_path:txt=$(@.abs-path)->mib_index:u32=$(@.mib-index)";
-      %delete: xrl
-      %"$(snmp.targetname)/xorp_if_mib/0.1/unload_mib?mib_index:u32=$(@.mib-index)->unloaded:bool";
+      %delete: xrl "$(snmp.targetname)/xorp_if_mib/0.1/unload_mib?mib_index:u32=$(@.mib-index)->unloaded:bool";
       abs-path {
 	%set: local;
 	%get: local;
