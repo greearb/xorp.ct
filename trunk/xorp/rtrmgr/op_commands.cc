@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.41 2005/01/31 01:29:30 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.42 2005/01/31 06:53:39 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -660,7 +660,7 @@ OpCommandList::find_executable_filename(const string& command_filename,
     if (command_filename[0] == '/') {
 	// Absolute path name
 	if (stat(command_filename.c_str(), &statbuf) == 0 &&
-	    access(command_filename.c_str(), X_OK) == 0 &&
+	    //access(command_filename.c_str(), X_OK) == 0 &&
 	    S_ISREG(statbuf.st_mode)) {
 	    executable_filename = command_filename;
 	    return true;
@@ -685,7 +685,7 @@ OpCommandList::find_executable_filename(const string& command_filename,
     while (!path.empty()) {
 	string full_path_executable = path.front() + "/" + command_filename;
 	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
-	    access(command_filename.c_str(), X_OK) == 0 &&
+	    //access(command_filename.c_str(), X_OK) == 0 &&
 	    S_ISREG(statbuf.st_mode)) {
 	    executable_filename = full_path_executable;
 	    return true;
