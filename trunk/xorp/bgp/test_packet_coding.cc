@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.2 2003/08/28 01:05:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.3 2003/08/28 02:33:41 atanu Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
@@ -35,6 +35,23 @@ test_multprotocol(TestInfo& /*info*/)
     assert(multi.length() == recv.length());
 
     assert(memcmp(multi.data(), recv.data(), recv.length()) == 0);
+
+    return true;
+}
+
+bool
+test_refresh(TestInfo& /*info*/)
+{
+    BGPRefreshCapability refresh;
+
+    refresh.encode();
+    assert(4 == refresh.length());
+
+    BGPRefreshCapability recv(refresh.length(), refresh.data());
+
+    assert(refresh.length() == recv.length());
+
+    assert(memcmp(refresh.data(), recv.data(), recv.length()) == 0);
 
     return true;
 }
@@ -101,20 +118,25 @@ test_open_packet_with_capabilities(TestInfo& /*info*/)
     // Add a multiprotocol parameter.
     openpacket.add_parameter(
 	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
-
+    // Add a refresh parameter
+    openpacket.add_parameter(
+	     new BGPRefreshCapability());
+    
     const uint8_t *buf;
     size_t len;
     buf = openpacket.encode(len);
 
     //open packets with no parameters have a fixed length of 29 bytes
     // +8 for the multiprotocol parameter.
-    assert(len == MINOPENPACKET + 8);
+    // +4 for the refresh parameter.
+    assert(len == MINOPENPACKET + 8 + 4);
 
     //check the common header
     const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
     uint16_t plen = htons(*((const uint16_t*)skip));
     // +8 for the multiprotocol parameter.
-    assert(plen == MINOPENPACKET + 8);
+    // +4 for the refresh parameter.
+    assert(plen == MINOPENPACKET + 8 + 4);
     skip+=2;
     uint8_t type = *skip;
     assert(type == MESSAGETYPEOPEN);
@@ -535,6 +557,7 @@ main(int argc, char** argv)
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
 	    {"multiprotocol", callback(test_multprotocol)},
+	    {"refresh", callback(test_refresh)},
 	    {"simple_open_packet", callback(test_simple_open_packet)},
 	    {"open_packet", callback(test_open_packet_with_capabilities)},
 	    {"keepalive_packet", callback(test_keepalive_packet)},
