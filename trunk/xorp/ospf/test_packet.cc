@@ -398,7 +398,7 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
-decoder1(TestInfo& info, OspfTypes::Version version)
+packet_decoder1(TestInfo& info, OspfTypes::Version version)
 {
     PacketDecoder dec;
     HelloPacket hello(version);
@@ -420,7 +420,7 @@ decoder1(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
-decoder2(TestInfo& info, OspfTypes::Version version)
+packet_decoder2(TestInfo& info, OspfTypes::Version version)
 {
     PacketDecoder dec;
     // Install a decoder for hello packets.
@@ -443,6 +443,8 @@ decoder2(TestInfo& info, OspfTypes::Version version)
 
     return true;
 }
+
+/* Packet stuff above - LSA stuff below */
 
 bool
 router_lsa_print(TestInfo& info)
@@ -512,7 +514,6 @@ router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 
     delete rlsa1;
     delete rlsa2;
-//     delete rlsa3;
 
     return true;
 }
@@ -548,10 +549,11 @@ main(int argc, char **argv)
 				   OspfTypes::V2)},
 	{"lsrp_compareV3", callback(link_state_request_packet_compare,
 				   OspfTypes::V3)},
-	{"decoder1V2", callback(decoder1, OspfTypes::V2)},
-	{"decoder1V3", callback(decoder1, OspfTypes::V3)},
-	{"decoder2V2", callback(decoder2, OspfTypes::V2)},
-	{"decoder2V3", callback(decoder2, OspfTypes::V3)},
+	{"packet_decoder1V2", callback(packet_decoder1, OspfTypes::V2)},
+	{"packet_decoder1V3", callback(packet_decoder1, OspfTypes::V3)},
+	{"packet_decoder2V2", callback(packet_decoder2, OspfTypes::V2)},
+	{"packet_decoder2V3", callback(packet_decoder2, OspfTypes::V3)},
+
 	{"router_lsa_compareV2", callback(router_lsa_compare, OspfTypes::V2)},
 	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
     };
