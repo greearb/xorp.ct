@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.9 2003/04/22 23:27:22 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.10 2003/05/21 05:32:52 pavlin Exp $"
 
 
 //
@@ -430,19 +430,16 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
     if (! is_up())
 	return (XORP_ERROR);
     
-    //
-    // TODO: if we are running in secure mode, then check ip_ttl and
-    // @router_alert_bool (e.g. (ip_ttl == MINTTL) && (router_alert_bool))
-    //
-    
     do {
 	if (proto_is_igmp()) {
-	    ret_value = igmp_process(src, dst, buffer);
+	    ret_value = igmp_process(src, dst, ip_ttl, ip_tos,
+				     router_alert_bool, buffer);
 	    break;
 	}
 #ifdef HAVE_IPV6
 	if (proto_is_mld6()) {
-	    ret_value = mld6_process(src, dst, buffer);
+	    ret_value = mld6_process(src, dst, ip_ttl, ip_tos,
+				     router_alert_bool, buffer);
 	    break;
 	}
 #endif
@@ -452,10 +449,6 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
     } while (false);
     
     return (ret_value);
-
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(router_alert_bool);
 }
 
 /**

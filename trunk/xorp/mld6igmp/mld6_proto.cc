@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.15 2003/05/21 05:32:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.16 2003/07/01 00:59:43 pavlin Exp $"
 
 
 //
@@ -56,6 +56,12 @@
  * Mld6igmpVif::mld6_process:
  * @src: The message source address.
  * @dst: The message destination address.
+ * @ip_ttl: The IP TTL of the message. If it has a negative value,
+ * it should be ignored.
+ * @ip_tos: The IP TOS of the message. If it has a negative value,
+ * it should be ignored.
+ * @router_alert_bool: True if the received IP packet had the ROUTER_ALERT
+ * IP option set.
  * @buffer: The buffer with the message.
  * 
  * Process MLD message and pass the control to the type-specific functions.
@@ -63,7 +69,11 @@
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
+Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
+			  int ip_ttl,
+			  int ip_tos,
+			  bool router_alert_bool,
+			  buffer_t *buffer)
 {
     uint8_t message_type;
     int max_resp_time;
@@ -139,7 +149,14 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	       cstring(src), cstring(dst),
 	       name().c_str());
     
-#if 0	// TODO: do we need the TTL and Router Alert option checks?
+    //
+    // TODO: if we are running in secure mode, then check ip_ttl, ip_tos and
+    // @router_alert_bool (e.g. (ip_ttl == MINTTL) && (router_alert_bool))
+    //
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+    UNUSED(router_alert_bool);
+#if 0
     //
     // TTL (aka. Hop-limit in IPv6) and Router Alert option check.
     //
@@ -169,10 +186,63 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     }
 #endif // 0/1
     
-#if 1	// TODO: do we need unicast/multicast destination address check?
     //
-    // Source and destination address check.
+    // Source address check.
     //
+    if (! src.is_unicast()) {
+	// Source address must always be unicast
+	// The kernel should have checked that, but just in case
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "source must be unicast",
+		     proto_message_type2ascii(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str());
+	return (XORP_ERROR);
+    }
+    if (src.af() != family()) {
+	// Invalid source address family
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "invalid source address family "
+		     "(received %d expected %d)",
+		     proto_message_type2ascii(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     src.af(), family());
+    }
+    switch (message_type) {
+    case MLD_LISTENER_QUERY:
+    case MLD_LISTENER_REPORT:
+    case MLD_LISTENER_DONE:
+	src.copy_out(in6_addr);
+	if (! IN6_IS_ADDR_LINKLOCAL(&in6_addr)) {
+	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			 "source is not a link-local address",
+			 proto_message_type2ascii(message_type),
+			 cstring(src), cstring(dst),
+			 name().c_str());
+	    return (XORP_ERROR);
+	}
+	break;
+    case MLD_MTRACE:
+	// TODO: perform the appropriate checks
+	break;
+    default:
+	break;
+    }
+
+    //
+    // Destination address check.
+    //
+    if (dst.af() != family()) {
+	// Invalid destination address family
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "invalid destination address family "
+		     "(received %d expected %d)",
+		     proto_message_type2ascii(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     dst.af(), family());
+    }
     switch (message_type) {
     case MLD_LISTENER_QUERY:
     case MLD_LISTENER_REPORT:
@@ -182,16 +252,6 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "destination must be multicast. "
 			 "Packet ignored.",
-			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst),
-			 name().c_str());
-	    return (XORP_ERROR);
-	}
-	// Source address check
-	src.copy_out(in6_addr);
-	if (! IN6_IS_ADDR_LINKLOCAL(&in6_addr)) {
-	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			 "source is not a link-local address",
 			 proto_message_type2ascii(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
@@ -207,8 +267,6 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     default:
 	break;
     }
-#endif /* 1/0 */
-
     
     //
     // Message-specific checks.

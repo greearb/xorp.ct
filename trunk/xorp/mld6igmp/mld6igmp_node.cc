@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.8 2003/05/21 05:32:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.9 2003/07/12 01:05:18 pavlin Exp $"
 
 
 //
@@ -704,21 +704,10 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
 	      ip_ttl, ip_tos, router_alert_bool, (uint32_t)rcvlen);
     
     //
-    // Misc. checks
+    // Check whether the node is up.
     //
     if (! is_up())
 	return (XORP_ERROR);
-    if ((src.af() != family()) || (dst.af() != family()))
-	return (XORP_ERROR);	// Invalid address family
-    if (! src.is_unicast())
-	return (XORP_ERROR);	// The source address has to be valid
-    if ((ip_ttl != MINTTL) || (! router_alert_bool)) {
-	// TODO: only if we are running in secure mode we should ignore
-	// messages with invalid ip_ttl?
-#if 0
-	return (XORP_ERROR);	// Invalid IP TTL
-#endif
-    }
     
     //
     // Find the vif for that packet
@@ -728,8 +717,6 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
-    if (! mld6igmp_vif->is_up())
-	return (XORP_ERROR);
     
     // Copy the data to the receiving #buffer_t
     BUFFER_RESET(_buffer_recv);
