@@ -1,41 +1,91 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.47 2004/03/03 01:24:29 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.48 2004/06/14 19:27:19 atanu Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.0RC (200?/??/??)
+Release 1.0RC (2004/06/14)
 =========================
   ALL:
     - All the routing processes can now be started and configured via the
       RTRMGR/XORPSH.
 
   LIBXORP:
-    - 
+    - Addition of support for safe callbacks (e.g., if an object is
+      destroyed, all callbacks that refer to that object are invalidated).
 
   LIBXIPC:
-    - 
+    - Addition of support for event notification if the status of a target
+      changes.
 
   LIBFEACLIENT:
-    - 
+    - Few bug fixes.
 
   XRL:
-    - 
+    - No significant changes.
 
   RTRMGR:
-    - Added support for explicit configuration of the XRL target name of
+    - Addition of new command-line option "-v" to print verbose information.
+
+    - Removal of command-line option "-d" that prints default information,
+      because the same information is printed with the "-h" flag.
+
+    - Addition of support for explicit configuration of the XRL target name of
       a module.
 
+    - Addition of support for %help command in the rtrmgr template files.
+
+    - Addition of support for new methods per module: "startup_method"
+      and "shutdown_method".
+
+    - Numerous other improvements and bug fixes.
+
   XORPSH:
-    - 
+    - Addition of new command-line option "-v" to print verbose information.
+
+    - Removal of command-line option "-d" that prints default information,
+      because the same information is printed with the "-h" flag.
+
+    - Addition of support for help string in the xorpsh operational
+      commands template files.
+
+    - Addition of support for positional arguments in the xorpsh operational
+      commands template files.
+
+    - Addition of support to interrupt an operational command.
+      Now if a command is interrupted from the command line by typing Ctrl-C,
+      then the executed binary command itself (and its forked children, if any)
+      is killed.
+
+    - Numerous other improvements and bug fixes.
 
   FEA/MFEA:
-    - 
+    - Addition of support for propagating the Forwarding Information Base
+      from the underlying system to clients interested in that information.
 
-  RIB: 
-    - 
+    - Addition of support for opening TCP or UDP sockets via the FEA.
+
+    - Modification to the MFEA to use "libfeaclient" to obtain the interface
+      information from the FEA.
+
+    - Numerious bug fixes.
+
+  RIB:
+    - Addition of support for redistributing routes between two internal
+      tables.
+
+    - Addition of support for obtaining routes directly from some of the
+      internal tables.
+
+    - Modification to the RIB to use "libfeaclient" to obtain the interface
+      information from the FEA.
+
+    - Modification to the RIB to use the new RedistTable to propagate
+      the final routes to the FEA and anyone else interested (e.g., PIM-SM).
+
+    - Few bug fixes.
 
   BGP:
     - IPv6 has now been tested with peerings to the 6Bone; unicast and
@@ -45,20 +95,59 @@ Release 1.0RC (200?/??/??)
 
     - The memory leaks from the previous release have been found and fixed.
 
+  STATIC_ROUTES:
+    - This is a new module for configuring static routes to the
+      unicast or multicast RIB.
+
   MLD/IGMP:
-    - 
+    - During startup, a primary address is selected per configured interface,
+      and this primary address should be the link-local unicast address
+      of that interface.
+
+    - New CLI commands: "show igmp interface address" and
+      "show mld interface address"
+
+    - Resend some of the XRLs (e.g., those who do not carry soft-state
+      such as protocol control messages) if there is an error.
+
+    - Few bug fixes.
 
   PIM-SM:
-    - Updated to support the lastest PIM-SM spec
-      (draft-ietf-pim-sm-v2-new-09.{ps,txt})
-    - Added support for "alternative subnet" configuration such that
+    - Updated to support the lastest PIM-SM specification
+      (draft-ietf-pim-sm-v2-new-09.{ps,txt}).
+
+    - Addition of support for "alternative subnet" configuration such that
       non-local senders appear as senders connected to the same subnet.
-      Needed as a work-around solution when there are uni-directional
+      It is needed as a work-around solution when there are uni-directional
       interfaces for sending and receiving traffic (e.g., satellite links).
 
+    - During startup, a primary address and a domain-wide address are
+      selected per configured interface.
+      The primary address should be the link-local unicast address
+      of that interface, and the domain-wide address should be a domain-wide
+      reachable unicast address.
+
+    - Resend some of the XRLs (e.g., those who do not carry soft-state
+      such as protocol control messages) if there is an error.
+
+    - Several bug fixes.
+
+  FIB2MRIB:
+    - This is a new module for propagating the unicast forwarding information
+      obtained from the underlying system via the FEA to the multicast RIB.
+
   CLI:
+    - Addition of support to propagate command interruption (e.g., Ctrl-C)
+      from the CLI to the object that handles the command processing
+      by calling a pre-defined callback.
+
+    - During startup, if the input is a terminal (e.g., xorpsh), then
+      read the terminal size instead of using the default values.
+
     - A bug fix related to the CLI paging output: now it can handle properly
       lines that are longer than the width of the CLI output terminal.
+
+    - Several other bug fixes.
 
   SNMP:
     - No significant changes.
@@ -149,7 +238,8 @@ Release 0.5 (2003/11/06)
   CLI:
     - Change slightly the command-line editing, so now Ctrl-W deletes
       the word before the cursor. Before, Ctrl-W would delete the
-      whole line
+      whole line.
+
     - Apply a fix to libtecla in network mode such that
       keyboard-generated signals are not propagated to the process
       we have connected to.
