@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.9 2003/06/26 02:17:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.10 2003/06/26 19:41:47 atanu Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -41,7 +41,7 @@ XrlCoordTarget::XrlCoordTarget(XrlRouter *r, Coord& coord)
     debug_msg("\n");
 }
 
-XrlCmdError 
+XrlCmdError
 XrlCoordTarget::common_0_1_get_target_name(string& name)
 {
     debug_msg("\n");
@@ -50,7 +50,7 @@ XrlCoordTarget::common_0_1_get_target_name(string& name)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlCoordTarget::common_0_1_get_version(string& version)
 {
     debug_msg("\n");
@@ -60,7 +60,7 @@ XrlCoordTarget::common_0_1_get_version(string& version)
 }
 
 XrlCmdError
-XrlCoordTarget::common_0_1_get_status(// Output values, 
+XrlCoordTarget::common_0_1_get_status(// Output values,
 				      uint32_t& status,
 				      string& reason)
 {
@@ -73,10 +73,11 @@ XrlCoordTarget::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlCoordTarget::common_0_1_shutdown()
 {
-    exit(0);
+    _coord._done = true;
+    return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlCoordTarget::coord_0_1_command(const string&	command)
 {
     debug_msg("command: <%s>\n", command.c_str());
@@ -86,8 +87,8 @@ XrlCoordTarget::coord_0_1_command(const string&	command)
 	_coord.command(command);
     } catch(const XorpException& e) {
 	_incommand--;
-	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " + 
-					   (_coord.pending() ? 
+	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
+					   (_coord.pending() ?
 					   "true" : "false"));
     }
     _incommand--;
@@ -95,7 +96,7 @@ XrlCoordTarget::coord_0_1_command(const string&	command)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlCoordTarget::coord_0_1_status(const string& peer, string& status)
 {
     debug_msg("status: %s\n", peer.c_str());
@@ -105,8 +106,8 @@ XrlCoordTarget::coord_0_1_status(const string& peer, string& status)
 	_coord.status(peer, status);
     } catch(const XorpException& e) {
 	_incommand--;
-	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " + 
-					   (_coord.pending() ? 
+	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
+					   (_coord.pending() ?
 					   "true" : "false"));
     }
     _incommand--;
@@ -145,7 +146,7 @@ XrlCmdError
 XrlCoordTarget::datain_0_1_error(const string&  peer, const uint32_t& genid,
 				 const string& reason)
 {
-    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(), genid, 
+    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(), genid,
 	      reason.c_str());
 
     _coord.datain_error(peer, genid, reason);
@@ -184,7 +185,7 @@ Coord::status(const string& peer, string& status)
 }
 
 bool
-Coord::pending() 
+Coord::pending()
 {
     return _command.pending();
 }
@@ -211,8 +212,8 @@ Coord::datain_closed(const string& peer, const uint32_t& genid)
     _command.datain_closed(peer, genid);
 }
 
-bool 
-Coord::done() 
+bool
+Coord::done()
 {
     return _done;
 }
@@ -224,10 +225,11 @@ usage(char *name)
     exit(-1);
 }
 
-int 
+int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
+
     //
     // Initialize and start xlog
     //
@@ -243,7 +245,7 @@ main(int argc, char **argv)
     const char *server = SERVER;
 
     while((c = getopt (argc, argv, "h:")) != EOF) {
-	switch(c) {  
+	switch(c) {
 	case 'h':
 	    finder_host = optarg;
 	    break;
@@ -251,7 +253,7 @@ main(int argc, char **argv)
 	    usage(argv[0]);
 	}
     }
-   
+
     try {
 	EventLoop eventloop;
 	XrlStdRouter router(eventloop, server, finder_host);
@@ -259,7 +261,17 @@ main(int argc, char **argv)
 	Coord coord(eventloop, com);
 	XrlCoordTarget xrl_target(&router, coord);
 
-	while(!coord.done()) {
+	{
+	    bool timed_out(false);
+	    XorpTimer t = eventloop.set_flag_after_ms(5000, &timed_out);
+	    while (router.ready() == false && timed_out == false) {
+		eventloop.run();
+	    }
+	    if (timed_out)
+		XLOG_FATAL("Xrl router did not become ready - No Finder?");
+	}
+
+	while (coord.done() == false) {
 	    eventloop.run();
 	}
 
