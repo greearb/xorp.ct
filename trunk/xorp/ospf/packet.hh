@@ -504,11 +504,31 @@ class LinkStateRequestPacket : public Packet {
  public:
     LinkStateRequestPacket(OspfTypes::Version version)
 	: Packet(version)
-
     {}
 
     OspfTypes::Type get_type() const { return 3; }
+
+    Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
+
+    /**
+     * Encode the packet.
+     *
+     * @param len an ouput paramater that returns the length of the
+     * encoded packet.
+     * @return pointer to packet, must be free'd.
+     */
+    uint8_t *encode(size_t &len);
+
+    list<Ls_request>& get_ls_request() {
+	return _ls_request;
+    }
+    
+    /**
+     * Generate a printable representation of the packet.
+     */
+    string str() const;
  private:
+    list<Ls_request> _ls_request;
 };
 
 inline

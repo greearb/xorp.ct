@@ -117,7 +117,7 @@ class Lsa_header {
     
     /**
      * Copy a wire format representation to the pointer provided.
-     * @return the number of butes written.
+     * @return the number of bytes written.
      */
     size_t copy_out(uint8_t *to_uint8) const;
 
@@ -224,6 +224,113 @@ class Lsa_header {
     uint32_t	_ls_sequence_number;
     uint16_t	_ls_checksum;
     uint16_t	_length;
+};
+
+/**
+ * Link State Request as sent in a Link State Request Packet.
+ */
+class Ls_request {
+ public:
+    Ls_request(OspfTypes::Version version) :
+	_version(version),  _ls_type(0),_link_state_id(0),
+	_advertising_router(0)
+    {}
+
+    Ls_request(OspfTypes::Version version, uint32_t ls_type,
+	       uint32_t link_state_id, uint32_t advertising_router) :
+	_version(version),  _ls_type(ls_type),_link_state_id(link_state_id),
+	_advertising_router(advertising_router)
+    {}
+    
+    Ls_request(const Ls_request& rhs) {
+	copy(rhs);
+    }
+
+    Ls_request operator=(const Ls_request& rhs) {
+	if(&rhs == this)
+	    return *this;
+	copy(rhs);
+	return *this;
+    }
+
+#define	ls_copy(var)	var = rhs.var;
+
+    void copy(const Ls_request& rhs) {
+	ls_copy(_version);
+	ls_copy(_ls_type);
+	ls_copy(_link_state_id);
+	ls_copy(_advertising_router);
+    }
+#undef	ls_copy
+    
+    /**
+     * @return the length of an link state request header.
+     */
+    static size_t length() { return 12; }
+    
+    /**
+     * Decode a Link State Request and return value inline not a pointer.
+     */
+    Ls_request
+    decode(uint8_t *ptr) throw(BadPacket);
+
+    /**
+     * Copy a wire format representation to the pointer provided.
+     * @return the number of bytes written.
+     */
+    size_t copy_out(uint8_t *to_uint8) const;
+
+    OspfTypes::Version get_version() const {
+	return _version;
+    }
+    
+    // LS type
+    void set_ls_type(uint32_t ls_type) {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    _ls_type = ls_type;
+	    break;
+	case OspfTypes::V3:
+	    if (ls_type > 0xffff)
+		XLOG_WARNING("Attempt to set %#x in an 16 bit field",
+			     ls_type);
+	    _ls_type = ls_type & 0xffff;
+	    break;
+	}
+    }
+
+    uint32_t get_ls_type() const {
+	return _ls_type;
+    }
+
+    // Link State ID
+    void set_link_state_id(uint32_t link_state_id) {
+	_link_state_id = link_state_id;
+    }
+
+    uint32_t get_link_state_id() const {
+	return _link_state_id;
+    }
+    
+    // Advertising Router
+    void set_advertising_router(uint32_t advertising_router) {
+	_advertising_router = advertising_router;
+    }
+
+    uint32_t get_advertising_router() const {
+	return _advertising_router;
+    }
+
+    /**
+     * Generate a printable representation of the request.
+     */
+    string str() const;
+    
+ private:
+    OspfTypes::Version _version;
+    uint32_t 	_ls_type;	// OSPF V2 4 bytes OSPF V3 2 bytes.
+    uint32_t 	_link_state_id;
+    uint32_t	_advertising_router;
 };
 
 #endif // __OSPF_LSA_HH__

@@ -35,8 +35,8 @@
 #include "lsa.hh"
 
 /**
- * A LSA header is a fixed length assume that we have been passed our
- * 20 bytes.
+ * A LSA header is a fixed length, the caller should have allocated
+ * enough space by calling the length() method.
  */
 Lsa_header
 Lsa_header::decode(uint8_t *ptr) throw(BadPacket)
@@ -66,6 +66,10 @@ Lsa_header::decode(uint8_t *ptr) throw(BadPacket)
     return header;
 }
 
+/**
+ * A LSA header is a fixed length, the caller should have allocated
+ * enough space by calling the length() method.
+ */
 size_t
 Lsa_header::copy_out(uint8_t *ptr) const
 {
@@ -115,6 +119,70 @@ Lsa_header::str() const
     output += c_format(" LS sequence number %u", get_ls_sequence_number());
     output += c_format(" LS checksum %#x", get_ls_checksum());
     output += c_format(" length %u", get_length());
+    
+    return output;
+}
+
+/**
+ * A link state request is a fixed length, the caller should have allocated
+ * enough space by calling the length() method.
+ */
+Ls_request
+Ls_request::decode(uint8_t *ptr) throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    Ls_request header(version);
+
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_ls_type(extract_32(&ptr[0]));
+	break;
+    case OspfTypes::V3:
+	header.set_ls_type(extract_16(&ptr[2]));
+	break;
+    }
+
+    header.set_link_state_id(extract_32(&ptr[4]));
+    header.set_advertising_router(extract_32(&ptr[8]));
+
+    return header;
+}
+
+/**
+ * A link state request is a fixed length, the caller should have allocated
+ * enough space by calling the length() method.
+ */
+size_t
+Ls_request::copy_out(uint8_t *ptr) const
+{
+    OspfTypes::Version version = get_version();
+
+    Ls_request header(version);
+
+    switch(version) {
+    case OspfTypes::V2:
+	embed_32(&ptr[0], get_ls_type());
+	break;
+    case OspfTypes::V3:
+	embed_16(&ptr[2], get_ls_type());
+	break;
+    }
+
+    embed_32(&ptr[4], get_link_state_id());
+    embed_32(&ptr[8], get_advertising_router());
+
+    return 20;
+}
+
+string
+Ls_request::str() const
+{
+    string output;
+
+    output = c_format(" LS type %u", get_ls_type());
+    output += c_format(" Link State ID %u", get_link_state_id());
+    output += c_format(" Advertising Router %#x", get_advertising_router());
     
     return output;
 }

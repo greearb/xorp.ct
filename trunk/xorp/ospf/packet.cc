@@ -510,6 +510,7 @@ HelloPacket::str() const
 
 
 /* Database Description packet */
+
 Packet *
 DataDescriptionPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
 {
@@ -590,8 +591,9 @@ DataDescriptionPacket::encode(size_t &len)
     uint8_t *ptr = new uint8_t[len];
     memset(ptr, 0, len);
 
-    // Put the specific Hello Packet information first as the standard
-    // header code will also add the checksum. This must be done last.
+    // Put the specific Data Description Packet information first as
+    // the standard header code will also add the checksum. This must
+    // be done last.
 
     /**************************************/
     OspfTypes::Version version = get_version();
@@ -657,6 +659,96 @@ DataDescriptionPacket::str() const
 
     list<Lsa_header> li = _lsa_headers;
     list<Lsa_header>::iterator i = li.begin();
+    for (; i != li.end(); i++) {
+	output += "\n\t" + (*i).str();
+    }
+
+    return output;
+}
+
+/* Link State Request Packet */
+
+Packet *
+LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    LinkStateRequestPacket *packet = new LinkStateRequestPacket(version);
+
+    size_t offset = packet->decode_standard_header(ptr, len);
+    
+    Ls_request ls(version);
+
+    // Verify that this packet is large enough, a standard header plus
+    // at least one request
+    if ((len - offset) < ls.length())
+	xorp_throw(BadPacket,
+		   c_format("Packet too short %u, must be at least %u",
+			    len,
+			    offset + ls.length()));
+
+#ifdef	DEBUG_RAW_PACKETS
+    debug_msg("\n%s", dump_packet(ptr, len).c_str());
+#endif
+
+
+    // How many request are there?
+    int requests = (len - offset) / ls.length();
+
+    // XXX - Should we be checking for multiples of 12 here?
+    for(int i = 0; i < requests; i++) {
+	packet->get_ls_request().
+	    push_back(ls.decode(&ptr[offset + i * ls.length()]));
+    }
+
+    return packet;
+}
+
+/**
+ * The caller must free this packet.
+ */
+uint8_t *
+LinkStateRequestPacket::encode(size_t &len)
+{
+    OspfTypes::Version version = get_version();
+    Ls_request ls(version);
+
+    size_t offset = get_standard_header_length();
+    len = offset + get_ls_request().size() * ls.length();
+
+    uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Put the specific Link State Request Packet information first as
+    // the standard header code will also add the checksum. This must
+    // be done last.
+    /**************************************/
+    list<Ls_request> &li = get_ls_request();
+    list<Ls_request>::iterator i = li.begin();
+    for(size_t index = 0; i != li.end(); i++, index += ls.length()) {
+	(*i).copy_out(&ptr[offset + index]);
+    }
+	
+    if (offset != encode_standard_header(ptr, len)) {
+	XLOG_ERROR("Encode of %s failed", str().c_str());
+	return 0;
+    }
+
+    return ptr;
+}
+
+string
+LinkStateRequestPacket::str() const
+{
+    string output;
+
+    output = "Link State Request Packet:\n";
+    // Standard Header
+    output += standard();
+    // Link State Request Packet Specifics
+
+    list<Ls_request> li = _ls_request;
+    list<Ls_request>::iterator i = li.begin();
     for (; i != li.end(); i++) {
 	output += "\n\t" + (*i).str();
     }
