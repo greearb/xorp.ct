@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.2 2002/12/14 23:42:55 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -22,7 +22,10 @@
 #include "xrl_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/callback.hh"
+
 #include "xrl_pf_inproc.hh"
+
 
 static const bool g_show_trace = false;
 #define trace(args...) if (g_show_trace) printf(args)
@@ -34,21 +37,21 @@ static bool hello_done = false;
 
 static const XrlCmdError
 hello_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response, 
-		   void*	cookie) {
-    trace("hello_recv_handler: request %s response %p cookie %p\n", 
-	  request.str().c_str(), response, cookie);
+		   XrlArgs*	response)
+{
+    trace("hello_recv_handler: request %s response %p\n", 
+	  request.str().c_str(), response);
     return XrlCmdError::OKAY();
 }
 
 static void
 hello_reply_handler(const XrlError&	e,
 		    const Xrl&		request, 
-		    XrlArgs*	response, 
-		    void*		cookie) {
+		    XrlArgs*		response)
+{
     if (e == XrlError::OKAY()) {
-	trace("hello_reply_handler: request %s response %p cookie %p\n", 
-	      request.str().c_str(), response, cookie);
+	trace("hello_reply_handler: request %s response %p\n", 
+	      request.str().c_str(), response);
     } else {
 	trace("hello failed: %s\n", e.str().c_str());
     }
@@ -60,7 +63,8 @@ test_hello(EventLoop& e, XrlPFInProcSender &s) {
     Xrl x("anywhere", "hello");
 
     debug_msg("test_hello\n");
-    s.send(x, hello_reply_handler, 0);
+    s.send(x,  callback(hello_reply_handler));
+
     while (hello_done == 0) {
 	e.run();
     }
@@ -74,24 +78,23 @@ static bool int32_done = false;
 
 static const XrlCmdError
 int32_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response, 
-		   void*	cookie) {
-    trace("int32_recv_handler: request %s response %p cookie %p\n", 
-	   request.str().c_str(), response, cookie);
-    if (response) {
+		   XrlArgs*	response)
+{
+    trace("int32_recv_handler: request %s response %p\n", 
+	   request.str().c_str(), response);
+    if (response)
 	response->add_int32("an_int32", 123456);
-    }
     return XrlCmdError::OKAY();
 }
 
 static void
 int32_reply_handler(const XrlError&	e, 
 		    const Xrl&		request, 
-		    XrlArgs*		response, 
-		    void*		cookie) {
+		    XrlArgs*		response)
+{
     if (e == XrlError::OKAY()) {
-	trace("int32_reply_handler: request %s response %p cookie %p\n", 
-	       request.str().c_str(), response, cookie);
+	trace("int32_reply_handler: request %s response %p\n",
+	      request.str().c_str(), response);
 	trace("int32 -> %s\n", response->str().c_str());
     } else {
 	fprintf(stderr, "get_int32 failed: %s\n", e.str().c_str());
@@ -107,8 +110,10 @@ test_int32(EventLoop& e, XrlPFInProcSender& s) {
 
     debug_msg("test_int32\n");
 
-    s.send(x, int32_reply_handler, 0);
-    while(int32_done == 0) e.run();
+    s.send(x, callback(int32_reply_handler));
+    while(int32_done == 0)
+	e.run();
+
     int32_done = 0;
 }
 
@@ -124,8 +129,9 @@ run_test()
 {
     EventLoop event_loop;
     XrlCmdMap cmd_map;
-    cmd_map.add_handler("hello", hello_recv_handler, 0);
-    cmd_map.add_handler("get_int32", int32_recv_handler, 0);
+
+    cmd_map.add_handler("hello", callback(hello_recv_handler));
+    cmd_map.add_handler("get_int32", callback(int32_recv_handler));
 
     XrlPFInProcListener listener(event_loop, &cmd_map);
     XrlPFInProcSender s(event_loop, listener.address());

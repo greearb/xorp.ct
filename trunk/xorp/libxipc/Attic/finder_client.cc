@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.1 2002/12/14 23:42:54 hodson Exp $"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -30,25 +30,35 @@
 // FinderRegistration - container for pending registration result
 
 struct FinderRegistration {
-    FinderRegistration(FinderClientCallback cb, void* userdata, 
+public:
+    FinderRegistration(const FinderClient::Callback& cb,
 		       const char *name, const char* value = "") :
-	_name(name), _value(value), _callback(cb), _userdata(userdata) {}
+	_name(name), _value(value), _callback(cb)
+    {}
+
     FinderRegistration() {}
     const char*			name() const { return _name.c_str(); }
     const char* 		value() const { return _value.c_str(); }
-    FinderClientCallback	callback() const { return _callback; }
-    void* 			userdata() const { return _userdata; }
+
     uint16_t 			seqno() const { return _seqno; }
     uint16_t			set_seqno(uint16_t s) { 
 	gettimeofday(&_issued, NULL);
 	return _seqno = s; 
     }
     const timeval& 		issued() const { return _issued; }
+
+    inline void notify(FinderClient::Error e,
+		       const char*	   name,
+		       const char*	   value)
+    {
+	if (_callback.is_empty() == false)
+	    _callback->dispatch(e, name, value);
+    }
+
 private:
     string			_name;
     string			_value;
-    FinderClientCallback	_callback;
-    void*			_userdata;
+    FinderClient::Callback	_callback;
     uint16_t			_seqno;
     timeval			_issued;
 };
@@ -157,8 +167,7 @@ FinderClient::register_handler(const FinderMessage& msg) {
 	debug_msg("acked something %d %d\n", r->seqno(), msg.ackno());
 	if (r->seqno() == msg.ackno()) {
 	    _resolved[r->name()] = r->value();
-	    if (r->callback())
-		r->callback()(FC_OKAY, r->name(), r->value(), r->userdata());
+	    r->notify(FinderClient::FC_OKAY, r->name(), r->value());
 	    _registers.erase(r);
 	    break;
 	}
@@ -176,8 +185,7 @@ FinderClient::unregister_handler(const FinderMessage& msg) {
     for(RLI r = _unregisters.begin(); r != _unregisters.end(); r++) {
 	debug_msg("acked something %d %d", r->seqno(), msg.ackno());
 	if (r->seqno() == msg.ackno()) {
-	    if (r->callback())
-		r->callback()(FC_OKAY, r->name(), r->value(), r->userdata());
+	    r->notify(FinderClient::FC_OKAY, r->name(), r->value());
 	    _unregisters.erase(r);
 	    break;
 	}
@@ -197,8 +205,7 @@ FinderClient::notify_handler(const FinderMessage& msg) {
 
     for (RLI q = _queries.begin(); q != _queries.end(); q++) {
 	if (q->name() == string(name)) {
-	    if (q->callback()) 
-		q->callback()(FC_OKAY, name, value, q->userdata());
+	    q->notify(FinderClient::FC_OKAY, name, value);
 	    _queries.erase(q);
 	    q--;
 	}
@@ -224,8 +231,7 @@ FinderClient::error_handler(const FinderMessage& msg) {
     // Check if message relates to attempted registration...
     for (RLI r = _registers.begin(); r != _registers.end(); r++) {
 	if (seqno == r->seqno()) {
-	    if (r->callback())
-		r->callback()(FC_ADD_FAILED, r->name(), NULL, r->userdata());
+	    r->notify(FinderClient::FC_ADD_FAILED, r->name(), 0);
 	    debug_msg("Register failed (\"%s\", \"%s\"):\n%s\n",
 		      r->name(), r->value(), msg.get_arg(1));
 	    _registers.erase(r);
@@ -236,9 +242,7 @@ FinderClient::error_handler(const FinderMessage& msg) {
     // Check if message relates to lookup 
     for (RLI q = _queries.begin(); q != _queries.end(); q++) {
 	if (seqno == q->seqno()) {
-	    if (q->callback())
-		q->callback()(FC_LOOKUP_FAILED, q->name(), NULL, 
-			      q->userdata());
+	    q->notify(FinderClient::FC_LOOKUP_FAILED, q->name(), 0); 
 	    debug_msg("Look up failed (\"%s\"): %s\n", 
 		      q->name(), msg.get_arg(1));
 	    _queries.erase(q);
@@ -298,43 +302,40 @@ FinderClient::receive_hook(int fd, SelectorMask sm, void* thunked_client) {
 // Registration Related
 
 void 
-FinderClient::add(const char* name, const char* value, 
-		  FinderClientCallback cb, void* userdata) {
+FinderClient::add(const char* name, const char* value, const Callback& cb)
+{
     if (_connection) {
-	FinderRegistration r(cb, userdata, name, value);
-	string s(name);
-	_registered[s] = r;
+	FinderRegistration r(cb, name, value);
+	_registered[name] = r;
 	send_register(r);
     } else {
-	cb(FC_NO_SERVER, name, value, userdata);
+	cb->dispatch(FinderClient::FC_NO_SERVER, name, value);
     }
 }
 
 void
-FinderClient::lookup(const char*          name, 
-		     FinderClientCallback cb, 
-		     void*                userdata) {
+FinderClient::lookup(const char* name, const Callback& cb) 
+{
     debug_msg("lookup %s\n", name);
     RMI i = _resolved.find(name);
     if (i != _resolved.end()) {
 	const string& v = i->second;
-	if (cb != NULL) 
-	    cb(FC_OKAY, name, v.c_str(), userdata);
+	if (cb.is_empty() == false) 
+	    cb->dispatch(FinderClient::FC_OKAY, name, v.c_str());
 	return;
     }
 
     if (connected()) {
-	FinderRegistration r(cb, userdata, name);
+	FinderRegistration r(cb, name);
 	send_resolve(r);
     } else {
-	cb(FC_NO_SERVER, name, 0, userdata);
+	cb->dispatch(FinderClient::FC_NO_SERVER, name, 0);
     }
 }
 
 void
-FinderClient::remove(const char*          name, 
-		     FinderClientCallback cb, 
-		     void*                userdata) {
+FinderClient::remove(const char* name, const Callback& cb) 
+{
     RI i = _registered.find(name);
     if (i != _registered.end()) {
 	_registered.erase(i);
@@ -346,10 +347,10 @@ FinderClient::remove(const char*          name,
     }
 
     if (_connection) {
-	FinderRegistration r(cb, userdata, name);
+	FinderRegistration r(cb, name);
 	send_unregister(r);
-    } else if (cb != NULL) {
-	cb(FC_OKAY, name, NULL, userdata);
+    } else if (cb.is_empty() == false) {
+	cb->dispatch(FinderClient::FC_OKAY, name, 0);
     }
 }
 
@@ -359,8 +360,8 @@ FinderClient::invalidate(const string& name)
     /* klduge */
     map<string,string>::iterator i = _resolved.find(name);
     if (i != _resolved.end()) {
-	    _resolved.erase(i);
-	    debug_msg("Invalidating %s\n", name.c_str());
+	_resolved.erase(i);
+	debug_msg("Invalidating %s\n", name.c_str());
     }
 }
 
@@ -453,7 +454,7 @@ FinderClient::terminate_connection() {
     // Announce lookup failures for pending queries
     while (_queries.empty() == false) {
 	FinderRegistration& q = _queries.front();
-	q.callback()(FC_NO_SERVER, q.name(), NULL, q.userdata());
+	q.notify(FinderClient::FC_NO_SERVER, q.name(), 0);
 	_queries.erase(_queries.begin());
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.1 2002/12/14 23:43:02 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.2 2002/12/15 22:53:23 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -54,10 +54,8 @@ void
 XrlRouter::send_callback(const XrlError &e,
 			 const Xrl& xrl, 
 			 XrlArgs* ret, 
-			 void *thunked_dispatch_state) {
-    DispatchState* ds = 
-	reinterpret_cast<DispatchState*>(thunked_dispatch_state);
-
+			 DispatchState* ds)
+{
     ds->_cb->dispatch(e, *ds->_router, xrl, ret);
 	
     ds->_router->_sends_pending--;
@@ -66,27 +64,26 @@ XrlRouter::send_callback(const XrlError &e,
 	fc.invalidate(ds->_xrl.target());
     }
     delete ds;
-
 }
 
 void
-XrlRouter::resolve_callback(FinderClientError	err,
+XrlRouter::resolve_callback(FinderClient::Error	err,
 			    const char*		/* name - ignored */,
 			    const char*		value,
-			    void*		thunked_dispatch_state) {
-    DispatchState*
-	ds = reinterpret_cast<DispatchState*>(thunked_dispatch_state);
+			    DispatchState*	ds)
+{
 
     ds->_router->_finder_lookups_pending--;
 
-    if (err == FC_OKAY) {
+    if (err == FinderClient::FC_OKAY) {
 	debug_msg("Resolved: %s\n", value);
 	XrlPFSender* s = XrlPFSenderFactory::create(ds->_router->_event_loop, 
 						    value);
 	if (s) {
 	    ds->_sender = s;
 	    ds->_router->_sends_pending++;
-	    s->send(ds->_xrl, send_callback, reinterpret_cast<void*>(ds));
+	    s->send(ds->_xrl,
+		    callback(&XrlRouter::send_callback, ds));
 	    trace_xrl("Sending ", ds->_xrl);
 	} else {
 	    trace_xrl("Resolve failed on ", ds->_xrl);
@@ -114,8 +111,8 @@ XrlRouter::send(const Xrl&      	xrl,
 	assert(0 && "Dispatch of resolved XRL's thru XrlRouter TBD.");
     }
 
-    _fc.lookup(xrl.target().c_str(), resolve_callback, 
-	       reinterpret_cast<void*>(ds));
+    _fc.lookup(xrl.target().c_str(),
+	       callback(&XrlRouter::resolve_callback, ds));
 
     return true;	// XXX This needs correcting.
 }
@@ -148,20 +145,16 @@ XrlRouter::~XrlRouter() {
 // ----------------------------------------------------------------------------
 // Registration with finder related
 
-enum FinderRegisterState {
-    FINDER_REGISTER_PENDING,
-    FINDER_REGISTER_SUCCESS,
-    FINDER_REGISTER_FAILURE
-};
+static const int FINDER_REGISTER_PENDING = 100;
+static const int FINDER_REGISTER_SUCCESS = 101;
+static const int FINDER_REGISTER_FAILURE = 102;
 
 void
-XrlRouter::finder_register_callback(FinderClientError	e,
+XrlRouter::finder_register_callback(FinderClient::Error	e,
 				    const char* 	/* name */,
 				    const char* 	/* value */,
-				    void*		thunk) {
-    FinderRegisterState* success = 
-	reinterpret_cast<FinderRegisterState*>(thunk);
-    if (e == FC_OKAY) {
+				    int*		success) {
+    if (e == FinderClient::FC_OKAY) {
 	*success = FINDER_REGISTER_SUCCESS;
     } else {
 	debug_msg("Failed to register with finder %d\n", (int)e);
@@ -175,15 +168,18 @@ XrlRouter::add_listener(XrlPFListener* pfl) {
     bool timed_out = false;
     XorpTimer timeout = _event_loop.set_flag_after_ms(3000, &timed_out);
 
-    FinderRegisterState frs = FINDER_REGISTER_PENDING;
+    int frs = FINDER_REGISTER_PENDING;
     
     string protocol_colon_address = 
 	string(pfl->protocol()) + string(":") + string(pfl->address());
 
     _fc.add(name().c_str(), protocol_colon_address.c_str(),
-	    finder_register_callback, 
-	    reinterpret_cast<FinderRegisterState*>(&frs));
+	    callback(&XrlRouter::finder_register_callback, &frs));
 
+    /*
+     * XXX This is really bad and esp since I've lectured people on doing
+     * this!!
+     */
     while (frs == FINDER_REGISTER_PENDING) {
 	_event_loop.run();
     }

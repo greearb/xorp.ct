@@ -12,35 +12,34 @@ const char* okay_str(bool okay) {
 }
 
 void 
-finder_addition(FinderClientError e,
+finder_addition(FinderClient::Error e,
 		const char*	  /* name */,
 		const char*       /* value */,
-		void*             thunked_success) {
+		bool*             p_success) {
     static int iter = 0;
 
-    if (e != FC_OKAY) {
+    if (e != FinderClient::FC_OKAY) {
 	fprintf(stderr, "Add failed (iteration = %d)\n", iter);
 	exit(-1);
     }
     iter ++;
 
-    bool* p_success = reinterpret_cast<bool*>(thunked_success);
     *p_success = true;
 }
 
 void 
-finder_removal(FinderClientError e,
+finder_removal(FinderClient::Error e,
 	       const char*	 /* name */,
 	       const char*       /* value */,
-	       void*		 thunked_success) {
+	       bool*		   p_success)
+{
     static int iter = 0;
-    if (e != FC_OKAY) {
+    if (e != FinderClient::FC_OKAY) {
 	fprintf(stderr, "Remove failed (iteration = %d)\n", iter);
 	exit(-1);
     }
     iter ++;
 
-    bool* p_success = reinterpret_cast<bool*>(thunked_success);
     *p_success = true;
 }
 
@@ -68,12 +67,10 @@ run_test()
     }
 
     for (int i = 0; i < 100; i++) {
-	client.add("hello", "world", finder_addition, 
-		   reinterpret_cast<void*>(&success));
+	client.add("hello", "world", callback(finder_addition, &success));
 	for (success = false; false == success; event_loop.run());
 
-	client.remove("hello", finder_removal, 
-		      reinterpret_cast<void*>(&success));
+	client.remove("hello", callback(finder_removal, &success));
 	for (success = false; false == success; event_loop.run());
     }
     return;

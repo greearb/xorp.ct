@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.1 2002/12/14 23:43:02 hodson Exp $
 
 #ifndef __XRLPF_STCP_HH__
 #define __XRLPF_STCP_HH__
@@ -28,17 +28,17 @@ class XrlPFSTCPSender;
 class STCPPacketHeader;
 
 struct RequestState {
-    XrlPFSTCPSender*	parent;
-    uint32_t		seqno;
-    Xrl			xrl;
-    XorpTimer		timeout;
+    XrlPFSTCPSender*		parent;
+    uint32_t			seqno;
+    Xrl				xrl;
+    XorpTimer			timeout;
     XrlPFSender::SendCallback	callback;
-    void*		userdata;
 
     RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x, 
-		 XrlPFSender::SendCallback cb, void* thunk)
-	: parent(p), seqno(sno), xrl(x), callback(cb), userdata(thunk) {}
-    RequestState() {}
+		 const XrlPFSender::SendCallback& cb)
+	: parent(p), seqno(sno), xrl(x), callback(cb)
+    {}
+
     bool has_seqno(uint32_t n) const { return seqno == n; }
 };
 
@@ -55,8 +55,9 @@ public:
 
     void add_request_handler(STCPRequestHandler* h);
     void remove_request_handler(const STCPRequestHandler* h);
+
 private:
-    static void connect_hook(int fd, SelectorMask m, void* thunked_listener);
+    void connect_hook(int fd, SelectorMask m);
 
     int	_fd;
     string _address_slash_port;
@@ -74,7 +75,7 @@ public:
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSTCPSender();
 
-    void send(const Xrl& x, SendCallback cb, void *cookie);
+    void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
     bool sends_pending() const 			{ return true; }
     bool alive() const 				{ return _fd > 0; }
 
@@ -112,7 +113,6 @@ private:
     RequestState* find_request(uint32_t seqno);
     void postpone_timeout(uint32_t seqno);
     void timeout_request(uint32_t seqno);
-    static void request_timed_out(void *thunked_request);
 
     // Tunable timer variables
     uint32_t _timeout_ms;

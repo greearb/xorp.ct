@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.1 2002/12/14 23:43:02 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -212,10 +212,10 @@ XrlPFSUDPSender::~XrlPFSUDPSender() {
 }
 
 void 
-XrlPFSUDPSender::send(const Xrl& x, SendCallback cb, void* cookie) {
-    
+XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
+{
     // Map request id to current object instance
-    Request request(this, x, cb, cookie);
+    Request request(this, x, cb);
     assert(requests_pending.find(request.xuid) == requests_pending.end());
     requests_pending[request.xuid] = request;
 
@@ -232,7 +232,7 @@ XrlPFSUDPSender::send(const Xrl& x, SendCallback cb, void* cookie) {
 		      (sockaddr*)&_destination, sizeof(_destination)) 
 	       != msg_bytes) {
 	debug_msg("Write failed: %s\n", strerror(errno));
-	cb(XrlError::SEND_FAILED(), x, NULL, cookie);
+	cb->dispatch(XrlError::SEND_FAILED(), x, 0);
 	return;
     }
 
@@ -251,7 +251,7 @@ XrlPFSUDPSender::timeout_hook(XUID xuid) {
     assert (i != requests_pending.end());
 
     Request& r = i->second;
-    r.callback(XrlError::REPLY_TIMED_OUT(), r.xrl, 0, r.thunk);
+    r.callback->dispatch(XrlError::REPLY_TIMED_OUT(), r.xrl, 0);
 
     debug_msg("Erasing state for %s (timeout)\n", r.xuid.str().c_str());
     requests_pending.erase(i);
@@ -299,10 +299,10 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
     r.timeout.unschedule();
     try {
 	XrlArgs response(buf + header_bytes);
-	r.callback(err, r.xrl, &response, r.thunk);
+	r.callback->dispatch(err, r.xrl, &response);
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: header_bytes %d content_bytes %d\n\t\"%s\"\n", header_bytes, content_bytes, buf + header_bytes);
-	r.callback(XrlError::CORRUPT_RESPONSE(), r.xrl, 0, r.thunk);
+	r.callback->dispatch(XrlError::CORRUPT_RESPONSE(), r.xrl, 0);
     }
     debug_msg("Erasing state for %s (answered)\n", r.xuid.str().c_str());
     requests_pending.erase(i);

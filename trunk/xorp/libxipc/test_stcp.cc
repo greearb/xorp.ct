@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.2 2002/12/14 23:42:57 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -37,33 +37,34 @@ static bool hello_done = false;
 
 static const XrlCmdError
 hello_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response, 
-		   void*	cookie) {
-    tracef("hello_recv_handler: request %s response %p cookie %p\n", 
-	   request.str().c_str(), response, cookie);
+		   XrlArgs*	response) 
+{
+    tracef("hello_recv_handler: request %s response %p\n", 
+	   request.str().c_str(), response);
     return XrlCmdError::OKAY();
 }
 
 static void
 hello_reply_handler(const XrlError&	e,
 		    const Xrl&		request, 
-		    XrlArgs*		response, 
-		    void*		cookie) {
+		    XrlArgs*		response) 
+{
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "hello failed: %s\n", e.str().c_str());
 	exit(-1);
     }
-    tracef("hello_reply_handler: request %s response %p cookie %p\n", 
-	   request.str().c_str(), response, cookie);
+    tracef("hello_reply_handler: request %s response %p\n", 
+	   request.str().c_str(), response);
     hello_done = true;
 }
 
 static void
-test_hello(EventLoop& e, XrlPFSTCPSender &s) {
+test_hello(EventLoop& e, XrlPFSTCPSender &s)
+{
     Xrl x("anywhere", "hello");
 
     debug_msg("test_hello\n");
-    s.send(x, hello_reply_handler, 0);
+    s.send(x, callback(hello_reply_handler));
     while (hello_done == false) {
 	e.run();
     }
@@ -77,10 +78,10 @@ static bool int32_done = false;
 
 static const XrlCmdError
 int32_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response, 
-		   void*	cookie) {
-    tracef("int32_recv_handler: request %s response %p cookie %p\n", 
-	   request.str().c_str(), response, cookie);
+		   XrlArgs*	response) 
+{
+    tracef("int32_recv_handler: request %s response %p\n", 
+	   request.str().c_str(), response);
     if (response) {
 	response->add_int32("an_int32", 123456);
     }
@@ -88,26 +89,27 @@ int32_recv_handler(const Xrl&	request,
 }
 
 static void
-int32_reply_handler(const XrlError&	e, 
-		    const Xrl&		request, 
-		    XrlArgs*		response, 
-		    void*		cookie) {
+int32_reply_handler(const XrlError&	e,
+		    const Xrl&		request,
+		    XrlArgs*		response)
+{
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "get_int32 failed: %s\n", e.str().c_str());
 	exit(-1);
     }
-    tracef("int32_reply_handler: request %s response %p cookie %p\n", 
-	   request.str().c_str(), response, cookie);
+    tracef("int32_reply_handler: request %s response %p\n", 
+	   request.str().c_str(), response);
     tracef("int32 -> %s\n", response->str().c_str());
     int32_done = true;
 }
 
 static void
-test_int32(EventLoop& e, XrlPFSTCPSender& s) {
+test_int32(EventLoop& e, XrlPFSTCPSender& s)
+{
     Xrl x("anywhere", "get_int32");
 
     debug_msg("test_int32\n");
-    s.send(x, int32_reply_handler, 0);
+    s.send(x, callback(int32_reply_handler));
 
     while (int32_done == 0) {
 	printf(".");
@@ -130,7 +132,7 @@ static void
 no_execute_reply_handler(const XrlError& e,
 			 const Xrl&	 /* request */,
 			 XrlArgs*	 /* response */,
-			 void*		 thunked_done)
+			 bool*		 done)
 {
     if (e != XrlError::COMMAND_FAILED()) {
 	fprintf(stderr, "no_execute_handler failed: %s\n", e.str().c_str());
@@ -141,7 +143,6 @@ no_execute_reply_handler(const XrlError& e,
 		"expected:\t%s\ngot:\t\t%s\n", NOISE, e.note().c_str());
 	exit(-1);
     }
-    bool* done = static_cast<bool*>(thunked_done);
     *done = true;
 }
 
@@ -153,7 +154,7 @@ test_xrlerror_note(EventLoop&e, XrlPFSTCPListener& l)
     XrlPFSTCPSender s(e, l.address());
 
     bool done = false;
-    s.send(x, no_execute_reply_handler, &done);
+    s.send(x, callback(no_execute_reply_handler, &done));
 
     while (done == false) {
 	e.run();
@@ -173,8 +174,8 @@ run_test()
     EventLoop event_loop;
 
     XrlCmdMap cmd_map;
-    cmd_map.add_handler("hello", hello_recv_handler, 0);
-    cmd_map.add_handler("get_int32", int32_recv_handler, 0);
+    cmd_map.add_handler("hello", callback(hello_recv_handler));
+    cmd_map.add_handler("get_int32", callback(int32_recv_handler));
     cmd_map.add_handler("no_execute", 
 			callback(no_execute_recv_handler, NOISE));
 

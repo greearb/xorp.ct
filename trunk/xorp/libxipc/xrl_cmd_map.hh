@@ -24,19 +24,13 @@
 #include "xrl.hh"
 #include "xrl_error.hh"
 
-// Deprecated callback type, still exists for compatibilty.
-typedef const XrlCmdError (*XrlCmdCallback) (const Xrl&	request,
-					     XrlArgs*	response,
-					     void*	cookie);
-
-typedef XorpCallback2<const XrlCmdError, const Xrl&, XrlArgs*>::RefPtr XrlRecvCallback;
+typedef
+XorpCallback2<const XrlCmdError, const Xrl&, XrlArgs*>::RefPtr XrlRecvCallback;
 
 struct XrlCmdEntry {
-    //    XrlCmdEntry(const char* s, XrlCmdCallback cb, void* magic) :
-    //	name(s), callback(cb), cookie(magic) {}
     XrlCmdEntry(const char* s, XrlRecvCallback cb) :
 	name(s), callback(cb) {}
-    XrlCmdEntry() : name("") {} // this has to be here for map<>.
+    //    XrlCmdEntry() : name("") {} // this has to be here for map<>.
     string		name;
     XrlRecvCallback	callback;
 };
@@ -47,25 +41,29 @@ public:
 
     const string& name() { return _name; }
     
-    inline bool add_handler(const char* cmd, XrlRecvCallback rcb) {
+    inline bool add_handler(const char* cmd, const XrlRecvCallback& rcb)
+    {
 	return add_handler(XrlCmdEntry(cmd, rcb));
     }
-    inline bool add_handler (const char* cmd, XrlCmdCallback cb, void* cookie)
-    {
-	return add_handler(cmd, callback(cb, cookie));
-    }
+
     bool add_handler (const XrlCmdEntry& c);
+
     bool remove_handler (const char* name);
+
     const XrlCmdEntry* get_handler(const char* name) const;
 
     uint32_t count_handlers() const;
 
     const XrlCmdEntry* get_handler(uint32_t index) const;
+
 protected:
     const string _name;
-    map<string, XrlCmdEntry> _cmd_map;
-    typedef map<string, XrlCmdEntry>::const_iterator CMI;
-    typedef map<string, XrlCmdEntry>::iterator MI;
+
+    typedef map<string, XrlCmdEntry> CmdMap;
+    typedef CmdMap::const_iterator CMI;
+    typedef CmdMap::iterator MI;
+
+    CmdMap _cmd_map;
 };
 
 #endif // __XRL_CMD_MAP_HH__

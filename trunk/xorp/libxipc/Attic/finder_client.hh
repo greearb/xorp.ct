@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.1 2002/12/14 23:42:54 hodson Exp $
 
 #ifndef __FINDER_CLIENT_HH__
 #define __FINDER_CLIENT_HH__
@@ -21,21 +21,29 @@
 #include <string>
 
 #include "libxorp/timer.hh"
+#include "libxorp/callback.hh"
 #include "finder_ipc.hh"
 
 class EventLoop;
 
 struct FinderRegistration;
 
-enum FinderClientError { FC_OKAY, FC_LOOKUP_FAILED, FC_ADD_FAILED, 
-			 FC_REMOVE_FAILED, FC_NO_SERVER };
-
-typedef void (*FinderClientCallback)(FinderClientError code, 
-				     const char* name, const char* value, 
-				     void* thunk);
-
 class FinderClient {
 public:
+    enum Error {
+	FC_OKAY,
+	FC_LOOKUP_FAILED,
+	FC_ADD_FAILED, 
+	FC_REMOVE_FAILED,
+	FC_NO_SERVER
+    };
+
+    typedef
+    XorpCallback3<void,Error,const char*,const char*>::RefPtr
+    Callback;
+
+public:
+    
     FinderClient(EventLoop& e,
 		 const char*	ipaddr = "localhost", 
 		 uint16_t	port   = FINDER_TCP_DEFAULT_PORT);
@@ -44,10 +52,9 @@ public:
     inline bool connected() const { return _connection != NULL; }
     void connect();
 
-    void add(const char* name, const char* value, 
-	     FinderClientCallback callback, void* thunk);
-    void lookup(const char* name, FinderClientCallback callback, void* thunk);
-    void remove(const char* name, FinderClientCallback callback, void* thunk);
+    void add(const char* name, const char* value, const Callback& cb);
+    void lookup(const char* name, const Callback& cb);
+    void remove(const char* name, const Callback& callback);
 
     void invalidate(const string& value);
 

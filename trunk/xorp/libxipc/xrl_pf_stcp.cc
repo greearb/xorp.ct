@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.1 2002/12/14 23:43:02 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.2 2002/12/15 22:53:23 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -346,7 +346,8 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m, int port)
     }
 
     _address_slash_port = address_slash_port(addr, port);
-    _event_loop.add_selector(_fd, SEL_RD, connect_hook, this);
+    _event_loop.add_selector(_fd, SEL_RD,
+			     callback(this, &XrlPFSTCPListener::connect_hook));
 }
 
 XrlPFSTCPListener::~XrlPFSTCPListener() {
@@ -360,9 +361,8 @@ XrlPFSTCPListener::~XrlPFSTCPListener() {
 }
 
 void
-XrlPFSTCPListener::connect_hook(int fd, SelectorMask /* m */, void* thunk) {
-    XrlPFSTCPListener* l = reinterpret_cast<XrlPFSTCPListener*>(thunk);
-
+XrlPFSTCPListener::connect_hook(int fd, SelectorMask /* m */)
+{
     struct sockaddr_in a;
     size_t alen = sizeof(a);
 
@@ -372,7 +372,7 @@ XrlPFSTCPListener::connect_hook(int fd, SelectorMask /* m */, void* thunk) {
 	return;
     }
     fcntl(cfd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
-    l->add_request_handler(new STCPRequestHandler(*l, cfd));
+    add_request_handler(new STCPRequestHandler(*this, cfd));
 }
 
 void
@@ -447,34 +447,36 @@ XrlPFSTCPSender::die(const char* reason) {
 
     for(list<RequestState>::iterator i = _requests_pending.begin(); 
 	i != _requests_pending.end(); i++) {
-	if (i->callback)
-	    i->callback(XrlError::SEND_FAILED(), i->xrl, 0, i->userdata);
+	if (i->callback.is_empty() == false)
+	    i->callback->dispatch(XrlError::SEND_FAILED(), i->xrl, 0);
     }
     _requests_pending.clear();
 
     for(list<RequestState>::iterator i = _requests_sent.begin(); 
 	i != _requests_sent.end(); i++) {
-	if (i->callback)
-	    i->callback(XrlError::SEND_FAILED(), i->xrl, 0, i->userdata);
+	if (i->callback.is_empty() == false)
+	    i->callback->dispatch(XrlError::SEND_FAILED(), i->xrl, 0);
     }
     _requests_sent.clear();
 }
 
 void
-XrlPFSTCPSender::send(const Xrl& x, SendCallback cb, void *cookie) {
+XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
+{
     if (_fd <= 0) {
 	debug_msg("Attempted send when socket is dead!\n");
-	cb(XrlError::SEND_FAILED(), x, 0, cookie);
+	cb->dispatch(XrlError::SEND_FAILED(), x, 0);
 	return;
     }
-    _requests_pending.push_back(RequestState(this, _current_seqno++, 
-					     x, cb, cookie));
+    _requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
 
     RequestState& r = _requests_pending.back();
-    r.timeout = _event_loop.new_oneoff_after_ms(_timeout_ms, 
-						request_timed_out, &r);
+    r.timeout = _event_loop.new_oneoff_after_ms(_timeout_ms,
+		    callback(this,
+			     &XrlPFSTCPSender::timeout_request, r.seqno));
 
-    if (_requests_pending.empty() == false && _keepalive_in_progress == false) {
+    if (_requests_pending.empty() == false &&
+	_keepalive_in_progress == false) {
 	send_first_request();
     } else {
 	// Already sending a request or doing keepalive
@@ -506,16 +508,10 @@ XrlPFSTCPSender::postpone_timeout(uint32_t seqno) {
 }
 
 void
-XrlPFSTCPSender::request_timed_out(void *request) {
-    RequestState* r = reinterpret_cast<RequestState*>(request);
-    XrlPFSTCPSender* s = r->parent;
-    s->timeout_request(r->seqno);
-}
-
-void
 XrlPFSTCPSender::timeout_request(uint32_t seqno) {
     RequestState* rs = find_request(seqno);
-    rs->callback(XrlError::REPLY_TIMED_OUT(), rs->xrl, 0, rs->userdata);
+    if (rs->callback.is_empty() == false)
+	rs->callback->dispatch(XrlError::REPLY_TIMED_OUT(), rs->xrl, 0);
     rs->callback = 0; // set to null because we don't want to call this again
     rs->timeout.unschedule();
     debug_msg("timeout_request:\nseqno %d xrl >> %s <<\n",
@@ -612,9 +608,9 @@ XrlPFSTCPSender::dispatch_reply() {
 
     try {
 	XrlArgs response(xrl_data);
-	rs->callback(rcv_err, rs->xrl, &response, rs->userdata);
+	rs->callback->dispatch(rcv_err, rs->xrl, &response);
     } catch (InvalidString& ) {
-	rs->callback(XrlError::CORRUPT_RESPONSE(), rs->xrl, 0, rs->userdata);
+	rs->callback->dispatch(XrlError::CORRUPT_RESPONSE(), rs->xrl, 0);
 	debug_msg("Corrupt response: %s\n", xrl_data);
     }
 

@@ -116,35 +116,6 @@ public:
      */
     bool send (const Xrl& xrl, const XrlCallback& callback);
 
-
-    // Deprecated callback typedef
-    typedef void (*ResponseCallback)(const XrlError& 	e,
-				     XrlRouter&		router,
-				     const Xrl&		request,
-				     XrlArgs*		response,
-				     void*		cookie);
-    /**
-     * [Deprecated] Dispatch an Xrl.
-     *
-     * NB A callback must be supplied if the Xrl returns a value.  If
-     * the Xrl returns nothing, a callback is only necessary if the
-     * dispatcher wants to know that the Xrl dispatch was successful
-     * and completed.
-     *
-     * @param xrl The Xrl to be dispatched.  
-     * @param user_callback invoked when the Xrl has returns or fails.  
-     * @param cookie to be passed to the user_callback.  
-     *
-     * @return true if sufficient resources available, false otherwise.
-     */
-    inline bool
-    send (const Xrl& 		xrl,
-	  ResponseCallback	user_callback, 
-	  void*			cookie = 0)
-    {
-	return send(xrl, callback(user_callback, cookie));
-    }
-
     /**
      * Returns true if this router has any pending actions.
      */
@@ -186,15 +157,18 @@ private:
     // The number of unanswered resolve requests
     int32_t 		_finder_lookups_pending;
 
-    static void		resolve_callback(FinderClientError, 
-					 const char*, const char*, void*);
+    static void		resolve_callback(FinderClient::Error, 
+					 const char*, const char*,
+					 DispatchState*);
 
-    static void 	send_callback(const XrlError&, const Xrl&, 
-				      XrlArgs*, void*);
+    static void 	send_callback(const XrlError&,
+				      const Xrl&, 
+				      XrlArgs*,
+				      DispatchState*);
 
-    static void		finder_register_callback(FinderClientError,
+    static void		finder_register_callback(FinderClient::Error,
 						 const char*, const char*,
-						 void *thunk);
+						 int *success);
 };
 
 #endif // __XRLROUTER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_client2.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_client2.cc,v 1.2 2002/12/14 23:42:55 hodson Exp $"
 
 #include <string>
 
@@ -70,12 +70,12 @@ announce_result(bool success) {
 // Connecting to server
 
 void
-add_hook(FinderClientError e,
+add_hook(FinderClient::Error e,
 	 const char* /* name */,
 	 const char* /* value */,
 	 void *cookie) {
     int* n = reinterpret_cast<int*>(cookie);
-    if (e == FC_OKAY) {
+    if (e == FinderClient::FC_OKAY) {
 	*n = *n + 1;
     } else {
 	*n = (int)num_entries + 1;
@@ -135,7 +135,7 @@ register_okay(EventLoop* e, FinderClient* fc) {
 // Resolve test
 
 void
-resolve_callback(FinderClientError	e,
+resolve_callback(FinderClient::Error	e,
 		 const char*		name,
 		 const char*		value,
 		 void*			cookie) {
@@ -146,7 +146,7 @@ resolve_callback(FinderClientError	e,
 	printf(" \"%s\" \"%s\"\n", entries[*n].name, entries[*n].value);
     }
 
-    if (e == FC_OKAY &&
+    if (e == FinderClient::FC_OKAY &&
 	*n < num_entries &&
 	strcmp(name, entries[*n].name) == 0 &&
 	strcmp(value, entries[*n].value) == 0) {

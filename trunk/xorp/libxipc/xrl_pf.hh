@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.2 2002/12/15 22:53:23 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -77,17 +77,17 @@ class XrlPFSender {
 public:
     XrlPFSender(EventLoop& e, const char* address = "") 
 	: _event_loop(e), _address(address) {}
-    virtual ~XrlPFSender() {}
-    
-    typedef void (*SendCallback)(const XrlError& e,	
-				 const Xrl& xrl,
-				 XrlArgs* return_values,
-				 void* thunk);
 
-    virtual void send(const Xrl& x, SendCallback cb, void* cookie) = 0;
+    virtual ~XrlPFSender() {}
+
+    typedef
+    XorpCallback3<void, const XrlError&, const Xrl&, XrlArgs*>::RefPtr
+    SendCallback;
+    
+    virtual void send(const Xrl& x, const SendCallback& cb) = 0;
     virtual bool sends_pending() const = 0;
 
-    const string&	address() const { return _address; }
+    const string& address() const { return _address; }
     EventLoop& event_loop() const { return _event_loop; }
 
     struct Request {
@@ -95,10 +95,9 @@ public:
 	XUID		xuid;		// to match requests and responses
 	Xrl		xrl;		
 	SendCallback	callback;
-	void*		thunk;
 	XorpTimer	timeout;
-	Request(XrlPFSender* p, const Xrl& x, SendCallback cb, void* cookie) 
-	    : parent(p), xuid(), xrl(x), callback(cb), thunk(cookie) {}
+	Request(XrlPFSender* p, const Xrl& x, const SendCallback& cb) 
+	    : parent(p), xuid(), xrl(x), callback(cb) {}
 	Request() {}
 	bool operator==(const XUID& x) const { return xuid == x; }
     };

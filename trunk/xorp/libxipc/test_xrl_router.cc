@@ -16,16 +16,14 @@
 
 static const XrlCmdError 
 hello_world(const Xrl&	/* request */,
-	    XrlArgs*	/* response */,
-	    void*) 
+	    XrlArgs*	/* response */)
 {
     return XrlCmdError::OKAY();
 }
 
 static const XrlCmdError
 passback_integer(const Xrl&	/* request*/,
-		 XrlArgs*	response,
-		 void*)
+		 XrlArgs*	response)
 {
     response->add_int32("the_number", 5);
     return XrlCmdError::OKAY();
@@ -47,12 +45,11 @@ hello_world_complete(const XrlError&	e,
 		     XrlRouter&		/* router */,
 		     const Xrl&		/* request */,
 		     XrlArgs*		/* response */,
-		     void*		cookie ) {
+		     bool*		done) {
     if (e != XrlError::OKAY())
 	exit_on_xrlerror(e, __FILE__, __LINE__);
 
-    bool *b = static_cast<bool*>(cookie);
-    *b = true;
+    *done = true;
 }
 
 static void
@@ -60,7 +57,7 @@ got_integer(const XrlError&	e,
 	    XrlRouter&		/* router */,
 	    const Xrl&		/* request */,
 	    XrlArgs*		response,
-	    void*		cookie) {
+	    bool*		done) {
     if (e != XrlError::OKAY())
 	exit_on_xrlerror(e, __FILE__, __LINE__);
 
@@ -79,8 +76,7 @@ got_integer(const XrlError&	e,
 	/* const XrlAtom &arg = */ response->item(i);
 	/*	printf("%s = %d\n", arg.name().c_str(), arg.int32()); */
     }
-    bool *b = static_cast<bool*>(cookie);
-    *b = true;
+    *done = true;
 }
 
 int main(int /* argc */, char *argv[]) {
@@ -112,8 +108,8 @@ int main(int /* argc */, char *argv[]) {
     party_a.add_listener(&listener_a);
 
     // Add command that party A knows about
-    party_a.add_handler("hello_world", hello_world, 0);
-    party_a.add_handler("passback_integer", passback_integer, 0);
+    party_a.add_handler("hello_world", callback(hello_world));
+    party_a.add_handler("passback_integer", callback(passback_integer));
 
     // Create and configure "party B"
     XrlRouter		party_b(event_loop, "party B");
@@ -123,11 +119,11 @@ int main(int /* argc */, char *argv[]) {
     // "Party B" send "hello world" to "Party A"
     bool step1_done = false;
     Xrl x("party A", "hello_world");
-    party_b.send(x, hello_world_complete, &step1_done);
+    party_b.send(x, callback(hello_world_complete, &step1_done));
 
     bool step2_done = false;
     Xrl y("party A", "passback_integer");
-    party_b.send(y, got_integer, &step2_done);
+    party_b.send(y, callback(got_integer, &step2_done));
 
     // Just run...
     bool finito = false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.1 2002/12/14 23:43:02 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -128,17 +128,17 @@ XrlPFInProcSender::~XrlPFInProcSender()
 {}
 
 void
-XrlPFInProcSender::send(const Xrl& x, SendCallback cb, void* cookie) {
+XrlPFInProcSender::send(const Xrl& x, const SendCallback& cb) {
     XrlPFInProcListener *l = get_inproc_listener(_listener_no);
 
     if (l) {
 	XrlArgs reply;
 	const XrlError e = l->dispatch(x, reply);
-	cb(e, x, (e == XrlError::OKAY()) ? &reply : 0, cookie);
+	cb->dispatch(e, x, (e == XrlError::OKAY()) ? &reply : 0);
     } else {
 	debug_msg("XrlPFInProcSender::send() no listener (id %d)\n", 
 		  _listener_no);
-	cb(XrlError::SEND_FAILED(), x, NULL, cookie);
+	cb->dispatch(XrlError::SEND_FAILED(), x, 0);
     }
 }
 
