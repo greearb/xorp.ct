@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.26 2003/09/19 21:06:49 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.27 2003/10/23 04:10:24 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -438,6 +438,8 @@ public:
     // SNPA - Don't deal. (ATM, FRAME RELAY, SMDS)
 
     void encode();
+
+    Safi safi()				{ return _safi; }
 protected:
 private:
 
@@ -471,6 +473,8 @@ public:
     const list<IPNet<A> >& wr_list() const { return _withdrawn;}
 
     void encode();
+
+    Safi safi()				{ return _safi; }
 protected:
 private:
 

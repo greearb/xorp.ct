@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.24 2003/10/23 03:10:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.25 2003/10/23 04:10:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -314,8 +314,8 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 	_packet->add_pathatt(mp);
     }
 
-    XLOG_ASSERT(_packet->mpreach(safi));
-    _packet->mpreach(safi)->add_nlri(rt.net());
+    XLOG_ASSERT(_packet->mpreach_ipv6(safi));
+    _packet->mpreach_ipv6(safi)->add_nlri(rt.net());
 
     return 0;
 }
@@ -364,12 +364,12 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
 
-    if (0 == _packet->mpunreach(safi)) {
+    if (0 == _packet->mpunreach_ipv6(safi)) {
 	MPUNReachNLRIAttribute<IPv6> mp(safi);
 	_packet->add_pathatt(mp);
     }
 
-    _packet->mpunreach(safi)->add_withdrawn(rt.net());
+    _packet->mpunreach_ipv6(safi)->add_withdrawn(rt.net());
 
     return 0;
 }
@@ -386,12 +386,20 @@ PeerHandler::push_packet()
     int nlri = _packet->nlri_list().size();
     int pa = _packet->pa_list().size();
 
-    // Account for IPv6
-    if(_packet->mpunreach(SAFI_UNICAST))
-	wdr += _packet->mpunreach(SAFI_UNICAST)->wr_list().size();
+    if(_packet->mpreach_ipv4(SAFI_MULTICAST))
+	nlri += _packet->mpreach_ipv4(SAFI_MULTICAST)->nlri_list().size();
+    if(_packet->mpunreach_ipv4(SAFI_MULTICAST))
+	wdr += _packet->mpunreach_ipv4(SAFI_MULTICAST)->wr_list().size();
 
-    if(_packet->mpreach(SAFI_UNICAST))
-	nlri += _packet->mpreach(SAFI_UNICAST)->nlri_list().size();
+    // Account for IPv6
+    if(_packet->mpreach_ipv6(SAFI_UNICAST))
+	nlri += _packet->mpreach_ipv6(SAFI_UNICAST)->nlri_list().size();
+    if(_packet->mpunreach_ipv6(SAFI_UNICAST))
+	wdr += _packet->mpunreach_ipv6(SAFI_UNICAST)->wr_list().size();
+    if(_packet->mpreach_ipv6(SAFI_MULTICAST))
+	nlri += _packet->mpreach_ipv6(SAFI_MULTICAST)->nlri_list().size();
+    if(_packet->mpunreach_ipv6(SAFI_MULTICAST))
+	wdr += _packet->mpunreach_ipv6(SAFI_MULTICAST)->wr_list().size();
 
     XLOG_ASSERT( (wdr+nlri) > 0);
     if (nlri > 0)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.19 2003/09/27 08:36:18 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.20 2003/10/23 03:10:04 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -209,8 +209,11 @@ public:
     const PathAttributeList<IPv4>& pa_list() const	{ return _pa_list; }
     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
 
-    MPReachNLRIAttribute<IPv6> *mpreach(Safi)		{ return _mpreach; }
-    MPUNReachNLRIAttribute<IPv6> *mpunreach(Safi)	{ return _mpunreach;}
+    MPReachNLRIAttribute<IPv4> *mpreach_ipv4(Safi);
+    MPUNReachNLRIAttribute<IPv4> *mpunreach_ipv4(Safi);
+
+    MPReachNLRIAttribute<IPv6> *mpreach_ipv6(Safi);
+    MPUNReachNLRIAttribute<IPv6> *mpunreach_ipv6(Safi);
 
     const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 
@@ -232,8 +235,18 @@ private:
     BGPUpdateAttribList		_wr_list;
     PathAttributeList<IPv4>	_pa_list;
     BGPUpdateAttribList		_nlri_list;
-    MPReachNLRIAttribute<IPv6>	*_mpreach;
-    MPUNReachNLRIAttribute<IPv6> *_mpunreach;
+
+//     MPReachNLRIAttribute<IPv4>	*_mpreach_ipv4_unicast;
+    MPReachNLRIAttribute<IPv4>	*_mpreach_ipv4_multicast;
+
+//     MPUNReachNLRIAttribute<IPv4> *_mpunreach_ipv4_unicast;
+    MPUNReachNLRIAttribute<IPv4> *_mpunreach_ipv4_multicast;
+
+    MPReachNLRIAttribute<IPv6>	*_mpreach_ipv6_unicast;
+    MPReachNLRIAttribute<IPv6>	*_mpreach_ipv6_multicast;
+
+    MPUNReachNLRIAttribute<IPv6> *_mpunreach_ipv6_unicast;
+    MPUNReachNLRIAttribute<IPv6> *_mpunreach_ipv6_multicast;
 };
 
 /* **************** BGPNotificationPacket *********************** */
