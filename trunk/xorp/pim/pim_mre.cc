@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.8 2003/01/24 19:50:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.9 2003/01/25 00:44:40 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -532,14 +532,9 @@ bool
 PimMre::is_prune_desired_sg_rpt() const
 {
     Mifset m;
-    PimMre *pim_mre_wc;
     PimMre *pim_mre_sg;
     
     if (! is_sg_rpt())
-	return (false);
-    
-    pim_mre_wc = wc_entry();
-    if (pim_mre_wc == NULL)
 	return (false);
     
     if (! is_rpt_join_desired_g())
@@ -550,10 +545,12 @@ PimMre::is_prune_desired_sg_rpt() const
 	return (true);
     
     pim_mre_sg = sg_entry();
-    if (pim_mre_sg != NULL) {
-	if (pim_mre_sg->is_spt()
-	    && (pim_mre_wc->rpfp_nbr_wc() != pim_mre_sg->rpfp_nbr_sg()))
-	    return (true);
+    if (pim_mre_sg == NULL)
+	return (false);
+    
+    if (pim_mre_sg->is_spt()
+	&& (rpfp_nbr_wc() != pim_mre_sg->rpfp_nbr_sg())) {
+	return (true);
     }
     
     return (false);
