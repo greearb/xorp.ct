@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.10 2004/07/09 04:42:24 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.11 2005/01/28 03:34:24 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Multicast Routing Design Architecture \\
 \vspace{1ex}
-Version 1.0}
+Version 1.1}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{July 8, 2004}
+\date{April 7, 2005}
 
 \maketitle
 
@@ -301,8 +301,8 @@ performance, the PIM encapsulation should be done in the kernel, and
 then we need a signaling mechanism between the kernel and the user
 process managing the kernel multicast forwarding entries. That mechanism
 would deal with installing the appropriate information needed by kernel-level
-Register encapsulation. Currently (July 2004), only few systems (\eg
-FreeBSD-5.2, FreeBSD-4.9 and later, and DragonFlyBSD) do support such
+Register encapsulation. Currently (April 2005), only recent releases
+of FreeBSD, NetBSD, OpenBSD and DragonFlyBSD do support such
 kernel-level encapsulation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -344,7 +344,7 @@ membership for group 224.0.1.20 on interface vif0''.
 Note that control packets used for multicast debugging such as MRINFO or
 multicast traceroute use IGMP as the network protocol. Hence, if such
 messages are received by the MLD/IGMP module, the appropriate
-information should be sent to the PIM module. Currently (July 2004),
+information should be sent to the PIM module. Currently (April 2005),
 the handling of such messages is not implemented yet.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -399,25 +399,29 @@ as URIB or MRIB entries to the RIB module.
 
 \begin{itemize}
 
-  \item December 11, 2002: Version 0.1 completed.
+  \item April 7, 2005: Bump-up the version to 1.1, and the date.
+  Update the list of the OS-es that support kernel-level PIM Register
+  encapsulation.
 
-  \item March 10, 2003: Updated to match XORP version 0.2 release code;
-  cleanup.
-
-  \item June 9, 2003: Updated to match XORP version 0.3 release code
-  (changes related to the MFEA--FEA merging).
-
-  \item August 28, 2003: Bump-up the version to 0.4, and the date;
-  minor edits.
-
-  \item November 6, 2003: Bump-up the version to 0.5, and the date;
-  minor edits.
+  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
+  does not deal with the MRIB information anymore.
 
   \item July 8, 2004: Status updated; added information about the FIB2MRIB
   and StaticRoutes modules. Bump-up the version to 1.0, and the date.
 
-  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
-  does not deal with the MRIB information anymore.
+  \item November 6, 2003: Bump-up the version to 0.5, and the date;
+  minor edits.
+
+  \item August 28, 2003: Bump-up the version to 0.4, and the date;
+  minor edits.
+
+  \item June 9, 2003: Updated to match XORP version 0.3 release code
+  (changes related to the MFEA--FEA merging).
+
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  cleanup.
+
+  \item December 11, 2002: Version 0.1 completed.
 
 \end{itemize}
 
