@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.9 2003/04/23 02:59:46 jcardona Exp $
+# $XORP: xorp/bootstrap,v 1.10 2003/05/21 21:26:52 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -148,5 +148,11 @@ run automake --add-missing --copy
 #
 autoconf_options=`program_flags autoconf 2.50 "--include=config" "-l config"`
 run autoconf ${autoconf_options}
+
+# Run autoconf in each subdirectory that has configure.in
+run cd cli/libtecla
+autoconf_options=`program_flags autoconf 2.50 "--include=../../config" "-l ../../config"`
+run autoconf ${autoconf_options}
+run cd ../..
 
 exit 0
