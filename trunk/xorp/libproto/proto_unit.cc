@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.3 2003/03/18 02:44:34 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.4 2003/03/19 01:04:13 pavlin Exp $"
 
 
 //
@@ -139,7 +139,7 @@ is_valid_module_id(xorp_module_id module_id)
  * for IPv4 and IPv6 respectively).
  * @init_module_id: The module ID (XORP_MODULE_*).
  * 
- * Proto unit node constructor.
+ * Proto unit constructor.
  **/
 ProtoUnit::ProtoUnit(int init_family, xorp_module_id init_module_id)
     : _family(init_family),
@@ -150,84 +150,12 @@ ProtoUnit::ProtoUnit(int init_family, xorp_module_id init_module_id)
     }
     
     _comm_handler	= -1;
-    _flags		= 0;
     _proto_version	= 0;
     _proto_version_default = 0;
-    _debug_flag		= false;
     _module_name	= xorp_module_name(init_family, init_module_id);
-    disable();			// XXX: default is to disable.
 }
 
 ProtoUnit::~ProtoUnit()
 {
     
-}
-
-const char *
-ProtoUnit::state_string() const
-{
-    if (is_disabled())
-	return ("DISABLED");
-    if (is_down())
-	return ("DOWN");
-    if (is_up())
-	return ("UP");
-    if (is_pending_up())
-	return ("PENDING_UP");
-    if (is_pending_down())
-	return ("PENDING_DOWN");
-    
-    return ("UNKNOWN");
-}
-
-int
-ProtoUnit::start()
-{
-    if (is_disabled())
-	return (XORP_ERROR);
-    if (is_up())
-	return (XORP_ERROR);		// Already running
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_UP;
-    
-    return (XORP_OK);
-}
-
-int
-ProtoUnit::stop()
-{
-    if (is_down())
-	return (XORP_ERROR);		// Wasn't running
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_DOWN;
-    
-    return (XORP_OK);
-}
-
-int
-ProtoUnit::pending_start()
-{
-    if (is_disabled())
-	return (XORP_ERROR);
-    if (is_up())
-	return (XORP_ERROR);		// Already running
-    if (is_pending_up())
-	return (XORP_ERROR);		// Already pending UP
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_PENDING_UP;
-    
-    return (XORP_OK);
-}
-
-int
-ProtoUnit::pending_stop()
-{
-    if (! is_up())
-	return (XORP_ERROR);		// Wasn't running
-    if (is_pending_down())
-	return (XORP_ERROR);		// Already pending DOWN
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_PENDING_DOWN;
-    
-    return (XORP_OK);
 }

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.7 2002/12/09 09:43:55 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 ##
 
 # -- Real Programs
@@ -24,10 +24,12 @@ libproto_a_SOURCES  = libproto_module.h
 libproto_a_SOURCES += proto_node.hh
 libproto_a_SOURCES += proto_node_cli.hh
 libproto_a_SOURCES += proto_register.hh
+libproto_a_SOURCES += proto_state.hh
 libproto_a_SOURCES += proto_unit.hh
 
 libproto_a_SOURCES += proto_node_cli.cc
 libproto_a_SOURCES += proto_register.cc
+libproto_a_SOURCES += proto_state.cc
 libproto_a_SOURCES += proto_unit.cc
 
 
