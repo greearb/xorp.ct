@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.24 2004/11/10 00:39:47 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.25 2004/11/11 07:48:21 bms Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -106,12 +106,12 @@ public:
     int register_ftic_table_set_secondary(FtiConfigTableSet *ftic_table_set);
     int register_ftic_table_observer_secondary(FtiConfigTableObserver *ftic_table_observer);
     
-    FtiConfigEntryGet&		ftic_entry_get_primary() { return *_ftic_entry_gets.front(); }
-    FtiConfigEntrySet&		ftic_entry_set_primary() { return *_ftic_entry_sets.front(); }
-    FtiConfigEntryObserver&	ftic_entry_observer_primary() { return *_ftic_entry_observers.front(); }
-    FtiConfigTableGet&		ftic_table_get_primary() { return *_ftic_table_gets.front(); }
-    FtiConfigTableSet&		ftic_table_set_primary() { return *_ftic_table_sets.front(); }
-    FtiConfigTableObserver&	ftic_table_observer_primary() { return *_ftic_table_observers.front(); }
+    FtiConfigEntryGet&		ftic_entry_get_primary() { return *_ftic_entry_get_primary; }
+    FtiConfigEntrySet&		ftic_entry_set_primary() { return *_ftic_entry_set_primary; }
+    FtiConfigEntryObserver&	ftic_entry_observer_primary() { return *_ftic_entry_observer_primary; }
+    FtiConfigTableGet&		ftic_table_get_primary() { return *_ftic_table_get_primary; }
+    FtiConfigTableSet&		ftic_table_set_primary() { return *_ftic_table_set_primary; }
+    FtiConfigTableObserver&	ftic_table_observer_primary() { return *_ftic_table_observer_primary; }
 
     /**
      * Setup the unit to behave as dummy (for testing purpose).
@@ -517,12 +517,19 @@ private:
     NexthopPortMapper&			_nexthop_port_mapper;
     IfTree&				_iftree;
 
-    list<FtiConfigEntryGet*>		_ftic_entry_gets;
-    list<FtiConfigEntrySet*>		_ftic_entry_sets;
-    list<FtiConfigEntryObserver*>	_ftic_entry_observers;
-    list<FtiConfigTableGet*>		_ftic_table_gets;
-    list<FtiConfigTableSet*>		_ftic_table_sets;
-    list<FtiConfigTableObserver*>	_ftic_table_observers;
+    FtiConfigEntryGet*			_ftic_entry_get_primary;
+    FtiConfigEntrySet*			_ftic_entry_set_primary;
+    FtiConfigEntryObserver*		_ftic_entry_observer_primary;
+    FtiConfigTableGet*			_ftic_table_get_primary;
+    FtiConfigTableSet*			_ftic_table_set_primary;
+    FtiConfigTableObserver*		_ftic_table_observer_primary;
+
+    list<FtiConfigEntryGet*>		_ftic_entry_gets_secondary;
+    list<FtiConfigEntrySet*>		_ftic_entry_sets_secondary;
+    list<FtiConfigEntryObserver*>	_ftic_entry_observers_secondary;
+    list<FtiConfigTableGet*>		_ftic_table_gets_secondary;
+    list<FtiConfigTableSet*>		_ftic_table_sets_secondary;
+    list<FtiConfigTableObserver*>	_ftic_table_observers_secondary;
     
     //
     // The primary mechanisms to get single-entry information

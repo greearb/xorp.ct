@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.33 2004/11/10 00:39:47 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.34 2004/11/11 23:26:10 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -89,9 +89,9 @@ public:
     int register_ifc_set_secondary(IfConfigSet *ifc_set);
     int register_ifc_observer_secondary(IfConfigObserver *ifc_observer);
 
-    IfConfigGet&	ifc_get_primary() { return *_ifc_gets.front(); }
-    IfConfigSet&	ifc_set_primary() { return *_ifc_sets.front(); }
-    IfConfigObserver&	ifc_observer_primary() { return *_ifc_observers.front(); }
+    IfConfigGet&	ifc_get_primary() { return *_ifc_get_primary; }
+    IfConfigSet&	ifc_set_primary() { return *_ifc_set_primary; }
+    IfConfigObserver&	ifc_observer_primary() { return *_ifc_observer_primary; }
 
     IfConfigGet&	ifc_get_ioctl() { return _ifc_get_ioctl; }
 
@@ -347,9 +347,12 @@ private:
     IfTree		_pulled_config;	// The IfTree when we pull the config
     IfTree		_pushed_config;	// The IfTree when we push the config
 
-    list<IfConfigGet*>		_ifc_gets;
-    list<IfConfigSet*>		_ifc_sets;
-    list<IfConfigObserver*>	_ifc_observers;
+    IfConfigGet*		_ifc_get_primary;
+    IfConfigSet*		_ifc_set_primary;
+    IfConfigObserver*		_ifc_observer_primary;
+    list<IfConfigGet*>		_ifc_gets_secondary;
+    list<IfConfigSet*>		_ifc_sets_secondary;
+    list<IfConfigObserver*>	_ifc_observers_secondary;
 
     //
     // The primary mechanisms to get interface-related information

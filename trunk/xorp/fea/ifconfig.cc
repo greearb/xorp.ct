@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.34 2004/11/10 00:39:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.35 2004/11/11 23:26:10 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -57,6 +57,9 @@ IfConfig::IfConfig(EventLoop& eventloop,
 		   NexthopPortMapper& nexthop_port_mapper)
     : _eventloop(eventloop), _ur(ur), _er(er),
       _nexthop_port_mapper(nexthop_port_mapper),
+      _ifc_get_primary(NULL),
+      _ifc_set_primary(NULL),
+      _ifc_observer_primary(NULL),
       _ifc_get_dummy(*this),
       _ifc_get_ioctl(*this),
       _ifc_get_sysctl(*this),
@@ -80,17 +83,17 @@ IfConfig::IfConfig(EventLoop& eventloop,
     // Check that all necessary mechanisms to interact with the
     // underlying system are in place.
     //
-    if (_ifc_gets.empty()) {
-	XLOG_FATAL("No mechanism to get the network interface information "
-		   "from the underlying system");
+    if (_ifc_get_primary == NULL) {
+	XLOG_FATAL("No primary mechanism to get the network interface "
+		   "information from the underlying system");
     }
-    if (_ifc_sets.empty()) {
-	XLOG_FATAL("No mechanism to set the network interface information "
-		   "into the underlying system");
+    if (_ifc_set_primary == NULL) {
+	XLOG_FATAL("No primary mechanism to set the network interface "
+		   "information into the underlying system");
     }
-    if (_ifc_observers.empty()) {
-	XLOG_FATAL("No mechanism to observe the network interface information "
-		   "from the underlying system");
+    if (_ifc_observer_primary) {
+	XLOG_FATAL("No primary mechanism to observe the network interface "
+		   "information from the underlying system");
     }
 
     //
@@ -103,11 +106,9 @@ IfConfig::IfConfig(EventLoop& eventloop,
 int
 IfConfig::register_ifc_get_primary(IfConfigGet *ifc_get)
 {
-    _ifc_gets.clear();
-    if (ifc_get != NULL) {
-	_ifc_gets.push_back(ifc_get);
+    _ifc_get_primary = ifc_get;
+    if (ifc_get != NULL)
 	ifc_get->set_primary();
-    }
 
     return (XORP_OK);
 }
@@ -115,11 +116,9 @@ IfConfig::register_ifc_get_primary(IfConfigGet *ifc_get)
 int
 IfConfig::register_ifc_set_primary(IfConfigSet *ifc_set)
 {
-    _ifc_sets.clear();
-    if (ifc_set != NULL) {
-	_ifc_sets.push_back(ifc_set);
+    _ifc_set_primary = ifc_set;
+    if (ifc_set != NULL)
 	ifc_set->set_primary();
-    }
 
     return (XORP_OK);
 }
@@ -127,11 +126,9 @@ IfConfig::register_ifc_set_primary(IfConfigSet *ifc_set)
 int
 IfConfig::register_ifc_observer_primary(IfConfigObserver *ifc_observer)
 {
-    _ifc_observers.clear();
-    if (ifc_observer != NULL) {
-	_ifc_observers.push_back(ifc_observer);
+    _ifc_observer_primary = ifc_observer;
+    if (ifc_observer != NULL)
 	ifc_observer->set_primary();
-    }
 
     return (XORP_OK);
 }
@@ -140,7 +137,7 @@ int
 IfConfig::register_ifc_get_secondary(IfConfigGet *ifc_get)
 {
     if (ifc_get != NULL) {
-	_ifc_gets.push_back(ifc_get);
+	_ifc_gets_secondary.push_back(ifc_get);
 	ifc_get->set_secondary();
     }
 
@@ -151,7 +148,7 @@ int
 IfConfig::register_ifc_set_secondary(IfConfigSet *ifc_set)
 {
     if (ifc_set != NULL) {
-	_ifc_sets.push_back(ifc_set);
+	_ifc_sets_secondary.push_back(ifc_set);
 	ifc_set->set_secondary();
     }
 
@@ -162,7 +159,7 @@ int
 IfConfig::register_ifc_observer_secondary(IfConfigObserver *ifc_observer)
 {
     if (ifc_observer != NULL) {
-	_ifc_observers.push_back(ifc_observer);
+	_ifc_observers_secondary.push_back(ifc_observer);
 	ifc_observer->set_secondary();
     }
 
@@ -197,24 +194,45 @@ IfConfig::start()
     if (_is_running)
 	return (XORP_OK);
 
-    for (ifc_get_iter = _ifc_gets.begin();
-	 ifc_get_iter != _ifc_gets.end();
+    //
+    // Start the IfConfigGet methods
+    //
+    if (_ifc_get_primary != NULL) {
+	if (_ifc_get_primary->start() < 0)
+	    return (XORP_ERROR);
+    }
+    for (ifc_get_iter = _ifc_gets_secondary.begin();
+	 ifc_get_iter != _ifc_gets_secondary.end();
 	 ++ifc_get_iter) {
 	IfConfigGet* ifc_get = *ifc_get_iter;
 	if (ifc_get->start() < 0)
 	    return (XORP_ERROR);
     }
 
-    for (ifc_set_iter = _ifc_sets.begin();
-	 ifc_set_iter != _ifc_sets.end();
+    //
+    // Start the IfConfigSet methods
+    //
+    if (_ifc_set_primary != NULL) {
+	if (_ifc_set_primary->start() < 0)
+	    return (XORP_ERROR);
+    }
+    for (ifc_set_iter = _ifc_sets_secondary.begin();
+	 ifc_set_iter != _ifc_sets_secondary.end();
 	 ++ifc_set_iter) {
 	IfConfigSet* ifc_set = *ifc_set_iter;
 	if (ifc_set->start() < 0)
 	    return (XORP_ERROR);
     }
 
-    for (ifc_observer_iter = _ifc_observers.begin();
-	 ifc_observer_iter != _ifc_observers.end();
+    //
+    // Start the IfConfigObserver methods
+    //
+    if (_ifc_observer_primary != NULL) {
+	if (_ifc_observer_primary->start() < 0)
+	    return (XORP_ERROR);
+    }
+    for (ifc_observer_iter = _ifc_observers_secondary.begin();
+	 ifc_observer_iter != _ifc_observers_secondary.end();
 	 ++ifc_observer_iter) {
 	IfConfigObserver* ifc_observer = *ifc_observer_iter;
 	if (ifc_observer->start() < 0)
@@ -243,27 +261,48 @@ IfConfig::stop()
     if (! _is_running)
 	return (XORP_OK);
 
-    for (ifc_observer_iter = _ifc_observers.begin();
-	 ifc_observer_iter != _ifc_observers.end();
+    //
+    // Stop the IfConfigObserver methods
+    //
+    for (ifc_observer_iter = _ifc_observers_secondary.begin();
+	 ifc_observer_iter != _ifc_observers_secondary.end();
 	 ++ifc_observer_iter) {
 	IfConfigObserver* ifc_observer = *ifc_observer_iter;
 	if (ifc_observer->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
+    if (_ifc_observer_primary != NULL) {
+	if (_ifc_observer_primary->stop() < 0)
+	    ret_value = XORP_ERROR;
+    }
 
-    for (ifc_set_iter = _ifc_sets.begin();
-	 ifc_set_iter != _ifc_sets.end();
+    //
+    // Stop the IfConfigSet methods
+    //
+    for (ifc_set_iter = _ifc_sets_secondary.begin();
+	 ifc_set_iter != _ifc_sets_secondary.end();
 	 ++ifc_set_iter) {
 	IfConfigSet* ifc_set = *ifc_set_iter;
 	if (ifc_set->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
+    if (_ifc_set_primary != NULL) {
+	if (_ifc_set_primary->stop() < 0)
+	    ret_value = XORP_ERROR;
+    }
 
-    for (ifc_get_iter = _ifc_gets.begin();
-	 ifc_get_iter != _ifc_gets.end();
+    //
+    // Stop the IfConfigGet methods
+    //
+    for (ifc_get_iter = _ifc_gets_secondary.begin();
+	 ifc_get_iter != _ifc_gets_secondary.end();
 	 ++ifc_get_iter) {
 	IfConfigGet* ifc_get = *ifc_get_iter;
 	if (ifc_get->stop() < 0)
+	    ret_value = XORP_ERROR;
+    }
+    if (_ifc_get_primary != NULL) {
+	if (_ifc_get_primary->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
 
@@ -499,7 +538,7 @@ IfConfig::push_config(const IfTree& config)
 {
     list<IfConfigSet*>::iterator ifc_set_iter;
 
-    if (_ifc_sets.empty())
+    if ((_ifc_set_primary == NULL) && _ifc_sets_secondary.empty())
 	return false;
 
     //
@@ -513,8 +552,12 @@ IfConfig::push_config(const IfTree& config)
     //
     _pushed_config = config;
 
-    for (ifc_set_iter = _ifc_sets.begin();
-	 ifc_set_iter != _ifc_sets.end();
+    if (_ifc_set_primary != NULL) {
+	if (_ifc_set_primary->push_config(config) != true)
+	    return false;
+    }
+    for (ifc_set_iter = _ifc_sets_secondary.begin();
+	 ifc_set_iter != _ifc_sets_secondary.end();
 	 ++ifc_set_iter) {
 	IfConfigSet* ifc_set = *ifc_set_iter;
 	if (ifc_set->push_config(config) != true)
@@ -527,17 +570,11 @@ IfConfig::push_config(const IfTree& config)
 const IfTree&
 IfConfig::pull_config()
 {
-    list<IfConfigGet*>::iterator ifc_get_iter;
-
     // Clear the old state
     _pulled_config.clear();
 
-    for (ifc_get_iter = _ifc_gets.begin();
-	 ifc_get_iter != _ifc_gets.end();
-	 ++ifc_get_iter) {
-	IfConfigGet* ifc_get = *ifc_get_iter;
-	ifc_get->pull_config(_pulled_config);
-    }
+    if (_ifc_get_primary != NULL)
+	_ifc_get_primary->pull_config(_pulled_config);
 
     return _pulled_config;
 }
