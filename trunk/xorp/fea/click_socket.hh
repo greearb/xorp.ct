@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.4 2004/11/23 00:53:19 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.5 2004/11/29 04:10:15 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -100,6 +100,17 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int stop();
+
+    /**
+     * Get the name of the external program to generate the Click
+     * configuration.
+     *
+     * @return the name of the external program to generate the Click
+     * configuration.
+     */
+    const string& click_config_generator_file() const {
+	return (_click_config_generator_file);
+    }
 
     /**
      * Specify the external program to generate the Click configuration.
