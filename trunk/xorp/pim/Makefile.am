@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.31 2004/11/30 07:47:26 bms Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.32 2005/01/25 01:47:00 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -84,13 +84,13 @@ test_pim_SOURCES += $(top_srcdir)/rib/redist_xrl.hh
 test_pim_SOURCES += $(top_srcdir)/rib/redist_xrl.cc
 
 test_pim_LDADD	 = $(LDADD)
+test_pim_LDADD	+= $(top_builddir)/fib2mrib/libfib2mrib.la
 test_pim_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.la
 test_pim_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 test_pim_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 
-test_pim_LDADD	+= $(top_builddir)/fib2mrib/libfib2mrib.la
 test_pim_LDADD	+= $(top_builddir)/xrl/targets/libfib2mribbase.la
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libftixif.la
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeafibxif.la

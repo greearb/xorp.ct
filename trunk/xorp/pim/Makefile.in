@@ -129,7 +129,7 @@ xorp_pimsm6_SOURCES = xorp_pimsm6.cc
 
 test_pim_SOURCES = test_pim.cc $(top_srcdir)/rib/rib_manager.hh $(top_srcdir)/rib/rib_manager.cc $(top_srcdir)/rib/xrl_target.hh $(top_srcdir)/rib/xrl_target.cc $(top_srcdir)/rib/redist_xrl.hh $(top_srcdir)/rib/redist_xrl.cc
 
-test_pim_LDADD = $(LDADD) $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/fib2mrib/libfib2mrib.la $(top_builddir)/xrl/targets/libfib2mribbase.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeafibxif.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libredist4xif.la $(top_builddir)/xrl/interfaces/libredisttransaction4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libredist6xif.la $(top_builddir)/xrl/interfaces/libpolicyredist4xif.la $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la $(top_builddir)/xrl/interfaces/libredisttransaction6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la
+test_pim_LDADD = $(LDADD) $(top_builddir)/fib2mrib/libfib2mrib.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/targets/libfib2mribbase.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeafibxif.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libredist4xif.la $(top_builddir)/xrl/interfaces/libredisttransaction4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libredist6xif.la $(top_builddir)/xrl/interfaces/libpolicyredist4xif.la $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la $(top_builddir)/xrl/interfaces/libredisttransaction6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la
 #test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
@@ -203,12 +203,12 @@ test_pim_DEPENDENCIES = libpim.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/fib2mrib/libfib2mrib.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/fib2mrib/libfib2mrib.la \
 	$(top_builddir)/xrl/targets/libfib2mribbase.la \
 	$(top_builddir)/xrl/interfaces/libftixif.la \
 	$(top_builddir)/xrl/interfaces/libfeafibxif.la \
