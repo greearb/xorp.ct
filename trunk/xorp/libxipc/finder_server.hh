@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_server.hh,v 1.5 2003/03/16 08:20:28 pavlin Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.6 2003/04/02 22:58:55 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
 
 #include "libxorp/xlog.h"
 
-#include "finder_ng.hh"
+#include "finder.hh"
 #include "finder_tcp_messenger.hh"
-#include "finder_ng_xrl_target.hh"
+#include "finder_xrl_target.hh"
 #include "permits.hh"
 #include "sockutil.hh"
 
@@ -31,20 +31,20 @@
  * Instantiates a Finder object and IPC infrastructure for Finder to accept
  * accept incoming connections.
  */
-class FinderNGServer {
+class FinderServer {
 public:
-    FinderNGServer(EventLoop& e)
+    FinderServer(EventLoop& e)
     {
 	IPv4 	 bind_addr = IPv4(if_get_preferred());
 	uint16_t bind_port = FINDER_NG_TCP_DEFAULT_PORT;
-	_f = new FinderNG();
-	_ft = new FinderNGTcpListener(e, *_f, _f->commands(),
+	_f = new Finder();
+	_ft = new FinderTcpListener(e, *_f, _f->commands(),
 				      bind_addr, bind_port);
-	_fxt = new FinderNGXrlTarget(*_f);
+	_fxt = new FinderXrlTarget(*_f);
 	add_permitted_host(bind_addr);
 	add_permitted_host(IPv4("127.0.0.1"));
     }
-    ~FinderNGServer()
+    ~FinderServer()
     {
 	delete _fxt;
 	delete _ft;
@@ -55,9 +55,9 @@ public:
 	return _f ? _f->messengers() : 0;
     }
 protected:
-    FinderNG*		 _f;
-    FinderNGTcpListener* _ft;
-    FinderNGXrlTarget*	 _fxt; 
+    Finder*		 _f;
+    FinderTcpListener* _ft;
+    FinderXrlTarget*	 _fxt; 
 };
 
 #endif // __LIBXIPC_FINDER_SERVER_HH__

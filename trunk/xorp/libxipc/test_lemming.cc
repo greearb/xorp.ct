@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.7 2003/04/02 22:58:56 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.8 2003/04/03 16:08:22 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -170,13 +170,13 @@ private:
 // Main body
 
 static bool
-toggle_finder(EventLoop* e, FinderNGServer** ppfs)
+toggle_finder(EventLoop* e, FinderServer** ppfs)
 {
     if (*ppfs) {
 	delete *ppfs;
 	*ppfs = 0;
     } else {
-	*ppfs = new FinderNGServer(*e);
+	*ppfs = new FinderServer(*e);
     }
     return true;
 }
@@ -193,7 +193,7 @@ lemming_main()
     EventLoop e;
     bool run = true;
 
-    FinderNGServer* pfs = 0;
+    FinderServer* pfs = 0;
 
     toggle_finder(&e, &pfs);
 

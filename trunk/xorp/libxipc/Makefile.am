@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.14 2003/04/15 16:37:47 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.15 2003/04/21 06:41:45 pavlin Exp $
 ##
 
 
@@ -11,10 +11,10 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 # -- Programs
 bin_PROGRAMS  =	call_xrl finder
 
-finder_SOURCES = finder_ng_main.cc
+finder_SOURCES = finder_main.cc
 
 # -- Test Programs 
-noinst_PROGRAMS  = test_finder_messenger test_finder_msgs test_finder_ng
+noinst_PROGRAMS  = test_finder_messenger test_finder_msgs test_finder
 noinst_PROGRAMS += test_finder_tcp
 noinst_PROGRAMS += test_header test_inproc test_lemming test_sudp test_stcp
 noinst_PROGRAMS += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
@@ -54,8 +54,8 @@ test_xrl_error_SOURCES		= test_xrl_error.cc
 test_xrl_router_SOURCES		= test_xrl_router.cc
 test_xrl_router_LDADD		= libfinder.a $(LDADD)
 
-test_finder_ng_SOURCES		= test_finder_ng.cc
-test_finder_ng_LDADD		= libfinder.a $(LDADD)
+test_finder_SOURCES		= test_finder.cc
+test_finder_LDADD		= libfinder.a $(LDADD)
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h
@@ -66,8 +66,8 @@ libxipc_a_SOURCES += finder_client.hh
 libxipc_a_SOURCES += finder_ipc.hh
 libxipc_a_SOURCES += finder_messenger.hh
 libxipc_a_SOURCES += finder_msgs.hh
-libxipc_a_SOURCES += finder_ng_client.hh
-libxipc_a_SOURCES += finder_ng_client_xrl_target.hh
+libxipc_a_SOURCES += finder_client.hh
+libxipc_a_SOURCES += finder_client_xrl_target.hh
 libxipc_a_SOURCES += finder_server.hh
 libxipc_a_SOURCES += finder_tcp_messenger.hh
 libxipc_a_SOURCES += finder_tcp.hh
@@ -100,8 +100,8 @@ libxipc_a_SOURCES += hmac_md5.c
 
 libxipc_a_SOURCES += finder_messenger.cc
 libxipc_a_SOURCES += finder_msgs.cc
-libxipc_a_SOURCES += finder_ng_client.cc
-libxipc_a_SOURCES += finder_ng_client_xrl_target.cc
+libxipc_a_SOURCES += finder_client.cc
+libxipc_a_SOURCES += finder_client_xrl_target.cc
 libxipc_a_SOURCES += finder_tcp.cc
 libxipc_a_SOURCES += finder_tcp_messenger.cc
 libxipc_a_SOURCES += header.cc
@@ -129,14 +129,14 @@ libxipc_a_SOURCES += xuid.cc
 
 # -- Library Sources (libfinder) 
 libfinder_a_SOURCES  = finder_base.hh
-libfinder_a_SOURCES += finder_ng.hh 
-libfinder_a_SOURCES += finder_ng_xrl_queue.hh
-libfinder_a_SOURCES += finder_ng_xrl_target.hh
+libfinder_a_SOURCES += finder.hh 
+libfinder_a_SOURCES += finder_xrl_queue.hh
+libfinder_a_SOURCES += finder_xrl_target.hh
 
 libfinder_a_SOURCES += finder_base.cc
-libfinder_a_SOURCES += finder_ng.cc
-libfinder_a_SOURCES += finder_ng_xrl_queue.cc
-libfinder_a_SOURCES += finder_ng_xrl_target.cc
+libfinder_a_SOURCES += finder.cc
+libfinder_a_SOURCES += finder_xrl_queue.cc
+libfinder_a_SOURCES += finder_xrl_target.cc
 
 # magic-script:			magic-script.in
 # 	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script

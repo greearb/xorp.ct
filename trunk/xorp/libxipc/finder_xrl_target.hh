@@ -12,18 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_xrl_target.hh,v 1.4 2003/03/06 01:18:57 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.5 2003/03/16 08:20:28 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_XRL_TARGET_HH__
 
 #include "finder_base.hh"
 
-class FinderNG;
+class Finder;
 
-class FinderNGXrlTarget : public XrlFinderTargetBase {
+class FinderXrlTarget : public XrlFinderTargetBase {
 public:
-    FinderNGXrlTarget(FinderNG& finder);
+    FinderXrlTarget(Finder& finder);
 
     /**
      *  Get name of Xrl Target
@@ -91,7 +91,7 @@ public:
     XrlCmdError finder_0_1_get_ipv6_permitted_nets(XrlAtomList&  ipv6nets);
     
 protected:
-    FinderNG& _finder;
+    Finder& _finder;
 };
 
 #endif // __LIBXIPC_FINDER_XRL_TARGET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.9 2003/03/12 20:02:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.10 2003/04/22 23:27:18 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -212,10 +212,10 @@ FinderTcpMessenger::error_event()
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// FinderNGTcpListener methods
+// FinderTcpListener methods
 //
 
-FinderNGTcpListener::FinderNGTcpListener(
+FinderTcpListener::FinderTcpListener(
 				 EventLoop&		 e,
 				 FinderMessengerManager& mm,
 				 XrlCmdMap&		 cmds,
@@ -227,12 +227,12 @@ FinderNGTcpListener::FinderNGTcpListener(
 {
 }
 					 
-FinderNGTcpListener::~FinderNGTcpListener()
+FinderTcpListener::~FinderTcpListener()
 {
 }
 
 bool
-FinderNGTcpListener::connection_event(int fd)
+FinderTcpListener::connection_event(int fd)
 {
     FinderTcpMessenger* m =
 	new FinderTcpMessenger(eventloop(), &_mm, fd, _cmds);
@@ -245,10 +245,10 @@ FinderNGTcpListener::connection_event(int fd)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// FinderNGTcpConnector methods
+// FinderTcpConnector methods
 //
 
-FinderNGTcpConnector::FinderNGTcpConnector(EventLoop& e,
+FinderTcpConnector::FinderTcpConnector(EventLoop& e,
 					   FinderMessengerManager& mm,
 					   XrlCmdMap& cmds,
 					   IPv4 host,
@@ -257,7 +257,7 @@ FinderNGTcpConnector::FinderNGTcpConnector(EventLoop& e,
 {}
 
 int
-FinderNGTcpConnector::connect(FinderTcpMessenger*& created_messenger)
+FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 {
     struct in_addr host_ia;
     host_ia.s_addr = _host.addr();
@@ -276,17 +276,17 @@ FinderNGTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// FinderNGTcpAutoConnector methods
+// FinderTcpAutoConnector methods
 //
 
-FinderNGTcpAutoConnector::FinderNGTcpAutoConnector(
+FinderTcpAutoConnector::FinderTcpAutoConnector(
 				   EventLoop&		   e,
 				   FinderMessengerManager& real_manager,
 				   XrlCmdMap&		   cmds,
 				   IPv4			   host,
 				   uint16_t		   port,
 				   bool			   en)
-    : FinderNGTcpConnector(e, *this, cmds, host, port),
+    : FinderTcpConnector(e, *this, cmds, host, port),
       _real_manager(real_manager), _connected(false), _enabled(en),
       _last_error(0), _consec_error(0)
 {
@@ -295,14 +295,14 @@ FinderNGTcpAutoConnector::FinderNGTcpAutoConnector(
     }
 }
 
-FinderNGTcpAutoConnector::~FinderNGTcpAutoConnector()
+FinderTcpAutoConnector::~FinderTcpAutoConnector()
 {
     // Any existing messenger will die and we need to not restart the timer
     set_enabled(false);
 }
 
 void
-FinderNGTcpAutoConnector::set_enabled(bool en)
+FinderTcpAutoConnector::set_enabled(bool en)
 {
     if (_enabled == en) {
 	return;
@@ -323,19 +323,19 @@ FinderNGTcpAutoConnector::set_enabled(bool en)
 }
 
 bool
-FinderNGTcpAutoConnector::enabled() const
+FinderTcpAutoConnector::enabled() const
 {
     return _enabled;
 }
 
 bool
-FinderNGTcpAutoConnector::connected() const
+FinderTcpAutoConnector::connected() const
 {
     return _connected;
 }
 
 void
-FinderNGTcpAutoConnector::do_auto_connect()
+FinderTcpAutoConnector::do_auto_connect()
 {
     XLOG_ASSERT(false == _connected);
 
@@ -364,29 +364,29 @@ FinderNGTcpAutoConnector::do_auto_connect()
 }
 
 void
-FinderNGTcpAutoConnector::start_timer(uint32_t ms)
+FinderTcpAutoConnector::start_timer(uint32_t ms)
 {
     XLOG_ASSERT(false == _retry_timer.scheduled());
     XLOG_ASSERT(false == _connected);
     _retry_timer =
 	_e.new_oneoff_after_ms(
-	    ms, callback(this, &FinderNGTcpAutoConnector::do_auto_connect));
+	    ms, callback(this, &FinderTcpAutoConnector::do_auto_connect));
 }
 
 void
-FinderNGTcpAutoConnector::stop_timer()
+FinderTcpAutoConnector::stop_timer()
 {
     _retry_timer.unschedule();
 }
 
 void
-FinderNGTcpAutoConnector::messenger_birth_event(FinderMessengerBase* m)
+FinderTcpAutoConnector::messenger_birth_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_birth_event(m);
 }
 
 void
-FinderNGTcpAutoConnector::messenger_death_event(FinderMessengerBase* m)
+FinderTcpAutoConnector::messenger_death_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_death_event(m);
     _connected = false;
@@ -395,25 +395,25 @@ FinderNGTcpAutoConnector::messenger_death_event(FinderMessengerBase* m)
 }
 
 void
-FinderNGTcpAutoConnector::messenger_active_event(FinderMessengerBase* m)
+FinderTcpAutoConnector::messenger_active_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_active_event(m);
     
 }
 void
-FinderNGTcpAutoConnector::messenger_inactive_event(FinderMessengerBase* m)
+FinderTcpAutoConnector::messenger_inactive_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_inactive_event(m);
 }
 
 void
-FinderNGTcpAutoConnector::messenger_stopped_event(FinderMessengerBase* m)
+FinderTcpAutoConnector::messenger_stopped_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_stopped_event(m);
 }
 
 bool
-FinderNGTcpAutoConnector::manages(const FinderMessengerBase* m) const
+FinderTcpAutoConnector::manages(const FinderMessengerBase* m) const
 {
     return _real_manager.manages(m);
 }

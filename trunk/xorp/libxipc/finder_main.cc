@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.6 2003/03/05 02:28:33 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.7 2003/03/08 20:18:21 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -30,9 +30,9 @@
 #include "libxorp/eventloop.hh"
 
 #include "sockutil.hh"
-#include "finder_ng.hh"
+#include "finder.hh"
 #include "finder_tcp_messenger.hh"
-#include "finder_ng_xrl_target.hh"
+#include "finder_xrl_target.hh"
 #include "permits.hh"
 
 static bool
@@ -149,7 +149,7 @@ finder_main(int argc, char* const argv[])
 	    }
 	    break;
 	case 'v':
-	    fprintf(stderr, "FinderNG\n");
+	    fprintf(stderr, "Finder\n");
 	    run_verbose = true;
 	    break;
 	case 'h':
@@ -175,9 +175,9 @@ finder_main(int argc, char* const argv[])
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	EventLoop e;
-	FinderNG f;
-	FinderNGTcpListener s(e, f, f.commands(), bind_addr, bind_port);
-	FinderNGXrlTarget x(f);
+	Finder f;
+	FinderTcpListener s(e, f, f.commands(), bind_addr, bind_port);
+	FinderXrlTarget x(f);
 	
 	XorpTimer twirl;
 	if (run_verbose)

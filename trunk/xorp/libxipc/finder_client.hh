@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_client.hh,v 1.4 2003/03/06 01:18:57 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.5 2003/03/08 20:56:52 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_HH__
@@ -44,23 +44,23 @@ protected:
     list<string> _values;
 };
 
-class FinderNGClientOp;
+class FinderClientOp;
 
-class FinderNGClientXrlCommandInterface
+class FinderClientXrlCommandInterface
 {
 public:
     virtual void uncache_xrl(const string& xrl)= 0;
     virtual void uncache_xrls_from_target(const string& target) = 0;
 };
 
-class FinderNGClient :
-    public FinderMessengerManager, public FinderNGClientXrlCommandInterface
+class FinderClient :
+    public FinderMessengerManager, public FinderClientXrlCommandInterface
 {
 public:
     typedef
     XorpCallback2<void, const XrlError&, const FinderDBEntry*>::RefPtr
     QueryCallback;
-    typedef ref_ptr<FinderNGClientOp> Operation;
+    typedef ref_ptr<FinderClientOp> Operation;
     typedef list<Operation> OperationQueue;
 
     typedef map<string, FinderDBEntry> ResolvedTable;
@@ -68,8 +68,8 @@ public:
     typedef vector<string>	       TargetIdList;
     
 public:
-    FinderNGClient();
-    virtual ~FinderNGClient();
+    FinderClient();
+    virtual ~FinderClient();
 
     bool register_xrl_target(const string& instance_name,
 			     const string& class_name,
@@ -96,8 +96,8 @@ public:
 
     inline OperationQueue& todo_list() { return _todo_list; }
     inline OperationQueue& done_list() { return _done_list; }
-    void   notify_done(const FinderNGClientOp* completed);
-    void   notify_failed(const FinderNGClientOp* completed);
+    void   notify_done(const FinderClientOp* completed);
+    void   notify_failed(const FinderClientOp* completed);
 
     inline XrlCmdMap& commands() { return _commands; }
 
@@ -113,7 +113,7 @@ protected:
     bool manages(const FinderMessengerBase*) const;
 
 protected:
-    // FinderNGClientXrlCommandInterface
+    // FinderClientXrlCommandInterface
     void uncache_xrl(const string& xrl);
     void uncache_xrls_from_target(const string& target);
     

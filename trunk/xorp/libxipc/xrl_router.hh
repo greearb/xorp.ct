@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.13 2003/04/22 18:07:36 mjh Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.14 2003/04/23 19:17:55 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -35,9 +35,9 @@ public:
     virtual XrlError dispatch_xrl(const Xrl& xrl, XrlArgs& ret_vals) const;
 };
 
-class FinderNGClient;
-class FinderNGClientXrlTarget;
-class FinderNGTcpAutoConnector;
+class FinderClient;
+class FinderClientXrlTarget;
+class FinderTcpAutoConnector;
 class FinderDBEntry;
 class XrlRouterDispatchState;
 
@@ -83,9 +83,9 @@ protected:
     
 protected:
     EventLoop&			_e;
-    FinderNGClient*		_fc;
-    FinderNGClientXrlTarget*	_fxt;
-    FinderNGTcpAutoConnector*	_fac;
+    FinderClient*		_fc;
+    FinderClientXrlTarget*	_fxt;
+    FinderTcpAutoConnector*	_fac;
     uint32_t			_id;
 
     uint32_t			_rpend, _spend;

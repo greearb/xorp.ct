@@ -12,46 +12,46 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.1 2003/02/24 19:39:18 hodson Exp $"
 
-#include "finder_ng_client_xrl_target.hh"
-#include "finder_ng_client.hh"
+#include "finder_client_xrl_target.hh"
+#include "finder_client.hh"
 
-FinderNGClientXrlTarget::FinderNGClientXrlTarget(
-			 FinderNGClientXrlCommandInterface* client,
+FinderClientXrlTarget::FinderClientXrlTarget(
+			 FinderClientXrlCommandInterface* client,
 			 XrlCmdMap* cmds)
     : XrlFinderclientTargetBase(cmds), _client(client)
 {}
 
 XrlCmdError
-FinderNGClientXrlTarget::common_0_1_get_target_name(string& n)
+FinderClientXrlTarget::common_0_1_get_target_name(string& n)
 {
     n = name();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGClientXrlTarget::common_0_1_get_version(string& v)
+FinderClientXrlTarget::common_0_1_get_version(string& v)
 {
     v = version();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGClientXrlTarget::finder_client_0_1_hello()
+FinderClientXrlTarget::finder_client_0_1_hello()
 {
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGClientXrlTarget::finder_client_0_1_remove_xrl_from_cache(const string& xrl)
+FinderClientXrlTarget::finder_client_0_1_remove_xrl_from_cache(const string& xrl)
 {
     _client->uncache_xrl(xrl);
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGClientXrlTarget::finder_client_0_1_remove_xrls_for_target_from_cache(const string& target)
+FinderClientXrlTarget::finder_client_0_1_remove_xrls_for_target_from_cache(const string& target)
 {
     _client->uncache_xrls_from_target(target);
     return XrlCmdError::OKAY();

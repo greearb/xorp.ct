@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.5 2003/03/07 18:23:44 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.6 2003/03/10 23:20:23 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -76,12 +76,12 @@ protected:
 /**
  * Class that creates FinderMessengers for incoming connections.
  */
-class FinderNGTcpListener : public FinderTcpListenerBase {
+class FinderTcpListener : public FinderTcpListenerBase {
 public:
     typedef FinderTcpListenerBase::AddrList Addr4List;
     typedef FinderTcpListenerBase::NetList Net4List;
 
-    FinderNGTcpListener(EventLoop&		e,
+    FinderTcpListener(EventLoop&		e,
 			FinderMessengerManager& mm,
 			XrlCmdMap&		cmds,
 			IPv4			interface,
@@ -89,7 +89,7 @@ public:
 			bool			enabled = true)
 	throw (InvalidPort);
 
-    ~FinderNGTcpListener();
+    ~FinderTcpListener();
 
     /**
      * Instantiate a Messenger instance for fd.
@@ -102,9 +102,9 @@ protected:
     XrlCmdMap& _cmds;
 };
 
-class FinderNGTcpConnector {
+class FinderTcpConnector {
 public:
-    FinderNGTcpConnector(EventLoop&		 e,
+    FinderTcpConnector(EventLoop&		 e,
 			 FinderMessengerManager& mm,
 			 XrlCmdMap&		 cmds,
 			 IPv4			 host,
@@ -128,21 +128,21 @@ protected:
 };
 
 /**
- * Class to establish and manage a single connection to a FinderNGTcpListener.
+ * Class to establish and manage a single connection to a FinderTcpListener.
  * Should the connection fail after being established a new connection is
  * started.
  */
-class FinderNGTcpAutoConnector
-    : public FinderNGTcpConnector, public FinderMessengerManager
+class FinderTcpAutoConnector
+    : public FinderTcpConnector, public FinderMessengerManager
 {
 public:
-    FinderNGTcpAutoConnector(EventLoop&		     e,
+    FinderTcpAutoConnector(EventLoop&		     e,
 			     FinderMessengerManager& mm,
 			     XrlCmdMap&		     cmds,
 			     IPv4		     host,
 			     uint16_t		     port,
 			     bool		     enabled = true);
-    virtual ~FinderNGTcpAutoConnector();
+    virtual ~FinderTcpAutoConnector();
 
     void set_enabled(bool en);
     bool enabled() const;

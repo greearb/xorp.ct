@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_xrl_queue.hh,v 1.1 2003/02/24 19:39:19 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.2 2003/03/16 08:20:28 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
@@ -20,14 +20,14 @@
 #include <list>
 #include "libxorp/ref_ptr.hh"
 
-class FinderNGXrlCommandBase;
+class FinderXrlCommandBase;
 
-class FinderNGXrlCommandQueue {
+class FinderXrlCommandQueue {
 public:
-    typedef ref_ptr<FinderNGXrlCommandBase> Command;
+    typedef ref_ptr<FinderXrlCommandBase> Command;
 
 public:
-    FinderNGXrlCommandQueue(FinderMessengerBase& messenger) :
+    FinderXrlCommandQueue(FinderMessengerBase& messenger) :
 	_m(messenger), _pending(false) {}
 
     inline FinderMessengerBase& messenger() { return _m; }
@@ -38,7 +38,7 @@ protected:
     void push();
 
 protected:
-    friend class FinderNGXrlCommandBase;
+    friend class FinderXrlCommandBase;
     void crank();
 
 private:
@@ -47,12 +47,12 @@ private:
     bool		 _pending;
 };
 
-class FinderNGXrlCommandBase {
+class FinderXrlCommandBase {
 public:
-    FinderNGXrlCommandBase(FinderNGXrlCommandQueue& q) : _queue(q) {}
-    virtual ~FinderNGXrlCommandBase() {}
+    FinderXrlCommandBase(FinderXrlCommandQueue& q) : _queue(q) {}
+    virtual ~FinderXrlCommandBase() {}
 
-    inline FinderNGXrlCommandQueue& queue() { return _queue; }
+    inline FinderXrlCommandQueue& queue() { return _queue; }
     inline FinderMessengerBase& messenger() { return _queue.messenger(); }
 
     virtual bool dispatch() = 0;
@@ -64,16 +64,16 @@ public:
     }
 
 protected:
-    FinderNGXrlCommandQueue& _queue;
+    FinderXrlCommandQueue& _queue;
 };
 
 #include "finder_client_xif.hh"
 
-class FinderNGSendHelloToClient : public FinderNGXrlCommandBase {
+class FinderSendHelloToClient : public FinderXrlCommandBase {
 public:
-    FinderNGSendHelloToClient(FinderNGXrlCommandQueue& q,
+    FinderSendHelloToClient(FinderXrlCommandQueue& q,
 			      const string&	       tgtname)
-	: FinderNGXrlCommandBase(q), _tgtname(tgtname)
+	: FinderXrlCommandBase(q), _tgtname(tgtname)
     {
     }
 
@@ -81,22 +81,22 @@ public:
     {
 	XrlFinderClientV0p1Client client(&(queue().messenger()));
 	return client.send_hello(_tgtname.c_str(),
-		  callback(static_cast<FinderNGXrlCommandBase*>(this),
-			   &FinderNGXrlCommandBase::dispatch_cb));
+		  callback(static_cast<FinderXrlCommandBase*>(this),
+			   &FinderXrlCommandBase::dispatch_cb));
     }
     
 protected:
     string _tgtname;
 };
 
-class FinderNGSendRemoveXrl : public FinderNGXrlCommandBase {
+class FinderSendRemoveXrl : public FinderXrlCommandBase {
 public:
-    FinderNGSendRemoveXrl(FinderNGXrlCommandQueue& q, const string& tgtname, const string& xrl)
-	: FinderNGXrlCommandBase(q), _tgtname(tgtname), _xrl(xrl)
+    FinderSendRemoveXrl(FinderXrlCommandQueue& q, const string& tgtname, const string& xrl)
+	: FinderXrlCommandBase(q), _tgtname(tgtname), _xrl(xrl)
     {
     }
 
-    ~FinderNGSendRemoveXrl()
+    ~FinderSendRemoveXrl()
     {
 	_tgtname = _xrl = "croak";
     }
@@ -105,8 +105,8 @@ public:
     {
 	XrlFinderClientV0p1Client client(&(queue().messenger()));
 	return client.send_remove_xrl_from_cache(_tgtname.c_str(), _xrl,
-		  callback(static_cast<FinderNGXrlCommandBase*>(this),
-			   &FinderNGXrlCommandBase::dispatch_cb));
+		  callback(static_cast<FinderXrlCommandBase*>(this),
+			   &FinderXrlCommandBase::dispatch_cb));
     }
     
 protected:
@@ -114,14 +114,14 @@ protected:
     string _xrl;
 };
 
-class FinderNGSendRemoveXrls : public FinderNGXrlCommandBase {
+class FinderSendRemoveXrls : public FinderXrlCommandBase {
 public:
-    FinderNGSendRemoveXrls(FinderNGXrlCommandQueue& q, const string& tgtname)
-	: FinderNGXrlCommandBase(q), _tgtname(tgtname)
+    FinderSendRemoveXrls(FinderXrlCommandQueue& q, const string& tgtname)
+	: FinderXrlCommandBase(q), _tgtname(tgtname)
     {
     }
 
-    ~FinderNGSendRemoveXrls()
+    ~FinderSendRemoveXrls()
     {
 	_tgtname = "croak";
     }
@@ -131,8 +131,8 @@ public:
 	XrlFinderClientV0p1Client client(&(queue().messenger()));
 	return client.send_remove_xrls_for_target_from_cache(_tgtname.c_str(),
 							     _tgtname,
-		  callback(static_cast<FinderNGXrlCommandBase*>(this),
-			   &FinderNGXrlCommandBase::dispatch_cb));
+		  callback(static_cast<FinderXrlCommandBase*>(this),
+			   &FinderXrlCommandBase::dispatch_cb));
     }
     
 protected:

@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.9 2003/03/16 08:20:28 pavlin Exp $"
 
 #include "libxorp/debug.h"
 
-#include "finder_ng_xrl_target.hh"
-#include "finder_ng.hh"
+#include "finder_xrl_target.hh"
+#include "finder.hh"
 #include "permits.hh"
 #include "xuid.hh"
 
@@ -78,27 +78,27 @@ make_cookie()
     return c_format("%08x%08x", invoked, r ^ hash_base);
 }
 
-FinderNGXrlTarget::FinderNGXrlTarget(FinderNG& finder)
+FinderXrlTarget::FinderXrlTarget(Finder& finder)
     : XrlFinderTargetBase(&(finder.commands())), _finder(finder)
 {
 }
 
 XrlCmdError
-FinderNGXrlTarget::common_0_1_get_target_name(string& name)
+FinderXrlTarget::common_0_1_get_target_name(string& name)
 {
     name = XrlFinderTargetBase::name();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGXrlTarget::common_0_1_get_version(string& name)
+FinderXrlTarget::common_0_1_get_version(string& name)
 {
     name = XrlFinderTargetBase::version();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
+FinderXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
 						     const string& class_name,
 						     const string& in_cookie,
 						     string&	   out_cookie)
@@ -125,7 +125,7 @@ FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
+FinderXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
 {
     finder_trace_init("unregister_finder_client(\"%s\")", tgt_name.c_str());
 
@@ -141,7 +141,7 @@ FinderNGXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
+FinderXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
 							const bool&   en)
 {
     finder_trace_init("set_finder_client_enabled(\"%s\", %s)",
@@ -157,7 +157,7 @@ FinderNGXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_finder_client_enabled(const string& tgt_name,
+FinderXrlTarget::finder_0_1_finder_client_enabled(const string& tgt_name,
 						    bool&         en)
 {
     finder_trace_init("finder_client_enabled(\"%s\")",
@@ -172,7 +172,7 @@ FinderNGXrlTarget::finder_0_1_finder_client_enabled(const string& tgt_name,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_add_xrl(const string& xrl,
+FinderXrlTarget::finder_0_1_add_xrl(const string& xrl,
 				      const string& protocol_name,
 				      const string& protocol_args,
 				      string&	    resolved_xrl_method_name)
@@ -212,7 +212,7 @@ FinderNGXrlTarget::finder_0_1_add_xrl(const string& xrl,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
+FinderXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
 {
     Xrl u;
 
@@ -242,7 +242,7 @@ FinderNGXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
+FinderXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 					  XrlAtomList&	resolved_xrls)
 {
     finder_trace_init("resolve_xrl(\"%s\")", xrl.c_str());
@@ -267,14 +267,14 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 	return XrlCmdError::COMMAND_FAILED("Xrl target is not enabled.");
     }
 
-    const FinderNG::Resolveables* resolutions = _finder.resolve(u.target(),
+    const Finder::Resolveables* resolutions = _finder.resolve(u.target(),
 								u.str());
     if (0 == resolutions) {
 	finder_trace_result("fail (does not resolve).");
 	return XrlCmdError::COMMAND_FAILED("Xrl does not resolve");
     }
 
-    FinderNG::Resolveables::const_iterator ci = resolutions->begin();
+    Finder::Resolveables::const_iterator ci = resolutions->begin();
     while (resolutions->end() != ci) {
 	string s;
 	try {
@@ -292,7 +292,7 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
+FinderXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
 {
     list<string> tgts;
 
@@ -310,7 +310,7 @@ FinderNGXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
+FinderXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
 						     XrlAtomList&  xal)
 {
     list<string> xrls;
@@ -335,7 +335,7 @@ FinderNGXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
+FinderXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
 {
     const IPv4Hosts& hl = permitted_ipv4_hosts();
     for (IPv4Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
@@ -345,7 +345,7 @@ FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
+FinderXrlTarget::finder_0_1_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
 {
     const IPv4Nets& nl = permitted_ipv4_nets();
     for (IPv4Nets::const_iterator ci = nl.begin(); ci != nl.end(); ++ci)
@@ -355,7 +355,7 @@ FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
+FinderXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
 {
     const IPv6Hosts& hl = permitted_ipv6_hosts();
     for (IPv6Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
@@ -365,7 +365,7 @@ FinderNGXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_ipv6_permitted_nets(XrlAtomList& ipv6nets)
+FinderXrlTarget::finder_0_1_get_ipv6_permitted_nets(XrlAtomList& ipv6nets)
 {
     const IPv6Nets& nl = permitted_ipv6_nets();
     for (IPv6Nets::const_iterator ci = nl.begin(); ci != nl.end(); ++ci)

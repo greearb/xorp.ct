@@ -89,8 +89,8 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 # -- Programs
 bin_PROGRAMS = call_xrl finder
 
-finder_SOURCES = finder_ng_main.cc
-noinst_PROGRAMS = test_finder_messenger test_finder_msgs test_finder_ng test_finder_tcp test_header test_inproc test_lemming test_sudp test_stcp test_xrl_error test_xrl test_xrl_atom test_xrl_args  test_xrl_router test_xrl_parser
+finder_SOURCES = finder_main.cc
+noinst_PROGRAMS = test_finder_messenger test_finder_msgs test_finder test_finder_tcp test_header test_inproc test_lemming test_sudp test_stcp test_xrl_error test_xrl test_xrl_atom test_xrl_args  test_xrl_router test_xrl_parser
 
 TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
 LDADD = ./libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
@@ -117,10 +117,10 @@ test_xrl_error_SOURCES = test_xrl_error.cc
 test_xrl_router_SOURCES = test_xrl_router.cc
 test_xrl_router_LDADD = libfinder.a $(LDADD)
 
-test_finder_ng_SOURCES = test_finder_ng.cc
-test_finder_ng_LDADD = libfinder.a $(LDADD)
-libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h finder_client.hh finder_ipc.hh finder_messenger.hh finder_msgs.hh finder_ng_client.hh finder_ng_client_xrl_target.hh finder_server.hh finder_tcp_messenger.hh finder_tcp.hh header.hh hmac.hh permits.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c finder_messenger.cc finder_msgs.cc finder_ng_client.cc finder_ng_client_xrl_target.cc finder_tcp.cc finder_tcp_messenger.cc header.cc hmac.cc permits.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
-libfinder_a_SOURCES = finder_base.hh finder_ng.hh  finder_ng_xrl_queue.hh finder_ng_xrl_target.hh finder_base.cc finder_ng.cc finder_ng_xrl_queue.cc finder_ng_xrl_target.cc finder_base.hh finder_base.cc finder_client_xif.hh finder_client_xif.cc
+test_finder_SOURCES = test_finder.cc
+test_finder_LDADD = libfinder.a $(LDADD)
+libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h finder_client.hh finder_ipc.hh finder_messenger.hh finder_msgs.hh finder_client.hh finder_client_xrl_target.hh finder_server.hh finder_tcp_messenger.hh finder_tcp.hh header.hh hmac.hh permits.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c finder_messenger.cc finder_msgs.cc finder_client.cc finder_client_xrl_target.cc finder_tcp.cc finder_tcp_messenger.cc header.cc hmac.cc permits.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
+libfinder_a_SOURCES = finder_base.hh finder.hh  finder_xrl_queue.hh finder_xrl_target.hh finder_base.cc finder.cc finder_xrl_queue.cc finder_xrl_target.cc finder_base.hh finder_base.cc finder_client_xif.hh finder_client_xif.cc
 BUILT_SOURCES = common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_xif.hh finder_xif.cc
 
 CLEANFILES = $(BUILT_SOURCES)
@@ -150,7 +150,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libxipc_a_LIBADD = 
 libxipc_a_OBJECTS =  hmac_md5.o finder_messenger.o finder_msgs.o \
-finder_ng_client.o finder_ng_client_xrl_target.o finder_tcp.o \
+finder_client.o finder_client_xrl_target.o finder_tcp.o \
 finder_tcp_messenger.o header.o hmac.o permits.o sockutil.o xrl.o \
 xrl_parser.o xrl_parser_input.o xrl_tokens.o xrl_atom.o \
 xrl_atom_encoding.o xrl_atom_list.o xrl_args.o xrl_cmd_map.o \
@@ -158,8 +158,8 @@ xrl_pf_factory.o xrl_pf_inproc.o xrl_pf_stcp.o xrl_pf_stcp_ph.o \
 xrl_pf_sudp.o xrl_router.o xrl_std_router.o xrl_error.o xuid.o \
 common_xif.o finder_client_base.o finder_xif.o
 libfinder_a_LIBADD = 
-libfinder_a_OBJECTS =  finder_base.o finder_ng.o finder_ng_xrl_queue.o \
-finder_ng_xrl_target.o finder_base.o finder_client_xif.o
+libfinder_a_OBJECTS =  finder_base.o finder.o finder_xrl_queue.o \
+finder_xrl_target.o finder_base.o finder_client_xif.o
 PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 call_xrl_OBJECTS =  call_xrl.o
@@ -167,7 +167,7 @@ call_xrl_LDADD = $(LDADD)
 call_xrl_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 call_xrl_LDFLAGS = 
-finder_OBJECTS =  finder_ng_main.o
+finder_OBJECTS =  finder_main.o
 finder_DEPENDENCIES =  libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 finder_LDFLAGS = 
@@ -181,10 +181,10 @@ test_finder_msgs_LDADD = $(LDADD)
 test_finder_msgs_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_msgs_LDFLAGS = 
-test_finder_ng_OBJECTS =  test_finder_ng.o
-test_finder_ng_DEPENDENCIES =  libfinder.a ./libfinder.a ./libxipc.a \
+test_finder_OBJECTS =  test_finder.o
+test_finder_DEPENDENCIES =  libfinder.a ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
-test_finder_ng_LDFLAGS = 
+test_finder_LDFLAGS = 
 test_finder_tcp_OBJECTS =  test_finder_tcp.o
 test_finder_tcp_LDADD = $(LDADD)
 test_finder_tcp_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
@@ -261,14 +261,14 @@ TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder_base.P \
 .deps/finder_client_base.P .deps/finder_client_xif.P \
-.deps/finder_messenger.P .deps/finder_msgs.P .deps/finder_ng.P \
-.deps/finder_ng_client.P .deps/finder_ng_client_xrl_target.P \
-.deps/finder_ng_main.P .deps/finder_ng_xrl_queue.P \
-.deps/finder_ng_xrl_target.P .deps/finder_tcp.P \
+.deps/finder_messenger.P .deps/finder_msgs.P .deps/finder.P \
+.deps/finder_client.P .deps/finder_client_xrl_target.P \
+.deps/finder_main.P .deps/finder_xrl_queue.P \
+.deps/finder_xrl_target.P .deps/finder_tcp.P \
 .deps/finder_tcp_messenger.P .deps/finder_xif.P .deps/header.P \
 .deps/hmac.P .deps/hmac_md5.P .deps/permits.P .deps/sockutil.P \
 .deps/test_finder_messenger.P .deps/test_finder_msgs.P \
-.deps/test_finder_ng.P .deps/test_finder_tcp.P .deps/test_header.P \
+.deps/test_finder.P .deps/test_finder_tcp.P .deps/test_header.P \
 .deps/test_inproc.P .deps/test_lemming.P .deps/test_stcp.P \
 .deps/test_sudp.P .deps/test_xrl.P .deps/test_xrl_args.P \
 .deps/test_xrl_atom.P .deps/test_xrl_error.P .deps/test_xrl_parser.P \
@@ -278,8 +278,8 @@ DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder_base.P \
 .deps/xrl_pf_factory.P .deps/xrl_pf_inproc.P .deps/xrl_pf_stcp.P \
 .deps/xrl_pf_stcp_ph.P .deps/xrl_pf_sudp.P .deps/xrl_router.P \
 .deps/xrl_std_router.P .deps/xrl_tokens.P .deps/xuid.P
-SOURCES = $(libxipc_a_SOURCES) $(libfinder_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_ng_SOURCES) $(test_finder_tcp_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
-OBJECTS = $(libxipc_a_OBJECTS) $(libfinder_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_messenger_OBJECTS) $(test_finder_msgs_OBJECTS) $(test_finder_ng_OBJECTS) $(test_finder_tcp_OBJECTS) $(test_header_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
+SOURCES = $(libxipc_a_SOURCES) $(libfinder_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_SOURCES) $(test_finder_tcp_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
+OBJECTS = $(libxipc_a_OBJECTS) $(libfinder_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_messenger_OBJECTS) $(test_finder_msgs_OBJECTS) $(test_finder_OBJECTS) $(test_finder_tcp_OBJECTS) $(test_header_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -377,9 +377,9 @@ test_finder_msgs: $(test_finder_msgs_OBJECTS) $(test_finder_msgs_DEPENDENCIES)
 	@rm -f test_finder_msgs
 	$(CXXLINK) $(test_finder_msgs_LDFLAGS) $(test_finder_msgs_OBJECTS) $(test_finder_msgs_LDADD) $(LIBS)
 
-test_finder_ng: $(test_finder_ng_OBJECTS) $(test_finder_ng_DEPENDENCIES)
-	@rm -f test_finder_ng
-	$(CXXLINK) $(test_finder_ng_LDFLAGS) $(test_finder_ng_OBJECTS) $(test_finder_ng_LDADD) $(LIBS)
+test_finder: $(test_finder_OBJECTS) $(test_finder_DEPENDENCIES)
+	@rm -f test_finder
+	$(CXXLINK) $(test_finder_LDFLAGS) $(test_finder_OBJECTS) $(test_finder_LDADD) $(LIBS)
 
 test_finder_tcp: $(test_finder_tcp_OBJECTS) $(test_finder_tcp_DEPENDENCIES)
 	@rm -f test_finder_tcp

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.15 2003/04/23 00:28:39 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.16 2003/04/23 19:17:55 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -25,8 +25,8 @@
 #include "xrl_pf.hh"
 #include "xrl_pf_factory.hh"
 
-#include "finder_ng_client.hh"
-#include "finder_ng_client_xrl_target.hh"
+#include "finder_client.hh"
+#include "finder_client_xrl_target.hh"
 #include "finder_tcp_messenger.hh"
 
 #include "sockutil.hh"
@@ -152,12 +152,12 @@ XrlRouter::XrlRouter(EventLoop&  e,
     throw (InvalidAddress)
     : XrlCmdDispatcher(entity_name), _e(e), _rpend(0), _spend(0)
 {
-    _fc = new FinderNGClient();
-    _fxt = new FinderNGClientXrlTarget(_fc, &_fc->commands());
+    _fc = new FinderClient();
+    _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
 
     if (0 == port)
 	port = FINDER_NG_TCP_DEFAULT_PORT;
-    _fac = new FinderNGTcpAutoConnector(e, *_fc, _fc->commands(),
+    _fac = new FinderTcpAutoConnector(e, *_fc, _fc->commands(),
 					finder_host(host), port);
 
     string iname = mk_instance_name(e, entity_name);

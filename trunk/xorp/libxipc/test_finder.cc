@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.5 2003/03/08 20:56:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.6 2003/03/10 23:20:25 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -22,10 +22,10 @@
 #include "libxorp/debug.h"
 #include "sockutil.hh"
 
-#include "finder_ng.hh"
-#include "finder_ng_xrl_target.hh"
-#include "finder_ng_client.hh"
-#include "finder_ng_client_xrl_target.hh"
+#include "finder.hh"
+#include "finder_xrl_target.hh"
+#include "finder_client.hh"
+#include "finder_client_xrl_target.hh"
 #include "finder_tcp_messenger.hh"
 #include "permits.hh"
 
@@ -34,7 +34,7 @@
 // Constants
 //
 
-static const char *program_name         = "test_finder_ng";
+static const char *program_name         = "test_finder";
 static const char *program_description  = "Test carrying and execution of "
 					  "Finder and Finder client";
 static const char *program_version_id   = "0.1";
@@ -84,7 +84,7 @@ resolve_callback(const XrlError&	e,
 }
 
 static int
-test_xrls_resolve(EventLoop& e, FinderNGClient& fc1, list<string>& xrls)
+test_xrls_resolve(EventLoop& e, FinderClient& fc1, list<string>& xrls)
 {
     //
     // Resolve set of xrl's
@@ -112,7 +112,7 @@ test_xrls_resolve(EventLoop& e, FinderNGClient& fc1, list<string>& xrls)
 
 #if 0
 static int
-test_xrls_locally_resolve(EventLoop& e, FinderNGClient& fc1, list<string>& xrls)
+test_xrls_locally_resolve(EventLoop& e, FinderClient& fc1, list<string>& xrls)
 {
     //
     // Check resolved xrl is in local cache.
@@ -141,12 +141,12 @@ public:
     {
 	add_permitted_host(host);
     }
-    FinderNG& finder() { return _finder; }
+    Finder& finder() { return _finder; }
 
 protected:
-    FinderNG		_finder;
-    FinderNGXrlTarget	_finder_xrl_handler;
-    FinderNGTcpListener	_finder_tcp4_source;
+    Finder		_finder;
+    FinderXrlTarget	_finder_xrl_handler;
+    FinderTcpListener	_finder_tcp4_source;
 };
 
 
@@ -172,9 +172,9 @@ test_main(void)
     //
     // Construct first finder client and messenger source for it.
     //
-    FinderNGClient fc1;
-    FinderNGClientXrlTarget fc1_xrl_handler(&fc1, &fc1.commands());
-    FinderNGTcpAutoConnector fc1_connector(e, fc1, fc1.commands(),
+    FinderClient fc1;
+    FinderClientXrlTarget fc1_xrl_handler(&fc1, &fc1.commands());
+    FinderTcpAutoConnector fc1_connector(e, fc1, fc1.commands(),
 					   test_host, test_port);
 
     //
@@ -264,9 +264,9 @@ test_main(void)
     //
     // Construct second finder client and messenger source for it.
     //
-    FinderNGClient fc2;
-    FinderNGClientXrlTarget fc2_xrl_handler(&fc2, &fc2.commands());
-    FinderNGTcpAutoConnector fc2_connector(e, fc2, fc2.commands(),
+    FinderClient fc2;
+    FinderClientXrlTarget fc2_xrl_handler(&fc2, &fc2.commands());
+    FinderTcpAutoConnector fc2_connector(e, fc2, fc2.commands(),
 					   test_host, test_port);
 
     // Register test client

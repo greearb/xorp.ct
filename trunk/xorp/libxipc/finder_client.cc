@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.11 2003/03/09 02:01:17 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.12 2003/03/09 17:50:37 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -20,7 +20,7 @@
 #include "libxorp/debug.h"
 
 #include "xrl_error.hh"
-#include "finder_ng_client.hh"
+#include "finder_client.hh"
 #include "finder_xif.hh"
 #include "finder_tcp_messenger.hh"
 
@@ -64,12 +64,12 @@ do {									      \
 } while(0)
 
 /**
- * Base class for operations to be executed by FinderNGClient.
+ * Base class for operations to be executed by FinderClient.
  */
-class FinderNGClientOp {
+class FinderClientOp {
 public:
-    FinderNGClientOp(FinderNGClient& fc) : _fc(fc) {}
-    virtual ~FinderNGClientOp() {}
+    FinderClientOp(FinderClient& fc) : _fc(fc) {}
+    virtual ~FinderClientOp() {}
 
     /*
      * If execute is called with m == 0, then Messenger is down.  Execute
@@ -77,32 +77,32 @@ public:
      */
     virtual void execute(FinderMessengerBase* m) = 0;
 
-    inline FinderNGClient& client() { return _fc; }
+    inline FinderClient& client() { return _fc; }
     
 protected:
-    FinderNGClient& _fc;
+    FinderClient& _fc;
 };
 
 /**
- * Base class for operations FinderNGClient only need execute once,
+ * Base class for operations FinderClient only need execute once,
  * eg resolutions.
  */
-class FinderNGClientOneOffOp : public FinderNGClientOp {
+class FinderClientOneOffOp : public FinderClientOp {
 public:
-    FinderNGClientOneOffOp(FinderNGClient& fc) : FinderNGClientOp(fc) {}
+    FinderClientOneOffOp(FinderClient& fc) : FinderClientOp(fc) {}
 
     virtual void force_failure(const XrlError&) = 0;
 };
 
 /**
- * Base class for operations FinderNGClient may have to repeat, eg
+ * Base class for operations FinderClient may have to repeat, eg
  * register target, register xrl, etc.  Each repeat operation is associated
  * with an enumerated target.
  */
-class FinderNGClientRepeatOp : public FinderNGClientOp {
+class FinderClientRepeatOp : public FinderClientOp {
 public:
-    FinderNGClientRepeatOp(FinderNGClient& fc, uint32_t target_id)
-	: FinderNGClientOp(fc), _tid(target_id) {}
+    FinderClientRepeatOp(FinderClient& fc, uint32_t target_id)
+	: FinderClientOp(fc), _tid(target_id) {}
 
     inline uint32_t target_id() const { return _tid; }
 
@@ -111,25 +111,25 @@ private:
 };
 
 /**
- * Class that handles resolutions for FinderNGClient, and puts results
- * into FinderNGClient's resolved table and notifies the client.
+ * Class that handles resolutions for FinderClient, and puts results
+ * into FinderClient's resolved table and notifies the client.
  */
-class FinderNGClientQuery : public FinderNGClientOneOffOp {
+class FinderClientQuery : public FinderClientOneOffOp {
 public:
-    typedef FinderNGClient::QueryCallback QueryCallback;
-    typedef FinderNGClient::ResolvedTable ResolvedTable;
+    typedef FinderClient::QueryCallback QueryCallback;
+    typedef FinderClient::ResolvedTable ResolvedTable;
     
 public:
-    FinderNGClientQuery(FinderNGClient&	fc,
+    FinderClientQuery(FinderClient&	fc,
 			const string&	key,
 			ResolvedTable&	rt,
 			const QueryCallback& qcb)
-	: FinderNGClientOneOffOp(fc), _key(key), _rt(rt), _qcb(qcb)
+	: FinderClientOneOffOp(fc), _key(key), _rt(rt), _qcb(qcb)
     {
 	finder_trace("Constructing ClientQuery \"%s\"", _key.c_str());
     }
 
-    ~FinderNGClientQuery()
+    ~FinderClientQuery()
     {
 	finder_trace("Destructing ClientQuery \"%s\"", _key.c_str());
     }
@@ -141,7 +141,7 @@ public:
 	XrlFinderV0p1Client cl(m);
 	if (!cl.send_resolve_xrl(
 			 finder, _key, 
-			 callback(this, &FinderNGClientQuery::query_callback))
+			 callback(this, &FinderClientQuery::query_callback))
 		) {
 	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	    XLOG_ERROR("Failed on send_resolve_xrl");
@@ -233,19 +233,19 @@ protected:
 /**
  * Class that handles the forwarding of Xrl's targetted at the finder.
  */
-class FinderNGForwardedXrl : public FinderNGClientOneOffOp {
+class FinderForwardedXrl : public FinderClientOneOffOp {
 public:
     typedef XrlPFSender::SendCallback XrlCallback;
 public:
-    FinderNGForwardedXrl(FinderNGClient&	fc,
+    FinderForwardedXrl(FinderClient&	fc,
 			 const Xrl& 		xrl,
 			 const XrlCallback&	xcb)
-	: FinderNGClientOneOffOp(fc), _xrl(xrl), _xcb(xcb)
+	: FinderClientOneOffOp(fc), _xrl(xrl), _xcb(xcb)
     {
 	finder_trace("Constructing ForwardedXrl \"%s\"", _xrl.str().c_str());
     }
 
-    ~FinderNGForwardedXrl()
+    ~FinderForwardedXrl()
     {
 	finder_trace("Destructing ForwardedXrl \"%s\"", _xrl.str().c_str());
     }
@@ -255,7 +255,7 @@ public:
     {
 	finder_trace_init("executing ForwardedXrl \"%s\"", _xrl.str().c_str());
 	if (m->send(_xrl,
-		    callback(this, &FinderNGForwardedXrl::execute_callback))) {
+		    callback(this, &FinderForwardedXrl::execute_callback))) {
 	    finder_trace_result("okay");
 	    return;
 	}
@@ -290,13 +290,13 @@ protected:
 /**
  * Class to register client with Finder.
  */
-class FinderNGClientRegisterTarget : public FinderNGClientRepeatOp {
+class FinderClientRegisterTarget : public FinderClientRepeatOp {
 public:
-    FinderNGClientRegisterTarget(FinderNGClient& fc,
+    FinderClientRegisterTarget(FinderClient& fc,
 				 uint32_t	 target_id,
 				 const string&	 instance_name,
 				 const string&	 class_name)
-	: FinderNGClientRepeatOp(fc, target_id),
+	: FinderClientRepeatOp(fc, target_id),
 	  _iname(instance_name), _cname(class_name), _cookie("")
     {}
 
@@ -306,7 +306,7 @@ public:
 	XLOG_ASSERT(ftm != 0);
 	XrlFinderV0p1Client cl(m);
 	if (!cl.send_register_finder_client(finder, _iname, _cname, _cookie,
-		callback(this, &FinderNGClientRegisterTarget::reg_callback))) {
+		callback(this, &FinderClientRegisterTarget::reg_callback))) {
 	    XLOG_ERROR("Failed on send_register_xrl");
 	    client().notify_failed(this);
 	} else {
@@ -339,18 +339,18 @@ protected:
 /**
  * Class to register an Xrl with the Finder.
  */
-class FinderNGClientRegisterXrl : public FinderNGClientRepeatOp {
+class FinderClientRegisterXrl : public FinderClientRepeatOp {
 public:
-    typedef FinderNGClient::LocalResolvedTable LocalResolvedTable;
+    typedef FinderClient::LocalResolvedTable LocalResolvedTable;
 
 public:
-    FinderNGClientRegisterXrl(FinderNGClient&	  fc,
+    FinderClientRegisterXrl(FinderClient&	  fc,
 			      LocalResolvedTable& lrt,
 			      uint32_t	 	  target_id,
 			      const string&	  xrl,
 			      const string&	  pf_name,
 			      const string&	  pf_args)
-	: FinderNGClientRepeatOp(fc, target_id), _lrt(lrt),
+	: FinderClientRepeatOp(fc, target_id), _lrt(lrt),
 	  _xrl(xrl), _pf(pf_name), _pf_args(pf_args)
     {}
 
@@ -360,7 +360,7 @@ public:
 	debug_msg("Sending add_xrl(\"%s\", \"%s\", \"%s\")\n",
 		  _xrl.c_str(), _pf.c_str(), _pf_args.c_str());
 	if (!cl.send_add_xrl(finder, _xrl, _pf, _pf_args,
-		callback(this, &FinderNGClientRegisterXrl::reg_callback))) {
+		callback(this, &FinderClientRegisterXrl::reg_callback))) {
 	    XLOG_ERROR("Failed on send_add_xrl");
 	    client().notify_failed(this);
 	}
@@ -389,20 +389,20 @@ protected:
     string _pf_args;
 };
 
-class FinderNGClientEnableXrls : public FinderNGClientRepeatOp {
+class FinderClientEnableXrls : public FinderClientRepeatOp {
 public:
-    FinderNGClientEnableXrls(FinderNGClient& fc,
+    FinderClientEnableXrls(FinderClient& fc,
 			     uint32_t        target_id,
 			     const string&   instance_name,
 			     bool	     en,
 			     bool&	     update_var)
-	: FinderNGClientRepeatOp(fc, target_id), _iname(instance_name),
+	: FinderClientRepeatOp(fc, target_id), _iname(instance_name),
 	  _en(en), _update_var(update_var)
     {
 	finder_trace("Constructing EnableXrls \"%s\"", _iname.c_str());
     }
 
-    ~FinderNGClientEnableXrls()
+    ~FinderClientEnableXrls()
     {
 	finder_trace("Destructing EnableXrls \"%s\"", _iname.c_str());
     }
@@ -414,7 +414,7 @@ public:
 	XLOG_ASSERT(ftm != 0);
 	XrlFinderV0p1Client cl(m);
 	if (!cl.send_set_finder_client_enabled(finder, _iname, _en,
-		callback(this, &FinderNGClientEnableXrls::en_callback))) {
+		callback(this, &FinderClientEnableXrls::en_callback))) {
 	    XLOG_ERROR("Failed on send_set_finder_client_enabled");
 	    finder_trace_result("failed (send)");
 	    client().notify_failed(this);
@@ -444,18 +444,18 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// FinderNGClient methods
+// FinderClient methods
 //
 
-FinderNGClient::FinderNGClient()
+FinderClient::FinderClient()
     : _messenger(0), _pending_result(false), _xrls_registered(false)
 {
-    finder_trace("Constructing FinderNGClient (%p)", this);
+    finder_trace("Constructing FinderClient (%p)", this);
 }
 
-FinderNGClient::~FinderNGClient()
+FinderClient::~FinderClient()
 {
-    finder_trace("Destructing FinderNGClient (%p)", this);
+    finder_trace("Destructing FinderClient (%p)", this);
     if (_messenger) {
 	_messenger->unhook_manager();
 	delete _messenger;
@@ -463,7 +463,7 @@ FinderNGClient::~FinderNGClient()
 }
 
 bool
-FinderNGClient::register_xrl_target(const string& instance_name,
+FinderClient::register_xrl_target(const string& instance_name,
 				    const string& class_name,
 				    uint32_t&	  target_id)
 {
@@ -483,7 +483,7 @@ FinderNGClient::register_xrl_target(const string& instance_name,
     _tids.push_back(instance_name);
 
     // We should check whether item exists on queue already.
-    Operation op(new FinderNGClientRegisterTarget(*this, target_id,
+    Operation op(new FinderClientRegisterTarget(*this, target_id,
 						  instance_name, class_name));
     _todo_list.push_back(op);
     crank();
@@ -491,7 +491,7 @@ FinderNGClient::register_xrl_target(const string& instance_name,
 }
 
 bool
-FinderNGClient::register_xrl(uint32_t target_id,
+FinderClient::register_xrl(uint32_t target_id,
 			     const string& xrl,
 			     const string& pf_name,
 			     const string& pf_args)
@@ -499,7 +499,7 @@ FinderNGClient::register_xrl(uint32_t target_id,
     if (target_id >= _tids.size() || _tids[target_id].empty())
 	return false;
 
-    Operation op(new FinderNGClientRegisterXrl(*this, _lrt, target_id, xrl,
+    Operation op(new FinderClientRegisterXrl(*this, _lrt, target_id, xrl,
 					       pf_name, pf_args));
     _todo_list.push_back(op);
     crank();
@@ -507,12 +507,12 @@ FinderNGClient::register_xrl(uint32_t target_id,
 }
 
 bool
-FinderNGClient::enable_xrls(uint32_t target_id)
+FinderClient::enable_xrls(uint32_t target_id)
 {
     if (target_id >= _tids.size() || _tids[target_id].empty())
 	return false;
 
-    Operation op(new FinderNGClientEnableXrls(*this, target_id,
+    Operation op(new FinderClientEnableXrls(*this, target_id,
 					      _tids[target_id], true,
 					      _xrls_registered));
     _todo_list.push_back(op);
@@ -521,7 +521,7 @@ FinderNGClient::enable_xrls(uint32_t target_id)
 }
 
 void
-FinderNGClient::query(const string& key,
+FinderClient::query(const string& key,
 		      const QueryCallback& qcb)
 {
 #if 0
@@ -544,13 +544,13 @@ FinderNGClient::query(const string& key,
 	return;
     }
 
-    Operation op(new FinderNGClientQuery(*this, key, _rt, qcb));
+    Operation op(new FinderClientQuery(*this, key, _rt, qcb));
     _todo_list.push_back(op);
     crank();
 }
 
 bool
-FinderNGClient::query_self(const string& incoming_xrl_cmd,
+FinderClient::query_self(const string& incoming_xrl_cmd,
 			   string& local_xrl) const
 {
     LocalResolvedTable::const_iterator i = _lrt.find(incoming_xrl_cmd);
@@ -561,23 +561,23 @@ FinderNGClient::query_self(const string& incoming_xrl_cmd,
 }
 
 bool
-FinderNGClient::forward_finder_xrl(const Xrl&				xrl,
+FinderClient::forward_finder_xrl(const Xrl&				xrl,
 				   const XrlPFSender::SendCallback& 	scb)
 {
-    Operation op(new FinderNGForwardedXrl(*this, xrl, scb));
+    Operation op(new FinderForwardedXrl(*this, xrl, scb));
     _todo_list.push_back(op);
     crank();
     return true;
 }
 
 FinderMessengerBase*
-FinderNGClient::messenger()
+FinderClient::messenger()
 {
     return _messenger;
 }
 
 void
-FinderNGClient::crank()
+FinderClient::crank()
 {
     if (_pending_result)
 	return;
@@ -593,7 +593,7 @@ FinderNGClient::crank()
 }
 
 void
-FinderNGClient::notify_done(const FinderNGClientOp* op)
+FinderClient::notify_done(const FinderClientOp* op)
 {
     // These assertions probably want revising.
     XLOG_ASSERT(_todo_list.empty() == false);
@@ -602,7 +602,7 @@ FinderNGClient::notify_done(const FinderNGClientOp* op)
     
     // If item is repeatable, ie we'd need to repeat it after a failure
     // put in the done list so we can recover it later.
-    if (dynamic_cast<const FinderNGClientRepeatOp*>(op))
+    if (dynamic_cast<const FinderClientRepeatOp*>(op))
 	_done_list.push_back(_todo_list.front());
     _todo_list.erase(_todo_list.begin());
     _pending_result = false;
@@ -610,7 +610,7 @@ FinderNGClient::notify_done(const FinderNGClientOp* op)
 }
 
 void
-FinderNGClient::notify_failed(const FinderNGClientOp* op)
+FinderClient::notify_failed(const FinderClientOp* op)
 {
     debug_msg("Client op failed, restarting...\n");
 
@@ -619,7 +619,7 @@ FinderNGClient::notify_failed(const FinderNGClientOp* op)
     XLOG_ASSERT(_todo_list.front().get() == op);
     XLOG_ASSERT(_pending_result == true);
 
-    if (dynamic_cast<const FinderNGClientRepeatOp*>(op)) {
+    if (dynamic_cast<const FinderClientRepeatOp*>(op)) {
 	_done_list.push_back(_todo_list.front());
     }
     _todo_list.erase(_todo_list.begin());
@@ -628,8 +628,8 @@ FinderNGClient::notify_failed(const FinderNGClientOp* op)
     OperationQueue::iterator i = _todo_list.begin();
     while (i != _todo_list.end()) {
 	OperationQueue::iterator curr = i++;
-	FinderNGClientOneOffOp* o = 
-	    dynamic_cast<FinderNGClientOneOffOp*>(curr->get());
+	FinderClientOneOffOp* o = 
+	    dynamic_cast<FinderClientOneOffOp*>(curr->get());
 	if (o) {
 	    o->force_failure(XrlError::NO_FINDER());
 	}
@@ -644,7 +644,7 @@ FinderNGClient::notify_failed(const FinderNGClientOp* op)
 }
 
 void
-FinderNGClient::prepare_for_restart()
+FinderClient::prepare_for_restart()
 {
     // Take all of operations on the done list and put at front of the todo
     // list.
@@ -668,7 +668,7 @@ FinderNGClient::prepare_for_restart()
 //
 
 void
-FinderNGClient::messenger_birth_event(FinderMessengerBase* m)
+FinderClient::messenger_birth_event(FinderMessengerBase* m)
 {
     finder_trace("messenger %p birth\n", m);    
     XLOG_ASSERT(0 == _messenger);
@@ -678,7 +678,7 @@ FinderNGClient::messenger_birth_event(FinderMessengerBase* m)
 }
 
 void
-FinderNGClient::messenger_death_event(FinderMessengerBase* m)
+FinderClient::messenger_death_event(FinderMessengerBase* m)
 {
     finder_trace("messenger %p death\n", m);
     XLOG_ASSERT(m == _messenger);
@@ -686,7 +686,7 @@ FinderNGClient::messenger_death_event(FinderMessengerBase* m)
 }
 
 void
-FinderNGClient::messenger_active_event(FinderMessengerBase* m)
+FinderClient::messenger_active_event(FinderMessengerBase* m)
 {
     // nothing to do - only have one messenger
     debug_msg("messenger %p active\n", m);
@@ -694,7 +694,7 @@ FinderNGClient::messenger_active_event(FinderMessengerBase* m)
 }
 
 void
-FinderNGClient::messenger_inactive_event(FinderMessengerBase* m)
+FinderClient::messenger_inactive_event(FinderMessengerBase* m)
 {
     // nothing to do - only have one messenger
     debug_msg("messenger %p inactive\n", m);
@@ -702,7 +702,7 @@ FinderNGClient::messenger_inactive_event(FinderMessengerBase* m)
 }
 
 void
-FinderNGClient::messenger_stopped_event(FinderMessengerBase* m)
+FinderClient::messenger_stopped_event(FinderMessengerBase* m)
 {
     debug_msg("messenger %p stopped (closing connecting)\n", m);
     XLOG_ASSERT(m == _messenger);
@@ -711,18 +711,18 @@ FinderNGClient::messenger_stopped_event(FinderMessengerBase* m)
 }
 
 bool
-FinderNGClient::manages(const FinderMessengerBase* m) const
+FinderClient::manages(const FinderMessengerBase* m) const
 {
     return m == _messenger;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// FinderNGClientXrlCommandInterface
+// FinderClientXrlCommandInterface
 //
 
 void
-FinderNGClient::uncache_xrl(const string& xrl)
+FinderClient::uncache_xrl(const string& xrl)
 {
     debug_msg("Request to uncache xrl \"%s\"\n", xrl.c_str());
 
@@ -736,7 +736,7 @@ FinderNGClient::uncache_xrl(const string& xrl)
 }
 
 void
-FinderNGClient::uncache_xrls_from_target(const string& target)
+FinderClient::uncache_xrls_from_target(const string& target)
 {
     size_t n = 0;
     ResolvedTable::iterator i = _rt.begin();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.8 2003/04/02 22:58:56 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.9 2003/04/22 23:27:19 hodson Exp $"
 
 #include <stdlib.h>
 
@@ -93,9 +93,9 @@ got_integer(const XrlError&	e,
     *done = true;
 }
 
-#include "finder_ng.hh"
+#include "finder.hh"
 #include "finder_tcp_messenger.hh"
-#include "finder_ng_xrl_target.hh"
+#include "finder_xrl_target.hh"
 #include "permits.hh"
 #include "sockutil.hh"
 
@@ -108,7 +108,7 @@ test_main()
     // test we create a Finder in process as we can't guarantee Finder
     // is already running.  Most XORP processes do not have to do this.
     
-    FinderNGServer* finder = new FinderNGServer(eventloop);
+    FinderServer* finder = new FinderServer(eventloop);
     
     // Create and configure "party_A"
     XrlRouter		party_a(eventloop, "party_A");

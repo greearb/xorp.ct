@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng.hh,v 1.5 2003/03/06 01:18:57 hodson Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.6 2003/03/07 19:49:56 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
@@ -24,20 +24,20 @@
 
 #include "xrl_cmd_map.hh"
 #include "finder_messenger.hh"
-#include "finder_ng_xrl_queue.hh"
+#include "finder_xrl_queue.hh"
 
-class FinderNGTarget;
+class FinderTarget;
 
-class FinderNG : public FinderMessengerManager {
+class Finder : public FinderMessengerManager {
 public:
     typedef list<FinderMessengerBase*> FinderMessengerList;
-    typedef map<FinderMessengerBase*, FinderNGXrlCommandQueue> OutQueueTable;
-    typedef map<string, FinderNGTarget> TargetTable;
+    typedef map<FinderMessengerBase*, FinderXrlCommandQueue> OutQueueTable;
+    typedef map<string, FinderTarget> TargetTable;
     typedef list<string> Resolveables;
     
 public:
-    FinderNG();
-    virtual ~FinderNG();
+    Finder();
+    virtual ~Finder();
 
 protected:
     /* Methods for FinderMessengerManager interface */
@@ -84,8 +84,8 @@ protected:
     void announce_departure(const string& target);
     void announce_departure(const string& target, const string& key);
 
-    FinderNG(const FinderNG&);			// Not implemented
-    FinderNG& operator=(const FinderNG&);	// Not implemented
+    Finder(const Finder&);			// Not implemented
+    Finder& operator=(const Finder&);	// Not implemented
     
 protected:
     XrlCmdMap		 _cmds;

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.12 2003/04/02 22:58:58 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.13 2003/04/22 19:20:25 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -314,7 +314,7 @@ main(int /* argc */, char *argv[])
     EventLoop eventloop;
 
     // Finder Server
-    FinderNGServer fs(eventloop);
+    FinderServer fs(eventloop);
 
     // Rib Server component
     XrlStdRouter xrl_router(eventloop, "rib");

@@ -19,9 +19,9 @@
 #include "libxipc/xrl_args.hh"
 #include "libxipc/finder_server.hh"
 
-#include "libxipc/finder_ng.hh"
+#include "libxipc/finder.hh"
 #include "libxipc/finder_tcp_messenger.hh"
-#include "libxipc/finder_ng_xrl_target.hh"
+#include "libxipc/finder_xrl_target.hh"
 #include "libxipc/permits.hh"
 #include "libxipc/sockutil.hh"
  
@@ -335,7 +335,7 @@ run_test_2()
     // test we create a Finder in process as we can't guarantee Finder
     // is already running.  Most XORP processes do not have to do this.
     
-    FinderNGServer* finder = new FinderNGServer(e);
+    FinderServer* finder = new FinderServer(e);
     
     // Create and configure "party_A"
     XrlRouter		party_a(e, "party_A");

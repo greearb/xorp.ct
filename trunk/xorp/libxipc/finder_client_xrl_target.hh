@@ -12,18 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.1 2003/02/24 19:39:18 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
 
 #include "finder_client_base.hh"
 
-class FinderNGClientXrlCommandInterface; 
+class FinderClientXrlCommandInterface; 
 
-class FinderNGClientXrlTarget : public XrlFinderclientTargetBase {
+class FinderClientXrlTarget : public XrlFinderclientTargetBase {
 public:
-    FinderNGClientXrlTarget(FinderNGClientXrlCommandInterface* client,
+    FinderClientXrlTarget(FinderClientXrlCommandInterface* client,
 			    XrlCmdMap* cmds);
 
     XrlCmdError common_0_1_get_target_name(string& name);
@@ -34,7 +34,7 @@ public:
     XrlCmdError finder_client_0_1_remove_xrls_for_target_from_cache(const string& target);
     
 protected:
-    FinderNGClientXrlCommandInterface* _client;
+    FinderClientXrlCommandInterface* _client;
 };
 
 #endif // __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__

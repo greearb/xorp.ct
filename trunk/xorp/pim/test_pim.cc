@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.15 2003/04/03 00:24:00 hodson Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.16 2003/04/22 23:27:24 hodson Exp $"
 
 
 //
@@ -158,9 +158,9 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	FinderNGServer *finder = NULL;
+	FinderServer *finder = NULL;
 	try {
-	    finder = new FinderNGServer(eventloop);
+	    finder = new FinderServer(eventloop);
 	} catch (const InvalidPort&) {
 	    XLOG_FATAL("Could not start in-process Finder");
 	}
