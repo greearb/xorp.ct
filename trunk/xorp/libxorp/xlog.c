@@ -13,7 +13,7 @@
  * legally binding. 
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.2 2003/01/26 04:06:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.3 2003/03/10 23:20:38 hodson Exp $"
 
 
 /*
@@ -333,6 +333,18 @@ xlog_set_preamble(const char* text)
     if (text != NULL) {
 	preamble_string = strdup(text);
     }
+}
+
+/**
+ * xlog_process_name:
+ * 
+ * Get the process name as set by xlog_init.
+ * Return value: pointer to process name on success, NULL otherwise.
+ **/
+const char*
+xlog_process_name()
+{
+    return process_name_string;
 }
 
 /**

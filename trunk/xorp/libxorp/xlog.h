@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.2 2003/03/10 23:20:38 hodson Exp $
  */
 
 
@@ -172,6 +172,13 @@ int	xlog_disable(xlog_level_t log_level);
  * @param text the preamble string, or NULL if no preamble.
  */
 void	xlog_set_preamble(const char *text);
+
+/**
+ * Get process name as set with xlog_init.
+ *
+ * @return pointer to name on success, NULL otherwise.
+ */
+const char* xlog_process_name(void);
 
 /**
  * Set the level of verbosity (@ref xlog_verbose_t) for the log entries.
