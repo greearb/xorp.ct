@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.6 2003/05/02 07:50:47 pavlin Exp $"
 
 #error "OBSOLETE FILE"
 
@@ -439,7 +439,7 @@ rtm_ifinfo_to_fea_cfg(const if_msghdr*  ifm,
     }
 
     ii->second.set_mtu(ifm->ifm_data.ifi_mtu);
-    ii->second.set_enabled(ifm->ifm_flags && IFF_UP);
+    ii->second.set_enabled(ifm->ifm_flags & IFF_UP);
     debug_msg("%s flags %s\n",
 	      ifname.c_str(), iff_flags(ifm->ifm_flags).c_str());
     // XXX: vifname == ifname on this platform

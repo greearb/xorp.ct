@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.1 2003/05/02 07:50:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -179,7 +179,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	// Get the flags
 	//
 	int flags = ifa->ifa_flags;
-	fi.set_enabled(flags && IFF_UP);
+	fi.set_enabled(flags & IFF_UP);
 	
 	debug_msg("%s flags %s\n",
 		  if_name.c_str(), IfConfigGet::iff_flags(flags).c_str());
