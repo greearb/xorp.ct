@@ -70,7 +70,9 @@ XrlCmdError XrlXorpIfMibTarget::xorp_if_mib_0_1_load_mib(
     mibmod = dlmod_create_module();
 
     strncpy(mibmod->name, mod_name.c_str(), MAXNAME);
+    mibmod->name[MAXNAME] = '\0';
     strncpy(mibmod->path, abs_path.c_str(), MAXPATH);
+    mibmod->name[MAXPATH] = '\0';
  
     dlmod_load_module(mibmod);
 
