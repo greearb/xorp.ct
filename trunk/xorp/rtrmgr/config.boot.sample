@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.18 2004/11/05 03:39:40 bms Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.19 2004/12/17 01:31:03 atanu Exp $ */
 
 
 interfaces {
@@ -52,6 +52,43 @@ interfaces {
 fea {
     enable-unicast-forwarding4: true
     /* enable-unicast-forwarding6: true */
+
+    click {
+	enabled: true
+
+	/*
+	 * Note: If both kernel-click and user-click are enabled, then
+	 * typically kernel-click-config-generator-file and
+	 * user-click-config-generator-file should point to different
+	 * generator files. Otherwise, a single common generator
+	 * wouldn't know whether to generate configuration for kernel-level
+	 * Click or for user-level Click.
+	 */
+	kernel-click {
+	    enabled: false
+	    install-on-startup:	true
+	    kernel-click-modules: "/path/to/proclikefs.o:/path/to/click.o"
+	    /* XXX: On FreeBSD we need only module click.ko */
+	    /* kernel-click-modules: "/path/to/click.ko" */
+	    mount-directory: "/click"
+	    kernel-click-config-generator-file: "/user/local/xorp/fea/xorp_fea_click_config_generator"
+	}
+
+	user-click {
+	    enabled: true
+	    command-file: "/usr/local/bin/click"
+	    /*
+	     * Note: don't add "-p <port>" as an extra argument, because it
+	     * will conflict with the FEA's addition of the same argument.
+	     */
+	    command-extra-arguments: "-R"
+	    command-execute-on-startup: true
+	    control-address: 127.0.0.1
+	    control-socket-port: 13000
+	    startup-config-file: "/dev/null"
+	    user-click-config-generator-file: "/user/local/xorp/fea/xorp_fea_click_config_generator"
+	}
+    }
 }
 
 protocols {
