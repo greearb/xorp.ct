@@ -155,13 +155,13 @@ protocols {
   ospf {
     router-id: ipv4;
     mospf: toggle = false;
-    flood_rate: int;
+    flood_rate: i32;
     area @: ipv4 {
       stub: toggle = false;
-      interface @: text {
+      interface @: txt {
         disable: toggle = false;
-        hello-interval: uint = 30;
-        dead-interval: uint = 95;
+        hello-interval: u32 = 30;
+        dead-interval: u32 = 95;
       }
     }
   }
@@ -184,7 +184,7 @@ the fragment above specifies that the name must be an IPv4 address.
   \item Leaf nodes such as  {\tt flood\_rate} and
 {\tt hello-interval}.  These nodes are also typed, and may optionally
 specify a default value.  In the example above, {\tt hello-interval} is
-of type {\tt uint} (unsigned 32 bit integer), and takes the default value of
+of type {\tt u32} (unsigned 32 bit integer), and takes the default value of
 30.
 
 \end{itemize}
@@ -349,9 +349,9 @@ interfaces {
 The following types are currently supported for template tree nodes:
 
 \begin{description}
-\item{\tt uint}\\
+\item{\tt u32}\\
 Unsigned 32 bit integer
-\item{\tt int}\\
+\item{\tt i32}\\
 Signed 32 bit integer
 \item{\tt bool}\\
 Boolean - valid values are {\tt true} and {\tt false}.
@@ -360,11 +360,11 @@ Similar to boolean, but requires a default value.  Display of the
 config tree node is suppressed if the value is the default.
 \item{\tt ipv4}\\
 An IPv4 address in dotted decimal format.
-\item{\tt ipv4\_prefix}\\ An IPv4 address and prefix length in the
+\item{\tt ipv4net}\\ An IPv4 address and prefix length in the
 conventional format.  E.g.: {\tt 1.2.3.4/24}.
 \item{\tt ipv6}\\
 An IPv6 address in the canonical colon-separated human-readable format.
-\item{\tt ipv6\_prefix}\\
+\item{\tt ipv6net}\\
 An IPv6 address and prefix in the conventional format. E.g.: {\tt
 fe80::1/64}
 \item{\tt macaddr}\\
@@ -604,7 +604,7 @@ this variable.
 
 For example, a node might specify an address family, which is intended
 to be one of ``inet'' or ``inet6''.  The type of the node is {\tt
-text}, which would allow any value, so the allow command might allow
+txt}, which would allow any value, so the allow command might allow
 the rtrmgr to restrict the legal values without having to
 communicate with the process providing this functionality.
 
@@ -614,7 +614,7 @@ parent node was of a certain value.
 For example:
 
 \begin{verbatim}
-      family @: text {
+      family @: txt {
         %allow: $(@) "inet" "inet6";
         address @: ipv4 {
           %allow: $(family.@) "inet";
