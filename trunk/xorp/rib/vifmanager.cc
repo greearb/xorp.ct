@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.6 2003/03/17 23:32:42 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.7 2003/03/19 09:05:20 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -34,11 +34,14 @@ VifManager::VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
     _interfaces_remaining = 0;
     _vifs_remaining = 0;
     _addrs_remaining = 0;
-
+    
+    enable();		// XXX: by default the VifManager is always enabled
 }
 
 VifManager::~VifManager() 
 {
+    stop();
+    
     map <string, Vif*>::iterator i;
     for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); ++i) {
 	delete i->second;
@@ -48,20 +51,56 @@ VifManager::~VifManager()
     }
 }
 
-void
-VifManager::start() 
+/**
+ * Start operation.
+ * 
+ * Start the process of registering with the FEA, etc.
+ * 
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+VifManager::start()
 {
+    enable();		// XXX: by default the VifManager is always enabled
+    
+    if (ProtoState::start() < 0)
+	return (XORP_ERROR);
+    
     if (_no_fea) {
 	_state = READY;
-	return;
+	return (XORP_OK);
     }
+    
+    register_if_spy();
+    return (XORP_OK);
+}
 
+/**
+ * Stop operation.
+ * 
+ * Gracefully stop the VifManager.
+ * 
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+VifManager::stop()
+{
+    if (! is_up())
+        return (XORP_ERROR);
+    
     clean_out_old_state();
+    
+    ProtoState::stop();
+    
+    return (XORP_OK);
 }
 
 void
 VifManager::clean_out_old_state() 
 {
+    if (_no_fea)
+	return;
+    
     // we call unregister_client first, to cause the FEA to remove any
     // registrations left over from previous incarnations of the RIB
     XorpCallback1<void, const XrlError&>::RefPtr cb;
@@ -78,7 +117,7 @@ VifManager::clean_out_old_state_done(const XrlError& e)
     // left behind from a previous incarnation.  Any other errors would
     // also show up in register_if_spy, so we'll let that deal with
     // them.
-    register_if_spy();
+    // register_if_spy();
 }
 
 void

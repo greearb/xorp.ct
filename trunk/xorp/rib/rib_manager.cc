@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.9 2003/03/20 00:57:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.10 2003/03/20 04:29:22 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -59,23 +59,56 @@ RibManager::RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router)
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib6");
 	return;
     }
-
-    _vifmanager.start();
 }
 
 RibManager::~RibManager()
 {
+    stop();
+    
     delete_pointers_list(_urib4_clients_list);
     delete_pointers_list(_mrib4_clients_list);
     delete_pointers_list(_urib6_clients_list);
     delete_pointers_list(_mrib6_clients_list);
 }
 
-void
-RibManager::run_event_loop() 
+/**
+ * RibManager::start:
+ * @void: 
+ * 
+ * Start operation.
+ * 
+ * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
+ **/
+int
+RibManager::start(void)
 {
-    while (true)
-	_event_loop.run();
+    if (ProtoState::start() < 0)
+	return (XORP_ERROR);
+    
+    _vifmanager.start();
+    
+    return (XORP_OK);
+}
+
+/**
+ * RibManager::stop:
+ * @void: 
+ * 
+ * Gracefully stop the RIB.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+RibManager::stop(void)
+{
+    if (! is_up())
+	return (XORP_ERROR);
+    
+    _vifmanager.stop();
+    
+    ProtoState::stop();
+    
+    return (XORP_OK);
 }
 
 int
@@ -404,6 +437,26 @@ RibManager::disable_rib_client(const string& target_name, int family,
 	return (XORP_ERROR);
     
     rib_client->set_enabled(false);
+    
+    return (XORP_OK);
+}
+
+//
+// Don't try to communicate with the FEA.
+//
+// Note that this method will be obsoleted in the future, and will
+// be replaced with cleaner interface.
+//
+int
+RibManager::no_fea()
+{
+    // TODO: FEA target name hardcoded
+    disable_rib_client("fea", AF_INET, true, false);
+#ifdef HAVE_IPV6
+    disable_rib_client("fea", AF_INET6, true, false);
+#endif
+    
+    _vifmanager.no_fea();
     
     return (XORP_OK);
 }

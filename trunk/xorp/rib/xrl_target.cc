@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.7 2003/03/20 00:57:54 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.8 2003/03/20 04:29:22 pavlin Exp $"
 
 #include "version.h"
 #include "rib_module.h"
@@ -40,12 +40,8 @@ XrlRibTarget::common_0_1_get_version(string& version)
 XrlCmdError 
 XrlRibTarget::rib_0_1_no_fea()
 {
-    // TODO: FEA target name hardcoded
-    _ribmanager->disable_rib_client("fea", AF_INET, true, false);
-#ifdef HAVE_IPV6
-    _ribmanager->disable_rib_client("fea", AF_INET6, true, false);
-#endif
-    _vifmanager.no_fea();
+    _ribmanager->no_fea();
+    
     return XrlCmdError::OKAY();
 }
 

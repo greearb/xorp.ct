@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.8 2003/03/20 00:57:53 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.9 2003/03/20 04:29:22 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -22,6 +22,8 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+
+#include "libproto/proto_state.hh"
 
 #include "libxipc/xrl_std_router.hh"
 
@@ -40,7 +42,7 @@
  * routes, IPv6 unicast routes and IPv6 multicast routes.  It also
  * contains the RIB's main eventloop.  
  */
-class RibManager {
+class RibManager : public ProtoState {
 public:
     /**
      * RibManager constructor
@@ -54,13 +56,23 @@ public:
      * RibManager destructor
      */
     ~RibManager();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	start();
     
     /**
-     * Run the RIB process's main event loop.  This should only return
-     * when the RIB process is terminating.  
+     * Stop operation.
+     * 
+     * Gracefully stop the RIB.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    void run_event_loop();
-
+    int	stop();
+    
     /**
      * new_vif is called to inform all the RIBs that a new virtual
      * interface has been created.
@@ -229,6 +241,16 @@ public:
      */
     int disable_rib_client(const string& target_name, int family,
 			   bool is_unicast, bool is_multicast);
+    
+    /**
+     * Don't try to communicate with the FEA.
+     * 
+     * Note that this method will be obsoleted in the future, and will
+     * be replaced with cleaner interface.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int no_fea();
     
 private:
     /**
