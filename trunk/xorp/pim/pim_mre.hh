@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.4 2003/01/13 20:40:22 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.5 2003/01/14 20:36:55 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -757,8 +757,9 @@ private:
 //
 // Global functions prototypes
 //
-// TODO: create a PimMre:: function that calls this one, and elimininate
-// it as a global function.
+// TODO: create PimMre:: methods that calls those below, and elimininate
+// them as global functions.
 extern void	pim_mre_join_timer_timeout(void *data_pointer);
+extern void	pim_mre_override_timer_timeout(void *data_pointer);
 
 #endif // __PIM_PIM_MRE_HH__

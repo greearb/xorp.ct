@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.6 2003/01/12 04:52:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.7 2003/01/17 08:02:26 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -45,7 +45,6 @@
 //
 // Local functions prototypes
 //
-static void	pim_mre_override_timer_timeout(void *data_pointer);
 
 
 //
@@ -2186,7 +2185,9 @@ pim_mre_join_timer_timeout(void *data_pointer)
     return;
 }
 
-static void
+// TODO: create a PimMre:: function that calls this one, and elimininate
+// it as a global function.
+void
 pim_mre_override_timer_timeout(void *data_pointer)
 {
     PimNbr *pim_nbr = NULL;
