@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.2 2002/12/14 23:42:49 hodson Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -21,10 +21,13 @@
 
 #include "peer_handler.hh"
 #include "plumbing.hh"
+#include "libxorp/eventloop.hh"
+#include "libxorp/timer.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/rib_xif.hh"
 
 class RibIpcHandler;
+class EventLoop;
 
 template <class A>
 class XrlQueue {
@@ -52,8 +55,14 @@ private:
     queue <Queued> _xrl_queue;
     static const int FLYING_LIMIT = 1;// XRL's allowed in flight at one time.
     int _flying;
+    bool _previously_succeeded; //true if we've previously been
+                                //successful in communicating with the RIB.
+    uint32_t _errors; //no. of consecutive non-fatal errors where we retried.
+    XorpTimer _delayed_send_timer; //used to resend after a certain delay.
 
     void sendit();
+    void delayed_send(uint32_t delay_ms);
+    EventLoop& get_eventloop() {return _rib_ipc_handler->eventloop();}
 
     void callback(const XrlError& error, const char *comment);
 };
@@ -65,7 +74,7 @@ private:
 
 class RibIpcHandler : public PeerHandler {
 public:
-    RibIpcHandler(XrlStdRouter *xrl_router);
+    RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop);
 
     ~RibIpcHandler();
 
@@ -98,10 +107,11 @@ public:
     ** Delete static route from routing table.
     */
     bool delete_static_route(const IPNet<IPv4>& nlri);
-    
+    EventLoop& eventloop() {return _eventloop;}
 private:
     string _ribname;
     XrlStdRouter *_xrl_router;
+    EventLoop& _eventloop;
 
     bool _ibgp; //did the current update message originate in IBGP?
     bool unregister_rib();

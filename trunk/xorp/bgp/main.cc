@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.14 2003/01/29 23:38:12 rizzo Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.15 2003/02/01 21:08:04 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -41,7 +41,7 @@ BGPMain::BGPMain()
     */
     _peerlist = new BGPPeerList();
     _xrl_router = new XrlStdRouter(*get_eventloop(), "bgp");
-    _rib_ipc_handler = new RibIpcHandler(_xrl_router);
+    _rib_ipc_handler = new RibIpcHandler(_xrl_router, *get_eventloop());
     _plumbing = new BGPPlumbing(_xrl_router, _rib_ipc_handler);
 }
 

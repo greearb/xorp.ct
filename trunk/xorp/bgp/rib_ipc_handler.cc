@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.3 2003/01/15 19:56:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.4 2003/01/26 04:06:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,12 +23,12 @@
 #include "bgp_module.h"
 #include "rib_ipc_handler.hh"
 
-RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router) 
-    : PeerHandler("RIBIpcHandler", NULL, NULL),
-       _ribname(""),
-      _xrl_router(xrl_router),
-      _v4_queue(this, xrl_router),
-      _v6_queue(this, xrl_router)
+RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop) 
+    : PeerHandler("RIBIpcHandler", NULL, NULL), 
+    _ribname(""),
+    _xrl_router(xrl_router), _eventloop(eventloop),
+    _v4_queue(this, xrl_router),
+    _v6_queue(this, xrl_router)
 {
 }
 
@@ -320,8 +320,8 @@ template<class A>
 XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
 		      XrlStdRouter *xrl_router) 
     : _rib_ipc_handler(rib_ipc_handler),
-    _xrl_router(xrl_router),
-    _flying(0)
+      _xrl_router(xrl_router),
+      _flying(0), _previously_succeeded(false)
 {
 }
 
@@ -384,7 +384,6 @@ XrlQueue<IPv4>::sendit()
     }
 
     Queued q = _xrl_queue.front();
-    _xrl_queue.pop();
 
     XrlRibV0p1Client rib(_xrl_router);
 
@@ -424,7 +423,6 @@ XrlQueue<IPv6>::sendit()
     }
 
     Queued q = _xrl_queue.front();
-    _xrl_queue.pop();
 
     XrlRibV0p1Client rib(_xrl_router);
 
@@ -454,11 +452,47 @@ template<class A>
 void
 XrlQueue<A>::callback(const XrlError& error, const char *comment)
 {
-    debug_msg("callback %s %s\n", comment, error.str().c_str());
-    if(XrlError::OKAY() != error) {
-	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-    }
-
     _flying--;
-    sendit();
+    debug_msg("callback %s %s\n", comment, error.str().c_str());
+    if (error == XrlError::OKAY()) {
+	_errors = 0;
+	_previously_succeeded = true;
+	_xrl_queue.pop();
+	sendit();
+    } else if (error == XrlError::NO_FINDER()) {
+	_errors++;
+	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	delayed_send(1000);
+    } else if (error == XrlError::RESOLVE_FAILED()) {
+	if (_previously_succeeded) {
+	    //XXX to be replaced with exit in production code
+	    abort();
+	} else {
+	    //give the other end time to get started
+	    XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	    _errors++;
+	    delayed_send(1000);
+	}
+    } else {
+	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
+	//XXX to be replaced with exit in production code
+	abort();
+    }
+    if (_errors > 10) {
+	//XXX to be replaced with exit in production code
+	abort();
+    }
 }
+
+
+template<class A>
+void
+XrlQueue<A>::delayed_send(uint32_t delay_ms) 
+{
+    
+    _delayed_send_timer = get_eventloop().
+	new_oneoff_after_ms(delay_ms, ::callback(this, 
+						 &XrlQueue<A>::sendit));
+}
+
+
