@@ -403,6 +403,7 @@ patch_etc() {
     cp $LIVEDIR/files/fstab   $CHROOTDIR/etc
     cp $LIVEDIR/files/motd   $CHROOTDIR/etc
     cp $LIVEDIR/files/shells   $CHROOTDIR/etc
+    cp $LIVEDIR/files/sshd_config   $CHROOTDIR/etc/ssh/sshd_config
 
     mkdir -p $CHROOTDIR/usr/local/etc/rc.d
     cp $LIVEDIR/files/xorp.sh   $CHROOTDIR/usr/local/etc/rc.d
