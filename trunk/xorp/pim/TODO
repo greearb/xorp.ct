@@ -1,6 +1,15 @@
 #
-# $XORP: xorp/pim/TODO,v 1.9 2003/01/25 00:44:40 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.10 2003/01/27 19:16:12 pavlin Exp $
 #
+
+* IMPL: CLI command "show pim join" :
+  Clean-up the output such that for each routing entry type
+  to print the output that makes sense for it.
+
+* IMPL: should "inherited_olist_sg_rpt() for PiMre (S,G) entry return
+  the value computed via (S,G,rpt) entry? Similarly, should
+  "inherited_olist_sg() for PimMre (S,G,rpt) entry return the
+  value computed vial (S,G) entry?
 
 * IMPL: whenever the iif changes, should we remove all matching
   PimMfc, and reset the SPT bit?
