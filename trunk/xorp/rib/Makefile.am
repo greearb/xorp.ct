@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.20 2004/02/06 01:35:59 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.21 2004/04/23 19:31:01 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -220,7 +220,6 @@ librib_a_SOURCES	+= protocol.cc
 librib_a_SOURCES	+= register_server.cc
 librib_a_SOURCES	+= rib.cc
 librib_a_SOURCES	+= rib_client.cc
-librib_a_SOURCES	+= route.cc
 librib_a_SOURCES	+= rt_tab_base.cc
 librib_a_SOURCES	+= rt_tab_deletion.cc
 librib_a_SOURCES	+= rt_tab_export.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.10 2004/02/11 08:48:47 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.11 2004/02/12 03:17:04 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -31,7 +31,7 @@
 
 /**
  * @short Base class for RIB routing table entries.
- * 
+ *
  * This is the base class from which RIB routing table entries are derived.
  * It's not useful by itself.
  */
@@ -41,27 +41,32 @@ public:
      * Constructor for a route entry.
      *
      * @param vif the Virtual Interface on which packets matching this
-     * routing table entry should be forwarded.  
+     * routing table entry should be forwarded.
      * @param nexthop the NextHop router to which packets matching this
      * entry should be forwarded.
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
     RouteEntry(Vif* vif, NextHop* nexthop, const Protocol& protocol,
-	       uint16_t metric);
+	       uint16_t metric)
+	: _vif(vif), _nexthop(nexthop), _protocol(protocol),
+	  _admin_distance(255), _metric(metric)
+    {
+    }
+
 
     /**
      * Destructor
      */
-    virtual ~RouteEntry();
+    virtual ~RouteEntry() {}
 
     /**
      * Get the VIF.
      *
      * @return the Virtual Interface on which packets matching this
-     * routing table entry should be forwarded.  
+     * routing table entry should be forwarded.
      */
-    Vif* vif() const { return _vif; }
+    inline Vif* vif() const { return _vif; }
 
     /**
      * Get the NextHop router.
@@ -71,12 +76,12 @@ public:
      */
     inline NextHop* nexthop() const { return _nexthop; }
 
-    /** 
+    /**
      * Set the NextHop router.
      *
      * @param v the NextHop router to be set on this route.
      */
-    void set_nexthop(NextHop* v) { _nexthop = v; }
+    inline void set_nexthop(NextHop* v) { _nexthop = v; }
 
     /**
      * Get the Administrative Distance.
@@ -94,7 +99,7 @@ public:
      *
      * @param ad the administrative distance to apply to this route.
      */
-    void set_admin_distance(uint16_t ad) { _admin_distance = ad; }
+    inline void set_admin_distance(uint16_t ad) { _admin_distance = ad; }
 
     /**
      * Get the routing protocol.
@@ -102,7 +107,7 @@ public:
      * @return the routing protocol that originated this route.
      * @see Protocol.
      */
-    const Protocol& protocol() const { return _protocol; }
+    inline const Protocol& protocol() const { return _protocol; }
 
     /**
      * Display the route for debugging purposes.
@@ -114,25 +119,14 @@ public:
      *
      * @param metric the routing protocol metric to be set on this route.
      */
-    void set_metric(uint16_t metric) { _metric = metric; }
-
-    /**
-     * Get a metric for the route that can be directly compared, even
-     * when the routes originate from different protocols.  Lower
-     * metrics are prefered.
-     *
-     * @return a metric where the most significant bits are the admin
-     * distance and the least significant bits are the routing
-     * protocol metric.
-     */
-    uint32_t global_metric() const { return (_admin_distance << 16) | _metric; }
+    inline void set_metric(uint16_t metric) { _metric = metric; }
 
     /**
      * Get the routing protocol metric.
      *
      * @return the routing protocol metric for this route.
      */
-    uint32_t metric() const { return _metric; }
+    inline uint32_t metric() const { return _metric; }
 
 protected:
     Vif*		_vif;
@@ -158,7 +152,7 @@ public:
      *
      * @param net the Subnet (address and mask) of the routing table entry.
      * @param vif the Virtual Interface on which packets matching this
-     * routing table entry should be forwarded.  
+     * routing table entry should be forwarded.
      * @param nexthop the NextHop router to which packets matching this
      * entry should be forwarded.
      * @param protocol the routing protocol that originated this route.
@@ -234,7 +228,7 @@ typedef IPRouteEntry<IPv6> IPv6RouteEntry;
  * information in this route entry.
  *
  * This is a template class, where A is either a the IPv4 class or the
- * IPv6 class.  
+ * IPv6 class.
  */
 template <class A>
 class ResolvedIPRouteEntry : public IPRouteEntry<A> {
@@ -247,7 +241,7 @@ public:
      *
      * @param net the Subnet (address and mask) of the routing table entry.
      * @param vif the Virtual Interface on which packets matching this
-     * routing table entry should be forwarded.  
+     * routing table entry should be forwarded.
      * @param nexthop the NextHop router to which packets matching this
      * entry should be forwarded.  This should be a local nexthop.
      * @param protocol the routing protocol that originated this route.
@@ -270,7 +264,7 @@ public:
      * @return the IGP parent route entry that was used to resolve the
      * EGP parent route entry's non-local nexthop into a local nexthop.
      */
-    const IPRouteEntry<A>* igp_parent() const { return _igp_parent; }
+    inline const IPRouteEntry<A>* igp_parent() const { return _igp_parent; }
 
     /**
      * Get the EGP parent.
@@ -278,7 +272,7 @@ public:
      * @return the EGP parent, which is the original route entry that
      * had a non-local nexthop.
      */
-    const IPRouteEntry<A>* egp_parent() const { return _egp_parent; }
+    inline const IPRouteEntry<A>* egp_parent() const { return _egp_parent; }
 
     /**
      * Set the backlink.  When a resolved route is created, the
@@ -287,19 +281,19 @@ public:
      * affected by a change in the IGP parent to be found easily.
      * However, if the EGP parent goes away, we need to remove the
      * links from this multimap, and the backlink provides an iterator
-     * into the multimap that makes this operation very efficient.  
+     * into the multimap that makes this operation very efficient.
      *
      * @param backlink the ExtIntTable multimap iterator for this route.
      */
-    void set_backlink(typename RouteBackLink::iterator v) { _backlink = v; }
+    inline void set_backlink(typename RouteBackLink::iterator v);
 
     /**
-     * Get the backlink.  
+     * Get the backlink.
      * @see ResolvedIPRouteEntry<A>::set_backlink
      *
      * @return the backlink iterator.
      */
-    typename RouteBackLink::iterator backlink() const { return _backlink; }
+    inline typename RouteBackLink::iterator backlink() const;
 
 private:
     mutable const IPRouteEntry<A>* _igp_parent;
@@ -310,6 +304,20 @@ private:
     // route deletion would be expensive.
     typename RouteBackLink::iterator _backlink;
 };
+
+template <typename A>
+inline void
+ResolvedIPRouteEntry<A>::set_backlink(typename RouteBackLink::iterator v)
+{
+    _backlink = v;
+}
+
+template <typename A>
+inline typename ResolvedIPRouteEntry<A>::RouteBackLink::iterator
+ResolvedIPRouteEntry<A>::backlink() const
+{
+    return _backlink;
+}
 
 typedef ResolvedIPRouteEntry<IPv4> ResolvedIPv4RouteEntry;
 typedef ResolvedIPRouteEntry<IPv6> ResolvedIPv6RouteEntry;
