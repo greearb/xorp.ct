@@ -1,9 +1,18 @@
 #
-# $XORP: xorp/rib/TODO,v 1.10 2004/05/20 23:45:45 pavlin Exp $
+# $XORP: xorp/rib/TODO,v 1.11 2004/06/22 03:09:56 pavlin Exp $
 #
 
 RIB To Do List
 =======================
+
+o The RIB should monitor the status of the FEA for route redistribution:
+  when the FEA is UP/DOWN the RIB should register/deregister the FEA for
+  route redistribution. Similar monitoring should be performed for
+  all other targets interested in route redistribution: if a target
+  dies, it should be removed (see RibManager::target_death()).
+
+o Get rid of the periodic RibManager::status_updater(), and
+  use event-driven status updater.
 
 o ExtIntTable needs some re-writing to be more symetric so that
 recursive BGP nexthop lookups are possible.
