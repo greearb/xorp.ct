@@ -101,20 +101,20 @@ test_main(uint32_t pre_block_secs,
 	return 1;
     }
 
-    verbose_log("Running for %d seconds\n", pre_block_secs);
+    verbose_log("Running for %u seconds\n", XORP_UINT_CAST(pre_block_secs));
     t = e.set_flag_after(TimeVal(pre_block_secs, 0), &timeout);
     while (t.scheduled()) {
 	e.run();
     }
 
-    verbose_log("Sleeping for %d seconds\n", block_secs);
+    verbose_log("Sleeping for %u seconds\n", XORP_UINT_CAST(block_secs));
     if (block_secs) {
 	TimerList::system_sleep(TimeVal(block_secs, 0));
     }
 
     fprintf(stderr, "Connected %d\n", fc.connected());
 
-    verbose_log("Running for %d seconds\n", block_secs);
+    verbose_log("Running for %u seconds\n", XORP_UINT_CAST(block_secs));
     t = e.set_flag_after(TimeVal(post_block_secs, 0), &timeout);
     while (t.scheduled()) {
 	e.run();

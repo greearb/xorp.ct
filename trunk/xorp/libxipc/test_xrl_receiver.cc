@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.4 2004/10/15 02:28:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.5 2004/12/09 07:54:37 pavlin Exp $"
 
 
 //
@@ -196,7 +196,7 @@ private:
 	}
 	if (delta_time == TimeVal::ZERO()) {
 	    printf("Received %u XRLs; delta-time = %s secs\n",
-		   (uint32_t)_received_xrls, delta_time.str().c_str());
+		   XORP_UINT_CAST(_received_xrls), delta_time.str().c_str());
 	    return;
 	}
 
@@ -205,7 +205,8 @@ private:
 	speed /= double_time;
 
 	printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
-	       (uint32_t)_received_xrls, delta_time.str().c_str(), speed);
+	       XORP_UINT_CAST(_received_xrls),
+	       delta_time.str().c_str(), speed);
 
 #if RECEIVE_DO_EXIT
 	// XXX: if enabled, then exit after all XRLs have been received.
