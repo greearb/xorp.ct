@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.68 2003/09/30 20:55:00 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.69 2003/10/02 15:10:57 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -420,6 +420,7 @@ if test "${snmpd}" = "not_found";  then
     snmpd=$snmpd2
 fi
 
+snmpd_valid="no"
 if test "${snmpd}" = "not_found" ; then
     AC_MSG_WARN("snmpd not found:  snmp test scripts will not work")
 elif test "${snmpd}" = "skip_check"; then
@@ -443,7 +444,7 @@ else
 		if ps -p ${pid} > /dev/null
 		then
 			kill ${pid}
-			snmpd_valid=yes
+			snmpd_valid="yes"
 			break 2
 		fi
 	done

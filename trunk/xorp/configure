@@ -4451,6 +4451,7 @@ fi
     snmpd=$snmpd2
 fi
 
+snmpd_valid="no"
 if test "${snmpd}" = "not_found" ; then
     { echo "$as_me:$LINENO: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&5
 echo "$as_me: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&2;}
@@ -4478,7 +4479,7 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
 		if ps -p ${pid} > /dev/null
 		then
 			kill ${pid}
-			snmpd_valid=yes
+			snmpd_valid="yes"
 			break 2
 		fi
 	done
