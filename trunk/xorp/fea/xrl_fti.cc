@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.6 2004/03/18 13:09:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.7 2004/05/05 06:56:11 pavlin Exp $"
 
 #include "xrl_fti.hh"
 
@@ -363,6 +363,8 @@ template<class F>
 void
 XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
 {
+    bool queue_was_empty = _inform_fib_client_queue.empty();
+
     if (fte_list.empty())
 	return;
 
@@ -373,10 +375,9 @@ XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
 	_inform_fib_client_queue.push_back(fte);
     }
 
-    // Start the timer to send all FIB entries
-    _inform_fib_client_queue_timer = eventloop().new_oneoff_after(
-	TimeVal(0, 0),
-	callback(this, &XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change));
+    // If the queue was empty before, start sending the routes
+    if (queue_was_empty)
+	send_fib_client_route_change();
 }
 
 template<class F>
@@ -401,16 +402,15 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
 	success = _xftm.send_fib_client_delete_route(_target_name, fte);
     }
 
-    if (success == XORP_OK)
-	return;		// OK
-
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _inform_fib_client_queue_timer = eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change));
+    if (success != XORP_OK) {
+	//
+	// If an error, then start a timer to try again
+	// TODO: XXX: the timer value is hardcoded here!!
+	//
+	_inform_fib_client_queue_timer = eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change));
+    }
 }
 
 template<class F>
@@ -426,9 +426,24 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change_cb(
     }
 
     //
-    // If an error, then start a timer to try again
+    // If command failed because the other side rejected it,
+    // then send the next route change.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_ERROR("Error sending route change to %s: %s",
+		   _target_name.c_str(), xrl_error.str().c_str());
+	_inform_fib_client_queue.pop_front();
+	send_fib_client_route_change();
+	return;
+    }
+
+    //
+    // If a transport error, then start a timer to try again
+    // (unless the timer is already running).
     // TODO: XXX: the timer value is hardcoded here!!
     //
+    if (_inform_fib_client_queue_timer.scheduled())
+	return;
     _inform_fib_client_queue_timer = eventloop().new_oneoff_after(
 	TimeVal(1, 0),
 	callback(this, &XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change));
