@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.2 2002/12/13 20:26:07 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.3 2003/01/20 20:36:23 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -93,13 +93,12 @@ run_tinderbox() {
 	eval cfg_home=\$home_$cfg
 	eval cfg_env=\$env_$cfg
 
-	errfile="${LOGDIR}/${cfg_host}-${cfg}"
+	errfile="${LOGDIR}/0/${cfg_host}-${cfg}"
 	header="${errfile}.header"
 
 	cat /dev/null > ${errfile}
 	if [ -z "${cfg_host}" ] ; then
 	    echo "Configuration \"$cfg\" has no host." > ${errfile}
-
 	    harp "${cfg}" "Misconfiguration" "${errfile}"
 	    continue
 	fi
@@ -120,7 +119,7 @@ run_tinderbox() {
 	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}" 
 
 	cp ${header} ${errfile}
-	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh" >>${errfile} 2>&1
+	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh " >>${errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp ${cfg} "remote build failed" "${errfile}"
 	    continue
@@ -155,7 +154,23 @@ checkout() {
     fi
 }
 
-mkdir -p ${LOGDIR}
-checkout "${LOGDIR}/checkout.log"
+roll_over_logs()
+{
+    log_history=10
+    rm -f ${LOGDIR}/${log_history}
+    log=${log_history}
+    while [ ${log} -ne 0 ] ; do
+	next_log=`expr ${log} - 1`
+	if [ -d ${LOGDIR}/${next_log} ] ; then
+	    mv ${LOGDIR}/${next_log} ${LOGDIR}/${log}
+	fi
+	log=${next_log}
+    done
+}
+
+roll_over_logs   
+mkdir -p ${LOGDIR}/0
+
+checkout "${LOGDIR}/0/checkout.log"
 run_tinderbox
 
