@@ -12,24 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.6 2003/03/16 08:20:31 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
-#ifdef HAVE_NET_ETHERNET_H
-#include <net/ethernet.h>
-#elif  HAVE_SYS_ETHERNET_H
-#include <sys/ethernet.h>
-#endif
 
 #include <map>
 #include <string>
 
 #include "xrl_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/xlog.h"
+
+#include "libxorp/ether_compat.h"
 
 #include "xrl_atom.hh"
 #include "xrl_atom_encoding.hh"
