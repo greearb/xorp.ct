@@ -100,7 +100,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rip.tgt rib.tgt ribclient.tgt rtrmgr.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rip.tgt ripng.tgt rib.tgt ribclient.tgt rtrmgr.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)

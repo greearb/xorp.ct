@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.24 2004/02/19 04:33:14 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.25 2004/02/19 18:29:22 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -27,6 +27,7 @@ tgt_files		+= mld6igmp.tgt
 tgt_files		+= ospf.tgt
 tgt_files		+= pim.tgt
 tgt_files		+= rip.tgt
+tgt_files		+= ripng.tgt
 tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
 tgt_files		+= rtrmgr.tgt
