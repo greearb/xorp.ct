@@ -459,6 +459,35 @@ XrlBgpTargetBase::handle_bgp_0_2_disable_peer(const XrlArgs& xa_inputs, XrlArgs*
 }
 
 const XrlCmdError
+XrlBgpTargetBase::handle_bgp_0_2_set_parameter(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 5) {
+	XLOG_ERROR("Wrong number of arguments (%u != 5) handling bgp/0.2/set_parameter",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = bgp_0_2_set_parameter(
+	    xa_inputs.get_string("local_ip"),
+	    xa_inputs.get_uint32("local_port"),
+	    xa_inputs.get_string("peer_ip"),
+	    xa_inputs.get_uint32("peer_port"),
+	    xa_inputs.get_string("parameter"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for bgp/0.2/set_parameter failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
 XrlBgpTargetBase::handle_bgp_0_2_next_hop_rewrite_filter(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
 {
     if (xa_inputs.size() != 5) {
@@ -1235,35 +1264,6 @@ XrlBgpTargetBase::handle_bgp_0_2_get_v6_route_list_next(const XrlArgs& xa_inputs
 	pxa_outputs->add("valid", valid);
     } catch (const XrlArgs::XrlAtomFound& ) {
 	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
-    }
-    return XrlCmdError::OKAY();
-}
-
-const XrlCmdError
-XrlBgpTargetBase::handle_bgp_0_2_set_parameter(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
-{
-    if (xa_inputs.size() != 5) {
-	XLOG_ERROR("Wrong number of arguments (%u != 5) handling bgp/0.2/set_parameter",
-            (uint32_t)xa_inputs.size());
-	return XrlCmdError::BAD_ARGS();
-    }
-
-    /* Return value declarations */
-    try {
-	XrlCmdError e = bgp_0_2_set_parameter(
-	    xa_inputs.get_string("local_ip"),
-	    xa_inputs.get_uint32("local_port"),
-	    xa_inputs.get_string("peer_ip"),
-	    xa_inputs.get_uint32("peer_port"),
-	    xa_inputs.get_string("parameter"));
-	if (e != XrlCmdError::OKAY()) {
-	    XLOG_WARNING("Handling method for bgp/0.2/set_parameter failed: %s",
-            		 e.str().c_str());
-	    return e;
-        }
-    } catch (const XrlArgs::XrlAtomNotFound& e) {
-	XLOG_ERROR("Argument not found");
-	return XrlCmdError::BAD_ARGS();
     }
     return XrlCmdError::OKAY();
 }

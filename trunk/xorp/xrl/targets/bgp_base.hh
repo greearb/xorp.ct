@@ -188,6 +188,19 @@ protected:
     /**
      *  Pure-virtual function that needs to be implemented to:
      *  
+     *  Set which parameters we support per peer
+     */
+    virtual XrlCmdError bgp_0_2_set_parameter(
+	// Input values, 
+	const string&	local_ip, 
+	const uint32_t&	local_port, 
+	const string&	peer_ip, 
+	const uint32_t&	peer_port, 
+	const string&	parameter) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *  
      *  Set next hop rewrite filter.
      */
     virtual XrlCmdError bgp_0_2_next_hop_rewrite_filter(
@@ -442,19 +455,6 @@ protected:
     /**
      *  Pure-virtual function that needs to be implemented to:
      *  
-     *  Set which parameters we support per peer
-     */
-    virtual XrlCmdError bgp_0_2_set_parameter(
-	// Input values, 
-	const string&	local_ip, 
-	const uint32_t&	local_port, 
-	const string&	peer_ip, 
-	const uint32_t&	peer_port, 
-	const string&	parameter) = 0;
-
-    /**
-     *  Pure-virtual function that needs to be implemented to:
-     *  
      *  Route Info Changed route_info_changed is called by the RIB on the RIB
      *  client (typically a routing protocol) that had registered an interest
      *  in the routing of an address. This can be because the metric and/or
@@ -560,6 +560,8 @@ private:
 
     const XrlCmdError handle_bgp_0_2_disable_peer(const XrlArgs& in, XrlArgs* out);
 
+    const XrlCmdError handle_bgp_0_2_set_parameter(const XrlArgs& in, XrlArgs* out);
+
     const XrlCmdError handle_bgp_0_2_next_hop_rewrite_filter(const XrlArgs& in, XrlArgs* out);
 
     const XrlCmdError handle_bgp_0_2_set_peer_state(const XrlArgs& in, XrlArgs* out);
@@ -595,8 +597,6 @@ private:
     const XrlCmdError handle_bgp_0_2_get_v4_route_list_next(const XrlArgs& in, XrlArgs* out);
 
     const XrlCmdError handle_bgp_0_2_get_v6_route_list_next(const XrlArgs& in, XrlArgs* out);
-
-    const XrlCmdError handle_bgp_0_2_set_parameter(const XrlArgs& in, XrlArgs* out);
 
     const XrlCmdError handle_rib_client_0_1_route_info_changed4(const XrlArgs& in, XrlArgs* out);
 
@@ -667,6 +667,10 @@ private:
 	if (_cmds->add_handler("bgp/0.2/disable_peer", 
 	    callback(this, &XrlBgpTargetBase::handle_bgp_0_2_disable_peer)) == false) {
 	    XLOG_ERROR("Failed to xrl handler finder://bgp/bgp/0.2/disable_peer");
+	}
+	if (_cmds->add_handler("bgp/0.2/set_parameter", 
+	    callback(this, &XrlBgpTargetBase::handle_bgp_0_2_set_parameter)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://bgp/bgp/0.2/set_parameter");
 	}
 	if (_cmds->add_handler("bgp/0.2/next_hop_rewrite_filter", 
 	    callback(this, &XrlBgpTargetBase::handle_bgp_0_2_next_hop_rewrite_filter)) == false) {
@@ -740,10 +744,6 @@ private:
 	    callback(this, &XrlBgpTargetBase::handle_bgp_0_2_get_v6_route_list_next)) == false) {
 	    XLOG_ERROR("Failed to xrl handler finder://bgp/bgp/0.2/get_v6_route_list_next");
 	}
-	if (_cmds->add_handler("bgp/0.2/set_parameter", 
-	    callback(this, &XrlBgpTargetBase::handle_bgp_0_2_set_parameter)) == false) {
-	    XLOG_ERROR("Failed to xrl handler finder://bgp/bgp/0.2/set_parameter");
-	}
 	if (_cmds->add_handler("rib_client/0.1/route_info_changed4", 
 	    callback(this, &XrlBgpTargetBase::handle_rib_client_0_1_route_info_changed4)) == false) {
 	    XLOG_ERROR("Failed to xrl handler finder://bgp/rib_client/0.1/route_info_changed4");
@@ -787,6 +787,7 @@ private:
 	_cmds->remove_handler("bgp/0.2/delete_peer");
 	_cmds->remove_handler("bgp/0.2/enable_peer");
 	_cmds->remove_handler("bgp/0.2/disable_peer");
+	_cmds->remove_handler("bgp/0.2/set_parameter");
 	_cmds->remove_handler("bgp/0.2/next_hop_rewrite_filter");
 	_cmds->remove_handler("bgp/0.2/set_peer_state");
 	_cmds->remove_handler("bgp/0.2/get_peer_list_start");
@@ -805,7 +806,6 @@ private:
 	_cmds->remove_handler("bgp/0.2/get_v6_route_list_start");
 	_cmds->remove_handler("bgp/0.2/get_v4_route_list_next");
 	_cmds->remove_handler("bgp/0.2/get_v6_route_list_next");
-	_cmds->remove_handler("bgp/0.2/set_parameter");
 	_cmds->remove_handler("rib_client/0.1/route_info_changed4");
 	_cmds->remove_handler("rib_client/0.1/route_info_changed6");
 	_cmds->remove_handler("rib_client/0.1/route_info_invalid4");

@@ -147,10 +147,10 @@ bgpPeerTable_get_first_data_point(void **my_loop_context,
     loop_context = SNMP_MALLOC_TYPEDEF(PeerLoopContext);
     if (NULL == loop_context) return NULL;
 
-    BgpMib::CB12 cb12;    // see bgp_xif.hh for this prototype
     loop_context->valid = false;
-    cb12 = callback(get_peer_list_start_done, loop_context);
-    bgp_mib.send_get_peer_list_start("bgp", cb12);
+    bgp_mib.send_get_peer_list_start("bgp",
+				     callback(get_peer_list_start_done,
+					      loop_context));
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after_ms(1000, &timeout);
     while (!timeout && !loop_context->valid) {
@@ -200,11 +200,10 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
 
     if (!loop_context->more) return NULL;
 
-    BgpMib::CB13 cb13;    // see bgp_xif.hh for this prototype
-
-    cb13 = callback(get_peer_list_next_done, data_context);
     data_context->valid = false; 
-    bgp_mib.send_get_peer_list_next("bgp", loop_context->peer_list_token, cb13);
+    bgp_mib.send_get_peer_list_next("bgp", loop_context->peer_list_token,
+				    callback(get_peer_list_next_done,
+					     data_context));
 
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after_ms(1000, &timeout);
@@ -297,36 +296,31 @@ bgpPeerTable_handler(
                 switch(table_info->colnum) {
                     case COLUMN_BGPPEERIDENTIFIER:
 			{
-			BgpMib::CB14 cb_peerid;
-			cb_peerid = callback(get_peer_id_done, req_cache);
 			bgp_mib.send_get_peer_id("bgp", cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
-			    cntxt->peer_remote_port, cb_peerid);
+			    cntxt->peer_remote_port,
+				       callback(get_peer_id_done, req_cache));
 			requests->delegated++;
 			break;
 			}
                     case COLUMN_BGPPEERSTATE:  // since they use the same XRL we
                     case COLUMN_BGPPEERADMINSTATUS: // can use the same callback
 			{
-			BgpMib::CB15 cb_peerstatus;
-			cb_peerstatus = callback(get_peer_status_done, 
-			    req_cache);
 			bgp_mib.send_get_peer_status("bgp",
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
-			    cb_peerstatus);
+			    callback(get_peer_status_done, 
+				     req_cache));
 			requests->delegated++;
 			break;
 			}
                     case COLUMN_BGPPEERNEGOTIATEDVERSION:
  			{
-			BgpMib::CB16 cb_peernegver;
-			cb_peernegver = 
-			  callback(get_peer_negotiated_version_done, req_cache);
 			bgp_mib.send_get_peer_negotiated_version("bgp", 
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
-			    cb_peernegver);
+			    callback(get_peer_negotiated_version_done,
+				     req_cache));
 			requests->delegated++;
 			break;
 			}
@@ -364,11 +358,11 @@ bgpPeerTable_handler(
 			}
                     case COLUMN_BGPPEERREMOTEAS:
  			{
-			BgpMib::CB17 cb_peeras;
-			cb_peeras = callback(get_peer_as_done, req_cache);
 			bgp_mib.send_get_peer_as("bgp", cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
-			    cntxt->peer_remote_port, cb_peeras);
+			    cntxt->peer_remote_port,
+			    callback(get_peer_as_done,
+				     req_cache));
 			requests->delegated++;
 			break;
 			}
@@ -379,26 +373,23 @@ bgpPeerTable_handler(
                     case COLUMN_BGPPEERLASTERROR:
                     case COLUMN_BGPPEERINUPDATEELAPSEDTIME:
  			{
-			BgpMib::CB18 cb_peermsgstats;
-			cb_peermsgstats = callback(get_peer_msg_stats_done,
-			    req_cache);
 			bgp_mib.send_get_peer_msg_stats("bgp", 
 			    cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
-			    cntxt->peer_remote_port, cb_peermsgstats);
+			    cntxt->peer_remote_port,
+			    callback(get_peer_msg_stats_done,
+				     req_cache));
 			requests->delegated++;
 			break;
 			}
                     case COLUMN_BGPPEERFSMESTABLISHEDTRANSITIONS:
                     case COLUMN_BGPPEERFSMESTABLISHEDTIME:
  			{
-			BgpMib::CB19 cb_peereststats;
-			cb_peereststats = callback(get_peer_established_stats, 
-						   req_cache);
 			bgp_mib.send_get_peer_established_stats("bgp", 
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port,
-			    cb_peereststats);
+			    callback(get_peer_established_stats, 
+				     req_cache));
 			requests->delegated++;
 			break;
 			}
@@ -410,13 +401,11 @@ bgpPeerTable_handler(
                     case COLUMN_BGPPEERMINASORIGINATIONINTERVAL:
                     case COLUMN_BGPPEERMINROUTEADVERTISEMENTINTERVAL:
  			{
-			BgpMib::CB20 cb_peertimercfg;
-			cb_peertimercfg = callback(get_peer_timer_config_done, 
-						   req_cache);
 			bgp_mib.send_get_peer_timer_config ("bgp", 
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
-			    cb_peertimercfg);
+			    callback(get_peer_timer_config_done, 
+						   req_cache));
 			requests->delegated++;
 			break;
 			}

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.9 2003/05/29 23:34:03 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.10 2003/07/25 02:12:24 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -113,6 +113,16 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32
 
+	/**
+	 * Set which parameters we support per peer
+	 */
+         set_parameter \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& parameter:txt
 
 	/**
 	 * Set next hop rewrite filter.
@@ -359,15 +369,4 @@ interface bgp/0.2 {
 		& calc_localpref:i32 \
 		& attr_unknown:binary \
 		& valid:bool
-
-	/**
-	 * Set which parameters we support per peer
-	 */
-         set_parameter \
-		? \
-		local_ip:txt \
-	        & local_port:u32 \
-		& peer_ip:txt \
-		& peer_port:u32 \
-		& parameter:txt
 }

@@ -104,16 +104,14 @@ static void local_route_table_update()
 		"updating local bgp4PathAttrTable...\n"));
 	    DEBUGMSGTL((BgpMib::the_instance().name(),
 		"local table size: %d\n", CONTAINER_SIZE(cb.container)));
-	    BgpMib::CB24 cb24;    // see bgp_xif.hh for this prototype
-	    cb24 = callback(get_v4_route_list_start_done);
-	    bgp_mib.send_get_v4_route_list_start("bgp", cb24);
+	    bgp_mib.send_get_v4_route_list_start("bgp",
+			     callback(get_v4_route_list_start_done));
 	    break;
 	}
 	case UpdateManager::UPDATING:
 	{
-	    BgpMib::CB26 cb26;    // see bgp_xif.hh for this prototype
-	    cb26 = callback(get_v4_route_list_next_done);
-	    bgp_mib.send_get_v4_route_list_next("bgp", update.list_token,cb26);
+	    bgp_mib.send_get_v4_route_list_next("bgp", update.list_token,
+					callback(get_v4_route_list_next_done));
 	    break;
 	}
 	case UpdateManager::CLEANING:
