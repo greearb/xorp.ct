@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.1 2003/01/21 01:11:07 mjh Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv4net.hh"
@@ -28,7 +28,8 @@ RefTrie<IPv6, IPv6RouteEntry*> trie6;
 void test(IPv4Net test_net, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_net.str().c_str());
-    RefTrieIterator<IPv4, IPv4RouteEntry*> ti = trie.lookup_node(test_net);
+    RefTriePostOrderIterator<IPv4, IPv4RouteEntry*> ti = 
+	trie.lookup_node(test_net);
     if (ti == trie.end()) {
 	printf("Fail: no result\n");
 	trie.print();
@@ -48,7 +49,7 @@ void test(IPv4Net test_net, IPv4RouteEntry *test_route) {
 void test_find(IPv4 test_addr, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_addr.str().c_str());
-    RefTrieIterator<IPv4, IPv4RouteEntry*> ti = trie.find(test_addr);
+    RefTriePostOrderIterator<IPv4, IPv4RouteEntry*> ti = trie.find(test_addr);
     if (ti == trie.end()) {
 	printf("Fail: no result\n");
 	trie.print();
@@ -68,7 +69,7 @@ void test_find(IPv4 test_addr, IPv4RouteEntry *test_route) {
 void test_less_specific(IPv4Net test_net, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up less specific for net: %s\n", test_net.str().c_str());
-    RefTrieIterator<IPv4, IPv4RouteEntry*> ti = trie.find_less_specific(test_net);
+    RefTriePostOrderIterator<IPv4, IPv4RouteEntry*> ti = trie.find_less_specific(test_net);
     if (ti == trie.end()) {
 	if (test_route == NULL) {
 	    printf("PASS\n");
@@ -127,7 +128,7 @@ void test_lower_bound(IPv4 test_addr, IPv4 test_answer) {
 void test6(IPv6Net test_net, IPv6RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_net.str().c_str());
-    RefTrieIterator<IPv6, IPv6RouteEntry*> ti = trie6.lookup_node(test_net);
+    RefTriePostOrderIterator<IPv6, IPv6RouteEntry*> ti = trie6.lookup_node(test_net);
     if (ti == trie6.end()) {
 	printf("Fail: no result\n");
 	trie.print();
@@ -147,7 +148,7 @@ void test6(IPv6Net test_net, IPv6RouteEntry *test_route) {
 void test_find6(IPv6 test_addr, IPv6RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_addr.str().c_str());
-    RefTrieIterator<IPv6, IPv6RouteEntry*> ti = trie6.find(test_addr);
+    RefTriePostOrderIterator<IPv6, IPv6RouteEntry*> ti = trie6.find(test_addr);
     const IPv6RouteEntry *r = ti.payload();
     if (ti == trie6.end()) {
 	printf("Fail: no result\n");
@@ -376,7 +377,7 @@ int main() {
     test_upper_bound(IPv4("1.2.2.1"), IPv4("1.2.2.255"));
     
     trie.print();
-    RefTrieIterator<IPv4, IPv4RouteEntry*> iter;
+    RefTriePostOrderIterator<IPv4, IPv4RouteEntry*> iter;
     IPv4Net subroot(IPv4("1.2.0.0"), 21);
     iter = trie.search_subtree(subroot);
     while (iter!=trie.end()) {
@@ -487,4 +488,93 @@ int main() {
     test_find(IPv4("9.9.9.8"), &d15);
     trie.erase(n14);
     trie.erase(n15);
+
+
+    printf("==================\nTest of preorder iterator\n");
+    // this is the list of subnets in prefix order.  The test consists in
+    // inserting a list of unsorted subnets and check that the iterator
+    // retrieves them in the proper order.
+
+    RefTrie<IPv4, IPv4RouteEntry*, 
+	RefTriePreOrderIterator<IPv4, IPv4RouteEntry*> > preotrie;
+    const char * subnets[] = {  "1.2.0.0/16",
+				"1.2.0.0/20",
+				"1.2.1.0/24",
+				"1.2.3.0/24",
+				"1.2.128.0/24" };
+    IPv4RouteEntry d16;
+    IPv4Net n16(subnets[3]);
+    printf("adding n16: %s route: %x\n", n16.str().c_str(), (u_int)(&d16));
+    preotrie.insert(n16, &d16);
+
+    IPv4RouteEntry d17;
+    IPv4Net n17(subnets[2]);
+    printf("adding n17: %s route: %x\n", n17.str().c_str(), (u_int)(&d17));
+    preotrie.insert(n17, &d17);
+
+    IPv4RouteEntry d18;
+    IPv4Net n18(subnets[0]);
+    printf("adding n18: %s route: %x\n", n18.str().c_str(), (u_int)(&d18));
+    preotrie.insert(n18, &d18);
+
+    IPv4RouteEntry d19;
+    IPv4Net n19(subnets[4]);
+    printf("adding n19: %s route: %x\n", n19.str().c_str(), (u_int)(&d19));
+    preotrie.insert(n19, &d19);
+
+    IPv4RouteEntry d20;
+    IPv4Net n20(subnets[1]);
+    printf("adding n20: %s route: %x\n", n20.str().c_str(), (u_int)(&d20));
+    preotrie.insert(n20, &d20);
+
+    //-------------------------------------------------------    
+    printf("-----------\n");
+    printf("Test of prefix increment (++ti)\n");
+    printf("-----------\n");
+    RefTriePreOrderIterator<IPv4, IPv4RouteEntry*> ti;
+    int subnetidx = 0;
+    for (ti = preotrie.begin() ; ti != preotrie.end() ; ti++) {
+        printf("*** node: %-26s %s\n",
+               ti.cur()->k().str().c_str(),
+               ti.cur()->has_payload() ? "PL" : "[]");
+	if (strcmp(subnets[subnetidx++],ti.cur()->k().str().c_str())) {
+	    fprintf(stderr, "invalid traversal order detected!\n");
+	    exit(1);
+	}
+	if (!ti.cur()->has_payload()) {
+	    fprintf(stderr, "iterator should not return empty nodes!\n");
+	    exit(1);
+	}
+    }
+    if (subnetidx != 5) {
+	fprintf(stderr, "iterator missing nodes!\n");
+	exit(1);
+    }
+    printf("PASS\n");
+
+    //-------------------------------------------------------    
+    printf("-----------\n");
+    printf("Test of postfix increment (ti++)\n");
+    printf("-----------\n");
+    subnetidx = 0;     
+    for (ti = preotrie.begin() ; ti != preotrie.end() ; ++ti) {
+        printf("*** node: %-26s %s\n",
+               ti.cur()->k().str().c_str(),
+               ti.cur()->has_payload() ? "PL" : "[]");
+	if (strcmp(subnets[subnetidx++],ti.cur()->k().str().c_str())) {
+	    fprintf(stderr, "invalid traversal order detected!\n");
+	    exit(1);
+	}
+	if (!ti.cur()->has_payload()) {
+	    fprintf(stderr, "iterator should not return empty nodes!\n");
+	    exit(1);
+	}
+    }
+    if (subnetidx != 5) {
+	fprintf(stderr, "iterator missing nodes!\n");
+	exit(1);
+    }
+    printf("PASS\n");
+
+
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.8 2003/03/10 23:20:34 hodson Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.9 2003/03/15 02:37:59 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -25,6 +25,8 @@
 
 #include "debug.h"
 #include "minitraits.hh"
+#include "stack"
+
 
 #define NODE_DELETED 0x8000
 #define NODE_REFS_MASK 0x7fff
@@ -34,9 +36,16 @@
  *
  * The template should be invoked with two classes, the basetype "A"
  * for the search Key (which is a subnet, IPNet<A>), and the Payload.
+ * 
+ * You may also specify one of the two iterators available for this class:
+ * RefTriePostOrderIterator and RefTriePreOrderIterator.  If none is
+ * specified, the former is used.
  */
-
 template <class A, class Payload>
+class RefTriePostOrderIterator;
+
+template <class A, class Payload, class __Iterator = 
+    RefTriePostOrderIterator<A,Payload> >
 class RefTrie;
 
 /**
@@ -116,6 +125,10 @@ public:
      * the next node in the iterator sequence. XXX check the description.
      */
     RefTrieNode* lower_bound(const Key &key);
+
+    RefTrieNode* get_left()                       { return this->_left;   }
+    RefTrieNode* get_right()                      { return this->_right;  }
+    RefTrieNode* get_parent()                     { return this->_up;   }
 
     bool has_payload() const			{ return _p != NULL;	}
     bool has_active_payload() const		
@@ -199,13 +212,7 @@ public:
     }
 
     /**
-     * helper methods for iterators.
-     * Visit order: start from the leaves and then go up.
-     * begin() moves to the first node we want to explore, which is
-     *	the leftmost node in the subtree.
-     * next() finds the 'next' node in the visit order.
-     * Invariant for next(): being on _cur means that we have visited its
-     * subtrees (and the node itself, of course, which is the current one).
+     * @return the leftmost node under this node
      */
 
     bool is_left() const		{ return _up && this == _up->_left; }
@@ -217,29 +224,6 @@ public:
 	return n;
     }
 
-    RefTrieNode *begin() { 
-	return leftmost();
-    }
-
-    RefTrieNode *next(const Key &root) {
-	RefTrieNode *n = this;
-
-	n->dump("next");
-	do {
-	    bool was_left_child = n->is_left();
-	    n = n->_up;
-	    if (n == NULL)			// cannot backtrack,
-		return NULL;		// we are done.
-	    // backtrack one level, then explore the leftmost path
-	    // on the right branch if not done already.
-	    if (was_left_child && n->_right)
-		n = n->_right->leftmost();
-	    if (!root.contains(n->_k))	// backtrack past root ?
-		return NULL;
-	} while (n->has_active_payload() == false);	
-	// found a good node.
-	return n;
-    }
 
     /**
      * @return the boundaries ("lo" and "hi") of the largest range that
@@ -365,23 +349,24 @@ private:
 
 
 /**
- * Iterator on a trie.
+ * Postorder Iterator on a trie.
  *
  * _cur points to the current object, _root contains the search key for
  * root of the subtree we want to scan. The iterator skips over empty
  * nodes, and visits the subtree in depth-first, left-to-right order.
- * This does not guarantees that keys returned are sorted by prefix length.
+ * The keys returned by this iterator are not sorted by prefix length.
  */
 template <class A, class Payload>
-class RefTrieIterator {
+class RefTriePostOrderIterator {
 public:
     typedef IPNet<A> Key;
+    typedef RefTrie<A,Payload,RefTriePostOrderIterator<A,Payload> > RefTrie;
     typedef RefTrieNode<A, Payload> Node;
 
     /**
      * Constructors
      */
-    RefTrieIterator()				
+    RefTriePostOrderIterator()				
     {
 	_cur = NULL;
 	_trie = NULL;
@@ -391,30 +376,33 @@ public:
      * constructor for exact searches: both the current node and the search
      * key are taken from n, so the iterator will only loop once.
      */
-    RefTrieIterator(const RefTrie<A,Payload>* trie, Node *n)
+    RefTriePostOrderIterator(const RefTrie* trie, Node *n)
     {
 	_trie = trie;
 	_cur = n;
-	if (_cur) 
+	if (_cur) {
 	    _cur->incr_refcount();
-	if (n)
 	    _root = n->k();
+	}
     }
 
     /**
      * construct for subtree scanning: the root key is set explicitly,
      * and the current node is set according to the search order.
      */
-    RefTrieIterator(const RefTrie<A,Payload>* trie, Node *n, const Key &k)
+    RefTriePostOrderIterator(const RefTrie* trie, Node *n, const Key &k)
     {
 	_trie = trie;
 	_root = k;
-	_cur = n ? n->begin() : NULL;
-	if (_cur)
+	_cur = n;
+
+	if (_cur) {
+	    begin();
 	    _cur->incr_refcount();
+	}
     }
 
-    RefTrieIterator(const RefTrieIterator& x) 
+    RefTriePostOrderIterator(const RefTriePostOrderIterator& x) 
     {
 	//printf("copy constructor , new node: %p\n", x._cur);
 	_trie = x._trie;
@@ -425,17 +413,29 @@ public:
 	    _cur->incr_refcount();
     }
 
-    ~RefTrieIterator()
+    ~RefTriePostOrderIterator()
     {
 	if (_cur) {
 	    _cur->decr_refcount();
 	    if (_cur->deleted() && _cur->references()==0) {
 		//XXX uglyness alert.
 		//printf("erasing node %p from iterator destructor\n", _cur);
-		const_cast<RefTrie<A, Payload>*>(_trie)->
+		const_cast<RefTrie*>(_trie)->
 		    set_root(_cur->erase());
 	    }
 	}
+    }
+
+    /**
+     * move to the starting position according to the visiting order
+     */
+    RefTriePostOrderIterator * begin() 
+    {
+	Node * n = _cur;
+	while (n->get_parent() && _root.contains(n->get_parent()->k()))
+	   n = n->get_parent();
+	_cur =  _cur->leftmost();
+	return this;
     }
 
     /**
@@ -444,9 +444,10 @@ public:
      * Updates position of iterator in tree.
      * @return position of iterator before increment.
      */
-    RefTrieIterator operator ++(int)		{ // postfix
+    RefTriePostOrderIterator operator ++(int)		
+    { 
 	//printf("postfix iterator: node was %p\n", _cur);
-	RefTrieIterator x = *this;
+	RefTriePostOrderIterator x = *this;
 	next();
 	return x;
     }
@@ -457,16 +458,33 @@ public:
      * Updates position of iterator in tree.
      * @return position of iterator after increment.
      */
-    RefTrieIterator& operator ++()		{ // prefix
+    RefTriePostOrderIterator& operator ++()		
+    { 
 	next();
 	return *this;
     }
 
     void next() const
     {
-	//printf("prefix iterator\n");
-	Node *oldnode = _cur;
-	_cur = _cur->next(_root);
+	Node * oldnode = _cur;
+	do {
+	   if (_cur->get_parent() == NULL) {
+	       _cur = NULL;
+	       break;             // cannot backtrack, finished
+	   }
+	   bool was_left_child = node_is_left(_cur);
+	   _cur = _cur->get_parent();
+	   // backtrack one level, then explore the leftmost path
+	   // on the right branch if not done already.
+	   if (was_left_child && _cur->get_right()) {
+	       _cur = _cur->get_right()->leftmost();
+	   }
+	   if (_root.contains(_cur->k()) == false) {
+	       _cur = NULL;
+	       break;
+	   }
+	} while (_cur->has_payload() == false);       // found a good node.
+
 	if (_cur)
 	    _cur->incr_refcount();
 
@@ -477,8 +495,7 @@ public:
 	    if (oldnode->deleted() && oldnode->references()==0) {
 		//XXX uglyness alert.
 		//printf("erasing node %p from prefix increment\n", oldnode);
-		const_cast<RefTrie<A, Payload>*>(_trie)->
-		    set_root(oldnode->erase());
+		const_cast<RefTrie*>(_trie)->set_root(oldnode->erase());
 	    }
 	}
     }
@@ -491,21 +508,22 @@ public:
 
     inline Node *cur() const { return _cur; }
 
-    bool operator==(const RefTrieIterator & x) const 
+    bool operator==(const RefTriePostOrderIterator & x) const 
     { 
 	force_valid();
 	x.force_valid();
 	return (_cur == x._cur); 
     }
 
-    bool operator!=(const RefTrieIterator & x) const 
+    bool operator!=(const RefTriePostOrderIterator & x) const 
     { 
 	force_valid();
 	x.force_valid();
 	return (_cur != x._cur); 
     }
 
-    Payload & payload() { 
+    Payload & payload() 
+    { 
 	/* Usage note: the node the iterator points at can be deleted.
 	   If there is any possibility that the node might have been
 	   deleted since the iterator was last examined, the user
@@ -522,13 +540,14 @@ public:
 	assert(!_cur->deleted());
 	return _cur->p(); 
     };
-    const Key & key() const { 
+    const Key & key() const 
+    { 
 	/* see payload() for usage note*/
 	assert(!_cur->deleted());
 	return _cur->k(); 
     };
 
-    RefTrieIterator& operator=(const RefTrieIterator& x) 
+    RefTriePostOrderIterator& operator=(const RefTriePostOrderIterator& x) 
     {
 	//printf("operator= , old node: %p new node: %p\n", _cur, x._cur);
 	Node *oldnode = _cur;
@@ -545,8 +564,8 @@ public:
 	    oldnode->decr_refcount();
 	    if (oldnode->deleted() && oldnode->references()==0) {
 		//XXX uglyness alert.
-		//printf("erasing node %p from iterator assignment\n", oldnode);
-		const_cast<RefTrie<A, Payload>*>(_trie)->
+                //printf("erasing node %p from prefix increment\n", oldnode);
+		const_cast<RefTrie*>(_trie)->
 		    set_root(oldnode->erase());
 	    }
 	}
@@ -557,9 +576,254 @@ private:
 			  cause the iterator to move from a deleted
 			  node to the first non-deleted node or
 			  end. */
+
+    bool node_is_left(Node* n) const
+    {
+	return n->get_parent() && n  == n->get_parent()->get_left();
+    }
     Key _root;
-    const RefTrie<A, Payload>* _trie;
+    const RefTrie* _trie;
 };
+
+/*
+ * Preorder Iterator on a trie.
+ *
+ * _cur points to the current object, _root contains the search key for
+ * root of the subtree we want to scan. The iterator does preorder traversal,
+ * that is, current node first, then left then right.  This guarantees that
+ * keys returned are sorted by prefix length.
+ */
+template <class A, class Payload>
+class RefTriePreOrderIterator {
+public:
+    typedef IPNet<A> Key;
+    typedef RefTrie<A, Payload, RefTriePreOrderIterator<A, Payload> > RefTrie;
+    typedef RefTrieNode<A, Payload> Node;
+
+    /**
+     * Constructors
+     */
+    RefTriePreOrderIterator()				
+    {
+	_cur = NULL;
+	_trie = NULL;
+    }
+
+    /**
+     * constructor for exact searches: both the current node and the search
+     * key are taken from n, so the iterator will only loop once.
+     */
+    explicit RefTriePreOrderIterator(const RefTrie* trie, Node *n)			
+    {
+	_trie = trie;
+	_cur = n;
+	if (_cur) {
+	    _cur->incr_refcount();
+	    _root = n->k();
+	}
+    }
+
+    /**
+     * construct for subtree scanning: the root key is set explicitly,
+     * and the current node is set according to the search order.
+     */
+    RefTriePreOrderIterator(const RefTrie* trie, Node *n, 
+	const Key &k)
+    {
+	_trie =  trie;
+	_root = k;
+	_cur = n; 
+	if (_cur) {
+	    begin();
+	    _cur->incr_refcount();
+	}
+    }
+
+    RefTriePreOrderIterator(const RefTriePreOrderIterator& x) 
+    {
+	//printf("copy constructor , new node: %p\n", x._cur);
+	_trie = x._trie;
+	_cur = x._cur;
+	_root = x._root;
+	_stack = x._stack;
+
+	if (_cur)
+	    _cur->incr_refcount();
+    }
+
+    ~RefTriePreOrderIterator()
+    {
+	if (_cur) {
+	    _cur->decr_refcount();
+	    if (_cur->deleted() && _cur->references()==0) {
+		//XXX uglyness alert.
+		//printf("erasing node %p from iterator destructor\n", _cur);
+		const_cast<RefTrie*>(_trie)->
+		    set_root(_cur->erase());
+	    }
+	}
+    }
+
+    /**
+     * move to the starting position according to the visiting order 
+     */
+    RefTriePreOrderIterator * begin() 
+    { 
+	while (!_stack.empty()) _stack.pop();
+	while (_cur->get_parent() && _root.contains(_cur->get_parent()->k()))
+	    _cur = _cur->get_parent();
+	_stack.push(_cur);
+	next();
+	return this;
+    }
+
+    /**
+     * Postfix increment
+     *
+     * Updates position of iterator in tree.
+     * @return position of iterator before increment.
+     */
+    RefTriePreOrderIterator operator ++(int)		
+    { 
+	RefTriePreOrderIterator x = *this;
+	next();
+	return x;
+    }
+
+    /**
+     * Prefix increment
+     *
+     * Updates position of iterator in tree.
+     * @return position of iterator after increment.
+     */
+    RefTriePreOrderIterator& operator ++()		
+    { 
+	next();
+	return *this;
+    }
+
+    void next() const
+    {
+	Node * oldnode = _cur;
+	
+	if (_stack.empty()) {
+	    _cur = NULL;
+	} else {
+	    do {
+		_cur = _stack.top();
+		_stack.pop();
+		if (_root.contains(_cur->k()) == false) {
+		    _cur = NULL;
+		    break;
+		}
+		if( _cur->get_right( ) != NULL )
+		    _stack.push(_cur->get_right());
+		if( _cur->get_left() != NULL )
+		    _stack.push(_cur->get_left());
+	    } while (_cur->has_payload() == false);	// found a good node.
+	}
+
+	if (_cur)
+	    _cur->incr_refcount();
+
+	//cleanup if this reduces the reference count on a deleted
+	//node to zero
+	if (oldnode) {
+	    oldnode->decr_refcount();
+	    if (oldnode->deleted() && oldnode->references()==0) {
+		//XXX uglyness alert.
+		//printf("erasing node %p from prefix increment\n", oldnode);
+		const_cast<RefTrie*>(_trie)->set_root(oldnode->erase());
+	    }
+	}
+    }
+
+    inline void force_valid() const 
+    {
+	if (_cur && _cur->deleted())
+	    next();
+    }
+
+    Node *cur() const { return _cur; };
+
+    bool operator==(const RefTriePreOrderIterator & x) const 
+    {
+	force_valid();
+	x.force_valid();
+	return (_cur == x._cur); 
+    }
+
+    bool operator!=(const RefTriePreOrderIterator & x) const 
+    { 
+	force_valid();
+	x.force_valid();
+	return (_cur != x._cur); 
+    }
+
+    Payload & payload()
+    { 
+	/* Usage note: the node the iterator points at can be deleted.
+	   If there is any possibility that the node might have been
+	   deleted since the iterator was last examined, the user
+	   should compare this iterator with end() to force the
+	   iterator to move to the next undeleted node or move to
+	   end() if there is no undeleted node after the node that was
+	   deleted.  */
+	/* Implementation node: We could have put a call to force_valid
+           here, but the force_valid can move the iterator to the end
+           of the trie, which would cause _cur to become NULL.  Then
+           we'd have to assert here anyway.  Doing it this way makes
+           it more likely that a failure to check will be noticed
+           early */
+	assert(!_cur->deleted());
+	return _cur->p(); 
+    };
+    const Key & key() const 
+    { 
+	/* see payload() for usage note*/
+	assert(!_cur->deleted());
+	return _cur->k(); 
+    };
+
+    RefTriePreOrderIterator& operator=(const RefTriePreOrderIterator& x) 
+    {
+	//printf("operator= , old node: %p new node: %p\n", _cur, x._cur);
+	Node *oldnode = _cur;
+	_trie = x._trie;
+	_cur = x._cur;
+	_root = x._root;
+	_stack = x._stack;
+
+	//need to increment before decrement, as the decrement might
+	//cause deleetion, which would be bad if the old Node was the
+	//same as the new Node.
+	if (_cur)
+	    _cur->incr_refcount();
+	if (oldnode) {
+	    oldnode->decr_refcount();
+	    if (oldnode->deleted() && oldnode->references()==0) {
+		//XXX uglyness alert.
+                //printf("erasing node %p from iter assignment\n", oldnode);
+		const_cast<RefTrie*>(_trie)->set_root(oldnode->erase());
+	    }
+	}
+	return *this;
+    }
+
+private:
+
+    mutable Node* _cur; /*this is mutable because const methods can
+			  cause the iterator to move from a deleted
+			  node to the first non-deleted node or
+			  end. */
+
+    mutable stack<Node*> _stack;   // previous comment applies here too
+    bool node_is_left(Node * n) const; 
+
+    Key		 _root;
+    const RefTrie* _trie;
+};
+
 
 /**
  * The RefTrie itself
@@ -570,12 +834,12 @@ private:
  * Additional methods are supported to provide access via iterators.
  */
 
-template <class A, class Payload>
+template <class A, class Payload, class __Iterator>  
 class RefTrie {
 public:
     typedef IPNet<A> Key;
-    typedef RefTrieIterator<A,Payload> iterator;
     typedef RefTrieNode<A,Payload> Node;
+    typedef __Iterator iterator;
 
     /**
      * stl map interface
@@ -659,7 +923,7 @@ public:
 
     const iterator end() const			
     { 
-	return iterator(const_cast<RefTrie<A,Payload>*>(this), 0); 
+	return iterator(const_cast<RefTrie*>(this), 0); 
     }
 
     void delete_all_nodes()			{
@@ -963,10 +1227,11 @@ RefTrieNode<A,Payload>::lower_bound(const Key &key)
 	if (cand->_p) {		// we also have a payload, so we are done.
 	    // printf("exact match\n");
 	    return cand;
-	} else {		// no payload, skip to the next node in the
-				// entire tree (use a null Key as root)
-	    // printf("exact match on empty node - calling next\n");
-	    return cand->next(Key());
+	} else {		// no payload, skip to the next (in postorder)
+				// node in the entire tree (null key as root)
+	    RefTriePostOrderIterator<A,Payload> iterator(NULL, cand, Key());
+	    ++iterator;
+	    return iterator.cur();
 	}
     }
     
@@ -1048,9 +1313,9 @@ RefTrieNode<A,Payload>::str() const
     return s;
 }
 
-template <class A, class Payload> 
+template <class A, class Payload, class __Iterator> 
 void 
-RefTrie<A,Payload>::print() const
+RefTrie<A,Payload,__Iterator>::print() const
 {
     //this is called print - it should NOT use debug_msg!!!
     printf("---- print trie ---\n");
@@ -1068,4 +1333,7 @@ RefTrie<A,Payload>::print() const
     }
     printf("---------------\n");
 }
+
+
+
 #endif // __LIBXORP_REF_TRIE_HH__

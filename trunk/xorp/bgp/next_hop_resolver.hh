@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.16 2003/05/14 09:32:47 pavlin Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.17 2003/06/17 06:44:16 atanu Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -391,10 +391,10 @@ private:
     };
 
     typedef set<NextHopEntry *> RealPrefixEntry;
-    typedef TrieIterator<A, RealPrefixEntry> RealPrefixIterator;
+    typedef TriePostOrderIterator<A, RealPrefixEntry> RealPrefixIterator;
 
     typedef NextHopEntry PrefixEntry;
-    typedef TrieIterator<A, PrefixEntry *> PrefixIterator;
+    typedef TriePostOrderIterator<A, PrefixEntry *> PrefixIterator;
 
     /**
      * The NextHopEntry is indexed in two ways either by prefix_len or by

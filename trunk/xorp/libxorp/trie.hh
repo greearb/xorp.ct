@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.11 2003/04/03 00:58:31 hodson Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.12 2003/04/03 19:04:33 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -27,6 +27,7 @@
 
 #include "debug.h"
 #include "minitraits.hh"
+#include "stack"
 
 /*
  * This module implements a trie to support route lookups.
@@ -109,6 +110,9 @@ public:
      */
     TrieNode* lower_bound(const Key &key);
 
+    TrieNode* get_left()			{ return this->_left;   }
+    TrieNode* get_right()			{ return this->_right;  }
+    TrieNode* get_parent()			{ return this->_up;   }
     bool has_payload() const			{ return _p != NULL;	}
     const Payload &const_p() const		{ return *_p;		}
     Payload &p()    			        { return *_p;		}
@@ -162,44 +166,13 @@ public:
     }
 
     /**
-     * helper methods for iterators.
-     * Visit order: start from the leaves and then go up.
-     * begin() moves to the first node we want to explore, which is
-     *	the leftmost node in the subtree.
-     * next() finds the 'next' node in the visit order.
-     * Invariant for next(): being on _cur means that we have visited its
-     * subtrees (and the node itself, of course, which is the current one).
+     * @return the leftmost node under this node
      */
 
-    bool is_left() const		{ return _up && this == _up->_left; }
-
-    TrieNode *leftmost() {
+    TrieNode * leftmost() {
 	TrieNode *n = this;
 	while (n->_left || n->_right)
 	    n = (n->_left ? n->_left : n->_right);
-	return n;
-    }
-
-    TrieNode *begin() { 
-	return leftmost();
-    }
-
-    TrieNode *next(const Key &root) {
-	TrieNode *n = this;
-	do {
-	    if (n->_up == NULL)
-		return NULL;		// cannot backtrack, finished
-	    bool was_left_child = n->is_left();
-	    n = n->_up;
-	    // backtrack one level, then explore the leftmost path
-	    // on the right branch if not done already.
-	    if (was_left_child && n->_right) {
-		n = n->_right->leftmost();
-	    }
-	    if (root.contains(n->_k) == false) {
-		 return NULL;
-	    }
-	} while (n->has_payload() == false);	// found a good node.
 	return n;
     }
 
@@ -314,15 +287,15 @@ private:
 };
 
 /**
- * Iterator on a trie.
+ * Postorder Iterator on a trie.
  *
  * _cur points to the current object, _root contains the search key for
  * root of the subtree we want to scan. The iterator skips over empty
  * nodes, and visits the subtree in depth-first, left-to-right order.
- * This does not guarantees that keys returned are sorted by prefix length.
+ * The keys returned by this iterator are not sorted by prefix length.
  */
 template <class A, class Payload>
-class TrieIterator {
+class TriePostOrderIterator {
 public:
     typedef IPNet<A> Key;
     typedef TrieNode<A, Payload> Node;
@@ -330,13 +303,13 @@ public:
     /**
      * Constructors
      */
-    TrieIterator()				{}
+    TriePostOrderIterator()				{}
 
     /**
      * constructor for exact searches: both the current node and the search
      * key are taken from n, so the iterator will only loop once.
      */
-    explicit TrieIterator(Node *n)			{
+    explicit TriePostOrderIterator(Node *n)			{
 	_cur = n;
 	if (n)
 	    _root = n->k();
@@ -346,9 +319,21 @@ public:
      * construct for subtree scanning: the root key is set explicitly,
      * and the current node is set according to the search order.
      */
-    TrieIterator(Node *n, const Key &k)		{
+    TriePostOrderIterator(Node *n, const Key &k)		{
 	_root = k;
-	_cur = n ? n->begin() : NULL;
+	_cur = n; 
+	if (_cur) begin();
+    }
+
+    /**
+     * move to the starting position according to the visiting order 
+     */
+    TriePostOrderIterator * begin() { 
+	Node * n = _cur;
+	while (n->get_parent() && _root.contains(n->get_parent()->k()))
+	    n = n->get_parent();
+	_cur =  _cur->leftmost();
+	return this;
     }
 
     /**
@@ -357,9 +342,9 @@ public:
      * Updates position of iterator in tree.
      * @return position of iterator before increment.
      */
-    TrieIterator operator ++(int)		{ // postfix
-	TrieIterator x = *this;
-	_cur = _cur->next(_root);
+    TriePostOrderIterator operator ++(int)		{ // postfix
+	TriePostOrderIterator x = *this;
+	next();
 	return x;
     }
 
@@ -369,22 +354,122 @@ public:
      * Updates position of iterator in tree.
      * @return position of iterator after increment.
      */
-    TrieIterator& operator ++()		{ // prefix
-	_cur = _cur->next(_root);
+    TriePostOrderIterator& operator ++()		{ // prefix
+	next();
 	return *this;
     }
 
     Node *cur() const			{ return _cur;		};
 
-    bool operator==(const TrieIterator & x) const { return (_cur == x._cur); }
+    bool operator==(const TriePostOrderIterator & x) const {
+	return (_cur == x._cur); 
+    }
 
     bool has_payload() const		{ return _cur->has_payload(); }
     Payload & payload()			{ return _cur->p(); };
     const Key & key() const		{ return _cur->k(); };
 
 private:
+
+    bool node_is_left(Node * n) const; 
+    void next();
+
     Node	*_cur;
     Key		_root;
+};
+
+/**
+ * Preorder Iterator on a trie.
+ *
+ * _cur points to the current object, _root contains the search key for
+ * root of the subtree we want to scan. The iterator does preorder traversal,
+ * that is, current node first, then left then right.  This guarantees that
+ * keys returned are sorted by prefix length.
+ */
+template <class A, class Payload>
+class TriePreOrderIterator {
+public:
+    typedef IPNet<A> Key;
+    typedef TrieNode<A, Payload> Node;
+
+    /**
+     * Constructors
+     */
+    TriePreOrderIterator()				{}
+
+    /**
+     * constructor for exact searches: both the current node and the search
+     * key are taken from n, so the iterator will only loop once.
+     */
+    explicit TriePreOrderIterator(Node *n)			{
+	_cur = n;
+	if (_cur) _root = n->k();
+    }
+
+    /**
+     * construct for subtree scanning: the root key is set explicitly,
+     * and the current node is set according to the search order.
+     */
+    TriePreOrderIterator(Node *n, const Key &k)		{
+	_root = k;
+	_cur = n; 
+	if (_cur) begin();
+    }
+
+    /**
+     * move to the starting position according to the visiting order 
+     */
+    TriePreOrderIterator * begin() { 
+	while (!_stack.empty()) _stack.pop();
+	while (_cur->get_parent() && _root.contains(_cur->get_parent()->k()))
+	    _cur = _cur->get_parent();
+	_stack.push(_cur);
+	next();
+	return this;
+    }
+
+    /**
+     * Postfix increment
+     *
+     * Updates position of iterator in tree.
+     * @return position of iterator before increment.
+     */
+    TriePreOrderIterator operator ++(int)		{ // postfix
+	TriePreOrderIterator x = *this;
+	next();
+	return x;
+    }
+
+    /**
+     * Prefix increment
+     *
+     * Updates position of iterator in tree.
+     * @return position of iterator after increment.
+     */
+    TriePreOrderIterator& operator ++()		{ // prefix
+	next();
+	return *this;
+    }
+
+    Node *cur() const			{ return _cur;		};
+
+    bool operator==(const TriePreOrderIterator & x) const {
+	return (_cur == x._cur); 
+    }
+
+    bool has_payload() const		{ return _cur->has_payload(); }
+    Payload & payload()			{ return _cur->p(); };
+    const Key & key() const		{ return _cur->k(); };
+
+private:
+
+
+    bool node_is_left(Node * n) const; 
+    void next();
+
+    Node	 *_cur;
+    Key		 _root;
+    stack<Node*> _stack;
 };
 
 /**
@@ -396,12 +481,13 @@ private:
  * Additional methods are supported to provide access via iterators.
  */
 
-template <class A, class Payload>
+template <class A, class Payload, class __Iterator =
+    TriePostOrderIterator<A,Payload> >
 class Trie {
 public:
     typedef IPNet<A> Key;
-    typedef TrieIterator<A,Payload> iterator;
     typedef TrieNode<A,Payload> Node;
+    typedef __Iterator iterator;
 
     /**
      * stl map interface
@@ -763,10 +849,12 @@ TrieNode<A,Payload>::lower_bound(const Key &key)
 	if (cand->_p) {		// we also have a payload, so we are done.
 	    // printf("exact match\n");
 	    return cand;
-	} else {		// no payload, skip to the next node in the
-				// entire tree (use a null Key as root)
+	} else {		// no payload, skip to the next (in postorder)
+				// node in the entire tree (null Key as root)
 	    // printf("exact match on empty node - calling next\n");
-	    return cand->next(Key());
+	    TriePostOrderIterator<A,Payload> iterator(cand, Key());
+	    ++iterator;
+	    return iterator.cur();
 	}
     }
     
@@ -842,9 +930,9 @@ TrieNode<A,Payload>::str() const
     return s;
 }
 
-template <class A, class Payload> 
+template <class A, class Payload, class __Iterator>
 void 
-Trie<A,Payload>::print() const
+Trie<A,Payload,__Iterator>::print() const
 {
     //this is called print - it should NOT use debug_msg!!!
     printf("---- print trie ---\n");
@@ -857,4 +945,59 @@ Trie<A,Payload>::print() const
     printf("---------------\n");
 }
 
+template <class A, class Payload>
+bool 
+TriePostOrderIterator<A,Payload>::node_is_left(Node* n) const 
+{ 
+    return n->get_parent() && n  == n->get_parent()->get_left(); 
+}
+
+template <class A, class Payload>
+void
+TriePostOrderIterator<A,Payload>::next() 
+{
+    Node * n = _cur;
+    do {
+	if (n->get_parent() == NULL) {
+	    _cur = NULL;
+	    return;		// cannot backtrack, finished
+	}
+	bool was_left_child = node_is_left(n);
+	n = n->get_parent();
+	// backtrack one level, then explore the leftmost path
+	// on the right branch if not done already.
+	if (was_left_child && n->get_right()) {
+	    n = n->get_right()->leftmost();
+	}
+	if (_root.contains(n->k()) == false) {
+	    _cur = NULL;
+	    return;
+	}
+    } while (n->has_payload() == false);	// found a good node.
+    _cur = n;
+}
+
+
+template <class A, class Payload>
+void
+TriePreOrderIterator<A,Payload>::next() 
+{
+    if (_stack.empty()) {
+	_cur = NULL;
+	return;
+    }
+
+    do {
+	_cur = _stack.top();
+	_stack.pop();
+	if (_root.contains(_cur->k()) == false) {
+	    _cur = NULL;
+	    return;
+	}
+	if( _cur->get_right( ) != NULL )
+	    _stack.push(_cur->get_right());
+	if( _cur->get_left() != NULL )
+	    _stack.push(_cur->get_left());
+    } while (_cur->has_payload() == false);	// found a good node.
+}
 #endif // __LIBXORP_TRIE_HH__
