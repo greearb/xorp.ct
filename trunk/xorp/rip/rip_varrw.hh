@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/rip_varrw.hh,v 1.1 2004/09/17 13:57:15 abittau Exp $
+// $XORP: xorp/rip/rip_varrw.hh,v 1.2 2004/09/18 00:00:32 pavlin Exp $
 
 #ifndef __RIP_RIP_VARRW_HH__
 #define __RIP_RIP_VARRW_HH__
@@ -55,8 +55,6 @@ private:
     bool write_nexthop(const string& id, const Element& e);
 
     RouteEntry<A>&	_route;
-
-    ElementFactory	_ef;
 };
 
 #endif // __RIP_RIP_VARRW_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.1 2004/09/17 13:57:15 abittau Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.2 2004/09/18 00:00:31 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -32,12 +32,8 @@ RIPVarRW<A>::RIPVarRW(RouteEntry<A>& route)
 
     read_route_nexthop(route);
 
-    initialize("metric",
-	       _ef.create(ElemU32::id,
-			  policy_utils::to_str(route.cost()).c_str()));
-    initialize("tag",
-	       _ef.create(ElemU32::id,
-			  policy_utils::to_str(route.tag()).c_str()));
+    initialize("metric", new ElemU32(route.cost()));
+    initialize("tag", new ElemU32(route.tag()));
 }
 
 template <class A>
@@ -106,10 +102,8 @@ template <>
 void
 RIPVarRW<IPv4>::read_route_nexthop(RouteEntry<IPv4>& route)
 {
-    initialize("network4",
-	       _ef.create(ElemIPv4Net::id, route.net().str().c_str()));
-    initialize("nexthop4",
-	       _ef.create(ElemIPv4::id, route.nexthop().str().c_str()));
+    initialize("network4", new ElemIPv4Net(route.net()));
+    initialize("nexthop4", new ElemIPv4(route.nexthop()));
     
     initialize("network6", NULL);
     initialize("nexthop6", NULL);
@@ -142,10 +136,9 @@ template <>
 void
 RIPVarRW<IPv6>::read_route_nexthop(RouteEntry<IPv6>& route)
 {
-    initialize("network6",
-	       _ef.create(ElemIPv6Net::id, route.net().str().c_str()));
-    initialize("nexthop6",
-	       _ef.create(ElemIPv6::id, route.nexthop().str().c_str()));
+    initialize("network6", new ElemIPv6Net(route.net()));
+    initialize("nexthop6", new ElemIPv6(route.nexthop()));
+    
     initialize("network4", NULL);
     initialize("nexthop4", NULL);
 }
