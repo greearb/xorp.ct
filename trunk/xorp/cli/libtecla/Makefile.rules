@@ -139,4 +139,5 @@ $(OBJDIR)/enhance.o: $(srcdir)/enhance.c $(srcdir)/libtecla.h
 
 $(OBJDIR)/keytab.h: $(srcdir)/keytab.h $(srcdir)/libtecla.h \
  $(srcdir)/hash.h $(srcdir)/strngmem.h
+	mkdir -p $(OBJDIR)
 	cp $(srcdir)/keytab.h $@
