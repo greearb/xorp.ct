@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rib/rib.tex,v 1.13 2004/08/03 05:02:53 pavlin Exp $
+% $XORP: xorp/docs/rib/rib.tex,v 1.14 2005/03/16 02:21:04 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Routing Information Base (RIB) Process \\
 \vspace{1ex}
-Version 1.0}
+Version 1.1}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{July 8, 2004}
+\date{April 7, 2005}
 
 \maketitle
 
@@ -295,22 +295,59 @@ or both.
 \subsection{Adding and Deleting Routes}
 
 \begin{verbatim}
-add_route4 ? protocol:txt & unicast:bool & multicast:bool & 
-        network:ipv4net & nexthop:ipv4 & metric:u32
-add_route6 ? protocol:txt & unicast:bool & multicast:bool & 
-        network:ipv6net & nexthop:ipv6 & metric:u32
-replace_route4 ? protocol:txt & unicast:bool & multicast:bool & 
-        network:ipv4net & nexthop:ipv4 & metric:u32
-replace_route6 ? protocol:txt & unicast:bool & multicast:bool & 
-        network:ipv6net & nexthop:ipv6 & metric:u32
-delete_route4 ? protocol:txt & unicast:bool & multicast:bool & 
-        network:ipv4net
-delete_route6 ? protocol:txt & unicast:bool & multicast:bool & 
-        network:ipv6net
+add_route4      ? protocol:txt & unicast:bool & multicast:bool  \
+                & network:ipv4net & nexthop:ipv4 & metric:u32   \
+                & policytags:list
+
+add_route6      ? protocol:txt & unicast:bool & multicast:bool  \
+                & network:ipv6net & nexthop:ipv6 & metric:u32   \
+                & policytags:list
+
+replace_route4  ? protocol:txt & unicast:bool & multicast:bool  \
+                & network:ipv4net & nexthop:ipv4 & metric:u32   \
+                & policytags:list
+
+replace_route6  ? protocol:txt & unicast:bool & multicast:bool  \
+                & network:ipv6net & nexthop:ipv6 & metric:u32   \
+                & policytags:list
+
+delete_route4   ? protocol:txt & unicast:bool & multicast:bool  \
+                & network:ipv4net
+
+delete_route6   ? protocol:txt & unicast:bool & multicast:bool  \
+                & network:ipv6net
+
+add_interface_route4    ? protocol:txt                          \
+                        & unicast:bool & multicast:bool         \
+                        & network:ipv4net & nexthop:ipv4        \
+                        & ifname:txt & vifname:txt & metric:u32 \
+                        & policytags:list
+
+add_interface_route6    ? protocol:txt                          \
+                        & unicast:bool & multicast:bool         \
+                        & network:ipv6net & nexthop:ipv6        \
+                        & ifname:txt & vifname:txt & metric:u32 \
+                        & policytags:list
+
+replace_interface_route4 ? protocol:txt                         \
+                        & unicast:bool & multicast:bool         \
+                        & network:ipv4net & nexthop:ipv4        \
+                        & ifname:txt & vifname:txt & metric:u32 \
+                        & policytags:list
+
+replace_interface_route6 ? protocol:txt                         \
+                        & unicast:bool & multicast:bool         \
+                        & network:ipv6net & nexthop:ipv6        \
+                        & ifname:txt & vifname:txt & metric:u32 \
+                        & policytags:list
 \end{verbatim}
 
 These XRLs are used to communicate new routes, changed routes, or the
 deletion of routes to the RIB.
+The {\tt add\_interface\_route} and {\tt replace\_interface\_route}
+XRLs are similar to the {\tt add\_route} and {\tt replace\_route}
+XRLs except that the origin explicitly specifies the outgoing
+network interface and vif for the route.
 
 Note that sending an {\tt add\_route} for a route that is already in
 the OriginTable for that protocol is an error, as is sending a {\tt
