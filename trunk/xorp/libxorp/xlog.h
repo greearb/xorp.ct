@@ -29,7 +29,7 @@
 
 /*
  * The following defines and notes we defined __printfike if it does not
- * already exist.  The expansion of this macro uses a gcc extension to 
+ * already exist.  The expansion of this macro uses a gcc extension to
  * check format strings.
  */
 #ifndef __printflike
@@ -42,7 +42,7 @@
 #endif /* __GNUC__ */
 #endif /* __printflike */
 
-/** 
+/**
  * @short XORP logging functions.
  *
  * The xlog functions provide a similar role to syslog.  The log
@@ -108,47 +108,54 @@ do {									 \
 
 /**
  * Initialize the log utility.
- * 
+ *
  *  As part of the initialization, the preamble string will be set to
  * <@ref process_name><@ref preamble_message>
  * Use in preference to @ref xlog_set_preamble which will be removed.
- * 
+ *
  * @param argv0 the path of the process executable from which the program name
  * will be extract to become part of the preamble string.
- * 
+ *
  * @param preamble_message a string that will become part of the
  * preamble string.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_init(const char *argv0, const char *preamble_message);
 
 /**
  * Gracefully exit logging.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_exit(void);
 
 /**
  * Start logging.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_start(void);
 
 /**
  * Stop logging.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_stop(void);
 
 /**
+ * Check if xlog is running.
+ *
+ * @return non-zero if xlog is running, otherwise 0.
+ */
+int	xlog_is_running(void);
+
+/**
  * Enable logging for messages of a given type (@ref log_level_t).
- * 
+ *
  * By default, all message types are enabled.
- * 
+ *
  * @param log_level the message type @ref xlog_level_t
  * (e.g., @ref XLOG_LEVEL_WARNING) to enable the logging for.
  * @return 0 on success, otherwise -1.
@@ -157,9 +164,9 @@ int	xlog_enable(xlog_level_t log_level);
 
 /**
  * Disable logging for messages of a given type (@ref log_level_t).
- * 
+ *
  * Note: @ref XLOG_LEVEL_FATAL cannot be disabled.
- * 
+ *
  * @param log_level the message type @ref xlog_level_t
  * (e.g., @ref XLOG_LEVEL_WARNING) to disable the logging for.
  * @return 0 on success, otherwise -1.
@@ -168,7 +175,7 @@ int	xlog_disable(xlog_level_t log_level);
 
 /**
  * Set the preamble string for the log entries.
- * 
+ *
  * @param text the preamble string, or NULL if no preamble.
  */
 void	xlog_set_preamble(const char *text);
@@ -182,10 +189,10 @@ const char* xlog_process_name(void);
 
 /**
  * Set the level of verbosity (@ref xlog_verbose_t) for the log entries.
- * 
+ *
  * Applies for all type of messages except for @ref XLOG_LEVEL_FATAL
  * which always is set to the most verbose level.
- * 
+ *
  * @param verbose_level the level of verbosity @ref xlog_verbose_t
  * (higher is more verbose).
  */
@@ -194,10 +201,10 @@ void	xlog_set_verbose(xlog_verbose_t verbose_level);
 /**
  * Set the level of verbosity (@ref xlog_verbose_t) for the log entries
  * of messages of a given type (@ref xlog_level_t).
- * 
+ *
  * Note: @ref XLOG_LEVEL_FATAL verbosity cannot be changed, and is
  * always set to the most verbose level.
- * 
+ *
  * @param log_level the message type @ref xlog_level_t to set the
  * verbosity of.
  * @param verbose_level the level of verbosity @ref xlog_verbose_t
@@ -208,7 +215,7 @@ void	xlog_level_set_verbose(xlog_level_t log_level,
 
 /**
  * Add a file descriptor to the set of output streams.
- * 
+ *
  * @param fp the file descriptor to add to the set of output streams.
  * @return 0 on success, otherwise -1.
  */
@@ -216,7 +223,7 @@ int 	xlog_add_output(FILE *fp);
 
 /**
  * Remove a file descriptor from the set of output streams.
- * 
+ *
  * @param fp the file descriptor to remove from the set of output streams.
  * @return 0 on success, otherwise -1.
  */
@@ -224,47 +231,47 @@ int	xlog_remove_output(FILE *fp);
 
 /**
  * Add a processing function and an object to the set of output streams.
- * 
+ *
  * @param func the function to add to the set of output streams.
  * @param obj the object to supply @ref func with when called.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int 	xlog_add_output_func(xlog_output_func_t func, void *obj);
 
 /**
  * Remove a processing function and an object from the set of output streams.
- * 
+ *
  * @param func the function to remove from the set of output streams.
  * @param obj the object that @ref func was supplied with.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_remove_output_func(xlog_output_func_t func, void *obj);
 
 /**
  * Add default output stream to list of output streams.
- * 
+ *
  * XXX: right now the default is '/dev/stderr', but it should eventually be:
  * `/dev/console' if the process has sufficient permissions,
  * and `/dev/stderr' otherwise.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_add_default_output(void);
 
 /**
  * Remove the default output stream from the set of output streams.
- * 
+ *
  * @return 0 on success, otherwise -1.
  */
 int	xlog_remove_default_output(void);
 
 /**
  * Write a FATAL message to the xlog output streams and aborts the program.
- * 
+ *
  * Note that FATAL messages cannot be disabled by @ref xlog_disable().
- * 
+ *
  * @param module_name the name of the module this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
@@ -276,7 +283,7 @@ void	xlog_fatal(const char *module_name, const char *where,
 
 /**
  * Write an ERROR message to the xlog output streams.
- * 
+ *
  * @param module_name the name of the module this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
@@ -288,7 +295,7 @@ void	xlog_error(const char *module_name, const char *where,
 
 /**
  * Write a WARNING message to the xlog output streams.
- * 
+ *
  * @param module_name the name of the module this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
@@ -300,7 +307,7 @@ void	xlog_warning(const char *module_name, const char *where,
 
 /**
  * Write an INFO message to the xlog output streams.
- * 
+ *
  * @param module_name the name of the module this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
@@ -312,11 +319,11 @@ void	xlog_info(const char *module_name, const char *where,
 
 /**
  * XORP replacement for assert(3).
- * 
+ *
  * Note that it cannot be conditionally disabled and logs error through
  * the standard XLOG mechanism.
  * Calls XLOG_FATAL if assertion fails.
- * 
+ *
  * @param assertion the assertion condition.
  */
 #define XLOG_ASSERT(assertion)						\
@@ -327,7 +334,7 @@ do {									\
 
 /**
  * A marker that can be used to indicate code that should never be executed.
- * 
+ *
  * Note that it cannot be conditionally disabled and logs error through
  * the standard XLOG mechanism.
  * Always calls XLOG_FATAL.
@@ -341,7 +348,7 @@ do {									\
 /**
  * A marker that can be used to indicate code that is not yet
  * implemented and hence should not be run.
- * 
+ *
  * Note that it cannot be conditionally disabled and logs error through
  * the standard XLOG mechanism.
  * Always calls XLOG_FATAL.
@@ -351,8 +358,6 @@ do {									\
 	XLOG_FATAL("Internal fatal error: unfinished code reached");	\
 	exit(1);	/* unreached: keep the compiler happy */	\
 } while (0)
-
-
 
 /*
  * The macros below define the XLOG_TRACE(), the macro responsible for
@@ -365,7 +370,7 @@ do {									\
  *		XLOG_TRACE(cond_variable, "The number is %d", 5);
  *
  * There is some additional unpleasantness in this header for
- * `configure' related magic.  
+ * `configure' related magic.
  *
  * The macro CPP_SUPPORTS_VA_ARGS is defined by `configure' tests if the
  * C preprocessor supports macros with variable length arguments.  We
@@ -378,36 +383,36 @@ do {									\
 #ifdef CPP_SUPPORTS_GNU_VA_ARGS
 #	    define XLOG_TRACE(args...)					\
 		_xcond_trace_msg_long(XORP_MODULE_NAME, __FILE__, __LINE__, __FUNCTION__, args)
-#else  
+#else
 #	    define XLOG_TRACE						\
 		_xcond_trace_entry(XORP_MODULE_NAME, __FILE__, __LINE__, __FUNCTION__),	\
 		_xcond_trace_msg_short
 #endif
 
 /* Function for systems with variable argument macros */
-void	_xcond_trace_msg_long(const char *module_name, 
+void	_xcond_trace_msg_long(const char *module_name,
 			      const char *file,
-			      int	  line, 
-			      const char *fn, 
-			      int	  flag, 
+			      int	  line,
+			      const char *fn,
+			      int	  flag,
 			      const char *format, ...) __printflike(6,7);
 
 /* Functions for systems without variable argument macros */
 void	_xcond_trace_entry(const char *module_name, const char *file,
 			   int line, const char *fn);
 
-void	_xcond_trace_msg_short(int flag, 
+void	_xcond_trace_msg_short(int flag,
 			       const char *format, ...) __printflike(2,3);
 
 /**
  * Compute the current local time and return it as a string.
- * 
+ *
  * The return string has the format:
  *   Year/Month/Day Hour:Minute:Second.Microsecond
  *   Example: 2002/02/05 20:22:09.808632
  *   Note that the returned string uses statically allocated memory,
  *   and does not need to be de-allocated.
- * 
+ *
  * @return a statically allocated string with the local time using
  * the format described above.
  */
@@ -415,13 +420,13 @@ const char *xlog_localtime2string(void);
 
 /**
  * A local implementation of vasprintf(3).
- * 
+ *
  * If vasprintf(3) is available, it is called instead.
- * 
+ *
  * @param ret a pointer to the string pointer to store the result.
  * @param format the printf(3)-style format.
  * @param ap the variable arguments for @ref format.
- * 
+ *
  * @return (From FreeBSD vasprintf(3) manual page):
  * The number of characters printed (not including the trailing '\0'
  * used to end output to strings). Also, set the value pointed to by
@@ -439,7 +444,7 @@ int x_vasprintf(char **ret, const char *format, va_list ap);
  * @param ret a pointer to the string pointer to store the result.
  * @param format the printf(3)-style format.
  * @param ... the variable arguments for @ref format.
- * 
+ *
  * @return (From FreeBSD asprintf(3) manual page):
  * The number of characters printed (not including the
  * trailing '\0' used to end output to strings). Also, set ret to be
@@ -455,7 +460,7 @@ int x_asprintf(char **ret, const char *format, ...);
 #undef __libxorp_xlog_defined_printflike
 #undef __printflike
 #endif /* __libxorp_xlog_defined_printflike */
-    
+
 #   ifdef __cplusplus
 }
 #   endif
