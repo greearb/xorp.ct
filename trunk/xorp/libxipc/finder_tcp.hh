@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.1 2003/01/21 18:51:36 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -143,14 +143,26 @@ public:
 
     /**
      * Add host to permitted hosts list.
+     * @return true if host is not on list already.
      */
     bool add_permitted_host(const IPv4& host);
 
     /**
+     * Add list of permitted hosts.
+     */
+    bool add_permitted_hosts(const AddrList& hosts);
+    
+    /**
      * Add net to permitted nets list.
+     * @return true if net is not on list already.
      */
     bool add_permitted_net(const IPv4Net& net);
 
+    /**
+     * Add list of permitted nets.
+     */
+    bool add_permitted_nets(const NetList& hosts);
+    
     inline const AddrList& permitted_hosts() const { return _ok_addrs; }
     inline const NetList&  permitted_nets() const  { return _ok_nets; }
 protected:
@@ -162,6 +174,8 @@ protected:
     
     FinderTcpListenerBase(const FinderTcpListenerBase&);	    // Not impl
     FinderTcpListenerBase& operator=(const FinderTcpListenerBase&); // Not impl
+
+    inline EventLoop& event_loop() const { return _e; }
     
 protected:
     EventLoop&	_e;
