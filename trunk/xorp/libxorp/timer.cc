@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.18 2004/09/27 01:04:13 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.19 2004/10/06 20:32:53 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -370,6 +370,7 @@ TimerList::run()
 	// timer to invoke the hook.
 	XorpTimer placeholder(t);
 	t->expire(placeholder, 0);
+	advance_time();
     }
 }
 
