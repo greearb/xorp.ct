@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.14 2004/11/05 00:48:18 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.15 2004/11/05 01:53:39 bms Exp $"
 
 
 #include "fea_module.h"
@@ -275,42 +275,48 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
 
-    // Check for a discard route; the referenced ifname must have the
-    // discard property. These use a separate route type in netlink
-    // land. Unlike BSD, they need not to point to a loopback interface.
-    IfTree& it = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-    XLOG_ASSERT(ii != it.ifs().end());
-    if (ii->second.discard()) {
-	rtmsg->rtm_type = RTN_BLACKHOLE;
-	goto skip_ifindex;
-    }
-
-    // Get the interface index
+    // Get the interface index, if it exists.
     if_index = 0;
 #ifdef HAVE_IF_NAMETOINDEX
     if_index = if_nametoindex(fte.vifname().c_str());
 #endif // HAVE_IF_NAMETOINDEX
     if (if_index == 0) {
-	XLOG_FATAL("Could not find interface index for name %s",
-		   fte.vifname().c_str());
+	// Check for a discard route; the referenced ifname must have
+	// the discard property. These use a separate route type in netlink
+	// land. Unlike BSD, it need not reference a loopback interface.
+	// Because this interface exists only in the FEA, it has no index.
+
+	IfTree& it = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+
+	XLOG_ASSERT(ii != it.ifs().end());
+
+	if (ii->second.discard()) {
+	    rtmsg->rtm_type = RTN_BLACKHOLE;
+	} else {
+	    // Catchall.
+	    XLOG_FATAL("Could not find interface index for name %s",
+			fte.vifname().c_str());
+	}
     }
 
-    // Add the interface index as an attribute
-    int int_if_index = if_index;
-    rta_len = RTA_LENGTH(sizeof(int_if_index));
-    if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+    // If the interface has an index in the host stack, add it
+    // as an attribute.
+    if (if_index != 0) {
+	int int_if_index = if_index;
+	rta_len = RTA_LENGTH(sizeof(int_if_index));
+	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
+	    XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
+		       sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+	}
+	rtattr = (struct rtattr*)(((char*)(rtattr)) +
+	    RTA_ALIGN((rtattr)->rta_len));
+	rtattr->rta_type = RTA_OIF;
+	rtattr->rta_len = rta_len;
+	data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+	memcpy(data, &int_if_index, sizeof(int_if_index));
+	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
-    rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
-    rtattr->rta_type = RTA_OIF;
-    rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
-    memcpy(data, &int_if_index, sizeof(int_if_index));
-    nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
-
-skip_ifindex:
 
     // Add the route priority as an attribute
     int int_priority = fte.metric();
