@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.9 2003/05/08 23:45:11 mjh Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.10 2003/06/17 06:44:16 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -132,7 +132,8 @@ public:
 		     PeerHandler* peer_handler);
     int delete_route(const IPNet<IPv6> &net,
 		     PeerHandler* peer_handler);
-    void push(PeerHandler* peer_handler);
+    void push_ipv4(PeerHandler* peer_handler);
+    void push_ipv6(PeerHandler* peer_handler);
     void output_no_longer_busy(PeerHandler* peer_handler);
     const SubnetRoute<IPv4>* 
       lookup_route(const IPNet<IPv4> &net) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.14 2003/04/22 23:27:15 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.15 2003/06/17 06:44:16 atanu Exp $"
 
 #include "fcntl.h"
 
@@ -102,7 +102,7 @@ PlumbingTest::test1()
     printf("------------------------------------------------------\n");
     printf("PUSH A ROUTE\n");
     printf("Pushing Route 1\n");
-    push(&dummy_peerhandler1);
+    push_ipv4(&dummy_peerhandler1);
     printf("Push done\n");
 
     printf("------------------------------------------------------\n");
@@ -139,7 +139,7 @@ PlumbingTest::test1()
     route2->unref();
 
     printf("Pushing Routes\n");
-    push(&dummy_peerhandler1);
+    push_ipv4(&dummy_peerhandler1);
     printf("Push done\n");
 
     printf("------------------------------------------------------\n");
@@ -174,7 +174,7 @@ PlumbingTest::test1()
     route1->unref();
 
     printf("Pushing Routes\n");
-    push(&dummy_peerhandler1);
+    push_ipv4(&dummy_peerhandler1);
     printf("Push done\n");
 
     IPv4 nhaddr2("20.20.20.2");
@@ -190,7 +190,7 @@ PlumbingTest::test1()
     route2->unref();
 
     printf("Pushing Routes\n");
-    push(&dummy_peerhandler2);
+    push_ipv4(&dummy_peerhandler2);
     printf("Push done\n");
 
     printf("\n\nDeleting Route 2 - shouldn't affect RibOut\n");
@@ -203,7 +203,7 @@ PlumbingTest::test1()
     route2->unref();
 
     printf("Pushing Routes\n");
-    push(&dummy_peerhandler2);
+    push_ipv4(&dummy_peerhandler2);
     printf("Push done\n");
 
     IPv4 nhaddr3("20.20.19.1");
@@ -218,7 +218,7 @@ PlumbingTest::test1()
     delete rtm2;
 
     printf("Pushing Routes\n");
-    push(&dummy_peerhandler2);
+    push_ipv4(&dummy_peerhandler2);
     printf("Push done\n");
 
     printf("\n\nDeleting Route 3 - this should cause route 1 to win again\n");
@@ -229,7 +229,7 @@ PlumbingTest::test1()
     route2->unref();
 
     printf("Pushing Routes\n");
-    push(&dummy_peerhandler2);
+    push_ipv4(&dummy_peerhandler2);
     printf("Push done\n");
 
     printf("------------------------------------------------------\n");
@@ -300,7 +300,7 @@ PlumbingTest::test2()
     printf("------------------------------------------------------\n");
     printf("PUSH A ROUTE\n");
     printf("Pushing Route 1\n");
-    push(&dummy_peerhandler1);
+    push_ipv4(&dummy_peerhandler1);
     printf("Push done\n");
     
     /*

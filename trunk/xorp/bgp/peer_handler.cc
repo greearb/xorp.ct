@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.15 2003/09/02 21:39:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.16 2003/09/04 03:24:32 atanu Exp $"
 
-#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -113,6 +113,9 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
     MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
+    
+    bool ipv4 = false;
+    bool ipv6 = false;
 
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
@@ -145,6 +148,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     ** IPv4 Withdraws
     */
     if (!p->wr_list().empty()) {
+	ipv4 = true;
 	BGPUpdateAttribList::const_iterator wi;
 	wi = p->wr_list().begin();
 	while (wi != p->wr_list().end()) {
@@ -157,6 +161,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     ** IPv6 Withdraws
     */
     if (mpunreach) {
+	ipv6 = true;
 	list<IPNet<IPv6> >::const_iterator wi6;
 	wi6 = mpunreach->wr_list().begin();
 	while (wi6 != mpunreach->wr_list().end()) {
@@ -169,6 +174,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     ** IPv4 Route add.
     */
     if (!p->nlri_list().empty()) {
+	ipv4 = true;
 	pa_list4.rehash();
 	XLOG_ASSERT(pa_list4.complete());
 	debug_msg("Built path attribute list: %s\n", pa_list4.str().c_str());
@@ -189,6 +195,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     ** IPv6 Route add.
     */
     if (mpreach) {
+	ipv6 = true;
 	pa_list6.rehash();
 	XLOG_ASSERT(pa_list6.complete());
 	debug_msg("Built path attribute list: %s\n", pa_list6.str().c_str());
@@ -205,7 +212,10 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	}
     }
 
-    _plumbing->push(this);
+    if (ipv4)
+	_plumbing->push_ipv4(this);
+    if (ipv6)
+	_plumbing->push_ipv6(this);
     return 0;
 }
 

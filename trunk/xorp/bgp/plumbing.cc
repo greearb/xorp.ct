@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.17 2003/08/06 17:52:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.18 2003/09/04 02:59:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -151,10 +151,16 @@ BGPPlumbing::lookup_route(const IPNet<IPv6> &net) const
 }
 
 void
-BGPPlumbing::push(PeerHandler* peer_handler) 
+BGPPlumbing::push_ipv4(PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::push\n");
     _v4_plumbing.push(peer_handler);
+}
+
+void
+BGPPlumbing::push_ipv6(PeerHandler* peer_handler) 
+{
+    debug_msg("BGPPlumbing::push\n");
     _v6_plumbing.push(peer_handler);
 }
 
