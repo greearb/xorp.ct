@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.49 2004/05/12 21:59:34 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.50 2004/05/13 06:06:27 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2095,7 +2095,7 @@ XrlPimNode::mfea_client_0_1_add_mrib4(
     const string&	, // xrl_sender_name, 
     const IPv4Net&	dest_prefix, 
     const IPv4&		next_hop_router_addr, 
-    const string&	, // next_hop_vif_name, 
+    const string&	next_hop_vif_name, 
     const uint32_t&	next_hop_vif_index, 
     const uint32_t&	metric_preference, 
     const uint32_t&	metric)
@@ -2121,7 +2121,7 @@ XrlPimNode::mfea_client_0_1_add_mrib4(
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
     //
-    PimNode::pim_mrib_table().add_pending_insert(0, mrib);
+    PimNode::pim_mrib_table().add_pending_insert(0, mrib, next_hop_vif_name);
     
     //
     // Success
@@ -2135,7 +2135,7 @@ XrlPimNode::mfea_client_0_1_add_mrib6(
     const string&	, // xrl_sender_name, 
     const IPv6Net&	dest_prefix, 
     const IPv6&		next_hop_router_addr, 
-    const string&	, // next_hop_vif_name, 
+    const string&	next_hop_vif_name, 
     const uint32_t&	next_hop_vif_index, 
     const uint32_t&	metric_preference, 
     const uint32_t&	metric)
@@ -2161,7 +2161,7 @@ XrlPimNode::mfea_client_0_1_add_mrib6(
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
     //
-    PimNode::pim_mrib_table().add_pending_insert(0, mrib);
+    PimNode::pim_mrib_table().add_pending_insert(0, mrib, next_hop_vif_name);
     
     //
     // Success
@@ -2416,6 +2416,7 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     const string&	cookie,
     const string&	protocol_origin)
 {
+    uint16_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
     //
@@ -2427,26 +2428,22 @@ XrlPimNode::redist_transaction4_0_1_add_route(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (pim_vif == NULL) {
-	string error_msg = c_format("Cannot add MRIB entry for vif %s: "
-				    "no such vif",
-				    vifname.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
+    if (pim_vif != NULL)
+	vif_index = pim_vif->vif_index();
 
     //
     // Create the Mrib entry
     //
     Mrib mrib = Mrib(IPvXNet(dst));
     mrib.set_next_hop_router_addr(IPvX(nh));
-    mrib.set_next_hop_vif_index(pim_vif->vif_index());
+    mrib.set_next_hop_vif_index(vif_index);
     mrib.set_metric_preference(ad);
     mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
     //
-    PimNode::pim_mrib_table().add_pending_insert(tid, mrib);
+    PimNode::pim_mrib_table().add_pending_insert(tid, mrib, vifname);
     
     //
     // Success
@@ -2578,6 +2575,7 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     const string&	cookie,
     const string&	protocol_origin)
 {
+    uint16_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
     //
@@ -2589,26 +2587,22 @@ XrlPimNode::redist_transaction6_0_1_add_route(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (pim_vif == NULL) {
-	string error_msg = c_format("Cannot add MRIB entry for vif %s: "
-				    "no such vif",
-				    vifname.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
+    if (pim_vif != NULL)
+	vif_index = pim_vif->vif_index();
 
     //
     // Create the Mrib entry
     //
     Mrib mrib = Mrib(IPvXNet(dst));
     mrib.set_next_hop_router_addr(IPvX(nh));
-    mrib.set_next_hop_vif_index(pim_vif->vif_index());
+    mrib.set_next_hop_vif_index(vif_index);
     mrib.set_metric_preference(ad);
     mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
     //
-    PimNode::pim_mrib_table().add_pending_insert(tid, mrib);
+    PimNode::pim_mrib_table().add_pending_insert(tid, mrib, vifname);
     
     //
     // Success
