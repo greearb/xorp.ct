@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.7 2004/04/10 20:05:46 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.8 2004/04/22 01:14:29 pavlin Exp $"
 
 
 //
@@ -65,7 +65,7 @@ StaticRoutesNode::startup()
     //
     // Transition to RUNNING occurs when all transient startup operations
     // are completed (e.g., after we have the interface/vif/address state
-    // available, after we have registered with the RIB, etc.
+    // available, after we have registered with the RIB, etc.)
     //
     ServiceBase::set_status(STARTING);
 
@@ -100,6 +100,9 @@ StaticRoutesNode::shutdown()
 	|| (ServiceBase::status() == FAILED)) {
 	return true;
     }
+
+    if (ServiceBase::status() != RUNNING)
+	return false;
 
     //
     // Transition to SHUTDOWN occurs when all transient shutdown operations
