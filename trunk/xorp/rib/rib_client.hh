@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_client.hh,v 1.1 2003/03/20 00:57:53 pavlin Exp $
+// $XORP: xorp/rib/rib_client.hh,v 1.2 2003/03/20 04:29:22 pavlin Exp $
 
 #ifndef __RIB_RIB_CLIENT_HH__
 #define __RIB_RIB_CLIENT_HH__
@@ -81,11 +81,19 @@ public:
      * packets towards the dest network.
      * @param vifname the name of the virtual interface to be used to
      * forward packets towards the dest network.
+     * @param metric the routing metric toward dest.
+     * @param admin_distance the administratively defined distance
+     * toward dest.
+     * @param protocol_origin the name of the protocol that originated
+     * this entry.
      */
     void add_route(const IPv4Net& dest,
 		   const IPv4& gw,
 		   const string& ifname,
-		   const string& vifname);
+		   const string& vifname,
+		   uint32_t metric,
+		   uint32_t admin_distance,
+		   const string& protocol_origin);
 
     /**
      * Communicate the deletion of an IPv4 route to the RIB client.
@@ -93,11 +101,6 @@ public:
      * @param dest the destination subnet of the route.
      */
     void delete_route(const IPv4Net&);
-
-    void add_route(const IPv6Net& dest,
-		   const IPv6& gw,
-		   const string& ifname,
-		   const string& vifname);
 
     /**
      * Communicate the addition of a new IPv6 route to the RIB client.
@@ -109,8 +112,20 @@ public:
      * packets towards the dest network.
      * @param vifname the name of the virtual interface to be used to
      * forward packets towards the dest network.
+     * @param metric the routing metric toward dest.
+     * @param admin_distance the administratively defined distance
+     * toward dest.
+     * @param protocol_origin the name of the protocol that originated
+     * this entry.
      */
-
+    void add_route(const IPv6Net& dest,
+		   const IPv6& gw,
+		   const string& ifname,
+		   const string& vifname,
+		   uint32_t metric,
+		   uint32_t admin_distance,
+		   const string& protocol_origin);
+    
     /**
      * Communicate the deletion of an IPv6 route to the RIB client.
      *

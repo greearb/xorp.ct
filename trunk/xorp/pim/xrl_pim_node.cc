@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.13 2003/03/25 06:55:08 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.14 2003/03/27 00:19:03 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -1772,7 +1772,7 @@ XrlPimNode::mfea_client_0_1_recv_dataflow_signal6(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_start_transaction(
+XrlPimNode::fti_0_2_start_transaction(
     // Output values, 
     uint32_t&	tid)
 {
@@ -1785,7 +1785,7 @@ XrlPimNode::fti_0_1_start_transaction(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_commit_transaction(
+XrlPimNode::fti_0_2_commit_transaction(
     // Input values, 
     const uint32_t&	tid)
 {
@@ -1801,7 +1801,7 @@ XrlPimNode::fti_0_1_commit_transaction(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_abort_transaction(
+XrlPimNode::fti_0_2_abort_transaction(
     // Input values, 
     const uint32_t&	tid)
 {
@@ -1817,15 +1817,21 @@ XrlPimNode::fti_0_1_abort_transaction(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_add_entry4(
+XrlPimNode::fti_0_2_add_entry4(
     // Input values, 
     const uint32_t&	tid, 
     const IPv4Net&	dst, 
     const IPv4&		gateway, 
     const string&	/* ifname */, 
-    const string&	vifname)
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
+    
+    // TODO: use "protocol_origin"
+    UNUSED(protocol_origin);
     
     if (pim_vif == NULL) {
 	string msg = c_format("Cannot add MRIB entry for vif %s: "
@@ -1857,9 +1863,8 @@ XrlPimNode::fti_0_1_add_entry4(
     Mrib mrib = Mrib(IPvXNet(dst));
     mrib.set_next_hop_router_addr(IPvX(gateway));
     mrib.set_next_hop_vif_index(pim_vif->vif_index());
-    // TODO: XXX: PAVPAVPAV: fix this!!
-    // mrib.set_metric_preference(metric_preference);
-    // mrib.set_metric(metric);
+    mrib.set_metric_preference(admin_distance);
+    mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
@@ -1870,15 +1875,21 @@ XrlPimNode::fti_0_1_add_entry4(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_add_entry6(
+XrlPimNode::fti_0_2_add_entry6(
     // Input values, 
     const uint32_t&	tid, 
     const IPv6Net&	dst, 
     const IPv6&		gateway, 
     const string&	/* ifname */, 
-    const string&	vifname)
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
+    
+    // TODO: use "protocol_origin"
+    UNUSED(protocol_origin);
     
     if (pim_vif == NULL) {
 	string msg = c_format("Cannot add MRIB entry for vif %s: "
@@ -1914,9 +1925,8 @@ XrlPimNode::fti_0_1_add_entry6(
     Mrib mrib = Mrib(IPvXNet(dst));
     mrib.set_next_hop_router_addr(IPvX(gateway));
     mrib.set_next_hop_vif_index(pim_vif->vif_index());
-    // TODO: XXX: PAVPAVPAV: fix this!!
-    // mrib.set_metric_preference(metric_preference);
-    // mrib.set_metric(metric);
+    mrib.set_metric_preference(admin_distance);
+    mrib.set_metric(metric);
     
     //
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
@@ -1927,7 +1937,7 @@ XrlPimNode::fti_0_1_add_entry6(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_delete_entry4(
+XrlPimNode::fti_0_2_delete_entry4(
     // Input values, 
     const uint32_t&	tid, 
     const IPv4Net&	dst)
@@ -1963,7 +1973,7 @@ XrlPimNode::fti_0_1_delete_entry4(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_delete_entry6(
+XrlPimNode::fti_0_2_delete_entry6(
     // Input values, 
     const uint32_t&	tid, 
     const IPv6Net&	dst)
@@ -2003,7 +2013,7 @@ XrlPimNode::fti_0_1_delete_entry6(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_delete_all_entries(
+XrlPimNode::fti_0_2_delete_all_entries(
     // Input values, 
     const uint32_t&	/* tid */)
 {
@@ -2013,7 +2023,7 @@ XrlPimNode::fti_0_1_delete_all_entries(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_delete_all_entries4(
+XrlPimNode::fti_0_2_delete_all_entries4(
     // Input values, 
     const uint32_t&	/* tid */)
 {
@@ -2040,7 +2050,7 @@ XrlPimNode::fti_0_1_delete_all_entries4(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_delete_all_entries6(
+XrlPimNode::fti_0_2_delete_all_entries6(
     // Input values, 
     const uint32_t&	/* tid */)
 {
@@ -2071,14 +2081,17 @@ XrlPimNode::fti_0_1_delete_all_entries6(
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_lookup_route4(
+XrlPimNode::fti_0_2_lookup_route4(
     // Input values, 
     const IPv4&		dst, 
     // Output values, 
     IPv4Net&		netmask, 
     IPv4&		gateway, 
     string&		ifname, 
-    string&		vifname)
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     //
     // Verify the address family
@@ -2127,19 +2140,26 @@ XrlPimNode::fti_0_1_lookup_route4(
     gateway = mrib->next_hop_router_addr().get_ipv4();
     ifname = pim_vif->ifname();
     vifname = pim_vif->name();
+    metric = mrib->metric();
+    admin_distance = mrib->metric_preference();
+    // TODO: set the value of protocol_origin to something meaningful
+    protocol_origin = "NOT_SUPPORTED";
     
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_lookup_route6(
+XrlPimNode::fti_0_2_lookup_route6(
     // Input values, 
     const IPv6&		dst, 
     // Output values, 
     IPv6Net&		netmask, 
     IPv6&		gateway, 
     string&		ifname, 
-    string&		vifname)
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     //
     // Verify the address family
@@ -2192,18 +2212,25 @@ XrlPimNode::fti_0_1_lookup_route6(
     gateway = mrib->next_hop_router_addr().get_ipv6();
     ifname = pim_vif->ifname();
     vifname = pim_vif->name();
+    metric = mrib->metric();
+    admin_distance = mrib->metric_preference();
+    // TODO: set the value of protocol_origin to something meaningful
+    protocol_origin = "NOT_SUPPORTED";
     
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_lookup_entry4(
+XrlPimNode::fti_0_2_lookup_entry4(
     // Input values, 
     const IPv4Net&	dst, 
     // Output values, 
     IPv4&		gateway, 
     string&		ifname, 
-    string&		vifname)
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     //
     // Verify the address family
@@ -2251,18 +2278,25 @@ XrlPimNode::fti_0_1_lookup_entry4(
     gateway = mrib->next_hop_router_addr().get_ipv4();
     ifname = pim_vif->ifname();
     vifname = pim_vif->name();
+    metric = mrib->metric();
+    admin_distance = mrib->metric_preference();
+    // TODO: set the value of protocol_origin to something meaningful
+    protocol_origin = "NOT_SUPPORTED";
     
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlPimNode::fti_0_1_lookup_entry6(
+XrlPimNode::fti_0_2_lookup_entry6(
     // Input values, 
     const IPv6Net&	dst, 
     // Output values, 
     IPv6&		gateway, 
     string&		ifname, 
-    string&		vifname)
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     //
     // Verify the address family
@@ -2314,6 +2348,10 @@ XrlPimNode::fti_0_1_lookup_entry6(
     gateway = mrib->next_hop_router_addr().get_ipv6();
     ifname = pim_vif->ifname();
     vifname = pim_vif->name();
+    metric = mrib->metric();
+    admin_distance = mrib->metric_preference();
+    // TODO: set the value of protocol_origin to something meaningful
+    protocol_origin = "NOT_SUPPORTED";
     
     return XrlCmdError::OKAY();
 }

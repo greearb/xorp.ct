@@ -85,7 +85,7 @@ RANLIB = @RANLIB@
 #
 # Sample Test Client Interface 
 #
-noinst_LIBRARIES = libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libtestxif.a
+noinst_LIBRARIES = libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libtestxif.a
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
 libcliprocessorxif_a_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
@@ -94,7 +94,7 @@ libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
 libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
 libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
 libfeaifmgrclientxif_a_SOURCES = fea_ifmgr_client_xif.hh  fea_ifmgr_client_xif.cc 
-libfeaftixif_a_SOURCES = fea_fti_xif.hh fea_fti_xif.cc
+libftixif_a_SOURCES = fti_xif.hh fti_xif.cc
 libfearawpkt_a_SOURCES = fea_rawpkt_xif.hh fea_rawpkt_xif.cc
 libfearawpktclient_a_SOURCES = fea_rawpkt_client_xif.hh  fea_rawpkt_client_xif.cc 
 libfinderxif_a_SOURCES = finder_xif.hh finder_xif.cc
@@ -144,8 +144,8 @@ libfeaifmgrxif_a_LIBADD =
 libfeaifmgrxif_a_OBJECTS =  fea_ifmgr_xif.o
 libfeaifmgrclientxif_a_LIBADD = 
 libfeaifmgrclientxif_a_OBJECTS =  fea_ifmgr_client_xif.o
-libfeaftixif_a_LIBADD = 
-libfeaftixif_a_OBJECTS =  fea_fti_xif.o
+libftixif_a_LIBADD = 
+libftixif_a_OBJECTS =  fti_xif.o
 libfearawpkt_a_LIBADD = 
 libfearawpkt_a_OBJECTS =  fea_rawpkt_xif.o
 libfearawpktclient_a_LIBADD = 
@@ -198,15 +198,15 @@ TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/bgp_xif.P .deps/cli_manager_xif.P \
 .deps/cli_processor_xif.P .deps/common_xif.P .deps/coord_xif.P \
-.deps/datain_xif.P .deps/fea_fti_xif.P .deps/fea_ifmgr_client_xif.P \
-.deps/fea_ifmgr_xif.P .deps/fea_rawpkt_client_xif.P \
-.deps/fea_rawpkt_xif.P .deps/finder_client_xif.P .deps/finder_xif.P \
+.deps/datain_xif.P .deps/fea_ifmgr_client_xif.P .deps/fea_ifmgr_xif.P \
+.deps/fea_rawpkt_client_xif.P .deps/fea_rawpkt_xif.P \
+.deps/finder_client_xif.P .deps/finder_xif.P .deps/fti_xif.P \
 .deps/mfea_client_xif.P .deps/mfea_xif.P .deps/mld6igmp_client_xif.P \
 .deps/mld6igmp_xif.P .deps/ospf_xif.P .deps/pim_xif.P \
 .deps/rib_client_xif.P .deps/rib_xif.P .deps/rtrmgr_client_xif.P \
 .deps/rtrmgr_xif.P .deps/test_peer_xif.P .deps/test_xif.P
-SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaftixif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES)
-OBJECTS = $(libbgpxif_a_OBJECTS) $(libclimanagerxif_a_OBJECTS) $(libcliprocessorxif_a_OBJECTS) $(libcommonxif_a_OBJECTS) $(libcoordxif_a_OBJECTS) $(libdatainxif_a_OBJECTS) $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaftixif_a_OBJECTS) $(libfearawpkt_a_OBJECTS) $(libfearawpktclient_a_OBJECTS) $(libfinderxif_a_OBJECTS) $(libfinderclientxif_a_OBJECTS) $(libmfeaxif_a_OBJECTS) $(libmfeaclientxif_a_OBJECTS) $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpclientxif_a_OBJECTS) $(libospfxif_a_OBJECTS) $(libpimxif_a_OBJECTS) $(libribxif_a_OBJECTS) $(libribclientxif_a_OBJECTS) $(librtrmgrxif_a_OBJECTS) $(librtrmgr_clientxif_a_OBJECTS) $(libtestpeerxif_a_OBJECTS) $(libtestxif_a_OBJECTS)
+SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libftixif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES)
+OBJECTS = $(libbgpxif_a_OBJECTS) $(libclimanagerxif_a_OBJECTS) $(libcliprocessorxif_a_OBJECTS) $(libcommonxif_a_OBJECTS) $(libcoordxif_a_OBJECTS) $(libdatainxif_a_OBJECTS) $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrclientxif_a_OBJECTS) $(libftixif_a_OBJECTS) $(libfearawpkt_a_OBJECTS) $(libfearawpktclient_a_OBJECTS) $(libfinderxif_a_OBJECTS) $(libfinderclientxif_a_OBJECTS) $(libmfeaxif_a_OBJECTS) $(libmfeaclientxif_a_OBJECTS) $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpclientxif_a_OBJECTS) $(libospfxif_a_OBJECTS) $(libpimxif_a_OBJECTS) $(libribxif_a_OBJECTS) $(libribclientxif_a_OBJECTS) $(librtrmgrxif_a_OBJECTS) $(librtrmgr_clientxif_a_OBJECTS) $(libtestpeerxif_a_OBJECTS) $(libtestxif_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -284,10 +284,10 @@ libfeaifmgrclientxif.a: $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif
 	$(AR) cru libfeaifmgrclientxif.a $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_LIBADD)
 	$(RANLIB) libfeaifmgrclientxif.a
 
-libfeaftixif.a: $(libfeaftixif_a_OBJECTS) $(libfeaftixif_a_DEPENDENCIES)
-	-rm -f libfeaftixif.a
-	$(AR) cru libfeaftixif.a $(libfeaftixif_a_OBJECTS) $(libfeaftixif_a_LIBADD)
-	$(RANLIB) libfeaftixif.a
+libftixif.a: $(libftixif_a_OBJECTS) $(libftixif_a_DEPENDENCIES)
+	-rm -f libftixif.a
+	$(AR) cru libftixif.a $(libftixif_a_OBJECTS) $(libftixif_a_LIBADD)
+	$(RANLIB) libftixif.a
 
 libfearawpkt.a: $(libfearawpkt_a_OBJECTS) $(libfearawpkt_a_DEPENDENCIES)
 	-rm -f libfearawpkt.a

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.8 2003/03/10 23:20:08 hodson Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.9 2003/03/16 08:35:03 pavlin Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -260,14 +260,18 @@ public:
 	const IPv4&	addr, 
 	const uint32_t&	prefix_len, 
 	const IPv4&	nexthop, 
-	const uint32_t&	metric);
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin);
 
     XrlCmdError rib_client_0_1_route_info_changed6(
 	// Input values, 
 	const IPv6&	addr, 
 	const uint32_t&	prefix_len, 
 	const IPv6&	nexthop, 
-	const uint32_t&	metric);
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin);
 
     XrlCmdError rib_client_0_1_route_info_invalid4(
 	// Input values, 

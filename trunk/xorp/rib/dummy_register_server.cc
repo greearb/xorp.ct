@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.3 2003/03/15 02:28:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.4 2003/03/15 03:13:11 pavlin Exp $"
 
 #include "rib_module.h"
 #include "dummy_register_server.hh"
@@ -30,14 +30,16 @@ DummyRegisterServer::send_route_changed(const string& modname,
 					const IPNet<IPv4>& net, 
 					const IPv4& nexthop,
 					uint32_t metric,
+					uint32_t admin_distance,
+					const string& protocol_origin,
 					bool multicast)
 {
     string s;
     
     if (verbose) {
-	printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d",
+	printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d admin_distance=%d protocol_origin=%s",
 	       modname.c_str(), net.str().c_str(), nexthop.str().c_str(), 
-	       metric);
+	       metric, admin_distance, protocol_origin.c_str());
     }
     
     s = modname + " " + net.str() + " " + nexthop.str();
@@ -84,12 +86,15 @@ DummyRegisterServer::send_route_changed(const string& modname,
 					const IPNet<IPv6>& net, 
 					const IPv6& nexthop,
 					uint32_t metric,
+					uint32_t admin_distance,
+					const string& protocol_origin,
 					bool multicast)
 {
     string s;
     
-    printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d",
-	   modname.c_str(), net.str().c_str(), nexthop.str().c_str(), metric);
+    printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d admin_distance=%d protocol_origin=%s",
+	   modname.c_str(), net.str().c_str(), nexthop.str().c_str(), metric,
+	   admin_distance, protocol_origin.c_str());
     
     s = modname + " " + net.str() + " " + nexthop.str();
     s += " " + c_format("%d", metric);

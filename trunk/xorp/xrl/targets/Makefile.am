@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.32 2002/12/09 09:43:59 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_builddir)/xrl/interfaces
@@ -54,7 +54,7 @@ demo_fea_if_client_base.hh: $(INTERFACES_DIR)/common.xif 		\
 libfeabase_a_SOURCES = fea_base.hh fea_base.cc
 fea_base.hh: $(INTERFACES_DIR)/common.xif 				\
 	     $(INTERFACES_DIR)/fea_ifmgr.xif				\
-             $(INTERFACES_DIR)/fea_fti.xif				\
+             $(INTERFACES_DIR)/fti.xif					\
 	     $(INTERFACES_DIR)/fea_rawpkt.xif
 
 # Finder
@@ -89,6 +89,7 @@ pim_base.hh: $(INTERFACES_DIR)/common.xif 				\
              $(INTERFACES_DIR)/cli_processor.xif			\
 	     $(INTERFACES_DIR)/mfea_client.xif				\
 	     $(INTERFACES_DIR)/mld6igmp_client.xif			\
+             $(INTERFACES_DIR)/fti.xif					\
 	     $(INTERFACES_DIR)/pim.xif
 
 # RIB

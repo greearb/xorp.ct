@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.9 2003/02/22 02:12:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.10 2003/03/10 23:20:08 hodson Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -614,12 +614,17 @@ XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_changed4(
         const IPv4& addr,
         const uint32_t& prefix_len,
 	const IPv4&	nexthop, 
-	const uint32_t&	metric)
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin)
 {
     IPNet<IPv4> net(addr, prefix_len);
     debug_msg("IGP route into changed for net %s\n", net.str().c_str());
-    debug_msg("Nexthop: %s Metric: %d\n", nexthop.str().c_str(), metric);
-
+    debug_msg("Nexthop: %s Metric: %d AdminDistance: %d ProtocolOrigin: %s\n",
+	      nexthop.str().c_str(), metric, admin_distance,
+	      protocol_origin.c_str());
+    
+    // TODO: admin_distance and protocol_origin are not used
     if(!_bgp.rib_client_route_info_changed4(addr, prefix_len, nexthop, metric))
 	return XrlCmdError::COMMAND_FAILED();
 
@@ -631,12 +636,17 @@ XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_changed6(
 	const IPv6&	addr, 
 	const uint32_t&	prefix_len,
 	const IPv6&	nexthop, 
-	const uint32_t&	metric)
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin)
 {
     IPNet<IPv6> net(addr, prefix_len);
     debug_msg("IGP route into changed for net %s\n", net.str().c_str());
-    debug_msg("Nexthop: %s Metric: %d\n", nexthop.str().c_str(), metric);
-
+    debug_msg("Nexthop: %s Metric: %d AdminDistance: %d ProtocolOrigin: %s\n",
+	      nexthop.str().c_str(), metric, admin_distance,
+	      protocol_origin.c_str());
+    
+    // TODO: admin_distance and protocol_origin are not used
     if(!_bgp.rib_client_route_info_changed6(addr, prefix_len, nexthop, metric))
 	return XrlCmdError::COMMAND_FAILED();
 

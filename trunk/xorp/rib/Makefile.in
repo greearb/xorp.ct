@@ -86,7 +86,7 @@ noinst_LIBRARIES = librib.a
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a
 
 # -- Program Sources
 main_routemap_SOURCES = routemap.hh routemap.cc main_routemap.cc
@@ -120,8 +120,7 @@ vifmanager.o xrl_target.o
 PROGRAMS =  $(bin_PROGRAMS)
 
 rib_OBJECTS =  main_rib.o
-rib_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+rib_DEPENDENCIES =  librib.a $(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \
@@ -132,7 +131,7 @@ rib_LDFLAGS =
 main_routemap_OBJECTS =  routemap.o main_routemap.o
 main_routemap_LDADD = $(LDADD)
 main_routemap_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \
@@ -142,7 +141,7 @@ main_routemap_LDFLAGS =
 test_rib_client_OBJECTS =  test_rib_client.o
 test_rib_client_LDADD = $(LDADD)
 test_rib_client_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \
@@ -152,7 +151,7 @@ test_rib_client_LDFLAGS =
 test_register_OBJECTS =  test_register.o dummy_register_server.o
 test_register_LDADD = $(LDADD)
 test_register_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \
@@ -161,7 +160,7 @@ $(top_builddir)/xrl/interfaces/libribclientxif.a
 test_register_LDFLAGS = 
 test_register_xrls_OBJECTS =  test_register_xrls.o
 test_register_xrls_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \
@@ -175,7 +174,7 @@ test_rib_direct_OBJECTS =  parser.o test_rib_direct.o \
 dummy_register_server.o
 test_rib_direct_LDADD = $(LDADD)
 test_rib_direct_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \
@@ -185,7 +184,7 @@ test_rib_direct_LDFLAGS =
 test_rib_xrls_OBJECTS =  parser.o test_rib_xrls.o \
 dummy_register_server.o
 test_rib_xrls_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libfeaftixif.a \
+$(top_builddir)/xrl/interfaces/libftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
 $(top_builddir)/libxorp/libxorp.a \

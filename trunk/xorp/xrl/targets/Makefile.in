@@ -515,7 +515,7 @@ demo_fea_if_client_base.hh: $(INTERFACES_DIR)/common.xif 		\
 			    $(INTERFACES_DIR)/fea_ifmgr_client.xif
 fea_base.hh: $(INTERFACES_DIR)/common.xif 				\
 	     $(INTERFACES_DIR)/fea_ifmgr.xif				\
-             $(INTERFACES_DIR)/fea_fti.xif				\
+             $(INTERFACES_DIR)/fti.xif					\
 	     $(INTERFACES_DIR)/fea_rawpkt.xif
 finder_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/finder.xif
 finder_client_base.hh: $(INTERFACES_DIR)/common.xif 			\
@@ -532,6 +532,7 @@ pim_base.hh: $(INTERFACES_DIR)/common.xif 				\
              $(INTERFACES_DIR)/cli_processor.xif			\
 	     $(INTERFACES_DIR)/mfea_client.xif				\
 	     $(INTERFACES_DIR)/mld6igmp_client.xif			\
+             $(INTERFACES_DIR)/fti.xif					\
 	     $(INTERFACES_DIR)/pim.xif
 rib_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/rib.xif
 ribclient_base.hh: $(INTERFACES_DIR)/rib_client.xif

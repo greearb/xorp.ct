@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.6 2003/03/19 09:05:20 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_client.cc,v 1.1 2003/03/20 00:57:53 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -30,7 +30,8 @@ send_rib_client_commands(RibClient *rc, int *pcount)
     
     count++;
     rc->delete_route(IPv4Net("128.16.8.8/16"));
-    rc->add_route(IPv4Net("128.16.8.8/16"), IPv4("128.16.8.1"), "if0", "vif0");
+    rc->add_route(IPv4Net("128.16.8.8/16"), IPv4("128.16.8.1"), "if0", "vif0",
+		  10, 20, "static");
     cout << "Sending RibClient commands" << endl;
     return true;
 }

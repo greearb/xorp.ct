@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.6 2003/03/15 03:13:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.7 2003/03/16 07:18:57 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -84,7 +84,8 @@ NotifyQueueChangedEntry<IPv4>::send(ResponseSender* response_sender,
     response_sender->send_route_info_changed4(modname.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), _nexthop,
-					      _metric, cb);
+					      _metric, _admin_distance,
+					      _protocol_origin.c_str(), cb);
 }
 
 void
@@ -93,9 +94,10 @@ NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
 				    NotifyQueue::XrlCompleteCB& cb) 
 {
     response_sender->send_route_info_changed6(modname.c_str(),
-					     _net.masked_addr(),
-					     _net.prefix_len(), _nexthop,
-					     _metric, cb);
+					      _net.masked_addr(),
+					      _net.prefix_len(), _nexthop,
+					      _metric, _admin_distance,
+					      _protocol_origin.c_str(), cb);
 }
 
 void
@@ -151,11 +153,14 @@ RegisterServer::send_route_changed(const string& modname,
 				   const IPNet<IPv4>& net,
 				   const IPv4& nexthop,
 				   uint32_t metric,
+				   uint32_t admin_distance,
+				   const string& protocol_origin,
 				   bool multicast) 
 {
     NotifyQueueChangedEntry<IPv4>* q_entry;
     q_entry = new NotifyQueueChangedEntry<IPv4>(net, nexthop,
-						metric, multicast);
+						metric, admin_distance,
+						protocol_origin, multicast);
     add_entry_to_queue(modname, (NotifyQueueEntry*)q_entry);
 }
 
@@ -175,11 +180,14 @@ RegisterServer::send_route_changed(const string& modname,
 				   const IPNet<IPv6>& net,
 				   const IPv6& nexthop,
 				   uint32_t metric,
+				   uint32_t admin_distance,
+				   const string& protocol_origin,
 				   bool multicast) 
 {
     NotifyQueueChangedEntry<IPv6>* q_entry;
     q_entry = new NotifyQueueChangedEntry<IPv6>(net, nexthop,
-						metric, multicast);
+						metric, admin_distance,
+						protocol_origin, multicast);
     add_entry_to_queue(modname, (NotifyQueueEntry*)q_entry);
 }
 

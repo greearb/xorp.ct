@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.9 2003/03/21 01:25:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.10 2003/03/21 03:01:46 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -42,13 +42,18 @@ public:
 	const IPv4&	addr, 
 	const uint32_t&	prefix_len, 
 	const IPv4&	nexthop, 
-	const uint32_t&	metric) {
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin) {
 	IPv4Net net(addr, prefix_len);
-	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %d\n",
-	       net.str().c_str(), nexthop.str().c_str(), metric);
+	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %d new admin_distance: %d new protocol_origin: %s\n",
+	       net.str().c_str(), nexthop.str().c_str(), metric,
+	       admin_distance, protocol_origin.c_str());
 	string s;
 	s = net.str() + " " + nexthop.str();
 	s += " " + c_format("%d", metric);
+	s += " " + c_format("%d", admin_distance);
+	s += " " + c_format("%s", protocol_origin.c_str());
 	_changed.insert(s);
 	callback_flag = true;
 	return XrlCmdError::OKAY();
@@ -59,7 +64,9 @@ public:
         const IPv6&	/* addr */, 
 	const uint32_t&	/* prefix_len */, 
 	const IPv6&	/* nexthop */, 
-	const uint32_t&	/* metric */) {
+	const uint32_t&	/* metric */,
+	const uint32_t&	/* admin_distance */,
+	const string&	/* protocol_origin */) {
 	return XrlCmdError::OKAY();
     }
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.32 2002/12/09 09:43:59 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $
 ##
 
 ###############################################################################
@@ -40,9 +40,9 @@ noinst_LIBRARIES += libfeaifmgrclientxif.a
 libfeaifmgrclientxif_a_SOURCES  = fea_ifmgr_client_xif.hh 
 libfeaifmgrclientxif_a_SOURCES += fea_ifmgr_client_xif.cc 
 
-# FEA Forwarding Table Interface Client Interface
-noinst_LIBRARIES += libfeaftixif.a
-libfeaftixif_a_SOURCES = fea_fti_xif.hh fea_fti_xif.cc
+# Forwarding Table Interface Client Interface
+noinst_LIBRARIES += libftixif.a
+libftixif_a_SOURCES = fti_xif.hh fti_xif.cc
 
 # FEA Raw Packet Server Interface
 noinst_LIBRARIES += libfearawpkt.a
@@ -90,7 +90,7 @@ libpimxif_a_SOURCES = pim_xif.hh pim_xif.cc
 noinst_LIBRARIES += libribxif.a
 libribxif_a_SOURCES = rib_xif.hh rib_xif.cc
 
-# RIB Client Interface supported by BGP and PIM
+# RIB Client Interface supported by BGP
 noinst_LIBRARIES += libribclientxif.a
 libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.1 2003/03/20 00:57:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.2 2003/03/20 04:29:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,7 +24,7 @@
 
 #include "libxorp/ref_ptr.hh"
 #include "libxipc/xrl_router.hh"
-#include "xrl/interfaces/fea_fti_xif.hh"
+#include "xrl/interfaces/fti_xif.hh"
 
 #include "rib_client.hh"
 
@@ -89,7 +89,7 @@ protected:
     uint32_t tid() const { return _tid; }
 
 protected:
-    XrlFtiV0p1Client	_fticlient;
+    XrlFtiV0p2Client	_fticlient;
     const string&	_target_name;
 
 private:
@@ -179,21 +179,30 @@ public:
 	      const IPv4&    gw,
 	      const string&  ifname,
 	      const string&  vifname,
+	      uint32_t	     metric,
+	      uint32_t	     admin_distance,
+	      const string&  protocol_origin,
 	      const string&  target_name)
 	: SyncFtiCommand(rtr, target_name), _dest(dest), _gw(gw),
-	  _ifname(ifname), _vifname(vifname)
+	  _ifname(ifname), _vifname(vifname),
+	  _metric(metric), _admin_distance(admin_distance),
+	  _protocol_origin(protocol_origin)
     {}
 
     void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
 	_fticlient.send_add_entry4(_target_name.c_str(), tid, _dest, _gw,
-				   _ifname, _vifname, cb);
+				   _ifname, _vifname, _metric, _admin_distance,
+				   _protocol_origin, cb);
     }
 
 private:
-    IPv4Net _dest;
-    IPv4    _gw;
-    string  _ifname;
-    string  _vifname;
+    IPv4Net	_dest;
+    IPv4	_gw;
+    string	_ifname;
+    string	_vifname;
+    uint32_t	_metric;
+    uint32_t	_admin_distance;
+    string	_protocol_origin;
 };
 
 // -------------------------------------------------------------------------
@@ -224,21 +233,30 @@ public:
 	      const IPv6&    gw,
 	      const string&  ifname,
 	      const string&  vifname,
+	      uint32_t	     metric,
+	      uint32_t	     admin_distance,
+	      const string&  protocol_origin,
 	      const string&  target_name)
 	: SyncFtiCommand(rtr, target_name), _dest(dest), _gw(gw),
-	  _ifname(ifname), _vifname(vifname)
+	  _ifname(ifname), _vifname(vifname),
+	  _metric(metric), _admin_distance(admin_distance),
+	  _protocol_origin(protocol_origin)
     {}
 
     void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
 	_fticlient.send_add_entry6(_target_name.c_str(), tid, _dest, _gw,
-				   _ifname, _vifname, cb);
+				   _ifname, _vifname, _metric, _admin_distance,
+				   _protocol_origin, cb);
     }
 
 private:
-    IPv6Net _dest;
-    IPv6    _gw;
-    string  _ifname;
-    string  _vifname;
+    IPv6Net	_dest;
+    IPv6	_gw;
+    string	_ifname;
+    string	_vifname;
+    uint32_t	_metric;
+    uint32_t	_admin_distance;
+    string	_protocol_origin;
 };
 
 // -------------------------------------------------------------------------
@@ -312,10 +330,15 @@ void
 RibClient::add_route(const IPv4Net& dest,
 		     const IPv4&    gw,
 		     const string&  ifname,
-		     const string&  vifname)
+		     const string&  vifname,
+		     uint32_t	    metric,
+		     uint32_t	    admin_distance,
+		     const string&  protocol_origin)
 {
     _tasks.push_back(RibClientTask(new AddRoute4(_xrl_router, dest, gw, 
 						 ifname, vifname,
+						 metric, admin_distance,
+						 protocol_origin,
 						 _target_name)));
     start();
 }
@@ -332,10 +355,15 @@ void
 RibClient::add_route(const IPv6Net& dest,
 		     const IPv6&    gw,
 		     const string&  ifname,
-		     const string&  vifname)
+		     const string&  vifname,
+		     uint32_t	    metric,
+		     uint32_t	    admin_distance,
+		     const string&  protocol_origin)
 {
     _tasks.push_back(RibClientTask(new AddRoute6(_xrl_router, dest, gw, 
 						 ifname, vifname,
+						 metric, admin_distance,
+						 protocol_origin,
 						 _target_name)));
     start();
 }
@@ -351,7 +379,8 @@ RibClient::delete_route(const IPv6Net& dest)
 void
 RibClient::add_route(const IPv4RouteEntry& re)
 {
-    add_route(dest(re), gw(re), ifname(re), vifname(re));
+    add_route(dest(re), gw(re), ifname(re), vifname(re), re.global_metric(),
+	      re.admin_distance(), re.protocol().name());
 }
 
 void
@@ -363,7 +392,8 @@ RibClient::delete_route(const IPv4RouteEntry& re)
 void
 RibClient::add_route(const IPv6RouteEntry& re)
 {
-    add_route(dest(re), gw(re), ifname(re), vifname(re));
+    add_route(dest(re), gw(re), ifname(re), vifname(re), re.global_metric(),
+	      re.admin_distance(), re.protocol().name());
 }
 
 void

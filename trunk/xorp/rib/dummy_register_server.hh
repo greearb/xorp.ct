@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_register_server.hh,v 1.2 2003/03/10 23:20:54 hodson Exp $
+// $XORP: xorp/rib/dummy_register_server.hh,v 1.3 2003/03/15 03:13:11 pavlin Exp $
 
 #ifndef __RIB_DUMMY_REGISTER_SERVER_HH__
 #define __RIB_DUMMY_REGISTER_SERVER_HH__
@@ -27,6 +27,8 @@ public:
 			    const IPNet<IPv4>& net,
 			    const IPv4& nexthop,
 			    uint32_t metric,
+			    uint32_t admin_distance,
+			    const string& protocol_origin,
 			    bool multicast);
     void send_invalidate(const string& modname,
 			 const IPNet<IPv4>& net,
@@ -36,6 +38,8 @@ public:
 			    const IPNet<IPv6>& net, 
 			    const IPv6& nexthop,
 			    uint32_t metric,
+			    uint32_t admin_distance,
+			    const string& protocol_origin,
 			    bool multicast);
     void send_invalidate(const string& modname,
 			 const IPNet<IPv6>& net,

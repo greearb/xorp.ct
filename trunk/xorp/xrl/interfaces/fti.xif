@@ -1,10 +1,10 @@
-/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.2 2003/03/22 03:26:42 pavlin Exp $ */
 
 /*
- * Forwarding Table XRL interface (part of FEA).
+ * Forwarding Table XRL interface (typically used by RIB clients).
  */
 
-interface fti/0.1 {
+interface fti/0.2 {
 
 	/**
 	 * Start transaction.
@@ -35,12 +35,20 @@ interface fti/0.1 {
 	 * @param gateway the address of the next-hop router toward dst.
 	 * @param ifname the name of the physical interface toward dst.
 	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	add_entry4 ? tid:u32 &						\
 		     dst:ipv4net &					\
 		     gateway:ipv4 &					\
 		     ifname:txt &					\
-		     vifname:txt
+		     vifname:txt &					\
+		     metric:u32 &					\
+		     admin_distance:u32 &				\
+		     protocol_origin:txt
 
 	/**
 	 * Add a routing entry.
@@ -50,12 +58,20 @@ interface fti/0.1 {
 	 * @param gateway the address of the next-hop router toward dst.
 	 * @param ifname the name of the physical interface toward dst.
 	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	add_entry6 ? tid:u32 &						\
 		     dst:ipv6net &					\
 		     gateway:ipv6 &					\
 		     ifname:txt &					\
-		     vifname:txt
+		     vifname:txt &					\
+		     metric:u32 &					\
+		     admin_distance:u32 &				\
+		     protocol_origin:txt
 
 	/**
 	 * Delete a routing entry.
@@ -101,11 +117,19 @@ interface fti/0.1 {
 	 * @param gateway the address of the next-hop router toward dst.
 	 * @param ifname the name of the physical interface toward dst.
 	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	lookup_route4 ? dst:ipv4 -> netmask:ipv4net &			\
 				    gateway:ipv4 &			\
 				    ifname:txt &			\
-				    vifname:txt
+				    vifname:txt &			\
+				    metric:u32 &			\
+				    admin_distance:u32 &		\
+				    protocol_origin:txt
 
 	/**
 	 * Lookup a route for a destination host address.
@@ -114,11 +138,19 @@ interface fti/0.1 {
 	 * @param gateway the address of the next-hop router toward dst.
 	 * @param ifname the name of the physical interface toward dst.
 	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	lookup_route6 ? dst:ipv6 -> netmask:ipv6net &			\
 				    gateway:ipv6 &			\
 				    ifname:txt &			\
-				    vifname:txt
+				    vifname:txt &			\
+				    metric:u32 &			\
+				    admin_distance:u32 &		\
+				    protocol_origin:txt
 
 	/**
 	 * Lookup a route for a destination subnet address.
@@ -127,11 +159,19 @@ interface fti/0.1 {
 	 * @param gateway the address of the next-hop router toward dst.
 	 * @param ifname the name of the physical interface toward dst.
 	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	lookup_entry4 ?  dst:ipv4net					\
 		      -> gateway:ipv4 &					\
 		    	 ifname:txt &					\
-			 vifname:txt
+			 vifname:txt &					\
+			 metric:u32 &					\
+			 admin_distance:u32 &				\
+			 protocol_origin:txt
 
 	/**
 	 * Lookup a route for a destination subnet address.
@@ -140,11 +180,19 @@ interface fti/0.1 {
 	 * @param gateway the address of the next-hop router toward dst.
 	 * @param ifname the name of the physical interface toward dst.
 	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	lookup_entry6 ?  dst:ipv6net					\
 		      -> gateway:ipv6 &					\
 			 ifname:txt &					\
-			 vifname:txt
+			 vifname:txt &					\
+			 metric:u32 &					\
+			 admin_distance:u32 &				\
+			 protocol_origin:txt
 
 	/*
 	 * TBD: start_reading and read_entry forwarding table dump methods.

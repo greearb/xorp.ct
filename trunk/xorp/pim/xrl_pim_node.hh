@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.16 2003/03/25 06:55:09 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.17 2003/03/27 00:19:03 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -599,7 +599,7 @@ protected:
      *  
      *  @param tid the transaction ID to use for this transaction.
      */
-    XrlCmdError fti_0_1_start_transaction(
+    XrlCmdError fti_0_2_start_transaction(
 	// Output values, 
 	uint32_t&	tid);
 
@@ -608,7 +608,7 @@ protected:
      *  
      *  @param tid the transaction ID of this transaction.
      */
-    virtual XrlCmdError fti_0_1_commit_transaction(
+    virtual XrlCmdError fti_0_2_commit_transaction(
 	// Input values, 
 	const uint32_t&	tid);
 
@@ -617,7 +617,7 @@ protected:
      *  
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_1_abort_transaction(
+    XrlCmdError fti_0_2_abort_transaction(
 	// Input values, 
 	const uint32_t&	tid);
 
@@ -633,14 +633,24 @@ protected:
      *  @param ifname the name of the physical interface toward dst.
      *  
      *  @param vifname the name of the virtual interface toward dst.
+     *  
+     *  @param metric the routing metric toward dst.
+     *  
+     *  @param admin_distance the administratively defined distance toward dst.
+     *  
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
-    XrlCmdError fti_0_1_add_entry4(
+    XrlCmdError fti_0_2_add_entry4(
 	// Input values, 
 	const uint32_t&	tid, 
 	const IPv4Net&	dst, 
 	const IPv4&	gateway, 
 	const string&	ifname, 
-	const string&	vifname);
+	const string&	vifname, 
+	const uint32_t&	metric, 
+	const uint32_t&	admin_distance, 
+	const string&	protocol_origin);
 
     /**
      *  Add a routing entry.
@@ -654,14 +664,24 @@ protected:
      *  @param ifname the name of the physical interface toward dst.
      *  
      *  @param vifname the name of the virtual interface toward dst.
+     *  
+     *  @param metric the routing metric toward dst.
+     *  
+     *  @param admin_distance the administratively defined distance toward dst.
+     *  
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
-    XrlCmdError fti_0_1_add_entry6(
+    XrlCmdError fti_0_2_add_entry6(
 	// Input values, 
 	const uint32_t&	tid, 
 	const IPv6Net&	dst, 
 	const IPv6&	gateway, 
 	const string&	ifname, 
-	const string&	vifname);
+	const string&	vifname, 
+	const uint32_t&	metric, 
+	const uint32_t&	admin_distance, 
+	const string&	protocol_origin);
 
     /**
      *  Delete a routing entry.
@@ -670,7 +690,7 @@ protected:
      *  
      *  @param dst the destination subnet address of the entry.
      */
-    XrlCmdError fti_0_1_delete_entry4(
+    XrlCmdError fti_0_2_delete_entry4(
 	// Input values, 
 	const uint32_t&	tid, 
 	const IPv4Net&	dst);
@@ -682,7 +702,7 @@ protected:
      *  
      *  @param dst the destination subnet address of the entry.
      */
-    XrlCmdError fti_0_1_delete_entry6(
+    XrlCmdError fti_0_2_delete_entry6(
 	// Input values, 
 	const uint32_t&	tid, 
 	const IPv6Net&	dst);
@@ -692,7 +712,7 @@ protected:
      *  
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_1_delete_all_entries(
+    XrlCmdError fti_0_2_delete_all_entries(
 	// Input values, 
 	const uint32_t&	tid);
 
@@ -701,7 +721,7 @@ protected:
      *  
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_1_delete_all_entries4(
+    XrlCmdError fti_0_2_delete_all_entries4(
 	// Input values, 
 	const uint32_t&	tid);
 
@@ -710,7 +730,7 @@ protected:
      *  
      *  @param tid the transaction ID of this transaction.
      */
-    XrlCmdError fti_0_1_delete_all_entries6(
+    XrlCmdError fti_0_2_delete_all_entries6(
 	// Input values, 
 	const uint32_t&	tid);
 
@@ -724,15 +744,25 @@ protected:
      *  @param ifname the name of the physical interface toward dst.
      *  
      *  @param vifname the name of the virtual interface toward dst.
+     *  
+     *  @param metric the routing metric toward dst.
+     *  
+     *  @param admin_distance the administratively defined distance toward dst.
+     *  
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
-    XrlCmdError fti_0_1_lookup_route4(
+    XrlCmdError fti_0_2_lookup_route4(
 	// Input values, 
 	const IPv4&	dst, 
 	// Output values, 
 	IPv4Net&	netmask, 
 	IPv4&		gateway, 
 	string&		ifname, 
-	string&		vifname);
+	string&		vifname, 
+	uint32_t&	metric, 
+	uint32_t&	admin_distance, 
+	string&		protocol_origin);
 
     /**
      *  Lookup a route for a destination host address.
@@ -744,15 +774,25 @@ protected:
      *  @param ifname the name of the physical interface toward dst.
      *  
      *  @param vifname the name of the virtual interface toward dst.
+     *  
+     *  @param metric the routing metric toward dst.
+     *  
+     *  @param admin_distance the administratively defined distance toward dst.
+     *  
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
-    XrlCmdError fti_0_1_lookup_route6(
+    XrlCmdError fti_0_2_lookup_route6(
 	// Input values, 
 	const IPv6&	dst, 
 	// Output values, 
 	IPv6Net&	netmask, 
 	IPv6&		gateway, 
 	string&		ifname, 
-	string&		vifname);
+	string&		vifname, 
+	uint32_t&	metric, 
+	uint32_t&	admin_distance, 
+	string&		protocol_origin);
 
     /**
      *  Lookup a route for a destination subnet address.
@@ -764,14 +804,24 @@ protected:
      *  @param ifname the name of the physical interface toward dst.
      *  
      *  @param vifname the name of the virtual interface toward dst.
+     *  
+     *  @param metric the routing metric toward dst.
+     *  
+     *  @param admin_distance the administratively defined distance toward dst.
+     *  
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
-    XrlCmdError fti_0_1_lookup_entry4(
+    XrlCmdError fti_0_2_lookup_entry4(
 	// Input values, 
 	const IPv4Net&	dst, 
 	// Output values, 
 	IPv4&		gateway, 
 	string&		ifname, 
-	string&		vifname);
+	string&		vifname, 
+	uint32_t&	metric, 
+	uint32_t&	admin_distance, 
+	string&		protocol_origin);
 
     /**
      *  Lookup a route for a destination subnet address.
@@ -783,14 +833,24 @@ protected:
      *  @param ifname the name of the physical interface toward dst.
      *  
      *  @param vifname the name of the virtual interface toward dst.
+     *  
+     *  @param metric the routing metric toward dst.
+     *  
+     *  @param admin_distance the administratively defined distance toward dst.
+     *  
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
-    XrlCmdError fti_0_1_lookup_entry6(
+    XrlCmdError fti_0_2_lookup_entry6(
 	// Input values, 
 	const IPv6Net&	dst, 
 	// Output values, 
 	IPv6&		gateway, 
 	string&		ifname, 
-	string&		vifname);
+	string&		vifname, 
+	uint32_t&	metric, 
+	uint32_t&	admin_distance, 
+	string&		protocol_origin);
 
     /**
      *  Add/delete membership information.

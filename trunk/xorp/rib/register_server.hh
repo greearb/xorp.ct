@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.4 2003/03/16 07:18:57 pavlin Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.5 2003/03/19 09:05:19 pavlin Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
@@ -94,10 +94,11 @@ private:
 class NotifyQueueEntry {
 public:
     /**
-     * The type of notifcation: either the data (nexthop, metric)
-     * associated with the registered route changed, or the data has
-     * changed enough that the registration has been invalidated and
-     * the client needs to register again to find out what happened 
+     * The type of notifcation: either the data (nexthop, metric,
+     * admin_distance) associated with the registered route changed,
+     * or the data has changed enough that the registration has been
+     * invalidated and the client needs to register again to find out
+     * what happened.
      */
     typedef enum EntryType { CHANGED, INVALIDATE };
 
@@ -129,7 +130,8 @@ private:
 
 /**
  * Notification Queue entry indicating that a change occured to the
- * metric or nexthop of a route in which interest was registered.  
+ * metric, admin_distance or nexthop of a route in which interest was
+ * registered.  
  *
  * The template class A is the address family: either the IPv4 class
  * or the IPv6 class.  
@@ -143,16 +145,23 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
      * @param net the destination subnet of the route that changed.
      * @param nexthop the new nexthop of the route that changed.
      * @param metric the new routing protocol metric of the route that changed.
+     * @param admin_distance the adminstratively defined distance of the
+     * routing protocol this routing entry was computed by.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
      * @param multicast true indicates that the change occured in the
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.
      */
     NotifyQueueChangedEntry(const IPNet<A>& net, const A& nexthop,
-			    uint32_t metric, bool multicast) 
+			    uint32_t metric, uint32_t admin_distance,
+			    const string& protocol_origin, bool multicast) 
     {
 	_net = net;
 	_nexthop = nexthop;
 	_metric = metric;
+	_admin_distance = admin_distance;
+	_protocol_origin = protocol_origin;
 	_multicast = multicast;
     }
 
@@ -179,6 +188,11 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
     IPNet<A>	_net;	// the route's full subnet (not the valid_subnet)
     A		_nexthop;	// the new nexthop of the route
     uint32_t	_metric;	// the metric of the route
+    uint32_t	_admin_distance; // the administratively defined distance of
+				// the routing protocol this routing entry
+				// was computed by
+    string	_protocol_origin; // the name of the protocol that originated
+				  // this route
     bool	_multicast;	// true if change occured in multicast RIB,
 				// otherwise change occured in the unicast RIB
 };
@@ -265,12 +279,15 @@ public:
     /** 
      * send_route_changed is called to communicate to another XRL
      * module that routing information in which it had registered an
-     * interest has changed its nexthop or metric
+     * interest has changed its nexthop, metric, or admin distance.
      *
      * @param modname the XRL target name of the module to notify.
      * @param net the destination subnet of the route that changed.
      * @param nexthop the new nexthop of the route that changed.
      * @param metric the new routing protocol metric of the route that changed.
+     * @param admin_distance the new admin distance of the route that changed.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
      * @param multicast true indicates that the change occured in the
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.
@@ -279,6 +296,8 @@ public:
 				    const IPNet<IPv4>& net,
 				    const IPv4& nexthop,
 				    uint32_t metric,
+				    uint32_t admin_distance,
+				    const string& protocol_origin,
 				    bool multicast);
     virtual void send_invalidate(const string& modname,
 				 const IPNet<IPv4>& net,
@@ -287,12 +306,15 @@ public:
     /** 
      * send_route_changed is called to communicate to another XRL
      * module that routing information in which it had registered an
-     * interest has changed its nexthop or metric
+     * interest has changed its nexthop, metric, or admin distance.
      *
      * @param modname the XRL target name of the module to notify.
      * @param net the destination subnet of the route that changed.
      * @param nexthop the new nexthop of the route that changed.
      * @param metric the new routing protocol metric of the route that changed.
+     * @param admin_distance the new admin distance of the route that changed.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
      * @param multicast true indicates that the change occured in the
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.
@@ -301,6 +323,8 @@ public:
 				    const IPNet<IPv6>& net,
 				    const IPv6& nexthop,
 				    uint32_t metric,
+				    uint32_t admin_distance,
+				    const string& protocol_origin,
 				    bool multicast);
     /**
      * send_invalidate is called to communicate to another XRL module
