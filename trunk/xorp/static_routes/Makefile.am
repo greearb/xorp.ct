@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.12 2003/09/30 20:41:21 pavlin Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.1 2004/02/12 20:11:25 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -29,7 +29,6 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
-LDADD		+= $(top_builddir)/libxipc/libfinder.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a

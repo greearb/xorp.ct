@@ -110,7 +110,7 @@ noinst_LIBRARIES = libstaticroutes.a
 LDFLAGS = 
 ### XRL libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libstaticroutesbase.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libstaticroutesbase.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 xorp_static_routes_SOURCES = xorp_static_routes.cc
@@ -149,7 +149,6 @@ xorp_static_routes_DEPENDENCIES = libstaticroutes.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
