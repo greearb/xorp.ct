@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.3 2003/01/13 20:11:22 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.4 2003/02/25 01:38:50 pavlin Exp $
 #
 
 #
@@ -1074,5 +1074,174 @@ pim_send_test_assert6()
     echo "pim_send_test_assert6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_assert6"
     XRL_ARGS="?vif_name:txt=$vif_name&source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&rpt_bit:bool=$rpt_bit&metric_preference:u32=$metric_preference&metric:u32=$metric"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_test_bsr_zone4()
+{
+    if [ $# -lt 6 ] ; then
+	echo "Usage: pim_add_test_bsr_zone4 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <bsr_addr> <bsr_priority> <hash_masklen> <fragment_tag>"
+	exit 1
+    fi
+    zone_id_scope_zone_prefix=$1
+    zone_id_is_scope_zone=$2
+    bsr_addr=$3
+    bsr_priority=$4
+    hash_masklen=$5
+    fragment_tag=$6
+    
+    echo "pim_add_test_bsr_zone4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_zone4"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv4=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen&fragment_tag:u32=$fragment_tag"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_test_bsr_zone6()
+{
+    if [ $# -lt 6 ] ; then
+	echo "Usage: pim_add_test_bsr_zone6 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <bsr_addr> <bsr_priority> <hash_masklen> <fragment_tag>"
+	exit 1
+    fi
+    zone_id_scope_zone_prefix=$1
+    zone_id_is_scope_zone=$2
+    bsr_addr=$3
+    bsr_priority=$4
+    hash_masklen=$5
+    fragment_tag=$6
+    
+    echo "pim_add_test_bsr_zone6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_zone6"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv6=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen&fragment_tag:u32=$fragment_tag"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_test_bsr_group_prefix4()
+{
+    if [ $# -lt 5 ] ; then
+	echo "Usage: pim_add_test_bsr_group_prefix4 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <is_scope_zone> <expected_rp_count>"
+	exit 1
+    fi
+    zone_id_scope_zone_prefix=$1
+    zone_id_is_scope_zone=$2
+    group_prefix=$3
+    is_scope_zone=$4
+    expected_rp_count=$5
+    
+    echo "pim_add_test_bsr_group_prefix4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_group_prefix4"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&expected_rp_count:u32=$expected_rp_count"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_test_bsr_group_prefix6()
+{
+    if [ $# -lt 5 ] ; then
+	echo "Usage: pim_add_test_bsr_group_prefix6 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <is_scope_zone> <expected_rp_count>"
+	exit 1
+    fi
+    zone_id_scope_zone_prefix=$1
+    zone_id_is_scope_zone=$2
+    group_prefix=$3
+    is_scope_zone=$4
+    expected_rp_count=$5
+    
+    echo "pim_add_test_bsr_group_prefix6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_group_prefix6"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&expected_rp_count:u32=$expected_rp_count"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_test_bsr_rp4()
+{
+    if [ $# -lt 6 ] ; then
+	echo "Usage: pim_add_test_bsr_rp4 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <rp_addr> <rp_priority> <rp_holdtime>"
+	exit 1
+    fi
+    zone_id_scope_zone_prefix=$1
+    zone_id_is_scope_zone=$2
+    group_prefix=$3
+    rp_addr=$4
+    rp_priority=$5
+    rp_holdtime=$6
+    
+    echo "pim_add_test_bsr_rp4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_rp4"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_add_test_bsr_rp6()
+{
+    if [ $# -lt 6 ] ; then
+	echo "Usage: pim_add_test_bsr_rp6 <zone_id_scope_zone_prefix> <zone_id_is_scope_zone> <group_prefix> <rp_addr> <rp_priority> <rp_holdtime>"
+	exit 1
+    fi
+    zone_id_scope_zone_prefix=$1
+    zone_id_is_scope_zone=$2
+    group_prefix=$3
+    rp_addr=$4
+    rp_priority=$5
+    rp_holdtime=$6
+    
+    echo "pim_add_test_bsr_rp6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_rp6"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_send_test_bootstrap()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_send_test_bootstrap <vif_name>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_send_test_bootstrap" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/send_test_bootstrap"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_send_test_bootstrap_by_dest4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_send_test_bootstrap_by_dest4 <vif_name> <dest_addr>"
+	exit 1
+    fi
+    vif_name=$1
+    dest_addr=$2
+    
+    echo "pim_send_test_bootstrap_by_dest4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/send_test_bootstrap_by_dest4"
+    XRL_ARGS="?vif_name:txt=$vif_name&dest_addr:ipv4=$dest_addr"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_send_test_bootstrap_by_dest6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_send_test_bootstrap_by_dest6 <vif_name> <dest_addr>"
+	exit 1
+    fi
+    vif_name=$1
+    dest_addr=$2
+    
+    echo "pim_send_test_bootstrap_by_dest6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/send_test_bootstrap_by_dest6"
+    XRL_ARGS="?vif_name:txt=$vif_name&dest_addr:ipv6=$dest_addr"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_send_test_cand_rp_adv()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pim_send_test_bootstrap"
+	exit 1
+    fi
+    
+    echo "pim_send_test_cand_rp_adv" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/send_test_cand_rp_adv"
+    XRL_ARGS=""
     call_xrl $XRL$XRL_ARGS fail:bool = false
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.5 2003/01/16 19:32:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.6 2003/02/25 01:38:49 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3788,6 +3788,286 @@ XrlPimNode::pim_0_1_send_test_assert6(
 				  rpt_bit,
 				  metric_preference,
 				  metric) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_test_bsr_zone4(
+    // Input values, 
+    const IPv4Net&	zone_id_scope_zone_prefix, 
+    const bool&		zone_id_is_scope_zone, 
+    const IPv4&		bsr_addr, 
+    const uint32_t&	bsr_priority, 
+    const uint32_t&	hash_masklen, 
+    const uint32_t&	fragment_tag, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if ((bsr_priority > 0xff)
+	|| (hash_masklen > 0xff)
+	|| (fragment_tag > 0xffff)) {
+	fail = true;
+	reason = "";
+	return XrlCmdError::OKAY();
+    }
+    
+    if (PimNode::add_test_bsr_zone(PimScopeZoneId(zone_id_scope_zone_prefix,
+						  zone_id_is_scope_zone),
+				   IPvX(bsr_addr),
+				   bsr_priority,
+				   hash_masklen,
+				   fragment_tag) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_test_bsr_zone6(
+    // Input values, 
+    const IPv6Net&	zone_id_scope_zone_prefix, 
+    const bool&		zone_id_is_scope_zone, 
+    const IPv6&		bsr_addr, 
+    const uint32_t&	bsr_priority, 
+    const uint32_t&	hash_masklen, 
+    const uint32_t&	fragment_tag, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if ((bsr_priority > 0xff)
+	|| (hash_masklen > 0xff)
+	|| (fragment_tag > 0xffff)) {
+	fail = true;
+	reason = "";
+	return XrlCmdError::OKAY();
+    }
+    
+    if (PimNode::add_test_bsr_zone(PimScopeZoneId(zone_id_scope_zone_prefix,
+						  zone_id_is_scope_zone),
+				   IPvX(bsr_addr),
+				   bsr_priority,
+				   hash_masklen,
+				   fragment_tag) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
+    // Input values, 
+    const IPv4Net&	zone_id_scope_zone_prefix, 
+    const bool&		zone_id_is_scope_zone, 
+    const IPv4Net&	group_prefix, 
+    const bool&		is_scope_zone, 
+    const uint32_t&	expected_rp_count, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (expected_rp_count > 0xff) {
+	fail = true;
+	reason = "";
+	return XrlCmdError::OKAY();
+    }
+    
+    if (PimNode::add_test_bsr_group_prefix(
+	PimScopeZoneId(zone_id_scope_zone_prefix,
+		       zone_id_is_scope_zone),
+	IPvXNet(group_prefix),
+	is_scope_zone,
+	expected_rp_count) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
+    // Input values, 
+    const IPv6Net&	zone_id_scope_zone_prefix, 
+    const bool&		zone_id_is_scope_zone, 
+    const IPv6Net&	group_prefix, 
+    const bool&		is_scope_zone, 
+    const uint32_t&	expected_rp_count, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (expected_rp_count > 0xff) {
+	fail = true;
+	reason = "";
+	return XrlCmdError::OKAY();
+    }
+    
+    if (PimNode::add_test_bsr_group_prefix(
+	PimScopeZoneId(zone_id_scope_zone_prefix,
+		       zone_id_is_scope_zone),
+	IPvXNet(group_prefix),
+	is_scope_zone,
+	expected_rp_count) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_test_bsr_rp4(
+    // Input values, 
+    const IPv4Net&	zone_id_scope_zone_prefix, 
+    const bool&		zone_id_is_scope_zone, 
+    const IPv4Net&	group_prefix, 
+    const IPv4&		rp_addr, 
+    const uint32_t&	rp_priority, 
+    const uint32_t&	rp_holdtime, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if ((rp_priority > 0xff)
+	|| (rp_holdtime > 0xff)) {
+	fail = true;
+	reason = "";
+	return XrlCmdError::OKAY();
+    }
+    
+    if (PimNode::add_test_bsr_rp(PimScopeZoneId(zone_id_scope_zone_prefix,
+						zone_id_is_scope_zone),
+				 IPvXNet(group_prefix),
+				 IPvX(rp_addr),
+				 rp_priority,
+				 rp_holdtime) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_test_bsr_rp6(
+    // Input values, 
+    const IPv6Net&	zone_id_scope_zone_prefix, 
+    const bool&		zone_id_is_scope_zone, 
+    const IPv6Net&	group_prefix, 
+    const IPv6&		rp_addr, 
+    const uint32_t&	rp_priority, 
+    const uint32_t&	rp_holdtime, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if ((rp_priority > 0xff)
+	|| (rp_holdtime > 0xff)) {
+	fail = true;
+	reason = "";
+	return XrlCmdError::OKAY();
+    }
+    
+    if (PimNode::add_test_bsr_rp(PimScopeZoneId(zone_id_scope_zone_prefix,
+						zone_id_is_scope_zone),
+				 IPvXNet(group_prefix),
+				 IPvX(rp_addr),
+				 rp_priority,
+				 rp_holdtime) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_send_test_bootstrap(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::send_test_bootstrap(vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_send_test_bootstrap_by_dest4(
+    // Input values, 
+    const string&	vif_name, 
+    const IPv4&		dest_addr, 
+    // Output		values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr)) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_send_test_bootstrap_by_dest6(
+    // Input values, 
+    const string&	vif_name, 
+    const IPv6&		dest_addr, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr)) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_send_test_cand_rp_adv(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::send_test_cand_rp_adv() < 0) {
 	fail = true;
     } else {
 	fail = false;

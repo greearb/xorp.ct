@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.6 2003/01/13 20:40:23 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.7 2003/02/08 11:08:36 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -274,7 +274,8 @@ public:
     buffer_t	*pim_bootstrap_send_prepare(const IPvX& dst_addr,
 					    const BsrZone& bsr_zone,
 					    bool is_first_fragment);
-    int		pim_cand_rp_adv_send(const BsrZone& bsr_zone);
+    int		pim_cand_rp_adv_send(const IPvX& bsr_addr,
+				     const BsrZone& bsr_zone);
     
     void	hello_timer_start(uint32_t sec, uint32_t usec);
     void	hello_timer_start_random(uint32_t sec, uint32_t usec);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.3 2003/01/13 20:11:21 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.4 2003/02/25 01:38:48 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -819,6 +819,7 @@ public:
     //
     // Test-related methods
     //
+    // Join/Prune test-related methods
     int		add_test_jp_entry(const IPvX& source_addr,
 				  const IPvX& group_addr,
 				  uint32_t group_masklen,
@@ -826,12 +827,33 @@ public:
 				  action_jp_t action_jp, uint16_t holdtime,
 				  bool new_group_bool);
     int		send_test_jp_entry(const IPvX& nbr_addr);
+    // Assert test-related methods
     int		send_test_assert(const string& vif_name,
 				 const IPvX& source_addr,
 				 const IPvX& group_addr,
 				 bool rpt_bit,
 				 uint32_t metric_preference,
 				 uint32_t metric);
+    // Bootstrap test-related methods
+    int		add_test_bsr_zone(const PimScopeZoneId& zone_id,
+				  const IPvX& bsr_addr,
+				  uint8_t bsr_priority,
+				  uint8_t hash_masklen,
+				  uint16_t fragment_tag);
+    int		add_test_bsr_group_prefix(const PimScopeZoneId& zone_id,
+					  const IPvXNet& group_prefix,
+					  bool is_scope_zone,
+					  uint8_t expected_rp_count);
+    int		add_test_bsr_rp(const PimScopeZoneId& zone_id,
+				const IPvXNet& group_prefix,
+				const IPvX& rp_addr,
+				uint8_t rp_priority,
+				uint16_t rp_holdtime);
+    int		send_test_bootstrap(const string& vif_name);
+    int		send_test_bootstrap_by_dest(const string& vif_name,
+					    const IPvX& dest_addr);
+    int		send_test_cand_rp_adv();
+    
     
     //
     // PimNbr-related methods

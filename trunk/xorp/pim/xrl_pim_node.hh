@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.7 2003/02/06 22:21:32 hodson Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.8 2003/02/25 01:38:50 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1517,6 +1517,123 @@ protected:
 	const bool&	rpt_bit, 
 	const uint32_t&	metric_preference, 
 	const uint32_t&	metric, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    /**
+     *  Test-related methods: send Bootstrap and Cand-RP-Adv messages.
+     *  
+     *  @param zone_id_scope_zone_prefix the zone prefix of the zone ID.
+     *  
+     *  @param zone_id_is_scope_zone true if the zone is scoped.
+     *  
+     *  @param bsr_addr the address of the Bootstrap router.
+     *  
+     *  @param bsr_priority the priority of the Bootstrap router.
+     *  
+     *  @param hash_masklen the hash masklen inside the Bootstrap messages.
+     *  
+     *  @param fragment_tag the fragment tag inside the Bootstrap messages.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    XrlCmdError pim_0_1_add_test_bsr_zone4(
+	// Input values, 
+	const IPv4Net&	zone_id_scope_zone_prefix, 
+	const bool&	zone_id_is_scope_zone, 
+	const IPv4&	bsr_addr, 
+	const uint32_t&	bsr_priority, 
+	const uint32_t&	hash_masklen, 
+	const uint32_t&	fragment_tag, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_add_test_bsr_zone6(
+	// Input values, 
+	const IPv6Net&	zone_id_scope_zone_prefix, 
+	const bool&	zone_id_is_scope_zone, 
+	const IPv6&	bsr_addr, 
+	const uint32_t&	bsr_priority, 
+	const uint32_t&	hash_masklen, 
+	const uint32_t&	fragment_tag, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_add_test_bsr_group_prefix4(
+	// Input values, 
+	const IPv4Net&	zone_id_scope_zone_prefix, 
+	const bool&	zone_id_is_scope_zone, 
+	const IPv4Net&	group_prefix, 
+	const bool&	is_scope_zone, 
+	const uint32_t&	expected_rp_count, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_add_test_bsr_group_prefix6(
+	// Input values, 
+	const IPv6Net&	zone_id_scope_zone_prefix, 
+	const bool&	zone_id_is_scope_zone, 
+	const IPv6Net&	group_prefix, 
+	const bool&	is_scope_zone, 
+	const uint32_t&	expected_rp_count, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_add_test_bsr_rp4(
+	// Input values, 
+	const IPv4Net&	zone_id_scope_zone_prefix, 
+	const bool&	zone_id_is_scope_zone, 
+	const IPv4Net&	group_prefix, 
+	const IPv4&	rp_addr, 
+	const uint32_t&	rp_priority, 
+	const uint32_t&	rp_holdtime, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_add_test_bsr_rp6(
+	// Input values, 
+	const IPv6Net&	zone_id_scope_zone_prefix, 
+	const bool&	zone_id_is_scope_zone, 
+	const IPv6Net&	group_prefix, 
+	const IPv6&	rp_addr, 
+	const uint32_t&	rp_priority, 
+	const uint32_t&	rp_holdtime, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_send_test_bootstrap(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_send_test_bootstrap_by_dest4(
+	// Input values, 
+	const string&	vif_name, 
+	const IPv4&	dest_addr, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_send_test_bootstrap_by_dest6(
+	// Input values, 
+	const string&	vif_name, 
+	const IPv6&	dest_addr, 
+	// Output values, 
+	bool&		fail, 
+	string&		reason);
+
+    XrlCmdError pim_0_1_send_test_cand_rp_adv(
 	// Output values, 
 	bool&		fail, 
 	string&		reason);

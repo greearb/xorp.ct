@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.2 2003/02/25 01:38:48 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.3 2003/02/26 19:59:39 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -64,7 +64,7 @@ public:
     list<BsrZone *>& config_bsr_zone_list() { return (_config_bsr_zone_list); }
     list<BsrZone *>& active_bsr_zone_list() { return (_active_bsr_zone_list); }
     list<BsrZone *>& expire_bsr_zone_list() { return (_expire_bsr_zone_list); }
-
+    
     BsrZone	*add_config_bsr_zone(const BsrZone& bsr_zone,
 				     string& error_msg);
     BsrZone	*add_active_bsr_zone(const BsrZone& bsr_zone,
@@ -90,6 +90,29 @@ public:
     void	clean_expire_bsr_zones();
     void	schedule_clean_expire_bsr_zones();
     
+    //
+    // Test-related methods
+    //
+    BsrZone	*add_test_bsr_zone(const PimScopeZoneId& zone_id,
+				   const IPvX& bsr_addr,
+				   uint8_t bsr_priority,
+				   uint8_t hash_masklen,
+				   uint16_t fragment_tag);
+    BsrZone	*find_test_bsr_zone(const PimScopeZoneId& zone_id) const;
+    BsrGroupPrefix *add_test_bsr_group_prefix(const PimScopeZoneId& zone_id,
+					      const IPvXNet& group_prefix,
+					      bool is_scope_zone,
+					      uint8_t expected_rp_count);
+    BsrRp	*add_test_bsr_rp(const PimScopeZoneId& zone_id,
+				 const IPvXNet& group_prefix,
+				 const IPvX& rp_addr,
+				 uint8_t rp_priority,
+				 uint16_t rp_holdtime);
+    int		send_test_bootstrap(const string& vif_name);
+    int		send_test_bootstrap_by_dest(const string& vif_name,
+					    const IPvX& dest_addr);
+    int		send_test_cand_rp_adv();
+    
 private:
     BsrZone	*find_bsr_zone_by_prefix_from_list(
 	const list<BsrZone *>& zone_list, const IPvXNet& group_prefix,
@@ -104,6 +127,7 @@ private:
 						// zones and/or Cand-RP info
     list<BsrZone *> _active_bsr_zone_list;	// List of active BSR zones
     list<BsrZone *> _expire_bsr_zone_list;	// List of expiring BSR zones
+    list<BsrZone *> _test_bsr_zone_list;	// List of test BSR zones
     Timer	_rp_table_apply_rp_changes_timer; // Timer to apply RP changes
 						  // to the RpTable
     Timer	_clean_expire_bsr_zones_timer;	// Timer to cleanup expiring
@@ -148,7 +172,7 @@ public:
     bool	is_cancel() const	{ return (_is_cancel);		}
     void	set_is_cancel(bool v) 	{ _is_cancel = v;		}
     const PimScopeZoneId& zone_id() const { return (_zone_id);		}
-    void	set_zone_id(PimScopeZoneId& zone_id) { _zone_id = zone_id; }
+    void	set_zone_id(const PimScopeZoneId& zone_id) { _zone_id = zone_id; }
     
     // The states used per scope zone
     enum bsr_zone_state_t {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.6 2003/02/26 03:32:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.7 2003/02/26 19:59:39 pavlin Exp $"
 
 
 //
@@ -88,6 +88,7 @@ PimBsr::~PimBsr(void)
     delete_pointers_list(_config_bsr_zone_list);
     delete_pointers_list(_active_bsr_zone_list);
     delete_pointers_list(_expire_bsr_zone_list);
+    delete_pointers_list(_test_bsr_zone_list);
 }
 
 /**
@@ -150,7 +151,7 @@ PimBsr::stop(void)
     //
     
     //
-    // Find the first vif that is UP, and use it to unicast Cand-RP-Adv
+    // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
     // messages.
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	pim_vif_up = pim_node().vif_find_by_vif_index(i);
@@ -170,37 +171,49 @@ PimBsr::stop(void)
 	 iter != _config_bsr_zone_list.end();
 	 ++iter) {
 	BsrZone *config_bsr_zone = *iter;
-	BsrZone *active_bsr_zone = NULL;
+	BsrZone *active_bsr_zone;
+	
+	active_bsr_zone = find_active_bsr_zone(config_bsr_zone->zone_id());
+	if (active_bsr_zone == NULL)
+	    continue;		// No active BsrZone yet
+	if (! active_bsr_zone->bsr_addr().is_unicast())
+	    continue;		// We don't know the BSR address
+	if (active_bsr_zone->i_am_bsr())
+	    continue;		// I am the BSR, hence don't send the messages
 	
 	//
-	// Cancel the Cand-RP-Advertise timer
+	// Cancel the Cand-RP-Advertise timer,
+	// and send Cand-RP-Adv messages with holdtime of zero.
 	//
-	if (config_bsr_zone->candidate_rp_advertise_timer().is_set()) {
+	do {
+	    if (! config_bsr_zone->candidate_rp_advertise_timer().is_set())
+		break;		// We were not sending Cand-RP-Adv messages
+	    
 	    config_bsr_zone->candidate_rp_advertise_timer().cancel();
+	    
+	    if (config_bsr_zone->bsr_group_prefix_list().empty())
+		break;		// No Cand-RP-Adv to cancel
 	    
 	    //
 	    // Send Cand-RP-Adv messages with holdtime of zero
 	    //
-	    if (! config_bsr_zone->bsr_group_prefix_list().empty()) {
-		if (pim_vif_up != NULL) {
-		    config_bsr_zone->set_is_cancel(true);
-		    pim_vif_up->pim_cand_rp_adv_send(*config_bsr_zone);
-		    config_bsr_zone->set_is_cancel(false);
-		} else {
-		    XLOG_ERROR("Cannot send Cand-RP Adv message: "
-			       "cannot find a vif that is UP and running");
-		}
+	    if (pim_vif_up == NULL) {
+		XLOG_ERROR("Cannot send Cand-RP Adv message: "
+			   "cannot find a vif that is UP and running");
+		break;
 	    }
-	}
+	    config_bsr_zone->set_is_cancel(true);
+	    pim_vif_up->pim_cand_rp_adv_send(active_bsr_zone->bsr_addr(),
+					     *config_bsr_zone);
+	    config_bsr_zone->set_is_cancel(false);
+	} while (false);
 	
 	//
 	// Send Bootstrap message with lowest priority
 	//
 	if (! config_bsr_zone->i_am_candidate_bsr())
 	    continue;
-	active_bsr_zone = find_active_bsr_zone(config_bsr_zone->zone_id());
-	if (active_bsr_zone == NULL)
-	    continue;
+	
 	//
 	// TODO: XXX: Sending BSM-cancel when in STATE_PENDING_BSR is not
 	// in the spec (04/27/2002).
@@ -879,6 +892,161 @@ PimBsr::can_add_active_bsr_zone(const BsrZone& bsr_zone,
     
     return (true);		// The new BsrZone can be added.
 }
+
+//
+// Test-related methods
+//
+BsrZone	*
+PimBsr::add_test_bsr_zone(const PimScopeZoneId& zone_id, const IPvX& bsr_addr,
+			  uint8_t bsr_priority, uint8_t hash_masklen,
+			  uint16_t fragment_tag)
+{
+    BsrZone *new_bsr_zone = new BsrZone(*this, bsr_addr, bsr_priority,
+					hash_masklen, fragment_tag);
+    new_bsr_zone->set_zone_id(zone_id);
+    new_bsr_zone->set_test_bsr_zone(true);
+    _test_bsr_zone_list.push_back(new_bsr_zone);
+    
+    return (new_bsr_zone);
+}
+
+BsrZone	*
+PimBsr::find_test_bsr_zone(const PimScopeZoneId& zone_id) const
+{
+    list<BsrZone *>::const_iterator iter_zone;
+    
+    for (iter_zone = _test_bsr_zone_list.begin();
+	 iter_zone != _test_bsr_zone_list.end();
+	 ++iter_zone) {
+	BsrZone *bsr_zone = *iter_zone;
+	if (bsr_zone->zone_id() == zone_id)
+	    return (bsr_zone);
+    }
+    
+    return (NULL);
+}
+
+BsrGroupPrefix *
+PimBsr::add_test_bsr_group_prefix(const PimScopeZoneId& zone_id,
+				  const IPvXNet& group_prefix,
+				  bool is_scope_zone,
+				  uint8_t expected_rp_count)
+{
+    BsrZone *bsr_zone = NULL;
+    BsrGroupPrefix *bsr_group_prefix = NULL;
+    
+    bsr_zone = find_test_bsr_zone(zone_id);
+    if (bsr_zone == NULL)
+	return (NULL);
+    
+    bsr_group_prefix = bsr_zone->add_bsr_group_prefix(group_prefix,
+						      is_scope_zone,
+						      expected_rp_count);
+    return (bsr_group_prefix);
+}
+
+BsrRp *
+PimBsr::add_test_bsr_rp(const PimScopeZoneId& zone_id,
+			const IPvXNet& group_prefix,
+			const IPvX& rp_addr,
+			uint8_t rp_priority,
+			uint16_t rp_holdtime)
+{
+    BsrZone *bsr_zone = NULL;
+    BsrGroupPrefix *bsr_group_prefix = NULL;
+    BsrRp *bsr_rp = NULL;
+    
+    bsr_zone = find_test_bsr_zone(zone_id);
+    if (bsr_zone == NULL)
+	return (NULL);
+    
+    bsr_group_prefix = bsr_zone->find_bsr_group_prefix(group_prefix);
+    if (bsr_group_prefix == NULL)
+	return (NULL);
+    
+    bsr_rp = bsr_group_prefix->add_rp(rp_addr, rp_priority, rp_holdtime);
+    return (bsr_rp);
+}
+
+int
+PimBsr::send_test_bootstrap(const string& vif_name)
+{
+    return (send_test_bootstrap_by_dest(vif_name, IPvX::PIM_ROUTERS(family())));
+}
+
+int
+PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
+				    const IPvX& dest_addr)
+{
+    PimVif *pim_vif = pim_node().vif_find_by_name(vif_name);
+    int ret_value = XORP_ERROR;
+    list<BsrZone *>::iterator bsr_iter;
+    
+    if (pim_vif == NULL) {
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
+    
+    for (bsr_iter = _test_bsr_zone_list.begin();
+	 bsr_iter != _test_bsr_zone_list.end();
+	 ++bsr_iter) {
+	BsrZone *bsr_zone = *bsr_iter;
+	if (pim_vif->pim_bootstrap_send(dest_addr, *bsr_zone)
+	    < 0) {
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
+	}
+    }
+    ret_value = XORP_OK;
+    goto ret_label;
+    
+ ret_label:
+    delete_pointers_list(_test_bsr_zone_list);
+    return (ret_value);
+}
+
+int
+PimBsr::send_test_cand_rp_adv()
+{
+    PimVif *pim_vif = NULL;
+    int ret_value = XORP_ERROR;
+    list<BsrZone *>::iterator bsr_iter;
+    
+    //
+    // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
+    // messages.
+    //
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	pim_vif = pim_node().vif_find_by_vif_index(i);
+	if (pim_vif == NULL)
+	    continue;
+	if (! pim_vif->is_up())
+	    continue;
+	break;	// Found
+    }
+    if (pim_vif == NULL) {
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
+    
+    for (bsr_iter = _test_bsr_zone_list.begin();
+	 bsr_iter != _test_bsr_zone_list.end();
+	 ++bsr_iter) {
+	BsrZone *bsr_zone = *bsr_iter;
+	if (pim_vif->pim_cand_rp_adv_send(bsr_zone->bsr_addr(), *bsr_zone)
+	    < 0) {
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
+	}
+    }
+    ret_value = XORP_OK;
+    goto ret_label;
+    
+ ret_label:
+    delete_pointers_list(_test_bsr_zone_list);
+    return (ret_value);
+}
+
 
 BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
     : _pim_bsr(pim_bsr),
@@ -2016,25 +2184,42 @@ bsr_zone_candidate_rp_advertise_timer_timeout(void *data_pointer)
     BsrZone& bsr_zone = *(BsrZone *)data_pointer;
     PimNode& pim_node = bsr_zone.pim_bsr().pim_node();
     PimVif *pim_vif = NULL;
+    const BsrZone *active_bsr_zone = NULL;
     
     //
-    // Find the first vif that is UP, and use it to unicast Cand-RP-Adv
-    // messages.
+    // Find the active BsrZone
     //
-    for (uint16_t i = 0; i < pim_node.maxvifs(); i++) {
-	pim_vif = pim_node.vif_find_by_vif_index(i);
-	if (pim_vif == NULL)
-	    continue;
-	if (! pim_vif->is_up())
-	    continue;
-	break;	// Found
-    }
-    if (pim_vif != NULL) {
-	pim_vif->pim_cand_rp_adv_send(bsr_zone);
-    } else {
-	XLOG_ERROR("Cannot send periodic Cand-RP Adv message: "
-		   "cannot find a vif that is UP and running");
-    }
+    active_bsr_zone = bsr_zone.pim_bsr().find_active_bsr_zone(bsr_zone.zone_id());
+    do {
+	if (active_bsr_zone == NULL)
+	    break;		// No active BsrZone yet
+	
+	if (! active_bsr_zone->bsr_addr().is_unicast())
+	    break;		// We don't know the BSR address
+	
+	if (active_bsr_zone->i_am_bsr())
+	    break;		// I am the BSR, hence don't send the message
+	
+	//
+	// Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
+	// messages.
+	//
+	for (uint16_t i = 0; i < pim_node.maxvifs(); i++) {
+	    pim_vif = pim_node.vif_find_by_vif_index(i);
+	    if (pim_vif == NULL)
+		continue;
+	    if (! pim_vif->is_up())
+		continue;
+	    break;	// Found
+	}
+	if (pim_vif == NULL) {
+	    XLOG_ERROR("Cannot send periodic Cand-RP Adv message: "
+		       "cannot find a vif that is UP and running");
+	    break;
+	}
+	
+	pim_vif->pim_cand_rp_adv_send(active_bsr_zone->bsr_addr(), bsr_zone);
+    } while (false);
     
     // Restart the timer
     bsr_zone.start_candidate_rp_advertise_timer();

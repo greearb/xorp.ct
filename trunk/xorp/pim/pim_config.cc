@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.3 2003/01/13 20:11:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.4 2003/02/25 01:38:48 pavlin Exp $"
 
 
 //
@@ -805,6 +805,84 @@ PimNode::send_test_assert(const string& vif_name,
 				 rpt_bit,
 				 metric_preference,
 				 metric) < 0) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::add_test_bsr_zone(const PimScopeZoneId& zone_id,
+			   const IPvX& bsr_addr,
+			   uint8_t bsr_priority,
+			   uint8_t hash_masklen,
+			   uint16_t fragment_tag)
+{
+    if (pim_bsr().add_test_bsr_zone(zone_id, bsr_addr, bsr_priority,
+				    hash_masklen, fragment_tag)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::add_test_bsr_group_prefix(const PimScopeZoneId& zone_id,
+				   const IPvXNet& group_prefix,
+				   bool is_scope_zone,
+				   uint8_t expected_rp_count)
+{
+    if (pim_bsr().add_test_bsr_group_prefix(zone_id, group_prefix,
+					    is_scope_zone, expected_rp_count)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::add_test_bsr_rp(const PimScopeZoneId& zone_id,
+			 const IPvXNet& group_prefix,
+			 const IPvX& rp_addr,
+			 uint8_t rp_priority,
+			 uint16_t rp_holdtime)
+{
+    if (pim_bsr().add_test_bsr_rp(zone_id, group_prefix, rp_addr, rp_priority,
+				  rp_holdtime)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::send_test_bootstrap(const string& vif_name)
+{
+    if (pim_bsr().send_test_bootstrap(vif_name) < 0) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::send_test_bootstrap_by_dest(const string& vif_name,
+				     const IPvX& dest_addr)
+{
+    if (pim_bsr().send_test_bootstrap_by_dest(vif_name, dest_addr) < 0) {
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::send_test_cand_rp_adv()
+{
+    if (pim_bsr().send_test_cand_rp_adv() < 0) {
 	return (XORP_ERROR);
     }
     
