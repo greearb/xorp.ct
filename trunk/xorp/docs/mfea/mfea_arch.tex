@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.7 2003/06/05 08:13:37 pavlin Exp $
+% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.8 2003/06/09 20:02:21 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Multicast Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 0.3}
+Version 0.4}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 9, 2003}
+\date{August 28, 2003}
 
 \maketitle
 
@@ -75,7 +75,7 @@ issues when implementing a new protocol. Finally, if we want to use
 PIM and MLD/IGMP in a simulation-like environment, it will be sufficient
 to add the simulation environment support only to the MFEA.
 
-Currently (June 2003), the MFEA supports abstraction for
+Currently (August 2003), the MFEA supports abstraction for
 the following systems:
 
 \begin{itemize}
@@ -85,7 +85,7 @@ the following systems:
 
 In the future, the MFEA will support simulation environment, and
 abstraction for Click~\cite{CLICK-PROJECT} forwarding
-path~\footnote{Currently (June 2003) Click does
+path~\footnote{Currently (August 2003) Click does
 not support multicast yet.}. Support for other systems will be added
 on-demand if there are available resources.
 
@@ -239,7 +239,7 @@ modules such as PIM and MLD/IGMP:
 
   \item Interface to send the MRIB information to the interested
   multicast-related modules. Note that this is a temporary solution, and
-  in the future (after June 2003) the multicast modules interested in
+  in the future (after August 2003) the multicast modules interested in
   the MRIB will obtain this information from the RIB module instead.
 
 \end{itemize}
@@ -269,7 +269,7 @@ MfeaVif per network interface such as physical
 interface, tunnel, or the loopback interface. In addition, there is
 one special MfeaVif: the PIM Register virtual
 interface that is used for sending and receiving PIM Register
-packets~\footnote{In the future (after June 2003), the PIM
+packets~\footnote{In the future (after August 2003), the PIM
 Register MfeaVif interface may not be part of the MFEA anymore, because
 it is strictly PIM-specific.}.
 
@@ -295,7 +295,7 @@ state in MfeaVif, but will not use a system call to leave the multicast
 group on the interface.
 
 Typically, from developer's point of view, all interactions with MfeaVif
-would be through MfeaNode~\footnote{For simplicity, currently (June
+would be through MfeaNode~\footnote{For simplicity, currently (August
 2003) there are few occasions when XrlMfeaNode uses direct access to MfeaVif.}.
 
 The public interface for MfeaVif contains the methods to manipulate a
@@ -317,7 +317,7 @@ enabled explicitly.
 \subsection{MfeaConfig Description}
 
 MfeaConfig handles the MFEA-specific configuration~\footnote{Currently
-(June 2003), MfeaConfig is not implemented; rather, all state is
+(August 2003), MfeaConfig is not implemented; rather, all state is
 kept inside MfeaNode instead.}. This configuration is used to configure the
 following units:
 
@@ -378,7 +378,7 @@ information toward the RPs or the senders. This information contains the
 next-hop router address and the interface toward that router, the
 routing metric and the metric preference.
 
-Currently (June 2003), the MRIB information is obtained by
+Currently (August 2003), the MRIB information is obtained by
 periodically reading the underlying unicast forwarding table by directly
 calling the appropriate method in the FEA. In the
 future, the MRIB would be obtained by the interested parties directly
@@ -449,6 +449,8 @@ operation when MfeaNode is stopped.
   \item June 9, 2003: Updated to match XORP version 0.3 release code
   (changes related to the MFEA--FEA merging, and refactoring of
   some of the MFEA internals).
+
+  \item August 28, 2003: Bump-up the version number to 0.4.
 
 \end{itemize}
 
