@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.20 2004/10/21 00:44:22 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.21 2004/11/12 00:47:36 bms Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -21,6 +21,7 @@
 #include "iftree.hh"
 
 class IfConfig;
+class RunCommand;
 
 class IfConfigSet {
 public:
@@ -600,10 +601,22 @@ private:
 				   uint32_t prefix_len,
 				   string& errmsg);
 
+    int execute_click_config_generator(string& errmsg);
+    void terminate_click_config_generator();
+    void click_config_generator_stdout_cb(RunCommand* run_command,
+					  const string& output);
+    void click_config_generator_stderr_cb(RunCommand* run_command,
+					  const string& output);
+    void click_config_generator_done_cb(RunCommand* run_command,
+					bool success,
+					const string& error_msg);
+    int write_generated_config(const string& config, string& errmsg);
     virtual string generate_config();
 
     ClickSocketReader	_cs_reader;
     IfTree		_iftree;
+    RunCommand*		_click_config_generator_run_command;
+    string		_click_config_generator_stdout;
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

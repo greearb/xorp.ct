@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.6 2004/11/12 00:47:36 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.7 2004/11/12 07:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/run_command.hh"
 
 #include "ifconfig.hh"
 #include "ifconfig_set.hh"
@@ -36,7 +37,8 @@
 IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
     : IfConfigSet(ifc),
       ClickSocket(ifc.eventloop()),
-      _cs_reader(*(ClickSocket *)this)
+      _cs_reader(*(ClickSocket *)this),
+      _click_config_generator_run_command(NULL)
 {
 }
 
@@ -77,6 +79,8 @@ IfConfigSetClick::stop()
     if (! _is_running)
 	return (XORP_OK);
 
+    terminate_click_config_generator();
+
     ret_value = ClickSocket::stop();
 
     _is_running = false;
@@ -99,19 +103,22 @@ IfConfigSetClick::config_end(string& errmsg)
 {
     debug_msg("config_end\n");
 
+#if 0		// TODO: XXX: PAVPAVPAV: remove it!
     //
-    // Write the configuration
+    // Generate the configuration and write it.
     //
     string config = generate_config();
-    string handler = "hotconfig";
-    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK) {
+    if (write_generated_config(config, errmsg) != XORP_OK)
 	return (XORP_ERROR);
-    }
+
+    return (XORP_OK);
+#endif
 
     //
-    // Notify the NextHopPortMapper observers about any port mapping changes
+    // Trigger the generation of the configuration
     //
-    ifc().nexthop_port_mapper().notify_observers();
+    if (execute_click_config_generator(errmsg) != XORP_OK)
+	return (XORP_ERROR);
 
     return (XORP_OK);
 }
@@ -600,6 +607,111 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 
     UNUSED(if_index);
     UNUSED(prefix_len);
+}
+
+int
+IfConfigSetClick::execute_click_config_generator(string& errmsg)
+{
+    string command = ClickSocket::click_config_generator_file();
+    string arguments = "";		// TODO: XXX: PAVPAVPAV: create them!
+
+    if (command.empty()) {
+	errmsg = c_format(
+	    "Cannot execute the Click configuration generator: "
+	    "empty generator file name");
+	return (XORP_ERROR);
+    }
+
+    // XXX: kill any previously running instance
+    if (_click_config_generator_run_command != NULL) {
+	delete _click_config_generator_run_command;
+	_click_config_generator_run_command = NULL;
+    }
+
+    // Clear any previous stdout
+    _click_config_generator_stdout.erase();
+
+    _click_config_generator_run_command = new RunCommand(
+	ifc().eventloop(),
+	command,
+	arguments,
+	callback(this, &IfConfigSetClick::click_config_generator_stdout_cb),
+	callback(this, &IfConfigSetClick::click_config_generator_stderr_cb),
+	callback(this, &IfConfigSetClick::click_config_generator_done_cb));
+
+    if (_click_config_generator_run_command->execute() != XORP_OK) {
+	delete _click_config_generator_run_command;
+	_click_config_generator_run_command = NULL;
+	errmsg = c_format("Could not execute the Click configuration generator");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+void
+IfConfigSetClick::terminate_click_config_generator()
+{
+    if (_click_config_generator_run_command != NULL) {
+	delete _click_config_generator_run_command;
+	_click_config_generator_run_command = NULL;
+    }
+}
+
+void
+IfConfigSetClick::click_config_generator_stdout_cb(RunCommand* run_command,
+						   const string& output)
+{
+    XLOG_ASSERT(run_command == _click_config_generator_run_command);
+    _click_config_generator_stdout += output;
+}
+
+void
+IfConfigSetClick::click_config_generator_stderr_cb(RunCommand* run_command,
+						   const string& output)
+{
+    XLOG_ASSERT(run_command == _click_config_generator_run_command);
+    XLOG_ERROR("External Click configuration generator stderr output: %s",
+	       output.c_str());
+}
+
+void
+IfConfigSetClick::click_config_generator_done_cb(RunCommand* run_command,
+						 bool success,
+						 const string& error_msg)
+{
+    XLOG_ASSERT(run_command == _click_config_generator_run_command);
+    if (! success) {
+	XLOG_ERROR("External Click configuration generator (%s) failed: %s",
+		   run_command->command().c_str(), error_msg.c_str());
+    }
+    delete _click_config_generator_run_command;
+    _click_config_generator_run_command = NULL;
+    if (! success)
+	return;
+
+    string write_errmsg;
+    if (write_generated_config(_click_config_generator_stdout, write_errmsg)
+	!= XORP_OK) {
+	XLOG_ERROR("Failed to write the Click configuration: %s",
+		   write_errmsg.c_str());
+    }
+}
+
+int
+IfConfigSetClick::write_generated_config(const string& config, string& errmsg)
+{
+    string handler = "hotconfig";
+
+    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK)
+	return (XORP_ERROR);
+
+    //
+    // Notify the NextHopPortMapper observers about any port mapping changes
+    //
+    ifc().nexthop_port_mapper().notify_observers();
+
+    return (XORP_OK);
 }
 
 string
