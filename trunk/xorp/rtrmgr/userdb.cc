@@ -12,27 +12,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.2 2003/03/10 23:21:03 hodson Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
-#include "config.h"
 #include "userdb.hh"
-#include <sys/types.h>
 #include <pwd.h>
 
-User::User(uint32_t user_id, const string& username) {
-    _user_id = user_id;
-    _username = username;
+User::User(uint32_t user_id, const string& username)
+    : _user_id(user_id),
+      _username(username)
+{
+
 }
 
 bool 
-User::has_acl_capability(const string& capname) const {
-    set <string>::iterator i;
-    i = _capabilities.find(capname);
-    if (i == _capabilities.end()) {
+User::has_acl_capability(const string& capname) const
+{
+    set<string>::iterator iter;
+
+    iter = _capabilities.find(capname);
+    if (iter == _capabilities.end()) {
 	return false;
     } else {
 	return true;
@@ -40,32 +42,42 @@ User::has_acl_capability(const string& capname) const {
 }
 
 void 
-User::add_acl_capability(const string& capname) {
-    set <string>::iterator i;
-    i = _capabilities.find(capname);
-    if (i == _capabilities.end()) {
+User::add_acl_capability(const string& capname)
+{
+    set<string>::iterator iter;
+
+    iter = _capabilities.find(capname);
+    if (iter == _capabilities.end()) {
 	_capabilities.insert(capname);
     }
 }
 
 UserInstance::UserInstance(uint32_t user_id, const string& username) 
-    : User(user_id, username) {
+    : User(user_id, username)
+{
+
 }
 
 
-UserDB::UserDB() {
+UserDB::UserDB()
+{
+
 }
 
-UserDB::~UserDB() {
-    map <uint32_t, User*>::iterator i;
-    for (i=_users.begin(); i!=_users.end(); i++) {
-	delete i->second;
+UserDB::~UserDB()
+{
+    map<uint32_t, User*>::iterator iter;
+
+    for (iter = _users.begin(); iter != _users.end(); ++iter) {
+	delete iter->second;
     }
 }
 
 void 
-UserDB::load_password_file() {
-    struct passwd *pwent;
+UserDB::load_password_file()
+{
+    struct passwd* pwent;
+
     pwent = getpwent();
     while (pwent != NULL) {
 #ifdef DEBUG_USERDB
@@ -78,10 +90,11 @@ UserDB::load_password_file() {
 }
 
 User* 
-UserDB::add_user(uint32_t user_id, const string& username) {
+UserDB::add_user(uint32_t user_id, const string& username)
+{
     if (_users.find(user_id) == _users.end()) {
-	User *newuser = new User(user_id, username);
-	struct group *grp = getgrnam("xorp");
+	User* newuser = new User(user_id, username);
+	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
 	    char **gr_mem = grp->gr_mem;
 	    while (*gr_mem != NULL) {
@@ -98,32 +111,37 @@ UserDB::add_user(uint32_t user_id, const string& username) {
 	_users[user_id] = newuser;
 	return newuser;
     } else {
-	//user id already exists
+	// This user_id already exists
 	return NULL;
     }
 }
 
 const User* 
-UserDB::find_user_by_user_id(uint32_t user_id) const {
-    map <uint32_t,User*>::const_iterator i = _users.find(user_id);
-    if (i == _users.end())
+UserDB::find_user_by_user_id(uint32_t user_id) const
+{
+    map<uint32_t,User*>::const_iterator iter = _users.find(user_id);
+
+    if (iter == _users.end())
 	return NULL;
     else
-	return i->second;
+	return iter->second;
 }
 
-
 void 
-UserDB::remove_user(uint32_t user_id) {
-    map <uint32_t,User*>::iterator i = _users.find(user_id);
-    User *user = i->second;
-    _users.erase(i);
+UserDB::remove_user(uint32_t user_id)
+{
+    map<uint32_t,User*>::iterator iter = _users.find(user_id);
+    User* user = iter->second;
+
+    _users.erase(iter);
     delete user;
 }
 
 bool
-UserDB::has_capability(uint32_t user_id, const string& capability) const {
+UserDB::has_capability(uint32_t user_id, const string& capability) const
+{
     const User* user = find_user_by_user_id(user_id);
+
     if (user == NULL) 
 	return false;
     return (user->has_acl_capability(capability));

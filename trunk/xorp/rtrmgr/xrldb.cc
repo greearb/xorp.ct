@@ -12,25 +12,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.3 2003/02/22 21:02:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.4 2003/03/10 23:21:04 hodson Exp $"
 
 #include <glob.h>
-#include "config.h"
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/exceptions.hh"
 #include "libxipc/xrl_parser.hh"
 #include "xrldb.hh"
 
+
 XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec) 
-    : _xrl(xrl), _rspec(rspec) {
+    : _xrl(xrl),
+      _rspec(rspec)
+{
 #ifdef DEBUG_XRLDB
     cout << "XrlSpec " + xrl.str() + " -> " + rspec.str() + "\n";
 #endif
 }
 
-
 XRLMatchType
-XrlSpec::matches(const Xrl& xrl, const XrlArgs& rspec) const {
+XrlSpec::matches(const Xrl& xrl, const XrlArgs& rspec) const
+{
 #if 0
     cout << "------\n";
     cout << "TEST:" << xrl.str() << " -> " << rspec.str() << "\n";
@@ -52,7 +55,8 @@ XrlSpec::matches(const Xrl& xrl, const XrlArgs& rspec) const {
 }
 
 string 
-XrlSpec::str() const {
+XrlSpec::str() const
+{
     string s = _xrl.str() + " -> " + _rspec.str();
     return s;
 }
@@ -114,39 +118,45 @@ XRLtarget::XRLtarget(const string& xrlfilename)
 }
 
 XRLMatchType
-XRLtarget::xrl_matches(const Xrl& xrl, const XrlArgs& rspec) const {
-    list <XrlSpec>::const_iterator i;
+XRLtarget::xrl_matches(const Xrl& xrl, const XrlArgs& rspec) const
+{
+    list<XrlSpec>::const_iterator iter;
     XRLMatchType match;
     XRLMatchType failure_type = MATCH_FAIL;
-    for (i = _xrlspecs.begin(); i!= _xrlspecs.end(); ++i) {
-	match = i->matches(xrl, rspec);
-	if (match == MATCH_ALL) return MATCH_ALL;
-	if (match == MATCH_XRL) failure_type = MATCH_XRL;
+
+    for (iter = _xrlspecs.begin(); iter != _xrlspecs.end(); ++iter) {
+	match = iter->matches(xrl, rspec);
+	if (match == MATCH_ALL)
+	    return MATCH_ALL;
+	if (match == MATCH_XRL)
+	    failure_type = MATCH_XRL;
     }
     return failure_type;
 }
 
-string 
-XRLtarget::str() const {
+string
+XRLtarget::str() const
+{
     string s = "  Target " + _targetname + ":\n";
-    list <XrlSpec>::const_iterator i;
-    for (i=_xrlspecs.begin(); i!=_xrlspecs.end(); ++i) {
-	s += "    " + i->str() + "\n";
+    list<XrlSpec>::const_iterator iter;
+
+    for (iter = _xrlspecs.begin(); iter != _xrlspecs.end(); ++iter) {
+	s += "    " + iter->str() + "\n";
     }
     return s;
 }
 
-XRLdb::XRLdb(const string& xrldir) {
+XRLdb::XRLdb(const string& xrldir)
+{
 #if 0
     printf("Initializing XRLdb from %s\n", xrldir.c_str());
 #endif
 
-    list <string> files;
+    list<string> files;
 
     struct stat dirdata;
     if (stat(xrldir.c_str(), &dirdata) < 0) {
-	string errstr = "rtrmgr: error reading xrl directory "
-	    + xrldir + "\n";
+	string errstr = "rtrmgr: error reading xrl directory " + xrldir + "\n";
 	errstr += strerror(errno); 
 	errstr += "\n";
 	fprintf(stderr, "%s", errstr.c_str());
@@ -159,7 +169,7 @@ XRLdb::XRLdb(const string& xrldir) {
 	fprintf(stderr, "%s", errstr.c_str());
 	exit(1);
     }
-    
+
     string globname = xrldir + "/*.xrls";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
@@ -176,7 +186,7 @@ XRLdb::XRLdb(const string& xrldir) {
 	exit(1);
     }
     
-    for (size_t i=0; i< (size_t)pglob.gl_pathc; i++) {
+    for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	_targets.push_back(XRLtarget(pglob.gl_pathv[i]));
     }
 #ifdef DEBUG_XRLDB
@@ -187,7 +197,8 @@ XRLdb::XRLdb(const string& xrldir) {
 }
 
 bool
-XRLdb::check_xrl_syntax(const string &xrlstr) const {
+XRLdb::check_xrl_syntax(const string &xrlstr) const
+{
 #ifdef DEBUG_XRLDB
     printf("XRLdb: checking xrl syntax: %s\n", xrlstr.c_str());
 #endif
@@ -211,39 +222,46 @@ XRLdb::check_xrl_syntax(const string &xrlstr) const {
 }
 
 XRLMatchType
-XRLdb::check_xrl_exists(const string &xrlstr) const {
+XRLdb::check_xrl_exists(const string &xrlstr) const
+{
 #if DEBUG_XRLDB
     printf("XRLdb: checking xrl exists: %s\n", xrlstr.c_str());
 #endif
     string::size_type start = xrlstr.find("->");
     string xrlspec;
     string rspec;
+
     if (start == string::npos) {
 	xrlspec = xrlstr;
 	rspec.empty();
     } else {
 	xrlspec = xrlstr.substr(0, start);
-	rspec = xrlstr.substr(start+2, xrlstr.size()-(start+2));
+	rspec = xrlstr.substr(start + 2, xrlstr.size() - (start + 2));
     }
+
     Xrl test_xrl(xrlspec.c_str());    
     XrlArgs test_atoms(rspec.c_str());
     XRLMatchType match;
     XRLMatchType failure_type = MATCH_FAIL;
-    list <XRLtarget>::const_iterator i;
-    for (i=_targets.begin(); i!=_targets.end(); ++i) {
-	match = i->xrl_matches(test_xrl, test_atoms);
-	if (match == MATCH_ALL) return MATCH_ALL;
-	if (match == MATCH_XRL) failure_type = MATCH_XRL;
+    list<XRLtarget>::const_iterator iter;
+    for (iter = _targets.begin(); iter != _targets.end(); ++iter) {
+	match = iter->xrl_matches(test_xrl, test_atoms);
+	if (match == MATCH_ALL)
+	    return MATCH_ALL;
+	if (match == MATCH_XRL)
+	    failure_type = MATCH_XRL;
     }
     return failure_type;
 }
 
 string 
-XRLdb::str() const {
+XRLdb::str() const
+{
     string s = "XRLdb contains\n";
-    list <XRLtarget>::const_iterator i;
-    for (i=_targets.begin(); i!=_targets.end(); ++i) {
-	s += i->str() + "\n";
+    list<XRLtarget>::const_iterator iter;
+
+    for (iter = _targets.begin(); iter != _targets.end(); ++iter) {
+	s += iter->str() + "\n";
     }
     return s;
 }

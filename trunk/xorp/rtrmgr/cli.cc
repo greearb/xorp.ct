@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.17 2003/11/20 05:45:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.18 2003/11/20 06:37:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -91,8 +91,8 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	com0->add_command("help", "Provide help with commands");
 	com0->add_command("quit", "Quit this command session");
     }
-    set <string> cmds = op_cmd_list()->top_level_commands();
-    set <string>::const_iterator iter;
+    set<string> cmds = op_cmd_list()->top_level_commands();
+    set<string>::const_iterator iter;
     for (iter = cmds.begin(); iter != cmds.end(); ++iter) {
 	com1 = com0->add_command(iter->c_str(), "help");
 	com1->set_global_name(iter->c_str());
@@ -145,7 +145,7 @@ RouterCLI::display_config_mode_users() const
 	    _cli_client.cli_print("Users ");
 	list<uint32_t>::const_iterator iter, iter2;
 	struct passwd* pwent;
-	for(iter = _config_mode_users.begin();
+	for (iter = _config_mode_users.begin();
 	    iter != _config_mode_users.end();
 	    ++iter) {
 	    if (iter != _config_mode_users.begin()) {
@@ -406,7 +406,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 				  const string& path)
 {
     string subpath;
-    set <string> existing_children;
+    set<string> existing_children;
 
     const list<CommandTreeNode*>& cmdchildren =
 	command_tree.root_node().children();
@@ -442,7 +442,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
     XLOG_ASSERT(ttn != NULL);
 
     list<TemplateTreeNode*>::const_iterator tti;
-    for(tti = ttn->children().begin();
+    for (tti = ttn->children().begin();
 	tti != ttn->children().end();
 	++tti) {
 	// we don't need to consider this child if it's already added

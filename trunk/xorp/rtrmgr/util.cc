@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.3 2003/11/06 00:23:43 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.4 2003/11/17 19:34:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -21,10 +21,11 @@
 #include <string>
 
 #include "rtrmgr_module.h"
-#include "libxorp/debug.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "util.hh"
+
 
 static string s_cfg_root;
 static string s_bin_root;
@@ -33,13 +34,14 @@ static string s_boot_file;
 list<string>
 split(const string& s, char ch)
 {
-    list <string> parts;
+    list<string> parts;
     string s2 = s;
     size_t ix;
+
     ix = s2.find(ch);
     while (ix != string::npos) {
-	parts.push_back(s2.substr(0,ix));
-	s2 = s2.substr(ix+1, s2.size()-ix);
+	parts.push_back(s2.substr(0, ix));
+	s2 = s2.substr(ix + 1, s2.size() - ix);
 	ix = s2.find(ch);
     }
     if (!s2.empty())
@@ -48,7 +50,7 @@ split(const string& s, char ch)
 }
 
 string
-find_exec_path_name(const char *progname)
+find_exec_path_name(const char* progname)
 {
     debug_msg("%s\n", progname);
 
@@ -58,7 +60,7 @@ find_exec_path_name(const char *progname)
     // Look for trailing slash in progname
     //
     const char* p = strrchr(progname, '/');
-    if (p) {
+    if (p != NULL) {
 	debug_msg("%s\n",  string(progname, p).c_str());
 	return string(progname, p);
     }
@@ -72,7 +74,7 @@ find_exec_path_name(const char *progname)
     while (s != NULL && *s != '\0') {
 	const char* e = strchr(s, ':');
 	string path;
-	if (e) {
+	if (e != NULL) {
 	    path = string(s, e);
 	    s = e + 1;
 	} else {
@@ -94,7 +96,7 @@ xorp_real_path(const string& path)
 
     char rp[MAXPATHLEN + 1];
     const char* prp = realpath(path.c_str(), rp);
-    if (prp) {
+    if (prp != NULL) {
 	debug_msg("return %s\n", prp);
 	return string(prp);
     }

@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrldb.hh,v 1.2 2002/12/14 23:43:11 hodson Exp $
+// $XORP: xorp/rtrmgr/xrldb.hh,v 1.3 2003/03/10 23:21:04 hodson Exp $
 
 #ifndef __RTRMGR_XRLDB_HH__
 #define __RTRMGR_XRLDB_HH__
 
 #include <list>
-#include "config.h"
 #include "libxorp/xorp.h"
 #include "libxipc/xrl_router.hh"
+
 
 enum XRLMatchType {
     MATCH_FAIL  = 0x0,
@@ -34,9 +34,10 @@ public:
     XrlSpec(const Xrl& xrl, const XrlArgs& rspec);
     XRLMatchType matches(const Xrl& xrl, const XrlArgs& rspec) const;
     string str() const;
+
 private:
-    Xrl _xrl;  //the XRL itself
-    XrlArgs _rspec; //the return spec
+    Xrl		_xrl;		// The XRL itself
+    XrlArgs	_rspec;		// The return spec
 };
 
 class XRLtarget {
@@ -44,19 +45,21 @@ public:
     XRLtarget(const string& xrlfilename);
     XRLMatchType xrl_matches(const Xrl& test_xrl, const XrlArgs& rspec) const;
     string str() const;
+
 private:
-    string _targetname;
-    list <XrlSpec> _xrlspecs;
+    string	_targetname;
+    list<XrlSpec> _xrlspecs;
 };
 
 class XRLdb {
 public:
-    XRLdb(const string &xrldir);
-    bool check_xrl_syntax(const string &xrl) const;
-    XRLMatchType check_xrl_exists(const string &xrl) const;
+    XRLdb(const string& xrldir);
+    bool check_xrl_syntax(const string& xrl) const;
+    XRLMatchType check_xrl_exists(const string& xrl) const;
     string str() const;
+
 private:
-    list <XRLtarget> _targets;
+    list<XRLtarget> _targets;
 };
 
 #endif // __RTRMGR_XRLDB_HH__

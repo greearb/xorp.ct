@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.17 2003/09/25 19:16:12 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.18 2003/09/30 20:50:51 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -48,18 +48,18 @@ XorpShell::XorpShell(const string& IPCname,
 		     const string& config_template_dir,
 		     const string& xrl_dir)
     : _eventloop(),
-    _xrlrouter(_eventloop, IPCname.c_str()),
-    _xclient(_eventloop, _xrlrouter),
-    _rtrmgr_client(&_xrlrouter),
-    _xorpsh_interface(&_xrlrouter, *this),
-    _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
-    _xorp_root_dir(xorp_root_dir),
-    _got_config(false),
-    _mode(MODE_INITIALIZING)
+      _xrlrouter(_eventloop, IPCname.c_str()),
+      _xclient(_eventloop, _xrlrouter),
+      _rtrmgr_client(&_xrlrouter),
+      _xorpsh_interface(&_xrlrouter, *this),
+      _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
+      _xorp_root_dir(xorp_root_dir),
+      _got_config(false),
+      _mode(MODE_INITIALIZING)
 {
     _ipc_name = IPCname;
 
-    // read the router config template files
+    // Read the router config template files
     try {
 	_tt = new TemplateTree(xorp_root_dir, config_template_dir, xrl_dir);
     } catch (const XorpException&) {
@@ -72,7 +72,7 @@ XorpShell::XorpShell(const string& IPCname,
     _tt->display_tree();
 #endif
 
-    // read the router operational template files
+    // Read the router operational template files
     try {
 	_ocl = new OpCommandList(config_template_dir.c_str(), _tt);
     } catch (const XorpException&) {
@@ -109,7 +109,7 @@ wait_for_xrlrouter_ready(EventLoop& e, XrlRouter& rtr)
 void
 XorpShell::run()
 {
-    // signal handlers so we can clean up when we're killed
+    // Signal handlers so we can clean up when we're killed
     running = true;
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
@@ -138,7 +138,7 @@ XorpShell::run()
 	   _authfile.c_str());
 #endif
 
-    FILE *file = fopen(_authfile.c_str(), "r");
+    FILE* file = fopen(_authfile.c_str(), "r");
     if (file == NULL) {
 	XLOG_FATAL("Failed to open authfile %s",
 		   _authfile.c_str());
@@ -147,8 +147,7 @@ XorpShell::run()
     memset(buf, 0, sizeof(buf));
     if (fgets(buf, sizeof(buf) - 1, file) == 0) {
 	fclose(file);
-	XLOG_FATAL("Failed to read authfile %s",
-		   _authfile.c_str());
+	XLOG_FATAL("Failed to read authfile %s", _authfile.c_str());
     }
     fclose(file);
     if (unlink(_authfile.c_str()) != 0) {
@@ -172,9 +171,8 @@ XorpShell::run()
 
     _mode = MODE_INITIALIZING;
 
-
     _rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
-        callback(this, &XorpShell::receive_config));
+				callback(this, &XorpShell::receive_config));
 
     while (_got_config == false) {
 #ifdef DEBUG_STARTUP
@@ -193,10 +191,9 @@ XorpShell::run()
     _ct = new SlaveConfigTree(_configuration, _tt, _xclient);
     _ocl->set_config_tree(_ct);
 
-    // start up the CLI
+    // Start up the CLI
     _cli_node.enable();
     _router_cli = new RouterCLI(*this, _cli_node);
-
 
     _mode = MODE_IDLE;
 
@@ -209,7 +206,7 @@ XorpShell::run()
 					  callback(this,
 						   &XorpShell::generic_done));
     _mode = MODE_SHUTDOWN;
-    // we need to return to the event loop to cause the unregister to be sent
+    // We need to return to the event loop to cause the unregister to be sent
     while (!_done) {
 	_eventloop.run();
     }
@@ -246,7 +243,7 @@ XorpShell::generic_done(const XrlError& e)
 	_done = true;
 	return;
     } else if ((e == XrlError::COMMAND_FAILED())
-	       && (e.note()=="AUTH_FAIL")) {
+	       && (e.note() == "AUTH_FAIL")) {
 	fprintf(stderr, "Authentication Failure\n");
 	exit(1);
     } else {
@@ -264,7 +261,7 @@ XorpShell::receive_config(const XrlError& e, const string* config)
 	_got_config = true;
 	return;
     } else if ((e == XrlError::COMMAND_FAILED())
-	       && (e.note()=="AUTH_FAIL")) {
+	       && (e.note() == "AUTH_FAIL")) {
 	fprintf(stderr, "Authentication Failure\n");
 	exit(1);
     } else {
@@ -274,22 +271,19 @@ XorpShell::receive_config(const XrlError& e, const string* config)
     }
 }
 
-
 void
 XorpShell::lock_config(LOCK_CALLBACK cb)
 {
-    // lock for 30 seconds - this should be overkill
+    // Lock for 30 seconds - this should be overkill
     _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 30000, cb);
 }
 
 void
 XorpShell::commit_changes(const string& deltas, const string& deletions,
-			  GENERIC_CALLBACK cb,
-			  CallBack final_cb)
+			  GENERIC_CALLBACK cb, CallBack final_cb)
 {
     _commit_callback = final_cb;
-    _rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken,
-					    _ipc_name,
+    _rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken, _ipc_name,
 					    deltas, deletions, cb);
 }
 
@@ -351,31 +345,31 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 			  const string& deletions)
 {
     if (_mode == MODE_COMMITTING) {
-	// this is the response back to our own request
+	// This is the response back to our own request
 	return;
     }
     string response;
     if (!_ct->apply_deltas(user_id, deltas,
-			   /*this is not a provisional change*/false,
+			   /* this is not a provisional change */ false,
 			   response)) {
 	_router_cli->notify_user("WARNING: Failed to merge deltas "
 				 "from rtrmgr\n",
-				 /*urgent*/ true);
-	_router_cli->notify_user(response, /*urgent*/true);
+				 /* urgent */ true);
+	_router_cli->notify_user(response, /* urgent */ true);
 	// XXX it's not clear we can continue if this happens
     }
     response == "";
     if (!_ct->apply_deletions(user_id, deletions,
-			      /* this is not a provisional change */false,
+			      /* this is not a provisional change */ false,
 			      response)) {
 	_router_cli->notify_user("WARNING: Failed to merge deletions "
 				 "from rtrmgr\n",
-				 /*urgent*/ true);
-	_router_cli->notify_user(response, /*urgent*/true);
-	// XXX it's not clear we can continue if this happens
+				 /* urgent */ true);
+	_router_cli->notify_user(response, /* urgent */ true);
+	// XXX: it's not clear we can continue if this happens
     }
 
-    // notfiy the user that the config changed
+    // Notify the user that the config changed
     struct passwd *pwent = getpwuid(user_id);
     string username;
     if (pwent == NULL)
@@ -384,11 +378,11 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	username = pwent->pw_name;
 
     if (_mode == MODE_LOADING) {
-	//no need to notify, as the change was caused by us.
+	// No need to notify, as the change was caused by us.
 	return;
     }
     string alert = "The configuration had been changed by user " +
-			username + "\n";
+	username + "\n";
     _router_cli->notify_user(alert, true);
 }
 
@@ -517,4 +511,3 @@ main(int argc, char *argv[])
 
     return 0;
 }
-

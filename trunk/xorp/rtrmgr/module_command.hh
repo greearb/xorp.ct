@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.11 2003/11/18 23:03:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.12 2003/11/21 20:11:32 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -53,9 +53,9 @@ public:
     string str() const;
 
 protected:
-    // void exec_complete(const XrlError& err, XrlArgs* xrlargs);
+    // void exec_complete(const XrlError& err, XrlArgs* xrl_args);
 
-    void action_complete(const XrlError& err, XrlArgs* args,
+    void action_complete(const XrlError& err, XrlArgs* xrl_args,
 			 ConfigTreeNode *ctn, Action *action, string cmd);
 
 private:

@@ -43,7 +43,7 @@ input:		/* empty */
 
 definition:	nodename nodegroup
 
-nodename:	literals {push_path();}
+nodename:	literals { push_path(); }
 		| named_literal { push_path(); }
 
 named_literal:	LITERAL VARDEF {

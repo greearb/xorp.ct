@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/path_segment.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/path_segment.hh,v 1.2 2003/03/10 23:21:00 hodson Exp $
 
 #ifndef __RTRMGR_PATH_SEGMENT_HH__
 #define __RTRMGR_PATH_SEGMENT_HH__
@@ -21,11 +21,13 @@ class PathSegment {
 public:
     PathSegment(const string& segname, bool is_tag) 
 	: _is_tag(is_tag), _segname(segname) {}
-    bool is_tag() const {return _is_tag;}
-    const string& segname() const {return _segname;}
+
+    bool is_tag() const { return _is_tag; }
+    const string& segname() const { return _segname; }
+
 private:
-    bool _is_tag;
-    string _segname;
+    bool	_is_tag;
+    string	_segname;
 };
 
 #endif // __RTRMGR_PATH_SEGMENT_HH__

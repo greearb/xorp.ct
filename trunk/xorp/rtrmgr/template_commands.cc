@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.30 2003/11/19 23:04:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.31 2003/11/20 19:33:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_router.hh"
 #include "conf_tree_node.hh"
@@ -29,25 +30,30 @@ Action::Action(TemplateTreeNode& template_tree_node,
 	       const list<string>& action) throw (ParseError)
     : _template_tree_node(template_tree_node)
 {
-
-    //we need to split the command into variable names and the rest so
-    //that when we later expand the variables, we can do them quickly
-    //and with no risk of accidentally doing multiple expansions.
     string cur("\n");
-    char c;
-    enum char_type {VAR, NON_VAR, QUOTE};
+    enum char_type { VAR, NON_VAR, QUOTE };
     char_type mode = NON_VAR;
-    typedef list<string>::const_iterator CI;
-    CI ptr = action.begin();
-    while (ptr != action.end()) {
-	string word = (*ptr);
-	if (word[0]=='"' && word[word.size()-1]=='"')
-	    word = word.substr(1, word.size()-2);
-	for(uint32_t i = 0; i < word.length(); i++) {
+    list<string>::const_iterator iter;
+
+    //
+    // We need to split the command into variable names and the rest so
+    // that when we later expand the variables, we can do them quickly
+    // and with no risk of accidentally doing multiple expansions.
+    //
+
+    iter = action.begin();
+    while (iter != action.end()) {
+	string word = (*iter);
+	char c;
+
+	if (word[0] == '"' && word[word.size() - 1] == '"')
+	    word = word.substr(1, word.size() - 2);
+
+	for (size_t i = 0; i < word.length(); i++) {
 	    c = word[i];
 	    switch (mode) {
 	    case VAR:
-		if (word[i]==')') {
+		if (word[i] == ')') {
 		    mode = NON_VAR;
 		    cur += ')';
 		    _split_cmd.push_back(cur);
@@ -57,16 +63,16 @@ Action::Action(TemplateTreeNode& template_tree_node,
 		cur += word[i];
 		break;
 	    case NON_VAR:
-		if (word[i]=='$') {
+		if (word[i] == '$') {
 		    mode = VAR;
-		    if (cur!="")
+		    if (cur != "")
 			_split_cmd.push_back(cur);
 		    cur = c;
 		    break;
 		}
-		if (word[i]=='`') {
+		if (word[i] == '`') {
 		    mode = QUOTE;
-		    if (cur!="")
+		    if (cur != "")
 			_split_cmd.push_back(cur);
 		    cur = c;
 		    break;
@@ -74,7 +80,7 @@ Action::Action(TemplateTreeNode& template_tree_node,
 		cur += word[i];
 		break;
 	    case QUOTE:
-		if (word[i]=='`') {
+		if (word[i] == '`') {
 		    mode = NON_VAR;
 		    cur += '`';
 		    _split_cmd.push_back(cur);
@@ -85,29 +91,30 @@ Action::Action(TemplateTreeNode& template_tree_node,
 		break;
 	    }
 	}
-	if ((cur != "") && (cur != "\n")) {
+	if ((cur != "") && (cur != "\n"))
 	    _split_cmd.push_back(cur);
-	}
 	cur = "\n";
-	++ptr;
+	++iter;
     }
 }
 
 string
-Action::str() const {
+Action::str() const
+{
     string str;
-    typedef list<string>::const_iterator CI;
-    CI ptr = _split_cmd.begin();
-    while (ptr != _split_cmd.end()) {
+    list<string>::const_iterator iter;
+
+    for (iter = _split_cmd.begin(); iter != _split_cmd.end(); ++iter) {
+	const string& cmd = *iter;
+
 	if (str == "") {
-	    str = (*ptr).substr(1,(*ptr).size()-1);
+	    str = cmd.substr(1, cmd.size() - 1);
 	} else {
-	    if ((*ptr)[0]=='\n')
-		str += " " + (*ptr).substr(1,(*ptr).size()-1);
+	    if (cmd[0] == '\n')
+		str += " " + cmd.substr(1, cmd.size() - 1);
 	    else
-		str += *ptr;
+		str += cmd;
 	}
-	++ptr;
     }
     return str;
 }
@@ -119,74 +126,91 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
     throw (ParseError)
     : Action(template_tree_node, action)
 {
+    list<string> xrl_parts = _split_cmd;
+
     debug_msg("XrlAction constructor\n");
-    assert(action.front()=="xrl");
+    XLOG_ASSERT(action.front() == "xrl");
+
     check_xrl_is_valid(action, xrldb);
 
-    list <string> xrlparts = _split_cmd;
-    list <string>::const_iterator si;
-    int j=0;
-    for (si = xrlparts.begin(); si!= xrlparts.end(); si++) {
-	debug_msg("Seg %d: >%s< \n", j++, si->c_str());
+    // Print debug info
+    {
+	list<string>::const_iterator si;
+	int j = 0;
+
+	for (si = xrl_parts.begin(); si!= xrl_parts.end(); ++si)
+	    debug_msg("Seg %d: >%s< \n", j++, si->c_str());
+	debug_msg("\n");
     }
-    debug_msg("\n");
-    //trim off the "xrl" command part.
-    xrlparts.pop_front();
-    if (xrlparts.empty())
+
+    // Trim off the "xrl" command part.
+    xrl_parts.pop_front();
+    if (xrl_parts.empty())
 	xorp_throw(ParseError, "bad XrlAction syntax\n");
 
     bool request_done = false;
-    int segcount = 0;
-    while (xrlparts.empty()==false) {
-	string segment = xrlparts.front();
+    size_t seg_count = 0;
+    while (xrl_parts.empty() == false) {
+	string segment = xrl_parts.front();
 	debug_msg("segment: %s\n", segment.c_str());
-	string origsegment = segment;
-	if (origsegment[0]=='\n') {
-	    //strip the magic "\n" off
-	    if (segcount == 0)
-		segment = segment.substr(1,segment.size()-1);
+	string orig_segment = segment;
+	if (orig_segment[0] == '\n') {
+	    // Strip the magic "\n" off
+	    if (seg_count == 0)
+		segment = segment.substr(1, segment.size() - 1);
 	    else
-		segment = " " + segment.substr(1,segment.size()-1);
+		segment = " " + segment.substr(1, segment.size() - 1);
 	}
 	string::size_type start = segment.find("->");
 	debug_msg("start=%u\n", (uint32_t)start);
 	if (start != string::npos) {
 	    debug_msg("found return spec\n");
-	    string::size_type origstart = origsegment.find("->");
+	    string::size_type orig_start = orig_segment.find("->");
 	    if (request_done)
 		xorp_throw(ParseError, "Two responses in one XRL\n");
 	    request_done = true;
 	    _request += segment.substr(0, start);
-	    if (origstart != 0)
-		_split_request.push_back(origsegment.substr(0, origstart));
-	    segment = segment.substr(start+2, segment.size()-(start+2));
-	    origsegment = origsegment.substr(origstart+2,
-					     origsegment.size()-(origstart+2));
+	    if (orig_start != 0)
+		_split_request.push_back(orig_segment.substr(0, orig_start));
+	    segment = segment.substr(start + 2, segment.size() - (start + 2));
+	    orig_segment = orig_segment.substr(orig_start + 2,
+					       orig_segment.size()
+					       - (orig_start + 2));
 	}
 	if (request_done) {
 	    _response += segment;
-	    if (!origsegment.empty())
-		_split_response.push_back(origsegment);
+	    if (!orig_segment.empty())
+		_split_response.push_back(orig_segment);
 	} else {
 	    _request += segment;
-	    if (!origsegment.empty())
-		_split_request.push_back(origsegment);
+	    if (!orig_segment.empty())
+		_split_request.push_back(orig_segment);
 	}
-	xrlparts.pop_front();
-	segcount++;
+	xrl_parts.pop_front();
+	seg_count++;
     }
-    debug_msg("XrlAction:\n");
-    debug_msg("Request: >%s<\n", _request.c_str());
-    list <string>::const_iterator i;
-    for (i = _split_request.begin(); i != _split_request.end(); i++) {
-	debug_msg(">%s< ", (*i).c_str());
+
+    // Print debug output
+    {
+	list<string>::const_iterator iter;
+
+	debug_msg("XrlAction:\n");
+	debug_msg("Request: >%s<\n", _request.c_str());
+	for (iter = _split_request.begin();
+	     iter != _split_request.end();
+	     ++iter) {
+	    debug_msg(">%s< ", (*iter).c_str());
+	}
+	debug_msg("\n");
+
+	debug_msg("Response: >%s<\n", _response.c_str());
+	for (iter = _split_response.begin();
+	     iter != _split_response.end();
+	     ++iter) {
+	    debug_msg(">%s< ", (*iter).c_str());
+	}
+	debug_msg("\n");
     }
-    debug_msg("\n");
-    debug_msg("Response: >%s<\n", _response.c_str());
-    for (i = _split_response.begin(); i != _split_response.end(); i++) {
-	debug_msg(">%s< ", (*i).c_str());
-    }
-    debug_msg("\n");
 }
 
 void
@@ -209,15 +233,16 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
     // XRL.  Then we can check it is a valid XRL as known by the
     // XRLdb.
     //
-    enum char_type {VAR, NON_VAR, QUOTE, ASSIGN};
+    enum char_type { VAR, NON_VAR, QUOTE, ASSIGN };
     char_type mode = NON_VAR;
     string cleaned_xrl;
 
     // Trim quotes from around the XRL
-    uint32_t start = 0;
-    uint32_t stop = xrlstr.length();
+    size_t start = 0;
+    size_t stop = xrlstr.length();
     if (xrlstr[start] == '"' && xrlstr[stop - 1] == '"') {
-	start++; stop--;
+	start++;
+	stop--;
     }
 
     //
@@ -250,7 +275,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
 		xrlstr + " the module has no default target name.\n";
 	    xorp_throw(ParseError, err);
 	}
-	
+
 	// Add the default target name to the cleaned XRL
 	cleaned_xrl += default_target_name;
 
@@ -263,7 +288,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
     }
 
     // Copy the XRL, omitting the "=$(VARNAME)" parts
-    for(uint32_t i = start; i < stop; i++) {
+    for (size_t i = start; i < stop; i++) {
 	switch (mode) {
 	case VAR:
 	    if (xrlstr[i] == '$' || xrlstr[i] == '`') {
@@ -272,7 +297,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
 		    xrlstr + " contains bad variable definition.\n";
 		xorp_throw(ParseError, err);
 	    }
-	    if (xrlstr[i]==')')
+	    if (xrlstr[i] == ')')
 		mode = NON_VAR;
 	    break;
 	case NON_VAR:
@@ -281,7 +306,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
 		break;
 	    }
 	    cleaned_xrl += xrlstr[i];
-	    // no break
+	    // FALLTHROUGH
 	case QUOTE:
 	    if (xrlstr[i] == '`')
 		mode = NON_VAR;
@@ -311,79 +336,79 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
 	xorp_throw(ParseError, err);
     }
     XRLMatchType match = xrldb.check_xrl_exists(cleaned_xrl);
-    switch (match)
-	{
-	case MATCH_FAIL:
-	case MATCH_RSPEC: {
-	    string err;
-	    err = "Error in XRL spec;\n" + cleaned_xrl +
-		" is not specified in the XRL targets directory.\n";
-	    xorp_throw(ParseError, err);
-	}
-	case MATCH_XRL: {
-	    string err;
-	    err = "Error in XRL spec;\n" + cleaned_xrl +
-		" has different return specification from that in the " +
-		"XRL targets directory.\n";
-	    xorp_throw(ParseError, err);
-	}
-	case MATCH_ALL:
-	    break;
+    switch (match) {
+    case MATCH_FAIL:
+    case MATCH_RSPEC: {
+	string err;
+	err = "Error in XRL spec;\n" + cleaned_xrl +
+	    " is not specified in the XRL targets directory.\n";
+	xorp_throw(ParseError, err);
+    }
+    case MATCH_XRL: {
+	string err;
+	err = "Error in XRL spec;\n" + cleaned_xrl +
+	    " has different return specification from that in the " +
+	    "XRL targets directory.\n";
+	xorp_throw(ParseError, err);
+    }
+    case MATCH_ALL:
+	break;
     }
 }
 
 int
 XrlAction::execute(const ConfigTreeNode& ctn,
 		   TaskManager& task_manager,
-		   XrlRouter::XrlCallback cb) const {
-
-    //first, go back through and merge all the separate words in the
-    //command back together.
-    list <string> expanded_cmd;
-    list <string>::const_iterator ptr;
+		   XrlRouter::XrlCallback cb) const
+{
+    list<string> expanded_cmd;
+    list<string>::const_iterator iter;
     string word;
-    for (ptr = _split_cmd.begin(); ptr != _split_cmd.end(); ptr++) {
-	string segment = *ptr;
-	//"\n" at start of segment indicates start of a word
+
+    //
+    // First, go back through and merge all the separate words in the
+    // command back together.
+    //
+    for (iter = _split_cmd.begin(); iter != _split_cmd.end(); ++iter) {
+	string segment = *iter;
+	// "\n" at start of segment indicates start of a word
 	if (segment[0] == '\n') {
-	    //store the previous word
+	    // Store the previous word
 	    if (word != "") {
 		expanded_cmd.push_back(word);
 		word = "";
 	    }
-	    //strip the magic "\n" off
-	    segment = segment.substr(1,segment.size()-1);
+	    // Strip the magic "\n" off
+	    segment = segment.substr(1, segment.size() - 1);
 	}
 	word += segment;
     }
-    //store the last word
+    // Store the last word
     if (word != "")
 	expanded_cmd.push_back(word);
 
-
-    //go through the expanded version and copy to an array
+    // Go through the expanded version and copy to an array
     string args[expanded_cmd.size()];
-    int words=0;
-    for (ptr = expanded_cmd.begin(); ptr != expanded_cmd.end(); ptr++) {
-	args[words] = *ptr;
+    size_t words = 0;
+    for (iter = expanded_cmd.begin(); iter != expanded_cmd.end(); ++iter) {
+	args[words] = *iter;
 	++words;
     }
-    if (words==0)
+    if (words == 0)
 	return (XORP_ERROR);
 
-
-    //now we're ready to begin...
+    //Now we're ready to begin...
     int result;
     if (args[0] == "xrl") {
-	if (words<2) {
+	if (words < 2) {
 	    string err = "XRL command is missing the XRL on node "
 		+ ctn.path() + "\n";
 	    XLOG_WARNING(err.c_str());
 	}
 
 	string xrlstr = args[1];
-	if (xrlstr[0]=='"' && xrlstr[xrlstr.size()-1]=='"')
-	    xrlstr = xrlstr.substr(1,xrlstr.size()-2);
+	if (xrlstr[0] == '"' && xrlstr[xrlstr.size() - 1] == '"')
+	    xrlstr = xrlstr.substr(1, xrlstr.size() - 2);
 	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
 
 	UnexpandedXrl uxrl(ctn, *this);
@@ -401,56 +426,59 @@ template<class TreeNode>
 string
 XrlAction::expand_xrl_variables(const TreeNode& tn) const
 {
+    string word;
+    string expanded_var;
+    list<string> expanded_cmd;
+
+    debug_msg(("expand_xrl_variables node " + tn.segname() +
+	       " XRL " + _request + "\n").c_str());
+
     //
     // Go through the split command, doing variable substitution
     // put split words back together, and remove special "\n" characters
     //
-    debug_msg(("expand_xrl_variables node " + tn.segname() +
-	       " XRL " + _request + "\n").c_str());
     list<string>::const_iterator iter = _split_request.begin();
-    string expanded_var;
-    list <string> expanded_cmd;
-    string word;
-
     while (iter != _split_request.end()) {
 	string segment = *iter;
 	// "\n" at start of segment indicates start of a word
 	if (segment[0] == '\n') {
-	    // store the previous word
+	    // Store the previous word
 	    if (word != "") {
 		expanded_cmd.push_back(word);
 		word = "";
 	    }
-	    // strip the magic "\n" off
+	    // Strip the magic "\n" off
 	    segment = segment.substr(1, segment.size() - 1);
 	}
 
-	// do variable expansion
+	// Do variable expansion
 	bool expand_done = false;
 	if (segment[0] == '`') {
 	    expand_done = tn.expand_expression(segment, expanded_var);
 	    if (expand_done) {
-		int len = expanded_var.length();
-		// remove quotes
+		size_t len = expanded_var.length();
+		// Remove quotes
 		if (expanded_var[0] == '"' && expanded_var[len - 1] == '"')
 		    word += expanded_var.substr(1, len - 2);
 		else
 		    word += expanded_var;
 	    } else {
-		fprintf(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n", segment.c_str(), tn.segname().c_str());
+		fprintf(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n",
+			segment.c_str(), tn.segname().c_str());
 		throw UnexpandedVariable(segment, tn.segname());
 	    }
 	} else if (segment[0] == '$') {
 	    expand_done = tn.expand_variable(segment, expanded_var);
 	    if (expand_done) {
-		int len = expanded_var.length();
-		// remove quotes
+		size_t len = expanded_var.length();
+		// Remove quotes
 		if (expanded_var[0] == '"' && expanded_var[len - 1] == '"')
 		    word += expanded_var.substr(1, len - 2);
 		else
 		    word += expanded_var;
 	    } else {
-		fprintf(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), tn.segname().c_str());
+		fprintf(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n",
+			segment.c_str(), tn.segname().c_str());
 		throw UnexpandedVariable(segment, tn.segname());
 	    }
 	} else {
@@ -458,7 +486,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn) const
 	}
 	++iter;
     }
-    // store the last word
+    // Store the last word
     if (word != "")
 	expanded_cmd.push_back(word);
 
@@ -470,7 +498,9 @@ XrlAction::expand_xrl_variables(const TreeNode& tn) const
     return xrlstr;
 }
 
-string XrlAction::affected_module(const ConfigTreeNode& ctn) const {
+string
+XrlAction::affected_module(const ConfigTreeNode& ctn) const
+{
     string::size_type end = _request.find("/");
     if (end == string::npos) {
 	XLOG_WARNING("Failed to find XRL target in XrlAction");
@@ -504,16 +534,18 @@ Command::Command(TemplateTreeNode& template_tree_node, const string& cmd_name)
     _cmd_name = cmd_name;
 }
 
-Command::~Command() {
-    list <Action*>::const_iterator i;
-    for (i= _actions.begin(); i != _actions.end(); i++) {
-	delete *i;
+Command::~Command()
+{
+    list<Action*>::const_iterator iter;
+    for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
+	delete *iter;
     }
 }
 
 void
-Command::add_action(const list <string>& action, const XRLdb& xrldb) {
-    if (action.front()=="xrl") {
+Command::add_action(const list<string>& action, const XRLdb& xrldb)
+{
+    if (action.front() == "xrl") {
 	_actions.push_back(new XrlAction(_template_tree_node, action, xrldb));
     } else {
 	_actions.push_back(new Action(_template_tree_node, action));
@@ -521,25 +553,26 @@ Command::add_action(const list <string>& action, const XRLdb& xrldb) {
 }
 
 int
-Command::execute(ConfigTreeNode& ctn,
-		 TaskManager& task_manager) const {
+Command::execute(ConfigTreeNode& ctn, TaskManager& task_manager) const
+{
     int result = 0;
     int actions = 0;
-    list <Action*>::const_iterator i;
-    for (i= _actions.begin(); i != _actions.end(); i++) {
-	const XrlAction *xa = dynamic_cast<const XrlAction*>(*i);
-	if (xa!=NULL) {
+
+    list<Action*>::const_iterator iter;
+    for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
+	const XrlAction* xa = dynamic_cast<const XrlAction*>(*iter);
+	if (xa != NULL) {
 	    result = xa->execute(ctn, task_manager,
 				 callback(const_cast<Command*>(this),
 					  &Command::action_complete, &ctn));
 	} else {
-	    //current we only implement XRL commands
+	    // Current we only implement XRL commands
 	    XLOG_FATAL("execute on unimplemented action type\n");
 	}
 	if (result < 0) {
 	    debug_msg("command execute returning %d\n", result);
-	    //XXXX how do we communicate this error back up
-	    //return result;
+	    // XXX: how do we communicate this error back up
+	    // return result;
 	}
 	actions++;
     }
@@ -550,8 +583,10 @@ Command::execute(ConfigTreeNode& ctn,
 void
 Command::action_complete(const XrlError& err,
 			 XrlArgs*,
-			 ConfigTreeNode *ctn) {
+			 ConfigTreeNode* ctn)
+{
     printf("Command::action_complete\n");
+
     if (err == XrlError::OKAY()) {
 	ctn->command_status_callback(this, true);
     } else {
@@ -559,12 +594,14 @@ Command::action_complete(const XrlError& err,
     }
 }
 
-set <string>
-Command::affected_xrl_modules(const ConfigTreeNode& ctn) const {
-    set <string> affected_modules;
-    list <Action*>::const_iterator i;
-    for (i = _actions.begin(); i != _actions.end(); i++) {
-	XrlAction* xa = dynamic_cast<XrlAction*>(*i);
+set<string>
+Command::affected_xrl_modules(const ConfigTreeNode& ctn) const
+{
+    set<string> affected_modules;
+    list<Action*>::const_iterator iter;
+
+    for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
+	XrlAction* xa = dynamic_cast<XrlAction*>(*iter);
 	if (xa != NULL) {
 	    string affected = xa->affected_module(ctn);
 	    affected_modules.insert(affected);
@@ -576,11 +613,11 @@ Command::affected_xrl_modules(const ConfigTreeNode& ctn) const {
 bool
 Command::affects_module(const ConfigTreeNode& ctn, const string& module) const
 {
-    //if we don't specify a module, we mean any module.
-    if (module=="")
+    // XXX: if we don't specify a module, we mean any module
+    if (module == "")
 	return true;
 
-    set <string> affected_modules = affected_xrl_modules(ctn);
+    set<string> affected_modules = affected_xrl_modules(ctn);
     if (affected_modules.find(module)==affected_modules.end()) {
 	return false;
     }
@@ -588,11 +625,13 @@ Command::affects_module(const ConfigTreeNode& ctn, const string& module) const
 }
 
 string
-Command::str() const {
+Command::str() const
+{
     string tmp = _cmd_name + ": ";
-    list <Action*>::const_iterator i;
-    for (i = _actions.begin(); i != _actions.end(); i++) {
-	tmp += (*i)->str() + ", ";
+    list<Action*>::const_iterator iter;
+
+    for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
+	tmp += (*iter)->str() + ", ";
     }
    return tmp;
 }
@@ -605,55 +644,65 @@ AllowCommand::AllowCommand(TemplateTreeNode& template_tree_node,
 }
 
 void
-AllowCommand::add_action(const list <string>& action)
-    throw (ParseError)
+AllowCommand::add_action(const list<string>& action) throw (ParseError)
 {
     debug_msg("AllowCommand::add_action\n");
+
     if (action.size() < 2) {
 	xorp_throw(ParseError, "Allow command with less than two parameters");
     }
-    list<string>::const_iterator i;
-    i = action.begin();
-    if ((_varname.size()!=0) && (_varname != *i)) {
-	xorp_throw(ParseError, "Currently only one variable per node can be specified using allow commands");
+
+    list<string>::const_iterator iter;
+    iter = action.begin();
+    if ((_varname.size() != 0) && (_varname != *iter)) {
+	xorp_throw(ParseError,
+		   "Currently only one variable per node can be specified using allow commands");
     }
-    _varname = *i;
-    ++i;
-    for(; i!= action.end(); ++i) {
-	if ((*i)[0] == '"')
-	    _allowed_values.push_back((*i).substr(1, (*i).size()-2));
+    _varname = *iter;
+    ++iter;
+    for ( ; iter != action.end(); ++iter) {
+	const string& value = *iter;
+	if (value[0] == '"')
+	    _allowed_values.push_back(value.substr(1, value.size() - 2));
 	else
-	    _allowed_values.push_back(*i);
+	    _allowed_values.push_back(value);
     }
 }
 
 int
-AllowCommand::execute(const ConfigTreeNode& ctn) const
-    throw (ParseError)
+AllowCommand::execute(const ConfigTreeNode& ctn) const throw (ParseError)
 {
     string found;
-    if (ctn.expand_variable(_varname, found)== false) {
-	string tmp = "\n AllowCommand: variable " + _varname +
+
+    if (ctn.expand_variable(_varname, found) == false) {
+	string err = "\n AllowCommand: variable " + _varname +
 	    " is not defined.\n";
-	xorp_throw(ParseError, tmp);
+	xorp_throw(ParseError, err);
     }
 
-    list<string>::const_iterator i;
-    for(i = _allowed_values.begin(); i!= _allowed_values.end(); ++i) {
-	if (found == *i)
+    list<string>::const_iterator iter;
+    for (iter = _allowed_values.begin();
+	iter != _allowed_values.end();
+	++iter) {
+	if (found == *iter)
 	    return 0;
     }
-    string tmp = "value " + found + " is not a valid value for " + _varname + "\n";
-    xorp_throw(ParseError, tmp);
+    string err = "value " + found + " is not a valid value for " + _varname + "\n";
+    xorp_throw(ParseError, err);
 }
 
 string
-AllowCommand::str() const {
+AllowCommand::str() const
+{
     string tmp;
+
     tmp = "AllowCommand: varname = " + _varname + " \n       Allowed values: ";
-    list<string>::const_iterator i;
-    for(i = _allowed_values.begin(); i!= _allowed_values.end(); ++i) {
-	tmp += "  " + *i;
+
+    list<string>::const_iterator iter;
+    for (iter = _allowed_values.begin();
+	 iter != _allowed_values.end();
+	 ++iter) {
+	tmp += "  " + *iter;
     }
     tmp += "\n";
     return tmp;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.1 2003/09/24 16:16:08 hodson Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.2 2003/09/25 00:54:10 hodson Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -57,6 +57,7 @@ string find_exec_path_name(const char* progname);
  *   @li @ref xorp_xrl_targets_dir()
  *   @li @ref xorp_boot_file()
  *
+ * @param argv0 the argv[0] supplied to main().
  */
 void xorp_path_init(const char* argv0);
 
@@ -104,8 +105,9 @@ string xorp_boot_file();
 
 /**
  * Return basename of binary.
+ *
+ * @param argv0 the argv[0] supplied to main().
  */
-const char*
-xorp_basename(const char* argv);
+const char* xorp_basename(const char* argv0);
 
 #endif // __RTRMGR_UTIL_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.33 2003/11/18 23:03:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.34 2003/11/21 02:14:29 pavlin Exp $"
 
 #include <signal.h>
 
@@ -229,7 +229,6 @@ main(int argc, char* const argv[])
 
     // initialize the event loop
     EventLoop eventloop;
-    randgen.add_eventloop(&eventloop);
 
     //
     // Start the finder.

@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.10 2003/05/31 22:33:28 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.11 2003/11/22 00:17:55 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 #define __RTRMGR_SLAVE_MODULE_MANAGER_HH__
+
 
 #include "libxorp/eventloop.hh"
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.9 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.10 2003/11/19 23:02:12 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -29,7 +29,7 @@
 
 // #define DEBUG_TEMPLATE_PARSER
 
-extern int init_template_parser(const char *, TemplateTree* c);
+extern int init_template_parser(const char* filename, TemplateTree* c);
 extern int parse_template();
 extern void tplterror(const char* s);
 
@@ -37,9 +37,14 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
 				   TemplateTreeNode* parent,
 				   const string& path,
 				   const string& varname)
-    : _template_tree(template_tree), _parent(parent), _module_name(""),
+    : _template_tree(template_tree),
+      _parent(parent),
+      _module_name(""),
       _default_target_name(""),
-      _segname(path), _varname(varname), _has_default(false), _is_tag(false)
+      _segname(path),
+      _varname(varname),
+      _has_default(false),
+      _is_tag(false)
 {
     if (_parent != NULL) {
 	_parent->add_child(this);
@@ -48,32 +53,35 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
     }
 }
 
-TemplateTreeNode::~TemplateTreeNode() {
-    while (!_children.empty()) {
+TemplateTreeNode::~TemplateTreeNode()
+{
+    while (! _children.empty()) {
 	delete _children.front();
 	_children.pop_front();
     }
 
-    map <string, Command *>::iterator i1, i2;
-    i1 = _cmd_map.begin();
-    while (i1 != _cmd_map.end()) {
-	i2 = i1;
-	i1++;
-	delete i2->second;
-	_cmd_map.erase(i2);
+    map<string, Command *>::iterator iter1, iter2;
+    iter1 = _cmd_map.begin();
+    while (iter1 != _cmd_map.end()) {
+	iter2 = iter1;
+	++iter1;
+	delete iter2->second;
+	_cmd_map.erase(iter2);
     }
 }
 
 void
-TemplateTreeNode::add_child(TemplateTreeNode* child) {
+TemplateTreeNode::add_child(TemplateTreeNode* child)
+{
     _children.push_back(child);
 }
 
 void
-TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
+TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
+{
     Command* command;
-    typedef map<string, Command*>::iterator I;
-    I iter;
+    map<string, Command*>::iterator iter;
+
     if (cmd == "%modinfo") {
 	iter = _cmd_map.find("%modinfo");
 	if (iter == _cmd_map.end()) {
@@ -83,8 +91,8 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
 	    command = iter->second;
 	}
     } else if (cmd == "%allow") {
-	//If the command already exists, no need to create it again.
-	//The command action will simply be added to the existing command.
+	// If the command already exists, no need to create it again.
+	// The command action will simply be added to the existing command.
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
 	    command = new AllowCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
@@ -97,8 +105,8 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
 	       || (cmd == "%unset")
 	       || (cmd == "%get")
 	       || (cmd == "%default")) {
-	//If the command already exists, no need to create it again.
-	//The command action will simply be added to the existing command.
+	// If the command already exists, no need to create it again.
+	// The command action will simply be added to the existing command.
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
 	    command = new Command(*this, cmd);
 	    _cmd_map[cmd] = command;
@@ -111,12 +119,14 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
     }
 }
 
-set <string>
-TemplateTreeNode::commands() const {
-    set <string> cmds;
-    map<string, Command *>::const_iterator i;
-    for (i=_cmd_map.begin(); i!= _cmd_map.end(); i++) {
-	cmds.insert(i->first);
+set<string>
+TemplateTreeNode::commands() const
+{
+    set<string> cmds;
+    map<string, Command *>::const_iterator iter;
+
+    for (iter = _cmd_map.begin(); iter != _cmd_map.end(); ++iter) {
+	cmds.insert(iter->first);
     }
     return cmds;
 }
@@ -124,42 +134,53 @@ TemplateTreeNode::commands() const {
 void
 TemplateTreeNode::add_action(const string& cmd,
 			     const list<string>& action_list,
-			     const XRLdb& xrldb) {
+			     const XRLdb& xrldb)
+{
     Command* command;
-    typedef map<string, Command*>::iterator I;
-    I iter;
+    map<string, Command*>::iterator iter;
+
     if (cmd == "%modinfo") {
 	iter = _cmd_map.find("%modinfo");
+	XLOG_ASSERT(iter != _cmd_map.end());
 	command = iter->second;
-	((ModuleCommand*)command)->add_action(action_list, xrldb);
+	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
+	XLOG_ASSERT(module_command != NULL);
+	module_command->add_action(action_list, xrldb);
     } else if (cmd == "%allow") {
 	iter = _cmd_map.find("%allow");
+	XLOG_ASSERT(iter != _cmd_map.end());
 	command = iter->second;
-	((AllowCommand*)command)->add_action(action_list);
+	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
+	XLOG_ASSERT(allow_command != NULL);
+	allow_command->add_action(action_list);
     } else {
 	iter = _cmd_map.find(cmd);
-	assert (iter != _cmd_map.end());
+	XLOG_ASSERT(iter != _cmd_map.end());
 	command = iter->second;
 	command->add_action(action_list, xrldb);
     }
 }
 
-map <string,string>
-TemplateTreeNode::create_variable_map(const list <string>& segments) const
+map<string, string>
+TemplateTreeNode::create_variable_map(const list<string>& segments) const
 {
-    map <string,string> varmap;
+    map<string,string> varmap;
     const TemplateTreeNode* ttn = this;
-    list <string>::const_reverse_iterator i;
-    for (i = segments.rbegin(); i != segments.rend(); i++) {
+    list<string>::const_reverse_iterator iter;
+
+    for (iter = segments.rbegin(); iter != segments.rend(); ++iter) {
 	if (ttn->name_is_variable())
-	    varmap[ttn->segname()] = *i;
+	    varmap[ttn->segname()] = *iter;
 	ttn = ttn->parent();
     }
     return varmap;
 }
 
-string TemplateTreeNode::path() const {
+string
+TemplateTreeNode::path() const
+{
     string path;
+
     if (_parent != NULL) {
 	string parent_path = _parent->path();
 	if (parent_path == "")
@@ -172,15 +193,18 @@ string TemplateTreeNode::path() const {
     return path;
 }
 
-string TemplateTreeNode::s() const {
+string
+TemplateTreeNode::s() const
+{
     string tmp;
+
     tmp = path() + " Type:" + typestr();
     if (has_default()) {
 	tmp += " = " + default_str();
     }
     if (!_cmd_map.empty()) {
-	typedef map<string, Command*>::const_iterator CI;
-	CI rpair = _cmd_map.begin();
+	map<string, Command*>::const_iterator rpair;
+	rpair = _cmd_map.begin();
 	while (rpair != _cmd_map.end()) {
 	    tmp += "\n    " + rpair->second->str();
 	    ++rpair;
@@ -189,31 +213,64 @@ string TemplateTreeNode::s() const {
     return tmp;
 }
 
-void TemplateTreeNode::print() const {
+void
+TemplateTreeNode::print() const
+{
     printf("%s\n", s().c_str());
-    list <TemplateTreeNode*>::const_iterator i;
-    for (i=_children.begin(); i!= _children.end(); ++i) {
-	(*i)->print();
+
+    list<TemplateTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	(*iter)->print();
     }
 }
 
 bool
-TemplateTreeNode::type_match(const string& ) const {
+TemplateTreeNode::type_match(const string& ) const
+{
     return true;
 }
 
-string TemplateTreeNode::strip_quotes(const string& s) const {
-    int len = s.length();
-    if (len < 2) return s;
-    if ((s[0]=='"') && (s[len-1]=='"'))
-	return s.substr(1,len-2);
+Command*
+TemplateTreeNode::command(const string& cmd_name)
+{
+    map<string, Command *>::iterator iter;
+
+    iter = _cmd_map.find(cmd_name);
+    if (iter == _cmd_map.end())
+	return NULL;
+    return iter->second;
+}
+
+const Command*
+TemplateTreeNode::const_command(const string& cmd_name) const
+{
+    map<string, Command *>::const_iterator iter;
+
+    iter = _cmd_map.find(cmd_name);
+    if (iter == _cmd_map.end())
+	return NULL;
+    return iter->second;
+}
+
+string
+TemplateTreeNode::strip_quotes(const string& s) const
+{
+    size_t len = s.length();
+
+    if (len < 2)
+	return s;
+    if ((s[0] == '"') && (s[len - 1] == '"'))
+	return s.substr(1, len - 2);
     else
 	return s;
 }
 
-bool TemplateTreeNode::name_is_variable() const {
-    if (_segname.size() < 4) return false;
-    if (_segname[0]!='$' || _segname[1]!='(')
+bool
+TemplateTreeNode::name_is_variable() const
+{
+    if (_segname.size() < 4)
+	return false;
+    if (_segname[0] != '$' || _segname[1] != '(')
 	return false;
     return true;
 }
@@ -274,7 +331,7 @@ TemplateTreeNode::get_default_target_name_by_variable(const string& varname) con
 
 void
 TemplateTreeNode::split_up_varname(const string& varname,
-				   list <string>& var_parts) const
+				   list<string>& var_parts) const
 {
     XLOG_ASSERT(varname[0] == '$');
     XLOG_ASSERT(varname[1] == '(');
@@ -293,13 +350,13 @@ TemplateTreeNode::find_varname_node(const string& varname) const
     }
 
     // Split varname
-    list <string> var_parts;
+    list<string> var_parts;
     split_up_varname(varname, var_parts);
 
     if (var_parts.front() == "@") {
 	return find_child_varname_node(var_parts);
     } else if (var_parts.size() > 1) {
-	// it's a parent node, or a child of a parent node
+	// It's a parent node, or a child of a parent node
 	return find_parent_varname_node(var_parts);
     }
 
@@ -308,15 +365,15 @@ TemplateTreeNode::find_varname_node(const string& varname) const
 }
 
 const TemplateTreeNode*
-TemplateTreeNode::find_parent_varname_node(const list <string>& var_parts) const
+TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts) const
 {
     if (_parent == NULL) {
 	return NULL;
     }
     if (is_tag() || (type() == NODE_VOID)) {
-	// when naming a parent node variable, you must start with a tag
+	// When naming a parent node variable, you must start with a tag
 	if (_segname == var_parts.front()) {
-	    // we've found the right place to start
+	    // We've found the right place to start
 	    return find_child_varname_node(var_parts);
 	}
     }
@@ -325,28 +382,28 @@ TemplateTreeNode::find_parent_varname_node(const list <string>& var_parts) const
 }
 
 const TemplateTreeNode*
-TemplateTreeNode::find_child_varname_node(const list <string>& var_parts) const
+TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
 {
     if ((var_parts.front() != "@") && (var_parts.front() != _segname)) {
 	// varname doesn't match us
 	return NULL;
     }
 
-    // the name might refer to this node
+    // The name might refer to this node
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
 	    return this;
 	}
     }
 
-    // the name might refer to a child of ours
-    list <string> child_var_parts = var_parts;
+    // The name might refer to a child of ours
+    list<string> child_var_parts = var_parts;
     child_var_parts.pop_front();
 
-    list <TemplateTreeNode* >::const_iterator ti;
-    for (ti = _children.begin(); ti != _children.end(); ++ti) {
+    list<TemplateTreeNode* >::const_iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	const TemplateTreeNode* found_child;
-	found_child = (*ti)->find_child_varname_node(child_var_parts);
+	found_child = (*iter)->find_child_varname_node(child_var_parts);
 	if (found_child != NULL)
 	    return found_child;
     }
@@ -357,48 +414,53 @@ TemplateTreeNode::find_child_varname_node(const list <string>& var_parts) const
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 				     bool include_intermediates,
-				     int depth) const {
+				     size_t depth) const
+{
     bool instantiated = false;
+
 #ifdef DEBUG
-    printf("TTN:check_command_tree %s type %s depth %d\n", _segname.c_str(), typestr().c_str(), depth);
+    printf("TTN:check_command_tree %s type %s depth %u\n", _segname.c_str(), typestr().c_str(), (uint32_t)depth);
 #endif
 
     if (_parent != NULL && _parent->is_tag() && (depth == 0)) {
-	/*if the parent is a tag, then this node must be a pure
-          variable. we don't want to instantiate any pure variable
-          nodes in the command tree */
+	//
+	// If the parent is a tag, then this node must be a pure
+	// variable. We don't want to instantiate any pure variable
+	// nodes in the command tree.
+	//
 #ifdef DEBUG
 	printf("pure variable\n");
 #endif
 	return false;
     }
 
-    list <string>::const_iterator ci;
-    for (ci = cmd_names.begin(); ci != cmd_names.end(); ci++) {
-	if(const_command(*ci)!=NULL) {
+    list<string>::const_iterator iter;
+    for (iter = cmd_names.begin(); iter != cmd_names.end(); ++iter) {
+	if (const_command(*iter) != NULL) {
 #ifdef DEBUG
-	    printf("node has command %s\n", (*ci).c_str());
+	    printf("node has command %s\n", (*iter).c_str());
 #endif
 	    instantiated = true;
 	    break;
 	} else {
 #ifdef DEBUG
-	    printf("node doesn't have command %s\n", (*ci).c_str());
+	    printf("node doesn't have command %s\n", (*iter).c_str());
 #endif
 	}
     }
 
-    //when we're building a command tree we only want to go one level
-    //into the template tree beyond the part of the tree that is
-    //instantiated by the config tree.  The exception is if the first
-    //level node is a tag or a VOID node, then we need to check
-    //further to find a real node.
-    if (_is_tag
-	|| ((type() == NODE_VOID) && include_intermediates)) {
-	list <TemplateTreeNode*>::const_iterator tti;
-	for (tti=_children.begin(); tti!= _children.end(); ++tti) {
+    //
+    // When we're building a command tree we only want to go one level
+    // into the template tree beyond the part of the tree that is
+    // instantiated by the config tree.  The exception is if the first
+    // level node is a tag or a VOID node, then we need to check
+    // further to find a real node.
+    //
+    if (_is_tag || ((type() == NODE_VOID) && include_intermediates)) {
+	list<TemplateTreeNode*>::const_iterator tti;
+	for (tti = _children.begin(); tti != _children.end(); ++tti) {
 	    if ((*tti)->check_command_tree(cmd_names, include_intermediates,
-					   depth+1)) {
+					   depth + 1)) {
 		instantiated = true;
 		break;
 	    }
@@ -409,50 +471,50 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 
 bool
 TemplateTreeNode::check_variable_name(const vector<string>& parts,
-				      uint part) const {
-    //printf("check_variable_name: us>%s< match>%s<, %d\n", _segname.c_str(),
-    //   parts[part].c_str(), part);
+				      size_t part) const
+{
+    // printf("check_variable_name: us>%s< match>%s<, %d\n",
+    //   _segname.c_str(), parts[part].c_str(), part);
     bool ok = false;
     if (_parent == NULL) {
-	//root node
+	// Root node
 	ok = true;
-	part--; //prevent increment of part later
+	part--; // Prevent increment of part later
     } else if (_parent->is_tag()) {
-	//we're the varname after a tag
+	// We're the varname after a tag
 	if (parts[part] == "*") {
 	    ok = true;
 	} else {
-	    //printf("--varname but not wildcarded\n");
+	    // printf("--varname but not wildcarded\n");
 	}
     } else {
-	if (parts[part]!=_segname) {
-	    //printf("--mismatch\n");
+	if (parts[part] != _segname) {
+	    // printf("--mismatch\n");
 	    return false;
 	}
 	ok = true;
     }
     if (ok) {
-	if (part == parts.size()-1) {
-	    //everything that we were looking for matched
-	    //printf("**match successful**\n");
+	if (part == parts.size() - 1) {
+	    // Everything that we were looking for matched
+	    // printf("**match successful**\n");
 	    return true;
 	}
 	if (_children.empty()) {
-	    //printf("--no children\n");
-	    //no more children, but the search string still has components
+	    // printf("--no children\n");
+	    // No more children, but the search string still has components
 	    return false;
 	}
-	list <TemplateTreeNode*>::const_iterator tti;
-	for (tti=_children.begin(); tti!= _children.end(); ++tti) {
-	    if ((*tti)->check_variable_name(parts, part+1)) {
+	list<TemplateTreeNode*>::const_iterator tti;
+	for (tti = _children.begin(); tti != _children.end(); ++tti) {
+	    if ((*tti)->check_variable_name(parts, part + 1)) {
 		return true;
 	    }
 	}
-	//printf("--no successful children, %d\n", part);
+	// printf("--no successful children, %d\n", part);
     }
     return false;
 }
-
 
 /**************************************************************************
  * TextTemplate
@@ -461,15 +523,14 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
 TextTemplate::TextTemplate(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
-			   const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname), _default("")
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default("")
 {
-
     if (initializer == "")
 	return;
 
-    if (!type_match(initializer)) {
+    if (! type_match(initializer)) {
 	string err = "Bad Text type value: " + initializer;
 	xorp_throw(ParseError, err);
     }
@@ -479,9 +540,13 @@ TextTemplate::TextTemplate(TemplateTree& template_tree,
     set_has_default();
 }
 
-bool TextTemplate::type_match(const string &) const {
-    //if the lexical analyser passed it to us, we can assume its a
-    //value text value
+bool
+TextTemplate::type_match(const string &) const
+{
+    //
+    // If the lexical analyser passed it to us, we can assume its a
+    // value text value.
+    //
     return true;
 }
 
@@ -493,15 +558,14 @@ bool TextTemplate::type_match(const string &) const {
 UIntTemplate::UIntTemplate(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
-			   const string& initializer)
-    throw (ParseError)
+			   const string& initializer) throw (ParseError)
     : TemplateTreeNode(template_tree, parent, path, varname)
 {
     if (initializer == "")
 	return;
 
     string s = strip_quotes(initializer);
-    if (!type_match(s)) {
+    if (! type_match(s)) {
 	string err = "Bad UInt type value: " + initializer;
 	xorp_throw(ParseError, err);
     }
@@ -509,16 +573,20 @@ UIntTemplate::UIntTemplate(TemplateTree& template_tree,
     set_has_default();
 }
 
-bool UIntTemplate::type_match(const string& orig) const {
+bool
+UIntTemplate::type_match(const string& orig) const
+{
     string s = strip_quotes(orig);
-    for(u_int i=0; i<s.length(); i++)
+
+    for (size_t i = 0; i < s.length(); i++)
 	if (s[i] < '0' || s[i] > '9')
 	    return false;
     return true;
 }
 
 string
-UIntTemplate::default_str() const {
+UIntTemplate::default_str() const
+{
     return c_format("%u", _default);
 }
 
@@ -530,15 +598,14 @@ UIntTemplate::default_str() const {
 IntTemplate::IntTemplate(TemplateTree& template_tree,
 			 TemplateTreeNode* parent,
 			 const string& path, const string& varname,
-			 const string& initializer)
-    throw (ParseError)
+			 const string& initializer) throw (ParseError)
     : TemplateTreeNode(template_tree, parent, path, varname)
 {
     if (initializer == "")
 	return;
 
     string s = strip_quotes(initializer);
-    if (!type_match(s)) {
+    if (! type_match(s)) {
 	string err = "Bad Int type value: " + initializer;
 	xorp_throw(ParseError, err);
     }
@@ -546,22 +613,25 @@ IntTemplate::IntTemplate(TemplateTree& template_tree,
     set_has_default();
 }
 
-bool IntTemplate::type_match(const string& orig) const {
+bool
+IntTemplate::type_match(const string& orig) const
+{
     string s = strip_quotes(orig);
-    int start=0;
-    if (s[0]=='-') {
-	if (s.length()==1)
+    size_t start = 0;
+    if (s[0] == '-') {
+	if (s.length() == 1)
 	    return false;
 	start = 1;
     }
-    for(u_int i=start; i<s.length(); i++)
+    for (size_t i = start; i < s.length(); i++)
 	if (s[i] < '0' || s[i] > '9')
 	    return false;
     return true;
 }
 
 string
-IntTemplate::default_str() const {
+IntTemplate::default_str() const
+{
     return c_format("%d", _default);
 }
 
@@ -573,13 +643,13 @@ IntTemplate::default_str() const {
 BoolTemplate::BoolTemplate(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
-			   const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname) {
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname)
+{
     if (initializer == "")
 	return;
 
-    if (!type_match(initializer)) {
+    if (! type_match(initializer)) {
 	string err = "Bad Bool type value: " + initializer;
 	xorp_throw(ParseError, err);
     }
@@ -590,7 +660,9 @@ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
     set_has_default();
 }
 
-bool BoolTemplate::type_match(const string& s) const {
+bool
+BoolTemplate::type_match(const string& s) const
+{
     if (s == "true")
 	return true;
     else if (s == "false")
@@ -598,7 +670,9 @@ bool BoolTemplate::type_match(const string& s) const {
     return false;
 }
 
-string BoolTemplate::default_str() const {
+string
+BoolTemplate::default_str() const
+{
     if (_default)
 	return "true";
     else
@@ -608,11 +682,11 @@ string BoolTemplate::default_str() const {
 IPv4Template::IPv4Template(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
-			   const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
 {
-    if (!initializer.empty()) {
+    if (! initializer.empty()) {
 	try {
 	    _default = new IPv4(initializer.c_str());
 	} catch (InvalidString) {
@@ -625,13 +699,18 @@ IPv4Template::IPv4Template(TemplateTree& template_tree,
 
 IPv4Template::~IPv4Template()
 {
-    delete _default;
+    if (_default != NULL)
+	delete _default;
 }
 
-bool IPv4Template::type_match(const string& s) const {
+bool
+IPv4Template::type_match(const string& s) const
+{
     string tmp = strip_quotes(s);
+
     if (tmp.empty())
 	return false;
+
     try {
 	IPv4* ipv4 = new IPv4(tmp.c_str());
 	delete ipv4;
@@ -645,11 +724,11 @@ bool IPv4Template::type_match(const string& s) const {
 IPv6Template::IPv6Template(TemplateTree& template_tree,
 			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
-			   const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
 {
-    if (!initializer.empty()) {
+    if (! initializer.empty()) {
 	try {
 	    _default = new IPv6(initializer.c_str());
 	} catch (InvalidString) {
@@ -662,13 +741,18 @@ IPv6Template::IPv6Template(TemplateTree& template_tree,
 
 IPv6Template::~IPv6Template()
 {
-    delete _default;
+    if (_default != NULL)
+	delete _default;
 }
 
-bool IPv6Template::type_match(const string& s) const {
+bool
+IPv6Template::type_match(const string& s) const
+{
     string tmp = strip_quotes(s);
+
     if (tmp.empty())
 	return false;
+
     try {
 	IPv6* ipv6 = new IPv6(tmp.c_str());
 	delete ipv6;
@@ -682,11 +766,11 @@ bool IPv6Template::type_match(const string& s) const {
 IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
 				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
-				 const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
 {
-    if (!initializer.empty()) {
+    if (! initializer.empty()) {
 	try {
 	    _default = new IPv4Net(initializer.c_str());
 	} catch (InvalidString) {
@@ -699,13 +783,18 @@ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
 
 IPv4NetTemplate::~IPv4NetTemplate()
 {
-    delete _default;
+    if (_default != NULL)
+	delete _default;
 }
 
-bool IPv4NetTemplate::type_match(const string& s) const {
+bool
+IPv4NetTemplate::type_match(const string& s) const
+{
     string tmp = strip_quotes(s);
+
     if (tmp.empty())
 	return false;
+
     try {
 	IPv4Net* ipv4net = new IPv4Net(tmp.c_str());
 	delete ipv4net;
@@ -719,11 +808,11 @@ bool IPv4NetTemplate::type_match(const string& s) const {
 IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
 				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
-				 const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
 {
-    if (!initializer.empty()) {
+    if (! initializer.empty()) {
 	try {
 	    _default = new IPv6Net(initializer.c_str());
 	} catch (InvalidString) {
@@ -736,13 +825,18 @@ IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
 
 IPv6NetTemplate::~IPv6NetTemplate()
 {
-    delete _default;
+    if (_default != NULL)
+	delete _default;
 }
 
-bool IPv6NetTemplate::type_match(const string& s) const {
+bool
+IPv6NetTemplate::type_match(const string& s) const
+{
     string tmp = strip_quotes(s);
+
     if (tmp.empty())
 	return false;
+
     try {
 	IPv6Net* ipv6net = new IPv6Net(tmp.c_str());
 	delete ipv6net;
@@ -756,10 +850,11 @@ bool IPv6NetTemplate::type_match(const string& s) const {
 MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
 				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
-				 const string& initializer)
-    throw (ParseError)
-    : TemplateTreeNode(template_tree, parent, path, varname), _default(0) {
-    if (!initializer.empty()) {
+				 const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
+{
+    if (! initializer.empty()) {
 	try {
 	    _default = new EtherMac(initializer.c_str());
 	} catch (BadMac) {
@@ -772,13 +867,18 @@ MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
 
 MacaddrTemplate::~MacaddrTemplate()
 {
-    delete _default;
+    if (_default != NULL)
+	delete _default;
 }
 
-bool MacaddrTemplate::type_match(const string& s) const {
+bool
+MacaddrTemplate::type_match(const string& s) const
+{
     string tmp = strip_quotes(s);
+
     if (tmp.empty())
 	return false;
+
     try {
 	EtherMac* mac = new EtherMac(tmp.c_str());
 	delete mac;
@@ -787,4 +887,3 @@ bool MacaddrTemplate::type_match(const string& s) const {
     }
     return true;
 }
-

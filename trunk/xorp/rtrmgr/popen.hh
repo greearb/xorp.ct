@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/popen.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/popen.hh,v 1.2 2003/03/10 23:21:00 hodson Exp $
 
-#ifndef __RTRMGR_POPEN2_HH__
-#define __RTRMGR_POPEN2_HH__
+#ifndef __RTRMGR_POPEN_HH__
+#define __RTRMGR_POPEN_HH__
 
 void popen2(const string& command, FILE *& outstream, FILE *& errstream);
 int pclose2(FILE *iop_out);
 
-#endif // __RTRMGR_POPEN2_HH__
+#endif // __RTRMGR_POPEN_HH__

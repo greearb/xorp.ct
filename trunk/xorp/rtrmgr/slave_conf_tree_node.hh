@@ -12,56 +12,60 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.2 2003/03/10 23:21:01 hodson Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.3 2003/05/10 23:23:03 mjh Exp $
 
-#ifndef __RTRMGR_SLAVE_CONFIG_TREE_NODE_HH__
-#define __RTRMGR_SLAVE_CONFIG_TREE_NODE_HH__
+#ifndef __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
+#define __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
 
 #include <map>
 #include <list>
 #include <set>
 #include <vector>
 #include <sys/time.h>
-#include "config.h"
 #include "libxorp/xorp.h"
 #include "module_manager.hh"
 #include "xorp_client.hh"
 #include "conf_tree_node.hh"
 
-class RouterCLI;
-class CommandTree;
-class TemplateTreeNode;
+
 class Command;
+class CommandTree;
+class RouterCLI;
+class TemplateTreeNode;
 
 class SlaveConfigTreeNode : public ConfigTreeNode {
 public:
     SlaveConfigTreeNode();
-    SlaveConfigTreeNode(const string &node_name, const string &path, 
-		   const TemplateTreeNode *ttn, 
-		   SlaveConfigTreeNode *parent, uid_t user_id);
+    SlaveConfigTreeNode(const string& node_name, const string& path,
+		   const TemplateTreeNode* ttn, 
+		   SlaveConfigTreeNode* parent, uid_t user_id);
+
     void create_command_tree(CommandTree& cmd_tree,
 			     const list<string>& commands,
 			     bool include_intermediates,
 			     bool include_templates) const;
 
     bool check_allowed_value(string& errmsg) const;
-
-    //adaptors so we don't need to cast elsewhere
-    inline SlaveConfigTreeNode* parent() {
-	return (SlaveConfigTreeNode*)_parent;
-    }
     int get_deltas(const SlaveConfigTreeNode& master_node);
     int get_deletions(const SlaveConfigTreeNode& master_node);
 
+    // adaptors so we don't need to cast elsewhere
+    inline SlaveConfigTreeNode* parent() {
+	return (SlaveConfigTreeNode*)_parent;
+    }
+
 protected:
-    bool build_command_tree(CommandTree &cmdtree, 
+    bool build_command_tree(CommandTree& cmdtree, 
 			    const list<string>& commands, 
 			    int depth,
 			    bool include_intermediates,
 			    bool include_templates) const;
+
 private:
-    //don't add any storage here, SlaveConfigTreeNode needs to be the
-    //same size as ConfigTreeNode
+    //
+    // XXX: don't add any storage here, SlaveConfigTreeNode needs to be the
+    // same size as ConfigTreeNode.
+    //
 };
 
-#endif // __RTRMGR_SLAVE_CONFIG_TREE_NODE_HH__
+#endif // __RTRMGR_SLAVE_CONF_TREE_NODE_HH__

@@ -12,18 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.4 2003/05/07 23:15:17 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.5 2003/05/29 21:17:17 mjh Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 
 #include "xrl/targets/xorpsh_base.hh"
 
+
 class XorpShell;
 
 class XrlXorpshInterface : public XrlXorpshTargetBase {
 public:
-    XrlXorpshInterface(XrlRouter *r, XorpShell& xorpsh);
+    XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh);
 
     XrlCmdError common_0_1_get_target_name(
 	// Output values, 

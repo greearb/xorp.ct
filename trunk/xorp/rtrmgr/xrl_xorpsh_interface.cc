@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.7 2003/05/29 21:17:17 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.8 2003/11/17 19:34:32 pavlin Exp $"
 
 // #define DEBUG_CONFIG_CHANGE
 #include "version.h"
@@ -22,20 +22,23 @@
 #include "xorpsh_main.hh"
 
 XrlXorpshInterface::XrlXorpshInterface(XrlRouter *r, XorpShell &xorpsh)
-    : XrlXorpshTargetBase(r),  _xorpsh(xorpsh)
+    : XrlXorpshTargetBase(r),
+      _xorpsh(xorpsh)
 {
 }
 
 XrlCmdError 
 XrlXorpshInterface::common_0_1_get_target_name(// Output values, 
-					       string& name) {
+					       string& name)
+{
     name = XrlXorpshTargetBase::name();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
 XrlXorpshInterface::common_0_1_get_version(// Output values, 
-					   string& version) {
+					   string& version)
+{
     version = XORPSH_VERSION;
     return XrlCmdError::OKAY();
 }
@@ -45,7 +48,7 @@ XrlXorpshInterface::common_0_1_get_status(// Output values,
 					  uint32_t& status,
 					  string& reason)
 {
-    //XXX placeholder only
+    // XXX placeholder only
     status = PROC_READY;
     reason = "Ready";
     return XrlCmdError::OKAY();
@@ -54,13 +57,14 @@ XrlXorpshInterface::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlXorpshInterface::common_0_1_shutdown()
 {
-    //XXX placeholder
+    // XXX placeholder
     exit(0);
 }
 
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_1_new_config_user(// Input values, 
-						      const uint32_t& user_id) {
+						      const uint32_t& user_id)
+{
     _xorpsh.new_config_user((uid_t)user_id);
     return XrlCmdError::OKAY();
 }
@@ -68,7 +72,8 @@ XrlXorpshInterface::rtrmgr_client_0_1_new_config_user(// Input values,
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_1_config_change_done(// Input values, 
 							 const bool& success, 
-							 const string& errmsg){
+							 const string& errmsg)
+{
 #ifdef DEBUG_CONFIG_CHANGE
     printf("received cfg change done\n");
     if (success)
@@ -84,7 +89,8 @@ XrlCmdError
 XrlXorpshInterface::rtrmgr_client_0_1_config_changed(// Input values, 
 						     const uint32_t& user_id, 
 						     const string& deltas, 
-						     const string& deletions) {
+						     const string& deletions)
+{
 #ifdef DEBUG_CONFIG_CHANGE
     printf("config changed: user_id: %d\nDELTAS:\n%sDELETIONS:\n%s\n",
 	   user_id, deltas.c_str(), deletions.c_str());

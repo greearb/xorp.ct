@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.24 2003/11/21 02:05:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.25 2003/11/21 20:11:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -1460,7 +1460,7 @@ ConfigTreeNode::join_up_varname(const list<string>& var_parts) const
 
 void
 ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
-					    uint part,
+					    size_t part,
 					    list<string>& matches) const
 {
     // Don't expand unless the node has been committed
@@ -1471,6 +1471,7 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
     if (is_root_node()) {
 	// root node
 	ok = true;
+	// TODO: what about if "part" is 0?
 	part--;		// Prevent increment of part later
     } else if ((!_parent->is_root_node()) && _parent->is_tag()) {
 	// We're the varname after a tag
@@ -1487,7 +1488,7 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
     if (ok) {
 	if (part == parts.size() - 1) {
 	    // Everything that we were looking for matched
-	    XLOG_ASSERT(parts[part]=="*");
+	    XLOG_ASSERT(parts[part] == "*");
 	    matches.push_back(_segname);
 	    return;
 	} 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.7 2003/11/20 06:37:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.8 2003/11/20 06:49:56 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -20,7 +20,6 @@
 #include <map>
 #include <list>
 #include <set>
-#include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
@@ -29,8 +28,8 @@
 #include "xrldb.hh"
 #include "path_segment.hh"
 
-class TemplateTreeNode;
 class ModuleCommand;
+class TemplateTreeNode;
 
 class TemplateTree {
 public:
@@ -38,36 +37,37 @@ public:
 		 const string& config_template_dir,
 		 const string& xrl_dir);
     ~TemplateTree();
-    void extend_path(string segment, bool is_tag);
+
+    void extend_path(const string& segment, bool is_tag);
     void pop_path();
-    void push_path(int type, char *initializer);
-    void add_untyped_node(string segment, bool is_tag);
-    void add_node(const string &segment, int type, char *initializer);
-    TemplateTreeNode *find_node(const list<string>& path_segments);
+    void push_path(int type, char* initializer);
+    void add_untyped_node(const string& segment, bool is_tag);
+    void add_node(const string& segment, int type, char* initializer);
+    TemplateTreeNode* find_node(const list<string>& path_segments);
     string path_as_string();
-    void add_cmd(char *cmd);
-    void add_cmd_action(string cmd, const list<string> &action);
+    void add_cmd(char* cmd);
+    void add_cmd_action(const string& cmd, const list<string>& action);
     void display_tree();
-    void register_module(const string &name, ModuleCommand *mc);
-    ModuleCommand *find_module(const string &name);
+    void register_module(const string& name, ModuleCommand* mc);
+    ModuleCommand* find_module(const string& name);
     bool check_variable_name(const string& s) const;
-    const XRLdb& xrldb() const {return _xrldb;}
-    TemplateTreeNode *root_node() const {return _root_node;}
+    const XRLdb& xrldb() const { return _xrldb; }
+    TemplateTreeNode* root_node() const { return _root_node; }
     const string& xorp_root_dir() const { return _xorp_root_dir; }
 
 private:
-    TemplateTreeNode *new_node(TemplateTreeNode *parent,
-			       const string &path, 
-			       const string &varname,
-			       int type, 
-			       const string &initializer);
-    TemplateTreeNode	*_root_node;
-    TemplateTreeNode	*_current_node;
-    map <string, ModuleCommand *> _registered_modules;
+    TemplateTreeNode* new_node(TemplateTreeNode* parent,
+			       const string& path,
+			       const string& varname,
+			       int type,
+			       const string& initializer);
+
+    TemplateTreeNode*	_root_node;
+    TemplateTreeNode*	_current_node;
+    map<string, ModuleCommand *> _registered_modules;
     list<PathSegment>	_path_segments;
     list<size_t>	_segment_lengths;
     XRLdb		_xrldb;
-    ModuleManager	*mmgr;
     string		_xorp_root_dir;	// The root of the XORP tree
 };
 

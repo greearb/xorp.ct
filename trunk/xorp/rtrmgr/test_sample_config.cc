@@ -12,15 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.10 2003/10/02 19:39:29 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.11 2003/11/18 23:03:57 pavlin Exp $"
 
 #include <signal.h>
 
+#include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
-
-#include "rtrmgr_module.h"
-#include "libxorp/xlog.h"
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -43,10 +44,11 @@ static const string default_xorp_root_dir = "..";
 static const string default_config_template_dir = srcdir + "/../etc/templates";
 static const string default_xrl_dir = srcdir + "/../xrl/targets";
 static const string default_config_boot = srcdir + "/config.boot.sample";
-/**
- * This test loads the template tree, then loads the sample config,
- * but doesn't call any XRLs or start any processes.
- */
+
+//
+// This test loads the template tree, then loads the sample config,
+// but doesn't call any XRLs or start any processes.
+//
 
 int
 main(int argc, char* const argv[])
@@ -68,7 +70,7 @@ main(int argc, char* const argv[])
     const string& xrl_dir = default_xrl_dir;
     const string& config_boot = default_config_boot;
 
-    //read the router config template files
+    // Read the router config template files
     TemplateTree *tt;
     try {
 	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
@@ -80,22 +82,25 @@ main(int argc, char* const argv[])
 	return -1;
     }
 
-    //initialize the event loop
+    // Initialize the event loop
     EventLoop eventloop; 
 
-    /* Finder Server */
+    // Initialize the finder server
     FinderServer fs(eventloop);
 
-    //start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */false, default_xorp_root_dir);
+    // Start the module manager
+    ModuleManager mmgr(eventloop, /* verbose = */ false,
+		       default_xorp_root_dir);
     try {
-	//initialize the IPC mechanism
+	// Initialize the IPC mechanism
 	XrlStdRouter xrl_router(eventloop, "rtrmgr-test", fs.addr(),
 				fs.port());
 	XorpClient xclient(eventloop, xrl_router);
 
-	//read the router startup configuration file,
-	//start the processes required, and initialize them
+	//
+	// Read the router startup configuration file, start the processes
+	// required, and initialize them.
+	//
 	MasterConfigTree ct(config_boot, tt, mmgr, xclient, false);
     } catch (InitError& e) {
 	xorp_print_standard_exceptions();
@@ -105,11 +110,12 @@ main(int argc, char* const argv[])
     }
 
     mmgr.shutdown();
-    while ((!mmgr.shutdown_complete()) && eventloop.timers_pending()) {
+    while ((! mmgr.shutdown_complete()) && eventloop.timers_pending()) {
 	eventloop.run();
     }
 
     delete tt;
+
     //
     // Gracefully stop and exit xlog
     //
@@ -118,11 +124,3 @@ main(int argc, char* const argv[])
 
     return (errcode);
 }
-
-
-
-
-
-
-
-

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.19 2003/11/21 20:11:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.20 2003/11/22 00:15:07 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -307,7 +307,7 @@ ModuleCommand::exec_complete(const XrlError& /* err */,
 
 void
 ModuleCommand::action_complete(const XrlError& err,
-			       XrlArgs* args,
+			       XrlArgs* xrl_args,
 			       ConfigTreeNode *ctn,
 			       Action* action,
 			       string cmd)
@@ -316,25 +316,25 @@ ModuleCommand::action_complete(const XrlError& err,
 
     if (err == XrlError::OKAY()) {
 	// XXX does this make sense?
-	if (! args->empty()) {
-	    debug_msg("ARGS: %s\n", args->str().c_str());
+	if (! xrl_args->empty()) {
+	    debug_msg("ARGS: %s\n", xrl_args->str().c_str());
 
-	    list<string> specargs;
+	    list<string> spec_args;
 	    XrlAction* xa = dynamic_cast<XrlAction*>(action);
 	    XLOG_ASSERT(xa != NULL);
 	    string s = xa->xrl_return_spec();
 	    while (true) {
 		string::size_type start = s.find("&");
 		if (start == string::npos) {
-		    specargs.push_back(s);
+		    spec_args.push_back(s);
 		    break;
 		}
-		specargs.push_back(s.substr(0, start));
-		debug_msg("specargs: %s\n", s.substr(0, start).c_str());
+		spec_args.push_back(s.substr(0, start));
+		debug_msg("spec_args: %s\n", s.substr(0, start).c_str());
 		s = s.substr(start+1, s.size()-(start+1));
 	    }
 	    list<string>::const_iterator iter;
-	    for (iter = specargs.begin(); iter != specargs.end(); ++iter) {
+	    for (iter = spec_args.begin(); iter != spec_args.end(); ++iter) {
 		string::size_type eq = iter->find("=");
 		if (eq == string::npos) {
 		    continue;
@@ -346,7 +346,7 @@ ModuleCommand::action_complete(const XrlError& err,
 		    debug_msg("varname=%s\n", varname.c_str());
 		    XrlAtom returned_atom;
 		    try {
-			returned_atom = args->item(atom.name());
+			returned_atom = xrl_args->item(atom.name());
 		    } catch (XrlArgs::XrlAtomNotFound& x) {
 			// XXX
 			XLOG_UNFINISHED();

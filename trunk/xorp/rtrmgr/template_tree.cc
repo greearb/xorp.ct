@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.11 2003/11/20 06:37:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.12 2003/11/20 06:49:56 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
@@ -26,7 +27,7 @@
 
 // #define DEBUG_TEMPLATE_PARSER
 
-extern int init_template_parser(const char* , TemplateTree* c);
+extern int init_template_parser(const char* filename, TemplateTree* c);
 extern int parse_template();
 extern void tplterror(const char* s);
 
@@ -39,7 +40,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     _root_node = new TemplateTreeNode(*this, NULL, "", "");
     _current_node = _root_node;
 
-    list <string> files;
+    list<string> files;
 
     struct stat dirdata;
     if (stat(config_template_dir.c_str(), &dirdata) < 0) {
@@ -101,52 +102,65 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     globfree(&pglob);
 }
 
-TemplateTree::~TemplateTree() {
+TemplateTree::~TemplateTree()
+{
+    XLOG_ASSERT(_root_node != NULL);
+
     delete _root_node;
 }
 
 void
-TemplateTree::display_tree() {
+TemplateTree::display_tree()
+{
     _root_node->print();
 }
 
-void TemplateTree::extend_path(string segment, bool is_tag) {
+void
+TemplateTree::extend_path(const string& segment, bool is_tag)
+{
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("extend_path %s\n", segment.c_str());
 #endif
-    _path_segments.push_back(PathSegment(segment,is_tag));
+
+    _path_segments.push_back(PathSegment(segment, is_tag));
 }
 
 void
-TemplateTree::pop_path() {
-    if (_segment_lengths.size()==0) {
+TemplateTree::pop_path()
+{
+    if (_segment_lengths.empty()) {
 	xorp_throw(ParseError, "Mismatched braces");
     }
+
     size_t segments_to_pop = _segment_lengths.front();
+
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("pop_path: %d\n", segments_to_pop);
 #endif
+
     _segment_lengths.pop_front();
     for (size_t i = 0; i < segments_to_pop; i++) {
 	_current_node = _current_node->parent();
     }
+
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("popped to %s\n", _current_node->path().c_str());
 #endif
 }
 
 string
-TemplateTree::path_as_string() {
+TemplateTree::path_as_string()
+{
     string path;
-    typedef list<PathSegment>::iterator CI;
-    CI ptr = _path_segments.begin();
-    while (ptr != _path_segments.end()) {
+
+    list<PathSegment>::iterator iter;
+    for (iter = _path_segments.begin(); iter != _path_segments.end(); ++iter) {
+	PathSegment& path_segment = *iter;
 	if (path == "") {
-	    path = ptr->segname();
+	    path = path_segment.segname();
 	} else {
-	    path += " " + ptr->segname();
+	    path += " " + path_segment.segname();
 	}
-	++ptr;
     }
     return path;
 }
@@ -154,56 +168,60 @@ TemplateTree::path_as_string() {
 TemplateTreeNode*
 TemplateTree::new_node(TemplateTreeNode* parent,
 		       const string& path, const string& varname,
-		       int type, const string& initializer) {
-    TemplateTreeNode* t;
+		       int type, const string& initializer)
+{
+    TemplateTreeNode* ttn;
+
     switch (type) {
     case NODE_VOID:
-	t = new TemplateTreeNode(*this, parent, path, varname);
+	ttn = new TemplateTreeNode(*this, parent, path, varname);
 	break;
     case NODE_TEXT:
-	t = new TextTemplate(*this, parent, path, varname, initializer);
+	ttn = new TextTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_UINT:
-	t = new UIntTemplate(*this, parent, path, varname, initializer);
+	ttn = new UIntTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_INT:
-	t = new IntTemplate(*this, parent, path, varname, initializer);
+	ttn = new IntTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_BOOL:
-	t = new BoolTemplate(*this, parent, path, varname, initializer);
+	ttn = new BoolTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV4:
-	t = new IPv4Template(*this, parent, path, varname, initializer);
+	ttn = new IPv4Template(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV4PREFIX:
-	t = new IPv4NetTemplate(*this, parent, path, varname, initializer);
+	ttn = new IPv4NetTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV6:
-	t = new IPv6Template(*this, parent, path, varname, initializer);
+	ttn = new IPv6Template(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV6PREFIX:
-	t = new IPv6NetTemplate(*this, parent, path, varname, initializer);
+	ttn = new IPv6NetTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_MACADDR:
-	t = new MacaddrTemplate(*this, parent, path, varname, initializer);
+	ttn = new MacaddrTemplate(*this, parent, path, varname, initializer);
 	break;
     default:
 	XLOG_UNREACHABLE();
     }
-    return t;
+    return ttn;
 }
 
 void
-TemplateTree::push_path(int type, char* cinit) {
+TemplateTree::push_path(int type, char* cinit)
+{
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("push_path\n");
 #endif
-    list <PathSegment>::const_iterator iter;
+
+    list<PathSegment>::const_iterator iter;
     iter = _path_segments.begin();
     size_t len = _path_segments.size();
     if (len > 0) {
 	for (size_t i = 0; i < len - 1; i++) {
-	    // add all except the last segment
+	    // Add all except the last segment
 	    add_untyped_node(iter->segname(), iter->is_tag());
 	    ++iter;
 	}
@@ -212,36 +230,39 @@ TemplateTree::push_path(int type, char* cinit) {
 
     _segment_lengths.push_front(len);
 
-    while (_path_segments.size()>0)
+    while (_path_segments.size() > 0)
 	_path_segments.pop_front();
 }
 
 void
-TemplateTree::add_untyped_node(string segment, bool is_tag) {
+TemplateTree::add_untyped_node(const string& segment, bool is_tag)
+{
+    TemplateTreeNode* found = NULL;
+
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("add_untyped_node: segment=%s\n", segment.c_str());
 #endif
-    list <TemplateTreeNode*>::const_iterator i;
-    i = _current_node->children().begin();
-    TemplateTreeNode* found = NULL;
-    while (i!= _current_node->children().end()) {
-	if ((*i)->segname() == segment) {
+
+    list<TemplateTreeNode*>::const_iterator iter;
+    iter = _current_node->children().begin();
+    while (iter != _current_node->children().end()) {
+	if ((*iter)->segname() == segment) {
 	    if (found != NULL) {
-		/*
-		 * If there are two nodes with the same segment name,
-		 * we can only distinguish between them by type.
-		 * extend_path doesn't have the type information
-		 * available because it wasn't at the relevant point
-		 * in the template file, so this is an error.  The
-		 * correct way to step past such a node would be
-		 * through a call to add_node .
-		 */
+		//
+		// If there are two nodes with the same segment name,
+		// we can only distinguish between them by type.
+		// extend_path doesn't have the type information
+		// available because it wasn't at the relevant point
+		// in the template file, so this is an error.  The
+		// correct way to step past such a node would be
+		// through a call to add_node .
+		//
 		string err = "Need to qualify type of " + segment + "\n";
 		xorp_throw(ParseError, err);
 	    }
-	    found = *i;
+	    found = *iter;
 	}
-	i++;
+	++iter;
     }
     if (found != NULL) {
 	_current_node = found;
@@ -254,48 +275,51 @@ TemplateTree::add_untyped_node(string segment, bool is_tag) {
 }
 
 void
-TemplateTree::add_node(const string& segment, int type, char* cinit) {
+TemplateTree::add_node(const string& segment, int type, char* cinit)
+{
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("add_node: segment=%s type: %d\n", segment.c_str(), type);
     printf("cn=%p\n", _current_node);
 #endif
+
     string varname = _path_segments.back().segname();
     if (varname == "@") {
 	if (_current_node->is_tag()) {
-	    //parent node is a tag
+	    // Parent node is a tag
 	    varname = _current_node->segname() + "." + "@";
 	} else {
-	    //what happened here?
+	    // What happened here?
 	    XLOG_UNREACHABLE();
 	}
     }
-    if (varname.empty() || varname[0]!='$') {
-	//this can't be a variable.
+    if (varname.empty() || varname[0] != '$') {
+	// This can't be a variable.
 	varname = "";
     }
 
-    //keep track of how many segments comprise this frame so we can
-    //pop the right number later
+    // Keep track of how many segments comprise this frame so we can
+    // pop the right number later.
 
     string initializer;
     if (cinit != NULL)
 	initializer = cinit;
 
-    list <TemplateTreeNode*>::const_iterator i;
-    i = _current_node->children().begin();
     TemplateTreeNode* found = NULL;
-    while (i!= _current_node->children().end()) {
-	if ((*i)->segname() == segment) {
-	    if (((*i)->type() == type)
-		|| (type == NODE_VOID) || ((*i)->type() == NODE_VOID)) {
+    list<TemplateTreeNode*>::const_iterator iter;
+    for (iter = _current_node->children().begin();
+	 iter != _current_node->children().end();
+	 ++iter) {
+	TemplateTreeNode* ttn = *iter;
+	if (ttn->segname() == segment) {
+	    if ((ttn->type() == type)
+		|| (type == NODE_VOID) || (ttn->type() == NODE_VOID)) {
 		if (found != NULL) {
-		    //I don't think this can happen
+		    // I don't think this can happen
 		    XLOG_UNREACHABLE();
 		}
-		found = *i;
+		found = ttn;
 	    }
 	}
-	i++;
     }
     if (found != NULL) {
 	_current_node = found;
@@ -312,49 +336,47 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
 }
 
 TemplateTreeNode*
-TemplateTree::find_node(const list<string>& path_segments) {
+TemplateTree::find_node(const list<string>& path_segments)
+{
     TemplateTreeNode* ttn = _root_node;
-    list <string>::const_iterator i;
-    for (i=path_segments.begin(); i!= path_segments.end(); ++i) {
-	list <TemplateTreeNode*> matches;
-	list <TemplateTreeNode*>::const_iterator ti;
 
-	//first look for an exact name match
-	ti = ttn->children().begin();
-	while (ti != ttn->children().end()) {
-	    if ((*ti)->segname() == *i) {
+    list<string>::const_iterator iter;
+    for (iter = path_segments.begin(); iter != path_segments.end(); ++iter) {
+	list<TemplateTreeNode*> matches;
+	list<TemplateTreeNode*>::const_iterator ti;
+
+	// First look for an exact name match
+	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
+	    if ((*ti)->segname() == *iter) {
 		matches.push_back(*ti);
 #ifdef DEBUG_TEMPLATE_PARSER
 		printf("matched: %s type %d\n", (*ti)->path().c_str(),
 		       (*ti)->type());
 #endif
 	    }
-	    ++ti;
 	}
-	if (matches.size()==1) {
+	if (matches.size() == 1) {
 	    ttn = matches.front();
 	    continue;
 	}
-	if (matches.size()>1) {
-	    //this shouldn't be possible
-	    fprintf(stderr, "Multiple match at node %s\n", (*i).c_str());
+	if (matches.size() > 1) {
+	    // This shouldn't be possible
+	    fprintf(stderr, "Multiple match at node %s\n", (*iter).c_str());
 	    XLOG_UNREACHABLE();
 	}
 
-	//there's no exact name match, so we're probably looking for a
-	//match of a value against a typed variable
-	ti = ttn->children().begin();
-	while (ti != ttn->children().end()) {
+	// There's no exact name match, so we're probably looking for a
+	// match of a value against a typed variable.
+	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
 	    if ((*ti)->type() != NODE_VOID) {
-		if ((*ti)->type_match(*i))
+		if ((*ti)->type_match(*iter))
 		    matches.push_back(*ti);
 	    }
-	    ++ti;
 	}
-	if (matches.size()==0)
+	if (matches.size() == 0)
 	    return NULL;
-	if (matches.size()>1) {
-	    string err = "Ambiguous value for node " + (*i) +
+	if (matches.size() > 1) {
+	    string err = "Ambiguous value for node " + (*iter) +
 		" - I can't tell which type this is.\n";
 	    xorp_throw(ParseError, err);
 	}
@@ -366,26 +388,29 @@ TemplateTree::find_node(const list<string>& path_segments) {
     return ttn;
 }
 
-
 void
-TemplateTree::add_cmd(char* cmd) {
+TemplateTree::add_cmd(char* cmd)
+{
     _current_node->add_cmd(string(cmd), *this);
 }
 
 void
-TemplateTree::add_cmd_action(string cmd, const list<string>& action) {
+TemplateTree::add_cmd_action(const string& cmd, const list<string>& action)
+{
     _current_node->add_action(cmd, action, _xrldb);
 }
 
 void
-TemplateTree::register_module(const string& name, ModuleCommand* mc) {
+TemplateTree::register_module(const string& name, ModuleCommand* mc)
+{
     _registered_modules[name] = mc;
 }
 
 ModuleCommand*
-TemplateTree::find_module(const string& name) {
-    typedef map<string, ModuleCommand*>::const_iterator CI;
-    CI rpair = _registered_modules.find(name);
+TemplateTree::find_module(const string& name)
+{
+    map<string, ModuleCommand*>::const_iterator rpair;
+    rpair = _registered_modules.find(name);
     if (rpair == _registered_modules.end())
 	return NULL;
     else
@@ -393,17 +418,18 @@ TemplateTree::find_module(const string& name) {
 }
 
 bool
-TemplateTree::check_variable_name(const string& s) const {
-    //trim $( and )
-    string trimmed = s.substr(2, s.size()-3);
+TemplateTree::check_variable_name(const string& s) const
+{
+    // Trim $( and )
+    string trimmed = s.substr(2, s.size() - 3);
 
-    //split on dots
-    list <string> sl = split(trimmed, '.');
+    // Split on dots
+    list<string> sl = split(trimmed, '.');
 
-    //copy into a vector
-    int len = sl.size();
+    // Copy into a vector
+    size_t len = sl.size();
     vector<string> v(len);
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
 	v[i] = sl.front();
 	sl.pop_front();
     }

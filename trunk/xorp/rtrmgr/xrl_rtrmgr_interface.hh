@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.7 2003/05/29 21:17:17 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.8 2003/09/16 09:35:18 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -23,20 +23,22 @@
 
 #define CNAMELEN 40
 
+
+class MasterConfigTree;
+class RandomGen;
 class User;
 class UserDB;
 class UserInstance;
-class MasterConfigTree;
-class RandomGen;
 
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+
 public:
     XrlRtrmgrInterface(XrlRouter& r, UserDB& db, EventLoop& eventloop,
 		       RandomGen& randgen);
     ~XrlRtrmgrInterface();
 
-    void set_conf_tree(MasterConfigTree *v) { _conf_tree = v; }
+    void set_conf_tree(MasterConfigTree* v) { _conf_tree = v; }
 
     XrlCmdError common_0_1_get_target_name(// Output values,
 					   string& name);
@@ -152,31 +154,31 @@ public:
 	const string& target, 
 	const string& filename);
 
-    typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
 private:
-    UserInstance *find_user_instance(uint32_t user_id, const string& clientname);
+    typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
 
+    UserInstance* find_user_instance(uint32_t user_id,
+				     const string& clientname);
     string generate_auth_token(const uint32_t& user_id, 
 			       const string& clientname);
-
     bool verify_token(const string& token) const;
     uint32_t get_user_id_from_token(const string& token) const;
     void lock_timeout();
 
     XrlRtrmgrClientV0p1Client _client_interface;
-    multimap <uint32_t, UserInstance*> _users;
-    multimap <uint32_t, UserInstance*> _config_users;
-    UserDB& _userdb;
-    MasterConfigTree *_conf_tree;
-    EventLoop& _eventloop;
-    RandomGen& _randgen;
+    multimap<uint32_t, UserInstance*> _users;
+    multimap<uint32_t, UserInstance*> _config_users;
+    UserDB&		_userdb;
+    MasterConfigTree*	_conf_tree;
+    EventLoop&		_eventloop;
+    RandomGen&		_randgen;
 
-    bool _exclusive; //indicates only one user allowed in config mode
+    bool	_exclusive;  // Indicates only one user allowed in config mode
 
-    //variables to implement global lock on config changes
-    bool _config_locked;
-    uint32_t _lock_holder;
-    XorpTimer _lock_timer;
+    // Variables to implement global lock on config changes
+    bool	_config_locked;
+    uint32_t	_lock_holder;
+    XorpTimer	_lock_timer;
 };
 
 #endif // __RTRMGR_XRL_RTRMGR_INTERFACE_HH__

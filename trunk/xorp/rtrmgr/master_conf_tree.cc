@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.22 2003/11/20 06:37:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.23 2003/11/21 19:35:55 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -711,7 +711,7 @@ MasterConfigTree::save_to_file(const string& filename,
 
     // Write the file header
     string header = "/*XORP Configuration File, v1.0*/\n";
-    uint bytes;
+    size_t bytes;
     bytes = fwrite(header.c_str(), 1, header.size(), file);
     if (bytes < header.size()) {
 	fclose(file);

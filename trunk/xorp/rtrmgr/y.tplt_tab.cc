@@ -615,7 +615,7 @@ yyreduce:
     {
 case 4:
 #line 46 "template.yy"
-{push_path();}
+{ push_path(); }
 break;
 case 5:
 #line 47 "template.yy"

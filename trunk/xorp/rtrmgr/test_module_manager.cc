@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.7 2003/08/01 23:07:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.8 2003/09/24 16:16:08 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -41,11 +41,11 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    // initialize the event loop
+    // Initialize the event loop
     EventLoop eventloop; 
 
-    // start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */true, ".");
+    // Start the module manager
+    ModuleManager mmgr(eventloop, /* verbose = */ true, ".");
     mmgr.new_module("finder", "../libxipc/xorp_finder");
 
     if (mmgr.module_has_started("finder") == true) {
@@ -65,18 +65,18 @@ main(int argc, char* const argv[])
 	return -1;
     }
 
-    while (eventloop.timers_pending() || waiting==true) {
+    while (eventloop.timers_pending() || waiting == true) {
 	printf(".");
 	eventloop.run();
     }
     
     printf("finder should now be running\n");
-    //assert(mmgr.module_running("finder") == true);
+    // XLOG_ASSERT(mmgr.module_running("finder") == true);
     sleep(2);
     
     printf("shutting down\n");
     mmgr.shutdown();
-    while (eventloop.timers_pending() && (!mmgr.shutdown_complete())) {
+    while (eventloop.timers_pending() && (! mmgr.shutdown_complete())) {
 	printf(".");
 	eventloop.run();
     }

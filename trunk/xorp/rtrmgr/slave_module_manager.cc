@@ -12,14 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.10 2003/05/31 22:33:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.11 2003/11/22 00:17:55 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "slave_module_manager.hh"
 
+
 //
-// This file merely provides dummy definitions for the module manager
+// XXX: this file merely provides dummy definitions for the module manager
 // for use in xorpsh, as xorpsh never actually starts any modules, but
 // the template commands need to know about a module manager.
 // This is an ugly hack.
@@ -49,8 +50,7 @@ ModuleManager::start_module(const string& name, bool do_exec,
 }
 
 int 
-ModuleManager::kill_module(const string& name,
-			  XorpCallback0<void>::RefPtr cb)
+ModuleManager::kill_module(const string& name, XorpCallback0<void>::RefPtr cb)
 {
     UNUSED(name);
     UNUSED(cb);

@@ -23,7 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.2 2003/03/10 23:21:00 hodson Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -53,7 +53,8 @@ static struct pid_s {
 } *pidlist;
 
 
-void popen2(const string& command, FILE *& outstream, FILE *&errstream)
+void
+popen2(const string& command, FILE *& outstream, FILE *&errstream)
 {
     struct pid_s *cur;
     FILE *iop_out, *iop_err;
@@ -101,7 +102,7 @@ void popen2(const string& command, FILE *& outstream, FILE *&errstream)
 	(void)close(pdes_err[1]);
 	return;
     }
-    
+
     string a1 = "sh";
     string a2 = "-c";
     argv[0] = a1.c_str();
@@ -110,7 +111,7 @@ void popen2(const string& command, FILE *& outstream, FILE *&errstream)
     argv[3] = NULL;
 
     switch (pid = vfork()) {
-    case -1:			/* Error. */
+    case -1:				/* Error. */
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);

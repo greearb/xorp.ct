@@ -12,32 +12,31 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/randomness.hh,v 1.2 2003/03/10 23:21:01 hodson Exp $
+// $XORP: xorp/rtrmgr/randomness.hh,v 1.3 2003/04/22 19:42:18 mjh Exp $
 
 #ifndef __RTRMGR_RANDOMNESS_HH__
 #define __RTRMGR_RANDOMNESS_HH__
 
 #include <stdio.h>
 
-#define RAND_POOL_SIZE 65536
-
 class RandomGen {
 public:
     RandomGen();
-    void add_eventloop(EventLoop *eventloop);
+    ~RandomGen();
+
     void get_random_bytes(size_t len, uint8_t* buf);
+
 private:
     bool read_file(const string& filename);
-    bool read_fd(FILE *file);
-    void add_buf_to_randomness(uint8_t *buf, int len);
+    bool read_fd(FILE* file);
+    void add_buf_to_randomness(uint8_t* buf, size_t len);
 
-    bool _random_exists;
-    bool _urandom_exists;
-    uint8_t *_random_data;
-    XorpTimer timer;
-    EventLoop *_eventloop;
-    int _last_loc;
-    int _counter;
+    static const size_t RAND_POOL_SIZE = 65536;
+
+    bool	_random_exists;
+    bool	_urandom_exists;
+    uint8_t*	_random_data;
+    uint32_t	_counter;
 };
 
 #endif // __RTRMGR_RANDOMNESS_HH__

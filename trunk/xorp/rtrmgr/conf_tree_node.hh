@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.11 2003/11/18 23:03:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.12 2003/11/21 02:05:25 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -37,7 +37,7 @@ public:
     ConfigTreeNode();
     ConfigTreeNode(const ConfigTreeNode& ctn);
     ConfigTreeNode(const string &node_name, const string &path, 
-		   const TemplateTreeNode *ttn, ConfigTreeNode *parent,
+		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
 		   uid_t user_id);
     ~ConfigTreeNode();
 
@@ -104,7 +104,7 @@ public:
     string get_module_name_by_variable(const string& varname) const;
     bool expand_expression(const string& varname, string& value) const;
     bool expand_variable(const string& varname, string& value) const;
-    void expand_varname_to_matchlist(const vector<string>& v, uint depth,
+    void expand_varname_to_matchlist(const vector<string>& v, size_t depth,
 				     list<string>& matches) const;
     bool set_variable(const string& varname, string& value);
 
@@ -148,7 +148,7 @@ protected:
     Command *_cmd_that_failed;
 
     // Variables contains the explicit variables set on this node
-    map <string, string> _variables;
+    map<string, string> _variables;
 
     // on_parent_path is used during variable expansion to keep track of where
     // we came from
