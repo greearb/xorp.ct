@@ -1,4 +1,4 @@
-% $XORP: xorp/docs/slides/xorp.tex,v 1.4 2004/02/19 20:12:39 atanu Exp $
+% $XORP: xorp/docs/slides/xorp.tex,v 1.5 2004/02/19 23:33:14 atanu Exp $
 
 \documentclass[landscape]{slides}
 %\usepackage{ncntrsbk}
@@ -131,11 +131,29 @@
   \item All routing/forwarding interactions with the operating system
     are performed through the Forwarding Engine Abstraction(FEA).
     \begin{itemize}
+    \item Allows distributed or offboard forwarding.
     \item Simplifies porting to new operating systems.
+    \item Eases construction of a XORP simulation environment.
     \end{itemize}
 
   \item The router manager is a fully configurable entity that
     is responsible for process management.
+  \end{itemize}
+
+\end{slide}
+%------------------------------------------------------------
+\begin{slide}
+
+  \T{Extensibility}
+
+  \begin{itemize}
+  \item One of the major goals of the project is extensibility.
+
+    \begin{itemize}
+    \item Allowing deployment in testbeds such as PlanetLab.
+    \item Enabling Research in new or current protocols.
+    \end{itemize}
+
   \end{itemize}
 
 \end{slide}
@@ -205,10 +223,25 @@
 
   \begin{itemize}
   \item Firewall integration (forwarding filters)
-  \item Security (integration with intrusion detection systems)
-  \item Distributed router.
   \item Intel network processor (IXP2400) port.
+  \item Distributed router.
+  \end{itemize}
+
+\end{slide}
+%------------------------------------------------------------
+\begin{slide}
+
+  \T{Possible Future Research}
+
+  \begin{itemize}
+  \item Security (integration with intrusion detection systems)
   \item XORP Simulation environment.
+    \begin{itemize}
+    \item An environment that allows the development of new protocols
+      or features. With the added benefit that the same code will work
+      with a real XORP router.
+    \end{itemize}
+    
   \item Next generation routing protocols.
   \end{itemize}
 
