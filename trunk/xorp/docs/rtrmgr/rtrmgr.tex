@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.20 2004/06/02 17:36:18 hodson Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.21 2004/06/09 22:33:47 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -34,13 +34,13 @@
 
 \title{XORP Router Manager Process (rtrmgr) \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2003}
 
 %\twocolumn
 \begin{document}
@@ -964,14 +964,14 @@ The command {\tt \%tag} is used to specify the help string associated
 with each tag. For example, statement:
 
 \begin{verbatim}
-        %command: "path/to/show_vif" %help: HELP;
+        %command: "path/to/show_vif -i $3" %help: HELP;
         %tag: HELP "Show vif information";
 \end{verbatim}
 
 is equvalent with:
 
 \begin{verbatim}
-        %command: "path/to/show_vif" %help: "Show vif information";
+        %command: "path/to/show_vif -i $3" %help: "Show vif information";
 \end{verbatim}
 
 \textit{Note: currently there is no security mechanism restricting
