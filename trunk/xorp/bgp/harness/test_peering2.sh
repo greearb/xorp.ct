@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.33 2004/04/02 07:17:17 mjh Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.34 2004/04/27 18:01:58 atanu Exp $
 #
 
 #
@@ -528,7 +528,70 @@ test9()
     reset
 }
 
-TESTS_NOT_FIXED=''
+test10()
+{
+    echo "TEST10 (Verify that a router ID of 0.0.0.0 doesn't cause a problem):"
+    echo "	1) Bring up peering (peer1)"
+
+    reset
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 0.0.0.0
+    coord peer2 assert established
+
+    reset
+}
+
+test11()
+{
+    echo "TEST11 (Behave sanely when two peers use the same router ID):"
+    echo "	1) Bring up peering (peer1)"
+    echo "	2) Bring up a second peering (peer2)"
+    echo "	3) Tear down both peerings"
+
+    reset
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 1.1.1.1
+    coord peer2 assert established
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 1.1.1.1
+    coord peer1 assert established
+
+    sleep 1
+
+    coord peer1 assert established
+    coord peer2 assert established
+
+    reset
+}
+
+test12()
+{
+    echo "TEST12 (Behave sanely when a peer reuses a router ID):"
+    echo "	1) Bring up peering (peer1)"
+    echo "      2) Tear down the peering (peer1)"
+    echo "	2) Bring up a second peering (peer2) with the same router ID"
+    echo "	3) Tear down peering (peer2)"
+
+    reset
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 1.1.1.1
+    coord peer2 assert established
+
+    # Reset the connection and reuse the ID on the other peer,should be legal. 
+    reset
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 1.1.1.1
+    coord peer1 assert established
+
+    sleep 1
+
+    coord peer1 assert established
+    coord peer2 assert established
+
+    reset
+}
+
+TESTS_NOT_FIXED='test10 test11 test12'
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9'
 
 # Include command line
