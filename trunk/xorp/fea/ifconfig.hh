@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.26 2004/08/12 22:18:37 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.27 2004/08/17 02:20:09 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -240,9 +240,11 @@ private:
     list<IfConfigObserver*>	_ifc_observers;
 
     //
-    // The mechanisms to get interface-related information
+    // The primary mechanisms to get interface-related information
     // from the underlying system.
-    // Ordering is important: the last that is supported is the one to use.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     IfConfigGetDummy		_ifc_get_dummy;
     IfConfigGetIoctl		_ifc_get_ioctl;
@@ -252,18 +254,22 @@ private:
     IfConfigGetNetlink		_ifc_get_netlink;
 
     //
-    // The mechanisms to set interface-related information
+    // The primary mechanisms to set interface-related information
     // within the underlying system.
-    // Ordering is important: the last that is supported is the one to use.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     IfConfigSetDummy		_ifc_set_dummy;
     IfConfigSetIoctl		_ifc_set_ioctl;
     IfConfigSetNetlink		_ifc_set_netlink;
 
     //
-    // The mechanisms to observe whether the interface-related information
-    // within the underlying system has changed.
-    // Ordering is important: the last that is supported is the one to use.
+    // The primary mechanisms to observe whether the interface-related
+    // information within the underlying system has changed.
+    //
+    // XXX: Ordering is important: the last that is supported
+    // is the one to use.
     //
     IfConfigObserverDummy	_ifc_observer_dummy;
     IfConfigObserverRtsock	_ifc_observer_rtsock;
