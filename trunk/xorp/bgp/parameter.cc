@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.15 2003/09/25 02:56:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.16 2003/09/27 03:42:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -527,9 +527,12 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	    p = new BGPRefreshCapability(len, d);
 	    break;
 
+	case CAPABILITYMULTIROUTE:
+	    p = new BGPMultiRouteCapability(len, d);
+	    break;
+
 	default:
 	    p = new BGPUnknownCapability(len, d);
-	    // abort();
 	}
 	break;
     }
