@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.21 2003/06/01 02:46:44 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.22 2003/07/22 21:38:09 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -133,7 +133,7 @@ void
 VifManager::set_vif_state()
 {
     map<string, Vif *>::const_iterator vif_iter;
-    string err;
+    string error_msg;
     
     //
     // Remove vifs that don't exist anymore
@@ -148,7 +148,7 @@ VifManager::set_vif_state()
 	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
-	    _rib_manager->delete_vif(vif_name, err);
+	    _rib_manager->delete_vif(vif_name, error_msg);
 	    _saved_vifs_by_name.erase(node_vif->name());
 	    delete node_vif;
 	    continue;
@@ -173,7 +173,7 @@ VifManager::set_vif_state()
 	// Add a new vif
 	//
 	if (node_vif == NULL) {
-	    _rib_manager->new_vif(vif->name(), *vif, err);
+	    _rib_manager->new_vif(vif->name(), *vif, error_msg);
 	    node_vif = new Vif(*vif);
 	    _saved_vifs_by_name.insert(pair<string, Vif*>(vif->name(),
 							  node_vif));
@@ -212,12 +212,12 @@ VifManager::set_vif_state()
 		if (ipvx.is_ipv4()) {
 		    _rib_manager->delete_vif_addr(node_vif->name(),
 						  ipvx.get_ipv4(),
-						  err);
+						  error_msg);
 		}
 		if (ipvx.is_ipv6()) {
 		    _rib_manager->delete_vif_addr(node_vif->name(),
 						  ipvx.get_ipv6(),
-						  err);
+						  error_msg);
 		}
 		node_vif->delete_address(ipvx);
 	    }
@@ -238,13 +238,13 @@ VifManager::set_vif_state()
 			_rib_manager->add_vif_addr(node_vif->name(),
 						   vif_addr.addr().get_ipv4(),
 						   vif_addr.subnet_addr().get_ipv4net(),
-						   err);
+						   error_msg);
 		    }
 		    if (vif_addr.addr().is_ipv6()) {
 			_rib_manager->add_vif_addr(node_vif->name(),
 						   vif_addr.addr().get_ipv6(),
 						   vif_addr.subnet_addr().get_ipv6net(),
-						   err);
+						   error_msg);
 		    }
 		    node_vif->add_address(vif_addr);
 		    continue;
