@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.25 2003/08/29 21:37:56 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.26 2003/10/30 04:37:45 atanu Exp $
 #
 
 #
@@ -142,7 +142,7 @@ test1()
     # Reset the peers
     reset
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
@@ -160,7 +160,7 @@ test1()
     uptime;echo "NOTE: Ocassionally we fail to make a connection. See the comment in the reset function"
 
     # Establish the new connection.
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 }
 
@@ -174,7 +174,7 @@ test2()
     reset
     
     # Establish the EBGP peering.
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     # send in the saved file
@@ -187,7 +187,7 @@ test2()
     done
 
     # Bring up peer1 and wait for it to receive all the updates
-    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
     bgp_peer_unchanged peer1
 
     # Bring up another peering to test the dump code.
@@ -204,7 +204,7 @@ test2()
 	    sleep 2
 	done
 
-	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 	coord peer1 assert established
 
 	# Wait for the BGP process to send all the updates to peer1
@@ -218,7 +218,7 @@ test2()
     coord target $HOST $PORT2
     coord initialise attach peer2
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     # Tearing out peer2 will cause all the routes to be withdrawn, wait
@@ -242,14 +242,14 @@ test3()
     reset
     
     # Establish the EBGP peering.
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     # send in the saved file
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
     # Bring up another peering
-    NOBLOCK=true coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    NOBLOCK=true coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
     # Allow some routes to be loaded
     sleep 5
@@ -279,14 +279,14 @@ test4()
     echo "$result"
 
     # Establish the EBGP peering.
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     # send in the saved file
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
     # Bring up a second peering and wait for all the updates to arrive
-    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
     while :
     do
@@ -327,14 +327,14 @@ test5()
     echo "$result"
 
     # Establish the EBGP peering.
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     # send in the saved file
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
     # Bring up a second peering and wait for all the updates to arrive
-    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
     while :
     do
@@ -364,7 +364,7 @@ test5()
     # Establish peer1
     coord target $HOST $PORT1
     coord initialise attach peer1
-    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
     # If peer1 receives any updates this is an error
     a=$(status peer1)
@@ -399,14 +399,14 @@ test6()
     status peer1
 
     # Establish the EBGP peering.
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
 
     # send in the saved file
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE $UPDATE_COUNT
 
     # Bring up a second peering and wait for all the updates to arrive
-    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
     while :
     do
