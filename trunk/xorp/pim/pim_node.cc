@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.23 2003/08/07 00:31:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.24 2003/08/07 01:09:10 pavlin Exp $"
 
 
 //
@@ -1723,3 +1723,170 @@ PimNode::find_processing_pim_mre_sg_rpt(uint16_t vif_index,
     
     return (NULL);
 }
+
+//
+// Statistics-related counters and values
+//
+#define GET_PIMSTAT_PER_NODE(stat_name)				\
+uint32_t							\
+PimNode::##stat_name() const					\
+{								\
+    uint32_t sum = 0;						\
+								\
+    for (uint16_t i = 0; i < maxvifs(); i++) {			\
+	PimVif *pim_vif = vif_find_by_vif_index(i);		\
+	if (pim_vif == NULL)					\
+	    continue;						\
+	sum += pim_vif->##stat_name();				\
+    }								\
+								\
+    return (sum);						\
+}
+
+GET_PIMSTAT_PER_NODE(pimstat_hello_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_hello_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_hello_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_register_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_register_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_register_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_register_stop_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_register_stop_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_register_stop_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_join_prune_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_join_prune_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_join_prune_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_bootstrap_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_bootstrap_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_bootstrap_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_assert_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_assert_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_assert_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_graft_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_graft_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_graft_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_graft_ack_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_graft_ack_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_graft_ack_messages_rx_errors)
+GET_PIMSTAT_PER_NODE(pimstat_candidate_rp_messages_received)
+GET_PIMSTAT_PER_NODE(pimstat_candidate_rp_messages_sent)
+GET_PIMSTAT_PER_NODE(pimstat_candidate_rp_messages_rx_errors)
+//
+GET_PIMSTAT_PER_NODE(pimstat_unknown_type_messages)
+GET_PIMSTAT_PER_NODE(pimstat_unknown_version_messages)
+GET_PIMSTAT_PER_NODE(pimstat_neighbor_unknown_messages)
+GET_PIMSTAT_PER_NODE(pimstat_bad_length_messages)
+GET_PIMSTAT_PER_NODE(pimstat_bad_checksum_messages)
+GET_PIMSTAT_PER_NODE(pimstat_bad_receive_interface_messages)
+GET_PIMSTAT_PER_NODE(pimstat_rx_interface_disabled_messages)
+GET_PIMSTAT_PER_NODE(pimstat_rx_register_not_rp)
+GET_PIMSTAT_PER_NODE(pimstat_rp_filtered_source)
+GET_PIMSTAT_PER_NODE(pimstat_unknown_register_stop)
+GET_PIMSTAT_PER_NODE(pimstat_rx_join_prune_no_state)
+GET_PIMSTAT_PER_NODE(pimstat_rx_graft_graft_ack_no_state)
+GET_PIMSTAT_PER_NODE(pimstat_rx_graft_on_upstream_interface)
+GET_PIMSTAT_PER_NODE(pimstat_rx_candidate_rp_not_bsr)
+GET_PIMSTAT_PER_NODE(pimstat_rx_bsr_when_bsr)
+GET_PIMSTAT_PER_NODE(pimstat_rx_bsr_not_rpf_interface)
+GET_PIMSTAT_PER_NODE(pimstat_rx_unknown_hello_option)
+GET_PIMSTAT_PER_NODE(pimstat_rx_data_no_state)
+GET_PIMSTAT_PER_NODE(pimstat_rx_rp_no_state)
+GET_PIMSTAT_PER_NODE(pimstat_rx_aggregate)
+GET_PIMSTAT_PER_NODE(pimstat_rx_malformed_packet)
+GET_PIMSTAT_PER_NODE(pimstat_no_rp)
+GET_PIMSTAT_PER_NODE(pimstat_no_route_upstream)
+GET_PIMSTAT_PER_NODE(pimstat_rp_mismatch)
+GET_PIMSTAT_PER_NODE(pimstat_rpf_neighbor_unknown)
+//
+GET_PIMSTAT_PER_NODE(pimstat_rx_join_rp)
+GET_PIMSTAT_PER_NODE(pimstat_rx_prune_rp)
+GET_PIMSTAT_PER_NODE(pimstat_rx_join_wc)
+GET_PIMSTAT_PER_NODE(pimstat_rx_prune_wc)
+GET_PIMSTAT_PER_NODE(pimstat_rx_join_sg)
+GET_PIMSTAT_PER_NODE(pimstat_rx_prune_sg)
+GET_PIMSTAT_PER_NODE(pimstat_rx_join_sg_rpt)
+GET_PIMSTAT_PER_NODE(pimstat_rx_prune_sg_rpt)
+
+#undef GET_PIMSTAT_PER_NODE
+
+
+#define GET_PIMSTAT_PER_VIF(stat_name)				\
+int								\
+PimNode::##stat_name##_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const \
+{								\
+    result = 0;							\
+								\
+    PimVif *pim_vif = vif_find_by_name(vif_name);		\
+    if (pim_vif == NULL) {					\
+	error_msg = c_format("Cannot get statistics for vif %s: no such vif", \
+			     vif_name.c_str());			\
+	return (XORP_ERROR);					\
+    }								\
+								\
+    result = pim_vif->##stat_name();				\
+    return (XORP_OK);						\
+}
+
+GET_PIMSTAT_PER_VIF(pimstat_hello_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_hello_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_hello_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_register_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_register_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_register_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_register_stop_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_register_stop_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_register_stop_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_join_prune_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_join_prune_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_join_prune_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_bootstrap_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_bootstrap_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_bootstrap_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_assert_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_assert_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_assert_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_graft_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_graft_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_graft_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_graft_ack_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_graft_ack_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_graft_ack_messages_rx_errors)
+GET_PIMSTAT_PER_VIF(pimstat_candidate_rp_messages_received)
+GET_PIMSTAT_PER_VIF(pimstat_candidate_rp_messages_sent)
+GET_PIMSTAT_PER_VIF(pimstat_candidate_rp_messages_rx_errors)
+//
+GET_PIMSTAT_PER_VIF(pimstat_unknown_type_messages)
+GET_PIMSTAT_PER_VIF(pimstat_unknown_version_messages)
+GET_PIMSTAT_PER_VIF(pimstat_neighbor_unknown_messages)
+GET_PIMSTAT_PER_VIF(pimstat_bad_length_messages)
+GET_PIMSTAT_PER_VIF(pimstat_bad_checksum_messages)
+GET_PIMSTAT_PER_VIF(pimstat_bad_receive_interface_messages)
+GET_PIMSTAT_PER_VIF(pimstat_rx_interface_disabled_messages)
+GET_PIMSTAT_PER_VIF(pimstat_rx_register_not_rp)
+GET_PIMSTAT_PER_VIF(pimstat_rp_filtered_source)
+GET_PIMSTAT_PER_VIF(pimstat_unknown_register_stop)
+GET_PIMSTAT_PER_VIF(pimstat_rx_join_prune_no_state)
+GET_PIMSTAT_PER_VIF(pimstat_rx_graft_graft_ack_no_state)
+GET_PIMSTAT_PER_VIF(pimstat_rx_graft_on_upstream_interface)
+GET_PIMSTAT_PER_VIF(pimstat_rx_candidate_rp_not_bsr)
+GET_PIMSTAT_PER_VIF(pimstat_rx_bsr_when_bsr)
+GET_PIMSTAT_PER_VIF(pimstat_rx_bsr_not_rpf_interface)
+GET_PIMSTAT_PER_VIF(pimstat_rx_unknown_hello_option)
+GET_PIMSTAT_PER_VIF(pimstat_rx_data_no_state)
+GET_PIMSTAT_PER_VIF(pimstat_rx_rp_no_state)
+GET_PIMSTAT_PER_VIF(pimstat_rx_aggregate)
+GET_PIMSTAT_PER_VIF(pimstat_rx_malformed_packet)
+GET_PIMSTAT_PER_VIF(pimstat_no_rp)
+GET_PIMSTAT_PER_VIF(pimstat_no_route_upstream)
+GET_PIMSTAT_PER_VIF(pimstat_rp_mismatch)
+GET_PIMSTAT_PER_VIF(pimstat_rpf_neighbor_unknown)
+//
+GET_PIMSTAT_PER_VIF(pimstat_rx_join_rp)
+GET_PIMSTAT_PER_VIF(pimstat_rx_prune_rp)
+GET_PIMSTAT_PER_VIF(pimstat_rx_join_wc)
+GET_PIMSTAT_PER_VIF(pimstat_rx_prune_wc)
+GET_PIMSTAT_PER_VIF(pimstat_rx_join_sg)
+GET_PIMSTAT_PER_VIF(pimstat_rx_prune_sg)
+GET_PIMSTAT_PER_VIF(pimstat_rx_join_sg_rpt)
+GET_PIMSTAT_PER_VIF(pimstat_rx_prune_sg_rpt)
+
+#undef GET_PIMSTAT_PER_VIF

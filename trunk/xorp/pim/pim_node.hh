@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.24 2003/08/06 18:52:00 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.25 2003/08/07 00:31:58 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -1106,6 +1106,136 @@ public:
     void decr_waiting_for_mfea_startup_events();
     void incr_waiting_for_mld6igmp_startup_events();
     void decr_waiting_for_mld6igmp_startup_events();
+
+    //
+    // Statistics-related counters and values
+    //
+    uint32_t	pimstat_hello_messages_received() const;
+    uint32_t	pimstat_hello_messages_sent() const;
+    uint32_t	pimstat_hello_messages_rx_errors() const;
+    uint32_t	pimstat_register_messages_received() const;
+    uint32_t	pimstat_register_messages_sent() const;
+    uint32_t	pimstat_register_messages_rx_errors() const;
+    uint32_t	pimstat_register_stop_messages_received() const;
+    uint32_t	pimstat_register_stop_messages_sent() const;
+    uint32_t	pimstat_register_stop_messages_rx_errors() const;
+    uint32_t	pimstat_join_prune_messages_received() const;
+    uint32_t	pimstat_join_prune_messages_sent() const;
+    uint32_t	pimstat_join_prune_messages_rx_errors() const;
+    uint32_t	pimstat_bootstrap_messages_received() const;
+    uint32_t	pimstat_bootstrap_messages_sent() const;
+    uint32_t	pimstat_bootstrap_messages_rx_errors() const;
+    uint32_t	pimstat_assert_messages_received() const;
+    uint32_t	pimstat_assert_messages_sent() const;
+    uint32_t	pimstat_assert_messages_rx_errors() const;
+    uint32_t	pimstat_graft_messages_received() const;
+    uint32_t	pimstat_graft_messages_sent() const;
+    uint32_t	pimstat_graft_messages_rx_errors() const;
+    uint32_t	pimstat_graft_ack_messages_received() const;
+    uint32_t	pimstat_graft_ack_messages_sent() const;
+    uint32_t	pimstat_graft_ack_messages_rx_errors() const;
+    uint32_t	pimstat_candidate_rp_messages_received() const;
+    uint32_t	pimstat_candidate_rp_messages_sent() const;
+    uint32_t	pimstat_candidate_rp_messages_rx_errors() const;
+    //
+    uint32_t	pimstat_unknown_type_messages() const;
+    uint32_t	pimstat_unknown_version_messages() const;
+    uint32_t	pimstat_neighbor_unknown_messages() const;
+    uint32_t	pimstat_bad_length_messages() const;
+    uint32_t	pimstat_bad_checksum_messages() const;
+    uint32_t	pimstat_bad_receive_interface_messages() const;
+    uint32_t	pimstat_rx_interface_disabled_messages() const;
+    uint32_t	pimstat_rx_register_not_rp() const;
+    uint32_t	pimstat_rp_filtered_source() const;
+    uint32_t	pimstat_unknown_register_stop() const;
+    uint32_t	pimstat_rx_join_prune_no_state() const;
+    uint32_t	pimstat_rx_graft_graft_ack_no_state() const;
+    uint32_t	pimstat_rx_graft_on_upstream_interface() const;
+    uint32_t	pimstat_rx_candidate_rp_not_bsr() const;
+    uint32_t	pimstat_rx_bsr_when_bsr() const;
+    uint32_t	pimstat_rx_bsr_not_rpf_interface() const;
+    uint32_t	pimstat_rx_unknown_hello_option() const;
+    uint32_t	pimstat_rx_data_no_state() const;
+    uint32_t	pimstat_rx_rp_no_state() const;
+    uint32_t	pimstat_rx_aggregate() const;
+    uint32_t	pimstat_rx_malformed_packet() const;
+    uint32_t	pimstat_no_rp() const;
+    uint32_t	pimstat_no_route_upstream() const;
+    uint32_t	pimstat_rp_mismatch() const;
+    uint32_t	pimstat_rpf_neighbor_unknown() const;
+    //
+    uint32_t	pimstat_rx_join_rp() const;
+    uint32_t	pimstat_rx_prune_rp() const;
+    uint32_t	pimstat_rx_join_wc() const;
+    uint32_t	pimstat_rx_prune_wc() const;
+    uint32_t	pimstat_rx_join_sg() const;
+    uint32_t	pimstat_rx_prune_sg() const;
+    uint32_t	pimstat_rx_join_sg_rpt() const;
+    uint32_t	pimstat_rx_prune_sg_rpt() const;
+    //
+    //
+    int	pimstat_hello_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_hello_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_hello_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_register_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_register_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_register_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_register_stop_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_register_stop_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_register_stop_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_join_prune_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_join_prune_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_join_prune_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_bootstrap_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_bootstrap_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_bootstrap_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_assert_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_assert_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_assert_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_graft_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_graft_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_graft_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_graft_ack_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_graft_ack_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_graft_ack_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_candidate_rp_messages_received_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_candidate_rp_messages_sent_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_candidate_rp_messages_rx_errors_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    //
+    int	pimstat_unknown_type_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_unknown_version_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_neighbor_unknown_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_bad_length_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_bad_checksum_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_bad_receive_interface_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_interface_disabled_messages_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_register_not_rp_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rp_filtered_source_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_unknown_register_stop_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_join_prune_no_state_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_graft_graft_ack_no_state_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_graft_on_upstream_interface_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_candidate_rp_not_bsr_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_bsr_when_bsr_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_bsr_not_rpf_interface_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_unknown_hello_option_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_data_no_state_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_rp_no_state_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_aggregate_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_malformed_packet_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_no_rp_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_no_route_upstream_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rp_mismatch_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rpf_neighbor_unknown_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    //
+    int	pimstat_rx_join_rp_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_prune_rp_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_join_wc_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_prune_wc_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_join_sg_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_prune_sg_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int	pimstat_rx_join_sg_rpt_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
+    int pimstat_rx_prune_sg_rpt_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
     
 private:
     

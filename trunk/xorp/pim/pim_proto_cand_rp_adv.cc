@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.9 2003/05/21 05:32:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.10 2003/06/16 22:48:03 pavlin Exp $"
 
 
 //
@@ -104,10 +104,14 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	// Try to find a non-scoped zone for this prefix
 	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(group_prefix,
 								 false);
-	if (active_bsr_zone == NULL)
-	    return (XORP_ERROR);	// XXX: don't know anything about this zone yet
+	if (active_bsr_zone == NULL) {
+	    // XXX: don't know anything about this zone yet
+	    ++_pimstat_rx_candidate_rp_not_bsr;
+	    return (XORP_ERROR);
+	}
 	if (active_bsr_zone->bsr_zone_state() != BsrZone::STATE_ELECTED_BSR) {
 	    // Silently drop the message
+	    ++_pimstat_rx_candidate_rp_not_bsr;
 	    return (XORP_ERROR);
 	}
 	
@@ -257,6 +261,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_CAND_RP_ADV),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
 
  rcvd_masklen_error:

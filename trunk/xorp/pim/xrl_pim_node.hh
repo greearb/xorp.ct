@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.24 2003/06/01 02:13:45 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.25 2003/07/30 23:43:30 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1511,6 +1511,609 @@ protected:
 	const IPv6&	dest_addr);
 
     XrlCmdError pim_0_1_send_test_cand_rp_adv();
+
+    /**
+     *  Statistics-related counters and values
+     */
+    XrlCmdError pim_0_1_pimstat_hello_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_hello_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_hello_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_stop_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_stop_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_stop_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_join_prune_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_join_prune_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_join_prune_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bootstrap_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bootstrap_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bootstrap_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_assert_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_assert_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_assert_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_ack_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_ack_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_ack_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_candidate_rp_messages_received(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_candidate_rp_messages_sent(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_candidate_rp_messages_rx_errors(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_unknown_type_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_unknown_version_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_neighbor_unknown_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bad_length_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bad_checksum_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bad_receive_interface_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_interface_disabled_messages(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_register_not_rp(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rp_filtered_source(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_unknown_register_stop(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_prune_no_state(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_graft_graft_ack_no_state(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_graft_on_upstream_interface(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_candidate_rp_not_bsr(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_bsr_when_bsr(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_bsr_not_rpf_interface(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_unknown_hello_option(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_data_no_state(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_rp_no_state(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_aggregate(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_malformed_packet(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_no_rp(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_no_route_upstream(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rp_mismatch(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rpf_neighbor_unknown(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_rp(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_rp(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_wc(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_wc(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_sg(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_sg(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_sg_rpt(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_sg_rpt(
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_hello_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_hello_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_hello_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_stop_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_stop_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_register_stop_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_join_prune_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_join_prune_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_join_prune_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bootstrap_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bootstrap_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bootstrap_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_assert_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_assert_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_assert_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_ack_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_ack_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_graft_ack_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_candidate_rp_messages_received_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_candidate_rp_messages_sent_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_candidate_rp_messages_rx_errors_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_unknown_type_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_unknown_version_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_neighbor_unknown_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bad_length_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bad_checksum_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_bad_receive_interface_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_interface_disabled_messages_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_register_not_rp_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rp_filtered_source_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_unknown_register_stop_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_prune_no_state_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_graft_graft_ack_no_state_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_graft_on_upstream_interface_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_candidate_rp_not_bsr_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_bsr_when_bsr_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_bsr_not_rpf_interface_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_unknown_hello_option_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_data_no_state_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_rp_no_state_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_aggregate_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_malformed_packet_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_no_rp_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_no_route_upstream_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rp_mismatch_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rpf_neighbor_unknown_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_rp_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_rp_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_wc_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_wc_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_sg_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_sg_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_join_sg_rpt_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
+
+    XrlCmdError pim_0_1_pimstat_rx_prune_sg_rpt_per_vif(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	value);
 
 private:
     const string& my_xrl_target_name() {

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.10 2003/06/03 18:52:19 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.11 2003/06/26 18:45:27 pavlin Exp $
 #
 
 #
@@ -1410,4 +1410,1628 @@ pim_send_test_cand_rp_adv()
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_cand_rp_adv"
     XRL_ARGS=""
     call_xrl $XRL$XRL_ARGS
+}
+
+#
+# Statistics-related counters and values
+#
+
+pim_pimstat_hello_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pim_pimstat_hello_messages_received"
+	exit 1
+    fi
+    
+    echo "pim_pimstat_hello_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_received"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pim_pimstat_hello_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pim_pimstat_hello_messages_sent"
+	exit 1
+    fi
+    
+    echo "pim_pimstat_hello_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_hello_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_hello_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_hello_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_register_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_register_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_register_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_register_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_register_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_register_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_stop_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_register_stop_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_register_stop_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_stop_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_register_stop_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_register_stop_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_stop_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_register_stop_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_register_stop_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_join_prune_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_join_prune_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_join_prune_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_join_prune_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_join_prune_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_join_prune_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_join_prune_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_join_prune_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_join_prune_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bootstrap_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_bootstrap_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_bootstrap_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bootstrap_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_bootstrap_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_bootstrap_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bootstrap_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_bootstrap_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_bootstrap_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_assert_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_assert_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_assert_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_assert_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_assert_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_assert_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_assert_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_assert_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_assert_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_graft_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_graft_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_graft_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_graft_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_graft_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_graft_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_ack_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_graft_ack_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_graft_ack_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_ack_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_graft_ack_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_graft_ack_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_ack_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_graft_ack_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_graft_ack_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_candidate_rp_messages_received()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_candidate_rp_messages_received"
+	exit 1
+    fi
+    
+    echo "pimstat_candidate_rp_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_candidate_rp_messages_sent()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_candidate_rp_messages_sent"
+	exit 1
+    fi
+    
+    echo "pimstat_candidate_rp_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_candidate_rp_messages_rx_errors()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_candidate_rp_messages_rx_errors"
+	exit 1
+    fi
+    
+    echo "pimstat_candidate_rp_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_unknown_type_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_unknown_type_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_unknown_type_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_unknown_version_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_unknown_version_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_unknown_version_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_neighbor_unknown_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_neighbor_unknown_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_neighbor_unknown_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bad_length_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_bad_length_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_bad_length_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bad_checksum_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_bad_checksum_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_bad_checksum_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bad_receive_interface_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_bad_receive_interface_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_bad_receive_interface_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_interface_disabled_messages()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_interface_disabled_messages"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_interface_disabled_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_register_not_rp()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_register_not_rp"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_register_not_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rp_filtered_source()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rp_filtered_source"
+	exit 1
+    fi
+    
+    echo "pimstat_rp_filtered_source" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_unknown_register_stop()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_unknown_register_stop"
+	exit 1
+    fi
+    
+    echo "pimstat_unknown_register_stop" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_prune_no_state()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_join_prune_no_state"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_join_prune_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_graft_graft_ack_no_state()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_graft_graft_ack_no_state"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_graft_graft_ack_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_graft_on_upstream_interface()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_graft_on_upstream_interface"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_graft_on_upstream_interface" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_candidate_rp_not_bsr()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_candidate_rp_not_bsr"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_candidate_rp_not_bsr" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_bsr_when_bsr()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_bsr_when_bsr"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_bsr_when_bsr" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_bsr_not_rpf_interface()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_bsr_not_rpf_interface"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_bsr_not_rpf_interface" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_unknown_hello_option()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_unknown_hello_option"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_unknown_hello_option" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_data_no_state()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_data_no_state"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_data_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_rp_no_state()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_rp_no_state"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_rp_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_aggregate()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_aggregate"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_aggregate" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_malformed_packet()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_malformed_packet"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_malformed_packet" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_no_rp()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_no_rp"
+	exit 1
+    fi
+    
+    echo "pimstat_no_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_no_route_upstream()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_no_route_upstream"
+	exit 1
+    fi
+    
+    echo "pimstat_no_route_upstream" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rp_mismatch()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rp_mismatch"
+	exit 1
+    fi
+    
+    echo "pimstat_rp_mismatch" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rpf_neighbor_unknown()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rpf_neighbor_unknown"
+	exit 1
+    fi
+    
+    echo "pimstat_rpf_neighbor_unknown" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_rp()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_join_rp"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_join_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_rp()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_prune_rp"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_prune_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_wc()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_join_wc"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_join_wc" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_wc()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_prune_wc"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_prune_wc" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_sg()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_join_sg"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_join_sg" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_sg()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_prune_sg"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_prune_sg" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_sg_rpt()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_join_sg_rpt"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_join_sg_rpt" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_sg_rpt()
+{
+    if [ $# -lt 0 ] ; then
+	echo "Usage: pimstat_rx_prune_sg_rpt"
+	exit 1
+    fi
+    
+    echo "pimstat_rx_prune_sg_rpt" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent"
+    XRL_ARGS=""
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pim_pimstat_hello_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_pimstat_hello_messages_received_per_vif <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_pimstat_hello_messages_received_per_vif" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_received_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pim_pimstat_hello_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_pimstat_hello_messages_sent_per_vif <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_pimstat_hello_messages_sent_per_vif" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_hello_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_hello_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_hello_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_register_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_register_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_register_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_register_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_register_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_register_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_stop_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_register_stop_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_register_stop_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_stop_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_register_stop_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_register_stop_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_register_stop_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_register_stop_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_register_stop_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_join_prune_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_join_prune_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_join_prune_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_join_prune_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_join_prune_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_join_prune_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_join_prune_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_join_prune_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_join_prune_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bootstrap_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_bootstrap_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_bootstrap_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bootstrap_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_bootstrap_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_bootstrap_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bootstrap_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_bootstrap_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_bootstrap_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_assert_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_assert_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_assert_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_assert_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_assert_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_assert_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_assert_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_assert_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_assert_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_graft_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_graft_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_graft_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_graft_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_graft_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_graft_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_ack_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_graft_ack_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_graft_ack_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_ack_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_graft_ack_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_graft_ack_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_graft_ack_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_graft_ack_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_graft_ack_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_candidate_rp_messages_received_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_candidate_rp_messages_received <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_candidate_rp_messages_received" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_candidate_rp_messages_sent_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_candidate_rp_messages_sent <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_candidate_rp_messages_sent" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_candidate_rp_messages_rx_errors_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_candidate_rp_messages_rx_errors <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_candidate_rp_messages_rx_errors" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_unknown_type_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_unknown_type_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_unknown_type_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_unknown_version_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_unknown_version_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_unknown_version_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_neighbor_unknown_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_neighbor_unknown_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_neighbor_unknown_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bad_length_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_bad_length_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_bad_length_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bad_checksum_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_bad_checksum_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_bad_checksum_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_bad_receive_interface_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_bad_receive_interface_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_bad_receive_interface_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_interface_disabled_messages_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_interface_disabled_messages <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_interface_disabled_messages" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_register_not_rp_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_register_not_rp <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_register_not_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rp_filtered_source_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rp_filtered_source <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rp_filtered_source" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_unknown_register_stop_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_unknown_register_stop <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_unknown_register_stop" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_prune_no_state_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_join_prune_no_state <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_join_prune_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_graft_graft_ack_no_state_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_graft_graft_ack_no_state <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_graft_graft_ack_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_graft_on_upstream_interface_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_graft_on_upstream_interface <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_graft_on_upstream_interface" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_candidate_rp_not_bsr_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_candidate_rp_not_bsr <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_candidate_rp_not_bsr" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_bsr_when_bsr_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_bsr_when_bsr <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_bsr_when_bsr" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_bsr_not_rpf_interface_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_bsr_not_rpf_interface <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_bsr_not_rpf_interface" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_unknown_hello_option_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_unknown_hello_option <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_unknown_hello_option" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_data_no_state_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_data_no_state <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_data_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_rp_no_state_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_rp_no_state <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_rp_no_state" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_aggregate_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_aggregate <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_aggregate" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_malformed_packet_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_malformed_packet <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_malformed_packet" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_no_rp_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_no_rp <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_no_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_no_route_upstream_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_no_route_upstream <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_no_route_upstream" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rp_mismatch_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rp_mismatch <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rp_mismatch" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rpf_neighbor_unknown_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rpf_neighbor_unknown <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rpf_neighbor_unknown" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_rp_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_join_rp <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_join_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_rp_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_prune_rp <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_prune_rp" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_wc_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_join_wc <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_join_wc" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_wc_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_prune_wc <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_prune_wc" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_sg_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_join_sg <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_join_sg" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_sg_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_prune_sg <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_prune_sg" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_join_sg_rpt_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_join_sg_rpt <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_join_sg_rpt" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
+}
+
+pimstat_rx_prune_sg_rpt_per_vif()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pimstat_rx_prune_sg_rpt <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pimstat_rx_prune_sg_rpt" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/pimstat_hello_messages_sent_per_vif"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p value:u32 $XRL$XRL_ARGS
 }

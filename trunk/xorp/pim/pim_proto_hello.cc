@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.10 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.11 2003/08/07 01:09:10 pavlin Exp $"
 
 
 //
@@ -182,6 +182,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	default:
 	    // XXX: skip unrecognized options
 	    BUFFER_GET_SKIP(option_length, buffer);
+	    ++_pimstat_rx_unknown_hello_option;
 	    break;
 	}
     }
@@ -286,6 +287,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_HELLO),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
     // UNUSED(dst);

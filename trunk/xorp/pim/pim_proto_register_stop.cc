@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.4 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.5 2003/06/16 22:48:04 pavlin Exp $"
 
 
 //
@@ -120,6 +120,7 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_REGISTER_STOP),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
  rcvd_masklen_error:
@@ -167,6 +168,7 @@ PimVif::pim_register_stop_process(const IPvX& rp_addr,
 	if (pim_mre == NULL) {
 	    // XXX: we don't have this (S,G) state. Ignore
 	    // TODO: print a warning, or do something else?
+	    ++_pimstat_unknown_register_stop;
 	    return (XORP_ERROR);
 	}
 	pim_mre->receive_register_stop();

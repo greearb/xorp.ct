@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.6 2003/05/21 05:32:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.7 2003/06/16 22:48:03 pavlin Exp $"
 
 
 //
@@ -105,7 +105,9 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     if (dst == IPvX::PIM_ROUTERS(family())) {
 	PimNbr *pim_nbr_rpf = pim_node().pim_nbr_rpf_find(bsr_addr);
 	if (pim_nbr_rpf != pim_nbr) {
+	    // RPF failed
 	    ret_value = XORP_ERROR;
+	    ++_pimstat_rx_bsr_not_rpf_interface;
 	    goto ret_label;
 	}
     } else if (pim_node().vif_find_by_addr(dst) != NULL) {
@@ -310,6 +312,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_BOOTSTRAP),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     ret_value = XORP_ERROR;
     goto ret_label;
     

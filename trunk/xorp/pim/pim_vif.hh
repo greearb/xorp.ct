@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.18 2003/07/16 02:12:20 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.19 2003/08/07 01:09:11 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -312,6 +312,72 @@ public:
     
     buffer_t	*buffer_send_prepare();
     buffer_t	*buffer_send_prepare(buffer_t *buffer);
+
+    //
+    // Statistics-related counters and values
+    //
+    uint32_t	pimstat_hello_messages_received() const { return _pimstat_hello_messages_received.get(); }
+    uint32_t	pimstat_hello_messages_sent() const { return _pimstat_hello_messages_sent.get(); }
+    uint32_t	pimstat_hello_messages_rx_errors() const { return _pimstat_hello_messages_rx_errors.get(); }
+    uint32_t	pimstat_register_messages_received() const { return _pimstat_register_messages_received.get(); }
+    uint32_t	pimstat_register_messages_sent() const { return _pimstat_register_messages_sent.get(); }
+    uint32_t	pimstat_register_messages_rx_errors() const { return _pimstat_register_messages_rx_errors.get(); }
+    uint32_t	pimstat_register_stop_messages_received() const { return _pimstat_register_stop_messages_received.get(); }
+    uint32_t	pimstat_register_stop_messages_sent() const { return _pimstat_register_stop_messages_sent.get(); }
+    uint32_t	pimstat_register_stop_messages_rx_errors() const { return _pimstat_register_stop_messages_rx_errors.get(); }
+    uint32_t	pimstat_join_prune_messages_received() const { return _pimstat_join_prune_messages_received.get(); }
+    uint32_t	pimstat_join_prune_messages_sent() const { return _pimstat_join_prune_messages_sent.get(); }
+    uint32_t	pimstat_join_prune_messages_rx_errors() const { return _pimstat_join_prune_messages_rx_errors.get(); }
+    uint32_t	pimstat_bootstrap_messages_received() const { return _pimstat_bootstrap_messages_received.get(); }
+    uint32_t	pimstat_bootstrap_messages_sent() const { return _pimstat_bootstrap_messages_sent.get(); }
+    uint32_t	pimstat_bootstrap_messages_rx_errors() const { return _pimstat_bootstrap_messages_rx_errors.get(); }
+    uint32_t	pimstat_assert_messages_received() const { return _pimstat_assert_messages_received.get(); }
+    uint32_t	pimstat_assert_messages_sent() const { return _pimstat_assert_messages_sent.get(); }
+    uint32_t	pimstat_assert_messages_rx_errors() const { return _pimstat_assert_messages_rx_errors.get(); }
+    uint32_t	pimstat_graft_messages_received() const { return _pimstat_graft_messages_received.get(); }
+    uint32_t	pimstat_graft_messages_sent() const { return _pimstat_graft_messages_sent.get(); }
+    uint32_t	pimstat_graft_messages_rx_errors() const { return _pimstat_graft_messages_rx_errors.get(); }
+    uint32_t	pimstat_graft_ack_messages_received() const { return _pimstat_graft_ack_messages_received.get(); }
+    uint32_t	pimstat_graft_ack_messages_sent() const { return _pimstat_graft_ack_messages_sent.get(); }
+    uint32_t	pimstat_graft_ack_messages_rx_errors() const { return _pimstat_graft_ack_messages_rx_errors.get(); }
+    uint32_t	pimstat_candidate_rp_messages_received() const { return _pimstat_candidate_rp_messages_received.get(); }
+    uint32_t	pimstat_candidate_rp_messages_sent() const { return _pimstat_candidate_rp_messages_sent.get(); }
+    uint32_t	pimstat_candidate_rp_messages_rx_errors() const { return _pimstat_candidate_rp_messages_rx_errors.get(); }
+    //
+    uint32_t	pimstat_unknown_type_messages() const { return _pimstat_unknown_type_messages.get(); }
+    uint32_t	pimstat_unknown_version_messages() const { return _pimstat_unknown_version_messages.get(); }
+    uint32_t	pimstat_neighbor_unknown_messages() const { return _pimstat_neighbor_unknown_messages.get(); }
+    uint32_t	pimstat_bad_length_messages() const { return _pimstat_bad_length_messages.get(); }
+    uint32_t	pimstat_bad_checksum_messages() const { return _pimstat_bad_checksum_messages.get(); }
+    uint32_t	pimstat_bad_receive_interface_messages() const { return _pimstat_bad_receive_interface_messages.get(); }
+    uint32_t	pimstat_rx_interface_disabled_messages() const { return _pimstat_rx_interface_disabled_messages.get(); }
+    uint32_t	pimstat_rx_register_not_rp() const { return _pimstat_rx_register_not_rp.get(); }
+    uint32_t	pimstat_rp_filtered_source() const { return _pimstat_rp_filtered_source.get(); }
+    uint32_t	pimstat_unknown_register_stop() const { return _pimstat_unknown_register_stop.get(); }
+    uint32_t	pimstat_rx_join_prune_no_state() const { return _pimstat_rx_join_prune_no_state.get(); }
+    uint32_t	pimstat_rx_graft_graft_ack_no_state() const { return _pimstat_rx_graft_graft_ack_no_state.get(); }
+    uint32_t	pimstat_rx_graft_on_upstream_interface() const { return _pimstat_rx_graft_on_upstream_interface.get(); }
+    uint32_t	pimstat_rx_candidate_rp_not_bsr() const { return _pimstat_rx_candidate_rp_not_bsr.get(); }
+    uint32_t	pimstat_rx_bsr_when_bsr() const { return _pimstat_rx_bsr_when_bsr.get(); }
+    uint32_t	pimstat_rx_bsr_not_rpf_interface() const { return _pimstat_rx_bsr_not_rpf_interface.get(); }
+    uint32_t	pimstat_rx_unknown_hello_option() const { return _pimstat_rx_unknown_hello_option.get(); }
+    uint32_t	pimstat_rx_data_no_state() const { return _pimstat_rx_data_no_state.get(); }
+    uint32_t	pimstat_rx_rp_no_state() const { return _pimstat_rx_rp_no_state.get(); }
+    uint32_t	pimstat_rx_aggregate() const { return _pimstat_rx_aggregate.get(); }
+    uint32_t	pimstat_rx_malformed_packet() const { return _pimstat_rx_malformed_packet.get(); }
+    uint32_t	pimstat_no_rp() const { return _pimstat_no_rp.get(); }
+    uint32_t	pimstat_no_route_upstream() const { return _pimstat_no_route_upstream.get(); }
+    uint32_t	pimstat_rp_mismatch() const { return _pimstat_rp_mismatch.get(); }
+    uint32_t	pimstat_rpf_neighbor_unknown() const { return _pimstat_rpf_neighbor_unknown.get(); }
+    //
+    uint32_t	pimstat_rx_join_rp() const { return _pimstat_rx_join_rp.get(); }
+    uint32_t	pimstat_rx_prune_rp() const { return _pimstat_rx_prune_rp.get(); }
+    uint32_t	pimstat_rx_join_wc() const { return _pimstat_rx_join_wc.get(); }
+    uint32_t	pimstat_rx_prune_wc() const { return _pimstat_rx_prune_wc.get(); }
+    uint32_t	pimstat_rx_join_sg() const { return _pimstat_rx_join_sg.get(); }
+    uint32_t	pimstat_rx_prune_sg() const { return _pimstat_rx_prune_sg.get(); }
+    uint32_t	pimstat_rx_join_sg_rpt() const { return _pimstat_rx_join_sg_rpt.get(); }
+    uint32_t	pimstat_rx_prune_sg_rpt() const { return _pimstat_rx_prune_sg_rpt.get(); }
     
 private:
     // Private functions
@@ -433,6 +499,72 @@ private:
     
     bool	_should_send_pim_hello;	// True if PIM_HELLO should be sent
 					// before any other control messages
+    
+    //
+    // Statistics-related counters and values
+    //
+    ConfigParam<uint32_t> _pimstat_hello_messages_received;
+    ConfigParam<uint32_t> _pimstat_hello_messages_sent;
+    ConfigParam<uint32_t> _pimstat_hello_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_register_messages_received;
+    ConfigParam<uint32_t> _pimstat_register_messages_sent;
+    ConfigParam<uint32_t> _pimstat_register_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_register_stop_messages_received;
+    ConfigParam<uint32_t> _pimstat_register_stop_messages_sent;
+    ConfigParam<uint32_t> _pimstat_register_stop_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_join_prune_messages_received;
+    ConfigParam<uint32_t> _pimstat_join_prune_messages_sent;
+    ConfigParam<uint32_t> _pimstat_join_prune_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_bootstrap_messages_received;
+    ConfigParam<uint32_t> _pimstat_bootstrap_messages_sent;
+    ConfigParam<uint32_t> _pimstat_bootstrap_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_assert_messages_received;
+    ConfigParam<uint32_t> _pimstat_assert_messages_sent;
+    ConfigParam<uint32_t> _pimstat_assert_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_graft_messages_received;
+    ConfigParam<uint32_t> _pimstat_graft_messages_sent;
+    ConfigParam<uint32_t> _pimstat_graft_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_graft_ack_messages_received;
+    ConfigParam<uint32_t> _pimstat_graft_ack_messages_sent;
+    ConfigParam<uint32_t> _pimstat_graft_ack_messages_rx_errors;
+    ConfigParam<uint32_t> _pimstat_candidate_rp_messages_received;
+    ConfigParam<uint32_t> _pimstat_candidate_rp_messages_sent;
+    ConfigParam<uint32_t> _pimstat_candidate_rp_messages_rx_errors;
+    //
+    ConfigParam<uint32_t> _pimstat_unknown_type_messages;
+    ConfigParam<uint32_t> _pimstat_unknown_version_messages;
+    ConfigParam<uint32_t> _pimstat_neighbor_unknown_messages;
+    ConfigParam<uint32_t> _pimstat_bad_length_messages;
+    ConfigParam<uint32_t> _pimstat_bad_checksum_messages;
+    ConfigParam<uint32_t> _pimstat_bad_receive_interface_messages; // XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_interface_disabled_messages;
+    ConfigParam<uint32_t> _pimstat_rx_register_not_rp;
+    ConfigParam<uint32_t> _pimstat_rp_filtered_source;		// XXX: unused
+    ConfigParam<uint32_t> _pimstat_unknown_register_stop;
+    ConfigParam<uint32_t> _pimstat_rx_join_prune_no_state;	// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_graft_graft_ack_no_state;	// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_graft_on_upstream_interface; // XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_candidate_rp_not_bsr;
+    ConfigParam<uint32_t> _pimstat_rx_bsr_when_bsr;		// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_bsr_not_rpf_interface;
+    ConfigParam<uint32_t> _pimstat_rx_unknown_hello_option;
+    ConfigParam<uint32_t> _pimstat_rx_data_no_state;		// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_rp_no_state;		// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_aggregate;		// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rx_malformed_packet;
+    ConfigParam<uint32_t> _pimstat_no_rp;			// XXX: unused
+    ConfigParam<uint32_t> _pimstat_no_route_upstream;		// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rp_mismatch;			// XXX: unused
+    ConfigParam<uint32_t> _pimstat_rpf_neighbor_unknown;	// XXX: unused
+    //
+    ConfigParam<uint32_t> _pimstat_rx_join_rp;
+    ConfigParam<uint32_t> _pimstat_rx_prune_rp;
+    ConfigParam<uint32_t> _pimstat_rx_join_wc;
+    ConfigParam<uint32_t> _pimstat_rx_prune_wc;
+    ConfigParam<uint32_t> _pimstat_rx_join_sg;
+    ConfigParam<uint32_t> _pimstat_rx_prune_sg;
+    ConfigParam<uint32_t> _pimstat_rx_join_sg_rpt;
+    ConfigParam<uint32_t> _pimstat_rx_prune_sg_rpt;
     
     size_t	_usage_by_pim_mre_task;	// Counter for usage by PimMreTask
     

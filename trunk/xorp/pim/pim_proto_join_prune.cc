@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.4 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.5 2003/06/23 18:56:54 pavlin Exp $"
 
 
 //
@@ -304,6 +304,36 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 				   group_masklen, mrt_entry_type,
 				   action_jp, holdtime, new_group_bool);
 	    new_group_bool = false;
+	    // Keep statistics per entry type
+	    switch (mrt_entry_type) {
+	    case MRT_ENTRY_RP:
+		if (action_jp == ACTION_JOIN)
+		    ++_pimstat_rx_join_rp;
+		else
+		    ++_pimstat_rx_prune_rp;
+		break;
+	    case MRT_ENTRY_WC:
+		if (action_jp == ACTION_JOIN)
+		    ++_pimstat_rx_join_wc;
+		else
+		    ++_pimstat_rx_prune_wc;
+		break;
+	    case MRT_ENTRY_SG:
+		if (action_jp == ACTION_JOIN)
+		    ++_pimstat_rx_join_sg;
+		else
+		    ++_pimstat_rx_prune_sg;
+		break;
+	    case MRT_ENTRY_SG_RPT:
+		if (action_jp == ACTION_JOIN)
+		    ++_pimstat_rx_join_sg_rpt;
+		else
+		    ++_pimstat_rx_prune_sg_rpt;
+		break;
+	    default:
+		XLOG_UNREACHABLE();
+		break;
+	    }
 	}
     }
     
@@ -321,6 +351,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_JOIN_PRUNE),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
  rcvd_masklen_error:

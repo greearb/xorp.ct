@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.20 2003/08/07 01:09:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.21 2003/08/07 02:41:44 pavlin Exp $"
 
 
 //
@@ -86,6 +86,70 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
       _join_prune_holdtime(PIM_JOIN_PRUNE_HOLDTIME_DEFAULT),
       _assert_time(PIM_ASSERT_ASSERT_TIME_DEFAULT),
       _assert_override_interval(PIM_ASSERT_ASSERT_OVERRIDE_INTERVAL_DEFAULT),
+      //
+      _pimstat_hello_messages_received(0),
+      _pimstat_hello_messages_sent(0),
+      _pimstat_hello_messages_rx_errors(0),
+      _pimstat_register_messages_received(0),
+      _pimstat_register_messages_sent(0),
+      _pimstat_register_messages_rx_errors(0),
+      _pimstat_register_stop_messages_received(0),
+      _pimstat_register_stop_messages_sent(0),
+      _pimstat_register_stop_messages_rx_errors(0),
+      _pimstat_join_prune_messages_received(0),
+      _pimstat_join_prune_messages_sent(0),
+      _pimstat_join_prune_messages_rx_errors(0),
+      _pimstat_bootstrap_messages_received(0),
+      _pimstat_bootstrap_messages_sent(0),
+      _pimstat_bootstrap_messages_rx_errors(0),
+      _pimstat_assert_messages_received(0),
+      _pimstat_assert_messages_sent(0),
+      _pimstat_assert_messages_rx_errors(0),
+      _pimstat_graft_messages_received(0),
+      _pimstat_graft_messages_sent(0),
+      _pimstat_graft_messages_rx_errors(0),
+      _pimstat_graft_ack_messages_received(0),
+      _pimstat_graft_ack_messages_sent(0),
+      _pimstat_graft_ack_messages_rx_errors(0),
+      _pimstat_candidate_rp_messages_received(0),
+      _pimstat_candidate_rp_messages_sent(0),
+      _pimstat_candidate_rp_messages_rx_errors(0),
+      //
+      _pimstat_unknown_type_messages(0),
+      _pimstat_unknown_version_messages(0),
+      _pimstat_neighbor_unknown_messages(0),
+      _pimstat_bad_length_messages(0),
+      _pimstat_bad_checksum_messages(0),
+      _pimstat_bad_receive_interface_messages(0),
+      _pimstat_rx_interface_disabled_messages(0),
+      _pimstat_rx_register_not_rp(0),
+      _pimstat_rp_filtered_source(0),
+      _pimstat_unknown_register_stop(0),
+      _pimstat_rx_join_prune_no_state(0),
+      _pimstat_rx_graft_graft_ack_no_state(0),
+      _pimstat_rx_graft_on_upstream_interface(0),
+      _pimstat_rx_candidate_rp_not_bsr(0),
+      _pimstat_rx_bsr_when_bsr(0),
+      _pimstat_rx_bsr_not_rpf_interface(0),
+      _pimstat_rx_unknown_hello_option(0),
+      _pimstat_rx_data_no_state(0),
+      _pimstat_rx_rp_no_state(0),
+      _pimstat_rx_aggregate(0),
+      _pimstat_rx_malformed_packet(0),
+      _pimstat_no_rp(0),
+      _pimstat_no_route_upstream(0),
+      _pimstat_rp_mismatch(0),
+      _pimstat_rpf_neighbor_unknown(0),
+      //
+      _pimstat_rx_join_rp(0),
+      _pimstat_rx_prune_rp(0),
+      _pimstat_rx_join_wc(0),
+      _pimstat_rx_prune_wc(0),
+      _pimstat_rx_join_sg(0),
+      _pimstat_rx_prune_sg(0),
+      _pimstat_rx_join_sg_rpt(0),
+      _pimstat_rx_prune_sg_rpt(0),
+      //
       _usage_by_pim_mre_task(0)
 {
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
@@ -551,6 +615,43 @@ PimVif::pim_send(const IPvX& dst,
 	}
     }
     
+    //
+    // Keep statistics per message type
+    //
+    if (ret_value >= 0) {
+	switch (message_type) {
+	case PIM_HELLO:
+	    ++_pimstat_hello_messages_sent;
+	    break;
+	case PIM_REGISTER:
+	    ++_pimstat_register_messages_sent;
+	    break;
+	case PIM_REGISTER_STOP:
+	    ++_pimstat_register_stop_messages_sent;
+	    break;
+	case PIM_JOIN_PRUNE:
+	    ++_pimstat_join_prune_messages_sent;
+	    break;
+	case PIM_BOOTSTRAP:
+	    ++_pimstat_bootstrap_messages_sent;
+	    break;
+	case PIM_ASSERT:
+	    ++_pimstat_assert_messages_sent;
+	    break;
+	case PIM_GRAFT:
+	    ++_pimstat_graft_messages_sent;
+	    break;
+	case PIM_GRAFT_ACK:
+	    ++_pimstat_graft_ack_messages_sent;
+	    break;
+	case PIM_CAND_RP_ADV:
+	    ++_pimstat_candidate_rp_messages_sent;
+	    break;
+	default:
+	    break;
+	}
+    }
+    
     return (ret_value);
     
  buflen_error:
@@ -562,7 +663,7 @@ PimVif::pim_send(const IPvX& dst,
 	       cstring(dst),
 	       name().c_str());
     return (XORP_ERROR);
-    
+
  rcvlen_error:
     // XXX: this should not happen. The only way to jump here
     // is if we are trying to send a PIM Register message that did not
@@ -597,8 +698,10 @@ PimVif::pim_recv(const IPvX& src,
 {
     int ret_value = XORP_ERROR;
     
-    if (! is_up())
+    if (! is_up()) {
+	++_pimstat_rx_interface_disabled_messages;
 	return (XORP_ERROR);
+    }
     
     ret_value = pim_process(src, dst, ip_ttl, ip_tos, router_alert_bool,
 			    buffer);
@@ -632,6 +735,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     uint8_t pim_vt;
     uint8_t message_type, proto_version;
     PimNbr *pim_nbr;
+    int ret_value = XORP_ERROR;
 
     // Ignore my own PIM messages
     if (pim_node().vif_find_by_addr(src) != NULL)
@@ -646,6 +750,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		     cstring(src), cstring(dst),
 		     name().c_str(),
 		     (uint32_t)BUFFER_DATA_SIZE(buffer));
+	++_pimstat_bad_length_messages;
 	return (XORP_ERROR);
     }
     
@@ -679,6 +784,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 "checksum error",
 			 cstring(src), cstring(dst),
 			 name().c_str());
+	    ++_pimstat_bad_checksum_messages;
 	    return (XORP_ERROR);
 	}
 	break;
@@ -707,6 +813,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		     cstring(src), cstring(dst),
 		     name().c_str(),
 		     proto_version);
+	++_pimstat_unknown_version_messages;
 	return (XORP_ERROR);
     }
     
@@ -735,7 +842,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 cstring(src), cstring(dst),
 			 name().c_str(),
 			 ip_ttl, 1);
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	//
 	// TODO: check for Router Alert option and ignore the message
@@ -763,7 +871,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		     PIMTYPE2ASCII(message_type),
 		     cstring(src), cstring(dst),
 		     name().c_str());
-	return (XORP_ERROR);
+	ret_value = XORP_ERROR;
+	goto ret_label;
     }
     if (src.af() != family()) {
 	// Invalid source address family
@@ -789,7 +898,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 #ifdef HAVE_IPV6
 #if 0
@@ -803,7 +913,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),
 			     name().c_str());
-		return (XORP_ERROR);
+		ret_value = XORP_ERROR;
+		goto ret_label;
 	    }
 	}
 #endif // 0/1
@@ -844,7 +955,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 #ifdef HAVE_IPV6
 	if (is_ipv6()) {
@@ -859,7 +971,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	break;
     case PIM_REGISTER:
@@ -873,7 +986,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	break;
 	
@@ -885,7 +999,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 #ifdef HAVE_IPV6
 	if (dst.is_unicast()) {
@@ -898,7 +1013,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),
 			     name().c_str());
-		return (XORP_ERROR);
+		ret_value = XORP_ERROR;
+		goto ret_label;
 	    }
 	    
 	    if (is_ipv6()) {
@@ -933,7 +1049,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	break;
     case PIM_GRAFT:
@@ -945,7 +1062,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	break;
     default:
@@ -955,7 +1073,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		     cstring(src), cstring(dst),
 		     name().c_str(),
 		     message_type);
-	return (XORP_ERROR);
+	ret_value = XORP_ERROR;
+	goto ret_label;
     }
     
     //
@@ -1002,7 +1121,9 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 			 PIMTYPE2ASCII(message_type),
 			 cstring(src), cstring(dst),
 			 name().c_str());
-	    return (XORP_ERROR);
+	    ++_pimstat_neighbor_unknown_messages;
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	break;
     case PIM_REGISTER:
@@ -1026,37 +1147,111 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     BUFFER_GET_SKIP(sizeof(struct pim), buffer);
     switch (message_type) {
     case PIM_HELLO:
-	pim_hello_recv(pim_nbr, src, dst, buffer, proto_version);
+	ret_value = pim_hello_recv(pim_nbr, src, dst, buffer, proto_version);
 	break;
     case PIM_REGISTER:
-	pim_register_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_register_recv(pim_nbr, src, dst, buffer);
 	break;
     case PIM_REGISTER_STOP:
-	pim_register_stop_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_register_stop_recv(pim_nbr, src, dst, buffer);
 	break;
     case PIM_JOIN_PRUNE:
-	pim_join_prune_recv(pim_nbr, src, dst, buffer, message_type);
+	ret_value = pim_join_prune_recv(pim_nbr, src, dst, buffer,
+					message_type);
 	break;
     case PIM_BOOTSTRAP:
-	pim_bootstrap_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_bootstrap_recv(pim_nbr, src, dst, buffer);
 	break;
     case PIM_ASSERT:
-	pim_assert_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_assert_recv(pim_nbr, src, dst, buffer);
 	break;
     case PIM_GRAFT:
-	pim_graft_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_graft_recv(pim_nbr, src, dst, buffer);
 	break;
     case PIM_GRAFT_ACK:
-	pim_graft_ack_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_graft_ack_recv(pim_nbr, src, dst, buffer);
 	break;
     case PIM_CAND_RP_ADV:
-	pim_cand_rp_adv_recv(pim_nbr, src, dst, buffer);
+	ret_value = pim_cand_rp_adv_recv(pim_nbr, src, dst, buffer);
 	break;
     default:
 	break;
     }
     
-    return (XORP_OK);
+ ret_label:
+    
+    //
+    // Keep statistics per message type
+    //
+    if (ret_value >= 0) {
+	switch (message_type) {
+	case PIM_HELLO:
+	    ++_pimstat_hello_messages_received;
+	    break;
+	case PIM_REGISTER:
+	    ++_pimstat_register_messages_received;
+	    break;
+	case PIM_REGISTER_STOP:
+	    ++_pimstat_register_stop_messages_received;
+	    break;
+	case PIM_JOIN_PRUNE:
+	    ++_pimstat_join_prune_messages_received;
+	    break;
+	case PIM_BOOTSTRAP:
+	    ++_pimstat_bootstrap_messages_received;
+	    break;
+	case PIM_ASSERT:
+	    ++_pimstat_assert_messages_received;
+	    break;
+	case PIM_GRAFT:
+	    ++_pimstat_graft_messages_received;
+	    break;
+	case PIM_GRAFT_ACK:
+	    ++_pimstat_graft_ack_messages_received;
+	    break;
+	case PIM_CAND_RP_ADV:
+	    ++_pimstat_candidate_rp_messages_received;
+	    break;
+	default:
+	    ++_pimstat_unknown_type_messages;
+	    break;
+	}
+    } else {
+	switch (message_type) {
+	case PIM_HELLO:
+	    ++_pimstat_hello_messages_rx_errors;
+	    break;
+	case PIM_REGISTER:
+	    ++_pimstat_register_messages_rx_errors;
+	    break;
+	case PIM_REGISTER_STOP:
+	    ++_pimstat_register_stop_messages_rx_errors;
+	    break;
+	case PIM_JOIN_PRUNE:
+	    ++_pimstat_join_prune_messages_rx_errors;
+	    break;
+	case PIM_BOOTSTRAP:
+	    ++_pimstat_bootstrap_messages_rx_errors;
+	    break;
+	case PIM_ASSERT:
+	    ++_pimstat_assert_messages_rx_errors;
+	    break;
+	case PIM_GRAFT:
+	    ++_pimstat_graft_messages_rx_errors;
+	    break;
+	case PIM_GRAFT_ACK:
+	    ++_pimstat_graft_ack_messages_rx_errors;
+	    break;
+	case PIM_CAND_RP_ADV:
+	    ++_pimstat_candidate_rp_messages_rx_errors;
+	    break;
+	default:
+	    ++_pimstat_unknown_type_messages;
+	    break;
+	}
+    }
+    
+    return (ret_value);
     
  rcvlen_error:    
     XLOG_UNREACHABLE();
@@ -1064,6 +1259,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		 "some fields are too short",
 		 cstring(src), cstring(dst),
 		 name().c_str());
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
  buflen_error:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.6 2003/07/08 01:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.7 2003/07/12 01:14:38 pavlin Exp $"
 
 
 //
@@ -190,6 +190,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	// send RegisterStop(S,G) to outer.src
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
+	++_pimstat_rx_register_not_rp;
 	return (XORP_OK);
     }
     
@@ -207,6 +208,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	// send RegisterStop(S,G) to outer.src
 	//
 	pim_register_stop_send(src, inner_src, inner_dst);
+	++_pimstat_rx_register_not_rp;
 	return (XORP_OK);
     }
     
@@ -411,6 +413,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_REGISTER),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
 }
 

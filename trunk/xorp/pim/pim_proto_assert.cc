@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.14 2003/06/26 22:12:08 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.15 2003/06/27 22:28:20 pavlin Exp $"
 
 
 //
@@ -112,6 +112,7 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_ASSERT),
 		 cstring(src), cstring(dst));
+    ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
  rcvd_masklen_error:
