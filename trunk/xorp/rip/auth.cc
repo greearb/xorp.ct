@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.4 2003/07/21 18:01:11 hodson Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.5 2003/08/01 04:08:11 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -69,6 +69,12 @@ NullAuthHandler::max_routing_entries() const
 
 const char*
 NullAuthHandler::name() const
+{
+    return auth_type_name();
+}
+
+const char*
+NullAuthHandler::auth_type_name()
 {
     return "none";
 }
@@ -150,6 +156,12 @@ PlaintextAuthHandler::max_routing_entries() const
 
 const char*
 PlaintextAuthHandler::name() const
+{
+    return auth_type_name();
+}
+
+const char*
+PlaintextAuthHandler::auth_type_name()
 {
     return "plaintext";
 }
@@ -325,6 +337,12 @@ MD5AuthHandler::max_routing_entries() const
 const char*
 MD5AuthHandler::name() const
 {
+    return auth_type_name();
+}
+
+const char*
+MD5AuthHandler::auth_type_name()
+{
     return "md5";
 }
 
@@ -406,7 +424,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 
     entries = 0;
     n_entries = 0;
-    
+
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES + sizeof(MD5PacketTrailer)) {
 	set_error(c_format("packet too large (%u bytes)",
 			   static_cast<uint32_t>(packet_bytes)));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.2 2003/04/23 17:06:48 hodson Exp $
+// $XORP: xorp/rip/auth.hh,v 1.3 2003/07/17 16:11:03 hodson Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -130,6 +130,8 @@ public:
     uint32_t max_routing_entries() const;
 
     const char* name() const;
+
+    static const char* auth_type_name();
 };
 
 /**
@@ -153,6 +155,8 @@ public:
     uint32_t max_routing_entries() const;
 
     const char* name() const;
+
+    static const char* auth_type_name();
 
     void set_key(const string& plaintext_key);
 
@@ -309,6 +313,8 @@ public:
     uint32_t max_routing_entries() const;
 
     const char* name() const;
+
+    static const char* auth_type_name();
 
     /**
      * Add key to MD5 key chain.  If key already exists, it is updated with
