@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.14 2004/03/24 19:02:14 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.15 2004/06/17 03:58:18 pavlin Exp $
 dnl
 
 dnl
@@ -219,11 +219,11 @@ ${test_have_broken_cxx_netinet6_nd6_h_header_files}
 [
 size_t size = sizeof(struct in6_prflags);
 ],
-  [AC_MSG_RESULT(yes)
-   AC_DEFINE(HAVE_BROKEN_CXX_NETINET6_ND6_H, 1,
+  AC_MSG_RESULT(yes),
+   [AC_MSG_RESULT(no)
+    AC_DEFINE(HAVE_BROKEN_CXX_NETINET6_ND6_H, 1,
 		[Define to 1 if netinet6/nd6.h is not C++ friendly])],
-
-   AC_MSG_RESULT(no))
+)
   AC_LANG_RESTORE
 fi
 
