@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.39 2004/12/02 07:02:38 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.40 2004/12/17 00:19:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -79,8 +79,8 @@ public:
     IfTree& live_config() { return (_live_config); }
     void    set_live_config(const IfTree& it) { _live_config = it; }
 
-    const IfTree& pulled_config() { return (_pulled_config); }
-    const IfTree& pushed_config() { return (_pushed_config); }
+    const IfTree& pulled_config()	{ return (_pulled_config); }
+    IfTree& pushed_config()		{ return (_pushed_config); }
 
     int register_ifc_get_primary(IfConfigGet *ifc_get);
     int register_ifc_set_primary(IfConfigSet *ifc_set);
@@ -284,11 +284,13 @@ public:
      * Push IfTree structure down to platform.  Errors are reported
      * via the constructor supplied ErrorReporter instance.
      *
-     * @param config the configuration to be pushed down.
+     * Note that on return some of the interface tree configuration state
+     * may be modified.
      *
+     * @param config the configuration to be pushed down.
      * @return true on success, otherwise false.
      */
-    bool push_config(const IfTree& config);
+    bool push_config(IfTree& config);
 
     /**
      * Pull up current config from platform.

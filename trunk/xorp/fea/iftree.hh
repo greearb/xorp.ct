@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.25 2004/11/11 23:17:42 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.26 2004/11/12 17:43:40 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -180,6 +180,9 @@ public:
      *   modified. Otherwise, the rules below are applied.
      * - If an item from the local tree is not in the other tree,
      *   it is marked as deleted in the local tree.
+     *   However, if an interface from the local tree is marked as "soft"
+     *   or "discard_emulated", and is not in the other tree, the interface
+     *   is not marked as deleted in the local tree.
      * - If an item from the local tree is in the other tree,
      *   its state is copied from the other tree to the local tree.
      * - If an item from the other tree is not in the local tree, we do NOT
@@ -252,6 +255,13 @@ public:
 	mark(CHANGED);
     }
 
+    inline bool is_discard_emulated() const { return _is_discard_emulated; }
+
+    inline void set_discard_emulated(bool v) {
+	_is_discard_emulated = v;
+	mark(CHANGED);
+    }
+
     /**
      * Get the system-specific interface flags.
      *
@@ -320,6 +330,7 @@ protected:
     uint16_t	 _pif_index;
     bool 	 _enabled;
     bool	 _discard;
+    bool	 _is_discard_emulated;
     uint32_t 	 _mtu;
     Mac 	 _mac;
     uint32_t	 _if_flags;	// The system-specific interface flags

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.23 2004/06/10 22:40:54 hodson Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.24 2004/11/30 11:49:28 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -266,6 +266,9 @@ IfTree::str() const
 //    modified. Otherwise, the rules below are applied.
 //  - If an item from the local tree is not in the other tree,
 //    it is marked as deleted in the local tree.
+//    However, if an interface from the local tree is marked as "soft"
+//    or "discard_emulated", and is not in the other tree, the interface
+//    is not marked as deleted in the local tree.
 //  - If an item from the local tree is in the other tree,
 //    its state is copied from the other tree to the local tree.
 //  - If an item from the other tree is not in the local tree, we do NOT
@@ -283,8 +286,13 @@ IfTree::align_with(const IfTree& o)
 	const string& ifname = ii->second.ifname();
 	IfTree::IfMap::const_iterator oi = o.get_if(ifname);
 	if (oi == o.ifs().end()) {
-	    // Mark local interface for deletion, not present in other
-	    ii->second.mark(DELETED);
+	    //
+	    // Mark local interface for deletion, not present in other,
+	    // unless the local interface is marked as "soft" or
+	    // "discard_emulated".
+	    //
+	    if (! (ii->second.is_soft() || ii->second.is_discard_emulated()))
+		ii->second.mark(DELETED);
 	    continue;
 	} else {
 	    if (! ii->second.is_same_state(oi->second))
@@ -432,7 +440,8 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
-      _enabled(false), _discard(false), _mtu(0), _if_flags(0)
+      _enabled(false), _discard(false), _is_discard_emulated(false),
+      _mtu(0), _if_flags(0)
 {}
 
 bool

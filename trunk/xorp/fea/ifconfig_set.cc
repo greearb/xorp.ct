@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.21 2004/12/08 01:41:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.22 2004/12/15 23:54:33 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -65,9 +65,9 @@ IfConfigSet::register_ifc_secondary()
 }
 
 bool
-IfConfigSet::push_config(const IfTree& it)
+IfConfigSet::push_config(IfTree& it)
 {
-    IfTree::IfMap::const_iterator ii;
+    IfTree::IfMap::iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
 
     // Clear errors associated with error reporter
@@ -98,7 +98,11 @@ IfConfigSet::push_config(const IfTree& it)
     //
     push_iftree_begin();
     for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
-	const IfTreeInterface& i = ii->second;
+	IfTreeInterface& i = ii->second;
+
+	// Set the "discard_emulated" flag if the discard interface is emulated
+	if (i.discard() && is_discard_emulated(i))
+	    i.set_discard_emulated(true);
 
 	// Soft interfaces and their child nodes should never be pushed.
 	if (i.is_soft())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.31 2004/12/17 10:40:19 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.32 2004/12/17 10:46:58 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -58,10 +58,13 @@ public:
     /**
      * Push the network interface configuration into the underlying system.
      *
+     * Note that on return some of the interface tree configuration state
+     * may be modified.
+     *
      * @param config the interface tree configuration to push.
      * @return true on success, otherwise false.
      */
-    virtual bool push_config(const IfTree& config);
+    virtual bool push_config(IfTree& config);
 
     /**
      * Determine if the interface's underlying provider implements discard
@@ -275,10 +278,13 @@ public:
     /**
      * Push the network interface configuration into the underlying system.
      *
+     * Note that on return some of the interface tree configuration state
+     * may be modified.
+     *
      * @param config the interface tree configuration to push.
      * @return true on success, otherwise false.
      */
-    virtual bool push_config(const IfTree& config);
+    virtual bool push_config(IfTree& config);
 
     /**
      * Determine if the interface's underlying provider implements discard

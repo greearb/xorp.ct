@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.41 2004/12/02 07:02:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.42 2004/12/17 00:19:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -612,12 +612,13 @@ IfConfig::set_user_click_config_generator_file(const string& v)
 }
 
 bool
-IfConfig::push_config(const IfTree& config)
+IfConfig::push_config(IfTree& config)
 {
+    bool ret_value = false;
     list<IfConfigSet*>::iterator ifc_set_iter;
 
     if ((_ifc_set_primary == NULL) && _ifc_sets_secondary.empty())
-	return false;
+	goto ret_label;
 
     //
     // XXX: explicitly pull the current config so we can align
@@ -625,24 +626,27 @@ IfConfig::push_config(const IfTree& config)
     //
     pull_config();
 
-    //
-    // Save a copy of the pushed config
-    //
-    _pushed_config = config;
-
     if (_ifc_set_primary != NULL) {
 	if (_ifc_set_primary->push_config(config) != true)
-	    return false;
+	    goto ret_label;
     }
     for (ifc_set_iter = _ifc_sets_secondary.begin();
 	 ifc_set_iter != _ifc_sets_secondary.end();
 	 ++ifc_set_iter) {
 	IfConfigSet* ifc_set = *ifc_set_iter;
 	if (ifc_set->push_config(config) != true)
-	    return false;
+	    goto ret_label;
     }
+    ret_value = true;		// Success
 
-    return true;
+ ret_label:
+    //
+    // Save a copy of the pushed config
+    //
+    if (ret_value == true)
+	_pushed_config = config;
+
+    return ret_value;
 }
 
 const IfTree&
