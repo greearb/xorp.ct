@@ -18,57 +18,8 @@
 #define __OSPF_LSA_HH__
 
 /**
- * Link State Advertisement (LSA)
- *
- * A generic LSA. All actual LSAs should be derived from this LSA.
- */
-#if	0
-class Lsa {
- public:
-    /**
-     * Decode an LSA.
-     */
-    void virtual decode(uint8_t *buf, size_t len) = 0;
-
-    /**
-     * Encode an LSA for transmission.
-     *
-     * @param len length of the encoded packet.
-     * 
-     * @return A pointer that must be delete'd.
-     */
-    virtual uint8_t *encode(size_t &len) = 0;
-
-    /**
-     * Add the LSA type bindings.
-     */
-    void install_type(LsaType type, Lsa *lsa); 
-
- private:
-    AckList _ack_list;		// List of ACKs received for this LSA.
-    XorpTimer _retransmit;	// Retransmit timer.
-
-    XorpTimer _timeout;		// Timeout this LSA.
-};
-
-typedef ref_ptr<Lsa> LsaRef;
-
-class LsaTransmit : class Transmit {
- public:
-    bool valid();
-
-    bool multiple() { return false;}
-
-    Transmit *clone();
-
-    uint8_t *generate(size_t &len);
- private:
-    LsaRef _lsaref;	// LSA.
-}
-#endif
-
-/**
- * LSA Header.
+ * LSA Header. Common header for all LSAs.
+ * Never store or pass a pointer, just deal with it inline.
  */
 class Lsa_header {
  public:
@@ -227,7 +178,84 @@ class Lsa_header {
 };
 
 /**
+ * Link State Advertisement (LSA)
+ *
+ * A generic LSA. All actual LSAs should be derived from this LSA.
+ */
+class Lsa {
+ public:
+    /**
+     * A reference counted pointer to an LSA which will be
+     * automatically deleted.
+     */
+    typedef ref_ptr<Lsa> LsaRef;
+
+    Lsa(OspfTypes::Version version)
+	: _version(version), _header(version)
+    {}
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    virtual LsaRef decode(uint8_t *buf, size_t& len) = 0;
+
+    /**
+     * Encode an LSA for transmission.
+     *
+     * @param len length of the encoded packet.
+     * 
+     * @return A pointer that must be delete'd.
+     */
+//     virtual uint8_t *encode(size_t &len) = 0;
+
+    /**
+     * Add the LSA type bindings.
+     */
+//     void install_type(LsaType type, Lsa *lsa); 
+
+ private:
+    const OspfTypes::Version 	_version;
+
+    Lsa_header _header;	// Common LSA header.
+
+//     AckList _ack_list;		// List of ACKs received for this LSA.
+//     XorpTimer _retransmit;	// Retransmit timer.
+
+//     XorpTimer _timeout;		// Timeout this LSA.
+};
+
+class RouterLsa : public Lsa {
+ public:
+    RouterLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {}
+ private:
+};
+
+#if	0
+class LsaTransmit : class Transmit {
+ public:
+    bool valid();
+
+    bool multiple() { return false;}
+
+    Transmit *clone();
+
+    uint8_t *generate(size_t &len);
+ private:
+    LsaRef _lsaref;	// LSA.
+}
+#endif
+
+
+/**
  * Link State Request as sent in a Link State Request Packet.
+ * Never store or pass a pointer, just deal with it inline.
  */
 class Ls_request {
  public:
