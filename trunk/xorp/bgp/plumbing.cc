@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.14 2003/05/15 16:47:59 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.15 2003/06/17 06:44:16 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -526,7 +526,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
 	rt = rt->parent();
     }
 
-    printf("type = %d\n", prevrt->type());
+    debug_msg("type = %d", prevrt->type());
     FilterTable<A> *filter_out = dynamic_cast<FilterTable<A> *>(prevrt);
     assert(filter_out != NULL);
 
