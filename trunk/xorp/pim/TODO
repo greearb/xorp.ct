@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.7 2003/01/14 20:37:35 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.8 2003/01/17 08:03:19 pavlin Exp $
 #
 
 * IMPL:
@@ -1094,26 +1094,12 @@ for the kernel patches as well.
 
 
 ====================OLD TODO BEGIN================
-* Initialize/setup pim_vif::vif_index() and vif_name();
-
-* Rename PIMjp_source to PIMjp_source_list
-
-* Make the URT a class
-
 * If invalid address in J/P message, ignore the whole message
-
-* Whenever a Mrt state is processed, first make sure the timer values
-  of ctimers are accurate.
 
 * Accept 0.0.0.0 destination address packets (see bottom of page 25
   section 4.4.1 in draft-new-03)
 
-* Take care of PimMre->_mre_prime;
-
 * All masklen to become uint8_t instead of uint32_t or better masklen_t
-
-* If I am not the target router for J/P message, take the appropriate
-  suppression actions.
 
 * All *address to become *addr
 
@@ -1124,23 +1110,11 @@ for the kernel patches as well.
 
 * Take care of the using of LAN Prune Delay stuff in Section 4.6.3 (I-D v.03)
 
-* pim_mrt()->metric_preference() should have the RPT_BIT reset for (S,G)
-
-* Use _members.~list(); or _members.list().clear(); ??
-
-* sources_size() in pim_proto_join_prune.hh: take out of both classes?
-
 * SPEC: Section 4.9: clarify what "data portion" for PIM checksum
   computation means. 
 
-* CONTINUE from pim_assert.c
-
 * When pim_vif_start() is called, send PIM_HELLO to all neighbors,
   and take care of all other details.
-
-* Rename vif.c VIF_OK to VIF_UP (?)
-
-* Use macros IS_IPV4() and IS_IPV6()
 
 * Add pim_api.h
 
@@ -1149,23 +1123,14 @@ for the kernel patches as well.
 
 * A better implementation of the protocol ASCII names.
 
-* Clean-up the MTYPE_* stuff used for X_MALLOC()
-
 * Clean-up the very first line of each file:
 /* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
 
-* Clean-up pim/pim_private.h
-
 * Use "return foo" instead of "return (foo)" ??
-
-* Rename pim_vif->version to pim_vif->pim_version and always
-  use the PIM_VERSION(pim_vif) macro.
 
 * Inside vifs, use only X_PROTO_PIM instead of PIMSM or PIMDM (??)
 
 * pim_vif.c needs fixing (it contains many PIM-DM definitions)
-
-* Do we need jp_header->graft_retransmit_timer ??
 
 * Make sure that PIM_JOIN_PRUNE_HOLDTIME_DEFAULT and
   PIMDM_JOIN_PRUNE_HOLDTIME_DEFAULT (or SM) are OK.
@@ -1173,13 +1138,6 @@ for the kernel patches as well.
 * Rename PIMDM_VIF_DR to PIM_VIF_DR
 PIMDM_VIF_OK to PIM_VIF_OK
 PIMDM_VIF_DISABLED to PIM_VIF_DISABLED
-
-* Fix the following code in pim_mrt.c
-	if (flip_flag) {
-	    TODO, XXX: this doesn't work!!
-	    pim_vif = pim_vifi2pim_vif(i);
-	    PIM_OIF_SETUP(family, pim_vif, pim_mrt);
-	}
 
 ====================OLD TODO END================
 ====================OLD pimdmd IMPL_NOTES BEGIN================
@@ -1227,8 +1185,6 @@ DONE:
 
 * Add to pimdm_nbr a field named 'pimdm_version', i.e. the PIM-DM
   version that should be used toward that neighbor.
-
-* Rename URT to MRIB (Multicast Routing Information Base)
 
 * If the number of J/P sources in a J/P message is very large, use
   IP fragmentation to create a larger message.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.7 2003/01/23 08:34:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.8 2003/01/24 19:50:02 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -76,9 +76,6 @@ PimMre::PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
     for (size_t i = 0; i < MAX_VIFS; i++)
 	_assert_winner_metrics[i] = NULL;
     
-#if 0	// TODO
-    COUNTER_RESET(_ctimers_decr_value);
-#endif
     _flags = 0;
 }
 

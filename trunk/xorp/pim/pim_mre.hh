@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.8 2003/01/23 05:01:27 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.9 2003/01/23 06:54:49 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -740,11 +740,6 @@ public:
     }
     
     // TODO: stuff that needs to be adapted or removed
-#if 0
-    void	ctimers_decr();
-    Timer	_ctimers_decr_timer;	// Timer to decrement all '*_ctimers'
-    counter_t	_ctimers_decr_value;	// Value to decrement from '*_ctimers'
-#endif
     Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
     Timer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
 						// support
