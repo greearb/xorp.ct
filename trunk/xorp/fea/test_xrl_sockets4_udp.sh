@@ -1,32 +1,41 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-finder_host=127.0.0.1
-finder_port=17777
+set -e
 
-#
-# Start finder
-#
-../libxipc/xorp_finder -p ${finder_port} &
-finder_pid=$!
+# srcdir is set by make for check target
 
-#
-# Wait a couple of seconds and check it is still running
-#
-sleep 2
-ps -p ${finder_pid} > /dev/null
-if [ $? -ne 0 ] ; then
-    echo "Finder did not start correctly."
-    exit 1
+# srcdir is set by make for check target
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+. ${srcdir}/../utils/xrl_shell_lib.sh
+
+test_xrl_sockets4_udp() 
+{
+    ./test_xrl_sockets4_udp
+}
+
+TESTS="test_xrl_sockets4_udp"
+
+# Include command line
+. ${srcdir}/../utils/args.sh
+
+if [ $START_PROGRAMS = "yes" ] ; then
+    CXRL="../libxipc/call_xrl -w 10 -r 10"
+    ../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ../libxipc/xorp_finder = $CXRL finder://finder/finder/0.2/get_xrl_targets
+EOF
+    exit $?
 fi
 
-./test_xrl_sockets4_udp -F ${finder_host}:${finder_port}
-exit_code=$?
+for t in ${TESTS} ; do
+    $t
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+        echo
+        echo "$0: Tests Failed"
+        exit ${_ret_value}
+    fi
+done
 
-ps -p ${finder_pid} > /dev/null
-if [ $? -ne 0 ] ; then
-    echo "Finder died unexpectedly."
-    exit 1
-fi
-
-kill -9 ${finder_pid}
-exit ${exit_code}
+echo
+echo "$0: Tests Succeeded"
+exit 0
