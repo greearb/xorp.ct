@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.11 2003/02/11 08:13:18 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.12 2003/02/11 09:42:30 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -3393,14 +3393,11 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG:	// 25
-	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_assert_rpf_interface_sg(vif_index);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC:	// 26
-	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_assert_rpf_interface_wc(vif_index);
-	break;
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG:		// 27
@@ -3431,10 +3428,12 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT:	// 32
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.receive_end_of_message_sg_rpt(vif_index);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_SG_SEE_PRUNE_WC:		// 33
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.sg_see_prune_wc(vif_index, addr_arg);
 	break;
 	
@@ -3483,34 +3482,42 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_RP:		// 45
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_start_vif_rp(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_WC:		// 46
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_start_vif_wc(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_SG:		// 47
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_start_vif_sg(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_SG_RPT:		// 48
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_start_vif_sg_rpt(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_RP:		// 49
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_stop_vif_rp(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_WC:		// 50
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_stop_vif_wc(vif_index);
 	break;
 
     case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_SG:		// 51
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_stop_vif_sg(vif_index);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_SG_RPT:		// 52
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	pim_mre.recompute_stop_vif_sg_rpt(vif_index);
 	break;
 
