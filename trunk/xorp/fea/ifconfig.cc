@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.26 2004/08/12 22:18:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.27 2004/08/17 02:20:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -159,6 +159,12 @@ IfConfig::set_dummy()
     register_ifc_get_primary(&_ifc_get_dummy);
     register_ifc_set_primary(&_ifc_set_dummy);
     register_ifc_observer_primary(&_ifc_observer_dummy);
+
+    //
+    // XXX: if we are dummy FEA, then we always have IPv4 and IPv6
+    //
+    _have_ipv4 = true;
+    _have_ipv6 = true;
 
     _is_dummy = true;
 
