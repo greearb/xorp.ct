@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.10 2003/09/30 03:08:01 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.11 2003/09/30 18:27:07 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -39,8 +39,8 @@ struct RipPacketHeader {
 
     static const uint8_t REQUEST  = 1;
     static const uint8_t RESPONSE = 2;
-    static const uint8_t IPv4_VERSION = 1;
-    static const uint8_t IPv6_VERSION = 2;
+    static const uint8_t IPv4_VERSION = 2;
+    static const uint8_t IPv6_VERSION = 1;
 };
 
 inline void
