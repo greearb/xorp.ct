@@ -213,7 +213,15 @@ install_bin: $(BINDIR) $(PROGRAMS) $(PROGRAMS_R)
 	  chmod ugo+rx $(BINDIR)/$$prog; \
 	done
 
-install: install_lib install_inc install_man install_bin
+#
+# XXX: we don't need to install libtecla, hence we disable the "install:"
+# target
+#.
+really_install: install_lib install_inc install_man install_bin
+install: 
+	@echo "libtecla installation disabled. Use target 'really_install' instead."
+uninstall: 
+	@echo "libtecla un-installation not needed"
 
 # Make any missing installation directories.
 
