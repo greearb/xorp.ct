@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.64 2002/12/09 18:28:44 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,8 +43,7 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
 
 BGPPeer::~BGPPeer()
 {
-    if (_SocketClient)
-	delete _SocketClient;
+    delete _SocketClient;
     delete _peerdata;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.82 2002/12/09 18:28:44 hodson Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -491,8 +491,11 @@ ASPathAttribute::encode() const
 
     uint16_t counter = 0;
 
-    const char * temp_data = _as_path.get_data(); // This must be first since it calculates the length as part of the process.
-    uint16_t length = _as_path.get_byte_size(); // Get the length of the AS bytes, don't include this header length yet.
+    size_t l;
+    // get our copy of the data.
+    const uint8_t * temp_data = _as_path.encode(l);
+    // Get the length of the AS bytes, don't include this header length yet.
+    uint16_t length = l;
     debug_msg("ASPath length is %d\n", length);
     uint8_t *data = new uint8_t[length + 4];
 
@@ -540,21 +543,22 @@ ASPathAttribute::decode()
 
     while (length > 0) {
 	dump_bytes(data, length);
-	// TODO this assumes a 16 bit AS number
-	temp_len = (*(data+1))*2+2;
-	as_len = *(data+1);
+	// XXX this assumes a 16 bit AS number
+	as_len = data[1];	// number 
+	temp_len = as_len*2+2;
 	assert(temp_len <= length);
 
-	debug_msg("temp_len %d, length %d, as_len %d\n", temp_len, length, as_len);
+	debug_msg("temp_len %d, length %d, as_len %d\n",
+		temp_len, length, as_len);
 	int t = static_cast<ASPathSegType>(*data);
 	switch (t) {
 	case AS_SET:
 	    debug_msg("Decoding AS Set\n");
-	    _as_path.add_segment(AsSet(data, as_len));
+	    _as_path.add_segment(AsSegment(data));
 	    break;
 	case AS_SEQUENCE:
 	    debug_msg("Decoding AS Sequence\n");
-	    _as_path.add_segment(AsSequence(data, as_len));
+	    _as_path.add_segment(AsSegment(data));
 	    break;
 	default:
 	    debug_msg("Wrong sequence type %d\n", t);

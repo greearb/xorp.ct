@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.7 2002/12/09 18:28:46 hodson Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -32,31 +32,47 @@ typedef enum ribout_queue_op {
 template<class A>
 class RouteQueueEntry {
 public:
-    RouteQueueEntry(const SubnetRoute<A>* route,
-		    RouteQueueOp operation);
-    RouteQueueEntry(RouteQueueOp operation,
-		    const PeerHandler *origin_peer); //for push only
-    ~RouteQueueEntry();
-    const SubnetRoute<A> *route() const {return _route;}
-    const IPNet<A>& net() const {return _route->net();}
+    /**
+     * XXX should change arguments to use &rt ?
+     */
+    RouteQueueEntry(const SubnetRoute<A>* rt, RouteQueueOp op) {
+	_op = op;
+	_route = new SubnetRoute<A>(*rt);
+	_origin_peer = 0;
+    }
+
+    //for push only
+    RouteQueueEntry(RouteQueueOp op, const PeerHandler *origin_peer) {
+	assert(op == RTQUEUE_OP_PUSH);
+	_op = op;
+	_route = 0;
+	_origin_peer = origin_peer; // 0 is valid.
+    }
+
+    ~RouteQueueEntry()				{ delete _route;	}
+
+    const SubnetRoute<A> *route() const		{ return _route;	}
+    const IPNet<A>& net() const			{ return _route->net();	}
     const PathAttributeList<A> *attributes() const {
 	return _route->attributes();
     }
-    RouteQueueOp op() const {return _op;}
+    RouteQueueOp op() const			{ return _op;		}
 
-    void set_origin_peer(const PeerHandler *peer) {_origin_peer = peer;}
-    const PeerHandler *origin_peer() const {return _origin_peer;}
-    void set_genid(uint32_t genid) {_genid = genid;}
-    uint32_t genid() const {return _genid;}
+    void set_origin_peer(const PeerHandler *peer) {_origin_peer = peer;	}
+    const PeerHandler *origin_peer() const	{ return _origin_peer;	}
+    void set_genid(uint32_t genid)		{ _genid = genid; 	}
+    uint32_t genid() const			{ return _genid;	}
 
     string str() const;
 private:
     RouteQueueOp _op;
 
-    //if _op is delete, we need to clone the route, and we can not
-    //safely refer to any of the fields of _route because the original
-    //route may have been deleted by the time to access the queue
-    //entry. if _op is add, we can just copy the original pointer.
+    /**
+     * If _op is delete, we need to clone the route, and we cannot safely
+     * refer to any of the fields of _route because the original route may
+     * have been deleted by the time to access the queue entry.
+     * If _op is add, we can just copy the original pointer.
+     */
     const SubnetRoute<A> *_route;
     const PeerHandler *_origin_peer;
     uint32_t _genid;

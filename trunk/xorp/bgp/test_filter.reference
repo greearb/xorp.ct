@@ -5,7 +5,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -14,7 +14,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -31,14 +31,14 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 
 
 [separator]-------------------------------------
@@ -49,7 +49,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -60,7 +60,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -74,7 +74,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -88,7 +88,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -100,7 +100,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
 [separator]-------------------------------------
@@ -121,7 +121,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -132,7 +132,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.18 2002/12/09 18:28:41 hodson Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_TRIE_HH__
 #define __BGP_TRIE_HH__
@@ -90,7 +90,6 @@ public:
     typedef RouteTrie::iterator iterator;
 
     BgpTrie()	{}
-    // XXX do we need a destructor to avoid leaks ?
 
     iterator insert(const IPNet& net, const SubnetRoute<A>& route);
 

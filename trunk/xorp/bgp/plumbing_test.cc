@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.41 2002/12/09 18:28:46 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "fcntl.h"
 
@@ -76,7 +76,8 @@ PlumbingTest::test1()
     IPv4 nhaddr("20.20.20.1");
     NextHopAttribute<IPv4> nexthop(nhaddr);
     AsPath as_path;
-    AsSequence as_seq;
+    AsSegment as_seq;
+    as_seq.set_type(AS_SEQUENCE);
     as_seq.add_as((uint16_t)666);
     as_path.add_segment(as_seq);
     ASPathAttribute aspathatt(as_path);
@@ -271,7 +272,8 @@ PlumbingTest::test2()
     IPv4 nhaddr("20.20.20.1");
     NextHopAttribute<IPv4> nexthop(nhaddr);
     AsPath as_path;
-    AsSequence as_seq;
+    AsSegment as_seq;
+    as_seq.set_type(AS_SEQUENCE);
     as_seq.add_as((uint16_t)666);
     as_path.add_segment(as_seq);
     ASPathAttribute aspathatt(as_path);

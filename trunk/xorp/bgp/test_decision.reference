@@ -7,7 +7,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -19,7 +19,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -36,7 +36,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -49,7 +49,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -58,7 +58,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -71,7 +71,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -87,7 +87,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -98,7 +98,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -108,7 +108,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -122,7 +122,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -139,7 +139,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -150,7 +150,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -160,7 +160,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -174,7 +174,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -191,7 +191,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -204,7 +204,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -213,7 +213,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -226,7 +226,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -241,7 +241,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -254,7 +254,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -263,7 +263,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -276,7 +276,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -291,7 +291,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -302,7 +302,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -312,7 +312,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -326,7 +326,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -342,7 +342,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -353,7 +353,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -363,7 +363,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -377,7 +377,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -393,7 +393,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -406,7 +406,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -415,7 +415,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -428,7 +428,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -444,7 +444,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -458,7 +458,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -468,7 +468,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=200
 Local Preference Attribute - 100
 
@@ -482,7 +482,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=200
 Local Preference Attribute - 100
 
@@ -499,7 +499,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=200
 Local Preference Attribute - 100
 
@@ -511,7 +511,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=200
 Local Preference Attribute - 100
 
@@ -522,7 +522,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -537,7 +537,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -554,7 +554,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -566,7 +566,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -577,7 +577,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -591,7 +591,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -607,7 +607,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -620,7 +620,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -629,7 +629,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -643,7 +643,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -660,7 +660,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -672,7 +672,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Multiple Exit Descriminator Attribute: MED=100
 Local Preference Attribute - 100
 
@@ -683,7 +683,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Multiple Exit Descriminator Attribute: MED=200
 Local Preference Attribute - 100
 
@@ -698,7 +698,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Multiple Exit Descriminator Attribute: MED=200
 Local Preference Attribute - 100
 
@@ -716,7 +716,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -731,7 +731,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -740,7 +740,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - EGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -756,7 +756,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - EGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -765,7 +765,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - INCOMPLETE
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -778,7 +778,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - INCOMPLETE
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -796,7 +796,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - INCOMPLETE
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -808,7 +808,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - INCOMPLETE
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -818,7 +818,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - EGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -833,7 +833,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - EGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -843,7 +843,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -854,7 +854,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -863,7 +863,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - EGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -876,7 +876,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - EGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -892,7 +892,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -905,7 +905,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -914,7 +914,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -927,7 +927,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -943,7 +943,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -954,7 +954,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -964,7 +964,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -978,7 +978,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -995,7 +995,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1009,7 +1009,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1030,7 +1030,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -1044,7 +1044,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -1074,7 +1074,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -1085,7 +1085,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -1094,7 +1094,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1106,7 +1106,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1125,7 +1125,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -1137,7 +1137,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -1154,7 +1154,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -1165,7 +1165,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
@@ -1195,7 +1195,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1208,7 +1208,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1218,7 +1218,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1229,7 +1229,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1238,7 +1238,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1251,7 +1251,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1268,7 +1268,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1279,7 +1279,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1289,7 +1289,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1300,7 +1300,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1310,7 +1310,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1321,7 +1321,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1330,7 +1330,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1343,7 +1343,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1360,7 +1360,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1378,7 +1378,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1395,7 +1395,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1406,7 +1406,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1416,7 +1416,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1427,7 +1427,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1436,7 +1436,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1447,7 +1447,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1456,7 +1456,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1469,7 +1469,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1486,7 +1486,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1497,7 +1497,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1507,7 +1507,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1518,7 +1518,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1527,7 +1527,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1538,7 +1538,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1547,7 +1547,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1560,7 +1560,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1577,7 +1577,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1588,7 +1588,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1598,7 +1598,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1609,7 +1609,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1618,7 +1618,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1631,7 +1631,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1650,7 +1650,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1661,7 +1661,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1671,7 +1671,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1686,7 +1686,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1705,7 +1705,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1718,7 +1718,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1727,7 +1727,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1739,7 +1739,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1748,7 +1748,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1761,7 +1761,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1781,7 +1781,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1796,7 +1796,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.2
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1816,7 +1816,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1826,7 +1826,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1835,7 +1835,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1847,7 +1847,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1856,7 +1856,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1869,7 +1869,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1886,7 +1886,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1897,7 +1897,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1907,7 +1907,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1919,7 +1919,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1940,7 +1940,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1951,7 +1951,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -1961,7 +1961,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1972,7 +1972,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -1982,7 +1982,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -1993,7 +1993,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 300
 
 
@@ -2002,7 +2002,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -2014,7 +2014,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 200
 
 
@@ -2023,7 +2023,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -2036,7 +2036,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -2053,7 +2053,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -2065,7 +2065,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -2075,7 +2075,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -2089,7 +2089,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -2108,7 +2108,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -2122,7 +2122,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.3
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
@@ -2131,7 +2131,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
@@ -2144,7 +2144,7 @@ SubnetRoute:
   Net: 1.0.1.0/24
   PAList: Next Hop Attribute 2.0.0.1
 Origin Path Attribute - IGP
-AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 

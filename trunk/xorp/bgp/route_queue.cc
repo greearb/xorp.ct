@@ -12,37 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_queue.cc,v 1.5 2002/12/09 18:28:46 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_queue.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "route_queue.hh"
 #include "peer_handler.hh"
-
-template<class A>
-RouteQueueEntry<A>::
-RouteQueueEntry<A>(const SubnetRoute<A>* queued_route, 
-		    RouteQueueOp operation) 
-{
-    _op = operation;
-    _route = new SubnetRoute<A>(*queued_route);
-    _origin_peer = NULL;
-}
-
-template<class A>
-RouteQueueEntry<A>::
-RouteQueueEntry<A>(RouteQueueOp operation, const PeerHandler *origin_peer) 
-{
-    assert(operation == RTQUEUE_OP_PUSH);
-    _op = operation;
-    _route = NULL;
-    //note: it is valid for origin_peer to be NULL.
-    _origin_peer = origin_peer;
-}
-
-template<class A>
-RouteQueueEntry<A>::~RouteQueueEntry<A>() {
-    if (_route != NULL)
-	delete _route;
-}
 
 template<class A>
 string

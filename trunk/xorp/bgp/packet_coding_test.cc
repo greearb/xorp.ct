@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.26 2002/12/09 18:28:43 hodson Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -240,17 +240,17 @@ int test_announce_packet(bool verbose) {
     for (i=0;i<=9;i++) {
 	as[i] = new AsNum((uint16_t)i);
     }
-    AsSequence seq1;
+    AsSegment seq1 = AsSegment(AS_SEQUENCE);
     seq1.add_as(*(as[1]));
     seq1.add_as(*(as[2]));
     seq1.add_as(*(as[3]));
 
-    AsSequence seq2;
+    AsSegment seq2 = AsSegment(AS_SEQUENCE);
     seq2.add_as(*(as[7]));
     seq2.add_as(*(as[8]));
     seq2.add_as(*(as[9]));
 
-    AsSet set1;
+    AsSegment set1 = AsSegment(AS_SET);
     set1.add_as(*(as[4]));
     set1.add_as(*(as[5]));
     set1.add_as(*(as[6]));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.59 2002/12/09 18:28:44 hodson Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -238,7 +238,8 @@ UpdatePacket* BGPTestPacket::create_update()
 	net[2] = new IPv4Net(*ip[2],32);
 	BGPWithdrawnRoute wdr(*net[2]);
 	
-	AsSequence as_seq;
+	AsSegment as_seq;
+	as_seq.set_type(AS_SEQUENCE);
 	debug_msg("sequence length : %d\n",as_seq.get_as_size());
         as_seq.add_as((uint16_t)12);
 	debug_msg("sequence length : %d\n",as_seq.get_as_size());

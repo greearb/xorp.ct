@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.37 2002/12/09 18:28:45 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -22,7 +22,7 @@
 
 BGPPeerData::BGPPeerData()
     // XXX assigning a default value here is bad
-    : _as_num((uint16_t)0)
+    : _as_num(AsNum::invalid_As)
 {
     _unsupported_parameters = false;
     //    add_sent_parameter( new BGPMultiProtocolCapability( AFI_IPV4 , SAFI_NLRI_UNICAST ) );
@@ -30,9 +30,8 @@ BGPPeerData::BGPPeerData()
 
 BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 			 const IPv4& next_hop, const uint16_t holdtime)
-    : _iptuple(iptuple)
+    : _iptuple(iptuple), _as_num(as)
 {
-    set_as_num(as);
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
 

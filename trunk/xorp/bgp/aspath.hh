@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.34 2002/12/09 18:28:40 hodson Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -27,102 +27,230 @@
 #include "libxorp/asnum.hh"
 #include "libxorp/exceptions.hh"
 
-//AS Path Values
+/**
+ * This file contains the classes to manipulate AS segments/lists/paths
+ *
+ * An AS_PATH is made of a list of segments, AS_SET or AS_SEQUENCE.
+ * Logically, you can think an AS_SEQUENCE as a list of AsNum,
+ * and an AS_SET as an unordered set of AsNum; the path would then be
+ * made of alternate AS_SET and AS_SEQUECEs. However, the max number
+ * of elements in an AS_SEQUENCE is 255, so you might need to split a
+ * sequence into multiple ones.
+ *
+ * In terms of internal representation, it might be more efficient
+ * useful to store segments as either an AS_SET, or a sequence of size 1,
+ * and then do the necessary grouping on output.
+ *
+ * The current implementation allows both forms.
+ *
+ * Note that the external representation (provided by encode()) returns
+ * a malloc'ed chunk of memory which must be freed by the caller.
+ */
+
+// AS Path Values
 enum ASPathSegType {
+    AS_NONE = 0,	// not initialized
     AS_SET = 1,
     AS_SEQUENCE = 2
 };
 
+/**
+ * Parent class for AsPath elements, which can be either AsSet or AsSequence.
+ */
 class AsSegment {
 public:
-    AsSegment();
-    AsSegment(const AsSegment& asseg);
-    virtual ~AsSegment();
-    const char * get_data() const;
-    void set_size(size_t s);
-    virtual size_t get_as_path_length() const = 0;
-    size_t get_as_size() const { return _num_as_entries; }
-    size_t get_as_byte_size() const { return _num_bytes_in_aspath; }
-    void add_as(const AsNum& n);
-    void prepend_as(const AsNum& n);
-    bool contains(const AsNum& as_num) const;
+    /**
+     * Constructor of an empty AsSegment
+     */
+    AsSegment(ASPathSegType t = AS_NONE) : _type(t), _entries(0) {}
+
+    /**
+     * constructor from external representation will just decode
+     * the chunk of data received, and convert to internal representation.
+     * In fact, the external representation is quite simple and effective.
+     *
+     * _type is d[0], l is d[1], entries follow.
+     */
+    AsSegment(const uint8_t* d)				{ decode(d); }
+
+    /**
+     * Copy constructor
+     */
+    AsSegment(const AsSegment& a) :
+	    _type(a._type), _entries(a._entries), _aslist(a._aslist)	{}
+
+    /**
+     * The destructor has nothing to do, the underlying container will
+     * take care of the thing.
+     */
+    ~AsSegment()					{}
+
+    /**
+     * reset whatever is currently contained in the object.
+     */
+    void clear()					{
+	_type = AS_NONE;
+	_aslist.clear();
+	_entries = 0;
+    }
+
+    size_t get_as_path_length() const			{
+	if (_type == AS_SET)
+	    return 1;
+	else if (_type == AS_SEQUENCE)
+	    return _entries;
+	else
+	    return 0; // XXX should not be called!
+    }
+
+    size_t get_as_size() const				{ return _entries; }
+
+    /**
+     * Add AsNum at the end of the segment (order is irrelevant
+     * for AS_SET but important for AS_SEQUENCE)
+     * This is used when initializing from a string.
+     */
+    void add_as(const AsNum& n)				{
+	debug_msg("Number of As entries %d\n", _entries);
+	_aslist.push_back(n);
+	_entries++;
+    }
+
+    /**
+     * Add AsNum at the beginning of the segment (order is irrelevant
+     * for AS_SET but important for AS_SEQUENCE).
+     * This is used e.g. when a node is adding its AsNum to the sequence.
+     */
+    void prepend_as(const AsNum& n)			{
+	debug_msg("Number of As entries %d\n", _entries);
+	_aslist.push_front(n);
+	_entries++;
+    }
+
+    /**
+     * Check if a given AsNum is contained in the segment.
+     */
+    bool contains(const AsNum& as_num) const		{
+	list <AsNum>::const_iterator iter;
+
+	for (iter = _aslist.begin(); iter != _aslist.end(); ++iter)
+	    if (*iter == as_num)
+		return true;
+	return false;
+    }
+
     const AsNum& first_asnum() const;
-    virtual void decode() = 0;
-    virtual void encode() const = 0;
-    void encode(ASPathSegType type) const;
-    virtual ASPathSegType type() const = 0;
-    virtual string str() const = 0;
+
+    /**
+     * Convert the external representation into the internal one.
+     * _type is d[0], _entries is d[1], entries follow.
+     */
+    void decode(const uint8_t *d);
+
+    /**
+     * Convert from internal to external representation. It is
+     * responsibility of the caller to free the returned block.
+     * @return pointer to the newly allocated block of data of size len.
+     */
+    const uint8_t *_encode(size_t &len) const;
+
+    /**
+     * @return string representation of the segment
+     */
+    string str() const;
+
+    /**
+     * compares internal representations for equality.
+     */
     bool operator==(const AsSegment& him) const;
+
+    /**
+     * Compares internal representations for <.
+     */
     bool operator<(const AsSegment& him) const;
-protected:
-    size_t _num_as_entries; // number of as numbers in the as path
-    mutable size_t _num_bytes_in_aspath; // number of bytes in the as path
-    mutable const uint8_t* _data;
-    list <AsNum> _aslist;
+
+    ASPathSegType type() const			{ return _type; }
+    void set_type(ASPathSegType t)		{ _type = t; }
+
 private:
+    ASPathSegType	_type;
+    size_t		_entries;	// # of AS numbers in the as path
+    list <AsNum>	_aslist;
 };
 
-class AsSet : public AsSegment {
-public:
-    AsSet();
-    AsSet(const uint8_t* d, size_t l);
-    AsSet(const AsSet& asset);
-    ~AsSet();
-    void decode();
-    void encode() const;
-    ASPathSegType type() const { return AS_SET; }
-    // Note: the contribution of an AS Set to AS Path Length is 1,
-    // irrespective of the number of entries in the AS Set
-    size_t get_as_path_length() const { return 1; }
-    string str() const;
-protected:
-private:
-};
-
-class AsSequence : public AsSegment {
-public:
-    AsSequence();
-    AsSequence(const uint8_t* d, size_t l);
-    AsSequence(const AsSequence& asseq);
-    ~AsSequence();
-    void decode();
-    void encode() const;
-    ASPathSegType type() const { return AS_SEQUENCE; }
-    size_t get_as_path_length() const { return _num_as_entries; }
-    string str() const;
-protected:
-private:
-};
-
+/**
+ * An AsPath is a list of AsSegments, each of which can be an AS_SET
+ * or an AS_SEQUENCE.
+ */
 class AsPath {
 public:
-    AsPath();
-    AsPath(const char *as_path) throw(InvalidString);
-    AsPath(const AsPath &as_path);
-    ~AsPath();
-    void add_segment(const AsSegment& s);
-    size_t get_path_length() const { return _as_path_length; }
-    bool contains(const AsNum& as_num) const;
-    const AsNum& first_asnum() const;
-    string str() const;
-    const AsSegment* get_segment(size_t n) const;
-    size_t get_num_segments() const { return _num_segments; }
-    void encode() const;
-    const char* get_data() const;
-    uint16_t get_byte_size() const { return _byte_length; }
-    void add_AS_in_sequence(const AsNum &asn);
-    bool operator==(const AsPath& him) const;
-    bool operator<(const AsPath& him) const;
-protected:
-private:
-    void increase_as_path_length(size_t n);
-    void decrease_as_path_length(size_t n);
+    AsPath() : _num_segments(0), _path_len(0)		{}
 
-    list <AsSegment*> _segments;
-    size_t _num_segments;
-    size_t _as_path_length;
-    mutable const uint8_t* _data;
-    mutable uint16_t _byte_length;
+    /**
+     * Initialize from a string in the format
+     *		1,2,(3,4,5),6,7,8,(9,10,11),12,13
+     */
+    AsPath(const char *as_path) throw(InvalidString);
+
+    /**
+     * Copy constructor
+     */
+    AsPath(const AsPath &a) : _segments(a._segments), 
+	_num_segments(a._num_segments), _path_len(a._path_len) {}
+
+    ~AsPath()						{}
+
+    void add_segment(const AsSegment& s);
+
+    size_t get_path_length() const			{ return _path_len; }
+
+    bool contains(const AsNum& as_num) const		{
+	list <AsSegment>::const_iterator i = _segments.begin();
+	for (; i != _segments.end(); ++i)
+	    if ((*i).contains(as_num))
+		return true;
+	return false;
+    }
+
+
+    const AsNum& first_asnum() const			{
+	assert(!_segments.empty());
+	return _segments.front().first_asnum();
+    }
+
+    string str() const;
+
+    const AsSegment& get_segment(size_t n) const	{
+	if (n < _num_segments) {
+	    list <AsSegment>::const_iterator iter = _segments.begin();
+	    for (u_int i = 0; i<n; i++)
+		++iter;
+	    return (*iter);
+        }
+	assert("Segment doesn't exist.\n"); // XXX eh ?
+	xorp_throw(InvalidString, "get_segment invalid n\n");
+    }
+
+    size_t get_num_segments() const		{ return _num_segments; }
+
+    /**
+     * From the internal representation, produce the external one.
+     */
+    const uint8_t *encode(size_t &len) const;
+
+    void add_AS_in_sequence(const AsNum &asn);
+
+    bool operator==(const AsPath& him) const;
+
+    bool operator<(const AsPath& him) const;
+
+private:
+    /**
+     * internal representation
+     */
+    list <AsSegment>	_segments;
+    size_t		_num_segments;
+    size_t		_path_len;
 };
 
 #endif // __BGP_ASPATH_HH__
