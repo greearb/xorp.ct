@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.23 2004/04/10 07:50:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.24 2004/04/29 23:32:19 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -58,7 +58,7 @@ XrlMfeaNode::~XrlMfeaNode()
 bool
 XrlMfeaNode::startup()
 {
-    if (MfeaNode::start() < 0)
+    if (start_mfea() < 0)
 	return false;
 
     return true;
@@ -67,7 +67,7 @@ XrlMfeaNode::startup()
 bool
 XrlMfeaNode::shutdown()
 {
-    if (MfeaNode::stop() < 0)
+    if (stop_mfea() < 0)
 	return false;
 
     return true;
@@ -128,6 +128,9 @@ XrlMfeaNode::start_mfea()
 {
     if (MfeaNode::start() < 0)
 	return (XORP_ERROR);
+
+    if (_xrl_mfea_vif_manager.start() != XORP_OK)
+	return (XORP_ERROR);
     
     return (XORP_OK);
 }
@@ -135,10 +138,15 @@ XrlMfeaNode::start_mfea()
 int
 XrlMfeaNode::stop_mfea()
 {
+    int ret_code = XORP_OK;
+
+    if (_xrl_mfea_vif_manager.stop() != XORP_OK)
+	ret_code = XORP_ERROR;
+
     if (MfeaNode::stop() < 0)
 	return (XORP_ERROR);
     
-    return (XORP_OK);
+    return (ret_code);
 }
 
 //
@@ -983,22 +991,10 @@ XrlMfeaNode::common_0_1_get_status(
 XrlCmdError
 XrlMfeaNode::common_0_1_shutdown()
 {
-    bool is_error = false;
-    string error_msg;
-
-    if (_xrl_mfea_vif_manager.stop() != XORP_OK) {
-	error_msg = c_format("Failed to stop XRL MFEA Vif Manager");
-	is_error = true;
-    }
-    
     if (stop_mfea() != XORP_OK) {
-	if (! is_error)
-	    error_msg = c_format("Failed to stop MFEA");
-	is_error = true;
-    }
-    
-    if (is_error)
+	string error_msg = c_format("Failed to stop MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -2467,33 +2463,16 @@ XrlMfeaNode::mfea_0_1_start_mfea()
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (_xrl_mfea_vif_manager.start() != XORP_OK) {
-	string error_msg = c_format("Failed to start XRL MFEA Vif Manager");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlMfeaNode::mfea_0_1_stop_mfea()
 {
-    bool is_error = false;
-    string error_msg;
-    
-    if (_xrl_mfea_vif_manager.stop() != XORP_OK) {
-	error_msg = c_format("Failed to stop XRL MFEA Vif Manager");
-	is_error = true;
-    }
-    
     if (stop_mfea() != XORP_OK) {
-	if (! is_error)
-	    error_msg = c_format("Failed to stop MFEA");
-	is_error = true;
-    }
-    
-    if (is_error)
+	string error_msg = c_format("Failed to stop MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }

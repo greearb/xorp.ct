@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.46 2004/03/18 00:47:17 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.47 2004/04/29 23:39:28 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -66,7 +66,7 @@ XrlPimNode::~XrlPimNode()
 bool
 XrlPimNode::startup()
 {
-    if (PimNode::start() < 0)
+    if (start_pim() < 0)
 	return false;
 
     return true;
@@ -75,7 +75,7 @@ XrlPimNode::startup()
 bool
 XrlPimNode::shutdown()
 {
-    if (PimNode::stop() < 0)
+    if (stop_pim() < 0)
 	return false;
 
     return true;
@@ -209,14 +209,6 @@ XrlPimNode::mfea_register_shutdown()
 {
     if (_is_mfea_add_protocol_registered)
 	PimNode::incr_shutdown_requests_n();
-
-    if (_is_mfea_allow_signal_messages_registered)
-	PimNode::incr_shutdown_requests_n();
-
-    if (_is_mfea_allow_mrib_messages_registered) {
-	if (PimNode::is_receive_mrib_from_mfea())
-	    PimNode::incr_shutdown_requests_n();
-    }
 
     send_mfea_deregistration();
 }
@@ -476,6 +468,8 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_add_protocol_registered = false;
+	_is_mfea_allow_signal_messages_registered = false;
+	_is_mfea_allow_mrib_messages_registered = false;
 	PimNode::decr_shutdown_requests_n();
 	return;
     }
