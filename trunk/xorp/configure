@@ -4916,7 +4916,7 @@ trap 'rm -fr `echo "Makefile
 	xrl/interfaces/Makefile
 	xrl/targets/Makefile
 	xrl/tests/Makefile
- config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+	libxipc/test_xrl_parser.sh config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -5080,7 +5080,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	xrl/interfaces/Makefile
 	xrl/targets/Makefile
 	xrl/tests/Makefile
-"}
+	libxipc/test_xrl_parser.sh"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -5249,11 +5249,12 @@ fi; done
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
+echo timestamp > stamp-h
+	chmod a+x libxipc/test_xrl_parser.sh
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h
-echo timestamp > stamp-h
 
 exit 0
 EOF
