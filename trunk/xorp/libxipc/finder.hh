@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.14 2004/05/23 15:24:14 hodson Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.15 2004/06/10 22:41:05 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_HH__
 #define __LIBXIPC_FINDER_HH__
@@ -36,7 +36,7 @@ class Finder : public FinderMessengerManager
 public:
     typedef list<FinderMessengerBase*> FinderMessengerList;
     typedef map<FinderMessengerBase*, FinderXrlCommandQueue> OutQueueTable;
-    typedef map<string,FinderTarget> TargetTable;
+    typedef map<string, FinderTarget> TargetTable;
     typedef map<string, FinderClass> ClassTable;
     typedef list<string> Resolveables;
     typedef list<FinderEvent> EventQueue;
