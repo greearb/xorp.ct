@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.6 2004/09/14 15:02:25 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.7 2004/09/14 16:47:26 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -150,37 +150,27 @@ class XrlFirewallTarget;
  * Concrete class which manages XORP's firewall abstraction.
  */
 class FirewallManager {
+	friend class FwProvider;
+	friend class XrlFirewallTarget;
 public:
 	FirewallManager() : _fwp(0) {}
 	virtual ~FirewallManager() {}
-
-	inline FwTable4& get_fwtable4() { return _fwtable4; }
-	inline FwTable6& get_fwtable6() { return _fwtable6; }
-
-	friend class XrlFirewallTarget;
-
-	// attempt to create a new instance of a firewall provider,
-	// and migrate all rules to this provider at runtime.
-	//
-	// this routine should catch the exception if we can't.
-	//
-	int set_fw_provider(const char* name);
-
-	// XXX: we need a means for a provider to 'take ownership'
-	// of the tables.
 
 private:
 	// Underlying firewall provider interface in use, or NULL
 	// if one hasn't been set up yet.
 	FwProvider*	_fwp;
 
-	//
 	// XORP's idea of the firewall rule tables. There are two
 	// separate tables; one for the IPv4 family, and one for
 	// the IPv6 family.
-	//
 	FwTable4	_fwtable4;
 	FwTable6	_fwtable6;
+
+private:
+	// Attempt to create a new instance of a firewall provider,
+	// and migrate all rules to this provider at runtime.
+	int set_fw_provider(const char* name);
 };
 
 /**************************************************************************/
@@ -206,6 +196,7 @@ public:
 	virtual int set_enabled(bool enabled) = 0;
 	virtual const char* get_provider_name() const = 0;
 	virtual const char* get_provider_version() const = 0;
+	virtual int take_table_ownership() = 0;
 
 	/* IPv4 firewall provider interface */
 	virtual int add_rule4(FwRule4& rule) = 0;
@@ -218,8 +209,6 @@ public:
 	virtual int delete_rule6(FwRule6& rule) = 0;
 	virtual uint32_t get_num_xorp_rules6() const = 0;
 	virtual uint32_t get_num_system_rules6() const = 0;
-
-	//virtual int take_table_ownership() = 0;
 
 protected:
 	FirewallManager&	_m;	// Back-reference to XRL target and
