@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.13 2003/05/21 21:15:25 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.14 2003/05/21 21:18:14 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -190,9 +190,11 @@ int
 SelectorList::select(TimeVal* timeout)
 {
     fd_set testfds[SEL_MAX_IDX];
+    int n = 0;
+
+ select_again:
     memcpy(testfds, _fds, sizeof(_fds));
 
-    int n = 0;
     if (timeout == 0 || *timeout == TimeVal::MAXIMUM()) {
 	n = ::select(_maxfd + 1,
 		     &testfds[SEL_RD_IDX],
@@ -210,12 +212,20 @@ SelectorList::select(TimeVal* timeout)
     }
 
     if (n < 0) {
-	if (errno == EBADF) {
+	if (errno == EINTR) {
+	    // The system call was interrupted by a signal, hence restart it.
+	    goto select_again;
+	}
+	switch (errno) {
+	case EBADF:
 	    callback_bad_descriptors();
-	} if (errno == EINVAL) {
+	    break;
+	case EINVAL:
 	    XLOG_FATAL("Bad select argument (probably timeval)");
-	} else {
+	    break;
+	default:
 	    XLOG_ERROR("SelectorList::select failed: %s", strerror(errno));
+	    break;
 	}
 	return 0;
     }
