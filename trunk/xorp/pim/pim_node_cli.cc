@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.20 2004/02/25 05:55:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.21 2004/02/25 06:10:46 pavlin Exp $"
 
 
 //
@@ -94,57 +94,110 @@ PimNodeCli::add_all_cli_commands()
 {
     // XXX: command "show" must have been installed by the CLI itself.
     
-    add_cli_dir_command("show pim",	"Display information about PIM");
+    if (pim_node().is_ipv4()) {
+	add_cli_dir_command("show pim",
+			    "Display information about IPv4 PIM");
 
-    add_cli_command("show pim bootstrap",
-		    "Display information about PIM bootstrap routers",
-		    callback(this, &PimNodeCli::cli_show_pim_bootstrap));
+	add_cli_command("show pim bootstrap",
+			"Display information about PIM IPv4 bootstrap routers",
+			callback(this, &PimNodeCli::cli_show_pim_bootstrap));
 
-    add_cli_command("show pim bootstrap rps",
-		    "Display information about PIM bootstrap RPs",
-		    callback(this, &PimNodeCli::cli_show_pim_bootstrap_rps));
-    
-    add_cli_command("show pim interface",
-		    "Display information about PIM interfaces",
-		    callback(this, &PimNodeCli::cli_show_pim_interface));
+	add_cli_command("show pim bootstrap rps",
+			"Display information about PIM IPv4 bootstrap RPs",
+			callback(this, &PimNodeCli::cli_show_pim_bootstrap_rps));
 
-    add_cli_command("show pim interface address",
-		    "Display information about addresses of PIM interfaces",
-		    callback(this, &PimNodeCli::cli_show_pim_interface_address));
+	add_cli_command("show pim interface",
+			"Display information about PIM IPv4 interfaces",
+			callback(this, &PimNodeCli::cli_show_pim_interface));
 
-    add_cli_command("show pim join",
-		    "Display information about PIM groups",
-		    callback(this, &PimNodeCli::cli_show_pim_join));
+	add_cli_command("show pim interface address",
+			"Display information about addresses of PIM IPv4 interfaces",
+			callback(this, &PimNodeCli::cli_show_pim_interface_address));
 
-    add_cli_command("show pim join all",
-		    "Display information about all PIM groups",
-		    callback(this, &PimNodeCli::cli_show_pim_join_all));
+	add_cli_command("show pim join",
+			"Display information about PIM IPv4 groups",
+			callback(this, &PimNodeCli::cli_show_pim_join));
 
-    add_cli_command("show pim mfc",
-		    "Display information about PIM Multicast Forwarding Cache",
-		    callback(this, &PimNodeCli::cli_show_pim_mfc));
+	add_cli_command("show pim join all",
+			"Display information about all PIM IPv4 groups",
+			callback(this, &PimNodeCli::cli_show_pim_join_all));
 
-    add_cli_command("show pim neighbors",
-		    "Display information about PIM neighbors",
-		    callback(this, &PimNodeCli::cli_show_pim_neighbors));
+	add_cli_command("show pim mfc",
+			"Display information about PIM Multicast Forwarding Cache",
+			callback(this, &PimNodeCli::cli_show_pim_mfc));
 
-    add_cli_command("show pim mrib",
-		    "Display MRIB information inside PIM",
-		    callback(this, &PimNodeCli::cli_show_pim_mrib));
+	add_cli_command("show pim neighbors",
+			"Display information about PIM IPv4 neighbors",
+			callback(this, &PimNodeCli::cli_show_pim_neighbors));
 
-    add_cli_command("show pim rps",
-		    "Display information about PIM RPs",
-		    callback(this, &PimNodeCli::cli_show_pim_rps));
+	add_cli_command("show pim mrib",
+			"Display MRIB IPv4 information inside PIM",
+			callback(this, &PimNodeCli::cli_show_pim_mrib));
 
-    add_cli_command("show pim scope",
-		    "Display information about PIM scope zones",
-		    callback(this, &PimNodeCli::cli_show_pim_scope));
+	add_cli_command("show pim rps",
+			"Display information about PIM IPv4 RPs",
+			callback(this, &PimNodeCli::cli_show_pim_rps));
+
+	add_cli_command("show pim scope",
+			"Display information about PIM IPv4 scope zones",
+			callback(this, &PimNodeCli::cli_show_pim_scope));
+    }
+
+    if (pim_node().is_ipv6()) {
+	add_cli_dir_command("show pim6",
+			    "Display information about IPv6 PIM");
+
+	add_cli_command("show pim6 bootstrap",
+			"Display information about PIM IPv6 bootstrap routers",
+			callback(this, &PimNodeCli::cli_show_pim_bootstrap));
+
+	add_cli_command("show pim6 bootstrap rps",
+			"Display information about PIM IPv6 bootstrap RPs",
+			callback(this, &PimNodeCli::cli_show_pim_bootstrap_rps));
+
+	add_cli_command("show pim6 interface",
+			"Display information about PIM IPv6 interfaces",
+			callback(this, &PimNodeCli::cli_show_pim_interface));
+
+	add_cli_command("show pim6 interface address",
+			"Display information about addresses of PIM IPv6 interfaces",
+			callback(this, &PimNodeCli::cli_show_pim_interface_address));
+
+	add_cli_command("show pim6 join",
+			"Display information about PIM IPv6 groups",
+			callback(this, &PimNodeCli::cli_show_pim_join));
+
+	add_cli_command("show pim6 join all",
+			"Display information about all PIM IPv6 groups",
+			callback(this, &PimNodeCli::cli_show_pim_join_all));
+
+	add_cli_command("show pim6 mfc",
+			"Display information about PIM Multicast Forwarding Cache",
+			callback(this, &PimNodeCli::cli_show_pim_mfc));
+
+	add_cli_command("show pim6 neighbors",
+			"Display information about PIM IPv6 neighbors",
+			callback(this, &PimNodeCli::cli_show_pim_neighbors));
+
+	add_cli_command("show pim6 mrib",
+			"Display MRIB IPv6 information inside PIM",
+			callback(this, &PimNodeCli::cli_show_pim_mrib));
+
+	add_cli_command("show pim6 rps",
+			"Display information about PIM IPv6 RPs",
+			callback(this, &PimNodeCli::cli_show_pim_rps));
+
+	add_cli_command("show pim6 scope",
+			"Display information about PIM IPv6 scope zones",
+			callback(this, &PimNodeCli::cli_show_pim_scope));
+    }
     
     return (XORP_OK);
 }
 
 //
 // CLI COMMAND: "show pim bootstrap [scope-zone-group-prefix [scoped]]"
+// CLI COMMAND: "show pim6 bootstrap [scope-zone-group-prefix [scoped]]"
 //
 // Display information about PIM bootstrap routers
 //
@@ -359,6 +412,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim bootstrap rps [scope-zone-group-prefix [scoped]]"
+// CLI COMMAND: "show pim6 bootstrap rps [scope-zone-group-prefix [scoped]]"
 //
 // Display information about PIM bootstrap RPs
 //
@@ -518,6 +572,7 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim interface [interface-name]"
+// CLI COMMAND: "show pim6 interface [interface-name]"
 //
 // Display information about the interfaces on which PIM is configured.
 //
@@ -571,6 +626,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim interface address [interface-name]"
+// CLI COMMAND: "show pim6 interface address [interface-name]"
 //
 // Display information about the addresses of PIM interfaces
 //
@@ -653,6 +709,7 @@ PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim join [group | group-range]"
+// CLI COMMAND: "show pim6 join [group | group-range]"
 //
 // Display information about PIM groups.
 //
@@ -689,6 +746,7 @@ PimNodeCli::cli_show_pim_join(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim join all [group | group-range]"
+// CLI COMMAND: "show pim6 join all [group | group-range]"
 //
 // Display information about all PIM groups.
 //
@@ -725,6 +783,7 @@ PimNodeCli::cli_show_pim_join_all(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim mfc [group | group-range]"
+// CLI COMMAND: "show pim6 mfc [group | group-range]"
 //
 // Display information about PIM Multicast Forwarding Cache.
 //
@@ -1117,6 +1176,7 @@ PimNodeCli::cli_print_pim_mfc(const PimMfc *pim_mfc)
 
 //
 // CLI COMMAND: "show pim neighbors [interface-name]"
+// CLI COMMAND: "show pim6 neighbors [interface-name]"
 //
 // Display information about PIM neighbors.
 //
@@ -1200,6 +1260,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim mrib [dest-address]"
+// CLI COMMAND: "show pim6 mrib [dest-address]"
 //
 // Display MRIB information inside PIM.
 //
@@ -1275,6 +1336,7 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim rps [group-address]"
+// CLI COMMAND: "show pim6 rps [group-address]"
 //
 // Display information about PIM RPs
 //
@@ -1389,6 +1451,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show pim scope"
+// CLI COMMAND: "show pim6 scope"
 //
 // Display information about PIM RPs
 //
