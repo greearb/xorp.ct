@@ -211,6 +211,11 @@ class Lsa_header {
 	return _length;
     }
 
+    /**
+     * Generate a printable representation of the header.
+     */
+    string str() const;
+
  private:
     OspfTypes::Version _version;
     uint16_t 	_LS_age;
