@@ -131,6 +131,7 @@ libxorp_a_SOURCES += xlog.c
 
 libxorp_a_SOURCES += asyncio.cc
 libxorp_a_SOURCES += c_format.cc
+libxorp_a_SOURCES += callback.cc
 libxorp_a_SOURCES += eventloop.cc
 libxorp_a_SOURCES += exceptions.cc
 libxorp_a_SOURCES += heap.cc
@@ -171,6 +172,6 @@ xlog.o: xlog.c
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@callback.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 13 > $(srcdir)/callback.hh
+@PY_BUILD@callback.hh: callback-gen.py ../config.h
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py $(CALLBACK_GEN_FLAGS) -b 6 -l 13 > $(srcdir)/callback.hh
 

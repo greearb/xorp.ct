@@ -64,6 +64,7 @@ target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
 AWK = @AWK@
+CALLBACK_GEN_FLAGS = @CALLBACK_GEN_FLAGS@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
