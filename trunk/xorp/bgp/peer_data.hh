@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.7 2003/09/27 03:42:20 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.8 2003/10/06 22:41:08 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -105,20 +105,31 @@ public:
      */
     void open_negotiation();
 
-    bool unicast_ipv4() {
-	return _unicast_ipv4;
+    /**
+     * Multiprotocol option negotiation.
+     */
+    enum Direction {
+	SENT = 0,		// Sent by us.
+	RECEIVED = 1,		// Received from peer.
+	NEGOTIATED = 2,		// Both sides agree.
+	// Note: ARRAY_SIZE must be larger than all previous values
+	ARRAY_SIZE = 2
+    };
+
+    bool unicast_ipv4(Direction d = NEGOTIATED) const {
+	return _unicast_ipv4[d];
     }
 
-    bool unicast_ipv6() {
-	return _unicast_ipv6;
+    bool unicast_ipv6(Direction d = NEGOTIATED) const {
+	return _unicast_ipv6[d];
     } 
 
-    bool multicast_ipv4() {
-	return _multicast_ipv4;
+    bool multicast_ipv4(Direction d = NEGOTIATED) const {
+	return _multicast_ipv4[d];
     }
 
-    bool multicast_ipv6() {
-	return _multicast_ipv6;
+    bool multicast_ipv6(Direction d = NEGOTIATED) const {
+	return _multicast_ipv6[d];
     }
 
     void set_v4_local_addr(const IPv4& addr) { _nexthop_ipv4 = addr; }
@@ -205,7 +216,10 @@ private:
     /**
      * The set of different topologies that we support.
      */
-    bool _unicast_ipv4, _unicast_ipv6, _multicast_ipv4,  _multicast_ipv6;
+    bool _unicast_ipv4[ARRAY_SIZE];
+    bool _unicast_ipv6[ARRAY_SIZE];
+    bool _multicast_ipv4[ARRAY_SIZE];
+    bool _multicast_ipv6[ARRAY_SIZE];
 
     /* XXX
     ** Eventually we will have totally programmable filters. As a

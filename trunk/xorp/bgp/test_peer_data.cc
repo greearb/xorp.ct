@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.1 2003/10/06 22:42:21 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.2 2003/10/13 23:42:26 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,6 +27,18 @@
 #include "iptuple.hh"
 #include "parameter.hh"
 #include "peer_data.hh"
+
+bool
+test1(TestInfo& info)
+{
+    DOUT(info) << "test1: " <<  endl;
+
+    assert(BGPPeerData::SENT < BGPPeerData::ARRAY_SIZE);
+    assert(BGPPeerData::RECEIVED < BGPPeerData::ARRAY_SIZE);
+    assert(BGPPeerData::NEGOTIATED < BGPPeerData::ARRAY_SIZE);
+
+    return true;
+}
 
 /*
 ** Fill in a parameter list structure with the parameters a peer might
@@ -47,9 +59,9 @@ open_packet_parameters(ParameterList& parameters)
 }
 
 bool
-test1(TestInfo& info)
+test2(TestInfo& info)
 {
-    DOUT(info) << "test1: " <<  endl;
+    DOUT(info) << "test2: " <<  endl;
 
     /*
     ** Create a PeerData structure.
@@ -146,6 +158,7 @@ main(int argc, char** argv)
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
 	    {"test1", callback(test1)},
+	    {"test2", callback(test2)},
 	};
 
 	if("" == test_name) {
