@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.45 2004/12/05 23:32:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.46 2004/12/17 01:31:01 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -465,6 +465,34 @@ BGPMain::disable_peer(const Iptuple& iptuple)
     peer->event_stop();
     stop_server(iptuple); // Stop the server for this peer.
     peer->set_current_peer_state(false);
+    return true;
+}
+
+bool
+BGPMain::set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+    const_cast<BGPPeerData*>(peer->peerdata())->set_v6_local_addr(next_hop);
+
+    return true;
+}
+
+bool
+BGPMain::get_nexthop6(const Iptuple& iptuple, IPv6& next_hop)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+    next_hop = peer->peerdata()->get_v6_local_addr();
+
     return true;
 }
 
