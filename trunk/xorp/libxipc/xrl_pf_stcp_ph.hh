@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.3 2003/03/10 23:20:29 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.4 2003/03/16 08:20:33 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__
@@ -36,20 +36,22 @@ enum STCPPacketType {
 
 // STCP Packet Header.
 struct STCPPacketHeader {
-    STCPPacketHeader(uint32_t seqno,
-		     STCPPacketType type,
-		     const XrlError& err,
-		     uint32_t xrl_data_bytes) {
-	initialize(seqno, type, err, xrl_data_bytes);
-    }
-    void initialize(uint32_t seqno, STCPPacketType type,
-		    const XrlError& err, uint32_t xrl_data_bytes);
+    STCPPacketHeader(uint32_t		seqno,
+		     STCPPacketType	type,
+		     const XrlError&	err,
+		     uint32_t		xrl_data_bytes);
+
+    void initialize(uint32_t		seqno,
+		    STCPPacketType	type,
+		    const XrlError&	err,
+		    uint32_t		xrl_data_bytes);
 
     bool is_valid() const;
 
     uint32_t fourcc() const;
 
     uint8_t  major() const;
+
     uint8_t  minor() const;
 
     STCPPacketType type() const;
@@ -57,14 +59,12 @@ struct STCPPacketHeader {
     uint32_t seqno() const;
 
     uint32_t error_code() const;
+
     uint32_t error_note_bytes() const;
 
     uint32_t xrl_data_bytes() const;
 
-    inline uint32_t payload_bytes() const
-    {
-	return error_note_bytes() + xrl_data_bytes();
-    }
+    uint32_t payload_bytes() const;
 
 private:
     uint8_t _fourcc[4];		  // fourcc 'S' 'T' 'C' 'P'

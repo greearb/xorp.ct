@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.2 2002/12/19 01:29:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.3 2003/03/10 23:20:29 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -73,11 +73,20 @@ static inline uint8_t unpack1(const uint8_t* src)
     return *src;
 }
 
+STCPPacketHeader::STCPPacketHeader(uint32_t		seqno,
+				   STCPPacketType	type,
+				   const XrlError&	err,
+				   uint32_t		xrl_data_bytes)
+{
+    initialize(seqno, type, err, xrl_data_bytes);
+}
+
 void
-STCPPacketHeader::initialize(uint32_t seqno,
-			     STCPPacketType type,
-			     const XrlError& xrl_err,
-			     uint32_t xrl_data_bytes) {
+STCPPacketHeader::initialize(uint32_t		seqno,
+			     STCPPacketType	type,
+			     const XrlError&	xrl_err,
+			     uint32_t		xrl_data_bytes)
+{
     pack4(PROTO_FOURCC, _fourcc);
     pack1(PROTO_MAJOR, _major);
     pack1(PROTO_MINOR, _minor);
@@ -165,4 +174,10 @@ uint32_t
 STCPPacketHeader::xrl_data_bytes() const
 {
     return unpack4(_xrl_data_bytes);
+}
+
+uint32_t
+STCPPacketHeader::payload_bytes() const
+{
+    return error_note_bytes() + xrl_data_bytes();
 }
