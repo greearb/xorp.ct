@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.6 2003/03/06 23:19:56 atanu Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.8 2004/06/10 22:41:57 hodson Exp $"
 
 #include "config.h"
 
@@ -102,6 +102,17 @@ spawn(const string& process, const char *output = "")
 		argv[i] = const_cast<char *>(tokens[i].c_str());
 	    }
 	    argv[tokens.size()] = 0;
+
+	    /*
+	    ** Unblock any blocked signals.
+	    */
+	    sigset_t set;
+	    sigfillset(&set);
+	    
+	    if (0 != sigprocmask(SIG_UNBLOCK, &set, 0)) {
+		cerr << "sigprockmask failed: " << strerror(errno) << endl;
+		exit(-1);
+	    }
 
 	    execv(argv[0], argv);
 	    cerr << "Failed to exec: " << process << endl;
@@ -348,12 +359,39 @@ main(int argc, char *argv[])
     ** Start all the background processes.
     */
     for(unsigned int i = 0; i < commands.size(); i++) {
+	sigset_t set;
+	sigemptyset(&set);
+	sigaddset(&set, SIGCHLD);
+
+	if (0 != sigprocmask(SIG_BLOCK, &set, 0)) {
+	    cerr << "sigprockmask failed: " << strerror(errno) << endl;
+	    exit(-1);
+	}
 	commands[i]._pid = spawn(commands[i]._command, output);
+	if (0 != sigprocmask(SIG_UNBLOCK, &set, 0)) {
+	    cerr << "sigprockmask failed: " << strerror(errno) << endl;
+	    exit(-1);
+	}
  	sleep(1);
 	if("" != commands[i]._wait_command) {
 	    wait_command = commands[i]._wait_command;
+	    /*
+	    ** Block SIGCHLD delivery until the spawn command has completed.
+	    ** It seems on Linux the child can run to completion.
+	    */
+	    if (0 != sigprocmask(SIG_BLOCK, &set, 0)) {
+		cerr << "sigprockmask failed: " << strerror(errno) << endl;
+		exit(-1);
+	    }
+
 	    wait_command_pid = spawn(commands[i]._wait_command.c_str(),
 				     output);
+
+	    if (0 != sigprocmask(SIG_UNBLOCK, &set, 0)) {
+		cerr << "sigprockmask failed: " << strerror(errno) << endl;
+		exit(-1);
+	    }
+
 	    while(Command::EMPTY != wait_command_pid)
 		pause();
 	}
