@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.5 2003/01/29 20:32:32 rizzo Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.6 2003/03/10 23:20:01 hodson Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -170,8 +170,8 @@ private:
     uint32_t _out_total_messages;
     uint8_t _last_error[2];
     uint32_t _established_transitions;
-    struct timeval _established_time;
-    struct timeval _in_update_time;
+    TimeVal _established_time;
+    TimeVal _in_update_time;
 
     /**
      * This timer is to break us out of the stopped state.

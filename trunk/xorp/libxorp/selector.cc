@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.7 2003/03/03 13:53:04 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.8 2003/03/10 23:20:34 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
 #include "debug.h"
 #include "selector.hh"
+#include "timeval.hh"
 #include "utility.h"
 #include "xlog.h"
 
@@ -184,16 +185,25 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
 }
 
 int
-SelectorList::select(timeval* timeout)
+SelectorList::select(TimeVal* timeout)
 {
+    struct timeval select_timeout;
+    struct timeval *select_timeout_p;
     fd_set testfds[SEL_MAX_IDX];
+    
     memcpy(testfds, _fds, sizeof(_fds));
+    if (timeout != NULL) {
+	timeout->copy_out(select_timeout);
+	select_timeout_p = &select_timeout;
+    } else {
+	select_timeout_p = NULL;
+    }
     
     int n = ::select(_maxfd + 1,
 		     &testfds[SEL_RD_IDX],
 		     &testfds[SEL_WR_IDX],
 		     &testfds[SEL_EX_IDX],
-		     timeout);
+		     select_timeout_p);
     if (n < 0) {
 	if (errno == EBADF) {
 	    callback_bad_descriptors();
@@ -250,10 +260,8 @@ SelectorList::select(timeval* timeout)
 int
 SelectorList::select(int millisecs)
 {
-        timeval t;
-        t.tv_sec  = millisecs / 1000;
-        t.tv_usec = (millisecs - t.tv_sec * 1000) * 1000;
-        return select(&t);
+    TimeVal t(millisecs / 1000, (millisecs % 1000) * 1000);
+    return select(&t);
 }
 
 void

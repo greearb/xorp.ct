@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.30 2003/03/07 01:19:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.31 2003/03/10 23:20:01 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -21,6 +21,7 @@
 #include "config.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "libxorp/timer.hh"
 
 #include "peer.hh"
 #include "main.hh"
@@ -47,8 +48,8 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
     _last_error[0] = 0;
     _last_error[1] = 0;
     _established_transitions = 0;
-    gettimeofday(&_established_time, NULL);
-    gettimeofday(&_in_update_time, NULL);
+    TimerList::system_gettimeofday(&_established_time);
+    TimerList::system_gettimeofday(&_in_update_time);
 }
 
 BGPPeer::~BGPPeer()
@@ -121,7 +122,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    _in_updates++;
-	    gettimeofday(&_in_update_time, NULL);
+	    TimerList::system_gettimeofday(&_in_update_time);
 	    UpdatePacket pac(buf, length);
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -1122,8 +1123,8 @@ BGPPeer::established()
     _in_total_messages = 0;
     _out_total_messages = 0;
     _established_transitions++;
-    gettimeofday(&_established_time, NULL);
-    gettimeofday(&_in_update_time, NULL);
+    TimerList::system_gettimeofday(&_established_time);
+    TimerList::system_gettimeofday(&_in_update_time);
     return true;
 }
 
@@ -1304,7 +1305,7 @@ BGPPeer::release_resources()
     _in_total_messages = 0;
     _out_total_messages = 0;
 
-    gettimeofday(&_established_time, NULL);
+    TimerList::system_gettimeofday(&_established_time);
     return true;
 }
 
@@ -1426,9 +1427,9 @@ BGPPeer::send_netreachability(const BGPUpdateAttrib &n)
 uint32_t
 BGPPeer::get_established_time() const
 {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    return now.tv_sec - _established_time.tv_sec;
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
+    return now.sec() - _established_time.sec();
 }
 
 void 
@@ -1444,7 +1445,7 @@ BGPPeer::get_msg_stats(uint32_t& in_updates,
     in_msgs = _in_total_messages;
     out_msgs = _out_total_messages;
     memcpy(&last_error, _last_error, 2);
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    in_update_elapsed = now.tv_sec - _in_update_time.tv_sec;
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
+    in_update_elapsed = now.sec() - _in_update_time.sec();
 }

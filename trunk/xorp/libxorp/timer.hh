@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.8 2003/03/28 12:37:20 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.9 2003/03/28 14:27:36 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -59,7 +59,7 @@ public:
     /**
      * @return the expiry time of the @ref XorpTimer
      */
-    const timeval& expiry() const;
+    const TimeVal& expiry() const;
 
     /**
      * Get the remaining time until the timer expires.
@@ -81,7 +81,7 @@ public:
     /**
      * Schedule the @ref XorpTimer object at a given time.
      */
-    void schedule_at(const timeval& when);
+    void schedule_at(const TimeVal& when);
 
     /**
      * Schedule the @ref XorpTimer object to expire in @ref wait
@@ -129,7 +129,7 @@ private:
 
 
 // TimerList can use alternate clock that uses this prototype
-typedef void (*query_current_time)(timeval*);
+typedef void (*query_current_time)(TimeVal*);
 
 /**
  * @short XorpTimer creation and scheduling entity
@@ -185,7 +185,7 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer new_oneoff_at(const timeval& when, 
+    XorpTimer new_oneoff_at(const TimeVal& when, 
 			    const OneoffTimerCallback& ocb);
 
     /**
@@ -231,7 +231,7 @@ public:
      *
      * @return the @ref XorpTimer created.  
      */
-    XorpTimer set_flag_at(const timeval& when, bool *flag_ptr);
+    XorpTimer set_flag_at(const TimeVal& when, bool *flag_ptr);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -291,18 +291,30 @@ public:
      *
      * @param tv reference that is assigned expiry time of next timer.
      * If there is no @ref XorpTimer pending, this value is assigned the
-     * maximum timeval value.
+     * maximum @ref TimeVal value (@see TimeVal::set_max()).
      *
      * @return true if there is a XorpTimer awaiting expiry, false otherwise.  
      */
-    bool get_next_delay(timeval& tv) const;
+    bool get_next_delay(TimeVal& tv) const;
 
     /**
      * Read from clock used by @ref TimerList object.
      *
      * @param now the return-by-reference value with the current time.
      */
-    inline void current_time(timeval& now) const { _current_time_proc(&now); }
+    inline void current_time(TimeVal& now) const { _current_time_proc(&now); }
+
+    /**
+     * Default time querier.
+     * 
+     * Get the current time by using the default time querier.
+     * E.g., in non-simulation environment, this typically would
+     * be gettimeofday(2).
+     * 
+     * @param tv a pointer to the @ref TimeVal storage to store the current
+     * time.
+     */
+    static void system_gettimeofday(TimeVal *tv);	// default time querier
     
 private:
     void schedule_node(TimerNode* t);	// Put node in time ordered list pos.
@@ -313,7 +325,6 @@ private:
     void release_lock() const		{ /* nothing, for now */ }
 
     query_current_time _current_time_proc;	// called to get time
-    static void system_gettimeofday(timeval*);	// default time querier
 
     friend class TimerNode;
 
@@ -333,11 +344,11 @@ protected:
     TimerNode(const TimerNode&);	// never called
     TimerNode& operator=(const TimerNode&);
 
-    bool scheduled() const	{ return _pos_in_heap >= 0; }
-    const timeval& expiry() const	{ return _expires; }
+    bool scheduled()		const	{ return _pos_in_heap >= 0; }
+    const TimeVal& expiry()	const	{ return _expires; }
     bool time_remaining(TimeVal& remain) const;
     
-    void schedule_at(const timeval&);
+    void schedule_at(const TimeVal&);
     void schedule_after(const TimeVal& wait);
     void schedule_after_ms(int x_ms);
     void reschedule_after_ms(int x_ms);
@@ -346,7 +357,7 @@ protected:
 
     int		_ref_cnt;	// Number of referring XorpTimer objects
 
-    timeval	_expires;	// Expiration time
+    TimeVal	_expires;	// Expiration time
     BasicTimerCallback _cb;
 
     TimerList*	_list;		// TimerList this node is associated w.
@@ -404,7 +415,7 @@ XorpTimer::scheduled() const
     return _node && _node->scheduled();
 }
 
-inline const timeval&
+inline const TimeVal&
 XorpTimer::expiry() const
 {
     assert(_node);
@@ -422,7 +433,7 @@ XorpTimer::time_remaining(TimeVal& remain) const
 }
 
 inline void
-XorpTimer::schedule_at(const timeval& t)
+XorpTimer::schedule_at(const TimeVal& t)
 {
     assert(_node);
     _node->schedule_at(t);

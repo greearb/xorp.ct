@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.2 2003/03/10 23:20:59 hodson Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -87,7 +87,7 @@ public:
     bool existence_committed() const {return _existence_committed;}
     bool deleted() const {return _deleted;}
     void undelete() {_deleted = false;}
-    const struct timeval& modification_time() const {
+    const TimeVal& modification_time() const {
 	return _modification_time;
     }
     const string& path() const {return _path;}
@@ -140,11 +140,9 @@ protected:
     uid_t _committed_user_id;  /* the user ID of the user who last
 				changed this node before the last
 				commit*/
-    struct timeval _modification_time; /* when the node was last changed */
-    struct timeval _committed_modification_time; /* when the node was
-                                                    last changed
-                                                    before the last
-                                                    commit*/
+    TimeVal _modification_time; /* when the node was last changed */
+    TimeVal _committed_modification_time; /* when the node was last changed
+					     before the last commit*/
 
     /*flags to keep track of what changes we've made since the last commit*/
     bool _existence_committed;  /* do we need to run %create commands */

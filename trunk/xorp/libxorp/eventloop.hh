@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.5 2003/03/27 17:01:07 hodson Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.6 2003/03/28 12:37:20 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -102,7 +102,7 @@ public:
      * @return a @ref XorpTimer object that must be assigned to remain 
      * scheduled.
      */
-    XorpTimer new_oneoff_at(const timeval& when, 
+    XorpTimer new_oneoff_at(const TimeVal& when, 
 			    const OneoffTimerCallback& ocb);
 
     /**
@@ -151,7 +151,7 @@ public:
      * @return a @ref XorpTimer object that must be assigned to remain 
      * scheduled.
      */
-    XorpTimer set_flag_at(const struct timeval& when, bool* flag_ptr);
+    XorpTimer set_flag_at(const TimeVal& when, bool* flag_ptr);
 
     /**
      * Add a flag setting timer to the EventLoop.
@@ -245,7 +245,7 @@ public:
     /**
      * Get current time according to EventLoop's TimerList
      */
-    inline void current_time(timeval& now) const;
+    inline void current_time(TimeVal& now) const;
 
 private:
     TimerList    _timer_list;
@@ -262,7 +262,7 @@ EventLoop::new_timer(const BasicTimerCallback& cb)
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_at(const timeval& tv, const OneoffTimerCallback& ocb)
+EventLoop::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& ocb)
 {
     return _timer_list.new_oneoff_at(tv, ocb);
 }
@@ -287,7 +287,7 @@ EventLoop::new_periodic(int period_ms, const PeriodicTimerCallback& pcb)
 }
 
 inline XorpTimer
-EventLoop::set_flag_at(const timeval& tv, bool *flag_ptr)
+EventLoop::set_flag_at(const TimeVal& tv, bool *flag_ptr)
 {
     return _timer_list.set_flag_at(tv, flag_ptr);
 }
@@ -336,7 +336,7 @@ EventLoop::timer_list_length() const
 }
 
 inline void
-EventLoop::current_time(timeval& t) const 
+EventLoop::current_time(TimeVal& t) const 
 {
     _timer_list.current_time(t);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xuid.cc,v 1.2 2002/12/19 01:29:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xuid.cc,v 1.3 2003/03/10 23:20:30 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -30,6 +30,7 @@
 #include "xrl_module.h"
 #include "config.h"
 #include "libxorp/utility.h"
+#include "libxorp/timer.hh"
 #include "libxorp/timeval.hh"
 #include "xuid.hh"
 
@@ -64,7 +65,7 @@ local_ip4_addr()
 void
 XUID::initialize()
 {
-    static struct timeval last;	// last time clock reading value
+    static TimeVal last;	// last time clock reading value
     static uint16_t ticks;	// number of ticks with same clock reading
 
     // Component 1: Local IPv4 Address - returned in network order
@@ -72,10 +73,10 @@ XUID::initialize()
     _data[0] = hid;
 
     // Component 2: Time since midnight (0 hour), January 1, 1970
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    _data[1] = htonl(now.tv_sec);
-    _data[2] = htonl(now.tv_usec);
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
+    _data[1] = htonl(now.sec());
+    _data[2] = htonl(now.usec());
 
     // Component 3: Process ID
     uint16_t pid = (uint16_t)getpid();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.4 2003/03/30 03:50:43 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.5 2003/03/31 03:45:19 pavlin Exp $"
 
 
 //
@@ -454,10 +454,10 @@ MfeaDfe::start_measurement()
 				      callback(this,
 					       &MfeaDfe::measurement_timer_timeout));
     
-    // XXX: for simulation purpose, replace gettimeofday() with NOW()
-    struct timeval current_time;
-    gettimeofday(&current_time, NULL);
-    _start_time[_delta_sg_count_index].copy_in(current_time);
+    TimeVal now;
+    
+    TimerList::system_gettimeofday(&now);
+    _start_time[_delta_sg_count_index] = now;
 }
 
 void

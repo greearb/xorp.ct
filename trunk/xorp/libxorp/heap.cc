@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.2 2003/03/06 23:11:55 atanu Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.3 2003/03/10 23:20:32 hodson Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"
@@ -109,7 +109,7 @@ Heap::push(Heap_Key k, void *p, int son)
 {
     if (p != 0) { /* insert new element at the end, possibly resize */
 	DBG(fprintf(stderr, "-- insert key %ld.%06ld ptr %p\n",
-		 k.tv_sec, k.tv_usec, p););
+		 k.sec(), k.usec(), p););
         son = _elements ;
         if (son == _size) /* need resize... */
             if (resize(_elements+1) )
@@ -158,7 +158,7 @@ Heap::pop_obj(void *obj)
 	    XLOG_FATAL("-- bad obj 0x%p instead of 0x%p at %d",
 			 _p[father].object, obj, father);
 	}
-	DBG(fprintf(stderr, "-- delete key %ld\n", _p[father].key.tv_sec););
+	DBG(fprintf(stderr, "-- delete key %ld\n", _p[father].key.sec()););
     }
     RESET_OFFSET(father);
     child = HEAP_LEFT(father) ;         /* left child */
@@ -284,7 +284,7 @@ Heap::print_all(int base)
     for (int i=base ; i < _elements ; i = i*2 + 1) {
 	for (int j = i ; j < _elements && j < i+l ; j++)
 	    fprintf(stderr, "%*s[%2d]%3ld%*s",
-		(depth/2)*7, blanks, j, _p[j].key.t.tv_sec, depth*7, blanks);
+		(depth/2)*7, blanks, j, _p[j].key.sec(), depth*7, blanks);
 	fprintf(stderr, "\n");
 	l = l*2 ;
 	depth /= 2 ;
@@ -324,7 +324,7 @@ main(int argc, char *argv[])
 	    break ;
 	h->print_all(0);
 	fprintf(stderr, "++ got %ld.%06ld 0x%p\n",
-		e->key.t.tv_sec, e->key.t.tv_usec, e->object);
+		e->key.sec(), e->key.usec(), e->object);
 	h->pop();
     }
 }

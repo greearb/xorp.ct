@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.5 2003/03/10 23:20:39 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.6 2003/03/30 03:50:44 pavlin Exp $"
 
 
 //
@@ -151,12 +151,9 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
     MfeaDft::const_gs_iterator iter_dft, iter_begin_dft, iter_end_dft;
     iter_begin_dft = mfea_node().mfea_dft().group_by_prefix_begin(group_range);
     iter_end_dft = mfea_node().mfea_dft().group_by_prefix_end(group_range);
-    struct timeval current_time;
     TimeVal now;
     
-    // XXX: for simulation purpose, replace gettimeofday() with NOW()
-    gettimeofday(&current_time, NULL);
-    now.copy_in(current_time);
+    TimerList::system_gettimeofday(&now);
     
     for (iter_dft = iter_begin_dft; iter_dft != iter_end_dft; ++iter_dft) {
 	MfeaDfeLookup *mfea_dfe_lookup = iter_dft->second;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.6 2003/02/22 21:02:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.7 2003/03/10 23:20:59 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -57,8 +57,8 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
     _parent = parent;
     _user_id = user_id;
     _committed_user_id = 0;
-    gettimeofday(&_modification_time, NULL);
-    memset(&_committed_modification_time, 0, sizeof(struct timeval));
+    TimerList::system_gettimeofday(&_modification_time);
+    _committed_modification_time.clear();
     _existence_committed = false;
     _value_committed = false;
     _actions_pending = 0;
@@ -195,7 +195,7 @@ ConfigTreeNode::set_value(const string &value, uid_t user_id) {
     _has_value = true;
     _value_committed = false;
     _user_id = user_id;
-    gettimeofday(&_modification_time, NULL);
+    TimerList::system_gettimeofday(&_modification_time);
 }
 
 
@@ -232,7 +232,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 			_committed_user_id = _user_id;
 			_user_id = user_id;
 			_committed_modification_time = _modification_time;
-			gettimeofday(&_modification_time, NULL);
+			TimerList::system_gettimeofday(&_modification_time);
 			_value_committed = false;
 		    } else {
 			_committed_value = delta_node->value();
@@ -938,7 +938,7 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id) {
     }
 
     _user_id = user_id;
-    gettimeofday(&_modification_time, NULL);
+    TimerList::system_gettimeofday(&_modification_time);
     _deleted = true;
     _value_committed = false;
 }

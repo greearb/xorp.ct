@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.3 2003/03/10 23:20:36 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.4 2003/03/27 01:51:57 hodson Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -74,19 +74,19 @@ test_many()
 }
 
 void
-print_tv(FILE * s, timeval a)
+print_tv(FILE * s, TimeVal a)
 {
-    fprintf(s, "%lu.%06lu", (unsigned long)a.tv_sec, (unsigned long)a.tv_usec);
+    fprintf(s, "%lu.%06lu", (unsigned long)a.sec(), (unsigned long)a.usec());
     fflush(s);
 }
 
 void
 test_wrap()
 {
-    timeval a = {INT_MAX, 999998} ;
-    timeval one_us = {0, 1} ;
-    timeval b = a + one_us;
-    timeval c = b + one_us;
+    TimeVal a(INT_MAX, 999998);
+    TimeVal one_us(0, 1);
+    TimeVal b = a + one_us;
+    TimeVal c = b + one_us;
 
     fprintf(stderr, "a is ");print_tv(stderr, a);fprintf(stderr, "\n");
     fprintf(stderr, "b is ");print_tv(stderr, b);fprintf(stderr, "\n");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/time_slice.hh,v 1.2 2003/03/10 23:20:36 hodson Exp $
+// $XORP: xorp/libxorp/time_slice.hh,v 1.3 2003/03/30 03:50:43 pavlin Exp $
 
 
 #ifndef __LIBXORP_TIME_SLICE_HH__
@@ -26,6 +26,7 @@
 
 #include <sys/time.h>
 
+#include "timer.hh"
 #include "timeval.hh"
 
 
@@ -106,20 +107,19 @@ private:
 inline bool
 TimeSlice::is_expired()
 {
-    struct timeval current_time;
-    
     if (--_remain_iter)
 	return (false);		// Don't test the time yet
     
     _remain_iter = _test_iter_frequency;
     
     // Test if the time slice has expired
-    gettimeofday(&current_time, NULL);
-    if (TimeVal(current_time) - _time_slice_limit < _time_slice_start)
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
+    if (now - _time_slice_limit < _time_slice_start)
 	return (false);		// The time slice has not expired
     
     // The time slice has expired
-    _time_slice_start.copy_in(current_time);
+    _time_slice_start = now;
     return (true);
 }
 

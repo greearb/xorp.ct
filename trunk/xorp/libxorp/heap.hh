@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.2 2003/02/26 00:14:13 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.3 2003/03/10 23:20:32 hodson Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -51,7 +51,7 @@ const int NOT_IN_HEAP =	-1 ;
 
 class Heap {
 private:
-typedef struct timeval Heap_Key ;
+typedef TimeVal Heap_Key ;
     struct heap_entry {
 	Heap_Key key ;    /* sorting key. Topmost element is smallest one */
 	void *object ;      /* object pointer */
@@ -95,7 +95,7 @@ public:
      * 
      * @param i the offset of the object to bubble-up.
      */
-    void push(int i) { push( (Heap_Key){0,0} /* anything */, NULL, i); }
+    void push(int i) { push( Heap_Key(0, 0) /* anything */, NULL, i); }
 
     /**
      * Move an object in the heap according to the new key.

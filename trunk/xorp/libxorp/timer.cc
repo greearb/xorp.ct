@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.5 2003/03/27 17:01:07 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.6 2003/03/28 12:37:20 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -92,13 +92,12 @@ TimerNode::expire(XorpTimer&, void*)
 bool
 TimerNode::time_remaining(TimeVal& remain) const
 {
-    struct timeval now_tmp;
+    TimeVal now;
     
     assert(_list);
-    _list->current_time(now_tmp);
+    _list->current_time(now);
     
-    TimeVal now(now_tmp);
-    remain.copy_in(expiry());
+    remain = expiry();
     if (remain <= now)
 	remain.clear();
     else
@@ -115,7 +114,7 @@ TimerNode::unschedule()
 }
 
 void
-TimerNode::schedule_at(const timeval& t)
+TimerNode::schedule_at(const TimeVal& t)
 {
     assert(_list);
     unschedule();
@@ -129,10 +128,10 @@ TimerNode::schedule_after(const TimeVal& wait)
     assert(_list);
     unschedule();
 
-    timeval now, interval;
-    wait.copy_out(interval);
+    TimeVal now;
+    
     _list->current_time(now);
-    _expires = now + interval;
+    _expires = now + wait;
     _list->schedule_node(this);
 }
 
@@ -142,13 +141,10 @@ TimerNode::schedule_after_ms(int ms)
     assert(_list);
     unschedule();
 
-    timeval interval;
-    interval.tv_sec  = ms / 1000;
-    interval.tv_usec = (ms % 1000) * 1000;
+    TimeVal now, interval(ms / 1000, (ms % 1000) * 1000);
 
-    timeval now;
     _list->current_time(now);
-    _expires = now + interval ;
+    _expires = now + interval;
     _list->schedule_node(this);
 }
 
@@ -158,9 +154,7 @@ TimerNode::reschedule_after_ms(int ms)
     assert(_list);
     unschedule();
 
-    timeval interval;
-    interval.tv_sec  = ms / 1000;
-    interval.tv_usec = (ms % 1000) * 1000;
+    TimeVal interval(ms / 1000, (ms % 1000) * 1000);
 
     _expires = _expires + interval;
     _list->schedule_node(this);
@@ -204,7 +198,7 @@ private:
 // XorpTimer factories
 
 XorpTimer
-TimerList::new_oneoff_at(const timeval& tv, const OneoffTimerCallback& cb)
+TimerList::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& cb)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
     n->schedule_at(tv);
@@ -245,7 +239,7 @@ set_flag_hook(bool* flag_ptr)
 }
 
 XorpTimer
-TimerList::set_flag_at(const timeval& tv, bool *flag_ptr)
+TimerList::set_flag_at(const TimeVal& tv, bool *flag_ptr)
 {
     assert(flag_ptr);
     *flag_ptr = false;
@@ -270,16 +264,22 @@ TimerList::set_flag_after_ms(int ms, bool *flag_ptr)
 
 // Default XorpTimer and TimerList clock
 void
-TimerList::system_gettimeofday(timeval *t)
+TimerList::system_gettimeofday(TimeVal *tv)
 {
-    gettimeofday(t, NULL);
+    struct timeval timeval_tmp;
+    
+    if (tv != NULL) {
+	gettimeofday(&timeval_tmp, NULL);
+	tv->copy_in(timeval_tmp);
+    }
 }
 
 // XXX locking need some care here. Worry about it when we have locks.
 void
 TimerList::run()
 {
-    timeval now;
+    TimeVal now;
+    
     _current_time_proc(&now);
     struct heap_entry *n;
     while ((n = top()) != 0 && n->key <= now) {
@@ -312,22 +312,21 @@ TimerList::size() const
 }
 
 bool
-TimerList::get_next_delay(timeval& tv) const
+TimerList::get_next_delay(TimeVal& tv) const
 {
     acquire_lock();
     struct heap_entry *t = top();
     release_lock();
     if (t == 0) {
-	tv.tv_sec  = 1000000;
-	tv.tv_usec = 0;
+	tv.set_max();
 	return false;
     } else {
-	timeval now ;
+	TimeVal now;
 	_current_time_proc(&now);
 	if ( t->key > now) // next event is in the future
 	    tv = t->key - now ;
 	else // next event is already in the past, return 0.0
-	    tv = (timeval){0,0};
+	    tv.clear();
 	return true;
     }
 }

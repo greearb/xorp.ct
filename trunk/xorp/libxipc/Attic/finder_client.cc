@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.5 2003/03/10 23:20:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.6 2003/03/27 01:51:57 hodson Exp $"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -24,6 +24,8 @@
 #include "config.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
+#include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
 #include "finder_client.hh"
 
 // ----------------------------------------------------------------------------
@@ -42,10 +44,10 @@ public:
 
     uint16_t 			seqno() const { return _seqno; }
     uint16_t			set_seqno(uint16_t s) {
-	gettimeofday(&_issued, NULL);
+	TimerList::system_gettimeofday(&_issued);
 	return _seqno = s;
     }
-    const timeval& 		issued() const { return _issued; }
+    const TimeVal& 		issued() const { return _issued; }
 
     inline void notify(FinderClient::Error e,
 		       const char*	   name,
@@ -60,7 +62,7 @@ private:
     string			_value;
     FinderClient::Callback	_callback;
     uint16_t			_seqno;
-    timeval			_issued;
+    TimeVal			_issued;
 };
 
 // ----------------------------------------------------------------------------
@@ -145,10 +147,10 @@ FinderClient::send_bye()
 void
 FinderClient::hello_handler(const FinderMessage& m)
 {
-    struct timeval now;
-    gettimeofday(&now, NULL);
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
     debug_msg("got hello (seqno %d) %lu.%06lu\n", m.seqno(),
-	      (unsigned long)now.tv_sec, (unsigned long)now.tv_usec);
+	      (unsigned long)now.sec(), (unsigned long)now.usec());
     UNUSED(m);
 }
 
@@ -387,10 +389,10 @@ FinderClient::initiate_hook()
 	FinderTCPClientIPCFactory::create(_finder_host.c_str(),
 					  _finder_port);
     if (_connection) {
-	struct timeval now;
-	gettimeofday(&now, NULL);
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
 	debug_msg("Connected to Finder. Re-registering...%lu.%06lu\n",
-		  (unsigned long)now.tv_sec, (unsigned long)now.tv_usec);
+		  (unsigned long)now.sec(), (unsigned long)now.usec());
 
 	// Connect succeed
 	_event_loop.add_selector(_connection->descriptor(),
