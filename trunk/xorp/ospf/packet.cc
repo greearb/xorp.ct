@@ -225,6 +225,16 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
     embed_16(&ptr[12], 0);
     uint16_t checksum_actual = checksum(ptr, len);
 
+    // Put the fields that we zero'd back the way that we found them.
+    switch(version) {
+    case OspfTypes::V2:
+	memcpy(&ptr[16], &_auth[0], sizeof(_auth));
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+    embed_16(&ptr[12], checksum_inpacket);
+    
     if (checksum_inpacket != checksum_actual)
 	xorp_throw(BadPacket,
 		   c_format("Checksum mismatch expected %#x received %#x",
