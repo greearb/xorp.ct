@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.2 2004/01/16 18:36:44 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.3 2004/02/19 00:28:45 hodson Exp $"
 
 #include <algorithm>
 
@@ -241,6 +241,12 @@ IfConfigAddressTable::vifaddr6_update(const string&	/* ifname */,
 				      const IPv6&	/* addr */,
 				      const Update&	/* update */,
 				      bool		/* system */)
+{
+    update();
+}
+
+void
+IfConfigAddressTable::updates_completed(bool		/* system */)
 {
     update();
 }

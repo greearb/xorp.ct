@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.2 2004/01/16 18:36:44 hodson Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.3 2004/02/19 00:28:45 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
@@ -89,6 +89,8 @@ protected:
 			 const IPv6&	addr,
 			 const Update&	update,
 			 bool		system);
+
+    void updates_completed(bool		system);
 
     /**
      * Walk interface configuration tree and find addresses that are
