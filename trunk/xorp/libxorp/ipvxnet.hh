@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.8 2003/09/30 03:17:03 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.9 2003/09/30 18:27:03 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -30,11 +30,11 @@
  *
  * See @ref IPNet for available methods.
  */
-typedef IPNet<IPvX> BaseIPvXNet; 
+typedef IPNet<IPvX> BaseIPvXNet;
 
 template<>
 inline
-IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t prefix_len)
+IPNet<IPvX>::IPNet(const IPvX& ipvx, uint32_t prefix_len)
     throw (InvalidNetmaskLength)
     : _prefix_len(prefix_len)
 {
@@ -43,7 +43,7 @@ IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t prefix_len)
     _masked_addr = ipvx.mask_by_prefix_len(prefix_len);
 }
 
-template <> 
+template <>
 inline void
 IPNet<IPvX>::initialize_from_string(const char *cp)
     throw (InvalidString, InvalidNetmaskLength)
@@ -56,12 +56,12 @@ IPNet<IPvX>::initialize_from_string(const char *cp)
     _prefix_len = atoi(slash + 1);
 
     string addr = string(cp, slash - cp);
-    
+
     _masked_addr = IPvX(addr.c_str()).mask_by_prefix_len(_prefix_len);
 }
 
 /**
- * IPvXNet class.  Container for IPv4 and IPv6 networks.  
+ * IPvXNet class.  Container for IPv4 and IPv6 networks.
  *
  * Also see @ref IPNet for available methods.
  */
@@ -72,7 +72,7 @@ public:
      *
      * Creates a network address of specified family, and address value of
      * INADDR_ANY or IN6ADDR_ANY (for IPv4 and IPv6 respectively).
-     * 
+     *
      * @param family the address family.
      */
     explicit IPvXNet(int family) throw (InvalidFamily)
@@ -85,21 +85,21 @@ public:
 
     /**
      * Copy constructor for BaseIPvXNet subnet address
-     * 
+     *
      * @param n the subnet to copy from.
      */
     IPvXNet(const BaseIPvXNet& n) : BaseIPvXNet(n) {}
 
     /**
      * Copy constructor for IPvXNet subnet address
-     * 
+     *
      * @param n the subnet to copy from.
      */
     IPvXNet(const IPvXNet& n) : BaseIPvXNet(n) {}
 
     /**
      * Copy constructor for IPv4Net subnet address
-     * 
+     *
      * @param v4net the subnet to copy from.
      */
     IPvXNet(const IPv4Net& v4net)
@@ -107,7 +107,7 @@ public:
 
     /**
      * Copy constructor for IPv6Net subnet address
-     * 
+     *
      * @param v6net the subnet to copy from.
      */
     IPvXNet(const IPv6Net& v6net)
@@ -129,28 +129,28 @@ public:
      * @param a base address for the subnet.
      * @param prefix_len length of subnet mask.
      */
-    IPvXNet(const IPvX& a, size_t prefix_len) throw (InvalidNetmaskLength)
+    IPvXNet(const IPvX& a, uint32_t prefix_len) throw (InvalidNetmaskLength)
 	: BaseIPvXNet(a, prefix_len) {}
 
     // The following methods are specific to IPvXNet
 
     /**
      * Test if this subnet is IPv4 subnet.
-     * 
+     *
      * @return true if the subnet is IPv4.
      */
     inline bool is_ipv4() const { return masked_addr().is_ipv4(); }
 
     /**
      * Test if this subnet is IPv6 subnet.
-     * 
+     *
      * @return true if the subnet is IPv6.
      */
     inline bool is_ipv6() const { return masked_addr().is_ipv6(); }
 
     /**
      * Get IPv4Net subnet.
-     * 
+     *
      * @return IPv4Net subnet contained with IPvXNet structure.
      */
     inline IPv4Net get_ipv4net() const 	throw (InvalidCast)
@@ -160,7 +160,7 @@ public:
 
     /**
      * Get IPv6Net subnet.
-     * 
+     *
      * @return IPv6Net subnet contained with IPvXNet structure.
      */
     inline IPv6Net get_ipv6net() const 	throw (InvalidCast)
@@ -170,7 +170,7 @@ public:
 
     /**
      * Assign address value to an IPv4Net subnet.
-     * 
+     *
      * @param to_ipv4net IPv4Net subnet to be assigned IPv4Net value contained
      * within this subnet.
      */
@@ -181,7 +181,7 @@ public:
 
     /**
      * Assign address value to an IPv6Net subnet.
-     * 
+     *
      * @param to_ipv6net IPv6Net subnet to be assigned IPv6Net value contained
      * within this subnet.
      */
@@ -192,18 +192,18 @@ public:
 
     /**
      * Get the address family.
-     * 
+     *
      * @return the address family of this subnet (AF_INET or AF_INET6).
      */
     inline int af() const { return masked_addr().af(); }
 
     /**
      * Get the multicast base subnet.
-     * 
+     *
      * Note that this is a static function and can be used without
      * a particular object. Example:
      *   IPvXNet my_prefix = IPvXNet::ip_multicast_base_prefix(my_family);
-     * 
+     *
      * @param family the address family.
      * @return the multicast base prefix address for address
      * family of @ref family.
@@ -217,7 +217,7 @@ public:
 
     /**
      * Test if this subnet is a valid multicast prefix address.
-     * 
+     *
      * @return true if this is a valid multicast prefix address.
      */
     bool is_multicast() const {

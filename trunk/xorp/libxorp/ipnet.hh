@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.8 2003/09/30 03:07:58 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.9 2003/09/30 18:27:02 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -23,11 +23,11 @@
 
 /**
  * @short A template class for subnets
- * 
+ *
  * A "subnet" is specified by a base "address" and a "prefix length".
  */
-template <class A> 
-class IPNet { 
+template <class A>
+class IPNet {
 public:
     /**
      * Default constructor taking no parameters.
@@ -40,17 +40,17 @@ public:
      * Constructor from a given base address and a prefix length.
      *
      * @param a base address for the subnet.
-     * @param prefix_len length of subnet mask (e.g., class C nets would have 
+     * @param prefix_len length of subnet mask (e.g., class C nets would have
      * prefix_len=24).
      */
-    IPNet(const A& a, size_t prefix_len) throw (InvalidNetmaskLength)
+    IPNet(const A& a, uint32_t prefix_len) throw (InvalidNetmaskLength)
 	: _masked_addr(a), _prefix_len(prefix_len)
     {
 	if (prefix_len > A::addr_bitlen())
 	    xorp_throw(InvalidNetmaskLength, prefix_len);
 	_masked_addr = a.mask_by_prefix_len(prefix_len);
     }
-    
+
     /**
      * Constructor from a string.
      *
@@ -65,7 +65,7 @@ public:
 
     /**
      * Copy constructor
-     * 
+     *
      * @param n the subnet to copy from.
      */
     IPNet(const IPNet& n) {
@@ -87,7 +87,7 @@ public:
 
     /**
      * Equality Operator
-     * 
+     *
      * @param other the right-hand operand to compare against.
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
@@ -99,9 +99,9 @@ public:
 
     /**
      * Less-Than Operator
-     * 
+     *
      * Less-than comparison for subnets (see body for description).
-     * 
+     *
      * @param other the right-hand side of the comparison.
      * @return true if the left-hand side is "smaller" than the right-hand
      * side according to the chosen order.
@@ -110,27 +110,27 @@ public:
 
     /**
      * Decrement Operator
-     * 
+     *
      * The numerical value of the prefix address is decrement by one.
      * Example: decrementing 128.2.0.0/16 results in 128.1.0.0/16.
-     * 
+     *
      * @return a reference to this subnet after the decrement
      */
     IPNet& operator--();
-    
+
     /**
      * Increment Operator
-     * 
+     *
      * The numerical value of the prefix address is incremented by one.
      * Example: incrementing 128.2.0.0/16 results in 128.3.0.0/16.
-     * 
+     *
      * @return a reference to this subnet after the increment
      */
     IPNet& operator++();
 
     /**
      * Convert this address from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the address.
      */
@@ -140,11 +140,11 @@ public:
 
     /**
      * Test if the object contains a real (non-default) value.
-     * 
+     *
      * @return true if the object stores a real (non-default) value.
      */
      bool is_valid() const { return _prefix_len != 0; }
-    
+
     /**
      * Test if subnets overlap.
      *
@@ -157,7 +157,7 @@ public:
      * Test if a subnet contains (or is equal to) another subnet.
      *
      * in LaTeX, x.contains(y) would be   $x \superseteq y$
-     * 
+     *
      * @param other the subnet to test against.
      * @return true if this subnet contains or is equal to @ref other.
      */
@@ -181,70 +181,70 @@ public:
      * @return the number of bits overlapping between @ref other and
      * this subnet.
      */
-    inline size_t overlap(const IPNet& other) const;
+    inline uint32_t overlap(const IPNet& other) const;
 
     /**
      * Get the address family.
-     * 
+     *
      * @return the address family of this address.
      */
     static const int af() { return A::af(); }
 
     /**
      * Get the base address.
-     * 
+     *
      * @return the base address for this subnet.
      */
     inline const A& masked_addr() const { return _masked_addr; }
 
     /**
      * Get the prefix length.
-     * 
+     *
      * @return the prefix length for this subnet.
      */
-    inline size_t prefix_len() const { return _prefix_len; }
+    inline uint32_t prefix_len() const { return _prefix_len; }
 
     /**
      * Get the network mask.
-     * 
+     *
      * @return the netmask associated with this subnet.
      */
     inline A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
 
     /**
      * Return the subnet containing all multicast addresses.
-     * 
+     *
      * Note that this is a static function and can be used without
      * a particular object. Example:
      *   IPv4Net my_prefix = IPv4Net::ip_multicast_base_prefix(); OK
      *   IPv4Net my_prefix = ipv4net.ip_multicast_base_prefix();  OK
-     * 
+     *
      * @return the subnet containing multicast addresses.
      */
     static const IPNet<A> ip_multicast_base_prefix() {
 	return IPNet(A::MULTICAST_BASE(),
 		     A::ip_multicast_base_address_mask_len());
     }
-    
+
     /**
      * Test if this subnet is within the multicast address range.
-     * 
+     *
      * @return true if this subnet is within the multicast address range.
      */
     bool is_multicast() const {
 	return (ip_multicast_base_prefix().contains(*this));
     }
-    
+
     /**
      * Get the highest address within this subnet.
-     * 
+     *
      * @return the highest address within this subnet.
      */
     inline A top_addr() const { return _masked_addr | ~netmask(); }
 
     /**
      * Get the smallest subnet containing both subnets.
-     * 
+     *
      * @return the smallest subnet containing both subnets passed
      * as arguments.
      */
@@ -257,7 +257,7 @@ protected:
 	throw (InvalidString, InvalidNetmaskLength);
 
     A		_masked_addr;
-    size_t	_prefix_len;
+    uint32_t	_prefix_len;
 };
 
 /* ------------------------------------------------------------------------- */
@@ -295,13 +295,13 @@ IPNet<A>::operator<(const IPNet& other) const
 
 #else	// old code
     const A& maddr_him = other.masked_addr();
-    size_t his_prefix_len = other.prefix_len();
+    uint32_t his_prefix_len = other.prefix_len();
 
     //the ordering is important because we want the longest match to
     //be first.  For example, we want the following:
     //  128.16.0.0/24 < 128.16.64.0/24 <  128.16.0.0/16 < 128.17.0.0/24
 
-    if (_prefix_len == his_prefix_len) return _masked_addr < maddr_him; 
+    if (_prefix_len == his_prefix_len) return _masked_addr < maddr_him;
 
     // we need to check the case when one subnet is a subset of
     // the other
@@ -366,13 +366,13 @@ IPNet<A>::initialize_from_string(const char *cp)
     char *slash = strrchr(cp, '/');
     if (slash == 0)
 	xorp_throw(InvalidString, "Missing slash");
-    
+
     if (*(slash + 1) == 0)
 	xorp_throw(InvalidString, "Missing prefix length");
     _prefix_len = atoi(slash + 1);
-    
+
     string addr = string(cp, slash - cp);
-    
+
     _masked_addr = A(addr.c_str()).mask_by_prefix_len(_prefix_len);
 }
 
@@ -395,18 +395,18 @@ IPNet<A>::operator++()
 }
 
 template <class A>
-inline size_t
+inline uint32_t
 IPNet<A>::overlap(const IPNet<A>& other) const
 {
     A addr = masked_addr() ^ other.masked_addr();
 
-    size_t p = (prefix_len() < other.prefix_len()) ? 
+    uint32_t p = (prefix_len() < other.prefix_len()) ?
 	prefix_len() : other.prefix_len();
 
-    size_t i = 0;
+    uint32_t i = 0;
 
     for (A o(A::ALL_ONES(_masked_addr.af())); i <= p; o = o >> 1, i++) {
-	if (o < addr) 
+	if (o < addr)
 	    return i - 1;
     }
     return i - 1;
@@ -415,12 +415,12 @@ IPNet<A>::overlap(const IPNet<A>& other) const
 /**
  * Determine the number of the most significant bits overlapping
  * between two subnets.
- * 
+ *
  * @param a1 the first subnet.
  * @param a2 the subnet.
  * @return the number of bits overlapping between @ref a1 and @ref a2.
  */
-template <class A> size_t
+template <class A> uint32_t
 overlap(const IPNet<A>& a1, const IPNet<A>& a2)
 {
     return a1.overlap(a2);

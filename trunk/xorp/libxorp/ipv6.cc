@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.7 2003/09/30 03:17:03 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.8 2003/09/30 18:27:03 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>  
+#include <arpa/inet.h>
 
 
 IPv6::IPv6(const uint8_t *from_uint8)
@@ -155,11 +155,11 @@ IPv6::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
 }
 
 IPv6
-IPv6::operator<<(size_t ls) const
+IPv6::operator<<(uint32_t ls) const
 {
     uint32_t tmp_addr[4];
     static_assert(sizeof(_addr) == sizeof(tmp_addr));
-    
+
     // Shift the words, and at the same time convert them into host-order
     switch (ls / 32) {
     case 0:
@@ -190,7 +190,7 @@ IPv6::operator<<(size_t ls) const
 	// ls >= 128; clear all bits
 	return ZERO();
     }
-    
+
     ls &= 0x1f;
     if (ls != 0) {
 	uint32_t rs = 32 - ls;
@@ -199,22 +199,22 @@ IPv6::operator<<(size_t ls) const
 	tmp_addr[2] = (tmp_addr[2] << ls) | (tmp_addr[3] >> rs);
 	tmp_addr[3] = tmp_addr[3] << ls;
     }
-    
+
     // Convert the words back into network-order
     tmp_addr[0] = htonl(tmp_addr[0]);
     tmp_addr[1] = htonl(tmp_addr[1]);
     tmp_addr[2] = htonl(tmp_addr[2]);
     tmp_addr[3] = htonl(tmp_addr[3]);
-    
+
     return IPv6(tmp_addr);
 }
 
 IPv6
-IPv6::operator>>(size_t rs) const
+IPv6::operator>>(uint32_t rs) const
 {
     uint32_t tmp_addr[4];
     static_assert(sizeof(_addr) == sizeof(tmp_addr));
-    
+
     // Shift the words, and at the same time convert them into host-order
     switch (rs / 32) {
     case 0:
@@ -245,7 +245,7 @@ IPv6::operator>>(size_t rs) const
 	// rs >= 128; clear all bits
 	return ZERO();
     }
-    
+
     rs &= 0x1f;
     if (rs != 0) {
 	uint32_t ls = 32 - rs;
@@ -254,13 +254,13 @@ IPv6::operator>>(size_t rs) const
 	tmp_addr[1] = (tmp_addr[1] >> rs) | (tmp_addr[0] << ls);
 	tmp_addr[0] = (tmp_addr[0] >> rs);
     }
-    
+
     // Convert the words back into network-order
     tmp_addr[0] = htonl(tmp_addr[0]);
     tmp_addr[1] = htonl(tmp_addr[1]);
     tmp_addr[2] = htonl(tmp_addr[2]);
     tmp_addr[3] = htonl(tmp_addr[3]);
-    
+
     return IPv6(tmp_addr);
 }
 
@@ -269,7 +269,7 @@ IPv6::operator<(const IPv6& other) const
 {
     int i;
     static_assert(sizeof(_addr) == 16);
-    
+
     for (i = 0; i < 3; i++) {	// XXX: Loop ends intentionally at 3 not 4
 	if (_addr[i] != other._addr[i])
 	    break;
@@ -295,24 +295,24 @@ IPv6::operator!=(const IPv6& other) const
 	    || (_addr[3] != other._addr[3]));
 }
 
-IPv6& 
+IPv6&
 IPv6::operator--()
-{ 
+{
     for (int i = 3; i >= 0; i--) {
 	if (_addr[i] == 0) {
 	    _addr[i] = 0xffffffffU;
 	} else {
 	    uint32_t tmp_addr = ntohl(_addr[i]) - 1;
-	    _addr[i] = htonl(tmp_addr); 
+	    _addr[i] = htonl(tmp_addr);
 	    return *this;
 	}
     }
     return *this;
 }
-    
-IPv6& 
+
+IPv6&
 IPv6::operator++()
-{ 
+{
     for (int i = 3; i >= 0; i--) {
 	if (_addr[i] == 0xffffffffU) {
 	    _addr[i] = 0;
@@ -328,7 +328,7 @@ IPv6::operator++()
 
 static IPv6 v6prefix[129];
 
-static size_t
+static uint32_t
 init_prefixes()
 {
     uint32_t u[4];
@@ -339,10 +339,10 @@ init_prefixes()
     }
     return 128;
 }
-static size_t n_inited_prefixes = init_prefixes();
+static uint32_t n_inited_prefixes = init_prefixes();
 
 const IPv6&
-IPv6::make_prefix(size_t mask_len) throw (InvalidNetmaskLength)
+IPv6::make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength)
 {
     if (mask_len > n_inited_prefixes)
 	xorp_throw(InvalidNetmaskLength, mask_len);
@@ -353,7 +353,7 @@ string
 IPv6::str() const
 {
     char str_buffer[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
-    
+
     inet_ntop(AF_INET6, &_addr[0], str_buffer, sizeof(str_buffer));
     return (str_buffer);	// XXX: implicitly create string return object
 }
@@ -364,7 +364,7 @@ IPv6::is_unicast() const
     // Icky casting because of alternate definitions of IN6_IS_ADDR_MULTICAST
     uint32_t *nc = const_cast<uint32_t*>(_addr);
     in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
-    
+
     return (! (IN6_IS_ADDR_MULTICAST(addr6)
 	       || IN6_IS_ADDR_UNSPECIFIED(const_cast<in6_addr*>(addr6))));
 }
@@ -375,7 +375,7 @@ IPv6::is_multicast() const
     // Icky casting because of alternate definitions of IN6_IS_ADDR_MULTICAST
     uint32_t *nc = const_cast<uint32_t*>(_addr);
     in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
-    
+
     return (IN6_IS_ADDR_MULTICAST(addr6));
 }
 
@@ -386,7 +386,7 @@ IPv6::is_nodelocal_multicast() const
     // of IN6_IS_ADDR_MC_NODELOCAL
     uint32_t *nc = const_cast<uint32_t*>(_addr);
     in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
-    
+
     return (IN6_IS_ADDR_MC_NODELOCAL(addr6));
 }
 
@@ -397,18 +397,18 @@ IPv6::is_linklocal_multicast() const
     // of IN6_IS_ADDR_MC_LINKLOCAL
     uint32_t *nc = const_cast<uint32_t*>(_addr);
     in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
-    
+
     return (IN6_IS_ADDR_MC_LINKLOCAL(addr6));
 }
 
-size_t
+uint32_t
 IPv6::mask_len() const
 {
-    size_t ctr = 0;
-    
+    uint32_t ctr = 0;
+
     for (int j = 0; j < 4; j++) {
 	uint32_t shift = ntohl(_addr[j]);
-	
+
 	for (int i = 0; i < 32; i++) {
 	    if ((shift & 0x80000000U) != 0) {
 		ctr++;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.7 2003/09/30 03:17:03 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.8 2003/09/30 18:27:03 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -148,20 +148,20 @@ IPv4::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
 }
 
 IPv4
-IPv4::operator<<(size_t left_shift) const
+IPv4::operator<<(uint32_t left_shift) const
 {
     if (left_shift >= 32) {
 	// Clear all bits.
 	// XXX: special case, because in C the behavior is undefined.
 	return (IPv4::ZERO());
     }
-    
+
     uint32_t tmp_addr = ntohl(_addr) << left_shift;
     return IPv4(htonl(tmp_addr));
 }
 
 IPv4
-IPv4::operator>>(size_t right_shift) const
+IPv4::operator>>(uint32_t right_shift) const
 {
     if (right_shift >= 32) {
 	// Clear all bits.
@@ -180,7 +180,7 @@ IPv4::operator<(const IPv4& other) const
 }
 
 IPv4
-IPv4::make_prefix(size_t mask_len) throw (InvalidNetmaskLength)
+IPv4::make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength)
 {
     if (mask_len > 32)
 	xorp_throw(InvalidNetmaskLength, mask_len);
@@ -188,12 +188,12 @@ IPv4::make_prefix(size_t mask_len) throw (InvalidNetmaskLength)
     return IPv4(htonl(m));
 }
 
-size_t
+uint32_t
 IPv4::mask_len() const
 {
-    size_t ctr = 0;
+    uint32_t ctr = 0;
     uint32_t shift = ntohl(_addr);
-    
+
     for (int i = 0; i < 32; i++) {
 	if ((shift & 0x80000000U) != 0) {
 	    ctr++;
@@ -225,7 +225,7 @@ string
 IPv4::str() const
 {
     struct in_addr in;
-    
+
     in.s_addr = _addr;
     return (inet_ntoa(in));	// XXX: implicitly create string return object
 }
@@ -234,7 +234,7 @@ bool
 IPv4::is_unicast() const
 {
     uint32_t addr4 = ntohl(_addr);
-    
+
     return (! (IN_MULTICAST(addr4)
 	       || IN_BADCLASS(addr4)
 	       || (addr4 & 0xff000000U) == 0));
@@ -244,7 +244,7 @@ bool
 IPv4::is_multicast() const
 {
     uint32_t addr4 = ntohl(_addr);
-    
+
     return (IN_MULTICAST(addr4));
 }
 
@@ -260,6 +260,6 @@ bool
 IPv4::is_linklocal_multicast() const
 {
     uint32_t addr4 = ntohl(_addr);
-    
+
     return (IN_MULTICAST(addr4) && (addr4 <= INADDR_MAX_LOCAL_GROUP));
 }

@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.8 2003/09/30 03:17:03 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.9 2003/09/30 18:27:03 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>  
+#include <arpa/inet.h>
 
 //
 // Static class members
@@ -30,7 +30,7 @@ IPvX::IPvX(int family) throw (InvalidFamily)
 {
     if ((family != AF_INET) && (family != AF_INET6))
 	xorp_throw(InvalidFamily, family);
-    
+
     _af = family;
     memset(_addr, 0, sizeof(_addr));
 }
@@ -40,7 +40,7 @@ IPvX::IPvX(int family) throw (InvalidFamily)
 IPvX::IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily)
 {
     assert(from_uint8 != NULL);
-    
+
     _af = family;
     memset(_addr, 0, sizeof(_addr));
     memcpy(_addr, from_uint8, addr_size());
@@ -50,7 +50,7 @@ IPvX::IPvX(const IPv4& ipv4)
 {
     static_assert(sizeof(_addr) >= sizeof(IPv4));
     static_assert(sizeof(IPv4) == 4);
-    
+
     _af = AF_INET;
     memset(_addr, 0, sizeof(_addr));
     memcpy(_addr, &ipv4, 4);
@@ -60,7 +60,7 @@ IPvX::IPvX(const IPv6& ipv6)
 {
     static_assert(sizeof(_addr) >= sizeof(IPv6));
     static_assert(sizeof(IPv6) == 16);
-    
+
     _af = AF_INET6;
     memcpy(_addr, &ipv6, 16);
 }
@@ -99,7 +99,7 @@ IPvX::IPvX(char const *from_cstring) throw (InvalidString)
     } else if (inet_pton(AF_INET6, from_cstring, _addr) > 0) {
 	_af = AF_INET6;
     } else {
-	xorp_throw(InvalidString, 
+	xorp_throw(InvalidString,
 		   c_format("Bad IPvX \"%s\"", from_cstring));
     }
 }
@@ -148,7 +148,7 @@ IPvX::operator^(const IPvX& other) const throw (InvalidCast)
 }
 
 IPvX
-IPvX::operator<<(size_t left_shift) const
+IPvX::operator<<(uint32_t left_shift) const
 {
     if (is_ipv4()) {
 	return get_ipv4() << left_shift;
@@ -158,7 +158,7 @@ IPvX::operator<<(size_t left_shift) const
 }
 
 IPvX
-IPvX::operator>>(size_t right_shift) const
+IPvX::operator>>(uint32_t right_shift) const
 {
     if (is_ipv4()) {
 	return get_ipv4() >> right_shift;
@@ -167,12 +167,12 @@ IPvX::operator>>(size_t right_shift) const
     }
 }
 
-bool 
+bool
 IPvX::operator<(const IPvX& other) const
 {
     static_assert(sizeof(_addr) == 16);
     int i;
-    
+
     for (i = 0; i < 3; i++) {	// Loop ends intentionally at 3 not 4.
 	if (_addr[i] != other._addr[i]) {
 	    break;
@@ -188,7 +188,7 @@ IPvX::operator==(const IPvX& other) const
 	return (get_ipv4() == other.get_ipv4());
     else if (is_ipv6() && other.is_ipv6())
 	return (get_ipv6() == other.get_ipv6());
-    else 
+    else
 	return false;
 }
 
@@ -199,12 +199,12 @@ IPvX::operator!=(const IPvX& other) const
 	return (get_ipv4() != other.get_ipv4());
     else if (is_ipv6() && other.is_ipv6())
 	return (get_ipv6() != other.get_ipv6());
-    else 
+    else
 	return true;
 }
 
-IPvX& 
-IPvX::operator--()  { 
+IPvX&
+IPvX::operator--()  {
     if (is_ipv4()) {
         *this = --get_ipv4();
     } else {
@@ -212,9 +212,9 @@ IPvX::operator--()  {
     }
     return (*this);
 }
-    
-IPvX& 
-IPvX::operator++() { 
+
+IPvX&
+IPvX::operator++() {
     if (is_ipv4()) {
         *this = ++get_ipv4();
     } else {
@@ -224,20 +224,20 @@ IPvX::operator++() {
 }
 
 IPvX
-IPvX::make_prefix(int family, size_t mask_len)
+IPvX::make_prefix(int family, uint32_t mask_len)
     throw (InvalidFamily, InvalidNetmaskLength)
 {
     if (family == AF_INET)
 	return IPv4::make_prefix(mask_len);
     else if (family == AF_INET6)
 	return IPv6::make_prefix(mask_len);
-    else 
+    else
 	xorp_throw(InvalidFamily, family);
     return IPvX(0);	/* Not Reached */
 }
 
 IPvX
-IPvX::mask_by_prefix_len(size_t prefix_len) const throw (InvalidNetmaskLength)
+IPvX::mask_by_prefix_len(uint32_t prefix_len) const throw (InvalidNetmaskLength)
 {
     if (_af == AF_INET)
 	return get_ipv4().mask_by_prefix_len(prefix_len);
@@ -254,7 +254,7 @@ IPvX::str() const
 	return get_ipv6().str();
 }
 
-size_t
+uint32_t
 IPvX::mask_len() const
 {
     if (is_ipv4())
@@ -326,7 +326,7 @@ IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
 	to_sockaddr_in.sin_family = _af;
 	to_sockaddr_in.sin_port = 0;			// XXX: not used
 	return (copy_out(to_sockaddr_in.sin_addr));
-	
+
     case AF_INET6:
 	return (copy_out(reinterpret_cast<sockaddr_in6&>(to_sockaddr_in)));
 
@@ -349,7 +349,7 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
     switch (_af) {
     case AF_INET:
 	return (copy_out(reinterpret_cast<sockaddr_in&>(to_sockaddr_in6)));
-	
+
     case AF_INET6:
 	memset(&to_sockaddr_in6, 0, sizeof(to_sockaddr_in6));
 #ifdef HAVE_SIN6_LEN
@@ -372,7 +372,7 @@ size_t
 IPvX::copy_in(int family, const uint8_t *from_uint8) throw (InvalidFamily)
 {
     _af = family;
-    
+
     switch (_af) {
     case AF_INET:
 	// FALLTHROUGH
@@ -423,7 +423,7 @@ size_t
 IPvX::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
 {
     _af = from_sockaddr_in.sin_family;
-    
+
     switch (_af) {
     case AF_INET:
 	return (copy_in(from_sockaddr_in.sin_addr));
@@ -443,7 +443,7 @@ size_t
 IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
 {
     _af = from_sockaddr_in6.sin6_family;
-    
+
     switch (_af) {
     case AF_INET:
 	return (copy_in(reinterpret_cast<const sockaddr_in&>(from_sockaddr_in6)));
@@ -452,14 +452,14 @@ IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
     default:
 	xorp_throw(InvalidFamily, _af);
     }
-    
+
     return((size_t)-1);
 }
 
 bool
 IPvX::is_zero() const
 {
-    if (_af == AF_INET) 
+    if (_af == AF_INET)
 	return get_ipv4().is_zero();
     return get_ipv6().is_zero();
 }
@@ -467,7 +467,7 @@ IPvX::is_zero() const
 bool
 IPvX::is_unicast() const
 {
-    if (_af == AF_INET) 
+    if (_af == AF_INET)
 	return get_ipv4().is_unicast();
     return get_ipv6().is_unicast();
 }
@@ -507,7 +507,7 @@ IPvX::ip_version() const throw (InvalidFamily)
     if (_af == AF_INET6)
 	return (IPv6::ip_version());
     xorp_throw(InvalidFamily, _af);
-    
+
     return ((size_t)-1);
 }
 
@@ -522,7 +522,7 @@ IPvX::ip_version_str() const throw (InvalidFamily)
     if (_af == AF_INET6)
 	return (IPv6::ip_version_str());
     xorp_throw(InvalidFamily, _af);
-    
+
     return (string("Unknown IP version"));
 }
 
@@ -538,16 +538,16 @@ IPvX::addr_size(int family) throw (InvalidFamily)
     return ((size_t)-1);
 }
 
-size_t
+uint32_t
 IPvX::ip_multicast_base_address_mask_len(int family) throw (InvalidFamily)
 {
     if (family == AF_INET)
 	return (IPv4::ip_multicast_base_address_mask_len());
     if (family == AF_INET6)
 	return (IPv6::ip_multicast_base_address_mask_len());
-    
+
     xorp_throw(InvalidFamily, family);
-    return ((size_t)-1);
+    return ((uint32_t)-1);
 }
 
 //
@@ -576,5 +576,3 @@ IPVX_CONSTANT_ACCESSOR(RIP2_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(PIM_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(OSPFIGP_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(OSPFIGP_DESIGNATED_ROUTERS);
-
-
