@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.29 2005/03/25 03:25:23 pavlin Exp $
+# $XORP: xorp/README,v 1.30 2005/03/25 03:52:34 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -274,6 +274,7 @@ The core team currently consists of:
 	Any opinions, findings, and conclusions or recommendations
 	expressed in this material are those of the author(s) and do not
 	necessarily reflect the views of the National Science Foundation.
+    - Microsoft
 
   * Martin C. Shepherd for the libtecla library (used by the CLI).
 
