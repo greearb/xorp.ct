@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.32 2002/12/09 18:28:44 hodson Exp $"
+#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -111,6 +111,10 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
     case COMMUNITY:
 	new_att =
 	    new CommunityAttribute((const CommunityAttribute&)att);
+	break;
+    case UNKNOWN:
+	new_att =
+	    new UnknownAttribute((const UnknownAttribute&)att);
 	break;
     }
     if (new_att != NULL) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.2 2002/12/13 23:57:05 rizzo Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -36,23 +36,25 @@ enum PathAttType {
     LOCAL_PREF = 5,
     ATOMIC_AGGREGATE = 6,
     AGGREGATOR = 7,
-    COMMUNITY = 8
+    COMMUNITY = 8,
+    UNKNOWN = 255
 };
 
 //PathAttSortType is only used in sorting a path attribute list - it's
 // different from PathAttType because we want to sort the path
 //attribute list on NextHop for less expensive processing when the IGP
 // information for a nexthop changes.
-enum  PathAttSortType {
-    SORT_NEXT_HOP = 1,
-    SORT_ORIGIN = 2,
-    SORT_AS_PATH = 3,
-    SORT_MED = 4,
-    SORT_LOCAL_PREF = 5,
-    SORT_ATOMIC_AGGREGATE = 6,
-    SORT_AGGREGATOR = 7,
-    SORT_COMMUNITY = 8
-};
+typedef uint8_t  PathAttSortType;
+
+#define SORT_NEXT_HOP  1
+#define SORT_ORIGIN  2
+#define SORT_AS_PATH  3
+#define SORT_MED  4
+#define SORT_LOCAL_PREF  5
+#define SORT_ATOMIC_AGGREGATE 6
+#define SORT_AGGREGATOR 7
+#define SORT_COMMUNITY 8
+
 
 //Origin values
 enum OriginType {
@@ -70,8 +72,8 @@ public:
     virtual ~PathAttribute();
     virtual void encode() const = 0;
     virtual void decode() = 0;
-    virtual PathAttType type() const = 0;
-    virtual PathAttSortType sorttype() const = 0;
+    virtual const PathAttType type() const = 0;
+    virtual const PathAttSortType sorttype() const = 0;
     virtual void add_hash(MD5_CTX *context) const;
 
     const uint8_t * get_data() const;
@@ -114,8 +116,8 @@ public:
     void encode() const;
     void decode();
     void add_hash(MD5_CTX *context) const;
-    PathAttType type() const { return ORIGIN; }
-    PathAttSortType sorttype() const { return SORT_ORIGIN; }
+    const PathAttType type() const { return ORIGIN; }
+    const PathAttSortType sorttype() const { return SORT_ORIGIN; }
     OriginType origintype() const { return _origin; }
     string str() const;
     bool operator<(const OriginAttribute& him) const {
@@ -137,8 +139,8 @@ public:
     ASPathAttribute(const uint8_t* d, uint16_t l);
     void encode() const;
     void decode();
-    PathAttType type() const { return AS_PATH; }
-    PathAttSortType sorttype() const { return SORT_AS_PATH; }
+    const PathAttType type() const { return AS_PATH; }
+    const PathAttSortType sorttype() const { return SORT_AS_PATH; }
     const AsPath &as_path() const { return _as_path; }
     string str() const;
     bool operator<(const ASPathAttribute& him) const {
@@ -167,8 +169,8 @@ public:
     void encode() const;
     void decode();
     void add_hash(MD5_CTX *context) const;
-    PathAttType type() const { return NEXT_HOP; }
-    PathAttSortType sorttype() const { return SORT_NEXT_HOP; }
+    const PathAttType type() const { return NEXT_HOP; }
+    const PathAttSortType sorttype() const { return SORT_NEXT_HOP; }
     string str() const;
     bool operator<(const NextHopAttribute& him) const {
 	return (_next_hop < him.nexthop());
@@ -192,8 +194,8 @@ public:
     MEDAttribute(const uint8_t* d, uint16_t l);
     void encode() const;
     void decode();
-    PathAttType type() const { return MED; }
-    PathAttSortType sorttype() const { return SORT_MED; }
+    const PathAttType type() const { return MED; }
+    const PathAttSortType sorttype() const { return SORT_MED; }
     uint32_t med() const { return _multiexitdisc; }
     string str() const;
     bool operator<(const MEDAttribute& him) const {
@@ -215,8 +217,8 @@ public:
     LocalPrefAttribute(const uint8_t* d, uint16_t l);
     void encode() const;
     void decode();
-    PathAttType type() const { return LOCAL_PREF; }
-    PathAttSortType sorttype() const { return SORT_LOCAL_PREF; }
+    const PathAttType type() const { return LOCAL_PREF; }
+    const PathAttSortType sorttype() const { return SORT_LOCAL_PREF; }
     uint32_t localpref() const { return _localpref; }
     string str() const;
     bool operator<(const LocalPrefAttribute& him) const {
@@ -244,8 +246,8 @@ public:
     AtomicAggAttribute(const uint8_t* d, uint16_t l);
     void encode() const;
     void decode();
-    PathAttType type() const { return ATOMIC_AGGREGATE; }
-    PathAttSortType sorttype() const { return SORT_ATOMIC_AGGREGATE; }
+    const PathAttType type() const { return ATOMIC_AGGREGATE; }
+    const PathAttSortType sorttype() const { return SORT_ATOMIC_AGGREGATE; }
     string str() const;
     bool operator<(const AtomicAggAttribute&) const {
 	return false;
@@ -266,8 +268,8 @@ public:
     AggregatorAttribute(const uint8_t* d, uint16_t l);
     void encode() const;
     void decode();
-    PathAttType type() const { return AGGREGATOR; }
-    PathAttSortType sorttype() const { return SORT_AGGREGATOR; }
+    const PathAttType type() const { return AGGREGATOR; }
+    const PathAttSortType sorttype() const { return SORT_AGGREGATOR; }
     const IPv4& route_aggregator() const { return _routeaggregator; }
     const AsNum& aggregator_as() const { return _aggregatoras; }
     string str() const;
@@ -299,14 +301,32 @@ public:
     const set <uint32_t>& community_set() const { return _communities; }
     void encode() const;
     void decode();
-    PathAttType type() const { return COMMUNITY; }
-    PathAttSortType sorttype() const { return SORT_COMMUNITY; }
+    const PathAttType type() const { return COMMUNITY; }
+    const PathAttSortType sorttype() const { return SORT_COMMUNITY; }
     string str() const;
     bool operator<(const CommunityAttribute& him) const;
     bool operator==(const CommunityAttribute& him) const;
 protected:
 private:
     set <uint32_t> _communities;
+};
+
+class UnknownAttribute : public PathAttribute
+{
+public:
+    UnknownAttribute();
+    UnknownAttribute(const UnknownAttribute& agg);
+    UnknownAttribute(const uint8_t* d, uint16_t l);
+    void encode() const;
+    void decode();
+    const PathAttType type() const { return UNKNOWN; }
+    const PathAttSortType sorttype() const { return _type; }
+    string str() const;
+    bool operator<(const UnknownAttribute& him) const;
+    bool operator==(const UnknownAttribute& him) const;
+protected:
+private:
+    uint8_t _type;
 };
 
 #endif // __BGP_PATH_ATTRIBUTE_HH__

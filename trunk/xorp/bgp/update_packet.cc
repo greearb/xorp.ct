@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -124,6 +124,10 @@ UpdatePacket::add_pathatt(const PathAttribute& pa)
     case COMMUNITY:
 	attribute = 
 	    new CommunityAttribute((const CommunityAttribute&)pa);
+	break;
+    case UNKNOWN:
+	attribute = 
+	    new UnknownAttribute((const UnknownAttribute&)pa);
 	break;
     }	
 	
@@ -434,7 +438,9 @@ UpdatePacket::decode()
 		    }
 		default:
 		    {
-			//XXX need to handle unknown transitive attributes
+			//this will throw an error if the attribute isn't
+			//optional transitive.
+			pa_temp = new UnknownAttribute(data,palength+shift);
 			break;
 		    }
 		}

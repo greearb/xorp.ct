@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.3 2002/12/13 23:57:05 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.4 2002/12/14 00:21:01 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -190,12 +190,8 @@ PathAttribute::str() const
     case COMMUNITY:
 	s += "COMMUNITY";
 	break;
-#if 0
     default:
-	// XXX this should be enabled in production code
-	s += "UNKNOWN";
-	assert("UNKNOWN Path attribute\n");
-#endif
+	s += c_format("UNKNOWN(%d)", type());
     }
     return s;
 }
@@ -232,6 +228,8 @@ PathAttribute::operator<(const PathAttribute& him) const
 	return ((AggregatorAttribute&)*this) < ((AggregatorAttribute&)him);
     case COMMUNITY:
 	return ((CommunityAttribute&)*this) < ((CommunityAttribute&)him);
+    case UNKNOWN:
+	return ((UnknownAttribute&)*this) < ((UnknownAttribute&)him);
     }
     abort();
 }
@@ -265,6 +263,8 @@ PathAttribute::operator==(const PathAttribute& him) const
 	return ((AggregatorAttribute&)*this) == ((AggregatorAttribute&)him);
     case COMMUNITY:
 	return ((CommunityAttribute&)*this) == ((CommunityAttribute&)him);
+    case UNKNOWN:
+	return ((UnknownAttribute&)*this) == ((UnknownAttribute&)him);
     }
     abort();
 }
@@ -1136,3 +1136,114 @@ CommunityAttribute::operator==(const CommunityAttribute& him) const
 	return true;
     return false;
 }
+
+/* ************ UnknownAttribute ************* */
+
+UnknownAttribute::UnknownAttribute()
+    : PathAttribute(true, true, false, false) /*optional transitive*/
+{
+}
+
+
+UnknownAttribute::UnknownAttribute(const UnknownAttribute& att)
+    : PathAttribute(att._optional, att._transitive,
+		    att._partial, att._extended)
+{
+    if (att._data != NULL) {
+	_length = att._length;
+	uint8_t *p = new uint8_t[_length];
+	memcpy(p, att._data, _length);
+	_data = p;
+    }
+    _attribute_length = att._attribute_length;
+    _type = att._type;
+}
+
+UnknownAttribute::UnknownAttribute(const uint8_t* d, uint16_t l)
+    : PathAttribute(false, false, false, false)
+{
+    uint8_t *data = new uint8_t[l];
+    memcpy(data, d, l);
+    _data = data;
+    _length = l;
+    decode();
+}
+
+void
+UnknownAttribute::encode() const
+{
+}
+
+void
+UnknownAttribute::decode()
+{
+    PathAttribute::decode();
+    const uint8_t *data = _data;
+    _type = data[1];
+
+    switch (_type) {
+    case ORIGIN:
+    case AS_PATH:
+    case NEXT_HOP:
+    case MED:
+    case LOCAL_PREF:
+    case ATOMIC_AGGREGATE:
+    case AGGREGATOR:
+    case COMMUNITY:
+	//we got called by mistake
+	abort();
+    default:
+	break;
+    }
+
+    if (_extended) {
+	uint16_t len;
+	memcpy(&len, data+2, 2);
+	_length = htons(len);
+	data += 4;
+    } else {
+	_length = data[2];
+	data += 3;
+    }
+    if (!optional() || !transitive()) {
+	xorp_throw(CorruptMessage,
+		   "Bad Flags in Unknown attribute",
+		   UPDATEMSGERR, ATTRFLAGS,
+		   get_data(), get_size());
+    }
+    debug_msg("Unknown Attribute\n");
+}
+
+string
+UnknownAttribute::str() const
+{
+    string s = "Unknown Attribute ";
+    for (int i=0; i< _length; i++) {
+	s += c_format("%x ", _data[i]);
+    }
+    return s;
+}
+
+bool
+UnknownAttribute::operator<(const UnknownAttribute& him) const
+{
+    if (_length < him.get_size())
+	return true;
+    if (_length > him.get_size())
+	return false;
+
+    //lengths are equal
+    if (memcmp(_data, him.get_data(), _length)<0)
+	return true;
+    return false;
+}
+
+bool
+UnknownAttribute::operator==(const UnknownAttribute& him) const
+{
+    if (_length != him.get_size())
+	return false;
+
+    return (memcmp(_data, him.get_data(), _length) == 0);
+}
+
