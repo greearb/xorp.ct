@@ -421,7 +421,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    lsa->set_v_bit(flag & 0x4);
 	    lsa->set_e_bit(flag & 0x2);
 	    lsa->set_b_bit(flag & 0x1);
-	    lsa->set_options(extract_32(&buf[header_length + 1]) & 0xffffff);
+	    lsa->set_options(extract_32(&buf[header_length]) & 0xffffff);
 	    break;
 	}
 
