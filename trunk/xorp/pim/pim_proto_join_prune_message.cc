@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.12 2003/09/30 18:27:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.13 2004/02/22 04:14:31 pavlin Exp $"
 
 
 //
@@ -777,7 +777,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    // XXX: check if already we added the entry because
 		    // of an (S,G) entry.
 		    //
-		    PimMre *pim_mre_sg = pim_mre_sg_rpt->sg_rpt_entry();
+		    PimMre *pim_mre_sg = pim_mre_sg_rpt->sg_entry();
 		    if ((pim_mre_sg != NULL) && (pim_mre_sg->is_spt())) {
 			// Note: If receiving (S,G) on the SPT, we only prune
 			// off the shared tree if the RPF neighbors differ,
