@@ -1,0 +1,138 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/mfea/configure_mfea,v 1.8 2003/05/16 02:16:25 pavlin Exp $
+#
+
+#
+# Send configuration commands to a running MFEA process.
+#
+
+MODULE_NAME="MFEA"
+HOSTNAME=`hostname`
+
+CLI_TARGET="CLI"
+MFEA_TARGET="MFEA_4"
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../mfea/xrl_mfea_shell_funcs.sh
+
+echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
+
+###############################################################
+# USER CONFIGURATION BEGIN
+###############################################################
+
+#
+# Select the vifs to enable
+#
+case ${HOSTNAME} in
+	xorp1)
+	ENABLE_VIFS="dc1 dc4"
+	;;
+
+	xorp2)
+	ENABLE_VIFS="dc1 dc2"
+	;;
+
+	xorp3)
+	ENABLE_VIFS="dc0 dc1 dc2"
+	;;
+
+	xorp4)
+	ENABLE_VIFS="eth6 eth7"
+	;;
+
+	xorp6)
+	ENABLE_VIFS="dc1"
+	;;
+
+	possum.icir.org)
+	ENABLE_VIFS="rl0"
+	;;
+
+	oreo.icir.org)
+	ENABLE_VIFS="wi0"
+	ENABLE_VIFS="ed1"
+	;;
+	
+	pie)
+	ENABLE_VIFS="en1"
+	;;
+	
+	*)
+	echo "Unknown host : ${HOSTNAME}"
+	exit 1
+	;;
+esac
+
+#
+# Comment-out to disable log trace
+#
+MFEA_ENABLE_LOG_TRACE=yes
+
+#
+# The subnets to enable/disable CLI access
+#
+CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
+
+
+###############################################################
+# USER CONFIGURATION END
+###############################################################
+
+
+# Add the PIM 'register_vif' to the list of interfaces to enable
+MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
+
+#
+# Disable log trace
+#
+if [ "${MFEA_ENABLE_LOG_TRACE}" != "yes" ] ; then
+	mfea_disable_log_trace
+fi
+
+#
+# Configure CLI
+#
+for subnet in ${CLI_ENABLE_SUBNETS}; do
+	cli_add_enable_cli_access_from_subnet4 ${subnet}
+done
+for subnet in ${CLI_DISABLE_SUBNETS}; do
+	cli_add_disable_cli_access_from_subnet4 ${subnet}
+done
+
+#
+# Enable and start CLI
+#
+cli_enable_cli
+cli_start_cli
+
+#
+# Enable and start MFEA CLI
+#
+mfea_enable_cli
+mfea_start_cli
+
+#
+# Enable and start MFEA
+#
+mfea_enable_mfea
+mfea_start_mfea
+
+#
+# Enable and start MFEA vifs
+#
+for vif in ${MFEA_ENABLE_VIFS}; do
+	mfea_enable_vif ${vif}
+	mfea_start_vif ${vif}
+done
+
+
+#
+# Done
+#
+echo "Configuration done."
+
+exit 0

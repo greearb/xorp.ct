@@ -1,0 +1,5 @@
+/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
+
+#include "common.xif"
+
+target bgp4_mib implements common/0.1

@@ -1,0 +1,180 @@
+
+
+
+
+Internet Engineering Task Force                         Francis Dupont
+INTERNET DRAFT                                           ENST Bretagne
+Expires in July 2002                                      Alain Durand
+                                                       January 2. 2002
+
+
+               BGP4 router ID for IPv6 only routers
+
+
+         <draft-dupont-durand-idr-ipv6-bgp-routerid-01.txt>
+
+
+Status of this Memo
+   
+   This document is an Internet Draft and is in full conformance with
+   all provisions of Section 10 of RFC 2026.
+
+
+   This document is an Internet-Draft.  Internet-Drafts are working
+   documents of the Internet Engineering Task Force (IETF), its
+   areas, and its working groups.  Note that other groups may also
+   distribute working documents as Internet-Drafts.
+
+
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other
+   documents at any time.  It is inappropriate to use Internet-
+   Drafts as reference material or to cite them other than as
+   "work in progress."
+
+
+   The list of current Internet Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt
+
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+
+   Distribution of this memo is unlimited.
+
+
+Abstract
+
+
+   BGP4 [1] uses a 32 bit field to identify router (the so called
+   "router-IDs"). In IPv4 domain, an IPv4 address of the router
+   is typically used in this field.
+   In an IPv6 routing domain, routers may very well not have any IPv4
+   Addresses. This document provides a simple way to form a globally
+   Unique ID in such a case.
+
+
+1. Introduction
+
+
+   BGP4 [1] extension for IPv6 are defined in [2] and [3].
+   However, BGP4 uses a 32 bit field known as the router ID.
+   This router ID is used in:
+
+
+   BGP4 [1] uses the router ID as an identifier in:
+    - BGP Identifier in OPEN messages (local use)
+    - AGGREGATOR (optional transitive) attributes
+    - ORIGINATOR_ID (optional non-transitive) attributes [4]
+    - CLUSTER_LIST (optional non-transitive) attributes [4]
+
+
+   The AGGREGATOR attributes contain an Autonomous
+   System (AS) number with the IP address of the BGP speaker
+   that formed the aggregate route. It is the only transitive,
+   (i.e. non local) use of the router ID.
+
+
+   The router ID should be somehow unique and BGP implementations
+   should provide a way to manually set it. This field typically
+   contains one of the IPv4 addresses of the BGP4 speaker.
+   In an IPv6 domain, some router may have IPv4 addresses,
+   and some other may very well not have any. On those routers,
+   one can not assigned random values to the router ID, as it could
+   conflict with the router ID derived from an IPv4 addresses on
+   another dual stack router.
+
+
+   This document specifies a simple way to construct a somehow
+   globally unique 32 bit router ID.
+
+
+2. Recommended practice
+
+
+   In the absence of a globally unique IPv4 address on the router,
+   the 32 bit routing ID may be constructed with:
+
+
+    - 4 bits set to one (as for an old reserved class E IPv4 address),
+
+
+    - 16 bits set to the AS number (a global AS number
+      SHOULD be used if the router ID can be seen outside the routing
+      domain).
+
+
+    - 12 bits manually allocated within the domain. This allows for 4096
+      different router IDs in each routing domain.
+
+
+                        1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-------+-------------------------------+-----------------------+
+   |       |                               |                       |
+   |  0xF  |          AS  Number           |  Locally allocated    |
+   |       |                               |                       |   
+   +-------+-------------------------------+-----------------------+
+
+
+
+   Note: 32 bit AS numbers could be introduced in the future.
+         This recommended solution would then have to be adapted.
+
+
+
+
+3. Security Considerations
+
+
+   The usage of fake IPv4 address of this form minimizes accidental
+   or deliberate confusions (ie. same router ID for two different
+   BGP speakers).
+
+
+4. References
+
+
+   [1] Y. Rekhter, T. Li, "A Border Gateway Protocol 4 (BGP-4)",
+       RFC 1771, March 1995.
+
+
+   [2] T. Bates, Y. Rekhter, R. Chandra, D. Katz, "Multiprotocol
+       Extensions for BGP-4", RFC 2858, June 2000.
+
+
+   [3] P. Marques, F. Dupont, "Use of BGP-4 Multiprotocol Extensions
+       for IPv6 Inter-Domain Routing", RFC 2545, March 1999.
+
+
+   [4] T. Bates, R. Chandra, E. Chen, "BGP Route Reflection -
+       An Alternative to Full Mesh IBGP", RFC 2796, April 2000.
+
+
+
+5. Author's Address
+
+
+   Francis Dupont
+   ENST Bretagne
+   Campus de Rennes
+   2, rue de la Chataigneraie
+   BP 78
+   35512 Cesson-Sevigne Cedex
+   FRANCE
+   Fax: +33 2 99 12 70 30
+   EMail: Francis.Dupont@enst-bretagne.fr
+
+
+   Alain Durand
+   SUN Microsystems, Inc
+   901 San Antonio Road
+   MPK17-202
+   Palo Alto, CA 94303-4900
+   USA
+   EMail: Alain.Durand@sun.com
+
+
+Expire in 6 months (July 3, 2002)
+

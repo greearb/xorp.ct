@@ -1,0 +1,23 @@
+#
+# $XORP: xorp/libxorp/README,v 1.6 2002/12/09 15:25:06 pavlin Exp $
+#
+
+	LIBXORP: XORP Common Library
+
+Libxorp is a set of classes for basic XORP functionalities such
+as IP addresses, IP subnets, etc.
+
+Documentation
+=============
+
+Overview material is present in:
+	$(XORP)/docs/libxorp 
+
+The programming documentation is in:
+	$(XORP)/docs/kdoc/html/libxorp
+
+Status
+======
+
+This code is functional and widely used by practically all other XORP
+components.

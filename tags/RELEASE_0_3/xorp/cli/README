@@ -1,0 +1,55 @@
+#
+# $XORP: xorp/cli/README,v 1.4 2003/06/05 08:44:37 pavlin Exp $
+#
+
+Command-Line Interface Implementation
+============================================
+
+This directory contains the XORP implementation of the CLI library.
+
+Startup
+=======
+
+The CLI is intended to run as a part of a process that wishes
+to enable CLI access.
+
+ - After a process that provides CLI access is started, if you want to
+   access its internal information, you can use the built-in CLI:
+     telnet localhost 12000
+   If you want to enable access from other subnets other than the local
+   host only, add lines similar to the following lines for each additional
+   subnet:
+
+	IPvXNet enable_ipvxnet("10.10.10.0/24");
+	cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet);
+	IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
+	cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
+
+
+   Currently, the CLI supports primarily "show" commands. For example,
+   "show pim interface" will show the list of all interfaces known to
+   PIM and their status. At each moment you can press <TAB> for the
+   list of existing commands at each level, and a brief description
+   of them. Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   Ctrl-E to go to the beginning or end of the current line, Ctrl-A
+   to kill the remaining part of the current line, etc.
+   To exit, press Ctrl-D when you are on a new empty line.
+
+Documentation
+=============
+
+Currently, the only available documentation is the source code itself.
+In the future documentation will be added to describe the CLI architecture.
+
+Testing
+=======
+
+Currently, the CLI testing is performed manually. See file ``TODO''
+for a list of known problems.
+
+Status
+======
+
+Currently (June 2003), the CLI implementation is reasonably
+stable, but more tests are needed and there are still several minor
+things that need fixing.

@@ -1,0 +1,61 @@
+#
+# $XORP: xorp/mibs/README,v 1.1 2003/06/06 18:31:28 jcardona Exp $
+#
+
+MIB modules for Net-SNMP
+========================
+
+This directory contains MIB modules that can be dynamically loaded by the
+Net-SNMP agent and that provide the MIBS that correspond to the protocols
+implemented in XORP.
+
+Configuration
+=============
+
+There are no executable files in this directory, just dynamically loadable
+modules (shared objects).  These modules are designed for the SNMP agent 
+included in the Net-SNMP package, version 5.0.6 or newer. 
+
+Startup
+=======
+
+In normal operation, the SNMP agent would be started by the XORP router manager
+process, not directly from the command line.  
+
+For testing and debugging purposes, the SNMP agent can be manually started.  The
+proper sequence is:
+
+    - Start the finder + other protocol processes (currently only bgp supported)
+    - Start /usr/local/sbin/snmpd
+    - Load xorp_if_mib_module (you may use the scripts provided in snmpdscripts,
+	or follow the instructions in snmpdscripts/README to have snmpd load
+	it when it starts)
+    - Load other protocol MIB modules (currently only bgp4_mib_1657.so)
+	(for this you can use the same methods as the step before, or the Xrl
+	methods you will find in xorp/xrl/interfaces/xorp_if_mib.xif)
+       
+Documentation
+=============
+
+The SNMP framework used in the project is described in:
+	$(XORP)/docs/snmp
+
+
+Testing
+=======
+
+Run gmake check in this directory.
+
+Status
+======
+
+The MIB development framework is complete except for SNMP trap support.
+
+Currenly we have partially implemented BGP4-MIB (RFC 1657), more specifically,
+the scalar bgpVersion and the table bgpPeerTable.
+ 
+Known problems
+==============
+
+Terminating snmpd (v 5.0.8) with XORP modules still loaded causes a core dump in FreeBSD.  
+

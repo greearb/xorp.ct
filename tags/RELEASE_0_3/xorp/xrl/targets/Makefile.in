@@ -1,0 +1,665 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ../..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+GMAKE = @GMAKE@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+INTERFACES_DIR = $(top_srcdir)/xrl/interfaces
+TARGET_DIR = $(top_srcdir)/xrl/targets
+
+###############################################################################
+# Xrl Target related
+###############################################################################
+
+# Add your target's library here
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
+
+# BGP
+libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
+
+# BGP4MIB
+libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
+
+# CLI
+libclibase_a_SOURCES = cli_base.hh cli_base.cc
+
+# COORD
+libcoordbase_a_SOURCES = coord_base.hh coord_base.cc
+
+# Demo FEA ifmgr client
+libdemofeaifmgrclientbase_a_SOURCES = demo_fea_ifmgr_client_base.hh	\
+				      demo_fea_ifmgr_client_base.cc
+
+
+# FEA
+libfeabase_a_SOURCES = fea_base.hh fea_base.cc
+
+# Finder
+libfinderbase_a_SOURCES = finder_base.hh finder_base.cc
+
+# Finder client
+libfinderclientbase_a_SOURCES = finder_client_base.hh finder_client_base.cc
+
+# MFEA
+libmfeabase_a_SOURCES = mfea_base.hh mfea_base.cc
+
+# MLD6IGMP
+libmld6igmpbase_a_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
+
+# OSPF
+libospfbase_a_SOURCES = ospf_base.hh ospf_base.cc
+
+# PIM
+libpimbase_a_SOURCES = pim_base.hh pim_base.cc
+
+# RIB
+libribbase_a_SOURCES = rib_base.hh rib_base.cc
+
+# RIB client
+libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
+
+# RTRMGR
+librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
+
+# Test finder events
+libtestfindereventsbase_a_SOURCES = test_finder_events_base.hh test_finder_events_base.cc
+
+# TEST PEER
+libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
+
+# XORP IF MIB
+libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
+
+# XORPSH
+libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
+
+# Add your target's library sources like this:
+# Test target
+libtestbase_a_SOURCES = test_base.hh test_base.cc
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+
+
+###############################################################################
+# Implicit Rules and related
+###############################################################################
+SCRIPT_DIR = $(top_srcdir)/xrl/scripts
+TGTGEN_PY = $(SCRIPT_DIR)/tgt-gen
+subdir = xrl/targets
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libbgp4mibbase_a_AR = $(AR) cru
+libbgp4mibbase_a_LIBADD =
+am_libbgp4mibbase_a_OBJECTS = bgp4_mib_base.$(OBJEXT)
+libbgp4mibbase_a_OBJECTS = $(am_libbgp4mibbase_a_OBJECTS)
+libbgpbase_a_AR = $(AR) cru
+libbgpbase_a_LIBADD =
+am_libbgpbase_a_OBJECTS = bgp_base.$(OBJEXT)
+libbgpbase_a_OBJECTS = $(am_libbgpbase_a_OBJECTS)
+libclibase_a_AR = $(AR) cru
+libclibase_a_LIBADD =
+am_libclibase_a_OBJECTS = cli_base.$(OBJEXT)
+libclibase_a_OBJECTS = $(am_libclibase_a_OBJECTS)
+libcoordbase_a_AR = $(AR) cru
+libcoordbase_a_LIBADD =
+am_libcoordbase_a_OBJECTS = coord_base.$(OBJEXT)
+libcoordbase_a_OBJECTS = $(am_libcoordbase_a_OBJECTS)
+libdemofeaifmgrclientbase_a_AR = $(AR) cru
+libdemofeaifmgrclientbase_a_LIBADD =
+am_libdemofeaifmgrclientbase_a_OBJECTS = \
+	demo_fea_ifmgr_client_base.$(OBJEXT)
+libdemofeaifmgrclientbase_a_OBJECTS = \
+	$(am_libdemofeaifmgrclientbase_a_OBJECTS)
+libfeabase_a_AR = $(AR) cru
+libfeabase_a_LIBADD =
+am_libfeabase_a_OBJECTS = fea_base.$(OBJEXT)
+libfeabase_a_OBJECTS = $(am_libfeabase_a_OBJECTS)
+libfinderbase_a_AR = $(AR) cru
+libfinderbase_a_LIBADD =
+am_libfinderbase_a_OBJECTS = finder_base.$(OBJEXT)
+libfinderbase_a_OBJECTS = $(am_libfinderbase_a_OBJECTS)
+libfinderclientbase_a_AR = $(AR) cru
+libfinderclientbase_a_LIBADD =
+am_libfinderclientbase_a_OBJECTS = finder_client_base.$(OBJEXT)
+libfinderclientbase_a_OBJECTS = $(am_libfinderclientbase_a_OBJECTS)
+libmfeabase_a_AR = $(AR) cru
+libmfeabase_a_LIBADD =
+am_libmfeabase_a_OBJECTS = mfea_base.$(OBJEXT)
+libmfeabase_a_OBJECTS = $(am_libmfeabase_a_OBJECTS)
+libmld6igmpbase_a_AR = $(AR) cru
+libmld6igmpbase_a_LIBADD =
+am_libmld6igmpbase_a_OBJECTS = mld6igmp_base.$(OBJEXT)
+libmld6igmpbase_a_OBJECTS = $(am_libmld6igmpbase_a_OBJECTS)
+libospfbase_a_AR = $(AR) cru
+libospfbase_a_LIBADD =
+am_libospfbase_a_OBJECTS = ospf_base.$(OBJEXT)
+libospfbase_a_OBJECTS = $(am_libospfbase_a_OBJECTS)
+libpimbase_a_AR = $(AR) cru
+libpimbase_a_LIBADD =
+am_libpimbase_a_OBJECTS = pim_base.$(OBJEXT)
+libpimbase_a_OBJECTS = $(am_libpimbase_a_OBJECTS)
+libribbase_a_AR = $(AR) cru
+libribbase_a_LIBADD =
+am_libribbase_a_OBJECTS = rib_base.$(OBJEXT)
+libribbase_a_OBJECTS = $(am_libribbase_a_OBJECTS)
+libribclientbase_a_AR = $(AR) cru
+libribclientbase_a_LIBADD =
+am_libribclientbase_a_OBJECTS = ribclient_base.$(OBJEXT)
+libribclientbase_a_OBJECTS = $(am_libribclientbase_a_OBJECTS)
+librtrmgrbase_a_AR = $(AR) cru
+librtrmgrbase_a_LIBADD =
+am_librtrmgrbase_a_OBJECTS = rtrmgr_base.$(OBJEXT)
+librtrmgrbase_a_OBJECTS = $(am_librtrmgrbase_a_OBJECTS)
+libtestbase_a_AR = $(AR) cru
+libtestbase_a_LIBADD =
+am_libtestbase_a_OBJECTS = test_base.$(OBJEXT)
+libtestbase_a_OBJECTS = $(am_libtestbase_a_OBJECTS)
+libtestfindereventsbase_a_AR = $(AR) cru
+libtestfindereventsbase_a_LIBADD =
+am_libtestfindereventsbase_a_OBJECTS = test_finder_events_base.$(OBJEXT)
+libtestfindereventsbase_a_OBJECTS = \
+	$(am_libtestfindereventsbase_a_OBJECTS)
+libtestpeerbase_a_AR = $(AR) cru
+libtestpeerbase_a_LIBADD =
+am_libtestpeerbase_a_OBJECTS = test_peer_base.$(OBJEXT)
+libtestpeerbase_a_OBJECTS = $(am_libtestpeerbase_a_OBJECTS)
+libxorpifmibbase_a_AR = $(AR) cru
+libxorpifmibbase_a_LIBADD =
+am_libxorpifmibbase_a_OBJECTS = xorp_if_mib_base.$(OBJEXT)
+libxorpifmibbase_a_OBJECTS = $(am_libxorpifmibbase_a_OBJECTS)
+libxorpshbase_a_AR = $(AR) cru
+libxorpshbase_a_LIBADD =
+am_libxorpshbase_a_OBJECTS = xorpsh_base.$(OBJEXT)
+libxorpshbase_a_OBJECTS = $(am_libxorpshbase_a_OBJECTS)
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgp4_mib_base.Po $(DEPDIR)/bgp_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/cli_base.Po $(DEPDIR)/coord_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/demo_fea_ifmgr_client_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_base.Po $(DEPDIR)/finder_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_client_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mfea_base.Po $(DEPDIR)/mld6igmp_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ospf_base.Po $(DEPDIR)/pim_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_base.Po $(DEPDIR)/ribclient_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_base.Po $(DEPDIR)/test_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_events_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_peer_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorpsh_base.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
+	$(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) \
+	$(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) \
+	$(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) \
+	$(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) \
+	$(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) \
+	$(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) \
+	$(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) \
+	$(libtestfindereventsbase_a_SOURCES) \
+	$(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) \
+	$(libxorpshbase_a_SOURCES)
+DIST_COMMON = Makefile.am Makefile.in
+SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+
+all: all-am
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  xrl/targets/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libbgp4mibbase.a: $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_DEPENDENCIES) 
+	-rm -f libbgp4mibbase.a
+	$(libbgp4mibbase_a_AR) libbgp4mibbase.a $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_LIBADD)
+	$(RANLIB) libbgp4mibbase.a
+libbgpbase.a: $(libbgpbase_a_OBJECTS) $(libbgpbase_a_DEPENDENCIES) 
+	-rm -f libbgpbase.a
+	$(libbgpbase_a_AR) libbgpbase.a $(libbgpbase_a_OBJECTS) $(libbgpbase_a_LIBADD)
+	$(RANLIB) libbgpbase.a
+libclibase.a: $(libclibase_a_OBJECTS) $(libclibase_a_DEPENDENCIES) 
+	-rm -f libclibase.a
+	$(libclibase_a_AR) libclibase.a $(libclibase_a_OBJECTS) $(libclibase_a_LIBADD)
+	$(RANLIB) libclibase.a
+libcoordbase.a: $(libcoordbase_a_OBJECTS) $(libcoordbase_a_DEPENDENCIES) 
+	-rm -f libcoordbase.a
+	$(libcoordbase_a_AR) libcoordbase.a $(libcoordbase_a_OBJECTS) $(libcoordbase_a_LIBADD)
+	$(RANLIB) libcoordbase.a
+libdemofeaifmgrclientbase.a: $(libdemofeaifmgrclientbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_DEPENDENCIES) 
+	-rm -f libdemofeaifmgrclientbase.a
+	$(libdemofeaifmgrclientbase_a_AR) libdemofeaifmgrclientbase.a $(libdemofeaifmgrclientbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_LIBADD)
+	$(RANLIB) libdemofeaifmgrclientbase.a
+libfeabase.a: $(libfeabase_a_OBJECTS) $(libfeabase_a_DEPENDENCIES) 
+	-rm -f libfeabase.a
+	$(libfeabase_a_AR) libfeabase.a $(libfeabase_a_OBJECTS) $(libfeabase_a_LIBADD)
+	$(RANLIB) libfeabase.a
+libfinderbase.a: $(libfinderbase_a_OBJECTS) $(libfinderbase_a_DEPENDENCIES) 
+	-rm -f libfinderbase.a
+	$(libfinderbase_a_AR) libfinderbase.a $(libfinderbase_a_OBJECTS) $(libfinderbase_a_LIBADD)
+	$(RANLIB) libfinderbase.a
+libfinderclientbase.a: $(libfinderclientbase_a_OBJECTS) $(libfinderclientbase_a_DEPENDENCIES) 
+	-rm -f libfinderclientbase.a
+	$(libfinderclientbase_a_AR) libfinderclientbase.a $(libfinderclientbase_a_OBJECTS) $(libfinderclientbase_a_LIBADD)
+	$(RANLIB) libfinderclientbase.a
+libmfeabase.a: $(libmfeabase_a_OBJECTS) $(libmfeabase_a_DEPENDENCIES) 
+	-rm -f libmfeabase.a
+	$(libmfeabase_a_AR) libmfeabase.a $(libmfeabase_a_OBJECTS) $(libmfeabase_a_LIBADD)
+	$(RANLIB) libmfeabase.a
+libmld6igmpbase.a: $(libmld6igmpbase_a_OBJECTS) $(libmld6igmpbase_a_DEPENDENCIES) 
+	-rm -f libmld6igmpbase.a
+	$(libmld6igmpbase_a_AR) libmld6igmpbase.a $(libmld6igmpbase_a_OBJECTS) $(libmld6igmpbase_a_LIBADD)
+	$(RANLIB) libmld6igmpbase.a
+libospfbase.a: $(libospfbase_a_OBJECTS) $(libospfbase_a_DEPENDENCIES) 
+	-rm -f libospfbase.a
+	$(libospfbase_a_AR) libospfbase.a $(libospfbase_a_OBJECTS) $(libospfbase_a_LIBADD)
+	$(RANLIB) libospfbase.a
+libpimbase.a: $(libpimbase_a_OBJECTS) $(libpimbase_a_DEPENDENCIES) 
+	-rm -f libpimbase.a
+	$(libpimbase_a_AR) libpimbase.a $(libpimbase_a_OBJECTS) $(libpimbase_a_LIBADD)
+	$(RANLIB) libpimbase.a
+libribbase.a: $(libribbase_a_OBJECTS) $(libribbase_a_DEPENDENCIES) 
+	-rm -f libribbase.a
+	$(libribbase_a_AR) libribbase.a $(libribbase_a_OBJECTS) $(libribbase_a_LIBADD)
+	$(RANLIB) libribbase.a
+libribclientbase.a: $(libribclientbase_a_OBJECTS) $(libribclientbase_a_DEPENDENCIES) 
+	-rm -f libribclientbase.a
+	$(libribclientbase_a_AR) libribclientbase.a $(libribclientbase_a_OBJECTS) $(libribclientbase_a_LIBADD)
+	$(RANLIB) libribclientbase.a
+librtrmgrbase.a: $(librtrmgrbase_a_OBJECTS) $(librtrmgrbase_a_DEPENDENCIES) 
+	-rm -f librtrmgrbase.a
+	$(librtrmgrbase_a_AR) librtrmgrbase.a $(librtrmgrbase_a_OBJECTS) $(librtrmgrbase_a_LIBADD)
+	$(RANLIB) librtrmgrbase.a
+libtestbase.a: $(libtestbase_a_OBJECTS) $(libtestbase_a_DEPENDENCIES) 
+	-rm -f libtestbase.a
+	$(libtestbase_a_AR) libtestbase.a $(libtestbase_a_OBJECTS) $(libtestbase_a_LIBADD)
+	$(RANLIB) libtestbase.a
+libtestfindereventsbase.a: $(libtestfindereventsbase_a_OBJECTS) $(libtestfindereventsbase_a_DEPENDENCIES) 
+	-rm -f libtestfindereventsbase.a
+	$(libtestfindereventsbase_a_AR) libtestfindereventsbase.a $(libtestfindereventsbase_a_OBJECTS) $(libtestfindereventsbase_a_LIBADD)
+	$(RANLIB) libtestfindereventsbase.a
+libtestpeerbase.a: $(libtestpeerbase_a_OBJECTS) $(libtestpeerbase_a_DEPENDENCIES) 
+	-rm -f libtestpeerbase.a
+	$(libtestpeerbase_a_AR) libtestpeerbase.a $(libtestpeerbase_a_OBJECTS) $(libtestpeerbase_a_LIBADD)
+	$(RANLIB) libtestpeerbase.a
+libxorpifmibbase.a: $(libxorpifmibbase_a_OBJECTS) $(libxorpifmibbase_a_DEPENDENCIES) 
+	-rm -f libxorpifmibbase.a
+	$(libxorpifmibbase_a_AR) libxorpifmibbase.a $(libxorpifmibbase_a_OBJECTS) $(libxorpifmibbase_a_LIBADD)
+	$(RANLIB) libxorpifmibbase.a
+libxorpshbase.a: $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_DEPENDENCIES) 
+	-rm -f libxorpshbase.a
+	$(libxorpshbase_a_AR) libxorpshbase.a $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_LIBADD)
+	$(RANLIB) libxorpshbase.a
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp4_mib_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/coord_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/demo_fea_ifmgr_client_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ribclient_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_events_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorpsh_base.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ../..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+check: check-am
+all-am: Makefile $(LIBRARIES)
+
+installdirs:
+
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-am
+
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+
+distclean: distclean-am
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am:
+
+install-exec-am:
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-am
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-info-am
+
+.PHONY: GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-info-am
+
+$(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
+		$(TARGET_DIR)/bgp.tgt					\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/bgp.xif				\
+		$(INTERFACES_DIR)/rib_client.xif
+$(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
+		$(INTERFACES_DIR)/common.xif
+$(srcdir)/cli_base.hh $(srcdir)/cli_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/cli_manager.xif
+$(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/coord.xif				\
+		$(INTERFACES_DIR)/datain.xif
+
+$(srcdir)/demo_fea_ifmgr_client_base.hh					\
+$(srcdir)/demo_fea_ifmgr_client_base.cc:				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_ifmgr_client.xif
+$(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea.xif 				\
+		$(INTERFACES_DIR)/fea_ifmgr.xif				\
+		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/fea_rawpkt.xif
+$(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder.xif				\
+		$(INTERFACES_DIR)/finder_event_notifier.xif
+$(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder_client.xif
+$(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/mfea.xif				\
+		$(INTERFACES_DIR)/fea_ifmgr_client.xif
+$(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/cli_processor.xif 			\
+		$(INTERFACES_DIR)/mfea_client.xif			\
+		$(INTERFACES_DIR)/mld6igmp.xif
+$(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/ospf.xif
+$(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/mfea_client.xif			\
+		$(INTERFACES_DIR)/mld6igmp_client.xif			\
+		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/pim.xif
+$(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rib.xif
+$(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
+		$(INTERFACES_DIR)/rib_client.xif
+$(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rtrmgr.xif
+$(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif
+$(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/test_peer.xif
+$(srcdir)/xorp_if_mib_base.hh $(srcdir)/xorp_if_mib_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/xorp_if_mib.xif
+$(srcdir)/xorpsh_base.hh $(srcdir)/xorpsh_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rtrmgr_client.xif
+# This is a hack to rebuild files here when interfaces implemented by
+# rib target are touched.  It largely duplicates information inside rib.tgt
+$(srcdir)/test_base.hh $(srcdir)/test_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/test.xif
+
+# If this code is commented out, please upgrade to python2.0 or above.
+
+@PY_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc	\
+@PY_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
+@PY_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

@@ -1,0 +1,696 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+# -- Subdirectories
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+GMAKE = @GMAKE@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+SUBDIRS = . tools
+
+# -- Real Programs
+bin_PROGRAMS = rtrmgr xorpsh
+
+#bin_PROGRAMS	 = rtrmgr
+
+# -- Test Programs
+#bin_PROGRAMS	+=
+TESTS = test_templates test_sample_config test_module_manager
+
+noinst_PROGRAMS = $(TESTS)
+
+# -- Libraries and library flags to link the binary programs
+LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+# -- Program Sources
+rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc task.cc
+
+rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
+
+#slave_module_manager really shouldn't be needed
+#unexpanded_xrl shouldn't really be needed
+#task.cc shouldn't really be needed
+xorpsh_SOURCES = rtrmgr_module.h version.h xorpsh_main.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc y.opcmd_tab.cc lex.opcmd.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc slave_conf_tree_node.cc conf_tree.cc slave_module_manager.cc  slave_conf_tree.cc xorp_client.cc xrldb.cc cli.cc command_tree.cc op_commands.cc popen.cc split.cc xrl_xorpsh_interface.cc unexpanded_xrl.cc task.cc
+
+xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
+
+test_templates_SOURCES = test_templates.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc command_tree.cc xorp_client.cc module_manager.cc split.cc task.cc
+test_templates_LDADD = $(LDADD)
+
+test_sample_config_SOURCES = test_sample_config.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc command_tree.cc xorp_client.cc module_manager.cc split.cc task.cc
+test_sample_config_LDADD = $(LDADD)
+
+#test_module_manager_SOURCES	+= conf_tree.cc
+test_module_manager_SOURCES = test_module_manager.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc xorp_client.cc module_manager.cc split.cc task.cc
+test_module_manager_LDADD = $(LDADD)
+
+# -- Library Sources
+
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST = Notes config.boot config.template fea.boot
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+subdir = rtrmgr
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+bin_PROGRAMS = rtrmgr$(EXEEXT) xorpsh$(EXEEXT)
+noinst_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
+	test_module_manager$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+
+am_rtrmgr_OBJECTS = y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) \
+	y.boot_tab.$(OBJEXT) lex.boot.$(OBJEXT) main_rtrmgr.$(OBJEXT) \
+	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
+	template_commands.$(OBJEXT) module_command.$(OBJEXT) \
+	conf_tree_node.$(OBJEXT) conf_tree.$(OBJEXT) \
+	master_conf_tree_node.$(OBJEXT) master_conf_tree.$(OBJEXT) \
+	module_manager.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
+	split.$(OBJEXT) userdb.$(OBJEXT) xrl_rtrmgr_interface.$(OBJEXT) \
+	randomness.$(OBJEXT) unexpanded_xrl.$(OBJEXT) task.$(OBJEXT)
+rtrmgr_OBJECTS = $(am_rtrmgr_OBJECTS)
+rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.a \
+	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+rtrmgr_LDFLAGS =
+am_test_module_manager_OBJECTS = test_module_manager.$(OBJEXT) \
+	y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) template_tree.$(OBJEXT) \
+	template_tree_node.$(OBJEXT) template_commands.$(OBJEXT) \
+	module_command.$(OBJEXT) xrldb.$(OBJEXT) \
+	unexpanded_xrl.$(OBJEXT) conf_tree_node.$(OBJEXT) \
+	xorp_client.$(OBJEXT) module_manager.$(OBJEXT) split.$(OBJEXT) \
+	task.$(OBJEXT)
+test_module_manager_OBJECTS = $(am_test_module_manager_OBJECTS)
+test_module_manager_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_module_manager_LDFLAGS =
+am_test_sample_config_OBJECTS = test_sample_config.$(OBJEXT) \
+	y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) y.boot_tab.$(OBJEXT) \
+	lex.boot.$(OBJEXT) template_tree.$(OBJEXT) \
+	template_tree_node.$(OBJEXT) template_commands.$(OBJEXT) \
+	module_command.$(OBJEXT) xrldb.$(OBJEXT) \
+	unexpanded_xrl.$(OBJEXT) conf_tree_node.$(OBJEXT) \
+	conf_tree.$(OBJEXT) master_conf_tree_node.$(OBJEXT) \
+	master_conf_tree.$(OBJEXT) command_tree.$(OBJEXT) \
+	xorp_client.$(OBJEXT) module_manager.$(OBJEXT) split.$(OBJEXT) \
+	task.$(OBJEXT)
+test_sample_config_OBJECTS = $(am_test_sample_config_OBJECTS)
+test_sample_config_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_sample_config_LDFLAGS =
+am_test_templates_OBJECTS = test_templates.$(OBJEXT) \
+	y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) template_tree.$(OBJEXT) \
+	template_tree_node.$(OBJEXT) template_commands.$(OBJEXT) \
+	module_command.$(OBJEXT) xrldb.$(OBJEXT) \
+	unexpanded_xrl.$(OBJEXT) conf_tree_node.$(OBJEXT) \
+	command_tree.$(OBJEXT) xorp_client.$(OBJEXT) \
+	module_manager.$(OBJEXT) split.$(OBJEXT) task.$(OBJEXT)
+test_templates_OBJECTS = $(am_test_templates_OBJECTS)
+test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_templates_LDFLAGS =
+am_xorpsh_OBJECTS = xorpsh_main.$(OBJEXT) y.tplt_tab.$(OBJEXT) \
+	lex.tplt.$(OBJEXT) y.boot_tab.$(OBJEXT) lex.boot.$(OBJEXT) \
+	y.opcmd_tab.$(OBJEXT) lex.opcmd.$(OBJEXT) \
+	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
+	template_commands.$(OBJEXT) module_command.$(OBJEXT) \
+	conf_tree_node.$(OBJEXT) slave_conf_tree_node.$(OBJEXT) \
+	conf_tree.$(OBJEXT) slave_module_manager.$(OBJEXT) \
+	slave_conf_tree.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
+	cli.$(OBJEXT) command_tree.$(OBJEXT) op_commands.$(OBJEXT) \
+	popen.$(OBJEXT) split.$(OBJEXT) xrl_xorpsh_interface.$(OBJEXT) \
+	unexpanded_xrl.$(OBJEXT) task.$(OBJEXT)
+xorpsh_OBJECTS = $(am_xorpsh_OBJECTS)
+xorpsh_DEPENDENCIES = $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/librtrmgrxif.a \
+	$(top_builddir)/xrl/targets/libxorpshbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorpsh_LDFLAGS =
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/cli.Po $(DEPDIR)/command_tree.Po \
+@AMDEP_TRUE@	$(DEPDIR)/conf_tree.Po $(DEPDIR)/conf_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/lex.boot.Po $(DEPDIR)/lex.opcmd.Po \
+@AMDEP_TRUE@	$(DEPDIR)/lex.tplt.Po $(DEPDIR)/main_rtrmgr.Po \
+@AMDEP_TRUE@	$(DEPDIR)/master_conf_tree.Po \
+@AMDEP_TRUE@	$(DEPDIR)/master_conf_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/module_command.Po \
+@AMDEP_TRUE@	$(DEPDIR)/module_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/op_commands.Po $(DEPDIR)/popen.Po \
+@AMDEP_TRUE@	$(DEPDIR)/randomness.Po \
+@AMDEP_TRUE@	$(DEPDIR)/slave_conf_tree.Po \
+@AMDEP_TRUE@	$(DEPDIR)/slave_conf_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/slave_module_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/split.Po $(DEPDIR)/task.Po \
+@AMDEP_TRUE@	$(DEPDIR)/template_commands.Po \
+@AMDEP_TRUE@	$(DEPDIR)/template_tree.Po \
+@AMDEP_TRUE@	$(DEPDIR)/template_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_module_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_sample_config.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_templates.Po \
+@AMDEP_TRUE@	$(DEPDIR)/unexpanded_xrl.Po $(DEPDIR)/userdb.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_client.Po $(DEPDIR)/xorpsh_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_rtrmgr_interface.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_xorpsh_interface.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrldb.Po $(DEPDIR)/y.boot_tab.Po \
+@AMDEP_TRUE@	$(DEPDIR)/y.opcmd_tab.Po $(DEPDIR)/y.tplt_tab.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(rtrmgr_SOURCES) $(test_module_manager_SOURCES) \
+	$(test_sample_config_SOURCES) $(test_templates_SOURCES) \
+	$(xorpsh_SOURCES)
+
+RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
+	uninstall-info-recursive all-recursive install-data-recursive \
+	install-exec-recursive installdirs-recursive install-recursive \
+	uninstall-recursive check-recursive installcheck-recursive
+DIST_COMMON = Makefile.am Makefile.in TODO
+DIST_SUBDIRS = $(SUBDIRS)
+SOURCES = $(rtrmgr_SOURCES) $(test_module_manager_SOURCES) $(test_sample_config_SOURCES) $(test_templates_SOURCES) $(xorpsh_SOURCES)
+
+all: all-recursive
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  rtrmgr/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+rtrmgr$(EXEEXT): $(rtrmgr_OBJECTS) $(rtrmgr_DEPENDENCIES) 
+	@rm -f rtrmgr$(EXEEXT)
+	$(CXXLINK) $(rtrmgr_LDFLAGS) $(rtrmgr_OBJECTS) $(rtrmgr_LDADD) $(LIBS)
+test_module_manager$(EXEEXT): $(test_module_manager_OBJECTS) $(test_module_manager_DEPENDENCIES) 
+	@rm -f test_module_manager$(EXEEXT)
+	$(CXXLINK) $(test_module_manager_LDFLAGS) $(test_module_manager_OBJECTS) $(test_module_manager_LDADD) $(LIBS)
+test_sample_config$(EXEEXT): $(test_sample_config_OBJECTS) $(test_sample_config_DEPENDENCIES) 
+	@rm -f test_sample_config$(EXEEXT)
+	$(CXXLINK) $(test_sample_config_LDFLAGS) $(test_sample_config_OBJECTS) $(test_sample_config_LDADD) $(LIBS)
+test_templates$(EXEEXT): $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES) 
+	@rm -f test_templates$(EXEEXT)
+	$(CXXLINK) $(test_templates_LDFLAGS) $(test_templates_OBJECTS) $(test_templates_LDADD) $(LIBS)
+xorpsh$(EXEEXT): $(xorpsh_OBJECTS) $(xorpsh_DEPENDENCIES) 
+	@rm -f xorpsh$(EXEEXT)
+	$(CXXLINK) $(xorpsh_LDFLAGS) $(xorpsh_OBJECTS) $(xorpsh_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/command_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/conf_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/conf_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.boot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.opcmd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.tplt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rtrmgr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/master_conf_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/master_conf_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/module_command.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/module_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/op_commands.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/popen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/randomness.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_conf_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_conf_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_module_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/split.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/task.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_commands.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_module_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_sample_config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_templates.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/unexpanded_xrl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/userdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorpsh_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_rtrmgr_interface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_xorpsh_interface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrldb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/y.boot_tab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/y.opcmd_tab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/y.tplt_tab.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive:
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+	for subdir in $(SUBDIRS); do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d $(distdir)/$$subdir \
+	    || mkdir $(distdir)/$$subdir \
+	    || exit 1; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$(top_distdir)" \
+	        distdir=../$(distdir)/$$subdir \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-recursive
+all-am: Makefile $(PROGRAMS)
+installdirs: installdirs-recursive
+installdirs-am:
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-recursive
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-recursive
+
+clean-am: clean-binPROGRAMS clean-generic clean-noinstPROGRAMS \
+	mostlyclean-am
+
+distclean: distclean-recursive
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-recursive
+
+dvi-am:
+
+info: info-recursive
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-binPROGRAMS
+
+install-info: install-info-recursive
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-recursive
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-recursive
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+uninstall-info: uninstall-info-recursive
+
+.PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
+	clean clean-binPROGRAMS clean-generic clean-noinstPROGRAMS \
+	clean-recursive distclean distclean-compile distclean-depend \
+	distclean-generic distclean-recursive distclean-tags distdir \
+	dvi dvi-am dvi-recursive info info-am info-recursive install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-data-recursive install-exec install-exec-am \
+	install-exec-recursive install-info install-info-am \
+	install-info-recursive install-man install-recursive \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am installdirs-recursive maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-info-recursive uninstall-recursive
+
+
+################################################################ 
+
+yacc:	.yacc_generated_files
+
+.yacc_generated_files: $(srcdir)/template.yy $(srcdir)/boot.yy $(srcdir)/op_commands.yy
+	( cd $(srcdir); \
+	yacc -d -p tplt -o y.tplt_tab.c template.yy; \
+	mv y.tplt_tab.c y.tplt_tab.cc; \
+	yacc -d -p boot -o y.boot_tab.c boot.yy; \
+	mv y.boot_tab.c y.boot_tab.cc; \
+	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy; \
+	mv y.opcmd_tab.c y.opcmd_tab.cc; \
+	touch .yacc_generated_files )
+
+$(srcdir)/lex.tplt.cc: $(srcdir)/template.ll $(srcdir)/y.tplt_tab.cc
+	( cd $(srcdir); \
+	flex -Ptplt -olex.tplt.cc template.ll )
+
+$(srcdir)/lex.boot.cc: $(srcdir)/boot.ll $(srcdir)/y.boot_tab.cc
+	( cd $(srcdir); \
+	flex -Pboot -olex.boot.cc boot.ll )
+
+$(srcdir)/lex.opcmd.cc: $(srcdir)/op_commands.ll $(srcdir)/y.opcmd_tab.cc
+	( cd $(srcdir); \
+	flex -Popcmd -olex.opcmd.cc op_commands.ll )
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

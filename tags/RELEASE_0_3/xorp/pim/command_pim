@@ -1,0 +1,34 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/command_pim,v 1.4 2003/03/25 00:29:46 pavlin Exp $
+#
+
+#
+# Send commands to a running PIM process.
+#
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+. ../pim/xrl_rib_shell_funcs.sh
+. ../pim/xrl_pim_shell_funcs.sh
+
+MODULE_NAME="PIM-SM"
+HOSTNAME=`hostname`
+
+echo "Sending command to $MODULE_NAME on $HOSTNAME..."
+
+#
+# The first argument should be the command to call.
+# The rest of the arguments should be the arguments to the command to call.
+#
+
+if [ $# -lt 1 ] ; then
+	echo "Usage: $0 <xrl_command> [xrl_command_arguments ... ]"
+	exit 1
+fi
+
+$*
+
+exit $?

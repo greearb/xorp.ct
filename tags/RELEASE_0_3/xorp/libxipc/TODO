@@ -1,0 +1,24 @@
+Any of these items are up for grabs.  Before embarking on them send a
+note to the developers list to check they are not covered by work in
+progress.
+
+o Rework the xrl parser related routines to make them more akin to the
+  parsing capabilities of the python scripts used to generate XRL
+  interfaces.
+
+o Copy minimization in existing protocol families.  There are a few
+  unnecessary copies that should be eliminated.  This may be
+  straightforward.  We might also want to consider using reference
+  counted XrlAtoms.
+
+o Add support for pipelining in Xrl protocol families.
+
+o Add support for handling one-to-many resolutions at client end, ie
+  implement a standard policy mechanism or have hooks for generic
+  policies.
+
+o Implement additional protocol families (signals, UNIX domain
+  sockets, XXX Your IPC mechanism here XXX)
+
+o Find whatever bug is stopping the TCP protocol family from passing
+  BGP tests.

@@ -1,0 +1,41 @@
+;;
+;; $XORP$
+;;
+
+;; These settings can be added to your .emacs file to give standard
+;; xorp developer emacs settings.  Please update if there are features
+;; others might find useful.
+
+;; Customizations for all of c-mode, c++-mode, and objc-mode
+(defun my-c-mode-common-hook ()
+
+;; Delete all whitespaces; optional
+  (c-toggle-hungry-state 1)
+
+;; Use pretty colors
+  (turn-on-font-lock)
+)
+
+(defun my-c++-mode-hook ()
+  (c-set-style "gnu")			; optional
+  (setq c-basic-offset 4)
+)
+
+(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+(add-hook 'c++-mode-hook 'my-c++-mode-hook)
+
+
+;;
+;; kdoc
+;;
+(global-set-key "\C-x5h"  'kdoc-insert)
+(autoload 'kdoc-insert "kdoc" nil t)
+(global-set-key "\C-x6h"  'kdoc-h-insert)
+(autoload 'kdoc-h-insert "kdoc" nil t)
+(global-set-key "\C-x7h"  'kdoc-class-insert)
+(autoload 'kdoc-class-insert "kdoc" nil t)
+;;;; Copy kdoc.el to ~/path/to/, and add that directory to your load path:
+; (setq load-path (cons "~/path/to/" load-path))
+;;;; Another way to do it.
+; (if (file-exists-p "~/path/to/kdoc.el")
+;     (load-library "~/path/to/kdoc.el"))

@@ -1,0 +1,13 @@
+show bgp peers {
+	%command: bgp/tools/xorpsh_print_peers;
+	%module: bgp;
+	%opt_parameter: detail;
+}
+
+show bgp routes {
+	%command: bgp/tools/xorpsh_print_routes;
+	%module: bgp;
+	%opt_parameter: summary;
+	%opt_parameter: detail;
+}
+

@@ -1,0 +1,908 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+# - The library
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+GMAKE = @GMAKE@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+noinst_LIBRARIES = libxipc.a libfinder.a
+
+# -- Programs
+bin_PROGRAMS = call_xrl finder
+
+# -- Test Programs and scripts (order of increasing complexity)
+test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header test_inproc test_sudp test_stcp test_lemming test_xrl_router test_finder_tcp test_finder_messenger test_finder_msgs test_finder test_finder_events
+
+test_extra_programs = test_xrl_parser test_finder_to
+
+test_scripts = test_xrl_parser.sh test_finder_deaths.sh
+
+TESTS = $(test_programs) $(test_scripts)
+
+noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
+noinst_SCRIPTS = $(test_scripts)
+
+# -- Libraries and library flags to link the binary programs
+LDADD = ./libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+
+finder_LDADD = libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+
+
+# -- Program Sources
+call_xrl_SOURCES = call_xrl.cc
+finder_SOURCES = finder_main.cc
+
+test_finder_messenger_SOURCES = test_finder_messenger.cc
+test_finder_msgs_SOURCES = test_finder_msgs.cc
+test_finder_tcp_SOURCES = test_finder_tcp.cc
+
+test_header_SOURCES = test_header.cc
+test_inproc_SOURCES = test_inproc.cc
+test_lemming_SOURCES = test_lemming.cc
+test_stcp_SOURCES = test_stcp.cc
+test_sudp_SOURCES = test_sudp.cc
+test_xrl_SOURCES = test_xrl.cc
+test_xrl_atom_SOURCES = test_xrl_atom.cc
+test_xrl_args_SOURCES = test_xrl_args.cc
+test_xrl_parser_SOURCES = test_xrl_parser.cc
+test_xrl_error_SOURCES = test_xrl_error.cc
+
+test_xrl_router_SOURCES = test_xrl_router.cc
+test_xrl_router_LDADD = libfinder.a $(LDADD)
+
+test_finder_SOURCES = test_finder.cc
+test_finder_LDADD = libfinder.a $(LDADD)
+
+test_finder_events_SOURCES = test_finder_events.cc test_finder_events_base.hh test_finder_events_base.cc finder_event_notifier_xif.hh finder_event_notifier_xif.cc
+test_finder_events_LDADD = libfinder.a $(LDADD)
+
+test_finder_to_SOURCES = test_finder_to.cc
+test_finder_to_LDADD = libfinder.a $(LDADD)
+
+# -- Library Sources (libxipc)
+libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h finder_client.hh finder_constants.hh finder_ipc.hh finder_messenger.hh finder_msgs.hh finder_client.hh finder_client_xrl_target.hh finder_tcp_messenger.hh finder_tcp.hh header.hh hmac.hh permits.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_dispatcher.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c finder_messenger.cc finder_msgs.cc finder_client.cc finder_client_xrl_target.cc finder_tcp.cc finder_tcp_messenger.cc header.cc hmac.cc permits.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_dispatcher.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
+
+# -- Library Sources (libfinder)
+libfinder_a_SOURCES = finder_base.hh finder_constants.hh finder.hh finder_server.hh finder_xrl_queue.hh finder_xrl_target.hh finder_base.cc finder.cc finder_server.cc finder_xrl_queue.cc finder_xrl_target.cc finder_base.hh finder_base.cc finder_client_xif.hh finder_client_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc
+
+
+# magic-script:			magic-script.in
+# 	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
+# 	chmod +x magic-script
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+
+# -- Generated Sources used in libxipc and libfinder 
+# (see explanation at end of file)
+BUILT_SOURCES = common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_xif.hh finder_xif.cc finder_event_notifier_xif.hh finder_event_notifier_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc test_finder_events_base.hh test_finder_events_base.cc
+
+CLEANFILES = $(BUILT_SOURCES)
+subdir = libxipc
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libfinder_a_AR = $(AR) cru
+libfinder_a_LIBADD =
+am_libfinder_a_OBJECTS = finder_base.$(OBJEXT) finder.$(OBJEXT) \
+	finder_server.$(OBJEXT) finder_xrl_queue.$(OBJEXT) \
+	finder_xrl_target.$(OBJEXT) finder_base.$(OBJEXT) \
+	finder_client_xif.$(OBJEXT) finder_event_observer_xif.$(OBJEXT)
+libfinder_a_OBJECTS = $(am_libfinder_a_OBJECTS)
+libxipc_a_AR = $(AR) cru
+libxipc_a_LIBADD =
+am_libxipc_a_OBJECTS = hmac_md5.$(OBJEXT) finder_messenger.$(OBJEXT) \
+	finder_msgs.$(OBJEXT) finder_client.$(OBJEXT) \
+	finder_client_xrl_target.$(OBJEXT) finder_tcp.$(OBJEXT) \
+	finder_tcp_messenger.$(OBJEXT) header.$(OBJEXT) hmac.$(OBJEXT) \
+	permits.$(OBJEXT) sockutil.$(OBJEXT) xrl.$(OBJEXT) \
+	xrl_parser.$(OBJEXT) xrl_parser_input.$(OBJEXT) \
+	xrl_tokens.$(OBJEXT) xrl_atom.$(OBJEXT) \
+	xrl_atom_encoding.$(OBJEXT) xrl_atom_list.$(OBJEXT) \
+	xrl_args.$(OBJEXT) xrl_cmd_map.$(OBJEXT) \
+	xrl_dispatcher.$(OBJEXT) xrl_pf_factory.$(OBJEXT) \
+	xrl_pf_inproc.$(OBJEXT) xrl_pf_stcp.$(OBJEXT) \
+	xrl_pf_stcp_ph.$(OBJEXT) xrl_pf_sudp.$(OBJEXT) \
+	xrl_router.$(OBJEXT) xrl_std_router.$(OBJEXT) \
+	xrl_error.$(OBJEXT) xuid.$(OBJEXT) common_xif.$(OBJEXT) \
+	finder_client_base.$(OBJEXT) finder_xif.$(OBJEXT)
+libxipc_a_OBJECTS = $(am_libxipc_a_OBJECTS)
+bin_PROGRAMS = call_xrl$(EXEEXT) finder$(EXEEXT)
+noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
+	test_xrl_atom$(EXEEXT) test_xrl_args$(EXEEXT) \
+	test_header$(EXEEXT) test_inproc$(EXEEXT) test_sudp$(EXEEXT) \
+	test_stcp$(EXEEXT) test_lemming$(EXEEXT) \
+	test_xrl_router$(EXEEXT) test_finder_tcp$(EXEEXT) \
+	test_finder_messenger$(EXEEXT) test_finder_msgs$(EXEEXT) \
+	test_finder$(EXEEXT) test_finder_events$(EXEEXT) \
+	test_xrl_parser$(EXEEXT) test_finder_to$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+
+am_call_xrl_OBJECTS = call_xrl.$(OBJEXT)
+call_xrl_OBJECTS = $(am_call_xrl_OBJECTS)
+call_xrl_LDADD = $(LDADD)
+call_xrl_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+call_xrl_LDFLAGS =
+am_finder_OBJECTS = finder_main.$(OBJEXT)
+finder_OBJECTS = $(am_finder_OBJECTS)
+finder_DEPENDENCIES = libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+finder_LDFLAGS =
+am_test_finder_OBJECTS = test_finder.$(OBJEXT)
+test_finder_OBJECTS = $(am_test_finder_OBJECTS)
+test_finder_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_finder_LDFLAGS =
+am_test_finder_events_OBJECTS = test_finder_events.$(OBJEXT) \
+	test_finder_events_base.$(OBJEXT) \
+	finder_event_notifier_xif.$(OBJEXT)
+test_finder_events_OBJECTS = $(am_test_finder_events_OBJECTS)
+test_finder_events_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_finder_events_LDFLAGS =
+am_test_finder_messenger_OBJECTS = test_finder_messenger.$(OBJEXT)
+test_finder_messenger_OBJECTS = $(am_test_finder_messenger_OBJECTS)
+test_finder_messenger_LDADD = $(LDADD)
+test_finder_messenger_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_finder_messenger_LDFLAGS =
+am_test_finder_msgs_OBJECTS = test_finder_msgs.$(OBJEXT)
+test_finder_msgs_OBJECTS = $(am_test_finder_msgs_OBJECTS)
+test_finder_msgs_LDADD = $(LDADD)
+test_finder_msgs_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_finder_msgs_LDFLAGS =
+am_test_finder_tcp_OBJECTS = test_finder_tcp.$(OBJEXT)
+test_finder_tcp_OBJECTS = $(am_test_finder_tcp_OBJECTS)
+test_finder_tcp_LDADD = $(LDADD)
+test_finder_tcp_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_finder_tcp_LDFLAGS =
+am_test_finder_to_OBJECTS = test_finder_to.$(OBJEXT)
+test_finder_to_OBJECTS = $(am_test_finder_to_OBJECTS)
+test_finder_to_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_finder_to_LDFLAGS =
+am_test_header_OBJECTS = test_header.$(OBJEXT)
+test_header_OBJECTS = $(am_test_header_OBJECTS)
+test_header_LDADD = $(LDADD)
+test_header_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_header_LDFLAGS =
+am_test_inproc_OBJECTS = test_inproc.$(OBJEXT)
+test_inproc_OBJECTS = $(am_test_inproc_OBJECTS)
+test_inproc_LDADD = $(LDADD)
+test_inproc_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_inproc_LDFLAGS =
+am_test_lemming_OBJECTS = test_lemming.$(OBJEXT)
+test_lemming_OBJECTS = $(am_test_lemming_OBJECTS)
+test_lemming_LDADD = $(LDADD)
+test_lemming_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_lemming_LDFLAGS =
+am_test_stcp_OBJECTS = test_stcp.$(OBJEXT)
+test_stcp_OBJECTS = $(am_test_stcp_OBJECTS)
+test_stcp_LDADD = $(LDADD)
+test_stcp_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_stcp_LDFLAGS =
+am_test_sudp_OBJECTS = test_sudp.$(OBJEXT)
+test_sudp_OBJECTS = $(am_test_sudp_OBJECTS)
+test_sudp_LDADD = $(LDADD)
+test_sudp_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_sudp_LDFLAGS =
+am_test_xrl_OBJECTS = test_xrl.$(OBJEXT)
+test_xrl_OBJECTS = $(am_test_xrl_OBJECTS)
+test_xrl_LDADD = $(LDADD)
+test_xrl_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_LDFLAGS =
+am_test_xrl_args_OBJECTS = test_xrl_args.$(OBJEXT)
+test_xrl_args_OBJECTS = $(am_test_xrl_args_OBJECTS)
+test_xrl_args_LDADD = $(LDADD)
+test_xrl_args_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_args_LDFLAGS =
+am_test_xrl_atom_OBJECTS = test_xrl_atom.$(OBJEXT)
+test_xrl_atom_OBJECTS = $(am_test_xrl_atom_OBJECTS)
+test_xrl_atom_LDADD = $(LDADD)
+test_xrl_atom_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_atom_LDFLAGS =
+am_test_xrl_error_OBJECTS = test_xrl_error.$(OBJEXT)
+test_xrl_error_OBJECTS = $(am_test_xrl_error_OBJECTS)
+test_xrl_error_LDADD = $(LDADD)
+test_xrl_error_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_error_LDFLAGS =
+am_test_xrl_parser_OBJECTS = test_xrl_parser.$(OBJEXT)
+test_xrl_parser_OBJECTS = $(am_test_xrl_parser_OBJECTS)
+test_xrl_parser_LDADD = $(LDADD)
+test_xrl_parser_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_parser_LDFLAGS =
+am_test_xrl_router_OBJECTS = test_xrl_router.$(OBJEXT)
+test_xrl_router_OBJECTS = $(am_test_xrl_router_OBJECTS)
+test_xrl_router_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_router_LDFLAGS =
+SCRIPTS = $(noinst_SCRIPTS)
+
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/call_xrl.Po $(DEPDIR)/common_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder.Po $(DEPDIR)/finder_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_client.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_client_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_client_xrl_target.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_event_notifier_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_event_observer_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_messenger.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_msgs.Po $(DEPDIR)/finder_server.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_tcp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_tcp_messenger.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_xrl_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_xrl_target.Po $(DEPDIR)/header.Po \
+@AMDEP_TRUE@	$(DEPDIR)/hmac.Po $(DEPDIR)/hmac_md5.Po \
+@AMDEP_TRUE@	$(DEPDIR)/permits.Po $(DEPDIR)/sockutil.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_events.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_events_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_messenger.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_msgs.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_tcp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_finder_to.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_header.Po $(DEPDIR)/test_inproc.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_lemming.Po $(DEPDIR)/test_stcp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_sudp.Po $(DEPDIR)/test_xrl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_args.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_atom.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_error.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_parser.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_router.Po $(DEPDIR)/xrl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_args.Po $(DEPDIR)/xrl_atom.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_atom_encoding.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_atom_list.Po $(DEPDIR)/xrl_cmd_map.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_dispatcher.Po $(DEPDIR)/xrl_error.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_parser.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_parser_input.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_factory.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_inproc.Po $(DEPDIR)/xrl_pf_stcp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_stcp_ph.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_sudp.Po $(DEPDIR)/xrl_router.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_std_router.Po $(DEPDIR)/xrl_tokens.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xuid.Po
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+CFLAGS = @CFLAGS@
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+DIST_SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) \
+	$(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_SOURCES) \
+	$(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) \
+	$(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) \
+	$(test_finder_to_SOURCES) $(test_header_SOURCES) \
+	$(test_inproc_SOURCES) $(test_lemming_SOURCES) \
+	$(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) \
+	$(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) \
+	$(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) \
+	$(test_xrl_router_SOURCES)
+DIST_COMMON = README Makefile.am Makefile.in TODO
+SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_router_SOURCES)
+
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
+
+.SUFFIXES:
+.SUFFIXES: .c .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  libxipc/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libfinder.a: $(libfinder_a_OBJECTS) $(libfinder_a_DEPENDENCIES) 
+	-rm -f libfinder.a
+	$(libfinder_a_AR) libfinder.a $(libfinder_a_OBJECTS) $(libfinder_a_LIBADD)
+	$(RANLIB) libfinder.a
+libxipc.a: $(libxipc_a_OBJECTS) $(libxipc_a_DEPENDENCIES) 
+	-rm -f libxipc.a
+	$(libxipc_a_AR) libxipc.a $(libxipc_a_OBJECTS) $(libxipc_a_LIBADD)
+	$(RANLIB) libxipc.a
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+call_xrl$(EXEEXT): $(call_xrl_OBJECTS) $(call_xrl_DEPENDENCIES) 
+	@rm -f call_xrl$(EXEEXT)
+	$(CXXLINK) $(call_xrl_LDFLAGS) $(call_xrl_OBJECTS) $(call_xrl_LDADD) $(LIBS)
+finder$(EXEEXT): $(finder_OBJECTS) $(finder_DEPENDENCIES) 
+	@rm -f finder$(EXEEXT)
+	$(CXXLINK) $(finder_LDFLAGS) $(finder_OBJECTS) $(finder_LDADD) $(LIBS)
+test_finder$(EXEEXT): $(test_finder_OBJECTS) $(test_finder_DEPENDENCIES) 
+	@rm -f test_finder$(EXEEXT)
+	$(CXXLINK) $(test_finder_LDFLAGS) $(test_finder_OBJECTS) $(test_finder_LDADD) $(LIBS)
+test_finder_events$(EXEEXT): $(test_finder_events_OBJECTS) $(test_finder_events_DEPENDENCIES) 
+	@rm -f test_finder_events$(EXEEXT)
+	$(CXXLINK) $(test_finder_events_LDFLAGS) $(test_finder_events_OBJECTS) $(test_finder_events_LDADD) $(LIBS)
+test_finder_messenger$(EXEEXT): $(test_finder_messenger_OBJECTS) $(test_finder_messenger_DEPENDENCIES) 
+	@rm -f test_finder_messenger$(EXEEXT)
+	$(CXXLINK) $(test_finder_messenger_LDFLAGS) $(test_finder_messenger_OBJECTS) $(test_finder_messenger_LDADD) $(LIBS)
+test_finder_msgs$(EXEEXT): $(test_finder_msgs_OBJECTS) $(test_finder_msgs_DEPENDENCIES) 
+	@rm -f test_finder_msgs$(EXEEXT)
+	$(CXXLINK) $(test_finder_msgs_LDFLAGS) $(test_finder_msgs_OBJECTS) $(test_finder_msgs_LDADD) $(LIBS)
+test_finder_tcp$(EXEEXT): $(test_finder_tcp_OBJECTS) $(test_finder_tcp_DEPENDENCIES) 
+	@rm -f test_finder_tcp$(EXEEXT)
+	$(CXXLINK) $(test_finder_tcp_LDFLAGS) $(test_finder_tcp_OBJECTS) $(test_finder_tcp_LDADD) $(LIBS)
+test_finder_to$(EXEEXT): $(test_finder_to_OBJECTS) $(test_finder_to_DEPENDENCIES) 
+	@rm -f test_finder_to$(EXEEXT)
+	$(CXXLINK) $(test_finder_to_LDFLAGS) $(test_finder_to_OBJECTS) $(test_finder_to_LDADD) $(LIBS)
+test_header$(EXEEXT): $(test_header_OBJECTS) $(test_header_DEPENDENCIES) 
+	@rm -f test_header$(EXEEXT)
+	$(CXXLINK) $(test_header_LDFLAGS) $(test_header_OBJECTS) $(test_header_LDADD) $(LIBS)
+test_inproc$(EXEEXT): $(test_inproc_OBJECTS) $(test_inproc_DEPENDENCIES) 
+	@rm -f test_inproc$(EXEEXT)
+	$(CXXLINK) $(test_inproc_LDFLAGS) $(test_inproc_OBJECTS) $(test_inproc_LDADD) $(LIBS)
+test_lemming$(EXEEXT): $(test_lemming_OBJECTS) $(test_lemming_DEPENDENCIES) 
+	@rm -f test_lemming$(EXEEXT)
+	$(CXXLINK) $(test_lemming_LDFLAGS) $(test_lemming_OBJECTS) $(test_lemming_LDADD) $(LIBS)
+test_stcp$(EXEEXT): $(test_stcp_OBJECTS) $(test_stcp_DEPENDENCIES) 
+	@rm -f test_stcp$(EXEEXT)
+	$(CXXLINK) $(test_stcp_LDFLAGS) $(test_stcp_OBJECTS) $(test_stcp_LDADD) $(LIBS)
+test_sudp$(EXEEXT): $(test_sudp_OBJECTS) $(test_sudp_DEPENDENCIES) 
+	@rm -f test_sudp$(EXEEXT)
+	$(CXXLINK) $(test_sudp_LDFLAGS) $(test_sudp_OBJECTS) $(test_sudp_LDADD) $(LIBS)
+test_xrl$(EXEEXT): $(test_xrl_OBJECTS) $(test_xrl_DEPENDENCIES) 
+	@rm -f test_xrl$(EXEEXT)
+	$(CXXLINK) $(test_xrl_LDFLAGS) $(test_xrl_OBJECTS) $(test_xrl_LDADD) $(LIBS)
+test_xrl_args$(EXEEXT): $(test_xrl_args_OBJECTS) $(test_xrl_args_DEPENDENCIES) 
+	@rm -f test_xrl_args$(EXEEXT)
+	$(CXXLINK) $(test_xrl_args_LDFLAGS) $(test_xrl_args_OBJECTS) $(test_xrl_args_LDADD) $(LIBS)
+test_xrl_atom$(EXEEXT): $(test_xrl_atom_OBJECTS) $(test_xrl_atom_DEPENDENCIES) 
+	@rm -f test_xrl_atom$(EXEEXT)
+	$(CXXLINK) $(test_xrl_atom_LDFLAGS) $(test_xrl_atom_OBJECTS) $(test_xrl_atom_LDADD) $(LIBS)
+test_xrl_error$(EXEEXT): $(test_xrl_error_OBJECTS) $(test_xrl_error_DEPENDENCIES) 
+	@rm -f test_xrl_error$(EXEEXT)
+	$(CXXLINK) $(test_xrl_error_LDFLAGS) $(test_xrl_error_OBJECTS) $(test_xrl_error_LDADD) $(LIBS)
+test_xrl_parser$(EXEEXT): $(test_xrl_parser_OBJECTS) $(test_xrl_parser_DEPENDENCIES) 
+	@rm -f test_xrl_parser$(EXEEXT)
+	$(CXXLINK) $(test_xrl_parser_LDFLAGS) $(test_xrl_parser_OBJECTS) $(test_xrl_parser_LDADD) $(LIBS)
+test_xrl_router$(EXEEXT): $(test_xrl_router_OBJECTS) $(test_xrl_router_DEPENDENCIES) 
+	@rm -f test_xrl_router$(EXEEXT)
+	$(CXXLINK) $(test_xrl_router_LDFLAGS) $(test_xrl_router_OBJECTS) $(test_xrl_router_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/call_xrl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/common_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_xrl_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_notifier_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_observer_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_messenger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_msgs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_tcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_tcp_messenger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_xrl_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_xrl_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/header.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hmac.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hmac_md5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/permits.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/sockutil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_events.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_events_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_messenger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_msgs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_tcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_finder_to.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_header.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_inproc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_lemming.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_stcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_sudp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_args.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_atom.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_router.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_args.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_atom.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_atom_encoding.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_atom_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_cmd_map.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_dispatcher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_parser_input.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_factory.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_inproc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_stcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_stcp_ph.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_sudp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_router.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_std_router.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_tokens.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xuid.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+CCDEPMODE = @CCDEPMODE@
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-am
+all-am: Makefile $(LIBRARIES) $(PROGRAMS) $(SCRIPTS)
+
+installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+clean: clean-am
+
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
+
+distclean: distclean-am
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-binPROGRAMS
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-am
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+.PHONY: GTAGS all all-am check check-TESTS check-am clean \
+	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am
+
+
+###############################################################################
+#
+# XXX This is somewhat nasty and very likely source of pain.
+# Autogenerated Xrl calling and handling code is used from the Xrl
+# build dir.  For all other Xrl senders and targets this happens much
+# later in the build process. But, as FinderClient itself uses and
+# supports an Xrl Interface we need to auto-generate the appropriate
+# files.  They are sym-linked here since we are not using libtool and
+# automake (rightly) dislikes cross directory builds.
+#
+
+###############################################################################
+#
+# Build interfaces
+#
+###############################################################################
+
+common_xif.%: $(top_srcdir)/xrl/interfaces/common_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/common_xif.hh $(top_srcdir)/xrl/interfaces/common_xif.cc: $(top_srcdir)/xrl/interfaces/common.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+finder_xif.%: $(top_srcdir)/xrl/interfaces/finder_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/finder_xif.hh $(top_srcdir)/xrl/interfaces/finder_xif.cc: $(top_srcdir)/xrl/interfaces/finder.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+finder_client_xif.%: $(top_srcdir)/xrl/interfaces/finder_client_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/finder_client_xif.hh $(top_srcdir)/xrl/interfaces/finder_client_xif.cc: $(top_srcdir)/xrl/interfaces/finder_client.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+finder_event_notifier_xif.%: $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.hh $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.cc: $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+finder_event_observer_xif.%: $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc: $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+###############################################################################
+#
+# Build handler bases
+#
+###############################################################################
+
+# Finder base
+
+finder_base.%: $(top_srcdir)/xrl/targets/finder_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/finder_base.hh				\
+$(top_srcdir)/xrl/targets/finder_base.cc:				\
+    $(top_srcdir)/xrl/targets/finder.tgt
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+# Finder client base
+
+finder_client_base.%: $(top_srcdir)/xrl/targets/finder_client_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/finder_client_base.hh				\
+$(top_srcdir)/xrl/targets/finder_client_base.cc:			\
+    $(top_srcdir)/xrl/targets/finder_client.tgt
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+# Test Finder events base
+
+test_finder_events_base.%: $(top_srcdir)/xrl/targets/test_finder_events_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/test_finder_events_base.hh 			\
+$(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
+    $(top_srcdir)/xrl/targets/test_finder_events.tgt
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

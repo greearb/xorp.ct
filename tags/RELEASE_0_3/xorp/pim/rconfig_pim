@@ -1,0 +1,29 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/rconfig_pim,v 1.1 2002/12/09 13:29:36 pavlin Exp $
+#
+
+#
+# Run configure_pim on a remote machine
+# Usage: 'rconfig_pim [<hostname1> [<hostname2>] ... ]
+#
+
+if [ $# -lt 1 ] ; then
+    # Configure the local host
+    os=`uname -s`
+    config_path="~/work/xorp/$os-xorp/pim"
+    cd $config_path; ./configure_pim
+    exit 0
+fi
+
+while [ $# -gt 0 ]; do
+    # Configure for each hostname
+    hostname=$1
+    os=`ssh $hostname uname -s`
+    config_path="~/work/xorp/$os-xorp/pim"
+    ssh $hostname "(cd $config_path; ./configure_pim; )"
+    shift
+done
+
+exit 0

@@ -1,0 +1,92 @@
+#!/bin/sh
+# @configure_input@
+
+#
+# This is the input to a generator script.  The script it generates
+# gen-pathconf.sh generates pathcons.sh which is intended for
+# inclusion by XORP test scripts to device path information.  
+# 
+# configure filters gen-pathconf.sh.in to produce gen-pathconf.sh
+# configure then runs gen-pathconf.sh to produce pathconf.sh
+#
+# This is a two stage process since not all versions of autoconf are able
+# to provide much path related information (esp. build directory).
+#
+
+# The following cut-line enclosed region of code is used in
+# gen-pathconf.sh and in pathconf.sh.
+# start-cutting - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# 
+# absolute_path <path>
+#
+# Attempt to make a potentially relative path absolute.
+#
+absolute_path()
+{
+    local odir
+    odir=${PWD}
+    cd -P ${1}
+    echo ${PWD}
+    cd ${odir}
+}
+
+# stop-cutting - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+this_dir=`dirname $0`
+
+#
+# Determine top-level build directory.  We only have to do this because
+# early autoconf versions do not make this available.  We assume we are in
+# ${XORP_BUILDDIR}/utils
+#
+xorp_top_builddir=`absolute_path ${this_dir}/..`
+
+cd ${this_dir}
+this_script=`basename $0`
+
+#
+# Top-level source dir is available on autoconf versions going back as far
+# as we might care (2.10), but it needs to be absolutized to be useful for
+# test scripts that may be run under ${xorp_top_builddir}.
+#
+xorp_top_srcdir=`absolute_path @top_srcdir@`
+
+#
+# The following are all available on autoconf versions we might care about.
+#
+xorp_prefix=@prefix@
+xorp_exec_prefix=@exec_prefix@
+xorp_bindir=@bindir@
+xorp_sbindir=@sbindir@
+xorp_sysconfdir=@sysconfdir@
+
+cat > ./pathconf.sh <<EOF
+#
+# This shell script contains path settings that should be used in test
+# scripts to devine relevant file locations.  It is automatically generated 
+# by ${this_script}, though the file to edit is ${this_script}.in.
+#
+xorp_top_builddir=${xorp_top_builddir}
+xorp_top_srcdir=${xorp_top_srcdir}
+xorp_prefix=${xorp_prefix}
+xorp_exec_prefix=${xorp_exec_prefix}
+xorp_bindir=${xorp_bindir}
+xorp_sbindir=${xorp_sbindir}
+xorp_sysconfdir=${xorp_sysconfdir}
+
+EOF
+
+cat ${this_script} | sed -n '/^# start-cutting/,/^# stop-cutting/ p' | \
+    sed -n '/cut/! p' >> ./pathconf.sh
+
+cat >> './pathconf.sh' <<'EOF'
+#
+# Assume this script is being sourced from builddir as it would be for the
+# automake 'check' target.
+#
+this_dir=`dirname $0`
+xorp_srcdir=`absolute_path ${this_dir}`
+xorp_builddir=`echo ${xorp_srcdir} | sed 's@${xorp_top_srcdir}@${xorp_top_builddir}@'`
+unset this_dir
+EOF
+

@@ -1,0 +1,202 @@
+/* $XORP: xorp/xrl/interfaces/fea_fti.xif,v 1.2 2003/03/22 03:26:42 pavlin Exp $ */
+
+/*
+ * Forwarding Table XRL interface (typically used by RIB clients).
+ */
+
+interface fti/0.2 {
+
+	/**
+	 * Start transaction.
+	 * 
+	 * @param tid the transaction ID to use for this transaction.
+	 */
+	start_transaction -> tid:u32
+
+	/**
+	 * Commit transaction.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	commit_transaction ? tid:u32
+
+	/**
+	 * Abort transaction.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	abort_transaction ? tid:u32
+
+	/**
+	 * Add a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
+	 */
+	add_entry4 ? tid:u32 &						\
+		     dst:ipv4net &					\
+		     gateway:ipv4 &					\
+		     ifname:txt &					\
+		     vifname:txt &					\
+		     metric:u32 &					\
+		     admin_distance:u32 &				\
+		     protocol_origin:txt
+
+	/**
+	 * Add a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
+	 */
+	add_entry6 ? tid:u32 &						\
+		     dst:ipv6net &					\
+		     gateway:ipv6 &					\
+		     ifname:txt &					\
+		     vifname:txt &					\
+		     metric:u32 &					\
+		     admin_distance:u32 &				\
+		     protocol_origin:txt
+
+	/**
+	 * Delete a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 */
+	delete_entry4 ? tid:u32 & dst:ipv4net
+
+	/**
+	 * Delete a routing entry.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst the destination subnet address of the entry.
+	 */
+	delete_entry6 ? tid:u32 & dst:ipv6net
+
+	/**
+	 * Delete all routing entries for all address families.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	delete_all_entries ? tid:u32
+
+	/**
+	 * Delete all routing entries for the IPv4 address family.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	delete_all_entries4 ? tid:u32
+
+	/**
+	 * Delete all routing entries for the IPv6 address family.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	delete_all_entries6 ? tid:u32
+
+	/**
+	 * Lookup a route for a destination host address.
+	 * 
+	 * @param dst the destination host address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
+	 */
+	lookup_route4 ? dst:ipv4 -> netmask:ipv4net &			\
+				    gateway:ipv4 &			\
+				    ifname:txt &			\
+				    vifname:txt &			\
+				    metric:u32 &			\
+				    admin_distance:u32 &		\
+				    protocol_origin:txt
+
+	/**
+	 * Lookup a route for a destination host address.
+	 * 
+	 * @param dst the destination host address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
+	 */
+	lookup_route6 ? dst:ipv6 -> netmask:ipv6net &			\
+				    gateway:ipv6 &			\
+				    ifname:txt &			\
+				    vifname:txt &			\
+				    metric:u32 &			\
+				    admin_distance:u32 &		\
+				    protocol_origin:txt
+
+	/**
+	 * Lookup a route for a destination subnet address.
+	 * 
+	 * @param dst the destination subnet address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
+	 */
+	lookup_entry4 ?  dst:ipv4net					\
+		      -> gateway:ipv4 &					\
+		    	 ifname:txt &					\
+			 vifname:txt &					\
+			 metric:u32 &					\
+			 admin_distance:u32 &				\
+			 protocol_origin:txt
+
+	/**
+	 * Lookup a route for a destination subnet address.
+	 * 
+	 * @param dst the destination subnet address to lookup.
+	 * @param gateway the address of the next-hop router toward dst.
+	 * @param ifname the name of the physical interface toward dst.
+	 * @param vifname the name of the virtual interface toward dst.
+	 * @param metric the routing metric toward dst.
+	 * @param admin_distance the administratively defined distance
+	 * toward dst.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
+	 */
+	lookup_entry6 ?  dst:ipv6net					\
+		      -> gateway:ipv6 &					\
+			 ifname:txt &					\
+			 vifname:txt &					\
+			 metric:u32 &					\
+			 admin_distance:u32 &				\
+			 protocol_origin:txt
+
+	/*
+	 * TBD: start_reading and read_entry forwarding table dump methods.
+	 * Perhaps we request the forwarding table be dumped to file and then
+	 * transfer the file.
+	 */
+}

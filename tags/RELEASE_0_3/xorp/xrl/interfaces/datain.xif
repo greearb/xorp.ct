@@ -1,0 +1,34 @@
+/* $XORP: xorp/xrl/interfaces/datain.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+
+/*
+ * Datain Interface. This interface is associated with the the test peer.
+ * A test peer client receives data.
+ */
+
+interface datain/0.1 {
+	/*
+	 * Receive messages from the test peer.
+	 *
+	 * @param peer. The peers router name.
+	 * @param status. Is the message good?
+	 * @param secs. Time that the message was received in seconds.
+	 * @param micro. Time that the message was received in microseconds.
+	 * @param data.
+	 */
+	receive ? peer:txt & status:bool & secs:u32 & micro:u32 & data:binary
+
+	/*
+	 * Error. There has been an error on the endpoint.
+	 *
+	 * @param peer. The peers router name.
+	 * @param reason. The error message
+	 */
+	error ? peer:txt & reason:txt
+
+	/*
+	 * Closed. The endpointed has been closed.
+	 *
+	 * @param peer. The peers router name.
+	 */
+	closed ? peer:txt
+}

@@ -1,0 +1,227 @@
+
+
+
+
+
+
+Network Working Group                                          G. Malkin
+Request for Comments: 1721                                Xylogics, Inc.
+Obsoletes: 1387                                            November 1994
+Category: Informational
+
+
+                    RIP Version 2 Protocol Analysis
+
+Status of this Memo
+
+   This memo provides information for the Internet community.  This memo
+   does not specify an Internet standard of any kind.  Distribution of
+   this memo is unlimited.
+
+Abstract
+
+   As required by Routing Protocol Criteria (RFC 1264), this report
+   documents the key features of the RIP-2 protocol and the current
+   implementation experience.  This report is a prerequisite to
+   advancing RIP-2 on the standards track.
+
+Acknowledgements
+
+   The RIP-2 protocol owes much to those who participated in the RIP-2
+   working group.  A special thanks goes to Fred Baker, for his help on
+   the MIB, and to Jeffrey Honig, for all his comments.
+
+1.  Protocol Documents
+
+   The RIP-2 applicability statement is defined in RFC 1722 [1].
+
+   The RIP-2 protocol description is defined in RFC 1723 [2].  This memo
+   obsoletes RFC 1388, which specifies an update to the "Routing
+   Information Protocol" RFC 1058 (STD 34).
+
+   The RIP-2 MIB description is defined in RFC 1724 [3].  This memo
+   obsoletes RFC 1389.
+
+2.  Key Features
+
+   While RIP-2 shares the same basic algorithms as RIP-1, it supports
+   several new features.  They are: external route tags, subnet masks,
+   next hop addresses, and authentication.
+
+   The significant change from RFC 1388 is the removal of the domain
+   field.  There was no clear agreement as to how the field would be
+   used, so it was determined to leave the field reserved for future
+   expansion.
+
+
+
+Malkin                                                          [Page 1]
+
+RFC 1721                     RIP-2 Analysis                November 1994
+
+
+2.1  External Route Tags
+
+   The route tag field may be used to propagate information acquired
+   from an EGP.  The definition of the contents of this field are beyond
+   the scope of this protocol.  However, it may be used, for example, to
+   propagate an EGP AS number.
+
+2.2  Subnet Masks
+
+   Inclusion of subnet masks was the original intent of opening the RIP
+   protocol for improvement.  Subnet mask information makes RIP more
+   useful in a variety of environments and allows the use of variable
+   subnet masks on the network.  Subnet masks are also necessary for
+   implementation of "classless" addressing, as the CIDR work proposes.
+
+2.3  Next Hop Addresses
+
+   Support for next hop addresses allows for optimization of routes in
+   an environment which uses multiple routing protocols.  For example,
+   if RIP-2 were being run on a network along with another IGP, and one
+   router ran both protocols, then that router could indicate to the
+   other RIP-2 routers that a better next hop than itself exists for a
+   given destination.
+
+2.4  Authentication
+
+   One significant improvement RIP-2 offers over RIP-1, is the addition
+   of an authentication mechanism.  Essentially, it is the same
+   extensible mechanism provided by OSPF.  Currently, only a plain-text
+   password is defined for authentication.  However, more sophisticated
+   authentication schemes can easily be incorporated as they are
+   defined.
+
+2.5  Multicasting
+
+   RIP-2 packets may be multicast instead of being broadcast.  The use
+   of an IP multicast address reduces the load on hosts which do not
+   support routing protocols.  It also allows RIP-2 routers to share
+   information which RIP-1 routers cannot hear.  This is useful since a
+   RIP-1 router may misinterpret route information because it cannot
+   apply the supplied subnet mask.
+
+3.  RIP-2 MIB
+
+   The MIB for RIP-2 allows for monitoring and control of RIP's
+   operation within the router.  In addition to global and per-interface
+   counters and controls, there are per-peer counters which provide the
+   status of RIP-2 "neighbors".
+
+
+
+Malkin                                                          [Page 2]
+
+RFC 1721                     RIP-2 Analysis                November 1994
+
+
+   The MIB was modified to deprecate the domain, which was removed from
+   the protocol.  It has also been converted into version 2 format.
+
+4.  Implementations
+
+   Currently, there are three complete implementations of RIP-2: GATED,
+   written by Jeffrey Honig at Cornell University; Xylogics's Annex
+   Communication server; and an implementation for NOS, written by Jeff
+   White.  The GATED implementation is available by anonymous FTP from
+   gated.cornell.edu as pub/gated/gated-alpha.tar.Z.  The implementation
+   for NOS is available by anonymous FTP from ucsd.edu as
+   /hamradio/packet/tcpip/incoming/rip2.zip.
+
+   Additionally, Midnight Networks has produced a test suite which
+   verifies an implementation's conformance to RFC 1388 implemented over
+   RFC 1058.
+
+   The author has conducted interoperability testing between the GATED
+   and Xylogics implementations and found no incompatibilities.  This
+   testing includes verification of protection provided by the
+   authentication mechanism described in section 2.4.
+
+5.  Operational experience
+
+   Xylogics has been running RIP-2 on its production systems for five
+   months.  The topology includes seven subnets in a class B address and
+   various, unregistered class C addresses used for dial-up access.  Six
+   systems, in conjunction with three routers from other vendors and
+   dozens of host systems, operate on those subnets.
+
+   The only problem which has appeared is the reaction of some routers
+   to Version 2 RIP packets.  Contrary to RFC 1058, these routers
+   discard Version 2 packets rather than ignoring the fields not defined
+   for Version 1.
+
+6.  References
+
+   [1] Malkin, G., "RIP Version 2 Protocol Applicability Statement", RFC
+       1722, Xylogics, Inc., November 1994.
+
+   [2] Malkin, G., "RIP Version 2 - Carrying Additional Information",
+       RFC 1723, Xylogics, Inc., November 1994.
+
+   [3] Malkin, G., and F. Baker, "RIP Version 2 MIB Extension", RFC
+       1724, Xylogics, Inc., Cisco Systems, November 1994.
+
+
+
+
+
+
+Malkin                                                          [Page 3]
+
+RFC 1721                     RIP-2 Analysis                November 1994
+
+
+7.  Security Considerations
+
+   Security issues are discussed in sections 2.4 and 4.
+
+8.  Author's Address
+
+   Gary Scott Malkin
+   Xylogics, Inc.
+   53 Third Avenue
+   Burlington, MA 01803
+
+   Phone:  (617) 272-8140
+   EMail:  gmalkin@Xylogics.COM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Malkin                                                          [Page 4]
+

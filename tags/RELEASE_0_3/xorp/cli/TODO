@@ -1,0 +1,77 @@
+#
+# $XORP: xorp/cli/TODO,v 1.2 2003/06/03 10:04:11 pavlin Exp $
+#
+
+* If SPACE is pressed on empty line at the bottom of the terminal xterm
+  window, and then Ctrl-D is pressed, the command completion help output
+  overlaps with the current line.
+
+* For consistency with other modules, rename init_family argument to
+  family in the CliNode constructor. Do similar renaming for other arguments.
+
+* Implement CliCommand::create_default_cli_commands() and use
+  it as appropriate.
+
+* Don't return any error if a command with exactly same help, etc
+  was installed already. (??)
+
+* Add output paging for <TAB> generated help
+
+* Change cli_command->server_name() and friends to 'processor_name'
+
+* Handle syncronously the XRL response to a command
+
+* When disconnecting a CliClient during initialization of a connection,
+  due to an error, print the error.
+
+* When asking for help '?' or <Tab> on a command that supports optional
+  arguments, print those optional arguments as well.
+
+* Add CliNode::delete_command()
+
+* cli_command->name() for the root command is empty string.
+  When printing error with cli_command->name(), use '' around the command
+  name to make it clear where the command is.
+
+* Implement the missing pipe filters
+
+* Add support for \" escaping of a quotation.
+
+* Parse the pipe commands and return error if the (number of) arguments
+  do not match
+
+* Change/fix pop_token() to return an error when no pair of quotations found
+
+* Add support to handle longer lines when paging
+
+* Check if the cli_client->_buffer_line magic indeed works if the
+  very last cli_printf() doesn't have '\n' at the end.
+
+* Commbine the "Enter" help message to be defined at a single place
+
+* Help messages for following commands are not same as in Juniper:
+  -  "| compare rollback"
+  -  "| display detail"
+  -  "| display inheritance"
+  -  "| display xml"
+
+* If no command is typed, the pressing "SPACE" should or should
+  not list the available commands? Right now, pressing the SPACE
+  when nothing typed at all will NOT list the available commands;
+  also, pressing it after another command will not list the sub-commands.
+
+* When ^D is pressed in the beginning of a line, the connection is closed.
+  Is this a desired behavior?
+
+* Implement name completion for filenames and for usernames (when appropriate).
+
+* In Juniper, we have:
+  "Delete all characters on the command line" : Ctrl-u or Ctrl-x
+  "Delete the word before cursor" : Ctrl-w, Esc-Backspace, or Alt-Backspace
+
+  In libtecla, all the above combinations works except "Ctrl-u" and "Ctrl-w".
+  Do we want to add those two combinations as well?
+
+  Other keys that don't work are:
+  "Search the CLI history in reverse order..." : Ctrl-r
+  "Search the CLI history by typing ..." : Esc-/

@@ -1,0 +1,21 @@
+# $XORP: other/testbed/config/config5.xt,v 1.1 2002/06/14 21:34:41 atanu Exp $
+#
+# Configuration for Pavlin to test multicast
+#
+# xorp0 --- xorp1 --- xorp2 --- xorp3 --- xorp4
+#
+
+# Click compliant 4.5 kernel
+kernel[/home/xorpc/u2/freebsd4.5.usr/src/sys/compile/XORP-4.3/kernel.debug] =
+      xorp0, xorp4
+
+# Pavlin's multicast kernel
+kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp1, xorp2, xorp3
+
+# Designate xorp2 as the router
+router = xorp2
+
+vlan = xorp0, xorp1
+vlan = xorp1, xorp2
+vlan = xorp2, xorp3
+vlan = xorp3, xorp4

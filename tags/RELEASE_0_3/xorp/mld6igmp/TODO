@@ -1,0 +1,68 @@
+#
+# $XORP: xorp/mld6igmp/TODO,v 1.7 2003/04/16 04:56:00 pavlin Exp $
+#
+
+* Add configuration option to enable checking for Router Alert option
+  (NOTE: applies to PIM as well).
+
+* Add Mld6igmpConfig class to Mld6igmpNode.
+
+* Add Mld6igmpNode::pending_down() and Mld6igmpVif::pending_down()
+  similar to PIM.
+
+* When a protocol registers with MLD6IGMP, that protocol should try
+  periodically the registration if MLD6IGMP has not been started yet
+  (applies to PIM as well).
+  Similarly, protocols that register with MFEA should retry the
+  registration if the MFEA is not UP yet (applies to MLD6IGMP, PIM)
+
+* When adding a protocol (for membership info), the return messages
+  should use vif_name instead of vif_index. Also, check that
+  in add/delete_protocol, the vif_name and vif_index match.
+  Similar match check should be applied for all XRLs in MFEA, MLD6IGMP and PIM
+
+* The "State" in "show igmp interface" should be "Up/Down" instead
+  of "UP/DOWN" ?? (for consistency with Juniper??)
+
+* Change all (Foo *)casting to static_cast<>
+
+* Replace all proto_family with family ?
+  (in all mcast-related directories)
+
+* Check return error when sending XRLs
+
+* The return XrlCmdError values in mld6igmp_proto_access.hh are probably
+  bogus.
+
+* Mld6igmpVif->_proto_flags setting with MLD6IGMP_VIF_QUERIER bitset
+  should be done by a member function.
+
+* Add xlog_stop() to libxorp.
+
+* Initialize/setup mld6igmp_vif::vif_index() and vif_name();
+
+* All the JOIN/PRUNE routing notification should happen when
+  MemberQuery is deleted?
+
+* Instead of using Join/Prune in the context of IGMP/MLD6, use
+  Join/Leave instead?
+
+* mld6igmp_recv() should have hlim as one of the arguments.
+
+* The IGMP spec must say that the Group Address in Membership Report
+  and Leave Group messages must be a valid multicast address.
+
+* In mld6igmp_recv(), if the mld6igmp_vif interface is NULL, e.g.
+  the interface is not configured, then print a warning or at least a message??
+  Currently, the program will crash (XLOG_UNREACHABLE()).
+
+* One of the function arguments in the received. mld6/igmp message
+  should be "int hlim" for hop-limits (?)
+
+* mld6igmp_recv() should decode the first 4/8 octets and pass
+the rest to igmp_process() and mld6_process()
+
+* Add igmp_api.h
+
+* Create all missing header files, then abstract the common stuff
+  between IGMP and MLD6 and put it in those files.

@@ -1,0 +1,718 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+GMAKE = @GMAKE@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+bin_PROGRAMS = fea fea_dummy demo_fea_ifmgr_client test_mfea
+check_PROGRAMS = test_rawsock4 test_ifmanager_transaction
+TESTS = $(check_PROGRAMS)
+
+demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+
+# disabled test_fea
+noinst_LIBRARIES = libfea.a
+
+
+# -- Libraries and library flags to link the binary programs
+
+# -- Program Sources
+fea_SOURCES = fea.cc
+### FEA XRL libraries
+### MFEA XRL libraries
+### MRT libraries
+### CLI libraries
+### XORP misc libraries
+fea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+fea_dummy_SOURCES = fea_dummy.cc
+### FEA XRL libraries
+### MFEA XRL libraries
+### MRT libraries
+### CLI libraries
+### XORP misc libraries
+fea_dummy_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+test_mfea_SOURCES = test_mfea.cc
+# FEA-specific begin
+# FEA-specific end
+#test_mfea_LDADD	+= $(top_builddir)/xrl/interfaces/libcommonxif.a
+### MRT libraries
+### CLI libraries
+### XORP misc libraries
+test_mfea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc iftree.cc
+test_ifmanager_transaction_LDADD = $(top_builddir)/libxorp/libxorp.a
+
+test_rawsock4_SOURCES = test_rawsock4.cc rawsock4.cc
+test_rawsock4_LDADD = $(top_builddir)/libxorp/libxorp.a
+
+
+# -- Library Sources
+libfea_a_SOURCES = fea_module.h mfea_module.h fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_mfea_vif_manager.hh xrl_rawsock4.hh xrl_target.hh fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_get.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifmanager_transaction.cc iftree.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_mfea_vif_manager.cc xrl_rawsock4.cc xrl_target.cc
+
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST = DEVNOTES.mfea command_mfea configure_mfea test_xrls.sh xrl_mfea_shell_funcs.sh
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+subdir = fea
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libfea_a_AR = $(AR) cru
+libfea_a_LIBADD =
+am_libfea_a_OBJECTS = fti_transaction.$(OBJEXT) fticonfig.$(OBJEXT) \
+	fticonfig_entry_get.$(OBJEXT) \
+	fticonfig_entry_get_dummy.$(OBJEXT) \
+	fticonfig_entry_get_netlink.$(OBJEXT) \
+	fticonfig_entry_get_rtsock.$(OBJEXT) \
+	fticonfig_entry_observer.$(OBJEXT) \
+	fticonfig_entry_observer_dummy.$(OBJEXT) \
+	fticonfig_entry_observer_rtsock.$(OBJEXT) \
+	fticonfig_entry_parse_nlm.$(OBJEXT) \
+	fticonfig_entry_parse_rtm.$(OBJEXT) \
+	fticonfig_entry_set.$(OBJEXT) \
+	fticonfig_entry_set_dummy.$(OBJEXT) \
+	fticonfig_entry_set_rtsock.$(OBJEXT) \
+	fticonfig_table_get.$(OBJEXT) \
+	fticonfig_table_get_dummy.$(OBJEXT) \
+	fticonfig_table_get_netlink.$(OBJEXT) \
+	fticonfig_table_get_sysctl.$(OBJEXT) \
+	fticonfig_table_observer.$(OBJEXT) \
+	fticonfig_table_observer_dummy.$(OBJEXT) \
+	fticonfig_table_observer_rtsock.$(OBJEXT) \
+	fticonfig_table_parse_nlm.$(OBJEXT) \
+	fticonfig_table_parse_rtm.$(OBJEXT) \
+	fticonfig_table_set.$(OBJEXT) \
+	fticonfig_table_set_dummy.$(OBJEXT) \
+	fticonfig_table_set_rtsock.$(OBJEXT) ifconfig.$(OBJEXT) \
+	ifconfig_get.$(OBJEXT) ifconfig_get_dummy.$(OBJEXT) \
+	ifconfig_get_getifaddrs.$(OBJEXT) ifconfig_get_ioctl.$(OBJEXT) \
+	ifconfig_get_sysctl.$(OBJEXT) ifconfig_observer.$(OBJEXT) \
+	ifconfig_observer_dummy.$(OBJEXT) \
+	ifconfig_observer_rtsock.$(OBJEXT) \
+	ifconfig_parse_ifaddrs.$(OBJEXT) ifconfig_parse_ifreq.$(OBJEXT) \
+	ifconfig_parse_rtm.$(OBJEXT) ifconfig_set.$(OBJEXT) \
+	ifconfig_set_dummy.$(OBJEXT) ifconfig_set_ioctl.$(OBJEXT) \
+	ifmanager_transaction.$(OBJEXT) iftree.$(OBJEXT) \
+	mfea_config.$(OBJEXT) mfea_dataflow.$(OBJEXT) \
+	mfea_mrouter.$(OBJEXT) mfea_node.$(OBJEXT) \
+	mfea_node_cli.$(OBJEXT) mfea_proto_comm.$(OBJEXT) \
+	mfea_vif.$(OBJEXT) netlink_socket.$(OBJEXT) \
+	netlink_socket_utils.$(OBJEXT) rawsock4.$(OBJEXT) \
+	routing_socket.$(OBJEXT) routing_socket_utils.$(OBJEXT) \
+	xrl_fti.$(OBJEXT) xrl_ifmanager.$(OBJEXT) \
+	xrl_ifupdate.$(OBJEXT) xrl_mfea_node.$(OBJEXT) \
+	xrl_mfea_vif_manager.$(OBJEXT) xrl_rawsock4.$(OBJEXT) \
+	xrl_target.$(OBJEXT)
+libfea_a_OBJECTS = $(am_libfea_a_OBJECTS)
+bin_PROGRAMS = fea$(EXEEXT) fea_dummy$(EXEEXT) \
+	demo_fea_ifmgr_client$(EXEEXT) test_mfea$(EXEEXT)
+check_PROGRAMS = test_rawsock4$(EXEEXT) \
+	test_ifmanager_transaction$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
+
+am_demo_fea_ifmgr_client_OBJECTS = demo_fea_ifmgr_client.$(OBJEXT)
+demo_fea_ifmgr_client_OBJECTS = $(am_demo_fea_ifmgr_client_OBJECTS)
+demo_fea_ifmgr_client_DEPENDENCIES = \
+	$(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+demo_fea_ifmgr_client_LDFLAGS =
+am_fea_OBJECTS = fea.$(OBJEXT)
+fea_OBJECTS = $(am_fea_OBJECTS)
+fea_DEPENDENCIES = libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+fea_LDFLAGS =
+am_fea_dummy_OBJECTS = fea_dummy.$(OBJEXT)
+fea_dummy_OBJECTS = $(am_fea_dummy_OBJECTS)
+fea_dummy_DEPENDENCIES = libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+fea_dummy_LDFLAGS =
+am_test_ifmanager_transaction_OBJECTS = \
+	test_ifmanager_transaction.$(OBJEXT) iftree.$(OBJEXT)
+test_ifmanager_transaction_OBJECTS = \
+	$(am_test_ifmanager_transaction_OBJECTS)
+test_ifmanager_transaction_DEPENDENCIES = \
+	$(top_builddir)/libxorp/libxorp.a
+test_ifmanager_transaction_LDFLAGS =
+am_test_mfea_OBJECTS = test_mfea.$(OBJEXT)
+test_mfea_OBJECTS = $(am_test_mfea_OBJECTS)
+test_mfea_DEPENDENCIES = libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/interfaces/libcommonxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_mfea_LDFLAGS =
+am_test_rawsock4_OBJECTS = test_rawsock4.$(OBJEXT) rawsock4.$(OBJEXT)
+test_rawsock4_OBJECTS = $(am_test_rawsock4_OBJECTS)
+test_rawsock4_DEPENDENCIES = $(top_builddir)/libxorp/libxorp.a
+test_rawsock4_LDFLAGS =
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/demo_fea_ifmgr_client.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea.Po $(DEPDIR)/fea_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fti_transaction.Po $(DEPDIR)/fticonfig.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get_netlink.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get_rtsock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_observer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_observer_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_observer_rtsock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_parse_nlm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_parse_rtm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_set.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_set_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_set_rtsock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_get.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_get_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_get_netlink.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_get_sysctl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_observer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_observer_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_observer_rtsock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_parse_nlm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_parse_rtm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_set.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_set_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fticonfig_table_set_rtsock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig.Po $(DEPDIR)/ifconfig_get.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_getifaddrs.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_ioctl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_get_sysctl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_observer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_observer_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_observer_rtsock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_parse_ifaddrs.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_parse_ifreq.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_parse_rtm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_set.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_set_dummy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifconfig_set_ioctl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifmanager_transaction.Po \
+@AMDEP_TRUE@	$(DEPDIR)/iftree.Po $(DEPDIR)/mfea_config.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mfea_dataflow.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mfea_mrouter.Po $(DEPDIR)/mfea_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mfea_node_cli.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mfea_proto_comm.Po $(DEPDIR)/mfea_vif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/netlink_socket.Po \
+@AMDEP_TRUE@	$(DEPDIR)/netlink_socket_utils.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rawsock4.Po $(DEPDIR)/routing_socket.Po \
+@AMDEP_TRUE@	$(DEPDIR)/routing_socket_utils.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ifmanager_transaction.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_mfea.Po $(DEPDIR)/test_rawsock4.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_fti.Po $(DEPDIR)/xrl_ifmanager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_ifupdate.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_mfea_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_mfea_vif_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_rawsock4.Po $(DEPDIR)/xrl_target.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libfea_a_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
+	$(fea_SOURCES) $(fea_dummy_SOURCES) \
+	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
+	$(test_rawsock4_SOURCES)
+DIST_COMMON = README Makefile.am Makefile.in TODO
+SOURCES = $(libfea_a_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(fea_SOURCES) $(fea_dummy_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES)
+
+all: all-am
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  fea/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libfea.a: $(libfea_a_OBJECTS) $(libfea_a_DEPENDENCIES) 
+	-rm -f libfea.a
+	$(libfea_a_AR) libfea.a $(libfea_a_OBJECTS) $(libfea_a_LIBADD)
+	$(RANLIB) libfea.a
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+demo_fea_ifmgr_client$(EXEEXT): $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_DEPENDENCIES) 
+	@rm -f demo_fea_ifmgr_client$(EXEEXT)
+	$(CXXLINK) $(demo_fea_ifmgr_client_LDFLAGS) $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_LDADD) $(LIBS)
+fea$(EXEEXT): $(fea_OBJECTS) $(fea_DEPENDENCIES) 
+	@rm -f fea$(EXEEXT)
+	$(CXXLINK) $(fea_LDFLAGS) $(fea_OBJECTS) $(fea_LDADD) $(LIBS)
+fea_dummy$(EXEEXT): $(fea_dummy_OBJECTS) $(fea_dummy_DEPENDENCIES) 
+	@rm -f fea_dummy$(EXEEXT)
+	$(CXXLINK) $(fea_dummy_LDFLAGS) $(fea_dummy_OBJECTS) $(fea_dummy_LDADD) $(LIBS)
+test_ifmanager_transaction$(EXEEXT): $(test_ifmanager_transaction_OBJECTS) $(test_ifmanager_transaction_DEPENDENCIES) 
+	@rm -f test_ifmanager_transaction$(EXEEXT)
+	$(CXXLINK) $(test_ifmanager_transaction_LDFLAGS) $(test_ifmanager_transaction_OBJECTS) $(test_ifmanager_transaction_LDADD) $(LIBS)
+test_mfea$(EXEEXT): $(test_mfea_OBJECTS) $(test_mfea_DEPENDENCIES) 
+	@rm -f test_mfea$(EXEEXT)
+	$(CXXLINK) $(test_mfea_LDFLAGS) $(test_mfea_OBJECTS) $(test_mfea_LDADD) $(LIBS)
+test_rawsock4$(EXEEXT): $(test_rawsock4_OBJECTS) $(test_rawsock4_DEPENDENCIES) 
+	@rm -f test_rawsock4$(EXEEXT)
+	$(CXXLINK) $(test_rawsock4_LDFLAGS) $(test_rawsock4_OBJECTS) $(test_rawsock4_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/demo_fea_ifmgr_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fti_transaction.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_get.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_get_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_get_netlink.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_get_rtsock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_observer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_observer_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_observer_rtsock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_parse_nlm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_parse_rtm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_set.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_set_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_set_rtsock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_get.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_get_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_get_netlink.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_get_sysctl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_observer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_observer_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_observer_rtsock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_parse_nlm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_parse_rtm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_set.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_set_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_table_set_rtsock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_getifaddrs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_ioctl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_get_sysctl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_observer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_observer_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_observer_rtsock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_parse_ifaddrs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_parse_ifreq.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_parse_rtm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set_dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifconfig_set_ioctl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmanager_transaction.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/iftree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_dataflow.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_mrouter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_node_cli.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_proto_comm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_vif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/netlink_socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/netlink_socket_utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rawsock4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routing_socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routing_socket_utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ifmanager_transaction.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mfea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rawsock4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_fti.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_ifmanager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_ifupdate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_mfea_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_mfea_vif_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_rawsock4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-am
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+
+installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-am
+
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES mostlyclean-am
+
+distclean: distclean-am
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-binPROGRAMS
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-am
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+.PHONY: GTAGS all all-am check check-TESTS check-am clean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

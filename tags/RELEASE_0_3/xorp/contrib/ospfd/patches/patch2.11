@@ -1,0 +1,296 @@
+diff -X exclude_files -Nabur ospfd2.10/linux/ospfd.tcl ospfd2.11/linux/ospfd.tcl
+--- ospfd2.10/linux/ospfd.tcl	Wed Oct 31 09:48:27 2001
++++ ospfd2.11/linux/ospfd.tcl	Thu Nov  8 11:19:37 2001
+@@ -52,6 +52,10 @@
+ set global_att(PPAdjLimit) 0
+ set global_att(random_refresh) 0
+ 
++set IGMP_OFF 0
++set IGMP_ON 1
++set IGMP_DFLT 2
++
+ ###############################################################
+ # Top-level commands to set global parameters
+ # Router ID is set by "routerid _id_"
+@@ -177,6 +181,7 @@
+ 
+ proc interface {address cost} {
+     global thisarea thisifc area_att ifc_att
++    global IGMP_DFLT
+     if {[lsearch $area_att($thisarea,interfaces) $address] != -1} {
+ 	return;
+     }
+@@ -199,6 +204,7 @@
+     set ifc_att($thisarea,$address,mc_fwd) 1
+     set ifc_att($thisarea,$address,demand) 0
+     set ifc_att($thisarea,$address,passive) 0
++    set ifc_att($thisarea,$address,igmp) $IGMP_DFLT
+ }
+ 
+ proc mtu {val} {
+@@ -261,6 +267,11 @@
+     global thisarea thisifc ifc_att
+     set ifc_att($thisarea,$thisifc,passive) 1
+ }
++proc igmp {} {
++    global thisarea thisifc ifc_att
++    global IGMP_ON
++    set ifc_att($thisarea,$thisifc,igmp) $IGMP_ON
++}
+ 
+ ###############################################################
+ # Area aggregate configuration:
+@@ -456,7 +467,8 @@
+ 		    $ifc_att($a,$i,cost) $ifc_att($a,$i,dead_int) \
+ 		    $ifc_att($a,$i,poll_int) $ifc_att($a,$i,auth_type) \
+ 		    $ifc_att($a,$i,auth_key) $ifc_att($a,$i,mc_fwd) \
+-		    $ifc_att($a,$i,demand) $ifc_att($a,$i,passive)
++		    $ifc_att($a,$i,demand) $ifc_att($a,$i,passive) \
++		    $ifc_att($a,$i,igmp)
+ 	    foreach nbr $ifc_att($a,$i,nbrs) {
+ 		sendnbr $nbr $nbr_att($a,$i,$nbr,pri)
+ 	    }
+diff -X exclude_files -Nabur ospfd2.10/linux/ospfd_linux.C ospfd2.11/linux/ospfd_linux.C
+--- ospfd2.10/linux/ospfd_linux.C	Wed Oct 31 09:48:27 2001
++++ ospfd2.11/linux/ospfd_linux.C	Thu Nov  8 11:19:37 2001
+@@ -969,8 +969,19 @@
+     m.mc_fwd = atoi(argv[15]);
+     m.demand = atoi(argv[16]);
+     m.passive = atoi(argv[17]);
+-    ospf->cfgIfc(&m, ADD_ITEM);
++    switch (atoi(argv[18])) {
++      case 0:
++	m.igmp = 0;
++	break;
++      case 1:
++	m.igmp = 1;
++	break;
++      default:
++	m.igmp = ((m.IfType == IFT_BROADCAST) ? 1 : 0);
++	break;
++    }
+ 
++    ospf->cfgIfc(&m, ADD_ITEM);
+     return(TCL_OK);
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.10/ospf_sim/sim.C ospfd2.11/ospf_sim/sim.C
+--- ospfd2.10/ospf_sim/sim.C	Wed Oct 31 09:48:28 2001
++++ ospfd2.11/ospf_sim/sim.C	Thu Nov  8 11:19:41 2001
+@@ -1102,6 +1102,7 @@
+     m.mc_fwd = 1;
+     m.demand = atoi(argv[9]);
+     m.passive = atoi(argv[11]);
++    m.igmp = ((m.IfType == IFT_BROADCAST) ? 1 : 0);
+     enabled = (atoi(argv[10]) != 0);
+     run_ospf = (atoi(argv[12]) != 0);
+     command = (enabled && run_ospf) ? SIM_CONFIG : SIM_CONFIG_DEL;
+diff -X exclude_files -Nabur ospfd2.10/src/config.h ospfd2.11/src/config.h
+--- ospfd2.10/src/config.h	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/config.h	Thu Nov  8 11:19:37 2001
+@@ -117,6 +117,7 @@
+     int	mc_fwd;		// Multicast forwarding enabled?
+     int	demand;		// On Demand interface?
+     int passive;	// Don't send control packets?
++    int igmp;		// IGMP enabled?
+ };
+ 
+ 
+diff -X exclude_files -Nabur ospfd2.10/src/grplsa.C ospfd2.11/src/grplsa.C
+--- ospfd2.10/src/grplsa.C	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/grplsa.C	Thu Nov  8 11:19:37 2001
+@@ -244,7 +244,7 @@
+         return(true);
+     // look for group-membership-LSA
+     glsa = (grpLSA *) ospf->FindLSA(0, lsa_ap, LST_GM, group, adv_rtr());
+-    if (!glsa)
++    if (!glsa || glsa->lsa_age() == MaxAge)
+ 	return(false);
+     // Search for vertex
+     len = glsa->ls_length() - sizeof(LShdr);
+diff -X exclude_files -Nabur ospfd2.10/src/ospf.C ospfd2.11/src/ospf.C
+--- ospfd2.10/src/ospf.C	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/ospf.C	Thu Nov  8 11:19:37 2001
+@@ -334,21 +334,33 @@
+     HostAddr *hp;
+     SpfIfc *ip;
+     IfcIterator iter(this);
++    InAddr my_old_addr;
+ 
++    my_old_addr = myaddr;
+     myaddr = 0;
+-    while ((ap = a_iter.get_next())) {
++    while ((ap = a_iter.get_next()) && !myaddr) {
+ 	AVLsearch h_iter(&ap->hosts);	
+ 	while ((hp = (HostAddr *)h_iter.next())) {
+ 	    if (hp->r_cost == 0 && hp->r_rte->mask() == 0xffffffffL) {
+ 	        myaddr = hp->r_rte->net();
+-		return;
++		break;
+ 	    }
+ 	}
+     }
+-    while ((ip = iter.get_next())) {
++    while ((ip = iter.get_next()) && !myaddr) {
+         if (ip->state() != IFS_DOWN && ip->if_addr != 0) {
+ 	    myaddr = ip->if_addr;
+ 	    return;
++	}
++    }
++
++    // If address changes, redo IGMP sources on unnumbered interfaces
++    if (myaddr != my_old_addr && mospf_enabled()) {
++        AVLsearch iter(&phyints);
++	PhyInt *phyp;
++	while ((phyp = (PhyInt *)iter.next())) {
++	    if (phyp->my_addr == my_old_addr)
++	        phyp->verify_igmp_capabilities();
+ 	}
+     }
+ }
+diff -X exclude_files -Nabur ospfd2.10/src/ospf.h ospfd2.11/src/ospf.h
+--- ospfd2.10/src/ospf.h	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/ospf.h	Thu Nov  8 11:19:37 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 10,	// Minor version number
++	vminor = 11,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.10/src/phyint.C ospfd2.11/src/phyint.C
+--- ospfd2.10/src/phyint.C	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/phyint.C	Thu Nov  8 11:19:37 2001
+@@ -40,6 +40,7 @@
+     my_addr = 0;
+     mospf_ifp = 0;
+     igmp_querier = 0;
++    igmp_enabled = false;
+     // Initialize IGMP configurable constants to RFC 2236 defaults
+     robustness_variable = 2;
+     query_interval = 125;
+@@ -163,26 +164,32 @@
+     bool was_querier;
+     bool multicast_routing;
+     int phyint = index1();
++    bool igmp_was_enabled;
+ 
+     multicast_routing = false;
+     was_querier = IAmQuerier();
+     my_addr = 0;
+     mospf_ifp = 0;
++    igmp_was_enabled = igmp_enabled;
+     if (operational) {
+ 	IfcIterator iter(ospf);
+ 	SpfIfc *ip;
++	InAddr igmp_addr;
+ 	while ((ip = iter.get_next())) {
+             if (ip->if_phyint != phyint)
+ 	        continue;
++	    // IGMP allowed?
++	    if (!ip->igmp_enabled)
++	        continue;
+ 	    // mulicast routing enabled?
+ 	    if (ospf->mospf_enabled() &&
+ 		(ip->if_mcfwd == IF_MCFWD_MC))
+ 		multicast_routing = true;
+-	    if (ip->unnumbered())
+-	        continue;
++	    // Address to use for IGMP
++	    igmp_addr = (ip->unnumbered() ? ospf->myaddr : ip->if_addr);
+ 	    // Can do IGMP on the interface
+-	    if (my_addr == 0 || ip->if_addr < my_addr)
+-	        my_addr = ip->if_addr;
++	    if (my_addr == 0 || igmp_addr < my_addr)
++	        my_addr = igmp_addr;
+ 	    // Running MOSPF too?
+ 	    if (ospf->mospf_enabled() &&
+ 		(ip->if_mcfwd == IF_MCFWD_MC))
+@@ -192,10 +199,18 @@
+ 
+     // Enable/disable multicast routing on interface
+     sys->set_multicast_routing(phyint, multicast_routing);
++    igmp_enabled = (my_addr && mospf_ifp);
++    if (igmp_enabled != igmp_was_enabled) {
++        if (igmp_enabled)
++	    ospf->app_join(phyint, IGMPAllRouters);
++	else
++	    ospf->app_leave(phyint, IGMPAllRouters);
++    }
+ 
+     // Should we be querier?
+-    if (my_addr && mospf_ifp) {
+-        if (!igmp_querier || my_addr < igmp_querier) {
++    if (igmp_enabled) {
++        if (!igmp_querier || my_addr < igmp_querier ||
++	    (was_querier && (my_addr != igmp_querier))) {
+ 	    igmp_querier = my_addr;
+ 	    if (ospf->spflog(LOG_QUERIER, 4)) {
+ 	        ospf->log(&igmp_querier);
+@@ -582,10 +597,6 @@
+     phyp = (PhyInt *)ospf->phyints.find(gentry->index2(), 0);
+     if (phyp)
+         phyp->send_query(gentry->index1());
+-    if (--queries_remaining <= 0) {
+-        int sec_tmo;
+-        stop();
+-	sec_tmo = (phyp->last_member_query_interval+9)/10;
+-	gentry->exp_tim.start(sec_tmo*Timer::SECOND, false);
+-    }
++    if (--queries_remaining <= 0)
++	gentry->exp_tim.restart(phyp->last_member_query_interval*100);
+ }
+diff -X exclude_files -Nabur ospfd2.10/src/phyint.h ospfd2.11/src/phyint.h
+--- ospfd2.10/src/phyint.h	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/phyint.h	Thu Nov  8 11:19:37 2001
+@@ -57,6 +57,7 @@
+     InAddr my_addr;	// Associated IP address
+     SpfIfc *mospf_ifp;	// Associated MOSPF-enabled interface
+     // IGMP parameters
++    bool igmp_enabled;
+     InAddr igmp_querier;// Current IGMP querier
+     IGMPQueryTimer qrytim;
+     StartupQueryTimer strqtim;
+@@ -148,3 +149,6 @@
+     friend class LeaveQueryTimer;
+     friend class V1MemberTimer;
+ };
++
++const InAddr IGMPAllSystems = 0xe0000001;
++const InAddr IGMPAllRouters = 0xe0000002;
+diff -X exclude_files -Nabur ospfd2.10/src/spfifc.C ospfd2.11/src/spfifc.C
+--- ospfd2.10/src/spfifc.C	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/spfifc.C	Thu Nov  8 11:19:37 2001
+@@ -152,6 +152,11 @@
+ 	ip->passive = m->passive;
+ 	restart = true;
+     }
++    // IGMP enabled?
++    if (ip->igmp_enabled != (m->igmp != 0)) {
++        ip->igmp_enabled = (m->igmp != 0);
++	restart = true;
++    }
+     // On Area change, must restart interface
+     if (new_ap != ip->if_area) {
+ 	if (ip->if_area) {
+@@ -204,6 +209,7 @@
+     if_keys = 0;
+     if_demand = false;
+     passive = 0;
++    igmp_enabled = false;
+ 
+     db_xsum = 0;
+     anext = 0;
+diff -X exclude_files -Nabur ospfd2.10/src/spfifc.h ospfd2.11/src/spfifc.h
+--- ospfd2.10/src/spfifc.h	Wed Oct 31 09:48:26 2001
++++ ospfd2.11/src/spfifc.h	Thu Nov  8 11:19:37 2001
+@@ -125,6 +125,7 @@
+     byte if_passwd[8];	// Simple password
+     int passive;	// Don't send or receive control packets?
+     int	if_mcfwd;	// Multicast forwardimg
++    bool igmp_enabled;	// IGMP enabled on interface?
+     SpfArea *if_area;	// Associated OSPF area
+     CryptK *if_keys;	// Cryptographic keys
+ 

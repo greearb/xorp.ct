@@ -1,0 +1,38 @@
+#
+# $XORP: xorp/rib/TODO,v 1.3 2003/03/20 00:57:52 pavlin Exp $
+#
+
+RIB To Do List, 9/24/02
+=======================
+
+1. ExtIntTable needs some re-writing to be more symetric so that
+recursive BGP nexthop lookups are possible.
+
+2. VIF configuration should be automatic, by communicating directly
+with the FEA.
+
+3. ExportTable needs a queue adding to rate control changes to the FEA
+when the FEA is not keeping up.
+
+4. ExportTable should amalgamate deletes and adds in its queue for the
+same route.
+
+5. RegisterServer should amalgamate deletes and adds in its queue for
+the same route.  
+
+6. RegisterServer should be smarter about the use of flush().
+
+7. Route redistribution needs finishing.
+
+8. Route filters are needed for route redistribution.
+
+9. Change OriginTable to hold data rather than pointers in the Trie.
+
+10. Better, more extensive test suites.
+
+11. Add new interface for PIM simply be able to get all the routes.
+
+12. Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
+    RIB clients.
+
+13. Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.

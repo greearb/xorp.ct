@@ -1,0 +1,118 @@
+#
+# $XORP: xorp/mfea/TODO,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+#
+
+* In MfeaDfe::is_valid(), the min threshold value must be defined
+  somewhere else, and it should be consistent with
+  BW_UPCALL_THRESHOLD_INTERVAL_MIN_SEC and
+  BW_UPCALL_THRESHOLD_INTERVAL_MIN_USEC
+
+* Rename MfeaNode::get_mrib_table() and UnixComm::get_mrib_table() and
+  friends (get_mrib_table_*) to get_mrib_entries
+
+* Rename protocol_name and protocol_id in the send protocol messages
+  to src_module_instance_name and src_module_id (or sth. like that).
+
+* Whenever the MFEA starts to measure a dataflow, the kernel query
+  frequency should be 1/4th of the specified 'measurement_interval'.
+
+* The min. required TTL to forward on a MFC entry should be configurable
+  per vif.
+
+* The receiving of kernel signals won't be activated if
+  UnixComm::open_proto_socket() is not called for IGMP/MLD.
+  Need to fix it such that add_selector() is called for
+  _mrouter_socket even if no IGMP/MLD is running.
+
+* Rename "functions" with "methods" in classes inside *.hh
+  (e.g., "Private functions". Same for all *.hh in other directories:
+  mrt, cli, mld6igmp, pim, libproto
+
+* Check the following error:
+[ 2002/06/15 16:57:49  ERROR test_mfea:1199 LIBXORP +193 selector.cc select ] SelectorList::select failed: Invalid argument
+
+* Use start_pim() and stop_pim() as appropriate.
+
+* If a protocol deletes itself from the MFEA, make sure that all
+  the groups it has joined will be left.
+
+* Replace all assert() with XORP_ASSERT() (inside MFEA, CLI, MLD6IGMP, PIM)
+
+* Fix all messages like the one below to print a more explicit information
+  where the error happened. Apply same for CLI, MLD6IGMP, PIM
+    if (is_invalid_family) {
+	// Invalid address family
+	reason = c_format("Received protocol message with invalid "
+			  "address family: IPv4");
+	fail = true;
+	return XrlCmdError::OKAY();
+    }
+
+* Wnen added a new protocol, schedule the sending back of the Vif
+  info to happen AFTER the return of the XRL handler (???).
+  If the registering protocol doesn't consider the return value
+  from the registration before accepting any other info, then
+  we don't need that. However, if the return value from the registration
+  is important whether to start accepting info from the MFEA,
+  then we must do the above.
+
+* Send delete_vif XRL to all registered protocols when needed.
+* Send delete_vif_addr XRL to all registered protocols when needed.
+
+* Some of the UnixComm::_sndbuf0/1 or _rcvbuf0/1 are not used and/or
+  should be much smaller.
+
+* A single UnixComm should be able to handle more than one protocol modules.
+
+* Get rid of _maxvifs ??
+
+* 'int proto' (e.g. IPPROTO_IGMP, etc) should be renamed to 'proto_number'
+   or sth. like that
+
+* There should be a periodic task to re-read the status of all
+  kernel interfaces.
+
+* In UnixComm::proto_socket_write() we should copy "databuf" to
+  _sndbuf instead of assigning it to _sndiov[].
+
+* Use if_nametoindex(3) when available
+
+* Take care of scope_id for IPv6:
+		struct sockaddr_in6 addr;
+               if (IN6_IS_ADDR_LINKLOCAL(&addr.sin6_addr))
+                {
+                        addr.sin6_scope_id = if_nametoindex(ifa->ifa_name);
+		}
+
+* Make the behavior consistent: if we use ioctl() to get the list of
+  interfaces, if there is an error, we return immediately;
+  However, if we use sysctl method and if there is an error, we
+  continue with the next interface.
+
+* If closing the _mrouter_socket, make sure that _proto_socket for
+  IGMP or ICMP6 is closed too.
+
+* When sending a request using UnixComm, make sure we are using the
+  right socket (e.g., IOCTL, etc)
+
+* In k_get_vif_flags(int family, char *vif_name, uint32_t *return_value)
+  rename 'return_value' to 'flags' or sth. else
+
+* Replace TRUE/FALSE with true/false
+
+* In function headers, make sure that constants have % in front.
+  E.g.: %XORP_OK %XORP_ERROR 
+
+* Send email to KAME. In the mean time detect the problem in configure.in
+#ifdef GET_TIME
+#undef GET_TIME		// TODO: on FreeBSD-4.3 including both ip_mroute.h
+			// and ip6_mroute.h is broken
+#endif
+
+
+* Change all "FOO node definition" to "FOO node declaration" (?)
+
+* _max_rate_limit should be uint64_t, otherwise cannot create an
+  explicit restriction to forward more than 4Gbps. However, the UNIX
+  kernel uses u_int for that, so we don't have much choice.
+
