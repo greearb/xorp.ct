@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.5 2003/03/10 20:20:14 pavlin Exp $
+# $XORP: xorp/README,v 1.6 2003/03/10 20:24:04 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -79,6 +79,7 @@ Currently, XORP implements the following protocols:
   * MLD v1 (not tested yet):
     - RFC 2710
 
+For description of the changes in each release, see xorp/RELEASE_NOTES.
 
 3. Compilation, configuration and startup
 ============================
