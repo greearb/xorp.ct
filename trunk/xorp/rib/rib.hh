@@ -66,7 +66,8 @@ public:
      * is the topology information, not the forwarding information.
      * @param rib_manager the main RIB manager process holding stuff
      * that's common to all the individual RIBs.
-     * @param eventloop the main event loop.  */
+     * @param eventloop the main event loop.
+     */
     RIB(RibTransportType rib_type, RibManager& rib_manager, 
 	EventLoop& eventloop);
 
@@ -74,11 +75,6 @@ public:
      * RIB Destructor.
      */
     virtual ~RIB();
-
-    /**
-     * set test-mode: don't try to send to RIB clients.
-     */
-    void no_rib_clients() { _no_rib_clients = true; }
 
     /**
      * set test-mode: abort on some errors that we'd normally mask
@@ -596,7 +592,6 @@ protected:
     RouteTable<A>	*_final_table;
     RegisterTable<A>	*_register_table;
     bool _mcast;
-    bool _no_rib_clients;
     bool _errors_are_fatal;
 
     map<const string, RouteTable<A> *>	_tables;
