@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.15 2003/04/23 09:39:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.1 2003/05/15 23:10:31 pavlin Exp $"
 
 
 //
@@ -95,6 +95,13 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
     
     _proto_socket = -1;
     
+    // Allocate the buffers
+    _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
+    _sndbuf0 = new uint8_t[IO_BUF_SIZE];
+    _rcvbuf1 = new uint8_t[IO_BUF_SIZE];
+    _sndbuf1 = new uint8_t[IO_BUF_SIZE];
+    _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
+    _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
     
     // recvmsg() and sendmsg() related initialization
     switch (family()) {
@@ -122,8 +129,8 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
     _sndmh.msg_iovlen		= 1;
     _rcviov[0].iov_base		= (caddr_t)_rcvbuf0;
     _rcviov[1].iov_base		= (caddr_t)_rcvbuf1;
-    _rcviov[0].iov_len		= sizeof(_rcvbuf0);
-    _rcviov[1].iov_len		= sizeof(_rcvbuf1);
+    _rcviov[0].iov_len		= IO_BUF_SIZE;
+    _rcviov[1].iov_len		= IO_BUF_SIZE;
     _sndiov[0].iov_base		= (caddr_t)_sndbuf0;
     _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
     _sndiov[0].iov_len		= 0;
@@ -131,7 +138,7 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
     
     _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
-    _rcvmh.msg_controllen	= sizeof(_rcvcmsgbuf);
+    _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
     
     _ignore_my_packets		= false;
@@ -140,6 +147,14 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
 ProtoComm::~ProtoComm()
 {
     stop();
+    
+    // Free the buffers
+    delete[] _rcvbuf0;
+    delete[] _sndbuf0;
+    delete[] _rcvbuf1;
+    delete[] _sndbuf1;
+    delete[] _rcvcmsgbuf;
+    delete[] _sndcmsgbuf;
 }
 
 /**
@@ -804,7 +819,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     UNUSED(mask);
     
     // Zero and reset various fields
-    _rcvmh.msg_controllen = sizeof(_rcvcmsgbuf);
+    _rcvmh.msg_controllen = CMSG_BUF_SIZE;
     // TODO: when resetting _from4 and _from6 do we need to set the address
     // family and the sockaddr len?
     switch (family()) {
@@ -1341,7 +1356,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	_sndmh.msg_namelen	= sizeof(_to4);
 	_sndmh.msg_iovlen	= 2;
 	_sndiov[0].iov_len	= ip_hdr_len;
-	if (datalen > sizeof(_sndbuf1)) {
+	if (datalen > IO_BUF_SIZE) {
 	    XLOG_ERROR("proto_socket_write() failed: "
 		       "cannot send packet on vif %s from %s to %s: "
 		       "too much data: %u octets (max = %u)",
@@ -1349,7 +1364,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		       src.str().c_str(),
 		       dst.str().c_str(),
 		       (uint32_t)datalen,
-		       (uint32_t)sizeof(_sndbuf1));
+		       (uint32_t)IO_BUF_SIZE);
 	    return (XORP_ERROR);
 	}
     	memcpy(_sndbuf1, databuf, datalen); // XXX: goes to _sndiov[1].iov_base
@@ -1497,7 +1512,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	dst.copy_out(_to6);
 	_sndmh.msg_namelen  = sizeof(_to6);
 	_sndmh.msg_iovlen   = 1;
-	if (datalen > sizeof(_sndbuf0)) {
+	if (datalen > IO_BUF_SIZE) {
 	    XLOG_ERROR("proto_socket_write() failed: "
 		       "error sending packet on vif %s from %s to %s: "
 		       "too much data: %u octets (max = %u)",
@@ -1505,7 +1520,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		       src.str().c_str(),
 		       dst.str().c_str(),
 		       (uint32_t)datalen,
-		       (uint32_t)sizeof(_sndbuf0));
+		       (uint32_t)IO_BUF_SIZE);
 	    return (XORP_ERROR);
 	}
 	memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base

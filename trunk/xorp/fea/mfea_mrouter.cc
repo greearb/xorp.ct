@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.15 2003/04/23 09:39:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.1 2003/05/15 23:10:30 pavlin Exp $"
 
 
 //
@@ -73,6 +73,14 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
 {
     _mrouter_socket = -1;
     
+    // Allocate the buffers
+    _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
+    _sndbuf0 = new uint8_t[IO_BUF_SIZE];
+    _rcvbuf1 = new uint8_t[IO_BUF_SIZE];
+    _sndbuf1 = new uint8_t[IO_BUF_SIZE];
+    _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
+    _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
+    
     // recvmsg() and sendmsg() related initialization
     switch (family()) {
     case AF_INET:
@@ -99,8 +107,8 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     _sndmh.msg_iovlen		= 1;
     _rcviov[0].iov_base		= (caddr_t)_rcvbuf0;
     _rcviov[1].iov_base		= (caddr_t)_rcvbuf1;
-    _rcviov[0].iov_len		= sizeof(_rcvbuf0);
-    _rcviov[1].iov_len		= sizeof(_rcvbuf1);
+    _rcviov[0].iov_len		= IO_BUF_SIZE;
+    _rcviov[1].iov_len		= IO_BUF_SIZE;
     _sndiov[0].iov_base		= (caddr_t)_sndbuf0;
     _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
     _sndiov[0].iov_len		= 0;
@@ -108,7 +116,7 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     
     _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
-    _rcvmh.msg_controllen	= sizeof(_rcvcmsgbuf);
+    _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
     
     _mrt_api_mrt_mfc_flags_disable_wrongvif = false;
@@ -120,6 +128,14 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
 MfeaMrouter::~MfeaMrouter()
 {
     stop();
+    
+    // Free the buffers
+    delete[] _rcvbuf0;
+    delete[] _sndbuf0;
+    delete[] _rcvbuf1;
+    delete[] _sndbuf1;
+    delete[] _rcvcmsgbuf;
+    delete[] _sndcmsgbuf;
 }
 
 /**
@@ -1485,7 +1501,7 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
     UNUSED(mask);
     
     // Zero and reset various fields
-    _rcvmh.msg_controllen = sizeof(_rcvcmsgbuf);
+    _rcvmh.msg_controllen = CMSG_BUF_SIZE;
     // TODO: when resetting _from4 and _from6 do we need to set the address
     // family and the sockaddr len?
     switch (family()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.6 2003/03/30 03:50:44 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.1 2003/05/15 23:10:31 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -307,12 +307,12 @@ private:
     int		  _ipproto;	// The protocol number (IPPROTO_*)
     xorp_module_id _module_id;	// The corresponding module id (XORP_MODULE_*)
     int		  _proto_socket;   // The socket for protocol message
-    uint8_t	  _rcvbuf0[IO_BUF_SIZE];	// Data buffer0 for receiving
-    uint8_t	  _sndbuf0[IO_BUF_SIZE];	// Data buffer0 for sending
-    uint8_t	  _rcvbuf1[IO_BUF_SIZE];	// Data buffer1 for receiving
-    uint8_t	  _sndbuf1[IO_BUF_SIZE];	// Data buffer1 for sending
-    uint8_t	  _rcvcmsgbuf[CMSG_BUF_SIZE]; // Control recv info (IPv6 only)
-    uint8_t	  _sndcmsgbuf[CMSG_BUF_SIZE]; // Control send info (IPv6 only)
+    uint8_t*	  _rcvbuf0;	// Data buffer0 for receiving
+    uint8_t*	  _sndbuf0;	// Data buffer0 for sending
+    uint8_t*	  _rcvbuf1;	// Data buffer1 for receiving
+    uint8_t*	  _sndbuf1;	// Data buffer1 for sending
+    uint8_t*	  _rcvcmsgbuf;	// Control recv info (IPv6 only)
+    uint8_t*	  _sndcmsgbuf;	// Control send info (IPv6 only)
     struct msghdr _rcvmh;	// The msghdr structure used by recvmsg()
     struct msghdr _sndmh;	// The msghdr structure used by sendmsg()
     struct iovec  _rcviov[2];	// The rcvmh scatter/gatter array
