@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.25 2004/12/06 00:51:40 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.26 2004/12/08 22:47:27 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -232,9 +232,11 @@ void
 XrlRtrmgrInterface::initialize_client_state(uint32_t user_id, 
 					    UserInstance *user)
 {
-    /* we need to send the running config and module state to the
-       client, but we first need to return from the current XRL, so we
-       schedule this on a zero-second timer */
+    //
+    // We need to send the running config and module state to the
+    // client, but we first need to return from the current XRL, so we
+    // schedule this on a zero-second timer.
+    //
     XorpTimer t;
     t = _eventloop.new_oneoff_after_ms(0,
              callback(this, &XrlRtrmgrInterface::send_client_state, 
@@ -260,7 +262,7 @@ XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
     ModuleManager &mmgr(_master_config_tree->module_manager());
     mmgr.get_module_list(module_names);
     list <string>::iterator i;
-    for(i = module_names.begin(); i != module_names.end(); i++) {
+    for (i = module_names.begin(); i != module_names.end(); i++) {
 	debug_msg("module: %s\n", (*i).c_str());
 	Module::ModuleStatus status = mmgr.module_status(*i);
 	if (status != Module::NO_SUCH_MODULE) {
@@ -368,13 +370,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
 }
 
 /**
- * this interface is deprecated as the main way for xorpsh to get the
+ * This interface is deprecated as the main way for xorpsh to get the
  * running config from the router manager.  It is retained for
  * debugging purposes.  xorpsh now gets its config automatically
  * immediatedly after registering which removes a potential timing
  * hole where the client could be told about a change to the config
- * before it has asked what the current config is. */
-
+ * before it has asked what the current config is.
+*/
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
 	// Input values, 
