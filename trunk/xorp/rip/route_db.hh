@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.10 2003/07/21 23:13:32 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.11 2003/08/01 04:08:13 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -200,7 +200,7 @@ public:
     /**
      * Pause route walking operation.  The instance state is
      * transitioned from RUNNING to PAUSED on the assumption that
-     * route walking will be resumed at some point in the future (@see
+     * route walking will be resumed at some point in the future (@ref
      * resume).  If the current route has a deletion timer associated
      * with it that would expire within pause_ms, the timer expiry is
      * pushed back so it will expire at a time after the expected

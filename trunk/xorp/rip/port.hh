@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.10 2003/07/21 18:06:55 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.11 2003/08/01 04:08:12 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -103,7 +103,7 @@ public:
      * Set the interquery gap.  This is the minimum temporal gap between
      * route request packets that query specific routes.  Fast arriving
      * queries are ignored.
-     * @parm t the interquery delay in milliseconds.
+     * @param t the interquery delay in milliseconds.
      */
     inline void		set_interquery_delay_ms(uint32_t t);
 
