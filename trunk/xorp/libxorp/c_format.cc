@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/c_format.cc,v 1.3 2003/03/10 23:20:30 hodson Exp $"
+#ident "$XORP: xorp/libxorp/c_format.cc,v 1.4 2004/06/10 22:41:14 hodson Exp $"
 
 #include <stdio.h>
+#include <vector>
 
 #include "xorp.h"
 #include "c_format.hh"
@@ -76,31 +77,24 @@ c_format_validate(const char* fmt, int exp_count)
     }
 }
 
-static inline string
-c_format_va(const char* fmt, va_list ap)
-{
-    size_t buf_size = 4096;		// Default buffer size
-    
-    // The loop below should not be executed more than two times: the
-    // first time to get the right size of the buffer if the default
-    // size is too small, and the second time with the right buffer size.
-    do {
-	char b[buf_size];
-	int ret = vsnprintf(b, buf_size, fmt, ap);
-	if ((size_t)ret < buf_size)
-	    return string(b);		// Buffer size is OK
-	buf_size = ret + 1;		// Add space for the extra '\0'
-    } while (true);
-}
-
 string
 do_c_format(const char* fmt, ...)
 {
+    size_t buf_size = 4096;             // Default buffer size
+    vector<char> b(buf_size);
     va_list ap;
-    va_start(ap, fmt);
-    string r = c_format_va(fmt, ap);
-    va_end(ap);
-    return r;
+
+    do {
+	va_start(ap, fmt);
+	int ret = vsnprintf(&b[0], buf_size, fmt, ap);
+	if ((size_t)ret < buf_size) {
+	    string r = string(&b[0]);	// Buffer size is OK
+	    va_end(ap);
+	    return r;
+	}
+	buf_size = ret + 1;		// Add space for the extra '\0'
+	b.resize(buf_size);
+    } while (true);
 }
 
 #ifdef TESTING_C_FORMAT_123
