@@ -1,11 +1,11 @@
 %{
 #include <string.h>
 #include "y.opcmd_tab.h"
-#define YY_NO_UNPUT
 %}
 	int opcmd_linenum = 1;
 	extern void* opcmdlval;
 %option noyywrap
+%option nounput
 %x comment
 
 

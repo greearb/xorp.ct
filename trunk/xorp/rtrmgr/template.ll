@@ -1,11 +1,11 @@
 %{
 #include <string.h>
 #include "y.tplt_tab.h"
-#define YY_NO_UNPUT
 %}
 	int tplt_linenum = 1;
 	extern void* tpltlval;
 %option noyywrap
+%option nounput
 %x comment
 
 RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?

@@ -1,13 +1,13 @@
 %{
 #include <string.h>
 #include "y.boot_tab.h"
-#define YY_NO_UNPUT
 #define SBUFSIZE 1024
 %}
 	int boot_linenum = 1;
 	extern void* bootlval;
 	char stringbuf[SBUFSIZE + 1];
 %option noyywrap
+%option nounput
 %x comment
 %x string
 
