@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.40 2004/04/06 07:14:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.41 2004/05/13 08:06:53 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1380,8 +1380,12 @@ XrlFeaTarget::fti_0_2_add_entry4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    // TODO: use those arguments
-    UNUSED(protocol_origin);
+    //
+    // XXX: don't add routes for directly-connected subnets,
+    // because that should be managed by the underlying system.
+    //
+    if (protocol_origin == "connected")
+	return XrlCmdError::OKAY();
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
@@ -1407,8 +1411,12 @@ XrlFeaTarget::fti_0_2_add_entry6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    // TODO: use those arguments
-    UNUSED(protocol_origin);
+    //
+    // XXX: don't add routes for directly-connected subnets,
+    // because that should be managed by the underlying system.
+    //
+    if (protocol_origin == "connected")
+	return XrlCmdError::OKAY();
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
@@ -1744,6 +1752,13 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
+    //
+    // XXX: don't add routes for directly-connected subnets,
+    // because that should be managed by the underlying system.
+    //
+    if (protocol_origin == "connected")
+	return XrlCmdError::OKAY();
+
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
@@ -1751,9 +1766,7 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 	);
     return _xftm.add(tid, op);
 
-    // TODO: use the protocol_origin argument
     UNUSED(cookie);
-    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -1816,6 +1829,13 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
+    //
+    // XXX: don't add routes for directly-connected subnets,
+    // because that should be managed by the underlying system.
+    //
+    if (protocol_origin == "connected")
+	return XrlCmdError::OKAY();
+
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
@@ -1823,9 +1843,7 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 	);
     return _xftm.add(tid, op);
 
-    // TODO: use the protocol_origin argument
     UNUSED(cookie);
-    UNUSED(protocol_origin);
 }
 
 XrlCmdError
