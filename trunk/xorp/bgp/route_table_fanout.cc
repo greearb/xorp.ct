@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.40 2004/11/04 01:33:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.41 2004/11/04 01:36:31 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -132,7 +132,8 @@ FanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
 			       const PeerHandler *ph, uint32_t genid) 
 {
     debug_msg("FanoutTable<IPv%u:%s>::add_next_table %x %s\n",
-	      A::ip_version(), pretty_string_safi(this->safi()),
+	      XORP_UINT_CAST(A::ip_version()),
+	      pretty_string_safi(this->safi()),
 	      (u_int)new_next_table, new_next_table->tablename().c_str());
 
     if (_next_tables.find(new_next_table) != _next_tables.end()) {
@@ -214,16 +215,18 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
 	    debug_msg("FanoutTable<IPv%u%s>::add_route %x.\n  Don't send back to %s\n",
-		      A::ip_version(), pretty_string_safi(this->safi()),
+		      XORP_UINT_CAST(A::ip_version()),
+		      pretty_string_safi(this->safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	} else {
 	    debug_msg("FanoutTable<IPv%u%s>::add_route %x to %s\n",
-		      A::ip_version(), pretty_string_safi(this->safi()),
+		      XORP_UINT_CAST(A::ip_version()),
+		      pretty_string_safi(this->safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 
 	    if (i.second().busy()) {
 		debug_msg("Fanout: queuing route, queue len is %u\n",
-			  (uint32_t)queued_peers.size());
+			  XORP_UINT_CAST(queued_peers.size()));
 		queued_peers.push_back(&(i.second()));
 		r = ADD_USED;
 	    } else {
@@ -282,7 +285,8 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    // don't send the route back to the peer it came from
 	} else {
 	    debug_msg("FanoutTable<IPv%u:%s>::replace_route %x -> %x to %s\n",
-		      A::ip_version(), pretty_string_safi(this->safi()),
+		      XORP_UINT_CAST(A::ip_version()),
+		      pretty_string_safi(this->safi()),
 		      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg),
 		      (i.first())->tablename().c_str());
 
@@ -331,11 +335,13 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	const PeerHandler *next_peer = i.second().peer_handler();
 	if (origin_peer == next_peer) {
 	    debug_msg("FanoutTable<IPv%u:%s>::delete_route %x.\n  Don't send back to %s\n",
-		      A::ip_version(), pretty_string_safi(this->safi()),
+		      XORP_UINT_CAST(A::ip_version()),
+		      pretty_string_safi(this->safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	} else {
 	    debug_msg("FanoutTable<IPv%u:%s>::delete_route %x to %s\n",
-		      A::ip_version(), pretty_string_safi(this->safi()),
+		      XORP_UINT_CAST(A::ip_version()),
+		      pretty_string_safi(this->safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	    if (i.second().busy()) {
 		queued_peers.push_back(&(i.second()));
@@ -871,8 +877,8 @@ FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 {
     XLOG_ASSERT(this->_parent == caller);
 
-    debug_msg("peer: %s genid: %d caller: %s\n",
-	      peer->peername().c_str(), genid,
+    debug_msg("peer: %s genid: %u caller: %s\n",
+	      peer->peername().c_str(), XORP_UINT_CAST(genid),
 	      caller->tablename().c_str());
 
     print_queue();
