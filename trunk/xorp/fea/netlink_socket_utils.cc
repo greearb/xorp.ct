@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.17 2004/10/26 01:23:50 bms Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.18 2004/11/05 00:47:17 bms Exp $"
 
 
 #include "fea_module.h"
@@ -160,12 +160,14 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
 }
 
 bool
-NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
+NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
+			     const struct nlmsghdr* nlh,
 			     const struct rtmsg* rtmsg, int rta_len)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[RTA_MAX + 1];
     int if_index;
+    bool ignore_ifindex = false;
     string if_name;
     int family = fte.nexthop().af();
     bool is_deleted = false;
@@ -186,16 +188,39 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
 	// TODO: XXX: PAVPAVPAV: handle it, if needed!
 	return false;		// TODO: is it really an error?
     }
-#ifdef notyet
+
     //
-    // Interpret notifications about discard routes from the
-    // kernel correctly.
-    // XXX: Don't forget to point them at the soft discard interface.
+    // Try to map discard routes back to the first software discard
+    // interface in the tree.
     //
     if ((rtmsg->rtm_type == RTN_BLACKHOLE) ||
-	(rtmsg->rtm_type == RTN_PROHIBIT))
-	    /* set nexthop to be the blackhole interface */ ;
-#endif
+	(rtmsg->rtm_type == RTN_PROHIBIT)) {
+	//
+	// Find first discard interface in the FEA. If we don't have one,
+	// log a warning and ignore this route. Because IfTree elements
+	// are held in a map, and we don't key on this property, we
+	// have to walk for it.
+	//
+	const IfTreeInterface* pi = NULL;
+	for (IfTree::IfMap::const_iterator ii = iftree.ifs().begin();
+	     ii != iftree.ifs().end(); ++ii) {
+		if (ii->second.discard()) {
+			pi = &ii->second;
+			break;
+		}
+	}
+
+	if (pi == NULL) {
+	    XLOG_ERROR(
+"Cannot map a discard route back to an FEA soft discard interface.");
+	    return false;
+	}
+
+	if_name = pi->ifname();		// XXX: ifname == vifname
+	// XXX: Do we need to change nexthop_addr?
+	ignore_ifindex = true;
+    }
+
     if (rtmsg->rtm_type == RTN_UNREACHABLE) {
 	// Ignore "destination unreachable" notifications.
 	return false;
@@ -263,7 +288,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     //
     // Get the interface name
     //
-    {
+    if (!ignore_ifindex) {
 	const char* name = NULL;
 #ifdef HAVE_IF_INDEXTONAME
 	char name_buf[IF_NAMESIZE];

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.9 2004/06/10 22:40:56 hodson Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.10 2004/09/09 18:54:31 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
 
 #include "fte.hh"
+#include "iftree.hh"
 
 //
 // TODO: XXX: a temporary definition of RTPROT_XORP (e.g., in case of Linux)
@@ -64,11 +65,13 @@ public:
      * 
      * @param fte the return-by-reference @ref FteX entry to return the result.
      * @param nlh the netlink message header.
+     * @param iftree the interface tree.
      * @param rtmsg the routing message.
      * @param rta_len the routing message payload.
      * @return true on success, otherwise false.
      */
-    static bool	nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
+    static bool	nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
+				   const struct nlmsghdr* nlh,
 				   const struct rtmsg* rtmsg, int rta_len);
 
     /**
