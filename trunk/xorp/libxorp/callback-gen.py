@@ -347,7 +347,8 @@ if (! cb.is_empty()) {
 void trace_dispatch_enter(const char* file, int line);
 void trace_dispatch_leave();
 
-#define record_dispatch_enter() trace_dispatch_enter(file(), line())
+#define record_dispatch_enter() trace_dispatch_enter( this->file(),	      \
+						      this->line() )
 #define record_dispatch_leave() trace_dispatch_leave()
 """
 
