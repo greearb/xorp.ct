@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.1 2003/05/02 07:50:47 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.2 2003/05/02 23:21:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -50,6 +50,29 @@ public:
     
 private:
     IfConfig&	_ifc;
+};
+
+class IfConfigObserverDummy : public IfConfigObserver {
+public:
+    IfConfigObserverDummy(IfConfig& ifc);
+    virtual ~IfConfigObserverDummy();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+private:
+    
 };
 
 class IfConfigObserverRtsock : public IfConfigObserver,

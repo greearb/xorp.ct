@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.1 2003/05/02 07:50:46 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.2 2003/05/09 19:28:12 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -67,6 +67,32 @@ protected:
     
 private:
     IfConfig&	_ifc;
+};
+
+class IfConfigGetDummy : public IfConfigGet {
+public:
+    IfConfigGetDummy(IfConfig& ifc);
+    virtual ~IfConfigGetDummy();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    virtual int pull_config(IfTree& config);
+    virtual void receive_data(const uint8_t* data, size_t n_bytes);
+    
+private:
+    
 };
 
 class IfConfigGetGetifaddrs : public IfConfigGet {

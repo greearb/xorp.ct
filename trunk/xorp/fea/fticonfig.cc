@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.1 2003/05/02 07:50:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.2 2003/05/02 23:21:36 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -31,13 +31,19 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
     : _eventloop(eventloop),
       _ftic_entry_get(NULL), _ftic_entry_set(NULL), _ftic_entry_observer(NULL),
       _ftic_table_get(NULL), _ftic_table_set(NULL), _ftic_table_observer(NULL),
+      _ftic_entry_get_dummy(*this),
       _ftic_entry_get_netlink(*this),
       _ftic_entry_get_rtsock(*this),
+      _ftic_entry_set_dummy(*this),
       _ftic_entry_set_rtsock(*this),
+      _ftic_entry_observer_dummy(*this),
       _ftic_entry_observer_rtsock(*this),
+      _ftic_table_get_dummy(*this),
       _ftic_table_get_netlink(*this),
       _ftic_table_get_sysctl(*this),
+      _ftic_table_set_dummy(*this),
       _ftic_table_set_rtsock(*this),
+      _ftic_table_observer_dummy(*this),
       _ftic_table_observer_rtsock(*this)
 {
     
@@ -87,6 +93,19 @@ int
 FtiConfig::register_ftic_table_observer(FtiConfigTableObserver *ftic_table_observer)
 {
     _ftic_table_observer = ftic_table_observer;
+    
+    return (XORP_OK);
+}
+
+int
+FtiConfig::set_dummy()
+{
+    register_ftic_entry_get(&_ftic_entry_get_dummy);
+    register_ftic_entry_set(&_ftic_entry_set_dummy);
+    register_ftic_entry_observer(&_ftic_entry_observer_dummy);
+    register_ftic_table_get(&_ftic_table_get_dummy);
+    register_ftic_table_set(&_ftic_table_set_dummy);
+    register_ftic_table_observer(&_ftic_table_observer_dummy);
     
     return (XORP_OK);
 }

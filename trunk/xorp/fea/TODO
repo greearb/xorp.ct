@@ -1,6 +1,16 @@
 #
-# $XORP: xorp/fea/TODO,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+# $XORP: xorp/fea/TODO,v 1.2 2003/05/02 07:50:41 pavlin Exp $
 #
+
+* Sync by renaming all "IfTree& iftree" to "IfTree& it" (or vice-versa).
+
+* When start/stop multicast routing, call start_pim/stop_pim XRL as well.
+
+* Implement following methods and their friends:
+  - set_allow_kernel_signal_messages(bool v)
+  - set_allow_mrib_messages(bool v)
+
+* Set the pif_index for MfeaVif
 
 * Rename rtsock.hh and rtsock.cc to routing_socket.hh and routing_socket.cc
   respectively.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.3 2003/05/02 07:50:46 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.4 2003/05/02 23:21:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -62,7 +62,7 @@ public:
     inline IfConfigErrorReporterBase&	er() { return _er; }
 
     IfTree& live_config() { return (_live_config); }
-    
+    void    set_live_config(const IfTree& it) { _live_config = it; }
     
     int register_ifc_get(IfConfigGet *ifc_get);
     int register_ifc_set(IfConfigSet *ifc_set);
@@ -71,6 +71,13 @@ public:
     IfConfigGet&	ifc_get() { return *_ifc_get; }
     IfConfigSet&	ifc_set() { return *_ifc_set; }
     IfConfigObserver&	ifc_observer() { return *_ifc_observer; }
+
+    /**
+     * Setup the unit to behave as dummy (for testing purpose).
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_dummy();
     
     /**
      * Start operation.
@@ -174,6 +181,7 @@ private:
     // from the underlying system.
     // Ordering is important: the last that is supported is the one to use.
     //
+    IfConfigGetDummy	_ifc_get_dummy;
     IfConfigGetIoctl	_ifc_get_ioctl;
     IfConfigGetSysctl	_ifc_get_sysctl;
     IfConfigGetGetifaddrs _ifc_get_getifaddrs;
@@ -183,6 +191,7 @@ private:
     // within the underlying system.
     // Ordering is important: the last that is supported is the one to use.
     //
+    IfConfigSetDummy	_ifc_set_dummy;
     IfConfigSetIoctl	_ifc_set_ioctl;
     
     //
@@ -190,6 +199,7 @@ private:
     // within the underlying system has changed.
     // Ordering is important: the last that is supported is the one to use.
     //
+    IfConfigObserverDummy _ifc_observer_dummy;
     IfConfigObserverRtsock _ifc_observer_rtsock;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.1 2003/05/02 07:50:44 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.2 2003/05/02 23:21:37 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -151,6 +151,67 @@ protected:
 private:
     FtiConfig&	_ftic;
     bool _in_configuration;
+};
+
+class FtiConfigEntrySetDummy : public FtiConfigEntrySet {
+public:
+    FtiConfigEntrySetDummy(FtiConfig& ftic);
+    virtual ~FtiConfigEntrySetDummy();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+    /**
+     * Add a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int add_entry4(const Fte4& fte);
+
+    /**
+     * Delete a single routing entry. Must be with a configuration interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int delete_entry4(const Fte4& fte);
+
+    /**
+     * Add a single routing entry. Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int add_entry6(const Fte6& fte);
+
+    /**
+     * Delete a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int delete_entry6(const Fte6& fte);
+    
+private:
 };
 
 class FtiConfigEntrySetRtsock : public FtiConfigEntrySet,

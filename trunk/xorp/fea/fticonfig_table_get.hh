@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.1 2003/05/02 07:50:44 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -93,6 +93,57 @@ protected:
     
 private:
     FtiConfig&	_ftic;
+};
+
+class FtiConfigTableGetDummy : public FtiConfigTableGet {
+public:
+    FtiConfigTableGetDummy(FtiConfig& ftic);
+    virtual ~FtiConfigTableGetDummy();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    /**
+     * Receive data.
+     * 
+     * @param data the buffer with the data.
+     * @param n_bytes the number of bytes in the @param data buffer.
+     */
+    virtual void receive_data(const uint8_t* data, size_t n_bytes);
+    
+    /**
+     * Obtain the unicast forwarding table.
+     *
+     * @param fte_list the return-by-reference list with all entries in
+     * the unicast forwarding table.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int get_table4(list<Fte4>& fte_list);
+
+    /**
+     * Obtain the unicast forwarding table.
+     *
+     * @param fte_list the return-by-reference list with all entries in
+     * the unicast forwarding table.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int get_table6(list<Fte6>& fte_list);
+    
+private:
+    
 };
 
 class FtiConfigTableGetSysctl : public FtiConfigTableGet {

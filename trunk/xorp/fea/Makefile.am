@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.8 2003/05/07 21:58:08 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.9 2003/05/08 22:38:05 hodson Exp $
 ##
 
 
-bin_PROGRAMS		 = fea
+bin_PROGRAMS		 = fea fea_dummy
 bin_PROGRAMS 		+= demo_fea_ifmgr_client
 check_PROGRAMS		 = test_rawsock4 test_ifmanager_transaction
 TESTS			 = $(check_PROGRAMS)
@@ -24,7 +24,7 @@ noinst_LIBRARIES	 = libfea.a
 
 # -- Program Sources
 
-fea_SOURCES		 = fea.cc
+fea_SOURCES		= fea.cc
 fea_LDADD		= ./libfea.a
 fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
@@ -32,6 +32,15 @@ fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+
+fea_dummy_SOURCES	= fea_dummy.cc
+fea_dummy_LDADD		= ./libfea.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+fea_dummy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+fea_dummy_LDADD		+= $(top_builddir)/libcomm/libcomm.a
+fea_dummy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 test_ifmanager_transaction_SOURCES  = test_ifmanager_transaction.cc
 test_ifmanager_transaction_SOURCES += iftree.cc
@@ -77,34 +86,43 @@ libfea_a_SOURCES	+= xrl_target.hh
 libfea_a_SOURCES	+= fti_transaction.cc
 libfea_a_SOURCES	+= fticonfig.cc
 libfea_a_SOURCES	+= fticonfig_entry_get.cc
+libfea_a_SOURCES	+= fticonfig_entry_get_dummy.cc
 libfea_a_SOURCES	+= fticonfig_entry_get_netlink.cc
 libfea_a_SOURCES	+= fticonfig_entry_get_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_entry_observer.cc
+libfea_a_SOURCES	+= fticonfig_entry_observer_dummy.cc
 libfea_a_SOURCES	+= fticonfig_entry_observer_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_entry_set.cc
+libfea_a_SOURCES	+= fticonfig_entry_set_dummy.cc
 libfea_a_SOURCES	+= fticonfig_entry_set_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_get.cc
+libfea_a_SOURCES	+= fticonfig_table_get_dummy.cc
 libfea_a_SOURCES	+= fticonfig_table_get_netlink.cc
 libfea_a_SOURCES	+= fticonfig_table_get_sysctl.cc
 libfea_a_SOURCES	+= fticonfig_table_observer.cc
+libfea_a_SOURCES	+= fticonfig_table_observer_dummy.cc
 libfea_a_SOURCES	+= fticonfig_table_observer_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_table_set.cc
+libfea_a_SOURCES	+= fticonfig_table_set_dummy.cc
 libfea_a_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_a_SOURCES	+= ifconfig.cc
 libfea_a_SOURCES	+= ifconfig_get.cc
+libfea_a_SOURCES	+= ifconfig_get_dummy.cc
 libfea_a_SOURCES	+= ifconfig_get_getifaddrs.cc
 libfea_a_SOURCES	+= ifconfig_get_ioctl.cc
 libfea_a_SOURCES	+= ifconfig_get_sysctl.cc
 libfea_a_SOURCES	+= ifconfig_observer.cc
+libfea_a_SOURCES	+= ifconfig_observer_dummy.cc
 libfea_a_SOURCES	+= ifconfig_observer_rtsock.cc
 libfea_a_SOURCES	+= ifconfig_parse_ifaddrs.cc
 libfea_a_SOURCES	+= ifconfig_parse_ifreq.cc
 libfea_a_SOURCES	+= ifconfig_parse_rtm.cc
 libfea_a_SOURCES	+= ifconfig_set.cc
+libfea_a_SOURCES	+= ifconfig_set_dummy.cc
 libfea_a_SOURCES	+= ifconfig_set_ioctl.cc
 libfea_a_SOURCES	+= ifmanager_transaction.cc
 libfea_a_SOURCES	+= iftree.cc

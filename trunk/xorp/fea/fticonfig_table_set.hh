@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.1 2003/05/02 07:50:45 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.2 2003/05/02 23:21:38 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -149,6 +149,65 @@ protected:
 private:
     FtiConfig&	_ftic;
     bool _in_configuration;
+};
+
+class FtiConfigTableSetDummy : public FtiConfigTableSet {
+public:
+    FtiConfigTableSetDummy(FtiConfig& ftic);
+    virtual ~FtiConfigTableSetDummy();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int set_table4(const list<Fte4>& fte_list);
+
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int delete_all_entries4();
+
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int set_table6(const list<Fte6>& fte_list);
+    
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int delete_all_entries6();
+    
+private:
+    
 };
 
 class FtiConfigTableSetRtsock : public FtiConfigTableSet,

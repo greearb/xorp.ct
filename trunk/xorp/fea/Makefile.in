@@ -81,11 +81,11 @@ PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
-bin_PROGRAMS = fea demo_fea_ifmgr_client
-check_PROGRAMS =  test_rawsock4 test_ifmanager_transaction
+bin_PROGRAMS = fea fea_dummy demo_fea_ifmgr_client
+check_PROGRAMS = test_rawsock4 test_ifmanager_transaction
 TESTS = $(check_PROGRAMS)
 
-demo_fea_ifmgr_client_SOURCES =  demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # disabled test_fea
@@ -98,12 +98,15 @@ noinst_LIBRARIES = libfea.a
 
 fea_SOURCES = fea.cc
 fea_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+fea_dummy_SOURCES = fea_dummy.cc
+fea_dummy_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc iftree.cc
 test_ifmanager_transaction_LDADD = $(top_builddir)/libxorp/libxorp.a
 
 test_rawsock4_SOURCES = test_rawsock4.cc rawsock4.cc
-test_rawsock4_LDADD =  $(top_builddir)/libxorp/libxorp.a
-libfea_a_SOURCES = fea_module.h fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh netlink_socket.hh netlink_socket_utils.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_rawsock4.hh xrl_target.hh fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_get.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_ioctl.cc ifmanager_transaction.cc iftree.cc netlink_socket.cc netlink_socket_utils.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_rawsock4.cc xrl_target.cc
+test_rawsock4_LDADD = $(top_builddir)/libxorp/libxorp.a
+libfea_a_SOURCES = fea_module.h fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh netlink_socket.hh netlink_socket_utils.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_rawsock4.hh xrl_target.hh fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_get.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifmanager_transaction.cc iftree.cc netlink_socket.cc netlink_socket_utils.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_rawsock4.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = test_xrls.sh
@@ -123,22 +126,26 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libfea_a_LIBADD = 
 libfea_a_OBJECTS =  fti_transaction.o fticonfig.o fticonfig_entry_get.o \
-fticonfig_entry_get_netlink.o fticonfig_entry_get_rtsock.o \
-fticonfig_entry_observer.o fticonfig_entry_observer_rtsock.o \
+fticonfig_entry_get_dummy.o fticonfig_entry_get_netlink.o \
+fticonfig_entry_get_rtsock.o fticonfig_entry_observer.o \
+fticonfig_entry_observer_dummy.o fticonfig_entry_observer_rtsock.o \
 fticonfig_entry_parse_nlm.o fticonfig_entry_parse_rtm.o \
-fticonfig_entry_set.o fticonfig_entry_set_rtsock.o \
-fticonfig_table_get.o fticonfig_table_get_netlink.o \
+fticonfig_entry_set.o fticonfig_entry_set_dummy.o \
+fticonfig_entry_set_rtsock.o fticonfig_table_get.o \
+fticonfig_table_get_dummy.o fticonfig_table_get_netlink.o \
 fticonfig_table_get_sysctl.o fticonfig_table_observer.o \
-fticonfig_table_observer_rtsock.o fticonfig_table_parse_nlm.o \
-fticonfig_table_parse_rtm.o fticonfig_table_set.o \
+fticonfig_table_observer_dummy.o fticonfig_table_observer_rtsock.o \
+fticonfig_table_parse_nlm.o fticonfig_table_parse_rtm.o \
+fticonfig_table_set.o fticonfig_table_set_dummy.o \
 fticonfig_table_set_rtsock.o ifconfig.o ifconfig_get.o \
-ifconfig_get_getifaddrs.o ifconfig_get_ioctl.o ifconfig_get_sysctl.o \
-ifconfig_observer.o ifconfig_observer_rtsock.o ifconfig_parse_ifaddrs.o \
+ifconfig_get_dummy.o ifconfig_get_getifaddrs.o ifconfig_get_ioctl.o \
+ifconfig_get_sysctl.o ifconfig_observer.o ifconfig_observer_dummy.o \
+ifconfig_observer_rtsock.o ifconfig_parse_ifaddrs.o \
 ifconfig_parse_ifreq.o ifconfig_parse_rtm.o ifconfig_set.o \
-ifconfig_set_ioctl.o ifmanager_transaction.o iftree.o netlink_socket.o \
-netlink_socket_utils.o rawsock4.o routing_socket.o \
-routing_socket_utils.o xrl_fti.o xrl_ifmanager.o xrl_ifupdate.o \
-xrl_rawsock4.o xrl_target.o
+ifconfig_set_dummy.o ifconfig_set_ioctl.o ifmanager_transaction.o \
+iftree.o netlink_socket.o netlink_socket_utils.o rawsock4.o \
+routing_socket.o routing_socket_utils.o xrl_fti.o xrl_ifmanager.o \
+xrl_ifupdate.o xrl_rawsock4.o xrl_target.o
 PROGRAMS =  $(bin_PROGRAMS)
 
 fea_OBJECTS =  fea.o
@@ -148,6 +155,14 @@ $(top_builddir)/xrl/interfaces/libfearawpktclient.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
 $(top_builddir)/libxorp/libxorp.a
 fea_LDFLAGS = 
+fea_dummy_OBJECTS =  fea_dummy.o
+fea_dummy_DEPENDENCIES =  ./libfea.a \
+$(top_builddir)/xrl/targets/libfeabase.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
+fea_dummy_LDFLAGS = 
 demo_fea_ifmgr_client_OBJECTS =  demo_fea_ifmgr_client.o
 demo_fea_ifmgr_client_DEPENDENCIES =  \
 $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a \
@@ -178,31 +193,36 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/demo_fea_ifmgr_client.P .deps/fea.P \
+DEP_FILES =  .deps/demo_fea_ifmgr_client.P .deps/fea.P .deps/fea_dummy.P \
 .deps/fti_transaction.P .deps/fticonfig.P .deps/fticonfig_entry_get.P \
-.deps/fticonfig_entry_get_netlink.P .deps/fticonfig_entry_get_rtsock.P \
-.deps/fticonfig_entry_observer.P \
+.deps/fticonfig_entry_get_dummy.P .deps/fticonfig_entry_get_netlink.P \
+.deps/fticonfig_entry_get_rtsock.P .deps/fticonfig_entry_observer.P \
+.deps/fticonfig_entry_observer_dummy.P \
 .deps/fticonfig_entry_observer_rtsock.P \
 .deps/fticonfig_entry_parse_nlm.P .deps/fticonfig_entry_parse_rtm.P \
-.deps/fticonfig_entry_set.P .deps/fticonfig_entry_set_rtsock.P \
-.deps/fticonfig_table_get.P .deps/fticonfig_table_get_netlink.P \
+.deps/fticonfig_entry_set.P .deps/fticonfig_entry_set_dummy.P \
+.deps/fticonfig_entry_set_rtsock.P .deps/fticonfig_table_get.P \
+.deps/fticonfig_table_get_dummy.P .deps/fticonfig_table_get_netlink.P \
 .deps/fticonfig_table_get_sysctl.P .deps/fticonfig_table_observer.P \
+.deps/fticonfig_table_observer_dummy.P \
 .deps/fticonfig_table_observer_rtsock.P \
 .deps/fticonfig_table_parse_nlm.P .deps/fticonfig_table_parse_rtm.P \
-.deps/fticonfig_table_set.P .deps/fticonfig_table_set_rtsock.P \
-.deps/ifconfig.P .deps/ifconfig_get.P .deps/ifconfig_get_getifaddrs.P \
-.deps/ifconfig_get_ioctl.P .deps/ifconfig_get_sysctl.P \
-.deps/ifconfig_observer.P .deps/ifconfig_observer_rtsock.P \
+.deps/fticonfig_table_set.P .deps/fticonfig_table_set_dummy.P \
+.deps/fticonfig_table_set_rtsock.P .deps/ifconfig.P \
+.deps/ifconfig_get.P .deps/ifconfig_get_dummy.P \
+.deps/ifconfig_get_getifaddrs.P .deps/ifconfig_get_ioctl.P \
+.deps/ifconfig_get_sysctl.P .deps/ifconfig_observer.P \
+.deps/ifconfig_observer_dummy.P .deps/ifconfig_observer_rtsock.P \
 .deps/ifconfig_parse_ifaddrs.P .deps/ifconfig_parse_ifreq.P \
 .deps/ifconfig_parse_rtm.P .deps/ifconfig_set.P \
-.deps/ifconfig_set_ioctl.P .deps/ifmanager_transaction.P .deps/iftree.P \
-.deps/netlink_socket.P .deps/netlink_socket_utils.P .deps/rawsock4.P \
-.deps/routing_socket.P .deps/routing_socket_utils.P \
-.deps/test_ifmanager_transaction.P .deps/test_rawsock4.P \
-.deps/xrl_fti.P .deps/xrl_ifmanager.P .deps/xrl_ifupdate.P \
-.deps/xrl_rawsock4.P .deps/xrl_target.P
-SOURCES = $(libfea_a_SOURCES) $(fea_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_rawsock4_SOURCES) $(test_ifmanager_transaction_SOURCES)
-OBJECTS = $(libfea_a_OBJECTS) $(fea_OBJECTS) $(demo_fea_ifmgr_client_OBJECTS) $(test_rawsock4_OBJECTS) $(test_ifmanager_transaction_OBJECTS)
+.deps/ifconfig_set_dummy.P .deps/ifconfig_set_ioctl.P \
+.deps/ifmanager_transaction.P .deps/iftree.P .deps/netlink_socket.P \
+.deps/netlink_socket_utils.P .deps/rawsock4.P .deps/routing_socket.P \
+.deps/routing_socket_utils.P .deps/test_ifmanager_transaction.P \
+.deps/test_rawsock4.P .deps/xrl_fti.P .deps/xrl_ifmanager.P \
+.deps/xrl_ifupdate.P .deps/xrl_rawsock4.P .deps/xrl_target.P
+SOURCES = $(libfea_a_SOURCES) $(fea_SOURCES) $(fea_dummy_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_rawsock4_SOURCES) $(test_ifmanager_transaction_SOURCES)
+OBJECTS = $(libfea_a_OBJECTS) $(fea_OBJECTS) $(fea_dummy_OBJECTS) $(demo_fea_ifmgr_client_OBJECTS) $(test_rawsock4_OBJECTS) $(test_ifmanager_transaction_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -282,6 +302,10 @@ maintainer-clean-checkPROGRAMS:
 fea: $(fea_OBJECTS) $(fea_DEPENDENCIES)
 	@rm -f fea
 	$(CXXLINK) $(fea_LDFLAGS) $(fea_OBJECTS) $(fea_LDADD) $(LIBS)
+
+fea_dummy: $(fea_dummy_OBJECTS) $(fea_dummy_DEPENDENCIES)
+	@rm -f fea_dummy
+	$(CXXLINK) $(fea_dummy_LDFLAGS) $(fea_dummy_OBJECTS) $(fea_dummy_LDADD) $(LIBS)
 
 demo_fea_ifmgr_client: $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_DEPENDENCIES)
 	@rm -f demo_fea_ifmgr_client

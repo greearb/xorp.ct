@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.1 2003/05/02 07:50:43 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.2 2003/05/02 23:21:36 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -113,6 +113,76 @@ protected:
     
 private:
     FtiConfig&	_ftic;
+};
+
+class FtiConfigEntryGetDummy : public FtiConfigEntryGet {
+public:
+    FtiConfigEntryGetDummy(FtiConfig& ftic);
+    virtual ~FtiConfigEntryGetDummy();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+    /**
+     * Receive data.
+     * 
+     * @param data the buffer with the data.
+     * @param n_bytes the number of bytes in the @param data buffer.
+     */
+    virtual void receive_data(const uint8_t* data, size_t n_bytes);
+    
+    /**
+     * Lookup a route.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int lookup_route4(const IPv4& dst, Fte4& fte);
+
+    /**
+     * Lookup entry.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int lookup_entry4(const IPv4Net& dst, Fte4& fte);
+
+    /**
+     * Lookup a route.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int lookup_route6(const IPv6& dst, Fte6& fte);
+
+    /**
+     * Lookup entry.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int lookup_entry6(const IPv6Net& dst, Fte6& fte);
+
+private:
 };
 
 class FtiConfigEntryGetRtsock : public FtiConfigEntryGet,

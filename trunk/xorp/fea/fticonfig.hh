@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.1 2003/05/02 07:50:43 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.2 2003/05/02 23:21:36 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -22,6 +22,7 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6net.hh"
+#include "libxorp/trie.hh"
 
 #include "fte.hh"
 #include "fticonfig_entry_get.hh"
@@ -38,6 +39,9 @@ class FtiConfigEntryObserver;
 class FtiConfigTableGet;
 class FtiConfigTableSet;
 class FtiConfigTableObserver;
+
+typedef Trie<IPv4, Fte4> Trie4;
+typedef Trie<IPv6, Fte6> Trie6;
 
 /**
  * @short Forwarding Table Interface.
@@ -75,6 +79,13 @@ public:
     FtiConfigTableSet&		ftic_table_set() { return *_ftic_table_set; }
     FtiConfigTableObserver&	ftic_table_observer() { return *_ftic_table_observer; }
 
+    /**
+     * Setup the unit to behave as dummy (for testing purpose).
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_dummy();
+    
     /**
      * Start operation.
      * 
@@ -236,8 +247,24 @@ public:
      */
     virtual int get_table6(list<Fte6>& fte_list);
 
-protected:
+    /**
+     * Get the IPv4 Trie (used for testing purpose).
+     * 
+     * @return the IPv4 Trie.
+     */
+    Trie4& trie4() { return _trie4; }
 
+    /**
+     * Get the IPv6 Trie (used for testing purpose).
+     * 
+     * @return the IPv6 Trie.
+     */
+    Trie6& trie6() { return _trie6; }
+    
+protected:
+    Trie4	_trie4;		// IPv4 trie (used for testing purpose)
+    Trie6	_trie6;		// IPv6 trie (used for testing purpose)
+    
 private:
     EventLoop&	_eventloop;
 
@@ -253,6 +280,7 @@ private:
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
+    FtiConfigEntryGetDummy	_ftic_entry_get_dummy;
     FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
     FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
     
@@ -261,6 +289,7 @@ private:
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
+    FtiConfigEntrySetDummy	_ftic_entry_set_dummy;
     FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
     
     //
@@ -271,6 +300,7 @@ private:
     // has changed.
     // Ordering is important: the last that is supported is the one to use.
     //
+    FtiConfigEntryObserverDummy	 _ftic_entry_observer_dummy;
     FtiConfigEntryObserverRtsock _ftic_entry_observer_rtsock;
 
     //
@@ -278,6 +308,7 @@ private:
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
+    FtiConfigTableGetDummy	_ftic_table_get_dummy;
     FtiConfigTableGetNetlink	_ftic_table_get_netlink;
     FtiConfigTableGetSysctl	_ftic_table_get_sysctl;
     
@@ -286,6 +317,7 @@ private:
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
+    FtiConfigTableSetDummy	_ftic_table_set_dummy;
     FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
     
     //
@@ -296,6 +328,7 @@ private:
     // has changed.
     // Ordering is important: the last that is supported is the one to use.
     //
+    FtiConfigTableObserverDummy	 _ftic_table_observer_dummy;
     FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
 };
 
