@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.82 2004/03/05 09:58:12 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.83 2004/03/05 18:39:42 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -152,8 +152,6 @@ AC_ARG_ENABLE(callback-debug,
 	[  --enable-callback-debug       enable callback debugging ],
 	AC_DEFINE(DEBUG_CALLBACKS, 1,
 	          [Define to enable callback debugging])
-	CALLBACK_GEN_FLAGS="-d"
-	AC_SUBST(CALLBACK_GEN_FLAGS)
 	,
 )
 
