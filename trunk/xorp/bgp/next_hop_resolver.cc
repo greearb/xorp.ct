@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.56 2002/12/11 22:22:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -736,9 +736,9 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 		_next_hop_cache.register_nexthop(rr->_nexthop, rr->_ref_cnt);
 		/*
 		** If the metrics haven't changed don't bother with
-		** the upcall.
+		** the upcall, unless resolvability changed.
 		*/
-		if (*resolves != rr->_resolvable && *metric != rr->_metric)
+		if (*resolves != rr->_resolvable || *metric != rr->_metric)
 		    _next_hop_resolver.next_hop_changed(rr->_nexthop);
 	    }
 
