@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.11 2003/03/07 19:23:40 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.12 2003/03/10 23:20:23 hodson Exp $"
 
 #include <functional>
 
@@ -276,7 +276,7 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
     in_addr if_ia;
     if_ia.s_addr = interface.addr();
 
-    _lfd = comm_bind_tcp4(&if_ia, port);
+    _lfd = comm_bind_tcp4(&if_ia, htons(port));
     if (XORP_ERROR == _lfd) {
 	xorp_throw(InvalidPort, strerror(errno));
     }
