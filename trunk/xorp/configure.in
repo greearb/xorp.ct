@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.104 2004/07/28 03:03:22 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.105 2004/08/11 06:32:57 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1331,8 +1331,15 @@ if test "${GCC}" = "yes" ; then
 	dnl	  create a warning for gcc 2.95.3
 	dnl	- On Linux RedHat 7.2, #elif creates a warning for gcc 2.96
 	dnl
-	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs -Wnon-const-format"
-	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wnon-const-format -Wtraditional"
+	dnl XXX: Flag -Wnon-const-format is not included, because it appears
+	dnl	 to exist only on earlier versions of gcc (e.g., gcc-2.95.x),
+	dnl	 and only on FreeBSD, but not on Linux. In addition, this flag
+	dnl	 appears to be problematic, because if it is enabled we cannot
+	dnl	 use statements like "vfprintf(stderr, fmt, ap);" where "fmt"
+	dnl	 is a variable (e.g., defined as "const char *").
+	dnl
+	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
+	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
 	XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-20")
