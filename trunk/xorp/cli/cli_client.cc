@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.22 2004/06/10 22:40:42 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.23 2004/06/12 00:33:57 pavlin Exp $"
 
 
 //
@@ -213,9 +213,17 @@ CliClient::delete_pipe_all()
 }
 
 void
-CliClient::add_page_buffer_line(const string& buffer_line)
+CliClient::append_page_buffer_line(const string& buffer_line)
 {
     page_buffer().push_back(buffer_line);
+}
+
+void
+CliClient::concat_page_buffer_line(const string& buffer_line, size_t pos)
+{
+    XLOG_ASSERT(pos < page_buffer().size());
+    string& line = page_buffer()[pos];
+    line += buffer_line;
 }
 
 // Process the line throught the pipes
@@ -577,10 +585,24 @@ CliClient::cli_print(const string& msg)
     int ret_value;
     string pipe_line, pipe_result;
     bool eof_input_bool = false;
+    bool is_incomplete_last_line = false;
 
     if (msg.size() == 0 || (msg[0] == '\0')) {
 	eof_input_bool = true;
     }
+
+    // Test if the last line added to the page buffer was incomplete
+    do {
+	if (page_buffer().empty())
+	    break;
+	const string& last_line = page_buffer_line(page_buffer().size() - 1);
+	if (last_line.empty())
+	    break;
+	if (last_line[last_line.size() - 1] == '\n')
+	    break;
+	is_incomplete_last_line = true;
+	break;
+    } while (false);
     
     // Process the data throught the pipe
     pipe_line += _buffer_line;
@@ -626,17 +648,43 @@ CliClient::cli_print(const string& msg)
 	    && (_client_type == CLIENT_TERMINAL)
 	    && (pipe_result[i] == '\n')) {
 	    // Add the line to the buffer output
-	    add_page_buffer_line(pipe_line);
+	    if (is_incomplete_last_line) {
+		concat_page_buffer_line(pipe_line, page_buffer().size() - 1);
+	    } else {
+		append_page_buffer_line(pipe_line);
+	    }
 	    if ((page_buffer_window_lines_n() >= window_height())
 		&& (! is_nomore_mode())) {
 		set_page_mode(true);
 	    } else {
-		incr_page_buffer_last_line_n();
+		if (! is_incomplete_last_line)
+		    incr_page_buffer_last_line_n();
 		output_string += pipe_line;
 	    }
 	    pipe_line = "";
+	    is_incomplete_last_line = false;
 	}
     }
+
+    if (pipe_line.size()) {
+	// Insert the remaining partial line into the buffer
+	if (is_page_buffer_mode() && (_client_type == CLIENT_TERMINAL)) {
+	    // Add the line to the buffer output
+	    if (is_incomplete_last_line) {
+		concat_page_buffer_line(pipe_line, page_buffer().size() - 1);
+	    } else {
+		append_page_buffer_line(pipe_line);
+	    }
+	    if ((page_buffer_window_lines_n() >= window_height())
+		&& (! is_nomore_mode())) {
+		set_page_mode(true);
+	    } else {
+		if (! is_incomplete_last_line)
+		    incr_page_buffer_last_line_n();
+	    }
+	}
+    }
+
     if (! (is_page_buffer_mode() && is_page_mode())) {
 	if (pipe_line.size())
 	    output_string += pipe_line;	// XXX: the remaining partial line

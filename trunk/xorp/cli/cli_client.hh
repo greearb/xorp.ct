@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.10 2004/06/10 22:40:42 hodson Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.11 2004/06/12 00:33:57 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -374,7 +374,8 @@ private:
     const string& page_buffer_line(size_t line_n) const;
     void	reset_page_buffer() { page_buffer().clear(); set_page_buffer_last_line_n(0); }
     size_t	page_buffer_lines_n() { return (page_buffer().size()); }
-    void	add_page_buffer_line(const string& buffer_line);
+    void	append_page_buffer_line(const string& buffer_line);
+    void	concat_page_buffer_line(const string& buffer_line, size_t pos);
     size_t	page_buffer_last_line_n() { return (*_page_buffer_last_line_n); }
     void	set_page_buffer_last_line_n(size_t v) { *_page_buffer_last_line_n = v; }
     void	incr_page_buffer_last_line_n() { (*_page_buffer_last_line_n)++; }
