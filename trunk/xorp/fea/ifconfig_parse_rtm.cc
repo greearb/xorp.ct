@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.7 2003/08/12 21:50:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.8 2003/09/11 12:57:29 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -63,12 +63,12 @@ IfConfigGet::parse_buffer_rtm(IfTree& , const uint8_t* , size_t )
 
 #else // HAVE_ROUTING_SOCKETS
 
-static void rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm,
+static void rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
 				  IfTree& it, u_short& if_index_hint);
-static void rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm,
+static void rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
 				IfTree& it, u_short if_index_hint);
 #ifdef RTM_IFANNOUNCE
-static void rtm_announce_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm,
+static void rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
 				    IfTree& it);
 #endif
 
@@ -79,11 +79,11 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
     bool recognized = false;
     u_short if_index_hint = 0;
     
-    const if_msghdr* ifm = reinterpret_cast<const if_msghdr *>(buf);
+    const struct if_msghdr* ifm = reinterpret_cast<const struct if_msghdr *>(buf);
     const uint8_t* last = buf + buf_bytes;
     
     for (const uint8_t* ptr = buf; ptr < last; ptr += ifm->ifm_msglen) {
-    	ifm = reinterpret_cast<const if_msghdr*>(ptr);
+    	ifm = reinterpret_cast<const struct if_msghdr*>(ptr);
 	if (ifm->ifm_version != RTM_VERSION) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
@@ -133,7 +133,7 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
 }
 
 static void
-rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
+rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		      u_short& if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFINFO);
@@ -292,8 +292,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
     //
     do {
 	if (sdl->sdl_type == IFT_ETHER) {
-	    if (sdl->sdl_alen == sizeof(ether_addr)) {
-		ether_addr ea;
+	    if (sdl->sdl_alen == sizeof(struct ether_addr)) {
+		struct ether_addr ea;
 		memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 		       sdl->sdl_alen);
 		fi.set_mac(EtherMac(ea));
@@ -320,7 +320,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
 			   if_name.c_str(), strerror(errno));
 	    } else {
-		ether_addr ea;
+		struct ether_addr ea;
 		memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
 		fi.set_mac(EtherMac(ea));
 		close(s);
@@ -373,7 +373,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 }
 
 static void
-rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
+rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		    u_short if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_NEWADDR || ifm->ifm_type == RTM_DELADDR);
@@ -411,7 +411,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	    ifc.map_ifindex(if_index, name);
     }
     if (name == NULL) {
-	XLOG_FATAL("Could not find interface corresponding to index %d\n",
+	XLOG_FATAL("Could not find interface corresponding to index %d",
 		   if_index);
     }
     if_name = string(name);
@@ -561,7 +561,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 
 #ifdef RTM_IFANNOUNCE
 static void
-rtm_announce_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it)
+rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFANNOUNCE);
     
