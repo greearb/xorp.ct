@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.15 2004/11/05 04:29:24 bms Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.16 2004/11/18 14:25:28 bms Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -27,6 +27,7 @@
 #include "fib2mrib_node.hh"
 #include "xrl_fib2mrib_node.hh"
 
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
 				 XrlRouter* xrl_router,
@@ -34,6 +35,7 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
 				 const string& rib_target)
     : Fib2mribNode(eventloop),
       XrlFib2mribTargetBase(xrl_router),
+      _xrl_router(xrl_router),
       _class_name(xrl_router->class_name()),
       _instance_name(xrl_router->instance_name()),
       _xrl_fea_fti_client(xrl_router),
@@ -67,6 +69,15 @@ XrlFib2mribNode::~XrlFib2mribNode()
 bool
 XrlFib2mribNode::startup()
 {
+    XrlFinderEventNotifierV0p1Client finder(_xrl_router);
+    XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
+	::callback(this, &XrlFib2mribNode::finder_interest_callback);
+
+    finder.send_register_class_event_interest("finder",
+	_xrl_router->instance_name(), _fea_target, cb);
+    finder.send_register_class_event_interest("finder",
+	_xrl_router->instance_name(), _rib_target, cb);
+
     return Fib2mribNode::startup();
 }
 
@@ -74,6 +85,13 @@ bool
 XrlFib2mribNode::shutdown()
 {
     return Fib2mribNode::shutdown();
+}
+
+void
+XrlFib2mribNode::finder_interest_callback(const XrlError& error)
+{
+    if (error != XrlError::OKAY())
+	XLOG_ERROR("callback: %s",  error.str().c_str());
 }
 
 bool
@@ -707,6 +725,40 @@ XrlFib2mribNode::common_0_1_shutdown()
     Fib2mribNode::shutdown();
 
     return XrlCmdError::OKAY();
+}
+
+/**
+ *  Handle finder process birth events
+ */
+XrlCmdError
+XrlFib2mribNode::finder_event_observer_0_1_xrl_target_birth(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+
+    return XrlCmdError::OKAY();
+    UNUSED(target_class);
+    UNUSED(target_instance);
+}
+
+/**
+ *  Handle finder process death events
+ */
+XrlCmdError
+XrlFib2mribNode::finder_event_observer_0_1_xrl_target_death(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+
+    if ((_fea_target == target_class) || (_rib_target == target_class)) {
+	XLOG_ERROR("FEA or RIB died, exiting.");
+	Fib2mribNode::shutdown();
+    }
+
+    return XrlCmdError::OKAY();
+    UNUSED(target_instance);
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.8 2004/06/10 22:41:01 hodson Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.9 2004/11/05 04:29:24 bms Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -60,6 +60,11 @@ public:
      */
     bool	shutdown();
 
+    /**
+     * Callback for process birth/death events.
+     */
+    void	finder_interest_callback(const XrlError& error);
+
 protected:
     //
     // XRL target methods
@@ -91,6 +96,16 @@ protected:
      *  Request clean shutdown of Xrl Target
      */
     XrlCmdError common_0_1_shutdown();
+
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&target_class,
+	const string&target_instance);
+
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&target_class,
+	const string&target_instance);
 
     /**
      *  Add a route.
@@ -295,6 +310,7 @@ private:
 	return XrlFib2mribTargetBase::name();
     }
 
+    XrlRouter*		_xrl_router;
     const string	_class_name;
     const string	_instance_name;
     XrlFtiV0p2Client	_xrl_fea_fti_client;
