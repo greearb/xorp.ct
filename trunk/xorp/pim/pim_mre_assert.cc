@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.11 2003/02/07 05:16:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.12 2003/02/07 05:58:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -143,10 +143,6 @@ PimMre::set_i_am_assert_loser_state(uint16_t vif_index)
 	}
 	if (is_wc()) {
 	    pim_mrt().add_task_assert_state_wc(vif_index, group_addr());
-	    break;
-	}
-	if (is_sg_rpt() || is_rp()) {
-	    XLOG_ASSERT(false);
 	    break;
 	}
     } while (false);
@@ -1009,4 +1005,291 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
     // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (XORP_OK);
+}
+
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_tracking_desired_sg(uint16_t vif_index)
+{
+    bool old_value, new_value;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_sg())
+	return (false);
+    
+    old_value = is_assert_tracking_desired_state(vif_index);
+    new_value = assert_tracking_desired_sg().test(vif_index);
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    // Set the new value
+    set_assert_tracking_desired_state(vif_index, new_value);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (true);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    if (new_value)
+	return (true);		// AssertTrackingDesired(S,G,I) -> TRUE: ignore
+    // AssertTrackingDesired(S,G,I) -> FALSE
+    set_assert_noinfo_state(vif_index);
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(S,G,I),
+    //	  and AssertWinnerMetric(S,G,I) assume default values).
+    delete_assert_winner_metric_sg(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_tracking_desired_wc(uint16_t vif_index)
+{
+    bool old_value, new_value;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_wc())
+	return (false);
+
+    old_value = is_assert_tracking_desired_state(vif_index);
+    new_value = assert_tracking_desired_wc().test(vif_index);
+    if (new_value == old_value)
+	return (false);			// Nothing changed
+    
+    // Set the new value
+    set_assert_tracking_desired_state(vif_index, new_value);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (true);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    if (new_value)
+	return (true);		// AssertTrackinDesired(*,G,I) -> TRUE: ignore
+    // AssertTrackingDesired(*,G,I) -> FALSE
+    set_assert_noinfo_state(vif_index);
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(*,G,I),
+    //	  and AssertWinnerMetric(*,G,I) assume default values).
+    delete_assert_winner_metric_wc(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
+{
+    AssertMetric *my_assert_metric, *winner_metric;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_sg())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (false);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    my_assert_metric = my_assert_metric_sg(vif_index);
+    winner_metric = assert_winner_metric_sg(vif_index);
+    XLOG_ASSERT(winner_metric != NULL);
+    XLOG_ASSERT(my_assert_metric != NULL);
+    XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
+    // Test if my metric has become better
+    if (! my_assert_metric->is_better(winner_metric))
+	return (false);
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(S,G,I),
+    //	  and AssertWinnerMetric(S,G,I) assume default values).
+    delete_assert_winner_metric_sg(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
+{
+    AssertMetric *my_assert_metric, *winner_metric;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_wc())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (false);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    my_assert_metric = rpt_assert_metric(vif_index);
+    winner_metric = assert_winner_metric_wc(vif_index);
+    XLOG_ASSERT(winner_metric != NULL);	// TODO: XXX: PAVPAVPAV: is this assert OK? E.g, what about if loser to (S,G) Winner?
+    XLOG_ASSERT(my_assert_metric != NULL);
+    XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
+    // Test if my metric has become better
+    if (! my_assert_metric->is_better(winner_metric))
+	return (false);
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(*,G,I),
+    //	  and AssertWinnerMetric(*,G,I) assume default values).
+    delete_assert_winner_metric_wc(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+//
+// "RPF_interface(S) stops being I"
+//
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_rpf_interface_sg(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_sg())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (false);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    if (rpf_interface_s() == vif_index)
+	return (false);			// Nothing changed
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(S,G,I),
+    //	  and AssertWinnerMetric(S,G,I) assume default values).
+    delete_assert_winner_metric_sg(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+//
+// "RPF_interface(RP(G)) stops being I"
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_rpf_interface_wc(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_wc())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (false);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    if (rpf_interface_rp() == vif_index)
+	return (false);			// Nothing changed
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(*,G,I),
+    //	  and AssertWinnerMetric(*,G,I) assume default values).
+    delete_assert_winner_metric_wc(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_sg())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (false);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(S,G,I),
+    //	  and AssertWinnerMetric(S,G,I) assume default values).
+    delete_assert_winner_metric_sg(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_receive_join_wc(uint16_t vif_index)
+{
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    if (! is_wc())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index))
+	goto assert_loser_state_label;
+    // All other states: ignore the change.
+    return (false);
+    
+ assert_loser_state_label:
+    // IamAssertLoser state
+    goto a5;
+    
+ a5:
+    //  * Delete assert info (AssertWinner(*,G,I),
+    //	  and AssertWinnerMetric(*,G,I) assume default values).
+    delete_assert_winner_metric_wc(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (true);
 }
