@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.7 2004/11/19 11:02:34 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.8 2004/11/23 00:53:20 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -35,9 +35,9 @@
 static const size_t MIN_IP_PKT_BYTES = 20;
 static const size_t MAX_IP_PKT_BYTES = 65535;
 
-class XrlRawSocketFilter : public FilterRawSocket4::InputFilter {
+class XrlRawSocket4Filter : public FilterRawSocket4::InputFilter {
 public:
-    XrlRawSocketFilter(XrlRawSocket4Manager&	rsm,
+    XrlRawSocket4Filter(XrlRawSocket4Manager&	rsm,
 		       const string&		tgt_name,
 		       const uint32_t&		proto)
 	: _rsm(rsm), _tgt(tgt_name), _proto(proto) {}
@@ -57,14 +57,14 @@ protected:
 // Filter class for checking incoming raw packets and checking whether
 // to forward them.
 
-class XrlVifInputFilter : public XrlRawSocketFilter {
+class XrlVifInputFilter4 : public XrlRawSocket4Filter {
 public:
-    XrlVifInputFilter(XrlRawSocket4Manager&	rsm,
+    XrlVifInputFilter4(XrlRawSocket4Manager&	rsm,
 		      const string&		tgt_name,
 		      const string&		ifname,
 		      const string&		vifname,
 		      uint32_t			proto)
-	: XrlRawSocketFilter(rsm, tgt_name, proto), _if(ifname), _vif(vifname)
+	: XrlRawSocket4Filter(rsm, tgt_name, proto), _if(ifname), _vif(vifname)
     {}
 
     void recv(const vector<uint8_t>& data)
@@ -155,12 +155,12 @@ XrlRawSocket4Manager::~XrlRawSocket4Manager()
 }
 
 void
-XrlRawSocket4Manager::erase_filters(const FilterBag::iterator& begin,
-				    const FilterBag::iterator& end)
+XrlRawSocket4Manager::erase_filters(const FilterBag4::iterator& begin,
+				    const FilterBag4::iterator& end)
 {
-    FilterBag::iterator fi(begin);
+    FilterBag4::iterator fi(begin);
     while (fi != end) {
-	XrlRawSocketFilter* filter = fi->second;
+	XrlRawSocket4Filter* filter = fi->second;
 
 	_rs.remove_filter(filter);
 	delete filter;
@@ -270,10 +270,10 @@ XrlRawSocket4Manager::register_vif_receiver(const string&	tgt,
 					    const uint32_t&	proto)
 {
 
-    FilterBag::iterator end = _filters.upper_bound(tgt);
-    for (FilterBag::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
-	XrlVifInputFilter* filter =
-	    dynamic_cast<XrlVifInputFilter*>(fi->second);
+    FilterBag4::iterator end = _filters.upper_bound(tgt);
+    for (FilterBag4::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
+	XrlVifInputFilter4* filter =
+	    dynamic_cast<XrlVifInputFilter4*>(fi->second);
 
 	if (filter == 0)
 	    continue; // Not a vif filter
@@ -287,14 +287,14 @@ XrlRawSocket4Manager::register_vif_receiver(const string&	tgt,
     }
 
     // Create filter for vif / protocol
-    XrlVifInputFilter* new_filter =
-	new XrlVifInputFilter(*this, tgt, ifname, vifname, proto);
+    XrlVifInputFilter4* new_filter =
+	new XrlVifInputFilter4(*this, tgt, ifname, vifname, proto);
 
     // Add filter to appropriate raw_socket
     _rs.add_filter(new_filter);
 
     // Add filter to those associated with xrl_target
-    _filters.insert(FilterBag::value_type(tgt, new_filter));
+    _filters.insert(FilterBag4::value_type(tgt, new_filter));
 
     return XrlCmdError::OKAY();
 }
@@ -305,14 +305,14 @@ XrlRawSocket4Manager::unregister_vif_receiver(const string&	tgt,
 					      const string&	vifname,
 					      const uint32_t&	proto)
 {
-    XrlVifInputFilter* filter = 0;
+    XrlVifInputFilter4* filter = 0;
 
     // Walk through list of iterators looking for matching vif / protocol
     // combination
-    FilterBag::iterator end = _filters.upper_bound(tgt);
-    for (FilterBag::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
+    FilterBag4::iterator end = _filters.upper_bound(tgt);
+    for (FilterBag4::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
 
-	filter = dynamic_cast<XrlVifInputFilter*>(fi->second);
+	filter = dynamic_cast<XrlVifInputFilter4*>(fi->second);
 	if (filter && filter->protocol() == proto &&
 	    filter->ifname() == ifname &&
 	    filter->vifname() == vifname) {

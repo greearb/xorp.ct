@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.5 2004/11/19 11:02:34 bms Exp $
+// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.6 2004/11/23 00:53:20 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK4_HH__
 #define __FEA_XRL_RAWSOCK4_HH__
@@ -25,7 +25,7 @@
 
 class InterfaceManager;
 class XrlRouter;
-class XrlRawSocketFilter;
+class XrlRawSocket4Filter;
 
 /**
  * @short A class that manages raw sockets as used by the XORP Xrl Interface.
@@ -89,12 +89,12 @@ protected:
     FilterRawSocket4  _rs;
 
     // Collection of RawSocketFilters created by XrlRawSocketManager
-    typedef multimap<string, XrlRawSocketFilter*> FilterBag;
-    FilterBag _filters;
+    typedef multimap<string, XrlRawSocket4Filter*> FilterBag4;
+    FilterBag4 _filters;
 
 protected:
-    void erase_filters(const FilterBag::iterator& begin,
-		       const FilterBag::iterator& end);
+    void erase_filters(const FilterBag4::iterator& begin,
+		       const FilterBag4::iterator& end);
 
 };
 
