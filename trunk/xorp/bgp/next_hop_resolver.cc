@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.5 2002/12/18 03:06:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.6 2002/12/18 23:22:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -155,7 +155,7 @@ NextHopResolver<A>::lookup(const A nexthop, bool& resolvable,
     ** in decision.
     */
     if (_next_hop_rib_request.lookup(nexthop, resolvable, metric)) {
-	XLOG_WARNING("FYI: Stale metrics supplied not to worry");
+	XLOG_INFO("FYI: Stale metrics supplied");
 	return true;
     }
 
