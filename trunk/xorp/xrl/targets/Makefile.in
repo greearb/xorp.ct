@@ -75,8 +75,6 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 
 INTERFACES_DIR = $(top_builddir)/xrl/interfaces
 noinst_LIBRARIES = libbgpbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestpeerbase.a libxorpshbase.a

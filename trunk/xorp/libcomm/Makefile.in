@@ -77,8 +77,6 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 
 # -- Test Programs
 bin_PROGRAMS =  test_comm

@@ -77,8 +77,6 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 bin_PROGRAMS = rib main_routemap test_fea_client test_register test_register_xrls test_rib_direct test_rib_xrls
 
 # -- Test scripts

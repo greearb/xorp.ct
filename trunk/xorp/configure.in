@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.8 2003/03/04 23:41:22 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.9 2003/03/11 00:17:08 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -905,46 +905,6 @@ fi
 AC_SUBST(OSPFD)
 AC_SUBST(OSPFD_OS)
 
-
-dnl ---------------------------------------------------------------------------
-dnl RIP Related
-dnl ---------------------------------------------------------------------------
-
-dnl ---------------------------------------------------------------------------
-dnl RIP check - only builds on freebsd and uses coarse grained os
-dnl check
-dnl ---------------------------------------------------------------------------
-
-AC_CACHE_CHECK(rip platform, xorp_cv_rip_os,
-[
-    case "${host_os}" in
-	freebsd* ) 
-	    xorp_cv_rip_os="freebsd"
-	;;
-	linux* ) 
-	    xorp_cv_rip_os="unsupported"
-	    dnl TODO: Uncomment the next line and remove the previous line
-	    dnl if RIP is supported on Linux.
-	    dnl xorp_cv_rip_os="linux"
-	;;
-	* )
-	    xorp_cv_rip_os="unsupported"
-	;;
-    esac
-])
-
-RIP_OS=${xorp_cv_rip_os}
-if test ${RIP_OS} != "unsupported" ; then
-    RIP="rip"
-else
-    echo "RIP will not be built."
-    RIP=""
-fi
-
-AC_SUBST(RIP)
-AC_SUBST(RIP_OS)
-
-
 dnl ---------------------------------------------------------------------------
 dnl Raw socket
 dnl ---------------------------------------------------------------------------
@@ -1073,9 +1033,6 @@ AC_OUTPUT(
 	ospfd/xorp/Makefile
 	pim/Makefile
 	rib/Makefile
-	rip/Makefile
-	rip/routed/Makefile
-	rip/route6d/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	policy/Makefile

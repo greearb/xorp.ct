@@ -77,8 +77,6 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 
 bin_PROGRAMS = coord test_peer
 TESTS = test_peering1.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_terminate.sh

@@ -4335,43 +4335,6 @@ fi
 
 
 
-
-
-echo $ac_n "checking rip platform""... $ac_c" 1>&6
-echo "configure:4342: checking rip platform" >&5
-if eval "test \"`echo '$''{'xorp_cv_rip_os'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  
-    case "${host_os}" in
-	freebsd* ) 
-	    xorp_cv_rip_os="freebsd"
-	;;
-	linux* ) 
-	    xorp_cv_rip_os="unsupported"
-	    	    	    	;;
-	* )
-	    xorp_cv_rip_os="unsupported"
-	;;
-    esac
-
-fi
-
-echo "$ac_t""$xorp_cv_rip_os" 1>&6
-
-RIP_OS=${xorp_cv_rip_os}
-if test ${RIP_OS} != "unsupported" ; then
-    RIP="rip"
-else
-    echo "RIP will not be built."
-    RIP=""
-fi
-
-
-
-
-
-
 case "${host_os}" in
     openbsd* )
     cat >> confdefs.h <<\EOF
@@ -4419,19 +4382,19 @@ cross_compiling=$ac_cv_prog_cc_cross
 
   CFLAGS="$CFLAGS $ac_flag"
   echo $ac_n "checking whether C compiler supports flag "$ac_flag"""... $ac_c" 1>&6
-echo "configure:4423: checking whether C compiler supports flag "$ac_flag"" >&5
+echo "configure:4386: checking whether C compiler supports flag "$ac_flag"" >&5
   if eval "test \"`echo '$''{'ac_cv_prog_c_compiler_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4428 "configure"
+#line 4391 "configure"
 #include "confdefs.h"
 
 int main() {
 return (0);
 ; return 0; }
 EOF
-if { (eval echo configure:4435: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4398: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
             
@@ -4478,19 +4441,19 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo $ac_n "checking whether C++ compiler supports flag "$ac_flag"""... $ac_c" 1>&6
-echo "configure:4482: checking whether C++ compiler supports flag "$ac_flag"" >&5
+echo "configure:4445: checking whether C++ compiler supports flag "$ac_flag"" >&5
   if eval "test \"`echo '$''{'ac_cv_prog_cxx_compiler_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4487 "configure"
+#line 4450 "configure"
 #include "confdefs.h"
 
 int main() {
 return (0);
 ; return 0; }
 EOF
-if { (eval echo configure:4494: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4457: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
             
@@ -4537,19 +4500,19 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo $ac_n "checking whether C++ compiler supports flag "$ac_flag"""... $ac_c" 1>&6
-echo "configure:4541: checking whether C++ compiler supports flag "$ac_flag"" >&5
+echo "configure:4504: checking whether C++ compiler supports flag "$ac_flag"" >&5
   if eval "test \"`echo '$''{'ac_cv_prog_cxx_compiler_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4546 "configure"
+#line 4509 "configure"
 #include "confdefs.h"
 
 int main() {
 return (0);
 ; return 0; }
 EOF
-if { (eval echo configure:4553: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4516: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
             
@@ -4739,9 +4702,6 @@ trap 'rm -fr `echo "Makefile
 	ospfd/xorp/Makefile
 	pim/Makefile
 	rib/Makefile
-	rip/Makefile
-	rip/routed/Makefile
-	rip/route6d/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	policy/Makefile
@@ -4830,8 +4790,6 @@ s%@FEA_BUILD_RTSOCK_TRUE@%$FEA_BUILD_RTSOCK_TRUE%g
 s%@FEA_BUILD_RTSOCK_FALSE@%$FEA_BUILD_RTSOCK_FALSE%g
 s%@OSPFD@%$OSPFD%g
 s%@OSPFD_OS@%$OSPFD_OS%g
-s%@RIP@%$RIP%g
-s%@RIP_OS@%$RIP_OS%g
 
 CEOF
 EOF
@@ -4905,9 +4863,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	ospfd/xorp/Makefile
 	pim/Makefile
 	rib/Makefile
-	rip/Makefile
-	rip/routed/Makefile
-	rip/route6d/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	policy/Makefile

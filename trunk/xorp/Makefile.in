@@ -77,14 +77,12 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 
 AUTOMAKE_OPTIONS = foreign
 ETAGS_ARGS = --c++
 
 # --- Conditional applications
-SUBDIRS = libxorp libcomm libxipc libproto mrt xrl cli policy mfea utils fea bgp mld6igmp pim rtrmgr rib @OSPFD@ @RIP@
+SUBDIRS = libxorp libcomm libxipc libproto mrt xrl cli policy mfea utils fea bgp mld6igmp pim rtrmgr rib @OSPFD@
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 

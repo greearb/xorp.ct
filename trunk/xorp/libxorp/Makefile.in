@@ -77,8 +77,6 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 
 noinst_LIBRARIES = libxorp.a
 TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_time_slice test_timer test_trie test_ref_trie test_types test_vif test_test_main

@@ -75,8 +75,6 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-RIP = @RIP@
-RIP_OS = @RIP_OS@
 SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast pim pim_testsuite rib rtrmgr test_harness
 
 # -- Extra files and directories to add to the distribution
