@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.26 2002/12/09 18:28:47 hodson Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -21,9 +21,9 @@
 #include "libxorp/trie.hh"
 
 template<class A>
-class BGPCacheTable : public BGPRouteTable<A>  {
+class CacheTable : public BGPRouteTable<A>  {
 public:
-    BGPCacheTable(string tablename, BGPRouteTable<A> *parent);
+    CacheTable(string tablename, BGPRouteTable<A> *parent);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

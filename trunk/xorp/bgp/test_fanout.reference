@@ -2,7 +2,7 @@
 [comment] TEST 1
 [comment] ADD AND DELETE
 [comment] SENDING FROM PEER 1
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -11,12 +11,12 @@ Origin Path Attribute - IGP
 AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -25,13 +25,13 @@ Origin Path Attribute - IGP
 AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -40,12 +40,12 @@ Origin Path Attribute - IGP
 AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -54,20 +54,20 @@ Origin Path Attribute - IGP
 AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 2
 [comment] SIMPLE FLOW CONTROL - PEER 2 BUSY
 [comment] SENDING FROM PEER 1
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -78,7 +78,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
@@ -89,7 +89,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [comment] SENDING FROM PEER 1
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -100,7 +100,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
@@ -113,7 +113,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
@@ -124,7 +124,7 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
@@ -137,7 +137,7 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [comment] PEER 1 GET_NEXT_MESSAGE
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -148,7 +148,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -168,7 +168,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
@@ -179,13 +179,13 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -196,7 +196,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
@@ -209,7 +209,7 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
@@ -220,13 +220,13 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D1 **]
+[** TABLE DebugTable-D1 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -237,13 +237,13 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D2 **]
+[** TABLE DebugTable-D2 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D3 **]
+[** TABLE DebugTable-D3 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -254,11 +254,11 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D3 **]
+[** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D3 **]
+[** TABLE DebugTable-D3 **]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
@@ -269,7 +269,7 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
-[** TABLE BGPDebugTable-D3 **]
+[** TABLE DebugTable-D3 **]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE

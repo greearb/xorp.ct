@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.2 2002/12/16 03:08:20 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -23,9 +23,9 @@
 #include "next_hop_resolver.hh"
 
 template<class A>
-class BGPDecisionTable : public BGPRouteTable<A>  {
+class DecisionTable : public BGPRouteTable<A>  {
 public:
-    BGPDecisionTable(string tablename, NextHopResolver<A>& next_hop_resolver);
+    DecisionTable(string tablename, NextHopResolver<A>& next_hop_resolver);
     int add_parent(BGPRouteTable<A> *parent,
 		   PeerHandler *peer_handler);
     int remove_parent(BGPRouteTable<A> *parent);

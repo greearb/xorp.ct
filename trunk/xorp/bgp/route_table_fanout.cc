@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.3 2002/12/16 03:08:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.4 2002/12/16 21:48:33 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -32,21 +32,21 @@ template<> const char* TypeName<IPv6>::get() { return "IPv6"; }
 
 
 template<class A>
-BGPFanoutTable<A>::BGPFanoutTable(string table_name,
-				  BGPRouteTable<A> *init_parent)
-    : BGPRouteTable<A>("BGPFanoutTable-" + table_name)
+FanoutTable<A>::FanoutTable(string table_name,
+			    BGPRouteTable<A> *init_parent)
+    : BGPRouteTable<A>("FanoutTable-" + table_name)
 {
     _parent = init_parent;
 }
 
 template<class A>
 int
-BGPFanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
-				  const PeerHandler *ph) 
+FanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
+			       const PeerHandler *ph) 
 {
-    debug_msg("BGPFanoutTable<%s>::add_next_table %x %s\n",
-	   TypeName<A>::get(),
-	   (u_int)new_next_table, new_next_table->tablename().c_str());
+    debug_msg("FanoutTable<%s>::add_next_table %x %s\n",
+	      TypeName<A>::get(),
+	      (u_int)new_next_table, new_next_table->tablename().c_str());
 
     if (_next_tables.find(new_next_table) != _next_tables.end()) {
 	// the next_table is already in the set
@@ -60,20 +60,20 @@ BGPFanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
 
 template<class A>
 int
-BGPFanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table) 
+FanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table) 
 {
     map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator iter;
     iter = _next_tables.find(ex_next_table);
     if (iter == _next_tables.end()) {
 	// the next_table is not already in the set
-	debug_msg("BGPFanoutTable<A>::remove_next_table\
+	debug_msg("FanoutTable<A>::remove_next_table\
  attempt to delete a table that doesn't exist\n");
 	abort();
     }
     skip_entire_queue(ex_next_table);
     if (ex_next_table->type() == DUMP_TABLE) {
-	remove_dump_table((BGPDumpTable<A>*)ex_next_table);
-	((BGPDumpTable<A>*)ex_next_table)->suspend_dump();
+	remove_dump_table((DumpTable<A>*)ex_next_table);
+	((DumpTable<A>*)ex_next_table)->suspend_dump();
     }
     _next_tables.erase(iter);
     return 0;
@@ -82,12 +82,12 @@ BGPFanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table)
 
 template<class A>
 int
-BGPFanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			     BGPRouteTable<A> *caller) 
+FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			  BGPRouteTable<A> *caller) 
 {
     debug_msg("%s\n", _tablename.c_str());
-    debug_msg("BGPFanoutTable::add_route %x\n",
-	   (u_int)(&rtmsg));
+    debug_msg("FanoutTable::add_route %x\n",
+	      (u_int)(&rtmsg));
 
     if (caller != _parent) abort();
 
@@ -101,17 +101,17 @@ BGPFanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	const PeerHandler *next_peer = i->second.peer_handler();
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
-	    debug_msg("BGPFanoutTable<%s>::add_route %x.\n  Don't send back to %s\n",
-		   TypeName<A>::get(),
-		   (u_int)(&rtmsg), (i->first)->tablename().c_str());
+	    debug_msg("FanoutTable<%s>::add_route %x.\n  Don't send back to %s\n",
+		      TypeName<A>::get(),
+		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
 	} else {
-	    debug_msg("BGPFanoutTable<%s>::add_route %x to %s\n",
-		   TypeName<A>::get(),
-		   (u_int)(&rtmsg), (i->first)->tablename().c_str());
+	    debug_msg("FanoutTable<%s>::add_route %x to %s\n",
+		      TypeName<A>::get(),
+		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
 
 	    if (i->second.busy()) {
 		debug_msg("Fanout: queuing route, queue len is %d\n",
-		       queued_peers.size());
+			  queued_peers.size());
 		queued_peers.push_back(&(i->second));
 		r = ADD_USED;
 	    } else {
@@ -135,13 +135,13 @@ BGPFanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPFanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				 const InternalMessage<A> &new_rtmsg,
-				 BGPRouteTable<A> *caller) 
+FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+			      const InternalMessage<A> &new_rtmsg,
+			      BGPRouteTable<A> *caller) 
 {
     debug_msg("%s\n", _tablename.c_str());
-    debug_msg("BGPFanoutTable::replace_route %x -> %x\n",
-	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
+    debug_msg("FanoutTable::replace_route %x -> %x\n",
+	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
 
     assert(caller == _parent);
 
@@ -156,10 +156,10 @@ BGPFanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
 	} else {
-	    debug_msg("BGPFanoutTable<%s>::replace_route %x -> %x to %s\n",
-		   TypeName<A>::get(),
-		   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg),
-		   (i->first)->tablename().c_str());
+	    debug_msg("FanoutTable<%s>::replace_route %x -> %x to %s\n",
+		      TypeName<A>::get(),
+		      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg),
+		      (i->first)->tablename().c_str());
 
 	    if (i->second.busy()) {
 		debug_msg("queueing replace_route\n");
@@ -185,8 +185,8 @@ BGPFanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPFanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-			       BGPRouteTable<A> *caller) 
+FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			     BGPRouteTable<A> *caller) 
 {
     if (caller != _parent) abort();
 
@@ -197,13 +197,13 @@ BGPFanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
 	const PeerHandler *next_peer = i->second.peer_handler();
 	if (origin_peer == next_peer) {
-	    debug_msg("BGPFanoutTable<%s>::delete_route %x.\n  Don't send back to %s\n",
-		   TypeName<A>::get(),
-		   (u_int)(&rtmsg), (i->first)->tablename().c_str());
+	    debug_msg("FanoutTable<%s>::delete_route %x.\n  Don't send back to %s\n",
+		      TypeName<A>::get(),
+		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
 	} else {
-	    debug_msg("BGPFanoutTable<%s>::delete_route %x to %s\n",
-		   TypeName<A>::get(),
-		   (u_int)(&rtmsg), (i->first)->tablename().c_str());
+	    debug_msg("FanoutTable<%s>::delete_route %x to %s\n",
+		      TypeName<A>::get(),
+		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
 	    if (i->second.busy()) {
 		queued_peers.push_back(&(i->second));
 	    } else {
@@ -218,9 +218,9 @@ BGPFanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPFanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
-			      BGPRouteTable<A> *caller,
-			      const PeerHandler *dump_peer) 
+FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+			   BGPRouteTable<A> *caller,
+			   const PeerHandler *dump_peer) 
 {
     if (caller != _parent) abort();
     BGPRouteTable<A> *dump_child;
@@ -242,7 +242,7 @@ BGPFanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPFanoutTable<A>::push(BGPRouteTable<A> *caller) 
+FanoutTable<A>::push(BGPRouteTable<A> *caller) 
 {
     debug_msg("Push\n");
     if (caller != _parent) abort();
@@ -269,31 +269,31 @@ BGPFanoutTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-BGPFanoutTable<A>::lookup_route(const IPNet<A> &net) const 
+FanoutTable<A>::lookup_route(const IPNet<A> &net) const 
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
 string
-BGPFanoutTable<A>::str() const 
+FanoutTable<A>::str() const 
 {
-    string s = "BGPFanoutTable<A>" + tablename();
+    string s = "FanoutTable<A>" + tablename();
     return s;
 }
 
 template<class A>
 void
-BGPFanoutTable<A>::add_dump_table(BGPDumpTable<A> *dump_table) 
+FanoutTable<A>::add_dump_table(DumpTable<A> *dump_table) 
 {
     _dump_tables.insert(dump_table);
 }
 
 template<class A>
 void
-BGPFanoutTable<A>::remove_dump_table(BGPDumpTable<A> *dump_table) 
+FanoutTable<A>::remove_dump_table(DumpTable<A> *dump_table) 
 {
-    set <BGPDumpTable<A>*>::iterator i;
+    set <DumpTable<A>*>::iterator i;
     i = _dump_tables.find(dump_table);
     assert(i != _dump_tables.end());
     _dump_tables.erase(i);
@@ -301,7 +301,7 @@ BGPFanoutTable<A>::remove_dump_table(BGPDumpTable<A> *dump_table)
 
 template<class A>
 int
-BGPFanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to) 
+FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to) 
 {
     assert(child_to_dump_to->type() != DUMP_TABLE);
 
@@ -318,8 +318,8 @@ BGPFanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to)
     const PeerHandler *peer_handler = peer_info->peer_handler();
 
     string tablename = string("DumpTable") + TypeName<A>::get();
-    BGPDumpTable<A>* dump_table =
-	new BGPDumpTable<A>(tablename, peer_handler, peer_list,
+    DumpTable<A>* dump_table =
+	new DumpTable<A>(tablename, peer_handler, peer_list,
 			    (BGPRouteTable<A>*)this);
 
     dump_table->set_next_table(child_to_dump_to);
@@ -336,11 +336,11 @@ BGPFanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to)
 /* mechanisms to implement flow control in the output plumbing */
 template<class A>
 void
-BGPFanoutTable<A>::add_to_queue(RouteQueueOp operation,
-				const InternalMessage<A> &rtmsg,
-				const list<PeerRoutePair<A>*>& queued_peers) 
+FanoutTable<A>::add_to_queue(RouteQueueOp operation,
+			     const InternalMessage<A> &rtmsg,
+			     const list<PeerRoutePair<A>*>& queued_peers) 
 {
-    debug_msg("BGPFanoutTable<A>::add_to_queue, op=%d, net=%s\n", 
+    debug_msg("FanoutTable<A>::add_to_queue, op=%d, net=%s\n", 
 	      operation, rtmsg.net().str().c_str());
     RouteQueueEntry<A> *queue_entry;
     queue_entry = new RouteQueueEntry<A>(rtmsg.route(), operation);
@@ -356,13 +356,13 @@ BGPFanoutTable<A>::add_to_queue(RouteQueueOp operation,
 
 template<class A>
 void
-BGPFanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
-					const InternalMessage<A> &new_rtmsg,
-					const list<PeerRoutePair<A>*>&
-					  queued_peers) 
+FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
+				     const InternalMessage<A> &new_rtmsg,
+				     const list<PeerRoutePair<A>*>&
+				     queued_peers) 
 {
-    debug_msg("BGPFanoutTable<A>::add_replace_to_queue\n");
-   // replace entails two queue entries, but they're always paired up
+    debug_msg("FanoutTable<A>::add_replace_to_queue\n");
+    // replace entails two queue entries, but they're always paired up
     // in the order OLD then NEW
     RouteQueueEntry<A> *queue_entry;
     queue_entry = new RouteQueueEntry<A>(old_rtmsg.route(),
@@ -394,11 +394,11 @@ BGPFanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 void
-BGPFanoutTable<A>::add_push_to_queue(const list<PeerRoutePair<A>*>&
-				     queued_peers,
-				     const PeerHandler *origin_peer) 
+FanoutTable<A>::add_push_to_queue(const list<PeerRoutePair<A>*>&
+				  queued_peers,
+				  const PeerHandler *origin_peer) 
 {
-    debug_msg("BGPFanoutTable<A>::add_push_to_queue\n");
+    debug_msg("FanoutTable<A>::add_push_to_queue\n");
     RouteQueueEntry<A> *queue_entry;
     queue_entry = new RouteQueueEntry<A>(RTQUEUE_OP_PUSH, origin_peer);
     _output_queue.push_back(queue_entry);
@@ -407,8 +407,8 @@ BGPFanoutTable<A>::add_push_to_queue(const list<PeerRoutePair<A>*>&
 
 template<class A>
 void
-BGPFanoutTable<A>::set_queue_positions(const list<PeerRoutePair<A>*>&
-				       queued_peers) 
+FanoutTable<A>::set_queue_positions(const list<PeerRoutePair<A>*>&
+				    queued_peers) 
 {
     list<PeerRoutePair<A>*>::const_iterator i;
     for (i = queued_peers.begin(); i != queued_peers.end(); i++) {
@@ -422,7 +422,7 @@ BGPFanoutTable<A>::set_queue_positions(const list<PeerRoutePair<A>*>&
 
 template<class A>
 void
-BGPFanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
+FanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
 {
     map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
     i = _next_tables.find(next_table);
@@ -444,9 +444,9 @@ BGPFanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 
 template<class A>
 bool
-BGPFanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
+FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
 {
-    debug_msg("BGPFanoutTable<A>::get_next_message: %p\n", next_table);
+    debug_msg("FanoutTable<A>::get_next_message: %p\n", next_table);
     print_queue();
     map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
     i = _next_tables.find(next_table);
@@ -556,7 +556,7 @@ BGPFanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     /* now we have to deal with freeing up the head of the queue if
        no-one else needs it now*/
     while(discard_possible) {
-	    map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator nti;
+	map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator nti;
 	// iterating on a map isn't very efficient, but the map
 	// shouldn't be all that large
 	bool discard = true;
@@ -594,7 +594,7 @@ BGPFanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 
 template<class A>
 void
-BGPFanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table) 
+FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table) 
 {
     map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
     i = _next_tables.find(next_table);
@@ -671,7 +671,7 @@ BGPFanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
 		    if (skipped == 2 &&
 			(nti->second.queue_position() 
 			 == (_output_queue.begin())++ ))
-		    discard = false;
+			discard = false;
 		}
 	    }
 	    if (discard) {
@@ -693,8 +693,8 @@ BGPFanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
 
 template<class A>
 void
-BGPFanoutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				    BGPRouteTable<A> *caller) 
+FanoutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
+				  BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
     map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
@@ -705,9 +705,9 @@ BGPFanoutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPFanoutTable<A>::peering_down_complete(const PeerHandler *peer,
-					 uint32_t genid,
-					 BGPRouteTable<A> *caller) 
+FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
+				      uint32_t genid,
+				      BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
     map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
@@ -720,7 +720,7 @@ BGPFanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template<class A>
 void
-BGPFanoutTable<A>::print_queue() 
+FanoutTable<A>::print_queue() 
 {
 #ifdef DEBUG_LOGGING
     // leave this as printf please - mjh
@@ -737,8 +737,8 @@ BGPFanoutTable<A>::print_queue()
 
 template class PeerRoutePair<IPv4>;
 template class PeerRoutePair<IPv6>;
-template class BGPFanoutTable<IPv4>;
-template class BGPFanoutTable<IPv6>;
+template class FanoutTable<IPv4>;
+template class FanoutTable<IPv6>;
 
 
 

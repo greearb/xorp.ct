@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.2 2002/12/16 03:08:21 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -123,8 +123,8 @@ private:
 };
 
 /*
- * BGPFilterTable is a route table that can hold banks of route
- * filters.  Normally BGPFilterTable propagates add_route,
+ * FilterTable is a route table that can hold banks of route
+ * filters.  Normally FilterTable propagates add_route,
  * delete_route and the response to lookup_route directly through from
  * the parent to the child.  A route filter can cause these to fail to
  * be propagated, or can modify the attributes of the route in the
@@ -132,11 +132,11 @@ private:
  */
 
 template<class A>
-class BGPFilterTable : public BGPRouteTable<A>  {
+class FilterTable : public BGPRouteTable<A>  {
 public:
-    BGPFilterTable(string tablename, BGPRouteTable<A> *parent, 
+    FilterTable(string tablename, BGPRouteTable<A> *parent, 
 		   NextHopResolver<A>& next_hop_resolver);
-    ~BGPFilterTable();
+    ~FilterTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

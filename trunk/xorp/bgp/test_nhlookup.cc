@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.2 2002/12/14 21:50:43 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.3 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -36,14 +36,14 @@ public:
     void set_output_file(FILE *file) { _ofile = file;}
     void set_response(bool response) {_response = response;}
     bool register_nexthop(A nexthop, IPNet<A> net, 
-			  BGPNhLookupTable<A> */*requester*/) {
+			  NhLookupTable<A> */*requester*/) {
 	fprintf(_ofile, "[NH REGISTER]\n");
 	fprintf(_ofile, "NextHop: %s\n", nexthop.str().c_str());
 	fprintf(_ofile, "Net: %s\n", net.str().c_str());
 	return _response;
     }
     void deregister_nexthop(A nexthop, IPNet<A> net, 
-			    BGPNhLookupTable<A> */*requester*/) {
+			    NhLookupTable<A> */*requester*/) {
 	fprintf(_ofile, "[NH DEREGISTER]\n");
 	fprintf(_ofile, "NextHop: %s\n", nexthop.str().c_str());
 	fprintf(_ofile, "Net: %s\n", net.str().c_str());
@@ -76,10 +76,10 @@ int main(int, char** argv) {
     DummyResolver<IPv4> nh_resolver;
 
     //trivial plumbing
-    BGPNhLookupTable<IPv4> *nhlookup_table
-	= new BGPNhLookupTable<IPv4>("NHLOOKUP", &nh_resolver, NULL);
-    BGPDebugTable<IPv4>* debug_table
-	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)nhlookup_table);
+    NhLookupTable<IPv4> *nhlookup_table
+	= new NhLookupTable<IPv4>("NHLOOKUP", &nh_resolver, NULL);
+    DebugTable<IPv4>* debug_table
+	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)nhlookup_table);
     nhlookup_table->set_next_table(debug_table);
 
     debug_table->set_output_file(filename);

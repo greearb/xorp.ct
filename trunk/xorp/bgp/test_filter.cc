@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.4 2002/12/16 03:08:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.5 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -38,7 +38,7 @@ int main(int, char** argv) {
     xlog_add_default_output();
     xlog_start();
     struct passwd *pwd = getpwuid(getuid());
-    string filename = "/tmp/test_nhlookup.";
+    string filename = "/tmp/test_filter.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.get_eventloop();
@@ -52,13 +52,13 @@ int main(int, char** argv) {
     // Trivial plumbing. We're not testing the RibInTable here, so
     // mostly we'll just inject directly into the FilterTable, but we
     // need an RibInTable here to test lookup_route.
-    BGPRibInTable<IPv4> *ribin_table
-	= new BGPRibInTable<IPv4>("RIB-in", &handler1);
-    BGPFilterTable<IPv4> *filter_table
-	= new BGPFilterTable<IPv4>("FILTER", ribin_table, next_hop_resolver);
+    RibInTable<IPv4> *ribin_table
+	= new RibInTable<IPv4>("RIB-in", &handler1);
+    FilterTable<IPv4> *filter_table
+	= new FilterTable<IPv4>("FILTER", ribin_table, next_hop_resolver);
     ribin_table->set_next_table(filter_table);
-    BGPDebugTable<IPv4>* debug_table
-	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)filter_table);
+    DebugTable<IPv4>* debug_table
+	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)filter_table);
     filter_table->set_next_table(debug_table);
     debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.2 2002/12/13 20:52:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.3 2002/12/13 22:30:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,7 +40,7 @@ NextHopResolver<A>::~NextHopResolver()
 
 template <class A>
 void
-NextHopResolver<A>::add_decision(BGPDecisionTable<A> *decision)
+NextHopResolver<A>::add_decision(DecisionTable<A> *decision)
 {
     _decision = decision;
 }
@@ -62,7 +62,7 @@ NextHopResolver<A>::register_ribname(const string& ribname)
 template <class A>
 bool
 NextHopResolver<A>::register_nexthop(A nexthop, IPNet<A> net,
-				     BGPNhLookupTable<A> *requester)
+				     NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net.str().c_str(), requester);
@@ -92,7 +92,7 @@ NextHopResolver<A>::register_nexthop(A nexthop, IPNet<A> net,
 template <class A>
 void
 NextHopResolver<A>::deregister_nexthop(A nexthop, IPNet<A> net,
-				    BGPNhLookupTable<A> *requester)
+				    NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net.str().c_str(), requester);
@@ -575,7 +575,7 @@ NextHopRibRequest<A>::~NextHopRibRequest()
 template<class A>
 void
 NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net,
-				       BGPNhLookupTable<A> *requester)
+				       NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net.str().c_str(), requester);
@@ -715,11 +715,11 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    */
 	    if (rr->_register) {
 		NHRequest<A>* request_data = &rr->_requests;
-		set <BGPNhLookupTable<A> *>::const_iterator req_iter;
+		set <NhLookupTable<A> *>::const_iterator req_iter;
 		for (req_iter = request_data->requesters().begin();
 		    req_iter != request_data->requesters().end();
 		    req_iter++) {
-		    BGPNhLookupTable<A> *requester = (*req_iter);
+		    NhLookupTable<A> *requester = (*req_iter);
 		    _next_hop_cache.register_nexthop(rr->_nexthop,
 			       request_data->request_nets(requester).size());
 		    requester->RIB_lookup_done(rr->_nexthop,
@@ -777,7 +777,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 template<class A>
 bool
 NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net,
-					 BGPNhLookupTable<A> *requester)
+					 NhLookupTable<A> *requester)
 {
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net.str().c_str(), requester);
@@ -932,14 +932,14 @@ NextHopRibRequest<A>::callback(const XrlError& error, string comment)
 /****************************************/
 
 template <class A>
-NHRequest<A>::NHRequest(IPNet<A> net, BGPNhLookupTable<A> *requester)
+NHRequest<A>::NHRequest(IPNet<A> net, NhLookupTable<A> *requester)
 {
     add_request(net, requester);
 }
 
 template <class A>
 void
-NHRequest<A>::add_request(IPNet<A> net, BGPNhLookupTable<A> *requester)
+NHRequest<A>::add_request(IPNet<A> net, NhLookupTable<A> *requester)
 {
     if (_request_map.find(requester) == _request_map.end()) {
 	_requesters.insert(requester);
@@ -951,9 +951,9 @@ NHRequest<A>::add_request(IPNet<A> net, BGPNhLookupTable<A> *requester)
 
 template <class A>
 bool
-NHRequest<A>::remove_request(IPNet<A> net, BGPNhLookupTable<A> *requester)
+NHRequest<A>::remove_request(IPNet<A> net, NhLookupTable<A> *requester)
 {
-    map <BGPNhLookupTable<A> *, set<IPNet<A> > >::iterator i;
+    map <NhLookupTable<A> *, set<IPNet<A> > >::iterator i;
     i = _request_map.find(requester);
     if (i == _request_map.end())
 	return false;
@@ -968,9 +968,9 @@ NHRequest<A>::remove_request(IPNet<A> net, BGPNhLookupTable<A> *requester)
 
 template <class A>
 const set <IPNet<A> >&
-NHRequest<A>::request_nets(BGPNhLookupTable<A>* requester) const
+NHRequest<A>::request_nets(NhLookupTable<A>* requester) const
 {
-    map <BGPNhLookupTable<A> *, set<IPNet<A> > >::const_iterator i;
+    map <NhLookupTable<A> *, set<IPNet<A> > >::const_iterator i;
     i = _request_map.find(requester);
     assert(i != _request_map.end());
 

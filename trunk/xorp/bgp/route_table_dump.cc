@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.2 2002/12/14 23:15:32 mjh Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -28,11 +28,11 @@
 #endif
 
 template<class A>
-BGPDumpTable<A>::BGPDumpTable(string table_name,
-			      const PeerHandler *peer,
-			      const list <const PeerHandler*>& peer_list,
-			      BGPRouteTable<A> *parent_table)
-    : BGPRouteTable<A>("BGPDumpTable-" + table_name),
+DumpTable<A>::DumpTable(string table_name,
+			const PeerHandler *peer,
+			const list <const PeerHandler*>& peer_list,
+			BGPRouteTable<A> *parent_table)
+    : BGPRouteTable<A>("DumpTable-" + table_name),
     _dump_iter(peer, peer_list)
 {
     cp(1);
@@ -45,11 +45,11 @@ BGPDumpTable<A>::BGPDumpTable(string table_name,
 
 template<class A>
 int
-BGPDumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			   BGPRouteTable<A> *caller) 
+DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			BGPRouteTable<A> *caller) 
 {
-    debug_msg("BGPDumpTable<A>::add_route %x on %s\n",
-	   (u_int)(&rtmsg), tablename().c_str());
+    debug_msg("DumpTable<A>::add_route %x on %s\n",
+	      (u_int)(&rtmsg), tablename().c_str());
     assert(caller == _parent);
     assert(_next_table != NULL);
     cp(1);
@@ -71,12 +71,12 @@ BGPDumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-			       const InternalMessage<A> &new_rtmsg,
-			       BGPRouteTable<A> *caller) 
+DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+			    const InternalMessage<A> &new_rtmsg,
+			    BGPRouteTable<A> *caller) 
 {
-    debug_msg("BGPDumpTable<A>::replace_route %x -> %x on %s\n",
-	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
+    debug_msg("DumpTable<A>::replace_route %x -> %x on %s\n",
+	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
     assert(caller == _parent);
     assert(_next_table != NULL);
     assert(old_rtmsg.net() == new_rtmsg.net());
@@ -114,15 +114,15 @@ BGPDumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
-			    BGPRouteTable<A> *caller,
-			    const PeerHandler* dump_peer) 
+DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+			 BGPRouteTable<A> *caller,
+			 const PeerHandler* dump_peer) 
 {
     cp(9);
     assert(caller == _parent);
     assert(_next_table != NULL);
     assert(dump_peer == _peer);
-    debug_msg("BGPDumpTable<A>::route_dump %s\n", rtmsg.net().str().c_str());
+    debug_msg("DumpTable<A>::route_dump %s\n", rtmsg.net().str().c_str());
     /* turn the route_dump into a route_add */
     _dump_iter.route_dump(rtmsg);
     return _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -134,11 +134,11 @@ BGPDumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-			      BGPRouteTable<A> *caller) 
+DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			   BGPRouteTable<A> *caller) 
 {
-    debug_msg("BGPDumpTable<A>::delete_route %x on %s\n",
-	   (u_int)(&rtmsg), tablename().c_str());
+    debug_msg("DumpTable<A>::delete_route %x on %s\n",
+	      (u_int)(&rtmsg), tablename().c_str());
     assert(caller == _parent);
     assert(_next_table != NULL);
 
@@ -156,7 +156,7 @@ BGPDumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::push(BGPRouteTable<A> *caller) 
+DumpTable<A>::push(BGPRouteTable<A> *caller) 
 {
     assert(caller == _parent);
     cp(12);
@@ -165,7 +165,7 @@ BGPDumpTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-BGPDumpTable<A>::lookup_route(const IPNet<A> &net) const 
+DumpTable<A>::lookup_route(const IPNet<A> &net) const 
 {
     cp(13);
     return _parent->lookup_route(net);
@@ -173,7 +173,7 @@ BGPDumpTable<A>::lookup_route(const IPNet<A> &net) const
 
 template<class A>
 void
-BGPDumpTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
+DumpTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
     cp(14);
     _parent->route_used(rt, in_use);
@@ -181,15 +181,15 @@ BGPDumpTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 
 template<class A>
 string
-BGPDumpTable<A>::str() const 
+DumpTable<A>::str() const 
 {
-    string s = "BGPDumpTable<A>" + tablename();
+    string s = "DumpTable<A>" + tablename();
     return s;
 }
 
 template<class A>
 void
-BGPDumpTable<A>::initiate_background_dump() 
+DumpTable<A>::initiate_background_dump() 
 {
     assert(_next_table != NULL);
     cp(15);
@@ -200,12 +200,12 @@ BGPDumpTable<A>::initiate_background_dump()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &BGPDumpTable<A>::dump_next_route));
+				     &DumpTable<A>::dump_next_route));
 }
 
 template<class A>
 void
-BGPDumpTable<A>::suspend_dump() 
+DumpTable<A>::suspend_dump() 
 {
     if (_dump_active == false) return;
     cp(16);
@@ -223,7 +223,7 @@ BGPDumpTable<A>::suspend_dump()
 
 template<class A>
 void
-BGPDumpTable<A>::dump_next_route() 
+DumpTable<A>::dump_next_route() 
 {
     if (_output_busy) {
 	cp(17);
@@ -236,7 +236,7 @@ BGPDumpTable<A>::dump_next_route()
     // process any queue that built up
     while(_parent->get_next_message(this) == true) {
 	cp(18);
-	debug_msg("BGPDumpTable<A>::dump_next_route processed queued message\n");
+	debug_msg("DumpTable<A>::dump_next_route processed queued message\n");
 	if (_output_busy) {
 	    cp(19);
 	    return;
@@ -296,12 +296,12 @@ BGPDumpTable<A>::dump_next_route()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &BGPDumpTable<A>::dump_next_route));
+				     &DumpTable<A>::dump_next_route));
 }
 
 template<class A>
 void
-BGPDumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
+DumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
 {
     assert(next_table == _next_table);
     if (busy)
@@ -329,7 +329,7 @@ BGPDumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 
 template<class A>
 bool
-BGPDumpTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
+DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
 {
     assert(next_table == _next_table);
     if (_waiting_for_deletion_completion) {
@@ -351,8 +351,8 @@ BGPDumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 
 template<class A>
 void
-BGPDumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				   BGPRouteTable<A> *caller) 
+DumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller) 
 {
     cp(37);
     XLOG_ASSERT(_parent == caller);
@@ -363,8 +363,8 @@ BGPDumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPDumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
-				       BGPRouteTable<A> *caller) 
+DumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
+				    BGPRouteTable<A> *caller) 
 {
     cp(38);
     XLOG_ASSERT(_parent == caller);
@@ -387,7 +387,7 @@ BGPDumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPDumpTable<A>::unplumb_self() 
+DumpTable<A>::unplumb_self() 
 {
     debug_msg("unplumbing self\n");
     assert(_next_table != NULL);
@@ -406,17 +406,17 @@ BGPDumpTable<A>::unplumb_self()
     cp(41);
     if (_parent != NULL) {
 	cp(42);
-	((BGPFanoutTable<A>*)_parent)->
+	((FanoutTable<A>*)_parent)->
 	    remove_next_table((BGPRouteTable<A>*)this);
-	((BGPFanoutTable<A>*)_parent)->add_next_table(_next_table, _peer);
+	((FanoutTable<A>*)_parent)->add_next_table(_next_table, _peer);
     }
     // ensure we can't continue to operate
     _next_table = (BGPRouteTable<A>*)0xd0d0;
     _parent = (BGPRouteTable<A>*)0xd0d0;
 }
 
-template class BGPDumpTable<IPv4>;
-template class BGPDumpTable<IPv6>;
+template class DumpTable<IPv4>;
+template class DumpTable<IPv6>;
 
 
 

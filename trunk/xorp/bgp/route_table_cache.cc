@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,26 +23,26 @@
 #include <map>
 
 template<class A>
-BGPCacheTable<A>::BGPCacheTable(string table_name,  
-				BGPRouteTable<A> *parent_table) 
-    : BGPRouteTable<A>("BGPCacheTable-" + table_name)
+CacheTable<A>::CacheTable(string table_name,  
+			  BGPRouteTable<A> *parent_table) 
+    : BGPRouteTable<A>("CacheTable-" + table_name)
 {
     _parent = parent_table;
 }
 
 template<class A>
 void
-BGPCacheTable<A>::flush_cache() {
-    debug_msg("BGPCacheTable<A>::flush_cache on %s\n",
+CacheTable<A>::flush_cache() {
+    debug_msg("CacheTable<A>::flush_cache on %s\n",
 	      tablename().c_str());
     _route_table.delete_all_nodes();
 }
 
 template<class A>
 int
-BGPCacheTable<A>::add_route(const InternalMessage<A> &rtmsg, 
-			    BGPRouteTable<A> *caller) {
-    debug_msg("BGPCacheTable<A>::add_route %x on %s\n",
+CacheTable<A>::add_route(const InternalMessage<A> &rtmsg, 
+			 BGPRouteTable<A> *caller) {
+    debug_msg("CacheTable<A>::add_route %x on %s\n",
 	   (u_int)(&rtmsg), tablename().c_str());
     debug_msg("add route: %s\n", rtmsg.net().str().c_str());
     assert(caller == _parent);
@@ -107,10 +107,10 @@ BGPCacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPCacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-				const InternalMessage<A> &new_rtmsg, 
-				BGPRouteTable<A> *caller) {
-    debug_msg("BGPCacheTable<A>::replace_route %x -> %x on %s\n",
+CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
+			     const InternalMessage<A> &new_rtmsg, 
+			     BGPRouteTable<A> *caller) {
+    debug_msg("CacheTable<A>::replace_route %x -> %x on %s\n",
 	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
     debug_msg("replace route: %s\n", old_rtmsg.net().str().c_str());
     assert(caller == _parent);
@@ -201,8 +201,8 @@ BGPCacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPCacheTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			       BGPRouteTable<A> *caller) {
+CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
+			    BGPRouteTable<A> *caller) {
 
     debug_msg("table %s route = %s\n", _tablename.c_str(),
 	      rtmsg.str().c_str());
@@ -254,16 +254,16 @@ BGPCacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPCacheTable<A>::push(BGPRouteTable<A> *caller) {
+CacheTable<A>::push(BGPRouteTable<A> *caller) {
     assert(caller == _parent);
     return _next_table->push((BGPRouteTable<A>*)this);
 }
 
 template<class A>
 int 
-BGPCacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
-			     BGPRouteTable<A> *caller,
-			     const PeerHandler *dump_peer) {
+CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+			  BGPRouteTable<A> *caller,
+			  const PeerHandler *dump_peer) {
     assert(caller == _parent);
     if (rtmsg.changed()) {
 	//Check we've got it cached.  Clear the changed bit so we
@@ -277,7 +277,7 @@ BGPCacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-BGPCacheTable<A>::lookup_route(const IPNet<A> &net) const {
+CacheTable<A>::lookup_route(const IPNet<A> &net) const {
     //return our cached copy if there is one, otherwise ask our parent
     Trie<A, const SubnetRoute<A> >::iterator iter;
     iter = _route_table.lookup_node(net);
@@ -289,21 +289,21 @@ BGPCacheTable<A>::lookup_route(const IPNet<A> &net) const {
 
 template<class A>
 void
-BGPCacheTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
+CacheTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
     _parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
-BGPCacheTable<A>::str() const {
-    string s = "BGPCacheTable<A>" + tablename();
+CacheTable<A>::str() const {
+    string s = "CacheTable<A>" + tablename();
     return s;
 }
 
 /* mechanisms to implement flow control in the output plumbing */
 template<class A>
 void 
-BGPCacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
+CacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
     XLOG_ASSERT(_next_table == next_table);
 
     _parent->output_state(busy, this);
@@ -311,12 +311,16 @@ BGPCacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
 
 template<class A>
 bool 
-BGPCacheTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
+CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
     XLOG_ASSERT(_next_table == next_table);
 
     return _parent->get_next_message(this);
 }
 
-template class BGPCacheTable<IPv4>;
-template class BGPCacheTable<IPv6>;
+template class CacheTable<IPv4>;
+template class CacheTable<IPv6>;
+
+
+
+
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.3 2002/12/16 03:08:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.4 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -37,7 +37,7 @@ int main(int, char** argv) {
     xlog_add_default_output();
     xlog_start();
     struct passwd *pwd = getpwuid(getuid());
-    string filename = "/tmp/test_nhlookup.";
+    string filename = "/tmp/test_decision.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
     EventLoop* eventloop = bgpmain.get_eventloop();
@@ -72,25 +72,25 @@ int main(int, char** argv) {
 
     DummyNextHopResolver<IPv4> next_hop_resolver;
 
-    BGPDecisionTable<IPv4> *decision_table
-	= new BGPDecisionTable<IPv4>("DECISION", next_hop_resolver);
+    DecisionTable<IPv4> *decision_table
+	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);
 
-    BGPDebugTable<IPv4>* debug_table
-	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)decision_table);
+    DebugTable<IPv4>* debug_table
+	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)decision_table);
     decision_table->set_next_table(debug_table);
 
-    BGPRibInTable<IPv4>* ribin_table1
-	= new BGPRibInTable<IPv4>("RIB-IN1", &handler1);
+    RibInTable<IPv4>* ribin_table1
+	= new RibInTable<IPv4>("RIB-IN1", &handler1);
     ribin_table1->set_next_table(decision_table);
     decision_table->add_parent(ribin_table1, &handler1);
 
-    BGPRibInTable<IPv4>* ribin_table2
-	= new BGPRibInTable<IPv4>("RIB-IN2", &handler2);
+    RibInTable<IPv4>* ribin_table2
+	= new RibInTable<IPv4>("RIB-IN2", &handler2);
     ribin_table2->set_next_table(decision_table);
     decision_table->add_parent(ribin_table2, &handler2);
 
-    BGPRibInTable<IPv4>* ribin_table3
-	= new BGPRibInTable<IPv4>("RIB-IN3", &handler3);
+    RibInTable<IPv4>* ribin_table3
+	= new RibInTable<IPv4>("RIB-IN3", &handler3);
     ribin_table3->set_next_table(decision_table);
     decision_table->add_parent(ribin_table3, &handler3);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.2 2002/12/14 23:42:49 hodson Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -31,11 +31,11 @@
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/rib_xif.hh"
 
-template<class A> class BGPNhLookupTable;
+template<class A> class NhLookupTable;
 template<class A> class NextHopCache;
 template<class A> class NextHopResolver;
 template<class A> class NextHopRibRequest;
-template<class A> class BGPDecisionTable;
+template<class A> class DecisionTable;
 template<class A> class NHRequest;
 
 /**
@@ -93,7 +93,7 @@ public:
      *
      * @param decision Pointer to the decision table.
      */
-    void add_decision(BGPDecisionTable<A> *decision);
+    void add_decision(DecisionTable<A> *decision);
 
     /**
     * Set the rib's name, allows for having a dummy rib or not having
@@ -112,7 +112,7 @@ public:
      * @return True if the registration succeed.
      */
     virtual bool register_nexthop(A nexthop, IPNet<A> net,
-				  BGPNhLookupTable<A> *requester);
+				  NhLookupTable<A> *requester);
 
     /**
      * De-Register interest in this nexthop.
@@ -124,7 +124,7 @@ public:
      * @return True if the registration succeed.
      */
     virtual void deregister_nexthop(A nexthop, IPNet<A> net,
-				    BGPNhLookupTable<A> *requester);
+				    NhLookupTable<A> *requester);
 
 
     /**
@@ -168,7 +168,7 @@ public:
      */
     void next_hop_changed(A nexthop);
 protected:
-    BGPDecisionTable<A> *_decision;
+    DecisionTable<A> *_decision;
 private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;
@@ -410,7 +410,7 @@ public:
      * when the response comes back.
      */
     void register_nexthop(A nexthop, IPNet<A> net,
-			  BGPNhLookupTable<A> *requester);
+			  NhLookupTable<A> *requester);
 
 
     /**
@@ -446,7 +446,7 @@ public:
      * @return True if an entry was found to remove.
      */
     bool deregister_nexthop(A nexthop, IPNet<A> net,
-			    BGPNhLookupTable<A> *requester);
+			    NhLookupTable<A> *requester);
 
     /**
      * Reregister interest with the RIB about this next hop.
@@ -515,7 +515,7 @@ private:
      * "_register" and "_reregister" will be true.
      */
     struct RibRequest {
-	RibRequest(A nexthop, IPNet<A> net, BGPNhLookupTable<A> *requester)
+	RibRequest(A nexthop, IPNet<A> net, NhLookupTable<A> *requester)
 	    : _nexthop(nexthop), _register(true), _requests(net, requester),
 	      _reregister(false), _ref_cnt(0)
 	{}
@@ -525,13 +525,13 @@ private:
 	      _ref_cnt(ref_cnt), _resolvable(resolvable), _metric(metric)
 	{}
 
-	void register_nexthop(IPNet<A> net, BGPNhLookupTable<A> *requester) {
+	void register_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
 	    XLOG_ASSERT(true == _reregister || true == _register);
 	    _register = true;
 	    _requests.add_request(net, requester);
 	}
 
-	bool deregister_nexthop(IPNet<A> net, BGPNhLookupTable<A> *requester) {
+	bool deregister_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
 	    XLOG_ASSERT(true == _reregister || true == _register);
 	    if (_register && _requests.remove_request(net, requester)) {
 		return true;
@@ -594,18 +594,18 @@ class NHRequest {
 public:
     NHRequest() {}
     NHRequest(IPNet<A> net,
-	      BGPNhLookupTable<A> *requester);
+	      NhLookupTable<A> *requester);
     void add_request(IPNet<A> net,
-		     BGPNhLookupTable<A> *requester);
+		     NhLookupTable<A> *requester);
     bool remove_request(IPNet<A> net,
-			BGPNhLookupTable<A> *requester);
-    const set <BGPNhLookupTable<A>*>& requesters() const {
+			NhLookupTable<A> *requester);
+    const set <NhLookupTable<A>*>& requesters() const {
 	return _requesters;
     }
-    const set <IPNet<A> >& request_nets(BGPNhLookupTable<A>* requester) const;
+    const set <IPNet<A> >& request_nets(NhLookupTable<A>* requester) const;
 private:
-    set <BGPNhLookupTable<A> *> _requesters;
-    map <BGPNhLookupTable<A> *, set<IPNet<A> > > _request_map;
+    set <NhLookupTable<A> *> _requesters;
+    map <NhLookupTable<A> *, set<IPNet<A> > > _request_map;
 };
 
 #endif // __BGP_NEXT_HOP_RESOLVER_HH__

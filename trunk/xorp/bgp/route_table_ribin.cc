@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.2 2002/12/14 00:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.3 2002/12/14 05:31:55 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,8 +24,8 @@
 
 
 template<class A>
-BGPRibInTable<A>::BGPRibInTable(string table_name, const PeerHandler *peer)
-    : BGPRouteTable<A>("BGPRibInTable-" + table_name), _peer(peer)
+RibInTable<A>::RibInTable(string table_name, const PeerHandler *peer)
+    : BGPRouteTable<A>("RibInTable-" + table_name), _peer(peer)
 {
     _route_table = new BgpTrie<A>;
     _peer_is_up = true;
@@ -37,14 +37,14 @@ BGPRibInTable<A>::BGPRibInTable(string table_name, const PeerHandler *peer)
 }
 
 template<class A>
-BGPRibInTable<A>::~BGPRibInTable()
+RibInTable<A>::~RibInTable()
 {
     delete _route_table;
 }
 
 template<class A>
 void
-BGPRibInTable<A>::peering_went_down()
+RibInTable<A>::peering_went_down()
 {
     _peer_is_up = false;
 
@@ -60,8 +60,8 @@ BGPRibInTable<A>::peering_went_down()
 
     string tablename = "Deleted" + _tablename;
 
-    BGPDeletionTable<A>* deletion_table =
-	new BGPDeletionTable<A>(tablename, _route_table, _peer, _genid, this);
+    DeletionTable<A>* deletion_table =
+	new DeletionTable<A>(tablename, _route_table, _peer, _genid, this);
 
     _route_table = new BgpTrie<A>;
 
@@ -75,7 +75,7 @@ BGPRibInTable<A>::peering_went_down()
 
 template<class A>
 void
-BGPRibInTable<A>::peering_came_up()
+RibInTable<A>::peering_came_up()
 {
     _peer_is_up = true;
     _genid++;
@@ -90,8 +90,8 @@ BGPRibInTable<A>::peering_came_up()
 
 template<class A>
 int
-BGPRibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			    BGPRouteTable<A> *caller)
+RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			 BGPRouteTable<A> *caller)
 {
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;
@@ -167,8 +167,8 @@ BGPRibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPRibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-			       BGPRouteTable<A> *caller)
+RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			    BGPRouteTable<A> *caller)
 {
     assert(caller == NULL);
     assert(rtmsg.origin_peer() == _peer);
@@ -209,9 +209,9 @@ BGPRibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPRibInTable<A>::push(BGPRouteTable<A> *caller)
+RibInTable<A>::push(BGPRouteTable<A> *caller)
 {
-    debug_msg("BGPRibInTable<A>::push\n");
+    debug_msg("RibInTable<A>::push\n");
     assert(caller == NULL);
     assert(_peer_is_up);
     assert(_next_table != NULL);
@@ -221,7 +221,7 @@ BGPRibInTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-BGPRibInTable<A>::lookup_route(const IPNet<A> &net) const
+RibInTable<A>::lookup_route(const IPNet<A> &net) const
 {
     if (_peer_is_up == false)
 	return NULL;
@@ -236,8 +236,7 @@ BGPRibInTable<A>::lookup_route(const IPNet<A> &net) const
 
 template<class A>
 void
-BGPRibInTable<A>::route_used(const SubnetRoute<A>* used_route,
-			     bool in_use)
+RibInTable<A>::route_used(const SubnetRoute<A>* used_route, bool in_use)
 {
     // we look this up rather than modify used_route itself because
     // it's possible that used_route originates the other side of a
@@ -253,15 +252,15 @@ BGPRibInTable<A>::route_used(const SubnetRoute<A>* used_route,
 
 template<class A>
 string
-BGPRibInTable<A>::str() const
+RibInTable<A>::str() const
 {
-    string s = "BGPRibInTable<A>" + tablename();
+    string s = "RibInTable<A>" + tablename();
     return s;
 }
 
 template<class A>
 bool
-BGPRibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
+RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 {
     BgpTrie<A>::iterator route_iterator;
     debug_msg("dump_next_route\n");
@@ -315,7 +314,7 @@ BGPRibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 
 template<class A>
 void
-BGPRibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
+RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
     debug_msg("igp_nexthop_changed for bgp_nexthop %s on table %s\n",
 	   bgp_nexthop.str().c_str(), _tablename.c_str());
@@ -369,13 +368,13 @@ BGPRibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 	    new_oneoff_after_ms(0 /*call back immediately, but after
 				    network events or expired timers */,
 				callback(this,
-					 &BGPRibInTable<A>::push_next_changed_nexthop));
+					 &RibInTable<A>::push_next_changed_nexthop));
     }
 }
 
 template<class A>
 void
-BGPRibInTable<A>::push_next_changed_nexthop()
+RibInTable<A>::push_next_changed_nexthop()
 {
     const ChainedSubnetRoute<A>* chained_rt, *first_rt;
     first_rt = chained_rt = _current_chain->second;
@@ -408,13 +407,13 @@ BGPRibInTable<A>::push_next_changed_nexthop()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &BGPRibInTable<A>::push_next_changed_nexthop));
+				     &RibInTable<A>::push_next_changed_nexthop));
 }
 
 
 template<class A>
 void
-BGPRibInTable<A>::deletion_nexthop_check(const SubnetRoute<A>* route)
+RibInTable<A>::deletion_nexthop_check(const SubnetRoute<A>* route)
 {
     // checks to make sure that the deletion doesn't make
     // _next_route_to_push invalid
@@ -432,7 +431,7 @@ BGPRibInTable<A>::deletion_nexthop_check(const SubnetRoute<A>* route)
 
 template<class A>
 void
-BGPRibInTable<A>::next_chain()
+RibInTable<A>::next_chain()
 {
     _current_chain++;
     if (_current_chain != _route_table->pathmap().end()
@@ -473,8 +472,8 @@ BGPRibInTable<A>::next_chain()
     _current_chain = pmi;
 }
 
-template class BGPRibInTable<IPv4>;
-template class BGPRibInTable<IPv6>;
+template class RibInTable<IPv4>;
+template class RibInTable<IPv6>;
 
 
 

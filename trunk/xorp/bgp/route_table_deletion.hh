@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.2 2002/12/14 05:31:55 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -24,14 +24,14 @@
 class EventLoop;
 
 template<class A>
-class BGPDeletionTable : public BGPRouteTable<A>  {
+class DeletionTable : public BGPRouteTable<A>  {
 public:
-    BGPDeletionTable(string tablename,
-		     BgpTrie<A>* route_table,
-		     const PeerHandler *peer,
-		     uint32_t genid,
-		     BGPRouteTable<A> *parent);
-    ~BGPDeletionTable();
+    DeletionTable(string tablename,
+		  BgpTrie<A>* route_table,
+		  const PeerHandler *peer,
+		  uint32_t genid,
+		  BGPRouteTable<A> *parent);
+    ~DeletionTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dummy_next_hop_resolver.hh,v 1.4 2002/12/09 18:28:41 hodson Exp $
+// $XORP: xorp/bgp/dummy_next_hop_resolver.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_DUMMY_NEXT_HOP_RESOLVER_HH__
 #define __BGP_DUMMY_NEXT_HOP_RESOLVER_HH__
@@ -42,7 +42,7 @@ public:
     void set_nexthop_metric(const A nexthop, uint32_t metric);
     void unset_nexthop_metric(const A nexthop);
 private:
-    BGPDecisionTable<A> *_decision;
+    DecisionTable<A> *_decision;
     map <A, uint32_t> _metrics;
 };
 

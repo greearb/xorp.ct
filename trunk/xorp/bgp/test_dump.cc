@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.2 2002/12/14 23:15:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.3 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -37,7 +37,7 @@ int main(int, char** argv) {
     xlog_add_default_output();
     xlog_start();
     struct passwd *pwd = getpwuid(getuid());
-    string filename = "/tmp/test_nhlookup.";
+    string filename = "/tmp/test_dump.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
     EventLoop* eventloop = bgpmain.get_eventloop();
@@ -72,34 +72,34 @@ int main(int, char** argv) {
 
     DummyNextHopResolver<IPv4> next_hop_resolver;
 
-    BGPDecisionTable<IPv4> *decision_table
-	= new BGPDecisionTable<IPv4>("DECISION", next_hop_resolver);
+    DecisionTable<IPv4> *decision_table
+	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);
 
-    BGPRibInTable<IPv4>* ribin_table1
-	= new BGPRibInTable<IPv4>("RIB-IN1", &handler1);
+    RibInTable<IPv4>* ribin_table1
+	= new RibInTable<IPv4>("RIB-IN1", &handler1);
 
     //In principle the cache shouldn't be needed, but ribin can't be
     //directly dollowed by decision because the dump_table calls
     //set_parent on the next table, and decision table doesn't support
     //set_parent because it is the only table with multiple parents.
-    BGPCacheTable<IPv4>* cache_table1
-	= new BGPCacheTable<IPv4>("Cache1", ribin_table1);
+    CacheTable<IPv4>* cache_table1
+	= new CacheTable<IPv4>("Cache1", ribin_table1);
     ribin_table1->set_next_table(cache_table1);
     cache_table1->set_next_table(decision_table);
 
-    BGPRibInTable<IPv4>* ribin_table2
-	= new BGPRibInTable<IPv4>("RIB-IN2", &handler2);
+    RibInTable<IPv4>* ribin_table2
+	= new RibInTable<IPv4>("RIB-IN2", &handler2);
 
-    BGPCacheTable<IPv4>* cache_table2
-	= new BGPCacheTable<IPv4>("Cache2", ribin_table2);
+    CacheTable<IPv4>* cache_table2
+	= new CacheTable<IPv4>("Cache2", ribin_table2);
     ribin_table2->set_next_table(cache_table2);
     cache_table2->set_next_table(decision_table);
 
-    BGPRibInTable<IPv4>* ribin_table3
-	= new BGPRibInTable<IPv4>("RIB-IN3", &handler3);
+    RibInTable<IPv4>* ribin_table3
+	= new RibInTable<IPv4>("RIB-IN3", &handler3);
 
-    BGPCacheTable<IPv4>* cache_table3
-	= new BGPCacheTable<IPv4>("Cache3", ribin_table3);
+    CacheTable<IPv4>* cache_table3
+	= new CacheTable<IPv4>("Cache3", ribin_table3);
     ribin_table3->set_next_table(cache_table3);
     cache_table3->set_next_table(decision_table);
 
@@ -107,20 +107,20 @@ int main(int, char** argv) {
     decision_table->add_parent(cache_table2, &handler2);
     decision_table->add_parent(cache_table3, &handler3);
 
-    BGPFanoutTable<IPv4> *fanout_table
-	= new BGPFanoutTable<IPv4>("FANOUT", decision_table);
+    FanoutTable<IPv4> *fanout_table
+	= new FanoutTable<IPv4>("FANOUT", decision_table);
     decision_table->set_next_table(fanout_table);
 
-    BGPDebugTable<IPv4>* debug_table1
-	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);
+    DebugTable<IPv4>* debug_table1
+	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table1, &handler1);
 
-    BGPDebugTable<IPv4>* debug_table2
-	 = new BGPDebugTable<IPv4>("D2", (BGPRouteTable<IPv4>*)fanout_table);
+    DebugTable<IPv4>* debug_table2
+	 = new DebugTable<IPv4>("D2", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table2, &handler2);
 
-    BGPDebugTable<IPv4>* debug_table3
-	 = new BGPDebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
+    DebugTable<IPv4>* debug_table3
+	 = new DebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table3, &handler3);
 
     debug_table1->set_output_file(filename);

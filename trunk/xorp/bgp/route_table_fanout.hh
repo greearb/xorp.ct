@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.25 2002/12/09 18:28:47 hodson Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -22,12 +22,12 @@
 #include "peer_route_pair.hh"
 #include "route_queue.hh"
 
-template<class A> class BGPDumpTable;
+template<class A> class DumpTable;
 
 template<class A>
-class BGPFanoutTable : public BGPRouteTable<A>  {
+class FanoutTable : public BGPRouteTable<A>  {
 public:
-    BGPFanoutTable(string tablename, BGPRouteTable<A> *parent);
+    FanoutTable(string tablename, BGPRouteTable<A> *parent);
     int add_next_table(BGPRouteTable<A> *next_table,
 		       const PeerHandler *ph);
     int remove_next_table(BGPRouteTable<A> *next_table);
@@ -74,12 +74,12 @@ private:
     void set_queue_positions(const list<PeerRoutePair<A>*>& queued_peers);
     void skip_entire_queue(BGPRouteTable<A> *next_table);
 
-    void add_dump_table(BGPDumpTable<A> *dump_table); 
-    void remove_dump_table(BGPDumpTable<A> *dump_table);
+    void add_dump_table(DumpTable<A> *dump_table); 
+    void remove_dump_table(DumpTable<A> *dump_table);
     map<BGPRouteTable<A> *, PeerRoutePair<A> > _next_tables;
 
     list <const RouteQueueEntry<A>*> _output_queue;
-    set <BGPDumpTable<A>*> _dump_tables;
+    set <DumpTable<A>*> _dump_tables;
 };
 
 #endif // __BGP_ROUTE_TABLE_FANOUT_HH__

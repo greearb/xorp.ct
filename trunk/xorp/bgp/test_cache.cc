@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.3 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -36,7 +36,7 @@ int main(int, char** argv) {
     xlog_add_default_output();
     xlog_start();
     struct passwd *pwd = getpwuid(getuid());
-    string filename = "/tmp/test_nhlookup.";
+    string filename = "/tmp/test_cache.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
     // EventLoop* eventloop = bgpmain.get_eventloop();
@@ -47,10 +47,10 @@ int main(int, char** argv) {
     PeerHandler handler2("test2", &peer2, NULL);
 
     // trivial plumbing
-    BGPCacheTable<IPv4> *cache_table
-	= new BGPCacheTable<IPv4>("CACHE", NULL);
-    BGPDebugTable<IPv4>* debug_table
-	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)cache_table);
+    CacheTable<IPv4> *cache_table
+	= new CacheTable<IPv4>("CACHE", NULL);
+    DebugTable<IPv4>* debug_table
+	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)cache_table);
     cache_table->set_next_table(debug_table);
     assert(cache_table->route_count() == 0);
 

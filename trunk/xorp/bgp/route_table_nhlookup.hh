@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.2 2002/12/16 03:08:21 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -54,11 +54,11 @@ private:
 };
 
 template<class A>
-class BGPNhLookupTable : public BGPRouteTable<A>  {
+class NhLookupTable : public BGPRouteTable<A>  {
 public:
-    BGPNhLookupTable(string tablename, 
-		     NextHopResolver<A> *nexthop_resolver,
-		     BGPRouteTable<A> *parent);
+    NhLookupTable(string tablename, 
+		  NextHopResolver<A> *nexthop_resolver,
+		  BGPRouteTable<A> *parent);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

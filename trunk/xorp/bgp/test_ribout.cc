@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.3 2002/12/14 23:32:44 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.4 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -38,7 +38,7 @@ int main(int, char** argv) {
     xlog_add_default_output();
     xlog_start();
     struct passwd *pwd = getpwuid(getuid());
-    string filename = "/tmp/test_nhlookup.";
+    string filename = "/tmp/test_ribout.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.get_eventloop();
@@ -51,10 +51,10 @@ int main(int, char** argv) {
     DebugPeerHandler handler(&peer1);
 
     //trivial plumbing
-    BGPDebugTable<IPv4>* debug_table
-	 = new BGPDebugTable<IPv4>("D1", NULL);
-    BGPRibOutTable<IPv4> *ribout_table
-	= new BGPRibOutTable<IPv4>("RibOut", debug_table, &handler);
+    DebugTable<IPv4>* debug_table
+	 = new DebugTable<IPv4>("D1", NULL);
+    RibOutTable<IPv4> *ribout_table
+	= new RibOutTable<IPv4>("RibOut", debug_table, &handler);
 
     debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);

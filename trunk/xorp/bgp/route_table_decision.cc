@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.2 2002/12/16 03:08:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.3 2002/12/16 21:48:33 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -26,19 +26,19 @@
 #endif
 
 template<class A>
-BGPDecisionTable<A>::BGPDecisionTable(string table_name, 
-				      NextHopResolver<A>& next_hop_resolver) 
-    : BGPRouteTable<A>("BGPDecisionTable" + table_name),
-      _next_hop_resolver(next_hop_resolver)
+DecisionTable<A>::DecisionTable(string table_name, 
+				NextHopResolver<A>& next_hop_resolver) 
+    : BGPRouteTable<A>("DecisionTable" + table_name),
+    _next_hop_resolver(next_hop_resolver)
 {
     cp(1);
 }
 
 template<class A>
 int
-BGPDecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
-				PeerHandler *peer_handler) {
-    debug_msg("BGPDecisionTable<A>::add_parent: %x\n", (u_int)new_parent);
+DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
+			     PeerHandler *peer_handler) {
+    debug_msg("DecisionTable<A>::add_parent: %x\n", (u_int)new_parent);
     if (_parents.find(new_parent)!=_parents.end()) {
 	//the parent is already in the set
 	cp(2);
@@ -51,8 +51,8 @@ BGPDecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
 
 template<class A>
 int
-BGPDecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
-    debug_msg("BGPDecisionTable<A>::remove_parent: %x\n", (u_int)ex_parent);
+DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
+    debug_msg("DecisionTable<A>::remove_parent: %x\n", (u_int)ex_parent);
     _parents.erase(_parents.find(ex_parent));
     cp(4);
     return 0;
@@ -118,7 +118,7 @@ BGPDecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
 
 template<class A>
 int
-BGPDecisionTable<A>::add_route(const InternalMessage<A> &rtmsg, 
+DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller) {
     if (_parents.find(caller)==_parents.end())
 	abort();
@@ -184,9 +184,9 @@ BGPDecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-				   const InternalMessage<A> &new_rtmsg, 
-				   BGPRouteTable<A> *caller) {
+DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
+				const InternalMessage<A> &new_rtmsg, 
+				BGPRouteTable<A> *caller) {
     assert(_parents.find(caller)!=_parents.end());
     assert(old_rtmsg.net()==new_rtmsg.net());
 
@@ -212,7 +212,7 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//we're replacing the previous winner
 	assert(old_winner == NULL);
 	if (route_is_better(old_rtmsg.route(), old_rtmsg.origin_peer(),
-			       new_rtmsg.route(), new_rtmsg.origin_peer())) {
+			    new_rtmsg.route(), new_rtmsg.origin_peer())) {
 	    cp(13);
 	    // The route is better, so no need to look for
 	    // any alternative route.
@@ -325,8 +325,8 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPDecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-				  BGPRouteTable<A> *caller) {
+DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
+			       BGPRouteTable<A> *caller) {
 
     debug_msg("delete route: %s\n",
 	      rtmsg.route()->str().c_str());
@@ -402,10 +402,10 @@ BGPDecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDecisionTable<A>::push(BGPRouteTable<A> *caller) {
+DecisionTable<A>::push(BGPRouteTable<A> *caller) {
     if (_parents.find(caller)==_parents.end())
 	abort();
-	cp(34);
+    cp(34);
     if (_next_table != NULL)
 	return _next_table->push((BGPRouteTable<A>*)this);
     return 0;
@@ -421,10 +421,10 @@ BGPDecisionTable<A>::push(BGPRouteTable<A> *caller) {
 
 template<class A>
 const SubnetRoute<A>*
-BGPDecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
-				  const IPNet<A> &net,
-				  const PeerHandler*& best_routes_peer,
-				  BGPRouteTable<A>*& best_routes_parent) const
+DecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
+			       const IPNet<A> &net,
+			       const PeerHandler*& best_routes_peer,
+			       BGPRouteTable<A>*& best_routes_parent) const
 {
     const SubnetRoute<A>* best_route, *found_route;
     best_routes_peer = NULL;
@@ -477,9 +477,9 @@ BGPDecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 			}
 		    }
 		}
-	    //if the route has the winner bit set, we don't need to go further
-	    if (best_route->is_winner())
-		cp(45);
+		//if the route has the winner bit set, we don't need to go further
+		if (best_route->is_winner())
+		    cp(45);
 		return best_route;
 	    }
 	}
@@ -490,7 +490,7 @@ BGPDecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 
 template<class A>
 const SubnetRoute<A>*
-BGPDecisionTable<A>::lookup_route(const IPNet<A> &net) const
+DecisionTable<A>::lookup_route(const IPNet<A> &net) const
 {
     const SubnetRoute<A>* winner;
     const PeerHandler* winners_peer;
@@ -501,12 +501,12 @@ BGPDecisionTable<A>::lookup_route(const IPNet<A> &net) const
 
 template<class A>
 bool
-BGPDecisionTable<A>::find_previous_winner(BGPRouteTable<A> *caller,
-					  const IPNet<A>& net,
-					  const SubnetRoute<A>*& winner,
-					  const PeerHandler*& winners_peer,
-					  BGPRouteTable<A>*& winners_parent
-					  ) const {
+DecisionTable<A>::find_previous_winner(BGPRouteTable<A> *caller,
+				       const IPNet<A>& net,
+				       const SubnetRoute<A>*& winner,
+				       const PeerHandler*& winners_peer,
+				       BGPRouteTable<A>*& winners_parent
+				       ) const {
     map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
     winner = NULL;
     winners_peer = NULL;
@@ -546,8 +546,8 @@ BGPDecisionTable<A>::find_previous_winner(BGPRouteTable<A> *caller,
 
 template<class A>
 uint32_t
-BGPDecisionTable<A>::local_pref(const SubnetRoute<A> *route,
-				const PeerHandler *peer) const
+DecisionTable<A>::local_pref(const SubnetRoute<A> *route,
+			     const PeerHandler *peer) const
 {
     /*
      * Local Pref should be present on all routes.  If the route comes
@@ -575,7 +575,7 @@ BGPDecisionTable<A>::local_pref(const SubnetRoute<A> *route,
 
 template<class A>
 uint32_t
-BGPDecisionTable<A>::med(const SubnetRoute<A> *route) const
+DecisionTable<A>::med(const SubnetRoute<A> *route) const
 {
     const PathAttributeList<A> *attrlist = route->attributes();
     list<const PathAttribute*> l = attrlist->att_list();
@@ -599,7 +599,7 @@ BGPDecisionTable<A>::med(const SubnetRoute<A> *route) const
 */
 template<class A>
 bool
-BGPDecisionTable<A>::resolvable(const A nexthop) const
+DecisionTable<A>::resolvable(const A nexthop) const
 {
     bool resolvable;
     uint32_t metric;
@@ -616,7 +616,7 @@ BGPDecisionTable<A>::resolvable(const A nexthop) const
 */
 template<class A>
 uint32_t
-BGPDecisionTable<A>::igp_distance(const A nexthop) const
+DecisionTable<A>::igp_distance(const A nexthop) const
 {
     bool resolvable;
     uint32_t metric;
@@ -626,7 +626,7 @@ BGPDecisionTable<A>::igp_distance(const A nexthop) const
 
     if (resolvable)
 	debug_msg("Decision: IGP distance for %s is %d", nexthop.str().c_str(),
-	       metric);
+		  metric);
     else
 	debug_msg("Decision: IGP distance for %s is unknown", nexthop.str().c_str());
 
@@ -642,10 +642,10 @@ BGPDecisionTable<A>::igp_distance(const A nexthop) const
 */
 template<class A>
 bool 
-BGPDecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
-				     const PeerHandler *our_peer,
-				     const SubnetRoute<A> *test_route,
-				     const PeerHandler *test_peer) const
+DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
+				  const PeerHandler *our_peer,
+				  const SubnetRoute<A> *test_route,
+				  const PeerHandler *test_peer) const
 {
     debug_msg("in route_is_better\n");
 
@@ -751,12 +751,12 @@ BGPDecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     //input sanity checks haven't done their job.
     if (!test_peer->ibgp() && (test_asnum != test_peer->AS_number()))
 	XLOG_FATAL("AS Path %s received from EBGP peer with AS %s\n",
-		     test_route->attributes()->aspath().str().c_str(),
-		     test_peer->AS_number().str().c_str());
+		   test_route->attributes()->aspath().str().c_str(),
+		   test_peer->AS_number().str().c_str());
     if (!our_peer->ibgp() && (our_asnum != our_peer->AS_number()))
 	XLOG_FATAL("AS Path %s received from EBGP peer with AS %s\n",
-		     our_route->attributes()->aspath().str().c_str(),
-		     our_peer->AS_number().str().c_str());
+		   our_route->attributes()->aspath().str().c_str(),
+		   our_peer->AS_number().str().c_str());
 
     if(test_asnum == our_asnum) {
 	int test_med = med(test_route);
@@ -852,7 +852,7 @@ BGPDecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
 
 template<class A>
 bool
-BGPDecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
+DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     const PeerHandler* peer = dump_iter.current_peer();
     map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
     for (i = _parents.begin(); i != _parents.end(); i++) {
@@ -868,7 +868,7 @@ BGPDecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
 
 template<class A>
 int
-BGPDecisionTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
+DecisionTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
 			     BGPRouteTable<A> */*caller*/,
 			     const PeerHandler *peer) {
     XLOG_ASSERT(_next_table != NULL);
@@ -877,7 +877,7 @@ BGPDecisionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 void
-BGPDecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
+DecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
     map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
     for (i = _parents.begin(); i != _parents.end(); i++) {
@@ -887,8 +887,8 @@ BGPDecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 
 template<class A>
 void
-BGPDecisionTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				       BGPRouteTable<A> *caller) {
+DecisionTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
+				    BGPRouteTable<A> *caller) {
     XLOG_ASSERT(_next_table != NULL);
     map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
     i = _parents.find(caller);
@@ -900,9 +900,9 @@ BGPDecisionTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPDecisionTable<A>::peering_down_complete(const PeerHandler *peer, 
-					   uint32_t genid,
-					   BGPRouteTable<A> *caller) {
+DecisionTable<A>::peering_down_complete(const PeerHandler *peer, 
+					uint32_t genid,
+					BGPRouteTable<A> *caller) {
     XLOG_ASSERT(_next_table != NULL);
     map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
     i = _parents.find(caller);
@@ -914,13 +914,13 @@ BGPDecisionTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template<class A>
 string
-BGPDecisionTable<A>::str() const {
-    string s = "BGPDecisionTable<A>" + tablename();
+DecisionTable<A>::str() const {
+    string s = "DecisionTable<A>" + tablename();
     return s;
 }
 
-template class BGPDecisionTable<IPv4>;
-template class BGPDecisionTable<IPv6>;
+template class DecisionTable<IPv4>;
+template class DecisionTable<IPv6>;
 
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,9 +22,9 @@
 #include "route_table_debug.hh"
 
 template<class A>
-BGPDebugTable<A>::BGPDebugTable(string table_name,  
-				BGPRouteTable<A> *parent_table) 
-    : BGPRouteTable<A>("BGPDebugTable-" + table_name)
+DebugTable<A>::DebugTable(string table_name,  
+			  BGPRouteTable<A> *parent_table) 
+    : BGPRouteTable<A>("DebugTable-" + table_name)
 {
     _parent = parent_table;
     _print_tablename = false;
@@ -32,15 +32,15 @@ BGPDebugTable<A>::BGPDebugTable(string table_name,
 }
 
 template<class A>
-BGPDebugTable<A>::~BGPDebugTable() {
+DebugTable<A>::~DebugTable() {
     if (_ofile != NULL)
 	fclose(_ofile);
 }
 
 template<class A>
 int
-BGPDebugTable<A>::add_route(const InternalMessage<A> &rtmsg, 
-			    BGPRouteTable<A> *caller) {
+DebugTable<A>::add_route(const InternalMessage<A> &rtmsg, 
+			 BGPRouteTable<A> *caller) {
     assert(caller == _parent);
     if (_print_tablename)
 	fprintf(_ofile, "[** TABLE %s **]\n", _tablename.c_str()); 
@@ -60,9 +60,9 @@ BGPDebugTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-				const InternalMessage<A> &new_rtmsg, 
-				BGPRouteTable<A> *caller) {
+DebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
+			     const InternalMessage<A> &new_rtmsg, 
+			     BGPRouteTable<A> *caller) {
     assert(caller == _parent);
     if (_print_tablename)
 	fprintf(_ofile, "[** TABLE %s **]\n", _tablename.c_str()); 
@@ -90,8 +90,8 @@ BGPDebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPDebugTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			       BGPRouteTable<A> *caller) {
+DebugTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
+			    BGPRouteTable<A> *caller) {
     assert(caller == _parent);
     if (_print_tablename)
 	fprintf(_ofile, "[** TABLE %s **]\n", _tablename.c_str()); 
@@ -111,7 +111,7 @@ BGPDebugTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDebugTable<A>::push(BGPRouteTable<A> *caller) {
+DebugTable<A>::push(BGPRouteTable<A> *caller) {
     assert(caller == _parent);
     if (_print_tablename)
 	fprintf(_ofile, "[** TABLE %s **]\n", _tablename.c_str()); 
@@ -121,9 +121,9 @@ BGPDebugTable<A>::push(BGPRouteTable<A> *caller) {
 
 template<class A>
 int
-BGPDebugTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
-			     BGPRouteTable<A> *caller,
-			     const PeerHandler */*peer*/) {
+DebugTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
+			  BGPRouteTable<A> *caller,
+			  const PeerHandler */*peer*/) {
     assert(caller == _parent);
     if (_print_tablename)
 	fprintf(_ofile, "[** TABLE %s **]\n", _tablename.c_str()); 
@@ -138,27 +138,27 @@ BGPDebugTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-BGPDebugTable<A>::lookup_route(const IPNet<A> &net) const {
+DebugTable<A>::lookup_route(const IPNet<A> &net) const {
     return _parent->lookup_route(net);
 }
 
 template<class A>
 void
-BGPDebugTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
+DebugTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
     _parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
-BGPDebugTable<A>::str() const {
-    string s = "BGPDebugTable<A>" + tablename();
+DebugTable<A>::str() const {
+    string s = "DebugTable<A>" + tablename();
     return s;
 }
 
 /* mechanisms to implement flow control in the output plumbing */
 template<class A>
 void 
-BGPDebugTable<A>::output_state(bool busy, BGPRouteTable<A> */*next_table*/) {
+DebugTable<A>::output_state(bool busy, BGPRouteTable<A> */*next_table*/) {
     if (busy)
 	fprintf(_ofile, "[OUTPUT_STATE: BUSY]\n");
     else
@@ -167,7 +167,7 @@ BGPDebugTable<A>::output_state(bool busy, BGPRouteTable<A> */*next_table*/) {
 
 template<class A>
 bool 
-BGPDebugTable<A>::get_next_message(BGPRouteTable<A> */*next_table*/) {
+DebugTable<A>::get_next_message(BGPRouteTable<A> */*next_table*/) {
     fprintf(_ofile, "[GET_NEXT_MESSAGE]: ");
     if (_msgs > 0) {
 	fprintf(_ofile, " RETURNING TRUE\n");
@@ -181,8 +181,8 @@ BGPDebugTable<A>::get_next_message(BGPRouteTable<A> */*next_table*/) {
 
 template<class A>
 void
-BGPDebugTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				    BGPRouteTable<A> *caller) {
+DebugTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
+				 BGPRouteTable<A> *caller) {
     XLOG_ASSERT(_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
@@ -190,9 +190,9 @@ BGPDebugTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPDebugTable<A>::peering_down_complete(const PeerHandler *peer, 
-					uint32_t genid,
-					BGPRouteTable<A> *caller) {
+DebugTable<A>::peering_down_complete(const PeerHandler *peer, 
+				     uint32_t genid,
+				     BGPRouteTable<A> *caller) {
     XLOG_ASSERT(_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
@@ -202,11 +202,11 @@ BGPDebugTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template<class A>
 bool
-BGPDebugTable<A>::set_output_file(const string& filename) {
+DebugTable<A>::set_output_file(const string& filename) {
     _ofile = fopen(filename.c_str(), "w");
     if (_ofile == NULL) {
 	XLOG_FATAL("Failed to open %s for writing %s", filename.c_str(),
-		     strerror(errno));
+		   strerror(errno));
 	return false;
     }
     return true;
@@ -214,22 +214,22 @@ BGPDebugTable<A>::set_output_file(const string& filename) {
 
 template<class A>
 void
-BGPDebugTable<A>::set_output_file(FILE *file) {
+DebugTable<A>::set_output_file(FILE *file) {
     _ofile = file;
 }
 
 template<class A>
 void
-BGPDebugTable<A>::write_separator() const {
+DebugTable<A>::write_separator() const {
     fprintf(_ofile, "[separator]-------------------------------------\n");
     fflush(_ofile);
 }
 
 template<class A>
 void
-BGPDebugTable<A>::write_comment(const string& s) const {
+DebugTable<A>::write_comment(const string& s) const {
     fprintf(_ofile, "[comment] %s\n", s.c_str());
     fflush(_ofile);
 }
 
-template class BGPDebugTable<IPv4>;
+template class DebugTable<IPv4>;

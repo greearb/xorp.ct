@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.2 2002/12/14 21:25:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.3 2002/12/16 04:05:14 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -37,7 +37,7 @@ int main(int, char** argv) {
     xlog_add_default_output();
     xlog_start();
     struct passwd *pwd = getpwuid(getuid());
-    string filename = "/tmp/test_nhlookup.";
+    string filename = "/tmp/test_fanout.";
     filename += pwd->pw_name;
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.get_eventloop();
@@ -47,15 +47,15 @@ int main(int, char** argv) {
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
 
-    BGPFanoutTable<IPv4> *fanout_table
-	= new BGPFanoutTable<IPv4>("FANOUT", NULL);
+    FanoutTable<IPv4> *fanout_table
+	= new FanoutTable<IPv4>("FANOUT", NULL);
 
-    BGPDebugTable<IPv4>* debug_table1
-	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);
+    DebugTable<IPv4>* debug_table1
+	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table1, &handler1);
 
-    BGPDebugTable<IPv4>* debug_table2
-	 = new BGPDebugTable<IPv4>("D2", (BGPRouteTable<IPv4>*)fanout_table);
+    DebugTable<IPv4>* debug_table2
+	 = new DebugTable<IPv4>("D2", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table2, &handler2);
 
     debug_table1->set_output_file(filename);
@@ -332,8 +332,8 @@ int main(int, char** argv) {
     BGPPeer peer3(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL);
 
-    BGPDebugTable<IPv4>* debug_table3
-	 = new BGPDebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
+    DebugTable<IPv4>* debug_table3
+	 = new DebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table3, &handler3);
 
     debug_table3->set_output_file(debug_table1->output_file());

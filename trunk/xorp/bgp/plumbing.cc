@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.2 2002/12/15 04:09:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.3 2002/12/16 03:08:20 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -170,11 +170,11 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
      */
 
     _decision_table = 
-	new BGPDecisionTable<A>(ribname + "DecisionTable", _next_hop_resolver);
+	new DecisionTable<A>(ribname + "DecisionTable", _next_hop_resolver);
     _next_hop_resolver.add_decision(_decision_table);
 
     _fanout_table = 
-	new BGPFanoutTable<A>(ribname + "FanoutTable", 
+	new FanoutTable<A>(ribname + "FanoutTable", 
 			      _decision_table);
     _decision_table->set_next_table(_fanout_table);
 
@@ -183,17 +183,17 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
      */
     
     _ipc_rib_in_table =
-	new BGPRibInTable<A>(_ribname + "IpcRibInTable",
+	new RibInTable<A>(_ribname + "IpcRibInTable",
 			     _master.rib_handler());
     _in_map[_master.rib_handler()] = _ipc_rib_in_table;
 
-    BGPFilterTable<A>* filter_in =
-	new BGPFilterTable<A>(_ribname + "IpcChannelInputFilter",
+    FilterTable<A>* filter_in =
+	new FilterTable<A>(_ribname + "IpcChannelInputFilter",
 			      _ipc_rib_in_table, _next_hop_resolver);
     _ipc_rib_in_table->set_next_table(filter_in);
     
-    BGPCacheTable<A>* cache_in = 
-	new BGPCacheTable<A>(_ribname + "IpcChannelInputCache",
+    CacheTable<A>* cache_in = 
+	new CacheTable<A>(_ribname + "IpcChannelInputCache",
 			     filter_in);
     filter_in->set_next_table(cache_in);
 
@@ -207,20 +207,20 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
      * Plumb the output branch
      */
 
-    BGPFilterTable<A> *filter_out =
-	new BGPFilterTable<A>(ribname + "IpcChannelOutputFilter",
+    FilterTable<A> *filter_out =
+	new FilterTable<A>(ribname + "IpcChannelOutputFilter",
 			     _fanout_table, _next_hop_resolver);
     _fanout_table->add_next_table(filter_out,NULL);
     _tables.insert(filter_out);
 
-    BGPCacheTable<A> *cache_out =
-	new BGPCacheTable<A>(ribname + "IpcChannelOutputCache",
+    CacheTable<A> *cache_out =
+	new CacheTable<A>(ribname + "IpcChannelOutputCache",
 			     filter_out);
     filter_out->set_next_table(cache_out);
     _tables.insert(cache_out);
 
     _ipc_rib_out_table =
-	new BGPRibOutTable<A>(ribname + "IpcRibOutTable",
+	new RibOutTable<A>(ribname + "IpcRibOutTable",
 			      cache_out, _master.rib_handler());
     _out_map[_master.rib_handler()] = _ipc_rib_out_table;
     cache_out->set_next_table(_ipc_rib_out_table);
@@ -268,22 +268,21 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
      * Plumb the input branch
      */
     
-    BGPRibInTable<A>* rib_in =
-	new BGPRibInTable<A>(_ribname + "RibIn" + peername, peer_handler);
+    RibInTable<A>* rib_in =
+	new RibInTable<A>(_ribname + "RibIn" + peername, peer_handler);
     _in_map[peer_handler] = rib_in;
 
-    BGPFilterTable<A>* filter_in =
-	new BGPFilterTable<A>(_ribname + "PeerInputFilter" + peername,
+    FilterTable<A>* filter_in =
+	new FilterTable<A>(_ribname + "PeerInputFilter" + peername,
 			      rib_in, _next_hop_resolver);
     rib_in->set_next_table(filter_in);
     
-    BGPCacheTable<A>* cache_in = 
-	new BGPCacheTable<A>(_ribname + "PeerInputCache" + peername,
-			     filter_in);
+    CacheTable<A>* cache_in = 
+	new CacheTable<A>(_ribname + "PeerInputCache" + peername, filter_in);
     filter_in->set_next_table(cache_in);
 
-    BGPNhLookupTable<A> *nexthop_in =
-	new BGPNhLookupTable<A>(_ribname + "NhLookup" + peername,
+    NhLookupTable<A> *nexthop_in =
+	new NhLookupTable<A>(_ribname + "NhLookup" + peername,
 				&_next_hop_resolver,
 				cache_in);
     cache_in->set_next_table(nexthop_in);
@@ -299,18 +298,17 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
      * Plumb the output branch
      */
     
-    BGPFilterTable<A>* filter_out =
-	new BGPFilterTable<A>(_ribname + "PeerOutputFilter" + peername,
+    FilterTable<A>* filter_out =
+	new FilterTable<A>(_ribname + "PeerOutputFilter" + peername,
 			      _fanout_table, _next_hop_resolver);
     _fanout_table->add_next_table(filter_out, peer_handler);
     
-    BGPCacheTable<A>* cache_out = 
-	new BGPCacheTable<A>(_ribname + "PeerOutputCache" + peername,
-			     filter_out);
+    CacheTable<A>* cache_out = 
+	new CacheTable<A>(_ribname + "PeerOutputCache" + peername, filter_out);
     filter_out->set_next_table(cache_out);
 
-    BGPRibOutTable<A>* rib_out =
-	new BGPRibOutTable<A>(_ribname + "RibOut" + peername,
+    RibOutTable<A>* rib_out =
+	new RibOutTable<A>(_ribname + "RibOut" + peername,
 			      cache_out, peer_handler);
     cache_out->set_next_table(rib_out);
     _out_map[peer_handler] = rib_out;
@@ -386,7 +384,7 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
        find the relevant output from the fanout table.  On the way,
        flush any caches we find. */
     BGPRouteTable<A> *rt, *prevrt; 
-    map <PeerHandler*, BGPRibOutTable<A>*>::iterator iter;
+    map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<A>::stop_peering: peer %#x not found",
@@ -397,7 +395,7 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
 	debug_msg("rt=%x (%s), _fanout_table=%x\n", 
 	       (u_int)rt, rt->tablename().c_str(), (u_int)_fanout_table);
 	if (rt->type() == CACHE_TABLE)
-	    ((BGPCacheTable<A>*)rt)->flush_cache();
+	    ((CacheTable<A>*)rt)->flush_cache();
 	prevrt = rt;
 	rt = rt->parent();
 	if (rt == NULL) {
@@ -416,13 +414,13 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
 template <class A>
 int 
 BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler) {
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
 		   peer_handler);
 
-    BGPRibInTable<A> *rib_in;
+    RibInTable<A> *rib_in;
     rib_in = iter->second;
     //peering went down will be propagated downstream by the RIB-In.
     rib_in->peering_went_down();
@@ -443,7 +441,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
 
     //plumb the output branch back into the fanout table
     BGPRouteTable<A> *rt, *prevrt;
-    map <PeerHandler*, BGPRibOutTable<A>*>::iterator iter;
+    map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_came_up: peer %#x not found",
@@ -458,19 +456,19 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
     }
 
     printf("type = %d\n", prevrt->type());
-    BGPFilterTable<A> *filter_out = dynamic_cast<BGPFilterTable<A> *>(prevrt);
+    FilterTable<A> *filter_out = dynamic_cast<FilterTable<A> *>(prevrt);
     assert(filter_out != NULL);
 
     _fanout_table->add_next_table(filter_out, peer_handler);
     filter_out->set_parent(_fanout_table);
 
     //bring the RibIn back up
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter2;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter2;
     iter2 = _in_map.find(peer_handler);
     if (iter2 == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
 		   peer_handler);
-    BGPRibInTable<A> *rib_in;
+    RibInTable<A> *rib_in;
     rib_in = iter2->second;
     rib_in->peering_came_up();
 
@@ -513,7 +511,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
      * Step 3 - remove the relevant parent link from the decision table
      */
 
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter2;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter2;
     iter2 = _in_map.find(peer_handler);
     child = iter2->second;
     rt = child;
@@ -533,7 +531,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
 	rt = child;
     }
 
-    map <PeerHandler*, BGPRibOutTable<A>*>::iterator iter;
+    map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end())
 	XLOG_FATAL("BGPPlumbingAF<A>::drop_peering: peer %#x not found",
@@ -544,7 +542,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
     while(rt != NULL) {
 	parent = rt->parent();
 	if (rt->type() == CACHE_TABLE)
-	    ((BGPCacheTable<A>*)rt)->flush_cache();
+	    ((CacheTable<A>*)rt)->flush_cache();
 	_tables.erase(rt);
 	delete rt;
 	rt = parent;
@@ -558,8 +556,8 @@ int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) {
     int result = 0;
-    BGPRibInTable<A> *rib_in;
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter;
+    RibInTable<A> *rib_in;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: add_route called for a PeerHandler that \
@@ -585,8 +583,8 @@ int
 BGPPlumbingAF<A>::delete_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) {
     int result = 0;
-    BGPRibInTable<A> *rib_in;
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter;
+    RibInTable<A> *rib_in;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: delete_route called for a \
@@ -612,8 +610,8 @@ int
 BGPPlumbingAF<A>::delete_route(const IPNet<A>& net,
 			       PeerHandler* peer_handler) {
     int result = 0;
-    BGPRibInTable<A> *rib_in;
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter;
+    RibInTable<A> *rib_in;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: delete_route called for a \
@@ -640,8 +638,8 @@ BGPPlumbingAF<A>::push(PeerHandler* peer_handler) {
 	XLOG_WARNING("push when none needed");
 	return;
     }
-    BGPRibInTable<A> *rib_in;
-    map <PeerHandler*, BGPRibInTable<A>* >::iterator iter;
+    RibInTable<A> *rib_in;
+    map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: Push called for a PeerHandler \
@@ -655,8 +653,8 @@ that has no associated RibIn");
 template <class A>
 void
 BGPPlumbingAF<A>::output_no_longer_busy(PeerHandler *peer_handler) {
-    BGPRibOutTable<A> *rib_out;
-    map <PeerHandler*, BGPRibOutTable<A>* >::iterator iter;
+    RibOutTable<A> *rib_out;
+    map <PeerHandler*, RibOutTable<A>* >::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end())
 	XLOG_FATAL("BGPPlumbingAF: output_no_longer_busy called for a \

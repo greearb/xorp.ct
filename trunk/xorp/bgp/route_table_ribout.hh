@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.30 2002/12/09 18:28:49 hodson Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -23,11 +23,11 @@
 #include "route_queue.hh"
 
 template<class A>
-class BGPRibOutTable : public BGPRouteTable<A>  {
+class RibOutTable : public BGPRouteTable<A>  {
 public:
-    BGPRibOutTable(string tablename, BGPRouteTable<A> *parent,
-		   PeerHandler *peer);
-    ~BGPRibOutTable();
+    RibOutTable(string tablename, BGPRouteTable<A> *parent,
+		PeerHandler *peer);
+    ~RibOutTable();
     void print_queue(const list<const RouteQueueEntry<A> *>& queue) const;
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);

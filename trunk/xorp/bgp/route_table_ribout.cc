@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.2 2002/12/14 23:15:32 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,10 +28,10 @@ template<> const char* TypeName<IPv4>::get() { return "IPv4"; }
 template<> const char* TypeName<IPv6>::get() { return "IPv6"; }
 
 template<class A>
-BGPRibOutTable<A>::BGPRibOutTable(string table_name,
-				  BGPRouteTable<A> *init_parent,
-				  PeerHandler *peer)
-    : BGPRouteTable<A>("BGPRibOutTable-" + table_name)
+RibOutTable<A>::RibOutTable(string table_name,
+			    BGPRouteTable<A> *init_parent,
+			    PeerHandler *peer)
+    : BGPRouteTable<A>("RibOutTable-" + table_name)
 {
     _parent = init_parent;
     _peer = peer;
@@ -48,7 +48,7 @@ filterbank\n");
 }
 
 template<class A>
-BGPRibOutTable<A>::~BGPRibOutTable() 
+RibOutTable<A>::~RibOutTable() 
 {
     print_queue(_queue);
     list<const RouteQueueEntry<A>*>::iterator i;
@@ -61,7 +61,7 @@ BGPRibOutTable<A>::~BGPRibOutTable()
 
 template<class A>
 void
-BGPRibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) 
+RibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) 
     const 
 {
 #ifdef DEBUG_LOGGING
@@ -87,7 +87,7 @@ BGPRibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue)
 	    break;
 	}
 	debug_msg("  Entry: %s (%s)\n", (*i)->net().str().c_str(),
-	    s.c_str());
+		  s.c_str());
 	++i;
     }
 #else
@@ -97,11 +97,11 @@ BGPRibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue)
 
 template<class A>
 int
-BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			    BGPRouteTable<A> *caller) 
+RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			  BGPRouteTable<A> *caller) 
 {
-    debug_msg("BGPRibOutTable<%s>::add_route %x for %s ", TypeName<A>::get(),
-	   (u_int)(&rtmsg), rtmsg.net().str().c_str());
+    debug_msg("RibOutTable<%s>::add_route %x for %s ", TypeName<A>::get(),
+	      (u_int)(&rtmsg), rtmsg.net().str().c_str());
     debug_msg("on %s\n", _tablename.c_str());
     print_queue(_queue);
     if (caller != _parent) abort();
@@ -113,7 +113,7 @@ BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     for (i = _queue.begin(); i != _queue.end(); i++) {
 	if ( (*i)->net() == rtmsg.net()) {
 	    debug_msg("old entry %s matches new entry %s\n",
-		   (*i)->net().str().c_str(), rtmsg.net().str().c_str());
+		      (*i)->net().str().c_str(), rtmsg.net().str().c_str());
 	    queued_entry = *i;
 	    break;
 	}
@@ -164,12 +164,12 @@ BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPRibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				 const InternalMessage<A> &new_rtmsg,
-				 BGPRouteTable<A> *caller) 
+RibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+			      const InternalMessage<A> &new_rtmsg,
+			      BGPRouteTable<A> *caller) 
 {
-    debug_msg("BGPRibOutTable<%s>::replace_route %x %x\n", TypeName<A>::get(),
-	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
+    debug_msg("RibOutTable<%s>::replace_route %x %x\n", TypeName<A>::get(),
+	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
     assert(old_rtmsg.push() == false);
 
     delete_route(old_rtmsg, caller);
@@ -178,12 +178,12 @@ BGPRibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPRibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-			       BGPRouteTable<A> *caller) 
+RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			     BGPRouteTable<A> *caller) 
 {
     debug_msg("%s\n", _tablename.c_str());
-    debug_msg("BGPRibOutTable<%s>::delete_route %x\n", TypeName<A>::get(),
-	   (u_int)(rtmsg.route()));
+    debug_msg("RibOutTable<%s>::delete_route %x\n", TypeName<A>::get(),
+	      (u_int)(rtmsg.route()));
     debug_msg("Attribute: %x\n", (u_int)(rtmsg.route()->attributes()));
     print_queue(_queue);
     if (caller != _parent) abort();
@@ -242,10 +242,10 @@ BGPRibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPRibOutTable<A>::push(BGPRouteTable<A> *caller) 
+RibOutTable<A>::push(BGPRouteTable<A> *caller) 
 {
     debug_msg("%s\n", _tablename.c_str());
-    debug_msg("BGPRibOutTable<%s>::push\n", TypeName<A>::get());
+    debug_msg("RibOutTable<%s>::push\n", TypeName<A>::get());
     if (caller != _parent) abort();
     // In push, we need to collect together all the SubnetRoutes that
     // have the same Path Attributes, and send them together in an
@@ -298,7 +298,7 @@ BGPRibOutTable<A>::push(BGPRouteTable<A> *caller)
 	    }
 	}
 	debug_msg("%d elements with attr %x moved to tmp queue\n", ctr,
-	       (u_int)attributes);
+		  (u_int)attributes);
 	print_queue(tmp_queue);
 
 	// at this point we pass the tmp_queue to the output BGP
@@ -367,7 +367,7 @@ BGPRibOutTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 void
-BGPRibOutTable<A>::output_no_longer_busy() 
+RibOutTable<A>::output_no_longer_busy() 
 {
     debug_msg("RibOut: output_no_longer_busy\n");
     if (_peer_busy == false) return;
@@ -403,15 +403,15 @@ BGPRibOutTable<A>::output_no_longer_busy()
 
 template<class A>
 const SubnetRoute<A>*
-BGPRibOutTable<A>::lookup_route(const IPNet<A> &net) const 
+RibOutTable<A>::lookup_route(const IPNet<A> &net) const 
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
 void
-BGPRibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				     BGPRouteTable<A> *caller) 
+RibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
+				  BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
     UNUSED(genid);
@@ -420,9 +420,9 @@ BGPRibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPRibOutTable<A>::peering_down_complete(const PeerHandler *peer,
-					 uint32_t genid,
-					 BGPRouteTable<A> *caller) 
+RibOutTable<A>::peering_down_complete(const PeerHandler *peer,
+				      uint32_t genid,
+				      BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
     UNUSED(genid);
@@ -431,14 +431,14 @@ BGPRibOutTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template<class A>
 string
-BGPRibOutTable<A>::str() const 
+RibOutTable<A>::str() const 
 {
-    string s = "BGPRibOutTable<A>" + tablename();
+    string s = "RibOutTable<A>" + tablename();
     return s;
 }
 
-template class BGPRibOutTable<IPv4>;
-template class BGPRibOutTable<IPv6>;
+template class RibOutTable<IPv4>;
+template class RibOutTable<IPv6>;
 
 
 

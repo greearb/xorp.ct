@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.2 2002/12/14 05:31:55 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,12 +23,12 @@
 #include "route_table_deletion.hh"
 
 template<class A>
-BGPDeletionTable<A>::BGPDeletionTable(string table_name,
-				      BgpTrie<A>* route_table,
-				      const PeerHandler *peer,
-				      uint32_t genid,
-				      BGPRouteTable<A> *parent_table)
-    : BGPRouteTable<A>("BGPDeletionTable-" + table_name)
+DeletionTable<A>::DeletionTable(string table_name,
+				BgpTrie<A>* route_table,
+				const PeerHandler *peer,
+				uint32_t genid,
+				BGPRouteTable<A> *parent_table)
+    : BGPRouteTable<A>("DeletionTable-" + table_name)
 {
     _parent = parent_table;
     _genid = genid;
@@ -38,18 +38,18 @@ BGPDeletionTable<A>::BGPDeletionTable(string table_name,
 }
 
 template<class A>
-BGPDeletionTable<A>::~BGPDeletionTable()
+DeletionTable<A>::~DeletionTable()
 {
     delete _route_table;
 }
 
 template<class A>
 int
-BGPDeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			       BGPRouteTable<A> *caller)
+DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			    BGPRouteTable<A> *caller)
 {
-    debug_msg("BGPDeletionTable<A>::add_route %x on %s\n",
-	   (u_int)(&rtmsg), tablename().c_str());
+    debug_msg("DeletionTable<A>::add_route %x on %s\n",
+	      (u_int)(&rtmsg), tablename().c_str());
     assert(caller == _parent);
     assert(_next_table != NULL);
 
@@ -90,12 +90,12 @@ BGPDeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				   const InternalMessage<A> &new_rtmsg,
-				   BGPRouteTable<A> *caller)
+DeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+				const InternalMessage<A> &new_rtmsg,
+				BGPRouteTable<A> *caller)
 {
-    debug_msg("BGPDeletionTable<A>::replace_route %x -> %x on %s\n",
-	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
+    debug_msg("DeletionTable<A>::replace_route %x -> %x on %s\n",
+	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
     assert(caller == _parent);
     assert(_next_table != NULL);
     assert(old_rtmsg.net() == new_rtmsg.net());
@@ -109,9 +109,9 @@ BGPDeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPDeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
-				BGPRouteTable<A> *caller,
-				const PeerHandler *dump_peer)
+DeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+			     BGPRouteTable<A> *caller,
+			     const PeerHandler *dump_peer)
 {
     assert(caller == _parent);
     assert(_next_table != NULL);
@@ -128,11 +128,11 @@ BGPDeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-				  BGPRouteTable<A> *caller)
+DeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			       BGPRouteTable<A> *caller)
 {
-    debug_msg("BGPDeletionTable<A>::delete_route %x on %s\n",
-	   (u_int)(&rtmsg), tablename().c_str());
+    debug_msg("DeletionTable<A>::delete_route %x on %s\n",
+	      (u_int)(&rtmsg), tablename().c_str());
     assert(caller == _parent);
     assert(_next_table != NULL);
     // we should never see a delete for a net that's in the deletion cache
@@ -144,7 +144,7 @@ BGPDeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDeletionTable<A>::push(BGPRouteTable<A> *caller)
+DeletionTable<A>::push(BGPRouteTable<A> *caller)
 {
     assert(caller == _parent);
     return _next_table->push((BGPRouteTable<A>*)this);
@@ -152,7 +152,7 @@ BGPDeletionTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-BGPDeletionTable<A>::lookup_route(const IPNet<A> &net) const
+DeletionTable<A>::lookup_route(const IPNet<A> &net) const
 {
     // Even though the peering has gone down, we still need to answer
     // lookup requests.  This is because we need to be internally
@@ -167,22 +167,22 @@ BGPDeletionTable<A>::lookup_route(const IPNet<A> &net) const
 
 template<class A>
 void
-BGPDeletionTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
+DeletionTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
     _parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
-BGPDeletionTable<A>::str() const
+DeletionTable<A>::str() const
 {
-    string s = "BGPDeletionTable<A>" + tablename();
+    string s = "DeletionTable<A>" + tablename();
     return s;
 }
 
 template<class A>
 void
-BGPDeletionTable<A>::initiate_background_deletion()
+DeletionTable<A>::initiate_background_deletion()
 {
     assert(_next_table != NULL);
     _del_sweep = _route_table->pathmap().begin();
@@ -197,12 +197,12 @@ BGPDeletionTable<A>::initiate_background_deletion()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &BGPDeletionTable<A>::delete_next_chain));
+				     &DeletionTable<A>::delete_next_chain));
 }
 
 template<class A>
 void
-BGPDeletionTable<A>::delete_next_chain()
+DeletionTable<A>::delete_next_chain()
 {
     debug_msg("deleted %d routes in %d chains\n", _deleted, _chains);
     if (_del_sweep == _route_table->pathmap().end()) {
@@ -252,12 +252,12 @@ BGPDeletionTable<A>::delete_next_chain()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &BGPDeletionTable<A>::delete_next_chain));
+				     &DeletionTable<A>::delete_next_chain));
 }
 
 template<class A>
 void
-BGPDeletionTable<A>::unplumb_self()
+DeletionTable<A>::unplumb_self()
 {
     debug_msg("unplumbing self\n");
     assert(_next_table != NULL);
@@ -275,8 +275,8 @@ BGPDeletionTable<A>::unplumb_self()
     _parent = (BGPRouteTable<A>*)0xd0d0;
 }
 
-template class BGPDeletionTable<IPv4>;
-template class BGPDeletionTable<IPv6>;
+template class DeletionTable<IPv4>;
+template class DeletionTable<IPv6>;
 
 
 

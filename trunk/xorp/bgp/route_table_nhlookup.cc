@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.2 2002/12/14 21:50:43 mjh Exp $"
 
 #include "route_table_nhlookup.hh"
 
@@ -91,9 +91,9 @@ MessageQueueEntry<A>::str() const
 }
 
 template <class A>
-BGPNhLookupTable<A>::BGPNhLookupTable(string tablename,
-				      NextHopResolver<A>* next_hop_resolver,
-				      BGPRouteTable<A> *parent)
+NhLookupTable<A>::NhLookupTable(string tablename,
+				NextHopResolver<A>* next_hop_resolver,
+				BGPRouteTable<A> *parent)
     : BGPRouteTable<A>(tablename)
 {
     _parent = parent;
@@ -102,8 +102,8 @@ BGPNhLookupTable<A>::BGPNhLookupTable(string tablename,
 
 template <class A>
 int
-BGPNhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			       BGPRouteTable<A> *caller) 
+NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			    BGPRouteTable<A> *caller) 
 {
     assert(caller == _parent);
 
@@ -115,7 +115,7 @@ BGPNhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
     // we need to queue the add, pending nexthop resolution
     Trie<A, const MessageQueueEntry<A> >::iterator inserted;
     inserted = _queue_by_net.insert(rtmsg.net(),
-				     MessageQueueEntry<A>(&rtmsg, NULL));
+				    MessageQueueEntry<A>(&rtmsg, NULL));
     const MessageQueueEntry<A>* mqe = &(inserted.payload());
     _queue_by_nexthop.insert(make_pair(rtmsg.nexthop(), mqe));
 
@@ -126,9 +126,9 @@ BGPNhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template <class A>
 int
-BGPNhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				   const InternalMessage<A> &new_rtmsg,
-				   BGPRouteTable<A> *caller) 
+NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+				const InternalMessage<A> &new_rtmsg,
+				BGPRouteTable<A> *caller) 
 {
     assert(caller == _parent);
     debug_msg("NhLookupTable::replace_route\n");
@@ -148,7 +148,7 @@ BGPNhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     }
 
     _next_hop_resolver->deregister_nexthop(old_rtmsg.route()->nexthop(),
-					 old_rtmsg.net(), this);
+					   old_rtmsg.net(), this);
 
     bool new_msg_needs_queuing;
     if (_next_hop_resolver->register_nexthop(new_rtmsg.nexthop(),
@@ -199,13 +199,13 @@ BGPNhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	if (propagate_as_add) {
 	    inserted
 		= _queue_by_net.insert(net,
-					 MessageQueueEntry<A>(&new_rtmsg,
-							      NULL));
+				       MessageQueueEntry<A>(&new_rtmsg,
+							    NULL));
 	} else {
 	    inserted
 		= _queue_by_net.insert(net,
-					 MessageQueueEntry<A>(&new_rtmsg,
-							      real_old_msg));
+				       MessageQueueEntry<A>(&new_rtmsg,
+							    real_old_msg));
 	}
 	const MessageQueueEntry<A>* mqe = &(inserted.payload());
 	_queue_by_nexthop.insert(make_pair(new_rtmsg.nexthop(), mqe));
@@ -217,7 +217,7 @@ BGPNhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     } else {
 	bool success;
 	if (propagate_as_add) {
-	     success = _next_table->add_route(new_rtmsg, this);
+	    success = _next_table->add_route(new_rtmsg, this);
 	} else {
 	    success = _next_table->replace_route(*real_old_msg,
 						 new_rtmsg, this);
@@ -232,8 +232,8 @@ BGPNhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template <class A>
 int
-BGPNhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-				  BGPRouteTable<A> *caller) 
+NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			       BGPRouteTable<A> *caller) 
 {
     assert(caller == _parent);
     IPNet<A> net = rtmsg.net();
@@ -251,7 +251,7 @@ BGPNhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 
     _next_hop_resolver->deregister_nexthop(rtmsg.route()->nexthop(),
-					 rtmsg.net(), this);
+					   rtmsg.net(), this);
 
     const InternalMessage<A>* real_msg = &rtmsg;
     if (msg_is_queued == true) {
@@ -301,7 +301,7 @@ BGPNhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template <class A>
 int
-BGPNhLookupTable<A>::push(BGPRouteTable<A> *caller) 
+NhLookupTable<A>::push(BGPRouteTable<A> *caller) 
 {
     assert(caller == _parent);
 
@@ -312,7 +312,7 @@ BGPNhLookupTable<A>::push(BGPRouteTable<A> *caller)
 
 template <class A>
 const SubnetRoute<A> *
-BGPNhLookupTable<A>::lookup_route(const IPNet<A> &net) const 
+NhLookupTable<A>::lookup_route(const IPNet<A> &net) const 
 {
     // Are we still waiting for the old_rtmsg to resolve?
     const MessageQueueEntry<A>* mqe = NULL;
@@ -341,16 +341,16 @@ BGPNhLookupTable<A>::lookup_route(const IPNet<A> &net) const
 
 template <class A>
 void
-BGPNhLookupTable<A>::route_used(const SubnetRoute<A>* route, bool in_use) 
+NhLookupTable<A>::route_used(const SubnetRoute<A>* route, bool in_use) 
 {
     _parent->route_used(route, in_use);
 }
 
 template <class A>
 void
-BGPNhLookupTable<A>::RIB_lookup_done(const A& nexthop,
-				     const set <IPNet<A> >& nets,
-				     bool /*lookup_succeeded*/) 
+NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
+				  const set <IPNet<A> >& nets,
+				  bool /*lookup_succeeded*/) 
 {
     multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter, nh_iter2;
     nh_iter = _queue_by_nexthop.find(nexthop);
@@ -382,11 +382,11 @@ BGPNhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 
 template <class A>
 string
-BGPNhLookupTable<A>::str() const 
+NhLookupTable<A>::str() const 
 {
-    string s = "BGPNhLookupTable<A>" + tablename();
+    string s = "NhLookupTable<A>" + tablename();
     return s;
 }
 
-template class BGPNhLookupTable<IPv4>;
-template class BGPNhLookupTable<IPv6>;
+template class NhLookupTable<IPv4>;
+template class NhLookupTable<IPv6>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.2 2002/12/15 04:09:28 mjh Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -60,13 +60,13 @@ public:
 private:
     const A& get_local_nexthop(const PeerHandler *peer_handler) const;
 
-    map <PeerHandler*, BGPRibInTable<A>* > _in_map;
-    map <BGPRibOutTable<A>*,  PeerHandler*> _reverse_out_map;
-    map <PeerHandler*, BGPRibOutTable<A>*> _out_map;
-    BGPDecisionTable<A> *_decision_table;
-    BGPFanoutTable<A> *_fanout_table;
-    BGPRibInTable<A> *_ipc_rib_in_table;
-    BGPRibOutTable<A> *_ipc_rib_out_table;
+    map <PeerHandler*, RibInTable<A>* > _in_map;
+    map <RibOutTable<A>*,  PeerHandler*> _reverse_out_map;
+    map <PeerHandler*, RibOutTable<A>*> _out_map;
+    DecisionTable<A> *_decision_table;
+    FanoutTable<A> *_fanout_table;
+    RibInTable<A> *_ipc_rib_in_table;
+    RibOutTable<A> *_ipc_rib_out_table;
     /* _tables is all the tables not covered above*/
     set <BGPRouteTable<A>*> _tables;
 

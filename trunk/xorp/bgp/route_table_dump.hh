@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.11 2002/12/09 18:28:47 hodson Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -24,12 +24,12 @@
 class EventLoop;
 
 template<class A>
-class BGPDumpTable : public BGPRouteTable<A>  {
+class DumpTable : public BGPRouteTable<A>  {
 public:
-    BGPDumpTable(string tablename,
-		 const PeerHandler *peer,
-		 const list <const PeerHandler*>& peer_list,
-		 BGPRouteTable<A> *parent);
+    DumpTable(string tablename,
+	      const PeerHandler *peer,
+	      const list <const PeerHandler*>& peer_list,
+	      BGPRouteTable<A> *parent);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,
