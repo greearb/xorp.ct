@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.34 2004/09/17 14:14:24 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.35 2004/10/29 01:23:31 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -14,6 +14,12 @@ protocols {
 	    next-hop: ipv4;
 	    holdtime: u32 = 120;
 	    enabled: bool = true;
+	
+	    ipv4-unicast: bool = true;
+	    ipv4-multicast: bool = false;
+	    ipv6-unicast: bool = false;
+	    ipv6-multicast: bool = false;
+
 	    md5-password: txt = "";
 	}
 
@@ -119,19 +125,27 @@ protocols {
 	    }
 
 	    set-parameter {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)&toggle:bool=$(@)";
 	    }
 
-	    enable-ipv4-multicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast";
+	    ipv4-unicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Unicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Unicast&toggle:bool=$(DEFAULT)";
 	    }
 
-	    enable-ipv6-unicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast";
+	    ipv4-multicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast&toggle:bool=$(DEFAULT)";
 	    }
 
-	    enable-ipv6-multicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast";
+	    ipv6-unicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast&toggle:bool=$(DEFAULT)";
+	    }
+
+	    ipv6-multicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(DEFAULT)";
 	    }
 	}
 
@@ -231,13 +245,20 @@ protocols {
 	    set-parameter {
 	    }
 
-	    enable-ipv4-multicast {
+	    ipv4-unicast {
+		%help: short "IPv4 Unicast";
 	    }
 
-	    enable-ipv6-unicast {
+	    ipv4-multicast {
+		%help: short "IPv4 Multicast";
 	    }
 
-	    enable-ipv6-multicast {
+	    ipv6-unicast {
+		%help: short "IPv6 Unicast";
+	    }
+
+	    ipv6-multicast {
+		%help: short "IPv6 Multicast";
 	    }
 	}
         

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.44 2004/12/05 22:23:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.45 2004/12/05 23:32:17 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -936,7 +936,8 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
 }
 
 bool
-BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
+BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
+		       const bool toggle)
 {
     BGPPeer *peer;
     // BGPPeerData *peerdata;
@@ -946,6 +947,7 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
 	return false;
     }
 
+    ParameterNode node;
     if (strcmp(parameter.c_str(),"Refresh_Capability") == 0) {
 	/*
 	** This is a place holder and example as to how to set
@@ -957,33 +959,32 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
 // 		  iptuple.str().c_str());
 // 	peerdata = const_cast<BGPPeerData *const>(peer->peerdata());
 // 	peerdata->add_sent_parameter( new BGPRefreshCapability() );
+    } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv4.Unicast") == 0) {
+ 	debug_msg("IPv4 Unicast\n");
+	node = new BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST);
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv4.Multicast") == 0) {
- 	debug_msg("Setting Multiprotocol IPv4 Multicast for peer %s.",
-		  iptuple.str().c_str());
- 	BGPPeerData *peerdata =
-	    const_cast<BGPPeerData *const>(peer->peerdata());
- 	peerdata->add_sent_parameter(
-	     new BGPMultiProtocolCapability(AFI_IPV4, SAFI_MULTICAST));
+ 	debug_msg("IPv4 Multicast\n");
+	node = new BGPMultiProtocolCapability(AFI_IPV4, SAFI_MULTICAST);
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Unicast") == 0) {
- 	debug_msg("Setting Multiprotocol IPv6 Unicast for peer %s.",
-		  iptuple.str().c_str());
- 	BGPPeerData *peerdata =
-	    const_cast<BGPPeerData *const>(peer->peerdata());
- 	peerdata->add_sent_parameter(
-	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST));
+ 	debug_msg("IPv6 Unicast\n");
+	node = new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST);
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Multicast") == 0) {
- 	debug_msg("Setting Multiprotocol IPv6 Multicast for peer %s.",
-		  iptuple.str().c_str());
- 	BGPPeerData *peerdata =
-	    const_cast<BGPPeerData *const>(peer->peerdata());
- 	peerdata->add_sent_parameter(
-	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_MULTICAST));
+ 	debug_msg("IPv6 Multicast\n");
+	node = new BGPMultiProtocolCapability(AFI_IPV6, SAFI_MULTICAST);
     } else {
 	XLOG_WARNING("Unable to set unknown parameter: <%s>.",
 		     parameter.c_str());
 	return false;
     }
+    
+    debug_msg("Peer %s. %s\n", iptuple.str().c_str(),toggle ? "true" :"false");
 
+    BGPPeerData *peerdata = const_cast<BGPPeerData *const>(peer->peerdata());
+    if (toggle) {
+	peerdata->add_sent_parameter(node);
+    } else {
+	peerdata->remove_sent_parameter(node);
+    }
     return true;
 }
 

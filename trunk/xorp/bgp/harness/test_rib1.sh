@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.15 2004/08/14 05:37:48 mjh Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.16 2004/08/14 05:58:01 mjh Exp $
 #
 
 #
@@ -96,7 +96,7 @@ configure_bgp()
     PORT=$PORT1_IPV6;PEER_PORT=$PEER1_PORT_IPV6;PEER_AS=$PEER1_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
-    set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast
+    set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 
     # EBGP - IPV6
@@ -105,7 +105,7 @@ configure_bgp()
     PORT=$PORT2_IPV6;PEER_PORT=$PEER2_PORT_IPV6;PEER_AS=$PEER2_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
-    set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast
+    set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 }
 

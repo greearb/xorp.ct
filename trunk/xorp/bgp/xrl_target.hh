@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.25 2004/09/21 18:09:48 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.26 2004/12/05 22:23:53 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -336,7 +336,8 @@ public:
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
-        const string& parameter);
+        const string& parameter,
+	const bool&	toggle);
 
     XrlCmdError finder_event_observer_0_1_xrl_target_birth(
 	// Input values,

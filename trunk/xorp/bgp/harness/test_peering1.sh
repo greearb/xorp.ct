@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.27 2004/08/15 19:30:18 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.28 2004/12/05 02:44:48 atanu Exp $
 #
 
 #
@@ -95,14 +95,14 @@ configure_bgp()
     PEER=$PEER3
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
-    set_parameter $LOCALHOST $PORT3 $PEER $PEER3_PORT MultiProtocol.IPv6.Unicast
+    set_parameter $LOCALHOST $PORT3 $PEER $PEER3_PORT MultiProtocol.IPv6.Unicast true
     enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
 
     # IBGP - IPV6
     PEER=$PEER4
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT $PEER4_AS $NEXT_HOP $HOLDTIME
-    set_parameter $LOCALHOST $PORT4 $PEER $PEER4_PORT MultiProtocol.IPv6.Unicast
+    set_parameter $LOCALHOST $PORT4 $PEER $PEER4_PORT MultiProtocol.IPv6.Unicast true
     enable_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT
 }
 
@@ -921,7 +921,7 @@ test27_ipv6()
     echo "TEST27 (IPV6) - Verify that routes originated by BGP reach an IBGP peer"
 
     coord reset
-    coord target $HOST $PORT1
+    coord target $HOST $PORT3
     coord initialise attach peer1
 
     # Introduce a route
@@ -961,7 +961,7 @@ test28_ipv6()
     echo "TEST28 (IPV6) - Verify that routes originated by BGP reach an EBGP peer"
 
     coord reset
-    coord target $HOST $PORT2
+    coord target $HOST $PORT4
     coord initialise attach peer1
 
     # Introduce a route

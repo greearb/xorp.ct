@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.17 2004/11/05 02:16:22 bms Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.18 2004/11/05 03:39:40 bms Exp $ */
 
 
 interfaces {
@@ -137,10 +137,10 @@ protocols {
 	    /* enabled: true */
 
 	    /* Optionally enable other AFI/SAFI combinations */
-	    /* enable-ipv4-multicast */
+	    /* ipv4-multicast: true */
 
-	    /* enable-ipv6-unicast */
-	    /* enable-ipv6-multicast */
+	    /* ipv6-unicast: true */
+	    /* ipv6-multicast: true */
 	}
 
 	/* Originate IPv4 Routes */

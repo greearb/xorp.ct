@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.31 2004/12/05 22:23:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.32 2004/12/05 23:31:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -807,14 +807,17 @@ XrlCmdError XrlBgpTarget::bgp_0_2_set_parameter(
 				  const uint32_t&	local_port, 
 				  const string&	peer_ip, 
 				  const uint32_t&	peer_port, 
-				  const string& parameter)
+				  const string& parameter,
+				  const bool&	toggle)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d paremeter %s\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port, parameter.c_str());
+    debug_msg("local ip %s local port %d peer ip %s peer port %d"
+	      " parameter %s state %s\n",
+	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	      parameter.c_str(), toggle ? "set" : "unset");
 
     Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
-    if(!_bgp.set_parameter(iptuple,parameter))
+    if(!_bgp.set_parameter(iptuple,parameter, toggle))
 	return XrlCmdError::COMMAND_FAILED();
 
     return XrlCmdError::OKAY();

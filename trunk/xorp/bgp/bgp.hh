@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.35 2004/12/05 16:14:34 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.36 2004/12/05 22:23:53 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -324,12 +324,14 @@ public:
      * per peer.
      *
      * @param iptuple iptuple
-     * @param parameter we are setting for this peer.
+     * @param parameter
+     * @param toggle enable or disable parameter
      */
     bool set_parameter(
 				// Input values,
 		       const Iptuple& iptuple,
-		       const string& parameter);
+		       const string& parameter,
+		       const bool toggle);
 
     /**
      * Originally inserted for testing. However, now used by all the

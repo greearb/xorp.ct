@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.5 2004/04/15 16:13:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.6 2004/06/10 22:40:38 hodson Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -135,6 +135,9 @@ test2(TestInfo& info)
     */
     if(!pd.parameter_recv_list().empty()) {
 	DOUT(info) << "The receive list should be empty\n";
+	ParameterList pl = pd.parameter_recv_list();
+	for(ParameterList::iterator i = pl.begin(); i != pl.end(); i++)
+	    DOUT(info) << "Parameter = " << (*i)->str() << endl;
 	return false;
     }
 

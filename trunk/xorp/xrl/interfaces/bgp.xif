@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.19 2004/08/06 01:41:18 bms Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.20 2004/12/05 22:35:07 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -171,7 +171,8 @@ interface bgp/0.2 {
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32 \
-		& parameter:txt
+		& parameter:txt \
+		& toggle:bool
 
 	/**
 	 * Set next hop rewrite filter.

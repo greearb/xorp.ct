@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.14 2004/02/24 17:26:03 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.15 2004/06/10 22:40:31 hodson Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -123,7 +123,8 @@ public:
     static BGPParameter *create(const uint8_t* d, uint16_t max_len,
                 size_t& actual_length) throw(CorruptMessage);
 
-    BGPParameter() : _data(0), _length(0), _type(PARAMINVALID)	{}
+    BGPParameter(bool send = true)
+	: _data(0), _length(0), _type(PARAMINVALID), _send(send) {}
     BGPParameter(uint8_t l, const uint8_t* d);
     BGPParameter(const BGPParameter& param);
     virtual ~BGPParameter()			{ delete[] _data; }
@@ -161,6 +162,8 @@ public:
 	return _data;
     }
 
+    bool send() const { return _send; }
+
     //    BGPParameter* clone() const;
     virtual string str() const = 0;
 protected:
@@ -168,6 +171,7 @@ protected:
     uint8_t _length;
     ParamType _type;
 private:
+    bool _send;		// This parameter should be sent by open.
 };
 
 /* _Data Parameter here includes the first byte which is the type */
@@ -216,7 +220,7 @@ private:
 
 class BGPCapParameter: public BGPParameter {
 public:
-    BGPCapParameter();
+    BGPCapParameter(bool send = true);
     BGPCapParameter(uint8_t l, const uint8_t* d);
     BGPCapParameter(const BGPCapParameter& param);
     // ~BGPCapParameter();
@@ -268,7 +272,7 @@ private:
 
 class BGPMultiProtocolCapability : public BGPCapParameter {
 public:
-    BGPMultiProtocolCapability(Afi afi, Safi safi);
+    BGPMultiProtocolCapability(Afi afi, Safi safi, bool send = true);
     BGPMultiProtocolCapability(uint8_t l, const uint8_t* d);
     BGPMultiProtocolCapability(const BGPMultiProtocolCapability& cap);
     void decode();

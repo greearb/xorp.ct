@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.15 2004/04/15 16:13:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.16 2004/06/10 22:40:32 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,32 +28,27 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 			 const IPv4& next_hop, const uint16_t holdtime)
     : _iptuple(iptuple), _as(as)
 {
-    // For the time being always enable unicast IPv4
-    _ipv4_unicast[SENT] = true;
-    _ipv4_unicast[RECEIVED] = true;
-    _ipv4_unicast[NEGOTIATED] = true;
-
-    // These values need to be negotiated.
-    _ipv6_unicast[SENT] = _ipv4_multicast[SENT] 
-	= _ipv6_multicast[SENT] = false;
-
-    _ipv6_unicast[RECEIVED] = _ipv4_multicast[RECEIVED] 
-	= _ipv6_multicast[RECEIVED] = false;
-
-    _ipv6_unicast[NEGOTIATED] = _ipv4_multicast[NEGOTIATED] 
-	= _ipv6_multicast[NEGOTIATED] = false;
-
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
 
     set_retry_duration(2 * 60 * 1000);	// Connect retry time.
 
-    // we support routing of IPv4 unicast
-//     add_sent_parameter(
-// 	    new BGPMultiProtocolCapability(AFI_IPV4, SAFI_NLRI_UNICAST));
+    // we support routing of IPv4 unicast by default.
+    // Don't send this parameter in the open
+    add_sent_parameter(new
+		       BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST,
+						  false));
+
+    // The peer has no way of telling us that it doesn't want IPv4
+    // unicast. So we have to configure the received parameter ourselves.
+    add_recv_parameter(new BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST));
+
     // we support route refresh
     // add_sent_parameter( new BGPRefreshCapability() );
     // add_sent_parameter( new BGPMultiRouteCapability() );
+
+    // Call this here to initialize all the state.
+    open_negotiation();
 }
 
 BGPPeerData::~BGPPeerData()
@@ -117,28 +112,36 @@ void
 BGPPeerData::add_parameter(ParameterList& p_list, const ParameterNode& p)
 {
     debug_msg("add_parameter %s\n", p->str().c_str());
+
+    // Its possible that a parameter is added more than once, so
+    // remove any old instances.
+    remove_parameter(p_list, p);
+
     p_list.push_back(p);
 }
 
 void
 BGPPeerData::remove_parameter(ParameterList& p_list, const ParameterNode& p)
 {
+    debug_msg("remove_parameter %s\n", p->str().c_str());
+
     const BGPParameter *par = p.get();
     ParameterList::iterator iter;
     for(iter = p_list.begin(); iter != p_list.end(); iter++) {
 	const ParameterNode& pnode = *iter;
 	if (par->compare(*(pnode.get()))) {
+	    debug_msg("removing %s\n", pnode.get()->str().c_str());
 	    p_list.erase(iter);
 	    return;
 	}
     }
-    XLOG_FATAL("Could not find %s", p->str().c_str());
+//     XLOG_WARNING("Could not find %s", p->str().c_str());
 }
 
 void
 BGPPeerData::save_parameters(const ParameterList& plist)
 {
-#if	1
+#if	0
     copy(plist.begin(), plist.end(),
 	 inserter(_recv_parameters, _recv_parameters.begin()));
 #else
@@ -150,10 +153,21 @@ BGPPeerData::save_parameters(const ParameterList& plist)
 void
 BGPPeerData::open_negotiation()
 {
+    // Set everything to false and use the parameters to fill in the values.
+    _ipv4_unicast[SENT] = _ipv6_unicast[SENT]
+	= _ipv4_multicast[SENT] = _ipv6_multicast[SENT] = false;
+
+    _ipv4_unicast[RECEIVED] = _ipv6_unicast[RECEIVED]
+	= _ipv4_multicast[RECEIVED] = _ipv6_multicast[RECEIVED] = false;
+
+    _ipv4_unicast[NEGOTIATED] = _ipv6_unicast[NEGOTIATED]
+	= _ipv4_multicast[NEGOTIATED] = _ipv6_multicast[NEGOTIATED] = false;
+
     /*
     ** Compare the parameters that we have sent against the ones we
     ** have received and place the common ones in negotiated.
     */
+    _negotiated_parameters.clear();
     ParameterList::iterator iter_sent;
     ParameterList::iterator iter_recv;
     for(iter_sent = _sent_parameters.begin(); 
@@ -186,6 +200,7 @@ BGPPeerData::open_negotiation()
 	   dynamic_cast<const BGPMultiProtocolCapability *>(pn.get())) {
 	    Afi afi = multi->get_address_family();
 	    Safi safi = multi->get_subsequent_address_family_id();
+	    debug_msg("sent AFI = %d SAFI = %d\n", afi, safi);
 	    switch(afi) {
 	    case AFI_IPV4:
 		switch(safi) {
@@ -196,6 +211,7 @@ BGPPeerData::open_negotiation()
 		    _ipv4_multicast[SENT] = true;
 		    break;
 		}
+		break;
 	    case AFI_IPV6:
 		switch(safi) {
 		case SAFI_UNICAST:
@@ -205,6 +221,7 @@ BGPPeerData::open_negotiation()
 		    _ipv6_multicast[SENT] = true;
 		    break;
 		}
+		break;
 	    }
 	}
     }
@@ -217,6 +234,7 @@ BGPPeerData::open_negotiation()
 	   dynamic_cast<const BGPMultiProtocolCapability *>(pn.get())) {
 	    Afi afi = multi->get_address_family();
 	    Safi safi = multi->get_subsequent_address_family_id();
+	    debug_msg("recv AFI = %d SAFI = %d\n", afi, safi);
 	    switch(afi) {
 	    case AFI_IPV4:
 		switch(safi) {
@@ -227,6 +245,7 @@ BGPPeerData::open_negotiation()
 		    _ipv4_multicast[RECEIVED] = true;
 		    break;
 		}
+		break;
 	    case AFI_IPV6:
 		switch(safi) {
 		case SAFI_UNICAST:
@@ -236,6 +255,7 @@ BGPPeerData::open_negotiation()
 		    _ipv6_multicast[RECEIVED] = true;
 		    break;
 		}
+		break;
 	    }
 	}
     }
@@ -249,6 +269,7 @@ BGPPeerData::open_negotiation()
 	   dynamic_cast<const BGPMultiProtocolCapability *>(pn.get())) {
 	    Afi afi = multi->get_address_family();
 	    Safi safi = multi->get_subsequent_address_family_id();
+	    debug_msg("negotiated AFI = %d SAFI = %d\n", afi, safi);
 	    switch(afi) {
 	    case AFI_IPV4:
 		switch(safi) {
@@ -259,6 +280,7 @@ BGPPeerData::open_negotiation()
 		    _ipv4_multicast[NEGOTIATED] = true;
 		    break;
 		}
+		break;
 	    case AFI_IPV6:
 		switch(safi) {
 		case SAFI_UNICAST:
@@ -268,6 +290,7 @@ BGPPeerData::open_negotiation()
 		    _ipv6_multicast[NEGOTIATED] = true;
 		    break;
 		}
+		break;
 	    }
 	}
     }
