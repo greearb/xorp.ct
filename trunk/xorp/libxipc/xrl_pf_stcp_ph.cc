@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.4 2003/09/11 19:26:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.5 2004/06/10 22:41:12 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -102,6 +102,7 @@ stcp_packet_type_valid(uint8_t t)
 {
     switch (STCPPacketType(t)) {
     case STCP_PT_HELO:
+    case STCP_PT_HELO_ACK:
     case STCP_PT_REQUEST:
     case STCP_PT_RESPONSE:
 	return true;
@@ -180,4 +181,10 @@ uint32_t
 STCPPacketHeader::payload_bytes() const
 {
     return error_note_bytes() + xrl_data_bytes();
+}
+
+uint32_t
+STCPPacketHeader::frame_bytes() const
+{
+    return sizeof(STCPPacketHeader) + payload_bytes();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.22 2003/09/26 23:58:44 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.23 2004/06/10 22:41:11 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -75,7 +75,24 @@ public:
     XrlPFSender(EventLoop& e, const char* address);
     virtual ~XrlPFSender();
 
-    virtual void send(const Xrl& x, const SendCallback& cb) = 0;
+    /**
+     * Send an Xrl.
+     *
+     * This method attempts to perform the sender side processing of an XRL.
+     *
+     * If a direct_call the method will return true or false to indicate
+     * success to the caller.  If not a direct call, a failure will be
+     * communicated via a callback since there's no way to get the information
+     * directly back to the caller.
+     *
+     * @param xrl XRL to be sent.
+     * @param direct_call indication of whether the caller is on the stack.
+     * @param cb Callback to be invoked with result.
+     *
+     */
+    virtual bool send(const Xrl& 		xrl,
+		      bool 			direct_call,
+		      const SendCallback& 	cb) = 0;
     virtual bool sends_pending() const = 0;
     virtual const char* protocol() const = 0;
     virtual bool alive() const = 0;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.15 2003/09/26 21:34:35 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.16 2004/06/10 22:41:12 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_SUDP_HH__
 #define __LIBXIPC_XRL_PF_SUDP_HH__
@@ -56,7 +56,9 @@ public:
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSUDPSender();
 
-    void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
+    bool send(const Xrl& 			x,
+	      bool 				direct_call,
+	      const XrlPFSender::SendCallback& 	cb);
 
     bool sends_pending() const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.5 2003/09/11 19:26:27 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.6 2004/06/10 22:41:12 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__
@@ -30,8 +30,9 @@
 
 enum STCPPacketType {
     STCP_PT_HELO	= 0x00,
-    STCP_PT_REQUEST	= 0x01,
-    STCP_PT_RESPONSE	= 0x02
+    STCP_PT_HELO_ACK	= 0x01,
+    STCP_PT_REQUEST	= 0x02,
+    STCP_PT_RESPONSE	= 0x03
 };
 
 // STCP Packet Header.
@@ -65,6 +66,9 @@ struct STCPPacketHeader {
     uint32_t xrl_data_bytes() const;
 
     uint32_t payload_bytes() const;
+
+    // Sum of header, error note, and payload bytes.
+    uint32_t frame_bytes() const;
 
 private:
     uint8_t _fourcc[4];		  // fourcc 'S' 'T' 'C' 'P'

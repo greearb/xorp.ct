@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.18 2003/10/02 18:55:05 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.19 2004/06/10 22:41:12 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
 
 #include "xrl_pf.hh"
 #include "libxorp/asyncio.hh"
+#include "libxorp/buffered_asyncio.hh"
 
 class Xrl;
 
@@ -28,6 +29,7 @@ class Xrl;
 class STCPRequestHandler;
 class XrlPFSTCPSender;
 class STCPPacketHeader;
+class RequestState;
 
 /**
  * @short Listener for XRL's transported by TCP.
@@ -57,8 +59,6 @@ private:
     static const uint32_t _timeout_period;
 };
 
-class RequestState;
-
 /**
  * @short Sender of Xrls by TCP.
  */
@@ -68,7 +68,9 @@ public:
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSTCPSender();
 
-    void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
+    bool send(const Xrl& 			x,
+	      bool 				direct_call,
+	      const XrlPFSender::SendCallback& 	cb);
 
     bool sends_pending() const;
 
@@ -83,7 +85,6 @@ public:
     inline uint32_t keepalive_ms() const	{ return _keepalive_ms; }
 
 private:
-    void send_first_request();
     void die(const char* reason);
 
     void update_writer(AsyncFileWriter::Event	e,
@@ -93,23 +94,18 @@ private:
 
     RequestState* find_request(uint32_t seqno);
 
-    void prepare_for_reply_header();
+    void read_event(BufferedAsyncReader*	reader,
+		    BufferedAsyncReader::Event	ev,
+		    uint8_t*			buffer,
+		    size_t			buffer_bytes);
 
-    void recv_data(AsyncFileReader::Event	ev,
-		   const uint8_t*		buffer,
-		   size_t			buffer_bytes,
-		   size_t			offset);
+    void send_request(RequestState*);
+    void dispose_request();
 
-    void dispatch_reply();
-
-    inline void start_keepalives();
-    inline void stop_keepalives();
-    inline void postpone_keepalive();
-    inline bool send_keepalive();
-    void confirm_keepalive(AsyncFileOperator::Event	e,
-			   const uint8_t*		buffer,
-			   size_t			buffer_bytes,
-			   size_t			offset);
+    void start_keepalives();
+    void stop_keepalives();
+    void defer_keepalives();
+    bool send_keepalive();
 
 private:
     uint32_t 			 _uid;
@@ -118,24 +114,24 @@ private:
     // Transmission related
     AsyncFileWriter*		  _writer;
 
-    list<ref_ptr<RequestState> > _requests_pending;	// All requests pending
-    list<ref_ptr<RequestState> > _requests_sent;	// All requests sent
+    list<ref_ptr<RequestState> > _requests_waiting;	// All requests pending
+    list<ref_ptr<RequestState> > _requests_sent;	// All requests pending
 
-    vector<uint8_t>		 _request_packet;
     uint32_t			 _current_seqno;
+    size_t			 _active_bytes;
+    size_t			 _active_requests;
 
     // Tunable timer variables
     uint32_t			 _keepalive_ms;
 
     // Reception related
-    AsyncFileReader*	    	 _reader;
+    BufferedAsyncReader*	 _reader;
     vector<uint8_t>		 _reply;
     const STCPPacketHeader*	 _sph;
 
     // Keepalive related
     XorpTimer			 _keepalive_timer;
-    vector<uint8_t>		 _keepalive_packet;
-    bool			 _keepalive_in_progress;
+    bool			 _keepalive_sent;
 
     // General stuff
     static const char*		 _protocol;

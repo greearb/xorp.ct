@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.39 2004/06/10 22:41:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.40 2004/09/22 02:16:30 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -308,7 +308,8 @@ XrlRouter::send_callback(const XrlError& e,
 bool
 XrlRouter::send_resolved(const Xrl&		xrl,
 			 const FinderDBEntry*	dbe,
-			 const XrlCallback&	cb)
+			 const XrlCallback&	cb,
+			 bool  direct_call)
 {
     try {
 	Xrl x(dbe->values().front().c_str());
@@ -355,8 +356,8 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	x.args().swap(tmp.args());
 	if (s) {
 	    trace_xrl("Sending ", x);
-	    s->send(x, callback(this, &XrlRouter::send_callback, s, cb));
-	    return true;
+	    return s->send(x, direct_call,
+			   callback(this, &XrlRouter::send_callback, s, cb));
 	}
 	cb->dispatch(XrlError(SEND_FAILED, "sender not instantiated"), 0);
     } catch (const InvalidString&) {
@@ -376,7 +377,12 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     _dsl.erase(i);
 
     if (e == XrlError::OKAY()) {
-	send_resolved(ds->xrl(), dbe, ds->cb());
+	if (send_resolved(ds->xrl(), dbe, ds->cb(), false) == false) {
+	    // We tried to force sender to send xrl and it declined the
+	    // opportunity.  This should only happen when it's out of buffer
+	    // space
+	    ds->cb()->dispatch(XrlError::SEND_FAILED_TRANSIENT(), 0);
+	}
     } else {
 	ds->cb()->dispatch(e, 0);
     }
@@ -468,6 +474,14 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 	return false;
     }
 
+#if 0
+    // XXX This stops us getting stuck with everything queued up on
+    // finder client responses.  It's likely to be a cause of pain for
+    // existing code.
+    if (_fc->queries_pending() > 0)
+	return false;
+#endif
+
     //
     // Fast path - Xrl resolution in cache and no Xrls ahead blocked on
     // on response from Finder.  Fast path cannot be taken if earlier Xrls
@@ -478,7 +492,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     string xrl_no_args = xrl.string_no_args();
     const FinderDBEntry* fdbe = _fc->query_cache(xrl_no_args);
     if (_dsl.empty() && fdbe) {
-	return send_resolved(xrl, fdbe, xcb);
+	return send_resolved(xrl, fdbe, xcb, true);
     }
 
     //

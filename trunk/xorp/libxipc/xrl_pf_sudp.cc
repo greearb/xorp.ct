@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.32 2004/03/28 15:34:16 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.33 2004/06/10 22:41:12 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -266,8 +266,10 @@ XrlPFSUDPSender::~XrlPFSUDPSender()
     }
 }
 
-void
-XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
+bool
+XrlPFSUDPSender::send(const Xrl& 			x,
+		      bool 				direct_call,
+		      const XrlPFSender::SendCallback& 	cb)
 {
     // Map request id to current object instance
     Request request(this, cb);
@@ -277,8 +279,12 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 	requests_pending.insert(XuidRequestMap::value_type(request.xuid,
 							   request));
     if (p.second == false) {
-	cb->dispatch(XrlError(SEND_FAILED, "Insufficient memory"), 0);
-	return;
+	if (direct_call) {
+	    return false;
+	} else {
+	    cb->dispatch(XrlError(SEND_FAILED, "Insufficient memory"), 0);
+	    return true;
+	}
     }
 
     // Prepare data
@@ -289,14 +295,18 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     ssize_t msg_bytes = msg.size();
     if (msg_bytes > SUDP_SEND_BUFFER_BYTES) {
 	debug_msg("Message sent larger than transport method designed");
-    } else if (sendto(sender_fd,
-		      msg.data(), msg.size(), 0,
+    } else if (sendto(sender_fd, msg.data(), msg.size(), 0,
 		      (sockaddr*)&_destination, sizeof(_destination))
 	       != msg_bytes) {
 	debug_msg("Write failed: %s\n", strerror(errno));
 	requests_pending.erase(p.first);
-	cb->dispatch(XrlError::SEND_FAILED(), 0);
-	return;
+
+	if (direct_call) {
+	    return false;
+	} else {
+	    cb->dispatch(XrlError::SEND_FAILED(), 0);
+	    return true;
+	}
     }
 
     XuidRequestMap::iterator& xi = p.first;
@@ -306,6 +316,7 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 	    callback(this, &XrlPFSUDPSender::timeout_hook, request.xuid));
     debug_msg("XrlPFSUDPSender::send (qsize %u)\n",
 	      (uint32_t)requests_pending.size());
+    return true;
 }
 
 bool

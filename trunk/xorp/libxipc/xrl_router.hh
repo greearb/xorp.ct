@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.28 2004/05/28 05:00:35 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.29 2004/06/10 22:41:13 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -186,7 +186,8 @@ protected:
      */
     bool send_resolved(const Xrl&		xrl,
 		       const FinderDBEntry*	dbe,
-		       const XrlCallback&	dispatch_cb);
+		       const XrlCallback&	dispatch_cb,
+		       bool  direct_call);
 
     void initialize(const char* class_name,
 		    IPv4	finder_addr,

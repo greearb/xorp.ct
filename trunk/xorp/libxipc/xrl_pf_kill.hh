@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxipc/xrl_pf_kill.hh,v 1.2 2004/10/04 19:28:25 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_KILL_HH__
 #define __LIBXIPC_XRL_PF_KILL_HH__
@@ -26,7 +26,9 @@ public:
     XrlPFKillSender(EventLoop& e, const char* pid_str) throw (XrlPFConstructorError);
     virtual ~XrlPFKillSender();
 
-    void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
+    bool send(const Xrl& 			x,
+	      bool 				direct_call,
+	      const XrlPFSender::SendCallback& 	cb);
 
     bool sends_pending() const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxipc/xrl_pf_kill.cc,v 1.2 2004/10/04 19:28:25 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -78,20 +78,32 @@ XrlPFKillSender::~XrlPFKillSender()
 {
 }
 
-void
-XrlPFKillSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
+bool
+XrlPFKillSender::send(const Xrl&			x,
+		      bool				direct_call,
+		      const XrlPFSender::SendCallback&	cb)
 {
     try {
 	int32_t sig = x.args().get_int32("signal");
 	int err = ::kill(_pid, sig);
-	if (err < 0)
-	    cb->dispatch(XrlError(COMMAND_FAILED, strerror(errno)), 0);
-	cb->dispatch(XrlError(), 0);
-	return;
+	if (direct_call) {
+	    return false;
+	} else {
+	    if (err < 0)
+		cb->dispatch(XrlError(COMMAND_FAILED, strerror(errno)), 0);
+	    else
+		cb->dispatch(XrlError::OKAY(), 0);
+	    return true;
+	}
     } catch (XrlArgs::XrlAtomNotFound) {
     }
 
-    cb->dispatch(XrlError(SEND_FAILED, "Bad XRL format"), 0);
+    if (direct_call) {
+	return false;
+    } else {
+	cb->dispatch(XrlError(SEND_FAILED, "Bad XRL format"), 0);
+	return true;
+    }
 }
 
 bool

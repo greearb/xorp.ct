@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.18 2004/06/10 22:41:11 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.19 2004/09/07 20:45:10 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -131,29 +131,40 @@ XrlPFInProcSender::XrlPFInProcSender(EventLoop& e, const char* address)
 XrlPFInProcSender::~XrlPFInProcSender()
 {}
 
-void
-XrlPFInProcSender::send(const Xrl& x, const SendCallback& cb)
+bool
+XrlPFInProcSender::send(const Xrl&		x,
+			bool			direct_call,
+			const SendCallback&	cb)
 {
     XrlPFInProcListener *l = get_inproc_listener(_listener_no);
 
     if (l == NULL) {
 	debug_msg("XrlPFInProcSender::send() no listener (id %d)\n",
 		  _listener_no);
-	cb->dispatch(XrlError::SEND_FAILED(), 0);
-	return;
+	if (direct_call) {
+	    return false;
+	} else {
+	    cb->dispatch(XrlError::SEND_FAILED(), 0);
+	    return true;
+	}
     }
 
     const XrlDispatcher *d = l->dispatcher();
     if (d == NULL) {
 	debug_msg("XrlPFInProcSender::send() no dispatcher (id %d)\n",
 		  _listener_no);
-	cb->dispatch(XrlError::SEND_FAILED(), 0);
-	return;
+	if (direct_call) {
+	    return false;
+	} else {
+	    cb->dispatch(XrlError::SEND_FAILED(), 0);
+	    return true;
+	}
     }
 
     XrlArgs reply;
     const XrlError e = d->dispatch_xrl(x.command(), x.args(), reply);
     cb->dispatch(e, (e == XrlError::OKAY()) ? &reply : 0);
+    return true;
 }
 
 const char*

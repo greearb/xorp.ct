@@ -12,11 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.13 2003/09/17 03:27:21 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.14 2004/06/10 22:41:08 hodson Exp $"
 
-/*
-#define DEBUG_LOGGING
-*/
+// #define DEBUG_LOGGING
 
 #include "xrl_module.h"
 
@@ -67,7 +65,7 @@ test_hello(EventLoop& e, XrlPFSTCPSender &s)
     Xrl x("anywhere", "hello");
 
     debug_msg("test_hello\n");
-    s.send(x, callback(hello_reply_handler, x));
+    s.send(x, false, callback(hello_reply_handler, x));
     while (hello_done == false) {
 	e.run();
     }
@@ -113,7 +111,7 @@ test_int32(EventLoop& e, XrlPFSTCPSender& s)
     Xrl x("anywhere", "get_int32");
 
     debug_msg("test_int32\n");
-    s.send(x, callback(int32_reply_handler, x));
+    s.send(x, false, callback(int32_reply_handler, x));
 
     while (int32_done == 0) {
 	e.run();
@@ -156,7 +154,7 @@ test_xrlerror_note(EventLoop&e, XrlPFSTCPListener& l)
     XrlPFSTCPSender s(e, l.address());
 
     bool done = false;
-    s.send(x, callback(no_execute_reply_handler, &done));
+    s.send(x, false, callback(no_execute_reply_handler, &done));
 
     while (done == false) {
 	e.run();

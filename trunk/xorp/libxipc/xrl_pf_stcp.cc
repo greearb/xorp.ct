@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.33 2004/09/22 21:11:14 pavlin Exp $"
+//#define DEBUG_LOGGING
+
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.35 2004/09/24 04:52:21 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -28,6 +30,7 @@
 #include "libxorp/debug.h"
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
+#include "libxorp/buffered_asyncio.hh"
 
 #include "sockutil.hh"
 #include "header.hh"
@@ -41,7 +44,23 @@
 const char* XrlPFSTCPSender::_protocol   = "stcp";
 const char* XrlPFSTCPListener::_protocol = "stcp";
 
-static const uint32_t DEFAULT_SENDER_KEEPALIVE_MS = 10000;
+static const uint32_t 	DEFAULT_SENDER_KEEPALIVE_MS = 10000;
+
+// The maximum number of bytes worth of XRL buffered before send()
+// returns false.  Resource preservation.
+static const size_t 	MAX_ACTIVE_BYTES 	    = 100000;
+
+// The maximum number of XRLs buffered at the sender.
+static const size_t 	MAX_ACTIVE_REQUESTS  	    = 100;
+
+// The maximum number of XRLs the receiver will dispatch per read event, ie
+// per read() system call.
+static const uint32_t   MAX_XRLS_DISPATCHED	    = 2;
+
+// The maximum number of buffers the AsyncFileWriters should coalesce.
+static const uint32_t   MAX_WRITES		    = 16;
+
+#define xassert(x) // An expensive - assert(x)
 
 
 // ----------------------------------------------------------------------------
@@ -52,8 +71,11 @@ static const uint32_t DEFAULT_SENDER_KEEPALIVE_MS = 10000;
 class STCPRequestHandler {
 public:
     STCPRequestHandler(XrlPFSTCPListener& parent, int fd) :
-	_parent(parent), _fd(fd), _request(),
-	_reader(parent.eventloop(), fd), _writer(parent.eventloop(), fd)
+	_parent(parent), _fd(fd),
+	_reader(parent.eventloop(), fd, 4 * 65536,
+		callback(this, &STCPRequestHandler::read_event)),
+	_writer(parent.eventloop(), fd, MAX_WRITES),
+	_responses_size(0)
     {
 	EventLoop& e = _parent.eventloop();
 	_life_timer = e.new_oneoff_after_ms(QUIET_LIFE_MS,
@@ -61,7 +83,7 @@ public:
 						     &STCPRequestHandler::die,
 						     "life timer expired",
 						     true));
-	prepare_for_request();
+	_reader.start();
 	debug_msg("STCPRequestHandler (%p) fd = %d\n", this, fd);
     }
 
@@ -70,18 +92,19 @@ public:
 	_parent.remove_request_handler(this);
 	_reader.stop();
 	_writer.stop();
-	close(_fd);
 	debug_msg("~STCPRequestHandler (%p) fd = %d\n", this, _fd);
+	close(_fd);
+	_fd = -1;
     }
 
-    void dispatch_request(uint32_t seqno, const char* xrl_c_str);
-    void prepare_for_request();
-    void update_reader(AsyncFileReader::Event,
-		       const uint8_t*,
-		       size_t,
-		       size_t);
+    void dispatch_request(uint32_t seqno, const uint8_t* buffer, size_t bytes);
+    void ack_helo(uint32_t seqno);
 
-    void start_writer();
+    void read_event(BufferedAsyncReader* 	reader,
+		    BufferedAsyncReader::Event 	e,
+		    uint8_t* 			buffer,
+		    size_t 			buffer_bytes);
+
     void update_writer(AsyncFileWriter::Event,
 		       const uint8_t*,
 		       size_t,
@@ -97,21 +120,15 @@ private:
     XrlPFSTCPListener& _parent;
     int _fd;
 
-    // Inbound request buffer
-    vector<char> _request;
-    size_t _request_seqno;
-    size_t _request_payload_bytes;
-
     // Reader associated with buffer
-    AsyncFileReader _reader;
+    BufferedAsyncReader _reader;
 
     // Writer associated current response (head of responses).
     AsyncFileWriter _writer;
 
     typedef vector<uint8_t> ReplyPacket;
-    list<ReplyPacket> _responses; // head is currently being written
-
-    size_t _response_offset;	// byte position of response being written
+    list<ReplyPacket> 	_responses; 	// head is currently being written
+    uint32_t		_responses_size;
 
     // STCPRequestHandlers delete themselves if quiescent for timeout period
     XorpTimer _life_timer;
@@ -123,200 +140,177 @@ private:
 };
 
 void
-STCPRequestHandler::prepare_for_request()
+STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
+			       BufferedAsyncReader::Event 	ev,
+			       uint8_t*				buffer,
+			       size_t   			buffer_bytes)
 {
-    _request_payload_bytes = 0;
-    _request_seqno = 0;
-
-    if (_request.size() < sizeof(STCPPacketHeader)) {
-	_request.resize(sizeof(STCPPacketHeader));
-    }
-    _reader.add_buffer((uint8_t*)&_request[0], sizeof(STCPPacketHeader),
-		       callback(this, &STCPRequestHandler::update_reader));
-    _reader.start();
-}
-
-void
-STCPRequestHandler::parse_header(const uint8_t* buffer, size_t bytes_done)
-{
-    if (bytes_done < sizeof(STCPPacketHeader)) {
-	debug_msg("Incoming with small header %u < %u\n",
-		  (uint32_t)bytes_done, (uint32_t)sizeof(STCPPacketHeader));
-	return;
-    }
-    assert(bytes_done == sizeof(STCPPacketHeader));
-
-    const STCPPacketHeader* sph = reinterpret_cast<const STCPPacketHeader*>
-	(buffer);
-
-    if (!sph->is_valid()) {
-	die("bad header");
+    if (ev == BufferedAsyncReader::ERROR_CHECK_ERRNO) {
+	XLOG_ERROR("Read failed (errno = %d): %s\n", errno, strerror(errno));
+	die("read error");
 	return;
     }
 
-    if (sph->type() == STCP_PT_HELO) {
-	debug_msg("got keepalive\n");
-	prepare_for_request(); // no further processing required
-	return;
-    } else if (sph->type() != STCP_PT_REQUEST) {
-	die("Bad packet type");
-	return;
-    }
-
-    _request_seqno = sph->seqno();
-    _request_payload_bytes = sph->payload_bytes();
-
-    if (_request_payload_bytes >= _request.size()) {
-	_request.resize(_request_payload_bytes + 1);
-    }
-    _reader.add_buffer((uint8_t*)&_request[0],
-		       _request_payload_bytes,
-		       callback(this, &STCPRequestHandler::update_reader));
-    _reader.start();
-    return;
-}
-
-void
-STCPRequestHandler::parse_payload()
-{
-    assert(_request.size() >= _request_payload_bytes + 1);
-
-    // Prepare to cast request as a C string
-    _request[_request_payload_bytes] = 0;
-
-    // dispatch request and buffer result
-    dispatch_request(_request_seqno, (const char*)&_request[0]);
-
-    // get ready for next request
-    prepare_for_request();
-}
-
-void
-STCPRequestHandler::update_reader(AsyncFileReader::Event ev,
-				  const uint8_t*	 buffer,
-				  size_t 		 /* buffer_bytes */,
-				  size_t		 bytes_done)
-{
-    postpone_death();
-
-    if (ev == AsyncFileReader::FLUSHING)
-	return; // this code predate flushing event
-
-    if (ev == AsyncFileReader::ERROR_CHECK_ERRNO) {
-	debug_msg("Read failed (errno = %d): %s\n",
-		  errno, strerror(errno));
-	if (errno == EAGAIN) {
-	    _reader.resume(); // error cause reader to stop
-	} else {
-	    debug_msg("Death due to read error\n");
-	    die("read error");
-	}
-	return;
-    }
-
-    if (ev == AsyncFileReader::END_OF_FILE) {
+    if (ev == BufferedAsyncReader::END_OF_FILE) {
 	die("end of file", false);
 	return;
     }
 
-    assert(ev == AsyncFileReader::DATA);
-    debug_msg("update_reader: %u done, expecting %u\n",
-	      (uint32_t)bytes_done,
-	      (_request_payload_bytes) ?
-	      (uint32_t)_request_payload_bytes
-	      : (uint32_t)sizeof(STCPPacketHeader));
+    for (uint iters = 0; iters < MAX_XRLS_DISPATCHED; iters++) {
+	if (buffer_bytes < sizeof(STCPPacketHeader)) {
+	    // Not enough data to even inspect the header
+	    size_t new_trigger_bytes = sizeof(STCPPacketHeader) - buffer_bytes;
+	    _reader.set_trigger_bytes(new_trigger_bytes);
+	    return;
+	}
 
-    if (_request_payload_bytes == 0) {
-	parse_header(buffer, bytes_done);
-    } else if (bytes_done == _request_payload_bytes) {
-	parse_payload();
+	const STCPPacketHeader* sph =
+	    reinterpret_cast<const STCPPacketHeader*>(buffer);
+
+	if (!sph->is_valid()) {
+	    die("bad header");
+	    return;
+	}
+
+	if (sph->type() == STCP_PT_HELO) {
+	    debug_msg("Got helo\n");
+	    ack_helo(sph->seqno());
+	    _reader.dispose(sph->frame_bytes());
+	    _reader.set_trigger_bytes(sizeof(STCPPacketHeader));
+	    return;
+	} else if (sph->type() != STCP_PT_REQUEST) {
+	    die("Bad packet type");
+	    return;
+	}
+
+	if (buffer_bytes >= sph->frame_bytes()) {
+	    uint8_t* xrl_data = buffer;
+	    xrl_data += sizeof(STCPPacketHeader) + sph->error_note_bytes();
+	    size_t   xrl_data_bytes = sph->payload_bytes();
+	    dispatch_request(sph->seqno(), xrl_data, xrl_data_bytes);
+	    _reader.dispose(sph->frame_bytes());
+	    buffer += sph->frame_bytes();
+	    buffer_bytes -= sph->frame_bytes();
+	} else {
+	    if (sph->frame_bytes() > _reader.reserve_bytes()) {
+		_reader.set_reserve_bytes(sph->frame_bytes());
+	    }
+	    _reader.set_trigger_bytes(sph->frame_bytes());
+	    return;
+	}
     }
+    _reader.set_trigger_bytes(sizeof(STCPPacketHeader));
 }
 
 void
-STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
+STCPRequestHandler::dispatch_request(uint32_t 		seqno,
+				     const uint8_t* 	packed_xrl,
+				     size_t 		packed_xrl_bytes)
 {
-    XrlError e;
-    XrlArgs response;
-
     const XrlDispatcher* d = _parent.dispatcher();
     assert(d != 0);
 
+    Xrl xrl;
+    bool unpack_failed = false;
     try {
-	Xrl xrl(xrl_c_str);
+	if (xrl.unpack(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
+	    unpack_failed = true;
+    } catch (...) {
+	unpack_failed = true;
+    }
+
+    XrlError e;
+    XrlArgs response;
+
+    if (unpack_failed == false) {
 	e = d->dispatch_xrl(xrl.command(), xrl.args(), response);
-    } catch (const InvalidString&) {
+    } else {
 	e = XrlError(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
     }
-    debug_msg("Response count %u\n", (uint32_t)_responses.size());
 
-    _responses.push_back(ReplyPacket());
+    size_t xrl_response_bytes = response.packed_bytes();
+    size_t note_bytes = e.note().size();
+
+    _responses.push_back(ReplyPacket(sizeof(STCPPacketHeader) + note_bytes + xrl_response_bytes));
+    _responses_size++;
     ReplyPacket& r = _responses.back();
 
-    string xrl_data = response.str();
-    r.resize(sizeof(STCPPacketHeader) + e.note().size() + xrl_data.size());
-
-    // We cast first few bytes of allocated block to packet header to
-    // avoid a copy after constructing.  This works because
-    // STCPPacketHeader uses a network order representation.
     STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&r[0]);
-    sph->initialize(seqno, STCP_PT_RESPONSE, e, xrl_data.size());
+    sph->initialize(seqno, STCP_PT_RESPONSE, e, xrl_response_bytes);
 
-    if (e.note().size()) {
+    if (note_bytes != 0) {
 	memcpy(&r[0] + sizeof(STCPPacketHeader),
-	       e.note().c_str(), e.note().size());
+	       e.note().c_str(), note_bytes);
     }
 
-    if (xrl_data.size()) {
-	memcpy(&r[0] + sizeof(STCPPacketHeader) + e.note().size(),
-	       xrl_data.c_str(), xrl_data.size());
+    if (xrl_response_bytes != 0) {
+	response.pack(&r[0] + sizeof(STCPPacketHeader) + note_bytes,
+		      xrl_response_bytes);
     }
+
+    _writer.add_buffer(&r[0], r.size(),
+		       callback(this, &STCPRequestHandler::update_writer));
 
     debug_msg("about to start_writer (%d)\n", _responses.size() != 0);
-    start_writer();
+    if (_writer.running() == false) {
+	_writer.start();
+    }
 }
 
 void
-STCPRequestHandler::start_writer()
+STCPRequestHandler::ack_helo(uint32_t seqno)
 {
-    debug_msg("start_writer (%d)\n", _responses.size() != 0);
-    if (_responses.empty() == false) {
-	assert(_writer.running() == false);
-	ReplyPacket& r = _responses.front();
-	_response_offset = 0;
-	_writer.add_buffer(&r[0], r.size(),
-			   callback(this, &STCPRequestHandler::update_writer));
+    _responses.push_back(ReplyPacket(sizeof(STCPPacketHeader)));
+    _responses_size++;
+    ReplyPacket& r = _responses.back();
+
+    STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&r[0]);
+    sph->initialize(seqno, STCP_PT_HELO_ACK, XrlError::OKAY(), 0);
+    _writer.add_buffer(&r[0], r.size(),
+		       callback(this, &STCPRequestHandler::update_writer));
+
+    xassert(_writer.buffers_remaining() == _responses.size());
+
+    if (_writer.running() == false) {
 	_writer.start();
     }
+    assert(_responses.empty() || _writer.running());
 }
 
 void
 STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 				  const uint8_t*	 /* buffer */,
 				  size_t		 /* buffer_bytes */,
-				  size_t		 bytes_done) {
+				  size_t		 bytes_done)
+{
     postpone_death();
 
     if (ev == AsyncFileWriter::FLUSHING)
 	return;	// code pre-dates FLUSHING event
 
-    debug_msg("Writer offset %u\n", (uint32_t)bytes_done);
+    debug_msg("Writer offset %u\n", static_cast<uint32_t>(bytes_done));
 
     if (ev == AsyncFileWriter::ERROR_CHECK_ERRNO && errno != EAGAIN) {
-	debug_msg("Read failed: %s\n", strerror(errno));
 	die("read failed");
 	return;
     }
 
-    list<ReplyPacket>::iterator ri = _responses.begin();
-    if (ri->size() == bytes_done) {
+    debug_msg("responses size %u ready %u\n",
+	      static_cast<uint32_t>(_responses.size()),
+	      static_cast<uint32_t>(_reader.available_bytes()));
+
+    if (_responses.front().size() == bytes_done) {
+	xassert(_responses.size() <= MAX_ACTIVE_REQUESTS);
 	debug_msg("Packet completed -> %u bytes written.\n",
-		  (uint32_t)ri->size());
+		  (uint32_t)_responses.front().size());
 	// erase old head
-	_responses.erase(ri);
-	_response_offset = 0;
+	_responses.pop_front();
+	_responses_size--;
+	xassert(_responses.empty() || _responses.size() == _responses_size);
 	// restart writer if necessary
-	start_writer();
+	if (_writer.running() == false && _responses.empty() == false)
+	    _writer.start();
+	return;
     }
 }
 
@@ -339,9 +333,7 @@ STCPRequestHandler::die(const char *reason, bool verbose)
 bool
 STCPRequestHandler::response_pending() const
 {
-    return ((_request_payload_bytes > 0)
-	    || (_responses.empty() == false)
-	    || _writer.running());
+    return (_responses.empty() == false) || (_writer.running() == true);
 }
 
 
@@ -363,12 +355,14 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
     string addr;
     if (get_local_socket_details(_fd, addr, port) == false) {
         close(_fd);
+	_fd = -1;
         xorp_throw(XrlPFConstructorError, strerror(errno));
     }
 
     if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
 	debug_msg("failed to go non-blocking\n");
         close(_fd);
+	_fd = -1;
         xorp_throw(XrlPFConstructorError, strerror(errno));
     }
 
@@ -386,6 +380,7 @@ XrlPFSTCPListener::~XrlPFSTCPListener()
     }
     _eventloop.remove_selector(_fd);
     close(_fd);
+    _fd = -1;
 }
 
 void
@@ -443,7 +438,7 @@ XrlPFSTCPListener::response_pending() const
  * in wire format rather than as an Xrl since the existing scheme
  * requires additional copy operations.
  */
-struct RequestState {
+class RequestState {
 public:
     typedef XrlPFSender::SendCallback Callback;
 
@@ -452,21 +447,52 @@ public:
 		 uint32_t	  sn,
 		 const Xrl&	  x,
 		 const Callback&  cb)
-	: _p(p), _sn(sn), _x(x), _cb(cb)
+	: _p(p), _sn(sn), _cb(cb), _keepalive(false)
     {
+	size_t header_bytes = sizeof(STCPPacketHeader);
+	size_t xrl_bytes = x.packed_bytes();
+	_b.resize(header_bytes + xrl_bytes);
+
+	// Prepare header
+	STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&_b[0]);
+	sph->initialize(_sn, STCP_PT_REQUEST, XrlError::OKAY(), xrl_bytes);
+
+	// Pack XRL data
+	x.pack(&_b[0] + header_bytes, xrl_bytes);
+
 	debug_msg("RequestState (%p - seqno %u)\n", this, sn);
 	debug_msg("RequestState Xrl = %s\n", x.str().c_str());
+    }
+
+    RequestState(XrlPFSTCPSender* p, uint32_t sn)
+	: _p(p), _sn(sn), _keepalive(true)
+    {
+	size_t header_bytes = sizeof(STCPPacketHeader);
+	_b.resize(header_bytes);
+
+	// Prepare header
+	STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&_b[0]);
+	sph->initialize(_sn, STCP_PT_HELO, XrlError::OKAY(), 0);
     }
 
     inline bool		    has_seqno(uint32_t n) const { return _sn == n; }
     inline XrlPFSTCPSender* parent() const		{ return _p; }
     inline uint32_t	    seqno() const		{ return _sn; }
-    inline Xrl&		    xrl() 			{ return _x; }
+    inline vector<uint8_t>& buffer() 			{ return _b; }
     inline Callback&	    cb() 			{ return _cb; }
+
+    inline bool is_keepalive()
+    {
+	if (_b.size() < sizeof(STCPPacketHeader))
+	    return false;
+	STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&_b[0]);
+	STCPPacketType pt = sph->type();
+	return pt == STCP_PT_HELO || pt == STCP_PT_HELO_ACK;
+    }
 
     ~RequestState()
     {
-	debug_msg("~RequestState (%p - seqno %u)\n", this, seqno());
+	//	debug_msg("~RequestState (%p - seqno %u)\n", this, seqno());
     }
 
 private:
@@ -476,8 +502,9 @@ private:
 private:
     XrlPFSTCPSender*	_p;				// parent
     uint32_t		_sn;				// sequence number
-    Xrl			_x;
+    vector<uint8_t>	_b;
     Callback		_cb;
+    bool		_keepalive;
 };
 
 
@@ -532,13 +559,15 @@ protected:
 // ----------------------------------------------------------------------------
 // Xrl Simple TCP protocol family sender -> -> -> XRLPFSTCPSender
 
+static uint32_t direct_calls = 0;
+static uint32_t indirect_calls = 0;
+
 uint32_t XrlPFSTCPSender::_next_uid = 0;
 
 XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     throw (XrlPFConstructorError)
     : XrlPFSender(e, addr_slash_port),
-      _uid(_next_uid++),
-      _fd(-1),
+      _uid(_next_uid++), _fd(-1),
       _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
     _fd = create_connected_ip_socket(TCP, addr_slash_port);
@@ -552,29 +581,34 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     if (fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL) | O_NONBLOCK) < 0) {
 	debug_msg("failed to go non-blocking.\n");
         close(_fd);
+	_fd = -1;
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Failed to set fd non-blocking: %s\n",
 			    strerror(errno)));
     }
 
-    _reader = new AsyncFileReader(e, _fd);
-    if (0 == _reader) {
-        xorp_throw(XrlPFConstructorError, "Could not allocate reader.");
-    }
+    _reader =
+	new BufferedAsyncReader(e, _fd, 4 * 65536,
+				callback(this, &XrlPFSTCPSender::read_event));
 
-    _writer = new AsyncFileWriter(e, _fd);
-    if (0 == _writer) {
-	delete _reader;
-        xorp_throw(XrlPFConstructorError, "Could not allocate writer.");
-    }
+    _reader->set_trigger_bytes(sizeof(STCPPacketHeader));
+    _reader->start();
 
-    prepare_for_reply_header();
+    _writer = new AsyncFileWriter(e, _fd, MAX_WRITES);
+
+    _current_seqno   = 0;
+    _active_bytes    = 0;
+    _active_requests = 0;
+    _keepalive_sent  = false;
+
     start_keepalives();
     sender_list.add_instance(_uid);
 }
 
 XrlPFSTCPSender::~XrlPFSTCPSender()
 {
+    debug_msg("Direct calls %u Indirect calls %u\n",
+	      direct_calls, indirect_calls);
     delete _reader;
     _reader = 0;
     delete _writer;
@@ -589,16 +623,11 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
 void
 XrlPFSTCPSender::die(const char* reason)
 {
-    UNUSED(reason);
-    debug_msg("Sender dying (fd = %d) reason: %s\n", _fd, reason);
-
     XLOG_ASSERT(_fd > 0);
 
-    // XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
-
+    XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
     stop_keepalives();
 
-    _reader->flush_buffers();
     delete _reader;
     _reader = 0;
 
@@ -612,115 +641,99 @@ XrlPFSTCPSender::die(const char* reason)
     // Detach all callbacks before attempting to invoke them.
     // Otherwise destructor may get called when we're still going through
     // the lists of callbacks.
-    list<ref_ptr<RequestState> > tmp_sent;
-    tmp_sent.splice(tmp_sent.begin(), _requests_sent);
+    list<ref_ptr<RequestState> > tmp;
+    tmp.splice(tmp.begin(), _requests_waiting);
+    tmp.splice(tmp.begin(), _requests_sent);
 
-    list<ref_ptr<RequestState> > tmp_pending;
-    tmp_pending.splice(tmp_pending.begin(), _requests_pending);
+    _active_requests = 0;
+    _active_bytes    = 0;
 
     // Make local copy of uid in case "this" is deleted in callback
     uint32_t uid = _uid;
 
-    debug_msg("Sent requests outstanding = %d\n", (int)tmp_sent.size());
-    while (tmp_sent.empty() == false) {
+    while (tmp.empty() == false) {
 	if (sender_list.valid_instance(uid) == false)
 	    break;
-	ref_ptr<RequestState>& rp = tmp_sent.front();
+	ref_ptr<RequestState>& rp = tmp.front();
 	if (rp->cb().is_empty() == false)
 	    rp->cb()->dispatch(XrlError::SEND_FAILED(), 0);
-	tmp_sent.pop_front();
+	tmp.pop_front();
+    }
+}
+
+bool
+XrlPFSTCPSender::send(const Xrl&	x,
+		      bool		direct_call,
+		      const		XrlPFSender::SendCallback& cb)
+{
+    if (direct_call) {
+	direct_calls ++;
+    } else {
+	indirect_calls ++;
     }
 
-    debug_msg("Pending requests outstanding = %d\n", (int)tmp_pending.size());
-    while (tmp_pending.empty() == false) {
-	if (sender_list.valid_instance(uid) == false)
-	    break;
-	ref_ptr<RequestState>& rp = tmp_pending.front();
-	if (rp->cb().is_empty() == false)
-	    rp->cb()->dispatch(XrlError::SEND_FAILED(), 0);
-	tmp_pending.pop_front();
+    if (_fd <= 0) {
+	debug_msg("Attempted send when socket is dead!\n");
+	if (direct_call) {
+	    return false;
+	} else {
+	    cb->dispatch(XrlError(SEND_FAILED, "socket dead"), 0);
+	    return true;
+	}
+    }
+
+    if (direct_call) {
+	// We don't want to accept if we are short of resources
+	if (_active_requests >= MAX_ACTIVE_REQUESTS) {
+	    debug_msg("too many requests %u\n",
+		      static_cast<uint32_t>(_active_requests));
+	    return false;
+	}
+	if (x.packed_bytes() + _active_bytes > MAX_ACTIVE_BYTES) {
+	    debug_msg("too many bytes %u\n",
+		      static_cast<uint32_t>(x.packed_bytes()));
+	    return false;
+	}
+    }
+
+    debug_msg("Seqno %u send %s\n", _current_seqno, x.str().c_str());
+    send_request(new RequestState(this, _current_seqno++, x, cb));
+
+    xassert(_requests_waiting.size() + _requests_sent.size() == _active_requests);
+
+    return true;
+}
+
+void
+XrlPFSTCPSender::send_request(RequestState* rs)
+{
+    _requests_waiting.push_back(rs);
+    const vector<uint8_t>& buffer = rs->buffer();
+    _active_bytes += buffer.size();
+    _active_requests ++;
+    _writer->add_buffer(&buffer[0], buffer.size(),
+			callback(this, &XrlPFSTCPSender::update_writer));
+    if (_writer->running() == false) {
+	_writer->start();
     }
 }
 
 void
-XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
+XrlPFSTCPSender::dispose_request()
 {
-    if (_fd <= 0) {
-	debug_msg("Attempted send when socket is dead!\n");
-	cb->dispatch(XrlError(SEND_FAILED, "socket dead"), 0);
-	return;
-    }
-
-    bool push = (_requests_pending.empty() == true &&
-		 _keepalive_in_progress == false);
-    _requests_pending.push_back(
-				new RequestState(this, _current_seqno++, x, cb)
-				);
-    if (push) {
-	send_first_request();
-    } else {
-	assert(_writer->running() == true);
-    }
+    assert(_requests_sent.empty() == false);
+    xassert(_requests_sent.size() + _requests_waiting.size() == _active_requests);
+    _active_bytes -= _requests_sent.front()->buffer().size();
+    _active_requests -= 1;
+    _requests_sent.pop_front();
+    xassert(_requests_waiting.size() == _writer->buffers_remaining());
 }
 
 bool
 XrlPFSTCPSender::sends_pending() const
 {
-    bool queues_empty = _requests_sent.empty() && _requests_pending.empty();
-    return !queues_empty;
-}
-
-RequestState*
-XrlPFSTCPSender::find_request(uint32_t seqno)
-{
-    list<ref_ptr<RequestState> >::iterator i;
-    for (i = _requests_sent.begin(); i != _requests_sent.end(); ++i) {
-	ref_ptr<RequestState>& rp = *i;
-	if (rp->has_seqno(seqno))
-	    return rp.get();
-    }
-
-    for (i = _requests_pending.begin(); i != _requests_pending.end(); ++i) {
-	ref_ptr<RequestState>& rp = *i;
-	if (rp->has_seqno(seqno))
-	    return rp.get();
-    }
-
-    abort();
-    return 0;
-}
-
-void
-XrlPFSTCPSender::send_first_request()
-{
-    assert(_writer);
-    assert(_writer->running() == false);
-
-    debug_msg("%s\n", __PRETTY_FUNCTION__);
-    // Render data as ascii
-    list< ref_ptr<RequestState> >::iterator i = _requests_pending.begin();
-    ref_ptr<RequestState>& r = *i;
-    string xrl_ascii = r->xrl().str();
-
-    // Size outgoing packet accordingly
-    size_t packet_size = sizeof(STCPPacketHeader) + xrl_ascii.size();
-    _request_packet.resize(packet_size);
-
-    // Configure header
-    STCPPacketHeader* sph =
-	reinterpret_cast<STCPPacketHeader*>(&_request_packet[0]);
-    sph->initialize(r->seqno(), STCP_PT_REQUEST, XrlError::OKAY(),
-		    xrl_ascii.size());
-
-    // Copy-in payload
-    memcpy(&_request_packet[sizeof(STCPPacketHeader)],
-	   xrl_ascii.data(), xrl_ascii.size());
-
-    // Kick off writing
-    _writer->add_buffer(&_request_packet[0], _request_packet.size(),
-			callback(this, &XrlPFSTCPSender::update_writer));
-    _writer->start();
-    assert(_writer->running());
+    return (_requests_waiting.empty() == false) ||
+	(_requests_sent.empty() == false);
 }
 
 void
@@ -730,168 +743,128 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 			       size_t			bytes_done)
 {
     UNUSED(buffer_bytes);
-    debug_msg("bytes done %u / %u\n", (uint32_t)bytes_done,
-	      (uint32_t)buffer_bytes);
-    assert(_keepalive_in_progress == false);
+
     if (e == AsyncFileWriter::FLUSHING)
 	return; // Code predates FLUSHING
 
     if (e != AsyncFileWriter::DATA) {
-	debug_msg("Write failed: %s\n", strerror(errno));
 	die("write failed");
     }
 
-    if (bytes_done != _request_packet.size()) {
+    if (bytes_done != buffer_bytes) {
 	return;
     }
 
-    list<ref_ptr<RequestState> >::iterator rs = _requests_pending.begin();
-    // Request has been sent. Move request from head of pend queue
-    // to tail of sent queue where it will wait for a reply
-    _requests_sent.splice(_requests_sent.end(), _requests_pending, rs);
-    if (_requests_pending.empty() == false) {
-	send_first_request();
-    }
+    ref_ptr<RequestState> rrp = _requests_waiting.front();
+    _requests_sent.push_back(rrp);
+    _requests_waiting.pop_front();
 }
 
 void
-XrlPFSTCPSender::dispatch_reply()
+XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
+			    BufferedAsyncReader::Event	ev,
+			    uint8_t*			buffer,
+			    size_t			buffer_bytes)
 {
-    uint32_t seqno = _sph->seqno();
-    assert(_sph->is_valid());
+    debug_msg("read event %u (need at least %u)\n",
+	      buffer_bytes, sizeof(STCPPacketHeader));
+    if (ev == BufferedAsyncReader::ERROR_CHECK_ERRNO) {
+	XLOG_ERROR("Read failed (errno = %d): %s\n", errno, strerror(errno));
+	die("read error");
+	return;
+    }
 
-    // Packet format is Header + optional Error note + xrl_data as textual info
+    if (ev == BufferedAsyncReader::END_OF_FILE) {
+	die("end of file");
+	return;
+    }
 
-    char* data = reinterpret_cast<char*>(&_reply[0] +
-					 sizeof(STCPPacketHeader));
+    defer_keepalives();
 
-    // We reserved an additional one byte for null termination
-    data[_sph->payload_bytes()] = 0;
+    if (buffer_bytes < sizeof(STCPPacketHeader)) {
+	// Not enough data to even inspect the header
+	size_t new_trigger_bytes = sizeof(STCPPacketHeader) - buffer_bytes;
+	_reader->set_trigger_bytes(new_trigger_bytes);
+	return;
+    }
 
-    XrlError rcv_err;
-    if (_sph->error_note_bytes()) {
-	rcv_err = XrlError(XrlErrorCode(_sph->error_code()),
-			   string(data, _sph->error_note_bytes()));
-	data += _sph->error_note_bytes();
+    const STCPPacketHeader* sph =
+	reinterpret_cast<const STCPPacketHeader*>(buffer);
+
+    if (sph->is_valid() == false) {
+	die("bad header");
+	return;
+    }
+
+    if (sph->seqno() != _requests_sent.front()->seqno()) {
+	die("Bad sequence number");
+	return;
+    }
+
+    if (sph->type() == STCP_PT_HELO_ACK) {
+	debug_msg("Got keep alive ack");
+	_keepalive_sent = false;
+	dispose_request();
+	_reader->dispose(sph->frame_bytes());
+	_reader->set_trigger_bytes(sizeof(*sph));
+	return;
+    }
+
+    if (sph->type() != STCP_PT_RESPONSE) {
+	die("unexpected packet type - not a response");
+    }
+
+    debug_msg("Frame Bytes %u Available %u\n",
+	      sph->frame_bytes(), buffer_bytes);
+    if (sph->frame_bytes() > buffer_bytes) {
+	if (_reader->reserve_bytes() < sph->frame_bytes())
+	    _reader->set_reserve_bytes(sph->frame_bytes());
+	_reader->set_trigger_bytes(sph->frame_bytes() - buffer_bytes);
+	return;
+    }
+
+    const uint8_t* xrl_data = buffer + sizeof(STCPPacketHeader);
+
+    XrlError xrl_error;
+    if (sph->error_note_bytes()) {
+	xrl_error = XrlError(XrlErrorCode(sph->error_code()),
+			     string((const char*)xrl_data,
+				    sph->error_note_bytes()));
+	xrl_data += sph->error_note_bytes();
     } else {
-	rcv_err = XrlError(XrlErrorCode(_sph->error_code()));
+	xrl_error = XrlError(XrlErrorCode(sph->error_code()));
     }
 
-    const char* xrl_data = "";
-    if (_sph->xrl_data_bytes()) {
-	xrl_data = data;
-    }
- 
-    list<ref_ptr<RequestState> >::iterator rs;
-    for (rs = _requests_sent.begin(); rs != _requests_sent.end(); ++rs) {
-	ref_ptr<RequestState>& rp = *rs;
-	if (rp->has_seqno(seqno))
-	    break;
-    }
+    // Get ref_ptr to callback from request state and discard the rest
+    XrlPFSender::SendCallback cb = _requests_sent.front()->cb();
+    dispose_request();
 
-    if (rs == _requests_sent.end()) {
-	RequestState* r = find_request(seqno);
-	if (r != 0)
-	    abort();
-    }
-    assert(rs != _requests_sent.end());
+    xassert(_active_requests == _requests_waiting.size() + _requests_sent.size());
 
-    XrlPFSender::SendCallback& cb = rs->get()->cb();
+    // Attempt to unpack the Xrl Arguments
+    XrlArgs  xa;
+    XrlArgs* xap = NULL;
     try {
-	XrlArgs response(xrl_data);
-	cb->dispatch(rcv_err, &response);
-    } catch (InvalidString& ) {
-	XrlError xe (XrlError::INTERNAL_ERROR().error_code(),
-		    "corrupt xrl response");
-	cb->dispatch(xe, 0);
+	if (sph->payload_bytes() > 0) {
+	    xa.unpack(xrl_data, sph->payload_bytes());
+	    xap = &xa;
+	}
+    } catch (...) {
+	xrl_error = XrlError(XrlError::INTERNAL_ERROR().error_code(),
+			     "corrupt xrl response");
+	xap = 0;
 	debug_msg("Corrupt response: %s\n", xrl_data);
     }
 
-    // Tidy up receive state
-    _requests_sent.erase(rs);
+    // Update reader to say we're done with this block of data and
+    // specify minimum reserve for next call.
+    _reader->dispose(sph->frame_bytes());
+    _reader->set_trigger_bytes(sizeof(STCPPacketHeader));
 
-    // Prepare for next reply
-    prepare_for_reply_header();
-}
+    // Dispatch Xrl and exit
+    cb->dispatch(xrl_error, xap);
 
-void
-XrlPFSTCPSender::recv_data(AsyncFileReader::Event e,
-			   const uint8_t*	    buffer,
-			   size_t		    /* buffer_bytes */,
-			   size_t		    offset)
-{
-    assert(buffer == &_reply[0]);
-    assert(_reply.size() >= sizeof(STCPPacketHeader));
-
-    switch (e) {
-    case AsyncFileReader::FLUSHING:
-	return; // Code pre-dates FLUSHING event, dont care about it
-
-    case AsyncFileReader::END_OF_FILE:
-	die("reached end of file.  Far end probably closed pipe.");
-	return;
-
-    case AsyncFileReader::ERROR_CHECK_ERRNO:
-	die(c_format("read error - %s", strerror(errno)).c_str());
-	return;
-
-    case AsyncFileReader::DATA:
-	break;
-    }
-
-    if (offset < sizeof(STCPPacketHeader)) {
-	// XXX Hopefully never reached.  Just wait until next
-	// chunk arrives before doing any more processing...
-	debug_msg("got small header...%u bytes\n", (uint32_t)offset);
-	assert(_reader->running());
-	return;
-    }
-
-    assert(_sph == 0 || offset >= sizeof(STCPPacketHeader));
-    if (_sph == 0) {
-	// Awaiting header - this looks like it
-	_sph = reinterpret_cast<const STCPPacketHeader*>(&_reply[0]);
-	if (_sph->is_valid() == false) {
-	    debug_msg("Invalid packet header (%d type 0x%02x)\n",
-		      _sph->is_valid(), _sph->type());
-	    die("invalid packet header");
-	    return;
-	} else if (_sph->type() != STCP_PT_RESPONSE) {
-	    die("unexpected packet type - not a response");
-	    return;
-	}
-	// Dimension to be 1 char longer so we can null terminate data portion
-	// later and cast it to a C-string.
-	_reply.resize(sizeof(STCPPacketHeader) + _sph->payload_bytes() + 1);
-	_sph = reinterpret_cast<const STCPPacketHeader*>(&_reply[0]);
-
-	if (_sph->payload_bytes()) {
-	    _reader->add_buffer_with_offset(
-			&_reply[0], _reply.size() - 1,
-			sizeof(STCPPacketHeader),
-			callback(this, &XrlPFSTCPSender::recv_data)
-			);
-	    _reader->start();
-	}
-    }
-    postpone_keepalive();
-
-    if (offset == sizeof(STCPPacketHeader) + _sph->payload_bytes()) {
-	dispatch_reply();
-    }
-}
-
-void
-XrlPFSTCPSender::prepare_for_reply_header()
-{
-    assert(_reader->running() == false);
-
-    _sph = 0;
-    if (_reply.size() < sizeof(STCPPacketHeader))
-	_reply.resize(sizeof(STCPPacketHeader));
-    _reader->add_buffer(&_reply[0], sizeof(STCPPacketHeader),
-			callback(this, &XrlPFSTCPSender::recv_data));
-    _reader->start();
+    debug_msg("Completed\n");
 }
 
 const char*
@@ -910,80 +883,38 @@ XrlPFSTCPSender::set_keepalive_ms(uint32_t t)
     start_keepalives();
 }
 
-inline void
+void
 XrlPFSTCPSender::start_keepalives()
 {
     _keepalive_timer = _eventloop.new_periodic(_keepalive_ms,
 						callback(this, &XrlPFSTCPSender::send_keepalive));
-    _keepalive_packet.resize(sizeof(STCPPacketHeader));
-    _keepalive_in_progress = false;
 }
 
-inline void
-XrlPFSTCPSender::postpone_keepalive()
-{
-    _keepalive_timer.schedule_after_ms(_keepalive_ms);
-}
-
-inline void
+void
 XrlPFSTCPSender::stop_keepalives()
 {
     _keepalive_timer.unschedule();
 }
 
-inline bool
-XrlPFSTCPSender::send_keepalive()
+void
+XrlPFSTCPSender::defer_keepalives()
 {
-    if (_writer->buffers_remaining() != 0) {
-	// no-go in middle of a transaction.
-	postpone_keepalive();
-	return true;
+    if (_keepalive_timer.scheduled()) {
+	_keepalive_timer.schedule_after_ms(_keepalive_ms);
     }
-
-    assert(_keepalive_packet.size() == sizeof(STCPPacketHeader));
-
-    STCPPacketHeader* sph =
-	reinterpret_cast<STCPPacketHeader*>(&_keepalive_packet[0]);
-    sph->initialize(_current_seqno++, STCP_PT_HELO, XrlError::OKAY(), 0);
-
-    _writer->add_buffer(&_keepalive_packet[0], _keepalive_packet.size(),
-			callback(this, &XrlPFSTCPSender::confirm_keepalive));
-    _writer->start();
-
-    _keepalive_in_progress = true;
-    return true;
 }
 
-void
-XrlPFSTCPSender::confirm_keepalive(AsyncFileWriter::Event e,
-				   const uint8_t*	  /* buffer */,
-				   size_t		  /* buffer_bytes */,
-				   size_t		  bytes_done)
+bool
+XrlPFSTCPSender::send_keepalive()
 {
-    assert(bytes_done == 0 || bytes_done == sizeof(STCPPacketHeader));
-
-    _keepalive_in_progress = false;
-
-    switch (e) {
-    case AsyncFileWriter::FLUSHING:
-	return; // code pre-dates FLUSHING
-
-    case AsyncFileWriter::ERROR_CHECK_ERRNO:
-    case AsyncFileWriter::END_OF_FILE:
-	if (errno == EAGAIN) {
-	    _writer->resume();
-	    return;
-	}
-	die("Keepalive failed");
-	return;
-
-    case AsyncFileWriter::DATA:
-	// Keepalive succeeded - kick off request dispatch if waiting.
-	debug_msg("Keepalive success\n");
-	assert(_writer->buffers_remaining() == 0);
-	assert(_writer->running() == false);
-	if (_requests_pending.empty() == false) {
-	    send_first_request();
-	}
+    if (_keepalive_sent == true) {
+	// There's an unack'ed keepalive message.
+	die("Keepalive timeout");
+	return false;
     }
+    debug_msg("Sending keepalive\n");
+    _keepalive_sent = true;
+    send_request(new RequestState(this, _current_seqno++));
+
+    return true;
 }
