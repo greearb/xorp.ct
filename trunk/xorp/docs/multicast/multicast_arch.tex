@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.2 2003/03/06 20:18:02 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -43,7 +43,7 @@ Version 0.2}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 6, 2003}
+\date{March 10, 2003}
 
 \maketitle
 
@@ -141,7 +141,7 @@ posses knowledge about the particular communication method used to send
 or receive packets. To achieve this, the implementation uses pure
 virtual C++ class methods (\eg methods declared such as:
 {\it virtual int send() = 0;}).
-The declaration of such methods require that each class must be
+The declaration of such methods requires that each class must be
 inherited by a ``wrapper'' class that implements all pure virtual
 methods. Then, all the details about the particular mechanism
 that is used to send or receive packets are in this wrapper class.
@@ -157,29 +157,29 @@ as long as we have the right mechanism that allows them to communicate
 with each other.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{MLD6/IGMP Daemon/Library}
+\section{MLD/IGMP Daemon/Library}
 
-Because a physical interface is owned by a single multicast routing
-protocol, then we can have MLD6/IGMP running as a library linked with
+A physical interface is owned by a single multicast routing
+protocol, therefore we can have MLD/IGMP running as a library linked with
 a multicast routing protocol on each of the
 interfaces owned by that protocol. This solution may not work only if
-there are more than one protocols that need membership information on an
+there is more than one protocol that needs multicast group membership
+information on an interface.
+
+The alternative solution is to have a separate MLD/IGMP daemon that
+takes care of multicast group membership for all interfaces, and then
+reports that information to all interested parties. Thus, more than one
+protocols may receive multicast group membership information per
 interface.
 
-The alternative solution is to have a separate MLD6/IGMP daemon that
-takes care of membership per all interfaces, and then reports that
-information to all interested parties. This will allow reporting this
-information to more than one protocols per interface (in case we need
-so).
-
-Separating IGMP/MLD6 from the routing code has the advantage of reducing
-dependency and better robustness; \eg if the MLD6/IGMP code crashes, it
-will not crash the routing protocol as well. Further, when it comes to
-upgrade (\eg from IGMPv2 to IGMPv3), if we are running MLD6/IGMP as a
-single process, then the upgrade can be performed by starting a new
-MLD6/IGMP daemon on the place of the old one. This restart will not
-require stopping the PIM daemon for example, which is very important for
-routers in real-world operation.
+Separating MLD/IGMP from the routing code has the advantage of reducing
+dependency and improving robustness; \eg if the MLD/IGMP code crashes, the
+routing protocol can continue running. Further, if we want to upgrade
+the software, and if we are running MLD/IGMP as a
+separate process, then the upgrade can be performed by starting a new
+MLD/IGMP daemon in place of the old one. Therefore, the upgrade does
+not require to stop the PIM daemon for example, which is very important
+for routers in real-world operation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Multicast Modules Interaction}
@@ -197,14 +197,14 @@ the multicast-related modules. Those interactions are:
 
 \begin{itemize}
 
-  \item MFEA--PIM: to send or receive PIM control messages, to forward
+  \item MFEA--PIM: to send or receive PIM control packets, to forward
    PIM-related signals from the multicast forwarding engine to PIM, to
    establish the communication between PIM and the multicast-forwarding
    engine, for the MFEA to join or leave a multicast group on behalf of
    PIM, etc.
 
   \item MFEA--MLD/IGMP: to send or receive MLD/IGMP control
-  messages, and to join or leave a multicast group on behalf of
+  packets, and to join or leave a multicast group on behalf of
   MLD/IGMP.
 
   \item MLD/IGMP--PIM: for PIM to monitor multicast membership about
@@ -235,53 +235,56 @@ PIM-SM needs to interact with the MFEA module for the following:
   forwarding engine.
 
   \item Receive PIM-related signals from the multicast forwarding engine
-  (when applicable). Examples of such signals are NOCACHE or WRONGVIF
-  on UNIX system to indicate that a multicast packet is received but
-  there is no matching forwarding entry, or a packet was not received on
-  the expected incoming interface respectively.
+  (when applicable). Examples of such signals in case of UNIX kernel are
+  NOCACHE or WRONGVIF/WRONGMIF: the former one is sent when the
+  underlying multicast
+  forwarding engine has no multicast forwarding entry for a multicast
+  packet; the latter one is sent when a multicast data packet has
+  arrived on an interface that is not the expected incoming interface to
+  forward that data packet.
 
   \item Receive bandwidth-related information about multicast data
   flows: \eg whether a data flow is idle, or whether the bandwidth of a
-  data flow is above a pre-defined threshold (need by PIM-SM to perform
+  data flow is above a pre-defined threshold (needed by PIM-SM to perform
   bandwidth-based Shortest-Path switch toward a source).
 
   \item Join/leave a multicast group.
 
-  \item Currently (December 2002), the MRIB information is
+  \item Currently (March 2003), the MRIB information is
   obtained through the MFEA.
 
-  \item Currently (December 2002), the information about
+  \item Currently (March 2003), the information about
   existing interfaces on a router is obtained through the MFEA.
 
 \end{itemize}
 
 On startup, the PIM module registers with the MFEA. As part of this
-registration, the MFEA initiates sending of information about existing
+registration, the MFEA sends information about existing
 interfaces on the system, and the current unicast forwarding
 information. If any of this information changes later, the MFEA sends
 the appropriate update to PIM. In addition, the MFEA creates the
-appropriate state to send and receive PIM control messages. After the
+appropriate state to send and receive PIM control packets. After the
 PIM module receives the network interface information, it instructs the
 MFEA to start PIM operation on selected interfaces. After that the PIM
 module can send and receive PIM control packets on those interfaces.
-Also, it it can send requests to the MFEA to add or modify multicast
+Also, it can send requests to the MFEA to add, delete or modify multicast
 forwarding entries in the kernel.
 
-Note that the current (December 2002) solution for PIM kernel
+Note that the current (March 2003) solution in case of UNIX PIM kernel
 uses one more signal from the kernel to the user-level daemon:
 {\emph WHOLEPKT} messages. Those messages are multicast packets that are
 suppose to be encapsulated in a PIM-SM Register message and sent to the
 RP. The encapsulation mechanism must know the RP address (in general,
-per multicast group address), and to avoid putting the RP addresses in
-the kernel (which would also change the traditional multicast API), the
-default solution is to use user-level encapsulation.  For best
+per multicast group address), threfore to avoid putting the RP addresses in
+the kernel (which would also change the traditional UNIX multicast API), the
+default solution is to use user-level encapsulation.  To improve
 performance, the PIM encapsulation should be done in the kernel, and
 then we need a signaling mechanism between the kernel and the user
 process managing the kernel multicast forwarding entries. That mechanism
-will deal with installing the right information for kernel-level
+would deal with installing the appropriate information needed by kernel-level
 Register encapsulation. Currently, there exist FreeBSD patches that
 support such kernel-level encapsulation, and they will be added to
-FreeBSD-CURRENT in January 2003.
+FreeBSD-CURRENT in March-April 2003.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the MFEA and MLD/IGMP modules}
@@ -294,20 +297,20 @@ MLD/IGMP needs to interact with the MFEA module for the following:
 
   \item Join/leave a multicast group.
 
-  \item Currently (December 2002), the information about
+  \item Currently (March 2003), the information about
   existing interfaces on a router is obtained through the MFEA.
 
 \end{itemize}
 
 On startup, the MLD/IGMP module registers with the MFEA. As part of this
-registration, the MFEA initiates sending of information about existing
-interfaces on the system, and the current unicast forwarding information. If
+registration, the MFEA sends information about existing
+interfaces on the system. If
 any of this information changes later, the MFEA sends the appropriate update
 to MLD/IGMP. In addition, the MFEA creates the appropriate state to send and
-receive MLD/IGMP control messages. After the MLD/IGMP module receives the
+receive MLD/IGMP control packets. After the MLD/IGMP module receives the
 network interface information, it instructs the MFEA to start MLD/IGMP
 operation on selected interfaces. After that the MLD/IGMP module can send and
-receive PIM control messages on those interfaces.
+receive MLD/IGMP control packets on those interfaces.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the MLD/IGMP and PIM modules}
@@ -320,18 +323,18 @@ the multicast membership on any of the selected interfaces changes, the
 MLD/IGMP module informs the PIM module about the change: \eg ``add
 membership for group 224.0.1.20 on interface vif0''.
 
-Note that control messages used for multicast debugging such as MRINFO or
+Note that control packets used for multicast debugging such as MRINFO or
 multicast traceroute use IGMP as the network protocol. Hence, if such
 messages are received by the MLD/IGMP module, the appropriate
-information should be sent to the PIM module. Currently (December 2002),
-the handling of such messages is not implemented yet. 
+information should be sent to the PIM module. Currently (March 2003),
+the handling of such messages is not implemented yet.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the RIB and PIM modules}
 
 The PIM module needs to interact with the RIB module to obtain the MRIB
 information, and to keep track if there is any change.
-Currently (December 2002), this interaction is not implemented;
+Currently (March 2003), this interaction is not implemented;
 instead, the MRIB information is received from the MFEA instead.
 
 
@@ -344,6 +347,9 @@ instead, the MRIB information is received from the MFEA instead.
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  cleanup.
 
 \end{itemize}
 
