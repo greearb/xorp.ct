@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.16 2003/05/23 09:51:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.17 2003/05/23 23:24:08 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -309,7 +309,6 @@ VifManager::xrl_result_register_client(const XrlError& e)
 	// entries that are already there. First, find out the set of
 	// all interfaces.
 	//
-	debug_msg("Vif manager registration completed\n");
 	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
 	cb = callback(this, &VifManager::xrl_result_get_configured_interface_names);
 	_ifmgr_client.send_get_configured_interface_names(_fea_target_name.c_str(),
@@ -354,6 +353,10 @@ VifManager::xrl_result_get_configured_interface_names(
 	    _ifmgr_client.send_get_configured_vif_names(_fea_target_name.c_str(),
 							ifname, cb);
 	    _interfaces_remaining++;
+	}
+	if (alist->size() == 0) {
+	    //if there were no configured interfaces, we're done.
+	    update_state();
 	}
 	return;
     }
