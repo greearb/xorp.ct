@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.2 2003/09/03 23:20:17 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.3 2003/09/10 19:21:33 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -775,6 +775,9 @@ public:
     bool execute(IfMgrIfTree& tree) const;
 };
 
+/**
+ * @short Hint that configuration tree has been sent in it's entirety.
+ */
 class IfMgrHintTreeComplete : public IfMgrHintCommandBase {
 public:
     bool forward(XrlSender&		sender,
@@ -783,6 +786,10 @@ public:
     string str() const;
 };
 
+/**
+ * @short Hint that configuration tree has changed and tree should
+ * be examined.
+ */
 class IfMgrHintUpdatesMade : public IfMgrHintCommandBase {
 public:
     bool forward(XrlSender&		sender,
@@ -792,18 +799,3 @@ public:
 };
 
 #endif // __LIBFEACLIENT_IFMGR_CMDS_HH__
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

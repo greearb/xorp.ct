@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.4 2003/09/03 23:20:17 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.5 2003/09/10 19:21:33 hodson Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -28,6 +28,9 @@ class IfMgrVifAtom;
 class IfMgrIPv4Atom;
 class IfMgrIPv6Atom;
 
+/**
+ * @short Base class for command sinks.
+ */
 class IfMgrCommandSinkBase {
 public:
     typedef ref_ptr<IfMgrCommandBase> Cmd;
