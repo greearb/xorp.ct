@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.84 2004/12/17 01:31:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.85 2004/12/17 08:35:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -82,7 +82,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	main()->profile().log(profile_message_in,
 			      c_format("message on %s len %u",
 				       str().c_str(),
-				       static_cast<uint32_t>(length)));
+				       XORP_UINT_CAST(length)));
 	
     TIMESPENT();
 
@@ -134,7 +134,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    break;
 	}
 	case MESSAGETYPEKEEPALIVE: {
-	    debug_msg("KEEPALIVE Packet RECEIVED %u\n", (uint32_t)length);
+	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+		      XORP_UINT_CAST(length));
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
@@ -155,9 +156,10 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg(pac.str().c_str());
 	    event_recvupdate(pac);
 	    TIMESPENT_CHECK();
-	    if(TIMESPENT_OVERLIMIT()) {
-		XLOG_WARNING("Processing packet took longer than %d second %s",
-			     TIMESPENT_LIMIT, pac.str().c_str());
+	    if (TIMESPENT_OVERLIMIT()) {
+		XLOG_WARNING("Processing packet took longer than %u second %s",
+			     XORP_UINT_CAST(TIMESPENT_LIMIT),
+			     pac.str().c_str());
 	    }
 	    break;
 	}
@@ -1031,8 +1033,8 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 		  _peerdata->as().str().c_str());
 	xorp_throw(CorruptMessage,
 		   c_format("Wrong AS %s expecting %s",
-		      p->as().str().c_str(),
-		      _peerdata->as().str().c_str()),
+			    p->as().str().c_str(),
+			    _peerdata->as().str().c_str()),
 		   OPENMSGERROR, BADASPEER);
     }
 
@@ -1088,7 +1090,7 @@ bool
 check_multiprotocol_nlri(const UpdatePacket *, const BGPUpdateAttribList& pa,
 			 bool neg)
 {
-    if(!pa.empty() && !neg) {
+    if (!pa.empty() && !neg) {
 #ifdef	REMOVE_UNNEGOTIATED_NLRI
 	// We didn't advertise this capability, so strip this sucker out.
 	const_cast<BGPUpdateAttribList *>(&pa)->clear();
@@ -1105,7 +1107,7 @@ inline
 bool
 check_multiprotocol_nlri(const UpdatePacket *p, PathAttribute *pa, bool neg)
 {
-    if(pa && !neg) {
+    if (pa && !neg) {
 #ifdef	REMOVE_UNNEGOTIATED_NLRI
 	// We didn't advertise this capability, so strip this sucker out.
 	PathAttributeList<IPv4>& tmp = 
@@ -1165,41 +1167,41 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     bool bad_nlri = false;
 #define STOP_IPV4_UNICAST
 #ifdef	STOP_IPV4_UNICAST
-    if(!check_multiprotocol_nlri(p, p->nlri_list(),
-				 peerdata()->
-				 multiprotocol<IPv4>(SAFI_UNICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->nlri_list(),
+				  peerdata()->
+				  multiprotocol<IPv4>(SAFI_UNICAST, dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->wr_list(),
-				 peerdata()->
-				 multiprotocol<IPv4>(SAFI_UNICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->wr_list(),
+				  peerdata()->
+				  multiprotocol<IPv4>(SAFI_UNICAST, dir)))
 	bad_nlri = true;
 #endif
-    if(!check_multiprotocol_nlri(p, p->mpreach<IPv4>(SAFI_MULTICAST),
-				 peerdata()->
-				 multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->mpreach<IPv4>(SAFI_MULTICAST),
+				  peerdata()->
+				  multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpunreach<IPv4>(SAFI_MULTICAST),
-				 peerdata()->
-				 multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->mpunreach<IPv4>(SAFI_MULTICAST),
+				  peerdata()->
+				  multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_UNICAST),
-				 peerdata()->
-				 multiprotocol<IPv6>(SAFI_UNICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_UNICAST),
+				  peerdata()->
+				  multiprotocol<IPv6>(SAFI_UNICAST, dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_UNICAST),
-				 peerdata()->
-				 multiprotocol<IPv6>(SAFI_UNICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_UNICAST),
+				  peerdata()->
+				  multiprotocol<IPv6>(SAFI_UNICAST, dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_MULTICAST),
-				 peerdata()->
-				 multiprotocol<IPv6>(SAFI_MULTICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_MULTICAST),
+				  peerdata()->
+				  multiprotocol<IPv6>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_MULTICAST),
-				 peerdata()->
-				 multiprotocol<IPv6>(SAFI_MULTICAST, dir)))
+    if (!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_MULTICAST),
+				  peerdata()->
+				  multiprotocol<IPv6>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
 #ifndef	REMOVE_UNNEGOTIATED_NLRI
-    if(bad_nlri)
+    if (bad_nlri)
 	return new NotificationPacket(UPDATEMSGERR, OPTATTR);
 #endif
 
@@ -1413,7 +1415,7 @@ BGPPeer::connected(int sock)
     ** then it may be necessary to deal with the STATESTOPPED
     ** explictly.
     */
-//     if(is_connected()) {
+//     if (is_connected()) {
 // 	debug_msg("Already connected dropping this connection\n");
 // 	::close(sock);
 // 	return;
@@ -1442,8 +1444,8 @@ BGPPeer::clear_all_timers()
 void
 BGPPeer::start_connect_retry_timer()
 {
-    debug_msg("Start Connect Retry timer after %d ms\n",
-	      _peerdata->get_retry_duration());
+    debug_msg("Start Connect Retry timer after %u ms\n",
+	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
     _timer_connect_retry = _mainprocess->eventloop().
 	new_oneoff_after_ms(_peerdata->get_retry_duration(),
@@ -1461,8 +1463,8 @@ BGPPeer::clear_connect_retry_timer()
 void
 BGPPeer::restart_connect_retry_timer()
 {
-    debug_msg("restart Connect Retry timer after %d ms\n",
-	      _peerdata->get_retry_duration());
+    debug_msg("restart Connect Retry timer after %u ms\n",
+	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
     clear_connect_retry_timer();
     start_connect_retry_timer();
@@ -1479,9 +1481,9 @@ BGPPeer::start_hold_timer()
     uint32_t duration = _peerdata->get_hold_duration();
 
     if (duration != 0) {
-	/* Add another half a second to give the remote keepalive a chance*/
+	/* Add another half a second to give the remote keepalive a chance */
 	duration += 500;
-	debug_msg("Holdtimer started %d\n", duration);
+	debug_msg("Holdtimer started %u\n", XORP_UINT_CAST(duration));
 	_timer_hold_time = _mainprocess->eventloop().
 	    new_oneoff_after_ms(duration,
 	    callback(this, &BGPPeer::event_holdexp));
@@ -1508,8 +1510,8 @@ void
 BGPPeer::start_keepalive_timer()
 {
     uint32_t duration = _peerdata->get_keepalive_duration();
-    debug_msg("KeepAlive timer started with duration %d\n",
-	      duration);
+    debug_msg("KeepAlive timer started with duration %u\n",
+	      XORP_UINT_CAST(duration));
 
     if (duration > 0)
 	_timer_keep_alive = _mainprocess->eventloop().
@@ -1690,7 +1692,7 @@ void
 trap_callback(const XrlError& error, const char *comment)
 {
     debug_msg("trap_callback %s %s\n", comment, error.str().c_str());
-    if(XrlError::OKAY() != error) {
+    if (XrlError::OKAY() != error) {
 	XLOG_WARNING("trap_callback: %s %s", comment, error.str().c_str());
     }
 }
