@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.8 2003/08/01 17:10:05 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.9 2004/01/09 00:14:37 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -30,6 +30,8 @@ static const uint32_t DEFAULT_DELETION_SECS = 120;
 
 static const uint32_t DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS = 1;
 static const uint32_t DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS = 5;
+
+static const uint32_t DEFAULT_TABLE_REQUEST_SECS = 1;
 
 static const uint32_t RIPv2_ROUTES_PER_PACKET = 25;
 
