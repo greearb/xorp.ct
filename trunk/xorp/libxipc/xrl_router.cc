@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.24 2003/06/19 00:44:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.25 2003/06/20 18:55:58 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -446,4 +446,22 @@ uint16_t
 XrlRouter::finder_port() const
 {
     return _fac->finder_port();
+}
+
+void
+XrlRouter::finder_connect_event()
+{
+    debug_msg("Finder connect event\n");
+}
+
+void
+XrlRouter::finder_disconnect_event()
+{
+    debug_msg("Finder disconnect event\n");
+}
+
+void
+XrlRouter::finder_ready_event(const string& tgt_name)
+{
+    debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
 }

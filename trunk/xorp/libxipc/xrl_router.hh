@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.20 2003/06/09 22:14:19 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.21 2003/06/19 00:44:44 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -25,6 +25,7 @@
 #include "xrl_dispatcher.hh"
 #include "xrl_pf.hh"
 #include "finder_constants.hh"
+#include "finder_client_observer.hh"
 
 class DispatchState;
 
@@ -34,7 +35,11 @@ class FinderTcpAutoConnector;
 class FinderDBEntry;
 class XrlRouterDispatchState;
 
-class XrlRouter : public XrlDispatcher, public XrlSender {
+class XrlRouter :
+    public XrlDispatcher,
+    public XrlSender,
+    public FinderClientObserver
+{
 public:
     typedef XrlSender::Callback XrlCallback;
     typedef XrlRouterDispatchState DispatchState;
@@ -69,18 +74,48 @@ public:
     bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
     inline EventLoop& eventloop()		{ return _e; }
+    
     inline const string& instance_name() const	{ return _instance_name; }
+
     inline const string& class_name() const	{ return XrlCmdMap::name(); }
 
     IPv4     finder_address() const;
+
     uint16_t finder_port() const;
     
 protected:
+    /**
+     * Called when Finder connection is established.
+     *
+     * Default implementation is a no-op.
+     */
+    virtual void finder_connect_event();
 
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Default implementation is a no-op.
+     */
+    virtual void finder_disconnect_event();
+
+    /**
+     * Called when an Xrl Target becomes visible to other processes.
+     * Implementers of this method should check @ref tgt_name
+     * corresponds to the @ref XrlRouter::instance_name as other
+     * targets within same process may cause this method to be
+     * invoked.
+     *
+     * Default implementation is a no-op.
+     *
+     * @param tgt_name name of Xrl Target becoming ready.
+     */
+    virtual void finder_ready_event(const string& tgt_name);
+
+protected:
     XrlError dispatch_xrl(const string&	 method_name,
 			  const XrlArgs& inputs,
 			  XrlArgs&	 outputs) const;
-
+    
 protected:
     /**
      * Resolve callback (slow path).
