@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.2 2003/10/11 19:47:36 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -212,18 +212,20 @@ IfConfigSet::push_vif(const IfTreeInterface&	i,
     bool enabled = i.enabled() & v.enabled();
 
     uint32_t curflags = i.if_flags();
+    uint32_t newflags = curflags;
     bool up = curflags & IFF_UP;
-    if (up && (deleted || !enabled)) {
-	curflags &= ~IFF_UP;
-    } else {
-	curflags |= IFF_UP;
-    }
+    if (up && (deleted || !enabled))
+	newflags &= ~IFF_UP;
+    if ( (!up) && enabled)
+	newflags |= IFF_UP;
+    if (curflags == newflags)
+	return;		// XXX: nothing changed
 
     string reason;
-    if (set_interface_flags(i.ifname(), if_index, curflags, reason) < 0) {
+    if (set_interface_flags(i.ifname(), if_index, newflags, reason) < 0) {
 	ifc().er().vif_error(i.ifname(), v.vifname(),
 			     c_format("Failed to set interface flags to 0x%08x (%s)",
-				      curflags, reason.c_str()));
+				      newflags, reason.c_str()));
 	XLOG_ERROR(ifc().er().last_error().c_str());
 	return;
     }
