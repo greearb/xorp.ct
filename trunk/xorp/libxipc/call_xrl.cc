@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.18 2003/06/24 18:51:41 atanu Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.19 2003/06/24 23:30:43 atanu Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -217,8 +217,10 @@ main(int argc, char* const argv[])
 
     bool pponly = false;	// Pre-process files only
     bool fileinput = false;
+    const char *finder_host = "localhost";
+    uint16_t port = FINDER_DEFAULT_PORT;
     int c;
-    while ((c = getopt(argc, argv, "Efir:w:")) != -1) {
+    while ((c = getopt(argc, argv, "F:Efir:w:")) != -1) {
 	switch (c) {
 	case 'E':
 	    pponly = true;
@@ -236,6 +238,14 @@ main(int argc, char* const argv[])
 	case 'w':
 	    wait_time = atoi(optarg) * 1000;
 	    break;
+	case 'F':
+	    {
+	    finder_host = strsep(&optarg, ":");
+	    const char *tmpport = strsep(&optarg, ":");
+	    if (0 != tmpport)
+		port = atoi(tmpport);
+	    }
+	    break;
 	default:
 	    usage();
 	    return -1;
@@ -246,7 +256,7 @@ main(int argc, char* const argv[])
 
     try {
 	EventLoop e;
-	XrlStdRouter router(e, ROUTER_NAME);
+	XrlStdRouter router(e, ROUTER_NAME, finder_host, port);
 
 	router.finalize();
 
