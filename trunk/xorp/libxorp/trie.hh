@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.14 2003/07/08 01:51:37 jcardona Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.15 2003/07/11 00:01:19 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -601,6 +601,7 @@ public:
      * Implemented as a find() with a less specific key.
      */
     iterator find_less_specific(const Key &key)	const {
+	assert(key.prefix_len() > 0);
 	Key x(key.masked_addr(), key.prefix_len() - 1);
 
 	return iterator(_root->find(x));
