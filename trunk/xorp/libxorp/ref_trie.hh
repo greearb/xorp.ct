@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.10 2003/06/26 21:38:53 jcardona Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.11 2003/07/08 01:51:36 jcardona Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -645,7 +645,6 @@ public:
 	_trie = x._trie;
 	_cur = x._cur;
 	_root = x._root;
-	_stack = x._stack;
 
 	if (_cur)
 	    _cur->incr_refcount();
@@ -669,11 +668,8 @@ public:
      */
     RefTriePreOrderIterator * begin() 
     { 
-	while (!_stack.empty()) _stack.pop();
 	while (_cur->get_parent() && _root.contains(_cur->get_parent()->k()))
 	    _cur = _cur->get_parent();
-	_stack.push(_cur);
-	next();
 	return this;
     }
 
@@ -706,18 +702,26 @@ public:
     {
 	Node * oldnode = _cur;
 	
-	if (_stack.empty()) {
-	    _cur = NULL;
-	} else {
-	    do {
-		_cur = _stack.top();
-		_stack.pop();
-		if( _cur->get_right( ) != NULL )
-		    _stack.push(_cur->get_right());
-		if( _cur->get_left() != NULL )
-		    _stack.push(_cur->get_left());
-	    } while (_cur->has_payload() == false);	// found a good node.
-	}
+	if (_cur == NULL) return;
+
+	do {
+	    if (_cur->get_left()) _cur=_cur->get_left();
+	    else {
+		bool was_right_child = node_is_right(_cur);
+		while (!(_cur->get_right() && !was_right_child) && 
+			_cur->get_parent() && 
+			_root.contains(_cur->get_parent()->k())) {
+		    was_right_child = node_is_right(_cur);
+		    _cur=_cur->get_parent(); 
+		}
+		if (!was_right_child && _cur->get_right()) 
+		    _cur=_cur->get_right();
+		else {
+		    _cur = NULL;
+		    break;
+		}
+	    }
+	} while (_cur->has_payload() == false);      // found a good node.
 
 	if (_cur)
 	    _cur->incr_refcount();
@@ -788,7 +792,6 @@ public:
 	_trie = x._trie;
 	_cur = x._cur;
 	_root = x._root;
-	_stack = x._stack;
 
 	//need to increment before decrement, as the decrement might
 	//cause deleetion, which would be bad if the old Node was the
@@ -813,8 +816,10 @@ private:
 			  node to the first non-deleted node or
 			  end. */
 
-    mutable stack<Node*> _stack;   // previous comment applies here too
-    bool node_is_left(Node * n) const; 
+    bool node_is_right(Node* n) const
+    {
+	return n->get_parent() && n  == n->get_parent()->get_right();
+    }
 
     Key		 _root;
     const RefTrie* _trie;
