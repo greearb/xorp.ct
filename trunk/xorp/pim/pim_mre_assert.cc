@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.25 2003/06/28 00:27:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.26 2003/06/28 02:37:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -419,7 +419,7 @@ PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
     int ret_value;
     assert_state_t assert_state;
     bool i_am_assert_winner_bool;
-    AssertMetric my_metric(pim_vif->addr());
+    AssertMetric my_metric(pim_vif->primary_addr());
     
     if (! (is_sg() || is_wc()))
 	return (XORP_ERROR);
@@ -561,7 +561,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     set_i_am_assert_winner_state(vif_index);
     return (XORP_OK);
     
-    // XXX: a4 is not triggered by receiving of an Assert message.
+    // XXX: a4 is not triggered by receiving of an Assert message
     
  a5:
     //  * Delete assert info (AssertWinner(*,G,I),
@@ -1488,6 +1488,28 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
     return (true);
 }
 
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_winner_nbr_sg_nlt_expired(uint16_t vif_index,
+						   const IPvX& nbr_addr)
+{
+    // XXX: the action is the same if the neighbor GenID has changed
+    return (recompute_assert_winner_nbr_sg_gen_id_changed(vif_index,
+							  nbr_addr));
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_winner_nbr_wc_nlt_expired(uint16_t vif_index,
+						   const IPvX& nbr_addr)
+{
+    // XXX: the action is the same if the neighbor GenID has changed
+    return (recompute_assert_winner_nbr_wc_gen_id_changed(vif_index,
+							  nbr_addr));
+}
+
 // Note: applies for (S,G)
 const Mifset&
 PimMre::assert_tracking_desired_sg() const
@@ -1697,7 +1719,7 @@ PimMre::spt_assert_metric(uint16_t vif_index) const
     if (pim_vif == NULL)
 	return (NULL);
     
-    assert_metric.set_addr(pim_vif->addr());
+    assert_metric.set_addr(pim_vif->primary_addr());
     assert_metric.set_rpt_bit_flag(false);
     assert_metric.set_metric_preference(metric_preference_s());
     assert_metric.set_metric(metric_s());
@@ -1722,7 +1744,7 @@ PimMre::rpt_assert_metric(uint16_t vif_index) const
     if (pim_vif == NULL)
 	return (NULL);
     
-    assert_metric.set_addr(pim_vif->addr());
+    assert_metric.set_addr(pim_vif->primary_addr());
     assert_metric.set_rpt_bit_flag(true);
     assert_metric.set_metric_preference(metric_preference_rp());
     assert_metric.set_metric(metric_rp());
