@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.2 2003/04/23 17:06:49 hodson Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.3 2003/06/05 02:11:21 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -81,7 +81,7 @@ build_auth_packet(vector<uint8_t>& pkt, AuthHandlerBase& ah, uint32_t n)
     for (uint32_t i = 0; i < n; i++) {
 	uint32_t offset = sizeof(RipPacketHeader) +
 	    (i + ah.head_entries()) * sizeof(PacketRouteEntry<IPv4>);
-	PacketRouteEntry<IPv4>* p = 
+	PacketRouteEntry<IPv4>* p =
 	    reinterpret_cast<PacketRouteEntry<IPv4>*>(&pkt[0] + offset);
 	p->initialize(0, IPv4Net("10.0.0.0/8"), IPv4("172.11.100.1"), 3);
     }
@@ -148,7 +148,7 @@ check_auth_packet(const vector<uint8_t>& pkt,
 	}
 	return 0;
     }
-    
+
     const PacketRouteEntry<IPv4>* exp0 =
 	reinterpret_cast<const PacketRouteEntry<IPv4>*>
 	    (&pkt[0] + sizeof(RipPacketHeader));
@@ -159,7 +159,7 @@ check_auth_packet(const vector<uint8_t>& pkt,
 		    "position\n");
 	return 1;
     }
-    
+
     return 0;
 }
 
@@ -170,7 +170,7 @@ void dump_binary_data(const vector<uint8_t>& data)
 {
     static const uint32_t BPL = 8;	// Bytes Per Line
 
-    vector<uint8_t>::size_type i = 0; 
+    vector<uint8_t>::size_type i = 0;
     while (i != data.size()) {
 	fprintf(stdout, "%08x ", static_cast<uint32_t>(i));
 	string hex;
@@ -215,7 +215,7 @@ test_main()
     //
     // Null Authentication Handler test
     //
-    
+
     NullAuthHandler nah;
     for (uint32_t n = 0; n < nah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, nah, n)) {
@@ -358,14 +358,14 @@ test_main()
 		    static_cast<uint32_t>(mah.key_chain().size()));
 	return 1;
     }
-    
+
     return 0;
 }
 
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -381,7 +381,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -436,7 +436,7 @@ main(int argc, char* const argv[])
         xorp_print_standard_exceptions();
         rval = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //

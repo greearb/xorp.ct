@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.2 2003/04/23 17:06:48 hodson Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.3 2003/06/05 02:11:21 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -103,7 +103,7 @@ NullAuthHandler::authenticate(const uint8_t*		     packet,
     if (n_entries == 0) {
 	return true;
     }
-    
+
     entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>
 	(packet + sizeof(RipPacketHeader));
 
@@ -174,7 +174,7 @@ PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
 {
     entries = 0;
     n_entries = 0;
-    
+
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES) {
 	set_error(c_format("packet too large (%u bytes)",
 			   static_cast<uint32_t>(packet_bytes)));
@@ -216,7 +216,7 @@ PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
     n_entries = entry_bytes / sizeof(PacketRouteEntry<IPv4>) - 1;
     if (n_entries)
 	entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>(ppr + 1);
-    
+
     return true;
 }
 
