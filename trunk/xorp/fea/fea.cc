@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.16 2003/12/10 22:37:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.17 2003/12/19 23:57:25 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -136,7 +136,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     // 5. XRL Target
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig, ifm,
-				xrl_ifc_reporter, 0);
+				xrl_ifc_reporter, 0, &lfc_bridge);
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;

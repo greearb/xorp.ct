@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.29 2003/11/06 17:12:20 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.30 2003/12/17 00:04:48 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -31,8 +31,9 @@ noinst_SCRIPTS		 = $(test_scripts)
 noinst_LIBRARIES	 = libfea.a
 
 # -- Sources and Linkage for xorp_fea
-xorp_fea_SOURCES	= fea.cc
-xorp_fea_LDADD		= $(noinst_LIBRARIES)
+xorp_fea_SOURCES	 = fea.cc
+xorp_fea_LDADD		 = $(noinst_LIBRARIES)
+
 ### FEA XRL libraries
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
@@ -53,6 +54,11 @@ xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### libfeaclient libraries
 xorp_fea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+### socket server libraries and related
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 ### XORP misc libraries
 xorp_fea_LDADD		+= $(top_builddir)/libproto/libproto.a
 xorp_fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
@@ -60,8 +66,11 @@ xorp_fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Sources and Linkage for xorp_fea_dummy
-xorp_fea_dummy_SOURCES	= fea_dummy.cc
-xorp_fea_dummy_LDADD	=  $(noinst_LIBRARIES)
+xorp_fea_dummy_SOURCES	 = fea_dummy.cc
+xorp_fea_dummy_LDADD	 = $(noinst_LIBRARIES)
+
+
+
 ### FEA XRL libraries
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
@@ -82,6 +91,11 @@ xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libclibase.a
 ### libfeaclient libraries
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+### socket server libraries and releated
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 ### XORP misc libraries
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libproto/libproto.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libxipc/libxipc.a
@@ -89,8 +103,9 @@ xorp_fea_dummy_LDADD	+= $(top_builddir)/libcomm/libcomm.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Sources and Linkage for test_mfea
-test_mfea_SOURCES	= test_mfea.cc
-test_mfea_LDADD		= $(noinst_LIBRARIES)
+test_mfea_SOURCES	 = test_mfea.cc
+test_mfea_LDADD		 = $(noinst_LIBRARIES)
+
 # FEA-specific begin
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
@@ -98,7 +113,6 @@ test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 # FEA-specific end
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
-#test_mfea_LDADD	+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
 ### MRT libraries
@@ -110,6 +124,14 @@ test_mfea_LDADD		+= @CLI_CURSES_LIB@
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+### libfeaclient libraries
+test_mfea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+### socket server libraries and releated
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 ### XORP misc libraries
 test_mfea_LDADD		+= $(top_builddir)/libproto/libproto.a
 test_mfea_LDADD		+= $(top_builddir)/libxipc/libfinder.a

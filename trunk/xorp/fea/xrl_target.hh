@@ -12,19 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.22 2003/10/28 19:36:27 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.23 2003/12/17 00:04:49 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
 
 #include "xrl/targets/fea_base.hh"
-
-#include "fticonfig.hh"
-
 #include "xrl_fti.hh"
 #include "xrl_ifmanager.hh"
-#include "xrl_ifupdate.hh"
-#include "xrl_rawsock4.hh"
+
+class FtiConfig;
+class InterfaceManager;
+class XrlIfConfigUpdateReporter;
+class XrlRawSocket4Manager;
+class LibFeaClientBridge;
 
 class XrlFeaTarget : public XrlFeaTargetBase {
 public:
@@ -33,7 +34,8 @@ public:
 		 FtiConfig& 			ftic,
 		 InterfaceManager& 		ifmgr,
 		 XrlIfConfigUpdateReporter&	ifupd,
-		 XrlRawSocket4Manager*		xrsm = 0);
+		 XrlRawSocket4Manager*		xrsm = 0,
+		 LibFeaClientBridge*		lfbr = 0);
 
     bool done() const { return _done; }
 
@@ -700,6 +702,7 @@ private:
     XrlInterfaceManager 	_xifmgr;
     XrlIfConfigUpdateReporter&	_xifcur;
     XrlRawSocket4Manager*	_xrsm;
+    LibFeaClientBridge*		_lfcb;
 
     bool			_done;	// True if we are done
 };

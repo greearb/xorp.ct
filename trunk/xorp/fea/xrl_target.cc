@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.32 2003/12/10 22:17:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.33 2003/12/17 00:04:49 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -26,6 +26,11 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+
+#include "fticonfig.hh"
+#include "libfeaclient_bridge.hh"
+#include "xrl_ifupdate.hh"
+#include "xrl_rawsock4.hh"
 #include "xrl_target.hh"
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
@@ -33,9 +38,10 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   FtiConfig&  		 	ftic,
 			   InterfaceManager&	 	ifmgr,
 			   XrlIfConfigUpdateReporter&	xifcur,
-			   XrlRawSocket4Manager*	xrsm)
+			   XrlRawSocket4Manager*	xrsm,
+			   LibFeaClientBridge*		lfcb)
     : XrlFeaTargetBase(&r), _xftm(e, ftic), _xifmgr(e, ifmgr),
-      _xifcur(xifcur), _xrsm(xrsm), _done(false)
+      _xifcur(xifcur), _xrsm(xrsm), _lfcb(lfcb), _done(false)
 {
 }
 
@@ -1138,18 +1144,30 @@ XrlFeaTarget::ifmgr_0_1_unregister_system_interfaces_client(const string& client
 
 XrlCmdError
 XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(
-	const string& /* clientname */
+	const string& clientname
 	)
 {
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
+    if (_lfcb == 0) {
+	return XrlCmdError::COMMAND_FAILED("Service not available.");
+    }
+    if (_lfcb->add_libfeaclient_mirror(clientname) == false) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
-	const string& /* clientname */
+	const string& clientname
 	)
 {
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
+    if (_lfcb == 0) {
+	return XrlCmdError::COMMAND_FAILED("Service not available.");
+    }
+    if (_lfcb->remove_libfeaclient_mirror(clientname) == false) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
 }
 
 // ----------------------------------------------------------------------------
