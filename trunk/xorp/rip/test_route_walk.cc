@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.8 2004/06/10 22:41:47 hodson Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.9 2004/10/03 10:34:21 abittau Exp $"
 
 #include <set>
 
@@ -153,11 +153,12 @@ public:
 
 	TimeVal ten_ms(0, 10000);
 
-	verbose_log("walked routes = %u\n", *done);
+	verbose_log("walked routes = %u\n", XORP_UINT_CAST(*done));
 	rw->resume();
 	while (todo != 0) {
 	    if (rw->current_route() == 0) {
-		verbose_log("Halting with %u routes done.\n", *done);
+		verbose_log("Halting with %u routes done.\n",
+			    XORP_UINT_CAST(*done));
 		return false;
 	    }
 	    if (wait_on_expiring) {
@@ -165,7 +166,8 @@ public:
 		if (delta < ten_ms) {
 		    verbose_log("Pausing on route about to be expired "
 				"or deleted (expiry in %d.%06d secs).\n",
-				delta.sec(), delta.usec());
+				XORP_INT_CAST(delta.sec()),
+				XORP_INT_CAST(delta.usec()));
 		    break;
 		}
 	    }
@@ -197,8 +199,9 @@ public:
 	TimeVal tv_add_end;
 	_e.current_time(tv_add_end);
 	tv_add_end -= tv_add_start;
-	verbose_log("Adding routes took %d.%06d secs\n",tv_add_end.sec(),
-							 tv_add_end.usec());
+	verbose_log("Adding routes took %d.%06d secs\n",
+		    XORP_INT_CAST(tv_add_end.sec()),
+		    XORP_INT_CAST(tv_add_end.usec()));
 
 	// Walk routes on 1ms timer
 	// We make 2 passes over routes with 97 routes read per 1ms
@@ -212,7 +215,8 @@ public:
 				callback(this,
 					 &RouteWalkTester<A>::walk_routes,
 					 &rw, false,
-					 &routes_done, 97u));
+					 &routes_done,
+					 static_cast<uint32_t>(97u)));
 	    while (t.scheduled()) {
 		_e.run();
 		if (routes_done > n_routes) {
@@ -221,8 +225,9 @@ public:
 		}
 	    }
 	    if (routes_done != n_routes) {
-		verbose_log("Read %u routes, expected to read %d\n",
-			    routes_done, n_routes);
+		verbose_log("Read %u routes, expected to read %u\n",
+			    XORP_UINT_CAST(routes_done),
+			    XORP_UINT_CAST(n_routes));
 		return 1;
 	    }
 	    routes_done = 0;
@@ -245,7 +250,8 @@ public:
 			    callback(this,
 				     &RouteWalkTester<A>::walk_routes,
 				     &rw, true,
-				     &routes_done, 10u));
+				     &routes_done,
+				     static_cast<uint32_t>(10u)));
 	while (t.scheduled()) {
 	    _e.run();
 	    if (routes_done > n_routes) {
@@ -254,7 +260,8 @@ public:
 	    }
 	}
 	verbose_log("Read %u routes, %u available at end.\n",
-		    routes_done, rdb.route_count());
+		    XORP_UINT_CAST(routes_done),
+		    XORP_UINT_CAST(rdb.route_count()));
 
 	rdb.flush_routes();
 	if (rdb.route_count() != 0) {
