@@ -1,0 +1,7 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "firewall.xif"
+
+target firewall implements	common/0.1,	\
+				firewall/0.1
