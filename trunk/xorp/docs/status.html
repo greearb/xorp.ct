@@ -9,7 +9,7 @@
 See the <a href="index.html">software documentation</a> for details of the
 XORP processes.
 <P>
-As of March 2003 (Release 0.2), the status is as follows:
+As of June 2003 (Release 0.3), the status is as follows:
 <DL>
 <DT><B>RIB</B>
 
@@ -104,7 +104,10 @@ probably new bugs.
 <P>
 <DT><B>SNMP</B>
 
-<DD>Not yet started.
+<DD>We are using the Net-SNMP agent.  We provide a XORP interface module that
+allows MIB modules to access information from XORP processes.  Currently we have
+partially implemented one such module, BGP4-MIB (RFC 1657).  The rtrmgr can be
+configured to start the SNMP agent and to load MIB modules.
 </DL>
 
 <hr>
@@ -112,7 +115,7 @@ probably new bugs.
 <!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
 <!-- hhmts start -->
 <small>
-Last modified: $XORP: xorp/docs/status.html,v 1.3 2003/03/07 01:18:20 pavlin Exp $
+Last modified: $XORP: xorp/docs/status.html,v 1.4 2003/05/16 21:13:48 pavlin Exp $
 </small>
 <!-- hhmts end -->
 
