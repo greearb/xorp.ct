@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.1 2003/08/22 23:19:02 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.2 2003/08/25 16:59:10 hodson Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -40,6 +40,42 @@ public:
 protected:
     IfMgrCommandSinkBase& _o1;
     IfMgrCommandSinkBase& _o2;
+};
+
+/**
+ * @short Class to dispatch Interface Manager Commands.
+ *
+ * This class buffers exactly one Interface Manager Command (@ref
+ * IfMgrCommandBase) and applies it to an Interface Manager
+ * Configuration Tree (@ref IfMgrIfTree) when it's execute() method is
+ * called.
+ */
+class IfMgrCommandDispatcher : public IfMgrCommandSinkBase {
+public:
+    typedef IfMgrCommandSinkBase::Cmd Cmd;
+
+public:
+    /**
+     * Constructor
+     * @param tree configuration tree to apply commands to.
+     */
+    IfMgrCommandDispatcher(IfMgrIfTree& tree);
+
+    /**
+     * Push a command into local storage ready for execution.
+     */
+    void push(const Cmd& cmd);
+
+    /**
+     * Execute command.
+     *
+     * @return command return status (true indicates success, false failure).
+     */
+    virtual bool execute();
+
+protected:
+    Cmd		 _cmd;
+    IfMgrIfTree& _iftree;
 };
 
 /**

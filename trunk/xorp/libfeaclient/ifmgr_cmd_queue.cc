@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.1 2003/08/22 23:19:02 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.2 2003/08/25 16:59:10 hodson Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -34,7 +34,6 @@ IfMgrCommandSinkBase::~IfMgrCommandSinkBase()
 // ----------------------------------------------------------------------------
 // IfMgrCommandTee
 
-
 IfMgrCommandTee::IfMgrCommandTee(IfMgrCommandSinkBase& o1,
 				 IfMgrCommandSinkBase& o2)
     : _o1(o1), _o2(o2)
@@ -46,6 +45,34 @@ IfMgrCommandTee::push(const Cmd& cmd)
 {
     _o1.push(cmd);
     _o2.push(cmd);
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrCommandDispatcher
+
+IfMgrCommandDispatcher::IfMgrCommandDispatcher(IfMgrIfTree& tree)
+    : _iftree(tree)
+{
+}
+
+void
+IfMgrCommandDispatcher::push(const Cmd& cmd)
+{
+    if (_cmd.get() != 0) {
+	XLOG_WARNING("Dropping buffered command.");
+    }
+    _cmd = cmd;
+}
+
+bool
+IfMgrCommandDispatcher::execute()
+{
+    bool success = false;
+    if (_cmd.get()) {
+	success = _cmd->execute(_iftree);
+	_cmd = 0;
+    }
+    return success;
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.1 2003/08/22 23:19:02 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.2 2003/08/25 16:59:10 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -36,35 +36,103 @@ public:
     typedef map<const string, IfMgrIfAtom> IfMap;
 
 public:
+
+    /**
+     * Interface collection accessor.
+     */
     inline const IfMap& interfaces() const		{ return _ifs; }
+
+    /**
+     * Interface collection accessor.
+     */
     inline IfMap& interfaces()				{ return _ifs; }
 
+    /**
+     * Erase all interface state.
+     */
+    inline void clear();
+
+    /**
+     * Find interface.
+     * @param ifname name of interface to find.
+     * @return pointer to interface structure on success, 0 otherwise.
+     */
     const IfMgrIfAtom* find_if(const string& ifname) const;
 
+    /**
+     * Find interface.
+     * @param ifname name of interface to find.
+     * @return pointer to interface structure on success, 0 otherwise.
+     */
     IfMgrIfAtom* find_if(const string& ifname);
 
+    /**
+     * Find virtual interface.
+     * @param ifname name of interface responsible for virtual interface.
+     * @param vifname name of virtual interface.
+     * @return pointer to virtual interface structure on success, 0 otherwise.
+     */
     const IfMgrVifAtom* find_vif(const string& ifname,
 				 const string& vifname) const;
 
+    /**
+     * Find virtual interface.
+     * @param ifname name of interface responsible for virtual interface.
+     * @param vifname name of virtual interface.
+     * @return pointer to virtual interface structure on success, 0 otherwise.
+     */
     IfMgrVifAtom* find_vif(const string& ifname,
 			   const string& vifname);
 
+    /**
+     * Find IPv4 address structure.
+     * @param ifname name of interface responsible for address.
+     * @param vifname name of virtual interface responsible for address.
+     * @param addr IPv4 address.
+     * @return pointer to virtual interface structure on success, 0 otherwise.
+     */
     const IfMgrIPv4Atom* find_addr(const string& ifname,
 				   const string& vifname,
 				   const IPv4	 addr) const;
 
+    /**
+     * Find IPv4 address structure.
+     * @param ifname name of interface responsible for address.
+     * @param vifname name of virtual interface responsible for address.
+     * @param addr IPv4 address.
+     * @return pointer to virtual interface structure on success, 0 otherwise.
+     */
     IfMgrIPv4Atom* find_addr(const string& ifname,
 			     const string& vifname,
 			     const IPv4	   addr);
 
+    /**
+     * Find IPv6 address structure.
+     * @param ifname name of interface responsible for address.
+     * @param vifname name of virtual interface responsible for address.
+     * @param addr IPv6 address.
+     * @return pointer to virtual interface structure on success, 0 otherwise.
+     */
     const IfMgrIPv6Atom* find_addr(const string& ifname,
 				   const string& vifname,
 				   const IPv6&	 addr) const;
 
+    /**
+     * Find IPv6 address structure.
+     * @param ifname name of interface responsible for address.
+     * @param vifname name of virtual interface responsible for address.
+     * @param addr IPv6 address.
+     * @return pointer to virtual interface structure on success, 0 otherwise.
+     */
     IfMgrIPv6Atom* find_addr(const string& ifname,
 			     const string& vifname,
 			     const IPv6&   addr);
 
+    /**
+     * Equality operator.
+     * @param o tree to compare against.
+     * @return true if this instance and o are the same, false otherwise.
+     */
     bool operator==(const IfMgrIfTree& o) const;
 
 protected:

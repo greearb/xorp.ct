@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/libfeaclient/Makefile.am,v 1.1 2003/08/22 23:19:02 hodson Exp $
 ##
 
 # -- Real Programs
@@ -13,10 +13,12 @@ noinst_LIBRARIES	= libfeaclient.a
 libfeaclient_a_SOURCES  = ifmgr_atoms.hh
 libfeaclient_a_SOURCES += ifmgr_cmds.hh
 libfeaclient_a_SOURCES += ifmgr_cmd_queue.hh
+libfeaclient_a_SOURCES += xrl_ifmgr_mirror.hh
 
 libfeaclient_a_SOURCES += ifmgr_atoms.cc
 libfeaclient_a_SOURCES += ifmgr_cmds.cc
 libfeaclient_a_SOURCES += ifmgr_cmd_queue.cc
+libfeaclient_a_SOURCES += xrl_ifmgr_mirror.cc
 
 # -- Test Programs
 TESTS			= test_local_copy
