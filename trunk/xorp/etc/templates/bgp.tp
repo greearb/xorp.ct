@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.37 2004/12/17 10:27:51 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.38 2005/03/09 22:50:39 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -201,9 +201,6 @@ protocols {
 }
 
 protocols {
-    %help: short "Configure routing protocols";
-    %help: long "The protocols grouping in the router configuration groups together all the \n configuration information for routing protocols.\nTyping protocols { as a command will start direct entry mode, whereby the \nrouter configuration can be entered.";
-
     bgp {
 	%help: short "Configure BGP inter-domain routing";
 
