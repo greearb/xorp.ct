@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.62 2002/12/09 18:29:26 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -76,6 +76,11 @@ PimMre::set_downstream_noinfo_state(uint16_t vif_index)
 	    pim_mrt().add_task_downstream_jp_state_sg_rpt(vif_index,
 							  source_addr(),
 							  group_addr());
+	    // XXX: try to explicitly remove the (S,G,rpt) entry here, because
+	    // a (S,G,rpt) entry may exist even if the upstream state is
+	    // NoInfo. In other words, even if the state of all downstream
+	    // interfaces changes to NoInfo, the upstream state may not change.
+	    entry_try_remove();
 	    break;
 	}
 	if (is_wc()) {
