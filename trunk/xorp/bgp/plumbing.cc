@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.62 2005/03/19 20:49:57 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.63 2005/03/20 23:14:31 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -376,8 +376,6 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _master.safi(),
 			   _fanout_table,
 			   _next_hop_resolver);
-    _fanout_table->add_next_table(filter_out, _master.rib_handler(),
-				  _ipc_rib_in_table->genid());
     _tables.insert(filter_out);
 
     PolicyTable<A>* policy_filter_out =
@@ -406,11 +404,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     _out_map[_master.rib_handler()] = _ipc_rib_out_table;
     cache_out->set_next_table(_ipc_rib_out_table);
 
-    // XXX: these are dups ?
-#if 0    
-    _tables.insert(filter_out);
-    _tables.insert(cache_out);
-#endif    
+    _fanout_table->add_next_table(filter_out, _master.rib_handler(),
+				  _ipc_rib_in_table->genid());
 }
 
 template <class A>
@@ -528,8 +523,6 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			   _master.safi(),
 			   _fanout_table,
 			   _next_hop_resolver);
-    _fanout_table->add_next_table(filter_out, peer_handler,
-				  rib_in->genid());
 
     PolicyTable<A>* policy_filter_out =
 	new PolicyTable<A>(_ribname + "PeerOutputPolicyFilter" + peername,
@@ -609,8 +602,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     /* 9. load up damping filters */
     /* TBD */
 
-    /* 10 inform ribout that it's up */
-    rib_out->ribout_peering_came_up();
+    /* 10. finally plumb in the output branch */
+    _fanout_table->add_next_table(filter_out, peer_handler, rib_in->genid());
 
     /* 11. cause the routing table to be dumped to the new peer */
     dump_entire_table(filter_out, _ribname);
@@ -706,15 +699,12 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
 
     //plumb the output branch back into the fanout table
     BGPRouteTable<A> *rt, *prevrt;
-    RibOutTable<A>* rib_out;
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_came_up: peer %p not found",
 		   peer_handler);
-    rib_out = iter->second;
-    rib_out->ribout_peering_came_up();
-    rt = rib_out;
+    rt = iter->second;
     prevrt = rt;
     while (rt != NULL) {
 	debug_msg("rt=%p (%s), _fanout_table=%p\n", 
@@ -727,8 +717,8 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     FilterTable<A> *filter_out = dynamic_cast<FilterTable<A> *>(prevrt);
     XLOG_ASSERT(filter_out != NULL);
 
-    _fanout_table->add_next_table(filter_out, peer_handler, rib_in->genid());
     filter_out->set_parent(_fanout_table);
+    _fanout_table->add_next_table(filter_out, peer_handler, rib_in->genid());
 
     //do the route dump
     dump_entire_table(filter_out, _ribname);

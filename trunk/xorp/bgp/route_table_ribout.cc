@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.24 2005/03/18 08:15:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.25 2005/03/20 23:14:31 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -445,10 +445,16 @@ RibOutTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template<class A>
 void
-RibOutTable<A>::ribout_peering_came_up() 
+RibOutTable<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
+				  BGPRouteTable<A> *caller) 
 {
-    _peer_is_up = true;
-    _peer_busy = false;
+    XLOG_ASSERT(this->_parent == caller);
+    UNUSED(genid);
+
+    if (peer == _peer) {
+	_peer_is_up = true;
+	_peer_busy = false;
+    }
 }
 
 template<class A>

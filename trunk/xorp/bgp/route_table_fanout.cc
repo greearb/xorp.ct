@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.47 2005/03/19 23:01:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.48 2005/03/20 22:08:24 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -141,6 +141,7 @@ FanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
 	return -1;
     }
     _next_tables.insert(new_next_table, ph, genid);
+    new_next_table->peering_came_up(ph, genid, this);
     return 0;
 }
 
