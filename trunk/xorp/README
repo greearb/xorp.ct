@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.11 2003/06/09 19:13:32 pavlin Exp $
+# $XORP: xorp/README,v 1.12 2003/06/11 21:58:03 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -78,10 +78,6 @@ This release of XORP compiles or may work on:
       available at:
 	http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=54724
     - IGMP and PIM-SM appear to work.
-
-  * MacOS X 10.2.x:
-    - The code compiles, but some of the internal tests fail.
-    - There is no FEA support.
 
 Known problems:
 
@@ -207,6 +203,9 @@ limited interest, or are not relevant to the current release:
   * config : autoconf/automake related files.
 
   * devnotes : various notes for the XORP core members.
+
+  * libfeaclient : Library that may be useful to clients of the FEA.
+    Currently, it is not used yet.
 
   * ospfd : John Moy's OSPFd implementation (http://www.ospf.org/).
     Not supported with this release.
