@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.4 2004/02/29 22:57:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.5 2004/03/02 04:06:25 pavlin Exp $"
 
 
 //
@@ -299,7 +299,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-14s %-8s %12s %-15s %-1s\n",
+    cli_print(c_format("%-12s %-8s %12s %-15s %-1s\n",
 		       "Interface", "State", "Vif/PifIndex", "Addr", "Flags"));
     for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
@@ -355,7 +355,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 	list<VifAddr>::const_iterator iter = mfea_vif->addr_list().begin();
 	string dd = c_format("%d/%d", mfea_vif->vif_index(),
 			     mfea_vif->pif_index());
-	cli_print(c_format("%-14s %-8s %12s %-15s %-1s\n",
+	cli_print(c_format("%-12s %-8s %12s %-15s %-1s\n",
 			   mfea_vif->name().c_str(),
 			   mfea_vif->state_string(),
 			   dd.c_str(),
@@ -388,7 +388,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-14s %-15s %-18s %-15s %-15s\n",
+    cli_print(c_format("%-12s %-15s %-18s %-15s %-15s\n",
 		       "Interface", "Addr", "Subnet", "Broadcast", "P2Paddr"));
     for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
@@ -407,7 +407,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 	// Print the first address
 	//
 	list<VifAddr>::const_iterator iter = mfea_vif->addr_list().begin();
-	cli_print(c_format("%-14s %-15s %-18s %-15s %-15s\n",
+	cli_print(c_format("%-12s %-15s %-18s %-15s %-15s\n",
 			   mfea_vif->name().c_str(),
 			   (iter != mfea_vif->addr_list().end())?
 			   cstring((*iter).addr()): "",
@@ -423,7 +423,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 	if (iter != mfea_vif->addr_list().end())
 	    ++iter;
 	for ( ; iter != mfea_vif->addr_list().end(); ++iter) {
-	    cli_print(c_format("%-14s %-15s %-18s %-15s %-15s\n",
+	    cli_print(c_format("%-12s %-15s %-18s %-15s %-15s\n",
 			       " ",
 			       cstring((*iter).addr()),
 			       cstring((*iter).subnet_addr()),

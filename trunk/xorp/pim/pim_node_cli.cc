@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.23 2004/02/29 22:59:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.24 2004/03/02 04:06:26 pavlin Exp $"
 
 
 //
@@ -603,7 +603,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-14s %-8s %-6s %1s %-8s %8s %-15s %9s\n",
+    cli_print(c_format("%-12s %-8s %-6s %1s %-8s %8s %-15s %9s\n",
 		       "Interface", "State", "Mode", "V", "PIMstate",
 		       "Priority", "DRaddr", "Neighbors"));
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
@@ -620,7 +620,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 	}
 	if (! do_print)
 	    continue;
-	cli_print(c_format("%-14s %-8s %-6s %1d %-8s %8d %-15s %9d\n",
+	cli_print(c_format("%-12s %-8s %-6s %1d %-8s %8d %-15s %9d\n",
 			   pim_vif->name().c_str(),
 			   pim_vif->state_string(),
 			   pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
@@ -657,7 +657,7 @@ PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-14s %-15s %-15s %-15s\n",
+    cli_print(c_format("%-12s %-15s %-15s %-15s\n",
 		       "Interface", "PrimaryAddr", "DomainWideAddr", "SecondaryAddr"));
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
@@ -687,7 +687,7 @@ PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
 		continue;
 	    secondary_addr_list.push_back(vif_addr.addr());
 	}
-	cli_print(c_format("%-14s %-15s %-15s %-15s\n",
+	cli_print(c_format("%-12s %-15s %-15s %-15s\n",
 			   pim_vif->name().c_str(),
 			   cstring(pim_vif->primary_addr()),
 			   cstring(pim_vif->domain_wide_addr()),
@@ -705,7 +705,7 @@ PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
 	     secondary_addr_iter != secondary_addr_list.end();
 	     ++secondary_addr_iter) {
 	    IPvX& secondary_addr = *secondary_addr_iter;
-	    cli_print(c_format("%-14s %-15s %-15s %-15s\n",
+	    cli_print(c_format("%-12s %-15s %-15s %-15s\n",
 			       " ",
 			       " ",
 			       " ",
@@ -1204,7 +1204,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-14s %10s %-15s %1s %-6s %8s %7s\n",
+    cli_print(c_format("%-12s %10s %-15s %1s %-6s %8s %7s\n",
 		       "Interface", "DRpriority", "NeighborAddr", "V", "Mode",
 		       "Holdtime", "Timeout"));
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
@@ -1242,7 +1242,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 		nbr_timeout_sec_string = "None";
 	    }
 	    
-	    cli_print(c_format("%-14s %10s %-15s %1d %-6s %8d %7s\n",
+	    cli_print(c_format("%-12s %10s %-15s %1d %-6s %8d %7s\n",
 			       pim_vif->name().c_str(),
 			       dr_priority_string.c_str(),
 			       cstring(pim_nbr->primary_addr()),
@@ -1256,7 +1256,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 		 list_iter != pim_nbr->secondary_addr_list().end();
 		 ++list_iter) {
 		const IPvX& secondary_addr = *list_iter;
-		cli_print(c_format("%-14s %10s %-15s\n",
+		cli_print(c_format("%-12s %10s %-15s\n",
 				   "",
 				   "",
 				   cstring(secondary_addr)));
