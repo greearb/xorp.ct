@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.7 2003/12/02 09:38:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.8 2004/01/13 01:18:25 pavlin Exp $"
 
 #include <signal.h>
 
@@ -57,7 +57,7 @@ usage(const char* name)
 	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
 	    default_xrl_dir.c_str());
 
-    exit(-1);
+    exit(1);
 }
 
 int

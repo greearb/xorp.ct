@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrldb.hh,v 1.3 2003/03/10 23:21:04 hodson Exp $
+// $XORP: xorp/rtrmgr/xrldb.hh,v 1.4 2003/12/02 09:39:01 pavlin Exp $
 
 #ifndef __RTRMGR_XRLDB_HH__
 #define __RTRMGR_XRLDB_HH__
@@ -20,6 +20,8 @@
 #include <list>
 #include "libxorp/xorp.h"
 #include "libxipc/xrl_router.hh"
+
+#include "rtrmgr_error.hh"
 
 
 enum XRLMatchType {
@@ -53,7 +55,7 @@ private:
 
 class XRLdb {
 public:
-    XRLdb(const string& xrldir);
+    XRLdb(const string& xrldir) throw (InitError);
     bool check_xrl_syntax(const string& xrl) const;
     XRLMatchType check_xrl_exists(const string& xrl) const;
     string str() const;

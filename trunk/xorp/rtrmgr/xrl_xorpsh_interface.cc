@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.8 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.9 2003/12/02 09:39:00 pavlin Exp $"
 
 // #define DEBUG_CONFIG_CHANGE
 #include "version.h"
@@ -57,7 +57,7 @@ XrlXorpshInterface::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlXorpshInterface::common_0_1_shutdown()
 {
-    // XXX placeholder
+    // TODO: XXX: implement it!!
     exit(0);
 }
 

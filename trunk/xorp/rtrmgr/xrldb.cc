@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.4 2003/03/10 23:21:04 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.5 2003/12/02 09:39:01 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -146,54 +146,50 @@ XRLtarget::str() const
     return s;
 }
 
-XRLdb::XRLdb(const string& xrldir)
+XRLdb::XRLdb(const string& xrldir) throw (InitError)
 {
-#if 0
-    printf("Initializing XRLdb from %s\n", xrldir.c_str());
-#endif
-
+    string errmsg;
     list<string> files;
 
     struct stat dirdata;
     if (stat(xrldir.c_str(), &dirdata) < 0) {
-	string errstr = "rtrmgr: error reading xrl directory " + xrldir + "\n";
-	errstr += strerror(errno); 
-	errstr += "\n";
-	fprintf(stderr, "%s", errstr.c_str());
-	exit(1);
+	errmsg = c_format("Error reading XRL directory %s: %s",
+			  xrldir.c_str(), strerror(errno));
+	xorp_throw(InitError, errmsg);
     }
 
     if ((dirdata.st_mode & S_IFDIR) == 0) {
-	string errstr = "rtrmgr: error reading xrl directory "
-	    + xrldir + "\n" + xrldir + " is not a directory\n";
-	fprintf(stderr, "%s", errstr.c_str());
-	exit(1);
+	errmsg = c_format("Error reading XRL directory %s: not a directory",
+			  xrldir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
+    // TODO: file suffix is hardcoded here!
     string globname = xrldir + "/*.xrls";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
-	fprintf(stderr, "rtrmgr failed to find xrl files in %s\n",
-		xrldir.c_str());
 	globfree(&pglob);
-	exit(1);
+	errmsg = c_format("Failed to find XRL files in %s", xrldir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
     if (pglob.gl_pathc == 0) {
-	fprintf(stderr, "rtrmgr failed to find any xrl files in %s\n", 
-		xrldir.c_str());
 	globfree(&pglob);
-	exit(1);
+	errmsg = c_format("Failed to find any XRL files in %s",
+			  xrldir.c_str());
+	xorp_throw(InitError, errmsg);
     }
     
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	_targets.push_back(XRLtarget(pglob.gl_pathv[i]));
     }
+
+    globfree(&pglob);
+
 #ifdef DEBUG_XRLDB
     printf("XRLdb initialized\n");
     printf("%s\n", str().c_str());
 #endif
-    globfree(&pglob);
 }
 
 bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.5 2003/12/02 09:38:55 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.6 2004/01/13 00:22:43 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -91,7 +91,7 @@ public:
 
     void set_config_tree(SlaveConfigTree* sct) { _conf_tree = sct; }
     OpCommand* new_op_command(const list<string>& parts);
-    int check_variable_name(const string& name) const;
+    bool check_variable_name(const string& name) const;
     OpCommand* find(const list<string>& parts);
     bool prefix_matches(const list<string>& parts) const;
     void execute(EventLoop* eventloop, const list<string>& parts,

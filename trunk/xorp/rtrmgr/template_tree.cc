@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.14 2004/01/05 23:45:04 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.15 2004/01/13 01:15:09 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -35,52 +35,49 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     : _xrldb(xrl_dir),
       _xorp_root_dir(xorp_root_dir)
 {
+    string errmsg;
+    list<string> files;
+
     _root_node = new TemplateTreeNode(*this, NULL, "", "");
     _current_node = _root_node;
 
-    list<string> files;
-
     struct stat dirdata;
     if (stat(config_template_dir.c_str(), &dirdata) < 0) {
-	string errstr = "rtrmgr: error reading config directory "
-	    + config_template_dir + "\n";
-	errstr += strerror(errno);
-	errstr += "\n";
-	fprintf(stderr, "%s", errstr.c_str());
-	exit(1);
+	errmsg = c_format("Error reading config directory %s: %s",
+			  config_template_dir.c_str(), strerror(errno));
+	xorp_throw(InitError, errmsg);
     }
 
     if ((dirdata.st_mode & S_IFDIR) == 0) {
-	string errstr = "rtrmgr: error reading config directory "
-	    + config_template_dir + "\n" + config_template_dir
-	    + " is not a directory\n";
-	fprintf(stderr, "%s", errstr.c_str());
-	exit(1);
+	errmsg = c_format("Error reading config directory %s: not a directory",
+			  config_template_dir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
+    // TODO: file suffix is hardcoded here!
     string globname = config_template_dir + "/*.tp";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
-	fprintf(stderr, "rtrmgr failed to find config files in %s\n",
-		config_template_dir.c_str());
 	globfree(&pglob);
-	exit(1);
+	errmsg = c_format("Failed to find config files in %s",
+			  config_template_dir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
     if (pglob.gl_pathc == 0) {
-	fprintf(stderr, "rtrmgr failed to find any template files in %s\n",
-		config_template_dir.c_str());
 	globfree(&pglob);
-	exit(1);
+	errmsg = c_format("Failed to find any template files in %s",
+			  config_template_dir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	printf("Loading template file %s\n", pglob.gl_pathv[i]);
 	if (init_template_parser(pglob.gl_pathv[i], this) < 0) {
-	    fprintf(stderr, "Failed to open template file: %s\n",
-		    config_template_dir.c_str());
 	    globfree(&pglob);
-	    exit(-1);
+	    errmsg = c_format("Failed to open template file: %s",
+			      config_template_dir.c_str());
+	    xorp_throw(InitError, errmsg);
 	}
 	try {
 	    parse_template();
@@ -90,8 +87,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	}
 	if (_path_segments.size() != 0) {
 	    globfree(&pglob);
-	    string errmsg;
-	    errmsg = c_format("Error: file %s is not terminated properly",
+	    errmsg = c_format("File %s is not terminated properly",
 			      pglob.gl_pathv[i]);
 	    xorp_throw(InitError, errmsg);
 	}
@@ -100,7 +96,6 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     globfree(&pglob);
 
     // Verify the template tree
-    string errmsg;
     if (_root_node->check_template_tree(errmsg) != true) {
 	xorp_throw(InitError, errmsg.c_str());
     }

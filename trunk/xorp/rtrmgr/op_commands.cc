@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.9 2003/12/02 09:38:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.10 2004/01/13 00:22:43 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -178,8 +178,8 @@ int
 OpCommand::add_command_file(const string& cmd_file)
 {
     if (!_cmd_file.empty()) {
-	string err = "Only one %command allowed per CLI command.";
-	opcmderror(err.c_str());
+	string errmsg = "Only one %command allowed per CLI command.";
+	opcmderror(errmsg.c_str());
 	return XORP_ERROR;
     }
     _cmd_file = cmd_file;
@@ -190,8 +190,8 @@ int
 OpCommand::add_module(const string& module)
 {
     if (!_module.empty()) {
-	string err = "Only one %module allowed per CLI command.";
-	opcmderror(err.c_str());
+	string errmsg = "Only one %module allowed per CLI command.";
+	opcmderror(errmsg.c_str());
 	return XORP_ERROR;
     }
     _module = module;
@@ -361,50 +361,47 @@ OpCommand::remove_instance(OpInstance* instance) const
 OpCommandList::OpCommandList(const string &config_template_dir,
 			     const TemplateTree *tt) throw (InitError)
 {
-    _template_tree = tt;
     list<string> files;
+    string errmsg;
+
+    _template_tree = tt;
 
     struct stat dirdata;
     if (stat(config_template_dir.c_str(), &dirdata) < 0) {
-	string errstr = "rtrmgr: error reading config directory "
-	    + config_template_dir + "\n";
-	errstr += strerror(errno);
-	errstr += "\n";
-	fprintf(stderr, "%s", errstr.c_str());
-	exit(1);
+	errmsg = c_format("Error reading config directory %s: %s",
+			  config_template_dir.c_str(), strerror(errno));
+	xorp_throw(InitError, errmsg);
     }
 
     if ((dirdata.st_mode & S_IFDIR) == 0) {
-	string errstr = "rtrmgr: error reading config directory "
-	    + config_template_dir + "\n" + config_template_dir
-	    + " is not a directory\n";
-	fprintf(stderr, "%s", errstr.c_str());
-	exit(1);
+	errmsg = c_format("Error reading config directory %s: not a directory",
+			  config_template_dir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
     // TODO: file suffix is hardcoded here!
     string globname = config_template_dir + "/*.cmds";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
-	fprintf(stderr, "rtrmgr failed to find config files in %s\n",
-		config_template_dir.c_str());
 	globfree(&pglob);
-	exit(1);
+	errmsg = c_format("Failed to find config files in %s",
+			  config_template_dir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
     if (pglob.gl_pathc == 0) {
-	fprintf(stderr, "rtrmgr failed to find any template files in %s\n",
-		config_template_dir.c_str());
 	globfree(&pglob);
-	exit(1);
+	errmsg = c_format("Failed to find any template files in %s",
+			  config_template_dir.c_str());
+	xorp_throw(InitError, errmsg);
     }
 
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	if (init_opcmd_parser(pglob.gl_pathv[i], this) < 0) {
-	    fprintf(stderr, "Failed to open template file: %s\n",
-		    config_template_dir.c_str());
 	    globfree(&pglob);
-	    exit(-1);
+	    errmsg = c_format("Failed to open template file: %s",
+			      config_template_dir.c_str());
+	    xorp_throw(InitError, errmsg);
 	}
 	try {
 	    parse_opcmd();
@@ -414,9 +411,8 @@ OpCommandList::OpCommandList(const string &config_template_dir,
 	}
 	if (_path_segments.size() != 0) {
 	    globfree(&pglob);
-	    string errmsg;
-	    errmsg = c_format("Error: file %s is not terminated properly",
-		    pglob.gl_pathv[i]);
+	    errmsg = c_format("File %s is not terminated properly",
+			      pglob.gl_pathv[i]);
 	    xorp_throw(InitError, errmsg);
 	}
     }
@@ -432,15 +428,10 @@ OpCommandList::~OpCommandList()
     }
 }
 
-int
+bool
 OpCommandList::check_variable_name(const string& name) const
 {
-    if (_template_tree->check_variable_name(name) == false) {
-	string err = "Bad template variable name: \"" + name + "\"\n";
-	opcmderror(err.c_str());
-	exit(1);
-    }
-    return XORP_OK;
+    return _template_tree->check_variable_name(name);
 }
 
 OpCommand*
@@ -491,10 +482,10 @@ OpCommandList::new_op_command(const list<string>& parts)
 
     existing_cmd = find(parts);
     if (existing_cmd != NULL) {
-	string err = "Duplicate command: \"";
-	err += existing_cmd->cmd_name() + "\"";
-	opcmderror(err.c_str());
-	exit(1);
+	string errmsg = c_format("Duplicate command: %s",
+				 existing_cmd->cmd_name().c_str());
+	opcmderror(errmsg.c_str());
+	return NULL;
     }
 
     new_cmd = new OpCommand(parts);
@@ -517,8 +508,14 @@ OpCommandList::display_list() const
 int
 OpCommandList::append_path(const string& path)
 {
-    if (path[0] == '$')
-	check_variable_name(path);
+    if (path[0] == '$') {
+	if (check_variable_name(path) == false) {
+	    string errmsg = c_format("Bad variable name: %s", path.c_str());
+	    opcmderror(errmsg.c_str());
+	    return XORP_ERROR;
+	}
+    }
+
     _path_segments.push_back(path);
     return XORP_OK;
 }
@@ -527,6 +524,7 @@ int
 OpCommandList::push_path()
 {
     _current_cmd = new_op_command(_path_segments);
+    XLOG_ASSERT(_current_cmd != NULL);
     return XORP_OK;
 }
 
@@ -545,9 +543,9 @@ int
 OpCommandList::add_cmd(const string& cmd)
 {
     if (cmd != "%command" && cmd != "%opt_parameter" && cmd != "%module") {
-	string err = "Unknown command \"" + cmd + "\"";
-	opcmderror(err.c_str());
-	exit(1);
+	string errmsg = c_format("Unknown command: %s", cmd.c_str());
+	opcmderror(errmsg.c_str());
+	return XORP_ERROR;
     }
     return XORP_OK;
 }
@@ -563,9 +561,10 @@ OpCommandList::add_cmd_action(const string& cmd, const list<string>& parts)
 	if (find_executable(parts.front(), executable)) {
 	    return _current_cmd->add_command_file(executable);
 	} else {
-	    string err = "File not found: " + parts.front();
-	    opcmderror(err.c_str());
-	    exit(1);
+	    string errmsg = c_format("File not found: %s",
+				     parts.front().c_str());
+	    opcmderror(errmsg.c_str());
+	    return XORP_ERROR;
 	}
     }
     if (cmd == "%module") {
@@ -574,9 +573,9 @@ OpCommandList::add_cmd_action(const string& cmd, const list<string>& parts)
     if (cmd == "%opt_parameter") {
 	return _current_cmd->add_opt_param(parts.front());
     }
-    string err = "Unknown command \"" + cmd + "\"";
-    opcmderror(err.c_str());
-    exit(1);
+    string errmsg = c_format("Unknown command %s", cmd.c_str());
+    opcmderror(errmsg.c_str());
+    return XORP_ERROR;
 }
 
 bool
