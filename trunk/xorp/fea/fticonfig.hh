@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.9 2003/10/13 02:23:19 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.10 2003/10/14 02:17:12 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -392,8 +392,8 @@ private:
     // Ordering is important: the last that is supported is the one to use.
     //
     FtiConfigTableGetDummy	_ftic_table_get_dummy;
-    FtiConfigTableGetNetlink	_ftic_table_get_netlink;
     FtiConfigTableGetSysctl	_ftic_table_get_sysctl;
+    FtiConfigTableGetNetlink	_ftic_table_get_netlink;
     
     //
     // The mechanisms to set the whole table information into the unicast
