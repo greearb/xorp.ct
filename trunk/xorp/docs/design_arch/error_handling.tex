@@ -6,6 +6,7 @@
 \newcommand{\module} {{\em module}\@\xspace}
 \newcommand{\modules} {{\em modules}\@\xspace}
 \newcommand{\finder} {{\em Finder}\@\xspace}
+\newcommand{\xorpsh} {{\em Xorpsh}\@\xspace}
 \newcommand{\cm} {{\em CM}\@\xspace}
 \newcommand{\xrl} {{\em XRL}\@\xspace}
 \textwidth 6.5in
@@ -16,7 +17,7 @@
 \oddsidemargin 0in
 %\date{}
 \title{Error Handling in XORP}
-\author{Second pass: Atanu Ghosh}
+%\author{Atanu Ghosh}
 %\twocolumn
 \begin{document}
 \parsep 0ex
@@ -72,13 +73,68 @@ different source tree may encounter compatibility problems.
 
 \section{Communication Error}
 
+\subsection{XRLs}
+
+Interprocess communication in XORP is achieved using XRLs. In this
+section we will consider what should be done when an XRL call fails
+due to a communication error.
+
+All XRL calls will ultimately get a response. In the normal case the
+response returns the status of the call (good or bad). In the abnormal
+case the response can be a timeout. Which denotes there was no
+response from the peer. Its not clear what can be inferred from a
+timeout response. The reasons for a timeout can be: the peer has died,
+peer is slow to respond, the Ethernet cable has been removed. As in
+all network communications when a timeout occurs we don't know if the
+last unacknowledged XRL/packet was received and processed by the peer.
+
+XRLs can be sent over unreliable transports such as UDP or reliable
+transports such as TCP. The type of transport that should be used will
+be specified when defining the interface. 
+
+If a timeout occurs when using an unreliable transport then it is up
+to the application to retransmit the request or ignore the failure.
+
+If a timeout occurs when using a reliable transport then it is not so
+clear what action should be taken. If the timeout has occurred because
+the peer is dead we will receive notification of this explicitly and
+will deal with it as specified in section \ref{pfailure}. For the rest
+of this discussion we will assume that the timeout is due to poor
+responsiveness of the peer or problems with the communications
+substrate. In the case of a transient communication problem, the XRL
+will eventually be sent to the peer, but the response will never be
+returned to the caller, as it has already been provided with a timeout
+response. We are now in the position that if the XRL command was
+adding a route we don't know if it succeeded or failed as the actual
+response will not be returned to the caller.
+
 \subsection{BGP}
 
-\section{Process Failure}
+\section{\label{pfailure}Process Failure}
+
+A XORP router is made up of a number of distinct processes. There are
+dependencies between these processes. We define the critical
+dependencies and what action to take on detecting failure.
+
+The most critical component of a XORP router is the Rtrmgr/\finder
+process. One of the functions of this component is to start/re-start
+processes. If process A is dependent on the status (alive, dead,
+restarted) of process B, then process A registers this interest with
+the \finder. This dependency on the Rtrmgr/\finder for managing and
+monitoring process state mean that a XORP router cannot survive the
+failure of this process. A XORP process on detecting the loss of the
+\finder must exit. There is one exception to this rule the \xorpsh
+process, this will be discussed later [REF].
+
+
+
 Each process in a XORP router is described and how it should behave
 when another process in the system fails. Processes can explicitly
 register interest in the status of other processes through the
-\finder.
+\finder. If process A is dependent on the state of process B then
+process A must register interest in process B.
+
+The only mechanism that a process should use to determine if 
 
 It is conceivable that the \finder could restart and in the same time
 window another monitored process could restart. In which case the
@@ -93,14 +149,16 @@ probability event.
 \hline
 Process fails &                &          &      &      &      &         &      &      &      &        \\\hline
               & Rtrmgr/\finder & FEA      & MFEA & RIB  & IGMP & PIM     & BGP  & RIP  & OSPF & XORPSH \\\hline
-Rtrmgr/finder & /              & Withdraw & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Exit   \\
-              &                & All      &      &      &      &         &      &      &      &        \\
+Rtrmgr/finder & /              & Withdraw & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Report \\
+              &                & All      &      &      &      &         &      &      &      & Problem\\
+              &                & Unicast  &      &      &      &         &      &      &      & Wait   \\
               &                & Routes   &      &      &      &         &      &      &      &        \\
               &                & Exit     &      &      &      &         &      &      &      &        \\\hline
 FEA           &  Restart       & /        & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Exit   \\\hline
 MFEA          &  Restart       & -        & /    & -    & Exit & Exit    & -    & -    & -    & -      \\\hline
 RIB           &  Restart       & Withdraw & /    & -    & Exit & Exit    & Exit & Exit & Exit & Exit   \\
               &                & All      &      &      & (G)  & (G)     & (G)  & (G)  & (G)  & (G)    \\
+              &                & Unicast  &      &      &      &         &      &      &      &        \\
               &                & Routes   &      &      &      &         &      &      &      &        \\\hline
 IGMP          &  Restart       & -        & -    & -    & /    & Delete  & -    & -    & -    & -      \\
               &                &          &      &      &      & Local   &      &      &      &        \\
