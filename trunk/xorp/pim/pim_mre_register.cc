@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.2 2003/01/30 01:43:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -69,7 +69,7 @@ PimMre::compute_is_could_register_sg() const
     return (mifs.test(vif_index)
 	    && is_keepalive_timer_running()
 	    && is_directly_connected_s()
-	    && (! i_am_rp()));
+	    && (! i_am_rp())); // TODO: XXX: PAVPAVPAV: not in the spec (yet)
 }
 
 //
