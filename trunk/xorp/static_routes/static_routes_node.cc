@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.17 2005/02/01 02:36:48 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.18 2005/02/09 23:29:40 pavlin Exp $"
 
 
 //
@@ -79,9 +79,9 @@ StaticRoutesNode::startup()
     _node_status = PROC_STARTUP;
 
     //
-    // Register and startup the interface manager
+    // Register with the FEA
     //
-    ifmgr_register_startup();
+    fea_register_startup();
 
     //
     // Register with the RIB
@@ -107,8 +107,9 @@ StaticRoutesNode::shutdown()
 	&& (ServiceBase::status() != STARTING)
 	&& (ServiceBase::status() != PAUSING)
 	&& (ServiceBase::status() != PAUSED)
-	&& (ServiceBase::status() != RESUMING))
+	&& (ServiceBase::status() != RESUMING)) {
 	return false;
+    }
 
     //
     // Transition to SHUTDOWN occurs when all transient shutdown operations
@@ -123,9 +124,9 @@ StaticRoutesNode::shutdown()
     rib_register_shutdown();
 
     //
-    // De-register and shutdown the interface manager
+    // De-register with the FEA
     //
-    ifmgr_register_shutdown();
+    fea_register_shutdown();
 
     //
     // Set the node status
@@ -133,7 +134,7 @@ StaticRoutesNode::shutdown()
     _node_status = PROC_SHUTDOWN;
 
     //
-    // Update status
+    // Update the node status
     //
     update_status();
 

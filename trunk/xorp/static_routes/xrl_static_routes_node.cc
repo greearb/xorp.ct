@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.18 2005/01/29 07:33:30 bms Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.19 2005/02/09 23:29:40 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -48,10 +48,10 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
       _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_finder_client(&xrl_router()),
-      _is_ifmgr_alive(false),
-      _is_ifmgr_registered(false),
-      _is_ifmgr_registering(false),
-      _is_ifmgr_deregistering(false),
+      _is_fea_alive(false),
+      _is_fea_registered(false),
+      _is_fea_registering(false),
+      _is_fea_deregistering(false),
       _is_rib_alive(false),
       _is_rib_registered(false),
       _is_rib_registering(false),
@@ -84,7 +84,7 @@ XrlStaticRoutesNode::shutdown()
 }
 
 //
-//
+// Finder-related events
 //
 void
 XrlStaticRoutesNode::finder_disconnect_event()
@@ -99,19 +99,20 @@ XrlStaticRoutesNode::finder_disconnect_event()
 // Register with the FEA
 //
 void
-XrlStaticRoutesNode::ifmgr_register_startup()
+XrlStaticRoutesNode::fea_register_startup()
 {
     bool success;
 
-    _ifmgr_register_startup_timer.unschedule();
-    _ifmgr_register_shutdown_timer.unschedule();
+    _fea_register_startup_timer.unschedule();
+    _fea_register_shutdown_timer.unschedule();
 
-    if (_is_ifmgr_registered)
+    if (_is_fea_registered)
 	return;		// Already registered
 
-    if (! _is_ifmgr_registering) {
-	StaticRoutesNode::incr_startup_requests_n();
-	_is_ifmgr_registering = true;
+    if (! _is_fea_registering) {
+	StaticRoutesNode::incr_startup_requests_n();	// XXX: for the ifmgr
+
+	_is_fea_registering = true;
     }
 
     //
@@ -119,28 +120,28 @@ XrlStaticRoutesNode::ifmgr_register_startup()
     //
     success = _xrl_finder_client.send_register_class_event_interest(
 	_finder_target.c_str(), _instance_name, _fea_target,
-	callback(this, &XrlStaticRoutesNode::finder_register_interest_ifmgr_cb));
+	callback(this, &XrlStaticRoutesNode::finder_register_interest_fea_cb));
 
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
 	//
-	_ifmgr_register_startup_timer =
+	_fea_register_startup_timer =
 	    StaticRoutesNode::eventloop().new_oneoff_after(
 		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::ifmgr_register_startup));
+		callback(this, &XrlStaticRoutesNode::fea_register_startup));
 	return;
     }
 }
 
 void
-XrlStaticRoutesNode::finder_register_interest_ifmgr_cb(
+XrlStaticRoutesNode::finder_register_interest_fea_cb(
     const XrlError& xrl_error)
 {
     // If success, then the FEA birth event will startup the ifmgr
     if (xrl_error == XrlError::OKAY()) {
-	_is_ifmgr_registering = false;
-	_is_ifmgr_registered = true;
+	_is_fea_registering = false;
+	_is_fea_registered = true;
 	return;
     }
 
@@ -156,11 +157,11 @@ XrlStaticRoutesNode::finder_register_interest_ifmgr_cb(
     // If an error, then start a timer to try again
     // (unless the timer is already running).
     //
-    if (! _ifmgr_register_startup_timer.scheduled()) {
-	_ifmgr_register_startup_timer =
+    if (! _fea_register_startup_timer.scheduled()) {
+	_fea_register_startup_timer =
 	    StaticRoutesNode::eventloop().new_oneoff_after(
 		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::ifmgr_register_startup));
+		callback(this, &XrlStaticRoutesNode::fea_register_startup));
     }
 }
 
@@ -168,22 +169,23 @@ XrlStaticRoutesNode::finder_register_interest_ifmgr_cb(
 // De-register with the FEA
 //
 void
-XrlStaticRoutesNode::ifmgr_register_shutdown()
+XrlStaticRoutesNode::fea_register_shutdown()
 {
     bool success;
 
-    _ifmgr_register_startup_timer.unschedule();
-    _ifmgr_register_shutdown_timer.unschedule();
+    _fea_register_startup_timer.unschedule();
+    _fea_register_shutdown_timer.unschedule();
 
-    if (! _is_ifmgr_alive)
+    if (! _is_fea_alive)
 	return;		// The FEA is not there anymore
 
-    if (! _is_ifmgr_registered)
+    if (! _is_fea_registered)
 	return;		// Not registered
 
-    if (! _is_ifmgr_deregistering) {
-	StaticRoutesNode::incr_shutdown_requests_n();
-	_is_ifmgr_deregistering = true;
+    if (! _is_fea_deregistering) {
+	StaticRoutesNode::incr_shutdown_requests_n();	// XXX: for the ifmgr
+
+	_is_fea_deregistering = true;
     }
 
     //
@@ -191,16 +193,16 @@ XrlStaticRoutesNode::ifmgr_register_shutdown()
     //
     success = _xrl_finder_client.send_deregister_class_event_interest(
 	_finder_target.c_str(), _instance_name, _fea_target,
-	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_ifmgr_cb));
+	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_fea_cb));
 
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
 	//
-	_ifmgr_register_shutdown_timer =
+	_fea_register_shutdown_timer =
 	    StaticRoutesNode::eventloop().new_oneoff_after(
 		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::ifmgr_register_shutdown));
+		callback(this, &XrlStaticRoutesNode::fea_register_shutdown));
 	return;
     }
 
@@ -212,13 +214,13 @@ XrlStaticRoutesNode::ifmgr_register_shutdown()
 }
 
 void
-XrlStaticRoutesNode::finder_deregister_interest_ifmgr_cb(
+XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
     const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
-	_is_ifmgr_deregistering = false;
-	_is_ifmgr_registered = false;
+	_is_fea_deregistering = false;
+	_is_fea_registered = false;
 	return;
     }
 
@@ -227,8 +229,8 @@ XrlStaticRoutesNode::finder_deregister_interest_ifmgr_cb(
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
-    _is_ifmgr_deregistering = false;
-    _is_ifmgr_registered = false;
+    _is_fea_deregistering = false;
+    _is_fea_registered = false;
 
     StaticRoutesNode::set_status(FAILED);
     StaticRoutesNode::update_status();
@@ -253,6 +255,7 @@ XrlStaticRoutesNode::rib_register_startup()
 	    StaticRoutesNode::incr_startup_requests_n();
 	if (! _is_rib_igp_table6_registered)
 	    StaticRoutesNode::incr_startup_requests_n();
+
 	_is_rib_registering = true;
     }
 
@@ -328,6 +331,7 @@ XrlStaticRoutesNode::rib_register_shutdown()
 	    StaticRoutesNode::incr_shutdown_requests_n();
 	if (_is_rib_igp_table6_registered)
 	    StaticRoutesNode::incr_shutdown_requests_n();
+
 	_is_rib_deregistering = true;
     }
 
@@ -644,7 +648,7 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
 	// XXX: when the startup is completed,
 	// IfMgrHintObserver::tree_complete() will be called.
 	//
-	_is_ifmgr_alive = true;
+	_is_fea_alive = true;
 	if (_ifmgr.startup() != true) {
 	    StaticRoutesNode::ServiceBase::set_status(FAILED);
 	    StaticRoutesNode::update_status();
@@ -671,7 +675,7 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
     if (_fea_target == target_class) {
 	XLOG_ERROR("FEA (instance %s) has died, shutting down.",
 		   target_instance.c_str());
-	_is_ifmgr_alive = false;
+	_is_fea_alive = false;
 	do_shutdown = true;
     }
 

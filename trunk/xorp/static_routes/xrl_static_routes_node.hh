@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.11 2005/01/29 07:14:32 bms Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.12 2005/02/09 23:29:40 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -27,8 +27,8 @@
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
-#include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
+#include "xrl/interfaces/rib_xif.hh"
 #include "xrl/targets/static_routes_base.hh"
 
 #include "static_routes_node.hh"
@@ -297,10 +297,10 @@ private:
      */
     virtual void finder_disconnect_event();
 
-    void ifmgr_register_startup();
-    void finder_register_interest_ifmgr_cb(const XrlError& xrl_error);
-    void ifmgr_register_shutdown();
-    void finder_deregister_interest_ifmgr_cb(const XrlError& xrl_error);
+    void fea_register_startup();
+    void finder_register_interest_fea_cb(const XrlError& xrl_error);
+    void fea_register_shutdown();
+    void finder_deregister_interest_fea_cb(const XrlError& xrl_error);
 
     void rib_register_startup();
     void finder_register_interest_rib_cb(const XrlError& xrl_error);
@@ -347,12 +347,13 @@ private:
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     static const TimeVal RETRY_TIMEVAL;
-    bool		_is_ifmgr_alive;
-    bool		_is_ifmgr_registered;
-    bool		_is_ifmgr_registering;
-    bool		_is_ifmgr_deregistering;
-    XorpTimer		_ifmgr_register_startup_timer;
-    XorpTimer		_ifmgr_register_shutdown_timer;
+
+    bool		_is_fea_alive;
+    bool		_is_fea_registered;
+    bool		_is_fea_registering;
+    bool		_is_fea_deregistering;
+    XorpTimer		_fea_register_startup_timer;
+    XorpTimer		_fea_register_shutdown_timer;
 
     bool		_is_rib_alive;
     bool		_is_rib_registered;
