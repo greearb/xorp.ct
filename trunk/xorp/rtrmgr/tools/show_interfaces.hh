@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.3 2003/03/10 23:21:04 hodson Exp $
+// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.4 2003/10/24 20:48:52 pavlin Exp $
 
-#ifndef __RIB_VIFMANAGER_HH__
-#define __RIB_VIFMANAGER_HH__
+#ifndef __RTRMGR_TOOLS_SHOW_INTERFACES_HH__
+#define __RTRMGR_TOOLS_SHOW_INTERFACES_HH__
 
 #include <map>
 #include "libxorp/vif.hh"
@@ -32,9 +32,11 @@ public:
      * The state of the InterfaceMonitor.  It it hasn't yet successfully
      * registered with the FEA, it will be in INITIALIZING state.  If
      * it has permanently failed to register with the FEA it will be
-     * in FAILED state.  Otherwise it should be in READY state.
+     * in FAILED state.  If it has received all expected information it
+     * will be in READY state. If it has successfully unregistered with the
+     * FEA it will be in DONE state.
      */
-    enum State { INITIALIZING, READY, FAILED };
+    enum State { INITIALIZING, READY, FAILED, DONE };
 
     /**
      * InterfaceMonitor constructor
@@ -53,6 +55,11 @@ public:
      * Start the process of registering with the FEA, etc
      */
     void start();
+
+    /**
+     * Stop the process and deregister with the FEA.
+     */
+    void stop();
 
     /**
      * @returns the state of the InterfaceMonitor. 
@@ -121,10 +128,10 @@ public:
 			 const uint32_t& event);
     void print_results() const;
 private:
-    void clean_out_old_state();
-    void clean_out_old_state_done(const XrlError& e);
-    void register_if_spy();
-    void register_if_spy_done(const XrlError& e);
+    void unregister_interface_monitor();
+    void unregister_interface_monitor_done(const XrlError& e);
+    void register_interface_monitor();
+    void register_interface_monitor_done(const XrlError& e);
     void interface_names_done(const XrlError& e, const XrlAtomList* alist);
     void vif_names_done(const XrlError& e, const XrlAtomList* alist,
 			string ifname);
@@ -174,4 +181,4 @@ private:
     multimap <string, Vif*> _vifs_by_interface;
 };
 
-#endif // __RIB_VIFMANAGER_HH__
+#endif // __RTRMGR_TOOLS_SHOW_INTERFACES_HH__

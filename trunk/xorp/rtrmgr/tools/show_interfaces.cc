@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.9 2003/10/10 21:58:56 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.10 2003/10/24 20:48:52 pavlin Exp $"
 
 #include "rtrmgr/rtrmgr_module.h"
 #include "config.h"
@@ -35,6 +35,8 @@ InterfaceMonitor::InterfaceMonitor(XrlRouter& xrl_rtr,
 
 InterfaceMonitor::~InterfaceMonitor()
 {
+    stop();
+
     map <string, Vif*>::iterator i;
     for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); i++) {
 	delete i->second;
@@ -47,49 +49,53 @@ InterfaceMonitor::~InterfaceMonitor()
 void
 InterfaceMonitor::start()
 {
-    clean_out_old_state();
+    register_interface_monitor();
 }
 
 void
-InterfaceMonitor::clean_out_old_state()
+InterfaceMonitor::stop()
 {
-    // we call unregister_client first, to cause the FEA to remove any
-    // registrations left over from previous incarnations of the RIB
+    unregister_interface_monitor();
+}
+
+void
+InterfaceMonitor::unregister_interface_monitor()
+{
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &InterfaceMonitor::clean_out_old_state_done);
+    cb = callback(this, &InterfaceMonitor::unregister_interface_monitor_done);
     if (_ifmgr_client.send_unregister_client("fea", _xrl_rtr.name(), cb)
 	== false) {
-	XLOG_ERROR("Failed to unregister fea client");
+	XLOG_ERROR("Failed to unregister interface monitor fea client");
 	_state = FAILED;
     }
 }
 
 void
-InterfaceMonitor::clean_out_old_state_done(const XrlError& e)
+InterfaceMonitor::unregister_interface_monitor_done(const XrlError& e)
 {
     UNUSED(e);
-    // We really don't care here if the request succeeded or failed.
-    // It's normal to fail with COMMAND_FAILED if there was no state
-    // left behind from a previous incarnation.  Any other errors would
-    // also show up in register_if_spy, so we'll let that deal with
-    // them.
-    register_if_spy();
+
+    //
+    // We really don't care here if the request succeeded or failed,
+    // because most likely we are exiting anyway.
+    //
+    _state = DONE;
 }
 
 void
-InterfaceMonitor::register_if_spy()
+InterfaceMonitor::register_interface_monitor()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &InterfaceMonitor::register_if_spy_done);
+    cb = callback(this, &InterfaceMonitor::register_interface_monitor_done);
     if (_ifmgr_client.send_register_client("fea", _xrl_rtr.name(), cb)
 	== false) {
-	XLOG_ERROR("Failed to register fea client");
+	XLOG_ERROR("Failed to register interface monitor fea client");
 	_state = FAILED;
     }
 }
 
 void
-InterfaceMonitor::register_if_spy_done(const XrlError& e)
+InterfaceMonitor::register_interface_monitor_done(const XrlError& e)
 {
     if (e == XrlError::OKAY()) {
 	// The registration was successful.  Now we need to query the
@@ -110,15 +116,15 @@ InterfaceMonitor::register_if_spy_done(const XrlError& e)
     // still can't register, give up.  It's a higher level issue as to
     // whether failing to register is a fatal error.
     if (e == XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
-	XLOG_WARNING("Register Interface Spy: RESOLVE_FAILED");
+	XLOG_WARNING("Register Interface Monitor: RESOLVE_FAILED");
 	_register_retry_counter++;
 	OneoffTimerCallback cb;
-	cb = callback(this, &InterfaceMonitor::register_if_spy);
+	cb = callback(this, &InterfaceMonitor::register_interface_monitor);
 	_register_retry_timer = _eventloop.new_oneoff_after_ms(2000, cb);
 	return;
     }
     _state = FAILED;
-    XLOG_ERROR("Register Interface Spy: Permanent Error");
+    XLOG_ERROR("Register Interface Monitor: Permanent Error");
 }
 
 void
@@ -647,7 +653,13 @@ main(int argc, char* const argv[])
 	while (ifmon.state() == InterfaceMonitor::INITIALIZING) {
 	    eventloop.run();
 	}
-	ifmon.print_results();
+	if (ifmon.state() == InterfaceMonitor::READY)
+	    ifmon.print_results();
+	
+	ifmon.stop();
+	while (ifmon.state() != InterfaceMonitor::DONE) {
+	    eventloop.run();
+	}
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
