@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.12 2003/07/30 23:43:29 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.13 2003/08/01 02:11:48 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -20,14 +20,15 @@ TESTS		+= test_ipvxnet
 TESTS		+= test_mac
 TESTS		+= test_observers
 TESTS		+= test_ref_ptr
-TESTS		+= test_ref_trie 
+TESTS		+= test_ref_trie
+TESTS		+= test_service
 TESTS		+= test_test_main
 TESTS		+= test_time_slice
 TESTS		+= test_timer
-TESTS		+= test_timeval 
+TESTS		+= test_timeval
 TESTS		+= test_trie
 TESTS		+= test_types
-TESTS		+= test_vif 
+TESTS		+= test_vif
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_asyncio
@@ -43,14 +44,15 @@ noinst_PROGRAMS	+= test_ipvxnet
 noinst_PROGRAMS	+= test_mac
 noinst_PROGRAMS	+= test_observers
 noinst_PROGRAMS	+= test_ref_ptr
-noinst_PROGRAMS	+= test_ref_trie 
+noinst_PROGRAMS	+= test_ref_trie
+noinst_PROGRAMS	+= test_service
 noinst_PROGRAMS	+= test_test_main
 noinst_PROGRAMS	+= test_time_slice
 noinst_PROGRAMS	+= test_timer
-noinst_PROGRAMS	+= test_timeval 
+noinst_PROGRAMS	+= test_timeval
 noinst_PROGRAMS	+= test_trie
 noinst_PROGRAMS	+= test_types
-noinst_PROGRAMS	+= test_vif 
+noinst_PROGRAMS	+= test_vif
 
 # -- No-install Libraries
 noinst_LIBRARIES = libxorp.a
@@ -73,6 +75,7 @@ test_mac_SOURCES	= test_mac.cc
 test_observers_SOURCES  = test_observers.cc
 test_ref_ptr_SOURCES	= test_ref_ptr.cc
 test_ref_trie_SOURCES	= test_ref_trie.cc
+test_service_SOURCES	= test_service.cc
 test_test_main_SOURCES	= test_test_main.cc
 test_time_slice_SOURCES	= test_time_slice.cc
 test_timer_SOURCES	= test_timer.cc
@@ -111,6 +114,7 @@ libxorp_a_SOURCES += nexthop.hh
 libxorp_a_SOURCES += old_trie.hh
 libxorp_a_SOURCES += ref_ptr.hh
 libxorp_a_SOURCES += selector.hh
+libxorp_a_SOURCES += service.hh
 libxorp_a_SOURCES += time_slice.hh
 libxorp_a_SOURCES += timer.hh
 libxorp_a_SOURCES += timeval.hh
@@ -135,6 +139,7 @@ libxorp_a_SOURCES += mac.cc
 libxorp_a_SOURCES += nexthop.cc
 libxorp_a_SOURCES += ref_ptr.cc
 libxorp_a_SOURCES += selector.cc
+libxorp_a_SOURCES += service.cc
 libxorp_a_SOURCES += time_slice.cc
 libxorp_a_SOURCES += timer.cc
 libxorp_a_SOURCES += token.cc
