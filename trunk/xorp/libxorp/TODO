@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxorp/TODO,v 1.24 2002/12/09 11:43:48 pavlin Exp $
+# $XORP: xorp/libxorp/TODO,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
 #
 
 * ether_compat.c is not linked against the library. Remove it
@@ -26,31 +26,7 @@
 
 * Rename IPvX *Vif::addr_ptr() to IPvX& Vif::vif_addr() instead?
 
-* Do we want to have Vif::operator string()?
-  E.g., should it be a policy that all XRL atoms should have string()
-  operator?
-
-* Change things around such that ProtoNode::vif_find...() functions
-  won't require static_cast<> to use them at the protocol level.
-
-* Change ProtoUnit::ProtoUnit() constructor such that the default is to disable
-  a Proto entry when created.
-
-* Add IPvXNet::is_multicast(), is_unicast(), etc.
-
 * All constants such as IP address size, should be static class constants.
-
-* Implement the equivalent of ipvx_smallest() and ipvx_largest()
-
-* Re-implement family2multicast_prefix_base()
-
-* Add IPvX(const char *addrstr) that should check first whether the
-  string is the IPv4 dotdecimal format, or the IPv6 format.
-
-* Need to create a front-end for C programs (e.g. family2addr_size())
-
-* Some of the IPvX function probably should not be inline.
-  E.g., IPvX::addr_size(family)
 
 * Need to do something about multiple EventLoop instances (breaks xorp
   ipc).  Some alternatives:
@@ -60,5 +36,4 @@
 	  event loops.
 	- change the way ipc learns about the event loop.
 
-
-
+* Do kdoc-ify ref_trie.hh and trie.hh
