@@ -111,7 +111,6 @@ pp_area_type(OspfTypes::AreaType area_type)
 #include "lsa.hh"
 #include "packet.hh"
 #include "transmit.hh"
-#include "peer.hh"
 #include "peer_manager.hh"
 #include "ls_database_manager.hh"
 
