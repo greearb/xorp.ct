@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.7 2003/03/13 08:54:09 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.1 2003/03/22 05:10:34 pavlin Exp $
 #
 
 #
@@ -22,7 +22,7 @@ rib_enable_rib()
     echo "rib_enable_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/enable_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_disable_rib()
@@ -30,7 +30,7 @@ rib_disable_rib()
     echo "rib_disable_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_start_rib()
@@ -38,7 +38,7 @@ rib_start_rib()
     echo "rib_start_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/start_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_stop_rib()
@@ -46,7 +46,7 @@ rib_stop_rib()
     echo "rib_stop_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/stop_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_rib_client4()
@@ -62,7 +62,7 @@ rib_add_rib_client4()
     echo "rib_add_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_rib_client6()
@@ -78,7 +78,7 @@ rib_add_rib_client6()
     echo "rib_add_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_rib_client4()
@@ -94,7 +94,7 @@ rib_delete_rib_client4()
     echo "rib_delete_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_rib_client6()
@@ -110,7 +110,7 @@ rib_delete_rib_client6()
     echo "rib_delete_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_enable_rib_client4()
@@ -126,7 +126,7 @@ rib_enable_rib_client4()
     echo "rib_enable_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/enable_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_enable_rib_client6()
@@ -142,7 +142,7 @@ rib_enable_rib_client6()
     echo "rib_enable_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/enable_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_disable_rib_client4()
@@ -158,7 +158,7 @@ rib_disable_rib_client4()
     echo "rib_disable_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_disable_rib_client6()
@@ -174,7 +174,7 @@ rib_disable_rib_client6()
     echo "rib_disable_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 rib_no_fea()
