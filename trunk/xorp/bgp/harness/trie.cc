@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.4 2003/04/02 22:19:00 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.5 2003/06/26 02:15:26 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -40,7 +40,7 @@ UpdatePacket *
 Trie::lookup(const string& net) const
 {
     IPv4Net n(net.c_str());
-    Payload payload = find(n);
+    TriePayload payload = find(n);
     const UpdatePacket *update = payload.get();
 
     if(0 == update)
@@ -63,7 +63,7 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
 {
     _update_cnt++;
 
-    Payload payload(tv, buf, len, this);
+    TriePayload payload(tv, buf, len, _first, _last);
     const UpdatePacket *update = payload.get();
 
     /*
@@ -218,13 +218,13 @@ Trie::bit_string_to_subnet(const char *st) const
 }
 
 bool
-Trie::insert(const IPv4Net& net, Payload& p)
+Trie::insert(const IPv4Net& net, TriePayload& p)
 {
     return insert(ntohl(net.masked_addr().addr()), net.prefix_len(), p);
 }
 
 bool
-Trie::insert(uint32_t address, int mask_length, Payload& p)
+Trie::insert(uint32_t address, int mask_length, TriePayload& p)
 {
 #ifdef	PARANOIA
     if(0 == p.get()) {
@@ -308,7 +308,7 @@ Trie::del(Tree *ptr, uint32_t address, int mask_length)
 		speak("del:2 not in table" newline);
 	    return false;
 	}
-	ptr->p = Payload();	// Invalidate this entry.
+	ptr->p = TriePayload();	// Invalidate this entry.
 	return true;
     }
 
@@ -337,13 +337,13 @@ Trie::del(Tree *ptr, uint32_t address, int mask_length)
     return status;
 }
 
-Trie::Payload 
+TriePayload 
 Trie::find(const IPv4Net& net) const
 {
     return find(ntohl(net.masked_addr().addr()), net.prefix_len());
 }
 
-Trie::Payload
+TriePayload
 Trie::find(uint32_t address, const int mask_length) const
 {
     const Tree *ptr = &_head;
@@ -361,21 +361,21 @@ Trie::find(uint32_t address, const int mask_length) const
 
 	if(_pretty)
 	    speak("%d", index);
-	Payload p = ptr->p;
+	TriePayload p = ptr->p;
 	if(mask_length == i)
 	    return p;
 	if(0 == (next = ptr->ptrs[index])) {
 	    if(_pretty)
 		speak("" newline);
-	    return Payload();
+	    return TriePayload();
 	}
 	ptr = next;
     }
     speak("find: should never happen" newline);
-    return Payload();
+    return TriePayload();
 }
 
-Trie::Payload
+TriePayload
 Trie::find(uint32_t address) const
 {
     const Tree *ptr = &_head;
@@ -392,7 +392,7 @@ Trie::find(uint32_t address) const
 
 	if(_pretty)
 	    speak("%d", index);
-	Payload p = ptr->p;
+	TriePayload p = ptr->p;
 	if(0 == (next = ptr->ptrs[index])) {
 	    if(_pretty)
 		speak("" newline);
@@ -401,5 +401,5 @@ Trie::find(uint32_t address) const
 	ptr = next;
     }
     speak("find: should never happen" newline);
-    return Payload();
+    return TriePayload();
 }

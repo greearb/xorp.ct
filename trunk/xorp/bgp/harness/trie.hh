@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.4 2003/04/02 22:19:00 pavlin Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.5 2003/06/26 02:15:26 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
@@ -20,6 +20,136 @@
 #include <stdio.h>
 #include "libxorp/timeval.hh"
 #include "bgp/packet.hh"
+
+class TrieData {
+public:
+    TrieData(const TimeVal& tv, const uint8_t *buf, size_t len,
+	     TrieData* &first, TrieData* &last) : _tv(tv),
+						_first(first),
+						_last(last) {
+	_packet = new UpdatePacket(buf, len);
+	_refcnt = 1;
+
+	_next = 0;
+	_prev = _last;		
+
+	if(0 == _first)
+	    _first = this;
+	if(0 != _last) 
+	    _last->_next = this;
+	_last = this;
+    }
+
+    void
+    incr_refcnt() {
+	_refcnt++;
+    }
+
+    bool
+    decr_refcnt() {
+	_refcnt--;
+
+	XLOG_ASSERT(_refcnt >= 0);
+
+	return 0 == _refcnt;
+    }
+
+    const UpdatePacket *data() const {
+	XLOG_ASSERT(_refcnt > 0);
+
+	return _packet;
+    }
+
+    const TimeVal& tv() const {
+	return _tv;
+    }
+
+    ~TrieData() {
+	XLOG_ASSERT(0 == _refcnt);
+
+	if(this == _first)
+	    _first = _next;
+	else
+	    _prev->_next = _next;
+	if(this == _last)
+	    _last = _prev;
+	if(0 != _next) {
+	    _next->_prev = _prev;
+	}
+// 	debug_msg("Deleting: %s\n", _packet->str().c_str());
+	delete _packet;
+    }
+
+private:
+    TimeVal _tv;
+    TrieData *_first;
+    TrieData *_last;
+
+    int _refcnt;
+    UpdatePacket *_packet;
+    TrieData *_next;
+    TrieData *_prev;
+};
+
+struct TriePayload {
+    TriePayload() : _data(0) {}
+
+    TriePayload(const TimeVal& tv, const uint8_t *buf, size_t len,
+	    TrieData* &first, TrieData* &last) {
+	_data = new TrieData(tv, buf, len, first, last);
+    }
+
+    ~TriePayload() {
+	zap();
+    }
+
+    TriePayload(const TriePayload& rhs) {
+	_data = 0;
+	copy(rhs);
+    }
+
+    TriePayload operator=(const TriePayload& rhs) {
+	if(&rhs == this)
+	    return *this;
+	zap();
+	copy(rhs);
+	    
+	return *this;
+    }
+
+    void copy(const TriePayload& rhs) {
+	if(rhs._data) {
+// 	    debug_msg("refcnt: %d %#x\n", rhs._data->_refcnt + 1, rhs._data);
+	    rhs._data->incr_refcnt();
+	    _data = rhs._data;
+	}
+    }
+
+    const UpdatePacket *get() const {
+	if(0 == _data)
+	    return 0;
+	return _data->data();
+    }
+
+    const UpdatePacket *get(TimeVal& tv) const {
+	if(0 == _data)
+	    return 0;
+	tv = _data->tv();
+	return _data->data();
+    }
+
+    void
+    zap() {
+// 	if(_data)
+// 	    debug_msg("refcnt: %d %#x\n", _data->_refcnt - 1, _data);
+	if(_data && _data->decr_refcnt()) {
+	    delete _data;
+	}
+	_data = 0;
+    }
+
+    TrieData *_data;
+};
 
 class Trie {
 public:
@@ -60,120 +190,18 @@ private:
     ** later one should be used. One possible problem is that update
     ** packets with withdraws only will not be stored.
     */
-    struct Payload {
-	Payload() : _data(0) {}
-
-	Payload(const TimeVal& tv, const uint8_t *buf, size_t len,
-		Trie *trie) {
-	    _data = new Data(tv, buf, len, trie);
-	}
-
-	~Payload() {
-	    zap();
-	}
-
-	Payload(const Payload& rhs) {
-	    _data = 0;
-	    copy(rhs);
-	}
-
-	Payload operator=(const Payload& rhs) {
-	    if(&rhs == this)
-		return *this;
-	    zap();
-	    copy(rhs);
-	    
-	    return *this;
-	}
-
-	void copy(const Payload& rhs) {
-	    if(rhs._data) {
-// 		debug_msg("refcnt: %d %#x\n", rhs._data->_refcnt + 1,
-// 			  rhs._data);
-		rhs._data->_refcnt++;
-		_data = rhs._data;
-	    }
-	}
-
-	const UpdatePacket *get() const {
-	    if(0 == _data)
-		return 0;
-	    return _data->_packet;
-	}
-
-	const UpdatePacket *get(TimeVal& tv) const {
-	    if(0 == _data)
-		return 0;
-	    tv = _data->_tv;
-	    return _data->_packet;
-	}
-
-	void
-	zap() {
-// 	    if(_data)
-// 		debug_msg("refcnt: %d %#x\n", _data->_refcnt - 1, _data);
-	    if(_data && --_data->_refcnt == 0) {
-		delete _data;
-	    }
-	    _data = 0;
-	}
-
-	struct Data {
-	    Data(const TimeVal& tv, const uint8_t *buf, size_t len,
-		 Trie *trie) : _tv(tv), _trie(trie) {
-		_packet = new UpdatePacket(buf, len);
-		_refcnt = 1;
-
-		_next = 0;
-		_prev = _trie->_last;		
-
-		if(0 == _trie->_first)
-		    _trie->_first = this;
-		if(0 != _trie->_last) 
-		    _trie->_last->_next = this;
-		_trie->_last = this;
-	    }
-	    ~Data() {
-		XLOG_ASSERT(0 == _refcnt);
-
-		if(this == _trie->_first)
-		    _trie->_first = _next;
-		else
-		    _prev->_next = _next;
-		if(this == _trie->_last)
-		    _trie->_last = _prev;
-		if(0 != _next) {
-		    _next->_prev = _prev;
-		}
-// 		debug_msg("Deleting: %s\n", _packet->str().c_str());
-		delete _packet;
-	    }
-
-	    TimeVal _tv;
-	    Trie *_trie;
-
-	    int _refcnt;
-	    UpdatePacket *_packet;
-	    Data *_next;
-	    Data *_prev;
-
-	};
-	Data *_data;
-    };
 
     struct Tree {
 	Tree *ptrs[2];
-	Payload p;
+	TriePayload p;
 
 	Tree() {
 	    ptrs[0] = ptrs[1] = 0;
 	}
     };
     
-    friend class Payload::Data;
-
-    Payload::Data *_first;
-    Payload::Data *_last;
+    TrieData *_first;
+    TrieData *_last;
 
     bool _debug;
     bool _pretty;
@@ -188,15 +216,15 @@ private:
     void print(FILE *fp) const;
     void prt(FILE *fp, const Tree *ptr, const char *st) const;
     string bit_string_to_subnet(const char *st) const;
-    bool insert(const IPv4Net& net, Payload& p);
-    bool insert(uint32_t address, int mask_length, Payload& p);
+    bool insert(const IPv4Net& net, TriePayload& p);
+    bool insert(uint32_t address, int mask_length, TriePayload& p);
     void del(Tree *ptr);
     bool del(const IPv4Net& net);
     bool del(uint32_t address, int mask_length);
     bool del(Tree *ptr, uint32_t address, int mask_length);
-    Trie::Payload find(const IPv4Net& net) const;
-    Trie::Payload find(uint32_t address, const int mask_length) const;
-    Trie::Payload find(uint32_t address) const;
+    TriePayload find(const IPv4Net& net) const;
+    TriePayload find(uint32_t address, const int mask_length) const;
+    TriePayload find(uint32_t address) const;
 };
 
 #endif // __BGP_HARNESS_TRIE_HH__
