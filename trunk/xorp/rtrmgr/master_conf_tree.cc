@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.38 2004/08/12 07:16:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.39 2004/11/01 21:48:02 atanu Exp $"
 
 
 #include <sys/stat.h>
@@ -210,18 +210,20 @@ MasterConfigTree::find_inactive_modules() const
     order_module_list(active_modules, ordered_active_modules);
 
     // Remove things that are common to both lists
-    list<string>::iterator iter;
     while (!ordered_active_modules.empty()) {
+	list<string>::iterator iter;
+	bool found = false;
 	for (iter = ordered_all_modules.begin();
 	     iter != ordered_all_modules.end();
 	     ++iter) {
 	    if (*iter == ordered_active_modules.front()) {
 		ordered_all_modules.erase(iter);
 		ordered_active_modules.pop_front();
+		found = true;
 		break;
 	    }
 	}
-	XLOG_ASSERT(iter != ordered_all_modules.end());
+	XLOG_ASSERT(found == true);
     }
 
     debug_msg("Inactive Module Order: ");
