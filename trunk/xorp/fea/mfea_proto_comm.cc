@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.11 2003/11/06 22:10:33 hodson Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.12 2003/11/11 22:12:06 pavlin Exp $"
 
 
 //
@@ -856,10 +856,10 @@ ProtoComm::open_proto_socket()
 	    struct icmp6_filter filter;
 	    
 	    // Pass all ICMPv6 messages
-	    ICMP6_FILTER_SETPASSALL(&filter);	    
+	    ICMP6_FILTER_SETPASSALL(&filter);    
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
-	    if (xorp_module_id() == XORP_MODULE_MLD6IGMP) {
+	    if (module_id() == XORP_MODULE_MLD6IGMP) {
 		// Filter all non-MLD ICMPv6 messages
 		ICMP6_FILTER_SETBLOCKALL(&filter);
 		ICMP6_FILTER_SETPASS(MLD_LISTENER_QUERY, &filter);
