@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.2 2004/10/27 21:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.3 2004/11/10 00:39:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -53,8 +53,6 @@ FtiConfigEntrySetClick::start()
     if (! ClickSocket::is_enabled())
 	return (XORP_ERROR);	// XXX: Not enabled
 
-    register_ftic_secondary();
-
     if (ClickSocket::start() < 0)
 	return (XORP_ERROR);
 
@@ -62,6 +60,13 @@ FtiConfigEntrySetClick::start()
     ftic().nexthop_port_mapper().add_observer(this);
 
     _is_running = true;
+
+    //
+    // XXX: we should register ourselves after we are running so the
+    // registration process itself can trigger some startup operations
+    // (if any).
+    //
+    register_ftic_secondary();
 
     return (XORP_OK);
 }
