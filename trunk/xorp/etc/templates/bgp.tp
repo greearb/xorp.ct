@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.20 2004/03/20 17:59:34 mjh Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.21 2004/04/16 01:27:21 atanu Exp $ */
 
 protocols {
   bgp {
@@ -45,6 +45,8 @@ protocols {
     %modinfo: default_targetname "bgp";
     %modinfo: statusmethod xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
     %modinfo: shutdownmethod xrl "$(bgp.targetname)/common/0.1/shutdown";
+    %mandatory: bgp-id;
+    %mandatory: local-as;
     targetname {
       %set:;
     }
@@ -60,7 +62,11 @@ protocols {
       %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
       %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       %activate: xrl "$(bgp.targetname)/bgp/0.2/enable_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
-      %mandatory: as next-hop;
+      %mandatory: as;
+      %mandatory: next-hop;
+      %mandatory: local-port;
+      %mandatory: peer-port;
+      %mandatory: local-ip;
       peer-port {
 	%set:; /*the no-op set is to indicate that this node can be set, but 	           not changed*/
       }
