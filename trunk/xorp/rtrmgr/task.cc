@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.14 2003/05/30 02:42:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.15 2003/05/30 04:42:09 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -395,6 +395,12 @@ Task::add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb)
 }
 
 void
+Task::set_ready_validation(Validation* validation)
+{
+    _ready_validation = validation;
+}
+
+void
 Task::run(CallBack cb)
 {
     printf("Task::run %s\n", _modname.c_str());
@@ -632,7 +638,14 @@ void
 TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl, 
 		     XrlRouter::XrlCallback& cb) 
 {
-    find_task(modname).add_xrl(xrl, cb);
+    Task& t(find_task(modname));
+    t.add_xrl(xrl, cb);
+
+    if (t.ready_validation() != NULL)
+	return;
+
+    XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
+    t.set_ready_validation(_module_commands[modname]->ready_validation(*this));
 }
 
 void

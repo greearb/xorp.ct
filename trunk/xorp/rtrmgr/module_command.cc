@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.9 2003/05/30 02:42:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.10 2003/05/30 04:42:09 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -131,6 +131,16 @@ ModuleCommand::startup_validation(TaskManager &taskmgr) const
 {
     if (_status_method == STATUS_BY_XRL) {
 	return new StatusConfigMeValidation(_modname, taskmgr);
+    } else {
+	return new DelayValidation(taskmgr.eventloop(), 2000);
+    }
+}
+
+Validation*
+ModuleCommand::ready_validation(TaskManager &taskmgr) const
+{
+    if (_status_method == STATUS_BY_XRL) {
+	return new StatusReadyValidation(_modname, taskmgr);
     } else {
 	return new DelayValidation(taskmgr.eventloop(), 2000);
     }

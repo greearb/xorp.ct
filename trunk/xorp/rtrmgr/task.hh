@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.11 2003/05/30 02:42:57 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.12 2003/05/30 04:42:09 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -118,6 +118,10 @@ public:
     void add_stop_module(const string& mod_name,
 			 Validation* validation);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
+    void set_ready_validation(Validation* validation);
+    Validation* ready_validation() const {
+	return _ready_validation;
+    }
     void run(CallBack cb);
     void xrl_done(bool success, bool fatal, string errmsg); 
     bool do_exec() const;
