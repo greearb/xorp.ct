@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.13 2003/04/25 19:14:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.14 2003/05/02 04:53:34 mjh Exp $"
 
 #include <signal.h>
 
@@ -163,7 +163,7 @@ main(int argc, char* const argv[])
 
 	//read the router startup configuration file,
 	//start the processes required, and initialize them
-	MasterConfigTree ct(config_boot, tt, mmgr, xclient, do_exec);
+	MasterConfigTree ct(config_boot, tt, taskmgr);
 	XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
 					 ct, eventloop, randgen);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.2 2003/05/02 04:08:25 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.3 2003/05/02 04:53:34 mjh Exp $"
 
 #include "task.hh"
 #include "module_manager.hh"
@@ -49,7 +49,8 @@ TaskXrlItem::execute(string& errmsg)
 
 void
 TaskXrlItem::execute_done(const XrlError& err, 
-			  XrlArgs* xrlargs) {
+			  XrlArgs* xrlargs) 
+{
 
     if (err != XrlError::OKAY()) {
 	//XXXX handle XRL errors here
@@ -195,7 +196,8 @@ Task::step4()
 }
 
 void
-Task::step4_done() {
+Task::step4_done() 
+{
     step5();
 }
 
@@ -210,7 +212,8 @@ Task::step5()
 }
 
 void
-Task::step5_done(bool success) {
+Task::step5_done(bool success) 
+{
     if (success)
 	step6();
     else
@@ -245,34 +248,83 @@ Task::xorp_client() const
 
 TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient, 
 			 bool do_exec)
-    : _mmgr(mmgr), _xorp_client(xclient), _do_exec(do_exec)
+    : _module_manager(mmgr), _xorp_client(xclient), _do_exec(do_exec)
 {
 }
 
+int
+TaskManager::add_module(const string& modname, const string& modpath,
+			Validation *validation)
+{
+    if (_tasks.find(modname) == _tasks.end()) {
+	_tasks[modname] = new Task(modname, *this);
+    }
+
+    if (_module_manager.module_exists(modname)) {
+	if (_module_manager.module_has_started(modname)) {
+	    return XORP_OK;
+	}
+    } else {
+	if (!_module_manager.new_module(modname, modpath)) {
+	    fail_tasklist_initialization("Can't create module");
+	    return XORP_ERROR;
+	}
+    }
+
+    find_task(modname).add_start_module(modname, validation);
+    return XORP_OK;
+}
+
 void
-TaskManager::run(CallBack cb) {
+TaskManager::run(CallBack cb) 
+{
     _completion_cb = cb;
     run_task();
 }
 
 void 
-TaskManager::run_task() {
+TaskManager::run_task() 
+{
     if (_tasks.empty()) {
 	_completion_cb->dispatch(true, "");
 	return;
     }
-    _tasks.begin()->second.run(callback(this, &TaskManager::task_done));
+    _tasks.begin()->second->run(callback(this, &TaskManager::task_done));
 }
 
 void 
-TaskManager::task_done(bool success, string errmsg) {
+TaskManager::task_done(bool success, string errmsg) 
+{
     if (!success) {
 	_completion_cb->dispatch(false, errmsg);
 	while (!_tasks.empty()) {
+	    delete _tasks.begin()->second;
 	    _tasks.erase(_tasks.begin());
 	}
 	return;
     }
+    delete _tasks.begin()->second;
     _tasks.erase(_tasks.begin());
     run_task();
+}
+
+void
+TaskManager::fail_tasklist_initialization(const string& errmsg)
+{
+    XLOG_ERROR((errmsg + "\n").c_str());
+    while (!_tasks.empty()) {
+	delete _tasks.begin()->second;
+	_tasks.erase(_tasks.begin());
+    }
+    return;
+}
+
+Task& 
+TaskManager::find_task(const string& modname)
+{
+    map<string, Task*>::iterator i;
+    i = _tasks.find(modname);
+    assert(i != _tasks.end());
+    assert(i->second != NULL);
+    return *(i->second);
 }

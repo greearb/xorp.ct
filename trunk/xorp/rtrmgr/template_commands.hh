@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.9 2003/04/23 04:24:36 mjh Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.10 2003/04/24 23:43:48 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -31,7 +31,6 @@
 class XRLdb;
 class XorpClient;
 class TemplateTree;
-class ModuleManager;
 
 class UnexpandedVariable {
 public:
@@ -90,53 +89,6 @@ public:
 protected:
     string _cmd_name;
     list <Action*> _actions;
-};
-
-class ModuleCommand : public Command {
-public:
-    ModuleCommand(const string &cmd_name, TemplateTree& ct);
-    ~ModuleCommand() {}
-    void add_action(const list <string> &action,
-		    const XRLdb& xrldb) throw (ParseError);
-    //    void set_path(const string &path);
-    //    void set_depends(const string &depends);
-    int  execute(XorpClient &xclient, uint tid,
-		 ModuleManager &module_manager, 
-		 bool do_exec, 
-		 bool do_commit) const;
-
-    bool execute_completed() const;
-    
-    const string& name() const {return _modname;}
-    const string& path() const {return _modpath;}
-    const list <string>& depends() const {return _depends;}
-    int start_transaction(ConfigTreeNode& ctn,
-			  XorpClient& xclient,  uint tid, 
-			  bool do_exec, bool do_commit) const;
-    int end_transaction(ConfigTreeNode& ctn,
-			XorpClient& xclient,  uint tid, 
-			bool do_exec, bool do_commit) const;
-    string str() const;
-
-protected:
-    void exec_complete(const XrlError& err, 
-		       XrlArgs* xrlargs);
-
-    void action_complete(const XrlError& err, 
-			 XrlArgs* args,
-			 ConfigTreeNode *ctn,
-			 Action *action,
-			 string cmd);
-
-private:
-    TemplateTree& _tt;
-    string _modname;
-    string _modpath;
-    list <string> _depends;
-    Action *_procready;
-    Action *_startcommit;
-    Action *_endcommit;
-    bool _execute_done;
 };
 
 class AllowCommand : public Command {

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.2 2003/03/10 23:21:02 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.3 2003/04/22 23:43:02 mjh Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
 #include "template_commands.hh"
+#include "module_command.hh"
 #include "template_tree.hh"
 #include "conf_tree.hh"
 #include "command_tree.hh"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.5 2003/04/22 23:43:01 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.6 2003/04/23 04:24:35 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -23,8 +23,7 @@
 #include "config.h"
 #include "libxorp/xorp.h"
 #include "master_conf_tree_node.hh"
-#include "module_manager.hh"
-#include "xorp_client.hh"
+#include "task.hh"
 #include "parse_error.hh"
 #include "conf_tree.hh"
 
@@ -35,8 +34,7 @@ class ConfTemplate;
 class MasterConfigTree :public ConfigTree {
 public:
     MasterConfigTree(const string& conffile, TemplateTree *ct, 
-		     ModuleManager& mm,
-		     XorpClient& xclient, bool do_exec);
+		     TaskManager& taskmgr);
     bool read_file(string& configuration, const string& conffile,
 		   string& errmsg);
     bool parse(const string& configuration, const string& conffile);
@@ -64,23 +62,26 @@ public:
     const MasterConfigTreeNode *const_root() const {
 	return (const MasterConfigTreeNode*)(&_root_node);
     }
+
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
 		      ConfigTree& deletion_tree);
 
     bool module_config_start(const string& module_name,
-			     uint tid, bool do_commit, 
+			     bool do_commit, 
 			     string& result);
     bool module_config_done(const string& module_name,
-			    uint tid, bool do_commit,
+			    bool do_commit,
 			    string& result);
 
-    ModuleManager &_module_manager;
-    XorpClient &_xclient;
+    bool do_exec() const {return _taskmgr.do_exec();}
+    ModuleManager& module_manager() const {return _taskmgr.module_manager();}
+    XorpClient& xorp_client() const {return _taskmgr.xorp_client();}
+
+    TaskManager& _taskmgr;
 
     //if _do_exec is false, run in debug mode, saying what we'd do,
     //but not actually doing anything
-    bool _do_exec; 
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_HH__

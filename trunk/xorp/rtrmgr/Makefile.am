@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.11 2003/04/24 23:43:47 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.12 2003/05/01 07:55:28 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -34,6 +34,7 @@ rtrmgr_SOURCES	+= main_rtrmgr.cc
 rtrmgr_SOURCES	+= template_tree.cc
 rtrmgr_SOURCES	+= template_tree_node.cc
 rtrmgr_SOURCES	+= template_commands.cc
+rtrmgr_SOURCES	+= module_command.cc
 rtrmgr_SOURCES	+= conf_tree_node.cc
 rtrmgr_SOURCES	+= conf_tree.cc
 rtrmgr_SOURCES	+= master_conf_tree_node.cc
@@ -64,6 +65,7 @@ xorpsh_SOURCES	+= lex.opcmd.cc
 xorpsh_SOURCES	+= template_tree.cc
 xorpsh_SOURCES	+= template_tree_node.cc
 xorpsh_SOURCES	+= template_commands.cc
+xorpsh_SOURCES	+= module_command.cc
 xorpsh_SOURCES	+= conf_tree_node.cc
 xorpsh_SOURCES	+= slave_conf_tree_node.cc
 xorpsh_SOURCES	+= conf_tree.cc
@@ -80,6 +82,8 @@ xorpsh_SOURCES	+= split.cc
 xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
 #unexpanded_xrl shouldn't really be needed
 xorpsh_SOURCES	+= unexpanded_xrl.cc
+#task.cc shouldn't really be needed
+xorpsh_SOURCES  += task.cc
 
 xorpsh_LDADD	= $(top_builddir)/cli/libcli.a
 xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.a
@@ -95,6 +99,7 @@ test_templates_SOURCES	+= lex.tplt.cc
 test_templates_SOURCES	+= template_tree.cc
 test_templates_SOURCES	+= template_tree_node.cc
 test_templates_SOURCES	+= template_commands.cc
+test_templates_SOURCES	+= module_command.cc
 test_templates_SOURCES	+= xrldb.cc
 test_templates_SOURCES	+= unexpanded_xrl.cc
 test_templates_SOURCES	+= conf_tree_node.cc
@@ -102,6 +107,7 @@ test_templates_SOURCES	+= command_tree.cc
 test_templates_SOURCES	+= xorp_client.cc
 test_templates_SOURCES	+= module_manager.cc
 test_templates_SOURCES	+= split.cc
+test_templates_SOURCES	+= task.cc
 test_templates_LDADD 	 = $(LDADD)
 
 test_sample_config_SOURCES	 = test_sample_config.cc
@@ -112,6 +118,7 @@ test_sample_config_SOURCES	+= lex.boot.cc
 test_sample_config_SOURCES	+= template_tree.cc
 test_sample_config_SOURCES	+= template_tree_node.cc
 test_sample_config_SOURCES	+= template_commands.cc
+test_sample_config_SOURCES	+= module_command.cc
 test_sample_config_SOURCES	+= xrldb.cc
 test_sample_config_SOURCES	+= unexpanded_xrl.cc
 test_sample_config_SOURCES	+= conf_tree_node.cc
@@ -122,6 +129,7 @@ test_sample_config_SOURCES	+= command_tree.cc
 test_sample_config_SOURCES	+= xorp_client.cc
 test_sample_config_SOURCES	+= module_manager.cc
 test_sample_config_SOURCES	+= split.cc
+test_sample_config_SOURCES	+= task.cc
 test_sample_config_LDADD 	 = $(LDADD)
 
 test_module_manager_SOURCES	 = test_module_manager.cc
@@ -130,6 +138,7 @@ test_module_manager_SOURCES	+= lex.tplt.cc
 test_module_manager_SOURCES	+= template_tree.cc
 test_module_manager_SOURCES	+= template_tree_node.cc
 test_module_manager_SOURCES	+= template_commands.cc
+test_module_manager_SOURCES	+= module_command.cc
 test_module_manager_SOURCES	+= xrldb.cc
 test_module_manager_SOURCES	+= unexpanded_xrl.cc
 test_module_manager_SOURCES	+= conf_tree_node.cc
@@ -137,6 +146,7 @@ test_module_manager_SOURCES	+= conf_tree_node.cc
 test_module_manager_SOURCES	+= xorp_client.cc
 test_module_manager_SOURCES	+= module_manager.cc
 test_module_manager_SOURCES	+= split.cc
+test_module_manager_SOURCES	+= task.cc
 test_module_manager_LDADD 	 = $(LDADD)
 
 # -- Library Sources

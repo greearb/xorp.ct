@@ -281,7 +281,7 @@ static char lastsymbol[256];
 static string current_cmd;
 //static string path_hold;
 static list <string> cmd_list;
-static TemplateTree *ct;
+static TemplateTree* tt;
 extern "C" int tpltparse();
 extern int tpltlex();
 
@@ -297,20 +297,20 @@ static void extend_path(char *segment, bool is_tag) {
     strncpy(lastsymbol, segment, 255);
     string segname;
     segname = segment;
-    ct->extend_path(segname, is_tag);
+    tt->extend_path(segname, is_tag);
     //free(segment);
     //  printf("\n>>> extend path: %s\n", path);
 }
 
 static void push_path() {
   //printf("\n>>>PUSH: %s\n", path);
-    ct->push_path(tplt_type, tplt_initializer);
+    tt->push_path(tplt_type, tplt_initializer);
     tplt_type = NODE_VOID;
     tplt_initializer = NULL;
 }
 
 static void pop_path() {
-    ct->pop_path();
+    tt->pop_path();
     tplt_type = NODE_VOID;
     tplt_initializer = NULL;
     //printf("\n>>>POP: %s\n", path);
@@ -324,7 +324,7 @@ static void terminal(char *segment) {
 
 static void add_cmd(char *cmd) {
     strncpy(lastsymbol, cmd, 255);
-    ct->add_cmd(cmd);
+    tt->add_cmd(cmd);
     current_cmd = cmd;
     free(cmd);
     cmd_list.clear();
@@ -362,12 +362,12 @@ static void end_cmd() {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("end_cmd\n");
 #endif	
-    ct->add_cmd_action(current_cmd, cmd_list); 
+    tt->add_cmd_action(current_cmd, cmd_list); 
     cmd_list.clear();
 }
 
 int init_template_parser (const char *filename, TemplateTree *c) {
-    ct = c;
+    tt = c;
     linenum = 1;
     tpltin = fopen(filename, "r");
     if (tpltin == NULL)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.2 2003/05/02 04:08:25 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.3 2003/05/02 04:53:34 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -103,18 +103,22 @@ class TaskManager {
 public:
     TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient,
 			     bool do_exec);
+    int add_module(const string& modname, const string& modpath,
+		   Validation *validation);
     void run(CallBack cb);
     XorpClient& xorp_client() const {return _xorp_client;}
-    ModuleManager& module_manager() const {return _mmgr;}
+    ModuleManager& module_manager() const {return _module_manager;}
     bool do_exec() const {return _do_exec;}
 private:
     void run_task();
     void task_done(bool success, string errmsg);
+    void fail_tasklist_initialization(const string& errmsg);
+    Task& find_task(const string& modname);
 
-    ModuleManager& _mmgr;
+    ModuleManager& _module_manager;
     XorpClient& _xorp_client;
     bool _do_exec;
-    map <string, Task> _tasks;
+    map <string, Task*> _tasks;
     CallBack _completion_cb;
 };
 
