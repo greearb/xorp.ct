@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.20 2004/04/30 17:56:21 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.21 2004/05/20 20:52:21 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -590,8 +590,7 @@ ProtoNode<V>::node_status(string& reason_msg)
 			      static_cast<uint32_t>(_startup_requests_n));
 	break;
     case PROC_NOT_READY:
-	// XXX: this state is unused
-	XLOG_UNREACHABLE();
+	reason_msg = c_format("Waiting for configuration completion");
 	break;
     case PROC_READY:
 	reason_msg = c_format("Node is READY");
@@ -602,8 +601,7 @@ ProtoNode<V>::node_status(string& reason_msg)
 			      static_cast<uint32_t>(_shutdown_requests_n));
 	break;
     case PROC_FAILED:
-	// XXX: this state is unused
-	XLOG_UNREACHABLE();
+	reason_msg = c_format("Node is PROC_FAILED");
 	break;
     case PROC_DONE:
 	// Process has completed operation
