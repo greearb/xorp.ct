@@ -1,0 +1,111 @@
+#
+# $XORP: xorp/README,v 1.13 2003/08/28 15:57:33 pavlin Exp $
+#
+
+	Build Notes for XORP (eXtensible Open Router Platform)
+
+
+
+1. Compilation
+==============
+
+To compile XORP, you must have GNU make (gmake) installed. Then just
+run the following commands in the top-level directory:
+
+./configure
+gmake
+
+
+2. Internal tests
+=================
+
+To run the internal tests, you must have "bash" installed. Then, after
+the code is compiled, you need to run the following command in the
+top-level directory:
+
+gmake check
+
+
+3. OS-specific notes
+======================
+
+3.1. FreeBSD
+============
+
+  * FreeBSD-4.5 and FreeBSD-4.6.2:
+    - Earlier XORP releases have been developed and tested on those
+      platforms.
+
+  * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE:
+    - No known issues.
+    - The code should compile with the following versions of the
+      gcc/g++ compiler: 2.95.4 (default), 3.2.1, 3.3.1.
+
+  * FreeBSD-5.1:
+    - The default gcc/g++ compiler (version 3.2.2) has a bug, hence
+      you must install a new compiler (e.g., gcc-3.3 from
+      /usr/ports/lang/gcc33 in the ports collection). Then, you must
+      set environmental variables CC and CXX to point to the new compiler
+      before running "./configure".
+      (e.g., "setenv CC gcc33; setenv CXX g++33").
+    - The code compiles with the new compiler, and the internal tests
+      appear to succeed.
+
+
+3.2. NetBSD
+===========
+
+  * NetBSD-1.6.1:
+    - The code compiles, but some of the internal tests fail.
+
+
+3.3. OpenBSD
+============
+
+  * OpenBSD-3.3:
+    - The default gcc/g++ compiler (version 2.95.x) has a bug, hence
+      you must install a new compiler (e.g., gcc-3.2.2 and g++-3.2.2 from
+      packages). Then, you must set environmental variables CC and CXX
+      to point to the new compiler before running "./configure"
+      (e.g., "setenv CC egcc; setenv CXX eg++").
+    - The code compiles with the new compiler, but some of the internal tests
+      fail.
+    - The default datasize limit per user may not be sufficient to compile
+      some parts of the code, hence you may need to increase the datasize
+      limit.  If you see the following compilation error:
+	  nm: Cannot allocate memory
+	  collect2: /usr/bin/nm returned 1 exit status
+      then you can run "limit datasize 200000" in tcsh
+      or "ulimit -d 200000" in sh. If necessary, increase further the
+      the datasize limit.
+
+
+3.4. Linux
+==========
+
+  * Linux RedHat-7.2 (kernel 2.4.18):
+    - The code compiles, but some of the internal tests fail dumping core.
+      The problem is attributable to exception handler failures caused by
+      the default compiler/binutils combination.  More information is
+      available at:
+	http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=54724
+    - IGMP and PIM-SM appear to work.
+
+  * Linux RedHat-7.3 (kernel 2.4-20):
+    - No known issues.
+    - The code should compile with the following versions of the
+      gcc/g++ compiler: 2.96 (default).
+
+  * Linux RedHat-9.2 (kernel 2.4.20-8smp):
+    - You must install the following RPMs (and all other RPMs they depend on):
+      - openssl-devel (e.g., openssl-devel-0.9.7a-5.i386.rpm)
+      - ncurses (e.g., ncurses-5.3-4.i386.rpm)
+    - The code compiles, but some of the internal tests fail.
+
+
+4. Known problems
+=================
+
+  * Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
+    The simplest work-around is to rerun gmake or not to use the -j flag.
+
