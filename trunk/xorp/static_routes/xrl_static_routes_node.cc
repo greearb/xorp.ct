@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.21 2005/02/12 08:09:12 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.22 2005/02/15 01:57:05 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -686,14 +686,14 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
 {
     bool do_shutdown = false;
 
-    if (_fea_target == target_class) {
+    if (target_class == _fea_target) {
 	XLOG_ERROR("FEA (instance %s) has died, shutting down.",
 		   target_instance.c_str());
 	_is_fea_alive = false;
 	do_shutdown = true;
     }
 
-    if (_rib_target == target_class) {
+    if (target_class == _rib_target) {
 	XLOG_ERROR("RIB (instance %s) has died, shutting down.",
 		   target_instance.c_str());
 	_is_rib_alive = false;
