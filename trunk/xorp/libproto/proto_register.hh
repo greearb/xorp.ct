@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_register.hh,v 1.2 2003/03/10 23:20:20 hodson Exp $
+// $XORP: xorp/libproto/proto_register.hh,v 1.3 2003/03/18 02:44:34 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_REGISTER_HH__
@@ -104,6 +104,10 @@ public:
 	return (_registered_protocols[module_id].module_instance_name_list());
     }
     
+    const list<pair<string, xorp_module_id> >& all_module_instance_name_list() const {
+	return (_all_module_instance_name_list);
+    }
+    
 private:
     
     /**
@@ -127,6 +131,7 @@ private:
     };
     
     RegisteredProtocol	_registered_protocols[XORP_MODULE_MAX];
+    list <pair<string, xorp_module_id> > _all_module_instance_name_list;
 };
 
 //

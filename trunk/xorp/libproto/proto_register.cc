@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_register.cc,v 1.2 2003/03/10 23:20:20 hodson Exp $"
+#ident "$XORP: xorp/libproto/proto_register.cc,v 1.3 2003/03/18 02:44:34 pavlin Exp $"
 
 
 //
@@ -72,6 +72,8 @@ ProtoRegister::add_protocol(const string& module_instance_name,
     if (registered_protocol.add_protocol_instance(module_instance_name) < 0)
 	return (XORP_ERROR);
     
+    _all_module_instance_name_list.push_back(pair<string, xorp_module_id>(module_instance_name, module_id));
+    
     return (XORP_OK);
 }
 
@@ -100,6 +102,17 @@ ProtoRegister::delete_protocol(const string& module_instance_name,
     
     if (registered_protocol.delete_protocol_instance(module_instance_name) < 0)
 	return (XORP_ERROR);
+    
+    list<pair<string, xorp_module_id> >::iterator iter;
+    
+    iter = find(_all_module_instance_name_list.begin(),
+		_all_module_instance_name_list.end(),
+		pair<string, xorp_module_id>(module_instance_name, module_id));
+    
+    if (iter == _all_module_instance_name_list.end())
+	return (XORP_ERROR);		// Not on the list
+    
+    _all_module_instance_name_list.erase(iter);
     
     return (XORP_OK);
 }
