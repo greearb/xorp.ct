@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.5 2003/05/29 22:37:01 mjh Exp $"
+#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.6 2003/05/29 23:24:52 mjh Exp $"
 
 #include <time.h>
 #include <vector>
@@ -148,7 +148,7 @@ XrlOspfTarget::common_0_1_get_version(
 				      // Output values, 
 				      string& version)
 {
-    version = c_format("OSPFD v%d.%d", OSPF::vmajor, OSPF::vminor);
+    version = c_format("OSPFD v%d.%d", (int)OSPF::vmajor, (int)OSPF::vminor);
     return XrlCmdError::OKAY();
 }
 
