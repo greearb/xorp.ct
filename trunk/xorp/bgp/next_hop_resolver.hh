@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.3 2002/12/17 22:06:04 mjh Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.4 2002/12/18 03:06:06 atanu Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -167,6 +167,20 @@ public:
      * @param nexthop The next hop that has changed.
      */
     void next_hop_changed(A nexthop);
+
+    /**
+     * Next hop changed.
+     *
+     * Whenever a next hop changes this method should be called and
+     * the change will be rippled up to the decision process. However
+     * if a change occurs but the metrics don't change don't bother to
+     * ripple up the change there is no point.
+     *
+     * @param nexthop The next hop that has changed.
+     * @param old_resolves The old resolve value.
+     * @param old_metric The old metric value.
+     */
+    void next_hop_changed(A nexthop, bool old_resolves, uint32_t old_metric);
 
     /**
      * Get NextHopRibRequest pointer.

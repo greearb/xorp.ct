@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.4 2002/12/17 22:06:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.5 2002/12/18 03:06:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -231,6 +231,34 @@ NextHopResolver<A>::next_hop_changed(A addr)
 	_decision->igp_nexthop_changed(addr);
     else
 	XLOG_FATAL("No pointer to the decision table.");
+}
+
+template <class A>
+void
+NextHopResolver<A>::next_hop_changed(A addr, bool old_resolves,
+				     uint32_t old_metric)
+{
+    debug_msg("next hop: %s\n", addr.str().c_str());
+    if (!_decision)
+	XLOG_FATAL("No pointer to the decision table.");
+
+    bool resolvable;
+    uint32_t metric;
+    if (!lookup(addr, resolvable, metric))
+	XLOG_FATAL("Could not lookup %s", addr.str().c_str());
+	
+    bool changed = false;
+	
+    // If resolvability has changed we care.
+    if (resolvable != old_resolves)
+	changed = true;
+
+    // Only if the nexthop resolves do we care if the metric has changed.
+    if (resolvable && metric != old_metric)
+	changed = true;
+
+    if (changed)
+	_decision->igp_nexthop_changed(addr);
 }
 
 /****************************************/
@@ -755,14 +783,15 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    ** RIB. If it was then notify decision that this next hop
 	    ** has changed.
 	    */
-	    if (rr->_reregister) {
+	    if (rr->_reregister && 0 != rr->_ref_cnt) {
 		_next_hop_cache.register_nexthop(rr->_nexthop, rr->_ref_cnt);
 		/*
-		** If the metrics haven't changed don't bother with
-		** the upcall, unless resolvability changed.
+		** Start the upcall with the old metrics. Only if the
+		** state has changed will the upcall be made.
 		*/
-		if (*resolves != rr->_resolvable || *metric != rr->_metric)
-		    _next_hop_resolver.next_hop_changed(rr->_nexthop);
+		_next_hop_resolver.next_hop_changed(rr->_nexthop,
+						    rr->_resolvable,
+						    rr->_metric);
 	    }
 
 	    delete rr;
@@ -847,8 +876,7 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
 	** changed. If the metrics have changed we need to make an
 	** upcall to the BGP decision process.
 	*/
-	if (resolvable != new_resolvable || metric != new_metric)
-	    _next_hop_resolver.next_hop_changed(nexthop);
+	_next_hop_resolver.next_hop_changed(nexthop, resolvable, metric);
 
 	return;
     }
