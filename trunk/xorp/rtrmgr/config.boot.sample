@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.16 2004/06/21 18:06:05 hodson Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.17 2004/11/05 02:16:22 bms Exp $ */
 
 
 interfaces {
@@ -34,7 +34,7 @@ interfaces {
 	    }
 	}
     }
-/*
+
     interface discard0 {
 	description: "discard interface"
 	enabled: true
@@ -47,7 +47,6 @@ interfaces {
 	    }
 	}
     }
-*/
 }
 
 fea {
