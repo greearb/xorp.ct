@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.12 2003/06/01 21:37:27 hodson Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.13 2003/11/13 19:05:48 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_HH__
 #define __LIBXIPC_FINDER_HH__
@@ -149,8 +149,6 @@ protected:
     Finder(const Finder&);		// Not implemented
     Finder& operator=(const Finder&);	// Not implemented
 
-    static const uint32_t MESSENGER_TIMEOUT_SECS = 30;
-
 protected:
     EventLoop&		 _e;
     XrlCmdMap		 _cmds;
@@ -160,7 +158,7 @@ protected:
     TargetTable		 _targets;		// Table of target instances
     ClassTable		 _classes;		// Table of known classes
     OutQueueTable	 _out_queues;		// Outbound message queues
-    EventQueue		 _event_queue;		// Queue for externally 
+    EventQueue		 _event_queue;		// Queue for externally
     						// advertised events
     XorpTimer		 _hello;		// Timer used to send
     						// keepalive messages to
