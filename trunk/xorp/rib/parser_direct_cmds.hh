@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.12 2004/06/10 22:41:37 hodson Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.13 2004/09/17 14:00:03 abittau Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -70,16 +70,44 @@ public:
     DirectRouteVerifyCommand(RIB<IPv4>& rib)
 	: RouteVerifyCommand(), _rib(rib) {}
     int execute() {
-	cout << "RouteVerifyCommand::execute " << _lookupaddr.str() << " "
-	     << _ifname << " " << _nexthop.str() << " "
-	     << c_format("%d", _metric) << "\n";
+	cout << "RouteVerifyCommand::execute " << _type
+	     << " " << _lookupaddr.str()
+	     << " " << _ifname
+	     << " " << _nexthop.str()
+	     << " " << c_format("%d", _metric)
+	     << "\n";
+
+	RibVerifyType verifytype;
+	if (_type == "miss")
+		verifytype = RibVerifyType(MISS);
+	else if (_type == "discard")
+		verifytype = RibVerifyType(DISCARD);
+	else if (_type == "ip")
+		verifytype = RibVerifyType(IP);
+	else {
+	    cerr <<
+"RouteVerify Failed: invalid match type specification " << _type << "\n";
+#ifndef TESTING_INTERACTIVELY
+	    // XXX stub this out if interactive
+	    abort();
+#endif
+	}
+
 	int dummy = _rib.verify_route(_lookupaddr, _ifname, _nexthop,
-				      (uint32_t)_metric);
+				      (uint32_t)_metric, verifytype);
 	if (dummy != XORP_OK) {
 	    cerr << "RouteVerify Failed!\n";
+#ifndef TESTING_INTERACTIVELY
+	    // XXX stub this out if interactive
 	    abort();
+#endif
 	}
+#ifndef TESTING_INTERACTIVELY
+	    // XXX stub this out if interactive
 	return dummy;
+#else
+	return XORP_OK;
+#endif
     }
 private:
     RIB<IPv4>& _rib;

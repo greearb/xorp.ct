@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.25 2004/07/24 01:01:51 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.26 2004/09/17 14:00:03 abittau Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -46,6 +46,12 @@ class RibManager;
 enum RibTransportType {
     UNICAST	= 1,
     MULTICAST	= 2
+};
+
+enum RibVerifyType {
+    MISS	= 0,	// No route to destination
+    DISCARD	= 1,	// Discard route for destination
+    IP		= 2	// Protocol route to destination
 };
 
 /**
@@ -267,15 +273,22 @@ public:
 			      const PolicyTags&	policytags);
 
     /**
-     * Verify that expected routing information is correct.  This is
-     * intended for testing purposes only.
+     * Verify the result of a route lookup in the RIB matches the
+     * parameters we expect. Intended for testing purposes only.
+     *
+     * @param lookupaddr the destination to be verified.
+     * @param nexthop_addr the expected next hop address.
+     * @param ifname the expected interface.
+     * @param metric the expected routing protocol metric.
+     * @param type the expected type of match.
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int verify_route(const A&		lookupaddr,
 			     const string&	ifname,
 			     const A&		nexthop_addr,
-			     uint32_t		metric);
+			     uint32_t		metric,
+			     RibVerifyType	matchtype);
 
     /**
      * Delete an existing route via the OriginTable called tablename.

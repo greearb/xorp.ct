@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.10 2004/02/11 08:48:45 pavlin Exp $
+// $XORP: xorp/rib/parser.hh,v 1.11 2004/06/10 22:41:37 hodson Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -325,20 +325,23 @@ protected:
 
 class RouteVerifyCommand : public Command {
 public:
-    RouteVerifyCommand() : Command("route verify ~IPv4 ~String ~IPv4 ~Int", 4)
+    RouteVerifyCommand() : Command(
+"route verify ~String ~IPv4 ~String ~IPv4 ~Int", 5)
     {
-	bind_ipv4(0, _lookupaddr);
-	bind_string(1, _ifname);
-	bind_ipv4(2, _nexthop);
-	bind_int(3, _metric);
+	bind_string(0, _type);
+	bind_ipv4(1, _lookupaddr);
+	bind_string(2, _ifname);
+	bind_ipv4(3, _nexthop);
+	bind_int(4, _metric);
     }
     virtual int execute() = 0;
 
 protected:
+    string	_type;			// Type of result expected.
     string	_ifname;
     IPv4	_lookupaddr;
     IPv4	_nexthop;
-    int         _metric;
+    int		_metric;
 };
 
 class EtherVifCommand : public Command {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.39 2004/09/17 14:00:03 abittau Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.40 2004/09/18 02:05:52 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -811,15 +811,17 @@ int
 RIB<A>::verify_route(const A& lookup_addr,
 		     const string& ifname,
 		     const A& nexthop_addr,
-		     uint32_t metric)
+		     uint32_t metric,
+		     RibVerifyType matchtype)
 {
     const IPRouteEntry<A>* re;
 
+    // 1. Check for an expected route miss.
+    // 2. Check table entry validity and existence.
     re = _final_table->lookup_route(lookup_addr);
     if (re == NULL || re->vif() == NULL) {
-	// TODO: XXX: hard-coded interface name!!
-	if (ifname == "discard") {
-	    debug_msg("****ROUTE FAILURE SUCCESSFULLY VERIFIED****\n");
+	if (matchtype == RibVerifyType(MISS)) {
+	    debug_msg("****ROUTE MISS SUCCESSFULLY VERIFIED****\n");
 	    return XORP_OK;
 	}
 	if (re == NULL) {
@@ -831,6 +833,19 @@ RIB<A>::verify_route(const A& lookup_addr,
 	return XORP_ERROR;
     }
 
+    // 3. Check for discard (blackhole) routes.
+    DiscardNextHop* dnh = dynamic_cast<DiscardNextHop*>(re->nexthop());
+    if (matchtype == RibVerifyType(DISCARD)) {
+	    if (dnh == NULL) {
+		    debug_msg("Next hop is not a DiscardNextHop");
+		    return XORP_ERROR;
+	    } else {
+		debug_msg("****DISCARD ROUTE SUCCESSFULLY VERIFIED****\n");
+		return XORP_OK;
+	    }
+    }
+
+    // 4. Check for protocol level routes (specifically IP).
     IPNextHop<A>* route_nexthop = dynamic_cast<IPNextHop<A>* >(re->nexthop());
     if (route_nexthop == NULL) {
 	debug_msg("Next hop is not an IPNextHop\n");
@@ -862,7 +877,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 	debug_msg("Metric: Exp: %d == Got: %d\n", metric,
 		  re->metric());
     }
-    debug_msg("****ROUTE SUCCESSFULLY VERIFIED****\n");
+    debug_msg("****IP ROUTE SUCCESSFULLY VERIFIED****\n");
     return XORP_OK;
 }
 
