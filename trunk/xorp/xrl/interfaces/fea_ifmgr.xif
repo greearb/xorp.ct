@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.11 2003/10/24 20:51:06 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.12 2003/10/28 19:36:28 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -75,6 +75,15 @@ interface ifmgr/0.1 {
 	create_interface ? tid:u32 & ifname:txt
 
 	delete_interface ? tid:u32 & ifname:txt
+
+	/**
+	 * Implicitly configure an interface within the FEA by using
+	 * information from the underlying system.
+	 *
+	 * @param tid the transaction ID.
+	 * @param ifname the name of the interface to configure.
+	 */
+	configure_interface_from_system ? tid:u32 & ifname:txt
 
 	set_interface_enabled ? tid:u32 & ifname:txt & enabled:bool
 
