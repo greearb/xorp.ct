@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.12 2005/02/11 04:21:40 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.13 2005/02/15 02:02:37 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -312,6 +312,13 @@ private:
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
     /**
+     * Called when Finder connection is established.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_connect_event();
+
+    /**
      * Called when Finder disconnect occurs.
      *
      * Note that this method overwrites an XrlRouter virtual method.
@@ -381,6 +388,8 @@ private:
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     static const TimeVal RETRY_TIMEVAL;
+
+    bool		_is_finder_alive;
 
     bool		_is_fea_alive;
     bool		_is_fea_registered;

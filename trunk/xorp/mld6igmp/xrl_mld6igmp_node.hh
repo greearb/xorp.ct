@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.24 2005/01/28 03:34:19 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.25 2005/02/17 01:03:36 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -587,6 +587,13 @@ protected:
     
 private:
     /**
+     * Called when Finder connection is established.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_connect_event();
+
+    /**
      * Called when Finder disconnect occurs.
      *
      * Note that this method overwrites an XrlRouter virtual method.
@@ -728,6 +735,8 @@ private:
     XorpTimer			_send_add_delete_membership_queue_timer;
 
     static const TimeVal	RETRY_TIMEVAL;
+
+    bool			_is_finder_alive;
 
     bool			_is_mfea_alive;
     bool			_is_mfea_registered;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.22 2005/02/15 01:57:05 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.23 2005/02/17 00:54:19 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -48,6 +48,7 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
       _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_finder_client(&xrl_router()),
+      _is_finder_alive(false),
       _is_fea_alive(false),
       _is_fea_registered(false),
       _is_fea_registering(false),
@@ -86,10 +87,28 @@ XrlStaticRoutesNode::shutdown()
 //
 // Finder-related events
 //
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XrlStaticRoutesNode::finder_connect_event()
+{
+    _is_finder_alive = true;
+}
+
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
 XrlStaticRoutesNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    _is_finder_alive = false;
 
     StaticRoutesNode::set_status(SERVICE_FAILED);
     StaticRoutesNode::update_status();
@@ -105,6 +124,9 @@ XrlStaticRoutesNode::fea_register_startup()
 
     _fea_register_startup_timer.unschedule();
     _fea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_fea_registered)
 	return;		// Already registered
@@ -176,6 +198,9 @@ XrlStaticRoutesNode::fea_register_shutdown()
     _fea_register_startup_timer.unschedule();
     _fea_register_shutdown_timer.unschedule();
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (! _is_fea_alive)
 	return;		// The FEA is not there anymore
 
@@ -246,6 +271,9 @@ XrlStaticRoutesNode::rib_register_startup()
 
     _rib_register_startup_timer.unschedule();
     _rib_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_rib_registered)
 	return;		// Already registered
@@ -320,6 +348,9 @@ XrlStaticRoutesNode::rib_register_shutdown()
     _rib_register_startup_timer.unschedule();
     _rib_register_shutdown_timer.unschedule();
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (! _is_rib_alive)
 	return;		// The RIB is not there anymore
 
@@ -386,6 +417,9 @@ void
 XrlStaticRoutesNode::send_rib_add_tables()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (! _is_rib_igp_table4_registered) {
 	success = _xrl_rib_client.send_add_igp_table4(
@@ -502,6 +536,9 @@ void
 XrlStaticRoutesNode::send_rib_delete_tables()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_rib_igp_table4_registered) {
 	bool success4;
@@ -1037,6 +1074,9 @@ void
 XrlStaticRoutesNode::send_rib_route_change()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     do {
 	// Pop-up all routes that are to be ignored

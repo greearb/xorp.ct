@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.13 2005/02/11 02:49:31 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.14 2005/02/15 01:57:06 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -305,6 +305,13 @@ private:
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
     /**
+     * Called when Finder connection is established.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_connect_event();
+
+    /**
      * Called when Finder disconnect occurs.
      *
      * Note that this method overwrites an XrlRouter virtual method.
@@ -361,6 +368,8 @@ private:
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     static const TimeVal RETRY_TIMEVAL;
+
+    bool		_is_finder_alive;
 
     bool		_is_fea_alive;
     bool		_is_fea_registered;

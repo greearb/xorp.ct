@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.21 2005/02/15 01:50:58 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.22 2005/02/17 00:54:20 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -49,6 +49,7 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
       _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_finder_client(&xrl_router()),
+      _is_finder_alive(false),
       _is_fea_alive(false),
       _is_fea_registered(false),
       _is_fea_registering(false),
@@ -93,10 +94,28 @@ XrlFib2mribNode::shutdown()
 //
 // Finder-related events
 //
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XrlFib2mribNode::finder_connect_event()
+{
+    _is_finder_alive = true;
+}
+
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
 XrlFib2mribNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    _is_finder_alive = false;
 
     Fib2mribNode::set_status(SERVICE_FAILED);
     Fib2mribNode::update_status();
@@ -112,6 +131,9 @@ XrlFib2mribNode::fea_register_startup()
 
     _fea_register_startup_timer.unschedule();
     _fea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_fea_registered)
 	return;		// Already registered
@@ -187,6 +209,9 @@ XrlFib2mribNode::fea_register_shutdown()
 
     _fea_register_startup_timer.unschedule();
     _fea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (! _is_fea_alive)
 	return;		// The FEA is not there anymore
@@ -266,6 +291,9 @@ XrlFib2mribNode::rib_register_startup()
     _rib_register_startup_timer.unschedule();
     _rib_register_shutdown_timer.unschedule();
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (_is_rib_registered)
 	return;		// Already registered
 
@@ -339,6 +367,9 @@ XrlFib2mribNode::rib_register_shutdown()
     _rib_register_startup_timer.unschedule();
     _rib_register_shutdown_timer.unschedule();
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (! _is_rib_alive)
 	return;		// The RIB is not there anymore
 
@@ -405,6 +436,9 @@ void
 XrlFib2mribNode::send_fea_add_fib_client()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     //
     // Test whether the underlying system supports IPv4
@@ -618,6 +652,9 @@ XrlFib2mribNode::send_fea_delete_fib_client()
 {
     bool success = true;
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (_is_fea_fib_client4_registered) {
 	bool success4;
 	success4 = _xrl_fea_fib_client.send_delete_fib_client4(
@@ -699,6 +736,9 @@ void
 XrlFib2mribNode::send_rib_add_tables()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (! _is_rib_igp_table4_registered) {
 	success = _xrl_rib_client.send_add_igp_table4(
@@ -813,6 +853,9 @@ void
 XrlFib2mribNode::send_rib_delete_tables()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_rib_igp_table4_registered) {
 	bool success4;
@@ -1321,6 +1364,9 @@ void
 XrlFib2mribNode::send_rib_route_change()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     do {
 	// Pop-up all routes that are to be ignored

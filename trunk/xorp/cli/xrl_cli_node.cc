@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.18 2005/02/12 04:50:25 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.19 2005/02/12 08:09:04 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -31,7 +31,8 @@ XrlCliNode::XrlCliNode(EventLoop&	eventloop,
 		   finder_port),
     XrlCliTargetBase(&xrl_router()),
       _cli_node(cli_node),
-      _xrl_cli_processor_client(&xrl_router())
+      _xrl_cli_processor_client(&xrl_router()),
+      _is_finder_alive(false)
 {
     _cli_node.set_send_process_command_callback(
 	callback(this, &XrlCliNode::send_process_command));
@@ -87,10 +88,28 @@ XrlCliNode::stop_cli()
 //
 // Finder-related events
 //
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XrlCliNode::finder_connect_event()
+{
+    _is_finder_alive = true;
+}
+
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
 XrlCliNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    _is_finder_alive = false;
 
     stop_cli();
 
@@ -332,6 +351,9 @@ XrlCliNode::send_process_command(const string& target,
 				 const string& command_name,
 				 const string& command_args)
 {
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     //
     // Send the request
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.31 2005/02/12 08:09:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.32 2005/02/17 01:03:36 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -54,6 +54,7 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
       _xrl_mld6igmp_client_client(&xrl_router()),
       _xrl_cli_manager_client(&xrl_router()),
       _xrl_finder_client(&xrl_router()),
+      _is_finder_alive(false),
       _is_mfea_alive(false),
       _is_mfea_registered(false),
       _is_mfea_registering(false),
@@ -158,10 +159,28 @@ XrlMld6igmpNode::stop_mld6igmp()
 //
 // Finder-related events
 //
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XrlMld6igmpNode::finder_connect_event()
+{
+    _is_finder_alive = true;
+}
+
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
 XrlMld6igmpNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    _is_finder_alive = false;
 
     Mld6igmpNode::set_status(SERVICE_FAILED);
     Mld6igmpNode::update_status();
@@ -177,6 +196,9 @@ XrlMld6igmpNode::mfea_register_startup()
 
     _mfea_register_startup_timer.unschedule();
     _mfea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_mfea_registered)
 	return;		// Already registered
@@ -252,6 +274,9 @@ XrlMld6igmpNode::mfea_register_shutdown()
     _mfea_register_startup_timer.unschedule();
     _mfea_register_shutdown_timer.unschedule();
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (! _is_mfea_alive)
 	return;		// The MFEA is not there anymore
 
@@ -315,6 +340,9 @@ void
 XrlMld6igmpNode::send_mfea_add_protocol()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     //
     // Register the protocol with the MFEA
@@ -393,6 +421,9 @@ void
 XrlMld6igmpNode::send_mfea_delete_protocol()
 {
     bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_mfea_add_protocol_registered) {
 	if (Mld6igmpNode::is_ipv4()) {
@@ -494,6 +525,9 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 {
     bool success = true;
     Mld6igmpVif *mld6igmp_vif = NULL;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_start_stop_protocol_kernel_vif_queue.empty())
 	return;			// No more changes
@@ -682,6 +716,9 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 {
     bool success = true;
     Mld6igmpVif *mld6igmp_vif = NULL;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_join_leave_multicast_group_queue.empty())
 	return;			// No more changes
@@ -901,6 +938,9 @@ XrlMld6igmpNode::send_add_delete_membership()
     bool success = true;
     Mld6igmpVif *mld6igmp_vif = NULL;
 
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
     if (_send_add_delete_membership_queue.empty())
 	return;			// No more changes
 
@@ -1067,7 +1107,10 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 			    size_t sndlen)
 {
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
-    
+
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     if (mld6igmp_vif == NULL) {
 	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %d: "
 		   "no such vif",
@@ -1151,6 +1194,9 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 						bool is_command_processor
     )
 {
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
@@ -1180,6 +1226,9 @@ XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_
 int
 XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),

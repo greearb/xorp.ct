@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.13 2004/06/10 22:40:43 hodson Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.14 2005/02/12 04:50:25 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -212,6 +212,13 @@ protected:
 				     const string *command_output);
 private:
     /**
+     * Called when Finder connection is established.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_connect_event();
+
+    /**
      * Called when Finder disconnect occurs.
      *
      * Note that this method overwrites an XrlRouter virtual method.
@@ -226,6 +233,8 @@ private:
     CliNode&	_cli_node;
 
     XrlCliProcessorV0p1Client _xrl_cli_processor_client;
+
+    bool		_is_finder_alive;
 };
 
 #endif // __CLI_XRL_CLI_NODE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.34 2005/02/15 02:08:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.35 2005/02/17 00:55:17 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -55,6 +55,7 @@ XrlMfeaNode::XrlMfeaNode(int		family,
       _xrl_mfea_client_client(&xrl_router()),
       _xrl_cli_manager_client(&xrl_router()),
       _xrl_finder_client(&xrl_router()),
+      _is_finder_alive(false),
       _is_fea_alive(false),
       _is_fea_registered(false),
       _is_fea_registering(false),
@@ -164,10 +165,28 @@ XrlMfeaNode::stop_mfea()
 //
 // Finder-related events
 //
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XrlMfeaNode::finder_connect_event()
+{
+    _is_finder_alive = true;
+}
+
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
 void
 XrlMfeaNode::finder_disconnect_event()
 {
     XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    _is_finder_alive = false;
 
     MfeaNode::set_status(SERVICE_FAILED);
     MfeaNode::update_status();
@@ -183,6 +202,9 @@ XrlMfeaNode::fea_register_startup()
 
     _fea_register_startup_timer.unschedule();
     _fea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (_is_fea_registered)
 	return;		// Already registered
@@ -253,6 +275,9 @@ XrlMfeaNode::fea_register_shutdown()
 
     _fea_register_startup_timer.unschedule();
     _fea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
 
     if (! _is_fea_alive)
 	return;		// The FEA is not there anymore
@@ -354,7 +379,10 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
     )
 {
     MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(vif_index);
-    
+
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     if (mfea_vif == NULL) {
 	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %d: "
 		   "no such vif",
@@ -465,7 +493,10 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 				 size_t sndlen)
 {
     MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(vif_index);
-    
+
+    if (! _is_finder_alive)
+	return (XORP_ERROR);	// The Finder is dead
+
     if (mfea_vif == NULL) {
 	XLOG_ERROR("Cannot send a kernel signal message on vif with vif_index %d: "
 		   "no such vif",
@@ -557,6 +588,9 @@ XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
 				 const string& vif_name,
 				 uint16_t vif_index)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     _xrl_mfea_client_client.send_new_vif(
 	dst_module_instance_name.c_str(),
 	vif_name,
@@ -581,6 +615,9 @@ XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
 				    xorp_module_id , // dst_module_id,
 				    const string& vif_name)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     _xrl_mfea_client_client.send_delete_vif(
 	dst_module_instance_name.c_str(),
 	vif_name,
@@ -612,6 +649,9 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
 				      const IPvX& broadcast,
 				      const IPvX& peer)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     do {
 	if (MfeaNode::is_ipv4()) {
 	    _xrl_mfea_client_client.send_add_vif_addr4(
@@ -661,6 +701,9 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
 					 const string& vif_name,
 					 const IPvX& addr)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     do {
 	if (MfeaNode::is_ipv4()) {
 	    _xrl_mfea_client_client.send_delete_vif_addr4(
@@ -714,6 +757,9 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
 				       bool is_broadcast,
 				       bool is_up)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     _xrl_mfea_client_client.send_set_vif_flags(
 	dst_module_instance_name.c_str(),
 	vif_name,
@@ -743,6 +789,9 @@ XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_nam
 					   xorp_module_id // dst_module_id
     )
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     _xrl_mfea_client_client.send_set_all_vifs_done(
 	dst_module_instance_name.c_str(),
 	callback(this, &XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb));
@@ -846,6 +895,9 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 				  bool is_geq_upcall,
 				  bool is_leq_upcall)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     do {
 	if (source_addr.is_ipv4()) {
 	    _xrl_mfea_client_client.send_recv_dataflow_signal4(
@@ -922,6 +974,9 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 					    bool is_command_processor
     )
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
@@ -951,6 +1006,9 @@ XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_erro
 int
 XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
+    if (! _is_finder_alive)
+	return(XORP_ERROR);	// The Finder is dead
+
     _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
