@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.27 2004/03/24 19:14:08 atanu Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.28 2004/03/28 20:59:23 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -659,7 +659,11 @@ VifManager::vif_deleted(const string& ifname, const string& vifname)
     
     map<string, Vif* >::iterator vi = _vifs_by_name.find(vifname);
     if (vi == _vifs_by_name.end()) {
-	XLOG_ERROR("vif_deleted: vif %s not found", vifname.c_str());
+	//
+	// XXX: a vif can be deleted twice: once by vif event,
+	// and once indirectly by interface event.
+	//
+	debug_msg("vif_deleted: vif %s not found\n", vifname.c_str());
 	return;
     }
     
