@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.12 2003/03/01 00:04:40 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.13 2003/03/02 06:51:30 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -12011,163 +12011,195 @@ state, or before the RUT receives the second Bootstrap message.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\section{Bootstrap Timeout}
+\section{Sending Candidate-RP-Advertisements}
 
 \para{Purpose:}
-Test the Bootstrap timeout between two routers.
+Test the transmission of Candidate-RP-Advertisement messages (C-RP-Advs)
+by each Candidate-RP (C-RP) to the BSR for that scope zone.
+
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-bsr-02 -- Section 3
+  \item draft-ietf-pim-sm-bsr-02 -- Section 3.1
 \end{itemize}
 
 \para{Discussion:}
-If the elected BSR goes away, it should timeout in the
-state of other routers. If it is gracefully shutdown, the BSR should send a
-Bootstrap message with holdtime of 0, \ie the timeout should be almost
-immediately.
-If the BSR crashes, it should take up to \verb=BS_Timeout= ({\PimsmBSTimeout})
-to timeout the state.
+Every C-RP periodically unicasts a C-RP-Adv to the BSR for that scope zone to
+inform the BSR of the C-RP's willingness to function as an RP. Unless
+configured otherwise, it does this for every Admin Scope zone for which it has
+state, and for the global scope zone.
 
 \para{Test Setup:}
-Connect the RUT and TR1 according to Figure~\ref{fig:bootstrap_timeout}.
-Configure TR1 as a Cand-BSR and a Cand-RP. Do not configure the RUT as a
-Cand-BSR or a Cand-RP.
+Connect the RUT, TR1, TR2, TR3, and TR4 according to
+Figure~\ref{fig:pim_test_6_3_sending_candidate_rp_advertisements}.
+Enable PIM-SM on the RUT, TR1, TR2, TR3, and TR4. Configure TR1
+as a Cand-BSR for non-scoped zone 224.0.0.0/4 with default BSR
+priority of 1, unless stated otherwise.
+Configure the RUT as a Candidate-RP for 226.0.0.0/8, Candidate-RP priority
+of 192, and Holdtime of \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), unless stated
+otherwise.
+
 
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[scale=0.8]{figs/pim_test_6_3_bootstrap_timeout}
-    \caption{Bootstrap timeout test setup}
-    \label{fig:bootstrap_timeout}
+    \includegraphics[scale=0.8]{figs/pim_test_6_3_sending_candidate_rp_advertisements}
+    \caption{Sending Candidate-RP-Advertisements test setup}
+    \label{fig:pim_test_6_3_sending_candidate_rp_advertisements}
   \end{center}
 \end{figure}
 
 \para{Procedure:}
+
+\subpara{Part A: Periodic transmission of C-RP-Advs.}
+
 \begin{enumerate}
 
-  \item Start the RUT.
+  \item Start the RUT and TR1, and start observing the Cand-RP-Adv messages
+  transmitted on LAN1.
 
-  \item Check that the RUT does not have any BSR or RP-related entries:
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, and send it on LAN1.
 
-\begin{verbatim}
-Xorp> show pim bootstrap
-Active zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-Expiring zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-Configured zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-
-Xorp> show pim rps
-RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix
-
-Xorp> show pim join all
-Group           Source          RP              Flags
-
-\end{verbatim}
-
-  \item Start TR1.
-
-  \item After up to \verb=BS_Timeout= + \verb=BS_Period= +
-        \verb=C-RP-Adv-Period=
-        (\ie $\leq$ ({\PimsmBSTimeout}) + ({\PimsmBSTimeout}) +
-        ({\PimsmCRPAdvPeriod})), the RUT must have a non-empty RP-Set
-        with TR1 included in that set:
-
-\begin{verbatim}
-Xorp> show pim bootstrap
-Active zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-10.3.0.1           1 0.0.0.0            0 AcceptPreferred      122
-Expiring zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-Configured zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-
-Xorp> show pim rps
-RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix
-10.3.0.1        bootstrap 192       60      19            0 224.0.0.0/4
-
-Xorp> show pim join all
-Group           Source          RP              Flags
-224.0.0.0       10.3.0.1        10.3.0.1        RP
-    Upstream interface (S): UNKNOWN
-    Upstream interface (RP): dc2
-    Upstream state: NotJoined
-    Register state:
-    Join timer: -1
-    Local include:            .............
-    Local exclude:            .............
-    Local include WC:         .............
-    Local include SG:         .............
-    Local exclude SG:         .............
-    Joins RP:                 .............
-    Joins WC:                 .............
-    Joins SG:                 .............
-    Prunes SG_RPT:            .............
-    Join state:               .............
-    Prune state:              .............
-    Prune pending state:      .............
-    I am assert winner state: .............
-    I am assert loser state:  .............
-    Assert winner WC:         .............
-    Assert winner SG:         .............
-    Assert lost WC:           .............
-    Could assert SG:          .............
-    I am DR:                  ....O........
-    Immediate olist RP:       .............
-    Immediate olist WC:       .............
-    Immediate olist SG:       .............
-    Inherited olist SG:       .............
-    Inherited olist SG_RPT:   .............
-    PIM include WC:           .............
-\end{verbatim}
-
-  \item Stop TR1.
-
-  \item Wait until the BSR entry in the RUT timeout (up to \verb=BS_Period=
-        ({\PimsmBSPeriod})). After that the RUT should show the BSR entry as
-        expired, though it may still cache it in the scope zone entry.
-        However, the RP-related entry might be deleted (though the spec
-        allows caching them):
-
-\begin{verbatim}
-Xorp> show pim bootstrap
-Active zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-10.3.0.1           1 0.0.0.0            0 AcceptAny              0      1369
-Expiring zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-Configured zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-
-Xorp> show pim rps
-RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix
-Xorp> show pim join all
-Group           Source          RP              Flags
-\end{verbatim}
-
-  \item After the Scope Zone in the RUT timeout, the RUT should not contain any
-        scope zone entries:
-
-\begin{verbatim}
-Xorp> show pim bootstrap
-Active zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-Expiring zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-Configured zones:
-BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
-\end{verbatim}
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  for 2 * \verb=C-RP-Adv_Period= (2 * {\PimsmCRPAdvPeriod}).
 
 \end{enumerate}
 
+\subpara{Part B: Transmission of C-RP-Advs after the BSR changes.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2, and start observing the Cand-RP-Adv
+  messages transmitted on LAN1 and LAN2.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, and send it on LAN1.
+
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  and LAN2 for \verb=C-RP-Adv_Period= ({\PimsmCRPAdvPeriod}).
+
+  \item Compose a Bootstrap message at TR2 with the BSR address set to TR2,
+  BSR priority of 20, and send it on LAN2.
+
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  and LAN2 for 2 * \verb=C-RP-Adv_Period= (2 * {\PimsmCRPAdvPeriod}).
+
+  \item Stop TR1 and TR2.
+
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  and LAN2 for 2 * \verb=C-RP-Adv_Period= (2 * {\PimsmCRPAdvPeriod}).
+
+\end{enumerate}
+
+\subpara{Part C: Transmission of C-RP-Advs when the router is a Zone Border
+Router.}
+
+\begin{enumerate}
+
+  \item Configure the RUT such that it is a Zone Border Router for 226.0.0.0/8
+  on the interface that connects the RUT to LAN2.
+
+  \item Start the RUT and TR1, and start observing the Cand-RP-Adv messages
+  transmitted on LAN1.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, and send it on LAN1.
+
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  and LAN2 for 2 * \verb=C-RP-Adv_Period= (2 * {\PimsmCRPAdvPeriod}).
+
+\end{enumerate}
+
+\subpara{Part D: Transmission of C-RP-Advs when the router is gracefully shut
+down.}
+
+\begin{enumerate}
+
+  \item Start the RUT and TR1, and start observing the Cand-RP-Adv messages
+  transmitted on LAN1.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, and send it on LAN1.
+
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  for 2 * \verb=C-RP-Adv_Period= (2 * {\PimsmCRPAdvPeriod}).
+
+  \item Gracefully shut down the RUT.
+
+  \item Continue observing the Cand-RP-Adv messages transmitted on LAN1
+  for 2 * \verb=C-RP-Adv_Period= (2 * {\PimsmCRPAdvPeriod}).
+
+\end{enumerate}
 
 \para{Observable Results:}
-TODO
+
+\subpara{Part A:}
+
+\begin{itemize}
+
+  \item Right after the RUT receives the Bootstrap message, it should
+  unicast a Cand-RP-Adv message to TR1. This message should have Prefix Count
+  of 1, Priority of 192, Holdtime of \verb=C-RP_Timeout= ({\PimsmCRPTimeout}),
+  RP address of the RUT address, and group prefix of 226.0.0.0/8. The Admin
+  Scope Zone bit in the group prefix should not be set.
+
+  \item After that, the RUT should periodically unicast to TR1 the same
+  message, once every \verb=C-RP-Adv_Period= ({\PimsmCRPAdvPeriod}).
+
+\end{itemize}
+
+\subpara{Part B:}
+
+\begin{itemize}
+
+  \item Until before TR2 transmits the Bootstrap message on LAN2, the result
+  should be same as in Part A.
+
+  \item After TR2 transmits the Bootstrap message on LAN2, the RUT should
+  immediately originate the same Cand-RP-Adv message as before, but it should
+  be unicast to TR2 instead of TR1.
+
+  \item After that, the RUT should periodically unicast to TR2 the same
+  message, once every \verb=C-RP-Adv_Period= ({\PimsmCRPAdvPeriod}).
+
+  \item After both TR1 and TR2 are shut down, then after up
+  to \verb=BS_Timeout= ({\PimsmBSTimeout}), the BS Timer in the RUT should
+  expire. After the BS Timer in the RUT timeout, the RUT should stop
+  unicast Cand-RP-Adv messages.  
+
+\end{itemize}
+
+\subpara{Part C:}
+
+\begin{itemize}
+
+  \item The result should be same as in Part A, except that the Admin Scope
+  Zone bit in the group prefix for 226.0.0.0/8 inside that message should be
+  set to one.
+
+\end{itemize}
+
+\subpara{Part D:}
+
+\begin{itemize}
+
+  \item Until before the RUT is shut down, the result should be same as in
+  Part A.
+
+  \item After the RUT is shut down, it should immediately unicast the
+  same Cand-RP-Adv message to TR1, except that the Holdtime inside that
+  message should be set to zero.
+
+\end{itemize}
 
 \para{Possible Problems:}
-TODO
+In Part A, B, and C, the period of periodic transmission of the Cand-RP-Adv
+messages might be different from \verb=C-RP-Adv_Period=
+({\PimsmCRPAdvPeriod}), though it must be smaller than
+\verb=C-RP_Timeout= ({\PimsmCRPTimeout}).
+In Part A, B, and C, the BS Timer in the RUT might expire earlier than
+3 * \verb=C-RP-Adv_Period= (3 * {\PimsmCRPAdvPeriod}), hence the RUT
+may stop transmitting Cand-RP-Adv messages right after the BS Timer expires.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Multicast Routing Table}
