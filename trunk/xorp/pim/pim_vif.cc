@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.15 2003/07/01 01:01:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.16 2003/07/03 07:20:36 pavlin Exp $"
 
 
 //
@@ -598,24 +598,22 @@ PimVif::pim_recv(const IPvX& src,
     if (! is_up())
 	return (XORP_ERROR);
     
-    //
-    // TODO: if we are running in secure mode, then check ip_ttl and
-    // @router_alert_bool (e.g. (ip_ttl == MINTTL) && (router_alert_bool))
-    //
-    
-    ret_value = pim_process(src, dst, buffer);
+    ret_value = pim_process(src, dst, ip_ttl, ip_tos, router_alert_bool,
+			    buffer);
     
     return (ret_value);
-    
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(router_alert_bool);
 }
 
 /**
  * PimVif::pim_process:
  * @src: The message source address.
  * @dst: The message destination address.
+ * @ip_ttl: The IP TTL of the message. If it has a negative value,
+ * it should be ignored.
+ * @ip_tos: The IP TOS of the message. If it has a negative value,
+ * it should be ignored.
+ * @router_alert_bool: True if the received IP packet had the ROUTER_ALERT
+ * IP option set.
  * @buffer: The buffer with the message.
  * 
  * Process PIM message and pass the control to the type-specific functions.
@@ -623,7 +621,11 @@ PimVif::pim_recv(const IPvX& src,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
+PimVif::pim_process(const IPvX& src, const IPvX& dst,
+		    int ip_ttl,
+		    int ip_tos,
+		    bool router_alert_bool,
+		    buffer_t *buffer)
 {
     uint8_t pim_vt;
     uint8_t message_type, proto_version;
@@ -706,7 +708,14 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	return (XORP_ERROR);
     }
     
-#if 0	// TODO: do we need the TTL and Router Alert option checks?
+    //
+    // TODO: if we are running in secure mode, then check ip_ttl, ip_tos and
+    // @router_alert_bool (e.g. (ip_ttl == MINTTL) && (router_alert_bool))
+    //
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+    UNUSED(router_alert_bool);
+#if 0
     //
     // TTL (aka. Hop-limit in IPv6) and Router Alert option checks.
     //
@@ -740,7 +749,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	break;
     }
 #endif // 0/1
-
+    
     //
     // Source address check.
     //
@@ -754,7 +763,16 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 		     name().c_str());
 	return (XORP_ERROR);
     }
-    
+    if (src.af() != family()) {
+	// Invalid source address family
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "invalid source address family "
+		     "(received %d expected %d)",
+		     PIMTYPE2ASCII(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     src.af(), family());
+    }
     switch (message_type) {
     case PIM_HELLO:
     case PIM_JOIN_PRUNE:
@@ -802,6 +820,16 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     //
     // Destination address check.
     //
+    if (dst.af() != family()) {
+	// Invalid destination address family
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "invalid destination address family "
+		     "(received %d expected %d)",
+		     PIMTYPE2ASCII(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     dst.af(), family());
+    }
     switch (message_type) {
     case PIM_HELLO:
     case PIM_JOIN_PRUNE:

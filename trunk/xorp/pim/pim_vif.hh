@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.15 2003/06/16 22:48:03 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.16 2003/06/23 18:56:55 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -453,6 +453,7 @@ private:
     
     // PIM control messages process functions
     int		pim_process(const IPvX& src, const IPvX& dst,
+			    int ip_ttl, int ip_tos, bool router_alert_bool,
 			    buffer_t *buffer);
     int		pim_assert_process(PimNbr *pim_nbr,
 				   const IPvX& src,
