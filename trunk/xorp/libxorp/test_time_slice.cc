@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_time_slice.cc,v 1.2 2003/03/10 23:20:36 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_time_slice.cc,v 1.3 2004/06/10 22:41:21 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/time_slice.hh"
 
@@ -168,7 +169,7 @@ test_time_slice_operators()
 void
 slow_function(unsigned int sleep_seconds)
 {
-    sleep(sleep_seconds);
+    TimerList::system_sleep(TimeVal(sleep_seconds, 0));
 }
 
 /**
@@ -177,7 +178,7 @@ slow_function(unsigned int sleep_seconds)
 void
 fast_function(unsigned int sleep_microseconds)
 {
-    usleep(sleep_microseconds);
+    TimerList::system_sleep(TimeVal(0, sleep_microseconds));
 }
 
 /**
@@ -280,11 +281,14 @@ main(int argc, char * const argv[])
     
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
+	EventLoop eventloop;
+
 	test_time_slice_valid_constructors();
 	test_time_slice_invalid_constructors();
 	test_time_slice_operators();
 	test_time_slice_operations();
 	ret_value = failures() ? 1 : 0;
+	UNUSED(eventloop);
     } catch (...) {
 	// Internal error
 	xorp_print_standard_exceptions();
