@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.29 2004/03/08 15:51:29 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.30 2004/03/08 18:14:29 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -286,7 +286,26 @@ are created by directly typing them in configuration mode.\n\
 \n\
 See also \"edit\".";
 
-    _help_long_c["show"] = "Show the value of a parameter";
+    _help_long_c["show"] = "\
+The \"show\" command will display all or part of the router configuration.\n\
+Without any parameters, the \"show\" command will display all of the router\n\
+configuration below the current position in the command tree (See the \n\
+\"edit\" command for how to move the current position).  The show command \n\
+can also take a part of the configuration as parameters; it will then show \n\
+only the selected part of the configuration.\n\
+\n\
+If the configuration has been modified, any changes not yet committed will \n\
+be highlighted.  For example, if \"show\" displays:\n\
+\n\
+  protocols {\n\
+      bgp {\n\
+>        peer 10.0.0.1 {\n\
+>           as 65001 \n\
+>        }\n\
+  }\n\
+\n\
+then this indicates that the peer 10.0.0.1 has been created or changed, \n\
+and the change has not yet been applied to the running router configuration.";
 
     _help_long_c["top"] = "\
 The \"top\" command will cause the current position in the configuration \n\
