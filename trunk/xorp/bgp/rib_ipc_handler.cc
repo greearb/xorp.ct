@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.38 2003/12/19 07:03:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.39 2003/12/19 07:39:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -468,7 +468,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
-				     q.comment.c_str()));
+				     q.comment));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route4(q.ribname.c_str(),
@@ -477,7 +477,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 				      q.net,
 				      ::callback(this,
 						 &XrlQueue::route_command_done,
-						 q.comment.c_str()));
+						 q.comment));
     }
 
     return sent;
@@ -507,7 +507,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
-				     q.comment.c_str()));
+				     q.comment));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route6(q.ribname.c_str(),
@@ -515,7 +515,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			       unicast, multicast,
 			       q.net,
 			       callback(this, &XrlQueue::route_command_done,
-					q.comment.c_str()));
+					q.comment));
     }
 
     return sent;
@@ -524,10 +524,10 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 template<class A>
 void
 XrlQueue<A>::route_command_done(const XrlError& error,
-				const char* comment)
+				const string comment)
 {
     _flying--;
-    debug_msg("callback %s %s\n", comment, error.str().c_str());
+    debug_msg("callback %s %s\n", comment.c_str(), error.str().c_str());
 
     switch (error.error_code()) {
     case OKAY:
@@ -536,14 +536,14 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     case REPLY_TIMED_OUT:
 	// We should really be using a reliable transport where
 	// this error cannot happen. But it has so lets retry if we can.
-	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
 	break;
 
     case RESOLVE_FAILED:
     case SEND_FAILED:
     case SEND_FAILED_TRANSIENT:
     case NO_SUCH_METHOD:
-	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
+	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
 	break;
 
     case NO_FINDER:
@@ -555,7 +555,7 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-	XLOG_FATAL("callback: %s %s",  comment, error.str().c_str());
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
 	break;
     }
 
