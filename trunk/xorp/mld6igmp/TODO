@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.3 2003/03/14 02:52:53 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.4 2003/03/14 03:39:41 pavlin Exp $
 #
+
+* Add configuration option to enable checking for Router Alert option
+  (NOTE: applies to PIM as well).
 
 * Add Mld6igmpConfig class to Mld6igmpNode.
 
@@ -9,7 +12,7 @@
 
 * When a protocol registers with MLD6IGMP, that protocol should try
   periodically the registration if MLD6IGMP has not been started yet
-  (applies for PIM)
+  (applies to PIM as well).
   Similarly, protocols that register with MFEA should retry the
   registration if the MFEA is not UP yet (applies to MLD6IGMP, PIM)
 
