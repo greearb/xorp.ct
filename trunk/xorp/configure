@@ -3683,91 +3683,6 @@ else
 fi
 
 
-if test -n "$ac_tool_prefix"; then
-  # Extract the first word of "${ac_tool_prefix}gmake", so it can be a program name with args.
-set dummy ${ac_tool_prefix}gmake; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_GMAKE+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$GMAKE"; then
-  ac_cv_prog_GMAKE="$GMAKE" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_GMAKE="${ac_tool_prefix}gmake"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-fi
-fi
-GMAKE=$ac_cv_prog_GMAKE
-if test -n "$GMAKE"; then
-  echo "$as_me:$LINENO: result: $GMAKE" >&5
-echo "${ECHO_T}$GMAKE" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-fi
-if test -z "$ac_cv_prog_GMAKE"; then
-  ac_ct_GMAKE=$GMAKE
-  # Extract the first word of "gmake", so it can be a program name with args.
-set dummy gmake; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_ac_ct_GMAKE+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$ac_ct_GMAKE"; then
-  ac_cv_prog_ac_ct_GMAKE="$ac_ct_GMAKE" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_ac_ct_GMAKE="gmake"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-  test -z "$ac_cv_prog_ac_ct_GMAKE" && ac_cv_prog_ac_ct_GMAKE=":"
-fi
-fi
-ac_ct_GMAKE=$ac_cv_prog_ac_ct_GMAKE
-if test -n "$ac_ct_GMAKE"; then
-  echo "$as_me:$LINENO: result: $ac_ct_GMAKE" >&5
-echo "${ECHO_T}$ac_ct_GMAKE" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-  GMAKE=$ac_ct_GMAKE
-else
-  GMAKE="$ac_cv_prog_GMAKE"
-fi
-
-if test "${GMAKE}" != "gmake" ; then
-   echo "The default XORP build process requires GNU make installed."
-   exit
-fi
-
 echo "$as_me:$LINENO: checking if default make is GNU make" >&5
 echo $ECHO_N "checking if default make is GNU make... $ECHO_C" >&6
 if test "${xorp_cv_default_gmake+set}" = set; then
@@ -8866,6 +8781,15 @@ fi
 
 
 
+
+case "${host_os}" in
+    *bsd*)  FLOWER_MALLOC=flower_malloc ;;
+    linux*) FLOWER_MALLOC=flower_malloc ;;
+    *) ;;
+esac
+
+
+
 case "${host_os}" in
     openbsd* )
 
@@ -9141,8 +9065,8 @@ echo "${ECHO_T}no" >&6
 
 
 				if test "${enable_debug}" = "no" ; then
-		CFLAGS=`echo $CFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
-		CXXFLAGS=`echo $CXXFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
+		CFLAGS=`echo $CFLAGS |  sed 's/-g//g'`
+		CXXFLAGS=`echo $CXXFLAGS |  sed 's/-g//g'`
 	fi
 
 			if test "${enable_optimize}" != "yes" ; then
@@ -9164,7 +9088,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile etc/Makefile etc/templates/Makefile fea/Makefile libcomm/Makefile libfeaclient/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/snmpdscripts/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh mibs/snmpdscripts/startsnmp"
+ac_config_files="$ac_config_files Makefile bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile etc/Makefile etc/templates/Makefile fea/Makefile libcomm/Makefile libfeaclient/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/snmpdscripts/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile utils/flower_malloc/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh mibs/snmpdscripts/startsnmp"
 ac_config_commands="$ac_config_commands default"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9691,6 +9615,7 @@ do
   "rtrmgr/Makefile" ) CONFIG_FILES="$CONFIG_FILES rtrmgr/Makefile" ;;
   "rtrmgr/tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES rtrmgr/tools/Makefile" ;;
   "utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
+  "utils/flower_malloc/Makefile" ) CONFIG_FILES="$CONFIG_FILES utils/flower_malloc/Makefile" ;;
   "xrl/Makefile" ) CONFIG_FILES="$CONFIG_FILES xrl/Makefile" ;;
   "xrl/interfaces/Makefile" ) CONFIG_FILES="$CONFIG_FILES xrl/interfaces/Makefile" ;;
   "xrl/targets/Makefile" ) CONFIG_FILES="$CONFIG_FILES xrl/targets/Makefile" ;;
@@ -9839,8 +9764,6 @@ s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@AR@,$AR,;t t
 s,@ac_ct_AR@,$ac_ct_AR,;t t
-s,@GMAKE@,$GMAKE,;t t
-s,@ac_ct_GMAKE@,$ac_ct_GMAKE,;t t
 s,@PYTHON@,$PYTHON,;t t
 s,@PY_BUILD@,$PY_BUILD,;t t
 s,@net_snmp_found@,$net_snmp_found,;t t
@@ -9850,6 +9773,7 @@ s,@MIBS@,$MIBS,;t t
 s,@CLI_CURSES_LIB@,$CLI_CURSES_LIB,;t t
 s,@OSPFD@,$OSPFD,;t t
 s,@OSPFD_OS@,$OSPFD_OS,;t t
+s,@FLOWER_MALLOC@,$FLOWER_MALLOC,;t t
 CEOF
 
 _ACEOF

@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.70 2003/10/02 23:43:17 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.71 2003/10/07 19:22:26 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -7,8 +7,8 @@ dnl Process this file with autoconf to produce a configure script.
 dnl ---------------------------------------------------------------------------
 
 dnl	Ordering:
-dnl	  Boilerplate (e.g, `AC_INIT(FILE)', etc.)
-dnl	  Command-line options to `configure'
+dnl	  Boilerplate (e.g, 'AC_INIT(FILE)', etc.)
+dnl	  Command-line options to 'configure'
 dnl	  Check for programs
 dnl	  Check for libraries
 dnl	  Check for header files and types
@@ -17,8 +17,7 @@ dnl	  Check for library functions
 dnl	  Check for system services
 dnl	  Check for compiler characteristics
 dnl	  Setup compiler flags
-dnl	  Output (e.g., `AC_OUTPUT([FILE...])', etc.)
-
+dnl	  Output (e.g., 'AC_OUTPUT([FILE...])', etc.)
 
 dnl ---------------------------------------------------------------------------
 dnl Boilerplate
@@ -275,12 +274,6 @@ AC_PROG_LN_S
 AC_PROG_RANLIB
 
 AC_CHECK_TOOL(AR, ar)
-
-AC_CHECK_TOOL(GMAKE, gmake, :)
-if test "${GMAKE}" != "gmake" ; then
-   echo "The default XORP build process requires GNU make installed."
-   exit
-fi
 
 AC_CACHE_CHECK(if default make is GNU make, xorp_cv_default_gmake,
 		  if (make -version) < /dev/null > /dev/null 2>&1 ; then
@@ -1163,11 +1156,11 @@ main()
 AC_LANG_RESTORE
 
 dnl ---------------------------------------------------------------------------
-dnl FEA Related
+dnl FEA related
 dnl ---------------------------------------------------------------------------
 
 dnl ---------------------------------------------------------------------------
-dnl OSPFD Related
+dnl OSPFD related
 dnl ---------------------------------------------------------------------------
 
 dnl ---------------------------------------------------------------------------
@@ -1203,6 +1196,22 @@ fi
 
 AC_SUBST(OSPFD)
 AC_SUBST(OSPFD_OS)
+
+dnl ---------------------------------------------------------------------------
+dnl utils/flower_malloc related
+dnl ---------------------------------------------------------------------------
+
+dnl flower_malloc in utils is an interposer and is only known to
+dnl work on systems supporting -shared.  AFAICT this needs some work for
+dnl a real test.  As a stop gap, we assume that if we are on *BSD or Linux
+dnl things work okay.  Only known failure case is OS X.
+
+case "${host_os}" in
+    *bsd*)  FLOWER_MALLOC=flower_malloc ;;
+    linux*) FLOWER_MALLOC=flower_malloc ;;
+    *) ;;
+esac
+AC_SUBST(FLOWER_MALLOC)
 
 dnl ---------------------------------------------------------------------------
 dnl Raw socket
@@ -1273,15 +1282,15 @@ if test "${GCC}" = "yes" ; then
 	dnl If debugging is disabled, filter-out the "-g" flag
 	dnl
 	if test "${enable_debug}" = "no" ; then
-		CFLAGS=`echo $CFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
-		CXXFLAGS=`echo $CXXFLAGS |  awk '{ for (i = 1; i <= NF; i++) { if ($i != "-g") X=X" "$i; }; print X; }'`
+		CFLAGS=`echo $CFLAGS |  sed 's/-g//g'`
+		CXXFLAGS=`echo $CXXFLAGS |  sed 's/-g//g'`
 	fi
 
 	dnl default compiler flags have optimization turned on which
 	dnl can cause helpful debugging info to be optimized out.
 	if test "${enable_optimize}" != "yes" ; then
 		dnl Could just append -O0, but two -O args are icky
-		dnl We make assumption change is O2 because extended regex's
+		dnl We make assumption change is O2 because extended regexps
 		dnl are not portable...
 		changequote(<<, >>)dnl preserve braces in sed expressions
 		CFLAGS=`echo $CFLAGS | sed 's/-O2//g'`
@@ -1347,6 +1356,7 @@ AC_OUTPUT(
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	utils/Makefile
+	utils/flower_malloc/Makefile
 	xrl/Makefile
 	xrl/interfaces/Makefile
 	xrl/targets/Makefile
