@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.28 2004/02/24 21:04:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.29 2004/02/24 23:51:56 pavlin Exp $"
 
 
 //
@@ -269,57 +269,12 @@ PimVif::start()
 	return (XORP_ERROR);
     if (! (is_multicast_capable() || is_pim_register()))
 	return (XORP_ERROR);
-    
-    //
-    // Get the primary address and the domain-wide reachable address.
-    // The primary address should be a link-local unicast address, and
-    // is used for transmitting the multicast control packets on the LAN.
-    // The domain-wide reachable address is the address that should be
-    // reachable by all PIM-SM routers in the domain
-    // (e.g., the Cand-BSR, or the Cand-RP address).
-    //
-    IPvX primary_a(IPvX::ZERO(family()));
-    IPvX domain_wide_a(IPvX::ZERO(family()));
 
-    // Reset the primary and the domain-wide addresses
-    pim_nbr_me().set_primary_addr(IPvX::ZERO(family()));
-    set_domain_wide_addr(IPvX::ZERO(family()));
-
-    list<VifAddr>::const_iterator iter;
-    for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
-	const VifAddr& vif_addr = *iter;
-	const IPvX& addr = vif_addr.addr();
-	if (! addr.is_unicast())
-	    continue;
-	if (addr.is_linklocal_unicast()) {
-	    primary_a = addr;
-	    continue;
-	}
-	// XXX: assume that everything else can be a domain-wide reachable
-	// address.
-	domain_wide_a = addr;
-    }
-    //
-    // XXX: if there is no link-local address to serve as a primary address,
-    // then use the domain-wide address as a primary address.
-    //
-    if (primary_a == IPvX::ZERO(family()))
-	primary_a = domain_wide_a;
-
-    //
-    // Check that the interface has a primary and a domain-wide reachable
-    // addresses.
-    //
-    if ((primary_a == IPvX::ZERO(family()))
-	|| (domain_wide_a == IPvX::ZERO(family()))) {
+    if (update_primary_and_domain_wide_address() < 0)
 	return (XORP_ERROR);
-    }
-    
+
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
-    
-    pim_nbr_me().set_primary_addr(primary_a);	// Set my PimNbr address
-    set_domain_wide_addr(domain_wide_a);
     
     //
     // Start the vif with the kernel
@@ -1375,6 +1330,66 @@ PimVif::buffer_send_prepare(buffer_t *buffer)
     XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL buffer_send_prepare() ERROR: buffer size too small");
     return (NULL);
+}
+
+/**
+ * PimVif::update_primary_and_domain_wide_address:
+ * @: 
+ * 
+ * Update the primary and the domain-wide reachable addresses.
+ * 
+ * The primary address should be a link-local unicast address, and
+ * is used for transmitting the multicast control packets on the LAN.
+ * The domain-wide reachable address is the address that should be
+ * reachable by all PIM-SM routers in the domain
+ * (e.g., the Cand-BSR, or the Cand-RP address).
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+PimVif::update_primary_and_domain_wide_address()
+{
+    IPvX primary_a(IPvX::ZERO(family()));
+    IPvX domain_wide_a(IPvX::ZERO(family()));
+
+    // Reset the primary and the domain-wide addresses
+    pim_nbr_me().set_primary_addr(IPvX::ZERO(family()));
+    set_domain_wide_addr(IPvX::ZERO(family()));
+
+    list<VifAddr>::const_iterator iter;
+    for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
+	const VifAddr& vif_addr = *iter;
+	const IPvX& addr = vif_addr.addr();
+	if (! addr.is_unicast())
+	    continue;
+	if (addr.is_linklocal_unicast()) {
+	    primary_a = addr;
+	    continue;
+	}
+	// XXX: assume that everything else can be a domain-wide reachable
+	// address.
+	domain_wide_a = addr;
+    }
+    //
+    // XXX: if there is no link-local address to serve as a primary address,
+    // then use the domain-wide address as a primary address.
+    //
+    if (primary_a == IPvX::ZERO(family()))
+	primary_a = domain_wide_a;
+
+    //
+    // Check that the interface has a primary and a domain-wide reachable
+    // addresses.
+    //
+    if ((primary_a == IPvX::ZERO(family()))
+	|| (domain_wide_a == IPvX::ZERO(family()))) {
+	return (XORP_ERROR);
+    }
+
+    pim_nbr_me().set_primary_addr(primary_a);	// Set my PimNbr address
+    set_domain_wide_addr(domain_wide_a);
+
+    return (XORP_OK);
 }
 
 /**

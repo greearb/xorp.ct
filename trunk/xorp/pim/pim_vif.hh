@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.23 2004/02/22 04:24:41 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.24 2004/02/24 21:04:55 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -225,6 +225,19 @@ public:
      * @param v the value of the domain-wide reachable address.
      */
     void	set_domain_wide_addr(const IPvX& v) { _domain_wide_addr = v; }
+
+    /**
+     * Update the primary and the domain-wide reachable addresses.
+     * 
+     * The primary address should be a link-local unicast address, and
+     * is used for transmitting the multicast control packets on the LAN.
+     * The domain-wide reachable address is the address that should be
+     * reachable by all PIM-SM routers in the domain
+     * (e.g., the Cand-BSR, or the Cand-RP address).
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		update_primary_and_domain_wide_address();
 
     /**
      * Get the address of the Designated Router on this interface.
