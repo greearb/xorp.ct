@@ -95,7 +95,7 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = test_trie test_peering1.sh test_peering2.sh test_routing1.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
+TESTS = test_trie test_peering1.sh test_peering2.sh test_routing1.sh test_routing2.sh test_rib1.sh test_rib_fea1.sh test_path_attribute1.sh test_terminate.sh
 
 # -- No-install Programs
 noinst_PROGRAMS = coord test_peer test_trie
