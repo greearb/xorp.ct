@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.20 2003/07/12 01:20:07 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.21 2003/08/05 06:06:22 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -59,6 +59,9 @@ Release 0.4 (2003/??/??)
       In addition, the same mechanism is implemented in the RP as well
       (not in the spec, where the SPT switch in the RP is always triggered
       by the first packet).
+
+    - Keep PIM-related statistics per interface (e.g., number of sent
+      or received PIM control messages, etc).
 
   CLI:
     - On exit, restore the original terminal flags in case of stdio-based
