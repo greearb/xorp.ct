@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.18 2005/03/23 09:45:17 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.19 2005/03/23 10:53:12 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -180,6 +180,7 @@ protocols {
 	    %help:	short "Configure the IPv6 Bootstrap mechanism";
 	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
 	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
+	    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/stop_bsr";
 
 	    disable {
 		%help:	short "Disable the IPv6 Bootstrap mechanism";
