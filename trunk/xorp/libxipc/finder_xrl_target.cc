@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.19 2004/06/10 22:41:06 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.20 2005/01/21 01:59:49 atanu Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -79,7 +79,7 @@ make_cookie()
     static uint32_t invoked = 0;
     static uint32_t hash_base;
     if (invoked == 0) {
-	srandom(uint32_t(getpid()) ^ uint32_t(&hash_base));
+	srandom(((unsigned long)(getpid())) ^ ((unsigned long)(&hash_base)));
 	invoked = random() ^ random();
 	hash_base = random();
     }
