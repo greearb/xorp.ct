@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.10 2003/05/20 00:20:01 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.11 2003/05/20 17:31:28 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -97,9 +97,10 @@ public:
     enum State { INITIALIZING, READY, FAILED };
 
     /**
-     * Get the state of the VifManager (@see VifManager::State).
+     * Get the state of the VifManager.
      * 
      * @return the state of the VifManager. 
+     * @see VifManager::State.
      */
     State state() const { return _state; }
 

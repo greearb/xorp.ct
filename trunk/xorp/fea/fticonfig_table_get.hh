@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.4 2003/05/28 21:50:53 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.5 2003/06/02 23:20:16 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -200,7 +200,7 @@ public:
      * Data has pop-up.
      * 
      * @param data the buffer with the data.
-     * @param nbytes the number of bytes in the @param data buffer.
+     * @param nbytes the number of bytes in the @ref data buffer.
      */
     virtual void nlsock_data(const uint8_t* data, size_t nbytes);
     

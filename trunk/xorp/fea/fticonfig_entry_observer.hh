@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.3 2003/05/10 00:06:39 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.4 2003/05/28 21:50:53 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
@@ -51,7 +51,7 @@ public:
      * Receive data from the underlying system.
      * 
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @param data.
+     * @param nbytes the number of bytes in the data buffer @ref data.
      */
     virtual void receive_data(const uint8_t* data, size_t nbytes) = 0;
     
@@ -84,7 +84,7 @@ public:
      * Receive data from the underlying system.
      * 
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @param data.
+     * @param nbytes the number of bytes in the data buffer @ref data.
      */
     virtual void receive_data(const uint8_t* data, size_t nbytes);
     
@@ -117,7 +117,7 @@ public:
      * Receive data from the underlying system.
      * 
      * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @param data.
+     * @param nbytes the number of bytes in the data buffer @ref data.
      */
     virtual void receive_data(const uint8_t* data, size_t nbytes);
     
