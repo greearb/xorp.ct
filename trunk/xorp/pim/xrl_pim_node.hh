@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.34 2004/01/05 20:40:50 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.35 2004/03/02 00:32:33 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -28,7 +28,6 @@
 #include "libxorp/transaction.hh"
 #include "libxipc/xrl_router.hh"
 #include "xrl/targets/pim_base.hh"
-#include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/mld6igmp_xif.hh"
@@ -42,25 +41,19 @@
 //
 class XrlPimNode : public PimNode,
 		   public XrlPimTargetBase,
-		   public XrlCommonV0p1Client,
-		   public XrlMfeaV0p1Client,
-		   public XrlRibV0p1Client,
-		   public XrlMld6igmpV0p1Client,
-		   public XrlCliManagerV0p1Client,
 		   public PimNodeCli {
 public:
     XrlPimNode(int family, xorp_module_id module_id,
 	       EventLoop& eventloop, XrlRouter* xrl_router)
 	: PimNode(family, module_id, eventloop),
 	  XrlPimTargetBase(xrl_router),
-	  XrlCommonV0p1Client(xrl_router),
-	  XrlMfeaV0p1Client(xrl_router),
-	  XrlRibV0p1Client(xrl_router),
-	  XrlMld6igmpV0p1Client(xrl_router),
-	  XrlCliManagerV0p1Client(xrl_router),
 	  PimNodeCli(*static_cast<PimNode *>(this)),
-	  _mrib_transaction_manager(eventloop)
-	{ }
+	  _mrib_transaction_manager(eventloop),
+	  _xrl_cli_manager_client(xrl_router),
+	  _xrl_mfea_client(xrl_router),
+	  _xrl_rib_client(xrl_router),
+	  _xrl_mld6igmp_client(xrl_router)
+    { }
     virtual ~XrlPimNode() { PimNode::stop(); PimNodeCli::stop(); }
     
     //
@@ -2394,7 +2387,12 @@ private:
     
     int family() const { return (PimNode::family()); }
     
-    TransactionManager _mrib_transaction_manager;
+    TransactionManager	_mrib_transaction_manager;
+
+    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    XrlMfeaV0p1Client		_xrl_mfea_client;
+    XrlRibV0p1Client		_xrl_rib_client;
+    XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;
 };
 
 #endif // __PIM_XRL_PIM_NODE_HH__
