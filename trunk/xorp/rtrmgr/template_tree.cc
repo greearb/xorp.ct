@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.12 2003/11/20 06:49:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.13 2003/12/02 09:38:58 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -126,7 +126,7 @@ TemplateTree::extend_path(const string& segment, bool is_tag)
 }
 
 void
-TemplateTree::pop_path()
+TemplateTree::pop_path() throw (ParseError)
 {
     if (_segment_lengths.empty()) {
 	xorp_throw(ParseError, "Mismatched braces");
@@ -236,6 +236,7 @@ TemplateTree::push_path(int type, char* cinit)
 
 void
 TemplateTree::add_untyped_node(const string& segment, bool is_tag)
+    throw (ParseError)
 {
     TemplateTreeNode* found = NULL;
 
@@ -378,7 +379,8 @@ TemplateTree::find_node(const list<string>& path_segments)
 	if (matches.size() > 1) {
 	    string err = "Ambiguous value for node " + (*iter) +
 		" - I can't tell which type this is.\n";
-	    xorp_throw(ParseError, err);
+	    debug_msg(err.c_str());
+	    return NULL;
 	}
 	ttn = matches.front();
 #ifdef DEBUG_TEMPLATE_PARSER

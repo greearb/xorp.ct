@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.8 2003/11/20 06:49:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.9 2003/12/02 09:38:58 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -20,13 +20,16 @@
 #include <map>
 #include <list>
 #include <set>
+
 #include "libxorp/xorp.h"
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
+
 #include "module_manager.hh"
 #include "xorp_client.hh"
 #include "xrldb.hh"
 #include "path_segment.hh"
+#include "parse_error.hh"
 
 class ModuleCommand;
 class TemplateTreeNode;
@@ -39,9 +42,9 @@ public:
     ~TemplateTree();
 
     void extend_path(const string& segment, bool is_tag);
-    void pop_path();
+    void pop_path() throw (ParseError);
     void push_path(int type, char* initializer);
-    void add_untyped_node(const string& segment, bool is_tag);
+    void add_untyped_node(const string& segment, bool is_tag) throw (ParseError);
     void add_node(const string& segment, int type, char* initializer);
     TemplateTreeNode* find_node(const list<string>& path_segments);
     string path_as_string();
