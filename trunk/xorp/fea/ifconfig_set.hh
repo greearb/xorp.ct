@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.6 2003/10/12 02:30:29 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.7 2003/10/12 02:43:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -356,9 +356,6 @@ private:
 					// cache so route lookup via netlink
 					// socket can appear synchronous.
     vector<uint8_t> _cache_data;	// Cached netlink socket data.
-
-    int _s4;
-    int _s6;
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

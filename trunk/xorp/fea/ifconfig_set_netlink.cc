@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.3 2003/10/12 02:30:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.4 2003/10/12 02:43:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -54,9 +54,7 @@ IfConfigSetNetlink::IfConfigSetNetlink(IfConfig& ifc)
       NetlinkSocket6(ifc.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this),
       _cache_valid(false),
-      _cache_seqno(0),
-      _s4(-1),
-      _s6(-1)
+      _cache_seqno(0)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ifc();
