@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.5 2003/01/26 01:25:28 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.6 2003/01/26 06:15:54 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -75,15 +75,13 @@ interface bgp/0.2 {
 	 * @param local server port.
 	 * @param peer IP address.
 	 * @param peer port.
-	 * @param as the peer's AS number.
 	 */
 	delete_peer \
 		? \
 		local_ip:txt \
 	        & local_port:u32 \
 		& peer_ip:txt \
-		& peer_port:u32 \
-		& as:u32
+		& peer_port:u32
 
 	/** 
 	 * Enable this peer.

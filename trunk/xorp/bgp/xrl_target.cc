@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.7 2003/01/26 06:15:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.8 2003/02/09 03:35:28 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -171,11 +171,12 @@ XrlBgpTarget::bgp_0_2_delete_peer(
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
-	const uint32_t&	peer_port, 
-	const uint32_t&	as)
+	const uint32_t&	peer_port)
 {
-    debug_msg("local ip %s local port %d peer ip %s peer port %d as %d\n",
-	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port, as);
+    debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
+	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
+    XLOG_WARNING("Not currently implemented\n");
 
     return XrlCmdError::OKAY();
 }
