@@ -5038,7 +5038,7 @@ if test "$ac_cv_search_hstrerror" != no; then
 fi
 
 
-CLI_CURSES_LIB="unknown"
+CLI_CURSES_LIB=""
 echo "$as_me:$LINENO: checking for tigetstr in -lcurses" >&5
 echo $ECHO_N "checking for tigetstr in -lcurses... $ECHO_C" >&6
 if test "${ac_cv_lib_curses_tigetstr+set}" = set; then
@@ -5222,11 +5222,6 @@ fi
 
 fi
 
-if test "${CLI_CURSES_LIB}" = "unknown" ; then
-  { { echo "$as_me:$LINENO: error: cannot select curses library" >&5
-echo "$as_me: error: cannot select curses library" >&2;}
-   { (exit 1); exit 1; }; };
-fi
 
 
 echo "$as_me:$LINENO: checking if malloc debugging is wanted" >&5
