@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.9 2003/11/06 20:42:22 atanu Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.10 2003/11/19 00:31:54 pavlin Exp $
 #
 
 Urgent
@@ -20,6 +20,10 @@ Configure Mode
    problem.
  - Implement the "help" and "quit" commands in the top-level xorpsh
    command tree.
+ - The parsing of the return arguments of %modinfo statusmethod xrl method
+   is still hardcoded in task.cc: "status:u32&reason:txt"
+   The status decoding should be completely based on the template
+   specification.
 
 Operational Mode
 
