@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.25 2004/11/12 01:37:27 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.26 2004/11/29 11:03:29 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -7,7 +7,7 @@ fea {
 
     click {
 	enabled:			bool = false;
-	click-config-generator-file:	txt = "/usr/local/xorp/fea/fea_click_config_generator.sh";
+	click-config-generator-file:	txt = "/usr/local/xorp/fea/xorp_fea_click_config_generator";
 
 	kernel-click {
 	    enabled:			bool = false;
