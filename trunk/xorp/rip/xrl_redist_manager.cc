@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.1 2004/05/03 23:10:51 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 #include "libxorp/callback.hh"
@@ -134,7 +134,7 @@ XrlRedistEnable<IPv4>::dispatch()
     XrlRibV0p1Client	cl(&xr);
 
     return cl.send_redist_enable4(
-		xrl_rib_name(), xr.instance_name(), _protocol, "rip",
+		xrl_rib_name(), xr.instance_name(), _protocol,
 		true /* unicast */, false /* multicast */, _protocol,
 		callback(this, &XrlRedistEnable<IPv4>::dispatch_complete)
 		);
@@ -152,7 +152,7 @@ XrlRedistEnable<IPv6>::dispatch()
     XrlRibV0p1Client	cl(&xr);
 
     return cl.send_redist_enable6(
-		xrl_rib_name(), xr.instance_name(), _protocol, "rip",
+		xrl_rib_name(), xr.instance_name(), _protocol,
 		true /* unicast */, false /* multicast */, _protocol,
 		callback(this, &XrlRedistEnable<IPv6>::dispatch_complete)
 		);
@@ -224,8 +224,8 @@ XrlRedistDisable<IPv4>::dispatch()
     XrlRibV0p1Client	cl(&xr);
 
     return cl.send_redist_disable4(
-		xrl_rib_name(), xr.instance_name(), _protocol, "rip",
-		true /* unicast */, false /* multicast */,
+		xrl_rib_name(), xr.instance_name(), _protocol,
+		true /* unicast */, false /* multicast */, _protocol,
 		callback(this, &XrlRedistDisable<IPv4>::dispatch_complete)
 		);
 }
@@ -242,8 +242,8 @@ XrlRedistDisable<IPv6>::dispatch()
     XrlRibV0p1Client	cl(&xr);
 
     return cl.send_redist_disable6(
-		xrl_rib_name(), xr.instance_name(), _protocol, "rip",
-		true /* unicast */, false /* multicast */,
+		xrl_rib_name(), xr.instance_name(), _protocol,
+		true /* unicast */, false /* multicast */, _protocol,
 		callback(this, &XrlRedistDisable<IPv6>::dispatch_complete)
 		);
 }
