@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.32 2003/09/26 21:34:35 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.33 2003/09/27 00:25:55 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -168,7 +168,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* finder_addr,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e)
+    : XrlDispatcher(class_name), _e(e), _finalized(false)
 {
     IPv4 finder_ip;
     if (0 == finder_addr) {
@@ -188,7 +188,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     IPv4 	 finder_ip,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e)
+    : XrlDispatcher(class_name), _e(e), _finalized(false)
 {
     if (0 == finder_port)
 	finder_port = FINDER_DEFAULT_PORT;
@@ -251,48 +251,40 @@ XrlRouter::add_listener(XrlPFListener* l)
     _listeners.push_back(l);
     l->set_dispatcher(this);
 
-    // Walk list of Xrl in command map and register them with finder client
-    XrlCmdMap::CmdMap::const_iterator ci = _cmd_map.begin();
-    while (ci != _cmd_map.end()) {
-	Xrl x("finder", _instance_name, ci->first);
-	debug_msg("adding handler for %s protocol %s address %s\n",
-		  x.str().c_str(), l->protocol(), l->address());
-	_fc->register_xrl(instance_name(), x.str(),
-			  l->protocol(), l->address());
-	++ci;
-    }
-
     return true;
 }
 
 void
 XrlRouter::finalize()
 {
-    // XXX should set a variable here to signal finalize set and no
-    // further registrations of commands or xrls will be accepted.
+    list<XrlPFListener*>::iterator li = _listeners.begin();
+    while (li != _listeners.end()) {
+	const XrlPFListener* l = *li;
+	// Walk list of Xrl in command map and register them with finder client
+	XrlCmdMap::CmdMap::const_iterator ci = _cmd_map.begin();
+	while (ci != _cmd_map.end()) {
+	    Xrl x("finder", _instance_name, ci->first);
+	    debug_msg("adding handler for %s protocol %s address %s\n",
+		      x.str().c_str(), l->protocol(), l->address());
+	    _fc->register_xrl(instance_name(), x.str(),
+			      l->protocol(), l->address());
+	    ++ci;
+	}
+	++li;
+    }
     _fc->enable_xrls(instance_name());
+    _finalized = true;
 }
 
 bool
 XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
 {
-    if (XrlCmdMap::add_handler(cmd, rcb) == false) {
+    if (finalized()) {
+	XLOG_ERROR("Attempting to add handler after XrlRouter finalized.  Handler = \"%s\"", cmd.c_str());
 	return false;
     }
-    // Walk list of listeners and register xrl corresponding to listener with
-    // finder client.
-    list<XrlPFListener*>::const_iterator pli = _listeners.begin();
 
-    while (pli != _listeners.end()) {
-	Xrl x("finder", _instance_name, cmd);
-	debug_msg("adding handler for %s protocol %s address %s\n",
-		  x.str().c_str(), (*pli)->protocol(), (*pli)->address());
-	_fc->register_xrl(instance_name(), x.str(),
-			  (*pli)->protocol(), (*pli)->address());
-	++pli;
-    }
-
-    return true;
+    return XrlCmdMap::add_handler(cmd, rcb);
 }
 
 void
