@@ -39,7 +39,8 @@ and other processes - this will eventually be described in additional
 documents.
 
 The user interface style is loosely modelled on that of a Juniper
-router.
+router.  This manual and the xorpsh itself are works in progress, and
+so may change significantly in the future.
 
 \section{Running xorpsh}
 \xorpsh provides an interactive command shell to a XORP user, similar
@@ -175,6 +176,7 @@ inserting it at the
 current cursor location.
 \end{itemize}
 
+\newpage
 \section{Command Modes}
 
 \xorpsh has two command modes:
@@ -199,7 +201,8 @@ present time though, there is no fine-grained access control.
 A user can only enter configuration mode if they are in the xorp Unix
 group.
 
-\subsection{Operational Mode}
+\newpage
+\section{Operational Mode}
 \noindent\fbox{
 \begin{minipage}{6in}
 \begin{alltt}
@@ -226,7 +229,8 @@ control-d instead).
 \item{\bf show}: displays many aspects of the running state of the
 router.
 \end{description}
-\subsubsection{Show Command}
+
+\subsection{Show Command}
 \noindent\fbox{
 \begin{minipage}{6in}
 \begin{alltt}
@@ -258,7 +262,6 @@ As an example, we show the peers of a BGP router:
 \begin{tabbing}
 Xorp> \textbf{show bgp peers detail}\\
 OK\\
-\\
 Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 \>  Peer ID: 192.150.187.109\\
 \>  Peer State: ESTABLISHED\\
@@ -282,7 +285,7 @@ Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 \vspace{0.1in}
 
 \newpage
-\subsection{Configuration Mode}
+\section{Configuration Mode}
 \noindent\fbox{
 \begin{minipage}{6in}
 \begin{alltt}
@@ -362,12 +365,14 @@ XORP> \textbf{show interfaces}\\
 }
 \vspace{0.1in}
 
-\noindent
+\subsection{Moving around the Configuration Tree}
 You can change the current location in the configuration tree using
 the edit, up, top and exit commands.
 \begin{itemize}
 \item \textbf{edit $<$\textit{element name}$>$}:       Edit a sub-element
-\item \textbf{exit}:       Exit from this configuration level
+\item \textbf{exit}:       Exit from this configuration level, or if
+at top level, exit
+configuration mode.
 \item \textbf{quit}:       Quit from this level
 \item \textbf{top}:        Exit to top level of configuration
 \item \textbf{up}:         Exit one level of configuration
@@ -402,6 +407,246 @@ XORP> \textbf{top}\\
 \\
 \noindent[edit]\\
 XORP>
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\subsection{Loading and Saving Configurations}
+
+On startup, the rtrmgr will read a configuration file.  It will then
+start up and configure the various router components as specified in
+the configuration file.
+
+The configuration file can be created externally, using a normal text
+editor, or it can be saved from the running router configuration.  A
+configuration file can also be loaded into a running router, causing
+the previous running configuration to be discarded.  The commands for
+this are:
+\begin{itemize}
+\item \textbf{save $<$\textit{filename}$>$}: save the current
+configuration in the specified file.
+\item \textbf{load $<$\textit{filename}$>$}: load the specified file,
+discarding the currently running configuration.
+\end{itemize}
+
+\subsection{Setting Configuration Values}
+
+\begin{itemize}
+\item \textbf{set $<$\textit{path to config}$>$
+$<$\textit{value}$>$}: set the value of the specified configuration
+node.
+\end{itemize}
+The set command is used to set or change the value of a configuration
+option.  The change does not actually take effect immediately - the
+commit command must be used to apply this and any other uncommitted
+changes.
+
+In the example below, the prefix length (netmask) of address
+192.150.187.108 on vif xl0 is changed, but not yet committed.  The
+``{\tt >}'' indicates parts of the configuration that have changed but
+not yet been committed.
+\vspace{0.1in}
+
+\noindent\fbox{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{show}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+\>\>\>prefix-length: 25\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+\\
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
+OK\\
+\\
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{show}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+>\>\> prefix-length: 24\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Adding New Configuration}
+New configuration can simply be typed at the command line while in
+configuration mode. The user interface for this is currently rather
+primitive and doesn't permit the more free-form configuration allowed
+in configuration files.
+
+For example, to configure a second vif on interface rl0:
+\vspace{0.1in}
+
+\noindent\fbox{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{show}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+\>\>\>prefix-length: 24\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+\\
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{vif rl0b \{}\\
+\>\>>\> \textbf{address 10.0.0.1 \{}\\
+\>\>>\>\> \textbf{prefix-length 16}\\
+\>\>>\>\> \textbf{broadcast 10.0.255.255}\\
+\>\>>\>\> \textbf{\}}\\
+\>\>>\> \textbf{\}}\\
+OK. Use "commit" to apply these changes.\\
+\\
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{show}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+\>\>\>prefix-length: 24\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+> vif rl0b \{\\
+>\>\> address 10.0.0.1 \{\\
+>\>\>\> prefix-length: 16\\
+>\>\>\> broadcast: 10.0.255.255\\
+>\>\>\}\\
+>\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\subsection{Deleting Parts of the Configuration}
+
+The delete command can be used to delete subtrees from the
+configuration.  The deletion will be visible in the results of the
+show command, but will not actually take place until the changes are
+committed.
+\vspace{0.1in}
+
+
+\noindent\fbox{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+XORP> \textbf{show interfaces interface rl0}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+\>\>\>prefix-length: 24\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+\>vif rl0b \{\\
+\>\> address 10.0.0.1 \{\\
+\>\>\> prefix-length: 16\\
+\>\>\> broadcast: 10.0.255.255\\
+\>\>\}\\
+\>\}\\
+\\
+\noindent[edit]\\
+XORP> \textbf{delete interfaces interface rl0 vif rl0b}\\
+Deleting:\\
+\>address 10.0.0.1 \{\\
+\>\>prefix-length: 16\\
+\>\>broadcast: 10.0.255.255\\
+\>\}\\
+\\
+OK\\
+\\
+\noindent[edit]\\
+XORP> \textbf{show interfaces interface rl0}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+\>\>\>prefix-length: 24\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Committing Changes}
+
+\noindent\fbox{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+\noindent[edit interfaces interface rl0]\\
+XORP> \textbf{commit}\\
+OK
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The commit command commits all the current configuration changes.
+This can take a number of seconds before the response is given.
+
+{\it If xorpsh was built with debugging enabled, the response can be
+considerably more verbose than shown above!}
+
+If two or more users are logged in using configuration mode, and one
+of them changes the configuration, the others will receive a warning:
+\vspace{0.1in}
+
+\noindent\fbox{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+\noindent[edit]\\
+XORP>\\
+The configuration had been changed by user mjh\\
+XORP>
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+
+\subsection{Discarding Changes}
+
+The user can discard a batch of changes by editing them back to their
+original configuration, or by using the exit command to leave
+configuration mode:
+\vspace{0.1in}
+
+\noindent\fbox{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+\noindent[edit]\\
+XORP> \textbf{exit}\\
+Error: There are uncommitted changes\\
+Use "commit" to commit the changes, or "exit discard" to discard them\\
+\\
+XORP> \textbf{exit discard}\\
+Xorp>
 \end{tabbing}
 \end{alltt}
 \end{minipage}
