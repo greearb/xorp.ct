@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.28 2003/03/12 22:58:41 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.29 2003/03/25 08:10:00 pavlin Exp $
 #
+
+* BSR SPEC:
+  Add/describe in each non-BSR a timer per Cand-RP that is based
+  on each Cand-RP holdtime (as specified in the Bootstrap message).
 
 * SPEC: Don't use "link-local" terminology, because it has no meaning
   for IPv4? Or, at least, clarify that it is only for IPv6, and describe
