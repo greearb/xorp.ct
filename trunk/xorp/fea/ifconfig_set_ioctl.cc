@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.11 2003/10/01 21:10:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.12 2003/10/02 16:58:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -213,31 +213,6 @@ public:
 	_ifreq.ifr_flags = flags;
     }
     int execute() const { return ioctl(fd(), SIOCSIFFLAGS, &_ifreq); }
-};
-
-/**
- * @short class to get interface flags
- */
-class IfGetFlags : public IfReq {
-public:
-    IfGetFlags(int fd, const string& ifname, uint32_t& flags) :
-	IfReq(fd, ifname), _flags(flags) {}
-
-    int execute() const {
-	int r = ioctl(fd(), SIOCGIFFLAGS, &_ifreq);
-	if (r >= 0) {
-	    static_assert(sizeof(_ifreq.ifr_flags) == 2);
-	    _flags = _ifreq.ifr_flags & 0xffff;
-	    debug_msg("%s: Got flags %s (0x%08x)\n",
-		      ifname().c_str(),
-		      IfConfigGet::iff_flags(_flags).c_str(),
-		      _flags);
-	}
-	return r;
-    }
-
-private:
-    uint32_t& _flags;
 };
 
 /**
@@ -617,15 +592,7 @@ IfConfigSetIoctl::push_vif(const IfTreeInterface&	i,
 		    v.is_marked(IfTreeItem::DELETED));
     bool enabled = i.enabled() & v.enabled();
 
-    uint32_t curflags;
-    if (IfGetFlags(_s4, i.ifname(), curflags).execute() < 0) {
-	ifc().er().vif_error(i.ifname(), v.vifname(),
-			     c_format("Failed to get interface flags: %s",
-				      strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
-
+    uint32_t curflags = i.if_flags();
     bool up = curflags & IFF_UP;
     if (up && (deleted || !enabled)) {
 	curflags &= ~IFF_UP;
