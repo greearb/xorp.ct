@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.25 2003/10/25 00:27:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.26 2003/10/27 19:29:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,14 +39,6 @@ void dump_bytes(const uint8_t*, size_t) {}
 /* **************** UpdatePacket *********************** */
 
 UpdatePacket::UpdatePacket()
-    : // _mpreach_ipv4_unicast(0), 
-      _mpreach_ipv4_multicast(0), 
-      // _mpunreach_ipv4_unicast(0), 
-      _mpunreach_ipv4_multicast(0),
-      _mpreach_ipv6_unicast(0), 
-      _mpreach_ipv6_multicast(0), 
-      _mpunreach_ipv6_unicast(0), 
-      _mpunreach_ipv6_multicast(0)
 {
     _Type = MESSAGETYPEUPDATE;
 }
@@ -61,114 +53,28 @@ UpdatePacket::add_nlri(const BGPUpdateAttrib& nlri)
     _nlri_list.push_back(nlri);
 }
 
-void
-UpdatePacket::multi_protocol(PathAttribute *pa)
-{
-    if(MP_REACH_NLRI == pa->type()) {
-	MPReachNLRIAttribute<IPv6> *mpreach_ipv6 =
-	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(pa);
-	if(0 != mpreach_ipv6) {
-	    switch(mpreach_ipv6->safi()) {
-	    case SAFI_UNICAST:
-		if(0 != _mpreach_ipv6_unicast)
-		    XLOG_WARNING(
-			 "Two multiprotocol reach attributes!!! %s %s", 
-				 _mpreach_ipv6_unicast->str().c_str(),
-				 pa->str().c_str());
-		_mpreach_ipv6_unicast = mpreach_ipv6;
-		break;
-	    case SAFI_MULTICAST:
-		if(0 != _mpreach_ipv6_multicast)
-		    XLOG_WARNING(
-			 "Two multiprotocol reach attributes!!! %s %s", 
-				 _mpreach_ipv6_multicast->str().c_str(),
-				 pa->str().c_str());
-		_mpreach_ipv6_multicast = mpreach_ipv6;
-		break;
-	    }
-	    return;
-	}
-	MPReachNLRIAttribute<IPv4> *mpreach_ipv4 =
-	    dynamic_cast<MPReachNLRIAttribute<IPv4>*>(pa);
-	if(0 != mpreach_ipv4) {
-	    switch(mpreach_ipv4->safi()) {
-	    case SAFI_UNICAST:
-		XLOG_FATAL("AFI == IPv4 SAFI == Unicast");
-// 		if(0 != _mpreach_ipv4_unicast)
-// 		    XLOG_WARNING(
-// 			 "Two multiprotocol reach attributes!!! %s %s", 
-// 				 _mpreach_ipv4_unicast->str().c_str(),
-// 				 pa->str().c_str());
-// 		_mpreach_ipv4_unicast = mpreach_ipv4
-		break;
-	    case SAFI_MULTICAST:
-		if(0 != _mpreach_ipv4_multicast)
-		    XLOG_WARNING(
-			 "Two multiprotocol reach attributes!!! %s %s", 
-				 _mpreach_ipv4_multicast->str().c_str(),
-				 pa->str().c_str());
-		_mpreach_ipv4_multicast = mpreach_ipv4;
-		break;
-	    }
-	    return;
-	}
-    } else if(MP_UNREACH_NLRI == pa->type()) {
-	MPUNReachNLRIAttribute<IPv6> *mpunreach_ipv6 =
-	    dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(pa);
-	if(0 != mpunreach_ipv6) {
-	    switch(mpunreach_ipv6->safi()) {
-	    case SAFI_UNICAST:
-		if(0 != _mpunreach_ipv6_unicast)
-		    XLOG_WARNING(
-			 "Two multiprotocol reach attributes!!! %s %s", 
-				 _mpunreach_ipv6_unicast->str().c_str(),
-				 pa->str().c_str());
-		_mpunreach_ipv6_unicast = mpunreach_ipv6;
-		break;
-	    case SAFI_MULTICAST:
-		if(0 != _mpunreach_ipv6_multicast)
-		    XLOG_WARNING(
-			 "Two multiprotocol reach attributes!!! %s %s", 
-				 _mpunreach_ipv6_multicast->str().c_str(),
-				 pa->str().c_str());
-		_mpunreach_ipv6_multicast = mpunreach_ipv6;
-		break;
-	    }
-	    return;
-	}
-	MPUNReachNLRIAttribute<IPv4> *mpunreach_ipv4 =
-	    dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(pa);
-	if(0 != mpunreach_ipv4) {
-	    switch(mpunreach_ipv4->safi()) {
-	    case SAFI_UNICAST:
-		XLOG_FATAL("AFI == IPv4 SAFI == Unicast");
-// 		if(0 != _mpunreach_ipv4_unicast)
-// 		    XLOG_WARNING(
-// 			 "Two multiprotocol reach attributes!!! %s %s", 
-// 				 _mpunreach_ipv4_unicast->str().c_str(),
-// 				 pa->str().c_str());
-// 		_mpunreach_ipv4_unicast = mpunreach_ipv4
-		break;
-	    case SAFI_MULTICAST:
-		if(0 != _mpunreach_ipv4_multicast)
-		    XLOG_WARNING(
-			 "Two multiprotocol reach attributes!!! %s %s", 
-				 _mpunreach_ipv4_multicast->str().c_str(),
-				 pa->str().c_str());
-		_mpunreach_ipv4_multicast = mpunreach_ipv4;
-		break;
-	    }
-	    return;
-	}
-    }
-}
-
 MPReachNLRIAttribute<IPv4> *
 UpdatePacket::mpreach_ipv4(Safi safi) const
 {
     XLOG_ASSERT(SAFI_MULTICAST == safi);
 
-    return _mpreach_ipv4_multicast;
+    PathAttributeList<IPv4>::const_iterator i;
+    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
+	MPReachNLRIAttribute<IPv4> *mpreach = 
+	    dynamic_cast<MPReachNLRIAttribute<IPv4> *>((*i));
+	if( mpreach) {
+	    switch(mpreach->safi()) {
+	    case SAFI_UNICAST:
+		XLOG_FATAL("AFI == IPv4 SAFI == Unicast");
+		break;
+	    case SAFI_MULTICAST:
+		return mpreach;
+		break;
+	    }
+	}
+    }
+	    
+    return 0;
 }
 
 MPUNReachNLRIAttribute<IPv4> *
@@ -176,20 +82,36 @@ UpdatePacket::mpunreach_ipv4(Safi safi) const
 {
     XLOG_ASSERT(SAFI_MULTICAST == safi);
 
-    return _mpunreach_ipv4_multicast;
+    PathAttributeList<IPv4>::const_iterator i;
+    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
+	MPUNReachNLRIAttribute<IPv4> *mpunreach = 
+	    dynamic_cast<MPUNReachNLRIAttribute<IPv4> *>((*i));
+	if (mpunreach) {
+	    switch(mpunreach->safi()) {
+	    case SAFI_UNICAST:
+		XLOG_FATAL("AFI == IPv4 SAFI == Unicast");
+		break;
+	    case SAFI_MULTICAST:
+		return mpunreach;
+		break;
+	    }
+	}
+    }
+	    
+    return 0;
 }
 
 MPReachNLRIAttribute<IPv6> *
 UpdatePacket::mpreach_ipv6(Safi safi) const
 {
-    switch(safi) {
-    case SAFI_UNICAST:
-	return _mpreach_ipv6_unicast;
-    case SAFI_MULTICAST:
-	return _mpreach_ipv6_multicast;
+    PathAttributeList<IPv6>::const_iterator i;
+    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
+	MPReachNLRIAttribute<IPv6> *mpreach = 
+	    dynamic_cast<MPReachNLRIAttribute<IPv6> *>((*i));
+	if (mpreach && mpreach->safi() == safi) {
+	    return mpreach;
+	}
     }
-
-    XLOG_UNREACHABLE();
 
     return 0;
 }
@@ -197,14 +119,14 @@ UpdatePacket::mpreach_ipv6(Safi safi) const
 MPUNReachNLRIAttribute<IPv6> *
 UpdatePacket::mpunreach_ipv6(Safi safi) const
 {
-    switch(safi) {
-    case SAFI_UNICAST:
-	return _mpunreach_ipv6_unicast;
-    case SAFI_MULTICAST:
-	return _mpunreach_ipv6_multicast;
+    PathAttributeList<IPv6>::const_iterator i;
+    for (i = _pa_list.begin(); i != _pa_list.end(); i++) {
+	MPUNReachNLRIAttribute<IPv6> *mpunreach = 
+	    dynamic_cast<MPUNReachNLRIAttribute<IPv6> *>((*i));
+	if (mpunreach && mpunreach->safi() == safi) {
+	    return mpunreach;
+	}
     }
-
-    XLOG_UNREACHABLE();
 
     return 0;
 }
@@ -213,14 +135,12 @@ void
 UpdatePacket::add_pathatt(const PathAttribute& pa)
 {
     PathAttribute *paclone = pa.clone();
-    multi_protocol(paclone);
    _pa_list.push_back(paclone);
 }
 
 void
 UpdatePacket::add_pathatt(PathAttribute *pa)
 {
-    multi_protocol(pa);
     _pa_list.push_back(pa);
 }
 
@@ -301,14 +221,6 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
 
 UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l) 
     throw(CorruptMessage)
-   : // _mpreach_ipv4_unicast(0), 
-    _mpreach_ipv4_multicast(0), 
-    // _mpunreach_ipv4_unicast(0), 
-    _mpunreach_ipv4_multicast(0),
-    _mpreach_ipv6_unicast(0), 
-    _mpreach_ipv6_multicast(0), 
-    _mpunreach_ipv6_unicast(0), 
-    _mpunreach_ipv6_multicast(0)
 {
     debug_msg("UpdatePacket constructor called\n");
     _Type = MESSAGETYPEUPDATE;

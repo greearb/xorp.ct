@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.21 2003/10/23 09:41:55 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.22 2003/10/25 00:27:59 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -224,29 +224,12 @@ public:
 protected:
 
 private:
-    /**
-     * Stash pointers to multiprotocol packets.
-     * @param pa path attribute.
-     */
-    void multi_protocol(PathAttribute *pa);
-
     // don't allow the use of the default copy constructor
     UpdatePacket(const UpdatePacket& UpdatePacket);
+
     BGPUpdateAttribList		_wr_list;
     PathAttributeList<IPv4>	_pa_list;
     BGPUpdateAttribList		_nlri_list;
-
-//     MPReachNLRIAttribute<IPv4>	*_mpreach_ipv4_unicast;
-    MPReachNLRIAttribute<IPv4>	*_mpreach_ipv4_multicast;
-
-//     MPUNReachNLRIAttribute<IPv4> *_mpunreach_ipv4_unicast;
-    MPUNReachNLRIAttribute<IPv4> *_mpunreach_ipv4_multicast;
-
-    MPReachNLRIAttribute<IPv6>	*_mpreach_ipv6_unicast;
-    MPReachNLRIAttribute<IPv6>	*_mpreach_ipv6_multicast;
-
-    MPUNReachNLRIAttribute<IPv6> *_mpunreach_ipv6_unicast;
-    MPUNReachNLRIAttribute<IPv6> *_mpunreach_ipv6_multicast;
 };
 
 /* **************** BGPNotificationPacket *********************** */
