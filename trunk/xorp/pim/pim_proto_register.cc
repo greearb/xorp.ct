@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.8 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.9 2003/09/13 02:56:30 pavlin Exp $"
 
 
 //
@@ -722,7 +722,15 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
     case AF_INET6: {
 	struct ip6_hdr ip6_header;
 	uint8_t *cp = (uint8_t *)&ip6_header;
-	
+
+	// XXX: conditionally define IPv6 header related values
+#ifndef IPV6_VERSION
+#define IPV6_VERSION		0x60
+#endif
+#ifndef IPV6_VERSION_MASK
+#define IPV6_VERSION_MASK	0xf0
+#endif
+
 	ip6_header.ip6_plen	= 0;
 	ip6_header.ip6_flow	= 0;
 	ip6_header.ip6_vfc	&= ~IPV6_VERSION_MASK;
