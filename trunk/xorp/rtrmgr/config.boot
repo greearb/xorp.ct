@@ -1,8 +1,8 @@
 interfaces {
   interface fxp0 {
     description: "control interface"
-    vif fxp0 {
-      address 192.150.187.100 {
+    vif xl0 {
+      address 192.150.187.75 {
         prefix-length: 24
         broadcast: 192.150.187.255
       }
@@ -25,14 +25,14 @@ protocols {
 */
 protocols {
   bgp {
-    bgp-id: 192.150.187.100
-    local-as: 65002
+    bgp-id: 192.150.187.75
+    local-as: 65016
     peer xorp-c4000 {
-      local-ip: 192.150.187.100
+      local-ip: 192.150.187.75
       peer-ip: 192.150.187.109
       as: 65000
       holdtime: 90
-      next-hop: 192.150.187.100
+      next-hop: 192.150.187.75
     }
   }
 }

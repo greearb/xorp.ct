@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.28 2003/04/23 02:59:46 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.29 2003/05/16 00:04:43 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -323,9 +323,9 @@ dnl ---------------------------------------------------------------------------
 AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
 if test "${net_snmp_found}" = "true" ;  then
     net_snmp_v=`net-snmp-config --version`
-    net_snmp_maj=`echo $net_snmp_v | sed 's/\..*//'` 
-    net_snmp_min=`echo $net_snmp_v | sed -e 's/[[0-9]]*\.//' -e 's/\.[[0-9]]*//'`
-    net_snmp_rev=`echo $net_snmp_v | sed 's/[[0-9]]*\.[[0-9]]*\.//'` 
+    net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.` 
+    net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.` 
+    net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.` 
     net_snmp_v=`net-snmp-config --version`
     AC_CACHE_CHECK(if net-snmp version equal or newer than 5.0.6,
     ac_cv_net_snmp_usable,

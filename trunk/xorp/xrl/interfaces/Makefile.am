@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.5 2003/05/09 20:58:20 hodson Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.6 2003/05/15 00:02:21 hodson Exp $
 ##
 
 ###############################################################################
@@ -111,10 +111,14 @@ librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
 # RTRMGR Client Interface
 noinst_LIBRARIES += librtrmgr_clientxif.a
 librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
-
+ 
 # Test Peer Interface
 noinst_LIBRARIES += libtestpeerxif.a
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
+
+# XORP MIBS Interface
+noinst_LIBRARIES += libxorpifmibxif.a
+libxorpifmibxif_a_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
 
 #
 # Sample Test Client Interface 

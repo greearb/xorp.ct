@@ -91,7 +91,7 @@ net_snmp_found = @net_snmp_found@
 #
 # Sample Test Client Interface 
 #
-noinst_LIBRARIES = libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libtestxif.a
+noinst_LIBRARIES = libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
 libcliprocessorxif_a_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
@@ -118,6 +118,7 @@ libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
 librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
 librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
+libxorpifmibxif_a_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
 
 ################################################################
@@ -192,6 +193,8 @@ librtrmgr_clientxif_a_LIBADD =
 librtrmgr_clientxif_a_OBJECTS =  rtrmgr_client_xif.o
 libtestpeerxif_a_LIBADD = 
 libtestpeerxif_a_OBJECTS =  test_peer_xif.o
+libxorpifmibxif_a_LIBADD = 
+libxorpifmibxif_a_OBJECTS =  xorp_if_mib_xif.o
 libtestxif_a_LIBADD = 
 libtestxif_a_OBJECTS =  test_xif.o
 CXXFLAGS = @CXXFLAGS@
@@ -218,9 +221,10 @@ DEP_FILES =  .deps/bgp_xif.P .deps/cli_manager_xif.P \
 .deps/mfea_client_xif.P .deps/mfea_xif.P .deps/mld6igmp_client_xif.P \
 .deps/mld6igmp_xif.P .deps/ospf_xif.P .deps/pim_xif.P \
 .deps/rib_client_xif.P .deps/rib_xif.P .deps/rtrmgr_client_xif.P \
-.deps/rtrmgr_xif.P .deps/test_peer_xif.P .deps/test_xif.P
-SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libftixif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES)
-OBJECTS = $(libbgpxif_a_OBJECTS) $(libclimanagerxif_a_OBJECTS) $(libcliprocessorxif_a_OBJECTS) $(libcommonxif_a_OBJECTS) $(libcoordxif_a_OBJECTS) $(libdatainxif_a_OBJECTS) $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrclientxif_a_OBJECTS) $(libftixif_a_OBJECTS) $(libfearawpkt_a_OBJECTS) $(libfearawpktclient_a_OBJECTS) $(libfinderxif_a_OBJECTS) $(libfindereventnotifierxif_a_OBJECTS) $(libfindereventobserverxif_a_OBJECTS) $(libfinderclientxif_a_OBJECTS) $(libmfeaxif_a_OBJECTS) $(libmfeaclientxif_a_OBJECTS) $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpclientxif_a_OBJECTS) $(libospfxif_a_OBJECTS) $(libpimxif_a_OBJECTS) $(libribxif_a_OBJECTS) $(libribclientxif_a_OBJECTS) $(librtrmgrxif_a_OBJECTS) $(librtrmgr_clientxif_a_OBJECTS) $(libtestpeerxif_a_OBJECTS) $(libtestxif_a_OBJECTS)
+.deps/rtrmgr_xif.P .deps/test_peer_xif.P .deps/test_xif.P \
+.deps/xorp_if_mib_xif.P
+SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libftixif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES) $(libtestxif_a_SOURCES)
+OBJECTS = $(libbgpxif_a_OBJECTS) $(libclimanagerxif_a_OBJECTS) $(libcliprocessorxif_a_OBJECTS) $(libcommonxif_a_OBJECTS) $(libcoordxif_a_OBJECTS) $(libdatainxif_a_OBJECTS) $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrclientxif_a_OBJECTS) $(libftixif_a_OBJECTS) $(libfearawpkt_a_OBJECTS) $(libfearawpktclient_a_OBJECTS) $(libfinderxif_a_OBJECTS) $(libfindereventnotifierxif_a_OBJECTS) $(libfindereventobserverxif_a_OBJECTS) $(libfinderclientxif_a_OBJECTS) $(libmfeaxif_a_OBJECTS) $(libmfeaclientxif_a_OBJECTS) $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpclientxif_a_OBJECTS) $(libospfxif_a_OBJECTS) $(libpimxif_a_OBJECTS) $(libribxif_a_OBJECTS) $(libribclientxif_a_OBJECTS) $(librtrmgrxif_a_OBJECTS) $(librtrmgr_clientxif_a_OBJECTS) $(libtestpeerxif_a_OBJECTS) $(libxorpifmibxif_a_OBJECTS) $(libtestxif_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -387,6 +391,11 @@ libtestpeerxif.a: $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_DEPENDENCIES)
 	-rm -f libtestpeerxif.a
 	$(AR) cru libtestpeerxif.a $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_LIBADD)
 	$(RANLIB) libtestpeerxif.a
+
+libxorpifmibxif.a: $(libxorpifmibxif_a_OBJECTS) $(libxorpifmibxif_a_DEPENDENCIES)
+	-rm -f libxorpifmibxif.a
+	$(AR) cru libxorpifmibxif.a $(libxorpifmibxif_a_OBJECTS) $(libxorpifmibxif_a_LIBADD)
+	$(RANLIB) libxorpifmibxif.a
 
 libtestxif.a: $(libtestxif_a_OBJECTS) $(libtestxif_a_DEPENDENCIES)
 	-rm -f libtestxif.a

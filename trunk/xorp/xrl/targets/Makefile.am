@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.9 2003/05/16 16:52:09 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.10 2003/05/18 03:18:23 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -31,6 +31,7 @@ noinst_LIBRARIES += librtrmgrbase.a
 noinst_LIBRARIES += libtestbase.a
 noinst_LIBRARIES += libtestfindereventsbase.a
 noinst_LIBRARIES += libtestpeerbase.a
+noinst_LIBRARIES += libxorpifmibbase.a
 noinst_LIBRARIES += libxorpshbase.a
 
 # BGP
@@ -151,7 +152,13 @@ $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
 
-# Xorpsh
+# XORP IF MIB
+libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
+$(srcdir)/xorp_if_mib_base.hh $(srcdir)/xorp_if_mib_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/xorp_if_mib.xif
+
+# XORPSH
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 $(srcdir)/xorpsh_base.hh $(srcdir)/xorpsh_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\

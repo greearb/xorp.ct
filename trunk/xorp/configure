@@ -2138,9 +2138,9 @@ fi
 
 if test "${net_snmp_found}" = "true" ;  then
     net_snmp_v=`net-snmp-config --version`
-    net_snmp_maj=`echo $net_snmp_v | sed 's/\..*//'` 
-    net_snmp_min=`echo $net_snmp_v | sed -e 's/[0-9]*\.//' -e 's/\.[0-9]*//'`
-    net_snmp_rev=`echo $net_snmp_v | sed 's/[0-9]*\.[0-9]*\.//'` 
+    net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.` 
+    net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.` 
+    net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.` 
     net_snmp_v=`net-snmp-config --version`
     echo $ac_n "checking if net-snmp version equal or newer than 5.0.6""... $ac_c" 1>&6
 echo "configure:2147: checking if net-snmp version equal or newer than 5.0.6" >&5

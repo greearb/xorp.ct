@@ -84,7 +84,7 @@ net_snmp_found = @net_snmp_found@
 
 INTERFACES_DIR = $(top_srcdir)/xrl/interfaces
 TARGET_DIR = $(top_srcdir)/xrl/targets
-noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpshbase.a
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -136,7 +136,10 @@ libtestfindereventsbase_a_SOURCES = test_finder_events_base.hh test_finder_event
 # TEST PEER
 libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
 
-# Xorpsh
+# XORP IF MIB
+libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
+
+# XORPSH
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 
 # Add your target's library sources like this:
@@ -199,6 +202,8 @@ libtestfindereventsbase_a_LIBADD =
 libtestfindereventsbase_a_OBJECTS =  test_finder_events_base.o
 libtestpeerbase_a_LIBADD = 
 libtestpeerbase_a_OBJECTS =  test_peer_base.o
+libxorpifmibbase_a_LIBADD = 
+libxorpifmibbase_a_OBJECTS =  xorp_if_mib_base.o
 libxorpshbase_a_LIBADD = 
 libxorpshbase_a_OBJECTS =  xorpsh_base.o
 CXXFLAGS = @CXXFLAGS@
@@ -222,9 +227,9 @@ DEP_FILES =  .deps/bgp4_mib_base.P .deps/bgp_base.P .deps/cli_base.P \
 .deps/mld6igmp_base.P .deps/ospf_base.P .deps/pim_base.P \
 .deps/rib_base.P .deps/ribclient_base.P .deps/rtrmgr_base.P \
 .deps/test_base.P .deps/test_finder_events_base.P \
-.deps/test_peer_base.P .deps/xorpsh_base.P
-SOURCES = $(libbgpbase_a_SOURCES) $(libbgp4mibbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
-OBJECTS = $(libbgpbase_a_OBJECTS) $(libbgp4mibbase_a_OBJECTS) $(libclibase_a_OBJECTS) $(libcoordbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_OBJECTS) $(libfeabase_a_OBJECTS) $(libfinderbase_a_OBJECTS) $(libfinderclientbase_a_OBJECTS) $(libmfeabase_a_OBJECTS) $(libmld6igmpbase_a_OBJECTS) $(libospfbase_a_OBJECTS) $(libpimbase_a_OBJECTS) $(libribbase_a_OBJECTS) $(libribclientbase_a_OBJECTS) $(librtrmgrbase_a_OBJECTS) $(libtestbase_a_OBJECTS) $(libtestfindereventsbase_a_OBJECTS) $(libtestpeerbase_a_OBJECTS) $(libxorpshbase_a_OBJECTS)
+.deps/test_peer_base.P .deps/xorp_if_mib_base.P .deps/xorpsh_base.P
+SOURCES = $(libbgpbase_a_SOURCES) $(libbgp4mibbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+OBJECTS = $(libbgpbase_a_OBJECTS) $(libbgp4mibbase_a_OBJECTS) $(libclibase_a_OBJECTS) $(libcoordbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_OBJECTS) $(libfeabase_a_OBJECTS) $(libfinderbase_a_OBJECTS) $(libfinderclientbase_a_OBJECTS) $(libmfeabase_a_OBJECTS) $(libmld6igmpbase_a_OBJECTS) $(libospfbase_a_OBJECTS) $(libpimbase_a_OBJECTS) $(libribbase_a_OBJECTS) $(libribclientbase_a_OBJECTS) $(librtrmgrbase_a_OBJECTS) $(libtestbase_a_OBJECTS) $(libtestfindereventsbase_a_OBJECTS) $(libtestpeerbase_a_OBJECTS) $(libxorpifmibbase_a_OBJECTS) $(libxorpshbase_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -351,6 +356,11 @@ libtestpeerbase.a: $(libtestpeerbase_a_OBJECTS) $(libtestpeerbase_a_DEPENDENCIES
 	-rm -f libtestpeerbase.a
 	$(AR) cru libtestpeerbase.a $(libtestpeerbase_a_OBJECTS) $(libtestpeerbase_a_LIBADD)
 	$(RANLIB) libtestpeerbase.a
+
+libxorpifmibbase.a: $(libxorpifmibbase_a_OBJECTS) $(libxorpifmibbase_a_DEPENDENCIES)
+	-rm -f libxorpifmibbase.a
+	$(AR) cru libxorpifmibbase.a $(libxorpifmibbase_a_OBJECTS) $(libxorpifmibbase_a_LIBADD)
+	$(RANLIB) libxorpifmibbase.a
 
 libxorpshbase.a: $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_DEPENDENCIES)
 	-rm -f libxorpshbase.a
@@ -596,6 +606,9 @@ $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
+$(srcdir)/xorp_if_mib_base.hh $(srcdir)/xorp_if_mib_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/xorp_if_mib.xif
 $(srcdir)/xorpsh_base.hh $(srcdir)/xorpsh_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr_client.xif
