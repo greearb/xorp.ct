@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.49 2004/06/14 23:29:38 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.50 2004/06/14 23:42:19 hodson Exp $
 #
 
 		XORP RELEASE NOTES
@@ -87,6 +87,10 @@ Release 1.0RC (2004/06/14)
 
     - Few bug fixes.
 
+  RIP:
+    - Packet forwarding and reception via FEA written for RIPv2 and RIPng.
+      RIPv2 should be usable.
+
   BGP:
     - IPv6 has now been tested with peerings to the 6Bone; unicast and
       multicast SAFIs.
@@ -151,10 +155,6 @@ Release 1.0RC (2004/06/14)
 
   SNMP:
     - No significant changes.
-
-  RIP:
-    - Packet forwarding and reception via FEA written for RIPv2 and RIPng.
-      RIPv2 should be usable.
 
 
 Release 0.5 (2003/11/06)
