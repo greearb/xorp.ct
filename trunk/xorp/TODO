@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.14 2002/12/09 04:26:58 pavlin Exp $
+# $XORP: xorp/TODO,v 1.1.1.1 2002/12/11 23:55:48 hodson Exp $
 #
 
 * Change configure.in NOT to use AC_EGREP_HEADER to check
@@ -8,9 +8,7 @@
 
 * Make all #include "config.h" to be #ifdef HAVE_CONFIG_H  (??)
 
-* Make the code as POSIX as possible:
-  - Replace the BSD-originated bcopy() and friends with the POSIX
-    memcpy() etc.
+* Make the code as POSIX as possible.
 
 * When checking for AF_ROUTE, AF_NETLINK, etc. in configure.in, instead
   of trying to run the test program, do only try to compile it instead.
