@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.16 2003/11/01 01:38:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.17 2003/12/08 20:20:36 pavlin Exp $"
 
 
 //
@@ -148,6 +148,11 @@ Mld6igmpNode::start()
 int
 Mld6igmpNode::stop()
 {
+    if (is_down()) {
+	ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
+	return (XORP_OK);
+    }
+
     if (! is_up())
 	return (XORP_ERROR);
     
@@ -166,15 +171,13 @@ Mld6igmpNode::stop()
 	XLOG_ERROR("Error stopping protocol with the kernel. Ignored.");
     }
     
-    // XXX: don't change the node status, because we are still ready
-    
     if (ProtoNode<Mld6igmpVif>::stop() < 0)
 	return (XORP_ERROR);
 
     //
     // Set the node status
     //
-    ProtoNode<Mld6igmpVif>::set_node_status(PROC_SHUTDOWN);
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
 
     return (XORP_OK);
 }
@@ -298,6 +301,9 @@ Mld6igmpNode::node_status(string& reason_msg)
     case PROC_FAILED:
 	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
 	XLOG_UNFINISHED();
+	break;
+    case PROC_DONE:
+	// Process has completed operation
 	break;
     default:
 	// Unknown status
