@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.8 2003/05/06 02:20:02 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/xorp_if_mib.xif,v 1.1 2003/05/20 01:20:46 jcardona Exp $ */
 
 /*
 ** XORP-SNMP interface MIB module
@@ -18,9 +18,9 @@ interface xorp_if_mib/0.1 {
 	 * Unload a MIB module 
 	 *
 	 * @param unloaded true if mib not loaded or successfully unloaded 
-	 * @param mod_index of the MIB module to be unloaded.  The index was the
-	 *   one returned by load_mib, or it can be found by inspecting the dlmod
-	 *   table: $ snmptable <host> UCD-DLMOD-MIB::dlmodTable 
+	 * @param mod_index of the MIB module to be unloaded.  The index was
+	 * the one returned by load_mib, or it can be found by inspecting the
+	 * dlmod table: $ snmptable <host> UCD-DLMOD-MIB::dlmodTable 
 	 */
 	unload_mib ?  mib_index:u32					    \ 
 		   -> unloaded:bool 
