@@ -685,7 +685,7 @@ xlog.o: xlog.c
 # If this code is commented out, please upgrade to python2.0 or above.
 
 @PY_BUILD@callback.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) callback-gen.py -b 6 -l 12 > callback.hh
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 12 > $(srcdir)/callback.hh
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
