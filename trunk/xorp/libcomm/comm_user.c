@@ -348,8 +348,10 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_join_udp6(const struct in6_addr *mcast_addr, uint join_if_index,
-		    unsigned short my_port, bool reuse_flag)
+comm_bind_join_udp6(const struct in6_addr *mcast_addr,
+		    unsigned int join_if_index,
+		    unsigned short my_port,
+		    bool reuse_flag)
 {
     int sock;
 
