@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.8 2003/06/06 08:45:11 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.9 2003/06/26 18:34:57 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -27,6 +27,9 @@ configuration, see the README files from the pimd distribution from USC:
 
 http://netweb.usc.edu/pim/pimd/
 
+Note that FreeBSD-current (as of August 28, 2003), and the forthcoming
+FreeBSD-4.9 and later already do have PIM support in the kernel,
+therefore they do not require to be patched anymore.
 
 For testing and debugging purposes, PIM-SM can be manually started.  The
 Xorp PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
@@ -126,7 +129,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (June 2003), the PIM-SM implementation is based
+Currently (August 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-05.{ps,txt} (The core PIM-SM specification).
