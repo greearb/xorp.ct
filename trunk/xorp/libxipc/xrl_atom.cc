@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.12 2004/06/10 22:41:10 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.13 2004/09/06 18:27:47 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -573,7 +573,7 @@ XrlAtom::operator==(const XrlAtom& other) const
 	}
     }
     //    debug_msg("%d%d%d%d\n", mn, mt, md, mv);
-    return mn == mt == md == mv; // redundant return value
+    return mn == mt == md == mv == true; // redundant return value
 }
 
 // ----------------------------------------------------------------------------
