@@ -1,13 +1,6 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.14 2003/11/06 22:17:46 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.15 2004/06/09 19:02:13 pavlin Exp $
 #
-
-* During shutdown, the following code in Mld6igmpNode::final_stop()
-  may actually return XORP_ERROR:
-
-    if (! (is_up() || is_pending_up() || is_pending_down()))
-        return (XORP_ERROR);
-  However, in case of PIM the above check is OK. Find the problem and fix it.
 
 * Implement RFC 3590 "Source Address Selection for the
   Multicast Listener Discovery (MLD) Protocol"
@@ -49,8 +42,6 @@
 
 * Replace all proto_family with family ?
   (in all mcast-related directories)
-
-* Check return error when sending XRLs
 
 * The return XrlCmdError values in mld6igmp_proto_access.hh are probably
   bogus.
