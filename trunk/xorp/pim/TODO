@@ -1,6 +1,15 @@
 #
-# $XORP: xorp/pim/TODO,v 1.70 2004/03/02 00:47:43 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.71 2004/03/04 03:06:17 pavlin Exp $
 #
+
+* PIM MIB SPEC:
+  Look into the following emails from
+  "Nicholas, Jonathan" <Jonathan.Nicholas@itt.com>
+  Date: Mon, 4 Feb 2002
+  Subject: [pim] PIM MIB
+
+  Date: Wed, 27 Mar 2002
+  Subject: [pim] PIM MIB
 
 * IMPL:
   Check again that various addresses are not link-local (e.g., the
@@ -34,9 +43,6 @@ address.
   Assert Timer Expires and if there are no more PIM neighbors, then
   the assert state-machine should transitinto NoInfo state".
 
-* BSR SPEC:
-  Change all "sec" to "secs".
-
 * IMPL:
   If a PIM control message is received witn an unrecognized version
   or type field, then the error message should be rate-limited.
@@ -60,8 +66,6 @@ address.
 
   The encapsulating packet uses the normal TTL that the router would use
   for any locally-generated IP packet.
-
-* BSR SPEC: Change "No Info" to "NoInfo".
 
 * IMPL: If the IP address of an interface changes, and if the router
   has not sent yet a Hello message, then if a Join/Prune or Assert message
@@ -105,10 +109,6 @@ address.
   on May 8, 2003 is specified in the spec, implemented and tested.
   Also, read other emails on the subject, and probably incorporate the
   solutions into the spec.
-
-* BSR SPEC:
-  Add/describe in each non-BSR a timer per Cand-RP that is based
-  on each Cand-RP holdtime (as specified in the Bootstrap message).
 
 * IMPL+BSR SPEC+TESTSUITE(?):
   In the bootstrap spec, if we receive and accept an unicast BSM,
@@ -402,7 +402,8 @@ Register_Suppression_Time + Register_Probe_Time )."
   add_mfc_to_kernel() would be called only if something about the PimMfc
   has changed.
 
-* SPEC (Bootstrap): Should the triggered Bootstrap message be sent immediately,
+* IMPL+SPEC (Bootstrap): Should the triggered Bootstrap message be sent
+  immediately,
   or waiting for a while after the first random Hello message is OK?
   If the latter, then sending immediately Join or Assert messages may not
   make much sense.
@@ -410,8 +411,6 @@ Register_Suppression_Time + Register_Probe_Time )."
   needs to be sent to a neighbor, a Hello message is sent first. The
   sending of the Hello message itself triggers the sending of the unicast
   Bootstrap messages.
-
-* BSR SPEC Bootstrap: Never send a Bootstrap message back to its BSR
 
 * TESTSUITE: Add "LAN Prune Delay" test.
   (Isn't already tested indirecty?? Search the Latex for "LAN Prune Delay")
@@ -558,10 +557,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: when we start/stop/enable/disable an unit, is it OK or ERROR
   to perform the same action twice once after another?
   This applies to the XRL return result as well.
-
-* BSR SPEC:
-  All Value names must be a single word. E.g:
-  BS Timeout -> BS_Timeout
 
 * SPEC+IMPL: Add descrpiption of the RP behavior when the Border bit of
   PIM Registers is set (see the RFC spec for that), and then implement
@@ -752,30 +747,27 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
   in a complicated way is same result as the XOR that is specified
   in the spec.
 
-* BSR SPEC:
-  If the Elected BSR is a neighbor, and that neighbor expired,
-  do we want to apply the optimization to expire immediately that BSR?
-
 * SPEC+IMPL:
   On startup, am I the DR by default, or wait some period of time
   before self-promote as the DR?
 
 * IMPL+BSR SPEC: Can an intermediate router that forwards a Bootstrap message
-  fragment it to fit the max. size on the outgoing link?
+  fragments it for whatever reason?
 
-* IMPL+PIM SPEC + BSR SPEC: If there is a scope boundary for some group range,
-  it must be a scope boundary (in case of IPv4) for 239.255.0.0/16
-  (the IPv4 Local Scope).
+* IMPL+PIM SPEC + BSR SPEC:
+When we are dealing with scoped group ranges, should the spec say
+that those group ranges must come from scoped addresses:
+e.g., 239.255.0.0/16 (the IPv4 Local Scope), or anything that is not
+the global scope in case of IPv6.
 
 * IMPL: Implement RFC 1256 (Router Solicitation)
 
 * IMPL+BSRSPEC: When the BSR collects all cand. RPs for a prefix, if their
   number is larger than 255, distribute only the best 255 RPs.
 
-* IMPL+BSR SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
+* IMPL: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
-
-* BSR SPEC: Add index
+  (??)
 
 * IMPL+SPEC:
   PIM MIB:
