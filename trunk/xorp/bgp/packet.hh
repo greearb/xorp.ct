@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.7 2003/01/24 19:50:10 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.8 2003/01/26 04:06:17 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -31,6 +31,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#include "exceptions.hh"
 #include "parameter.hh"
 #include "local_data.hh"
 #include "peer_data.hh"
@@ -107,43 +108,6 @@ const size_t MINOPENPACKET = BGP_COMMON_HEADER_LEN + 10;
 const size_t MINUPDATEPACKET = BGP_COMMON_HEADER_LEN + 2 + 2;
 const size_t MINKEEPALIVEPACKET = BGP_COMMON_HEADER_LEN;
 const size_t MINNOTIFICATIONPACKET = BGP_COMMON_HEADER_LEN + 2;
-
-/**
- * This exception is thrown when a bad input message is received.
- */
-class CorruptMessage : public XorpReasonedException {
-public:
-    CorruptMessage(const char* file, size_t line, const string init_why = "")
- 	: XorpReasonedException("CorruptMessage", file, line, init_why),
-	  _error(0), _subcode(0), _data(0), _len(0)
-    {}
-
-    CorruptMessage(const char* file, size_t line,
-		   const string init_why,
-		   const int error, const int subcode)
- 	: XorpReasonedException("CorruptMessage", file, line, init_why),
-	  _error(error), _subcode(subcode), _data(0), _len(0)
-    {}
-
-    CorruptMessage(const char* file, size_t line,
-		   const string init_why,
-		   const int error, const int subcode,
-		   const uint8_t *data, const size_t len)
- 	: XorpReasonedException("CorruptMessage", file, line, init_why),
-	  _error(error), _subcode(subcode), _data(data), _len(len)
-    {}
-
-    const int error() const { return _error; }
-    const int subcode() const { return _subcode; }
-    const uint8_t *data() const { return _data; }
-    const size_t len() const { return _len; }
-private:
-    const int _error;
-    const int _subcode;
-    const uint8_t *_data;
-    const size_t _len;
-};
-
 
 /**
  * The main container for BGP messages (packets) which are sent

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.4 2003/01/17 05:51:07 mjh Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.5 2003/01/24 22:14:45 rizzo Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -25,6 +25,7 @@
 #include "config.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "exceptions.hh"       // for CorruptMessage exception
 #include "aspath.hh"
 #include "md5.h"
 
@@ -32,11 +33,26 @@
  * PathAttribute
  *
  * components of the path attribute. They have variable sizes
- * The actual layout in the packet is the following:
+ * The actual layout on the wire is the following:
  *	[ flags ]       1 byte
  *	[ type  ]       1 byte
  *	[ len   ][....] 1 or 2 bytes
  *	[ data     ]    len bytes
+ *
+ * PathAttribute is the base class for a set of derived class which
+ * represent the various attributes.
+ * A PathAttribute object of a given type can be created explicitly,
+ * using one of the constructors, and then adding components to it;
+ *
+ * (XXX this is still to be implemented)
+ * or it can be created by calling the create() method on a block
+ * of data received from the wire.
+ * In addition to the parsed components (next hops, AS numbers and paths,
+ * and various other attributes), the objects always contain the wire
+ * representation of the object, a pointer to which is accessible with
+ * the data() method, and whose size is size().
+ * Whenever the object is altered, the wire representation needs to be
+ * recomputed.
  */
 
 enum PathAttType {
@@ -51,9 +67,9 @@ enum PathAttType {
     UNKNOWN = 255
 };
 
-//PathAttSortType is only used in sorting a path attribute list - it's
+// PathAttSortType is only used in sorting a path attribute list - it's
 // different from PathAttType because we want to sort the path
-//attribute list on NextHop for less expensive processing when the IGP
+// attribute list on NextHop for less expensive processing when the IGP
 // information for a nexthop changes.
 typedef uint8_t  PathAttSortType;
 
@@ -116,11 +132,11 @@ public:
     virtual string str() const;
     bool operator<(const PathAttribute& him) const;
     bool operator==(const PathAttribute& him) const;
-    bool optional() const		{ return _flags & Optional; }
-    bool transitive() const		{ return _flags & Transitive; }
-    bool partial() const		{ return _flags & Partial; }
-    bool extended() const		{ return _flags & Extended; }
-    bool well_known() const		{ return !optional(); }
+    bool optional() const			{ return _flags & Optional; }
+    bool transitive() const			{ return _flags & Transitive; }
+    bool partial() const			{ return _flags & Partial; }
+    bool extended() const			{ return _flags & Extended; }
+    bool well_known() const			{ return !optional(); }
 
 protected:
     const uint8_t* _data; // data includes the PathAttribute header

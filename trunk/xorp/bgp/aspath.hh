@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.5 2003/01/26 04:06:17 pavlin Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.6 2003/01/26 17:03:18 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -27,6 +27,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/asnum.hh"
 #include "libxorp/exceptions.hh"
+#include "exceptions.hh"
 
 /**
  * This file contains the classes to manipulate AS segments/lists/paths

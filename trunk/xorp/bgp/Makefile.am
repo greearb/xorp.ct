@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.6 2003/01/25 02:10:07 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.7 2003/01/25 08:34:18 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -115,6 +115,7 @@ libbgp_a_SOURCES += aspath.hh
 libbgp_a_SOURCES += attribute_manager.hh
 libbgp_a_SOURCES += bgp_trie.hh
 libbgp_a_SOURCES += dump_iterators.hh
+libbgp_a_SOURCES += exceptions.hh
 libbgp_a_SOURCES += internal_message.hh
 libbgp_a_SOURCES += iptuple.hh
 libbgp_a_SOURCES += local_data.hh
