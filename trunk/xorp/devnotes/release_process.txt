@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.27 2004/07/14 03:11:41 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.28 2004/07/14 07:21:20 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -59,6 +59,27 @@ the login shell is csh or tcsh):
 	MISC: - Include the list below about tasks for everyone
 	      - Include info about when everyone should stop committing
 		code
+
+========================================================================
+0725.	TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
+	      (NOTE: for the time being, do not do it yet, untill we
+	      have a better idea about the particular purpose, if any,
+	      of XORP_MODULE_VERSION).
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+
+========================================================================
+0750.	TASK: Bump-up the release version number
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	COMMANDS:
+ # Edit xorp/README
+ # Edit xorp/RELEASE_NOTES
+ # Edit xorp/VERSION
+ # Edit xorp/configure.in (the second argument in AM_INIT_AUTOMAKE() 
+ cd xorp
+ ./bootstrap
+ cvs commit -m "Prepare XORP for release: bump-up version number"
 
 ========================================================================
 0800.	TASK: Prune old entries in xorp/foo/TODO files
@@ -173,14 +194,6 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 
 ========================================================================
-1700.	TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
-	      (NOTE: for the time being, do not do it yet, untill we
-	      have a better idea about the particular purpose, if any,
-	      of XORP_MODULE_VERSION).
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-
-========================================================================
 1800.	TASK: Update xorp/docs/kdoc/gen-kdoc.sh
 	WHO:  Release manager
 	WHEN: 1 day before the release date
@@ -197,18 +210,6 @@ the login shell is csh or tcsh):
 	      has started. 
 	WHO:  Release manager
 	WHEN: 2 hours before intended release time
-
-========================================================================
-2100.	TASK: Bump-up the release version number
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # Edit xorp/README
- # Edit xorp/RELEASE_NOTES
- # Edit xorp/VERSION
- # Edit xorp/configure.in (the second argument in AM_INIT_AUTOMAKE() 
- ./bootstrap
- cvs commit -m "Prepare XORP for release: bump-up version number"
 
 ========================================================================
 2200.	TASK: Verify that the code compiles and passes all tests.
@@ -285,6 +286,13 @@ the login shell is csh or tcsh):
  cd ..
 
 ========================================================================
+2450.	TASK: Prepare the Live CD ISO image
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # See other/LiveCD/README
+
+========================================================================
 2500.	TASK: Copy the tarballs to the web server
 	WHO:  Release manager
 	WHEN: Release time
@@ -293,6 +301,8 @@ the login shell is csh or tcsh):
  scp -p xorp-$ReleaseVersion.tar.gz www.xorp.org:~/
  scp -p docs-$ReleaseVersion.tar.gz www.xorp.org:~/
  ssh www.xorp.org "(echo $ReleaseVersion > _XORP_VERSION)";
+ unsetenv ReleaseTag
+ unsetenv ReleaseVersion
  # Wait for the previous command to return
  ssh www.xorp.org
  setenv ReleaseVersion `cat _XORP_VERSION`
@@ -322,9 +332,38 @@ the login shell is csh or tcsh):
  # Commands continue from the previous task
  cd ..
  rm current; ln -s $ReleaseVersion current
- exit
- unsetenv ReleaseTag
- unsetenv ReleaseVersion
+
+========================================================================
+2625.	TASK: Calculate the MD5 checksums
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # Commands continue from the previous task
+ cd current
+ md5 LiveCD.iso.gz
+ md5 xorp-$ReleaseVersion.tar.gz
+
+========================================================================
+2650.	TASK: Update the Web pages with the MD5 checksums calculated above
+	WHO:  Release manager
+	WHEN: Release time
+	MISC: - Update www/html_src/livecd.html with the LiveCD MD5
+		checksum.
+	      - Update www/html_src/download.html with the MD5 checksum
+		of the XORP source code tarball.
+
+========================================================================
+2675.	TASK: Regenerate the Web pages in www
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ cd www
+ gmake
+ gmake check
+	NOTE: the last command may fail with huge number of errors.
+	This is probably because of some configuration requirement
+	to run the "nsgmls" verification program. In the near future
+	the problem will be identified and fixed.
 
 ========================================================================
 2700.	TASK: Update the XORP web page on the main Web server www.xorp.org
