@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.4 2003/05/31 06:42:30 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.5 2003/06/01 02:09:58 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -139,49 +139,6 @@ interface mfea_client/0.1 {
 					& source_address:ipv6		\
 					& dest_address:ipv6		\
 					& protocol_message:binary
-	
-	/**
-	 * Add Multicast Routing Information Base information.
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param dest_prefix the destination prefix to add.
-	 * @param next_hop_router_addr the address of the next-hop router
-	 * toward the destination prefix.
-	 * @param next_hop_vif_name the name of the vif toward the
-	 * destination prefix.
-	 * @param next_hop_vif_index the index of the vif toward the
-	 * destination prefix.
-	 * @param metric_preference the metric preference for this entry.
-	 * @param metric the metric for this entry.
-	 */
-	add_mrib4	? xrl_sender_name:txt				\
-			& dest_prefix:ipv4net				\
-			& next_hop_router_addr:ipv4			\
-			& next_hop_vif_name:txt & next_hop_vif_index:u32 \
-			& metric_preference:u32				\
-			& metric:u32
-	add_mrib6	? xrl_sender_name:txt				\
-			& dest_prefix:ipv6net				\
-			& next_hop_router_addr:ipv6			\
-			& next_hop_vif_name:txt & next_hop_vif_index:u32 \
-			& metric_preference:u32				\
-			& metric:u32
-	
-	/**
-	 * Delete Multicast Routing Information Base information.
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param dest_prefix the destination prefix to delete.
-	 */
-	delete_mrib4	? xrl_sender_name:txt				\
-			& dest_prefix:ipv4net
-	delete_mrib6	? xrl_sender_name:txt				\
-			& dest_prefix:ipv6net
-	
-	/**
-	 * Complete a transaction with MRIB information.
-	 *
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 */
-	set_mrib_done	? xrl_sender_name:txt
 	
 	/**
 	 * A signal that a dataflow-related pre-condition is true.

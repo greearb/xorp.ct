@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.37 2004/05/19 19:48:33 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.38 2004/06/10 22:41:32 hodson Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -1057,10 +1057,6 @@ public:
 	return (_switch_to_spt_threshold_bytes);
     }
 
-    bool is_receive_mrib_from_mfea() const {
-	return (_is_receive_mrib_from_mfea);
-    }
-    void set_receive_mrib_from_mfea(bool v) { _is_receive_mrib_from_mfea = v; }
 
     //
     // Statistics-related counters and values
@@ -1261,7 +1257,6 @@ private:
     ConfigParam<uint32_t>	_switch_to_spt_threshold_interval_sec;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_bytes;
 
-    bool			_is_receive_mrib_from_mfea;
 
     //
     // Debug and test-related state

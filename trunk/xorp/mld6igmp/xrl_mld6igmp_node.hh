@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.22 2004/04/29 23:35:44 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.23 2004/06/10 22:41:28 hodson Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -359,63 +359,6 @@ protected:
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
-    //
-    // MRIB-related add/delete/done: not used by MLD or IGMP.
-    //
-    XrlCmdError mfea_client_0_1_add_mrib4(
-	// Input values, 
-	const string&		, // xrl_sender_name, 
-	const IPv4Net&		, // dest_prefix, 
-	const IPv4&		, // next_hop_router_addr, 
-	const string&		, // next_hop_vif_name, 
-	const uint32_t&		, // next_hop_vif_index, 
-	const uint32_t&		, // metric_preference, 
-	const uint32_t&		  // metric
-	) {
-	string msg = "Unexpected add_mrib() message";
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-
-    XrlCmdError mfea_client_0_1_add_mrib6(
-	// Input values, 
-	const string&		, // xrl_sender_name, 
-	const IPv6Net&		, // dest_prefix, 
-	const IPv6&		, // next_hop_router_addr, 
-	const string&		, // next_hop_vif_name, 
-	const uint32_t&		, // next_hop_vif_index, 
-	const uint32_t&		, // metric_preference, 
-	const uint32_t&		  // metric
-	) {
-	string msg = "Unexpected add_mrib() message";
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    XrlCmdError mfea_client_0_1_delete_mrib4(
-	// Input values, 
-	const string&		, // xrl_sender_name, 
-	const IPv4Net&		  // dest_prefix
-	) {
-	string msg = "Unexpected delete_mrib() message";
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    XrlCmdError mfea_client_0_1_delete_mrib6(
-	// Input values, 
-	const string&		, // xrl_sender_name, 
-	const IPv6Net&		  // dest_prefix
-	) {
-	string msg = "Unexpected delete_mrib() message";
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-
-    XrlCmdError mfea_client_0_1_set_mrib_done(
-	// Input values, 
-	const string&		  // xrl_sender_name
-	) {
-	string msg = "Unexpected set_mrib_done() message";
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-
     //
     // A signal that a dataflow-related pre-condition is true:
     // not used by MLD or IGMP.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.21 2004/06/08 12:33:48 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.22 2004/06/10 22:40:55 hodson Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -34,7 +34,6 @@
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
-#include "mrt/mrib_table.hh"
 #include "mrt/mifset.hh"
 #include "mfea_dataflow.hh"
 #include "mfea_mrouter.hh"
@@ -563,134 +562,6 @@ public:
 						    xorp_module_id module_id);
     
     /**
-     * Add a protocol to receive MRIB messages.
-     * 
-     * Add a protocol to the set of protocols that are interested in
-     * receiving MRIB (see @ref Mrib) messages.
-     * 
-     * The MRIB (see @ref Mrib) messages contain (unicast) routing
-     * information that can be used for obtaining the RPF (Reverse-Path
-     * Forwarding) information.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to add.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		add_allow_mrib_messages(const string& module_instance_name,
-					xorp_module_id module_id);
-    
-    /**
-     * Delete a protocol from receiving MRIB messages.
-     * 
-     * Delete a protocol to the set of protocols that are interested in
-     * receiving MRIB (see @ref Mrib) messages.
-     * 
-     * The MRIB (see @ref Mrib) messages contain (unicast) routing
-     * information that can be used for obtaining the RPF (Reverse-Path
-     * Forwarding) information.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to delete.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		delete_allow_mrib_messages(const string& module_instance_name,
-					   xorp_module_id module_id);
-    
-    /**
-     * Add a @ref Mrib entry to user-level protocols.
-     * 
-     * Add a @ref Mrib entry to all user-level protocols that are
-     * interested in receiving MRIB messages.
-     * 
-     * @param mrib the @ref Mrib entry to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		send_add_mrib(const Mrib& mrib);
-    
-    /**
-     * Delete a @ref Mrib entry from user-level protocols.
-     * 
-     * Delete a @ref Mrib entry from all user-level protocols that are
-     * interested in receiving MRIB messages.
-     * 
-     * @param mrib the @ref Mrib entry to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		send_delete_mrib(const Mrib& mrib);
-    
-    /**
-     * Complete a transaction of add/delete @ref Mrib entries.
-     * 
-     * Complete a transaction of add/delete @ref Mrib entries with all
-     * user-level protocols that are interested in receiving MRIB messages.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		send_set_mrib_done();
-    
-    /**
-     * Add a @ref Mrib entry to an user-level protocol.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @param dst_module_instance_name the module instance name of the
-     * module-recepient of the message.
-     * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
-     * module-recepient of the message.
-     * 
-     * @param mrib the @ref Mrib entry to add.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int	send_add_mrib(const string& dst_module_instance_name,
-			      xorp_module_id dst_module_id,
-			      const Mrib& mrib) = 0;
-
-    /**
-     * Delete a @ref Mrib entry from an user-level protocol.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @param dst_module_instance_name the module instance name of the
-     * module-recepient of the message.
-     * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
-     * module-recepient of the message.
-     * 
-     * @param mrib the @ref Mrib entry to delete.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int	send_delete_mrib(const string& dst_module_instance_name,
-				 xorp_module_id dst_module_id,
-				 const Mrib& mrib) = 0;
-
-    /**
-     * Signal completion of a transaction of add/delete @ref Mrib entries
-     * to an user-level protocol.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @param dst_module_instance_name the module instance name of the
-     * module-recepient of the message.
-     * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
-     * module-recepient of the message.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int	send_set_mrib_done(const string& dst_module_instance_name,
-				   xorp_module_id dst_module_id) = 0;
-    
-    /**
      * Receive a protocol message from an user-level protocol.
      * 
      * @param src_module_instance_name the module instance name of the
@@ -1184,78 +1055,6 @@ public:
     int		get_vif_count(uint16_t vif_index, VifCount& vif_count);
     
     /**
-     * Get a reference to the local copy of the MRIB table (@ref MribTable).
-     * 
-     * @return a reference to the local copy of the MRIB table
-     * (@ref MribTable).
-     */
-    MribTable&	mrib_table() { return (_mrib_table); }
-    
-    /**
-     * Get a reference to the default metric preference for the MRIB table.
-     * 
-     * Note that this is a configurable parameter.
-     * 
-     * @return a reference to the default metric preference for the MRIB table.
-     */
-    ConfigParam<uint32_t>& mrib_table_default_metric_preference() {
-	return (_mrib_table_default_metric_preference);
-    }
-    
-    /**
-     * Set the default metric preference for the MRIB table.
-     * 
-     * @param metric_preference the new value for the default metric
-     * preference.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_mrib_table_default_metric_preference(uint32_t metric_preference);
-    
-    /**
-     * Reset the default metric preference for the MRIB table to its original
-     * value.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int reset_mrib_table_default_metric_preference();
-    
-    /**
-     * Get a reference to the default metric for the MRIB table.
-     * 
-     * Note that this is a configurable parameter.
-     * 
-     * @return a reference to the default metric for the MRIB table.
-     */
-    ConfigParam<uint32_t>& mrib_table_default_metric() {
-	return (_mrib_table_default_metric);
-    }
-
-    /**
-     * Set the default metric for the MRIB table.
-     * 
-     * @param metric the new value for the default metric.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_mrib_table_default_metric(uint32_t metric);
-    
-    /**
-     * Reset the default metric for the MRIB table to its original value.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int reset_mrib_table_default_metric();
-    
-    /**
-     * Get a copy of the kernel MRIB (@ref Mrib) information.
-     * 
-     * @param mrib_table a reference to the routing table vector composed
-     * of @ref Mrib elements.
-     * @return The number of entries in @ref mrib_table, or XORP_ERROR
-     * if there was an error.
-     */
-    int		get_mrib_table(vector<Mrib* >& mrib_table);
-    
-    /**
      * Get a reference to the mrouter (@ref MfeaMrouter).
      * 
      * @return a reference to the mrouter (@ref MfeaMrouter).
@@ -1372,31 +1171,20 @@ private:
     virtual bool ifmgr_shutdown() = 0;
 
 
-    void mrib_table_read_timer_timeout();
     int add_pim_register_vif();
     
     // Private state
     MfeaMrouter		_mfea_mrouter;	// The mrouter state
     vector<ProtoComm *>	_proto_comms;	// The set of active ProtoComm entries
     
-    MribTable	_mrib_table;		// The MRIB table (XXX: optional)
-#define MRIB_TABLE_DEFAULT_METRIC_PREFERENCE	100
-#define MRIB_TABLE_DEFAULT_METRIC		100
-    ConfigParam<uint32_t> _mrib_table_default_metric_preference;
-    ConfigParam<uint32_t> _mrib_table_default_metric;
-#define MRIB_TABLE_READ_PERIOD_SEC 10
-#define MRIB_TABLE_READ_PERIOD_USEC 0
-    XorpTimer	_mrib_table_read_timer;	// Timer to (re)read the MRIB table
     MfeaDft	_mfea_dft;		// The dataflow monitoring table
     
     //
     // The state to register:
     //  - protocol instances
     //  - protocol instances interested in receiving kernel signal messages
-    //  - protocol instances interested in receiving MRIB messages
     ProtoRegister	_proto_register;
     ProtoRegister	_kernel_signal_messages_register;
-    ProtoRegister	_mrib_messages_register;
 
     //
     // A local copy with the interface state information

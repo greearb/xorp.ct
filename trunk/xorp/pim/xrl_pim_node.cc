@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.58 2004/08/03 18:09:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.59 2005/01/25 00:52:33 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -51,7 +51,6 @@ XrlPimNode::XrlPimNode(int family,
       _mld6igmp_target(mld6igmp_target),
       _is_mfea_add_protocol_registered(false),
       _is_mfea_allow_signal_messages_registered(false),
-      _is_mfea_allow_mrib_messages_registered(false),
       _is_rib_client_registered(false)
 {
 
@@ -201,11 +200,6 @@ XrlPimNode::mfea_register_startup()
     if (! _is_mfea_allow_signal_messages_registered)
 	PimNode::incr_startup_requests_n();
 
-    if (! _is_mfea_allow_mrib_messages_registered) {
-	if (PimNode::is_receive_mrib_from_mfea())
-	    PimNode::incr_startup_requests_n();
-    }
-
     send_mfea_registration();
 }
 
@@ -221,12 +215,6 @@ XrlPimNode::mfea_register_shutdown()
 void
 XrlPimNode::rib_register_startup()
 {
-    if (PimNode::is_receive_mrib_from_mfea()) {
-	// XXX: we don't really need to register with the RIB
-	PimNode::update_status();
-	return;
-    }
-
     if (! _is_rib_client_registered)
 	PimNode::incr_startup_requests_n();
 
@@ -236,12 +224,6 @@ XrlPimNode::rib_register_startup()
 void
 XrlPimNode::rib_register_shutdown()
 {
-    if (PimNode::is_receive_mrib_from_mfea()) {
-	// XXX: we don't really need to de-register with the RIB
-	PimNode::update_status();
-	return;
-    }
-
     if (_is_rib_client_registered)
 	PimNode::incr_shutdown_requests_n();
 
@@ -325,37 +307,6 @@ XrlPimNode::send_mfea_registration()
 	    callback(this, &XrlPimNode::send_mfea_registration));
 	return;
     }
-
-    //
-    // Enable receiving of MRIB information
-    //
-    if ((! _is_mfea_allow_mrib_messages_registered)
-	&& PimNode::is_receive_mrib_from_mfea()) {
-	success = _xrl_mfea_client.send_allow_mrib_messages(
-	    _mfea_target.c_str(),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    true,			// XXX: enable
-	    callback(this,
-		     &XrlPimNode::mfea_client_send_allow_mrib_messages_cb));
-	if (success)
-	    return;
-    }
-
-    if (! success) {
-	//
-	// If an error, then start a timer to try again
-	// TODO: XXX: the timer value is hardcoded here!!
-	//
-	XLOG_ERROR("Failed to enable the receiving of MRIB messages "
-		   "with the MFEA. "
-		   "Will try again.");
-	_mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlPimNode::send_mfea_registration));
-	return;
-    }
 }
 
 void
@@ -421,37 +372,6 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
 	callback(this, &XrlPimNode::send_mfea_registration));
 }
 
-void
-XrlPimNode::mfea_client_send_allow_mrib_messages_cb(const XrlError& xrl_error)
-{
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
-	_is_mfea_allow_mrib_messages_registered = true;
-	send_mfea_registration();
-	PimNode::decr_startup_requests_n();
-	return;
-    }
-
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
-	XLOG_FATAL("Cannot allow MRIB messages with the MFEA: %s",
-		   xrl_error.str().c_str());
-    }
-
-    //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    if (_mfea_registration_timer.scheduled())
-	return;
-    _mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlPimNode::send_mfea_registration));
-}
-
 //
 // De-register with the MFEA
 //
@@ -501,7 +421,6 @@ XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_add_protocol_registered = false;
 	_is_mfea_allow_signal_messages_registered = false;
-	_is_mfea_allow_mrib_messages_registered = false;
 	PimNode::decr_shutdown_requests_n();
 	return;
     }
@@ -522,8 +441,7 @@ XrlPimNode::send_rib_registration()
 {
     bool success = true;
 
-    if ((! _is_rib_client_registered)
-	&& (!  PimNode::is_receive_mrib_from_mfea())) {
+    if (! _is_rib_client_registered) {
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_rib_client.send_redist_transaction_enable4(
 		_rib_target.c_str(),
@@ -2270,162 +2188,6 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     //
     // Success
     //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_add_mrib4(
-    // Input values, 
-    const string&	, // xrl_sender_name, 
-    const IPv4Net&	dest_prefix, 
-    const IPv4&		next_hop_router_addr, 
-    const string&	next_hop_vif_name, 
-    const uint32_t&	next_hop_vif_index, 
-    const uint32_t&	metric_preference, 
-    const uint32_t&	metric)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Create the Mrib entry
-    //
-    Mrib mrib = Mrib(IPvXNet(dest_prefix));
-    mrib.set_next_hop_router_addr(IPvX(next_hop_router_addr));
-    mrib.set_next_hop_vif_index(next_hop_vif_index);
-    mrib.set_metric_preference(metric_preference);
-    mrib.set_metric(metric);
-    
-    //
-    // Add the Mrib to the list of pending transactions as an 'insert()' entry
-    //
-    PimNode::pim_mrib_table().add_pending_insert(0, mrib, next_hop_vif_name);
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_add_mrib6(
-    // Input values, 
-    const string&	, // xrl_sender_name, 
-    const IPv6Net&	dest_prefix, 
-    const IPv6&		next_hop_router_addr, 
-    const string&	next_hop_vif_name, 
-    const uint32_t&	next_hop_vif_index, 
-    const uint32_t&	metric_preference, 
-    const uint32_t&	metric)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Create the Mrib entry
-    //
-    Mrib mrib = Mrib(IPvXNet(dest_prefix));
-    mrib.set_next_hop_router_addr(IPvX(next_hop_router_addr));
-    mrib.set_next_hop_vif_index(next_hop_vif_index);
-    mrib.set_metric_preference(metric_preference);
-    mrib.set_metric(metric);
-    
-    //
-    // Add the Mrib to the list of pending transactions as an 'insert()' entry
-    //
-    PimNode::pim_mrib_table().add_pending_insert(0, mrib, next_hop_vif_name);
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_delete_mrib4(
-    // Input values, 
-    const string&	, // xrl_sender_name, 
-    const IPv4Net&	dest_prefix)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Create the Mrib entry
-    //
-    Mrib mrib = Mrib(IPvXNet(dest_prefix));
-    
-    //
-    // Add the Mrib to the list of pending transactions as an 'remove()' entry
-    //
-    PimNode::pim_mrib_table().add_pending_remove(0, mrib);
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_delete_mrib6(
-    // Input values, 
-    const string&	, // xrl_sender_name, 
-    const IPv6Net&	dest_prefix)
-{
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Create the Mrib entry
-    //
-    Mrib mrib = Mrib(IPvXNet(dest_prefix));
-    
-    //
-    // Add the Mrib to the list of pending transactions as an 'remove()' entry
-    //
-    PimNode::pim_mrib_table().add_pending_remove(0, mrib);
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_set_mrib_done(
-    // Input values, 
-    const string&	// xrl_sender_name, 
-    )
-{
-    //
-    // Commit all pending Mrib transactions
-    //
-    PimNode::pim_mrib_table().commit_pending_transactions(0);
-    
     return XrlCmdError::OKAY();
 }
 

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.12 2004/06/23 01:43:34 pavlin Exp $
+% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.13 2004/07/09 04:41:44 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -114,9 +114,6 @@ Acronyms used in this document:
   \item {\bf MLD/IGMP}: {\bf M}ulticast {\bf L}istener {\bf D}iscovery/{\bf
   I}nternet {\bf G}roup {\bf M}anagement {\bf P}rotocol
 
-  \item {\bf MRIB}: {\bf M}ulticast {\bf R}outing {\bf I}nformation
-  {\bf B}ase
-
   \item {\bf PIM-SM}: {\bf P}rotocol {\bf I}ndependent {\bf M}ulticast--{\bf
   S}parse {\bf M}ode
 
@@ -153,8 +150,6 @@ the same name. The main components are briefly described below:
 
   \item {\bf MfeaDft:} table with dataflow-related information for
   estimating the bandwidth per dataflow.
-
-  \item {\bf MribTable:} the table with MRIB information.
 
   \item {\bf ProtoComm:} per-protocol UNIX-specific unit for
   communication with the underlying system.
@@ -237,11 +232,6 @@ modules such as PIM and MLD/IGMP:
   \item Interface to add/delete MFC entries, \ie entries to the
   multicast forwarding engine.
 
-  \item Interface to send the MRIB information to the interested
-  multicast-related modules. Note that as of July 2004 this interface is
-  deprecated, and the multicast modules interested in
-  the MRIB should obtain this information from the RIB module instead.
-
 \end{itemize}
 
 MfeaNode itself does not implement the mechanisms to communicate with
@@ -250,8 +240,9 @@ to/from the PIM module). Those mechanisms are outside the scope of
 MfeaNode, and must be implemented separately.
 
 MfeaNode contains several pure virtual methods (\eg
-\verb=send_add_mrib()= is used to add MRIB entry to a
-multicast-related module that is interested in tracking the MRIB) 
+\verb=dataflow_signal_send()= is used to send multicast dataflow-related
+signals to a multicast-related module that is interested in tracking
+dataflow-related conditions)
 that must be implemented by a class that inherits MfeaNode.
 For example, XrlMfeaNode is a class that uses MfeaNode as a base class;
 XrlMfeaNode uses XRL-based communication mechanisms between MfeaNode
@@ -369,25 +360,6 @@ pre-defined condition is true (until the entry is explicitly deleted by
 the module that installed it).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{MribTable Description}
-
-{\bf Note: As of July 2004 obtaning the MRIB information via the MFEA
-is deprecated. In the future the MRIB support within the MFEA will
-be removed completely.}
-
-MribTable is the table with the MRIB information. Whenever this
-information changes, the change is propagated to all interested
-parties that have registered interest in it. For example, in
-case of PIM-SM the MRIB is used to compute the Reverse-Path Forwarding
-information toward the RPs or the senders. This information contains the
-next-hop router address and the interface toward that router, the
-routing metric and the metric preference.
-
-The MRIB information is obtained by periodically reading the underlying
-unicast forwarding table by directly calling the appropriate method in the
-FEA.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{ProtoComm Description}
 
 ProtoComm is a per-protocol unit for communication with the
@@ -404,8 +376,7 @@ it did not exist).
 
 Each ProtoComm entry is also used to keep information about various
 protocol preferences: \eg whether a protocol module instance is interested in
-receiving various kernel upcall signals, whether it needs to receive
-MRIB information, etc.
+receiving various kernel upcall signals, etc.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{MfeaMrouter Description}
@@ -458,6 +429,9 @@ operation when MfeaNode is stopped.
   \item November 6, 2003: Bump-up the version to 0.5, and the date.
 
   \item July 8, 2004: Updated to match XORP version 1.0 release code.
+
+  \item January 27, 2005: Remove MRIB-related text, because the MFEA
+  does not deal with the MRIB information anymore.
 
 \end{itemize}
 

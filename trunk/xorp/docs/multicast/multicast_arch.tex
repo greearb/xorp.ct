@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.9 2004/06/23 02:40:26 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.10 2004/07/09 04:42:24 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -275,9 +275,6 @@ PIM-SM needs to interact with the MFEA module for the following:
 
   \item Obtain information about existing interfaces on a router.
 
-  \item Note that as of (July 2004), the MRIB information is
-  not obtained anymore from the MFEA, but from the RIB.
-
 \end{itemize}
 
 On startup, the PIM module registers with the MFEA. As part of this
@@ -356,9 +353,6 @@ the handling of such messages is not implemented yet.
 The PIM module needs to interact with the RIB module to obtain the MRIB
 information, and to keep track if there is any change.
 
-Note that previously the MRIB information was received from the MFEA.
-As of July 2004 the MRIB is received from the RIB instead.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the FEA and FIB2MRIB modules}
 \label{sec:fea-to-fib2mrib-interaction}
@@ -421,6 +415,9 @@ as URIB or MRIB entries to the RIB module.
 
   \item July 8, 2004: Status updated; added information about the FIB2MRIB
   and StaticRoutes modules. Bump-up the version to 1.0, and the date.
+
+  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
+  does not deal with the MRIB information anymore.
 
 \end{itemize}
 

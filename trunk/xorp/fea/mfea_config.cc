@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.7 2004/05/20 20:52:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.8 2004/06/10 22:40:54 hodson Exp $"
 
 
 //
@@ -399,38 +399,6 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-MfeaNode::set_mrib_table_default_metric_preference(uint32_t metric_preference)
-{
-    mrib_table_default_metric_preference().set(metric_preference);
-    
-    return (XORP_OK);
-}
-
-int
-MfeaNode::reset_mrib_table_default_metric_preference()
-{
-    mrib_table_default_metric_preference().reset();
-    
-    return (XORP_OK);
-}
-
-int
-MfeaNode::set_mrib_table_default_metric(uint32_t metric)
-{
-    mrib_table_default_metric().set(metric);
-    
-    return (XORP_OK);
-}
-
-int
-MfeaNode::reset_mrib_table_default_metric()
-{
-    mrib_table_default_metric().reset();
     
     return (XORP_OK);
 }

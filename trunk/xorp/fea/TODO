@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.26 2004/12/15 18:46:16 bms Exp $
+# $XORP: xorp/fea/TODO,v 1.27 2004/12/15 18:48:43 bms Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -67,9 +67,6 @@
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
 
-* Remove the MRIB-support from the MFEA, because all interested parties
-  should use the RIB itself.
-
 * Try to replicate the following error message during shutdown:
 [ 2004/06/07 09:38:21  ERROR xorp_fea:20735 MFEA +1601 mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (18.18.0.1 224.0.1.1)) failed: Bad file descriptor
 
@@ -90,7 +87,6 @@
 
 * Implement following methods and their friends:
   - set_allow_kernel_signal_messages(bool v)
-  - set_allow_mrib_messages(bool v)
 
 * Set the pif_index for MfeaVif
 
@@ -98,9 +94,6 @@
   somewhere else, and it should be consistent with
   BW_UPCALL_THRESHOLD_INTERVAL_MIN_SEC and
   BW_UPCALL_THRESHOLD_INTERVAL_MIN_USEC
-
-* Rename MfeaNode::get_mrib_table() and UnixComm::get_mrib_table() and
-  friends (get_mrib_table_*) to get_mrib_entries
 
 * Rename protocol_name and protocol_id in the send protocol messages
   to src_module_instance_name and src_module_id (or sth. like that).

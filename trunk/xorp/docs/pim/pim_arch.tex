@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.10 2004/06/23 02:48:52 pavlin Exp $
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.11 2004/07/09 04:42:24 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -577,8 +577,7 @@ class Mrib {
 
 
 The MRIB information is obtained from the RIB
-module~\footnote{Note that before July 2004 the information was
-received from the MFEA instead.}; if the RIB changes, the
+module; if the RIB changes, the
 PimMribTable is updated as well. Examples when the MRIB information
 may change are: the unicast routing changes the next-hop router address
 toward a destination, local configuration changes some of the routing
@@ -704,6 +703,9 @@ following units:
 
   \item July 8, 2004: Updated to match release 1.0. Bump-up the version to
   1.0, and the date.
+
+  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
+  does not deal with the MRIB information anymore.
 
 \end{itemize}
 

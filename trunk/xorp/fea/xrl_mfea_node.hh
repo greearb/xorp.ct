@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.15 2004/05/20 20:52:21 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.16 2004/06/10 22:40:58 hodson Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -263,27 +263,6 @@ protected:
      *  signal messages by protocol
      */
     XrlCmdError mfea_0_1_allow_signal_messages(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const bool&	is_allow);
-    
-    /**
-     *  Enable/disable the receiving of Multicast Routing Information Base
-     *  information.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol to add.
-     *  
-     *  @param protocol_id the ID of the protocol to add (both sides must agree
-     *  on the particular values).
-     *  
-     *  @param is_allow if true, enable the receiving of MRIB information
-     *  messages by protocol 'protocol_name'.
-     */
-    XrlCmdError mfea_0_1_allow_mrib_messages(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
@@ -623,33 +602,6 @@ protected:
 	// Input values,
 	const bool&	enable);
 
-    /**
-     *  Configure MFEA MRIB-related parameters. The 'set_foo' XRLs set the
-     *  particular values. The 'reset_foo' XRLs reset the metrics to their
-     *  default values.
-     *  
-     *  @param metric_preference the MRIB metric preference.
-     */
-    XrlCmdError mfea_0_1_get_mrib_table_default_metric_preference(
-	// Output values, 
-	uint32_t&	metric_preference);
-
-    XrlCmdError mfea_0_1_set_mrib_table_default_metric_preference(
-	// Input values, 
-	const uint32_t&	metric_preference);
-
-    XrlCmdError mfea_0_1_reset_mrib_table_default_metric_preference();
-
-    XrlCmdError mfea_0_1_get_mrib_table_default_metric(
-	// Output values, 
-	uint32_t&	metric);
-
-    XrlCmdError mfea_0_1_set_mrib_table_default_metric(
-	// Input values, 
-	const uint32_t&	metric);
-
-    XrlCmdError mfea_0_1_reset_mrib_table_default_metric();
-
 private:
 
     bool ifmgr_startup();
@@ -661,20 +613,6 @@ private:
     //
     // Protocol node methods
     //
-
-    //
-    // Methods for sending MRIB information
-    //
-    int	send_add_mrib(const string& dst_module_instance_name,
-		      xorp_module_id dst_module_id,
-		      const Mrib& mrib);
-    int	send_delete_mrib(const string& dst_module_instance_name,
-			 xorp_module_id dst_module_id,
-			 const Mrib& mrib);
-    int	send_set_mrib_done(const string& dst_module_instance_name,
-			   xorp_module_id dst_module_id);
-    void send_add_delete_mrib();
-    void mfea_client_client_send_add_delete_mrib_cb(const XrlError& xrl_error);
 
     //
     // XXX: mfea_client_client_send_recv_kernel_signal_message_cb() in fact
@@ -860,42 +798,6 @@ private:
     
     int family() const { return (MfeaNode::family()); }
 
-    /**
-     * Class for handling the queue of sending Add/Delete MRIB requests
-     */
-    class SendAddDeleteMrib {
-    public:
-	SendAddDeleteMrib(const string& dst_module_instance_name,
-			  xorp_module_id dst_module_id,
-			  const Mrib& mrib,
-			  bool is_add)
-	    : _dst_module_instance_name(dst_module_instance_name),
-	      _dst_module_id(dst_module_id),
-	      _mrib(mrib),
-	      _is_add(is_add),
-	      _is_done(false) {}
-	SendAddDeleteMrib(const string& dst_module_instance_name,
-			  xorp_module_id dst_module_id,
-			  int family)
-	    : _dst_module_instance_name(dst_module_instance_name),
-	      _dst_module_id(dst_module_id),
-	      _mrib(family),
-	      _is_add(false),
-	      _is_done(true) {}
-	const string& dst_module_instance_name() const { return _dst_module_instance_name; }
-	xorp_module_id dst_module_id() const { return _dst_module_id; }
-	const Mrib& mrib() const { return _mrib; }
-	bool is_add() const { return _is_add; }
-	bool is_done() const { return _is_done; }
-
-    private:
-	string		_dst_module_instance_name;
-	xorp_module_id	_dst_module_id;
-	Mrib		_mrib;
-	bool		_is_add;
-	bool		_is_done;
-    };
-
     const string		_class_name;
     const string		_instance_name;
     const string		_fea_target;
@@ -904,9 +806,6 @@ private:
 
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
-
-    list<SendAddDeleteMrib>	_send_add_delete_mrib_queue;
-    XorpTimer			_send_add_delete_mrib_queue_timer;
 };
 
 #endif // __FEA_XRL_MFEA_NODE_HH__

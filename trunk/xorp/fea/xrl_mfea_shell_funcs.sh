@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.8 2003/12/20 01:43:34 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.9 2004/03/05 13:59:43 pavlin Exp $
 #
 
 #
@@ -201,84 +201,4 @@ mfea_log_trace_all()
     XRL="finder://$MFEA_TARGET/mfea/0.1/log_trace_all"
     XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mfea_get_mrib_table_default_metric_preference()
-{
-    if [ $# -lt 0 ] ; then
-	echo "Usage: mfea_get_mrib_table_default_metric_preference"
-	exit 1
-    fi
-    
-    echo "mfea_get_mrib_table_default_metric_preference" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/get_mrib_table_default_metric_preference"
-    XRL_ARGS=""
-    call_xrl_wrapper -p metric_preference:u32 $XRL$XRL_ARGS
-}
-
-mfea_set_mrib_table_default_metric_preference()
-{
-    if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_set_mrib_table_default_metric_preference <metric_preference:u32>"
-	exit 1
-    fi
-    metric_preference=$1
-    
-    echo "mfea_set_mrib_table_default_metric_preference" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/set_mrib_table_default_metric_preference"
-    XRL_ARGS="?metric_preference:u32=$metric_preference"
-    call_xrl_wrapper $XRL$XRL_ARGS
-}
-
-mfea_reset_mrib_table_default_metric_preference()
-{
-    if [ $# -lt 0 ] ; then
-	echo "Usage: mfea_reset_mrib_table_default_metric_preference"
-	exit 1
-    fi
-    
-    echo "mfea_reset_mrib_table_default_metric_preference" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/reset_mrib_table_default_metric_preference"
-    XRL_ARGS=""
-    call_xrl_wrapper $XRL$XRL_ARGS
-}
-
-mfea_get_mrib_table_default_metric()
-{
-    if [ $# -lt 0 ] ; then
-	echo "Usage: mfea_get_mrib_table_default_metric"
-	exit 1
-    fi
-    
-    echo "mfea_get_mrib_table_default_metric" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/get_mrib_table_default_metric"
-    XRL_ARGS=""
-    call_xrl_wrapper -p metric:u32 $XRL$XRL_ARGS
-}
-
-mfea_set_mrib_table_default_metric()
-{
-    if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_set_mrib_table_default_metric <metric:u32>"
-	exit 1
-    fi
-    metric=$1
-    
-    echo "mfea_set_mrib_table_default_metric" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/set_mrib_table_default_metric"
-    XRL_ARGS="?metric:u32=$metric"
-    call_xrl_wrapper $XRL$XRL_ARGS
-}
-
-mfea_reset_mrib_table_default_metric()
-{
-    if [ $# -lt 0 ] ; then
-	echo "Usage: mfea_reset_mrib_table_default_metric"
-	exit 1
-    fi
-    
-    echo "mfea_reset_mrib_table_default_metric" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/reset_mrib_table_default_metric"
-    XRL_ARGS=""
-    call_xrl_wrapper $XRL$XRL_ARGS
 }

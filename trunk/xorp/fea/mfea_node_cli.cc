@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.9 2004/06/10 22:40:55 hodson Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.10 2004/09/23 18:40:15 pavlin Exp $"
 
 
 //
@@ -121,10 +121,6 @@ MfeaNodeCli::add_all_cli_commands()
 	add_cli_command("show mfea interface address",
 			"Display information about addresses of MFEA IPv4 interfaces",
 			callback(this, &MfeaNodeCli::cli_show_mfea_interface_address));
-
-	add_cli_command("show mfea mrib",
-			"Display MRIB IPv4 information inside MFEA",
-			callback(this, &MfeaNodeCli::cli_show_mfea_mrib));
     }
 
     if (mfea_node().is_ipv6()) {
@@ -142,10 +138,6 @@ MfeaNodeCli::add_all_cli_commands()
 	add_cli_command("show mfea6 interface address",
 			"Display information about addresses of MFEA IPv6 interfaces",
 			callback(this, &MfeaNodeCli::cli_show_mfea_interface_address));
-
-	add_cli_command("show mfea6 mrib",
-			"Display MRIB IPv6 information inside MFEA",
-			callback(this, &MfeaNodeCli::cli_show_mfea_mrib));
     }
 
     return (XORP_OK);
@@ -441,82 +433,6 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 			       cstring((*iter).broadcast_addr()),
 			       cstring((*iter).peer_addr())));
 	}
-    }
-    
-    return (XORP_OK);
-}
-
-//
-// CLI COMMAND: "show mfea mrib [dest-address]"
-// CLI COMMAND: "show mfea6 mrib [dest-address]"
-//
-// Display MRIB information inside MFEA.
-//
-int
-MfeaNodeCli::cli_show_mfea_mrib(const vector<string>& argv)
-{
-    string dest_address_name;
-    IPvX dest_address(family());
-    
-    // Check the optional argument
-    if (argv.size()) {
-	dest_address_name = argv[0];
-	try {
-	    dest_address = IPvX(dest_address_name.c_str());
-	} catch (InvalidString) {
-	    cli_print(c_format("ERROR: Invalid destination address: %s\n",
-			       dest_address_name.c_str()));
-	    return (XORP_ERROR);
-	}
-    }
-    
-    // Test if we should print a single entry only
-    if (dest_address_name.size()) {
-	Mrib *mrib = mfea_node().mrib_table().find(dest_address);
-	if (mrib == NULL) {
-	    cli_print(c_format("No matching MRIB entry for %s\n",
-			       dest_address_name.c_str()));
-	    return (XORP_ERROR);
-	}
-	cli_print(c_format("%-18s %-15s %-7s %-8s %10s %6s\n",
-			   "DestPrefix", "NextHopRouter", "VifName", 
-			   "VifIndex", "MetricPref", "Metric"));
-	string vif_name = "UNKNOWN";
-	Vif *vif = mfea_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
-	if (vif != NULL)
-	    vif_name = vif->name();
-	cli_print(c_format("%-18s %-15s %-7s %-8d %10d %6d\n",
-			   cstring(mrib->dest_prefix()),
-			   cstring(mrib->next_hop_router_addr()),
-			   vif_name.c_str(),
-			   mrib->next_hop_vif_index(),
-			   mrib->metric_preference(),
-			   mrib->metric()));
-	return (XORP_OK);
-    }
-    
-    cli_print(c_format("%-18s %-15s %-7s %-8s %10s %6s\n",
-		       "DestPrefix", "NextHopRouter", "VifName", "VifIndex",
-		       "MetricPref", "Metric"));
-    MribTable::iterator iter;
-    for (iter = mfea_node().mrib_table().begin();
-	 iter != mfea_node().mrib_table().end();
-	 ++iter) {
-	Mrib *mrib = *iter;
-	if (mrib == NULL)
-	    continue;
-	
-	string vif_name = "UNKNOWN";
-	Vif *vif = mfea_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
-	if (vif != NULL)
-	    vif_name = vif->name();
-	cli_print(c_format("%-18s %-15s %-7s %-8d %10d %6d\n",
-			   cstring(mrib->dest_prefix()),
-			   cstring(mrib->next_hop_router_addr()),
-			   vif_name.c_str(),
-			   mrib->next_hop_vif_index(),
-			   mrib->metric_preference(),
-			   mrib->metric()));
     }
     
     return (XORP_OK);

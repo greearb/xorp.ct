@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.53 2004/08/24 19:02:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.54 2004/12/17 20:30:46 pavlin Exp $"
 
 
 //
@@ -74,7 +74,6 @@ PimNode::PimNode(int family, xorp_module_id module_id,
       _is_switch_to_spt_enabled(false),	// XXX: disabled by defailt
       _switch_to_spt_threshold_interval_sec(0),
       _switch_to_spt_threshold_bytes(0),
-      _is_receive_mrib_from_mfea(false),
       _is_log_trace(false),
       _test_jp_header(*this)
 {

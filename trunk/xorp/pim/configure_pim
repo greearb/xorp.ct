@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.35 2004/08/25 06:23:52 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.36 2004/09/29 08:29:40 pavlin Exp $
 #
 
 #
@@ -226,12 +226,6 @@ CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
 CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
 
 #
-# MRIB default metric preference and metric
-#
-#MRIB_TABLE_DEFAULT_METRIC_PREFERENCE=100
-#MRIB_TABLE_DEFAULT_METRIC=100
-
-#
 # The PIM shortest-path tree switch bandwidth threshold
 #
 # The "interval" (in seconds) and the "bytes" values specify the minimum
@@ -329,12 +323,6 @@ mfea_start_cli
 #
 # Enable and start MFEA
 #
-if [ "${MRIB_TABLE_DEFAULT_METRIC_PREFERENCE}" != "" ] ; then
-	mfea_set_mrib_table_default_metric_preference ${MRIB_TABLE_DEFAULT_METRIC_PREFERENCE}
-fi
-if [ "${MRIB_TABLE_DEFAULT_METRIC}" != "" ] ; then
-	mfea_set_mrib_table_default_metric ${MRIB_TABLE_DEFAULT_METRIC}
-fi
 mfea_enable_mfea true
 mfea_start_mfea
 

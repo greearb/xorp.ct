@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.44 2004/08/03 05:21:26 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.45 2004/08/03 18:09:14 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -360,72 +360,6 @@ protected:
 	const IPv6&	source_address, 
 	const IPv6&	dest_address, 
 	const vector<uint8_t>&	protocol_message);
-    
-    /**
-     *  Add Multicast Routing Information Base information.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param dest_prefix the destination prefix to add.
-     *  
-     *  @param next_hop_router_addr the address of the next-hop router toward
-     *  the destination prefix.
-     *  
-     *  @param next_hop_vif_name the name of the vif toward the destination
-     *  prefix.
-     *  
-     *  @param next_hop_vif_index the index of the vif toward the destination
-     *  prefix.
-     *  
-     *  @param metric_preference the metric preference for this entry.
-     *  
-     *  @param metric the metric for this entry.
-     */
-    XrlCmdError mfea_client_0_1_add_mrib4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv4Net&	dest_prefix, 
-	const IPv4&	next_hop_router_addr, 
-	const string&	next_hop_vif_name, 
-	const uint32_t&	next_hop_vif_index, 
-	const uint32_t&	metric_preference, 
-	const uint32_t&	metric);
-    
-    XrlCmdError mfea_client_0_1_add_mrib6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6Net&	dest_prefix, 
-	const IPv6&	next_hop_router_addr, 
-	const string&	next_hop_vif_name, 
-	const uint32_t&	next_hop_vif_index, 
-	const uint32_t&	metric_preference, 
-	const uint32_t&	metric);
-    
-    /**
-     *  Delete Multicast Routing Information Base information.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param dest_prefix the destination prefix to delete.
-     */
-    XrlCmdError mfea_client_0_1_delete_mrib4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv4Net&	dest_prefix);
-    
-    XrlCmdError mfea_client_0_1_delete_mrib6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6Net&	dest_prefix);
-
-    /**
-     *  Complete a transaction with MRIB information.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     */
-    XrlCmdError mfea_client_0_1_set_mrib_done(
-	// Input values, 
-	const string&	xrl_sender_name);
     
     /**
      *  A signal that a dataflow-related pre-condition is true.
@@ -2147,7 +2081,6 @@ private:
     void send_mfea_registration();
     void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
     void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
-    void mfea_client_send_allow_mrib_messages_cb(const XrlError& xrl_error);
     void send_mfea_deregistration();
     void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
 
@@ -2409,7 +2342,6 @@ private:
     const string		_mld6igmp_target;
     bool			_is_mfea_add_protocol_registered;
     bool			_is_mfea_allow_signal_messages_registered;
-    bool			_is_mfea_allow_mrib_messages_registered;
     bool			_is_rib_client_registered;
     XorpTimer			_mfea_registration_timer;
     XorpTimer			_rib_registration_timer;

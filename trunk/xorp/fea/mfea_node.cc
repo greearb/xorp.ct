@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.39 2004/08/03 03:51:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.40 2004/12/17 20:30:45 pavlin Exp $"
 
 
 //
@@ -79,9 +79,6 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
 		   EventLoop& eventloop, FtiConfig& ftic)
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
       _mfea_mrouter(*this),
-      _mrib_table(family),
-      _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
-      _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
       _mfea_dft(*this),
       _is_log_trace(false),
       _ftic(ftic)
@@ -206,12 +203,6 @@ MfeaNode::final_start()
     // Start the mfea_vifs
     start_all_vifs();
 
-    // Start the timer to read immediately the MRIB table
-    mrib_table().clear();
-    _mrib_table_read_timer = eventloop().new_oneoff_after(
-	TimeVal(0,0),
-	callback(this, &MfeaNode::mrib_table_read_timer_timeout));
-
     return (XORP_OK);
 }
 
@@ -257,10 +248,6 @@ MfeaNode::stop()
     // Stop the MfeaMrouter
     _mfea_mrouter.stop();
 
-    // Clear the MRIB table
-    _mrib_table_read_timer.unschedule();
-    mrib_table().clear();
-    
     if (ProtoNode<MfeaVif>::pending_stop() < 0)
 	return (XORP_ERROR);
 
@@ -1183,12 +1170,6 @@ int
 MfeaNode::delete_protocol(const string& module_instance_name,
 			  xorp_module_id module_id)
 {
-    // Delete MRIB registration
-    if (_mrib_messages_register.is_registered(module_instance_name,
-					      module_id)) {
-	delete_allow_mrib_messages(module_instance_name, module_id);
-    }
-    
     // Delete kernel signal registration
     if (_kernel_signal_messages_register.is_registered(module_instance_name,
 						       module_id)) {
@@ -1391,147 +1372,6 @@ MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name
 		   "from receiving kernel signal messages",
 		   module_instance_name.c_str(), module_id);
 	return (XORP_ERROR);	// Probably not added before
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::add_allow_mrib_messages:
- * @module_instance_name: The module instance name of the protocol to add to
- * receive MRIB messages.
- * @module_id: The #xorp_module_id of the protocol to add to receive
- * MRIB messages.
- * 
- * Add a protocol to the set of protocols that are interested in
- * receiving MRIB messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::add_allow_mrib_messages(const string& module_instance_name,
-				  xorp_module_id module_id)
-{
-    // Add the state
-    if (_mrib_messages_register.add_protocol(module_instance_name, module_id)
-	< 0) {
-	XLOG_ERROR("Cannot add protocol instance %s with module_id = %d "
-		   "to receive MRIB messages",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Already added
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::delete_allow_mrib_messages:
- * @module_instance_name: The module instance name of the protocol to delete
- * from receiving MRIB messages.
- * @module_id: The #xorp_module_id of the protocol to delete from receiving
- * MRIB messages.
- * 
- * Delete a protocol from the set of protocols that are interested in
- * receiving MRIB messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::delete_allow_mrib_messages(const string& module_instance_name,
-				     xorp_module_id module_id)
-{
-    // Delete the state
-    if (_mrib_messages_register.delete_protocol(module_instance_name,
-						module_id)
-	< 0) {
-	XLOG_ERROR("Cannot delete protocol instance %s with module_id = %d "
-		   "from receiving MRIB messages",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Probably not added before
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::send_add_mrib:
- * @mrib: The #Mrib entry to add.
- * 
- * Add a #Mrib entry to all user-level protocols that are interested in
- * receiving MRIB messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::send_add_mrib(const Mrib& mrib)
-{
-    ProtoRegister& pr = _mrib_messages_register;
-    const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
-    
-    //
-    // Send the message to all upper-layer protocols that expect it.
-    //
-    list<pair<string, xorp_module_id> >::const_iterator iter;
-    for (iter = module_list.begin(); iter != module_list.end(); ++iter) {
-	const string& dst_module_instance_name = (*iter).first;
-	xorp_module_id dst_module_id = (*iter).second;
-	send_add_mrib(dst_module_instance_name, dst_module_id, mrib);
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::send_delete_mrib:
- * @mrib: The #Mrib entry to delete.
- * 
- * Delete a #Mrib entry from all user-level protocols that are interested in
- * receiving MRIB messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::send_delete_mrib(const Mrib& mrib)
-{
-    ProtoRegister& pr = _mrib_messages_register;
-    const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
-    
-    //
-    // Send the message to all upper-layer protocols that expect it.
-    //
-    list<pair<string, xorp_module_id> >::const_iterator iter;
-    for (iter = module_list.begin(); iter != module_list.end(); ++iter) {
-	const string& dst_module_instance_name = (*iter).first;
-	xorp_module_id dst_module_id = (*iter).second;
-	send_delete_mrib(dst_module_instance_name, dst_module_id, mrib);
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::send_set_mrib_done:
- * @: 
- * 
- * Complete a transaction of add/delete #Mrib entries with all user-level
- * protocols that are interested in receiving MRIB messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::send_set_mrib_done()
-{
-    ProtoRegister& pr = _mrib_messages_register;
-    const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
-    
-    //
-    // Send the message to all upper-layer protocols that expect it.
-    //
-    list<pair<string, xorp_module_id> >::const_iterator iter;
-    for (iter = module_list.begin(); iter != module_list.end(); ++iter) {
-	const string& dst_module_instance_name = (*iter).first;
-	xorp_module_id dst_module_id = (*iter).second;
-	send_set_mrib_done(dst_module_instance_name, dst_module_id);
     }
     
     return (XORP_OK);
@@ -2469,206 +2309,4 @@ MfeaNode::proto_comm_find_by_ipproto(int ipproto) const
     }
     
     return (NULL);
-}
-
-/**
- * MfeaNode::get_mrib_table:
- * @mrib_table: A reference to the routing table vector composed
- * of #Mrib elements.
- * 
- * Return value: The number of entries in @mrib_table, or %XORP_ERROR
- * if there was an error.
- **/
-int
-MfeaNode::get_mrib_table(vector<Mrib* >& mrib_table)
-{
-    int mrib_table_n = 0;
-    
-    switch (family()) {
-    case AF_INET:
-    {
-	list<Fte4> fte_list4;
-	list<Fte4>::iterator iter;
-	
-	if (_ftic.get_table4(fte_list4) != true)
-	    return (XORP_ERROR);
-	mrib_table.resize(fte_list4.size());
-	for (iter = fte_list4.begin(); iter != fte_list4.end(); ++iter) {
-	    Fte4& fte = *iter;
-	    Mrib* mrib = new Mrib(family());
-	    mrib_table[mrib_table_n++] = mrib;
-	    MfeaVif *mfea_vif = NULL;
-	    mrib->set_dest_prefix(IPvXNet(fte.net()));
-	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());
-	    mrib->set_metric(mrib_table_default_metric().get());
-	    mrib->set_next_hop_router_addr(IPvX(fte.nexthop()));
-
-	    // Set the vif index
-	    mfea_vif = vif_find_by_name(fte.vifname());
-	    if (mfea_vif != NULL)
-		mrib->set_next_hop_vif_index(mfea_vif->vif_index());
-	    if (mrib->next_hop_vif_index() >= maxvifs()) {
-		debug_msg("get_mrib_table() error: "
-			  "cannot find interface toward next-hop "
-			  "router %s for destination %s\n",
-			  cstring(mrib->next_hop_router_addr()),
-			  cstring(mrib->dest_prefix()));
-	    }
-	}
-    }
-    break;
-    
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-	list<Fte6> fte_list6;
-	list<Fte6>::iterator iter;
-	
-	if (_ftic.get_table6(fte_list6) != true)
-	    return (XORP_ERROR);
-	mrib_table.resize(fte_list6.size());
-	for (iter = fte_list6.begin(); iter != fte_list6.end(); ++iter) {
-	    Fte6& fte = *iter;
-	    Mrib* mrib = new Mrib(family());
-	    mrib_table[mrib_table_n++] = mrib;
-	    MfeaVif *mfea_vif = NULL;
-	    mrib->set_dest_prefix(IPvXNet(fte.net()));
-	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());
-	    mrib->set_metric(mrib_table_default_metric().get());
-	    mrib->set_next_hop_router_addr(IPvX(fte.nexthop()));
-
-	    // Set the vif index
-	    mfea_vif = vif_find_by_name(fte.vifname());
-	    if (mfea_vif != NULL)
-		mrib->set_next_hop_vif_index(mfea_vif->vif_index());
-	    if (mrib->next_hop_vif_index() >= maxvifs()) {
-		debug_msg("get_mrib_table() error: "
-			  "cannot find interface toward next-hop "
-			  "router %s for destination %s\n",
-			  cstring(mrib->next_hop_router_addr()),
-			  cstring(mrib->dest_prefix()));
-	    }
-	}
-    }
-    break;
-#endif // HAVE_IPV6
-    
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-
-    return (mrib_table_n);
-}
-
-/**
- * MfeaNode::mrib_table_read_timer_timeout:
- * 
- * Timeout handler to read the MRIB table.
- **/
-void
-MfeaNode::mrib_table_read_timer_timeout()
-{
-    MribTable new_mrib_table(family());
-    MribTable::iterator iter;
-    bool is_changed = false;
-
-    ProtoRegister& pr = _mrib_messages_register;
-    const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
-    
-    if ((maxvifs() == 0) || (module_list.empty())) {
-	//
-	// XXX: If we don't have any vifs yet or if we don't have modules
-	// interested in the MRIB table, then there no point to get
-	// the MRIB table.
-	// Restart the timer after a much shorter interval.
-	//
-	TimeVal timeval(MRIB_TABLE_READ_PERIOD_SEC,
-			MRIB_TABLE_READ_PERIOD_USEC);
-	timeval = timeval/4 + TimeVal(1, 0);
-	
-	//
-	// Start again the timer
-	//
-	_mrib_table_read_timer =
-	    eventloop().new_oneoff_after(timeval,
-					 callback(this,
-						  &MfeaNode::mrib_table_read_timer_timeout));
-	return;
-    }
-    
-    //
-    // Add all new entries to the temporary table
-    //
-    do {
-	vector<Mrib* > new_mrib_vector;
-	int new_mrib_array_size = get_mrib_table(new_mrib_vector);
-	
-	if (new_mrib_array_size > 0) {
-	    for (int i = 0; i < new_mrib_array_size; i++) {
-		Mrib* new_mrib = new_mrib_vector[i];
-		new_mrib_table.insert(*new_mrib);
-	    }
-	}
-	delete_pointers_vector(new_mrib_vector);
-    } while (false);
-    
-    //
-    // Delete the entries that have disappeared
-    //
-    for (iter = mrib_table().begin();
-	 iter != mrib_table().end();
-	 ++iter) {
-	Mrib *mrib = *iter;
-	if (mrib == NULL)
-	    continue;
-	Mrib *new_mrib = new_mrib_table.find_exact(mrib->dest_prefix());
-	if ((new_mrib == NULL) || (*new_mrib != *mrib)) {
-	    send_delete_mrib(*mrib);
-	    is_changed = true;
-	}
-    }
-    
-    //
-    // Add the entries that have appeared
-    //
-    for (iter = new_mrib_table.begin();
-	 iter != new_mrib_table.end();
-	 ++iter) {
-	Mrib *new_mrib = *iter;
-	if (new_mrib == NULL)
-	    continue;
-	Mrib *mrib = mrib_table().find_exact(new_mrib->dest_prefix());
-	if ((mrib == NULL) || (*new_mrib != *mrib)) {
-	    send_add_mrib(*new_mrib);
-	    is_changed = true;
-	}
-    }
-
-    //
-    // Replace the table if changed
-    //
-    if (is_changed) {
-	mrib_table().clear();
-	
-	for (iter = new_mrib_table.begin();
-	     iter != new_mrib_table.end();
-	     ++iter) {
-	    Mrib *new_mrib = *iter;
-	    if (new_mrib == NULL)
-		continue;
-	    mrib_table().insert(*new_mrib);
-	}
-	
-	send_set_mrib_done();
-    }
-    
-    //
-    // Start again the timer
-    //
-    _mrib_table_read_timer =
-	eventloop().new_oneoff_after(TimeVal(MRIB_TABLE_READ_PERIOD_SEC,
-					     MRIB_TABLE_READ_PERIOD_USEC),
-				     callback(this,
-					      &MfeaNode::mrib_table_read_timer_timeout));
 }
