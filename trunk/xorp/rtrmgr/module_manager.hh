@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.9 2003/04/25 02:59:04 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.10 2003/04/25 03:39:02 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -55,11 +55,13 @@ public:
     string err;
 };
 
+class ModuleManager;
+
 class Module {
 public:
-    Module(const string& name, bool verbose);
-    int set_execution_path(const string &path);
+    Module(ModuleManager& mmgr, const string& name, bool verbose);
     ~Module();
+    int set_execution_path(const string &path);
     int run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb);
     void module_run_done(bool success);
     void set_stalled();
@@ -69,6 +71,9 @@ public:
     string str() const;
     int status() const {return _status;}
 private:
+    void new_status(int new_status);
+    
+    ModuleManager &_mmgr;
     string _name;
     string _path; //relative path
     string _expath; //absolute path
@@ -93,6 +98,8 @@ public:
     bool module_has_started(const string &name) const;
     void shutdown();
     EventLoop& eventloop() {return _eventloop;}
+    void module_status_changed(const string& name, 
+			       int old_status, int new_status);
 private:
     Module *find_module(const string &name);
     const Module *const_find_module(const string &name) const;

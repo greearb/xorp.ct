@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.9 2003/04/25 02:59:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.10 2003/04/25 03:39:02 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -28,7 +28,8 @@ extern "C" int errno;
 
 static map<pid_t, Module*> module_pids;
 
-static void childhandler(int x) {
+static void childhandler(int x) 
+{
     printf("childhandler: %d\n", x);
     pid_t pid;
     int status;
@@ -52,14 +53,37 @@ static void childhandler(int x) {
     }
 }
 
-Module::Module(const string& name, bool verbose)
-    : _name(name), 
+Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
+    : _mmgr(mmgr), _name(name), 
     _pid(0),
     _status(MODULE_NOT_STARTED),
     _verbose(verbose) 
 {}
 
-int Module::set_execution_path(const string &path) {
+Module::~Module() 
+{
+    if (_verbose)
+	printf("Shutting down %s\n", _name.c_str());
+    if (!_do_exec)
+	return;
+    if (_status != MODULE_FAILED) {
+	new_status(MODULE_SHUTTING_DOWN);
+	kill(_pid, SIGTERM);
+    }
+
+    //give the process time to exit
+    for(int i=0;i<3;i++) {
+	sleep(1);
+	if (_status == MODULE_FAILED)
+	    return;
+    }
+
+    //if it still hasn't exited, kill it properly.
+    kill(_pid, SIGKILL);
+}
+
+int Module::set_execution_path(const string &path) 
+{
     _path = path;
     struct stat sb;
     if (_verbose) {
@@ -140,16 +164,17 @@ int Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
     if (_verbose)
 	printf("New module has PID %d\n", _pid);
     module_pids[_pid] = this;
-    _status = MODULE_STARTUP;
+    new_status(MODULE_STARTUP);
     cb->dispatch(true);
     return XORP_OK;
 }
 
-void Module::module_run_done(bool success) {
+void Module::module_run_done(bool success) 
+{
     printf("module_run_done\n");
     //do we think we managed to start it?
     if (success == false) {
-	_status = MODULE_FAILED;
+	new_status(MODULE_FAILED);
 	return;
     }
 
@@ -160,70 +185,63 @@ void Module::module_run_done(bool success) {
 	return;
     }
     if (_status == MODULE_STARTUP) {
-	_status = MODULE_INITIALIZING;
+	new_status(MODULE_INITIALIZING);
     }
-}
-
-Module::~Module() {
-    if (_verbose)
-	printf("Shutting down %s\n", _name.c_str());
-    if (!_do_exec)
-	return;
-    if (_status != MODULE_FAILED) {
-	_status = MODULE_SHUTTING_DOWN;
-	kill(_pid, SIGTERM);
-    }
-
-    //give the process time to exit
-    for(int i=0;i<3;i++) {
-	sleep(1);
-	if (_status == MODULE_FAILED)
-	    return;
-    }
-
-    //if it still hasn't exited, kill it properly.
-    kill(_pid, SIGKILL);
 }
 
 void
-Module::set_stalled() {
+Module::set_stalled() 
+{
     if (_verbose)
 	printf("Module stalled: %s\n", _name.c_str());
-    _status = MODULE_STALLED;
+    new_status(MODULE_STALLED);
 }
 
 void
-Module::normal_exit() {
+Module::normal_exit() 
+{
     if (_verbose)
 	printf("Module normal exit: %s\n", _name.c_str());
-    _status = MODULE_NOT_STARTED;
+    new_status(MODULE_NOT_STARTED);
 }
 
 void
-Module::abnormal_exit(int status) {
+Module::abnormal_exit(int status) 
+{
     if (_verbose)
 	printf("Module abnormal exit: %s status:%d\n", _name.c_str(), status);
-    _status = MODULE_FAILED;
+    new_status(MODULE_FAILED);
 }
 
 void
-Module::killed() {
+Module::killed() 
+{
     if (_status == MODULE_SHUTTING_DOWN) {
 	//it may have been shutting down already, in which case this is OK.
 	if (_verbose)
 	    printf("Module killed during shutdown: %s\n", _name.c_str());
-	_status = MODULE_NOT_STARTED;
+	new_status(MODULE_NOT_STARTED);
     } else {
 	//we don't know why it was killed.
 	if (_verbose)
 	    printf("Module abnormally killed: %s\n", _name.c_str());
-	_status = MODULE_FAILED;
+	new_status(MODULE_FAILED);
     }
 }
 
+void Module::new_status(int new_status) 
+{
+    if (new_status == _status)
+	return;
+
+    int old_status = _status;
+    _status = new_status;
+    _mmgr.module_status_changed(_name, old_status, new_status);
+}
 
 string
-Module::str() const {
+Module::str() const 
+{
     string s = "Module " + _name + ", path " + _path + "\n";
     if (_status != MODULE_NOT_STARTED && _status != MODULE_FAILED)
 	s += c_format("Module is running, pid=%d\n", _pid);
@@ -242,14 +260,15 @@ ModuleManager::~ModuleManager() {
 }
 
 bool
-ModuleManager::new_module(const string& name, const string& path) {
+ModuleManager::new_module(const string& name, const string& path) 
+{
     if (_verbose)
 	printf("ModuleManager::new_module %s\n", name.c_str());
     map<string, Module *>::iterator found_mod;
     found_mod = _modules.find(name);
     if (found_mod == _modules.end()) {
 	Module *newmod;
-	newmod = new Module(name, _verbose);
+	newmod = new Module(*this, name, _verbose);
 	_modules[name] = newmod;
 	if (newmod->set_execution_path(path) != XORP_OK)
 	    return false;
@@ -263,14 +282,16 @@ ModuleManager::new_module(const string& name, const string& path) {
 
 int 
 ModuleManager::run_module(const string&name, bool do_exec, 
-			  XorpCallback1<void, bool>::RefPtr cb) {
+			  XorpCallback1<void, bool>::RefPtr cb) 
+{
     Module *m =  find_module(name);
     assert (m != NULL);
     return m->run(do_exec, cb);
 }
 
 bool
-ModuleManager::module_is_running(const string &name) const {
+ModuleManager::module_is_running(const string &name) const 
+{
     const Module *module = const_find_module(name);
     if (module == NULL)
 	return false;
@@ -278,7 +299,8 @@ ModuleManager::module_is_running(const string &name) const {
 }
 
 bool
-ModuleManager::module_has_started(const string &name) const {
+ModuleManager::module_has_started(const string &name) const 
+{
     const Module *module = const_find_module(name);
     if (module == NULL)
 	return false;
@@ -286,7 +308,8 @@ ModuleManager::module_has_started(const string &name) const {
 }
 
 Module*
-ModuleManager::find_module(const string &name) {
+ModuleManager::find_module(const string &name) 
+{
     map<string, Module *>::iterator found;
     found = _modules.find(name);
     if (found == _modules.end()) {
@@ -299,7 +322,8 @@ ModuleManager::find_module(const string &name) {
 }
 
 const Module*
-ModuleManager::const_find_module(const string &name) const {
+ModuleManager::const_find_module(const string &name) const 
+{
     map<string, Module *>::const_iterator found;
     found = _modules.find(name);
     if (found == _modules.end()) {
@@ -310,12 +334,24 @@ ModuleManager::const_find_module(const string &name) const {
 }
 
 bool 
-ModuleManager::module_exists(const string &name) const {
+ModuleManager::module_exists(const string &name) const 
+{
     return _modules.find(name) != _modules.end();
 }
 
 void
-ModuleManager::shutdown() {
+ModuleManager::module_status_changed(const string& name,
+				     int old_status, int new_status) 
+{
+    //XXX eventually we'll tell someone that things changed
+    UNUSED(name);
+    UNUSED(old_status);
+    UNUSED(new_status);
+}
+
+void
+ModuleManager::shutdown() 
+{
     debug_msg("ModuleManager::shutdown\n");
     map<string, Module *>::iterator found, prev;
     found = _modules.begin(); 
