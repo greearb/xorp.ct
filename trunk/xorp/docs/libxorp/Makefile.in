@@ -119,7 +119,7 @@ SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 DOCS = libxorp_overview
 
 # -- Document Sources
-libxorp_overview_LATEX = libxorp_overview.tex
+libxorp_overview_LATEX = ../tex/xorp.bib libxorp_overview.tex
 subdir = docs/libxorp
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.6 2003/03/08 00:03:36 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.7 2003/06/03 23:51:26 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Libxorp Library Overview \\
 \vspace{1ex}
-Version 0.2}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 10, 2003}
+\date{June 6, 2003}
 
 \maketitle
 
@@ -86,6 +86,8 @@ components (in alphabetical order):
 
   \item \emph{debug.h}: Provides facility for generating debug messages.
 
+  \item \emph{ether\_compat.h}: Ethernet manipulation compatibility functions.
+
   \item \emph{eventloop.hh: class EventLoop}: Event loop class for
   coordinated operations between timers and I/O operations on file
   descriptors.
@@ -120,13 +122,15 @@ components (in alphabetical order):
 
   \item \emph{selector.hh}: I/O multiplexing interface.
 
+  \item \emph{status\_codes.h}: Process states status codes.
+
   \item \emph{time\_slice.hh: class TimeSlice}: A class for computing
   whether some processing is taking too long.
 
   \item \emph{timer.hh, class XorpTimer}: XORP timer facility.
 
-  \item \emph{timeval.hh}: Contains implementation of various timeval
-  operations.
+  \item \emph{timeval.hh: class TimeVal}: A class for storing time values
+  (similar to \emph{struct timeval}).
 
   \item \emph{token.hh}: Token related definitions.
 
@@ -135,6 +139,9 @@ components (in alphabetical order):
   \item \emph{trie.hh}: Implementation of a trie to support route
   lookups.
 
+  \item \emph{utility.h}: Contains various mini-utilities
+  (mostly compiler-related helpers).
+
   \item \emph{utils.hh}: Contains various utilities (\eg to delete a
   list or array of pointers and the objects pointed to).
 
@@ -142,6 +149,9 @@ components (in alphabetical order):
   virtual interface address classes.
 
   \item \emph{xlog.h}: Provides facility for log messages generation.
+
+  \item \emph{xorp.h}: The XORP main include file that should be included
+  by all XORP C and C++ files.
 
 \end{itemize}
 
@@ -252,6 +262,14 @@ debug_msg("The number is %d\n", 5);
 
 For more details see the comments inside that file.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ether\_compat.h}
+
+This file contains Ethernet-related manipulation compatibility
+functions. For example, it includes the appropriate system files,
+and declares functions \verb=ether_aton()= and \verb=ether_ntoa()=
+(implemented locally in \emph{ether\_compat.c}) if the system is missing
+the corresponding \verb=ether_aton(3)= and \verb=ether_ntoa(3)=.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{eventloop.hh}
@@ -382,7 +400,15 @@ A SelectorList provides an entity where callbacks for pending I/O
 operations on file descriptors may be registered.  The callbacks
 are invoked when one of the select methods is called and I/O
 is pending on the particular descriptors.
- 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{status\_codes.h}
+
+This file contains the enumerated \emph{ProcessStatus} codes
+that a XORP process should report to the XORP router manager
+(\emph{rtrmgr})~\cite{xorp:rtrmgr}.
+The file itself contains a detailed explanation of the process states
+(valid transaction between states, triggering events, actions, etc).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{time\_slice.hh}
@@ -402,10 +428,10 @@ from a developer's point of view is \emph{class XorpTimer}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{timeval.hh}
 
-This file contains implementation of various timeval operations.
-For example, it contains Less-Than and Addition operators for timeval
-structures.
-
+This file contains implementation of \emph{class TimeVal} for 
+storing time values (similar to \emph{struct timeval}).
+\emph{TimeVal} implements the appropriate constructors and numerous
+helper methods (\eg Less-Than and Addition operators, etc).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{token.hh}
@@ -437,6 +463,12 @@ are the most important. Those templates should be invoked with two
 classes, the basetype ``A'' for the search Key (which is a subnet,
 \verb=IPNet<A>=), and the Payload.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{utility.h}
+
+This file contains various mini-utilities.  Those utilities are mostly
+compiler-related helpers; \eg compile-time assertion, \emph{UNUSED(var)}
+macro to suppress warnings about unused functions arguments, etc.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{utils.hh}
@@ -610,26 +642,59 @@ main(int argc, char *argv[])
 \end{itemize}
 
 
-The \verb=XLOG_*()= macros (except \verb=XLOG_TRACE()=)
-have same arguments as printf(3). I.e.:
-
-\begin{verbatim}
-printf(const char *format, ...);
-\end{verbatim}
-
-The only difference is that the xlog utility automatically
+Typically, a developer would use the macros described below
+to print a message, add an assert statement, place a marker, etc.
+If a macro accepts a message to print, the format of the message is same
+as printf(3). The only difference is that the xlog utility automatically
 adds \verb='\n'=, (i.e. end-of-line) at the end of each string
-specified by \verb=format=.
-The \verb=XLOG_TRACE()= macro is same as the other \verb=XLOG_*()= macros,
-except that the very first argument is a conditional variable:
+specified by \verb=format=:
 
-\begin{verbatim}
-XLOG_TRACE(int cond_boolean, const char *format, ...)
-\end{verbatim}
+\begin{itemize}
 
-Only if \verb=cond_boolean= is not 0, then the specified string will
-be output.
+  \item \verb=XLOG_FATAL(const char *format, ...)=
+  \newline
+  Write a FATAL message to the xlog output streams and abort the program.
 
+  \item \verb=XLOG_ERROR(const char *format, ...)=
+  \newline
+  Write an ERROR message to the xlog output streams.
+
+  \item \verb=XLOG_WARNING(const char *format, ...)=
+  \newline
+  Write a WARNING message to the xlog output streams.
+
+  \item \verb=XLOG_INFO(const char *format, ...)=
+  \newline
+  Write an INFO message to the xlog output streams.
+
+  \item \verb=XLOG_TRACE(int cond_boolean, const char *format, ...)=
+  \newline
+  Write a TRACE message to the xlog output stream, but only
+  if \verb=cond_boolean= is not 0.
+
+  \item \verb=XLOG_ASSERT(assertion)=
+  \newline
+  The XORP replacement for assert(3), except that it cannot be
+  conditionally disabled and logs error messages through the standard
+  xlog mechanism. It calls \verb=XLOG_FATAL()= if the assertion fails.
+
+  \item \verb=XLOG_UNREACHABLE()=
+  \newline
+   A marker that can be used to indicate code that should never be executed.
+
+  \item \verb=XLOG_UNFINISHED()=
+  \newline
+  A marker that can be used to indicate code that is not yet implemented
+  and hence should not be run.
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{xorp.h}
+
+This is the XORP main include file that should be included by all XORP
+C and C++ files. This file itself includes a number of frequently used system
+header files, defines several commonly used values, etc.
 
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -645,13 +710,15 @@ be output.
   \item March 10, 2003: Updated to match XORP version 0.2 release code;
   add information about RefTrie; cleanup.
 
+  \item June 6, 2003: Updated to match XORP version 0.3 release code.
+
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\bibliography{libxorp_overview}
-%\bibliographystyle{plain}
+\bibliography{../tex/xorp}
+\bibliographystyle{plain}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
