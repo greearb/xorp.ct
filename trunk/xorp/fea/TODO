@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.15 2004/04/11 19:29:38 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.16 2004/06/09 19:01:39 pavlin Exp $
 #
 
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
@@ -47,6 +47,9 @@
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
+
+* Try to replicate the following error message during shutdown:
+[ 2004/06/07 09:38:21  ERROR xorp_fea:20735 MFEA +1601 mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (18.18.0.1 224.0.1.1)) failed: Bad file descriptor
 
 * During shutdown, the following code in MfeaNode::final_stop()
   may actually return XORP_ERROR:
