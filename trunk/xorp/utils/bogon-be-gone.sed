@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/utils/bogon-be-gone.sed,v 1.4 2002/12/09 02:46:40 pavlin Exp $
+# $XORP: xorp/utils/bogon-be-gone.sed,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 #
 
 #
@@ -13,11 +13,23 @@
 # get eye strain looking at the diffs :-)
 #
 
+# Remove Trailing whitespaces from lines
+s/[ 	]*$//
+
 # Ignore pre-processor directives
-/^#/ n
+/^#/ b
 
 # Ignore comments at top of file
-/^\/\// n
+/^\/\// b
+
+# Dont process text within C comments
+/^\/\*/,/\*\/$/ b
+
+# Dont futz with enum assignments since aligned values are okay
+/enum.*{/,/};/ b
+
+# Dont futz with const assignments since aligned values are okay
+/const[^=]*=.*;/ b
 
 # Attempt to fix missing spaces around operators with parenthetical expressions, ie if (), for(), etc... 
 # The list of operators is incomplete
@@ -53,13 +65,32 @@ s/\([ 	]\{1,\}\)switch(/\1switch (/
 s/\([ 	]\{1,\}\)for(/\1for (/
 
 # Map "while(" -> "while ("
-s/\([ 	]\{1,\}\)for(/\1for (/
+s/\([ 	]\{1,\}\)while(/\1while (/
 
 # Map "; };" -> "; }"
 s/;\([ 	]\{1,\}\)}[ 	]*;[ 	]*$/;\1}/
 
-# Remove Trailing whitespaces from lines
-s/[ 	]*$//
-
 # Put a space between a c-plus-plus comment and following text "//foo" -> "// foo"
 s/\([ 	]*\/\/\)\([^ 	]\)/\1 \2/
+
+# Put a newline between name of function and starting bracket.  Per style guide
+# and heated debate, ie
+#
+#  int foo() {      -> int foo()
+#      ....            {
+#      ....                ....   
+#  }                   }
+#
+# But be careful not to futz with opening brace after some common decls, eg
+# class, struct, etc
+
+/^struct/ b
+/^typedef/ b
+/^class/ b
+/^enum/ b
+/^extern/ b
+/^[A-Za-z].*{[ 	]*$/ {
+    s/[ 	]*{[ 	]*$//
+    a\
+{
+}
