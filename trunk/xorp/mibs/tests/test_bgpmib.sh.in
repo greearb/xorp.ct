@@ -39,7 +39,8 @@ configure_snmp()
 
     # the rest is to configure the snmp agent
     SNMPDCONF=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.conf
-    SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.log
+    LOGSTAMP=`date "+%y%m%d%H%M%S"`
+    SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd${LOGSTAMP}.log
     SNMPDDBG=bgp4_mib_1657,xorp_if_mib_module
     echo 'rwcommunity xorp' > ${SNMPDCONF}
     echo "dlmod xorp_if_mib_module "					\
@@ -55,6 +56,9 @@ onexit()
     last=$?
     if [ ${last} -eq 0 ] ; then
 	echo "$0: Tests Succeeded"
+	
+        # Cleanup only on success	
+	rm -f bgpPeerTable?.tmp bgp4PathAttrTable?.tmp snmpd*.log
     else
 	echo "$0: Tests Failed"
     fi
@@ -70,7 +74,6 @@ onexit()
  
     ${CALLXRL} "finder://xorp_if_mib/common/0.1/shutdown"
 
-    rm -fr bgpPeerTable?.tmp
 }
 
 trap onexit 0 2
@@ -269,8 +272,8 @@ test2()
 
     echo 'bulk reading the entire BGP path attr table... '
     snmptable ${SNMPCONF} -CH -Cf "," ${SNMPHOST} \
-	BGP4-MIB::bgp4PathAttrTable > bgp4PathAttrTable2.tmp
-    cat bgp4PathAttrTable2.tmp
+	BGP4-MIB::bgp4PathAttrTable > bgp4PathAttrTable3.tmp
+    cat bgp4PathAttrTable3.tmp
 
 
     # Unload MIB
