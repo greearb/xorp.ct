@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_click.cc,v 1.3 2004/11/10 00:39:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_click.cc,v 1.4 2004/11/12 00:31:05 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -91,24 +91,15 @@ IfConfigGetClick::pull_config(IfTree& iftree)
 bool
 IfConfigGetClick::read_config(IfTree& it)
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    UNUSED(it);
-    
     //
-    // The IPv4 information
+    // XXX: get the tree from the IfconfigSetClick instance.
+    // The reason for that is because it is practically
+    // impossible to read the Click configuration and parse it to restore
+    // the original IfTree state.
     //
-    if (ifc().have_ipv4()) {
+    if (! ifc().ifc_set_click().is_running())
+	return (false);
 
-    }
-    
-#ifdef HAVE_IPV6
-    //
-    // The IPv6 information
-    //
-    if (ifc().have_ipv6()) {
-
-    }
-#endif // HAVE_IPV6
-    
-    return true;
+    it = ifc().ifc_set_click().iftree();
+    return (true);
 }
