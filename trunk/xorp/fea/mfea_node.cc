@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.5 2003/05/21 14:26:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.6 2003/05/31 23:27:48 pavlin Exp $"
 
 
 //
@@ -290,6 +290,31 @@ MfeaNode::add_pim_register_vif()
 	    XLOG_ERROR("Cannot add Register vif: %s", err.c_str());
 	    return (XORP_ERROR);
 	}
+	
+	// Propagate the changes to the MFEA clients.
+	string dummy_reason;
+	add_config_vif(register_vif.name(), register_vif.vif_index(),
+		       dummy_reason);
+	list<VifAddr>::const_iterator vif_addr_iter;
+	for (vif_addr_iter = register_vif.addr_list().begin();
+	     vif_addr_iter != register_vif.addr_list().end();
+	     ++vif_addr_iter) {
+	    const VifAddr& vif_addr = *vif_addr_iter;
+	    add_config_vif_addr(register_vif.name(),
+				vif_addr.addr(),
+				vif_addr.subnet_addr(),
+				vif_addr.broadcast_addr(),
+				vif_addr.peer_addr(),
+				dummy_reason);
+	}
+	set_config_vif_flags(register_vif.name(),
+			     register_vif.is_pim_register(),
+			     register_vif.is_p2p(),
+			     register_vif.is_loopback(),
+			     register_vif.is_multicast_capable(),
+			     register_vif.is_broadcast_capable(),
+			     register_vif.is_underlying_vif_up(),
+			     dummy_reason);
     }
     
     return (XORP_OK);

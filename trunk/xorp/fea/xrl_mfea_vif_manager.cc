@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.12 2003/05/27 17:47:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.13 2003/06/01 02:12:21 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -222,10 +222,15 @@ XrlMfeaVifManager::set_vif_state()
 		    continue;
 		}
 		// Update the address
-		*node_vif_addr = vif_addr;
+		if (*node_vif_addr != vif_addr) {
+		    *node_vif_addr = vif_addr;
+		}
 	    }
 	}
     }
+    
+    // Done
+    _mfea_node.set_config_all_vifs_done(err);
 }
 
 void

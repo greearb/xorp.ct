@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.1 2003/05/15 23:10:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.2 2003/06/01 02:17:00 pavlin Exp $"
 
 
 //
@@ -242,6 +242,10 @@ MfeaNode::set_config_all_vifs_done(string& reason)
 	    // Delete the interface
 	    string vif_name = node_vif->name();
 	    delete_vif(vif_name, err);
+	    
+	    // Propagate the changes to the MFEA clients.
+	    delete_config_vif(vif_name, err);
+	    
 	    continue;
 	}
     }
@@ -260,6 +264,32 @@ MfeaNode::set_config_all_vifs_done(string& reason)
 	//
 	if (node_vif == NULL) {
 	    add_vif(*vif, err);
+	    
+	    // Propagate the changes to the MFEA clients.
+	    {
+		add_config_vif(vif->name(), vif->vif_index(), err);
+		list<VifAddr>::const_iterator vif_addr_iter;
+		for (vif_addr_iter = vif->addr_list().begin();
+		     vif_addr_iter != vif->addr_list().end();
+		     ++vif_addr_iter) {
+		    const VifAddr& vif_addr = *vif_addr_iter;
+		    add_config_vif_addr(vif->name(),
+					vif_addr.addr(),
+					vif_addr.subnet_addr(),
+					vif_addr.broadcast_addr(),
+					vif_addr.peer_addr(),
+					err);
+		}
+		set_config_vif_flags(vif->name(),
+				     vif->is_pim_register(),
+				     vif->is_p2p(),
+				     vif->is_loopback(),
+				     vif->is_multicast_capable(),
+				     vif->is_broadcast_capable(),
+				     vif->is_underlying_vif_up(),
+				     err);
+	    }
+	    
 	    continue;
 	}
 	
@@ -271,6 +301,16 @@ MfeaNode::set_config_all_vifs_done(string& reason)
 	node_vif->set_multicast_capable(vif->is_multicast_capable());
 	node_vif->set_broadcast_capable(vif->is_broadcast_capable());
 	node_vif->set_underlying_vif_up(vif->is_underlying_vif_up());
+	
+	// Propagate the changes to the MFEA clients.
+	set_config_vif_flags(vif->name(),
+			     vif->is_pim_register(),
+			     vif->is_p2p(),
+			     vif->is_loopback(),
+			     vif->is_multicast_capable(),
+			     vif->is_broadcast_capable(),
+			     vif->is_underlying_vif_up(),
+			     err);
 	
 	//
 	// Delete vif addresses that don't exist anymore
@@ -292,6 +332,9 @@ MfeaNode::set_config_all_vifs_done(string& reason)
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
 		node_vif->delete_address(ipvx);
+
+		// Propagate the changes to the MFEA clients.
+		delete_config_vif_addr(node_vif->name(), ipvx, err);
 	    }
 	}
 	
@@ -307,10 +350,34 @@ MfeaNode::set_config_all_vifs_done(string& reason)
 		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
 		if (node_vif_addr == NULL) {
 		    node_vif->add_address(vif_addr);
+
+		    // Propagate the changes to the MFEA clients.
+		    add_config_vif_addr(node_vif->name(),
+					vif_addr.addr(),
+					vif_addr.subnet_addr(),
+					vif_addr.broadcast_addr(),
+					vif_addr.peer_addr(),
+					err);
+		
 		    continue;
 		}
 		// Update the address
-		*node_vif_addr = vif_addr;
+		if (*node_vif_addr != vif_addr) {
+		    *node_vif_addr = vif_addr;
+		    
+		    // Propagate the changes to the MFEA clients.
+		    {
+			delete_config_vif_addr(node_vif->name(),
+					       vif_addr.addr(),
+					       err);
+			add_config_vif_addr(node_vif->name(),
+					    vif_addr.addr(),
+					    vif_addr.subnet_addr(),
+					    vif_addr.broadcast_addr(),
+					    vif_addr.peer_addr(),
+					    err);
+		    }
+		}
 	    }
 	}
     }
