@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.10 2004/11/05 03:19:26 bms Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.11 2004/11/05 03:54:10 bms Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -289,7 +289,7 @@ string
 IfMgrIfSetMtu::str() const
 {
     return if_str_begin(this, "Mtu") + ", " +
-	c_format("%u", mtu_bytes()) + if_str_end();
+	c_format("%u", XORP_UINT_CAST(mtu_bytes())) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -358,7 +358,7 @@ string
 IfMgrIfSetPifIndex::str() const
 {
     return if_str_begin(this, "SetPifIndex") +
-	c_format(", %u", pif_index()) + if_str_end();
+	c_format(", %u", XORP_UINT_CAST(pif_index())) + if_str_end();
 }
 
 
@@ -634,7 +634,7 @@ string
 IfMgrVifSetPifIndex::str() const
 {
     return vif_str_begin(this, "SetPifIndex")
-	+ ", " + c_format("%u", pif_index()) + vif_str_end();
+	+ ", " + c_format("%u", XORP_UINT_CAST(pif_index())) + vif_str_end();
 }
 
 
@@ -741,7 +741,7 @@ string
 IfMgrIPv4SetPrefix::str() const
 {
     return ipv4_str_begin(this, "SetPrefix") + ", "
-	+ c_format("%u", prefix_len()) + ipv4_str_end();
+	+ c_format("%u", XORP_UINT_CAST(prefix_len())) + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -1012,7 +1012,7 @@ string
 IfMgrIPv6SetPrefix::str() const
 {
     return ipv6_str_begin(this, "SetPrefix") + ", "
-	+ c_format("%u", prefix_len()) + ipv6_str_end();
+	+ c_format("%u", XORP_UINT_CAST(prefix_len())) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------
