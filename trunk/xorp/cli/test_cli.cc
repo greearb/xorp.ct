@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.24 2004/02/28 21:14:49 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.25 2004/03/02 05:27:20 pavlin Exp $"
 
 
 //
@@ -431,9 +431,9 @@ cli_print_wide(const string& ,		// server_name
 
     string trail = "111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999";
 #if 1
-    for (int i = 0; i < 100; i++)
-	cli_client->cli_print(c_format("This is my line number %d %s\n",
-				       i, trail.c_str()));
+    for (int i = 0; i < 200; i++)
+	cli_client->cli_print(c_format("This is my line number %d %s %d\n",
+				       i, trail.c_str(), i));
 #endif
 
     return (XORP_OK);
