@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.26 2003/09/24 01:13:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.27 2003/09/30 03:07:57 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -247,7 +247,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
     const string&	ifname, 
     const string&	vif, 
     // Output values, 
-    uint32_t&	pif_index)
+    uint32_t&		pif_index)
 {
     const IfTreeVif* fv = 0;
     XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
@@ -325,7 +325,7 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_all_mtu(
 				// Input values,
 				const string&	ifname,
-				uint32_t&		mtu)
+				uint32_t&	mtu)
 {
     const IfTreeInterface* fi = 0;
     XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi);
@@ -340,7 +340,7 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
 				// Input values,
 				const string&	ifname,
-				uint32_t&		mtu)
+				uint32_t&	mtu)
 {
     const IfTreeInterface* fi = 0;
     XrlCmdError e = _xifmgr.get_if(ifname, fi);
@@ -392,7 +392,7 @@ XrlFeaTarget::ifmgr_0_1_get_all_prefix4(
 				    const string&	vifname,
 				    const IPv4&	addr,
 				    // Output values,
-				    uint32_t&	prefix_len)
+				    uint32_t&		prefix_len)
 {
     const IfTreeAddr4* fa = 0;
     XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
@@ -410,7 +410,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
 				    const string&	vifname,
 				    const IPv4&	addr,
 				    // Output values,
-				    uint32_t&	prefix_len)
+				    uint32_t&		prefix_len)
 {
     const IfTreeAddr4* fa = 0;
     XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
@@ -437,7 +437,7 @@ XrlFeaTarget::ifmgr_0_1_get_all_broadcast4(
 	return e;
 
     broadcast = fa->bcast();
-    return _xifmgr.addr_valid(ifname, vifname, "broadcast", broadcast);
+    return _xifmgr.addr_valid(ifname, vifname, addr, "broadcast", broadcast);
 }
 
 XrlCmdError
@@ -456,7 +456,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
 	return e;
 
     broadcast = fa->bcast();
-    return _xifmgr.addr_valid(ifname, vifname, "broadcast", broadcast);
+    return _xifmgr.addr_valid(ifname, vifname, addr, "broadcast", broadcast);
 }
 
 XrlCmdError
@@ -475,7 +475,7 @@ XrlFeaTarget::ifmgr_0_1_get_all_endpoint4(
 	return e;
 
     endpoint = fa->endpoint();
-    return _xifmgr.addr_valid(ifname, vifname, "endpoint", endpoint);
+    return _xifmgr.addr_valid(ifname, vifname, addr, "endpoint", endpoint);
 }
 
 XrlCmdError
@@ -494,7 +494,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
 	return e;
 
     endpoint = fa->endpoint();
-    return _xifmgr.addr_valid(ifname, vifname, "endpoint", endpoint);
+    return _xifmgr.addr_valid(ifname, vifname, addr, "endpoint", endpoint);
 }
 
 XrlCmdError
@@ -502,9 +502,9 @@ XrlFeaTarget::ifmgr_0_1_get_all_prefix6(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
-				    const IPv6&	addr,
+				    const IPv6&		addr,
 				    // Output values,
-				    uint32_t&	prefix_len)
+				    uint32_t&		prefix_len)
 {
     const IfTreeAddr6* fa = 0;
     XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
@@ -520,9 +520,9 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
-				    const IPv6&	addr,
+				    const IPv6&		addr,
 				    // Output values,
-				    uint32_t&	prefix_len)
+				    uint32_t&		prefix_len)
 {
     const IfTreeAddr6* fa = 0;
     XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
@@ -538,7 +538,7 @@ XrlFeaTarget::ifmgr_0_1_get_all_endpoint6(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
-				      const IPv6&		addr,
+				      const IPv6&	addr,
 				      // Output values,
 				      IPv6&		endpoint)
 {
@@ -549,7 +549,7 @@ XrlFeaTarget::ifmgr_0_1_get_all_endpoint6(
 	return e;
 
     endpoint = fa->endpoint();
-    return  _xifmgr.addr_valid(ifname, vifname, "endpoint", endpoint);
+    return  _xifmgr.addr_valid(ifname, vifname, addr, "endpoint", endpoint);
 }
 
 XrlCmdError
@@ -557,7 +557,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
-				      const IPv6&		addr,
+				      const IPv6&	addr,
 				      // Output values,
 				      IPv6&		endpoint)
 {
@@ -568,7 +568,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
 	return e;
 
     endpoint = fa->endpoint();
-    return  _xifmgr.addr_valid(ifname, vifname, "endpoint", endpoint);
+    return  _xifmgr.addr_valid(ifname, vifname, addr, "endpoint", endpoint);
 }
 
 XrlCmdError
@@ -785,7 +785,7 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_create_interface(
 					 // Input values,
 					 const uint32_t&	tid,
-					 const string&	ifname)
+					 const string&		ifname)
 {
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new AddInterface(it, ifname));
@@ -795,7 +795,7 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_delete_interface(
 					 // Input values,
 					 const uint32_t&	tid,
-					 const string&	ifname)
+					 const string&		ifname)
 {
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new RemoveInterface(it, ifname));

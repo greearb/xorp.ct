@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.5 2003/05/09 05:32:54 mjh Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.6 2003/05/14 09:37:55 pavlin Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
@@ -108,13 +108,15 @@ public:
 
     inline XrlCmdError addr_valid(const string& ifname,
 				  const string& vifname,
+				  const IPv4&	addr,
 				  const string& descr,
-				  const IPv4&   addr);
+				  const IPv4&   validate_addr);
 
     inline XrlCmdError addr_valid(const string& ifname,
 				  const string& vifname,
+				  const IPv6&	addr,
 				  const string& descr,
-				  const IPv6&   addr);
+				  const IPv6&   validate_addr);
 
     inline IfTree& iftree() const	{ return _ifm.iftree(); }
 
@@ -222,10 +224,11 @@ XrlInterfaceManager::pull_config_get_addr(const string&	ifname,
 inline XrlCmdError
 XrlInterfaceManager::addr_valid(const string& ifname,
 				const string& vifname,
+				const IPv4&   addr,
 				const string& descr,
-				const IPv4&   addr)
+				const IPv4&   validate_addr)
 {
-    if (addr != IPv4::ZERO())
+    if (validate_addr != IPv4::ZERO())
 	return XrlCmdError::OKAY();
     return
 	XrlCmdError::COMMAND_FAILED(c_format("No %s address associated with "
@@ -238,10 +241,11 @@ XrlInterfaceManager::addr_valid(const string& ifname,
 inline XrlCmdError
 XrlInterfaceManager::addr_valid(const string& ifname,
 				const string& vifname,
+				const IPv6&   addr,
 				const string& descr,
-				const IPv6&   addr)
+				const IPv6&   validate_addr)
 {
-    if (addr != IPv6::ZERO())
+    if (validate_addr != IPv6::ZERO())
 	return XrlCmdError::OKAY();
     return
 	XrlCmdError::COMMAND_FAILED(c_format("No %s address associated with "
