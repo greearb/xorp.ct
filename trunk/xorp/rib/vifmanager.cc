@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.22 2003/07/22 21:38:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.23 2003/08/07 02:24:13 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -50,7 +50,7 @@ VifManager::~VifManager()
     stop();
     
     // Remove all Vif entries
-    map <string, Vif*>::iterator iter;
+    map<string, Vif*>::iterator iter;
     for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
 	delete iter->second;
     }
@@ -132,7 +132,7 @@ VifManager::update_state()
 void
 VifManager::set_vif_state()
 {
-    map<string, Vif *>::const_iterator vif_iter;
+    map<string, Vif*>::const_iterator vif_iter;
     string error_msg;
     
     //
@@ -164,7 +164,7 @@ VifManager::set_vif_state()
 	Vif* vif = vif_iter->second;
 	Vif* node_vif = NULL;
 	
-	map<string, Vif *>::const_iterator tmp_vif_iter;
+	map<string, Vif*>::const_iterator tmp_vif_iter;
 	tmp_vif_iter = _saved_vifs_by_name.find(vif->name());
 	if (tmp_vif_iter != _saved_vifs_by_name.end())
 	    node_vif = tmp_vif_iter->second;
@@ -680,7 +680,7 @@ VifManager::vif_created(const string& ifname, const string& vifname)
     //
     // Create a new vif
     //
-    Vif *vif = new Vif(vifname, ifname);
+    Vif* vif = new Vif(vifname, ifname);
     _vifs_by_name[vifname] = vif;
     _vifs_by_interface.insert(pair<string, Vif*>(ifname, vif));
     
@@ -999,7 +999,7 @@ VifManager::xrl_result_get_configured_prefix6(const XrlError& e,
 	    update_state();
 	    return;
 	}
-	Vif *vif = _vifs_by_name[vifname];
+	Vif* vif = _vifs_by_name[vifname];
 	debug_msg("adding address %s prefix_len %d to interface %s vif %s\n",
 		  addr.str().c_str(), *prefix_len,
 		  ifname.c_str(), vifname.c_str());
@@ -1188,7 +1188,7 @@ VifManager::vifaddr4_deleted(const string& ifname,
 	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
-    Vif *vif = _vifs_by_name[vifname];
+    Vif* vif = _vifs_by_name[vifname];
     vif->delete_address(addr);
     
     update_state();
@@ -1206,7 +1206,7 @@ VifManager::vifaddr6_deleted(const string& ifname,
 	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
-    Vif *vif = _vifs_by_name[vifname];
+    Vif* vif = _vifs_by_name[vifname];
     vif->delete_address(addr);
     
     update_state();

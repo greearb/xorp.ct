@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.17 2003/07/22 21:37:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.18 2003/08/07 02:23:38 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -52,7 +52,7 @@ XrlMfeaVifManager::~XrlMfeaVifManager()
     stop();
     
     // Remove all Vif entries
-    map <string, Vif*>::iterator iter;
+    map<string, Vif*>::iterator iter;
     for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
 	delete iter->second;
     }
@@ -136,7 +136,7 @@ XrlMfeaVifManager::update_state()
 void
 XrlMfeaVifManager::set_vif_state()
 {
-    map<string, Vif *>::const_iterator vif_iter;
+    map<string, Vif*>::const_iterator vif_iter;
     map<string, Vif>::iterator mfea_vif_iter;
     string error_msg;
     
@@ -775,7 +775,7 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
     //
     // Create a new vif
     //
-    Vif *vif = new Vif(vifname, ifname);
+    Vif* vif = new Vif(vifname, ifname);
     _vifs_by_name[vifname] = vif;
     _vifs_by_interface.insert(pair<string, Vif*>(ifname, vif));
     
@@ -1133,7 +1133,7 @@ XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
 	    update_state();
 	    return;
 	}
-	Vif *vif = _vifs_by_name[vifname];
+	Vif* vif = _vifs_by_name[vifname];
 	debug_msg("adding address %s prefix_len %d to interface %s vif %s\n",
 		  addr.str().c_str(), *prefix_len,
 		  ifname.c_str(), vifname.c_str());
@@ -1338,7 +1338,7 @@ XrlMfeaVifManager::vifaddr4_deleted(const string& ifname,
 	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
-    Vif *vif = _vifs_by_name[vifname];
+    Vif* vif = _vifs_by_name[vifname];
     vif->delete_address(addr);
     
     update_state();
@@ -1356,7 +1356,7 @@ XrlMfeaVifManager::vifaddr6_deleted(const string& ifname,
 	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
-    Vif *vif = _vifs_by_name[vifname];
+    Vif* vif = _vifs_by_name[vifname];
     vif->delete_address(addr);
     
     update_state();
