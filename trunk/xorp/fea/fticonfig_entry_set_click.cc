@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.14 2004/12/14 02:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.15 2004/12/17 00:19:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -275,11 +275,11 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
     // XXX: here we always write the same config to both kernel and
     // user-level Click.
     //
-    bool is_kernel_config = true;
-    bool is_user_config = true;
+    bool has_kernel_config = true;
+    bool has_user_config = true;
     if (ClickSocket::write_config(element, handler,
-				  is_kernel_config, config,
-				  is_user_config, config,
+				  has_kernel_config, config,
+				  has_user_config, config,
 				  error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("%s", error_msg.c_str());
@@ -355,11 +355,11 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
     // XXX: here we always write the same config to both kernel and
     // user-level Click.
     //
-    bool is_kernel_config = true;
-    bool is_user_config = true;
+    bool has_kernel_config = true;
+    bool has_user_config = true;
     if (ClickSocket::write_config(element, handler,
-				  is_kernel_config, config,
-				  is_user_config, config,
+				  has_kernel_config, config,
+				  has_user_config, config,
 				  error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("%s", error_msg.c_str());
