@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.6 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.7 2003/09/30 18:27:06 pavlin Exp $"
 
 
 //
@@ -156,7 +156,7 @@ PimVif::pim_register_stop_process(const IPvX& rp_addr,
 		     "invalid group mask length = %d "
 		     "instead of %u",
 		     PIMTYPE2ASCII(PIM_REGISTER_STOP),
-		     cstring(rp_addr), cstring(addr()),
+		     cstring(rp_addr), cstring(domain_wide_addr()),
 		     group_mask_len, (uint32_t)IPvX::addr_bitlen(family()));
 	return (XORP_ERROR);
     }
@@ -176,14 +176,16 @@ PimVif::pim_register_stop_process(const IPvX& rp_addr,
     }
     
     // (*,G) Register-Stop
-    // Apply to all (S,G) entries for this group
+    // Apply to all (S,G) entries for this group that are not in the NoInfo
+    // state.
     // TODO: XXX: PAVPAVPAV: should schedule a timeslice task for this.
     PimMrtSg::const_gs_iterator iter_begin, iter_end, iter;
     iter_begin = pim_mrt().pim_mrt_sg().group_by_addr_begin(group_addr);
     iter_end = pim_mrt().pim_mrt_sg().group_by_addr_end(group_addr);
     for (iter = iter_begin; iter != iter_end; ++iter) {
 	PimMre *pim_mre = iter->second;
-	pim_mre->receive_register_stop();
+	if (! pim_mre->is_register_noinfo_state())
+	    pim_mre->receive_register_stop();
     }
     
     return (XORP_OK);
@@ -210,7 +212,7 @@ PimVif::pim_register_stop_send(const IPvX& dr_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_REGISTER_STOP),
-	       cstring(addr()), cstring(dr_addr),
+	       cstring(domain_wide_addr()), cstring(dr_addr),
 	       family());
     return (XORP_ERROR);
     
@@ -219,6 +221,6 @@ PimVif::pim_register_stop_send(const IPvX& dr_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_REGISTER_STOP),
-	       cstring(addr()), cstring(dr_addr));
+	       cstring(domain_wide_addr()), cstring(dr_addr));
     return (XORP_ERROR);
 }
