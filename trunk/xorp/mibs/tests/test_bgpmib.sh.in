@@ -9,12 +9,15 @@
 # terminate them at the end of the tests.
 #
 # Preconditons
-# 1) Run a finder process
-# 2) Run xorp "../../bgp/bgp"
-# 3) Run "../../bgp/harness/test_peer -s peer1"
-# 4) Run "../../bgp/harness/test_peer -s peer2"
-# 5) Run "../../bgp/harness/coord"
-# 6) Run "snmpd"
+ # Preconditons
+ # 1) Run a finder process
+# 2) Run a FEA process.
+# 3) Run a RIB process.
+# 4) Run xorp "../bgp"
+# 5) Run "./test_peer -s peer1"
+# 6) Run "./test_peer -s peer2"
+# 7) Run "./coord"
+# 8) Run "snmpd"
 #
 set -e
 
@@ -210,6 +213,8 @@ then
     BGP_BUILDDIR=${XORP_TOP_BUILDDIR}/bgp
     ${XORP_TOP_BUILDDIR}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ${XORP_TOP_BUILDDIR}/libxipc/finder
+    ${XORP_TOP_BUILDDIR}/fea/fea_dummy   = $CXRL finder://fea/common/0.1/get_target_name
+    ${XORP_TOP_BUILDDIR}/rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
     ${BGP_BUILDDIR}/bgp = $CXRL finder://bgp/common/0.1/get_target_name
     ${BGP_BUILDDIR}/harness/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BGP_BUILDDIR}/harness/coord = $CXRL finder://coord/common/0.1/get_target_name
