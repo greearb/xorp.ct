@@ -12,13 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.35 2003/12/19 01:31:09 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.36 2003/12/19 01:50:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
-
-// Give every XRL in flight the opportunity to timeout
-#define MAX_ERR_RETRIES FLYING_LIMIT
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
