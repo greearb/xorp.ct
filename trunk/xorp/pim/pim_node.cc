@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.49 2004/06/10 22:41:32 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.50 2004/07/26 07:07:57 pavlin Exp $"
 
 
 //
@@ -1441,7 +1441,7 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
  * Find a PIM neighbor by its address.
  * 
  * Note: this method should be used in very limited cases, because
- * in case of IPv6 a neighbor's IP address may be non-unique within
+ * in case of IPv6 a neighbor's IP address may not be unique within
  * the PIM neighbor database due to scope issues.
  * 
  * Return value: The #PimNbr entry for the neighbor if found, otherwise %NULL.
@@ -1452,6 +1452,9 @@ PimNode::pim_nbr_find(const IPvX& nbr_addr)
     for (uint16_t i = 0; i < maxvifs(); i++) {
 	PimVif *pim_vif = vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
+	    continue;
+	// Exclude the PIM Register vif (as a safe-guard)
+	if (pim_vif->is_pim_register())
 	    continue;
 	PimNbr *pim_nbr = pim_vif->pim_nbr_find(nbr_addr);
 	if (pim_nbr != NULL)
@@ -1483,12 +1486,15 @@ PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
     }
     
     if (pim_nbr == NULL) {
-	// Find the first vif
+	// Find the first vif. Note that the PIM Register vif is excluded.
 	PimVif *pim_vif = NULL;
 	for (uint16_t i = 0; i < maxvifs(); i++) {
 	    pim_vif = vif_find_by_vif_index(i);
-	    if (pim_vif != NULL)
-		break;
+	    if (pim_vif == NULL)
+		continue;
+	    if (pim_vif->is_pim_register())
+		continue;
+	    break;
 	}
 	XLOG_ASSERT(pim_vif != NULL);
 	pim_nbr = new PimNbr(*pim_vif, ipvx_zero, PIM_VERSION_DEFAULT);
