@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.9 2003/05/09 19:36:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.10 2003/05/09 21:00:51 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -331,7 +331,7 @@ Finder::messenger_death_event(FinderMessengerBase* m)
 	    ti++;
 	    continue;
 	}
-	remove_target(++ti);
+	remove_target(ti);
 	break;
     }
     validate_finder_classes_and_instances(_classes, _targets);
