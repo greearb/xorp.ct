@@ -12,19 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/c_format.cc,v 1.8 2002/12/09 18:29:11 hodson Exp $"
+#ident "$XORP: xorp/libxorp/c_format.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
 
 #include <stdio.h>
+
+#include "xorp.h"
 #include "c_format.hh"
 
-void c_format_validate(const char* fmt, int exp_count) {
-    const char *p=fmt;
-    int state=0, count=0;
-    while(*p!=0) {
-	if (state==0) {
-	    if (*p=='%') {
+void
+c_format_validate(const char* fmt, int exp_count)
+{
+    const char *p = fmt;
+    int state = 0;
+    int count = 0;
+    
+    while(*p != 0) {
+	if (state == 0) {
+	    if (*p == '%') {
 		count++;
-		state=1;
+		state = 1;
 	    }
 	} else {
 	    switch (*p) {
@@ -46,16 +52,16 @@ void c_format_validate(const char* fmt, int exp_count) {
 	    case 's':
 	    case 'p':
 		//parameter type specifiers
-		state=0;
+		state = 0;
 		break;
 	    case '%':
 		//escaped percent
-		state=0;
+		state = 0;
 		count--;
 		break;
 	    case 'n':
 		//we don't permit %n
-		fprintf(stderr, "%%n detected in c_format\n");
+		fprintf(stderr, "%%n detected in c_format()\n");
 		abort();
 	    case '*':
 		//field width or precision also needs a parameter
@@ -98,7 +104,8 @@ do_c_format(const char* fmt, ...)
 }
 
 #ifdef TESTING_C_FORMAT_123
-int main(int, char**) {
+int main(int, char**)
+{
     c_format("%d", 3);
 
     printf("%s", c_format("hello%%\n").c_str());
@@ -107,4 +114,4 @@ int main(int, char**) {
     printf("%s", c_format("hello %*d %%%s\n", 5, 27, "xyz").c_str());
     printf("%s", c_format("hello %%%*n\n").c_str());
 }
-#endif
+#endif // TESTING_C_FORMAT_123
