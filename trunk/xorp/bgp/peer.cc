@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.43 2003/08/27 22:32:48 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.44 2003/09/03 18:39:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1031,6 +1031,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 		next_hop_attr = (NextHopAttribute<IPv4>*)(*i);
 		break;
 	    case LOCAL_PREF:
+		local_pref = true;
 		break;
 	    case MED:
 		break;
