@@ -12,8 +12,9 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.27 2002/12/10 16:50:15 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
 
+//#define DEBUG_LOGGING
 #include "rt_tab_register.hh"
 #include "register_server.hh"
 
@@ -440,7 +441,9 @@ RegisterTable<A>::notify_invalidated(Trie<A, RouteRegister<A>*>::iterator iter)
     list <string> module_names = iter.payload()->module_names();
     list <string>::const_iterator i;
     IPNet<A> valid_subnet = iter.payload()->valid_subnet();
+    debug_msg("notify_invalidated: %s\n", valid_subnet.str().c_str());
     for (i = module_names.begin(); i != module_names.end(); i++) {
+	debug_msg("we will send an invalidate to %s\n", (*i).c_str());
 	_register_server->send_invalidate(*i, valid_subnet, _mcast);
     }
     delete iter.payload();

@@ -12,15 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.7 2002/12/10 06:56:08 mjh Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
 
+//#define DEBUG_LOGGING
 #include "urib_module.h"
 #include "config.h"
 #include "libxorp/debug.h"
 #include "register_server.hh"
 
 NotifyQueue::NotifyQueue(const string& modname)
-    : _modname(modname) 
+    : _modname(modname), _active(false), _response_sender(NULL)
 {
 }
 
@@ -55,8 +56,10 @@ NotifyQueue::flush(ResponseSender* response_sender)
     // this isn't really the best way to do this, because when the
     // queue is active it won't force transaction batching, but it's
     // better than nothing
-    if (_active)
+    if (_active) {
+	debug_msg("queue is already active\n");
 	return;
+    }
     _active = true;
     send_next();
 }
