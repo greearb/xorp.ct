@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.6 2004/04/06 07:14:24 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.7 2004/06/10 22:40:54 hodson Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -189,6 +189,32 @@ public:
 
 private:
     bool _en;
+};
+
+/**
+ * Class for setting the discard state of an interface.
+ */
+class SetInterfaceDiscard : public InterfaceModifier {
+public:
+    SetInterfaceDiscard(IfTree&		it,
+			const string&	ifname,
+			bool		discard)
+	: InterfaceModifier(it, ifname), _discard(discard) {}
+
+    bool dispatch() {
+	IfTreeInterface* fi = interface();
+	if (fi == 0) return false;
+	fi->set_discard(_discard);
+	return true;
+    }
+
+    string str() const {
+	return c_format("SetInterfaceDiscard: %s %s",
+			ifname().c_str(), _discard ? "true" : "false");
+    }
+
+private:
+    bool _discard;
 };
 
 /**

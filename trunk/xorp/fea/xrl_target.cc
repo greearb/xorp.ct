@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.51 2004/10/02 04:22:20 atanu Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.52 2004/11/02 14:33:08 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -354,6 +354,23 @@ XrlFeaTarget::ifmgr_0_1_get_system_interface_enabled(
 }
 
 XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_system_interface_discard(
+					      // Input values,
+					      const string&	ifname,
+					      // Output values,
+					      bool&		discard)
+{
+    const IfTreeInterface* fi = 0;
+    //XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi); // XXX
+    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	discard = fi->discard();
+
+    return e;
+}
+
+XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
 					      // Input values,
 					      const string&	ifname,
@@ -365,6 +382,22 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
 
     if (e == XrlCmdError::OKAY())
 	enabled = fi->enabled();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_interface_discard(
+					      // Input values,
+					      const string&	ifname,
+					      // Output values,
+					      bool&		discard)
+{
+    const IfTreeInterface* fi = 0;
+    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	discard = fi->discard();
 
     return e;
 }
@@ -953,6 +986,18 @@ XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
 {
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new SetInterfaceEnabled(it, ifname, enabled));
+}
+
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_interface_discard(
+					      // Input values,
+					      const uint32_t&	tid,
+					      const string&	ifname,
+					      const bool&	discard)
+{
+    IfTree& it = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetInterfaceDiscard(it, ifname, discard));
 }
 
 
