@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.23 2004/04/15 16:13:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.24 2004/04/22 19:29:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -20,23 +20,30 @@
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "route_table_cache.hh"
-#include <map>
+#include "bgp.hh"
+
+template<class A> DeleteAllNodes<A>::RouteTables DeleteAllNodes<A>::_route_tables;
+template<class A> int DeleteAllNodes<A>::_deletions_per_call = 1000;
 
 template<class A>
 CacheTable<A>::CacheTable(string table_name,  
 			  Safi safi,
-			  BGPRouteTable<A> *parent_table)
-    : BGPRouteTable<A>("CacheTable-" + table_name, safi)
+			  BGPRouteTable<A> *parent_table,
+			  const PeerHandler *peer)
+    : BGPRouteTable<A>("CacheTable-" + table_name, safi),
+      _peer(peer)
 {
     this->_parent = parent_table;
+    _route_table = new RefTrie<A, const SubnetRoute<A> >;
 }
 
 template<class A>
 CacheTable<A>::~CacheTable()
 {
-    if (_route_table.begin() != _route_table.end()) {
+    if (_route_table->begin() != _route_table->end()) {
 	XLOG_WARNING("CacheTable trie was not empty on deletion\n");
     }
+    delete _route_table;
 }
 
 template<class A>
@@ -44,7 +51,9 @@ void
 CacheTable<A>::flush_cache()
 {
     debug_msg("%s\n", this->tablename().c_str());
-    _route_table.delete_all_nodes();
+//     _route_table->delete_all_nodes();
+    new DeleteAllNodes<A>(this->_peer, _route_table);
+    _route_table = new RefTrie<A, const SubnetRoute<A> >;
 }
 
 template<class A>
@@ -66,7 +75,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
     IPNet<A> net = rtmsg.net();
 
     //check we don't already have this cached
-    XLOG_ASSERT(_route_table.lookup_node(net) == _route_table.end());
+    XLOG_ASSERT(_route_table->lookup_node(net) == _route_table->end());
 
     if (rtmsg.changed()==false) {
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -79,7 +88,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	const SubnetRoute<A> *msg_route = rtmsg.route();
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
-	ti = _route_table.insert(msg_route->net(), *msg_route);
+	ti = _route_table->insert(msg_route->net(), *msg_route);
 	debug_msg("Cache Table: %s\n", this->tablename().c_str());
 	debug_msg("Caching route: %p net: %s atts: %p  %s\n", msg_route,
 	       msg_route->net().str().c_str(), 
@@ -154,8 +163,8 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     //do we have the old route cached?
     if (old_rtmsg.changed()==true) {
 	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
-	iter = _route_table.lookup_node(net);
-	if (iter == _route_table.end()) {
+	iter = _route_table->lookup_node(net);
+	if (iter == _route_table->end()) {
 	    //We don't flush the cache, so this should not happen
 	    XLOG_UNREACHABLE();
 	} else {
@@ -171,7 +180,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 						   old_rtmsg.genid());
 
 	    //delete it from our cache, 
-	    _route_table.erase(old_rtmsg.net());
+	    _route_table->erase(old_rtmsg.net());
 
 	    //It's the responsibility of the recipient of a changed
 	    //route to store it or free it.
@@ -194,7 +203,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	const SubnetRoute<A> *new_route = new_rtmsg.route();
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
-	ti = _route_table.insert(net, *new_route);
+	ti = _route_table->insert(net, *new_route);
 	debug_msg("Caching route2: %p net: %s atts: %p  %s\n", new_route,
 	       new_route->net().str().c_str(), 
 	       (new_route->attributes()), 
@@ -254,15 +263,15 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     //do we already have this cached?
     typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
-    iter = _route_table.lookup_node(net);
-    if (iter != _route_table.end()) {
+    iter = _route_table->lookup_node(net);
+    if (iter != _route_table->end()) {
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 
 	//Delete it from our cache trie.  The actual deletion will
 	//only take place when iter goes out of scope, so
 	//existing_route remains valid til then.
-	_route_table.erase(iter);
+	_route_table->erase(iter);
 
 	InternalMessage<A> old_rt_msg(existing_route,
 				      rtmsg.origin_peer(),
@@ -309,8 +318,8 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	//don't confuse anyone downstream.
 	IPNet<A> net = rtmsg.route()->net();
 	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
-	iter = _route_table.lookup_node(net);
-	XLOG_ASSERT(iter != _route_table.end());
+	iter = _route_table->lookup_node(net);
+	XLOG_ASSERT(iter != _route_table->end());
 
 	//It's the responsibility of the recipient of a changed route
 	//to store or delete it.  We don't need it anymore (we found
@@ -327,7 +336,7 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     } else {
 	//We must not have this cached
 	IPNet<A> net = rtmsg.route()->net();
-	XLOG_ASSERT(_route_table.lookup_node(net) == _route_table.end());
+	XLOG_ASSERT(_route_table->lookup_node(net) == _route_table->end());
 
 	return this->_next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, 
 				       dump_peer);
@@ -340,8 +349,8 @@ CacheTable<A>::lookup_route(const IPNet<A> &net) const
 {
     //return our cached copy if there is one, otherwise ask our parent
     typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
-    iter = _route_table.lookup_node(net);
-    if (iter != _route_table.end())
+    iter = _route_table->lookup_node(net);
+    if (iter != _route_table->end())
 	return &(iter.payload());
     else
 	return this->_parent->lookup_route(net);
@@ -378,6 +387,13 @@ CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     XLOG_ASSERT(this->_next_table == next_table);
 
     return this->_parent->get_next_message(this);
+}
+
+template<class A>
+EventLoop& 
+CacheTable<A>::eventloop() const 
+{
+    return _peer->eventloop();
 }
 
 template class CacheTable<IPv4>;

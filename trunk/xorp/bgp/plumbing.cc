@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.44 2004/04/14 19:14:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.45 2004/04/15 16:13:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -285,7 +285,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "IpcChannelInputCache",
 			  _master.safi(),
-			  filter_in);
+			  filter_in,
+			  _master.rib_handler());
     filter_in->set_next_table(cache_in);
 
     NhLookupTable<A> *nexthop_in =
@@ -316,7 +317,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     CacheTable<A> *cache_out =
 	new CacheTable<A>(ribname + "IpcChannelOutputCache",
 			  _master.safi(),
-			  filter_out);
+			  filter_out,
+			  _master.rib_handler());
     filter_out->set_next_table(cache_out);
     _tables.insert(cache_out);
 
@@ -389,7 +391,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "PeerInputCache" + peername,
 			  _master.safi(),
-			  filter_in);
+			  filter_in,
+			  peer_handler);
     filter_in->set_next_table(cache_in);
 
     NhLookupTable<A> *nexthop_in =
@@ -422,7 +425,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     CacheTable<A>* cache_out = 
 	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
 			  _master.safi(),
-			  filter_out);
+			  filter_out,
+			  peer_handler);
     filter_out->set_next_table(cache_out);
 
     RibOutTable<A>* rib_out =

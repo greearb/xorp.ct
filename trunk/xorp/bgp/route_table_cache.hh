@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.9 2004/04/01 19:54:06 mjh Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.10 2004/04/12 23:25:03 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
 
+#include <queue>
+#include "libxorp/timer.hh"
 #include "route_table_base.hh"
 #include "libxorp/ref_trie.hh"
 
@@ -41,10 +43,13 @@ RefTrieNode<IPv6, const SubnetRoute<IPv6> >
     p->unref();
 }
 
+class EventLoop;
+
 template<class A>
 class CacheTable : public BGPRouteTable<A>  {
 public:
-    CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent);
+    CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent,
+	       const PeerHandler *peer);
     ~CacheTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
@@ -70,10 +75,76 @@ public:
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     int route_count() const {
-	return _route_table.route_count();
+	return _route_table->route_count();
+    }
+    EventLoop& eventloop() const;
+
+private:
+    RefTrie<A, const SubnetRoute<A> > *_route_table;
+    const PeerHandler *_peer;
+};
+
+/**
+ * @short Delete nodes in the cache table trie.
+ */
+template<class A>
+class DeleteAllNodes {
+public:
+    typedef RefTrie<A, const SubnetRoute<A> > RouteTable;
+    typedef queue<RouteTable *> RouteTables;
+
+    DeleteAllNodes(const PeerHandler *peer, 
+		   RefTrie<A, const SubnetRoute<A> > *route_table)
+	: _peer(peer) {
+
+	    bool empty = _route_tables.empty();
+	    _route_tables.push(route_table);
+
+	    if (empty) {
+		_deleter =  peer->eventloop().
+		    new_periodic(1000,
+				 callback(this,
+				       &DeleteAllNodes<A>::delete_some_nodes));
+	    } else {
+		delete this;
+	    }
+	}
+
+    /**
+     * Background task that deletes nodes it trie.
+     *
+     * @return true if there are routes to delete.
+     */
+    bool delete_some_nodes() {
+	RouteTable *route_table = _route_tables.front();
+	RouteTable::iterator current = route_table->begin();
+	for(int i = 0; i < _deletions_per_call; i++, current) {
+	    route_table->erase(current);
+	    if (current == route_table->end()) {
+		_route_tables.pop();
+		delete route_table;
+		break;
+	    }
+	}
+
+	bool empty = _route_tables.empty();
+	if (empty)
+	    delete this;
+
+	return !empty;
+    }
+
+    /**
+     * @return true if route tables exist and are still being deleted.
+     */
+    static bool running() {
+	return !_route_tables.empty();
     }
 private:
-    RefTrie<A, const SubnetRoute<A> > _route_table;
+    static RouteTables _route_tables;	// Queue of route tables to delete.
+    XorpTimer _deleter;			// 
+    const PeerHandler *_peer;		// Handle to the EventLoop.
+    static int _deletions_per_call;	// Number of nodes deleted per call.
 };
 
 #endif // __BGP_ROUTE_TABLE_CACHE_HH__

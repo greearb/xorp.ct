@@ -56,6 +56,13 @@ illegal.
 
 -- added 2003-11-06 by AG
 
+33) Routes held in cache tables are deleted in the background using a
+timer. Perhaps the shutdown code should check that the deletion has
+completed before allowing exiting. A hook has been left to determine
+if deletion has completed (DeleteAllNodes::running()).
+
+-- added 2004-05-05 AG
+
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
 changing router ID's to IP addresses.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.27 2004/03/04 03:41:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.28 2004/04/01 19:54:08 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -92,7 +92,8 @@ test_dump(TestInfo& /*info*/)
     //set_parent on the next table, and decision table doesn't support
     //set_parent because it is the only table with multiple parents.
     CacheTable<IPv4>* cache_table1
-	= new CacheTable<IPv4>("Cache1", SAFI_UNICAST, ribin_table1);
+	= new CacheTable<IPv4>("Cache1", SAFI_UNICAST, ribin_table1,
+			       &handler1);
     ribin_table1->set_next_table(cache_table1);
     cache_table1->set_next_table(decision_table);
 
@@ -100,7 +101,8 @@ test_dump(TestInfo& /*info*/)
 	= new RibInTable<IPv4>("RIB-IN2", SAFI_UNICAST, &handler2);
 
     CacheTable<IPv4>* cache_table2
-	= new CacheTable<IPv4>("Cache2", SAFI_UNICAST, ribin_table2);
+	= new CacheTable<IPv4>("Cache2", SAFI_UNICAST, ribin_table2,
+			       &handler2);
     ribin_table2->set_next_table(cache_table2);
     cache_table2->set_next_table(decision_table);
 
@@ -108,7 +110,8 @@ test_dump(TestInfo& /*info*/)
 	= new RibInTable<IPv4>("RIB-IN3", SAFI_UNICAST, &handler3);
 
     CacheTable<IPv4>* cache_table3
-	= new CacheTable<IPv4>("Cache3", SAFI_UNICAST, ribin_table3);
+	= new CacheTable<IPv4>("Cache3", SAFI_UNICAST, ribin_table3,
+			       &handler3);
     ribin_table3->set_next_table(cache_table3);
     cache_table3->set_next_table(decision_table);
 
