@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.3 2003/03/10 20:26:47 mjh Exp $
+// $XORP: xorp/rib/rib.hh,v 1.4 2003/03/10 23:20:55 hodson Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -385,7 +385,7 @@ private:
      * @param rt the routing table to start with.
      * @param typemask the bitwise-or of the routing table types that
      * we may track back through.
-     * @returns the last matching table, or @ref rt if rt itself doesn't match.
+     * @return the last matching table, or @ref rt if rt itself doesn't match.
      */
     RouteTable<A>* track_back(RouteTable<A> *rt, int typemask) const;
 
@@ -398,7 +398,7 @@ private:
      * @param rt the routing table to start with.
      * @param typemask the bitwise-or of the routing table types that
      * we may track forward through.
-     * @returns the last matching table
+     * @return the last matching table
      */
     RouteTable<A>* track_forward(RouteTable<A> *rt, int typemask) const;
 
@@ -480,7 +480,7 @@ private:
      * associated with an IP address.
      *
      * @param addr the IP address of the nexthop router
-     * @returns the IPExternalNextHop class instance for @ref addr
+     * @return the IPExternalNextHop class instance for @ref addr
      */
     inline IPExternalNextHop<A>*
     find_or_create_external_nexthop(const A& addr);
@@ -490,7 +490,7 @@ private:
      * associated with an IP address.
      *
      * @param addr the IP address of the nexthop router
-     * @returns the IPPeerNextHop class instance for @ref addr
+     * @return the IPPeerNextHop class instance for @ref addr
      */
     inline IPPeerNextHop<A>*
     find_or_create_peer_nexthop(const A& addr);

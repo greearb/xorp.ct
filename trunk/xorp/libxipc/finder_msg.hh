@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_msg.hh,v 1.2 2002/12/19 01:29:08 hodson Exp $
+// $XORP: xorp/libxipc/finder_msg.hh,v 1.3 2003/03/10 23:20:23 hodson Exp $
 
 #ifndef __IPC_FINDER_MSG_HH__
 #define __IPC_FINDER_MSG_HH__
@@ -177,7 +177,7 @@ struct FinderParser {
      * Attempts to determine if the supplied string looks like a
      * FinderMessage header.
      * @param header candidate finder message header.
-     * @returns header size if valid, 0 if there is no enough data to
+     * @return header size if valid, 0 if there is no enough data to
      * determine if it is a valid header.  Throws an exception is data
      * does not look like a FinderMessage header.
      */
@@ -191,7 +191,7 @@ struct FinderParser {
     static size_t max_header_bytes();
 
     /**
-     * @returns the size of the payload data.
+     * @return the size of the payload data.
      */
     static size_t peek_payload_bytes(const string& header)
 	throw (BadFinderMessage);

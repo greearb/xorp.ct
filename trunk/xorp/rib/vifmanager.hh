@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.3 2003/03/10 20:26:48 mjh Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.4 2003/03/10 23:20:58 hodson Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -78,7 +78,7 @@ public:
     void start();
 
     /**
-     * @returns the state of the VifManager. 
+     * @return the state of the VifManager. 
      * @see VifManager::State
      */
     State state() const { return _state; }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.5 2003/03/10 20:26:47 mjh Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.6 2003/03/10 23:20:54 hodson Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -142,13 +142,13 @@ public:
     void delete_route(const IPv6RouteEntry& re);
 
     /**
-     * @returns the number of route adds and deletes that are
+     * @return the number of route adds and deletes that are
      * currently queued for communication with the FEA.  
      */
     size_t tasks_count() const;
 
     /**
-     * @returns true if there are currently any adds or deletes queued
+     * @return true if there are currently any adds or deletes queued
      * for transmission to the FEA or awaiting acknowledgement from
      * the FEA
      */

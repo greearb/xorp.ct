@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.7 2003/02/07 05:35:39 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.8 2003/03/10 23:20:34 hodson Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -740,7 +740,7 @@ private:
 /**
  * add subnet/payload to the tree at *root.
  *
- * @returns a pointer to the newly inserted node.
+ * @return a pointer to the newly inserted node.
  */
 template <class A, class Payload> 
 RefTrieNode<A, Payload> *
@@ -859,7 +859,7 @@ RefTrieNode<A, Payload>::insert(RefTrieNode **root,
 /**
  * Remove this node, cleanup useless internal nodes.
  *
- * @returns a pointer to the root of the trie.
+ * @return a pointer to the root of the trie.
  */
 template <class A, class Payload>
 RefTrieNode<A, Payload> *
