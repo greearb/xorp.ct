@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.14 2004/04/28 15:56:48 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.15 2004/06/10 22:41:40 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -24,7 +24,7 @@ template <typename A>
 inline static string
 make_merged_name(const RouteTable<A>* a, const RouteTable<A>* b)
 {
-    return string("Merged:(" + a->tablename() + ")+( " + b->tablename() + ")");
+    return string("Merged:(" + a->tablename() + ")+(" + b->tablename() + ")");
 }
 
 //
