@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.3 2003/03/16 07:18:58 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.4 2003/03/17 23:32:42 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
@@ -40,8 +40,8 @@ public:
      * @param fea a pointer to the RIB's @ref FeaClient instance.  The
      * FeaClient is used to communicate with the FEA using XRLs.
      */
-    ExportTable(const string& tablename, RouteTable<A>* parent, 
-		FeaClient *fea);
+    ExportTable(const string& tablename, RouteTable<A> *parent, 
+		FeaClient *fea_client);
 
     /**
      * ExportTable Destructor
@@ -66,7 +66,7 @@ public:
      * @param caller the @ref RouteTable calling this method. This
      * must be the same as _parent
      */
-    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *caller);
+    int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 
     /**
      * lookup a route in this RIB. This request is simply passed on
@@ -122,8 +122,8 @@ public:
     void flush();
     
 private:
-    RouteTable<A>* _parent;
-    FeaClient * _fea;
+    RouteTable<A>	*_parent;
+    FeaClient		*_fea_client;
 };
 
 #endif // __RIB_RT_TAB_EXPORT_HH__

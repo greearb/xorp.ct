@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.7 2003/03/15 02:37:59 pavlin Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.8 2003/03/17 23:32:42 pavlin Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -32,17 +32,18 @@ typedef ref_ptr<SyncFtiCommand> FeaClientTask;
  * FeaClient communicates add route and delete requests from the RIBs
  * to the FEA process.
  */
-class FeaClient
-{
+class FeaClient {
 public:
     /**
      * FeaClient constructor.
      *
      * @param xrl_router XRL router instance to use for communication
-     * with the FEA
+     * with the FEA.
+     * @param target_name the XRL target name to send the route changes to.
      * @param max_ops the maximum number of operations in a transaction.
      */
-    FeaClient(XrlRouter& xrl_router, uint32_t max_ops = 100);
+    FeaClient(XrlRouter& xrl_router, const string& target_name,
+	      size_t max_ops = 100);
 
     /**
      * FeaClient destructor
@@ -158,27 +159,31 @@ public:
 
 protected:
     /**
-     * @return The next task or 0 if there isn't one.
+     * @return The next task or NULL if there isn't one.
      */
     SyncFtiCommand *get_next();
+
     /**
      * Called when a transaction has completed.
      */
     void transaction_completed();
+
     /**
      * Called to start a transaction.
      */
     void start();
 
-    XrlRouter& _xrl_router;
-    bool _busy;			// Transaction in progress.
-    list<FeaClientTask> _tasks;	// List of current task.
-    list<FeaClientTask> _completed_tasks;	// Completed tasks are
-						// stored here. For
-						// later deletion.
-    const uint32_t _max_ops;	// Maximum allowed tasks in a transaction.
-    uint32_t _op_count;		// Number of tasks in this transaction.
-    bool _enabled;		// Enabled state
+private:
+    XrlRouter&	_xrl_router;		// The XRL router to use
+    const string _target_name;		// The XRL target name to send the
+					// route changes to.
+    bool	_busy;			// Transaction in progress
+    list<FeaClientTask> _tasks;		// List of current task
+    list<FeaClientTask> _completed_tasks; // Completed tasks are stored here
+					  // for later deletion.
+    const size_t _max_ops;		// Max. allowed tasks in a transaction
+    size_t	_op_count;		// Number of tasks in this transaction
+    bool	_enabled;		// Enabled state
 };
 
 #endif // __RIB_FEA_CLIENT_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.2 2003/03/10 20:26:48 mjh Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.3 2003/03/10 23:20:58 hodson Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -41,7 +41,7 @@ public:
      * @param vifmanager the VifManager for this process handling
      * communication with the FEA regarding VIF changes.
      */ 
-    XrlRibTarget(XrlRouter* r,
+    XrlRibTarget(XrlRouter *r,
 		 RIB<IPv4>& u4, RIB<IPv4>& m4,
 		 RIB<IPv6>& u6, RIB<IPv6>& m6,
 		 VifManager& vifmanager, RibManager *ribmanager) : 
@@ -53,12 +53,12 @@ public:
     ~XrlRibTarget() {}
 
 protected:
-    RIB<IPv4>& _urib4;
-    RIB<IPv4>& _mrib4;
-    RIB<IPv6>& _urib6;
-    RIB<IPv6>& _mrib6;
+    RIB<IPv4>&	_urib4;
+    RIB<IPv4>&	_mrib4;
+    RIB<IPv6>&	_urib6;
+    RIB<IPv6>&	_mrib6;
     VifManager& _vifmanager;
-    RibManager* _ribmanager;
+    RibManager	*_ribmanager;
 
 protected:
 

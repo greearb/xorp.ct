@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -69,7 +69,7 @@ public:
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
      */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A>*) { abort(); }
+    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { abort(); }
 
     /**
      * Delete a route from the OriginTable.
@@ -82,7 +82,7 @@ public:
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
      */
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>*) { abort(); }
+    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { abort(); }
 
     /**
      * Delete all the routes that are in this OriginTable.  The
@@ -97,7 +97,7 @@ public:
      * @param net the subnet to look up.
      * @return a pointer to the route entry if it exists, NULL otherwise.
      */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
+    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -107,7 +107,7 @@ public:
      * @return a pointer to the most specific route entry if any entry
      * matches, NULL otherwise.  
      */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
+    const IPRouteEntry<A> *lookup_route(const A& addr) const;
 
     /**
      * Lookup an IP addressto get the most specific (longest prefix
@@ -121,7 +121,7 @@ public:
      * relevant answer.  It is up to the recipient of this pointer to
      * free the associated memory.
      */
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+    RouteRange<A> *lookup_route_range(const A& addr) const;
 
     /**
      * @return the default administrative distance for this OriginTable
@@ -142,14 +142,14 @@ public:
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
      */
-    void replumb(RouteTable<A>*, RouteTable<A>* ) {}
+    void replumb(RouteTable<A> *, RouteTable<A> *) {}
 
     /**
      * Render the OriginTable as a string for debugging purposes
      */
     string str() const;
 private:
-    Trie<A, const IPRouteEntry<A>*> _ip_route_table;
+    Trie<A, const IPRouteEntry<A> *> _ip_route_table;
     int		_admin_distance;		// 0 .. 255
     int		_igp;				// IGP or EGP
 };

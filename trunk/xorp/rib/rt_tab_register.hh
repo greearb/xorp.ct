@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.3 2003/03/10 23:20:57 hodson Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.4 2003/03/16 07:19:00 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -157,9 +157,9 @@ public:
      */
     RouteRegister(const IPNet<A>& valid_subnet, 
 		  const IPRouteEntry<A> *route,
-		  const ModuleData *module) :
-	_valid_subnet(valid_subnet), _route(route) {
-	    _modules.insert(module);
+		  const ModuleData *module)
+	: _valid_subnet(valid_subnet), _route(route) {
+	_modules.insert(module);
     }
 
     /**
@@ -202,7 +202,7 @@ public:
      * the ModuleData as needing nitification.  
      */
     void mark_modules() const {
-	    set<const ModuleData*>::iterator i;
+	    set<const ModuleData *>::iterator i;
 	    for (i = _modules.begin(); i != _modules.end(); ++i)
 		(*i)->set();
     }
@@ -229,7 +229,7 @@ public:
      */
     list <string> module_names() const {
 	    list <string> names;
-	    set <const ModuleData*, ModuleCmp>::const_iterator i;
+	    set <const ModuleData *, ModuleCmp>::const_iterator i;
 	    for (i = _modules.begin(); i != _modules.end(); ++i)
 		names.push_back((*i)->name());
 	    return names;
@@ -241,7 +241,7 @@ public:
     string str() const;
     
 private:
-    set<const ModuleData*, ModuleCmp> _modules;
+    set<const ModuleData *, ModuleCmp> _modules;
     // _net duplicates the storage of this in the RegisterTable map -
     // not very efficient
     IPNet<A> _valid_subnet;
@@ -304,7 +304,7 @@ public:
      * @param route the new route.
      * @param caller this must be this table's parent table.
      */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
     /**
      * Delete a route from the RIB.  This will be propagated
@@ -315,13 +315,13 @@ public:
      * @param route the route being deleted.
      * @param caller this must be this table's parent table.  
      */
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* caller);
+    int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 
     /**
      * Lookup a route in the RIB.  This request will be propagated to
      * the parent table unchanged.  
      */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const {
+    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const {
 	    return _parent->lookup_route(net);
     }
 
@@ -329,7 +329,7 @@ public:
      * Lookup a route in the RIB.  This request will be propagated to
      * the parent table unchanged.  
      */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const {
+    const IPRouteEntry<A> *lookup_route(const A& addr) const {
 	    return _parent->lookup_route(addr);
     }
 
@@ -338,7 +338,7 @@ public:
      * propagated to the parent table unchanged.  It is not expected
      * this will be called, but not prohibited.  
      */
-    RouteRange<A>* lookup_route_range(const A& addr) const {
+    RouteRange<A> *lookup_route_range(const A& addr) const {
 	    return _parent->lookup_route_range(addr);
     }
 
@@ -349,7 +349,7 @@ public:
      * the same as the existing parent)
      * @param new_parent the new parent RouteTable
      */
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent) {
+    void replumb(RouteTable<A> *old_parent, RouteTable<A> *new_parent) {
 	    if (_parent == old_parent)
 		_parent = new_parent;
 	    else	// shouldn't be possible
@@ -359,7 +359,7 @@ public:
     /**
      * @return the parent @ref RouteTable of this RegisterTable
      */
-    RouteTable<A>* parent()			{ return _parent;	}
+    RouteTable<A> *parent()			{ return _parent;	}
 
     /**
      * @return this RegisterTable as a string for debugging purposes
@@ -388,7 +388,7 @@ public:
      * subset of this route (including the address of interest) for
      * which this answer also applies.
      */
-    RouteRegister<A>* register_route_range(const A& addr,
+    RouteRegister<A> *register_route_range(const A& addr,
 					   const string& module);
 
     /**
@@ -418,22 +418,22 @@ public:
     
 private:
     RouteRegister<A>* add_registration(const IPNet<A>& net,
-				       const IPRouteEntry<A>* route,
+				       const IPRouteEntry<A> *route,
 				       const string& module);
     bool delete_registration(const IPNet<A>& net, const string& module);
     bool notify_relevant_modules(bool add,
 				 const IPRouteEntry<A>& changed_route);
     bool find_matches(const IPRouteEntry<A>& route);
 
-    void notify_invalidated(typename Trie<A, RouteRegister<A>*>::iterator iter);
-    void notify_route_changed(typename Trie<A, RouteRegister<A>*>::iterator iter,
+    void notify_invalidated(typename Trie<A, RouteRegister<A> *>::iterator iter);
+    void notify_route_changed(typename Trie<A, RouteRegister<A> *>::iterator iter,
 			      const IPRouteEntry<A>& changed_route);
 
-    set<const ModuleData*, ModuleCmp> _module_names;
-    Trie<A, RouteRegister<A>*> _ipregistry;
-    RouteTable<A>* _parent;
-    RegisterServer* _register_server;
-    bool _mcast;  // is this a multicast rib?
+    set<const ModuleData *, ModuleCmp>	_module_names;
+    Trie<A, RouteRegister<A> *>		_ipregistry;
+    RouteTable<A>			*_parent;
+    RegisterServer			*_register_server;
+    bool				_mcast;  // is this a multicast rib?
 };
 
 #endif // __RIB_RT_TAB_REGISTER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.10 2003/03/17 23:32:42 pavlin Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.11 2003/03/18 00:55:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,8 +27,6 @@
 #include "xrl/interfaces/fea_fti_xif.hh"
 
 #include "fea_client.hh"
-
-static const char *server = "fea";
 
 // For the time being this code is synchronous.  Instead of making the
 // FTI of the FEA support synchronous and asynchronous interfaces, we
@@ -58,10 +56,10 @@ public:
     // Callback to get the next add or delete if available.
     typedef ref_ptr<XorpCallback0<SyncFtiCommand *> > GetNextCallback;
 
-    typedef ref_ptr<XorpCallback1<void, const XrlError&> >
-    CommandCompleteCallback;
+    typedef ref_ptr<XorpCallback1<void, const XrlError&> > CommandCompleteCallback;
 
-    SyncFtiCommand(XrlRouter& rtr) : _fticlient(&rtr) {}
+    SyncFtiCommand(XrlRouter& rtr, const string& target_name)
+	: _fticlient(&rtr), _target_name(target_name) {}
     virtual ~SyncFtiCommand() {}
 
     void start(const CompletionCallback& cb, const GetNextCallback& gncb);
@@ -92,20 +90,21 @@ protected:
 
 protected:
     XrlFtiV0p1Client	_fticlient;
+    const string&	_target_name;
 
 private:
     uint32_t		_tid;		// transaction id
-    GetNextCallback	_get_next_cb;	// Get the next operation
     CompletionCallback	_completion_cb;	// callback called when done
+    GetNextCallback	_get_next_cb;	// get the next operation
 };
 
 void
-SyncFtiCommand::start(const CompletionCallback& cb,
+SyncFtiCommand::start(const CompletionCallback& ccb,
 		      const GetNextCallback& gncb)
 {
-    _completion_cb = cb;
+    _completion_cb = ccb;
     _get_next_cb = gncb;
-    _fticlient.send_start_transaction(server,
+    _fticlient.send_start_transaction(_target_name.c_str(),
 				      callback(
 					  this,
 					  &SyncFtiCommand::start_complete));
@@ -150,7 +149,7 @@ void
 SyncFtiCommand::commit()
 {
     debug_msg("commit\n");
-    _fticlient.send_commit_transaction(server,
+    _fticlient.send_commit_transaction(_target_name.c_str(),
 				       _tid,
 				       callback(
 					   this,
@@ -178,13 +177,14 @@ public:
 	      const IPv4Net& dest,
 	      const IPv4&    gw,
 	      const string&  ifname,
-	      const string&  vifname)
-	: SyncFtiCommand(rtr), _dest(dest), _gw(gw),
+	      const string&  vifname,
+	      const string&  target_name)
+	: SyncFtiCommand(rtr, target_name), _dest(dest), _gw(gw),
 	  _ifname(ifname), _vifname(vifname)
     {}
 
     void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
-	_fticlient.send_add_entry4(server, tid, _dest, _gw,
+	_fticlient.send_add_entry4(_target_name.c_str(), tid, _dest, _gw,
 				   _ifname, _vifname, cb);
     }
 
@@ -200,12 +200,13 @@ private:
 
 class DeleteRoute4 : public SyncFtiCommand {
 public:
-    DeleteRoute4(XrlRouter& rtr, const IPv4Net& dest)
-	: SyncFtiCommand(rtr), _dest(dest)
+    DeleteRoute4(XrlRouter& rtr, const IPv4Net& dest,
+		 const string& target_name)
+	: SyncFtiCommand(rtr, target_name), _dest(dest)
     {}
 
     void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
-	_fticlient.send_delete_entry4(server, tid, _dest, cb);
+	_fticlient.send_delete_entry4(_target_name.c_str(), tid, _dest, cb);
     }
 
 private:
@@ -221,14 +222,15 @@ public:
 	      const IPv6Net& dest,
 	      const IPv6&    gw,
 	      const string&  ifname,
-	      const string&  vifname)
-	: SyncFtiCommand(rtr), _dest(dest), _gw(gw),
+	      const string&  vifname,
+	      const string&  target_name)
+	: SyncFtiCommand(rtr, target_name), _dest(dest), _gw(gw),
 	  _ifname(ifname), _vifname(vifname)
     {}
 
     void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
-	_fticlient.send_add_entry6(server, tid, _dest, _gw, _ifname,
-				   _vifname, cb);
+	_fticlient.send_add_entry6(_target_name.c_str(), tid, _dest, _gw,
+				   _ifname, _vifname, cb);
     }
 
 private:
@@ -243,12 +245,13 @@ private:
 
 class DeleteRoute6 : public SyncFtiCommand {
 public:
-    DeleteRoute6(XrlRouter& rtr, const IPv6Net& dest)
-	: SyncFtiCommand(rtr), _dest(dest)
+    DeleteRoute6(XrlRouter& rtr, const IPv6Net& dest,
+		 const string& target_name)
+	: SyncFtiCommand(rtr, target_name), _dest(dest)
     {}
 
     void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
-	_fticlient.send_delete_entry6(server, tid, _dest, cb);
+	_fticlient.send_delete_entry6(_target_name.c_str(), tid, _dest, cb);
     }
 
 private:
@@ -269,7 +272,7 @@ template<typename A>
 inline const A&
 gw(const IPRouteEntry<A>& re)
 {
-    IPNextHop<A>* nh = reinterpret_cast<IPNextHop<A>*>(re.nexthop());
+    IPNextHop<A> *nh = reinterpret_cast<IPNextHop<A> *>(re.nexthop());
     return nh->addr();
 }
 
@@ -290,8 +293,13 @@ ifname(const IPRouteEntry<A>& re)
 // -------------------------------------------------------------------------
 // FeaClient
 
-FeaClient::FeaClient(XrlRouter& rtr, uint32_t	max_ops)
-    : _xrl_router(rtr), _busy(false), _max_ops(max_ops), _enabled(true)
+FeaClient::FeaClient(XrlRouter& rtr, const string& target_name, size_t max_ops)
+    : _xrl_router(rtr),
+      _target_name(target_name),
+      _busy(false),
+      _max_ops(max_ops),
+      _op_count(0),
+      _enabled(true)
 {
 }
 
@@ -318,14 +326,16 @@ FeaClient::add_route(const IPv4Net& dest,
 		     const string&  vifname)
 {
     _tasks.push_back(FeaClientTask(new AddRoute4(_xrl_router, dest, gw, 
-						 ifname, vifname)));
+						 ifname, vifname,
+						 _target_name)));
     start();
 }
 
 void
 FeaClient::delete_route(const IPv4Net& dest)
 {
-    _tasks.push_back(FeaClientTask(new DeleteRoute4(_xrl_router, dest)));
+    _tasks.push_back(FeaClientTask(new DeleteRoute4(_xrl_router, dest,
+						    _target_name)));
     start();
 }
 
@@ -336,14 +346,16 @@ FeaClient::add_route(const IPv6Net& dest,
 		     const string&  vifname)
 {
     _tasks.push_back(FeaClientTask(new AddRoute6(_xrl_router, dest, gw, 
-						 ifname, vifname)));
+						 ifname, vifname,
+						 _target_name)));
     start();
 }
 
 void
 FeaClient::delete_route(const IPv6Net& dest)
 {
-    _tasks.push_back(FeaClientTask(new DeleteRoute6(_xrl_router, dest)));
+    _tasks.push_back(FeaClientTask(new DeleteRoute6(_xrl_router, dest,
+						    _target_name)));
     start();
 }
 
@@ -413,7 +425,7 @@ FeaClient::transaction_completed()
 
     while (!_completed_tasks.empty())
 	_completed_tasks.erase(_completed_tasks.begin());
-	
+    
     if (!_tasks.empty())
 	start();
 }

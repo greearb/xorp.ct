@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.4 2003/03/15 02:28:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.5 2003/03/16 07:19:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -24,7 +24,7 @@
 #include "fea_client.hh"
 
 static bool
-send_fea_commands(FeaClient* fc, int *pcount)
+send_fea_commands(FeaClient *fc, int *pcount)
 {
     int& count = *pcount;
     
@@ -40,7 +40,7 @@ fea_client_test()
 {
     EventLoop e;
     XrlStdRouter rtr(e, "test_fea");
-    FeaClient fc(rtr);
+    FeaClient fc(rtr, "fea");
     int n = 0;
 
     XorpTimer t = e.new_periodic(1000, callback(&send_fea_commands, &fc, &n));
@@ -53,7 +53,7 @@ fea_client_test()
     }
 }
 
-int main(int, char* argv[])
+int main(int, char *argv[])
 {
     //
     // Initialize and start xlog

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.5 2003/03/16 07:19:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.6 2003/03/17 23:32:42 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -21,10 +21,12 @@
 #include "rib_manager.hh"
 #include "vifmanager.hh"
 
-VifManager::VifManager(XrlRouter& xrl_rtr, EventLoop& eventloop,
-		       RibManager* rib_manager)
-    : _xrl_rtr(xrl_rtr), _eventloop(eventloop), _rib_manager(rib_manager),
-      _ifmgr_client(&xrl_rtr)
+VifManager::VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
+		       RibManager *rib_manager)
+    : _xrl_router(xrl_router),
+      _eventloop(eventloop),
+      _rib_manager(rib_manager),
+      _ifmgr_client(&xrl_router)
 {
     _no_fea = false;
     _state = INITIALIZING;
@@ -64,7 +66,7 @@ VifManager::clean_out_old_state()
     // registrations left over from previous incarnations of the RIB
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(this, &VifManager::clean_out_old_state_done);
-    _ifmgr_client.send_unregister_client("fea", _xrl_rtr.name(), cb);
+    _ifmgr_client.send_unregister_client("fea", _xrl_router.name(), cb);
 }
 
 void
@@ -84,7 +86,7 @@ VifManager::register_if_spy()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(this, &VifManager::register_if_spy_done);
-    _ifmgr_client.send_register_client("fea", _xrl_rtr.name(), cb);
+    _ifmgr_client.send_register_client("fea", _xrl_router.name(), cb);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.3 2003/03/16 07:18:58 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -65,13 +65,13 @@
 template<class A>
 class RouteRange {
 public:
-    RouteRange(const A& req_addr, const IPRouteEntry<A>* route,
-	       const A& top, const A& bottom) :
-	_req_addr(req_addr), _route(route), _top(top), _bottom(bottom) {}
+    RouteRange(const A& req_addr, const IPRouteEntry<A> *route,
+	       const A& top, const A& bottom)
+	: _req_addr(req_addr), _route(route), _top(top), _bottom(bottom) {}
 
     const A& top() const			{ return _top;		}
     const A& bottom() const			{ return _bottom;	}
-    const IPRouteEntry<A>* route() const	{ return _route;	}
+    const IPRouteEntry<A> *route() const	{ return _route;	}
     const IPNet<A>& net() const			{ return _route->net();	}
 
     /**
@@ -116,10 +116,10 @@ public:
     }
 
 private:
-    A _req_addr;
-    const IPRouteEntry<A>* _route;
-    A _top;
-    A _bottom;
+    A	_req_addr;
+    const IPRouteEntry<A> *_route;
+    A	_top;
+    A	_bottom;
 };
 
 //A = Address Type, eg IPv4
@@ -176,8 +176,8 @@ public:
     virtual void flush() {}
 
 protected:
-    string _tablename;
-    RouteTable* _next_table;
+    string	_tablename;
+    RouteTable	*_next_table;
 };
 
 #endif // __RIB_RT_TAB_BASE_HH__

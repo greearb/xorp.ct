@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.5 2003/03/16 07:18:58 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.6 2003/03/17 23:32:42 pavlin Exp $"
 
 #include "rib_module.h"
 #include "fea_client.hh"
@@ -25,11 +25,11 @@
 template<class A>
 ExportTable<A>::ExportTable<A>(const string&  tablename,
 			       RouteTable<A>  *parent,
-			       FeaClient      *fea)
+			       FeaClient      *fea_client)
     : RouteTable<A>(tablename)
 {
     _parent = parent;
-    _fea = fea;
+    _fea_client = fea_client;
 
     // plumb ourselves into the table graph
     if (_parent != NULL) {
@@ -41,7 +41,8 @@ ExportTable<A>::ExportTable<A>(const string&  tablename,
 }
 
 template<class A>
-ExportTable<A>::~ExportTable<A>() {
+ExportTable<A>::~ExportTable<A>()
+{
 }
 
 template<class A>
@@ -56,7 +57,7 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 	printf("Add route called for connected route\n");
 	return 0;
     }
-    _fea->add_route(route);
+    _fea_client->add_route(route);
 
     debug_msg(("Add route called on export table " + _tablename +
 	       "\n").c_str());
@@ -74,7 +75,7 @@ ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
 	printf("Delete route called for connected route\n");
 	return 0;
     }
-    _fea->delete_route(*route);
+    _fea_client->delete_route(*route);
 
     debug_msg("Delete route called on export table\n");
     return 0;

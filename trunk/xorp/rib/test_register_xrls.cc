@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.5 2003/03/15 02:28:40 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.6 2003/03/16 07:19:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -310,16 +310,16 @@ main(int /* argc */, char *argv[])
     FinderServer fs(event_loop);
 
     // Rib Server component
-    XrlStdRouter xrl_rtr(event_loop, "rib");
-    FeaClient fea(xrl_rtr);
+    XrlStdRouter xrl_router(event_loop, "rib");
+    FeaClient fea(xrl_router, "fea");
 
     // Rib Client component
-    XrlStdRouter client_xrl_rtr(event_loop, "ribclient");
-    RibClientTarget ribclienttarget(&client_xrl_rtr);
+    XrlStdRouter client_xrl_router(event_loop, "ribclient");
+    RibClientTarget ribclienttarget(&client_xrl_router);
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST);
-    RegisterServer regserv(&xrl_rtr);
+    RegisterServer regserv(&xrl_router);
     urib4.initialize_register(&regserv);
     if (urib4.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
@@ -334,10 +334,10 @@ main(int /* argc */, char *argv[])
     RIB<IPv6> mrib6(MULTICAST);
     mrib6.add_igp_table("connected");
 
-    VifManager vifmanager(xrl_rtr, event_loop, NULL);
-    XrlRibTarget xrt(&xrl_rtr, urib4, mrib4, urib6, mrib6, vifmanager, NULL);
+    VifManager vifmanager(xrl_router, event_loop, NULL);
+    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vifmanager, NULL);
 
-    XrlRibV0p1Client xc(&xrl_rtr);
+    XrlRibV0p1Client xc(&xrl_router);
 
     add_igp_table(xc, event_loop, "ospf");
     add_egp_table(xc, event_loop, "ebgp");

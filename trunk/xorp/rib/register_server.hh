@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.3 2003/03/15 03:13:11 pavlin Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.4 2003/03/16 07:18:57 pavlin Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
@@ -69,7 +69,7 @@ public:
      * batch of changes (and to consolidate those changes to avoid
      * thrashing, but we don't currently do this).
      */
-    void flush(ResponseSender* response_sender);
+    void flush(ResponseSender *response_sender);
     typedef XorpCallback1<void, const XrlError&>::RefPtr XrlCompleteCB;
 
     /**
@@ -79,11 +79,12 @@ public:
      * @param e the XRL completion status code. 
      */
     void xrl_done(const XrlError& e);
+
 private:
-    string _modname;
-    list <NotifyQueueEntry*> _queue;
-    bool _active;
-    ResponseSender* _response_sender;
+    string		_modname;
+    list <NotifyQueueEntry *> _queue;
+    bool		_active;
+    ResponseSender	*_response_sender;
 };
 
 
@@ -113,7 +114,7 @@ public:
     /** 
      * Send the queue entry (pure virtual)
      */
-    virtual void send(ResponseSender* response_sender,
+    virtual void send(ResponseSender *response_sender,
 		      const string& modname,
 		      NotifyQueue::XrlCompleteCB& cb) = 0;
 
@@ -122,6 +123,7 @@ public:
      * @see NotifyQueueEntry::EntryType
      */
     virtual EntryType type() const = 0;
+
 private:
 };
 
@@ -169,14 +171,16 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
      * @param modname the XRL module target name to send this information to.
      * @param cb the method to call back when this XRL completes.
      */
-    void send(ResponseSender* response_sender,
+    void send(ResponseSender *response_sender,
 	      const string& modname,
 	      NotifyQueue::XrlCompleteCB& cb);
+
  private:
-    IPNet<A> _net; // the route's full subnet (not the valid_subnet)
-    A _nexthop;
-    uint32_t _metric;
-    bool _multicast;
+    IPNet<A>	_net;	// the route's full subnet (not the valid_subnet)
+    A		_nexthop;	// the new nexthop of the route
+    uint32_t	_metric;	// the metric of the route
+    bool	_multicast;	// true if change occured in multicast RIB,
+				// otherwise change occured in the unicast RIB
 };
 
 /**
@@ -220,14 +224,15 @@ public:
      * @param modname the XRL module target name to send this information to.
      * @param cb the method to call back when this XRL completes.
      */
-    void send(ResponseSender* response_sender,
+    void send(ResponseSender *response_sender,
 	      const string& modname,
 	      NotifyQueue::XrlCompleteCB& cb);
 private:
-    IPNet<A> _net;	// the valid_subnet from the RouteRegister
+    IPNet<A>	_net;	// the valid_subnet from the RouteRegister
 			// instance.  The other end already knows the
 			// route's full subnet
-    bool _multicast;
+    bool	_multicast;	// true if change occured in multicast RIB,
+				// otherwise change occured in the unicast RIB
 };
 
 
@@ -250,7 +255,7 @@ public:
      * @param xrl_router the XRL router instance used to send and
      * receive XRLs in this process.
      */
-    RegisterServer(XrlRouter* xrl_router);
+    RegisterServer(XrlRouter *xrl_router);
 
     /**
      * RegisterServer destructor
@@ -319,9 +324,10 @@ public:
      * @see NotifyQueue::flush
      */
     virtual void flush();
+
 protected:
     void add_entry_to_queue(const string& modname, NotifyQueueEntry *e);
-    map <string, NotifyQueue*> _queuemap;
+    map <string, NotifyQueue *> _queuemap;
     ResponseSender _response_sender;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.6 2003/03/15 02:28:40 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.7 2003/03/16 07:19:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -74,8 +74,8 @@ parser_main()
     TestFinderServer fs(event_loop);
 
     // Rib Server component
-    XrlStdRouter xrl_rtr(event_loop, "rib");
-    FeaClient fea(xrl_rtr);
+    XrlStdRouter xrl_router(event_loop, "rib");
+    FeaClient fea(xrl_router, "fea");
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST);
@@ -87,10 +87,10 @@ parser_main()
     RIB<IPv6> urib6(UNICAST);
     RIB<IPv6> mrib6(MULTICAST);
 
-    VifManager vifmanager(xrl_rtr, event_loop, NULL);
-    XrlRibTarget xrt(&xrl_rtr, urib4, mrib4, urib6, mrib6, vifmanager, NULL);
+    VifManager vifmanager(xrl_router, event_loop, NULL);
+    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vifmanager, NULL);
 
-    XrlRibV0p1Client xrl_client(&xrl_rtr);
+    XrlRibV0p1Client xrl_client(&xrl_router);
 
     // Variable used to signal completion of Xrl parse completion
     XrlCompletion cv;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_merged.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
+// $XORP: xorp/rib/rt_tab_merged.hh,v 1.3 2003/03/16 07:18:59 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_MERGED_HH__
 #define __RIB_RT_TAB_MERGED_HH__
@@ -52,8 +52,8 @@ public:
      * @param table_b one of two parent RouteTables
      */
     MergedTable(const string&  tablename, 
-		RouteTable<A>* table_a, 
-		RouteTable<A>* table_b);
+		RouteTable<A> *table_a, 
+		RouteTable<A> *table_b);
 
     /**
      * An add_route request from a parent table causes a lookup on the
@@ -77,7 +77,7 @@ public:
      * @param route the route to be deleted.
      * @param caller the parent table sending the delete_route.  
      */
-    int delete_route(const IPRouteEntry<A> *, 
+    int delete_route(const IPRouteEntry<A> *route,
 		     RouteTable<A> *caller);
 
     /**
@@ -140,8 +140,8 @@ public:
      */
     string str() const;
 private:
-    RouteTable<A>* _table_a;
-    RouteTable<A>* _table_b;
+    RouteTable<A> *_table_a;
+    RouteTable<A> *_table_b;
 };
 
 #endif // __RIB_RT_TAB_MERGED_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.3 2003/03/10 23:20:56 hodson Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.4 2003/03/16 07:18:59 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -62,8 +62,8 @@ public:
      * @param int_table parent RouteTables supplying IGP routes
      */
     ExtIntTable(const string&  tblname,
-		RouteTable<A>* ext_table,
-		RouteTable<A>* int_table);
+		RouteTable<A> *ext_table,
+		RouteTable<A> *int_table);
     /**
      * An add_route request from a parent table causes a lookup on the
      * other parent table.  If the route is better than the one from the
@@ -86,7 +86,7 @@ public:
      * @param route the route to be deleted.
      * @param caller the parent table sending the delete_route.
      */
-    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *caller);
+    int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 
     /**
      * Lookup a specific subnet.  The lookup will first look in the
@@ -180,19 +180,19 @@ private:
     const IPRouteEntry<A> *
         lookup_route_in_igp_parent(const A& addr) const;
 
-    RouteTable<A>* _ext_table;
-    RouteTable<A>* _int_table;
-    Trie<A, const ResolvedIPRouteEntry<A>*> _ip_route_table;
-    multimap<A, const IPRouteEntry<A>*> _ip_unresolved_nexthops;
+    RouteTable<A>				*_ext_table;
+    RouteTable<A>				*_int_table;
+    Trie<A, const ResolvedIPRouteEntry<A> *>	_ip_route_table;
+    multimap<A, const IPRouteEntry<A> *>	_ip_unresolved_nexthops;
 
     // _ip_igp_parents gives us a fast way of finding a route
     // affected by a change in an igp parent route
-    multimap<const IPRouteEntry<A>*,
-	     ResolvedIPRouteEntry<A> *> _ip_igp_parents;
+    multimap<const IPRouteEntry<A> *,
+	     ResolvedIPRouteEntry<A> *>		_ip_igp_parents;
 
     // _resolving_routes is a Trie of all the routes that are used to
     // resolve external routes
-    Trie<A, const IPRouteEntry<A>*> _resolving_routes;
+    Trie<A, const IPRouteEntry<A> *> _resolving_routes;
 };
 
 #endif // __RIB_RT_TAB_EXTINT_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.3 2003/03/10 23:20:54 hodson Exp $
+// $XORP: xorp/rib/parser.hh,v 1.4 2003/03/16 07:18:57 pavlin Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -81,7 +81,7 @@ class ArgumentParser {
 public:
     ArgumentParser(const string& parser_name) : _argname(parser_name) {}
     virtual ~ArgumentParser() {}
-    virtual Datum* parse(const string& s) const = 0;
+    virtual Datum *parse(const string& s) const = 0;
     const string& name() const { return _argname;}
 private:
     const string _argname;
@@ -90,25 +90,25 @@ private:
 class IntArgumentParser : public ArgumentParser {
 public:
     IntArgumentParser() : ArgumentParser("~Int") {}
-    Datum* parse(const string& str) const; 
+    Datum *parse(const string& str) const; 
 };
 
 class StringArgumentParser : public ArgumentParser {
 public:
     StringArgumentParser() : ArgumentParser("~String") {}
-    Datum* parse(const string& str) const;
+    Datum *parse(const string& str) const;
 };
 
 class IPv4ArgumentParser : public ArgumentParser {
 public:
     IPv4ArgumentParser() : ArgumentParser("~IPv4") {}
-    Datum* parse(const string& str) const;
+    Datum *parse(const string& str) const;
 };
 
 class IPv4NetArgumentParser : public ArgumentParser {
 public:
     IPv4NetArgumentParser() : ArgumentParser("~IPv4Net") {}
-    Datum* parse(const string& str) const;
+    Datum *parse(const string& str) const;
 };
 
 class Parser {
@@ -116,16 +116,16 @@ public:
     Parser();
     ~Parser();
     int parse(const string& str) const;
-    bool add_command(Command* command);
-    bool add_argtype(ArgumentParser* arg); 
+    bool add_command(Command *command);
+    bool add_argtype(ArgumentParser *arg); 
     void set_separator(char sep) {_separator = sep;}
 private:
-    ArgumentParser* get_argument_parser(const string& name) const;
+    ArgumentParser *get_argument_parser(const string& name) const;
 
     int split_into_words(const string& str, vector <string>& words) const;
     char _separator;
-    map <string, Command*> _templates;
-    map <string, ArgumentParser*> _argtypes;
+    map <string, Command *> _templates;
+    map <string, ArgumentParser *> _argtypes;
 };
 
 class Parse_error {
@@ -142,15 +142,16 @@ private:
  */
 class DatumVariableBinding {
 public:
-    virtual void transfer(Datum* d) throw (Parse_error) = 0;
+    virtual void transfer(Datum *d) throw (Parse_error) = 0;
 };
 
 class DatumIntBinding : public DatumVariableBinding {
 public:
     DatumIntBinding(int& i) : _i(i) {}
-    void transfer(Datum* d) throw (Parse_error) {
-	IntDatum* id = dynamic_cast<IntDatum*>(d);
-	if (0 == id) throw Parse_error("Wrong type ? int decoding failed");
+    void transfer(Datum *d) throw (Parse_error) {
+	IntDatum *id = dynamic_cast<IntDatum *>(d);
+	if (0 == id)
+	    throw Parse_error("Wrong type ? int decoding failed");
 	_i = id->get();
     }
 private:
@@ -160,9 +161,10 @@ private:
 class DatumStringBinding : public DatumVariableBinding {
 public:
     DatumStringBinding(string& s) : _s(s) {}
-    void transfer(Datum* d) throw (Parse_error) {
-	StringDatum* id = dynamic_cast<StringDatum*>(d);
-	if (0 == id) throw Parse_error("Wrong type ? string decoding failed");
+    void transfer(Datum *d) throw (Parse_error) {
+	StringDatum *id = dynamic_cast<StringDatum *>(d);
+	if (0 == id)
+	    throw Parse_error("Wrong type ? string decoding failed");
 	_s = id->get();
     }
 private:
@@ -172,9 +174,10 @@ private:
 class DatumIPv4Binding : public DatumVariableBinding {
 public:
     DatumIPv4Binding(IPv4& ipv4) : _ipv4(ipv4) {}
-    void transfer(Datum* d) throw (Parse_error) {
-	IPv4Datum* id = dynamic_cast<IPv4Datum*>(d);
-	if (0 == id) throw Parse_error("Wrong type ? ipv4 decoding failed");
+    void transfer(Datum *d) throw (Parse_error) {
+	IPv4Datum *id = dynamic_cast<IPv4Datum *>(d);
+	if (0 == id)
+	    throw Parse_error("Wrong type ? ipv4 decoding failed");
 	_ipv4 = id->get();
     }
 private:
@@ -184,9 +187,10 @@ private:
 class DatumIPv4NetBinding : public DatumVariableBinding {
 public:
     DatumIPv4NetBinding(IPv4Net& ipv4net) : _ipv4net(ipv4net) {}
-    void transfer(Datum* d) throw (Parse_error) {
-	IPv4NetDatum* id = dynamic_cast<IPv4NetDatum*>(d);
-	if (0 == id) throw Parse_error("Wrong type ? ipv4 decoding failed");
+    void transfer(Datum *d) throw (Parse_error) {
+	IPv4NetDatum *id = dynamic_cast<IPv4NetDatum *>(d);
+	if (0 == id)
+	    throw Parse_error("Wrong type ? ipv4 decoding failed");
 	_ipv4net = id->get();
     }
 private:
@@ -201,7 +205,7 @@ public:
     virtual int execute() = 0;
     const string& syntax() const { return _syntax; }
 
-    void set_arg(int argnum, Datum* d) throw (Parse_error);
+    void set_arg(int argnum, Datum *d) throw (Parse_error);
     int  num_args() const { return _nargs; }
 
 protected:
@@ -216,20 +220,20 @@ protected:
     // bind positional argument to Datum type so when argument n arrives, it
     // can be decoded into a member variable 
     //
-    void bind(int n, DatumVariableBinding* b);
+    void bind(int n, DatumVariableBinding *b);
     void bind_int(int n, int& i);
     void bind_string(int n, string& s);
     void bind_ipv4(int n, IPv4& addr);
     void bind_ipv4net(int n, IPv4Net& net);
 
-    DatumVariableBinding* find_binding(int n);
+    DatumVariableBinding *find_binding(int n);
 
 protected:
     const string _syntax;
     const int _nargs;	// number of arguments before execute can be called
     int _last_arg;	// last argument added
 
-    map<int, DatumVariableBinding*> _bindings;
+    map<int, DatumVariableBinding *> _bindings;
 };
 
 class TableOriginCommand : public Command {

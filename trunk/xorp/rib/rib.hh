@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.5 2003/03/15 02:37:59 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.6 2003/03/16 07:18:58 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -74,7 +74,7 @@ public:
     /**
      * set test-mode: don't try to send to FEA
      */
-    void no_fea() {_no_fea = true;}
+    void no_fea() { _no_fea = true; }
 
     /**
      * Initialize the RIB's ExportTable so that the winning routes are
@@ -83,7 +83,7 @@ public:
      * @see ExportTable
      * @return -1 if already initialized.
      */
-    int initialize_export(FeaClient *fea);
+    int initialize_export(FeaClient *fea_client);
 
     /**
      * Initialize the RIB's RegisterTable.  The RegisterTable allows
@@ -256,7 +256,7 @@ public:
     /**
      * Used for debugging only
      */
-    virtual RouteRange<A>* route_range_lookup(const A& lookupaddr);
+    virtual RouteRange<A> *route_range_lookup(const A& lookupaddr);
 
     /**
      * Register interest in being notified about all changes to
@@ -268,7 +268,7 @@ public:
      * @param module the XRL module name to which notifications of
      * changes should be sent.
      */
-    virtual RouteRegister<A>* route_register(const A&	   lookupaddr,
+    virtual RouteRegister<A> *route_register(const A&	   lookupaddr,
 					     const string& module);
 
     /**
@@ -360,6 +360,7 @@ public:
      * Print the RIB structure for debugging
      */
     void print_rib() const;
+
 private:
     /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
@@ -388,7 +389,7 @@ private:
      * we may track back through.
      * @return the last matching table, or @ref rt if rt itself doesn't match.
      */
-    RouteTable<A>* track_back(RouteTable<A> *rt, int typemask) const;
+    RouteTable<A> *track_back(RouteTable<A> *rt, int typemask) const;
 
     /**
      * track_forward trough the RouteTables' child pointers to find
@@ -401,7 +402,7 @@ private:
      * we may track forward through.
      * @return the last matching table
      */
-    RouteTable<A>* track_forward(RouteTable<A> *rt, int typemask) const;
+    RouteTable<A> *track_forward(RouteTable<A> *rt, int typemask) const;
 
     /**
      * Find a routing table, given its table name
@@ -409,7 +410,7 @@ private:
      * @param tablename the name of the table to search for.
      * @return pointer to table if exists, 0 otherwise.
      */
-    inline RouteTable<A>* find_table(const string& tablename);
+    inline RouteTable<A> *find_table(const string& tablename);
 
     /**
      * Find a routing protcol, given its protocol name
@@ -417,7 +418,7 @@ private:
      * @param protocol the name of the table to search for.
      * @return pointer to table if exists, 0 otherwise.
      */
-    inline Protocol* find_protocol(const string& protocol);
+    inline Protocol *find_protocol(const string& protocol);
 
     /**
      * Add table to RIB, but don't do any plumbing.  The caller should
@@ -428,7 +429,7 @@ private:
      * @param table the table to be added.
      * @return 0 on success, -1 if named table already exists.
      */
-    inline int add_table(const string& tablename, RouteTable<A>* table);
+    inline int add_table(const string& tablename, RouteTable<A> *table);
 
     /**
      * Remove table from RIB, but don't do any unplumbing.
@@ -456,7 +457,7 @@ private:
      * @param addr the IP address to lookup
      * @return pointer to Vif on success, 0 otherwise.
      */
-    inline Vif* find_vif(const A& addr);
+    inline Vif *find_vif(const A& addr);
 
     /**
      * Find the IP External Nexthop class instance associated with an IP
@@ -465,7 +466,7 @@ private:
      * @param addr the IP address of the nexthop router
      * @return pointer to external next hop if it exists, 0 otherwise.
      */
-    inline IPExternalNextHop<A>* find_external_nexthop(const A& addr);
+    inline IPExternalNextHop<A> *find_external_nexthop(const A& addr);
 
     /**
      * Find the IP Peer Nexthop class instance associated with an IP
@@ -474,7 +475,7 @@ private:
      * @param addr the IP address of the nexthop router
      * @return pointer to peer next hop if it exists, 0 otherwise.
      */
-    inline IPPeerNextHop<A>* find_peer_nexthop(const A& addr);
+    inline IPPeerNextHop<A> *find_peer_nexthop(const A& addr);
 
     /**
      * Find or create the IP External Nexthop class instance
@@ -483,7 +484,7 @@ private:
      * @param addr the IP address of the nexthop router
      * @return the IPExternalNextHop class instance for @ref addr
      */
-    inline IPExternalNextHop<A>*
+    inline IPExternalNextHop<A> *
     find_or_create_external_nexthop(const A& addr);
 
     /**
@@ -493,7 +494,7 @@ private:
      * @param addr the IP address of the nexthop router
      * @return the IPPeerNextHop class instance for @ref addr
      */
-    inline IPPeerNextHop<A>*
+    inline IPPeerNextHop<A> *
     find_or_create_peer_nexthop(const A& addr);
 
     /**
@@ -504,7 +505,7 @@ private:
     /**
      * not implemented - force use of default assignment operator to fail
      */
-    RIB& operator=(const RIB&);
+    RIB& operator=(const RIB& );
 
     /**
      * Flush out routing table changes to other processes.
@@ -512,13 +513,13 @@ private:
     void flush();
 
 protected:
-    RouteTable<A>*	_final_table;
-    RegisterTable<A>*	_register_table;
+    RouteTable<A>	*_final_table;
+    RegisterTable<A>	*_register_table;
     bool _mcast;
     bool _no_fea;
 
-    map<const string, RouteTable<A>*>	_tables;
-    map<const string, Protocol*>        _protocols;
+    map<const string, RouteTable<A> *>	_tables;
+    map<const string, Protocol *>	_protocols;
     map<const string, Vif>		_vifs;
     map<const string, int>		_admin_distances;
     map<const A, IPExternalNextHop<A> >	_external_nexthops;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.5 2003/03/15 02:37:59 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.6 2003/03/16 07:19:00 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -54,12 +54,12 @@ public:
     /**
      * VifManager constructor
      *
-     * @param xrl_rtr this process's XRL router.
+     * @param xrl_router this process's XRL router.
      * @param eventloop this process's EventLoop.
      * @param rib_manager this class contains the actual RIBs for IPv4
      * and IPv4, unicast and multicast.
      */
-    VifManager(XrlRouter& xrl_rtr, EventLoop& eventloop,
+    VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
 	       RibManager *rib_manager);
 
     /**
@@ -147,10 +147,10 @@ private:
     void clean_out_old_state_done(const XrlError& e);
     void register_if_spy();
     void register_if_spy_done(const XrlError& e);
-    void interface_names_done(const XrlError& e, const XrlAtomList* alist);
-    void vif_names_done(const XrlError& e, const XrlAtomList* alist,
+    void interface_names_done(const XrlError& e, const XrlAtomList *alist);
+    void vif_names_done(const XrlError& e, const XrlAtomList *alist,
 			string ifname);
-    void get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
+    void get_all_vifaddr4_done(const XrlError& e, const XrlAtomList *alist,
 			       string ifname, string vifname);
 
     void interface_deleted(const string& ifname);
@@ -158,12 +158,12 @@ private:
     void vif_created(const string& ifname, const string& vifname);
     void vifaddr4_created(const string& ifname, const string& vifname,
 			  const IPv4& addr);
-    void vifaddr4_done(const XrlError& e, const uint32_t* prefix_len,
+    void vifaddr4_done(const XrlError& e, const uint32_t *prefix_len,
 		       string ifname, string vifname,
 		       IPv4 addr);
     void vifaddr6_created(const string& ifname, const string& vifname,
 			  const IPv6& addr);
-    void vifaddr6_done(const XrlError& e, const uint32_t* prefix_len,
+    void vifaddr6_done(const XrlError& e, const uint32_t *prefix_len,
 		       string ifname, string vifname,
 		       IPv6 addr);
     void vifaddr4_deleted(const string& ifname, const string& vifname,
@@ -173,13 +173,13 @@ private:
 
     bool _no_fea;
 
-    XrlRouter& _xrl_rtr;
-    EventLoop& _eventloop;
-    RibManager *_rib_manager;
-    XrlIfmgrV0p1Client _ifmgr_client;
-    XorpTimer _register_retry_timer;
-    State _state;
-    int _register_retry_counter;
+    XrlRouter&		_xrl_router;
+    EventLoop&		_eventloop;
+    RibManager		*_rib_manager;
+    XrlIfmgrV0p1Client	_ifmgr_client;
+    XorpTimer		_register_retry_timer;
+    State		_state;
+    int			_register_retry_counter;
 
     // the following variables keep track of how many answers we're
     // still expecting from various pipelined queries to the FEA
@@ -187,8 +187,8 @@ private:
     int _vifs_remaining;
     int _addrs_remaining;
 
-    map <string, Vif*> _vifs_by_name;
-    multimap <string, Vif*> _vifs_by_interface;
+    map <string, Vif *> _vifs_by_name;
+    multimap <string, Vif *> _vifs_by_interface;
 };
 
 #endif // __RIB_VIFMANAGER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.6 2003/03/15 03:30:25 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.7 2003/03/16 07:18:58 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -133,10 +133,10 @@ public:
 	return _metric;
     }
 protected:
-    Vif *_vif;
-    NextHop *_nh;
-    uint16_t _admin_distance; // lower is better
-    uint16_t _metric; // lower is better
+    Vif		*_vif;
+    NextHop	*_nh;
+    uint16_t	_admin_distance;	// lower is better
+    uint16_t	_metric;		// lower is better
 
     // The routing protocol that instantiated this route
     const Protocol& _proto;
@@ -165,8 +165,9 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     IPRouteEntry(const IPNet<A>& net, Vif *vif, NextHop *nh,
-		 const Protocol& proto, uint16_t metric) :
-	RouteEntry(vif, nh, proto, metric), _net(net) {}
+		 const Protocol& proto, uint16_t metric)
+	: RouteEntry(vif, nh, proto, metric), _net(net) {}
+
     /**
      * Destructor for Routing Table Entry
      */
@@ -233,7 +234,7 @@ template <class A>
 class ResolvedIPRouteEntry : public IPRouteEntry<A> {
 public:
     typedef
-    multimap<const IPRouteEntry<A>*, ResolvedIPRouteEntry<A> *> RouteBackLink;
+    multimap<const IPRouteEntry<A> *, ResolvedIPRouteEntry<A> *> RouteBackLink;
 
 public:
     /**
@@ -252,9 +253,9 @@ public:
      */
     ResolvedIPRouteEntry(const IPNet<A>& net, Vif *vif, NextHop *nh,
 			 const Protocol& proto, uint16_t metric,
-			 const IPRouteEntry<A>* igp_parent,
-			 const IPRouteEntry<A>* egp_parent) :
-	IPRouteEntry<A>(net, vif, nh, proto, metric),
+			 const IPRouteEntry<A> *igp_parent,
+			 const IPRouteEntry<A> *egp_parent)
+	: IPRouteEntry<A>(net, vif, nh, proto, metric),
 	_igp_parent(igp_parent),
 	_egp_parent(egp_parent)
     { }
@@ -300,8 +301,8 @@ public:
      */
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 private:
-    mutable const IPRouteEntry<A>* _igp_parent;
-    mutable const IPRouteEntry<A>* _egp_parent;
+    mutable const IPRouteEntry<A> *_igp_parent;
+    mutable const IPRouteEntry<A> *_egp_parent;
 
     // _backlink is used for removing the corresponding entry from the
     // RouteTable's map that is indexed by igp_parent.  Without it,
