@@ -1,10 +1,10 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.3 2003/01/29 01:35:47 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.4 2003/01/31 03:00:26 atanu Exp $
 #
 
-CALLXRL=${CALLXRL:-../../libxipc/call_xrl}
+CALLXRL=${CALLXRL:-../../libxipc/call_xrl -r 10}
 BASE=${BASE:-test_peer} # Set BASE in callers environment.
 
 #
