@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.13 2003/01/30 01:43:46 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.14 2003/01/31 02:50:21 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -579,9 +579,7 @@ public:
     }
     void	set_assert_winner_metric_wc(uint16_t vif_index, AssertMetric *v);
     void	set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v);
-    void	set_assert_winner_metric(uint16_t vif_index, AssertMetric *v) {
-	_assert_winner_metrics[vif_index] = v;
-    }
+    void	set_assert_winner_metric(uint16_t vif_index, AssertMetric *v);
     void	delete_assert_winner_metric_wc(uint16_t vif_index);
     void	delete_assert_winner_metric_sg(uint16_t vif_index);
     void	delete_assert_winner_metric(uint16_t vif_index);

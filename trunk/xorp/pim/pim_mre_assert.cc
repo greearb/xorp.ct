@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.6 2003/01/30 00:39:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.7 2003/01/30 02:36:16 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -248,7 +248,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 			  bool i_am_assert_winner_bool)
 {
     uint16_t vif_index = pim_vif->vif_index();
-    AssertMetric *save_assert_metric;
+    AssertMetric *new_assert_metric;
     
     if (! is_wc())
 	return (XORP_ERROR);
@@ -304,26 +304,16 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 		       &PimMre::assert_timer_timeout_wc);
     //  * Store self as AssertWinner(*,G,I)
     //  * Store rpt_assert_metric(G,I) as AssertWinnerMetric(*,G,I)
-    save_assert_metric = assert_winner_metric_wc(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *rpt_assert_metric(vif_index);
-    } else {
-	save_assert_metric = new AssertMetric(*rpt_assert_metric(vif_index));
-	set_assert_winner_metric_wc(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*rpt_assert_metric(vif_index));
+    set_assert_winner_metric_wc(vif_index, new_assert_metric);
     set_i_am_assert_winner_state(vif_index);
     return (XORP_OK);
     
  a2:
     //  * Store new assert winner as AssertWinner(*,G,I) and assert winner
     //    metric as AssertWinnerMetric(*,G,I)
-    save_assert_metric = assert_winner_metric_wc(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *assert_metric;
-    } else {
-	save_assert_metric = new AssertMetric(*assert_metric);
-	set_assert_winner_metric_wc(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*assert_metric);
+    set_assert_winner_metric_wc(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     mifset_timer_start(assert_timers,
 		       vif_index,
@@ -363,7 +353,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 			  bool i_am_assert_winner_bool)
 {
     uint16_t vif_index = pim_vif->vif_index();
-    AssertMetric *save_assert_metric;
+    AssertMetric *new_assert_metric;
     
     if (! is_sg())
 	return (XORP_ERROR);
@@ -425,26 +415,16 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 		       &PimMre::assert_timer_timeout_sg);
     //  * Store self as AssertWinner(S,G,I)
     //  * Store spt_assert_metric(S,I) as AssertWinnerMetric(S,G,I)
-    save_assert_metric = assert_winner_metric_sg(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *spt_assert_metric(vif_index);
-    } else {
-	save_assert_metric = new AssertMetric(*spt_assert_metric(vif_index));
-	set_assert_winner_metric_sg(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*spt_assert_metric(vif_index));
+    set_assert_winner_metric_sg(vif_index, new_assert_metric);
     set_i_am_assert_winner_state(vif_index);
     return (XORP_OK);
     
  a2:
     //  * Store new assert winner as AssertWinner(S,G,I) and assert winner
     //    metric as AssertWinnerMetric(S,G,I)
-    save_assert_metric = assert_winner_metric_sg(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *assert_metric;
-    } else {
-	save_assert_metric = new AssertMetric(*assert_metric);
-	set_assert_winner_metric_sg(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*assert_metric);
+    set_assert_winner_metric_sg(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     mifset_timer_start(assert_timers,
 		       vif_index,
@@ -486,13 +466,8 @@ PimMre::assert_process_sg(PimVif *pim_vif,
  a6:
     //  * Store new assert winner as AssertWinner(S,G,I) and assert winner
     //    metric as AssertWinnerMetric(S,G,I)
-    save_assert_metric = assert_winner_metric_sg(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *assert_metric;
-    } else {
-	save_assert_metric = new AssertMetric(*assert_metric);
-	set_assert_winner_metric_sg(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*assert_metric);
+    set_assert_winner_metric_sg(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     mifset_timer_start(assert_timers,
 		       vif_index,
@@ -511,7 +486,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 				  const IPvX& assert_source_addr)
 {
     uint16_t vif_index = pim_vif->vif_index();
-    AssertMetric *save_assert_metric;
+    AssertMetric *new_assert_metric;
     Mifset mifs;
 
     if (! is_wc()) {		// TODO: OK to enable only for is_wc() ?
@@ -548,13 +523,8 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 		       &PimMre::assert_timer_timeout_wc);
     //  * Store self as AssertWinner(*,G,I)
     //  * Store rpt_assert_metric(G,I) as AssertWinnerMetric(*,G,I)
-    save_assert_metric = assert_winner_metric_wc(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *rpt_assert_metric(vif_index);
-    } else {
-	save_assert_metric = new AssertMetric(*rpt_assert_metric(vif_index));
-	set_assert_winner_metric_wc(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*rpt_assert_metric(vif_index));
+    set_assert_winner_metric_wc(vif_index, new_assert_metric);
     set_i_am_assert_winner_state(vif_index);
     return (XORP_OK);
 }
@@ -564,7 +534,7 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
 				  const IPvX& assert_source_addr)
 {
     uint16_t vif_index = pim_vif->vif_index();
-    AssertMetric *save_assert_metric;
+    AssertMetric *new_assert_metric;
     Mifset mifs;
     
     if (! is_sg())
@@ -601,13 +571,8 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
 		       &PimMre::assert_timer_timeout_sg);
     //  * Store self as AssertWinner(S,G,I)
     //  * Store spt_assert_metric(S,I) as AssertWinnerMetric(S,G,I)
-    save_assert_metric = assert_winner_metric_sg(vif_index);
-    if (save_assert_metric != NULL) {
-	*save_assert_metric = *spt_assert_metric(vif_index);
-    } else {
-	save_assert_metric = new AssertMetric(*spt_assert_metric(vif_index));
-	set_assert_winner_metric_sg(vif_index, save_assert_metric);
-    }
+    new_assert_metric = new AssertMetric(*spt_assert_metric(vif_index));
+    set_assert_winner_metric_sg(vif_index, new_assert_metric);
     set_i_am_assert_winner_state(vif_index);
     return (XORP_OK);
 }
@@ -868,6 +833,24 @@ PimMre::set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v)
 }
 
 void
+PimMre::set_assert_winner_metric(uint16_t vif_index, AssertMetric *v)
+{
+    
+    AssertMetric *old_assert_metric;
+    
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+
+    old_assert_metric = _assert_winner_metrics[vif_index];
+    if (old_assert_metric == v)
+	return;		// Nothing changed
+    
+    if (old_assert_metric != NULL)
+	delete old_assert_metric;
+    _assert_winner_metrics[vif_index] = v;
+}
+
+void
 PimMre::delete_assert_winner_metric_wc(uint16_t vif_index)
 {
     PimMre *pim_mre_wc;
@@ -910,15 +893,7 @@ PimMre::delete_assert_winner_metric_sg(uint16_t vif_index)
 void
 PimMre::delete_assert_winner_metric(uint16_t vif_index)
 {
-    AssertMetric *assert_metric = assert_winner_metric(vif_index);
-    
-    if (vif_index == Vif::VIF_INDEX_INVALID)
-	return;
-    
-    if (assert_metric != NULL) {
-	set_assert_winner_metric(vif_index, NULL);
-	delete assert_metric;
-    }
+    set_assert_winner_metric(vif_index, NULL);
 }
 
 void
