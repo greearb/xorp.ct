@@ -38,6 +38,7 @@ protocols {
       as: 65000
       holdtime: 90
       next-hop: 192.150.187.108
+      set-parameter: "MultiProtocol.IPv6.Unicast"
     }
   }
 }
