@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.47 2004/12/17 09:49:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.48 2005/01/05 22:04:30 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -107,7 +107,7 @@ BGPMain::~BGPMain()
     */
     if (eventloop().timer_list_length() > 1)
 	XLOG_INFO("EVENT: timers %u",
-		  static_cast<uint32_t>(eventloop().timer_list_length()));
+		  XORP_UINT_CAST(eventloop().timer_list_length()));
 
     /*
     ** Force the table de-registration from the RIB. Otherwise the
@@ -920,8 +920,9 @@ BGPMain::rib_client_route_info_changed4(const IPv4& addr,
 					const uint32_t& metric)
 {
     debug_msg("rib_client_route_info_changed4:"
-	      " addr %s prefix_len %d nexthop %s metric %d\n",
-	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
+	      " addr %s prefix_len %u nexthop %s metric %u\n",
+	      addr.str().c_str(), XORP_UINT_CAST(prefix_len),
+	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
 
     return plumbing_unicast()->plumbing_ipv4().
 	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
@@ -935,8 +936,9 @@ BGPMain::rib_client_route_info_changed6(const IPv6& addr,
 					const uint32_t& metric)
 {
     debug_msg("rib_client_route_info_changed6:"
-	      " addr %s prefix_len %d nexthop %s metric %d\n",
-	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
+	      " addr %s prefix_len %u nexthop %s metric %u\n",
+	      addr.str().c_str(), XORP_UINT_CAST(prefix_len),
+	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
 
     return plumbing_unicast()->plumbing_ipv6().
 	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
@@ -948,7 +950,8 @@ BGPMain::rib_client_route_info_invalid4(const IPv4& addr,
 					const uint32_t& prefix_len)
 {
     debug_msg("rib_client_route_info_invalid4:"
-	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
+	      " addr %s prefix_len %u\n", addr.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     return plumbing_unicast()->plumbing_ipv4().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
@@ -959,7 +962,8 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
 					const uint32_t& prefix_len)
 {
     debug_msg("rib_client_route_info_invalid6:"
-	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
+	      " addr %s prefix_len %u\n", addr.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     return plumbing_unicast()->plumbing_ipv6().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
