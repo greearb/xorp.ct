@@ -2,7 +2,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/test2.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/test2.sh,v 1.2 2003/05/24 23:35:25 mjh Exp $
 #
 
 #
@@ -30,7 +30,7 @@ onexit()
     else
 	echo "$0: Tests Failed"
 	#echo "Stopping BGP"
-	#(cd ..;./xrl_shell_funcs.sh terminate)
+	#(cd ..;./xrl_shell_funcs.sh shutdown)
     fi
 }
 
