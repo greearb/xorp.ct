@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.13 2003/12/02 09:38:55 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.14 2004/01/13 00:47:08 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -35,9 +35,11 @@ public:
 		    const XRLdb& xrldb) throw (ParseError);
     // int execute(TaskManager& taskmgr) const;
     Validation* startup_validation(TaskManager& taskmgr) const;
+    Validation* config_validation(TaskManager& taskmgr) const;
     Validation* ready_validation(TaskManager& taskmgr) const;
     Validation* shutdown_validation(TaskManager& taskmgr) const;
-    Shutdown* shutdown_method(TaskManager& taskmgr) const;
+    Startup*	startup_method(TaskManager& taskmgr) const;
+    Shutdown*	shutdown_method(TaskManager& taskmgr) const;
 
     // bool execute_completed() const;
 
@@ -66,6 +68,7 @@ private:
     Action*		_startcommit;
     Action*		_endcommit;
     Action*		_status_method;
+    Action*		_startup_method;
     Action*		_shutdown_method;
     bool		_execute_done;
 };

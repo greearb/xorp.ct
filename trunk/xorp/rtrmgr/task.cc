@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.33 2004/02/26 16:02:49 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.34 2004/05/11 16:50:58 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -24,6 +24,8 @@
 #include "unexpanded_xrl.hh"
 
 #define MAX_STATUS_RETRIES 30
+
+// #define DEBUG_TASKS
 
 
 // ----------------------------------------------------------------------------
@@ -196,12 +198,48 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	    _cb->dispatch(false);
 	}
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
-			callback(this, &StatusReadyValidation::validate, _cb));
+			callback(this, &XrlStatusValidation::validate, _cb));
     } else {
 	XLOG_ERROR("Error while validating module %s", _module_name.c_str());
 	XLOG_WARNING("Continuing anyway, cross your fingers...");
 	_cb->dispatch(true);
     }
+}
+
+
+// ----------------------------------------------------------------------------
+// StatusStartupValidation implementation
+
+StatusStartupValidation::StatusStartupValidation(const string& module_name,
+						 const XrlAction& xrl_action,
+						 TaskManager& taskmgr)
+    : XrlStatusValidation(module_name, xrl_action, taskmgr)
+{
+}
+
+void
+StatusStartupValidation::handle_status_response(ProcessStatus status,
+						const string& reason)
+{
+    switch (status) {
+    case PROC_NULL:
+	// This is not a valid responses.
+	XLOG_ERROR("Bad status response; reason: %s", reason.c_str());
+	_cb->dispatch(false);
+	return;
+    case PROC_FAILED:
+    case PROC_SHUTDOWN:
+    case PROC_DONE:
+	_cb->dispatch(false);
+	return;
+    case PROC_STARTUP:
+    case PROC_NOT_READY:
+    case PROC_READY:
+	// The process is ready to be activated
+	_cb->dispatch(true);
+	return;
+    }
+    XLOG_UNREACHABLE();
 }
 
 
@@ -364,6 +402,129 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	XLOG_ERROR("Error while shutdown validation of module %s",
 		   _module_name.c_str());
 	// Return false, and we can shut it down using kill.
+	_cb->dispatch(false);
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+// Startup implementation
+
+Startup::Startup(const string& module_name)
+    : _module_name(module_name)
+{
+}
+
+
+// ----------------------------------------------------------------------------
+// XrlStartup implementation
+
+XrlStartup::XrlStartup(const string& module_name,
+		       const XrlAction& xrl_action,
+		       TaskManager& taskmgr)
+    : Startup(module_name),
+      _xrl_action(xrl_action),
+      _task_manager(taskmgr)
+{
+}
+
+EventLoop&
+XrlStartup::eventloop() const
+{
+    return _task_manager.eventloop();
+}
+
+void
+XrlStartup::startup(CallBack cb)
+{
+    _cb = cb;
+    if (_task_manager.do_exec()) {
+	string xrl_request, errmsg;
+	Xrl* xrl = NULL;
+	do {
+	    // Try to expand using the configuration tree
+	    const ConfigTreeNode* ctn;
+	    ctn = _task_manager.config_tree().find_config_module(_module_name);
+	    if (ctn != NULL) {
+		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
+						     errmsg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Cannot expand XRL startup action %s "
+			       "for module %s: %s",
+			       _xrl_action.str().c_str(),
+			       _module_name.c_str(),
+			       errmsg.c_str());
+		}
+	    }
+
+	    // Try to expand using the template tree
+	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
+	    if (_xrl_action.expand_xrl_variables(ttn, xrl_request, errmsg)
+		!= XORP_OK) {
+		XLOG_FATAL("Cannot expand XRL startup action %s "
+			   "for module %s: %s",
+			   _xrl_action.str().c_str(),
+			   _module_name.c_str(),
+			   errmsg.c_str());
+	    }
+	    break;
+	} while (false);
+	if (xrl_request.empty()) {
+	    XLOG_ERROR("Cannot expand XRL startup action %s for module %s",
+		       _xrl_action.str().c_str(), _module_name.c_str());
+	    return;
+	}
+
+	// Create the XRL
+	try {
+	    xrl = new Xrl(xrl_request.c_str());
+	} catch (const InvalidString& e) {
+	    XLOG_ERROR("Invalid XRL startup action %s for module %s",
+		       xrl_request.c_str(), _module_name.c_str());
+	}
+
+#ifdef DEBUG_TASKS
+	printf("XRL: >%s<\n", xrl->str().c_str());
+#endif
+	string response = _xrl_action.xrl_return_spec();
+	_task_manager.xorp_client().send_now(*xrl,
+				callback(this, &XrlStartup::startup_done),
+					     response, true);
+	delete xrl;
+    } else {
+	//
+	// When we're running with do_exec == false, we want to
+	// exercise most of the same machinery, but we want to ensure
+	// that the xrl_done response gets the right arguments even
+	// though we're not going to call the XRL.
+	//
+#ifdef DEBUG_TASKS
+	printf("XRL: dummy call to %s\n", _xrl_action.request().c_str());
+#endif
+	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
+			callback(this, &XrlStartup::dummy_response));
+    }
+}
+
+void
+XrlStartup::dummy_response()
+{
+    XrlError e = XrlError::OKAY();
+    XrlArgs a;
+
+    startup_done(e, &a);
+}
+
+void
+XrlStartup::startup_done(const XrlError& err, XrlArgs* xrl_args)
+{
+    UNUSED(xrl_args);
+
+    if (err == XrlError::OKAY()) {
+	// Success
+	_cb->dispatch(true);
+    } else {
+	// Failure
 	_cb->dispatch(false);
     }
 }
@@ -674,9 +835,11 @@ Task::Task(const string& name, TaskManager& taskmgr)
       _taskmgr(taskmgr),
       _start_module(false),
       _stop_module(false),
-      _start_validation(NULL),
+      _startup_validation(NULL),
+      _config_validation(NULL),
       _ready_validation(NULL),
       _shutdown_validation(NULL),
+      _startup_method(NULL),
       _shutdown_method(NULL),
       _config_done(false)
 {
@@ -684,25 +847,37 @@ Task::Task(const string& name, TaskManager& taskmgr)
 
 Task::~Task()
 {
-    if (_start_validation != NULL)
-	delete _start_validation;
+    if (_startup_validation != NULL)
+	delete _startup_validation;
+    if (_config_validation != NULL)
+	delete _config_validation;
     if (_ready_validation != NULL)
 	delete _ready_validation;
     if (_shutdown_validation != NULL)
 	delete _shutdown_validation;
+    if (_startup_method != NULL)
+	delete _startup_method;
     if (_shutdown_method != NULL)
 	delete _shutdown_method;
 }
 
 void
-Task::start_module(const string& module_name, Validation* validation)
+Task::start_module(const string& module_name,
+		   Validation* startup_validation,
+		   Validation* config_validation,
+		   Startup* startup)
 {
     XLOG_ASSERT(_start_module == false);
     XLOG_ASSERT(_stop_module == false);
+    XLOG_ASSERT(_startup_validation == NULL);
+    XLOG_ASSERT(_config_validation == NULL);
+    XLOG_ASSERT(_startup_method == NULL);
 
     _start_module = true;
     _module_name = module_name;
-    _start_validation = validation;
+    _startup_validation = startup_validation;
+    _config_validation = config_validation;
+    _startup_method = startup;
 }
 
 void
@@ -778,10 +953,10 @@ Task::step2_wait()
     printf("step2 (%s)\n", _module_name.c_str());
 #endif
 
-    if (_start_module && (_start_validation != NULL)) {
-	_start_validation->validate(callback(this, &Task::step2_done));
+    if (_start_module && (_startup_validation != NULL)) {
+	_startup_validation->validate(callback(this, &Task::step2_done));
     } else {
-	step3_config();
+	step2_2_wait();
     }
 }
 
@@ -793,9 +968,64 @@ Task::step2_done(bool success)
 #endif
 
     if (success)
-	step3_config();
+	step2_2_wait();
     else
 	task_fail("Can't validate start of process " + _module_name, true);
+}
+
+void
+Task::step2_2_wait()
+{
+#ifdef DEBUG_TASKS
+    printf("step2_2 (%s)\n", _module_name.c_str());
+#endif
+
+    if (_start_module && (_startup_method != NULL)) {
+	_startup_method->startup(callback(this, &Task::step2_2_done));
+    } else {
+	step2_3_wait();
+    }
+}
+
+void
+Task::step2_2_done(bool success)
+{
+#ifdef DEBUG_TASKS
+    printf("step2_2_done (%s)\n", _module_name.c_str());
+#endif
+
+    if (success)
+	step2_3_wait();
+    else
+	task_fail("Can't startup process " + _module_name, true);
+}
+
+void
+Task::step2_3_wait()
+{
+#ifdef DEBUG_TASKS
+    printf("step2_3 (%s)\n", _module_name.c_str());
+#endif
+
+    if (_start_module && (_config_validation != NULL)) {
+	_config_validation->validate(callback(this, &Task::step2_3_done));
+    } else {
+	step3_config();
+    }
+}
+
+void
+Task::step2_3_done(bool success)
+{
+#ifdef DEBUG_TASKS
+    printf("step2_3_done (%s)\n", _module_name.c_str());
+#endif
+
+    if (success)
+	step3_config();
+    else
+	task_fail("Can't validate config ready of process " + _module_name,
+		  true);
 }
 
 void
@@ -1056,8 +1286,11 @@ TaskManager::add_module(const ModuleCommand& module_command)
 	}
     }
 
-    Validation* validation = module_command.startup_validation(*this);
-    find_task(module_name).start_module(module_name, validation);
+    Validation* startup_validation = module_command.startup_validation(*this);
+    Validation* config_validation = module_command.config_validation(*this);
+    Startup* startup_method = module_command.startup_method(*this);
+    find_task(module_name).start_module(module_name, startup_validation,
+					config_validation, startup_method);
 
     _module_commands[module_name] = &module_command;
     return XORP_OK;

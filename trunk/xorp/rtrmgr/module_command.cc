@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.22 2004/01/13 00:47:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.23 2004/01/14 01:14:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -58,6 +58,7 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
       _startcommit(NULL),
       _endcommit(NULL),
       _status_method(NULL),
+      _startup_method(NULL),
       _shutdown_method(NULL),
       _execute_done(false)
 {
@@ -72,6 +73,8 @@ ModuleCommand::~ModuleCommand()
 	delete _endcommit;
     if (_status_method != NULL)
 	delete _status_method;
+    if (_startup_method != NULL)
+	delete _startup_method;
     if (_shutdown_method != NULL)
 	delete _shutdown_method;
 }
@@ -92,6 +95,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     if ((subcommand == "startcommit")
 	|| (subcommand == "endcommit")
 	|| (subcommand == "statusmethod")
+	|| (subcommand == "startupmethod")
 	|| (subcommand == "shutdownmethod")) {
 	expected_action_size = 3;
     }
@@ -165,6 +169,15 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	} else {
 	    _status_method = new Action(template_tree_node(), newaction);
 	}
+    } else if (cmd == "startupmethod") {
+	list<string> newaction = action;
+	newaction.pop_front();
+	if (newaction.front() == "xrl") {
+	    _startup_method = new XrlAction(template_tree_node(), newaction,
+					    xrldb);
+	} else {
+	    _startup_method = new Action(template_tree_node(), newaction);
+	}
     } else if (cmd == "shutdownmethod") {
 	list<string> newaction = action;
 	newaction.pop_front();
@@ -189,7 +202,22 @@ ModuleCommand::execute(TaskManager& taskmgr) const
 #endif // 0
 
 Validation*
-ModuleCommand::startup_validation(TaskManager &taskmgr) const
+ModuleCommand::startup_validation(TaskManager& taskmgr) const
+{
+    if ((_status_method != NULL) && (_startup_method != NULL)) {
+	// TODO: for now we can handle only XRL actions
+	XrlAction* xa = dynamic_cast<XrlAction*>(_status_method);
+	if (xa != NULL)
+	    return new StatusStartupValidation(_module_name, *xa, taskmgr);
+	else
+	    return NULL;
+    } else {
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
+    }
+}
+
+Validation*
+ModuleCommand::config_validation(TaskManager& taskmgr) const
 {
     if (_status_method != NULL) {
 	// TODO: for now we can handle only XRL actions
@@ -204,7 +232,7 @@ ModuleCommand::startup_validation(TaskManager &taskmgr) const
 }
 
 Validation*
-ModuleCommand::ready_validation(TaskManager &taskmgr) const
+ModuleCommand::ready_validation(TaskManager& taskmgr) const
 {
     if (_status_method != NULL) {
 	// TODO: for now we can handle only XRL actions
@@ -219,7 +247,7 @@ ModuleCommand::ready_validation(TaskManager &taskmgr) const
 }
 
 Validation*
-ModuleCommand::shutdown_validation(TaskManager &taskmgr) const
+ModuleCommand::shutdown_validation(TaskManager& taskmgr) const
 {
     if (_status_method != NULL) {
 	// TODO: for now we can handle only XRL actions
@@ -233,8 +261,24 @@ ModuleCommand::shutdown_validation(TaskManager &taskmgr) const
     }
 }
 
+Startup*
+ModuleCommand::startup_method(TaskManager& taskmgr) const
+{
+    if (_startup_method != NULL) {
+	// TODO: for now we can handle only XRL actions
+	XrlAction* xa = dynamic_cast<XrlAction*>(_startup_method);
+	if (xa != NULL)
+	    return new XrlStartup(_module_name, *xa, taskmgr);
+	else
+	    return NULL;
+    } else {
+	// The startup method is optional
+	return NULL;
+    }
+}
+
 Shutdown*
-ModuleCommand::shutdown_method(TaskManager &taskmgr) const
+ModuleCommand::shutdown_method(TaskManager& taskmgr) const
 {
     if (_shutdown_method != NULL) {
 	// TODO: for now we can handle only XRL actions

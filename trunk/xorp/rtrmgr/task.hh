@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.22 2003/12/13 00:16:39 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.23 2004/05/11 16:50:58 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -83,6 +83,16 @@ protected:
     uint32_t		_retries;
 };
 
+class StatusStartupValidation : public XrlStatusValidation {
+public:
+    StatusStartupValidation(const string& module_name,
+			    const XrlAction& xrl_action,
+			    TaskManager& taskmgr);
+
+private:
+    void handle_status_response(ProcessStatus status, const string& reason);
+};
+
 class StatusReadyValidation : public XrlStatusValidation {
 public:
     StatusReadyValidation(const string& module_name,
@@ -112,6 +122,37 @@ public:
 private:
     void xrl_done(const XrlError& e, XrlArgs* xrl_args);
     void handle_status_response(ProcessStatus status, const string& reason);
+};
+
+class Startup {
+public:
+    typedef XorpCallback1<void, bool>::RefPtr CallBack;
+    Startup(const string& module_name);
+    virtual ~Startup() {}
+
+    virtual void startup(CallBack cb) = 0;
+
+protected:
+    const string _module_name;
+};
+
+class XrlStartup : public Startup {
+public:
+    XrlStartup(const string& module_name, const XrlAction& xrl_action,
+	       TaskManager& taskmgr);
+    virtual ~XrlStartup() {}
+
+    void startup(CallBack cb);
+    EventLoop& eventloop() const;
+
+private:
+    void dummy_response();
+    void startup_done(const XrlError& err, XrlArgs* xrl_args);
+
+    const XrlAction&	_xrl_action;
+    TaskManager&	_task_manager;
+    CallBack		_cb;
+    XorpTimer		_dummy_timer;
 };
 
 class Shutdown {
@@ -171,7 +212,8 @@ public:
     Task(const string& name, TaskManager& taskmgr);
     ~Task();
 
-    void start_module(const string& mod_name, Validation* validation);
+    void start_module(const string& mod_name, Validation* startup_validation,
+		      Validation* config_validation, Startup* startup);
     void shutdown_module(const string& mod_name, Validation* validation,
 			 Shutdown* shutdown);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
@@ -192,6 +234,12 @@ protected:
 
     void step2_wait();
     void step2_done(bool success);
+
+    void step2_2_wait();
+    void step2_2_done(bool success);
+
+    void step2_3_wait();
+    void step2_3_done(bool success);
 
     void step3_config();
     void step3_done(bool success);
@@ -217,12 +265,15 @@ private:
     string	_module_name;	// The name of the module to start and stop
     bool	_start_module;
     bool	_stop_module;
-    Validation*	_start_validation; // The validation mechanism for the module 
-                                   // start
+    Validation*	_startup_validation; // The validation mechanism for the
+                                     // module startup
+    Validation* _config_validation;  // The validation mechanism for the
+				     // module configuration
     Validation*	_ready_validation; // The validation mechanism for the module 
                                    // reconfiguration
     Validation*	_shutdown_validation;  // The validation mechanism for the 
                                        // module shutdown
+    Startup*	_startup_method;
     Shutdown*	_shutdown_method;
     list<TaskXrlItem> _xrls;
     bool	_config_done;	// True if we changed the module's config
