@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.2 2003/01/17 08:02:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.3 2003/03/10 23:20:49 hodson Exp $"
 
 //
 // PIM Multicast Routing Table implementation.
@@ -263,9 +263,9 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    // Compute and set the MRIB and RPF-related state
 	    pim_mre->set_mrib_rp(pim_mre->compute_mrib_rp());
 	    pim_mre->set_mrib_s(pim_mre->compute_mrib_s());
-	    pim_mre->set_mrib_next_hop_s(pim_mre->compute_mrib_next_hop_s());
+	    pim_mre->set_nbr_mrib_next_hop_s(pim_mre->compute_nbr_mrib_next_hop_s());
 	    pim_mre->set_rpfp_nbr_sg(pim_mre->compute_rpfp_nbr_sg());
-	    if ((pim_mre->mrib_next_hop_s() == NULL)
+	    if ((pim_mre->nbr_mrib_next_hop_s() == NULL)
 		|| (pim_mre->rpfp_nbr_sg() == NULL)) {
 		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
 	    }
@@ -346,9 +346,9 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    
 	    // Compute and set the MRIB and RPF-related state
 	    pim_mre->set_mrib_rp(pim_mre->compute_mrib_rp());
-	    pim_mre->set_mrib_next_hop_rp(pim_mre->compute_mrib_next_hop_rp());
+	    pim_mre->set_nbr_mrib_next_hop_rp(pim_mre->compute_nbr_mrib_next_hop_rp());
 	    pim_mre->set_rpfp_nbr_wc(pim_mre->compute_rpfp_nbr_wc());
-	    if ((pim_mre->mrib_next_hop_rp() == NULL)
+	    if ((pim_mre->nbr_mrib_next_hop_rp() == NULL)
 		|| (pim_mre->rpfp_nbr_wc() == NULL)) {
 		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
 	    }
@@ -391,8 +391,8 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    
 	    // Compute and set the MRIB and RPF-related state
 	    pim_mre->set_mrib_rp(pim_mre->compute_mrib_rp());
-	    pim_mre->set_mrib_next_hop_rp(pim_mre->compute_mrib_next_hop_rp());
-	    if (pim_mre->mrib_next_hop_rp() == NULL) {
+	    pim_mre->set_nbr_mrib_next_hop_rp(pim_mre->compute_nbr_mrib_next_hop_rp());
+	    if (pim_mre->nbr_mrib_next_hop_rp() == NULL) {
 		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
 	    }
 	    

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.12 2003/07/12 01:14:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.13 2003/09/25 02:13:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -145,7 +145,7 @@ PimMrt::add_task_mrib_changed(const IPvXNet& modified_prefix_addr)
 
 // TODO: not used (not needed?)
 void
-PimMrt::add_task_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
+PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -153,7 +153,7 @@ PimMrt::add_task_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 	// Schedule the RP-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
@@ -164,7 +164,7 @@ PimMrt::add_task_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 	// Schedule the G-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
@@ -175,7 +175,7 @@ PimMrt::add_task_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 	// Schedule the S-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(modified_prefix_addr);
 	
 	add_task(pim_mre_task);
@@ -185,7 +185,7 @@ PimMrt::add_task_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
 
 // TODO: not used (not needed?)
 void
-PimMrt::add_task_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr)
+PimMrt::add_task_nbr_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -193,7 +193,7 @@ PimMrt::add_task_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr)
 	// Schedule the RP-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
 	
 	add_task(pim_mre_task);
@@ -210,7 +210,7 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_rp(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
 	
@@ -222,7 +222,7 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	// Schedule the (*,G)-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
 	
@@ -246,7 +246,7 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 	// Schedule the (S,G)-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
 	
@@ -289,7 +289,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	// Schedule the RP-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
+			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_rp(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
 	

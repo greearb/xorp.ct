@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.32 2004/02/22 03:32:58 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.33 2004/02/24 19:57:04 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -173,9 +173,9 @@ public:
     //
     // Note: applies only for (*,*,RP) and (*,G), but works also for (S,G)
     // and (S,G,rpt)
-    PimNbr	*mrib_next_hop_rp() const;
+    PimNbr	*nbr_mrib_next_hop_rp() const;
     // Note: applies only for (S,G)
-    PimNbr	*mrib_next_hop_s()  const { return (_mrib_next_hop_s);	}
+    PimNbr	*nbr_mrib_next_hop_s() const { return (_nbr_mrib_next_hop_s); }
     // Note: applies only for (*,G) ans (S,G,rpt) but works also for (S,G)
     PimNbr	*rpfp_nbr_wc()	const;
     // Note: applies only for (S,G)
@@ -187,9 +187,9 @@ public:
     // Note: applies for all entries
     bool	is_pim_nbr_missing() const;
     // Note: applies only for (*,*,RP) and (*,G)
-    void	set_mrib_next_hop_rp(PimNbr *v);
+    void	set_nbr_mrib_next_hop_rp(PimNbr *v);
     // Note: applies only for (S,G)
-    void	set_mrib_next_hop_s(PimNbr *v);
+    void	set_nbr_mrib_next_hop_s(PimNbr *v);
     // Note: applies only for (*,G)
     void	set_rpfp_nbr_wc(PimNbr *v);
     // Note: applies only for (S,G)
@@ -198,9 +198,9 @@ public:
     void	set_rpfp_nbr_sg_rpt(PimNbr *v);
     // Note: applies only for (*,*,RP), (*,G), (S,G,rpt), but works also
     // for (S,G).
-    PimNbr	*compute_mrib_next_hop_rp() const;
+    PimNbr	*compute_nbr_mrib_next_hop_rp() const;
     // Note: applies only for (S,G)
-    PimNbr	*compute_mrib_next_hop_s() const;
+    PimNbr	*compute_nbr_mrib_next_hop_s() const;
     // Note: applies only for (*,G)
     PimNbr	*compute_rpfp_nbr_wc() const;
     // Note: applies only for (S,G)
@@ -208,8 +208,8 @@ public:
     // Note: applies only for (S,G,rpt)
     PimNbr	*compute_rpfp_nbr_sg_rpt() const;
     // (*,*,RP)-related upstream changes
-    void	recompute_mrib_next_hop_rp_changed();
-    void	recompute_mrib_next_hop_rp_gen_id_changed();
+    void	recompute_nbr_mrib_next_hop_rp_changed();
+    void	recompute_nbr_mrib_next_hop_rp_gen_id_changed();
     // (*,G)-related upstream changes
     void	recompute_rpfp_nbr_wc_assert_changed();
     void	recompute_rpfp_nbr_wc_not_assert_changed();
@@ -226,8 +226,8 @@ public:
     // Note: applies for (S,G)
     void	recompute_is_directly_connected_sg();
     //
-    PimNbr	*_mrib_next_hop_rp;	// Applies only for (*,*,RP) and (*,G)
-    PimNbr	*_mrib_next_hop_s;	// Applies only for (S,G)
+    PimNbr	*_nbr_mrib_next_hop_rp;	// Applies only for (*,*,RP) and (*,G)
+    PimNbr	*_nbr_mrib_next_hop_s;	// Applies only for (S,G)
     PimNbr	*_rpfp_nbr_wc;		// Applies only for (*,G)
     PimNbr	*_rpfp_nbr_sg;		// Applies only for (S,G)
     PimNbr	*_rpfp_nbr_sg_rpt;	// Applies only for (S,G,rpt)

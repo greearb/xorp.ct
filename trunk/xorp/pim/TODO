@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.66 2004/02/23 23:38:22 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.67 2004/02/24 23:50:19 pavlin Exp $
 #
 
 * IMPL:
@@ -519,9 +519,9 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   VIF_INDEX_INVALID ??
 
 * IMPL: remove the following input state ??
-        INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED,           // 3
-        INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED,         // 5
-        INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED,            // 6
+        INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED,           // 3
+        INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED,         // 5
+        INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED,            // 6
         (Maybe yes, because it is never used??)
 
 * SPEC+IMPL: If an interface goes down:
@@ -570,7 +570,7 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 
 * IMPL: If I am the RP for PimMre, do we want to explicity test for that and
   set/return the PimNbr and the Mrib to NULL?
-  E.g., in PimMre::compute_mrib_next_hop_rp(),
+  E.g., in PimMre::compute_nbr_mrib_next_hop_rp(),
   PimMre::compute_rpfp_nbr_wc()
   Similar for S, if a directly-connected S, or I am the S.
 
@@ -653,7 +653,8 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   "RPF'(*,G) changes not due to an Assert"
   In that case, does it matter in what order the actions are performed?
   
-* IMPL: Unite in PimMreTrackState MRIB_NEXT_HOP_RP with MRIB_NEXT_HOP_RP_G
+* IMPL: Unite in PimMreTrackState NBR_MRIB_NEXT_HOP_RP with
+  NBR_MRIB_NEXT_HOP_RP_G
   (XXX: not need for this??)
 
 * SPEC+IMPL: fix the definition for "acceptable assert" for (*,G) to

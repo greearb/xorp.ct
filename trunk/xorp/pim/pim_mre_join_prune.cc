@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.26 2003/09/30 18:27:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.27 2004/02/22 03:43:49 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1219,7 +1219,7 @@ void
 PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
 		       const IPvX& target_nbr_addr)
 {
-    PimNbr *my_mrib_next_hop_rp;
+    PimNbr *my_nbr_mrib_next_hop_rp;
     PimVif *pim_vif;
     
     if (vif_index == Vif::VIF_INDEX_INVALID)
@@ -1233,12 +1233,12 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
     return;
     
  joined_state_label:
-    my_mrib_next_hop_rp = mrib_next_hop_rp();
-    if (my_mrib_next_hop_rp == NULL)
+    my_nbr_mrib_next_hop_rp = nbr_mrib_next_hop_rp();
+    if (my_nbr_mrib_next_hop_rp == NULL)
 	return;			// XXX: I don't know the MRIB.next_hop(RP).
-    if (my_mrib_next_hop_rp->vif_index() != vif_index)
+    if (my_nbr_mrib_next_hop_rp->vif_index() != vif_index)
 	return;
-    if (! my_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
+    if (! my_nbr_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
 	return;
     
     // `target_nbr_addr' belongs to NBR(RPF_interface(RP), MRIB.next_hop(RP))
@@ -1265,7 +1265,7 @@ void
 PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
 			const IPvX& target_nbr_addr)
 {
-    PimNbr *my_mrib_next_hop_rp;
+    PimNbr *my_nbr_mrib_next_hop_rp;
     PimVif *pim_vif;
     
     if (vif_index == Vif::VIF_INDEX_INVALID)
@@ -1279,12 +1279,12 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
     return;
     
  joined_state_label:
-    my_mrib_next_hop_rp = mrib_next_hop_rp();
-    if (my_mrib_next_hop_rp == NULL)
+    my_nbr_mrib_next_hop_rp = nbr_mrib_next_hop_rp();
+    if (my_nbr_mrib_next_hop_rp == NULL)
 	return;			// XXX: I don't know the MRIB.next_hop(RP)
-    if (my_mrib_next_hop_rp->vif_index() != vif_index)
+    if (my_nbr_mrib_next_hop_rp->vif_index() != vif_index)
 	return;
-    if (! my_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
+    if (! my_nbr_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
 	return;
     
     // `target_nbr_addr' belongs to NBR(RPF_interface(RP), MRIB.next_hop(RP))
@@ -1749,7 +1749,7 @@ PimMre::recompute_is_join_desired_rp()
     if (! is_join_desired_rp())
 	return (false);		// Nothing changed
     // Send Join(*,*,RP) to MRIB.next_hop(RP)
-    pim_nbr = mrib_next_hop_rp();
+    pim_nbr = nbr_mrib_next_hop_rp();
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
 	    XLOG_WARNING("JoinDesired(*,*,RP) = true: "
@@ -1780,7 +1780,7 @@ PimMre::recompute_is_join_desired_rp()
     if (is_join_desired_rp())
 	return (false);		// Nothing changed
     // Send Prune(*,*,RP) to MRIB.next_hop(RP)
-    pim_nbr = mrib_next_hop_rp();
+    pim_nbr = nbr_mrib_next_hop_rp();
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
 	    XLOG_WARNING("JoinDesired(*,*,RP) = false: "
@@ -2357,7 +2357,7 @@ PimMre::join_timer_timeout()
     
     // Joined state
     // Send Join(*,*,RP) to MRIB.next_hop(RP)
-    pim_nbr = mrib_next_hop_rp();  
+    pim_nbr = nbr_mrib_next_hop_rp();  
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
 	    XLOG_WARNING("JoinDesired(*,*,RP) = true: "

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.12 2003/09/25 02:15:33 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.13 2004/02/22 03:54:12 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -64,10 +64,10 @@ public:
 	INPUT_STATE_RP_CHANGED = 0,				// 0
 	INPUT_STATE_MRIB_RP_CHANGED,				// 1
 	INPUT_STATE_MRIB_S_CHANGED,				// 2
-	INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED,			// 3
-	INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED,		// 4
-	INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED,			// 5
-	INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED,			// 6
+	INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED,		// 3
+	INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED,	// 4
+	INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED,		// 5
+	INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED,		// 6
 	INPUT_STATE_RPFP_NBR_WC_CHANGED,			// 7
 	INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED,			// 8
 	INPUT_STATE_RPFP_NBR_SG_CHANGED,			// 9
@@ -169,8 +169,8 @@ public:
 	OUTPUT_STATE_RPFP_NBR_SG_GEN_ID,			// 44
 	OUTPUT_STATE_RPFP_NBR_SG_RPT,				// 45
 	OUTPUT_STATE_RPFP_NBR_SG_RPT_SG,			// 46
-	OUTPUT_STATE_MRIB_NEXT_HOP_RP,				// 47
-	OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID,			// 48
+	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP,			// 47
+	OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID,		// 48
 	OUTPUT_STATE_OUT_START_VIF_RP,				// 49
 	OUTPUT_STATE_OUT_START_VIF_WC,				// 50
 	OUTPUT_STATE_OUT_START_VIF_SG,				// 51
@@ -211,10 +211,10 @@ public:
     void	input_state_rp_changed(list<PimMreAction> action_list);
     void	input_state_mrib_rp_changed(list<PimMreAction> action_list);
     void	input_state_mrib_s_changed(list<PimMreAction> action_list);
-    void	input_state_mrib_next_hop_rp_changed(list<PimMreAction> action_list);
-    void	input_state_mrib_next_hop_rp_gen_id_changed(list<PimMreAction> action_list);
-    void	input_state_mrib_next_hop_rp_g_changed(list<PimMreAction> action_list);
-    void	input_state_mrib_next_hop_s_changed(list<PimMreAction> action_list);
+    void	input_state_nbr_mrib_next_hop_rp_changed(list<PimMreAction> action_list);
+    void	input_state_nbr_mrib_next_hop_rp_gen_id_changed(list<PimMreAction> action_list);
+    void	input_state_nbr_mrib_next_hop_rp_g_changed(list<PimMreAction> action_list);
+    void	input_state_nbr_mrib_next_hop_s_changed(list<PimMreAction> action_list);
     void	input_state_rpfp_nbr_wc_changed(list<PimMreAction> action_list);
     void	input_state_rpfp_nbr_wc_gen_id_changed(list<PimMreAction> action_list);
     void	input_state_rpfp_nbr_sg_changed(list<PimMreAction> action_list);
@@ -315,8 +315,8 @@ public:
     list<PimMreAction>	output_state_rpfp_nbr_sg_gen_id(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_rpfp_nbr_sg_rpt(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_rpfp_nbr_sg_rpt_sg(list<PimMreAction> action_list);
-    list<PimMreAction>	output_state_mrib_next_hop_rp(list<PimMreAction> action_list);
-    list<PimMreAction>	output_state_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_nbr_mrib_next_hop_rp(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_nbr_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_start_vif_rp(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_start_vif_wc(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_start_vif_sg(list<PimMreAction> action_list);
@@ -438,10 +438,10 @@ private:
     void	track_state_rpf_interface_rp(list<PimMreAction> action_list);
     void	track_state_rpf_interface_s(list<PimMreAction> action_list);
     // RPF neighbor info
-    void	track_state_mrib_next_hop_rp(list<PimMreAction> action_list);
-    void	track_state_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list);
-    void	track_state_mrib_next_hop_rp_g(list<PimMreAction> action_list);
-    void	track_state_mrib_next_hop_s(list<PimMreAction> action_list);
+    void	track_state_nbr_mrib_next_hop_rp(list<PimMreAction> action_list);
+    void	track_state_nbr_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list);
+    void	track_state_nbr_mrib_next_hop_rp_g(list<PimMreAction> action_list);
+    void	track_state_nbr_mrib_next_hop_s(list<PimMreAction> action_list);
     void	track_state_mrib_pref_metric_s(list<PimMreAction> action_list);
     void	track_state_mrib_pref_metric_rp(list<PimMreAction> action_list);
     // JOIN/PRUNE info

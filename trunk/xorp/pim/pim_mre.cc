@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.24 2003/06/13 01:32:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.25 2003/07/03 07:09:10 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -57,8 +57,8 @@ PimMre::PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
     _mrib_rp = NULL;
     _mrib_s = NULL;
     
-    _mrib_next_hop_rp = NULL;
-    _mrib_next_hop_s = NULL;
+    _nbr_mrib_next_hop_rp = NULL;
+    _nbr_mrib_next_hop_s = NULL;
     _rpfp_nbr_wc = NULL;
     _rpfp_nbr_sg = NULL;
     _rpfp_nbr_sg_rpt = NULL;
@@ -122,8 +122,8 @@ PimMre::add_pim_mre_lists()
     do {
 	if (is_rp()) {
 	    // (*,*,RP)
-	    if (_mrib_next_hop_rp != NULL) {
-		_mrib_next_hop_rp->add_pim_mre(this);
+	    if (_nbr_mrib_next_hop_rp != NULL) {
+		_nbr_mrib_next_hop_rp->add_pim_mre(this);
 	    } else {
 		pim_node().add_pim_mre_no_pim_nbr(this);
 	    }
@@ -132,12 +132,12 @@ PimMre::add_pim_mre_lists()
 	
 	if (is_wc()) {
 	    // (*,G)
-	    if (_mrib_next_hop_rp != NULL) {
-		_mrib_next_hop_rp->add_pim_mre(this);
+	    if (_nbr_mrib_next_hop_rp != NULL) {
+		_nbr_mrib_next_hop_rp->add_pim_mre(this);
 	    } else {
 		pim_node().add_pim_mre_no_pim_nbr(this);
 	    }
-	    if (_rpfp_nbr_wc != _mrib_next_hop_rp) {
+	    if (_rpfp_nbr_wc != _nbr_mrib_next_hop_rp) {
 		if (_rpfp_nbr_wc != NULL) {
 		    _rpfp_nbr_wc->add_pim_mre(this);
 		} else {
@@ -149,12 +149,12 @@ PimMre::add_pim_mre_lists()
 	
 	if (is_sg()) {
 	    // (S,G)
-	    if (_mrib_next_hop_s != NULL) {
-		_mrib_next_hop_s->add_pim_mre(this);
+	    if (_nbr_mrib_next_hop_s != NULL) {
+		_nbr_mrib_next_hop_s->add_pim_mre(this);
 	    } else {
 		pim_node().add_pim_mre_no_pim_nbr(this);
 	    }
-	    if (_rpfp_nbr_sg != _mrib_next_hop_s) {
+	    if (_rpfp_nbr_sg != _nbr_mrib_next_hop_s) {
 		if (_rpfp_nbr_sg != NULL) {
 		    _rpfp_nbr_sg->add_pim_mre(this);
 		} else {
@@ -196,50 +196,50 @@ PimMre::remove_pim_mre_lists()
     do {
 	if (is_rp()) {
 	    // (*,*,RP)
-	    if (_mrib_next_hop_rp != NULL) {
-		_mrib_next_hop_rp->delete_pim_mre(this);
+	    if (_nbr_mrib_next_hop_rp != NULL) {
+		_nbr_mrib_next_hop_rp->delete_pim_mre(this);
 	    } else {
 		pim_node().delete_pim_mre_no_pim_nbr(this);
 	    }
-	    _mrib_next_hop_rp = NULL;
+	    _nbr_mrib_next_hop_rp = NULL;
 	    break;
 	}
 	
 	if (is_wc()) {
 	    // (*,G)
-	    if (_mrib_next_hop_rp != NULL) {
-		_mrib_next_hop_rp->delete_pim_mre(this);
+	    if (_nbr_mrib_next_hop_rp != NULL) {
+		_nbr_mrib_next_hop_rp->delete_pim_mre(this);
 	    } else {
 		pim_node().delete_pim_mre_no_pim_nbr(this);
 	    }
-	    if (_rpfp_nbr_wc != _mrib_next_hop_rp) {
+	    if (_rpfp_nbr_wc != _nbr_mrib_next_hop_rp) {
 		if (_rpfp_nbr_wc != NULL) {
 		    _rpfp_nbr_wc->delete_pim_mre(this);
 		} else {
 		    pim_node().delete_pim_mre_no_pim_nbr(this);
 		}
 	    }
-	    _mrib_next_hop_rp = NULL;
+	    _nbr_mrib_next_hop_rp = NULL;
 	    _rpfp_nbr_wc = NULL;
 	    break;
 	}
 	
 	if (is_sg()) {
 	    // (S,G)
-	    if (_mrib_next_hop_s != NULL) {
-		_mrib_next_hop_s->delete_pim_mre(this);
+	    if (_nbr_mrib_next_hop_s != NULL) {
+		_nbr_mrib_next_hop_s->delete_pim_mre(this);
 	    } else {
 		pim_node().delete_pim_mre_no_pim_nbr(this);
 	    }
-	    if (_rpfp_nbr_sg != _mrib_next_hop_s) {
+	    if (_rpfp_nbr_sg != _nbr_mrib_next_hop_s) {
 		if (_rpfp_nbr_sg != NULL) {
 		    _rpfp_nbr_sg->delete_pim_mre(this);
 		} else {
 		    pim_node().delete_pim_mre_no_pim_nbr(this);
 		}
 	    }
-	    _mrib_next_hop_s = NULL;
-	    _mrib_next_hop_rp = NULL;
+	    _nbr_mrib_next_hop_s = NULL;
+	    _nbr_mrib_next_hop_rp = NULL;
 	    break;
 	}
 	

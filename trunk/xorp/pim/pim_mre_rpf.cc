@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.20 2003/09/30 18:27:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.21 2004/02/22 03:49:36 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -50,16 +50,16 @@
 //
 
 PimNbr *
-PimMre::mrib_next_hop_rp() const
+PimMre::nbr_mrib_next_hop_rp() const
 {
     if (is_rp() || is_wc())
-	return (_mrib_next_hop_rp);
+	return (_nbr_mrib_next_hop_rp);
     
     if (wc_entry() != NULL)
-	return (wc_entry()->mrib_next_hop_rp());
+	return (wc_entry()->nbr_mrib_next_hop_rp());
     
     if (rp_entry() != NULL)
-	return (rp_entry()->mrib_next_hop_rp());
+	return (rp_entry()->nbr_mrib_next_hop_rp());
     
     return (NULL);
 }
@@ -78,7 +78,7 @@ PimMre::rpfp_nbr_wc() const
 	return (wc_entry()->rpfp_nbr_wc());
     
     // Return MRIB.next_hop(RP(G))
-    return (mrib_next_hop_rp());
+    return (nbr_mrib_next_hop_rp());
 }
 
 uint16_t
@@ -135,9 +135,9 @@ PimMre::is_pim_nbr_in_use(const PimNbr *pim_nbr) const
 {
     if (pim_nbr == NULL)
 	return (false);
-    if (_mrib_next_hop_rp == pim_nbr)
+    if (_nbr_mrib_next_hop_rp == pim_nbr)
 	return (true);
-    if (_mrib_next_hop_s == pim_nbr)
+    if (_nbr_mrib_next_hop_s == pim_nbr)
 	return (true);
     if (_rpfp_nbr_wc == pim_nbr)
 	return (true);
@@ -155,20 +155,20 @@ PimMre::is_pim_nbr_missing() const
 {
     if (is_rp()) {
 	// (*,*,RP) entry
-	if (_mrib_next_hop_rp == NULL)
+	if (_nbr_mrib_next_hop_rp == NULL)
 	    return (true);
 	return (false);
     }
     if (is_wc()) {
 	// (*,G) entry
-	if ((_mrib_next_hop_rp == NULL)
+	if ((_nbr_mrib_next_hop_rp == NULL)
 	    || (_rpfp_nbr_wc == NULL))
 	    return (true);
 	return (false);
     }
     if (is_sg()) {
 	// (S,G) entry
-	if ((_mrib_next_hop_s == NULL)
+	if ((_nbr_mrib_next_hop_s == NULL)
 	    || (_rpfp_nbr_sg == NULL))
 	    return (true);
 	return (false);
@@ -187,9 +187,9 @@ PimMre::is_pim_nbr_missing() const
 
 // Note: applies only for (*,*,RP) and (*,G)
 void
-PimMre::set_mrib_next_hop_rp(PimNbr *v)
+PimMre::set_nbr_mrib_next_hop_rp(PimNbr *v)
 {
-    PimNbr *old_pim_nbr = _mrib_next_hop_rp;
+    PimNbr *old_pim_nbr = _nbr_mrib_next_hop_rp;
     
     if (! (is_rp() || is_wc()))
 	return;
@@ -200,7 +200,7 @@ PimMre::set_mrib_next_hop_rp(PimNbr *v)
     // Set the new value, and if necessary add to the list of PimMre entries
     // for this neighbor.
     bool is_new_nbr_in_use = is_pim_nbr_in_use(v);
-    _mrib_next_hop_rp = v;
+    _nbr_mrib_next_hop_rp = v;
     if ((v != NULL) && (! is_new_nbr_in_use)) {
 	v->add_pim_mre(this);
     }
@@ -226,9 +226,9 @@ PimMre::set_mrib_next_hop_rp(PimNbr *v)
 
 // Note: applies only for (S,G)
 void
-PimMre::set_mrib_next_hop_s(PimNbr *v)
+PimMre::set_nbr_mrib_next_hop_s(PimNbr *v)
 {
-    PimNbr *old_pim_nbr = _mrib_next_hop_s;
+    PimNbr *old_pim_nbr = _nbr_mrib_next_hop_s;
     
     if (! is_sg())
 	return;
@@ -239,7 +239,7 @@ PimMre::set_mrib_next_hop_s(PimNbr *v)
     // Set the new value, and if necessary add to the list of PimMre entries
     // for this neighbor.
     bool is_new_nbr_in_use = is_pim_nbr_in_use(v);
-    _mrib_next_hop_s = v;
+    _nbr_mrib_next_hop_s = v;
     if ((v != NULL) && (! is_new_nbr_in_use)) {
 	v->add_pim_mre(this);
     }
@@ -656,7 +656,7 @@ PimMre::compute_mrib_s() const
 // However, it works also for (S,G).
 // XXX: the return info does NOT take into account the Asserts
 PimNbr *
-PimMre::compute_mrib_next_hop_rp() const
+PimMre::compute_nbr_mrib_next_hop_rp() const
 {
     if (rpf_interface_rp() == Vif::VIF_INDEX_INVALID)
 	return (NULL);
@@ -674,7 +674,7 @@ PimMre::compute_mrib_next_hop_rp() const
 // XXX: the return info does NOT take into account the Asserts
 // XXX: if the source is directly connected, return NULL.
 PimNbr *
-PimMre::compute_mrib_next_hop_s() const
+PimMre::compute_nbr_mrib_next_hop_s() const
 {
     if (! is_sg())
 	return (NULL);
@@ -734,7 +734,7 @@ PimMre::compute_rpfp_nbr_wc() const
 	return (pim_vif->pim_nbr_find(winner_metric->addr()));
     }
     
-    return (compute_mrib_next_hop_rp());
+    return (compute_nbr_mrib_next_hop_rp());
 }
 
 //
@@ -777,7 +777,7 @@ PimMre::compute_rpfp_nbr_sg() const
 	return (pim_vif->pim_nbr_find(winner_metric->addr()));
     }
     
-    return (compute_mrib_next_hop_s());
+    return (compute_nbr_mrib_next_hop_s());
 }
 
 //
@@ -833,7 +833,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     // is modified such that (S,G,rpt) Prune are sent only when there is (*,G)
     // state.
     //
-    return (compute_mrib_next_hop_rp());
+    return (compute_nbr_mrib_next_hop_rp());
 }
 
 //
@@ -842,7 +842,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
 // Note: applies only for (*,*,RP) entries
 //
 void
-PimMre::recompute_mrib_next_hop_rp_changed()
+PimMre::recompute_nbr_mrib_next_hop_rp_changed()
 {
     PimNbr *old_pim_nbr, *new_pim_nbr;
     uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
@@ -850,17 +850,17 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     if (! is_rp())
 	return;
     
-    new_pim_nbr = compute_mrib_next_hop_rp();
+    new_pim_nbr = compute_nbr_mrib_next_hop_rp();
     
     if (is_joined_state())
 	goto joined_state_label;
     // All other states: just set the new upstream neighbor
-    set_mrib_next_hop_rp(new_pim_nbr);
+    set_nbr_mrib_next_hop_rp(new_pim_nbr);
     return;
     
  joined_state_label:
     // Joined state
-    old_pim_nbr = mrib_next_hop_rp();
+    old_pim_nbr = nbr_mrib_next_hop_rp();
     if (new_pim_nbr == old_pim_nbr)
 	return;				// Nothing changed
     
@@ -886,7 +886,7 @@ PimMre::recompute_mrib_next_hop_rp_changed()
 				  new_group_bool);
     }
     // Set the new upstream neighbor.
-    set_mrib_next_hop_rp(new_pim_nbr);
+    set_nbr_mrib_next_hop_rp(new_pim_nbr);
     // Restart the JoinTimer
     join_timer() =
 	pim_node().eventloop().new_oneoff_after(
@@ -900,7 +900,7 @@ PimMre::recompute_mrib_next_hop_rp_changed()
 // Note: applies only for (*,*,RP) entries
 //
 void
-PimMre::recompute_mrib_next_hop_rp_gen_id_changed()
+PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
 {
     PimVif *pim_vif;
     PimNbr *pim_nbr;
@@ -915,7 +915,7 @@ PimMre::recompute_mrib_next_hop_rp_gen_id_changed()
     
  joined_state_label:
     // Joined state
-    pim_nbr = mrib_next_hop_rp();
+    pim_nbr = nbr_mrib_next_hop_rp();
     if (pim_nbr == NULL)
 	return;
     // Restart JoinTimer if it is larger than t_override

@@ -1,6 +1,6 @@
 Input = INPUT_STATE_RP_CHANGED
         OUTPUT_STATE_MRIB_RP_RP                                    (*,*,RP)
-        OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP                          (*,*,RP)
         OUTPUT_STATE_RP_WC                                            (*,G)
         OUTPUT_STATE_MRIB_RP_WC                                       (*,G)
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
@@ -29,7 +29,7 @@ Input = INPUT_STATE_RP_CHANGED
 
 Input = INPUT_STATE_MRIB_RP_CHANGED
         OUTPUT_STATE_MRIB_RP_RP                                    (*,*,RP)
-        OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP                          (*,*,RP)
         OUTPUT_STATE_MRIB_RP_WC                                       (*,G)
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
         OUTPUT_STATE_RPFP_NBR_WC_NOT_ASSERT                           (*,G)
@@ -67,25 +67,25 @@ Input = INPUT_STATE_MRIB_S_CHANGED
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
         OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
-Input = INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED
-        OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
+Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP                          (*,*,RP)
         OUTPUT_STATE_RPFP_NBR_WC_NOT_ASSERT                           (*,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
         OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
 
-Input = INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED
-        OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID                       (*,*,RP)
+Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED
+        OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID                   (*,*,RP)
 
-Input = INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED
+Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED
         OUTPUT_STATE_RPFP_NBR_WC_NOT_ASSERT                           (*,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
         OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
 
-Input = INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED
+Input = INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED
         OUTPUT_STATE_RPFP_NBR_SG_NOT_ASSERT                           (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.17 2004/02/18 02:48:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.18 2004/02/22 04:01:25 pavlin Exp $"
 
 
 //
@@ -841,13 +841,13 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 		       (iif_pim_vif_rp != NULL)?
 		       iif_pim_vif_rp->name().c_str() : "UNKNOWN"));
     cli_print(c_format("    Upstream MRIB next hop (RP): %s\n",
-		       (pim_mre->mrib_next_hop_rp() != NULL)?
-		       cstring(pim_mre->mrib_next_hop_rp()->primary_addr())
+		       (pim_mre->nbr_mrib_next_hop_rp() != NULL)?
+		       cstring(pim_mre->nbr_mrib_next_hop_rp()->primary_addr())
 		       : "UNKNOWN"));
     if (pim_mre->is_sg()) {
 	cli_print(c_format("    Upstream MRIB next hop (S):  %s\n",
-			   (pim_mre->mrib_next_hop_s() != NULL)?
-			   cstring(pim_mre->mrib_next_hop_s()->primary_addr())
+			   (pim_mre->nbr_mrib_next_hop_s() != NULL)?
+			   cstring(pim_mre->nbr_mrib_next_hop_s()->primary_addr())
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_wc()) {

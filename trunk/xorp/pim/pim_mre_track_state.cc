@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.23 2004/02/22 03:54:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.24 2004/02/24 19:59:51 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -107,8 +107,8 @@ PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
     output_state_rpfp_nbr_sg_gen_id(action_list);
     output_state_rpfp_nbr_sg_rpt(action_list);
     output_state_rpfp_nbr_sg_rpt_sg(action_list);
-    output_state_mrib_next_hop_rp(action_list);
-    output_state_mrib_next_hop_rp_gen_id(action_list);
+    output_state_nbr_mrib_next_hop_rp(action_list);
+    output_state_nbr_mrib_next_hop_rp_gen_id(action_list);
     output_state_out_start_vif_rp(action_list);
     output_state_out_start_vif_wc(action_list);
     output_state_out_start_vif_sg(action_list);
@@ -443,10 +443,10 @@ do {									\
     INPUT_NAME(INPUT_STATE_RP_CHANGED);					// 0
     INPUT_NAME(INPUT_STATE_MRIB_RP_CHANGED);				// 1
     INPUT_NAME(INPUT_STATE_MRIB_S_CHANGED);				// 2
-    INPUT_NAME(INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED);			// 3
-    INPUT_NAME(INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);		// 4
-    INPUT_NAME(INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED);			// 5
-    INPUT_NAME(INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED);			// 6
+    INPUT_NAME(INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED);		// 3
+    INPUT_NAME(INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);	// 4
+    INPUT_NAME(INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED);		// 5
+    INPUT_NAME(INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED);		// 6
     INPUT_NAME(INPUT_STATE_RPFP_NBR_WC_CHANGED);			// 7
     INPUT_NAME(INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED);			// 8
     INPUT_NAME(INPUT_STATE_RPFP_NBR_SG_CHANGED);			// 9
@@ -543,8 +543,8 @@ do {									\
     OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_GEN_ID);			// 44
     OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_RPT);				// 45
     OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_RPT_SG);			// 46
-    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP);				// 47
-    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID);			// 48
+    OUTPUT_NAME(OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP);			// 47
+    OUTPUT_NAME(OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID);		// 48
     OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_RP);				// 49
     OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_WC);				// 50
     OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_SG);				// 51
@@ -719,27 +719,27 @@ PimMreTrackState::input_state_mrib_s_changed(list<PimMreAction> action_list)
 }
 
 void
-PimMreTrackState::input_state_mrib_next_hop_rp_changed(list<PimMreAction> action_list)
+PimMreTrackState::input_state_nbr_mrib_next_hop_rp_changed(list<PimMreAction> action_list)
 {
-    add_action_list(INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED, action_list);
+    add_action_list(INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED, action_list);
 }
 
 void
-PimMreTrackState::input_state_mrib_next_hop_rp_gen_id_changed(list<PimMreAction> action_list)
+PimMreTrackState::input_state_nbr_mrib_next_hop_rp_gen_id_changed(list<PimMreAction> action_list)
 {
-    add_action_list(INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED, action_list);
+    add_action_list(INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED, action_list);
 }
 
 void
-PimMreTrackState::input_state_mrib_next_hop_rp_g_changed(list<PimMreAction> action_list)
+PimMreTrackState::input_state_nbr_mrib_next_hop_rp_g_changed(list<PimMreAction> action_list)
 {
-    add_action_list(INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED, action_list);
+    add_action_list(INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED, action_list);
 }
 
 void
-PimMreTrackState::input_state_mrib_next_hop_s_changed(list<PimMreAction> action_list)
+PimMreTrackState::input_state_nbr_mrib_next_hop_s_changed(list<PimMreAction> action_list)
 {
-    add_action_list(INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED, action_list);
+    add_action_list(INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED, action_list);
 }
 
 void
@@ -1747,31 +1747,31 @@ PimMreTrackState::output_state_rpfp_nbr_sg_rpt_sg(list<PimMreAction> action_list
 }
 
 list<PimMreAction>
-PimMreTrackState::output_state_mrib_next_hop_rp(list<PimMreAction> action_list)
+PimMreTrackState::output_state_nbr_mrib_next_hop_rp(list<PimMreAction> action_list)
 {
     bool init_flag = action_list.empty();
-    PimMreAction action(OUTPUT_STATE_MRIB_NEXT_HOP_RP, PIM_MRE_RP);
+    PimMreAction action(OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP, PIM_MRE_RP);
     
     if (can_add_action_to_list(action_list, action))
 	action_list.push_back(action);
     
     if (init_flag)
-	track_state_mrib_next_hop_rp(action_list);
+	track_state_nbr_mrib_next_hop_rp(action_list);
     
     return (action_list);
 }
 
 list<PimMreAction>
-PimMreTrackState::output_state_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list)
+PimMreTrackState::output_state_nbr_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list)
 {
     bool init_flag = action_list.empty();
-    PimMreAction action(OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID, PIM_MRE_RP);
+    PimMreAction action(OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID, PIM_MRE_RP);
     
     if (can_add_action_to_list(action_list, action))
 	action_list.push_back(action);
     
     if (init_flag)
-	track_state_mrib_next_hop_rp_gen_id(action_list);
+	track_state_nbr_mrib_next_hop_rp_gen_id(action_list);
     
     return (action_list);
 }
@@ -2358,38 +2358,38 @@ PimMreTrackState::track_state_rpf_interface_s(list<PimMreAction> action_list)
 }
 
 void
-PimMreTrackState::track_state_mrib_next_hop_rp(list<PimMreAction> action_list)
+PimMreTrackState::track_state_nbr_mrib_next_hop_rp(list<PimMreAction> action_list)
 {
-    action_list = output_state_mrib_next_hop_rp(action_list);
+    action_list = output_state_nbr_mrib_next_hop_rp(action_list);
     
     track_state_rp(action_list);
     track_state_mrib_rp(action_list);
     
-    input_state_mrib_next_hop_rp_changed(action_list);
+    input_state_nbr_mrib_next_hop_rp_changed(action_list);
 }
 
 void
-PimMreTrackState::track_state_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list)
+PimMreTrackState::track_state_nbr_mrib_next_hop_rp_gen_id(list<PimMreAction> action_list)
 {
-    action_list = output_state_mrib_next_hop_rp_gen_id(action_list);
+    action_list = output_state_nbr_mrib_next_hop_rp_gen_id(action_list);
     
-    input_state_mrib_next_hop_rp_gen_id_changed(action_list);
+    input_state_nbr_mrib_next_hop_rp_gen_id_changed(action_list);
 }
 
 void
-PimMreTrackState::track_state_mrib_next_hop_rp_g(list<PimMreAction> action_list)
+PimMreTrackState::track_state_nbr_mrib_next_hop_rp_g(list<PimMreAction> action_list)
 {
-    track_state_mrib_next_hop_rp(action_list);
+    track_state_nbr_mrib_next_hop_rp(action_list);
     
-    input_state_mrib_next_hop_rp_g_changed(action_list);
+    input_state_nbr_mrib_next_hop_rp_g_changed(action_list);
 }
 
 void
-PimMreTrackState::track_state_mrib_next_hop_s(list<PimMreAction> action_list)
+PimMreTrackState::track_state_nbr_mrib_next_hop_s(list<PimMreAction> action_list)
 {
     track_state_mrib_s(action_list);
     
-    input_state_mrib_next_hop_s_changed(action_list);
+    input_state_nbr_mrib_next_hop_s_changed(action_list);
 }
 
 void
@@ -2721,7 +2721,7 @@ PimMreTrackState::track_state_rpfp_nbr_wc_not_assert(list<PimMreAction> action_l
     action_list = output_state_rpfp_nbr_wc_not_assert(action_list);
     
     track_state_rpf_interface_rp(action_list);
-    track_state_mrib_next_hop_rp_g(action_list);
+    track_state_nbr_mrib_next_hop_rp_g(action_list);
 
     input_state_rpfp_nbr_wc_changed(action_list);
 }
@@ -2756,7 +2756,7 @@ PimMreTrackState::track_state_rpfp_nbr_sg_not_assert(list<PimMreAction> action_l
     action_list = output_state_rpfp_nbr_sg_not_assert(action_list);
     
     track_state_rpf_interface_s(action_list);
-    track_state_mrib_next_hop_s(action_list);
+    track_state_nbr_mrib_next_hop_s(action_list);
     
     input_state_rpfp_nbr_sg_changed(action_list);
 }
@@ -3672,12 +3672,12 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	pim_mre.recompute_rpfp_nbr_sg_rpt_sg_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP:		// 47
-	pim_mre.recompute_mrib_next_hop_rp_changed();
+    case PimMreTrackState::OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP:		// 47
+	pim_mre.recompute_nbr_mrib_next_hop_rp_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID:	// 48
-	pim_mre.recompute_mrib_next_hop_rp_gen_id_changed();
+    case PimMreTrackState::OUTPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID:	// 48
+	pim_mre.recompute_nbr_mrib_next_hop_rp_gen_id_changed();
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_RP:		// 49
