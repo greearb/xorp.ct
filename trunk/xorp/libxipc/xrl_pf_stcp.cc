@@ -25,7 +25,6 @@
 #include <map>
 #include <algorithm>
 
-//#define DEBUG_LOGGING
 #include "libxorp/debug.h"
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
@@ -56,7 +55,6 @@ public:
 	_parent(parent), _fd(fd), _request(),
 	_reader(parent.eventloop(), fd), _writer(parent.eventloop(), fd)
     {
-	debug_msg("STCPRequestHandler constructor\n");
 	EventLoop& e = _parent.eventloop();
 	_life_timer = e.new_oneoff_after_ms(QUIET_LIFE_MS,
 					    callback(this,
@@ -141,7 +139,6 @@ STCPRequestHandler::prepare_for_request()
 void
 STCPRequestHandler::parse_header(const uint8_t* buffer, size_t bytes_done)
 {
-    debug_msg("STCPRequestHandler parse_header\n");
     if (bytes_done < sizeof(STCPPacketHeader)) {
 	debug_msg("Incoming with small header %u < %u\n",
 		  (uint32_t)bytes_done, (uint32_t)sizeof(STCPPacketHeader));
@@ -358,7 +355,7 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
     throw (XrlPFConstructorError)
     : XrlPFListener(e, x), _fd(-1), _address_slash_port()
 {
-    debug_msg("XrlPFSTCPListener constructor\n");
+
     if ((_fd = create_listening_ip_socket(TCP, port)) < 1) {
 	xorp_throw(XrlPFConstructorError, strerror(errno));
     }
@@ -396,7 +393,6 @@ XrlPFSTCPListener::connect_hook(int fd, SelectorMask /* m */)
 {
     struct sockaddr_in a;
     socklen_t alen = sizeof(a);
-    debug_msg("XrlPFSTCPListener connect_hook\n");
 
     int cfd = accept(fd, (sockaddr*)&a, &alen);
     if (cfd < 0) {
@@ -545,7 +541,6 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
       _fd(-1),
       _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
-    debug_msg("XrlPFSTCPSender constructor\n");
     _fd = create_connected_ip_socket(TCP, addr_slash_port);
     debug_msg("stcp sender (%p) fd = %d\n", this, _fd);
     if (_fd <= 0) {
@@ -650,7 +645,6 @@ XrlPFSTCPSender::die(const char* reason)
 void
 XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 {
-    debug_msg("XrlPFSTCPSender send\n");
     if (_fd <= 0) {
 	debug_msg("Attempted send when socket is dead!\n");
 	cb->dispatch(XrlError(SEND_FAILED, "socket dead"), 0);
@@ -665,8 +659,7 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     if (push) {
 	send_first_request();
     } else {
-	debug_msg("push is false\n");
-	//assert(_writer->running() == true);
+	assert(_writer->running() == true);
     }
 }
 
@@ -727,7 +720,7 @@ XrlPFSTCPSender::send_first_request()
     _writer->add_buffer(&_request_packet[0], _request_packet.size(),
 			callback(this, &XrlPFSTCPSender::update_writer));
     _writer->start();
-    //    assert(_writer->running());
+    assert(_writer->running());
 }
 
 void
@@ -955,9 +948,9 @@ XrlPFSTCPSender::send_keepalive()
 
     _writer->add_buffer(&_keepalive_packet[0], _keepalive_packet.size(),
 			callback(this, &XrlPFSTCPSender::confirm_keepalive));
-    _keepalive_in_progress = true;
     _writer->start();
 
+    _keepalive_in_progress = true;
     return true;
 }
 

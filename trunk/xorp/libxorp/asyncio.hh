@@ -204,9 +204,7 @@ public:
      * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor marked as non-blocking to write to.
      */
-    AsyncFileWriter(EventLoop& e, int fd) : AsyncFileOperator(e, fd),
-					    _immediate_ctr(0)
-    {}
+    AsyncFileWriter(EventLoop& e, int fd) : AsyncFileOperator(e, fd) {}
 
     ~AsyncFileWriter() { stop(); }
 
@@ -275,11 +273,9 @@ protected:
     };
 
     void write(int, SelectorMask);
-    void immediate_write();
-    bool complete_transfer(ssize_t done);
+    void complete_transfer(ssize_t done);
 
     list<BufferInfo> _buffers;
-    int _immediate_ctr;
 };
 
 #endif // __LIBXORP_ASYNCIO_HH__

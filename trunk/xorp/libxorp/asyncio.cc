@@ -190,71 +190,24 @@ AsyncFileWriter::write(int fd, SelectorMask m)
     BufferInfo& head = _buffers.front();
 
     sig_t   saved_sigpipe = signal(SIGPIPE, SIG_IGN);
-    //    printf("W %d\n", head._buffer_bytes - head._offset);
     ssize_t done = ::write(_fd, head._buffer + head._offset,
 			   head._buffer_bytes - head._offset);
     signal(SIGPIPE, saved_sigpipe);
     if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
-	//	perror("something went wrong...\n");
 	errno = 0;
 	return;
     }
-    //printf("[%d] ", done); fflush(stdout);
     complete_transfer(done);
 }
 
-void
-AsyncFileWriter::immediate_write() 
-{
-    assert(_running == false);
-    assert(_buffers.empty()==false);
-    _immediate_ctr++;
-    ssize_t bytes_to_send = 0;
-    bool stopped = false;
-    ssize_t done = -1;
-    if (_immediate_ctr == 25) {
-	//make sure we go to the eventloop occasionally
-	_immediate_ctr = 0;
-    } else {
-	BufferInfo& head = _buffers.front();
-
-	sig_t   saved_sigpipe = signal(SIGPIPE, SIG_IGN);
-	bytes_to_send = (ssize_t)(head._buffer_bytes - head._offset);
-	//printf("IW %d ", bytes_to_send);
-	assert(_running == false);
-	done = ::write(_fd, head._buffer + head._offset,
-			       bytes_to_send);
-	assert(_running == false);
-	signal(SIGPIPE, saved_sigpipe);
-	//printf("[%d]\n", done);
-	if (done > 0) {
-	    stopped = complete_transfer(done);
-	}
-    }
-    if (done < bytes_to_send 
-	|| (stopped == false && _buffers.empty() == false)) {
-	//printf("[%d] ", _buffers.size());
-	assert(_running == false);
-	_running = true;
-	_immediate_ctr = 0;
-	EventLoop& e = _eventloop;
-	if (e.add_selector(_fd, SEL_WR, 
-			   callback(this, &AsyncFileWriter::write)) == false) {
-	    XLOG_ERROR("Async writer failed to add_selector.");
-	}
-    }
-}
-
-
-
 // transfer_complete() invokes callbacks if necessary and updates buffer
 // variables and buffer list.
-bool
+void
 AsyncFileWriter::complete_transfer(ssize_t done) 
 {
     // XXX careful after callback is invoked: "this" maybe deleted, so do
     // not reference any object state after callback.
-    bool stopped = false;
+
     if (done >= 0) {
 	BufferInfo& head = _buffers.front();
 	head._offset += done;
@@ -263,7 +216,6 @@ AsyncFileWriter::complete_transfer(ssize_t done)
 	    _buffers.erase(_buffers.begin());	// remove head
 	    if (_buffers.empty()) {
 		stop();
-		stopped = true;
 	    }
 	    copy.dispatch_callback(DATA);
 	} else {
@@ -271,11 +223,9 @@ AsyncFileWriter::complete_transfer(ssize_t done)
 	}
     } else {
 	stop();
-	stopped = true;
 	BufferInfo& head = _buffers.front();
 	head.dispatch_callback(ERROR_CHECK_ERRNO);
     }
-    return stopped;
 }
 
 bool 
@@ -288,14 +238,18 @@ AsyncFileWriter::start() {
 	return false;
     }
 
-    immediate_write();
+    EventLoop& e = _eventloop;
+    if (e.add_selector(_fd, SEL_WR, 
+		       callback(this, &AsyncFileWriter::write)) == false) {
+	XLOG_ERROR("Async reader failed to add_selector.");
+    }
+    _running = true;
     return _running;
 }
 
 void
 AsyncFileWriter::stop() {
-    if (_running == true)
-	_eventloop.remove_selector(_fd, SEL_WR);
+    _eventloop.remove_selector(_fd, SEL_WR);
     _running = false;
 }
 
