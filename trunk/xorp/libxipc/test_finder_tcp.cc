@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.12 2004/09/02 02:38:01 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.13 2004/12/09 07:54:37 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -65,7 +65,8 @@ public:
 		    const uint8_t* data,
 		    uint32_t	   data_bytes)
     {
-	verbose_log("- %s %d %p %u\n", _name, errval, data, data_bytes);
+	verbose_log("- %s %d %p %u\n", _name, errval, data,
+		    XORP_UINT_CAST(data_bytes));
 	_reads++;
     }
 
@@ -73,14 +74,16 @@ public:
 		     const uint8_t* data,
 		     uint32_t	    data_bytes)
     {
-	verbose_log("+ %s %d %p %u\n", _name, errval, data, data_bytes);
+	verbose_log("+ %s %d %p %u\n", _name, errval, data,
+		    XORP_UINT_CAST(data_bytes));
 	_writes++;
     }
 
     void
     write_msg()
     {
-	string s = c_format("%p Write event %d", this, _writes);
+	string s = c_format("%p Write event %u", this,
+			    XORP_UINT_CAST(_writes));
 	strncpy(_buf, s.c_str(), sizeof(_buf) - 1);
 	_buf[sizeof(_buf) - 1] = '\0';
 	write_data(reinterpret_cast<const uint8_t*>(_buf), strlen(_buf));

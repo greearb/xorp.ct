@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_msgs.cc,v 1.3 2003/03/10 23:20:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_msgs.cc,v 1.4 2004/06/10 22:41:08 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -65,7 +65,8 @@ test_parser(const string& msg, MsgType e)
 {
     try {
 	ParsedFinderXrlMessage p(msg.c_str());
-	verbose_log("Got Xrl message (seqno = %u)\n", p.seqno());
+	verbose_log("Got Xrl message (seqno = %u)\n",
+		    XORP_UINT_CAST(p.seqno()));
     } catch (const WrongFinderMessageType&) {
 	if (e == XRL_MSG) {
 	    verbose_log("Expected Xrl message, but got:\n%s\n", msg.c_str());
@@ -79,7 +80,8 @@ test_parser(const string& msg, MsgType e)
 
     try {
 	ParsedFinderXrlResponse p(msg.c_str());
-	verbose_log("Got Xrl Response message (seqno = %u)\n", p.seqno());
+	verbose_log("Got Xrl Response message (seqno = %u)\n",
+		    XORP_UINT_CAST(p.seqno()));
     } catch (const WrongFinderMessageType&) {
 	if (e == XRL_RESPONSE_MSG) {
 	    verbose_log("Unexpected XrlResponse message, but got:\n%s\n",
@@ -167,7 +169,8 @@ test_main()
 		ParsedFinderXrlMessage p(corrupted.c_str());
 
 		verbose_log("Corruption char 0x%02x accepted in header at "
-			    " position %d in:\n%s\n", i, j, corrupted.c_str());
+			    " position %d in:\n%s\n", i,
+			    XORP_UINT_CAST(j), corrupted.c_str());
 		verbose_log("Original message:\n%s\n",  good.c_str());
 
 		return 1;
@@ -187,7 +190,8 @@ test_main()
     ParsedFinderXrlResponse pfxr(fxr.str().c_str());
     //    verbose_log("Message is \"%s\"\n", fxr.str().c_str());
     if (pfxr.seqno() != seqno) {
-	verbose_log("Failed on seqno (%u != %u)\n", pfxr.seqno(), seqno);
+	verbose_log("Failed on seqno (%u != %u)\n",
+		    XORP_UINT_CAST(pfxr.seqno()), XORP_UINT_CAST(seqno));
 	return 1;
     }
     if (pfxr.xrl_error() != XrlError::OKAY()) {
