@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.34 2004/03/02 00:32:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.35 2004/03/04 03:06:00 pavlin Exp $"
 
 
 //
@@ -505,19 +505,20 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	return (XORP_ERROR);
 
     //
-    // If the destination address is unicast, then modify some of
-    // the sending values.
+    // Some of the messages need to be send by unicast across the domain.
+    // For those messages we need to modify some of the sending values.
     //
     if (dst.is_unicast()) {
-	//
-	// XXX: if we use LAN-local unicast, the TTL of the unicast packets
-	// probably should be MINTTL instead of DEFTTL. However, this will
-	// complicate things a bit (we would need to check per message type),
-	// and in general it shoudn't hurt even if we use unicast
-	// with TTL > MINTTL
-	//
-	ttl = IPDEFTTL;
-	router_alert_bool = false;
+	switch (message_type) {
+	case PIM_REGISTER:
+	case PIM_REGISTER_STOP:
+	case PIM_CAND_RP_ADV:
+	    ttl = IPDEFTTL;
+	    router_alert_bool = false;
+	    break;
+	default:
+	    break;
+	}
     }
     
     //
