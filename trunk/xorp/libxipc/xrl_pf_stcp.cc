@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.13 2003/05/09 19:36:17 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.14 2003/05/09 21:00:52 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -357,10 +357,10 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlDispatcher* x, uint16_t po
 
 XrlPFSTCPListener::~XrlPFSTCPListener()
 {
-    list<STCPRequestHandler*>::iterator i;
-    for (i = _request_handlers.begin(); i != _request_handlers.end(); i++) {
-	delete *i;
-	*i = 0;
+    while (_request_handlers.empty() == false) {
+	delete _request_handlers.front();
+	// nb destructor for STCPRequestHandler triggers removal of node
+	// from list
     }
     _eventloop.remove_selector(_fd);
     close(_fd);
@@ -385,9 +385,8 @@ void
 XrlPFSTCPListener::add_request_handler(STCPRequestHandler* h)
 {
     // assert handler is not already in list
-    assert(remove(_request_handlers.begin(), _request_handlers.end(), h)
+    assert(find(_request_handlers.begin(), _request_handlers.end(), h)
 	   == _request_handlers.end());
-
     _request_handlers.push_back(h);
 }
 
@@ -395,9 +394,9 @@ void
 XrlPFSTCPListener::remove_request_handler(const STCPRequestHandler* rh)
 {
     list<STCPRequestHandler*>::iterator i;
-
-    i = remove(_request_handlers.begin(), _request_handlers.end(), rh);
+    i = find(_request_handlers.begin(), _request_handlers.end(), rh);
     assert(i != _request_handlers.end());
+    _request_handlers.erase(i);
 }
 
 // ----------------------------------------------------------------------------

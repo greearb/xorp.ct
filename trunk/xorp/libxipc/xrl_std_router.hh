@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.7 2003/04/22 23:27:19 hodson Exp $
+// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.8 2003/05/21 23:05:22 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_STD_ROUTER_HH__
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
 
 #include "xrl_router.hh"
-#include "xrl_pf_sudp.hh"
+#include "xrl_pf_stcp.hh"
 
 /**
  * @short Standard XRL transmission and reception point.
@@ -32,18 +32,18 @@ class XrlStdRouter : public XrlRouter {
 public:
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name)
-	: XrlRouter(eventloop, class_name), _sudp(eventloop, this)
+	: XrlRouter(eventloop, class_name), _stcp(eventloop, this)
     {
-	add_listener(&_sudp);
+	add_listener(&_stcp);
     }
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 IPv4		finder_address)
 	: XrlRouter(eventloop, class_name, finder_address),
-	  _sudp(eventloop, this)
+	  _stcp(eventloop, this)
     {
-	add_listener(&_sudp);
+	add_listener(&_stcp);
     }
 
     
@@ -52,18 +52,18 @@ public:
 		 IPv4		finder_address,
 		 uint16_t	finder_port)
 	: XrlRouter(eventloop, class_name, finder_address, finder_port),
-	  _sudp(eventloop, this)
+	  _stcp(eventloop, this)
     {
-	add_listener(&_sudp);
+	add_listener(&_stcp);
     }
     
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 const char*	finder_address)
 	: XrlRouter(eventloop, class_name, finder_address),
-	  _sudp(eventloop, this)
+	  _stcp(eventloop, this)
     {
-	add_listener(&_sudp);
+	add_listener(&_stcp);
     }
 
     XrlStdRouter(EventLoop&	eventloop,
@@ -71,18 +71,18 @@ public:
 		 const char*	finder_address,
 		 uint16_t	finder_port)
 	: XrlRouter(eventloop, class_name, finder_address, finder_port),
-	  _sudp(eventloop, this)
+	  _stcp(eventloop, this)
     {
-	add_listener(&_sudp);
+	add_listener(&_stcp);
     }
 
     ~XrlStdRouter()
     {
-	// remove_listener(&_sudp);
+	// remove_listener(&_stcp);
     }
 
 private:
-    XrlPFSUDPListener _sudp;
+    XrlPFSTCPListener _stcp;
 };
 
 #endif // __LIBXIPC_XRL_STD_ROUTER_HH__
