@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.53 2003/07/22 17:05:07 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.54 2003/07/27 11:00:18 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1237,6 +1237,8 @@ AC_OUTPUT(
 	docs/rtrmgr/Makefile
 	docs/snmp/Makefile
 	docs/test_harness/Makefile
+	etc/Makefile
+	etc/templates/Makefile
 	fea/Makefile
 	libcomm/Makefile
 	libproto/Makefile
