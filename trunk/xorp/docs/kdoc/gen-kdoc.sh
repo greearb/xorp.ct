@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.15 2004/01/05 23:50:21 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.16 2004/01/06 20:22:59 hodson Exp $
 #
 
 #
@@ -348,7 +348,7 @@ kdoc_libxipc()
 #
 kdoc_xrl_interfaces()
 {
-    lib="xrl-sender-interfaces"
+    lib="xrl-interfaces"
     desc="Generated code for sending Xrl's to Targets"
     html_start_page="index.html"
     files="xrl/interfaces/*.hh"
@@ -423,7 +423,7 @@ kdoc_fea()
     html_start_page="index.html"
     files="fea/*.hh"
     excludes="fea/*click*hh"
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli "
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli"
     kdocify
 }
 
@@ -433,7 +433,7 @@ kdoc_fea()
 kdoc_libfeaclient()
 {
     lib="libfeaclient"
-    desc="Forwarind Engine Abstraction Library"
+    desc="Forwarind Engine Abstraction Client library"
     html_start_page="index.html"
     files="libfeaclient/*h"
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
@@ -479,6 +479,20 @@ kdoc_bgp()
     files="bgp/*.hh"
     excludes="bgp/*test*h"
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
+    kdocify
+}
+
+#
+# fib2mrib
+#
+kdoc_fib2mrib()
+{
+    lib="fib2mrib"
+    desc="FIB2MRIB daemon"
+    html_start_page="index.html"
+    files="fib2mrib/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient"
     kdocify
 }
 
@@ -538,9 +552,24 @@ kdoc_rtrmgr()
     kdocify
 }
 
+#
+# static_routes
+#
+kdoc_static_routes()
+{
+    lib="static_routes"
+    desc="Static Routes daemon"
+    html_start_page="index.html"
+    files="static_routes/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient"
+    kdocify
+}
+
+
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
-	       xrl_targets mrt cli fea libfeaclient mld6igmp pim bgp mibs \
-	       rib rip rtrmgr"
+	       xrl_targets mrt cli fea libfeaclient mld6igmp pim bgp fib2mrib \
+	       mibs rib rip rtrmgr static_routes"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
     kdoc_$i
