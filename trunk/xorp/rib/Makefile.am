@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.4 2003/03/15 02:28:37 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.5 2003/03/17 23:32:42 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS		 = rib main_routemap
 
 # -- Test Programs
-bin_PROGRAMS		+= test_fea_client
+bin_PROGRAMS		+= test_rib_client
 bin_PROGRAMS		+= test_register
 bin_PROGRAMS		+= test_register_xrls
 bin_PROGRAMS		+= test_rib_direct
@@ -61,15 +61,15 @@ test_register_xrls_LDADD += $(top_builddir)/xrl/interfaces/libribxif.a
 test_register_xrls_LDADD += $(top_builddir)/xrl/targets/libribbase.a
 test_register_xrls_LDADD += $(top_builddir)/xrl/targets/libribclientbase.a
 
-test_fea_client_SOURCES  = test_fea_client.cc
+test_rib_client_SOURCES  = test_rib_client.cc
 
 # -- Library Sources
 librib_a_SOURCES  = rib_module.h
 librib_a_SOURCES += version.h
-librib_a_SOURCES += fea_client.hh
 librib_a_SOURCES += protocol.hh
 librib_a_SOURCES += register_server.hh
 librib_a_SOURCES += rib.hh
+librib_a_SOURCES += rib_client.hh
 librib_a_SOURCES += rib_manager.hh
 librib_a_SOURCES += route.hh
 librib_a_SOURCES += rt_tab_base.hh
@@ -82,10 +82,10 @@ librib_a_SOURCES += rt_tab_register.hh
 librib_a_SOURCES += vifmanager.hh
 librib_a_SOURCES += xrl_target.hh
 
-librib_a_SOURCES += fea_client.cc
 librib_a_SOURCES += protocol.cc
 librib_a_SOURCES += register_server.cc
 librib_a_SOURCES += rib.cc
+librib_a_SOURCES += rib_client.cc
 librib_a_SOURCES += rib_manager.cc
 librib_a_SOURCES += route.cc
 librib_a_SOURCES += rt_tab_base.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.7 2003/03/16 07:19:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.8 2003/03/19 09:05:20 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -27,7 +27,7 @@
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
 #include "xrl_target.hh"
-#include "fea_client.hh"
+#include "rib_client.hh"
 #include "dummy_register_server.hh"
 
 #ifdef ORIGINAL_FINDER
@@ -75,7 +75,7 @@ parser_main()
 
     // Rib Server component
     XrlStdRouter xrl_router(event_loop, "rib");
-    FeaClient fea(xrl_router, "fea");
+    RibClient rib_client(xrl_router, "fea");
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST);

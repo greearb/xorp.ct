@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.6 2003/03/16 07:19:00 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.7 2003/03/19 09:05:21 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -39,7 +39,7 @@ class RibManager;
  * connected subnets, and which are nexthops that need to be resolved
  * using other routes to figure out where next to send the packet.
  * Only routes with nexthops that are on directly connected subnets
- * can be sent to the FEA 
+ * can be sent to the FEA. 
  */
 class VifManager {
 public:

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.8 2003/03/17 23:32:42 pavlin Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.9 2003/03/19 09:05:19 pavlin Exp $
 
-#ifndef __RIB_FEA_CLIENT_HH__
-#define __RIB_FEA_CLIENT_HH__
+#ifndef __RIB_RIB_CLIENT_HH__
+#define __RIB_RIB_CLIENT_HH__
 
 #include <list>
 #include "libxorp/ref_ptr.hh"
@@ -24,37 +24,38 @@
 class XrlRouter;
 
 class SyncFtiCommand;
-typedef ref_ptr<SyncFtiCommand> FeaClientTask;
+typedef ref_ptr<SyncFtiCommand> RibClientTask;
 
 /**
- * @short FeaClient handles communication of routes to the FEA.
+ * @short RibClient handles communication of routes to a RIB client (e.g.,
+ * the FEA).
  *
- * FeaClient communicates add route and delete requests from the RIBs
- * to the FEA process.
+ * RibClient communicates add route and delete requests from the RIBs
+ * to a RIB client (e.g., the FEA).
  */
-class FeaClient {
+class RibClient {
 public:
     /**
-     * FeaClient constructor.
+     * RibClient constructor.
      *
      * @param xrl_router XRL router instance to use for communication
-     * with the FEA.
+     * with the RIB client.
      * @param target_name the XRL target name to send the route changes to.
      * @param max_ops the maximum number of operations in a transaction.
      */
-    FeaClient(XrlRouter& xrl_router, const string& target_name,
+    RibClient(XrlRouter& xrl_router, const string& target_name,
 	      size_t max_ops = 100);
 
     /**
-     * FeaClient destructor
+     * RibClient destructor
      */
-    ~FeaClient();
+    ~RibClient();
 
     /**
      * Set enabled state.
      *
-     * When enabled FeaClient attempts to send commands to the FEA.  When
-     * disabled it silently ignores the requests.
+     * When enabled RibClient attempts to send commands to the RIB client.
+     * When disabled it silently ignores the requests.
      */
     void set_enabled(bool en);
 
@@ -64,7 +65,7 @@ public:
     bool enabled() const;
     
     /**
-     * Communicate the addition of a new IPv4 route to the FEA.
+     * Communicate the addition of a new IPv4 route to the RIB client.
      *
      * @param dest the destination subnet of the route.
      * @param gw the nexthop gateway to be used to forward packets
@@ -80,7 +81,7 @@ public:
 		   const string& vifname);
 
     /**
-     * Communicate the deletion of an IPv4 route to the FEA.
+     * Communicate the deletion of an IPv4 route to the RIB client.
      *
      * @param dest the destination subnet of the route.
      */
@@ -92,7 +93,7 @@ public:
 		   const string& vifname);
 
     /**
-     * Communicate the addition of a new IPv6 route to the FEA.
+     * Communicate the addition of a new IPv6 route to the RIB client.
      *
      * @param dest the destination subnet of the route.
      * @param gw the nexthop gateway to be used to forward packets
@@ -104,7 +105,7 @@ public:
      */
 
     /**
-     * Communicate the deletion of an IPv6 route to the FEA.
+     * Communicate the deletion of an IPv6 route to the RIB client.
      *
      * @param dest the destination subnet of the route.
      */
@@ -117,28 +118,28 @@ public:
     //
 
     /**
-     * Communicate the addition of a new IPv4 route to the FEA.
+     * Communicate the addition of a new IPv4 route to the RIB client.
      *
      * @param re the routing table entry of the new route.
      */
     void add_route(const IPv4RouteEntry& re);
 
     /**
-     * Communicate the deletion of a new IPv4 route to the FEA.
+     * Communicate the deletion of a new IPv4 route to the RIB client.
      *
      * @param re the routing table entry of the route to be deleted.
      */
     void delete_route(const IPv4RouteEntry& re);
 
     /**
-     * Communicate the addition of a new IPv6 route to the FEA.
+     * Communicate the addition of a new IPv6 route to the RIB client.
      *
      * @param re the routing table entry of the new route.
      */
     void add_route(const IPv6RouteEntry& re);
 
     /**
-     * Communicate the deletion of a new IPv6 route to the FEA.
+     * Communicate the deletion of a new IPv6 route to the RIB client.
      *
      * @param re the routing table entry of the route to be deleted.
      */
@@ -146,14 +147,14 @@ public:
 
     /**
      * @return the number of route adds and deletes that are
-     * currently queued for communication with the FEA.  
+     * currently queued for communication with the RIB client.  
      */
     size_t tasks_count() const;
 
     /**
      * @return true if there are currently any adds or deletes queued
-     * for transmission to the FEA or awaiting acknowledgement from
-     * the FEA
+     * for transmission to the RIB client or awaiting acknowledgement from
+     * the RIB client.
      */
     bool tasks_pending() const;
 
@@ -178,12 +179,12 @@ private:
     const string _target_name;		// The XRL target name to send the
 					// route changes to.
     bool	_busy;			// Transaction in progress
-    list<FeaClientTask> _tasks;		// List of current task
-    list<FeaClientTask> _completed_tasks; // Completed tasks are stored here
+    list<RibClientTask> _tasks;		// List of current task
+    list<RibClientTask> _completed_tasks; // Completed tasks are stored here
 					  // for later deletion.
     const size_t _max_ops;		// Max. allowed tasks in a transaction
     size_t	_op_count;		// Number of tasks in this transaction
     bool	_enabled;		// Enabled state
 };
 
-#endif // __RIB_FEA_CLIENT_HH__
+#endif // __RIB_RIB_CLIENT_HH__

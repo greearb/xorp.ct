@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.7 2003/03/17 23:32:42 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.8 2003/03/19 09:05:19 pavlin Exp $"
 
 #include "config.h"
 
@@ -22,7 +22,7 @@
 RibManager::RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router)
     : _event_loop(event_loop),
       _xrl_router(xrl_std_router),
-      _fea_client(_xrl_router, "fea"),       // TODO: don't hardcode the name
+      _rib_client(_xrl_router, "fea"),       // TODO: don't hardcode the name
       _mrib4_client(_xrl_router, "PIMSM_4"), // TODO: don't hardcode the name
       _mrib6_client(_xrl_router, "PIMSM_6"), // TODO: don't hardcode the name
       _rserv(&_xrl_router),
@@ -33,7 +33,7 @@ RibManager::RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router)
       _vifmanager(_xrl_router, _event_loop, this),
       _xrt(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, _vifmanager, this)
 {
-    _urib4.initialize_export(&_fea_client);
+    _urib4.initialize_export(&_rib_client);
     _urib4.initialize_register(&_rserv);
     if (_urib4.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
@@ -47,7 +47,7 @@ RibManager::RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router)
 	return;
     }
 
-    _urib6.initialize_export(&_fea_client);
+    _urib6.initialize_export(&_rib_client);
     _urib6.initialize_register(&_rserv);
     if (_urib6.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib6");
@@ -204,14 +204,16 @@ RibManager::delete_vif_addr(const string& vifname,
 }
 
 void
-RibManager::set_fea_enabled(bool en)
+RibManager::set_rib_clients_enabled(bool en)
 {
-    _fea_client.set_enabled(en);
+    // TODO: XXX: PAVPAVPAV: this needs fixing
+    _rib_client.set_enabled(en);
 }
 
 bool
-RibManager::fea_enabled() const
+RibManager::rib_clients_enabled() const
 {
-    return _fea_client.enabled();
+    // TODO: XXX: PAVPAVPAV: this needs fixing
+    return _rib_client.enabled();
 }
 

@@ -77,7 +77,7 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-bin_PROGRAMS = rib main_routemap test_fea_client test_register test_register_xrls test_rib_direct test_rib_xrls
+bin_PROGRAMS = rib main_routemap test_rib_client test_register test_register_xrls test_rib_direct test_rib_xrls
 
 # -- Test scripts
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_register
@@ -100,8 +100,8 @@ test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register
 test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc
 test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
-test_fea_client_SOURCES = test_fea_client.cc
-librib_a_SOURCES = rib_module.h version.h fea_client.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh fea_client.cc protocol.cc register_server.cc rib.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
+test_rib_client_SOURCES = test_rib_client.cc
+librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
 EXTRA_DIST = commands test_rib_direct.sh test_rib_xrls.sh xrl_shell_funcs.sh
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -113,7 +113,7 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 librib_a_LIBADD = 
-librib_a_OBJECTS =  fea_client.o protocol.o register_server.o rib.o \
+librib_a_OBJECTS =  protocol.o register_server.o rib.o rib_client.o \
 rib_manager.o route.o rt_tab_base.o rt_tab_export.o rt_tab_extint.o \
 rt_tab_merged.o rt_tab_origin.o rt_tab_redist.o rt_tab_register.o \
 vifmanager.o xrl_target.o
@@ -137,15 +137,15 @@ $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 $(top_builddir)/xrl/interfaces/libribclientxif.a
 main_routemap_LDFLAGS = 
-test_fea_client_OBJECTS =  test_fea_client.o
-test_fea_client_LDADD = $(LDADD)
-test_fea_client_DEPENDENCIES =  librib.a \
+test_rib_client_OBJECTS =  test_rib_client.o
+test_rib_client_LDADD = $(LDADD)
+test_rib_client_DEPENDENCIES =  librib.a \
 $(top_builddir)/xrl/interfaces/libfeaftixif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 $(top_builddir)/xrl/interfaces/libribclientxif.a
-test_fea_client_LDFLAGS = 
+test_rib_client_LDFLAGS = 
 test_register_OBJECTS =  test_register.o dummy_register_server.o
 test_register_LDADD = $(LDADD)
 test_register_DEPENDENCIES =  librib.a \
@@ -205,17 +205,17 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/dummy_register_server.P .deps/fea_client.P \
-.deps/main_rib.P .deps/main_routemap.P .deps/parser.P .deps/protocol.P \
-.deps/register_server.P .deps/rib.P .deps/rib_manager.P .deps/route.P \
-.deps/routemap.P .deps/rt_tab_base.P .deps/rt_tab_export.P \
-.deps/rt_tab_extint.P .deps/rt_tab_merged.P .deps/rt_tab_origin.P \
-.deps/rt_tab_redist.P .deps/rt_tab_register.P .deps/test_fea_client.P \
+DEP_FILES =  .deps/dummy_register_server.P .deps/main_rib.P \
+.deps/main_routemap.P .deps/parser.P .deps/protocol.P \
+.deps/register_server.P .deps/rib.P .deps/rib_client.P \
+.deps/rib_manager.P .deps/route.P .deps/routemap.P .deps/rt_tab_base.P \
+.deps/rt_tab_export.P .deps/rt_tab_extint.P .deps/rt_tab_merged.P \
+.deps/rt_tab_origin.P .deps/rt_tab_redist.P .deps/rt_tab_register.P \
 .deps/test_register.P .deps/test_register_xrls.P \
-.deps/test_rib_direct.P .deps/test_rib_xrls.P .deps/vifmanager.P \
-.deps/xrl_target.P
-SOURCES = $(librib_a_SOURCES) $(rib_SOURCES) $(main_routemap_SOURCES) $(test_fea_client_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
-OBJECTS = $(librib_a_OBJECTS) $(rib_OBJECTS) $(main_routemap_OBJECTS) $(test_fea_client_OBJECTS) $(test_register_OBJECTS) $(test_register_xrls_OBJECTS) $(test_rib_direct_OBJECTS) $(test_rib_xrls_OBJECTS)
+.deps/test_rib_client.P .deps/test_rib_direct.P .deps/test_rib_xrls.P \
+.deps/vifmanager.P .deps/xrl_target.P
+SOURCES = $(librib_a_SOURCES) $(rib_SOURCES) $(main_routemap_SOURCES) $(test_rib_client_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
+OBJECTS = $(librib_a_OBJECTS) $(rib_OBJECTS) $(main_routemap_OBJECTS) $(test_rib_client_OBJECTS) $(test_register_OBJECTS) $(test_register_xrls_OBJECTS) $(test_rib_direct_OBJECTS) $(test_rib_xrls_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -291,9 +291,9 @@ main_routemap: $(main_routemap_OBJECTS) $(main_routemap_DEPENDENCIES)
 	@rm -f main_routemap
 	$(CXXLINK) $(main_routemap_LDFLAGS) $(main_routemap_OBJECTS) $(main_routemap_LDADD) $(LIBS)
 
-test_fea_client: $(test_fea_client_OBJECTS) $(test_fea_client_DEPENDENCIES)
-	@rm -f test_fea_client
-	$(CXXLINK) $(test_fea_client_LDFLAGS) $(test_fea_client_OBJECTS) $(test_fea_client_LDADD) $(LIBS)
+test_rib_client: $(test_rib_client_OBJECTS) $(test_rib_client_DEPENDENCIES)
+	@rm -f test_rib_client
+	$(CXXLINK) $(test_rib_client_LDFLAGS) $(test_rib_client_OBJECTS) $(test_rib_client_LDADD) $(LIBS)
 
 test_register: $(test_register_OBJECTS) $(test_register_DEPENDENCIES)
 	@rm -f test_register

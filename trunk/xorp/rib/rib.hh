@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.6 2003/03/16 07:18:58 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.7 2003/03/19 09:05:19 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -35,8 +35,8 @@
 #include "rt_tab_register.hh"
 #include "rt_tab_export.hh"
 
-class FeaClient;
 class RegisterServer;
+class RibClient;
 
 enum RibTransportType {
     UNICAST = 1,
@@ -72,18 +72,18 @@ public:
     virtual ~RIB();
 
     /**
-     * set test-mode: don't try to send to FEA
+     * set test-mode: don't try to send to RIB clients.
      */
-    void no_fea() { _no_fea = true; }
+    void no_rib_clients() { _no_rib_clients = true; }
 
     /**
      * Initialize the RIB's ExportTable so that the winning routes are
-     * exported to the Forwarding Engine.
+     * exported to the RIB clients (e.g., the FEA).
      *
      * @see ExportTable
      * @return -1 if already initialized.
      */
-    int initialize_export(FeaClient *fea_client);
+    int initialize_export(RibClient *rib_client);
 
     /**
      * Initialize the RIB's RegisterTable.  The RegisterTable allows
@@ -516,7 +516,7 @@ protected:
     RouteTable<A>	*_final_table;
     RegisterTable<A>	*_register_table;
     bool _mcast;
-    bool _no_fea;
+    bool _no_rib_clients;
 
     map<const string, RouteTable<A> *>	_tables;
     map<const string, Protocol *>	_protocols;

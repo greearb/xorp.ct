@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.11 2003/03/18 00:55:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.12 2003/03/19 09:05:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,10 +26,10 @@
 #include "libxipc/xrl_router.hh"
 #include "xrl/interfaces/fea_fti_xif.hh"
 
-#include "fea_client.hh"
+#include "rib_client.hh"
 
 // For the time being this code is synchronous.  Instead of making the
-// FTI of the FEA support synchronous and asynchronous interfaces, we
+// FTI of the RIB clients support synchronous and asynchronous interfaces, we
 // use asynchronous operations here, but make them look asynchronous.  This
 // mode of operation may be bad for some FTI implementations.  For the time
 // being we are ignoring this issue, but it needs revisiting.
@@ -119,7 +119,8 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
 	send_command(_tid, callback(this, &SyncFtiCommand::command_complete));
 	return;
     }
-    XLOG_ERROR("Could not start Synchronous FEA command: %s", e.str().c_str());
+    XLOG_ERROR("Could not start Synchronous RibClient command: %s",
+	       e.str().c_str());
     done();
 }
 
@@ -162,7 +163,7 @@ SyncFtiCommand::commit_complete(const XrlError& e)
 {
     debug_msg("Commit completed\n");
     if (e != XrlError::OKAY()) {
-	XLOG_ERROR("Could not commit Synchronous FEA command: %s.",
+	XLOG_ERROR("Could not commit Synchronous RibClient command: %s.",
 		   e.str().c_str());
     }
     done();
@@ -291,9 +292,9 @@ ifname(const IPRouteEntry<A>& re)
 }
 
 // -------------------------------------------------------------------------
-// FeaClient
+// RibClient
 
-FeaClient::FeaClient(XrlRouter& rtr, const string& target_name, size_t max_ops)
+RibClient::RibClient(XrlRouter& rtr, const string& target_name, size_t max_ops)
     : _xrl_router(rtr),
       _target_name(target_name),
       _busy(false),
@@ -303,101 +304,101 @@ FeaClient::FeaClient(XrlRouter& rtr, const string& target_name, size_t max_ops)
 {
 }
 
-FeaClient::~FeaClient()
+RibClient::~RibClient()
 {
 }
 
 void
-FeaClient::set_enabled(bool en)
+RibClient::set_enabled(bool en)
 {
     _enabled = en;
 }
 
 bool
-FeaClient::enabled() const
+RibClient::enabled() const
 {
     return _enabled;
 }
 
 void
-FeaClient::add_route(const IPv4Net& dest,
+RibClient::add_route(const IPv4Net& dest,
 		     const IPv4&    gw,
 		     const string&  ifname,
 		     const string&  vifname)
 {
-    _tasks.push_back(FeaClientTask(new AddRoute4(_xrl_router, dest, gw, 
+    _tasks.push_back(RibClientTask(new AddRoute4(_xrl_router, dest, gw, 
 						 ifname, vifname,
 						 _target_name)));
     start();
 }
 
 void
-FeaClient::delete_route(const IPv4Net& dest)
+RibClient::delete_route(const IPv4Net& dest)
 {
-    _tasks.push_back(FeaClientTask(new DeleteRoute4(_xrl_router, dest,
+    _tasks.push_back(RibClientTask(new DeleteRoute4(_xrl_router, dest,
 						    _target_name)));
     start();
 }
 
 void
-FeaClient::add_route(const IPv6Net& dest,
+RibClient::add_route(const IPv6Net& dest,
 		     const IPv6&    gw,
 		     const string&  ifname,
 		     const string&  vifname)
 {
-    _tasks.push_back(FeaClientTask(new AddRoute6(_xrl_router, dest, gw, 
+    _tasks.push_back(RibClientTask(new AddRoute6(_xrl_router, dest, gw, 
 						 ifname, vifname,
 						 _target_name)));
     start();
 }
 
 void
-FeaClient::delete_route(const IPv6Net& dest)
+RibClient::delete_route(const IPv6Net& dest)
 {
-    _tasks.push_back(FeaClientTask(new DeleteRoute6(_xrl_router, dest,
+    _tasks.push_back(RibClientTask(new DeleteRoute6(_xrl_router, dest,
 						    _target_name)));
     start();
 }
 
 void
-FeaClient::add_route(const IPv4RouteEntry& re)
+RibClient::add_route(const IPv4RouteEntry& re)
 {
     add_route(dest(re), gw(re), ifname(re), vifname(re));
 }
 
 void
-FeaClient::delete_route(const IPv4RouteEntry& re)
+RibClient::delete_route(const IPv4RouteEntry& re)
 {
     delete_route(dest(re));
 }
 
 void
-FeaClient::add_route(const IPv6RouteEntry& re)
+RibClient::add_route(const IPv6RouteEntry& re)
 {
     add_route(dest(re), gw(re), ifname(re), vifname(re));
 }
 
 void
-FeaClient::delete_route(const IPv6RouteEntry& re)
+RibClient::delete_route(const IPv6RouteEntry& re)
 {
     delete_route(dest(re));
 }
 
 size_t
-FeaClient::tasks_count() const
+RibClient::tasks_count() const
 {
     return _tasks.size();
 }
 
 bool
-FeaClient::tasks_pending() const
+RibClient::tasks_pending() const
 {
     XLOG_ASSERT(_tasks.empty());
     return !_tasks.empty();
 }
 
 SyncFtiCommand *
-FeaClient::get_next()
+RibClient::get_next()
 {
     debug_msg("Get next task count %u op count %d\n", (uint32_t)tasks_count(),
 	      _op_count);
@@ -411,13 +412,13 @@ FeaClient::get_next()
 
     debug_msg("Get next found one\n");
 
-    FeaClientTask fct = _tasks.front();
+    RibClientTask rib_client_task = _tasks.front();
 
-    return &(*fct);
+    return &(*rib_client_task);
 }
 
 void
-FeaClient::transaction_completed()
+RibClient::transaction_completed()
 {
     XLOG_ASSERT(_busy);
 
@@ -431,7 +432,7 @@ FeaClient::transaction_completed()
 }
 
 void
-FeaClient::start()
+RibClient::start()
 {
     if (_busy) {
 	debug_msg("start: busy\n");
@@ -448,8 +449,8 @@ FeaClient::start()
 	_busy = true;
 	_op_count = 0;
 	_tasks.front()->start(callback(this,
-				       &FeaClient::transaction_completed),
-			      callback(this, &FeaClient::get_next));
+				       &RibClient::transaction_completed),
+			      callback(this, &RibClient::get_next));
     } else {
 	_tasks.clear();
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.8 2003/03/17 23:32:42 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.9 2003/03/19 09:05:19 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -200,11 +200,12 @@ RIB<A>::RIB(RibTransportType t)
 
 template<class A>
 int
-RIB<A>::initialize_export(FeaClient *fea_client)
+RIB<A>::initialize_export(RibClient *rib_client)
 {
-    ExportTable<A> *et = new ExportTable<A>("ExportToFEA", 0, fea_client);
+    ExportTable<A> *et = new ExportTable<A>("ExportToRibClients", 0,
+					    rib_client);
     
-    if (add_table("ExportToFEA", et) != 0) {
+    if (add_table("ExportToRibClients", et) != 0) {
 	XLOG_FATAL("Export already initialized.");
 	//delete et;
 	//return -1;
@@ -241,7 +242,7 @@ RIB<A>::initialize_register(RegisterServer *regserv)
     }
     _register_table = rt;
 
-    if (find_table("ExportToFEA") == 0) {
+    if (find_table("ExportToRibClients") == 0) {
 	//No ExportTable<A> - perhaps we're an MRIB.
 	if (_final_table != 0) {
 	    XLOG_FATAL("No export table when initializing register table");

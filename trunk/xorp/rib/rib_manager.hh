@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.6 2003/03/17 23:32:42 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.7 2003/03/19 09:05:19 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -26,7 +26,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "rib.hh"
-#include "fea_client.hh"
+#include "rib_client.hh"
 #include "register_server.hh"
 #include "vifmanager.hh"
 #include "xrl_target.hh"
@@ -144,15 +144,15 @@ public:
 			const IPv6& addr,
 			string& err);
 
-    void set_fea_enabled(bool en);
-    bool fea_enabled() const;
+    void set_rib_clients_enabled(bool en);
+    bool rib_clients_enabled() const;
     
 private:
     EventLoop&		_event_loop;	// The event loop to use
     XrlStdRouter&	_xrl_router;	// The XRL router to use
-    FeaClient		_fea_client;	// For handling routes to the FEA
-    FeaClient		_mrib4_client;	// For handling IPv4 MRIB to a client
-    FeaClient		_mrib6_client;	// For handling IPv6 MRIB to a client
+    RibClient		_rib_client;	// To send URIB routes to clients
+    RibClient		_mrib4_client;	// To send IPv4 MRIB routes to clients 
+    RibClient		_mrib6_client;	// To send IPv6 MRIB routes to clients
     RegisterServer	_rserv;		// To notify clients about route change
     
     RIB<IPv4>		_urib4;		// The IPv4 unicast RIB

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.5 2003/03/15 02:28:40 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.6 2003/03/16 07:19:01 pavlin Exp $"
 
 #include "version.h"
 #include "rib_module.h"
@@ -40,7 +40,7 @@ XrlRibTarget::common_0_1_get_version(string& version)
 XrlCmdError 
 XrlRibTarget::rib_0_1_no_fea()
 {
-    _ribmanager->set_fea_enabled(false);
+    _ribmanager->set_rib_clients_enabled(false);
     _vifmanager.no_fea();
     return XrlCmdError::OKAY();
 }

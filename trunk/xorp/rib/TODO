@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+# $XORP: xorp/rib/TODO,v 1.2 2003/03/15 02:05:10 pavlin Exp $
 #
 
 RIB To Do List, 9/24/02
@@ -31,3 +31,9 @@ the same route.
 10. Better, more extensive test suites.
 
 11. Add new interface for PIM simply be able to get all the routes.
+
+12. Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
+    RIB clients.
+13. Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.
+
+    

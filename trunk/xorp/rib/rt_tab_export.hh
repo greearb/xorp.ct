@@ -12,21 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.4 2003/03/17 23:32:42 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.5 2003/03/19 09:05:20 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
 
 #include "rt_tab_base.hh"
 
-class FeaClient;
+class RibClient;
 
 /** 
- * @short ExportTable is used to send routes to the FEA
+ * @short ExportTable is used to send routes to the RIB clients.
  *
- * ExportTable is a @ref RouteTable that is used in Unicast RIBs to
- * send routes to the Forwarding Engine Abstraction (FEA) process.  It
- * is the final RouteTable in the RIB 
+ * ExportTable is a @ref RouteTable that is used in RIBs to
+ * send routes to the RIB clients such as the Forwarding Engine Abstraction
+ * (FEA) process.  It is the final RouteTable in the RIB.
  */
 template<class A>
 class ExportTable : public RouteTable<A> {
@@ -37,11 +37,11 @@ public:
      * @param tablename the name of the table, used for debugging purposes.
      * @param parent the @ref RouteTable immediately preceding this
      * one.  Usually this will be a @ref RegisterTable.
-     * @param fea a pointer to the RIB's @ref FeaClient instance.  The
-     * FeaClient is used to communicate with the FEA using XRLs.
+     * @param rib_client a pointer to the RIB's @ref RibClient instance.  The
+     * RibClient is used to communicate with the RIB client using XRLs.
      */
     ExportTable(const string& tablename, RouteTable<A> *parent, 
-		FeaClient *fea_client);
+		RibClient *rib_client);
 
     /**
      * ExportTable Destructor
@@ -50,7 +50,7 @@ public:
 
     /**
      * add_route is called when a new route is successfully added to
-     * the RIB, and this needs to be communicated to the FEA.
+     * the RIB, and this needs to be communicated to the RIB clients.
      * 
      * @param route the @ref RouteEntry for the new route.
      * @param caller the @ref RouteTable calling this method. This
@@ -60,7 +60,7 @@ public:
 
     /**
      * delete_route is called when a route is removed from the
-     * the RIB, and this needs to be communicated to the FEA.
+     * the RIB, and this needs to be communicated to the RIB clients.
      * 
      * @param route the @ref RouteEntry for the route being deleted.
      * @param caller the @ref RouteTable calling this method. This
@@ -117,13 +117,13 @@ public:
      * replace a route).  flush is called explicitly after the end of
      * a batch of changes to allow events to be queued and then
      * amalgamated in the ExportTable to reduce unnecessary changes
-     * reaching the FEA.
+     * reaching the RIB clients.
      */
     void flush();
     
 private:
     RouteTable<A>	*_parent;
-    FeaClient		*_fea_client;
+    RibClient		*_rib_client;
 };
 
 #endif // __RIB_RT_TAB_EXPORT_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.5 2003/03/16 07:19:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.6 2003/03/19 09:05:20 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -21,34 +21,35 @@
 #include "libxorp/exceptions.hh"
 #include "libxipc/xrl_std_router.hh"
 
-#include "fea_client.hh"
+#include "rib_client.hh"
 
 static bool
-send_fea_commands(FeaClient *fc, int *pcount)
+send_rib_client_commands(RibClient *rc, int *pcount)
 {
     int& count = *pcount;
     
     count++;
-    fc->delete_route(IPv4Net("128.16.8.8/16"));
-    fc->add_route(IPv4Net("128.16.8.8/16"), IPv4("128.16.8.1"), "if0", "vif0");
-    cout << "Sending fea commands" << endl;
+    rc->delete_route(IPv4Net("128.16.8.8/16"));
+    rc->add_route(IPv4Net("128.16.8.8/16"), IPv4("128.16.8.1"), "if0", "vif0");
+    cout << "Sending RibClient commands" << endl;
     return true;
 }
 
 void
-fea_client_test()
+rib_client_test()
 {
     EventLoop e;
     XrlStdRouter rtr(e, "test_fea");
-    FeaClient fc(rtr, "fea");
+    RibClient rc(rtr, "fea");
     int n = 0;
 
-    XorpTimer t = e.new_periodic(1000, callback(&send_fea_commands, &fc, &n));
+    XorpTimer t = e.new_periodic(1000, callback(&send_rib_client_commands,
+						&rc, &n));
     while(n < 10) 
 	e.run();
     t.unschedule();
     
-    while (fc.tasks_pending()) {
+    while (rc.tasks_pending()) {
 	e.run();
     }
 }
@@ -67,7 +68,7 @@ int main(int, char *argv[])
 
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	fea_client_test();
+	rib_client_test();
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
