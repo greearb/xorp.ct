@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.3 2002/12/17 22:06:06 mjh Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.4 2002/12/18 03:06:06 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -42,7 +42,7 @@ public:
 
     const InternalMessage<A>* delete_msg() const {return _delete_msg;}
     const SubnetRoute<A>* deleted_route() const {return _cloned_deleted_route;}
-    const IPNet<A>& net() const {return _add_msg->net();}
+    const IPNet<A>& net() const {return _cloned_added_route->net();}
     string str() const;
 private:
     void copy_in(const InternalMessage<A>* add_msg,
