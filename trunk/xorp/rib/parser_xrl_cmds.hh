@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.9 2004/05/06 23:05:24 hodson Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.10 2004/06/10 22:41:37 hodson Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -62,6 +62,7 @@ public:
 
 	_xrl_client.send_add_route4(
 	    "rib", _tablename, unicast, multicast,_net, _nexthop, _metric,
+	    XrlAtomList(), // no policy
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;

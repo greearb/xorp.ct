@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.12 2004/05/06 00:25:56 hodson Exp $
+// $XORP: xorp/rib/route.hh,v 1.13 2004/06/10 22:41:39 hodson Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -25,6 +26,8 @@
 #include "libxorp/ipv6net.hh"
 #include "libxorp/vif.hh"
 #include "libxorp/nexthop.hh"
+
+#include "policy/backend/policytags.hh"
 
 #include "protocol.hh"
 
@@ -163,6 +166,24 @@ public:
 	: RouteEntry(vif, nexthop, protocol, metric), _net(net) {}
 
     /**
+     * Constructor for IPRouteEntry.
+     *
+     * @param net the Subnet (address and mask) of the routing table entry.
+     * @param vif the Virtual Interface on which packets matching this
+     * routing table entry should be forwarded.
+     * @param nexthop the NextHop router to which packets matching this
+     * entry should be forwarded.
+     * @param protocol the routing protocol that originated this route.
+     * @param metric the routing protocol metric for this route.
+     * @param policytags the policy-tags for this route.
+     */
+    IPRouteEntry(const IPNet<A>& net, Vif* vif, NextHop* nexthop,
+		 const Protocol& protocol, uint16_t metric,
+		 const PolicyTags& policytags)
+	: RouteEntry(vif, nexthop, protocol, metric), _net(net),
+	  _policytags(policytags) {}
+
+    /**
      * Destructor for Routing Table Entry
      */
     ~IPRouteEntry() {}
@@ -197,6 +218,22 @@ public:
     }
 
     /**
+     * Get the policy-tags for this route.
+     *
+     * @return the policy-tags for this route.
+     */
+    inline const PolicyTags& policytags() const {
+	return _policytags;
+    }
+
+    /**
+     * Replace policy-tags in the route.
+     *
+     * @param ptags The new policy-tags for this route.
+     */
+    inline void set_policytags(const PolicyTags& ptags) { _policytags = ptags; }
+
+    /**
      * Get the route entry as a string for debugging purposes.
      *
      * @return a human readable representation of the route entry.
@@ -206,11 +243,13 @@ public:
 	string vif = (_vif) ? string(_vif->name()) : string("NULL");
 	return string("Dst: ") + dst + string(" Vif: ") + vif +
 	    string(" NextHop: ") + _nexthop->str() + string(" Metric: ") +
-	    c_format("%d", _metric);
+	    c_format("%d", _metric) + string(" PolicyTags: ") +
+	    _policytags.str();
     }
 
 protected:
     IPNet<A> _net;		// The route entry's subnet address
+    PolicyTags _policytags;	// Tags used for policy route redistribution
 };
 
 typedef IPRouteEntry<IPv4> IPv4RouteEntry;
@@ -254,7 +293,7 @@ public:
 			 const Protocol& protocol, uint16_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)
-	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric),
+	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric,PolicyTags()),
 	_igp_parent(igp_parent),
 	_egp_parent(egp_parent) { }
 

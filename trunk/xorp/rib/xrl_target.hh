@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.25 2004/07/24 01:01:53 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.26 2004/08/03 05:02:56 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -203,6 +204,8 @@ protected:
      *  destination.
      *
      *  @param metric the routing metric.
+     *
+     *  @param policytags the policy-tags for this route.
      */
     XrlCmdError rib_0_1_add_route4(
 	// Input values,
@@ -211,7 +214,8 @@ protected:
 	const bool&	multicast,
 	const IPv4Net&	network,
 	const IPv4&     nexthop,
-	const uint32_t&       metric);
+	const uint32_t& metric,
+	const XrlAtomList&      policytags);
 
     XrlCmdError rib_0_1_add_route6(
 	// Input values,
@@ -220,7 +224,8 @@ protected:
 	const bool&	multicast,
 	const IPv6Net&	network,
 	const IPv6&	nexthop,
-	const uint32_t&       metric);
+	const uint32_t& metric,
+	const XrlAtomList&      policytags);
 
     XrlCmdError rib_0_1_replace_route4(
 	// Input values,
@@ -229,7 +234,8 @@ protected:
 	const bool&	multicast,
 	const IPv4Net&	network,
 	const IPv4&     nexthop,
-	const uint32_t&       metric);
+	const uint32_t& metric,
+	const XrlAtomList&      policytags);
 
     XrlCmdError rib_0_1_replace_route6(
 	// Input values,
@@ -238,7 +244,8 @@ protected:
 	const bool&	multicast,
 	const IPv6Net&	network,
 	const IPv6&	nexthop,
-	const uint32_t&       metric);
+	const uint32_t& metric,
+	const XrlAtomList&      policytags);
 
     XrlCmdError rib_0_1_delete_route4(
 	// Input values,
@@ -276,50 +283,56 @@ protected:
      *  destination.
      *
      *  @param metric the routing metric.
+     *
+     *  @param policytags the policy-tags for this route.
      */
     XrlCmdError rib_0_1_add_interface_route4(
 	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv4Net&	network,
-	const IPv4&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric);
+	const string&	    protocol,
+	const bool&	    unicast,
+	const bool&	    multicast,
+	const IPv4Net&	    network,
+	const IPv4&	    nexthop,
+	const string&	    ifname,
+	const string&	    vifname,
+	const uint32_t&	    metric,
+	const XrlAtomList&  policytags);
 
     XrlCmdError rib_0_1_add_interface_route6(
 	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric);
+	const string&	    protocol,
+	const bool&	    unicast,
+	const bool&	    multicast,
+	const IPv6Net&	    network,
+	const IPv6&	    nexthop,
+	const string&	    ifname,
+	const string&	    vifname,
+	const uint32_t&	    metric,
+	const XrlAtomList&  policytags);
 
     XrlCmdError rib_0_1_replace_interface_route4(
 	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv4Net&	network,
-	const IPv4&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric);
+	const string&	    protocol,
+	const bool&	    unicast,
+	const bool&	    multicast,
+	const IPv4Net&	    network,
+	const IPv4&	    nexthop,
+	const string&	    ifname,
+	const string&	    vifname,
+	const uint32_t&	    metric,
+	const XrlAtomList&  policytags);
 
     XrlCmdError rib_0_1_replace_interface_route6(
 	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric);
+	const string&	    protocol,
+	const bool&	    unicast,
+	const bool&	    multicast,
+	const IPv6Net&	    network,
+	const IPv6&	    nexthop,
+	const string&	    ifname,
+	const string&	    vifname,
+	const uint32_t&	    metric,
+	const XrlAtomList&  policytags);
 
     /**
      *  Lookup nexthop.
@@ -702,6 +715,50 @@ protected:
 	// Input values,
 	const string&	target_class,
 	const string&	target_instance);
+
+
+    /**
+     * Configure a policy filter
+     *
+     * @param filter id of filter to configure.
+     * @param conf configuration of filter.
+     */
+    XrlCmdError policy_backend_0_1_configure(
+        // Input values,
+        const uint32_t& filter,
+        const string&   conf);
+      
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter id of filter to reset.
+     */
+    XrlCmdError policy_backend_0_1_reset(
+        // Input values,
+        const uint32_t& filter);
+
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    XrlCmdError policy_backend_0_1_push_routes();
+
+    
+    /**
+     * Redistribute to a protocol based on policy-tags.
+     *
+     * @param protocol protocol to redistribute to
+     * @param policytags policy-tags of routes which need to be redistributed.
+     */
+    XrlCmdError rib_0_1_insert_policy_redist_tags(
+        // Input values,
+        const string&   protocol,
+        const XrlAtomList&      policytags);
+
+    /**
+     * Reset policy redistribution map.
+     */
+    XrlCmdError rib_0_1_reset_policy_redist_tags();
+
 };
 
 #endif // __RIB_XRL_TARGET_HH__

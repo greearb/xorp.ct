@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.7 2004/05/20 23:45:46 pavlin Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.8 2004/08/03 05:02:56 pavlin Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -47,13 +47,13 @@ add_vif_addr6()
 add_route4()
 {
     echo -n "add_route4" $*
-    $CALLXRL "finder://rib/rib/0.1/add_route4?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv4net=$4&nexthop:ipv4=$5&metric:u32=$6"
+    $CALLXRL "finder://rib/rib/0.1/add_route4?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv4net=$4&nexthop:ipv4=$5&metric:u32=$6&policytags:list=$7"
 }
 
 add_route6()
 {
     echo -n "add_route6" $*
-    $CALLXRL "finder://rib/rib/0.1/add_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4&nexthop:ipv6=$5&metric:u32=$6"
+    $CALLXRL "finder://rib/rib/0.1/add_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4&nexthop:ipv6=$5&metric:u32=$6&policytags:list=$7"
 }
 
 delete_route4()

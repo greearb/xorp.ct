@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,10 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.37 2004/07/24 01:01:51 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.38 2004/07/24 01:44:09 pavlin Exp $"
 
 #include "rib_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -24,6 +24,7 @@
 #include "register_server.hh"
 #include "rib_manager.hh"
 #include "rib.hh"
+
 
 // ----------------------------------------------------------------------------
 // Inline table utility methods
@@ -221,7 +222,8 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
       _eventloop(eventloop),
       _final_table(NULL),
       _register_table(NULL),
-      _errors_are_fatal(false)
+      _errors_are_fatal(false),
+      _policy_redist_table(NULL)
 {
     if (t == UNICAST) {
 	_multicast = false;
@@ -264,6 +266,12 @@ RIB<A>::initialize(RegisterServer& register_server)
 	XLOG_FATAL("Could not initialize register table for %s",
 		   name().c_str());
     }
+
+    if (initialize_policy_redist() != XORP_OK) {
+	XLOG_FATAL("Could not initialize policy redistribution table for %s",
+		   name().c_str());
+    }
+    
     //
     // XXX: we must initialize the final RedistTable after the
     // RegistTable has been initialized.
@@ -285,10 +293,39 @@ RIB<A>::initialize(RegisterServer& register_server)
 
 template <typename A>
 int
-RIB<A>::initialize_redist_all(const string& all)
+RIB<A>::initialize_policy_redist()
 {
     if (_register_table == NULL) {
 	XLOG_ERROR("Register table is not yet initialized");
+	return XORP_ERROR;
+    }
+
+    if (_policy_redist_table != NULL) {
+	return XORP_OK;	// done already
+    }
+
+    _policy_redist_table =
+	new PolicyRedistTable<A>(_register_table,_rib_manager.xrl_router(),
+				 _rib_manager.policy_redist_map(),
+				 _multicast);
+    if (add_table(_policy_redist_table) != XORP_OK) {
+	delete _policy_redist_table;
+	_policy_redist_table = NULL;
+	return XORP_ERROR;
+    }
+
+    if (_final_table == NULL || _final_table == _register_table)
+	_final_table = _policy_redist_table;
+    
+    return XORP_OK;
+}
+
+template <typename A>
+int
+RIB<A>::initialize_redist_all(const string& all)
+{
+    if (_policy_redist_table == NULL) {
+	XLOG_ERROR("Policy redist table is not yet initialized");
 	return XORP_ERROR;
     }
 
@@ -297,7 +334,7 @@ RIB<A>::initialize_redist_all(const string& all)
     }
 
     RedistTable<A>* r;
-    r = new RedistTable<A>(redist_tablename(all), _register_table);
+    r = new RedistTable<A>(redist_tablename(all), _policy_redist_table);
     if (add_table(r) != XORP_OK) {
 	delete r;
 	return XORP_ERROR;
@@ -306,7 +343,7 @@ RIB<A>::initialize_redist_all(const string& all)
     //
     // Set the RedistTable as the final table
     //
-    if (_final_table == NULL || _final_table == _register_table)
+    if (_final_table == NULL || _final_table == _policy_redist_table)
 	_final_table = r;
 
     return XORP_OK;
@@ -393,12 +430,12 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 	     ai++) {
 	    if (ai->addr().is_ipv4()) {
 		add_route("connected", ai->subnet_addr().get_ipv4net(),
-			  ai->addr().get_ipv4(), "", "", 0);
+			  ai->addr().get_ipv4(), "", "", 0,PolicyTags());
 		if (new_vif->is_p2p() && (ai->peer_addr() != IPv4::ZERO())) {
 		    add_route("connected",
 			      IPv4Net(ai->peer_addr().get_ipv4(),
 				      IPv4::addr_bitlen()),
-			      ai->addr().get_ipv4(), "", "", 0);
+			      ai->addr().get_ipv4(), "", "", 0,PolicyTags());
 		}
 	    }
 	}
@@ -429,12 +466,12 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 	     ai++) {
 	    if (ai->addr().is_ipv6()) {
 		add_route("connected", ai->subnet_addr().get_ipv6net(),
-			  ai->addr().get_ipv6(), "", "", 0);
+			  ai->addr().get_ipv6(), "", "", 0,PolicyTags());
 		if (new_vif->is_p2p() && (ai->peer_addr() != IPv6::ZERO())) {
 		    add_route("connected",
 			      IPv6Net(ai->peer_addr().get_ipv6(),
 				      IPv6::addr_bitlen()),
-			      ai->addr().get_ipv6(), "", "", 0);
+			      ai->addr().get_ipv6(), "", "", 0,PolicyTags());
 		}
 	    }
 	}
@@ -517,11 +554,12 @@ RIB<A>::add_vif_address(const string&	vifname,
     }
     vi->second.add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
     // Add a route for this subnet
-    add_route("connected", subnet, addr, "", "", /* best possible metric */ 0);
+    add_route("connected", subnet, addr, "", "", /* best possible metric */ 0,
+	      PolicyTags());
     if (vi->second.is_p2p() && (peer_addr != A::ZERO())) {
 	add_route("connected",
 		  IPNet<A>(peer_addr, A::addr_bitlen()),
-		  peer_addr, "", "", 0);
+		  peer_addr, "", "", 0,PolicyTags());
     }
     return XORP_OK;
 }
@@ -567,8 +605,10 @@ RIB<A>::add_route(const string&		tablename,
 		  const A&		nexthop_addr,
 		  const string&		ifname,
 		  const string&		vifname,
-		  uint32_t		metric)
+		  uint32_t		metric,
+		  const PolicyTags&	policytags)
 {
+
     RouteTable<A>* rt = find_table(tablename);
     if (rt == NULL) {
 	if (_errors_are_fatal) {
@@ -621,7 +661,8 @@ RIB<A>::add_route(const string&		tablename,
 	}
 	Vif* vif = &iter->second;
 	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
-	ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol, metric));
+	ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
+		      metric,policytags));
 	flush();
 	return XORP_OK;
     }
@@ -641,7 +682,7 @@ RIB<A>::add_route(const string&		tablename,
 	    debug_msg("**directly connected route found for nexthop\n");
 	    IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, re->vif(), nexthop,
-					  *protocol, metric));
+					  *protocol, metric, policytags));
 	    flush();
 	    return XORP_OK;
 	} else {
@@ -661,7 +702,7 @@ RIB<A>::add_route(const string&		tablename,
 
 	    IPNextHop<A>* nexthop = find_or_create_external_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nexthop,
-					  *protocol, metric));
+					  *protocol, metric,policytags));
 	    flush();
 	    return XORP_OK;
 	}
@@ -702,7 +743,8 @@ RIB<A>::add_route(const string&		tablename,
 	metric &= 0xffff;
     }
 
-    ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol, metric));
+    ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
+				  metric,policytags));
 
     flush();
     return XORP_OK;
@@ -715,7 +757,8 @@ RIB<A>::replace_route(const string&	tablename,
 		      const A&		nexthop_addr,
 		      const string&	ifname,
 		      const string&	vifname,
-		      uint32_t		metric)
+		      uint32_t		metric,
+		      const PolicyTags&	policytags)
 {
     RouteTable<A>* rt = find_table(tablename);
     if (NULL == rt)
@@ -730,7 +773,7 @@ RIB<A>::replace_route(const string&	tablename,
 	return response;
 
     response = add_route(tablename, net, nexthop_addr, ifname, vifname,
-			 metric);
+			 metric,policytags);
 
     // No need to flush here, as add_route will do it for us.
 
@@ -884,11 +927,25 @@ RIB<A>::add_igp_table(const string& tablename,
     if (r != XORP_OK)
 	return r;
 
+
+    const string* redistparent = &tablename;
+
+    if(tablename == "connected") {
+	r = add_policy_connected_table(tablename);
+	if(r != XORP_OK) {
+	    delete_origin_table(tablename, target_class, target_instance);
+	    return r;
+	}
+
+	redistparent = &PolicyConnectedTable<A>::table_name;
+    }
+
+
     // XXX For now we unconditionally plumb a RedistTable behind each
     // OriginTable.  We do this because the RedistTable needs to track
     // the routes within the OriginTable in order to be able to render
     // a dump when another protocol requests redistribution.
-    r = add_redist_table(tablename);
+    r = add_redist_table(*redistparent);
     if (r != XORP_OK) {
 	delete_origin_table(tablename, target_class, target_instance);
     }
@@ -919,6 +976,29 @@ RIB<A>::add_egp_table(const string& tablename,
     }
 #endif
     return r;
+}
+
+template <typename A>
+int
+RIB<A>::add_policy_connected_table(const string& parent_tablename) {
+    RouteTable<A>* parent = find_table(parent_tablename);
+    if (parent == NULL) {
+	XLOG_WARNING("add_policy_connected_table: parent table %s does not exist",
+		     parent_tablename.c_str());
+	return XORP_ERROR;
+    }
+
+    if(find_table(PolicyConnectedTable<A>::table_name))
+	return XORP_OK;
+
+    PolicyConnectedTable<A>* pt = 
+	new PolicyConnectedTable<A>(parent,_rib_manager.policy_filters());
+    if (add_table(pt) != XORP_OK) {
+	delete pt;
+	return XORP_ERROR;
+    }
+
+    return XORP_OK;
 }
 
 template <typename A>
@@ -1061,6 +1141,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	    // or a RegisterTable.
 	    //
 	    if ((_final_table->type() != REDIST_TABLE)
+		&& (_final_table->type() != POLICY_REDIST_TABLE)
 		&& (_final_table->type() != REGISTER_TABLE)) {
 		XLOG_UNREACHABLE();
 	    }
@@ -1072,6 +1153,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	    //
 	    RouteTable<A>* rt = track_back(_final_table,
 					   REDIST_TABLE
+					   | POLICY_REDIST_TABLE
 					   | REGISTER_TABLE);
 
 	    //
@@ -1091,6 +1173,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	//
 	RouteTable<A>* next_table = track_back(_final_table,
 					       REDIST_TABLE
+					       | POLICY_REDIST_TABLE
 					       | REGISTER_TABLE);
 	RouteTable<A>* existing_table = next_table->parent();
 	if (protocol_type == IGP) {
@@ -1107,7 +1190,8 @@ RIB<A>::add_origin_table(const string& tablename,
 	    return XORP_ERROR;
 	}
 
-	if (_final_table->type() & (REDIST_TABLE | REGISTER_TABLE)) {
+	if (_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE | 
+				    REGISTER_TABLE)) {
 	    ei_table->set_next_table(next_table);
 	    next_table->replumb(existing_table, ei_table);
 	} else {
@@ -1124,7 +1208,8 @@ RIB<A>::add_origin_table(const string& tablename,
 
     // Skip past any RedistTables
     RouteTable<A>* new_prev_table = track_forward(existing_table,
-						  REDIST_TABLE);
+						  (REDIST_TABLE |
+						   POLICY_CONNECTED_TABLE));
     if (new_prev_table != existing_table) {
 	existing_table = new_prev_table;
 	next_table = existing_table->next_table();
@@ -1303,6 +1388,22 @@ RIB<A>::name() const
 		    (_multicast) ? "Multicast" : "Unicast",
 		    A::ip_version_str().c_str());
 }
+
+
+template <typename A>
+void
+RIB<A>::push_routes() {
+    RouteTable<A>* rt = find_table(PolicyConnectedTable<A>::table_name);
+    XLOG_ASSERT(rt);
+
+    PolicyConnectedTable<A>* pct = dynamic_cast<PolicyConnectedTable<A>*>(rt);
+    XLOG_ASSERT(pct);
+
+    pct->push_routes();
+}
+
+
+
 
 template class RIB<IPv4>;
 template class RIB<IPv6>;

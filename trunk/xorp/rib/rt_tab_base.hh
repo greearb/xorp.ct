@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.15 2004/06/10 22:41:39 hodson Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.16 2004/07/24 01:01:52 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -32,7 +33,11 @@ enum TableType {
     DELETION_TABLE	= 1 << 5,
     EXPECT_TABLE	= 1 << 6,
     LOG_TABLE		= 1 << 7,
-    MAX_TABLE_TYPE	= 1 << 7
+    
+    POLICY_REDIST_TABLE	    = 1 << 8,
+    POLICY_CONNECTED_TABLE  = 1 << 9,
+
+    MAX_TABLE_TYPE	= 1 << 9
 };
 
 /**
@@ -174,6 +179,11 @@ public:
     inline const string& tablename() const	{ return _tablename; }
     inline RouteTable* next_table()		{ return _next_table; }
     inline const RouteTable* next_table() const	{ return _next_table; }
+
+    // this call should be received and dealt with by the PolicyRedistTable. 
+    virtual void replace_policytags(const IPRouteEntry<A>& route,
+				    const PolicyTags& prevtags,
+				    RouteTable* caller);
 
 protected:
     inline void set_tablename(const string& s) { _tablename = s; }

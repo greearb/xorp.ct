@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.27 2004/06/10 13:49:27 hodson Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.28 2004/07/24 01:01:51 pavlin Exp $
 ##
 
 SUBDIRS = . tools
@@ -42,8 +42,11 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libredist4xif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libredist6xif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
+LDADD           += $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a
+LDADD           += $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 LDADD		+= $(top_builddir)/libxipc/libfinder.a
+LDADD           += $(top_builddir)/policy/backend/libpolicybackend.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libproto/libproto.a
@@ -64,11 +67,14 @@ xorp_rib_SOURCES        += protocol.hh
 xorp_rib_SOURCES        += register_server.hh
 xorp_rib_SOURCES        += rib.hh
 xorp_rib_SOURCES        += rib_manager.hh
+xorp_rib_SOURCES        += rib_varrw.hh
 xorp_rib_SOURCES        += route.hh
 xorp_rib_SOURCES        += rt_tab_base.hh
 xorp_rib_SOURCES        += rt_tab_extint.hh
 xorp_rib_SOURCES        += rt_tab_merged.hh
 xorp_rib_SOURCES        += rt_tab_origin.hh
+xorp_rib_SOURCES        += rt_tab_pol_conn.hh
+xorp_rib_SOURCES        += rt_tab_pol_redist.hh
 xorp_rib_SOURCES        += rt_tab_redist.hh
 xorp_rib_SOURCES        += rt_tab_register.hh
 xorp_rib_SOURCES        += vifmanager.hh
@@ -187,6 +193,8 @@ test_deletion_LDADD	 = $(LDADD)
 
 test_redist_SOURCES	 = test_redist.cc
 test_redist_LDADD	 = ./librib.a
+test_redist_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.a
+test_redist_LDADD       += $(top_builddir)/libxipc/libxipc.a
 test_redist_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
@@ -195,6 +203,7 @@ librib_a_SOURCES	+= protocol.hh
 librib_a_SOURCES	+= register_server.hh
 librib_a_SOURCES	+= rib.hh
 librib_a_SOURCES	+= rib_manager.hh
+librib_a_SOURCES        += rib_varrw.hh
 librib_a_SOURCES	+= route.hh
 librib_a_SOURCES	+= rt_tab_base.hh
 librib_a_SOURCES	+= rt_tab_deletion.hh
@@ -202,6 +211,8 @@ librib_a_SOURCES	+= rt_tab_extint.hh
 librib_a_SOURCES	+= rt_tab_log.hh
 librib_a_SOURCES	+= rt_tab_merged.hh
 librib_a_SOURCES	+= rt_tab_origin.hh
+librib_a_SOURCES	+= rt_tab_pol_conn.hh
+librib_a_SOURCES	+= rt_tab_pol_redist.hh
 librib_a_SOURCES	+= rt_tab_redist.hh
 librib_a_SOURCES	+= rt_tab_register.hh
 librib_a_SOURCES	+= vifmanager.hh
@@ -209,12 +220,15 @@ librib_a_SOURCES	+= xrl_target.hh
 librib_a_SOURCES	+= protocol.cc
 librib_a_SOURCES	+= register_server.cc
 librib_a_SOURCES	+= rib.cc
+librib_a_SOURCES        += rib_varrw.cc
 librib_a_SOURCES	+= rt_tab_base.cc
 librib_a_SOURCES	+= rt_tab_deletion.cc
 librib_a_SOURCES	+= rt_tab_extint.cc
 librib_a_SOURCES	+= rt_tab_log.cc
 librib_a_SOURCES	+= rt_tab_merged.cc
 librib_a_SOURCES	+= rt_tab_origin.cc
+librib_a_SOURCES	+= rt_tab_pol_conn.cc
+librib_a_SOURCES	+= rt_tab_pol_redist.cc
 librib_a_SOURCES	+= rt_tab_redist.cc
 librib_a_SOURCES	+= rt_tab_register.cc
 librib_a_SOURCES	+= vifmanager.cc

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.11 2004/06/10 22:41:37 hodson Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.12 2004/07/24 01:01:51 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -212,3 +213,54 @@ RibManager::delete_redist_xrl_output6(const string&	/* target_name */,
     return XORP_OK;
 }
 
+void
+RibManager::configure_filter(const uint32_t&	/* filter */,
+			     const string&	/* conf */)
+{
+}
+
+void
+RibManager::reset_filter(const uint32_t&	/* filter */)
+{
+}
+
+void
+RibManager::push_routes()
+{
+}
+
+void
+RibManager::insert_policy_redist_tags(const string& /* protocol */,
+                                      const PolicyTags& /* tags */)
+{
+}
+
+void 
+RibManager::reset_policy_redist_tags()
+{
+}
+
+PolicyFilters&
+RibManager::policy_filters()
+{
+    return _policy_filters;
+}
+
+PolicyRedistMap&
+RibManager::policy_redist_map() 
+{ 
+    return _policy_redist_map;
+}
+
+XrlStdRouter&
+RibManager::xrl_router()
+{
+    // hope xrl router was set
+    return *_xrl_router;
+}
+
+void
+RibManager::set_xrl_router(XrlStdRouter& rtr)
+{
+    _xrl_router = &rtr;
+}

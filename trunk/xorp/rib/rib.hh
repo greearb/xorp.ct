@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.24 2004/06/10 22:41:39 hodson Exp $
+// $XORP: xorp/rib/rib.hh,v 1.25 2004/07/24 01:01:51 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -32,8 +33,12 @@
 #include "rt_tab_merged.hh"
 #include "rt_tab_extint.hh"
 #include "rt_tab_redist.hh"
+#include "rt_tab_pol_redist.hh"
 #include "rt_tab_register.hh"
+#include "rt_tab_pol_conn.hh"
 
+#include "policy/backend/policytags.hh"
+#include "policy/backend/policy_redist_map.hh"
 
 class RegisterServer;
 class RibManager;
@@ -101,6 +106,16 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int initialize_redist_all(const string& all);
+
+    /**
+     * Initialize the RIB's PolicyRedistTable.  The PolicyRedistTable enables
+     * route redistribution according to policy configuration.  Based on the
+     * policy tags of routes passing through this table, a redistribution
+     * request is sent to the relevant protocols.  If routes are being deleted,
+     * protocols are informed to stop advertising the route.
+     *
+     */
+    int initialize_policy_redist();
 
     /**
      * Initialize the RIB's RegisterTable.  The RegisterTable allows
@@ -215,6 +230,7 @@ public:
      * @param vifname the name of the virtual interface toward the
      * destination. If an empty string the interface will be chosen by RIB.
      * @param metric the routing protocol metric associated with this route.
+     * @param policytags the policy-tags for this route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_route(const string&		tablename,
@@ -222,7 +238,8 @@ public:
 			  const A&		nexthop_addr,
 			  const string&		ifname,
 			  const string&		vifname,
-			  uint32_t		metric);
+			  uint32_t		metric,
+			  const PolicyTags&	policytags);
 
     /**
      * Replace  an existing route via the OriginTable called tablename.
@@ -237,6 +254,7 @@ public:
      * @param vifname the name of the virtual interface toward the
      * destination. If an empty string the interface will be chosen by RIB.
      * @param metric the new routing protocol metric associated with this
+     * @param policytags the policy-tags for this route.
      * route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -245,7 +263,8 @@ public:
 			      const A&		nexthop_addr,
 			      const string&	ifname,
 			      const string&	vifname,
-			      uint32_t		metric);
+			      uint32_t		metric,
+			      const PolicyTags&	policytags);
 
     /**
      * Verify that expected routing information is correct.  This is
@@ -414,6 +433,11 @@ public:
      */
     string name() const;
 
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes();
+
 private:
     /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
@@ -444,6 +468,16 @@ private:
     int delete_origin_table(const string& tablename,
 			    const string& target_class,
 			    const string& target_instance);
+
+    /**
+     * Add a table for policy filtering of connected routes.
+     *
+     * This is used to enable route redistribution of connected routes.
+     *
+     * @param origin_tablename The name of the origin table.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_policy_connected_table(const string& origin_tablename);
 
     /**
      * Add a RedistTable behind OriginTable.  This allows routes
@@ -593,13 +627,17 @@ private:
      */
     void flush();
 
+
 protected:
     RibManager&		_rib_manager;
     EventLoop&		_eventloop;
     RouteTable<A>*	_final_table;
     RegisterTable<A>*	_register_table;
+
     bool		_multicast;
     bool		_errors_are_fatal;
+
+    PolicyRedistTable<A>*		_policy_redist_table;
 
     list<RouteTable<A>* >		_tables;
     map<const string, Protocol* >	_protocols;

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_base.cc,v 1.5 2004/03/25 01:45:08 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_base.cc,v 1.6 2004/06/10 22:41:39 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -29,6 +30,17 @@ RouteTable<A>::set_next_table(RouteTable<A>* next_table)
 {
     _next_table = next_table;
 }
+
+template <typename A>
+void
+RouteTable<A>::replace_policytags(const IPRouteEntry<A>& route,
+				  const PolicyTags& prevtags,
+				  RouteTable* caller) {
+    XLOG_ASSERT(_next_table);
+    UNUSED(caller);
+    _next_table->replace_policytags(route,prevtags,this);
+}				  
+
 
 template class RouteTable<IPv4>;
 typedef RouteTable<IPv4> IPv4RouteTable;

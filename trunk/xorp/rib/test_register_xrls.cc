@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.28 2004/06/10 22:41:42 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.29 2004/07/24 01:01:53 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -224,7 +224,7 @@ add_route(XrlRibV0p1Client& client,
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
     client.send_add_route4("rib", protocol, true, false,
-			   net, nexthop, metric, cb);
+			   net, nexthop, metric, XrlAtomList(), cb);
 
     xrl_done_flag = false;
     while (xrl_done_flag == false) {

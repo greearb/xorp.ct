@@ -107,13 +107,13 @@ noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_direct
 noinst_LIBRARIES = librib.a libribxrl.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
 main_routemap_LDADD = $(LDADD)
 
-xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
+xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
 xorp_rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
 
 test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_direct.cc
@@ -132,10 +132,10 @@ test_deletion_SOURCES = rib_module.h rt_tab_base.hh rt_tab_expect.hh rt_tab_orig
 test_deletion_LDADD = $(LDADD)
 
 test_redist_SOURCES = test_redist.cc
-test_redist_LDADD = ./librib.a $(top_builddir)/libxorp/libxorp.a
+test_redist_LDADD = ./librib.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
+librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
 libribxrl_a_SOURCES = redist_xrl.hh redist_xrl.cc
 
@@ -154,11 +154,12 @@ LIBRARIES = $(noinst_LIBRARIES)
 librib_a_AR = $(AR) cru
 librib_a_LIBADD =
 am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
-	rib.$(OBJEXT) rt_tab_base.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
-	rt_tab_extint.$(OBJEXT) rt_tab_log.$(OBJEXT) \
-	rt_tab_merged.$(OBJEXT) rt_tab_origin.$(OBJEXT) \
-	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
-	vifmanager.$(OBJEXT)
+	rib.$(OBJEXT) rib_varrw.$(OBJEXT) rt_tab_base.$(OBJEXT) \
+	rt_tab_deletion.$(OBJEXT) rt_tab_extint.$(OBJEXT) \
+	rt_tab_log.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
+	rt_tab_origin.$(OBJEXT) rt_tab_pol_conn.$(OBJEXT) \
+	rt_tab_pol_redist.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
+	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 libribxrl_a_AR = $(AR) cru
 libribxrl_a_LIBADD =
@@ -184,8 +185,11 @@ main_routemap_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -205,8 +209,11 @@ test_deletion_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -214,7 +221,10 @@ test_deletion_DEPENDENCIES = librib.a libribxrl.a \
 test_deletion_LDFLAGS =
 am_test_redist_OBJECTS = test_redist.$(OBJEXT)
 test_redist_OBJECTS = $(am_test_redist_OBJECTS)
-test_redist_DEPENDENCIES = ./librib.a $(top_builddir)/libxorp/libxorp.a
+test_redist_DEPENDENCIES = ./librib.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a
 test_redist_LDFLAGS =
 am_test_register_OBJECTS = dummy_register_server.$(OBJEXT) \
 	dummy_rib_manager.$(OBJEXT) test_register.$(OBJEXT)
@@ -230,8 +240,11 @@ test_register_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -251,8 +264,11 @@ test_register_xrls_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -276,8 +292,11 @@ test_rib_direct_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -298,8 +317,11 @@ test_rib_xrls_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -321,8 +343,11 @@ xorp_rib_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -342,13 +367,15 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
 @AMDEP_TRUE@	$(DEPDIR)/redist_xrl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rib_manager.Po $(DEPDIR)/routemap.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_manager.Po $(DEPDIR)/rib_varrw.Po \
+@AMDEP_TRUE@	$(DEPDIR)/routemap.Po $(DEPDIR)/rt_tab_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_deletion.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_expect.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po $(DEPDIR)/rt_tab_log.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_pol_conn.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_pol_redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_register.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_deletion.Po $(DEPDIR)/test_redist.Po \
@@ -473,6 +500,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_varrw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_deletion.Po@am__quote@
@@ -481,6 +509,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_origin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_pol_conn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_pol_redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_deletion.Po@am__quote@

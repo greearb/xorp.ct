@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.14 2004/06/10 22:41:42 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.15 2004/07/24 01:01:53 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -120,6 +121,7 @@ main (int /* argc */, char* argv[])
     EventLoop eventloop;
     XrlStdRouter xrl_router(eventloop, "rib");
     RibManager rib_manager;
+    rib_manager.set_xrl_router(xrl_router);
 
     RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     rib_ptr = &rib;
@@ -157,9 +159,12 @@ main (int /* argc */, char* argv[])
     verify_route("10.0.1.4", "vif1", "10.0.1.1", 0);
     verify_route("10.0.2.4", "vif2", "10.0.2.1", 0);
 
-    rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"), "", "", 0);
-    rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"), "", "", 1);
-    rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"), "", "", 2);
+    rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"), 
+		  "", "", 0, PolicyTags());
+    rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"), 
+		  "", "", 1, PolicyTags());
+    rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"), 
+		  "", "", 2, PolicyTags());
 
     verify_route("1.0.5.4", "vif0", "10.0.0.2", 0);
     verify_route("1.0.3.4", "vif1", "10.0.1.2", 1);
@@ -172,21 +177,25 @@ main (int /* argc */, char* argv[])
 		     "9.255.255.255");
 
     // Add a route to another IGP table
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), "", "", 3);
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 
+		  "", "", 3, PolicyTags());
     test_route_range("1.0.4.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.8.1", "vif0", "10.0.0.2", "1.0.7.0", "1.0.8.255");
     test_route_range("1.0.6.1", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
     // Add an EGP route
-    rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"), "", "", 4);
+    rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"), 
+		  "", "", 4, PolicyTags());
     test_route_range("5.0.5.1", "vif1", "10.0.1.2", "5.0.5.0", "5.0.5.255");
     test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0", "5.0.4.255");
 
-    rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"), "", "", 5);
+    rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"), 
+		  "", "", 5, PolicyTags());
     test_route_range("1.0.5.1", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.6.1", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
-    rib.add_route("ospf", IPv4Net("1.0.5.64", 26), IPv4("10.0.1.2"), "", "", 6);
+    rib.add_route("ospf", IPv4Net("1.0.5.64", 26), IPv4("10.0.1.2"), 
+		  "", "", 6, PolicyTags());
     test_route_range("1.0.5.1", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.63");
 
 
@@ -211,14 +220,16 @@ main (int /* argc */, char* argv[])
 
 
     // Add a route that should have no effect
-    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), "", "", 1);
+    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 
+		  "", "", 1, PolicyTags());
     if (verbose)
 	printf("##########################\n");
     if (!register_server.verify_no_info())
 	abort();
 
     // Add a route that should cause both registrations to be invalidated
-    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), "", "", 1);
+    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 
+		  "", "", 1, PolicyTags());
     if (!register_server.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
     if (!register_server.verify_invalidated("foo2 1.0.5.0/26 mcast:false"))
@@ -263,8 +274,10 @@ main (int /* argc */, char* argv[])
 	abort();
 
     // Test registration where the address doesn't resolve
-    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), "", "", 1);
-    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), "", "", 1);
+    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 
+		  "", "", 1, PolicyTags());
+    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 
+		  "", "", 1, PolicyTags());
     rib.delete_route("ebgp", IPv4Net("1.0.0.0", 20));
     rib.delete_route("static", IPv4Net("1.0.0.0", 16));
     rib.delete_route("ospf", IPv4Net("1.0.6.0", 24));
@@ -285,7 +298,8 @@ main (int /* argc */, char* argv[])
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
 
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), "", "", 3);
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 
+		  "", "", 3, PolicyTags());
     if (!register_server.verify_invalidated("foo 1.0.6.0/23 mcast:false"))
 	abort();
     if (!register_server.verify_invalidated("foo2 1.0.6.0/23 mcast:false"))

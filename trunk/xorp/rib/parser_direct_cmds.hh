@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.11 2004/05/06 23:05:24 hodson Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.12 2004/06/10 22:41:37 hodson Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -46,7 +46,7 @@ public:
 	cout << _net.str() << " " << _nexthop.str() << " "
 	     << c_format("%d", _metric) << "\n";
 	return _rib.add_route(_tablename, _net, _nexthop, "", "",
-			      (uint32_t)_metric);
+			      (uint32_t)_metric, PolicyTags());
     }
 private:
     RIB<IPv4>& _rib;

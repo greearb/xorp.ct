@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.26 2004/06/10 22:41:39 hodson Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.27 2004/07/24 01:01:52 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -332,6 +333,66 @@ public:
 				  const string&	cookie,
 				  bool		is_xrl_transaction_output);
 
+
+    XrlStdRouter& xrl_router() {    return _xrl_router; }
+
+    /**
+     * Push the connected routes through the policy filter for re-filtering.
+     */
+    void push_routes();
+
+    /**
+     * Configure a policy filter.
+     *
+     * Will throw an exception on error.
+     *
+     * In this case the source match filter of connected routes will be
+     * configured.
+     *
+     * @param filter Identifier of filter to configure.
+     * @param conf Configuration of the filter.
+     */
+    void configure_filter(const uint32_t& filter, const string& conf);
+
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter Identifier of filter to reset.
+     */
+    void reset_filter(const uint32_t& filter);
+
+    /**
+     * @return the global instance of policy filters.
+     */
+    PolicyFilters&	policy_filters()    { return _policy_filters; }
+
+    /**
+     * @return the global instance of the policy redistribution map.
+     */
+    PolicyRedistMap&	policy_redist_map() { return _policy_redist_map; }
+
+
+    /**
+     * Insert [old ones are kept] policy-tags for a protocol.
+     *
+     * All routes which contain at least one of these tags, will be
+     * redistributed to the protocol.
+     *
+     * @param protocol Destination protocol for redistribution.
+     * @param tags Policy-tags of routes which need to be redistributed.
+     */
+    void insert_policy_redist_tags(const string& protocol, 
+				   const PolicyTags& tags);
+
+    /**
+     * Reset the policy redistribution map.
+     *
+     * This map allows policy redistribution to occur by directing routes with
+     * specific policy-tags to specific protocols.
+     *
+     */
+    void reset_policy_redist_tags();
+
 private:
     ProcessStatus       _status_code;
     string              _status_reason;
@@ -350,6 +411,14 @@ private:
     XorpTimer		_status_update_timer;	// Timer for periodic checks of RIB status
 
     const string	_fea_target;
+
+    PolicyFilters	_policy_filters;	// Connected routes filter.
+						// only one should be present.
+
+    PolicyRedistMap	_policy_redist_map;	// Policy registribution map
+						// [links policy-tags to
+						// targets].
+						// only one should be present.
 };
 
 #endif // __RIB_RIB_MANAGER_HH__
