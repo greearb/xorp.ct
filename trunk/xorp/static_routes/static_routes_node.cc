@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.15 2004/09/17 19:52:35 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.16 2004/09/17 20:02:28 pavlin Exp $"
 
 
 //
@@ -255,7 +255,7 @@ StaticRoutesNode::node_status(string& reason_msg)
     case PROC_STARTUP:
 	// Get the message about the startup progress
 	reason_msg = c_format("Waiting for %u startup events",
-			      static_cast<uint32_t>(_startup_requests_n));
+			      XORP_UINT_CAST(_startup_requests_n));
 	break;
     case PROC_NOT_READY:
 	// XXX: this state is unused
@@ -267,7 +267,7 @@ StaticRoutesNode::node_status(string& reason_msg)
     case PROC_SHUTDOWN:
 	// Get the message about the shutdown progress
 	reason_msg = c_format("Waiting for %u shutdown events",
-			      static_cast<uint32_t>(_shutdown_requests_n));
+			      XORP_UINT_CAST(_shutdown_requests_n));
 	break;
     case PROC_FAILED:
 	// XXX: this state is unused
