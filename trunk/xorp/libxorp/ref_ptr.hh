@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.10 2003/08/28 16:11:05 pavlin Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.11 2004/06/10 22:41:18 hodson Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -431,7 +431,7 @@ public:
     }
 
     /**
-     * Dereference pointer to refence counted object.
+     * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
     inline _Tp* get() const {
@@ -465,7 +465,8 @@ public:
      * @return true if reference pointer refers to a null object.
      */
     inline bool is_empty() const {
-	return _M_counter < 0;
+	return get() == 0;
+	//	return _M_counter < 0;
     }
 
     /**
