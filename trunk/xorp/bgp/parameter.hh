@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.2 2003/01/24 22:14:44 rizzo Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include "libxorp/debug.h"
 #include <string>
+#include "exceptions.hh"
 
 enum ParamType {
     PARAMINVALID = 0,		// param type not set yet.
@@ -50,6 +51,17 @@ enum CapType {
 
 class BGPParameter {
 public:
+    /**
+     * create a new BGPParameter from incoming data.
+     * Takes a chunk of memory of size l, returns an object of the
+     * appropriate type and actual_length is the number of bytes used
+     * from the packet.
+     * Throws an exception on error.
+     */
+
+    static BGPParameter *create(const uint8_t* d, uint16_t max_len,
+                size_t& actual_length) throw(CorruptMessage);
+
     BGPParameter() : _data(0), _length(0), _type(PARAMINVALID)	{}
     BGPParameter(uint8_t l, const uint8_t* d);
     BGPParameter(const BGPParameter& param);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.10 2003/01/29 20:32:32 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.11 2003/01/29 22:17:10 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -166,11 +166,9 @@ public:
     string str() const;
 
     const uint8_t Version() const		{ return _Version; }
-    const AsNum AutonomousSystemNumber() const	{
-	return _AutonomousSystemNumber;
-    }
+    const AsNum as() const			{ return _as; }
     const uint16_t HoldTime() const		{ return _HoldTime; }
-    const IPv4 BGPIdentifier() const		{ return _BGPIdentifier; }
+    const IPv4 id() const			{ return _id; }
     const uint8_t OptParmLen() const		{ return _OptParmLen; }
     bool operator==(const OpenPacket& him) const;
     void add_parameter(const BGPParameter *p);
@@ -186,8 +184,8 @@ private:
     // don't allow the use of the default copy constructor
     OpenPacket(const OpenPacket& OpenPacket);
 
-    IPv4	_BGPIdentifier;
-    AsNum	_AutonomousSystemNumber;
+    IPv4	_id;
+    AsNum	_as;
     uint16_t	_HoldTime;
     uint8_t	_OptParmLen;
     uint8_t	_Version;

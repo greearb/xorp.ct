@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.4 2003/01/29 20:32:32 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.5 2003/01/29 22:17:10 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -272,28 +272,16 @@ PeerHandler::output_no_longer_busy()
 	_plumbing->output_no_longer_busy(this);
 }
 
-AsNum
-PeerHandler::AS_number() const
-{
-    return AsNum(_peer->peerdata()->get_as_num());
-}
-
-bool
-PeerHandler::ibgp() const
-{
-    return _peer->peerdata()->get_internal_peer();
-}
-
 uint32_t
 PeerHandler::id() const
 {
-    return ntohl(_peer->peerdata()->get_id().addr());
+    return ntohl(_peer->peerdata()->id().addr());
 }
 
 const IPv4&
 PeerHandler::bgp_id() const
 {
-    return _peer->peerdata()->get_id();
+    return _peer->peerdata()->id();
 }
 
 uint32_t
@@ -319,4 +307,3 @@ PeerHandler::get_eventloop() const
 {
     return _peer->main()->get_eventloop();
 }
-

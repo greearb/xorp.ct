@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.6 2003/01/28 19:15:17 rizzo Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.7 2003/01/28 22:06:58 rizzo Exp $"
 
 #include "fcntl.h"
 
@@ -49,10 +49,10 @@ bool
 PlumbingTest::test1() 
 {
     LocalData local_data;
-    local_data.set_as_num(my_AS_number());
+    local_data.set_as(my_AS_number());
 
     BGPPeerData *peer_data1 = new BGPPeerData();
-    peer_data1->set_as_num(AsNum(666));
+    peer_data1->set_as(AsNum(666));
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
@@ -63,7 +63,7 @@ PlumbingTest::test1()
     printf("Peering Added.\n");
 
     BGPPeerData *peer_data2 = new BGPPeerData();;
-    peer_data2->set_as_num(AsNum(667));
+    peer_data2->set_as(AsNum(667));
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
@@ -254,10 +254,10 @@ PlumbingTest::test2()
     ** 1. Create a single peer (peer1).
     */
     LocalData local_data;
-    local_data.set_as_num(my_AS_number());
+    local_data.set_as(my_AS_number());
 
     BGPPeerData *peer_data1 = new BGPPeerData();
-    peer_data1->set_as_num(AsNum(666));
+    peer_data1->set_as(AsNum(666));
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
     printf("Adding Peering 1\n");
@@ -307,7 +307,7 @@ PlumbingTest::test2()
     ** 3. Add another peer (peer2).
     */
     BGPPeerData *peer_data2 = new BGPPeerData();;
-    peer_data2->set_as_num(AsNum(667));
+    peer_data2->set_as(AsNum(667));
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
     printf("Adding Peering 2\n");

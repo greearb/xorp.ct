@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.7 2003/01/28 22:06:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.8 2003/01/29 20:32:31 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -24,13 +24,9 @@ extern void dump_bytes(const uint8_t *d, size_t l);
 /* **************** OpenPacket *********************** */
 
 
-OpenPacket::OpenPacket(const AsNum& as,
-			     const IPv4& bgpid,
-			     const uint16_t holdtime) :
-    _BGPIdentifier(bgpid),
-    _AutonomousSystemNumber(as),
-    _HoldTime(holdtime),
-    _Version(BGPVERSION)
+OpenPacket::OpenPacket(const AsNum& as, const IPv4& id,
+		const uint16_t holdtime) :
+    _id(id), _as(as), _HoldTime(holdtime), _Version(BGPVERSION)
 {
     debug_msg("OpenPacket(BGPLocalData *d) constructor called\n");
 
@@ -50,11 +46,11 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
     d = basic_encode(len, d);
 
     d[BGP_COMMON_HEADER_LEN] = _Version;
-    _AutonomousSystemNumber.copy_out(d + BGP_COMMON_HEADER_LEN + 1);
+    _as.copy_out(d + BGP_COMMON_HEADER_LEN + 1);
 
     d[BGP_COMMON_HEADER_LEN + 3] = (_HoldTime >> 8) & 0xff;
     d[BGP_COMMON_HEADER_LEN + 4] = _HoldTime & 0xff;
-    _BGPIdentifier.copy_out(d + BGP_COMMON_HEADER_LEN + 5);
+    _id.copy_out(d + BGP_COMMON_HEADER_LEN + 5);
     d[BGP_COMMON_HEADER_LEN + 9] = _OptParmLen;
 
     if (_num_parameters > 0)  {
@@ -70,10 +66,9 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
     return d;
 }
 
-OpenPacket::OpenPacket(const uint8_t *data, uint16_t l)
+OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 	throw(CorruptMessage)
-    // XXX assigning dummy value is bad practice
-    : _AutonomousSystemNumber(AsNum::AS_INVALID)
+    : _as(AsNum::AS_INVALID)
 {
     debug_msg("OpenPacket(const uint8_t *, uint16_t) constructor called\n");
     _Type = MESSAGETYPEOPEN;
@@ -81,13 +76,7 @@ OpenPacket::OpenPacket(const uint8_t *data, uint16_t l)
     _OptParmLen = 0;
     _num_parameters = 0;
 
-    ParamType param_type;
-    int param_len;
-    int prev_len;
-    int count = 0;
-    int remaining_param_len;
-    BGPParameter *p;
-    uint8_t myOptParmLen;
+    size_t i, myOptParmLen;
 
     if (l < MINOPENPACKET) {
 	debug_msg("Open message too short\n");
@@ -95,83 +84,28 @@ OpenPacket::OpenPacket(const uint8_t *data, uint16_t l)
 		   MSGHEADERERR, BADMESSLEN);
     }
 
-    /* shift data by common header length */
-    data = data + BGP_COMMON_HEADER_LEN;
+    d += BGP_COMMON_HEADER_LEN;	// skip common header
 
-    _Version = (uint8_t &)(*data);
+    _Version = d[0];
 
-    data++;
-    _AutonomousSystemNumber = AsNum(data);
-    data += 2;
+    _as = AsNum(d+1);
 
-    _HoldTime = ntohs((uint16_t &)(*data));
-    data += 2;
+    _HoldTime = (d[3]<<8) + d[4];
 
-    _BGPIdentifier = IPv4((const uint8_t *)(data));
-    data += 4;
+    _id = IPv4(d+5);
+    myOptParmLen = i = d[9];
+    d += 10;		// skip over fixed open header
 
-    remaining_param_len = (uint8_t)(* data);
-    myOptParmLen = remaining_param_len;
-    data++;
+    while (i > 0) {
+	size_t len;
+	debug_msg("Length of unread parameters : %d\n", i);
 
-    while(remaining_param_len > 0) {
-	count ++;
-	p = NULL;
-	if (count == 5)
-	    assert(1 == 2);
-
-	debug_msg("Length of unread parameters : %d\n", remaining_param_len);
-
-	param_type = (ParamType)(* (data));
-	param_len = (uint8_t)(* (data+1));
-
-	prev_len = remaining_param_len;
-
-	remaining_param_len -= (param_len + 2);
-
-	if (prev_len < remaining_param_len || param_len == 0) {
-	    debug_msg("Badly constructed Parameters\n");
-	    debug_msg("Throw exception\n");
-	    debug_msg("Send bad packet\n");
-	    // XXX there doesn't seem to be a good error code for this.
-	    xorp_throw(CorruptMessage, "Badly constructed Parameters\n",
-		       OPENMSGERROR, 0);
-	}
-
-	debug_msg("param_type %d param_len %d\n", param_type, param_len);
-
-	switch (param_type) {
-	case PARAMTYPEAUTH:
-	    p = new BGPAuthParameter(param_len+2, data);
-	    break;
-	case PARAMTYPECAP: {
-	    CapType cap_type = (CapType)*(data+2);
-	    switch (cap_type) { // This is the capability type
-	    case CAPABILITYMULTIPROTOCOL:
-		p = new BGPMultiProtocolCapability(param_len+2 , data);
-		break;
-	    case CAPABILITYREFRESH:
-	    case CAPABILITYREFRESHOLD:
-		p = new BGPRefreshCapability(param_len+2 , data);
-		break;
-	    default:
-		p = new BGPUnknownCapability(param_len+2 , data);
-		// abort();
-	    }
-	    break;
-	}
-	default :
-	    debug_msg("Some other type\n");
-	    debug_msg("Throw exception\n");
-	    debug_msg("Send invalid packet");
-	    xorp_throw(CorruptMessage,
-		       c_format("Unrecognised optional parameter %d\n",
-				param_type),
-		       OPENMSGERROR, UNSUPOPTPAR);
-	}
+	BGPParameter *p = BGPParameter::create(d, i, len);
 	if (p != NULL)
 	    add_parameter(p);
-	data = data + param_len +2;
+	assert(len > 0);	// make sure we terminate!
+	i -= len;
+	d += len;
     }
     // check to see if the length of the optional parameters defined in the
     // packet is the same as the total length of the decoded parameters.
@@ -192,9 +126,9 @@ OpenPacket::str() const
 		  " - Holdtime : %d\n"
 		  " - BGP Identifier : %s\n",
 		  _Version,
-		  _AutonomousSystemNumber.str().c_str(),
+		  _as.str().c_str(),
 		  _HoldTime,
-		  _BGPIdentifier.str().c_str());
+		  _id.str().c_str());
 
     list <BGPParameter*>::const_iterator pi = parameter_list().begin();
     while (pi != parameter_list().end()) {
@@ -210,13 +144,13 @@ OpenPacket::operator==(const OpenPacket& him) const
     // version
 
     // as
-    if (_AutonomousSystemNumber != him.AutonomousSystemNumber())
+    if (_as != him.as())
 	return false;
     // hold time
     if (_HoldTime != him.HoldTime())
 	return false;
     // bgp id
-    if (_BGPIdentifier != him.BGPIdentifier())
+    if (_id != him.id())
 	return false;
     // opt parm len
     if (_OptParmLen != him.OptParmLen())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.6 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.7 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -2099,7 +2099,7 @@ int main(int, char** argv) {
     next_hop_resolver.set_nexthop_metric(nexthop1, 200);
     next_hop_resolver.set_nexthop_metric(nexthop3, 100);
     peer_data2->set_internal_peer(false);
-    peer_data2->set_as_num(AsNum(9));
+    peer_data2->set_as(AsNum(9));
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 13");
     debug_table->write_comment("TEST OF IBGP vs EBGP");

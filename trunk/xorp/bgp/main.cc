@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.12 2003/01/28 20:09:21 rizzo Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.13 2003/01/29 00:38:56 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -162,16 +162,11 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
 {
     LocalData *local = get_local_data();
 
-    /* XXX
-    ** Only deal with two bytes AS numbers for the time being.
-    */
-    local->set_as_num(AsNum(as));
+    local->set_as(AsNum(as));
     local->set_id(id);
 
-    _plumbing->set_my_as_number(local->get_as_num());
+    _plumbing->set_my_as_number(local->as());
 }
-
-
 
 /*
 ** Callback registered with the asyncio code.
@@ -303,7 +298,7 @@ BGPMain::create_peer(BGPPeerData *pd)
     if (find_peer(pd->iptuple())) {
 	XLOG_WARNING("This peer already exists: %s %s",
 		     pd->iptuple().str().c_str(),
-		     pd->get_as_num().str().c_str());
+		     pd->as().str().c_str());
 	return false;
     }
 
@@ -407,8 +402,7 @@ BGPMain::get_peer_id(const Iptuple& iptuple, IPv4& peer_id)
     BGPPeer *peer = find_peer(iptuple);
     if (peer == NULL)
 	return false;
-    const BGPPeerData* pd = peer->peerdata();
-    peer_id = pd->get_id();
+    peer_id = peer->peerdata()->id();
     return true;
 }
 
@@ -456,7 +450,7 @@ BGPMain::get_peer_as(const Iptuple& iptuple, uint32_t& peer_as)
 
     // XXX is it appropriate to return an extended AS number in this
     // context?
-    peer_as = pd->get_as_num().as32(); 
+    peer_as = pd->as().as32(); 
 
     return true;
 }

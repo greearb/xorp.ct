@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.2 2003/01/25 02:10:07 mjh Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -64,9 +64,11 @@ public:
     virtual PeerOutputState push_packet();
     virtual void output_no_longer_busy();
 
-    AsNum AS_number() const;
-    const string& peername() const { return _peername; }
-    bool ibgp() const;
+    AsNum AS_number() const		{ return _peer->peerdata()->as(); }
+    const string& peername() const	{ return _peername; }
+    bool ibgp() const			{
+	return _peer->peerdata()->get_internal_peer();
+    }
 
     /**
      * @return the neighbours BGP ID as an integer for use by decision.

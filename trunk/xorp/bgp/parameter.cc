@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.2 2003/01/24 22:14:44 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -509,4 +509,62 @@ BGPUnknownCapability::encode() const
     // should never do this
     debug_msg("we shouldn't ever send an unknown capability\n");
     // abort();
+}
+
+BGPParameter *
+BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
+	throw(CorruptMessage)
+{
+    assert (d == 0);	// this is a programming error
+    if (max_len < 2)
+	xorp_throw(CorruptMessage, "Short block to BGPParameter::create\n",
+                       OPENMSGERROR, 0);
+
+    ParamType param_type = (ParamType)d[0];
+    len = d[1];
+     
+    if (len == 0 || len+2 > max_len ) {
+	debug_msg("Badly constructed Parameters\n");
+	debug_msg("Throw exception\n");
+	debug_msg("Send bad packet\n");
+	// XXX there doesn't seem to be a good error code for this.
+	xorp_throw(CorruptMessage, "Badly constructed Parameters\n",
+		   OPENMSGERROR, 0);
+    }
+    debug_msg("param type %d len %d (+2)\n", param_type, len);
+
+    BGPParameter *p = NULL;
+    switch (param_type) {
+    case PARAMTYPEAUTH:
+	p = new BGPAuthParameter(len+2, d);
+	break;
+
+    case PARAMTYPECAP: {
+	CapType cap_type = (CapType)d[2];
+	switch (cap_type) { // This is the capability type
+	case CAPABILITYMULTIPROTOCOL:
+	    p = new BGPMultiProtocolCapability(len+2, d);
+	    break;
+
+	case CAPABILITYREFRESH:
+	case CAPABILITYREFRESHOLD:
+	    p = new BGPRefreshCapability(len+2 , d);
+	    break;
+
+	default:
+	    p = new BGPUnknownCapability(len+2 , d);
+	    // abort();
+	}
+	break;
+    }
+
+    default :
+	debug_msg("Some other type\n");
+	debug_msg("Throw exception\n");
+	debug_msg("Send invalid packet");
+	xorp_throw(CorruptMessage,
+	       c_format("Unrecognised optional parameter %d\n", param_type),
+	       OPENMSGERROR, UNSUPOPTPAR);
+    }
+    return p;
 }

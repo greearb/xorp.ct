@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.4 2003/01/24 22:14:45 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.5 2003/01/28 03:21:52 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -22,7 +22,7 @@
 
 BGPPeerData::BGPPeerData()
     // XXX assigning a default value here is bad
-    : _as_num(AsNum::AS_INVALID)
+    : _as(AsNum::AS_INVALID)
 {
     _unsupported_parameters = false;
     //    add_sent_parameter( new BGPMultiProtocolCapability( AFI_IPV4 , SAFI_NLRI_UNICAST ) );
@@ -30,7 +30,7 @@ BGPPeerData::BGPPeerData()
 
 BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 			 const IPv4& next_hop, const uint16_t holdtime)
-    : _iptuple(iptuple), _as_num(as)
+    : _iptuple(iptuple), _as(as)
 {
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
@@ -66,20 +66,6 @@ BGPPeerData::~BGPPeerData()
     }
 }
 
-void
-BGPPeerData::set_id(const IPv4& id)
-{
-    debug_msg("\n");
-    _id = id;
-}
-
-const
-IPv4&
-BGPPeerData::get_id() const
-{
-    debug_msg("\n");
-    return _id;
-}
 
 // Set whether a peer is internal or external
 void
@@ -94,20 +80,6 @@ BGPPeerData::get_internal_peer() const
 {
     debug_msg("Internal Peer retrieved as %i\n", _internal);
     return _internal;
-}
-
-const AsNum&
-BGPPeerData::get_as_num() const
-{
-    debug_msg("AS num retrieved as %s\n", _as_num.str().c_str());
-    return _as_num;
-}
-
-void
-BGPPeerData::set_as_num(const AsNum& a)
-{
-    debug_msg("AS num set as %d\n", a.as());
-    _as_num = a;
 }
 
 uint32_t
@@ -211,5 +183,5 @@ void
 BGPPeerData::dump_peer_data() const
 {
     debug_msg("Iptuple: %s AS: %s\n", iptuple().str().c_str(),
-	      get_as_num().str().c_str());
+	      as().str().c_str());
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.2 2003/01/26 06:15:53 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -24,8 +24,8 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/asnum.hh"
-#include "parameter.hh"
 #include "iptuple.hh"
+#include "parameter.hh"
 
 #define BGPVERSION 4
 
@@ -36,10 +36,10 @@ public:
 		const IPv4& next_hop, const uint16_t holdtime);
     ~BGPPeerData();
 
-    const Iptuple& iptuple() const { return _iptuple; }
+    const Iptuple& iptuple() const		{ return _iptuple; }
 
-    const AsNum& get_as_num() const;
-    void set_as_num(const AsNum& a);
+    const AsNum& as() const			{ return _as; }
+    void set_as(const AsNum& a)			{ _as = a; }
 
     uint32_t get_hold_duration() const;
     void set_hold_duration(uint32_t d);
@@ -50,8 +50,8 @@ public:
     uint32_t get_keepalive_duration() const;
     void set_keepalive_duration(uint32_t d);
 
-    const IPv4& get_id() const;
-    void set_id(const IPv4& i);
+    const IPv4& id() const			{ return _id; }
+    void set_id(const IPv4& i)			{ _id = i; }
 
     bool get_internal_peer() const;
     void set_internal_peer(bool p);
@@ -114,17 +114,19 @@ public:
 
 protected:
 private:
-    void add_parameter(const BGPParameter *,  list<const BGPParameter*>& p_list);
-    void remove_parameter(const BGPParameter *p,  list<const BGPParameter*>& p_list);
+    void add_parameter(const BGPParameter *,
+	 list<const BGPParameter*>& p_list);
+    void remove_parameter(const BGPParameter *p,
+	 list<const BGPParameter*>& p_list);
 
     /*
-    ** Local Interface, Local Server Port, Peer Interface and
-    ** Peer Server Port tuple.
-    */
+     * Local Interface, Local Server Port, Peer Interface and
+     * Peer Server Port tuple.
+     */
     const Iptuple _iptuple;
 
-    bool _internal;
-    AsNum _as_num;
+    bool	_internal;	// set if our peer has the same _as
+    AsNum	_as;
 
     /*
     ** Holdtime in seconds. Value sent in open negotiation.

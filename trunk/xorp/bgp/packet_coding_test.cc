@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.14 2003/01/29 05:43:55 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.15 2003/01/29 20:32:32 rizzo Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
@@ -183,8 +183,8 @@ test_simple_open_packet()
 
     //check the information we put in came out again OK.
     assert(receivedpacket.HoldTime() == 1234);
-    assert(receivedpacket.AutonomousSystemNumber() == AsNum(666));
-    assert(receivedpacket.BGPIdentifier() == IPv4("1.2.3.4"));
+    assert(receivedpacket.as() == AsNum(666));
+    assert(receivedpacket.id() == IPv4("1.2.3.4"));
     assert(receivedpacket.Version() == 4);
 
 #ifdef	OPEN_PACKET_OPTIONS

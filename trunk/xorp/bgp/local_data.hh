@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.2 2002/12/13 22:38:54 rizzo Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.3 2003/01/28 03:21:52 rizzo Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -31,34 +31,29 @@
 
 class LocalData {
 public:
-    /**
-     * XXX see if it is possible to avoid calling the default
-     * initializer, as the AsNum field would be invalid.
-     */
-    // LocalData();	// not implemented
-    LocalData() : _as_num(AsNum::AS_INVALID)		{}
+    LocalData() : _as(AsNum::AS_INVALID)	{}
 
     LocalData(const AsNum& as, const IPv4& id)
-	    : _as_num(as), _bgp_id(id)		{
+	    : _as(as), _id(id)			{
 	_num_parameters = 0;
 	_param_length = 0;
     }
 
     ~LocalData()				{
-	list <const BGPParameter*>::iterator iter;
+	list <const BGPParameter*>::const_iterator iter;
 
 	for (iter = _parameters.begin(); iter != _parameters.end(); ++iter)
 	    delete *iter;
     }
 
 
-    const AsNum& get_as_num() const		{ return _as_num;	}
+    const AsNum& as() const			{ return _as;		}
 
-    void set_as_num(const AsNum& a)		{ _as_num = a;		}
+    void set_as(const AsNum& a)			{ _as = a;		}
 
-    const IPv4& get_id() const			{ return _bgp_id;	}
+    const IPv4& id() const			{ return _id;		}
 
-    void set_id(const IPv4& i)			{ _bgp_id = i;		}
+    void set_id(const IPv4& i)			{ _id = i;		}
 
 
     uint8_t get_paramlength() const		{ return _param_length;	}
@@ -82,12 +77,12 @@ public:
 
 protected:
 private:
-    AsNum _as_num;
-    IPv4 _bgp_id;
+    AsNum	_as;
+    IPv4	_id;
 
     list <const BGPParameter*> _parameters;
-    uint8_t _num_parameters;
-    uint8_t _param_length;
+    uint8_t	_num_parameters;
+    uint8_t	_param_length;
 };
 
 #endif // __BGP_LOCAL_DATA_HH__

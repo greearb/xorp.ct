@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.17 2003/01/28 00:35:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.18 2003/01/29 20:32:32 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -453,8 +453,8 @@ BGPPeer::event_open()			// EVENTBGPTRANOPEN
     case STATECONNECT:
     case STATEACTIVE: {
 	OpenPacket *open_packet =
-	    new OpenPacket(_localdata->get_as_num(),
-		    _localdata->get_id(),
+	    new OpenPacket(_localdata->as(),
+		    _localdata->id(),
 		    _peerdata->get_configured_hold_time());
 
 	list <const BGPParameter*>::const_iterator
@@ -697,7 +697,7 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 	    }
 	    // if AS number is the same as the local AS number set
 	    // connection as internal otherwise set as external
-	    if ( _localdata->get_as_num() == _peerdata->get_as_num() )
+	    if ( _localdata->as() == _peerdata->as() )
 		_peerdata->set_internal_peer(true);
 	    else
 		_peerdata->set_internal_peer(false);
@@ -916,19 +916,19 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 	xorp_throw(CorruptMessage,
 		   c_format("Unsupported BGPVERSION %d", p->Version()),
 		   OPENMSGERROR, UNSUPVERNUM);
-    if (p->AutonomousSystemNumber() != _peerdata->get_as_num()) {
+    if (p->as() != _peerdata->as()) {
 	debug_msg("**** Peer has %s, should have %s ****\n",
-		  p->AutonomousSystemNumber().str().c_str(),
-		  _peerdata->get_as_num().str().c_str());
+		  p->as().str().c_str(),
+		  _peerdata->as().str().c_str());
 	xorp_throw(CorruptMessage,
 		   c_format("Wrong AS %s expecting %s",
-		      p->AutonomousSystemNumber().str().c_str(),
-		      _peerdata->get_as_num().str().c_str()),
+		      p->as().str().c_str(),
+		      _peerdata->as().str().c_str()),
 		   OPENMSGERROR, BADASPEER);
     }
 
     // XXX What do we check for a bad BGP ID?
-    _peerdata->set_id(p->BGPIdentifier());
+    _peerdata->set_id(p->id());
 
     // put received parameters into the peer data.
     _peerdata->clone_parameters(  p->parameter_list() );
@@ -1065,7 +1065,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 
 	    // If this is an EBGP peering, the AS Path MUST start
 	    // with the AS number of the peer.
-	    AsNum my_asnum(peerdata()->get_as_num());
+	    AsNum my_asnum(peerdata()->as());
 	    if (as_path_attr->as_path().first_asnum() != my_asnum)
 		return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 	}
