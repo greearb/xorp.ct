@@ -18,7 +18,7 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
 XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
 
-CALLXRL='../../libxipc/call_xrl -r 50 -w 20'
+CALLXRL='../../libxipc/call_xrl -r 50'
 . ${BGP_SRCDIR}/harness/xrl_shell_funcs.sh ""
 . ${BGP_SRCDIR}/xrl_shell_funcs.sh ""
 
