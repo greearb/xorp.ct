@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.5 2003/06/20 18:55:56 hodson Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.6 2003/06/20 22:21:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,7 +61,8 @@ ProcessWatch::birth(const string& target_class, const string& target_instance)
     } else if(target_class == "rib" && false == _rib) {
 	_rib = true;
 	_rib_instance = target_instance;
-    }
+    } else
+	add_process(target_class, target_instance);
 }
 
 void 
@@ -76,7 +77,8 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
 	XLOG_ERROR("The rib died");
 	start_kill_timer();
 	_shutdown->dispatch();
-    }
+    } else
+	remove_process(target_class, target_instance);
 }
 
 void
@@ -97,4 +99,46 @@ bool
 ProcessWatch::ready() const
 {
     return _fea && _rib;
+}
+
+bool
+ProcessWatch::process_exists(const string& target) const
+{
+    debug_msg("process_exists: %s\n", target.c_str());
+
+    list<Process>::const_iterator i;
+    for(i = _processes.begin(); i != _processes.end(); i++)
+	if(target == i->_target_class)
+	    return true;
+
+    return false;
+}
+
+void 
+ProcessWatch::add_process(const string& target_class,
+			  const string& target_instance)
+{
+    debug_msg("add_process: %s %s\n", target_class.c_str(),
+	      target_instance.c_str());
+
+    _processes.push_back(Process(target_class, target_instance));
+}
+
+void 
+ProcessWatch::remove_process(const string& target_class,
+			     const string& target_instance)
+{
+    debug_msg("remove_process: %s %s\n", target_class.c_str(),
+	      target_instance.c_str());
+
+    list<Process>::iterator i;
+    for(i = _processes.begin(); i != _processes.end(); i++)
+	if(target_class == i->_target_class &&
+	   target_instance == i->_target_instance) {
+	    _processes.erase(i);
+	    return;
+	}
+
+    XLOG_FATAL("unknown process %s %s", target_class.c_str(),
+	       target_instance.c_str());
 }

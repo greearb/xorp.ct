@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/process_watch.hh,v 1.4 2003/06/20 22:21:53 atanu Exp $
+// $XORP: xorp/bgp/process_watch.hh,v 1.5 2003/08/21 19:00:30 atanu Exp $
 
 #ifndef __BGP_PROCESS_WATCH_HH__
 #define __BGP_PROCESS_WATCH_HH__
@@ -58,8 +58,17 @@ public:
      */
     bool ready() const;
 
+    /**
+     * @return true if the target process exists.
+     */
+    bool process_exists(const string& target) const;
+
 protected:
     void interest_callback(const XrlError& error);
+    void add_process(const string& target_class,
+		     const string& target_instance);
+    void remove_process(const string& target_class,
+			const string& target_instance);
 
 private:
     EventLoop& _eventloop;
@@ -72,6 +81,16 @@ private:
     string _rib_instance;
 
     XorpTimer _shutdown_timer;
+
+    class Process {
+    public:
+	Process(string c, string i) : _target_class(c), _target_instance(i)
+	{}
+	string _target_class;
+	string _target_instance;
+    };
+
+    list<Process> _processes;
 };
 
 #endif // __BGP_PROCESS_WATCH_HH__
