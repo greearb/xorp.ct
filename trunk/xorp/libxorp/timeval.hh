@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.12 2003/04/02 18:14:16 hodson Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.13 2003/04/02 18:57:02 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -77,14 +77,6 @@ public:
     int32_t usec() const	{ return _usec; }
     
     /**
-     * Set the time value.
-     * 
-     * @param sec the number of seconds.
-     * @param usec the number of microseconds.
-     */
-    void set(int32_t sec, int32_t usec) { _sec = sec; _usec = usec; }
-    
-    /**
      * Get zero value.
      */
     inline static TimeVal ZERO();
@@ -121,6 +113,11 @@ public:
      * @return the double-float value of this TimeVal time.
      */
     double get_double() const { return (_sec * 1.0 + _usec * 1.0e-6); }
+
+    /**
+     * Assignment Operator
+     */
+    inline TimeVal& operator=(const TimeVal& other);
     
     /**
      * Equality Operator
@@ -213,7 +210,7 @@ public:
      * by @ref d.
      */
     inline TimeVal operator/(const double& d) const;
-    
+
 private:
     int32_t _sec;		// The number of seconds
     int32_t _usec;		// The number of microseconds
@@ -247,6 +244,14 @@ TimeVal::copy_out(timeval& timeval) const
     timeval.tv_sec = _sec;
     timeval.tv_usec = _usec;
     return (sizeof(_sec) + sizeof(_usec));
+}
+
+inline TimeVal&
+TimeVal::operator=(const TimeVal& other)
+{
+    _sec = other.sec();
+    _usec = other.usec();
+    return *this;
 }
 
 inline bool
@@ -346,6 +351,33 @@ inline TimeVal
 TimeVal::MINIMUM()
 {
     return TimeVal(- 0x7fffffff - 1, - (ONE_MILLION - 1));
+}
+
+/**
+ * Prefix unary minus.
+ */
+inline TimeVal
+operator-(const TimeVal& v)
+{
+    return TimeVal(-v.sec(), -v.usec());
+}
+
+/**
+ * Multiply TimeVal by integer.
+ */
+inline TimeVal
+operator*(int n, const TimeVal& t)
+{
+    return t * n;
+}
+
+/**
+ * Multiply TimeVal by double.
+ */
+inline TimeVal
+operator*(const double& d, const TimeVal& t)
+{
+    return t * d;
 }
 
 /**
