@@ -507,7 +507,7 @@ RouterLsa::encode()
     list<RouterLink> &rl = get_router_links();
     list<RouterLink>::iterator i = rl.begin();
     size_t index = header_length + 4;
-    for (; i != rl.begin(); i++, index += router_link_len) {
+    for (; i != rl.end(); i++, index += router_link_len) {
 	(*i).copy_out(&ptr[index]);
     }
 
@@ -527,7 +527,11 @@ RouterLsa::str() const
 
     string output;
 
-    output = _header.str();
+    output += "Router-LSA:\n";
+    output += _header.str();
+
+    output += "\n";
+
     switch(version) {
     case OspfTypes::V2:
 	break;
@@ -538,14 +542,14 @@ RouterLsa::str() const
 
     output += c_format("\tV-bit %s\n", get_v_bit() ? "true" : "false");
     output += c_format("\tE-bit %s\n", get_e_bit() ? "true" : "false");
-    output += c_format("\tB-bit %s\n", get_b_bit() ? "true" : "false");
+    output += c_format("\tB-bit %s", get_b_bit() ? "true" : "false");
 
     switch(version) {
     case OspfTypes::V2:
 	// # links we don't bother to store this info.
 	break;
     case OspfTypes::V3:
-	output += c_format("\tOptions %#x\n", get_options());
+	output += c_format("\n\tOptions %#x", get_options());
 	break;
     }
 
