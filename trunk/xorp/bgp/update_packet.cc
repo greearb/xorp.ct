@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.26 2003/10/27 19:29:46 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.27 2003/10/28 19:24:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -51,84 +51,6 @@ void
 UpdatePacket::add_nlri(const BGPUpdateAttrib& nlri)
 {
     _nlri_list.push_back(nlri);
-}
-
-MPReachNLRIAttribute<IPv4> *
-UpdatePacket::mpreach_ipv4(Safi safi) const
-{
-    XLOG_ASSERT(SAFI_MULTICAST == safi);
-
-    PathAttributeList<IPv4>::const_iterator i;
-    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
-	MPReachNLRIAttribute<IPv4> *mpreach = 
-	    dynamic_cast<MPReachNLRIAttribute<IPv4> *>((*i));
-	if( mpreach) {
-	    switch(mpreach->safi()) {
-	    case SAFI_UNICAST:
-		XLOG_FATAL("AFI == IPv4 SAFI == Unicast");
-		break;
-	    case SAFI_MULTICAST:
-		return mpreach;
-		break;
-	    }
-	}
-    }
-	    
-    return 0;
-}
-
-MPUNReachNLRIAttribute<IPv4> *
-UpdatePacket::mpunreach_ipv4(Safi safi) const
-{
-    XLOG_ASSERT(SAFI_MULTICAST == safi);
-
-    PathAttributeList<IPv4>::const_iterator i;
-    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
-	MPUNReachNLRIAttribute<IPv4> *mpunreach = 
-	    dynamic_cast<MPUNReachNLRIAttribute<IPv4> *>((*i));
-	if (mpunreach) {
-	    switch(mpunreach->safi()) {
-	    case SAFI_UNICAST:
-		XLOG_FATAL("AFI == IPv4 SAFI == Unicast");
-		break;
-	    case SAFI_MULTICAST:
-		return mpunreach;
-		break;
-	    }
-	}
-    }
-	    
-    return 0;
-}
-
-MPReachNLRIAttribute<IPv6> *
-UpdatePacket::mpreach_ipv6(Safi safi) const
-{
-    PathAttributeList<IPv6>::const_iterator i;
-    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
-	MPReachNLRIAttribute<IPv6> *mpreach = 
-	    dynamic_cast<MPReachNLRIAttribute<IPv6> *>((*i));
-	if (mpreach && mpreach->safi() == safi) {
-	    return mpreach;
-	}
-    }
-
-    return 0;
-}
-
-MPUNReachNLRIAttribute<IPv6> *
-UpdatePacket::mpunreach_ipv6(Safi safi) const
-{
-    PathAttributeList<IPv6>::const_iterator i;
-    for (i = _pa_list.begin(); i != _pa_list.end(); i++) {
-	MPUNReachNLRIAttribute<IPv6> *mpunreach = 
-	    dynamic_cast<MPUNReachNLRIAttribute<IPv6> *>((*i));
-	if (mpunreach && mpunreach->safi() == safi) {
-	    return mpunreach;
-	}
-    }
-
-    return 0;
 }
 
 void
@@ -347,3 +269,4 @@ UpdatePacket::operator==(const UpdatePacket& him) const
 
     return true;
 }
+

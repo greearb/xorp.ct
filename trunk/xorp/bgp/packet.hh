@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.22 2003/10/25 00:27:59 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.23 2003/10/28 19:24:05 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -209,11 +209,8 @@ public:
     const PathAttributeList<IPv4>& pa_list() const	{ return _pa_list; }
     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
 
-    MPReachNLRIAttribute<IPv4> *mpreach_ipv4(Safi) const;
-    MPUNReachNLRIAttribute<IPv4> *mpunreach_ipv4(Safi) const;
-
-    MPReachNLRIAttribute<IPv6> *mpreach_ipv6(Safi) const;
-    MPUNReachNLRIAttribute<IPv6> *mpunreach_ipv6(Safi) const;
+    template <class A> MPReachNLRIAttribute<A> *mpreach(Safi) const;
+    template <class A> MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
 
     const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 
@@ -231,6 +228,42 @@ private:
     PathAttributeList<IPv4>	_pa_list;
     BGPUpdateAttribList		_nlri_list;
 };
+
+template <class A> 
+MPReachNLRIAttribute<A> *
+UpdatePacket::mpreach(Safi safi) const
+{
+    XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
+
+    typename PathAttributeList<A>::const_iterator i;
+    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
+	MPReachNLRIAttribute<A> *mpreach = 
+	    dynamic_cast<MPReachNLRIAttribute<A> *>((*i));
+	if (mpreach && mpreach->safi() == safi) {
+	    return mpreach;
+	}
+    }
+
+    return 0;
+}
+
+template <class A> 
+MPUNReachNLRIAttribute<A> *
+UpdatePacket::mpunreach(Safi safi) const
+{
+    XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
+
+    typename PathAttributeList<A>::const_iterator i;
+    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
+	MPUNReachNLRIAttribute<A> *mpunreach = 
+	    dynamic_cast<MPUNReachNLRIAttribute<A> *>((*i));
+	if (mpunreach && mpunreach->safi() == safi) {
+	    return mpunreach;
+	}
+    }
+
+    return 0;
+}
 
 /* **************** BGPNotificationPacket *********************** */
 

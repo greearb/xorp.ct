@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.50 2003/10/26 04:27:46 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.51 2003/10/28 00:48:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1043,23 +1043,23 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 //     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
     BGPPeerData::Direction dir = BGPPeerData::SENT;
     bool bad_nlri = false;
-    if(!check_multiprotocol_nlri(p, p->mpreach_ipv4(SAFI_MULTICAST),
+    if(!check_multiprotocol_nlri(p, p->mpreach<IPv4>(SAFI_MULTICAST),
 				 peerdata()->multicast_ipv4(dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpunreach_ipv4(SAFI_MULTICAST),
+    if(!check_multiprotocol_nlri(p, p->mpunreach<IPv4>(SAFI_MULTICAST),
 				 peerdata()->multicast_ipv4(dir)))
 	bad_nlri = true;
 
-    if(!check_multiprotocol_nlri(p, p->mpreach_ipv6(SAFI_UNICAST),
+    if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_UNICAST),
 				 peerdata()->unicast_ipv6(dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpunreach_ipv6(SAFI_UNICAST),
+    if(!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_UNICAST),
 				 peerdata()->unicast_ipv6(dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpreach_ipv6(SAFI_MULTICAST),
+    if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_MULTICAST),
 				 peerdata()->multicast_ipv6(dir)))
 	bad_nlri = true;
-    if(!check_multiprotocol_nlri(p, p->mpunreach_ipv6(SAFI_MULTICAST),
+    if(!check_multiprotocol_nlri(p, p->mpunreach<IPv6>(SAFI_MULTICAST),
 				 peerdata()->multicast_ipv6(dir)))
 	bad_nlri = true;
 #ifndef	REMOVE_UNNEGOTIATED_NLRI
@@ -1130,9 +1130,9 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	** NEXT_HOP
 	*/
 	if ( p->nlri_list().empty() == false ||
-	     p->mpreach_ipv4(SAFI_MULTICAST) ||
-	     p->mpreach_ipv6(SAFI_UNICAST)   ||
-	     p->mpreach_ipv6(SAFI_MULTICAST)) {
+	     p->mpreach<IPv4>(SAFI_MULTICAST) ||
+	     p->mpreach<IPv6>(SAFI_UNICAST)   ||
+	     p->mpreach<IPv6>(SAFI_MULTICAST)) {
 	    // The ORIGIN Path attribute is mandatory 
 	    if (origin_attr == NULL) {
 		debug_msg("Missing ORIGIN\n");
@@ -1160,22 +1160,22 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 
 	    // In a multiprotocol NLRI message there is always a nexthop,
 	    // just check that its not zero.
-	    if( p->mpreach_ipv4(SAFI_MULTICAST) && 
-		p->mpreach_ipv4(SAFI_MULTICAST)->nexthop() == IPv4::ZERO()) {
+	    if (p->mpreach<IPv4>(SAFI_MULTICAST) && 
+		p->mpreach<IPv4>(SAFI_MULTICAST)->nexthop() == IPv4::ZERO()) {
 		uint8_t data = NEXT_HOP;
 		return new 
 		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
 	    }
 
-	    if( p->mpreach_ipv6(SAFI_UNICAST) && 
-		p->mpreach_ipv6(SAFI_UNICAST)->nexthop() == IPv6::ZERO()) {
+	    if (p->mpreach<IPv6>(SAFI_UNICAST) && 
+		p->mpreach<IPv6>(SAFI_UNICAST)->nexthop() == IPv6::ZERO()) {
 		uint8_t data = NEXT_HOP;
 		return new 
 		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
 	    }
 
-	    if( p->mpreach_ipv6(SAFI_MULTICAST) && 
-		p->mpreach_ipv6(SAFI_MULTICAST)->nexthop() == IPv6::ZERO()) {
+	    if (p->mpreach<IPv6>(SAFI_MULTICAST) && 
+		p->mpreach<IPv6>(SAFI_MULTICAST)->nexthop() == IPv6::ZERO()) {
 		uint8_t data = NEXT_HOP;
 		return new 
 		    NotificationPacket(UPDATEMSGERR, MISSWATTR, &data, 1);
