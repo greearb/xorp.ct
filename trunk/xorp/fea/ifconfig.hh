@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.29 2004/09/13 20:37:48 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.30 2004/10/21 00:44:22 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -28,6 +28,7 @@ class IfConfigSet;
 class IfConfigObserver;
 class IfConfigErrorReporterBase;
 class IfConfigUpdateReporterBase;
+class NexthopPortMapper;
 
 
 /**
@@ -45,9 +46,11 @@ public:
      *		 spontaneously on the underlying platform.
      * @param er error reporter that errors are propagated through when
      *           configurations are pushed down.
+     * @param nexthop_port_mapper the next-hop port mapper.
      */
     IfConfig(EventLoop& eventloop, IfConfigUpdateReporterBase& ur,
-	     IfConfigErrorReporterBase& er);
+	     IfConfigErrorReporterBase& er,
+	     NexthopPortMapper& nexthop_port_mapper);
 
     /**
      * Virtual destructor (in case this class is used as base class).
@@ -223,6 +226,7 @@ private:
     EventLoop&			_eventloop;
     IfConfigUpdateReporterBase&	_ur;
     IfConfigErrorReporterBase&	_er;
+    NexthopPortMapper&		_nexthop_port_mapper;
 
     //
     // A cache of associative array of interface names to interface index.

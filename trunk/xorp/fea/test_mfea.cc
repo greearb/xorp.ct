@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.11 2004/10/02 03:42:09 atanu Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.12 2004/10/02 19:49:50 atanu Exp $"
 
 
 //
@@ -40,6 +40,7 @@
 #include "ifconfig.hh"
 #include "ifconfig_addr_table.hh"
 #include "libfeaclient_bridge.hh"
+#include "nexthop_port_mapper.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_socket_server.hh"
@@ -141,14 +142,19 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
 				    finder_hostname, finder_port);
 
     //
-    // Profile entity.
+    // Profile entity
     //
     Profile profile;
 
     //
+    // Next-hop port mapper
+    //
+    NexthopPortMapper nexthop_port_mapper;
+
+    //
     // FtiConfig
     //
-    FtiConfig fticonfig(eventloop, profile);
+    FtiConfig fticonfig(eventloop, profile, nexthop_port_mapper);
     if (is_dummy)
 	fticonfig.set_dummy();
     fticonfig.start();
@@ -165,7 +171,7 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
 
     IfConfigErrorReporter if_err;
 
-    IfConfig ifconfig(eventloop, ifc_repl, if_err);
+    IfConfig ifconfig(eventloop, ifc_repl, if_err, nexthop_port_mapper);
     if (is_dummy)
 	ifconfig.set_dummy();
     ifconfig.start();

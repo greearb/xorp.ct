@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.37 2004/10/02 03:42:11 atanu Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.38 2004/10/02 19:49:51 atanu Exp $"
 
 
 //
@@ -40,6 +40,7 @@
 #include "fea/ifconfig.hh"
 #include "fea/ifconfig_addr_table.hh"
 #include "fea/libfeaclient_bridge.hh"
+#include "fea/nexthop_port_mapper.hh"
 #include "fea/xrl_ifupdate.hh"
 #include "fea/xrl_mfea_node.hh"
 #include "fea/xrl_socket_server.hh"
@@ -148,14 +149,19 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 	finder_hostname, finder_port);
 
     //
-    // Profile entity.
+    // Profile entity
     //
     Profile profile;
-    
+
+    //
+    // Next-hop port mapper
+    //
+    NexthopPortMapper nexthop_port_mapper;
+
     //
     // FtiConfig
     //
-    FtiConfig fticonfig(eventloop, profile);
+    FtiConfig fticonfig(eventloop, profile, nexthop_port_mapper);
     if (is_dummy)
 	fticonfig.set_dummy();
     fticonfig.start();
@@ -172,7 +178,7 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 
     IfConfigErrorReporter if_err;
 
-    IfConfig ifconfig(eventloop, ifc_repl, if_err);
+    IfConfig ifconfig(eventloop, ifc_repl, if_err, nexthop_port_mapper);
     if (is_dummy)
 	ifconfig.set_dummy();
     ifconfig.start();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.18 2004/09/01 18:11:00 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.19 2004/10/02 19:49:50 atanu Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -33,13 +33,14 @@
 #include "fticonfig_table_observer.hh"
 
 class EventLoop;
-class Profile;
 class FtiConfigEntryGet;
 class FtiConfigEntrySet;
 class FtiConfigEntryObserver;
 class FtiConfigTableGet;
 class FtiConfigTableSet;
 class FtiConfigTableObserver;
+class NexthopPortMapper;
+class Profile;
 
 typedef Trie<IPv4, Fte4> Trie4;
 typedef Trie<IPv6, Fte6> Trie6;
@@ -56,8 +57,11 @@ public:
      * Constructor.
      * 
      * @param eventloop the event loop.
+     * @param profile the profile entity.
+     * @param nexthop_port_mapper the next-hop port mapper.
      */
-    FtiConfig(EventLoop& eventloop, Profile& profile);
+    FtiConfig(EventLoop& eventloop, Profile& profile,
+	      NexthopPortMapper& nexthop_port_mapper);
 
     /**
      * Virtual destructor (in case this class is used as base class).
@@ -391,8 +395,9 @@ protected:
     Trie6	_trie6;		// IPv6 trie (used for testing purpose)
     
 private:
-    EventLoop&	_eventloop;
-    Profile&	_profile;
+    EventLoop&				_eventloop;
+    Profile&				_profile;
+    NexthopPortMapper&			_nexthop_port_mapper;
 
     list<FtiConfigEntryGet*>		_ftic_entry_gets;
     list<FtiConfigEntrySet*>		_ftic_entry_sets;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.31 2004/10/21 00:27:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.32 2004/10/21 00:44:22 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -53,8 +53,10 @@ map_changes(const IfTreeItem::State&		fci,
 
 IfConfig::IfConfig(EventLoop& eventloop,
 		   IfConfigUpdateReporterBase& ur,
-		   IfConfigErrorReporterBase& er)
+		   IfConfigErrorReporterBase& er,
+		   NexthopPortMapper& nexthop_port_mapper)
     : _eventloop(eventloop), _ur(ur), _er(er),
+      _nexthop_port_mapper(nexthop_port_mapper),
       _ifc_get_dummy(*this),
       _ifc_get_ioctl(*this),
       _ifc_get_sysctl(*this),
