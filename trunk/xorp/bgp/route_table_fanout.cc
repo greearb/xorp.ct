@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.38 2004/09/17 13:50:54 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.39 2004/10/19 20:08:23 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -91,7 +91,7 @@ NextTableMap<A>::find(BGPRouteTable<A> *next_table)
     if (i == _next_tables.end())
 	return end();
     PeerTableInfo<A>* prpair = i->second;
-    typename map <uint32_t, PeerTableInfo<A>* >::iterator j;
+    typename multimap<uint32_t, PeerTableInfo<A>* >::iterator j;
     uint32_t id = i->second->peer_handler()->id().addr();
     j = _next_table_order.find(id);
     while (j->first == id  && j->second != prpair) {
