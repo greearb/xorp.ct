@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.4 2003/05/28 21:50:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.5 2003/06/02 21:20:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -43,8 +43,9 @@
 
 FtiConfigEntryGetNetlink::FtiConfigEntryGetNetlink(FtiConfig& ftic)
     : FtiConfigEntryGet(ftic),
-      NetlinkSocket(ftic.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket *)this),
+      NetlinkSocket4(ftic.eventloop()),
+      NetlinkSocket6(ftic.eventloop()),
+      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this),
       _cache_valid(false),
       _cache_seqno(0)
 {
@@ -61,13 +62,32 @@ FtiConfigEntryGetNetlink::~FtiConfigEntryGetNetlink()
 int
 FtiConfigEntryGetNetlink::start()
 {
-    return (NetlinkSocket::start(AF_INET));
-}
+    if (NetlinkSocket4::start() < 0)
+	return (XORP_ERROR);
     
+#ifdef HAVE_IPV6
+    if (NetlinkSocket6::start() < 0)
+	return (XORP_ERROR);
+#endif
+    return (XORP_OK);
+}
+
 int
 FtiConfigEntryGetNetlink::stop()
 {
-    return (NetlinkSocket::stop());
+    int ret_value4 = XORP_OK;
+    int ret_value6 = XORP_OK;
+    
+    ret_value4 = NetlinkSocket4::stop();
+    
+#ifdef HAVE_IPV6
+    ret_value6 = NetlinkSocket6::stop();
+#endif
+    
+    if ((ret_value4 < 0) || (ret_value6 < 0))
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
 }
 
 /**
@@ -203,7 +223,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     struct rtmsg	*rtmsg;
     struct rtattr	*rtattr;
     int			rta_len;
-    NetlinkSocket&	ns = *this;
+    NetlinkSocket*	ns_ptr = NULL;
     int			family = dst.af();
     
     // Zero the return information
@@ -213,6 +233,23 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     if (! dst.is_unicast()) {
 	return false;
     }
+    
+    // Get the pointer to the NetlinkSocket
+    do {
+	if (dst.is_ipv4()) {
+	    NetlinkSocket4& ns4 = *this;
+	    ns_ptr = &ns4;
+	    break;
+	}
+	if (dst.is_ipv6()) {
+	    NetlinkSocket6& ns6 = *this;
+	    ns_ptr = &ns6;
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while(false);
     
     //
     // Set the request. First the socket, then the request itself.
@@ -230,8 +267,8 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST;
-    nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_seq = ns_ptr->seqno();
+    nlh->nlmsg_pid = ns_ptr->pid();
     rtmsg = (struct rtmsg *)NLMSG_DATA(nlh);
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = IPvX::addr_bitlen(family);
@@ -254,8 +291,8 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     rtmsg->rtm_type  = RTN_UNSPEC;
     rtmsg->rtm_flags = 0;
     
-    if (ns.sendto(rtmbuf, nlh->nlmsg_len, 0, (struct sockaddr *)&snl,
-		  sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
+    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0, (struct sockaddr *)&snl,
+		       sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",
 		   strerror(errno));
 	return false;
@@ -269,7 +306,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     _cache_seqno = nlh->nlmsg_seq;
     _cache_valid = false;
     while (_cache_valid == false) {
-	ns.force_recvfrom(0, (struct sockaddr *)&snl, &snl_len);
+	ns_ptr->force_recvfrom(0, (struct sockaddr *)&snl, &snl_len);
     }
     nlh_answer = (struct nlmsghdr *)(&_cache_data[0]);
     XLOG_ASSERT(nlh_answer->nlmsg_type == RTM_NEWROUTE);
@@ -305,13 +342,13 @@ FtiConfigEntryGetNetlink::lookup_entry(const IPvXNet& dst, FteX& fte)
 void
 FtiConfigEntryGetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
 {
-    NetlinkSocket& ns = *this;
-
+    NetlinkSocket4& ns4 = *this;	// XXX: needed only to get the pid
+    
     //
     // Copy data that has been requested to be cached by setting _cache_seqno.
     //
     size_t d = 0, off = 0;
-    pid_t my_pid = ns.pid();
+    pid_t my_pid = ns4.pid();
     
     UNUSED(my_pid);	// XXX: (see below)
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.4 2003/05/28 21:50:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.5 2003/06/02 21:20:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -41,8 +41,9 @@
 
 FtiConfigTableGetNetlink::FtiConfigTableGetNetlink(FtiConfig& ftic)
     : FtiConfigTableGet(ftic),
-      NetlinkSocket(ftic.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket *)this),
+      NetlinkSocket4(ftic.eventloop()),
+      NetlinkSocket6(ftic.eventloop()),
+      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this),
       _cache_valid(false),
       _cache_seqno(0)
 {
@@ -59,13 +60,32 @@ FtiConfigTableGetNetlink::~FtiConfigTableGetNetlink()
 int
 FtiConfigTableGetNetlink::start()
 {
-    return (NetlinkSocket::start(AF_INET));
+    if (NetlinkSocket4::start() < 0)
+	return (XORP_ERROR);
+    
+#ifdef HAVE_IPV6
+    if (NetlinkSocket6::start() < 0)
+	return (XORP_ERROR);
+#endif
+    return (XORP_OK);
 }
     
 int
 FtiConfigTableGetNetlink::stop()
 {
-    return (NetlinkSocket::stop());
+    int ret_value4 = XORP_OK;
+    int ret_value6 = XORP_OK;
+    
+    ret_value4 = NetlinkSocket4::stop();
+    
+#ifdef HAVE_IPV6
+    ret_value6 = NetlinkSocket6::stop();
+#endif
+    
+    if ((ret_value4 < 0) || (ret_value6 < 0))
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
 }
 
 bool
@@ -138,8 +158,29 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     struct nlmsghdr	*nlh;
     struct sockaddr_nl	snl;
     struct rtgenmsg	*rtgenmsg;
-    NetlinkSocket&	ns = *this;
+    NetlinkSocket*	ns_ptr = NULL;
     
+    // Get the pointer to the NetlinkSocket
+    switch(family) {
+    case AF_INET:
+    {
+	NetlinkSocket4&	ns4 = *this;
+	ns_ptr = &ns4;
+	break;
+    }
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	NetlinkSocket6&	ns6 = *this;
+	ns_ptr = &ns6;
+	break;
+    }
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+
     //
     // Set the request. First the socket, then the request itself.
     //
@@ -156,13 +197,13 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtgenmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
-    nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_seq = ns_ptr->seqno();
+    nlh->nlmsg_pid = ns_ptr->pid();
     rtgenmsg = (struct rtgenmsg *)NLMSG_DATA(nlh);
     rtgenmsg->rtgen_family = family;
     
-    if (ns.sendto(rtmbuf, nlh->nlmsg_len, 0, (struct sockaddr *)&snl,
-		  sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
+    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0, (struct sockaddr *)&snl,
+		       sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",
 		   strerror(errno));
 	return false;
@@ -176,7 +217,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     _cache_seqno = nlh->nlmsg_seq;
     _cache_valid = false;
     while (_cache_valid == false) {
-	ns.force_recvmsg(0);
+	ns_ptr->force_recvmsg(0);
     }
     return (parse_buffer_nlm(family, fte_list, &_cache_data[0],
 			     _cache_data.size()));
@@ -195,13 +236,13 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
 void
 FtiConfigTableGetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
 {
-    NetlinkSocket& ns = *this;
+    NetlinkSocket4& ns4 = *this;	// XXX: needed only to get the pid
     
     //
     // Copy data that has been requested to be cached by setting _cache_seqno.
     //
     size_t d = 0, off = 0;
-    pid_t my_pid = ns.pid();
+    pid_t my_pid = ns4.pid();
     
     UNUSED(my_pid);	// XXX: (see below)
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rtsock.hh,v 1.3 2003/03/10 23:20:16 hodson Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.1 2003/05/02 07:50:48 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -41,7 +41,7 @@ public:
      * @param af the address family.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start(int af = AF_UNSPEC);
+    int start(int af);
 
     /**
      * Stop the netlink socket operation.
@@ -139,9 +139,45 @@ private:
     friend class NetlinkSocketPlumber; // class that hooks observers in and out
 };
 
+/**
+ * NetlinkSocket4 class is a wrapper for NetlinkSocket class for IPv4.
+ */
+class NetlinkSocket4 : public NetlinkSocket {
+public:
+    NetlinkSocket4(EventLoop& e) : NetlinkSocket(e) { }
+
+    /**
+     * Start the netlink socket operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start() { return NetlinkSocket::start(AF_INET); }
+};
+
+/**
+ * NetlinkSocket6 class is a wrapper for NetlinkSocket class for IPv6.
+ */
+class NetlinkSocket6 : public NetlinkSocket {
+public:
+    NetlinkSocket6(EventLoop& e) : NetlinkSocket(e) { }
+
+    /**
+     * Start the netlink socket operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start() {
+#ifdef HAVE_IPV6
+	return NetlinkSocket::start(AF_INET6);
+#else
+	return (XORP_ERROR);
+#endif
+    }
+};
+
 class NetlinkSocketObserver {
 public:
-    NetlinkSocketObserver(NetlinkSocket& ns);
+    NetlinkSocketObserver(NetlinkSocket4& ns4, NetlinkSocket6& ns6);
 
     virtual ~NetlinkSocketObserver();
 
@@ -155,12 +191,18 @@ public:
     virtual void nlsock_data(const uint8_t* data, size_t nbytes) = 0;
 
     /**
-     * Get NetlinkSocket associated with Observer.
+     * Get NetlinkSocket for IPv4 associated with Observer.
      */
-    NetlinkSocket& netlink_socket();
+    NetlinkSocket& netlink_socket4();
+
+    /**
+     * Get NetlinkSocket for IPv6 associated with Observer.
+     */
+    NetlinkSocket& netlink_socket6();
 
 private:
-    NetlinkSocket& _ns;
+    NetlinkSocket4& _ns4;
+    NetlinkSocket6& _ns6;
 };
 
 #endif // __FEA_NETLINK_SOCKET_HH__

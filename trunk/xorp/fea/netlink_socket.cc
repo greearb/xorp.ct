@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.2 2003/05/21 05:32:51 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -413,20 +413,30 @@ struct NetlinkSocketPlumber {
     }
 };
 
-NetlinkSocketObserver::NetlinkSocketObserver(NetlinkSocket& ns)
-    : _ns(ns)
+NetlinkSocketObserver::NetlinkSocketObserver(NetlinkSocket4& ns4,
+					     NetlinkSocket6& ns6)
+    : _ns4(ns4),
+      _ns6(ns6)
 {
-    NetlinkSocketPlumber::plumb(ns, this);
+    NetlinkSocketPlumber::plumb(ns4, this);
+    NetlinkSocketPlumber::plumb(ns6, this);
 }
 
 NetlinkSocketObserver::~NetlinkSocketObserver()
 {
-    NetlinkSocketPlumber::unplumb(_ns, this);
+    NetlinkSocketPlumber::unplumb(_ns4, this);
+    NetlinkSocketPlumber::unplumb(_ns6, this);
 }
 
 NetlinkSocket&
-NetlinkSocketObserver::netlink_socket()
+NetlinkSocketObserver::netlink_socket4()
 {
-    return _ns;
+    return _ns4;
+}
+
+NetlinkSocket&
+NetlinkSocketObserver::netlink_socket6()
+{
+    return _ns6;
 }
 
