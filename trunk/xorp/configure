@@ -3124,6 +3124,13 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
     ;;
+    windows* )
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_WINDOWS 1
+_ACEOF
+
+    ;;
 esac
 
 

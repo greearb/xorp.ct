@@ -282,6 +282,9 @@
 /* Define to 1 if the OS is Solaris */
 #undef HOST_OS_SOLARIS
 
+/* Define to 1 if the OS is Windows */
+#undef HOST_OS_WINDOWS
+
 /* Define to 1 if your IPv4 values are not modified on receiving raw IPv4
    packets */
 #undef IPV4_RAW_INPUT_IS_RAW
