@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.4 2003/03/14 03:39:41 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.5 2003/03/14 12:29:39 pavlin Exp $
 #
+
+* Rename all MLD6_foo macro definitions to MLD_foo
+  (because KAME's implementation is leading toward that naming scheme).
 
 * Add configuration option to enable checking for Router Alert option
   (NOTE: applies to PIM as well).
