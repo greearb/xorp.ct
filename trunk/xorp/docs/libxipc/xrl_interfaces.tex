@@ -8,6 +8,7 @@
 \usepackage{listings}
 
 \newcommand{\eg}{\emph{e.g.\/}} % e.g.
+\newcommand{\ie}{\emph{i.e.\/}} % i.e.
 
 %% Configure listings
 \lstloadlanguages{C++,C}
@@ -42,7 +43,7 @@ Version 0.2}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 6, 2003}
+\date{March 10, 2003}
 
 \begin{document}
 
@@ -203,7 +204,7 @@ a typedef is used in the class method.  The relevant typedef appears
 immediately before each send method.  When called, the first callback
 argument of the callback is an {\tt XrlError} object.  If the value is
 {\tt XrlError::OKAY()} then return values from the XRL will be pointed
-to by the following arguments (\eg. const string* for string argument).
+to by the following arguments (\eg, const string* for string argument).
 Otherwise, the return value pointers will be {\tt NULL} since there is
 no data available for return values when errors occur.
 
@@ -289,7 +290,3 @@ arguments are just reference arguments.
 \bibliographystyle{plain}
 
 \end{document}
-
-
-
-
