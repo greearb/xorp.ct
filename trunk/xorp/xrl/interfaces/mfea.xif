@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.2 2003/02/08 09:18:27 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -14,23 +14,17 @@ interface mfea/0.1 {
 	 * @param protocol_name the name of the protocol to add/delete.
 	 * @param protocol_id the ID of the protocol to add/delete
 	 * (both sides must agree on the particular values).
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	/* TODO: the protocol names have to be globally defined */
 	add_protocol4	? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			-> fail:bool & reason:txt
+			& protocol_name:txt & protocol_id:u32
 	add_protocol6	? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			-> fail:bool & reason:txt
+			& protocol_name:txt & protocol_id:u32
 	
 	delete_protocol4 ? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			-> fail:bool & reason:txt
+			& protocol_name:txt & protocol_id:u32
 	delete_protocol6 ? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			-> fail:bool & reason:txt
+			& protocol_name:txt & protocol_id:u32
 
 	/**
 	 * Start/stop a protocol on an interface in the Multicast FEA.
@@ -44,27 +38,21 @@ interface mfea/0.1 {
 	 * particular protocol.
 	 * @param vif_index the index of the vif to start/stop for the
 	 * particular protocol.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	/* TODO: the protocol names have to be globally defined */
 	start_protocol_vif4 ? xrl_sender_name:txt			\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 	start_protocol_vif6 ? xrl_sender_name:txt			\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 	
 	stop_protocol_vif4 ? xrl_sender_name:txt			\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 	stop_protocol_vif6 ? xrl_sender_name:txt			\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 
 	/**
 	 * Enable/disable the receiving of kernel-originated signal messages.
@@ -75,14 +63,11 @@ interface mfea/0.1 {
 	 * agree on the particular values).
 	 * @param is_allow if true, enable the receiving of kernel-originated
 	 * signal messages by protocol 'protocol_name'.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	 /* TODO: enable/disable per message type? */
 	allow_signal_messages	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
-				& is_allow:bool				\
-				-> fail:bool & reason:txt
+				& is_allow:bool
 	
 	/**
 	 * Enable/disable the receiving of Multicast Routing Information Base
@@ -94,13 +79,10 @@ interface mfea/0.1 {
 	 * agree on the particular values).
 	 * @param is_allow if true, enable the receiving of MRIB information
 	 * messages by protocol 'protocol_name'.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	allow_mrib_messages	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
-				& is_allow:bool				\
-				-> fail:bool & reason:txt
+				& is_allow:bool
 	
 	/**
 	 * Join/leave a multicast group.
@@ -115,30 +97,24 @@ interface mfea/0.1 {
 	 * @param vif_index the index of the vif to join/leave the multicast
 	 * group.
 	 * @param group_address the multicast group to join/leave.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	join_multicast_group4	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
 				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv4			\
-				-> fail:bool & reason:txt
+				& group_address:ipv4
 	join_multicast_group6	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
 				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv6			\
-				-> fail:bool & reason:txt
+				& group_address:ipv6
 	
 	leave_multicast_group4	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
 				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv4			\
-				-> fail:bool & reason:txt
+				& group_address:ipv4
 	leave_multicast_group6	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
 				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv6			\
-				-> fail:bool & reason:txt
+				& group_address:ipv6
 	
 	/**
 	 * Add/delete a Multicast Forwarding Cache with the kernel.
@@ -154,8 +130,6 @@ interface mfea/0.1 {
 	 * @param max_vifs_oiflist the number of vifs covered
 	 * by oiflist or oiflist_disable_wrongvif .
 	 * @param rp_address the RP address of the MFC to add.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_mfc4	? xrl_sender_name:txt				\
 			& source_address:ipv4 & group_address:ipv4	\
@@ -163,22 +137,18 @@ interface mfea/0.1 {
 			& oiflist:binary				\
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
-			& rp_address:ipv4				\
-			-> fail:bool & reason:txt
+			& rp_address:ipv4
 	add_mfc6	? xrl_sender_name:txt				\
 			& source_address:ipv6 & group_address:ipv6	\
 			& iif_vif_index:u32				\
 			& oiflist:binary				\
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
-			& rp_address:ipv6				\
-			-> fail:bool & reason:txt
+			& rp_address:ipv6
 	delete_mfc4	? xrl_sender_name:txt				\
-			& source_address:ipv4 & group_address:ipv4	\
-			-> fail:bool & reason:txt
+			& source_address:ipv4 & group_address:ipv4
 	delete_mfc6	? xrl_sender_name:txt				\
-			& source_address:ipv6 & group_address:ipv6	\
-			-> fail:bool & reason:txt
+			& source_address:ipv6 & group_address:ipv6
 	
 	/**
 	 * Send a protocol message to the MFEA.
@@ -197,8 +167,6 @@ interface mfea/0.1 {
 	 * negative value, the TOS will be set by the lower layers.
 	 * @param is_router_alert set/reset the IP Router Alert option in
 	 * the IP packet to send (when applicable).
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	send_protocol_message4	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
@@ -206,16 +174,14 @@ interface mfea/0.1 {
 				& source_address:ipv4 & dest_address:ipv4 \
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
-				& protocol_message:binary		\
-				-> fail:bool & reason:txt
+				& protocol_message:binary
 	send_protocol_message6	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
 				& vif_name:txt & vif_index:u32		\
 				& source_address:ipv6 & dest_address:ipv6 \
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
-				& protocol_message:binary		\
-				-> fail:bool & reason:txt
+				& protocol_message:binary
 	
 	/**
 	 * Add/delete a dataflow monitor with the MFEA.
@@ -250,8 +216,7 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool			\
-				-> fail:bool & reason:txt
+				& is_leq_upcall:bool
 	add_dataflow_monitor6	? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -262,8 +227,7 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool			\
-				-> fail:bool & reason:txt
+				& is_leq_upcall:bool
 	delete_dataflow_monitor4? xrl_sender_name:txt			\
 				& source_address:ipv4			\
 				& group_address:ipv4			\
@@ -274,8 +238,7 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool			\
-				-> fail:bool & reason:txt
+				& is_leq_upcall:bool
 	delete_dataflow_monitor6? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -286,63 +249,49 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool			\
-				-> fail:bool & reason:txt
+				& is_leq_upcall:bool
 	delete_all_dataflow_monitor4? xrl_sender_name:txt		\
 				& source_address:ipv4			\
-				& group_address:ipv4			\
-				-> fail:bool & reason:txt
+				& group_address:ipv4
 	delete_all_dataflow_monitor6? xrl_sender_name:txt		\
 				& source_address:ipv6			\
-				& group_address:ipv6			\
-				-> fail:bool & reason:txt
+				& group_address:ipv6
 
 	/**
 	 * Enable/disable/start/stop a MFEA vif interface.
 	 *
 	 * @param vif_name the name of the vif to enable/disable/start/stop.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_vif	? vif_name:txt	-> fail:bool & reason:txt
-	disable_vif	? vif_name:txt	-> fail:bool & reason:txt
-	start_vif	? vif_name:txt	-> fail:bool & reason:txt
-	stop_vif	? vif_name:txt	-> fail:bool & reason:txt
+	enable_vif	? vif_name:txt
+	disable_vif	? vif_name:txt
+	start_vif	? vif_name:txt
+	stop_vif	? vif_name:txt
 
 	/**
 	 * Enable/disable/start/stop all MFEA vif interfaces.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_all_vifs			-> fail:bool & reason:txt
-	disable_all_vifs		-> fail:bool & reason:txt
-	start_all_vifs			-> fail:bool & reason:txt
-	stop_all_vifs			-> fail:bool & reason:txt
+	enable_all_vifs
+	disable_all_vifs
+	start_all_vifs
+	stop_all_vifs
 	
 	/**
 	 * Enable/disable/start/stop the MFEA and the MFEA CLI access.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_mfea			-> fail:bool & reason:txt
-	disable_mfea			-> fail:bool & reason:txt
-	enable_cli			-> fail:bool & reason:txt
-	disable_cli			-> fail:bool & reason:txt
-	start_mfea			-> fail:bool & reason:txt
-	stop_mfea			-> fail:bool & reason:txt
-	start_cli			-> fail:bool & reason:txt
-	stop_cli			-> fail:bool & reason:txt
+	enable_mfea
+	disable_mfea
+	enable_cli
+	disable_cli
+	start_mfea
+	stop_mfea
+	start_cli
+	stop_cli
 
 	/**
 	 * Enable/disable the MFEA trace log.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_log_trace		-> fail:bool & reason:txt
-	disable_log_trace		-> fail:bool & reason:txt
+	enable_log_trace
+	disable_log_trace
 
 	/**
 	 * Configure MFEA MRIB-related parameters.
@@ -351,21 +300,11 @@ interface mfea/0.1 {
 	 *
 	 * @param metric_preference the MRIB metric preference.
 	 * @param metric the MRIB metric.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	get_mrib_table_default_metric_preference ?			\
-					-> metric_preference:u32	\
-					& fail:bool & reason:txt
-	set_mrib_table_default_metric_preference ? metric_preference:u32 \
-					-> fail:bool & reason:txt
-	reset_mrib_table_default_metric_preference ?			\
-					-> fail:bool & reason:txt
-	get_mrib_table_default_metric ?					\
-					-> metric:u32			\
-					& fail:bool & reason:txt
-	set_mrib_table_default_metric ?	metric:u32			\
-					-> fail:bool & reason:txt
-	reset_mrib_table_default_metric ?				\
-					-> fail:bool & reason:txt
+	get_mrib_table_default_metric_preference ? -> metric_preference:u32
+	set_mrib_table_default_metric_preference ? metric_preference:u32
+	reset_mrib_table_default_metric_preference
+	get_mrib_table_default_metric ?	-> metric:u32
+	set_mrib_table_default_metric ?	metric:u32
+	reset_mrib_table_default_metric
 }

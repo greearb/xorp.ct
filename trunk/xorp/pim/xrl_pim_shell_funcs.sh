@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.6 2003/03/03 02:07:01 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.7 2003/03/13 08:54:09 pavlin Exp $
 #
 
 #
@@ -24,7 +24,7 @@ pim_enable_vif()
     echo "pim_enable_vif" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_disable_vif()
@@ -38,7 +38,7 @@ pim_disable_vif()
     echo "pim_disable_vif" $*
     XRL="finder://$PIM_TARGET/pim/0.1/disable_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_start_vif()
@@ -52,7 +52,7 @@ pim_start_vif()
     echo "pim_start_vif" $*
     XRL="finder://$PIM_TARGET/pim/0.1/start_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_stop_vif()
@@ -66,7 +66,7 @@ pim_stop_vif()
     echo "pim_stop_vif" $*
     XRL="finder://$PIM_TARGET/pim/0.1/stop_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_enable_all_vifs()
@@ -74,7 +74,7 @@ pim_enable_all_vifs()
     echo "pim_enable_all_vifs" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_disable_all_vifs()
@@ -82,7 +82,7 @@ pim_disable_all_vifs()
     echo "pim_disable_all_vifs" $*
     XRL="finder://$PIM_TARGET/pim/0.1/disable_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_start_all_vifs()
@@ -90,7 +90,7 @@ pim_start_all_vifs()
     echo "pim_start_all_vifs" $*
     XRL="finder://$PIM_TARGET/pim/0.1/start_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_stop_all_vifs()
@@ -98,7 +98,7 @@ pim_stop_all_vifs()
     echo "pim_stop_all_vifs" $*
     XRL="finder://$PIM_TARGET/pim/0.1/stop_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_is_vif_setup_completed()
@@ -114,7 +114,7 @@ pim_enable_cli()
     echo "pim_enable_cli" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_disable_cli()
@@ -122,7 +122,7 @@ pim_disable_cli()
     echo "pim_disable_cli" $*
     XRL="finder://$PIM_TARGET/pim/0.1/disable_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_start_cli()
@@ -130,7 +130,7 @@ pim_start_cli()
     echo "pim_start_cli" $*
     XRL="finder://$PIM_TARGET/pim/0.1/start_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_stop_cli()
@@ -138,7 +138,7 @@ pim_stop_cli()
     echo "pim_stop_cli" $*
     XRL="finder://$PIM_TARGET/pim/0.1/stop_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARG
 }
 
 pim_enable_pim()
@@ -146,7 +146,7 @@ pim_enable_pim()
     echo "pim_enable_pim" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_pim"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_disable_pim()
@@ -154,7 +154,7 @@ pim_disable_pim()
     echo "pim_disable_pim" $*
     XRL="finder://$PIM_TARGET/pim/0.1/disable_pim"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_start_pim()
@@ -162,7 +162,7 @@ pim_start_pim()
     echo "pim_start_pim" $*
     XRL="finder://$PIM_TARGET/pim/0.1/start_pim"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_stop_pim()
@@ -170,7 +170,7 @@ pim_stop_pim()
     echo "pim_stop_pim" $*
     XRL="finder://$PIM_TARGET/pim/0.1/stop_pim"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_enable_bsr()
@@ -178,7 +178,7 @@ pim_enable_bsr()
     echo "pim_enable_bsr" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_bsr"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_disable_bsr()
@@ -186,7 +186,7 @@ pim_disable_bsr()
     echo "pim_disable_bsr" $*
     XRL="finder://$PIM_TARGET/pim/0.1/disable_bsr"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_start_bsr()
@@ -194,7 +194,7 @@ pim_start_bsr()
     echo "pim_start_bsr" $*
     XRL="finder://$PIM_TARGET/pim/0.1/start_bsr"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_stop_bsr()
@@ -202,7 +202,7 @@ pim_stop_bsr()
     echo "pim_stop_bsr" $*
     XRL="finder://$PIM_TARGET/pim/0.1/stop_bsr"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 #
@@ -220,7 +220,7 @@ pim_add_config_scope_zone_by_vif_name4()
     echo "pim_add_config_scope_zone_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_name4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_scope_zone_by_vif_name6()
@@ -235,7 +235,7 @@ pim_add_config_scope_zone_by_vif_name6()
     echo "pim_add_config_scope_zone_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_name6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_scope_zone_by_vif_addr4()
@@ -250,7 +250,7 @@ pim_add_config_scope_zone_by_vif_addr4()
     echo "pim_add_config_scope_zone_by_vif_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_addr4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_addr:ipv4=$vif_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_scope_zone_by_vif_addr6()
@@ -265,7 +265,7 @@ pim_add_config_scope_zone_by_vif_addr6()
     echo "pim_add_config_scope_zone_by_vif_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_scope_zone_by_vif_addr6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_addr:ipv6=$vif_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_scope_zone_by_vif_name4()
@@ -280,7 +280,7 @@ pim_delete_config_scope_zone_by_vif_name4()
     echo "pim_delete_config_scope_zone_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_name4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_scope_zone_by_vif_name6()
@@ -295,7 +295,7 @@ pim_delete_config_scope_zone_by_vif_name6()
     echo "pim_delete_config_scope_zone_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_name6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_scope_zone_by_vif_addr4()
@@ -310,7 +310,7 @@ pim_delete_config_scope_zone_by_vif_addr4()
     echo "pim_delete_config_scope_zone_by_vif_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_addr4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&vif_addr:ipv4=$vif_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_scope_zone_by_vif_addr6()
@@ -325,7 +325,7 @@ pim_delete_config_scope_zone_by_vif_addr6()
     echo "pim_delete_config_scope_zone_by_vif_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_scope_zone_by_vif_addr6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&vif_addr:ipv6=$vif_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 #
@@ -346,7 +346,7 @@ pim_add_config_cand_bsr_by_vif_name4()
     echo "pim_add_config_cand_bsr_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_vif_name4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_bsr_by_vif_name6()
@@ -364,7 +364,7 @@ pim_add_config_cand_bsr_by_vif_name6()
     echo "pim_add_config_cand_bsr_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_vif_name6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_bsr_by_addr4()
@@ -382,7 +382,7 @@ pim_add_config_cand_bsr_by_addr4()
     echo "pim_add_config_cand_bsr_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_addr4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv4=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_bsr_by_addr6()
@@ -400,7 +400,7 @@ pim_add_config_cand_bsr_by_addr6()
     echo "pim_add_config_cand_bsr_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_addr6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv6=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_cand_bsr4()
@@ -415,7 +415,7 @@ pim_delete_config_cand_bsr4()
     echo "pim_delete_config_cand_bsr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_bsr4"
     XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_cand_bsr6()
@@ -430,7 +430,7 @@ pim_delete_config_cand_bsr6()
     echo "pim_delete_config_cand_bsr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_bsr6"
     XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_rp_by_vif_name4()
@@ -448,7 +448,7 @@ pim_add_config_cand_rp_by_vif_name4()
     echo "pim_add_config_cand_rp_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_vif_name4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_rp_by_vif_name6()
@@ -466,7 +466,7 @@ pim_add_config_cand_rp_by_vif_name6()
     echo "pim_add_config_cand_rp_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_vif_name6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_rp_by_addr4()
@@ -484,7 +484,7 @@ pim_add_config_cand_rp_by_addr4()
     echo "pim_add_config_cand_rp_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_addr4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv4=$cand_rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_rp_by_addr6()
@@ -502,7 +502,7 @@ pim_add_config_cand_rp_by_addr6()
     echo "pim_add_config_cand_rp_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_addr6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv6=$cand_rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_cand_rp_by_vif_name4()
@@ -518,7 +518,7 @@ pim_delete_config_cand_rp_by_vif_name4()
     echo "pim_delete_config_cand_rp_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_vif_name4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_cand_rp_by_vif_name6()
@@ -534,7 +534,7 @@ pim_delete_config_cand_rp_by_vif_name6()
     echo "pim_delete_config_cand_rp_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_vif_name6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_cand_rp_by_addr4()
@@ -550,7 +550,7 @@ pim_delete_config_cand_rp_by_addr4()
     echo "pim_delete_config_cand_rp_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_addr4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv4=$cand_rp_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_cand_rp_by_addr6()
@@ -566,7 +566,7 @@ pim_delete_config_cand_rp_by_addr6()
     echo "pim_delete_config_cand_rp_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_addr6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv6=$cand_rp_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_rp4()
@@ -583,7 +583,7 @@ pim_add_config_rp4()
     echo "pim_add_config_rp4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_rp4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr&rp_priority:u32=$rp_priority&hash_masklen:u32=$hash_masklen"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_rp6()
@@ -600,7 +600,7 @@ pim_add_config_rp6()
     echo "pim_add_config_rp6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_rp6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr&rp_priority:u32=$rp_priority&hash_masklen:u32=$hash_masklen"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_rp4()
@@ -615,7 +615,7 @@ pim_delete_config_rp4()
     echo "pim_delete_config_rp4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_rp4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_delete_config_rp6()
@@ -630,7 +630,7 @@ pim_delete_config_rp6()
     echo "pim_delete_config_rp6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_rp6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_config_rp_done()
@@ -643,7 +643,7 @@ pim_config_rp_done()
     echo "pim_config_rp_done" $*
     XRL="finder://$PIM_TARGET/pim/0.1/config_rp_done"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 #
@@ -675,7 +675,7 @@ pim_set_vif_proto_version()
     echo "pim_set_vif_proto_version" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_proto_version"
     XRL_ARGS="?vif_name:txt=$vif_name&proto_version:u32=$proto_version"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_proto_version()
@@ -689,7 +689,7 @@ pim_reset_vif_proto_version()
     echo "pim_reset_vif_proto_version" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_proto_version"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_hello_triggered_delay()
@@ -718,7 +718,7 @@ pim_set_vif_hello_triggered_delay()
     echo "pim_set_vif_hello_triggered_delay" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_hello_triggered_delay"
     XRL_ARGS="?vif_name:txt=$vif_name&hello_triggered_delay:u32=$hello_triggered_delay"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_hello_triggered_delay()
@@ -732,7 +732,7 @@ pim_reset_vif_hello_triggered_delay()
     echo "pim_reset_vif_hello_triggered_delay" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_hello_triggered_delay"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_hello_period()
@@ -761,7 +761,7 @@ pim_set_vif_hello_period()
     echo "pim_set_vif_hello_period" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_hello_period"
     XRL_ARGS="?vif_name:txt=$vif_name&hello_period:u32=$hello_period"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_hello_period()
@@ -775,7 +775,7 @@ pim_reset_vif_hello_period()
     echo "pim_reset_vif_hello_period" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_hello_period"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_hello_holdtime()
@@ -804,7 +804,7 @@ pim_set_vif_hello_holdtime()
     echo "pim_set_vif_hello_holdtime" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_hello_holdtime"
     XRL_ARGS="?vif_name:txt=$vif_name&hello_holdtime:u32=$hello_holdtime"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_hello_holdtime()
@@ -818,7 +818,7 @@ pim_reset_vif_hello_holdtime()
     echo "pim_reset_vif_hello_holdtime" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_hello_holdtime"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_dr_priority()
@@ -847,7 +847,7 @@ pim_set_vif_dr_priority()
     echo "pim_set_vif_dr_priority" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_dr_priority"
     XRL_ARGS="?vif_name:txt=$vif_name&dr_priority:u32=$dr_priority"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_dr_priority()
@@ -861,7 +861,7 @@ pim_reset_vif_dr_priority()
     echo "pim_reset_vif_dr_priority" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_dr_priority"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_lan_delay()
@@ -890,7 +890,7 @@ pim_set_vif_lan_delay()
     echo "pim_set_vif_lan_delay" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_lan_delay"
     XRL_ARGS="?vif_name:txt=$vif_name&lan_delay:u32=$lan_delay"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_lan_delay()
@@ -904,7 +904,7 @@ pim_reset_vif_lan_delay()
     echo "pim_reset_vif_lan_delay" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_lan_delay"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_override_interval()
@@ -933,7 +933,7 @@ pim_set_vif_override_interval()
     echo "pim_set_vif_override_interval" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_override_interval"
     XRL_ARGS="?vif_name:txt=$vif_name&override_interval:u32=$override_interval"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_override_interval()
@@ -947,7 +947,7 @@ pim_reset_vif_override_interval()
     echo "pim_reset_vif_override_interval" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_override_interval"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_is_tracking_support_disabled()
@@ -976,7 +976,7 @@ pim_set_vif_is_tracking_support_disabled()
     echo "pim_set_vif_is_tracking_support_disalbed" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_is_tracking_support_disabled"
     XRL_ARGS="?vif_name:txt=$vif_name&is_tracking_support_disabled:bool=$is_tracking_support_disabled"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_is_tracking_support_disabled()
@@ -990,7 +990,7 @@ pim_reset_vif_is_tracking_support_disabled()
     echo "pim_reset_vif_is_tracking_support_disabled" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_is_tracking_support_disabled"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_accept_nohello_neighbors()
@@ -1019,7 +1019,7 @@ pim_set_vif_accept_nohello_neighbors()
     echo "pim_set_vif_accept_nohello_neighbors" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_accept_nohello_neighbors"
     XRL_ARGS="?vif_name:txt=$vif_name&accept_nohello_neighbors:bool=$accept_nohello_neighbors"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_accept_nohello_neighbors()
@@ -1033,7 +1033,7 @@ pim_reset_vif_accept_nohello_neighbors()
     echo "pim_reset_vif_accept_nohello_neighbors" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_accept_nohello_neighbors"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_get_vif_join_prune_period()
@@ -1062,7 +1062,7 @@ pim_set_vif_join_prune_period()
     echo "pim_set_vif_join_prune_period" $*
     XRL="finder://$PIM_TARGET/pim/0.1/set_vif_join_prune_period"
     XRL_ARGS="?vif_name:txt=$vif_name&join_prune_period:u32=$join_prune_period"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_reset_vif_join_prune_period()
@@ -1076,7 +1076,7 @@ pim_reset_vif_join_prune_period()
     echo "pim_reset_vif_join_prune_period" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_join_prune_period"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_enable_log_trace()
@@ -1084,7 +1084,7 @@ pim_enable_log_trace()
     echo "pim_enable_log_trace" $*
     XRL="finder://$PIM_TARGET/pim/0.1/enable_log_trace"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_disable_log_trace()
@@ -1092,7 +1092,7 @@ pim_disable_log_trace()
     echo "pim_disable_log_trace" $*
     XRL="finder://$PIM_TARGET/pim/0.1/disable_log_trace"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+    call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_test_jp_entry4()
@@ -1112,7 +1112,7 @@ pim_add_test_jp_entry4()
     echo "pim_add_test_jp_entry4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_jp_entry4"
     XRL_ARGS="?source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&group_masklen:u32=$group_masklen&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_jp_entry6()
@@ -1132,7 +1132,7 @@ pim_add_test_jp_entry6()
     echo "pim_add_test_jp_entry6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_jp_entry6"
     XRL_ARGS="?source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&group_masklen:u32=$group_masklen&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_jp_entry4()
@@ -1146,7 +1146,7 @@ pim_send_test_jp_entry4()
     echo "pim_send_test_jp_entry4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_jp_entry4"
     XRL_ARGS="?nbr_addr:ipv4=$nbr_addr"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_jp_entry6()
@@ -1160,7 +1160,7 @@ pim_send_test_jp_entry6()
     echo "pim_send_test_jp_entry6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_jp_entry6"
     XRL_ARGS="?nbr_addr:ipv6=$nbr_addr"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_assert4()
@@ -1179,7 +1179,7 @@ pim_send_test_assert4()
     echo "pim_send_test_assert4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_assert4"
     XRL_ARGS="?vif_name:txt=$vif_name&source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&rpt_bit:bool=$rpt_bit&metric_preference:u32=$metric_preference&metric:u32=$metric"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_assert6()
@@ -1198,7 +1198,7 @@ pim_send_test_assert6()
     echo "pim_send_test_assert6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_assert6"
     XRL_ARGS="?vif_name:txt=$vif_name&source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&rpt_bit:bool=$rpt_bit&metric_preference:u32=$metric_preference&metric:u32=$metric"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_zone4()
@@ -1217,7 +1217,7 @@ pim_add_test_bsr_zone4()
     echo "pim_add_test_bsr_zone4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_zone4"
     XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv4=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen&fragment_tag:u32=$fragment_tag"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_zone6()
@@ -1236,7 +1236,7 @@ pim_add_test_bsr_zone6()
     echo "pim_add_test_bsr_zone6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_zone6"
     XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv6=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen&fragment_tag:u32=$fragment_tag"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_group_prefix4()
@@ -1254,7 +1254,7 @@ pim_add_test_bsr_group_prefix4()
     echo "pim_add_test_bsr_group_prefix4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_group_prefix4"
     XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&expected_rp_count:u32=$expected_rp_count"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_group_prefix6()
@@ -1272,7 +1272,7 @@ pim_add_test_bsr_group_prefix6()
     echo "pim_add_test_bsr_group_prefix6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_group_prefix6"
     XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&expected_rp_count:u32=$expected_rp_count"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_rp4()
@@ -1291,7 +1291,7 @@ pim_add_test_bsr_rp4()
     echo "pim_add_test_bsr_rp4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_rp4"
     XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_rp6()
@@ -1310,7 +1310,7 @@ pim_add_test_bsr_rp6()
     echo "pim_add_test_bsr_rp6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_rp6"
     XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_bootstrap()
@@ -1324,7 +1324,7 @@ pim_send_test_bootstrap()
     echo "pim_send_test_bootstrap" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_bootstrap"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_bootstrap_by_dest4()
@@ -1339,7 +1339,7 @@ pim_send_test_bootstrap_by_dest4()
     echo "pim_send_test_bootstrap_by_dest4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_bootstrap_by_dest4"
     XRL_ARGS="?vif_name:txt=$vif_name&dest_addr:ipv4=$dest_addr"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_bootstrap_by_dest6()
@@ -1354,7 +1354,7 @@ pim_send_test_bootstrap_by_dest6()
     echo "pim_send_test_bootstrap_by_dest6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_bootstrap_by_dest6"
     XRL_ARGS="?vif_name:txt=$vif_name&dest_addr:ipv6=$dest_addr"
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }
 
 pim_send_test_cand_rp_adv()
@@ -1367,5 +1367,5 @@ pim_send_test_cand_rp_adv()
     echo "pim_send_test_cand_rp_adv" $*
     XRL="finder://$PIM_TARGET/pim/0.1/send_test_cand_rp_adv"
     XRL_ARGS=""
-    call_xrl $XRL$XRL_ARGS fail:bool = false
+    call_xrl $XRL$XRL_ARGS
 }

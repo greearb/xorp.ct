@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.9 2003/03/18 02:44:36 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.10 2003/03/25 01:21:47 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -75,15 +75,9 @@ protected:
     //
     // Protocol node methods
     //
-    void xrl_result_add_protocol(const XrlError& xrl_error,
-				 const bool *fail,
-				 const string *reason);
-    void xrl_result_allow_signal_messages(const XrlError& xrl_error,
-					  const bool *fail,
-					  const string *reason);
-    void xrl_result_delete_protocol(const XrlError& xrl_error,
-				    const bool *fail,
-				    const string *reason);
+    void xrl_result_add_protocol(const XrlError& xrl_error);
+    void xrl_result_allow_signal_messages(const XrlError& xrl_error);
+    void xrl_result_delete_protocol(const XrlError& xrl_error);
     
     int	proto_send(const string& dst_module_instance_name,
 		   xorp_module_id dst_module_id,
@@ -91,52 +85,38 @@ protected:
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool router_alert_bool,
 		   const uint8_t * sndbuf, size_t sndlen);
-    void xrl_result_send_protocol_message(const XrlError& xrl_error,
-					  const bool *fail,
-					  const string *reason);
+    void xrl_result_send_protocol_message(const XrlError& xrl_error);
     
     int start_protocol_kernel();
     int stop_protocol_kernel();
     
     int start_protocol_kernel_vif(uint16_t vif_index);
-    void xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error,
-					      const bool *fail,
-					      const string *reason);
+    void xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error);
 
     int stop_protocol_kernel_vif(uint16_t vif_index);
-    void xrl_result_stop_protocol_kernel_vif(const XrlError& xrl_error,
-					     const bool *fail,
-					     const string *reason);
+    void xrl_result_stop_protocol_kernel_vif(const XrlError& xrl_error);
     
     int join_multicast_group(uint16_t vif_index,
 			     const IPvX& multicast_group);
-    void xrl_result_join_multicast_group(const XrlError& xrl_error,
-					 const bool *fail,
-					 const string *reason);
+    void xrl_result_join_multicast_group(const XrlError& xrl_error);
     
     int leave_multicast_group(uint16_t vif_index,
 			      const IPvX& multicast_group);
-    void xrl_result_leave_multicast_group(const XrlError& xrl_error,
-					  const bool *fail,
-					  const string *reason);
+    void xrl_result_leave_multicast_group(const XrlError& xrl_error);
     
     int send_add_membership(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
 			    uint16_t vif_index,
 			    const IPvX& source,
 			    const IPvX& group);
-    void xrl_result_send_add_membership(const XrlError& xrl_error,
-					const bool *fail,
-					const string *reason);
+    void xrl_result_send_add_membership(const XrlError& xrl_error);
 
     int send_delete_membership(const string& dst_module_instance_name,
 			       xorp_module_id dst_module_id,
 			       uint16_t vif_index,
 			       const IPvX& source,
 			       const IPvX& group);
-    void xrl_result_send_delete_membership(const XrlError& xrl_error,
-					   const bool *fail,
-					   const string *reason);
+    void xrl_result_send_delete_membership(const XrlError& xrl_error);
     
     //
     // Protocol node CLI methods
@@ -207,18 +187,11 @@ protected:
      *  @param vif_name the name of the new vif.
      *  
      *  @param vif_index the index of the new vif.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_new_vif(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const uint32_t&	vif_index);
 
     /**
      *  Delete an existing vif.
@@ -226,18 +199,11 @@ protected:
      *  @param vif_name the name of the vif to delete.
      *  
      *  @param vif_index the index of the vif to delete.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_delete_vif(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const uint32_t&	vif_index);
 
     /**
      *  Add an address to a vif.
@@ -253,10 +219,6 @@ protected:
      *  @param broadcast the broadcast address (when applicable).
      *  
      *  @param peer the peer address (when applicable).
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_add_vif_addr4(
 	// Input values, 
@@ -265,10 +227,7 @@ protected:
 	const IPv4&	addr, 
 	const IPv4Net&	subnet, 
 	const IPv4&	broadcast, 
-	const IPv4&	peer, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const IPv4&	peer);
 
     XrlCmdError mfea_client_0_1_add_vif_addr6(
 	// Input values, 
@@ -277,10 +236,7 @@ protected:
 	const IPv6&	addr, 
 	const IPv6Net&	subnet, 
 	const IPv6&	broadcast, 
-	const IPv6&	peer, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const IPv6&	peer);
 
     /**
      *  Delete an address from a vif.
@@ -290,28 +246,18 @@ protected:
      *  @param vif_index the index of the vif.
      *  
      *  @param addr the unicast address to delete.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_delete_vif_addr4(
 	// Input values, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
-	const IPv4&	addr, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const IPv4&	addr);
     
     XrlCmdError mfea_client_0_1_delete_vif_addr6(
 	// Input values, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
-	const IPv6&	addr, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const IPv6&	addr);
 
     /**
      *  Set flags to a vif.
@@ -331,10 +277,6 @@ protected:
      *  @param is_broadcast true if the vif is broadcast-capable.
      *  
      *  @param is_up true if the vif is UP and running.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_set_vif_flags(
 	// Input values, 
@@ -345,10 +287,7 @@ protected:
 	const bool&	is_loopback, 
 	const bool&	is_multicast, 
 	const bool&	is_broadcast, 
-	const bool&	is_up, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const bool&	is_up);
 
     /**
      *  Complete a transaction with vif information.
@@ -356,30 +295,16 @@ protected:
      *  @param vif_name the name of the vif.
      *  
      *  @param vif_index the index of the vif.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_set_vif_done(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail,
-	string& reason);
+	const uint32_t&	vif_index);
 
     /**
      *  Complete all transactions with vif information.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mfea_client_0_1_set_all_vifs_done(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_client_0_1_set_all_vifs_done();
 
     /**
      *  Test if the vif setup is completed.
@@ -418,10 +343,6 @@ protected:
      *  the IP packet was set (when applicable).
      *  
      *  @param protocol_message the protocol message.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_recv_protocol_message4(
 	// Input values, 
@@ -435,10 +356,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
-	const vector<uint8_t>&	protocol_message, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const vector<uint8_t>&	protocol_message);
 
     XrlCmdError mfea_client_0_1_recv_protocol_message6(
 	// Input values, 
@@ -452,10 +370,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
-	const vector<uint8_t>&	protocol_message, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const vector<uint8_t>&	protocol_message);
     
     /**
      *  
@@ -480,10 +395,6 @@ protected:
      *  @param dest_address the destination address.
      *  
      *  @param protocol_message the protocol message.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_client_0_1_recv_kernel_signal_message4(
 	// Input values, 
@@ -495,14 +406,10 @@ protected:
 	const uint32_t&		, // vif_index, 
 	const IPv4&		, // source_address, 
 	const IPv4&		, // dest_address, 
-	const vector<uint8_t>&	, // protocol_message, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected kernel signal message";
-	return XrlCmdError::OKAY();
+	const vector<uint8_t>&	  // protocol_message
+	) {
+	string msg  = "Unexpected kernel signal message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
     XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
@@ -515,14 +422,10 @@ protected:
 	const uint32_t&		, // vif_index, 
 	const IPv6&		, // source_address, 
 	const IPv6&		, // dest_address, 
-	const vector<uint8_t>&	, // protocol_message, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected kernel signal message";
-	return XrlCmdError::OKAY();
+	const vector<uint8_t>&	  // protocol_message
+	) {
+	string msg = "Unexpected kernel signal message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
     //
@@ -536,14 +439,10 @@ protected:
 	const string&		, // next_hop_vif_name, 
 	const uint32_t&		, // next_hop_vif_index, 
 	const uint32_t&		, // metric_preference, 
-	const uint32_t&		, // metric, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected add_mrib() message";
-	return XrlCmdError::OKAY();
+	const uint32_t&		  // metric
+	) {
+	string msg = "Unexpected add_mrib() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
 
     XrlCmdError mfea_client_0_1_add_mrib6(
@@ -554,52 +453,36 @@ protected:
 	const string&		, // next_hop_vif_name, 
 	const uint32_t&		, // next_hop_vif_index, 
 	const uint32_t&		, // metric_preference, 
-	const uint32_t&		, // metric, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected add_mrib() message";
-	return XrlCmdError::OKAY();
+	const uint32_t&		  // metric
+	) {
+	string msg = "Unexpected add_mrib() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
     XrlCmdError mfea_client_0_1_delete_mrib4(
 	// Input values, 
 	const string&		, // xrl_sender_name, 
-	const IPv4Net&		, // dest_prefix, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected delete_mrib() message";
-	return XrlCmdError::OKAY();
+	const IPv4Net&		  // dest_prefix
+	) {
+	string msg = "Unexpected delete_mrib() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
     XrlCmdError mfea_client_0_1_delete_mrib6(
 	// Input values, 
 	const string&		, // xrl_sender_name, 
-	const IPv6Net&		, // dest_prefix, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected delete_mrib() message";
-	return XrlCmdError::OKAY();
+	const IPv6Net&		  // dest_prefix
+	) {
+	string msg = "Unexpected delete_mrib() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
 
     XrlCmdError mfea_client_0_1_set_mrib_done(
 	// Input values, 
-	const string&		, // xrl_sender_name, 
-	// Output values, 
-	bool&			fail, 
-	string&			reason) {
-	
-	fail = true;
-	reason = "Unexpected set_mrib_done() message";
-	return XrlCmdError::OKAY();
+	const string&		  // xrl_sender_name
+	) {
+	string msg = "Unexpected set_mrib_done() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
 
     //
@@ -622,14 +505,10 @@ protected:
 	const bool&		, // is_threshold_in_packets,
 	const bool&		, // is_threshold_in_bytes,
 	const bool&		, // is_geq_upcall,
-	const bool&		, // is_leq_upcall,
-	// Output values, 
-	bool&		fail, 
-	string&		reason) {
-	
-	fail = true;
-	reason = "Unexpected recv_dataflow_signal4() message";
-	return XrlCmdError::OKAY();
+	const bool&		  // is_leq_upcall
+	) {
+	string msg = "Unexpected recv_dataflow_signal4() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
 
     XrlCmdError mfea_client_0_1_recv_dataflow_signal6(
@@ -648,130 +527,64 @@ protected:
 	const bool&		, // is_threshold_in_packets,
 	const bool&		, // is_threshold_in_bytes,
 	const bool&		, // is_geq_upcall,
-	const bool&		, // is_leq_upcall,
-	// Output values, 
-	bool&	fail, 
-	string&	reason) {
-	
-	fail = true;
-	reason = "Unexpected recv_dataflow_signal4() message";
-	return XrlCmdError::OKAY();
+	const bool&		  // is_leq_upcall
+	) {
+	string msg = "Unexpected recv_dataflow_signal4() message";
+	return XrlCmdError::COMMAND_FAILED(msg);
     }
 
     /**
      *  Enable/disable/start/stop a MLD6IGMP vif interface.
      *  
      *  @param vif_name the name of the vif to enable/disable/start/stop.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mld6igmp_0_1_enable_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     XrlCmdError mld6igmp_0_1_disable_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     XrlCmdError mld6igmp_0_1_start_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     XrlCmdError mld6igmp_0_1_stop_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     /**
      *  Enable/disable/start/stop all MLD6IGMP vif interfaces.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mld6igmp_0_1_enable_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_enable_all_vifs();
 
-    XrlCmdError mld6igmp_0_1_disable_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_disable_all_vifs();
 
-    XrlCmdError mld6igmp_0_1_start_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_start_all_vifs();
 
-    XrlCmdError mld6igmp_0_1_stop_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_stop_all_vifs();
 
     /**
      *  Enable/disable/start/stop MLD6IGMP protocol and MLD6IGMP CLI access.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mld6igmp_0_1_enable_mld6igmp(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_enable_mld6igmp();
 
-    XrlCmdError mld6igmp_0_1_disable_mld6igmp(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_disable_mld6igmp();
 
-    XrlCmdError mld6igmp_0_1_enable_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_enable_cli();
 
-    XrlCmdError mld6igmp_0_1_disable_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_disable_cli();
 
-    XrlCmdError mld6igmp_0_1_start_mld6igmp(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_start_mld6igmp();
 
-    XrlCmdError mld6igmp_0_1_stop_mld6igmp(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_stop_mld6igmp();
 
-    XrlCmdError mld6igmp_0_1_start_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_start_cli();
 
-    XrlCmdError mld6igmp_0_1_stop_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_stop_cli();
 
     /**
-     *  Pure-virtual function that needs to be implemented to:
-     *  
      *  Configure MLD6IGMP interface-related metrics. The 'set_foo' XRLs set
      *  the particular values. The 'reset_foo' XRLs reset the metrics to their
      *  default values.
@@ -779,50 +592,28 @@ protected:
      *  @param vif_name the name of the vif to configure.
      *  
      *  @param proto_version the protocol version.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mld6igmp_0_1_get_vif_proto_version(
 	// Input values, 
 	const string&	vif_name, 
 	// Output values, 
-	uint32_t&	proto_version, 
-	bool&	fail, 
-	string&	reason);
+	uint32_t&	proto_version);
 
     XrlCmdError mld6igmp_0_1_set_vif_proto_version(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	proto_version, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	proto_version);
 
     XrlCmdError mld6igmp_0_1_reset_vif_proto_version(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     /**
      *  Enable/disable the MLD6IGMP trace log.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mld6igmp_0_1_enable_log_trace(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_enable_log_trace();
 
-    XrlCmdError mld6igmp_0_1_disable_log_trace(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mld6igmp_0_1_disable_log_trace();
 
     /**
      *  Add/delete a client protocol in the MLD/IGMP protocol.
@@ -838,13 +629,8 @@ protected:
      *  to.
      *  
      *  @param vif_index the index of the vif the protocol add/delete to apply
-     *  to.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured. The added protocol
-     *  will receive Join/Leave membership information about same-LAN members
-     *  for the particular vif.
+     *  to. The added protocol will receive Join/Leave membership information
+     *  about same-LAN members for the particular vif.
      */
     XrlCmdError mld6igmp_0_1_add_protocol4(
 	// Input values, 
@@ -852,10 +638,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     XrlCmdError mld6igmp_0_1_add_protocol6(
 	// Input values, 
@@ -863,10 +646,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     XrlCmdError mld6igmp_0_1_delete_protocol4(
 	// Input values, 
@@ -874,10 +654,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     XrlCmdError mld6igmp_0_1_delete_protocol6(
 	// Input values, 
@@ -885,10 +662,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
     
     
 private:

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.2 2003/03/13 00:32:06 pavlin Exp $ */
 
 /*
  * Multicast Listener Discovery/Internet Group Management Protocol
@@ -12,40 +12,32 @@ interface mld6igmp/0.1 {
 	 * Enable/disable/start/stop a MLD6IGMP vif interface.
 	 *
 	 * @param vif_name the name of the vif to enable/disable/start/stop.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_vif	? vif_name:txt	-> fail:bool & reason:txt
-	disable_vif	? vif_name:txt	-> fail:bool & reason:txt
-	start_vif	? vif_name:txt	-> fail:bool & reason:txt
-	stop_vif	? vif_name:txt	-> fail:bool & reason:txt
+	enable_vif	? vif_name:txt
+	disable_vif	? vif_name:txt
+	start_vif	? vif_name:txt
+	stop_vif	? vif_name:txt
 
 	/**
 	 * Enable/disable/start/stop all MLD6IGMP vif interfaces.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_all_vifs			-> fail:bool & reason:txt
-	disable_all_vifs		-> fail:bool & reason:txt
-	start_all_vifs			-> fail:bool & reason:txt
-	stop_all_vifs			-> fail:bool & reason:txt
+	enable_all_vifs
+	disable_all_vifs
+	start_all_vifs
+	stop_all_vifs
 	
 	/**
 	 * Enable/disable/start/stop MLD6IGMP protocol and the
 	 * MLD6IGMP CLI access.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_mld6igmp			-> fail:bool & reason:txt
-	disable_mld6igmp		-> fail:bool & reason:txt
-	enable_cli			-> fail:bool & reason:txt
-	disable_cli			-> fail:bool & reason:txt
-	start_mld6igmp			-> fail:bool & reason:txt
-	stop_mld6igmp			-> fail:bool & reason:txt
-	start_cli			-> fail:bool & reason:txt
-	stop_cli			-> fail:bool & reason:txt
+	enable_mld6igmp
+	disable_mld6igmp
+	enable_cli
+	disable_cli
+	start_mld6igmp
+	stop_mld6igmp
+	start_cli
+	stop_cli
 
 	/**
 	 * Configure MLD6IGMP interface-related metrics.
@@ -55,26 +47,18 @@ interface mld6igmp/0.1 {
 	 *
 	 * @param vif_name the name of the vif to configure.
 	 * @param proto_version the protocol version.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	get_vif_proto_version		? vif_name:txt			\
-					-> proto_version:u32		\
-					& fail:bool & reason:txt
+					-> proto_version:u32
 	set_vif_proto_version		? vif_name:txt			\
-					& proto_version:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_proto_version		? vif_name:txt			\
-					-> fail:bool & reason:txt
+					& proto_version:u32
+	reset_vif_proto_version		? vif_name:txt
 
 	/**
 	 * Enable/disable the MLD6IGMP trace log.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_log_trace		-> fail:bool & reason:txt
-	disable_log_trace		-> fail:bool & reason:txt
+	enable_log_trace
+	disable_log_trace
 
 
 	/**
@@ -88,8 +72,6 @@ interface mld6igmp/0.1 {
 	 * apply to.
 	 * @param vif_index the index of the vif the protocol add/delete to
 	 * apply to.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 *
 	 * The added protocol will receive Join/Leave membership information
 	 * about same-LAN members for the particular vif.
@@ -97,19 +79,15 @@ interface mld6igmp/0.1 {
 	/* TODO: the protocol names have to be globally defined */
 	add_protocol4	? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 	add_protocol6	? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 	
 	delete_protocol4 ? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 	delete_protocol6 ? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+			& vif_name:txt & vif_index:u32
 }

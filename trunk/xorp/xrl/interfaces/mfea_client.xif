@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.2 2003/01/13 20:40:23 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -11,23 +11,17 @@ interface mfea_client/0.1 {
 	 *
 	 * @param vif_name the name of the new vif.
 	 * @param vif_index the index of the new vif.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	new_vif		? vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+	new_vif		? vif_name:txt & vif_index:u32
 	
 	/**
 	 * Delete an existing vif.
 	 *
 	 * @param vif_name the name of the vif to delete.
 	 * @param vif_index the index of the vif to delete.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	delete_vif	? vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
-
+	delete_vif	? vif_name:txt & vif_index:u32
+	
 	/**
 	 * Add an address to a vif.
 	 *
@@ -37,17 +31,13 @@ interface mfea_client/0.1 {
 	 * @param subnet the subnet address to add.
 	 * @param broadcast the broadcast address (when applicable).
 	 * @param peer the peer address (when applicable).
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_vif_addr4	? vif_name:txt & vif_index:u32			\
 			& addr:ipv4 & subnet:ipv4net			\
-			& broadcast:ipv4 & peer:ipv4			\
-			-> fail:bool & reason:txt
+			& broadcast:ipv4 & peer:ipv4
 	add_vif_addr6	? vif_name:txt & vif_index:u32			\
 			& addr:ipv6 & subnet:ipv6net			\
-			& broadcast:ipv6 & peer:ipv6			\
-			-> fail:bool & reason:txt
+			& broadcast:ipv6 & peer:ipv6
 	
 	/**
 	 * Delete an address from a vif.
@@ -55,13 +45,9 @@ interface mfea_client/0.1 {
 	 * @param vif_name the name of the vif.
 	 * @param vif_index the index of the vif.
 	 * @param addr the unicast address to delete.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	delete_vif_addr4? vif_name:txt & vif_index:u32 & addr:ipv4	\
-			-> fail:bool & reason:txt
-	delete_vif_addr6? vif_name:txt & vif_index:u32 & addr:ipv6	\
-			-> fail:bool & reason:txt
+	delete_vif_addr4? vif_name:txt & vif_index:u32 & addr:ipv4
+	delete_vif_addr6? vif_name:txt & vif_index:u32 & addr:ipv6
 	
 	/**
 	 * Set flags to a vif.
@@ -74,42 +60,31 @@ interface mfea_client/0.1 {
 	 * @param is_multicast true if the vif is multicast-capable.
 	 * @param is_broadcast true if the vif is broadcast-capable.
 	 * @param is_up true if the vif is UP and running.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	set_vif_flags	? vif_name:txt & vif_index:u32			\
 			& is_pim_register:bool & is_p2p:bool		\
 			& is_loopback:bool & is_multicast:bool		\
-			& is_broadcast:bool & is_up:bool		\
-			-> fail:bool & reason:txt
+			& is_broadcast:bool & is_up:bool
 	
 	/**
 	 * Complete a transaction with vif information.
 	 *
 	 * @param vif_name the name of the vif.
 	 * @param vif_index the index of the vif.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	set_vif_done	? vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
+	set_vif_done	? vif_name:txt & vif_index:u32
 
 	/**
 	 * Complete all transactions with vif information.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	set_all_vifs_done						\
-			-> fail:bool & reason:txt
+	set_all_vifs_done
 
 	/**
 	 * Test if the vif setup is completed.
 	 *
 	 * @param is_completed if true the vif setup is completed.
 	 */
-	is_vif_setup_completed						\
-			-> is_completed:bool
+	is_vif_setup_completed	-> is_completed:bool
 		
 	/**
 	 * Receive a protocol message from the MFEA.
@@ -129,8 +104,6 @@ interface mfea_client/0.1 {
 	 * @param is_router_alert if true, the IP Router Alert option in
 	 * the IP packet was set (when applicable).
 	 * @param protocol_message the protocol message.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	recv_protocol_message4	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
@@ -139,8 +112,7 @@ interface mfea_client/0.1 {
 				& dest_address:ipv4			\
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
-				& protocol_message:binary		\
-				-> fail:bool & reason:txt
+				& protocol_message:binary
 	recv_protocol_message6	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
 				& vif_name:txt & vif_index:u32		\
@@ -148,8 +120,7 @@ interface mfea_client/0.1 {
 				& dest_address:ipv6			\
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
-				& protocol_message:binary		\
-				-> fail:bool & reason:txt
+				& protocol_message:binary
 	
 	/**
 	 * Receive a kernel signal message from the MFEA.
@@ -165,8 +136,6 @@ interface mfea_client/0.1 {
 	 * @param source_address the address of the sender.
 	 * @param dest_address the destination address.
 	 * @param protocol_message the protocol message.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	recv_kernel_signal_message4	? xrl_sender_name:txt		\
 					& protocol_name:txt & protocol_id:u32 \
@@ -174,16 +143,14 @@ interface mfea_client/0.1 {
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv4		\
 					& dest_address:ipv4		\
-					& protocol_message:binary	\
-					-> fail:bool & reason:txt
+					& protocol_message:binary
 	recv_kernel_signal_message6	? xrl_sender_name:txt		\
 					& protocol_name:txt & protocol_id:u32 \
 					& message_type:u32		\
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv6		\
 					& dest_address:ipv6		\
-					& protocol_message:binary	\
-					-> fail:bool & reason:txt
+					& protocol_message:binary
 	
 	/**
 	 * Add Multicast Routing Information Base information.
@@ -197,47 +164,36 @@ interface mfea_client/0.1 {
 	 * destination prefix.
 	 * @param metric_preference the metric preference for this entry.
 	 * @param metric the metric for this entry.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_mrib4	? xrl_sender_name:txt				\
 			& dest_prefix:ipv4net				\
 			& next_hop_router_addr:ipv4			\
 			& next_hop_vif_name:txt & next_hop_vif_index:u32 \
 			& metric_preference:u32				\
-			& metric:u32					\
-			-> fail:bool & reason:txt
+			& metric:u32
 	add_mrib6	? xrl_sender_name:txt				\
 			& dest_prefix:ipv6net				\
 			& next_hop_router_addr:ipv6			\
 			& next_hop_vif_name:txt & next_hop_vif_index:u32 \
 			& metric_preference:u32				\
-			& metric:u32					\
-			-> fail:bool & reason:txt
+			& metric:u32
 	
 	/**
 	 * Delete Multicast Routing Information Base information.
 	 * @param xrl_sender_name the XRL name of the originator of this XRL.
 	 * @param dest_prefix the destination prefix to delete.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	delete_mrib4	? xrl_sender_name:txt				\
-			& dest_prefix:ipv4net				\
-			-> fail:bool & reason:txt
+			& dest_prefix:ipv4net
 	delete_mrib6	? xrl_sender_name:txt				\
-			& dest_prefix:ipv6net				\
-			-> fail:bool & reason:txt
+			& dest_prefix:ipv6net
 	
 	/**
 	 * Complete a transaction with MRIB information.
 	 *
 	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	set_mrib_done	? xrl_sender_name:txt				\
-			-> fail:bool & reason:txt
+	set_mrib_done	? xrl_sender_name:txt
 	
 	/**
 	 * A signal that a dataflow-related pre-condition is true.
@@ -282,8 +238,7 @@ interface mfea_client/0.1 {
 				& is_threshold_in_packets: bool		\
 				& is_threshold_in_bytes: bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall: bool			\
-				-> fail:bool & reason:txt
+				& is_leq_upcall: bool
 	recv_dataflow_signal6	? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -298,6 +253,5 @@ interface mfea_client/0.1 {
 				& is_threshold_in_packets: bool		\
 				& is_threshold_in_bytes: bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall: bool			\
-				-> fail:bool & reason:txt
+				& is_leq_upcall:bool
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.8 2003/03/18 02:44:35 pavlin Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.9 2003/03/25 01:21:47 pavlin Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -88,9 +88,7 @@ protected:
     // is in the name of consistency between the XRL calling function
     // and the return result callback...
     //
-    void xrl_result_recv_protocol_message(const XrlError& xrl_error,
-					  const bool *fail,
-					  const string *reason);
+    void xrl_result_recv_protocol_message(const XrlError& xrl_error);
     int signal_message_send(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
 			    int message_type,
@@ -119,31 +117,15 @@ protected:
     // is in the name of consistency between the XRL calling function
     // and the return result callback...
     //
-    void xrl_result_recv_kernel_signal_message(const XrlError& xrl_error,
-					       const bool *fail,
-					       const string *reason);
+    void xrl_result_recv_kernel_signal_message(const XrlError& xrl_error);
     
-    void xrl_result_new_vif(const XrlError& xrl_error,
-			    const bool *fail,
-			    const string *reason);
-    void xrl_result_delete_vif(const XrlError& xrl_error,
-			       const bool *fail,
-			       const string *reason);
-    void xrl_result_add_vif_addr(const XrlError& xrl_error,
-				 const bool *fail,
-				 const string *reason);
-    void xrl_result_delete_vif_addr(const XrlError& xrl_error,
-				    const bool *fail,
-				    const string *reason);
-    void xrl_result_set_vif_flags(const XrlError& xrl_error,
-				  const bool *fail,
-				  const string *reason);
-    void xrl_result_set_vif_done(const XrlError& xrl_error,
-				 const bool *fail,
-				 const string *reason);
-    void xrl_result_set_all_vifs_done(const XrlError& xrl_error,
-				      const bool *fail,
-				      const string *reason);
+    void xrl_result_new_vif(const XrlError& xrl_error);
+    void xrl_result_delete_vif(const XrlError& xrl_error);
+    void xrl_result_add_vif_addr(const XrlError& xrl_error);
+    void xrl_result_delete_vif_addr(const XrlError& xrl_error);
+    void xrl_result_set_vif_flags(const XrlError& xrl_error);
+    void xrl_result_set_vif_done(const XrlError& xrl_error);
+    void xrl_result_set_all_vifs_done(const XrlError& xrl_error);
     
     int dataflow_signal_send(const string& dst_module_instance_name,
 			     xorp_module_id dst_module_id,
@@ -161,10 +143,8 @@ protected:
 			     bool is_threshold_in_bytes,
 			     bool is_geq_upcall,
 			     bool is_leq_upcall);
-
-    void xrl_result_recv_dataflow_signal(const XrlError& xrl_error,
-					 const bool *fail,
-					 const string *reason);
+    
+    void xrl_result_recv_dataflow_signal(const XrlError& xrl_error);
     
     //
     // Protocol node CLI methods
@@ -238,46 +218,30 @@ protected:
      *  
      *  @param protocol_id the ID of the protocol to add/delete
      *  (both sides must agree on the particular values).
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_add_protocol4(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	protocol_id);
 
     XrlCmdError mfea_0_1_add_protocol6(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	protocol_id);
 
     XrlCmdError mfea_0_1_delete_protocol4(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	protocol_id);
 
     XrlCmdError mfea_0_1_delete_protocol6(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	protocol_id);
 
     /**
      *  Start/stop a protocol on an interface in the Multicast FEA.
@@ -295,10 +259,6 @@ protected:
      *  
      *  @param vif_index the index of the vif to start/stop for the particular
      *  protocol.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_start_protocol_vif4(
 	// Input values, 
@@ -306,10 +266,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     XrlCmdError mfea_0_1_start_protocol_vif6(
 	// Input values, 
@@ -317,10 +274,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     XrlCmdError mfea_0_1_stop_protocol_vif4(
 	// Input values, 
@@ -328,10 +282,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     XrlCmdError mfea_0_1_stop_protocol_vif6(
 	// Input values, 
@@ -339,10 +290,7 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	vif_index);
 
     /**
      *  Enable/disable the receiving of kernel-originated signal messages.
@@ -356,22 +304,13 @@ protected:
      *  
      *  @param is_allow if true, enable the receiving of kernel-originated
      *  signal messages by protocol
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
-     *  
-     *  @protocol_name.
      */
     XrlCmdError mfea_0_1_allow_signal_messages(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
-	const bool&	is_allow, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const bool&	is_allow);
     
     /**
      *  Enable/disable the receiving of Multicast Routing Information Base
@@ -386,30 +325,17 @@ protected:
      *  
      *  @param is_allow if true, enable the receiving of MRIB information
      *  messages by protocol 'protocol_name'.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_allow_mrib_messages(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
-	const bool&	is_allow, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const bool&	is_allow);
     
-    void xrl_result_add_mrib(const XrlError& xrl_error,
-			     const bool *fail,
-			     const string *reason);
-    void xrl_result_delete_mrib(const XrlError& xrl_error,
-				const bool *fail,
-				const string *reason);
-    void xrl_result_set_mrib_done(const XrlError& xrl_error,
-				  const bool *fail,
-				  const string *reason);
+    void xrl_result_add_mrib(const XrlError& xrl_error);
+    void xrl_result_delete_mrib(const XrlError& xrl_error);
+    void xrl_result_set_mrib_done(const XrlError& xrl_error);
     
     /**
      *  Join/leave a multicast group.
@@ -428,10 +354,6 @@ protected:
      *  group.
      *  
      *  @param group_address the multicast group to join/leave
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_join_multicast_group4(
 	// Input values, 
@@ -440,10 +362,7 @@ protected:
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
-	const IPv4&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv4&	group_address);
 
     XrlCmdError mfea_0_1_join_multicast_group6(
 	// Input values, 
@@ -452,10 +371,7 @@ protected:
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
-	const IPv6&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv6&	group_address);
 
     XrlCmdError mfea_0_1_leave_multicast_group4(
 	// Input values, 
@@ -464,10 +380,7 @@ protected:
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
-	const IPv4&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv4&	group_address);
 
     XrlCmdError mfea_0_1_leave_multicast_group6(
 	// Input values, 
@@ -476,10 +389,7 @@ protected:
 	const uint32_t&	protocol_id, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
-	const IPv6&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv6&	group_address);
 
     /**
      *  Add/delete a Multicast Forwarding Cache with the kernel.
@@ -502,10 +412,6 @@ protected:
      *  oiflist_disable_wrongvif .
      *  
      *  @param rp_address the RP address of the MFC to add.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_add_mfc4(
 	// Input values, 
@@ -516,10 +422,7 @@ protected:
 	const vector<uint8_t>&	oiflist, 
 	const vector<uint8_t>&	oiflist_disable_wrongvif, 
 	const uint32_t&	max_vifs_oiflist, 
-	const IPv4&	rp_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv4&	rp_address);
 
     XrlCmdError mfea_0_1_add_mfc6(
 	// Input values, 
@@ -530,28 +433,19 @@ protected:
 	const vector<uint8_t>&	oiflist, 
 	const vector<uint8_t>&	oiflist_disable_wrongvif, 
 	const uint32_t&	max_vifs_oiflist, 
-	const IPv6&	rp_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv6&	rp_address);
 
     XrlCmdError mfea_0_1_delete_mfc4(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const IPv4&	source_address, 
-	const IPv4&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv4&	group_address);
 
     XrlCmdError mfea_0_1_delete_mfc6(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const IPv6&	source_address, 
-	const IPv6&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv6&	group_address);
 
     /**
      *  Send a protocol message to the MFEA.
@@ -579,10 +473,6 @@ protected:
      *  
      *  @param is_router_alert set/reset the IP Router Alert option in the IP
      *  packet to send (when applicable).
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_send_protocol_message4(
 	// Input values, 
@@ -596,10 +486,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
-	const vector<uint8_t>&	protocol_message, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const vector<uint8_t>&	protocol_message);
 
     XrlCmdError mfea_0_1_send_protocol_message6(
 	// Input values, 
@@ -613,10 +500,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
-	const vector<uint8_t>&	protocol_message, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const vector<uint8_t>&	protocol_message);
     
     /**
      *  Add/delete a dataflow monitor with the MFEA.
@@ -661,10 +545,7 @@ protected:
 	const bool&	is_threshold_in_packets, 
 	const bool&	is_threshold_in_bytes, 
 	const bool&	is_geq_upcall, 
-	const bool&	is_leq_upcall, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const bool&	is_leq_upcall);
 
     XrlCmdError mfea_0_1_add_dataflow_monitor6(
 	// Input values, 
@@ -678,10 +559,7 @@ protected:
 	const bool&	is_threshold_in_packets, 
 	const bool&	is_threshold_in_bytes, 
 	const bool&	is_geq_upcall, 
-	const bool&	is_leq_upcall, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const bool&	is_leq_upcall);
 
     XrlCmdError mfea_0_1_delete_dataflow_monitor4(
 	// Input values, 
@@ -695,10 +573,7 @@ protected:
 	const bool&	is_threshold_in_packets, 
 	const bool&	is_threshold_in_bytes, 
 	const bool&	is_geq_upcall, 
-	const bool&	is_leq_upcall, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const bool&	is_leq_upcall);
 
     XrlCmdError mfea_0_1_delete_dataflow_monitor6(
 	// Input values, 
@@ -712,155 +587,77 @@ protected:
 	const bool&	is_threshold_in_packets, 
 	const bool&	is_threshold_in_bytes, 
 	const bool&	is_geq_upcall, 
-	const bool&	is_leq_upcall, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const bool&	is_leq_upcall);
 
     XrlCmdError mfea_0_1_delete_all_dataflow_monitor4(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const IPv4&	source_address, 
-	const IPv4&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv4&	group_address);
 
     XrlCmdError mfea_0_1_delete_all_dataflow_monitor6(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const IPv6&	source_address, 
-	const IPv6&	group_address, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const IPv6&	group_address);
 
     /**
      *  Enable/disable/start/stop a MFEA vif interface.
      *  
      *  @param vif_name the name of the vif to enable/disable/start/stop.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_enable_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     XrlCmdError mfea_0_1_disable_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     XrlCmdError mfea_0_1_start_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     XrlCmdError mfea_0_1_stop_vif(
 	// Input values, 
-	const string&	vif_name, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const string&	vif_name);
 
     /**
      *  Enable/disable/start/stop all MFEA vif interfaces.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mfea_0_1_enable_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_enable_all_vifs();
 
-    XrlCmdError mfea_0_1_disable_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_disable_all_vifs();
 
-    XrlCmdError mfea_0_1_start_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_start_all_vifs();
 
-    XrlCmdError mfea_0_1_stop_all_vifs(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_stop_all_vifs();
 
     /**
      *  Enable/disable/start/stop MFEA and the MFEA CLI access.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mfea_0_1_enable_mfea(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_enable_mfea();
 
-    XrlCmdError mfea_0_1_disable_mfea(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_disable_mfea();
 
-    XrlCmdError mfea_0_1_enable_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_enable_cli();
 
-    XrlCmdError mfea_0_1_disable_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
-    XrlCmdError mfea_0_1_start_mfea(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_disable_cli();
 
-    XrlCmdError mfea_0_1_stop_mfea(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_start_mfea();
 
-    XrlCmdError mfea_0_1_start_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_stop_mfea();
 
-    XrlCmdError mfea_0_1_stop_cli(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_start_cli();
+
+    XrlCmdError mfea_0_1_stop_cli();
 
     /**
      *  Enable/disable the MFEA trace log.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
-    XrlCmdError mfea_0_1_enable_log_trace(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_enable_log_trace();
 
-    XrlCmdError mfea_0_1_disable_log_trace(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_disable_log_trace();
 
     /**
      *  Configure MFEA MRIB-related parameters. The 'set_foo' XRLs set the
@@ -868,46 +665,26 @@ protected:
      *  default values.
      *  
      *  @param metric_preference the MRIB metric preference.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured.
      */
     XrlCmdError mfea_0_1_get_mrib_table_default_metric_preference(
 	// Output values, 
-	uint32_t&	metric_preference, 
-	bool&	fail, 
-	string&	reason);
+	uint32_t&	metric_preference);
 
     XrlCmdError mfea_0_1_set_mrib_table_default_metric_preference(
 	// Input values, 
-	const uint32_t&	metric_preference, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	metric_preference);
 
-    XrlCmdError mfea_0_1_reset_mrib_table_default_metric_preference(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_reset_mrib_table_default_metric_preference();
 
     XrlCmdError mfea_0_1_get_mrib_table_default_metric(
 	// Output values, 
-	uint32_t&	metric, 
-	bool&	fail, 
-	string&	reason);
+	uint32_t&	metric);
 
     XrlCmdError mfea_0_1_set_mrib_table_default_metric(
 	// Input values, 
-	const uint32_t&	metric, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+	const uint32_t&	metric);
 
-    XrlCmdError mfea_0_1_reset_mrib_table_default_metric(
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
+    XrlCmdError mfea_0_1_reset_mrib_table_default_metric();
     
 private:
     const string& my_xrl_target_name() {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.5 2003/02/27 03:11:06 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.6 2003/03/03 02:07:01 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -11,50 +11,39 @@ interface pim/0.1 {
 	 * Enable/disable/start/stop a PIM vif interface.
 	 *
 	 * @param vif_name the name of the vif to enable/disable/start/stop.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_vif	? vif_name:txt	-> fail:bool & reason:txt
-	disable_vif	? vif_name:txt	-> fail:bool & reason:txt
-	start_vif	? vif_name:txt	-> fail:bool & reason:txt
-	stop_vif	? vif_name:txt	-> fail:bool & reason:txt
+	enable_vif	? vif_name:txt
+	disable_vif	? vif_name:txt
+	start_vif	? vif_name:txt
+	stop_vif	? vif_name:txt
 
 	/**
 	 * Enable/disable/start/stop all PIM vif interfaces.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_all_vifs			-> fail:bool & reason:txt
-	disable_all_vifs		-> fail:bool & reason:txt
-	start_all_vifs			-> fail:bool & reason:txt
-	stop_all_vifs			-> fail:bool & reason:txt
+	enable_all_vifs
+	disable_all_vifs
+	start_all_vifs
+	stop_all_vifs
 	
 	/**
 	 * Enable/disable/start/stop PIM protocol and PIM CLI access.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_pim			-> fail:bool & reason:txt
-	disable_pim			-> fail:bool & reason:txt
-	enable_cli			-> fail:bool & reason:txt
-	disable_cli			-> fail:bool & reason:txt
-	start_pim			-> fail:bool & reason:txt
-	stop_pim			-> fail:bool & reason:txt
-	start_cli			-> fail:bool & reason:txt
-	stop_cli			-> fail:bool & reason:txt
+	enable_pim
+	disable_pim
+	enable_cli
+	disable_cli
+	start_pim
+	stop_pim
+	start_cli
+	stop_cli
 
 	/**
 	 * Enable/disable/start/stop BSR.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_bsr			-> fail:bool & reason:txt
-	disable_bsr			-> fail:bool & reason:txt
-	start_bsr			-> fail:bool & reason:txt
-	stop_bsr			-> fail:bool & reason:txt
+	enable_bsr
+	disable_bsr
+	start_bsr
+	stop_bsr
 
 	/**
 	 * Add/delete scope zone.
@@ -64,33 +53,23 @@ interface pim/0.1 {
 	 * scope zone.
 	 * @param vif_addr the address of the vif to use as a bondary of the
 	 * scope zone.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
-						& vif_name:txt		\
-						-> fail:bool & reason:txt
+						& vif_name:txt
 	add_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
-						& vif_name:txt		\
-						-> fail:bool & reason:txt
+						& vif_name:txt
 	add_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
-						& vif_addr:ipv4		\
-						-> fail:bool & reason:txt
+						& vif_addr:ipv4
 	add_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
-						& vif_addr:ipv6		\
-						-> fail:bool & reason:txt
+						& vif_addr:ipv6
 	delete_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
-						& vif_name:txt		\
-						-> fail:bool & reason:txt
+						& vif_name:txt
 	delete_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
-						& vif_name:txt		\
-						-> fail:bool & reason:txt
+						& vif_name:txt
 	delete_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
-						& vif_addr:ipv4		\
-						-> fail:bool & reason:txt
+						& vif_addr:ipv4
 	delete_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
-						& vif_addr:ipv6		\
-						-> fail:bool & reason:txt
+						& vif_addr:ipv6
 
 	/**
 	 * Add/delete candidate-BSR configuration.
@@ -103,39 +82,31 @@ interface pim/0.1 {
 	 * @param cand_bsr_addr the address to use as a candidate-BSR.
 	 * @param bsr_priority the BSR priority (larger is better).
 	 * @param hash_masklen the hash mask length.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_config_cand_bsr_by_vif_name4? scope_zone_id:ipv4net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& bsr_priority:u32		\
-					& hash_masklen:u32		\
-					-> fail:bool & reason:txt
+					& hash_masklen:u32
 	add_config_cand_bsr_by_vif_name6? scope_zone_id:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& bsr_priority:u32		\
-					& hash_masklen:u32		\
-					-> fail:bool & reason:txt
+					& hash_masklen:u32
 	add_config_cand_bsr_by_addr4	? scope_zone_id:ipv4net		\
 					& is_scope_zone:bool		\
 					& cand_bsr_addr:ipv4		\
 					& bsr_priority:u32		\
-					& hash_masklen:u32		\
-					-> fail:bool & reason:txt
+					& hash_masklen:u32
 	add_config_cand_bsr_by_addr6	? scope_zone_id:ipv6net		\
 					& is_scope_zone:bool		\
 					& cand_bsr_addr:ipv6		\
 					& bsr_priority:u32		\
-					& hash_masklen:u32		\
-					-> fail:bool & reason:txt
+					& hash_masklen:u32
 	delete_config_cand_bsr4		? scope_zone_id:ipv4net		\
-					& is_scope_zone:bool		\
-					-> fail:bool & reason:txt
+					& is_scope_zone:bool
 	delete_config_cand_bsr6		? scope_zone_id:ipv6net		\
-					& is_scope_zone:bool		\
-					-> fail:bool & reason:txt
+					& is_scope_zone:bool
 
 	/**
 	 * Add/delete Candidate-RP configuration.
@@ -148,49 +119,39 @@ interface pim/0.1 {
 	 * @param cand_rp_addr the address to use as a candidate-RP.
 	 * @param rp_priority the Cand-RP priority (smaller is better).
 	 * @param rp_holdtime the Cand-RP holdtime (in seconds).
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_config_cand_rp_by_vif_name4	? group_prefix:ipv4net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& rp_priority:u32		\
-					& rp_holdtime:u32		\
-					-> fail:bool & reason:txt
+					& rp_holdtime:u32
 	add_config_cand_rp_by_vif_name6	? group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& rp_priority:u32		\
-					& rp_holdtime:u32		\
-					-> fail:bool & reason:txt
+					& rp_holdtime:u32
 	add_config_cand_rp_by_addr4	? group_prefix:ipv4net		\
 					& is_scope_zone:bool		\
 					& cand_rp_addr:ipv4		\
 					& rp_priority:u32		\
-					& rp_holdtime:u32		\
-					-> fail:bool & reason:txt
+					& rp_holdtime:u32
 	add_config_cand_rp_by_addr6	? group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
 					& cand_rp_addr:ipv6		\
 					& rp_priority:u32		\
-					& rp_holdtime:u32		\
-					-> fail:bool & reason:txt
+					& rp_holdtime:u32
 	delete_config_cand_rp_by_vif_name4? group_prefix:ipv4net	\
 					& is_scope_zone:bool		\
-					& vif_name:txt			\
-					-> fail:bool & reason:txt
+					& vif_name:txt
 	delete_config_cand_rp_by_vif_name6? group_prefix:ipv6net	\
 					& is_scope_zone:bool		\
-					& vif_name:txt			\
-					-> fail:bool & reason:txt
+					& vif_name:txt
 	delete_config_cand_rp_by_addr4	? group_prefix:ipv4net		\
 					& is_scope_zone:bool		\
-					& cand_rp_addr:ipv4		\
-					-> fail:bool & reason:txt
+					& cand_rp_addr:ipv4
 	delete_config_cand_rp_by_addr6	? group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
-					& cand_rp_addr:ipv6		\
-					-> fail:bool & reason:txt
+					& cand_rp_addr:ipv6
 
 	/**
 	 * Add/delete/complete static RP configuration.
@@ -201,26 +162,20 @@ interface pim/0.1 {
 	 * @param hash_masklen the hash masklen used in computing an RP for
 	 * a group. It should be same across all RPs. If set to zero,
 	 * the default one will be used.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_config_rp4			? group_prefix:ipv4net		\
 					& rp_addr:ipv4			\
 					& rp_priority:u32		\
-					& hash_masklen:u32		\
-					-> fail:bool & reason:txt
+					& hash_masklen:u32
 	add_config_rp6			? group_prefix:ipv6net		\
 					& rp_addr:ipv6			\
 					& rp_priority:u32		\
-					& hash_masklen:u32		\
-					-> fail:bool & reason:txt
+					& hash_masklen:u32
 	delete_config_rp4		? group_prefix:ipv4net		\
-					& rp_addr:ipv4			\
-					-> fail:bool & reason:txt
+					& rp_addr:ipv4
 	delete_config_rp6		? group_prefix:ipv6net		\
-					& rp_addr:ipv6			\
-					-> fail:bool & reason:txt
-	config_rp_done			-> fail:bool & reason:txt
+					& rp_addr:ipv6
+	config_rp_done
 
 	/**
 	 * Configure PIM Hello-related metrics.
@@ -245,124 +200,62 @@ interface pim/0.1 {
 	 * @param accept_nohello_neighbors if true, accept neighbors that
 	 * didn't send a Hello message first.
 	 * @param join_prune_period the period between Join/Prune messages.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	get_vif_proto_version		? vif_name:txt			\
-					-> proto_version:u32		\
-					& fail:bool & reason:txt
-	set_vif_proto_version		? vif_name:txt			\
-					& proto_version:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_proto_version		? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_hello_triggered_delay	? vif_name:txt			\
-					-> hello_triggered_delay:u32	\
-					& fail:bool & reason:txt
-	set_vif_hello_triggered_delay	? vif_name:txt			\
-					& hello_triggered_delay:u32	\
-					-> fail:bool & reason:txt
-	reset_vif_hello_triggered_delay	? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_hello_period		? vif_name:txt			\
-					-> hello_period:u32		\
-					& fail:bool & reason:txt
-	set_vif_hello_period		? vif_name:txt			\
-					& hello_period:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_hello_period		? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_hello_holdtime		? vif_name:txt			\
-					-> hello_holdtime:u32		\
-					& fail:bool & reason:txt
-	set_vif_hello_holdtime		? vif_name:txt			\
-					& hello_holdtime:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_hello_holdtime	? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_dr_priority		? vif_name:txt			\
-					-> dr_priority:u32		\
-					& fail:bool & reason:txt
-	set_vif_dr_priority		? vif_name:txt			\
-					& dr_priority:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_dr_priority		? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_lan_delay		? vif_name:txt			\
-					-> lan_delay:u32		\
-					& fail:bool & reason:txt
-	set_vif_lan_delay		? vif_name:txt			\
-					& lan_delay:u32			\
-					-> fail:bool & reason:txt
-	reset_vif_lan_delay		? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_override_interval	? vif_name:txt			\
-					-> override_interval:u32	\
-					& fail:bool & reason:txt
-	set_vif_override_interval	? vif_name:txt			\
-					& override_interval:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_override_interval	? vif_name:txt			\
-					-> fail:bool & reason:txt
-	get_vif_is_tracking_support_disabled ? vif_name:txt		\
-					-> is_tracking_support_disabled:bool \
-					& fail:bool & reason:txt
-	set_vif_is_tracking_support_disabled ? vif_name:txt		\
-					& is_tracking_support_disabled:bool \
-					-> fail:bool & reason:txt
-	reset_vif_is_tracking_support_disabled ? vif_name:txt		\
-					-> fail:bool & reason:txt
-	get_vif_accept_nohello_neighbors ? vif_name:txt			\
-					-> accept_nohello_neighbors:bool \
-					& fail:bool & reason:txt
-	set_vif_accept_nohello_neighbors ? vif_name:txt			\
-					& accept_nohello_neighbors:bool	\
-					-> fail:bool & reason:txt
-	reset_vif_accept_nohello_neighbors ? vif_name:txt		\
-					-> fail:bool & reason:txt
-	get_vif_join_prune_period	? vif_name:txt			\
-					-> join_prune_period:u32	\
-					& fail:bool & reason:txt
-	set_vif_join_prune_period	? vif_name:txt			\
-					& join_prune_period:u32		\
-					-> fail:bool & reason:txt
-	reset_vif_join_prune_period	? vif_name:txt			\
-					-> fail:bool & reason:txt
+	get_vif_proto_version		? vif_name:txt -> proto_version:u32
+	set_vif_proto_version		? vif_name:txt  & proto_version:u32
+	reset_vif_proto_version		? vif_name:txt
+	get_vif_hello_triggered_delay	? vif_name:txt -> hello_triggered_delay:u32
+	set_vif_hello_triggered_delay	? vif_name:txt  & hello_triggered_delay:u32
+	reset_vif_hello_triggered_delay	? vif_name:txt
+	get_vif_hello_period		? vif_name:txt -> hello_period:u32
+	set_vif_hello_period		? vif_name:txt  & hello_period:u32
+	reset_vif_hello_period		? vif_name:txt
+	get_vif_hello_holdtime		? vif_name:txt -> hello_holdtime:u32
+	set_vif_hello_holdtime		? vif_name:txt  & hello_holdtime:u32
+	reset_vif_hello_holdtime	? vif_name:txt
+	get_vif_dr_priority		? vif_name:txt -> dr_priority:u32
+	set_vif_dr_priority		? vif_name:txt  & dr_priority:u32
+	reset_vif_dr_priority		? vif_name:txt
+	get_vif_lan_delay		? vif_name:txt -> lan_delay:u32
+	set_vif_lan_delay		? vif_name:txt  & lan_delay:u32
+	reset_vif_lan_delay		? vif_name:txt
+	get_vif_override_interval	? vif_name:txt -> override_interval:u32
+	set_vif_override_interval	? vif_name:txt  & override_interval:u32
+	reset_vif_override_interval	? vif_name:txt
+	get_vif_is_tracking_support_disabled ? vif_name:txt -> is_tracking_support_disabled:bool
+	set_vif_is_tracking_support_disabled ? vif_name:txt  & is_tracking_support_disabled:bool
+	reset_vif_is_tracking_support_disabled ? vif_name:txt
+	get_vif_accept_nohello_neighbors ? vif_name:txt -> accept_nohello_neighbors:bool
+	set_vif_accept_nohello_neighbors ? vif_name:txt  & accept_nohello_neighbors:bool
+	reset_vif_accept_nohello_neighbors ? vif_name:txt
+	get_vif_join_prune_period	? vif_name:txt -> join_prune_period:u32
+	set_vif_join_prune_period	? vif_name:txt  & join_prune_period:u32
+	reset_vif_join_prune_period	? vif_name:txt
 
 	/**
 	 * Enable/disable the PIM trace log.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_log_trace		-> fail:bool & reason:txt
-	disable_log_trace		-> fail:bool & reason:txt
+	enable_log_trace
+	disable_log_trace
 
 	/**
 	 * Test-related methods: add Join/Prune entries, and send them
 	 * to a neighbor.
-	 *
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_test_jp_entry4	? source_addr:ipv4 & group_addr:ipv4	\
 				& group_masklen:u32			\
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
-				& new_group_bool:bool			\
-				-> fail:bool & reason:txt
+				& new_group_bool:bool
 	add_test_jp_entry6	? source_addr:ipv6 & group_addr:ipv6	\
 				& group_masklen:u32			\
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
-				& new_group_bool:bool			\
-				-> fail:bool & reason:txt
-	send_test_jp_entry4	? nbr_addr:ipv4				\
-				-> fail:bool & reason:txt
-	send_test_jp_entry6	? nbr_addr:ipv6				\
-				-> fail:bool & reason:txt
+				& new_group_bool:bool
+	send_test_jp_entry4	? nbr_addr:ipv4
+	send_test_jp_entry6	? nbr_addr:ipv6
 
 	/**
 	 * Test-related methods: send an Assert message on an interface.
@@ -374,21 +267,17 @@ interface pim/0.1 {
 	 * @param metric_preference the metric preference inside the Assert
 	   message.
 	 * @param metric the metric inside the Assert message.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	send_test_assert4	? vif_name:txt				\
 				& source_addr:ipv4 & group_addr:ipv4	\
 				& rpt_bit:bool				\
 				& metric_preference:u32			\
-				& metric:u32				\
-				-> fail:bool & reason:txt
+				& metric:u32
 	send_test_assert6	? vif_name:txt				\
 				& source_addr:ipv6 & group_addr:ipv6	\
 				& rpt_bit:bool				\
 				& metric_preference:u32			\
-				& metric:u32				\
-				-> fail:bool & reason:txt
+				& metric:u32
 
 	/**
 	 * Test-related methods: send Bootstrap and Cand-RP-Adv messages.
@@ -409,56 +298,45 @@ interface pim/0.1 {
 	 * @param rp_holdtime the RP holdtime.
 	 * @param vif_name the name of the vif to send the messages on.
 	 * @param dest_addr the destination address to send the message to.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
 	add_test_bsr_zone4	? zone_id_scope_zone_prefix:ipv4net	\
 				& zone_id_is_scope_zone:bool		\
 				& bsr_addr:ipv4				\
 				& bsr_priority:u32			\
 				& hash_masklen:u32			\
-				& fragment_tag:u32			\
-				-> fail:bool & reason:txt
+				& fragment_tag:u32
 	add_test_bsr_zone6	? zone_id_scope_zone_prefix:ipv6net	\
 				& zone_id_is_scope_zone:bool		\
 				& bsr_addr:ipv6				\
 				& bsr_priority:u32			\
 				& hash_masklen:u32			\
-				& fragment_tag:u32			\
-				-> fail:bool & reason:txt
+				& fragment_tag:u32
 	add_test_bsr_group_prefix4 ? zone_id_scope_zone_prefix:ipv4net	\
 				& zone_id_is_scope_zone:bool		\
 				& group_prefix:ipv4net			\
 				& is_scope_zone:bool			\
-				& expected_rp_count:u32			\
-				-> fail:bool & reason:txt
+				& expected_rp_count:u32
 	add_test_bsr_group_prefix6 ? zone_id_scope_zone_prefix:ipv6net	\
 				& zone_id_is_scope_zone:bool		\
 				& group_prefix:ipv6net			\
 				& is_scope_zone:bool			\
-				& expected_rp_count:u32			\
-				-> fail:bool & reason:txt
+				& expected_rp_count:u32
 	add_test_bsr_rp4	? zone_id_scope_zone_prefix:ipv4net	\
 				& zone_id_is_scope_zone:bool		\
 				& group_prefix:ipv4net			\
 				& rp_addr:ipv4				\
 				& rp_priority:u32			\
-				& rp_holdtime:u32			\
-				-> fail:bool & reason:txt
+				& rp_holdtime:u32
 	add_test_bsr_rp6	? zone_id_scope_zone_prefix:ipv6net	\
 				& zone_id_is_scope_zone:bool		\
 				& group_prefix:ipv6net			\
 				& rp_addr:ipv6				\
 				& rp_priority:u32			\
-				& rp_holdtime:u32			\
-				-> fail:bool & reason:txt
-	send_test_bootstrap	? vif_name:txt				\
-				-> fail:bool & reason:txt
+				& rp_holdtime:u32
+	send_test_bootstrap	? vif_name:txt
 	send_test_bootstrap_by_dest4 ? vif_name:txt			\
-				& dest_addr:ipv4			\
-				-> fail:bool & reason:txt
+				& dest_addr:ipv4
 	send_test_bootstrap_by_dest6 ? vif_name:txt			\
-				& dest_addr:ipv6			\
-				-> fail:bool & reason:txt
-	send_test_cand_rp_adv	-> fail:bool & reason:txt
+				& dest_addr:ipv6
+	send_test_cand_rp_adv
 }
