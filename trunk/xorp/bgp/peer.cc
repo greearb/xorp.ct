@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.22 2003/01/31 23:51:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.23 2003/02/01 21:08:04 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -1218,7 +1218,10 @@ BGPPeer::restart_connect_retry_timer()
 void
 BGPPeer::start_hold_timer()
 {
-    uint32_t duration = _peerdata->get_hold_duration();
+    uint32_t duration = _peerdata->get_hold_duration() + 
+	/* Add another half a second to give the remote keepalive a
+	   chance*/
+	500;
     debug_msg("Holdtimer started %d\n", duration);
 
     if (duration != 0)
