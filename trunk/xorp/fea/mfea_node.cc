@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.17 2003/10/14 22:39:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.18 2003/10/26 18:25:23 pavlin Exp $"
 
 
 //
@@ -93,9 +93,11 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
     
     for (size_t i = 0; i < _proto_comms.size(); i++)
 	_proto_comms[i] = NULL;
-    
+
+    //
     // Set the node status.
     // XXX: note that we don't really need to wait for FEA, hence we are READY.
+    //
     ProtoNode<MfeaVif>::set_node_status(PROC_READY);
 }
 
@@ -133,9 +135,11 @@ MfeaNode::start()
 {
     if (ProtoNode<MfeaVif>::start() < 0)
 	return (XORP_ERROR);
-    
+
+    //
     // Set the node status.
     // XXX: note that we don't really need to wait for FEA, hence we are READY.
+    //
     ProtoNode<MfeaVif>::set_node_status(PROC_READY);
     
     // Start the MfeaMrouter
@@ -189,8 +193,104 @@ MfeaNode::stop()
     
     if (ProtoNode<MfeaVif>::stop() < 0)
 	return (XORP_ERROR);
-    
+
+    //
+    // Set the node status
+    //
+    ProtoNode<MfeaVif>::set_node_status(PROC_SHUTDOWN);
+
     return (XORP_OK);
+}
+
+/**
+ * MfeaNode::has_pending_down_units:
+ * @reason_msg: return-by-reference string that contains human-readable
+ * information about the status.
+ * 
+ * Test if there is an unit that is in PENDING_DOWN state.
+ * 
+ * Return value: True if there is an unit that is in PENDING_DOWN state,
+ * otherwise false.
+ **/
+bool
+MfeaNode::has_pending_down_units(string& reason_msg)
+{
+    vector<MfeaVif *>::iterator iter;
+    
+    //
+    // Test the interfaces
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	MfeaVif *mfea_vif = (*iter);
+	if (mfea_vif == NULL)
+	    continue;
+	// TODO: XXX: PAVPAVPAV: vif pending-down state
+	// is not used/implemented yet
+	if (mfea_vif->is_pending_down()) {
+	    reason_msg = c_format("Vif %s is in state %s",
+				  mfea_vif->name().c_str(),
+				  mfea_vif->state_string());
+	    return (true);
+	}
+    }
+    
+    //
+    // TODO: XXX: PAVPAVPAV: test other units that may be waiting
+    // in PENDING_DOWN state.
+    //
+    
+    reason_msg = "No pending-down units";
+    return (false);
+}
+
+/**
+ * MfeaNode::node_status:
+ * @reason_msg: return-by-reference string that contains human-readable
+ * information about the status.
+ * 
+ * Get the node status (see @ref ProcessStatus).
+ * 
+ * Return value: The node status (see @ref ProcessStatus).
+ **/
+ProcessStatus
+MfeaNode::node_status(string& reason_msg)
+{
+    ProcessStatus status = ProtoNode<MfeaVif>::node_status();
+    
+    // Set the return message with the reason
+    reason_msg = "";
+    switch (status) {
+    case PROC_NULL:
+	// Can't be running and in this state
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_STARTUP:
+	// Waiting for unknown reason
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_NOT_READY:
+	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
+	XLOG_UNFINISHED();
+	break;
+    case PROC_READY:
+	reason_msg = c_format("Node is READY (running status %s)",
+			      ProtoState::state_string());
+	break;
+    case PROC_SHUTDOWN:
+	// Get the message about the shutdown progress
+	has_pending_down_units(reason_msg);
+	break;
+    case PROC_FAILED:
+	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
+	XLOG_UNFINISHED();
+	break;
+    default:
+	// Unknown status
+	XLOG_UNREACHABLE();
+	break;
+    }
+    
+    return (status);
 }
 
 /**

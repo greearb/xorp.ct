@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.13 2003/09/23 03:35:38 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.14 2003/10/14 22:39:45 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -93,6 +93,26 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+
+    /**
+     * Test if there is an unit that is in PENDING_DOWN state.
+     * 
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the unit that is in PENDING_DOWN
+     * state (if any).
+     * @return true if there is an unit that is in PENDING_DOWN state,
+     * otherwise false.
+     */
+    bool	has_pending_down_units(string& reason_msg);
+    
+    /**
+     * Get the node status (see @ref ProcessStatus).
+     * 
+     * @param reason_msg return-by-reference string that contains
+     * human-readable information about the status.
+     * @return the node status (see @ref ProcessStatus).
+     */
+    ProcessStatus	node_status(string& reason_msg);
     
     /**
      * Test if the underlying system supports IPv4 multicast routing.
