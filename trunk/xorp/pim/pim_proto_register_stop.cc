@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.7 2003/09/30 18:27:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.8 2004/02/22 04:20:03 pavlin Exp $"
 
 
 //
@@ -205,7 +205,7 @@ PimVif::pim_register_stop_send(const IPvX& dr_addr,
 			   group_addr_reserved_flags, buffer);
     PUT_ENCODED_UNICAST_ADDR(family(), source_addr, buffer);
     
-    return (pim_send(dr_addr, PIM_REGISTER_STOP, buffer));
+    return (pim_send(domain_wide_addr(), dr_addr, PIM_REGISTER_STOP, buffer));
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();

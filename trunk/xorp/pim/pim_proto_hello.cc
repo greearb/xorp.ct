@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.12 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.13 2004/02/22 04:12:21 pavlin Exp $"
 
 
 //
@@ -666,7 +666,8 @@ PimVif::pim_hello_send()
 	}
     }
     
-    return (pim_send(IPvX::PIM_ROUTERS(family()), PIM_HELLO, buffer));
+    return (pim_send(primary_addr(), IPvX::PIM_ROUTERS(family()),
+		     PIM_HELLO, buffer));
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();

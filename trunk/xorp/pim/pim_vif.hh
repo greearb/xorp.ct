@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.22 2003/09/30 18:27:06 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.23 2004/02/22 04:24:41 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -265,8 +265,8 @@ public:
     //
     // Functions for sending protocol messages.
     //
-    int		pim_send(const IPvX& dst, uint8_t message_type,
-			 buffer_t *buffer);
+    int		pim_send(const IPvX& src, const IPvX& dst,
+			 uint8_t message_type, buffer_t *buffer);
     int		pim_hello_send();
     int		pim_hello_first_send();
     int		pim_join_prune_send(PimNbr *pim_nbr, PimJpHeader *jp_header);
@@ -291,7 +291,8 @@ public:
 				       const IPvX& group_addr);
     int		pim_bootstrap_send(const IPvX& dst_addr,
 				   const BsrZone& bsr_zone);
-    buffer_t	*pim_bootstrap_send_prepare(const IPvX& dst_addr,
+    buffer_t	*pim_bootstrap_send_prepare(const IPvX& src_addr,
+					    const IPvX& dst_addr,
 					    const BsrZone& bsr_zone,
 					    bool is_first_fragment);
     int		pim_cand_rp_adv_send(const IPvX& bsr_addr,

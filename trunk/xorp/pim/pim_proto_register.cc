@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.10 2003/11/12 19:07:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.11 2004/02/22 04:18:17 pavlin Exp $"
 
 
 //
@@ -445,7 +445,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	// TODO: XXX: PAVPAVPAV: check the data length, and the inner IP pkt.
 	BUFFER_PUT_DATA(rcvbuf, buffer, rcvlen);
 	
-	return (pim_send(rp_addr, PIM_REGISTER, buffer));
+	return (pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer));
     }
     
     //
@@ -563,7 +563,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    buffer = buffer_send_prepare();
 	    BUFFER_PUT_HOST_32(flags, buffer);
 	    BUFFER_PUT_DATA(first_frag, buffer, first_frag_len);
-	    pim_send(rp_addr, PIM_REGISTER, buffer);
+	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer);
 	    
 	    data_start += first_frag_len;
 	}
@@ -610,7 +610,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    buffer = buffer_send_prepare();
 	    BUFFER_PUT_HOST_32(flags, buffer);
 	    BUFFER_PUT_DATA(frag_buf, buffer, frag_len);
-	    pim_send(rp_addr, PIM_REGISTER, buffer);
+	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer);
 	    
 	    data_start += frag_data_len;
 	}
@@ -731,7 +731,7 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	return (XORP_ERROR);
     }
     
-    return (pim_send(rp_addr, PIM_REGISTER, buffer));
+    return (pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer));
     
  buflen_error:
     XLOG_UNREACHABLE();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.13 2004/02/22 04:14:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.14 2004/02/24 20:17:03 pavlin Exp $"
 
 
 //
@@ -1192,8 +1192,8 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
     //
     // Send the message
     //
-    if (pim_vif->pim_send(IPvX::PIM_ROUTERS(family()), PIM_JOIN_PRUNE,
-			  buffer) < 0) {
+    if (pim_vif->pim_send(pim_vif->primary_addr(), IPvX::PIM_ROUTERS(family()),
+			  PIM_JOIN_PRUNE, buffer) < 0) {
 	return (XORP_ERROR);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.3 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.4 2004/02/22 04:09:12 pavlin Exp $"
 
 
 //
@@ -72,7 +72,7 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
     buffer2 = buffer_send_prepare();
     BUFFER_PUT_DATA(BUFFER_DATA_HEAD(buffer), buffer2,
 		    BUFFER_DATA_SIZE(buffer));
-    ret_value = pim_send(src, PIM_GRAFT_ACK, buffer2);
+    ret_value = pim_send(domain_wide_addr(), src, PIM_GRAFT_ACK, buffer2);
     
     UNUSED(pim_nbr);
     // UNUSED(dst);
@@ -94,8 +94,12 @@ int
 PimVif::pim_graft_send(const IPvX& dst, buffer_t *buffer)
 {
     int ret_value;
+    IPvX& src = primary_addr();
+
+    if (dst.is_unicast())
+	src = domain_wide_addr();
     
-    ret_value = pim_send(dst, PIM_GRAFT, buffer);
+    ret_value = pim_send(src, dst, PIM_GRAFT, buffer);
     
     return (ret_value);
 
@@ -105,8 +109,6 @@ PimVif::pim_graft_send(const IPvX& dst, buffer_t *buffer)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_GRAFT),
-	       dst.is_multicast() ?
-	       cstring(primary_addr()) : cstring(domain_wide_addr()),
-	       cstring(dst));
+	       cstring(src), cstring(dst));
 }
 #endif /* 0 */

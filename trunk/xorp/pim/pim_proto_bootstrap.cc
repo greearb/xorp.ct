@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.9 2003/09/30 18:27:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.10 2004/02/22 04:07:44 pavlin Exp $"
 
 
 //
@@ -345,6 +345,10 @@ int
 PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 {
     size_t avail_buffer_size = 0;
+    IPvX src_addr = primary_addr();
+
+    if (dst_addr.is_unicast())
+	src_addr = domain_wide_addr();
     
     if (bsr_zone.bsr_addr() == dst_addr)
 	return (XORP_ERROR);	// Never send-back to the BSR
@@ -360,7 +364,8 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 	return (XORP_ERROR);	// Don't across scope zone boundary
     }
     
-    buffer_t *buffer = pim_bootstrap_send_prepare(dst_addr, bsr_zone, true);
+    buffer_t *buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
+						  bsr_zone, true);
     if (buffer == NULL)
 	return (XORP_ERROR);
     
@@ -396,9 +401,10 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 	    //
 	    if (iter_prefix != bsr_zone.bsr_group_prefix_list().begin()) {
 		// Send the accumulated prefixes so far
-		if (pim_send(dst_addr, PIM_BOOTSTRAP, buffer) < 0)
+		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer) < 0)
 		    return (XORP_ERROR);
-		buffer = pim_bootstrap_send_prepare(dst_addr, bsr_zone, false);
+		buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
+						    bsr_zone, false);
 		if (buffer == NULL)
 		    return (XORP_ERROR);
 	    }
@@ -452,9 +458,10 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 		//
 		// Send the accumulated RPs so far
 		//
-		if (pim_send(dst_addr, PIM_BOOTSTRAP, buffer) < 0)
+		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer) < 0)
 		    return (XORP_ERROR);
-		buffer = pim_bootstrap_send_prepare(dst_addr, bsr_zone, false);
+		buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
+						    bsr_zone, false);
 		if (buffer == NULL)
 		    return (XORP_ERROR);
 		
@@ -517,7 +524,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     //
     // Send the lastest fragment
     //
-    if (pim_send(dst_addr, PIM_BOOTSTRAP, buffer) < 0)
+    if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer) < 0)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -527,9 +534,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       dst_addr.is_multicast() ?
-	       cstring(primary_addr()) : cstring(domain_wide_addr()),
-	       cstring(dst_addr),
+	       cstring(src_addr), cstring(dst_addr),
 	       family());
     return (XORP_ERROR);
     
@@ -538,9 +543,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       dst_addr.is_multicast() ?
-	       cstring(primary_addr()) : cstring(domain_wide_addr()),
-	       cstring(dst_addr));
+	       cstring(src_addr), cstring(dst_addr));
     return (XORP_ERROR);
 }
 
@@ -548,7 +551,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 // Prepare the zone-specific data and add it to the buffer to send.
 //
 buffer_t *
-PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
+PimVif::pim_bootstrap_send_prepare(const IPvX& src_addr, const IPvX& dst_addr,
 				   const BsrZone& bsr_zone,
 				   bool is_first_fragment)
 {
@@ -606,9 +609,7 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       dst_addr.is_multicast() ?
-	       cstring(primary_addr()) : cstring(domain_wide_addr()),
-	       cstring(dst_addr),
+	       cstring(src_addr), cstring(dst_addr),
 	       family());
     return (NULL);
     
@@ -617,8 +618,6 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       dst_addr.is_multicast() ?
-	       cstring(primary_addr()) : cstring(domain_wide_addr()),
-	       cstring(dst_addr));
+	       cstring(src_addr), cstring(dst_addr));
     return (NULL);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.26 2003/09/13 02:56:30 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.27 2004/02/22 04:24:41 pavlin Exp $"
 
 
 //
@@ -487,6 +487,7 @@ PimVif::final_stop()
 
 /**
  * PimVif::pim_send:
+ * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The PIM type of the message.
  * @buffer: The buffer with the rest of the message.
@@ -498,9 +499,8 @@ PimVif::final_stop()
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::pim_send(const IPvX& dst,
-		 uint8_t message_type,
-		 buffer_t *buffer)
+PimVif::pim_send(const IPvX& src, const IPvX& dst,
+		 uint8_t message_type, buffer_t *buffer)
 {
     uint8_t pim_vt;
     uint16_t cksum;
@@ -508,7 +508,6 @@ PimVif::pim_send(const IPvX& dst,
     int ip_tos = -1;
     int ret_value;
     size_t datalen;
-    IPvX src = primary_addr();
     int ttl = MINTTL;
     bool router_alert_bool = true;
 
@@ -527,7 +526,6 @@ PimVif::pim_send(const IPvX& dst,
 	// and in general it shoudn't hurt even if we use unicast
 	// with TTL > MINTTL
 	//
-	src = domain_wide_addr();
 	ttl = IPDEFTTL;
 	router_alert_bool = false;
     }
