@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.36 2004/05/28 22:27:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.37 2004/05/31 02:32:15 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -491,7 +491,7 @@ RouterCLI::op_mode_help(const string& path, bool& is_executable) const
     if (path.size() == 4) {
 	trimmed_path == "";
     } else {
-	XLOG_ASSERT(path.substr(0,5) == "help ");
+	XLOG_ASSERT(path.substr(0, 5) == "help ");
 	trimmed_path = path.substr(5, path.size() - 5);
     }
 
@@ -638,7 +638,8 @@ RouterCLI::add_static_configure_mode_commands()
     _delete_node = com0->add_command("delete", get_help_c("delete"));
 
     // Edit command
-    _edit_node = com0->add_command("edit", get_help_c("edit"));
+    _edit_node = com0->add_command("edit", get_help_c("edit"),
+				   callback(this, &RouterCLI::edit_func));
     _edit_node->set_global_name("edit");
 
     // Exit command
@@ -706,11 +707,11 @@ RouterCLI::configure_mode_help(const string& path,
     map<string, string> children;
     string trimmed_path;
 
-    XLOG_ASSERT(path.substr(0,4) == "help");
+    XLOG_ASSERT(path.substr(0, 4) == "help");
     if (path.size() == 4) {
 	trimmed_path == "";
     } else {
-	XLOG_ASSERT(path.substr(0,5) == "help ");
+	XLOG_ASSERT(path.substr(0, 5) == "help ");
 	trimmed_path = path.substr(5, path.size() - 5);
     }
 
@@ -1026,7 +1027,7 @@ RouterCLI::add_edit_subtree()
     current_config_node->create_command_tree(cmd_tree,
 					      cmds,
 					      /* include_intermediates */ true,
-					      /* include templates */ true);
+					      /* include templates */ false);
     debug_msg("==========================================================\n");
     debug_msg("edit subtree is:\n\n");
     debug_msg("%s", cmd_tree.tree_str().c_str());
@@ -1419,7 +1420,7 @@ RouterCLI::logout_func(const string& ,
 		       const vector<string>& argv)
 {
     if (! argv.empty()) {
-	_cli_client.cli_print("Error: quit does not take any parameters\n");
+	_cli_client.cli_print("ERROR: quit does not take any parameters\n");
 	return (XORP_ERROR);
     }
 
@@ -1438,11 +1439,11 @@ RouterCLI::exit_func(const string& ,
 {
     if (command_global_name == "exit configuration-mode") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("Error: \"exit configuration-mode\"  does not take any additional parameters\n");
+	    _cli_client.cli_print("ERROR: \"exit configuration-mode\"  does not take any additional parameters\n");
 	    return (XORP_ERROR);
 	}
 	if (_changes_made) {
-	    _cli_client.cli_print("Error: There are uncommitted changes\n");
+	    _cli_client.cli_print("ERROR: There are uncommitted changes\n");
 	    _cli_client.cli_print("Use \"commit\" to commit the changes, or \"exit discard\" to discard them\n");
 	    return (XORP_ERROR);
 	}
@@ -1453,7 +1454,7 @@ RouterCLI::exit_func(const string& ,
     }
     if (command_global_name == "exit discard") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("Error: \"exit discard\"  does not take any additional parameters\n");
+	    _cli_client.cli_print("ERROR: \"exit discard\"  does not take any additional parameters\n");
 	    return (XORP_ERROR);
 	}
 	config_tree()->discard_changes();
@@ -1464,7 +1465,7 @@ RouterCLI::exit_func(const string& ,
     }
     if (command_global_name == "top") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("Error: top does not take any parameters\n");
+	    _cli_client.cli_print("ERROR: top does not take any parameters\n");
 	    return (XORP_ERROR);
 	}
 	reset_path();
@@ -1478,7 +1479,7 @@ RouterCLI::exit_func(const string& ,
     //
     if (command_global_name == "up") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("Error: up does not take any parameters\n");
+	    _cli_client.cli_print("ERROR: up does not take any parameters\n");
 	    return (XORP_ERROR);
 	}
 	if (! _path.empty())
@@ -1489,7 +1490,7 @@ RouterCLI::exit_func(const string& ,
 	    _path.pop_back();
 	} else {
 	    if (_changes_made) {
-		_cli_client.cli_print("Error: There are uncommitted changes\n");
+		_cli_client.cli_print("ERROR: There are uncommitted changes\n");
 		_cli_client.cli_print("Use \"commit\" to commit the changes, or \"exit discard\" to discard them\n");
 		return (XORP_ERROR);
 	    }
@@ -1512,12 +1513,41 @@ RouterCLI::edit_func(const string& ,
 		     const string& command_global_name,
 		     const vector<string>& argv)
 {
-    if (! argv.empty())
-	return (XORP_ERROR);
-
     string cmd_name = command_global_name;
-    XLOG_ASSERT(cmd_name.substr(0, 5) == "edit ");
-    string path = cmd_name.substr(5, cmd_name.size() - 5);
+    string path;
+
+    if (cmd_name != "edit") {
+	XLOG_ASSERT(cmd_name.substr(0, 5) == "edit ");
+	path = cmd_name.substr(5, cmd_name.size() - 5);
+    }
+
+    if (! argv.empty()) {
+	string arg_string, msg;
+
+	for (size_t i = 0; i < argv.size(); i++) {
+	    if (! arg_string.empty())
+		arg_string += " ";
+	    arg_string += argv[i];
+	}
+
+	if (path.empty()) {
+	    msg = c_format("ERROR: sub-element \"%s\" does not exist.\n",
+			   arg_string.c_str());
+	} else {
+	    msg = c_format("ERROR: element \"%s\" does not contain "
+			   "sub-element \"%s\".\n",
+			   path.c_str(),
+			   arg_string.c_str());
+	}
+	_cli_client.cli_print(msg);
+	return (XORP_ERROR);
+    }
+
+    if (cmd_name == "edit") {
+	// Just print the current edit level
+	config_mode_prompt();
+	return (XORP_OK);
+    }
 
     set_path(path);
     apply_path_change();
@@ -2420,7 +2450,7 @@ RouterCLI::op_mode_func(const string& ,
 	list<string> test_parts;
 	string cmd_error;
 
-	_cli_client.cli_print("Error: no matching command:\n");
+	_cli_client.cli_print("ERROR: no matching command:\n");
 	for (iter = path_segments.begin();
 	     iter != path_segments.end();
 	     ++iter) {
@@ -2452,7 +2482,7 @@ RouterCLI::op_mode_cmd_done(bool success, const string& result)
 	// XXX: don't print anything after a command in operational mode
 	// _cli_client.cli_print("OK\n");
     } else {
-	_cli_client.cli_print("Error:\n");
+	_cli_client.cli_print("ERROR:\n");
     }
     if (!result.empty())
 	_cli_client.cli_print(result + "\n");
