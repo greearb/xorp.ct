@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.13 2004/05/28 22:28:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.14 2004/06/10 22:41:56 hodson Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -29,6 +29,7 @@
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
 #include "xrl_xorpsh_interface.hh"
+#include "generic_module_manager.hh"
 
 
 class OpCommandList;
@@ -96,6 +97,9 @@ public:
 
     void config_changed(uid_t user_id, const string& deltas, 
 			const string& deletions);
+
+    void module_status_change(const string& modname, 
+			      GenericModule::ModuleStatus status);
 
     typedef XorpCallback2<void, const XrlError&, 
 			  const uint32_t*>::RefPtr PID_CALLBACK;

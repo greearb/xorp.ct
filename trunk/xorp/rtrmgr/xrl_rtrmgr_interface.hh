@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.13 2004/06/10 22:41:56 hodson Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.14 2004/08/19 00:44:08 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -170,7 +170,7 @@ private:
     uint32_t get_user_id_from_token(const string& token) const;
     void lock_timeout();
 
-    XrlRtrmgrClientV0p1Client _client_interface;
+    XrlRtrmgrClientV0p2Client _client_interface;
     multimap<uint32_t, UserInstance*> _users;
     multimap<uint32_t, UserInstance*> _config_users;
     UserDB&		_userdb;

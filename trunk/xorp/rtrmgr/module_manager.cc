@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.33 2004/08/19 00:20:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.34 2004/08/19 02:00:21 pavlin Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -176,11 +176,9 @@ child_handler(int x)
 }
 
 Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
-    : _mmgr(mmgr),
-      _name(name),
+    : GenericModule(name), _mmgr(mmgr),
       _userid(NO_SETUID_ON_EXEC),
       _pid(0),
-      _status(MODULE_NOT_STARTED),
       _do_exec(false),
       _verbose(verbose)
 {
@@ -578,7 +576,7 @@ Module::str() const
 
 ModuleManager::ModuleManager(EventLoop& eventloop, bool do_restart,
 			     bool verbose, const string& xorp_root_dir)
-    : _eventloop(eventloop),
+    : GenericModuleManager(eventloop),
       _do_restart(do_restart),
       _verbose(verbose),
       _xorp_root_dir(xorp_root_dir),

@@ -12,15 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.15 2004/05/11 16:50:58 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.16 2004/06/10 22:41:53 hodson Exp $
 
 #ifndef __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 #define __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 
 
 #include "libxorp/eventloop.hh"
+#include "generic_module_manager.hh"
 
-
+#if 0
 class ModuleManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
@@ -36,5 +37,7 @@ public:
 		      ModuleManager::CallBack cb, bool do_exec);
 private:
 };
+
+#endif
 
 #endif // __RTRMGR_SLAVE_MODULE_MANAGER_HH__

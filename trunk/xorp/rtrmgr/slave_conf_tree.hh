@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.12 2004/05/28 22:27:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.13 2004/06/10 22:41:53 hodson Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -24,7 +24,7 @@
 
 #include "conf_tree.hh"
 #include "conf_tree_node.hh"
-#include "module_manager.hh"
+#include "slave_module_manager.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
 #include "xorpsh_main.hh"

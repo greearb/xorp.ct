@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.22 2004/06/10 22:41:52 hodson Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.23 2004/08/19 02:00:21 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -24,8 +24,7 @@
 #include "libxorp/timer.hh"
 #include "libxorp/callback.hh"
 
-
-#define NO_SETUID_ON_EXEC 0
+#include "generic_module_manager.hh"
 
 class EventLoop;
 class MasterConfigTree;
@@ -34,35 +33,14 @@ class ModuleManager;
 class XorpClient;
 class XrlAction;
 
-class Module {
+
+#define NO_SETUID_ON_EXEC 0
+
+class Module : public GenericModule {
 public:
     Module(ModuleManager& mmgr, const string& name, bool verbose);
     ~Module();
 
-    enum ModuleStatus {
-	// The process has started, but we haven't started configuring it yet
-	MODULE_STARTUP		= 0,
-
-	// The process has started, and we're in the process of configuring it
-	// (or it's finished configuration, but waiting for another process)
-	MODULE_INITIALIZING	= 1,
-
-	// The process is operating normally
-	MODULE_RUNNING		= 2,
-
-	// The process has failed, and is no longer runnning
-	MODULE_FAILED		= 3,
-
-	// The process has failed; it's running, but not responding anymore
-	MODULE_STALLED		= 4,
-
-	// The process has been signalled to shut down, but hasn't exitted yet
-	MODULE_SHUTTING_DOWN	= 5,
-
-	// The process has not been started
-	MODULE_NOT_STARTED	= 6
-    };
- 
     int set_execution_path(const string& path);
     void set_argv(const vector<string>& argv);
     void set_userid(uid_t userid);
@@ -72,25 +50,21 @@ public:
     void normal_exit();
     void abnormal_exit(int child_wait_status);
     void killed();
-    string str() const;
-    ModuleStatus status() const { return _status; }
     void terminate(XorpCallback0<void>::RefPtr cb);
     void terminate_with_prejudice(XorpCallback0<void>::RefPtr cb);
     ModuleManager& module_manager() const { return _mmgr; }
-    const string& name() const { return _name; }
+    string str() const;
 
 private:
     void new_status(ModuleStatus new_status);
-    
+
     ModuleManager& _mmgr;
-    string	_name;
     string	_path;		// relative path
     string	_expath;	// absolute path
     vector<string> _argv;	// command line arguments
     uid_t       _userid;        // userid to execute process as, zero
 				// for current user
     pid_t	_pid;
-    ModuleStatus _status;
     bool	_do_exec;	// false indicates we're running in test mode,
 				// when we may not actually start any processes
 
@@ -98,7 +72,7 @@ private:
     XorpTimer	_shutdown_timer;
 };
 
-class ModuleManager {
+class ModuleManager : public GenericModuleManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
     
 public:
@@ -153,7 +127,6 @@ private:
     const Module* const_find_module(const string& module_name) const;
 
     map<string, Module *> _modules;
-    EventLoop&	_eventloop;
     bool	_do_restart;
     bool	_verbose;	// Set to true if output is verbose
     string	_xorp_root_dir;	// The root of the XORP tree

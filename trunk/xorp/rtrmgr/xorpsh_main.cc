@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.29 2004/06/10 22:41:56 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.30 2004/08/19 01:01:14 pavlin Exp $"
 
 
 #include <sys/types.h>
@@ -425,6 +425,16 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	username + "\n";
     _router_cli->notify_user(alert, true);
 }
+
+void 
+XorpShell::module_status_change(const string& modname, 
+				GenericModule::ModuleStatus status)
+{
+    UNUSED(modname);
+    UNUSED(status);
+}
+
+
 
 void
 XorpShell::get_rtrmgr_pid(PID_CALLBACK cb)

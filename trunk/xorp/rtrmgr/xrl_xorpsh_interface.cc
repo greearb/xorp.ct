@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.14 2004/05/28 22:28:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.15 2004/06/10 22:41:56 hodson Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -69,7 +69,7 @@ XrlXorpshInterface::common_0_1_shutdown()
 }
 
 XrlCmdError 
-XrlXorpshInterface::rtrmgr_client_0_1_new_config_user(// Input values, 
+XrlXorpshInterface::rtrmgr_client_0_2_new_config_user(// Input values, 
 						      const uint32_t& user_id)
 {
     _xorpsh.new_config_user((uid_t)user_id);
@@ -77,7 +77,7 @@ XrlXorpshInterface::rtrmgr_client_0_1_new_config_user(// Input values,
 }
 
 XrlCmdError 
-XrlXorpshInterface::rtrmgr_client_0_1_config_change_done(// Input values, 
+XrlXorpshInterface::rtrmgr_client_0_2_config_change_done(// Input values, 
 							 const bool& success, 
 							 const string& errmsg)
 {
@@ -91,7 +91,7 @@ XrlXorpshInterface::rtrmgr_client_0_1_config_change_done(// Input values,
 }
 
 XrlCmdError 
-XrlXorpshInterface::rtrmgr_client_0_1_config_changed(// Input values, 
+XrlXorpshInterface::rtrmgr_client_0_2_config_changed(// Input values, 
 						     const uint32_t& user_id, 
 						     const string& deltas, 
 						     const string& deletions)
@@ -103,3 +103,14 @@ XrlXorpshInterface::rtrmgr_client_0_1_config_changed(// Input values,
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlXorpshInterface::rtrmgr_client_0_2_module_status(// Input values,
+						    const string&   modname,
+						    const uint32_t& status)
+{
+    XLOG_TRACE(_verbose,
+	       "module status: %s changed to status %d\n",
+	       modname.c_str(), status);
+    _xorpsh.module_status_change(modname, (GenericModule::ModuleStatus)status);
+    return XrlCmdError::OKAY();
+}

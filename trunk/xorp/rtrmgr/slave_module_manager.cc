@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.16 2004/05/28 22:27:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.17 2004/06/10 22:41:53 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -23,7 +23,7 @@
 
 #include "slave_module_manager.hh"
 
-
+#if 0
 //
 // XXX: this file merely provides dummy definitions for the module manager
 // for use in xorpsh, as xorpsh never actually starts any modules, but
@@ -87,3 +87,4 @@ ModuleManager::shell_execute(uid_t userid, const vector<string>& argv,
     UNUSED(do_exec);
     return XORP_ERROR;
 }
+#endif

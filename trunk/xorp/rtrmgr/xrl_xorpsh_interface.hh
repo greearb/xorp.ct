@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.8 2004/05/28 22:28:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.9 2004/06/10 22:41:56 hodson Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
@@ -47,20 +47,25 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
-    XrlCmdError rtrmgr_client_0_1_new_config_user(
+    XrlCmdError rtrmgr_client_0_2_new_config_user(
 	// Input values, 
 	const uint32_t&	user_id);
 
-    XrlCmdError rtrmgr_client_0_1_config_change_done(
+    XrlCmdError rtrmgr_client_0_2_config_change_done(
 	// Input values, 
 	const bool&	success, 
 	const string&	errmsg);
 
-    XrlCmdError rtrmgr_client_0_1_config_changed(
+    XrlCmdError rtrmgr_client_0_2_config_changed(
 	// Input values, 
 	const uint32_t&	user_id, 
 	const string&	deltas, 
 	const string&	deletions);
+
+    XrlCmdError rtrmgr_client_0_2_module_status(
+	// Input values,
+        const string&   modname,
+        const uint32_t& status);
 
 private:
     XorpShell&	_xorpsh;
