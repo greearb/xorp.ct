@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.11 2005/03/15 00:33:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.12 2005/03/19 23:33:15 pavlin Exp $"
 
 //
 // MFEA virtual interfaces implementation.
@@ -143,6 +143,9 @@ MfeaVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
 
+    XLOG_INFO("Interface started: %s%s",
+	      this->str().c_str(), flags_string().c_str());
+
     return (XORP_OK);
 }
 
@@ -185,7 +188,7 @@ MfeaVif::stop(string& error_msg)
 	ret_value = XORP_ERROR;
     }
 
-    XLOG_INFO("STOPPED %s%s",
+    XLOG_INFO("Interface stopped %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
     //
@@ -206,7 +209,8 @@ MfeaVif::enable()
 {
     ProtoUnit::enable();
 
-    XLOG_INFO("Enabled vif: %s", name().c_str());
+    XLOG_INFO("Interface enabled %s%s",
+	      this->str().c_str(), flags_string().c_str());
 }
 
 /**
@@ -223,7 +227,8 @@ MfeaVif::disable()
     stop(error_msg);
     ProtoUnit::disable();
 
-    XLOG_INFO("Disabled vif: %s", name().c_str());
+    XLOG_INFO("Interface disabled %s%s",
+	      this->str().c_str(), flags_string().c_str());
 }
 
 /**

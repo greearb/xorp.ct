@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.50 2005/03/19 23:41:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.51 2005/03/20 00:21:10 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -203,6 +203,8 @@ MfeaNode::final_start()
     // Start the mfea_vifs
     start_all_vifs();
 
+    XLOG_INFO("MFEA started");
+
     return (XORP_OK);
 }
 
@@ -286,7 +288,37 @@ MfeaNode::final_stop()
     if (ProtoNode<MfeaVif>::stop() < 0)
 	return (XORP_ERROR);
 
+    XLOG_INFO("MFEA stopped");
+
     return (XORP_OK);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+MfeaNode::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("MFEA enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+MfeaNode::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("MFEA disabled");
 }
 
 void
@@ -645,7 +677,7 @@ MfeaNode::add_vif(const Vif& vif, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("New vif: %s", mfea_vif->str().c_str());
+    XLOG_INFO("Interface added: %s", mfea_vif->str().c_str());
     
     return (XORP_OK);
 }
@@ -768,7 +800,7 @@ MfeaNode::delete_vif(const string& vif_name, string& error_msg)
     
     delete mfea_vif;
     
-    XLOG_INFO("Deleted vif: %s", vif_name.c_str());
+    XLOG_INFO("Interface deleted: %s", vif_name.c_str());
     
     return (XORP_OK);
 }

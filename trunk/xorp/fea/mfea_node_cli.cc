@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.13 2005/03/05 01:41:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.14 2005/03/19 23:31:50 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) CLI implementation
@@ -83,7 +83,9 @@ MfeaNodeCli::start()
 
     if (add_all_cli_commands() < 0)
 	return (XORP_ERROR);
-    
+
+    XLOG_INFO("CLI started");
+
     return (XORP_OK);
 }
 
@@ -100,8 +102,38 @@ MfeaNodeCli::stop()
 
     if (delete_all_cli_commands() < 0)
 	ret_code = XORP_ERROR;
-    
+
+    XLOG_INFO("CLI stopped");
+
     return (ret_code);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+MfeaNodeCli::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("CLI enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+MfeaNodeCli::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("CLI disabled");
 }
 
 int

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node_cli.hh,v 1.2 2004/06/10 22:40:55 hodson Exp $
+// $XORP: xorp/fea/mfea_node_cli.hh,v 1.3 2005/01/28 03:34:18 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_CLI_HH__
@@ -70,6 +70,21 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+    
+    /**
+     * Enable node operation.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
+    
+    /**
+     * Disable node operation.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
     
     /**
      * Install all MFEA-related CLI commands to the CLI.
