@@ -92,10 +92,10 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-bin_PROGRAMS =
+bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS =
+TESTS = 
 
 # -- No-install Programs
 noinst_PROGRAMS = test_comm
@@ -168,7 +168,7 @@ AR = ar
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libcomm.a: $(libcomm_a_OBJECTS) $(libcomm_a_DEPENDENCIES)
+libcomm.a: $(libcomm_a_OBJECTS) $(libcomm_a_DEPENDENCIES) 
 	-rm -f libcomm.a
 	$(libcomm_a_AR) libcomm.a $(libcomm_a_OBJECTS) $(libcomm_a_LIBADD)
 	$(RANLIB) libcomm.a
@@ -198,7 +198,7 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-test_comm$(EXEEXT): $(test_comm_OBJECTS) $(test_comm_DEPENDENCIES)
+test_comm$(EXEEXT): $(test_comm_OBJECTS) $(test_comm_DEPENDENCIES) 
 	@rm -f test_comm$(EXEEXT)
 	$(LINK) $(test_comm_LDFLAGS) $(test_comm_OBJECTS) $(test_comm_LDADD) $(LIBS)
 
