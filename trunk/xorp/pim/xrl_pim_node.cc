@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.42 2003/12/16 23:40:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.43 2004/01/05 20:40:50 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -4539,7 +4539,7 @@ XrlPimNode::pim_0_1_pimstat_neighbors4(
 	if (pim_vif == NULL)
 	    continue;
 	
-	if (pim_vif->addr_ptr() == NULL)
+	if (pim_vif->primary_addr() == IPvX::ZERO(family()))
 	    continue;		// XXX: ignore vifs with no address
 	
 	list<PimNbr *>::iterator iter;
@@ -4550,7 +4550,7 @@ XrlPimNode::pim_0_1_pimstat_neighbors4(
 	    
 	    nbrs_number++;
 	    vifs.append(XrlAtom(pim_vif->name()));
-	    addresses.append(XrlAtom(pim_vif->addr_ptr()->get_ipv4()));
+	    addresses.append(XrlAtom(pim_vif->primary_addr().get_ipv4()));
 	    pim_versions.append(XrlAtom((int32_t)pim_nbr->proto_version()));
 	    if (pim_nbr->is_dr_priority_present())
 		dr_priorities.append(XrlAtom((int32_t)pim_nbr->dr_priority()));
@@ -4606,7 +4606,7 @@ XrlPimNode::pim_0_1_pimstat_neighbors6(
 	if (pim_vif == NULL)
 	    continue;
 	
-	if (pim_vif->addr_ptr() == NULL)
+	if (pim_vif->primary_addr() == IPvX::ZERO(family()))
 	    continue;		// XXX: ignore vifs with no address
 	
 	list<PimNbr *>::iterator iter;
@@ -4617,7 +4617,7 @@ XrlPimNode::pim_0_1_pimstat_neighbors6(
 	    
 	    nbrs_number++;
 	    vifs.append(XrlAtom(pim_vif->name()));
-	    addresses.append(XrlAtom(pim_vif->addr_ptr()->get_ipv6()));
+	    addresses.append(XrlAtom(pim_vif->primary_addr().get_ipv6()));
 	    pim_versions.append(XrlAtom((int32_t)pim_nbr->proto_version()));
 	    if (pim_nbr->is_dr_priority_present())
 		dr_priorities.append(XrlAtom((int32_t)pim_nbr->dr_priority()));
