@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.26 2003/06/16 22:47:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.27 2003/07/16 02:56:57 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -308,6 +308,7 @@ XrlPimNode::start_protocol_kernel()
     //
     // Enable receiving of MRIB information
     //
+#if 0
     XrlMfeaV0p1Client::send_allow_mrib_messages(
 	xorp_module_name(family(), XORP_MODULE_MFEA),
 	my_xrl_target_name(),
@@ -316,8 +317,28 @@ XrlPimNode::start_protocol_kernel()
 	true,			// XXX: enable
 	callback(this, &XrlPimNode::xrl_result_allow_mrib_messages));
     PimNode::incr_waiting_for_mfea_startup_events();
-    
-    // TODO: explicitly start the XRL operations?
+#else
+    do {
+	if (PimNode::is_ipv4()) {
+	    XrlRibV0p1Client::send_add_rib_client4(
+		xorp_module_name(family(), XORP_MODULE_RIB),
+		my_xrl_target_name(), false, true,
+		callback(this, &XrlPimNode::xrl_result_add_rib_client));
+	    break;
+	}
+	
+	if (PimNode::is_ipv6()) {
+	    XrlRibV0p1Client::send_add_rib_client6(
+		xorp_module_name(family(), XORP_MODULE_RIB),
+		my_xrl_target_name(), false, true,
+		callback(this, &XrlPimNode::xrl_result_add_rib_client));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+#endif
     
     return (XORP_OK);
 }
@@ -353,6 +374,18 @@ XrlPimNode::xrl_result_allow_mrib_messages(const XrlError& xrl_error)
     
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send allow_mrib_messages() to MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
+void
+XrlPimNode::xrl_result_add_rib_client(const XrlError& xrl_error)
+{
+    // PimNode::decr_waiting_for_mfea_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to add a protocol to RIB: %s",
 		   xrl_error.str().c_str());
 	return;
     }
@@ -1939,6 +1972,9 @@ XrlPimNode::fti_0_2_add_entry4(
     //
     PimNode::pim_mrib_table().add_pending_insert(tid, mrib);
     
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2000,7 +2036,10 @@ XrlPimNode::fti_0_2_add_entry6(
     // Add the Mrib to the list of pending transactions as an 'insert()' entry
     //
     PimNode::pim_mrib_table().add_pending_insert(tid, mrib);
-    
+
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2036,7 +2075,10 @@ XrlPimNode::fti_0_2_delete_entry4(
     // Add the Mrib to the list of pending transactions as an 'remove()' entry
     //
     PimNode::pim_mrib_table().add_pending_remove(tid, mrib);
-    
+
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2077,6 +2119,9 @@ XrlPimNode::fti_0_2_delete_entry6(
     //
     PimNode::pim_mrib_table().add_pending_remove(tid, mrib);
     
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2113,7 +2158,7 @@ XrlPimNode::fti_0_2_delete_all_entries4(
     } while (false);
     
     PimNode::pim_mrib_table().clear();
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -2212,7 +2257,10 @@ XrlPimNode::fti_0_2_lookup_route4(
     admin_distance = mrib->metric_preference();
     // TODO: set the value of protocol_origin to something meaningful
     protocol_origin = "NOT_SUPPORTED";
-    
+
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2285,6 +2333,9 @@ XrlPimNode::fti_0_2_lookup_route6(
     // TODO: set the value of protocol_origin to something meaningful
     protocol_origin = "NOT_SUPPORTED";
     
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2351,6 +2402,9 @@ XrlPimNode::fti_0_2_lookup_entry4(
     // TODO: set the value of protocol_origin to something meaningful
     protocol_origin = "NOT_SUPPORTED";
     
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 
@@ -2421,6 +2475,9 @@ XrlPimNode::fti_0_2_lookup_entry6(
     // TODO: set the value of protocol_origin to something meaningful
     protocol_origin = "NOT_SUPPORTED";
     
+    //
+    // Success
+    //
     return XrlCmdError::OKAY();
 }
 

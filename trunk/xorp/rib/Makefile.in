@@ -91,13 +91,16 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
+bin_PROGRAMS = xorp_rib
 
 # -- Test Programs
-bin_PROGRAMS = xorp_rib main_routemap test_rib_client test_register test_register_xrls test_rib_direct test_rib_xrls
+check_PROGRAMS = test_rib_client test_register test_register_xrls test_rib_direct test_rib_xrls
+TESTS = $(check_PROGRAMS) test_rib_direct.sh test_rib_xrls.sh test_register
 
-# -- Test scripts
-TESTS = test_rib_direct.sh test_rib_xrls.sh test_register
+# -- No-install Programs
+noinst_PROGRAMS = main_routemap
 
+# -- No-install Libraries
 noinst_LIBRARIES = librib.a
 
 # -- Libraries and library flags to link the binary programs
@@ -146,11 +149,12 @@ am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
 	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT) \
 	xrl_target.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
-bin_PROGRAMS = xorp_rib$(EXEEXT) main_routemap$(EXEEXT) \
-	test_rib_client$(EXEEXT) test_register$(EXEEXT) \
+bin_PROGRAMS = xorp_rib$(EXEEXT)
+check_PROGRAMS = test_rib_client$(EXEEXT) test_register$(EXEEXT) \
 	test_register_xrls$(EXEEXT) test_rib_direct$(EXEEXT) \
 	test_rib_xrls$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
+noinst_PROGRAMS = main_routemap$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_main_routemap_OBJECTS = routemap.$(OBJEXT) main_routemap.$(OBJEXT)
 main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
@@ -335,6 +339,12 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 main_routemap$(EXEEXT): $(main_routemap_OBJECTS) $(main_routemap_DEPENDENCIES) 
 	@rm -f main_routemap$(EXEEXT)
 	$(CXXLINK) $(main_routemap_LDFLAGS) $(main_routemap_OBJECTS) $(main_routemap_LDADD) $(LIBS)
@@ -515,6 +525,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
@@ -547,8 +558,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
@@ -584,7 +595,8 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES distclean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS distclean \
 	distclean-compile distclean-depend distclean-generic \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-binPROGRAMS install-data install-data-am \

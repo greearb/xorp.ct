@@ -1,27 +1,24 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.14 2003/06/03 21:59:23 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.15 2003/07/17 00:28:33 pavlin Exp $
 ##
 
-
+# -- Real Programs
 bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
-bin_PROGRAMS 		+= demo_fea_ifmgr_client test_mfea
+
+# -- Test Programs
 check_PROGRAMS		 = test_rawsock4 test_ifmanager_transaction
 TESTS			 = $(check_PROGRAMS)
 
-demo_fea_ifmgr_client_SOURCES  = demo_fea_ifmgr_client.cc
-demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxipc/libxipc.a
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libcomm/libcomm.a
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
+# -- No-install Programs
+noinst_PROGRAMS 	 = demo_fea_ifmgr_client test_mfea
 
+# -- No-install Libraries
 noinst_LIBRARIES	 = libfea.a
 
 # -- Libraries and library flags to link the binary programs
 
 # -- Program Sources
-
 xorp_fea_SOURCES	= fea.cc
 xorp_fea_LDADD		= $(noinst_LIBRARIES)
 ### FEA XRL libraries
@@ -107,8 +104,14 @@ test_ifmanager_transaction_LDADD    = $(top_builddir)/libxorp/libxorp.a
 test_rawsock4_SOURCES	 = test_rawsock4.cc rawsock4.cc
 test_rawsock4_LDADD	 = $(top_builddir)/libxorp/libxorp.a
 
-# -- Library Sources
+demo_fea_ifmgr_client_SOURCES  = demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a
+demo_fea_ifmgr_client_LDADD   += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxipc/libxipc.a
+demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libcomm/libcomm.a
+demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 
+# -- Library Sources
 libfea_a_SOURCES	 = fea_module.h
 libfea_a_SOURCES	+= mfea_module.h
 libfea_a_SOURCES	+= fte.hh

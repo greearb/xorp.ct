@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.23 2003/05/31 17:53:38 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.24 2003/06/01 02:13:45 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -30,6 +30,7 @@
 #include "xrl/targets/pim_base.hh"
 #include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
+#include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/mld6igmp_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "pim_node.hh"
@@ -43,6 +44,7 @@ class XrlPimNode : public PimNode,
 		   public XrlPimTargetBase,
 		   public XrlCommonV0p1Client,
 		   public XrlMfeaV0p1Client,
+		   public XrlRibV0p1Client,
 		   public XrlMld6igmpV0p1Client,
 		   public XrlCliManagerV0p1Client,
 		   public PimNodeCli {
@@ -53,6 +55,7 @@ public:
 	  XrlPimTargetBase(xrl_router),
 	  XrlCommonV0p1Client(xrl_router),
 	  XrlMfeaV0p1Client(xrl_router),
+	  XrlRibV0p1Client(xrl_router),
 	  XrlMld6igmpV0p1Client(xrl_router),
 	  XrlCliManagerV0p1Client(xrl_router),
 	  PimNodeCli(*static_cast<PimNode *>(this)),
@@ -93,6 +96,7 @@ protected:
     void xrl_result_add_protocol_mfea(const XrlError& xrl_error);
     void xrl_result_allow_signal_messages(const XrlError& xrl_error);
     void xrl_result_allow_mrib_messages(const XrlError& xrl_error);
+    void xrl_result_add_rib_client(const XrlError& xrl_error);
     
     int stop_protocol_kernel();
     void xrl_result_delete_protocol_mfea(const XrlError& xrl_error);

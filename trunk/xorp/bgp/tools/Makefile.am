@@ -1,12 +1,21 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/tools/Makefile.am,v 1.7 2003/03/31 16:10:14 hodson Exp $
+## $XORP: xorp/bgp/tools/Makefile.am,v 1.8 2003/05/07 21:58:07 pavlin Exp $
 ##
 
-# -- Real Programs
-bin_PROGRAMS	 = print_peers xorpsh_print_peers print_routes xorpsh_print_routes
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
 
-noinst_PROGRAMS  =
+# -- Real Programs
+bin_PROGRAMS	 = xorpsh_print_peers xorpsh_print_routes
+
+# -- Test Programs
+TESTS		 =
+
+# -- No-install Programs
+noinst_PROGRAMS  = print_peers print_routes
+
+# -- No-install Libraries
 noinst_LIBRARIES =
 
 # -- Libraries and library flags to link the binary programs

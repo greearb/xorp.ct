@@ -1,14 +1,19 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.6 2003/05/07 21:58:11 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.7 2003/06/02 04:11:08 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS  = 
+bin_PROGRAMS	 = 
 
 # -- Test Programs
-bin_PROGRAMS	+= test_pim
+check_PROGRAMS	 = 
+TESTS		 = $(check_PROGRAMS)
 
+# -- No-install Programs
+noinst_PROGRAMS  = test_pim
+
+# -- No-install Libraries
 noinst_LIBRARIES = libpim.a
 
 # -- Libraries and library flags to link the binary programs
@@ -31,6 +36,7 @@ LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.a
 LDADD		+= $(top_builddir)/rib/librib.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libftixif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 ### MFEA libraries

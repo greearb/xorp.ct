@@ -94,13 +94,16 @@ snmpd2 = @snmpd2@
 SUBDIRS = . harness tools
 
 # -- Real Programs
+bin_PROGRAMS = xorp_bgp
 
 # -- Test Programs
-bin_PROGRAMS = xorp_bgp packet_test plumbing_test update_test
+check_PROGRAMS = aspath_test packet_coding_test isolation_tests
+TESTS = $(check_PROGRAMS)
 
-TESTS = aspath_test packet_coding_test isolation_tests
+# -- No-install Programs
+noinst_PROGRAMS = packet_test plumbing_test update_test
 
-noinst_PROGRAMS = $(TESTS)
+# -- No-install Libraries
 noinst_LIBRARIES = libbgp.a
 
 # -- Libraries and library flags to link the binary programs
@@ -155,10 +158,11 @@ am_libbgp_a_OBJECTS = aspath.$(OBJEXT) attribute_manager.$(OBJEXT) \
 	subnet_route.$(OBJEXT) update_attrib.$(OBJEXT) \
 	update_packet.$(OBJEXT) xrl_target.$(OBJEXT)
 libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
-bin_PROGRAMS = xorp_bgp$(EXEEXT) packet_test$(EXEEXT) \
-	plumbing_test$(EXEEXT) update_test$(EXEEXT)
-noinst_PROGRAMS = aspath_test$(EXEEXT) packet_coding_test$(EXEEXT) \
+bin_PROGRAMS = xorp_bgp$(EXEEXT)
+check_PROGRAMS = aspath_test$(EXEEXT) packet_coding_test$(EXEEXT) \
 	isolation_tests$(EXEEXT)
+noinst_PROGRAMS = packet_test$(EXEEXT) plumbing_test$(EXEEXT) \
+	update_test$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
@@ -354,6 +358,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
@@ -644,6 +651,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
@@ -676,8 +684,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -715,9 +723,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS clean-recursive distclean \
-	distclean-compile distclean-depend distclean-generic \
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS clean-recursive \
+	distclean distclean-compile distclean-depend distclean-generic \
 	distclean-recursive distclean-tags distdir dvi dvi-am \
 	dvi-recursive info info-am info-recursive install install-am \
 	install-binPROGRAMS install-data install-data-am \

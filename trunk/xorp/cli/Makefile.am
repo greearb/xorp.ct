@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/cli/Makefile.am,v 1.3 2003/03/31 16:10:15 hodson Exp $
+## $XORP: xorp/cli/Makefile.am,v 1.4 2003/05/07 21:58:08 pavlin Exp $
 ##
 
 # -- Subdirectories (directory ordering is important)
@@ -10,8 +10,12 @@ SUBDIRS = libtecla .
 bin_PROGRAMS  = 
 
 # -- Test Programs
-bin_PROGRAMS += test_cli
+TESTS		 =
 
+# -- No-install Programs
+noinst_PROGRAMS  = test_cli
+
+# -- No-install Libraries
 noinst_LIBRARIES = libcli.a
 
 # -- Libraries and library flags to link the binary programs

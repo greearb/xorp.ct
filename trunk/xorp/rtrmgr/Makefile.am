@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.14 2003/05/07 21:58:12 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.15 2003/07/17 00:28:35 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -10,11 +10,16 @@ SUBDIRS = . tools
 bin_PROGRAMS	 = xorp_rtrmgr xorpsh
 
 # -- Test Programs
-#bin_PROGRAMS	+=
+check_PROGRAMS	 = test_templates
+check_PROGRAMS	+= test_sample_config
+check_PROGRAMS	+= test_module_manager
+TESTS		 = $(check_PROGRAMS)
 
-TESTS		 = test_templates test_sample_config test_module_manager
+# -- No-install Programs
+noinst_PROGRAMS  = 
 
-noinst_PROGRAMS = $(TESTS)
+# -- No-install Libraries
+noinst_LIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(top_builddir)/libxipc/libfinder.a
@@ -46,7 +51,7 @@ xorp_rtrmgr_SOURCES	+= userdb.cc
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
 xorp_rtrmgr_SOURCES	+= randomness.cc
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
-xorp_rtrmgr_SOURCES  += task.cc
+xorp_rtrmgr_SOURCES	+= task.cc
 
 xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a 
 xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 

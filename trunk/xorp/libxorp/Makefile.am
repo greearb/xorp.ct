@@ -1,20 +1,25 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.10 2003/06/20 19:21:40 hodson Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.11 2003/07/21 22:35:49 atanu Exp $
 ##
 
-# - The library
-noinst_LIBRARIES = libxorp.a
+# -- Real Programs
+bin_PROGRAMS	 = 
 
 # -- Test Programs
-TESTS		 = test_asyncio test_callback test_config_param
-TESTS		+= test_ipnet test_ipv4 test_ipv4net
-TESTS		+= test_ipv6 test_ipv6net test_ipvx test_ipvxnet
-TESTS		+= test_mac test_observers test_ref_ptr test_ref_trie 
-TESTS		+= test_test_main test_time_slice test_timer test_timeval 
-TESTS		+= test_trie test_types test_vif 
+check_PROGRAMS	 = test_asyncio test_callback test_config_param
+check_PROGRAMS	+= test_ipnet test_ipv4 test_ipv4net
+check_PROGRAMS	+= test_ipv6 test_ipv6net test_ipvx test_ipvxnet
+check_PROGRAMS	+= test_mac test_observers test_ref_ptr test_ref_trie 
+check_PROGRAMS	+= test_test_main test_time_slice test_timer test_timeval 
+check_PROGRAMS	+= test_trie test_types test_vif 
+TESTS		 = $(check_PROGRAMS)
 
-noinst_PROGRAMS	 = $(TESTS)
+# -- No-install Programs
+noinst_PROGRAMS  = 
+
+# -- No-install Libraries
+noinst_LIBRARIES = libxorp.a
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LIBRARIES)

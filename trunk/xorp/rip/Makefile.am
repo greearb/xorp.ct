@@ -1,21 +1,32 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.10 2003/07/15 17:40:43 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.11 2003/07/21 18:05:55 hodson Exp $
 ##
 
+# -- Real Programs
+bin_PROGRAMS	 = 
+
+# -- Test Programs
+check_PROGRAMS	 = test_auth
+check_PROGRAMS	+= test_packets
+check_PROGRAMS	+= test_request
+check_PROGRAMS	+= test_route_walk
+check_PROGRAMS	+= test_timers
+check_PROGRAMS	+= test_update_queue
+TESTS		 = $(check_PROGRAMS)
+
+# -- No-install Programs
+noinst_PROGRAMS  = 
+
+# -- No-install Libraries
 noinst_LIBRARIES		 = librip.a
+
+# -- Libraries and library flags to link the binary programs
 LDFLAGS				 =
 LDADD				 = ./librip.a
 LDADD				+= $(top_builddir)/libxorp/libxorp.a
 
-noinst_PROGRAMS			 = $(TESTS)
-TESTS				 = test_auth
-TESTS				+= test_packets
-TESTS				+= test_request
-TESTS				+= test_route_walk
-TESTS				+= test_timers
-TESTS				+= test_update_queue
-
+# -- Program Sources
 test_auth_SOURCES		 = test_auth.cc
 test_packets_SOURCES		 = test_packets.cc
 test_request_SOURCES		 = test_request.cc
@@ -23,6 +34,7 @@ test_route_walk_SOURCES		 = test_route_walk.cc
 test_timers_SOURCES		 = test_timers.cc
 test_update_queue_SOURCES	 = test_update_queue.cc
 
+# -- Library Sources
 librip_a_SOURCES		 = rip_module.h
 
 librip_a_SOURCES		+= auth.hh

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.17 2003/06/17 06:44:15 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.18 2003/07/17 00:28:31 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -10,13 +10,13 @@ SUBDIRS = . harness tools
 bin_PROGRAMS	 = xorp_bgp
 
 # -- Test Programs
-bin_PROGRAMS	+= packet_test plumbing_test update_test
+check_PROGRAMS	 = aspath_test packet_coding_test isolation_tests
+TESTS		 = $(check_PROGRAMS)
 
-TESTS		 = aspath_test
-TESTS		+= packet_coding_test
-TESTS		+= isolation_tests
+# -- No-install Programs
+noinst_PROGRAMS	 = packet_test plumbing_test update_test
 
-noinst_PROGRAMS = $(TESTS)
+# -- No-install Libraries
 noinst_LIBRARIES = libbgp.a
 
 # -- Libraries and library flags to link the binary programs

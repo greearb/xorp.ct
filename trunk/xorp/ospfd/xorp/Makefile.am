@@ -1,13 +1,20 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.4 2003/05/07 21:58:11 pavlin Exp $
+## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.5 2003/07/17 00:28:34 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS = xorp_ospf ospfd_mon ospfd_browser
+bin_PROGRAMS	 = xorp_ospf
 
 # -- Test Programs
-#bin_PROGRAMS +=
+check_PROGRAMS	 = 
+TESTS		 = $(check_PROGRAMS)
+
+# -- No-install Programs
+noinst_PROGRAMS  = ospfd_mon ospfd_browser
+
+# -- No-install Libraries
+noinst_LIBRARIES = 
 
 AM_CPPFLAGS  = -I$(top_builddir) -I$(srcdir)/../src
 

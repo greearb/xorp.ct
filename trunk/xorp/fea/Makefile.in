@@ -13,6 +13,8 @@
 
 @SET_MAKE@
 
+# -- Real Programs
+
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -89,15 +91,17 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-bin_PROGRAMS = xorp_fea xorp_fea_dummy demo_fea_ifmgr_client test_mfea
+bin_PROGRAMS = xorp_fea xorp_fea_dummy
+
+# -- Test Programs
 check_PROGRAMS = test_rawsock4 test_ifmanager_transaction
 TESTS = $(check_PROGRAMS)
 
-demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
-demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+# -- No-install Programs
+noinst_PROGRAMS = demo_fea_ifmgr_client test_mfea
 
+# -- No-install Libraries
 noinst_LIBRARIES = libfea.a
-
 
 # -- Libraries and library flags to link the binary programs
 
@@ -133,6 +137,8 @@ test_ifmanager_transaction_LDADD = $(top_builddir)/libxorp/libxorp.a
 test_rawsock4_SOURCES = test_rawsock4.cc rawsock4.cc
 test_rawsock4_LDADD = $(top_builddir)/libxorp/libxorp.a
 
+demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 libfea_a_SOURCES = fea_module.h mfea_module.h fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_mfea_vif_manager.hh xrl_rawsock4.hh xrl_target.hh fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_get.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifmanager_transaction.cc iftree.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_mfea_vif_manager.cc xrl_rawsock4.cc xrl_target.cc
@@ -196,11 +202,11 @@ am_libfea_a_OBJECTS = fti_transaction.$(OBJEXT) fticonfig.$(OBJEXT) \
 	xrl_mfea_vif_manager.$(OBJEXT) xrl_rawsock4.$(OBJEXT) \
 	xrl_target.$(OBJEXT)
 libfea_a_OBJECTS = $(am_libfea_a_OBJECTS)
-bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT) \
-	demo_fea_ifmgr_client$(EXEEXT) test_mfea$(EXEEXT)
+bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
 check_PROGRAMS = test_rawsock4$(EXEEXT) \
 	test_ifmanager_transaction$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
+noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT) test_mfea$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_demo_fea_ifmgr_client_OBJECTS = demo_fea_ifmgr_client.$(OBJEXT)
 demo_fea_ifmgr_client_OBJECTS = $(am_demo_fea_ifmgr_client_OBJECTS)
@@ -410,6 +416,9 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 demo_fea_ifmgr_client$(EXEEXT): $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_DEPENDENCIES) 
 	@rm -f demo_fea_ifmgr_client$(EXEEXT)
 	$(CXXLINK) $(demo_fea_ifmgr_client_LDFLAGS) $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_LDADD) $(LIBS)
@@ -664,7 +673,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES mostlyclean-am
+	clean-noinstLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
@@ -701,15 +710,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
 	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	clean-noinstLIBRARIES clean-noinstPROGRAMS distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic tags \
+	uninstall uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,14 +1,19 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.6 2003/05/07 21:58:10 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.7 2003/06/03 10:30:36 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- Test Programs
-bin_PROGRAMS	+= test_mld6igmp
+check_PROGRAMS	 = 
+TESTS		 = $(check_PROGRAMS)
 
+# -- No-install Programs
+noinst_PROGRAMS  = test_mld6igmp
+
+# -- No-install Libraries
 noinst_LIBRARIES = libmld6igmp.a
 
 # -- Libraries and library flags to link the binary programs

@@ -1,14 +1,19 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mfea/Makefile.am,v 1.5 2003/05/07 21:58:09 pavlin Exp $
+## $XORP: xorp/mfea/Makefile.am,v 1.6 2003/06/03 18:52:18 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 =
+bin_PROGRAMS	 = 
 
 # -- Test Programs
-bin_PROGRAMS	+= test_mfea
+check_PROGRAMS	 = 
+TESTS		 = $(check_PROGRAMS)
 
+# -- No-install Programs
+noinst_PROGRAMS  = test_mfea
+
+# -- No-install Libraries
 noinst_LIBRARIES = libmfea.a
 
 # -- Libraries and library flags to link the binary programs

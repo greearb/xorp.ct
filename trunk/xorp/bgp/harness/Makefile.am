@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.8 2003/06/27 22:07:23 atanu Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.9 2003/07/02 20:20:35 atanu Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS	 = coord test_peer
+bin_PROGRAMS	 = 
 
 # -- Test Programs
 TESTS		 = test_peering1.sh
@@ -14,7 +14,10 @@ TESTS		+= test_rib1.sh
 TESTS		+= test_rib_fea1.sh
 TESTS		+= test_terminate.sh
 
-noinst_PROGRAMS  =
+# -- No-install Programs
+noinst_PROGRAMS  = coord test_peer
+
+# -- No-install Libraries
 noinst_LIBRARIES =
 
 # -- Libraries and library flags to link the binary programs

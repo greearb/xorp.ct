@@ -1,21 +1,24 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.11 2003/05/23 01:02:41 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.12 2003/07/17 00:28:35 pavlin Exp $
 ##
 
 # -- Real Programs
-bin_PROGRAMS		 = xorp_rib main_routemap
+bin_PROGRAMS	 = xorp_rib
 
 # -- Test Programs
-bin_PROGRAMS		+= test_rib_client
-bin_PROGRAMS		+= test_register
-bin_PROGRAMS		+= test_register_xrls
-bin_PROGRAMS		+= test_rib_direct
-bin_PROGRAMS		+= test_rib_xrls
+check_PROGRAMS	 = test_rib_client
+check_PROGRAMS	+= test_register
+check_PROGRAMS	+= test_register_xrls
+check_PROGRAMS	+= test_rib_direct
+check_PROGRAMS	+= test_rib_xrls
+TESTS		 = $(check_PROGRAMS)
+TESTS		+= test_rib_direct.sh test_rib_xrls.sh test_register
 
-# -- Test scripts
-TESTS 			 = test_rib_direct.sh test_rib_xrls.sh test_register
+# -- No-install Programs
+noinst_PROGRAMS  = main_routemap
 
+# -- No-install Libraries
 noinst_LIBRARIES	 = librib.a
 
 # -- Libraries and library flags to link the binary programs
@@ -48,7 +51,6 @@ test_rib_xrls_SOURCES	+= dummy_register_server.cc
 test_rib_xrls_LDADD	 = $(LDADD)
 test_rib_xrls_LDADD	+= $(top_builddir)/xrl/interfaces/libribxif.a
 test_rib_xrls_LDADD	+= $(top_builddir)/xrl/targets/libribbase.a
-
 
 test_register_SOURCES	 = test_register.cc
 test_register_SOURCES	+= dummy_register_server.hh
