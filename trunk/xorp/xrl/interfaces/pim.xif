@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.7 2003/03/25 06:55:10 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.8 2003/03/27 00:19:04 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -163,19 +163,19 @@ interface pim/0.1 {
 	 * a group. It should be same across all RPs. If set to zero,
 	 * the default one will be used.
 	 */
-	add_config_rp4			? group_prefix:ipv4net		\
+	add_config_static_rp4		? group_prefix:ipv4net		\
 					& rp_addr:ipv4			\
 					& rp_priority:u32		\
 					& hash_masklen:u32
-	add_config_rp6			? group_prefix:ipv6net		\
+	add_config_static_rp6		? group_prefix:ipv6net		\
 					& rp_addr:ipv6			\
 					& rp_priority:u32		\
 					& hash_masklen:u32
-	delete_config_rp4		? group_prefix:ipv4net		\
+	delete_config_static_rp4	? group_prefix:ipv4net		\
 					& rp_addr:ipv4
-	delete_config_rp6		? group_prefix:ipv6net		\
+	delete_config_static_rp6	? group_prefix:ipv6net		\
 					& rp_addr:ipv6
-	config_rp_done
+	config_static_rp_done
 
 	/**
 	 * Configure PIM Hello-related metrics.
