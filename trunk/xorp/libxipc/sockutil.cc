@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.10 2004/09/08 02:03:54 atanu Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.11 2004/10/06 20:39:17 pavlin Exp $"
 
 #include "config.h"
 
@@ -516,8 +516,8 @@ if_set_preferred(in_addr new_addr)
 	if (if_probe(i, name, addr, flags) &&
 	    addr.s_addr == new_addr.s_addr &&
 	    (flags & IFF_UP)) {
-	    XLOG_INFO("Changing to interface %s addr %s for IP based XRL "
-		      "communication.", name.c_str(), inet_ntoa(addr));
+// 	    XLOG_INFO("Changing to interface %s addr %s for IP based XRL "
+// 		      "communication.", name.c_str(), inet_ntoa(addr));
 	    s_if_preferred = addr;
 	    return true;
 	}
