@@ -21,7 +21,7 @@
 set -e
 
 # to debug 
-set -x
+# set -x
 
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
