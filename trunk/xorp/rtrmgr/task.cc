@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.37 2004/05/28 22:27:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.38 2004/06/10 22:41:54 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -685,7 +685,8 @@ TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
 bool
 TaskXrlItem::execute(string& errmsg)
 {
-    XLOG_TRACE(_verbose, "Expanding %s\n", _unexpanded_xrl.str().c_str());
+    if (_task.do_exec())
+	XLOG_TRACE(_verbose, "Expanding %s\n", _unexpanded_xrl.str().c_str());
 
     Xrl* xrl = _unexpanded_xrl.expand(errmsg);
     if (xrl == NULL) {
@@ -693,7 +694,8 @@ TaskXrlItem::execute(string& errmsg)
 			  _unexpanded_xrl.str().c_str(), errmsg.c_str());
 	return false;
     }
-    XLOG_TRACE(_verbose, "Executing XRL: >%s<\n", xrl->str().c_str());
+    if (_task.do_exec())
+	XLOG_TRACE(_verbose, "Executing XRL: >%s<\n", xrl->str().c_str());
 
     string xrl_return_spec = _unexpanded_xrl.return_spec();
 
