@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.16 2003/05/31 06:45:58 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.17 2003/06/01 02:11:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -75,9 +75,9 @@ protected:
     //
     // Protocol node methods
     //
-    void xrl_result_add_protocol(const XrlError& xrl_error);
+    void xrl_result_add_protocol_mfea(const XrlError& xrl_error);
     void xrl_result_allow_signal_messages(const XrlError& xrl_error);
-    void xrl_result_delete_protocol(const XrlError& xrl_error);
+    void xrl_result_delete_protocol_mfea(const XrlError& xrl_error);
     
     int	proto_send(const string& dst_module_instance_name,
 		   xorp_module_id dst_module_id,

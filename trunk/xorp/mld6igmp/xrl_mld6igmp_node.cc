@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.15 2003/05/31 16:16:25 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.16 2003/06/01 02:11:18 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -108,36 +108,6 @@ XrlMld6igmpNode::stop_mld6igmp()
 	ret_code = XORP_ERROR;
     
     return (ret_code);
-}
-
-void
-XrlMld6igmpNode::xrl_result_add_protocol(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add a protocol to MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlMld6igmpNode::xrl_result_allow_signal_messages(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send allow_signal_messages() to MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlMld6igmpNode::xrl_result_delete_protocol(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete a protocol from MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
 }
 
 //
@@ -252,45 +222,98 @@ XrlMld6igmpNode::start_protocol_kernel()
     //
     // Register the protocol with the MFEA
     //
-    if (family() == AF_INET) {
-	XrlMfeaV0p1Client::send_add_protocol4(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(Mld6igmpNode::module_name()),
-	    Mld6igmpNode::module_id(),
-	    callback(this, &XrlMld6igmpNode::xrl_result_add_protocol));
-    } else {
-	XrlMfeaV0p1Client::send_add_protocol6(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(Mld6igmpNode::module_name()),
-	    Mld6igmpNode::module_id(),
-	    callback(this, &XrlMld6igmpNode::xrl_result_add_protocol));
-    }
+    do {
+	if (Mld6igmpNode::is_ipv4()) {
+	    XrlMfeaV0p1Client::send_add_protocol4(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(Mld6igmpNode::module_name()),
+		Mld6igmpNode::module_id(),
+		callback(this, &XrlMld6igmpNode::xrl_result_add_protocol_mfea));
+	    break;
+	}
+	
+	if (Mld6igmpNode::is_ipv6()) {
+	    XrlMfeaV0p1Client::send_add_protocol6(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(Mld6igmpNode::module_name()),
+		Mld6igmpNode::module_id(),
+		callback(this, &XrlMld6igmpNode::xrl_result_add_protocol_mfea));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+    Mld6igmpNode::incr_waiting_for_mfea_startup_events();
     
     return (XORP_OK);
+}
+
+void
+XrlMld6igmpNode::xrl_result_add_protocol_mfea(const XrlError& xrl_error)
+{
+    Mld6igmpNode::decr_waiting_for_mfea_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to add a protocol to MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
+void
+XrlMld6igmpNode::xrl_result_allow_signal_messages(const XrlError& xrl_error)
+{
+    Mld6igmpNode::decr_waiting_for_mfea_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to send allow_signal_messages() to MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
 }
 
 int
 XrlMld6igmpNode::stop_protocol_kernel()
 {   
-    if (family() == AF_INET) {
-	XrlMfeaV0p1Client::send_delete_protocol4(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(Mld6igmpNode::module_name()),
-	    Mld6igmpNode::module_id(),
-	    callback(this, &XrlMld6igmpNode::xrl_result_delete_protocol));
-    } else {
-	XrlMfeaV0p1Client::send_delete_protocol6(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(Mld6igmpNode::module_name()),
-	    Mld6igmpNode::module_id(),
-	    callback(this, &XrlMld6igmpNode::xrl_result_delete_protocol));
-    }
+    do {
+	if (Mld6igmpNode::is_ipv4()) {
+	    XrlMfeaV0p1Client::send_delete_protocol4(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(Mld6igmpNode::module_name()),
+		Mld6igmpNode::module_id(),
+		callback(this, &XrlMld6igmpNode::xrl_result_delete_protocol_mfea));
+	    break;
+	}
+	
+	if (Mld6igmpNode::is_ipv6()) {
+	    XrlMfeaV0p1Client::send_delete_protocol6(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(Mld6igmpNode::module_name()),
+		Mld6igmpNode::module_id(),
+		callback(this, &XrlMld6igmpNode::xrl_result_delete_protocol_mfea));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
     
     return (XORP_OK);
+}
+
+void
+XrlMld6igmpNode::xrl_result_delete_protocol_mfea(const XrlError& xrl_error)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to delete a protocol from MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
 }
 
 int
@@ -332,12 +355,15 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
 	XLOG_UNREACHABLE();
 	break;
     } while (false);
+    Mld6igmpNode::incr_waiting_for_mfea_startup_events();
     
     return (XORP_OK);
 }
 void
 XrlMld6igmpNode::xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error)
 {
+    Mld6igmpNode::decr_waiting_for_mfea_startup_events();
+    
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to start a kernel vif with the MFEA: %s",
 		   xrl_error.str().c_str());
@@ -717,9 +743,8 @@ XrlMld6igmpNode::common_0_1_get_status(// Output values,
 				       uint32_t& status,
 				       string& reason)
 {
-    //XXX placeholder only
-    status = PROC_READY;
-    reason = "Ready";
+    status = Mld6igmpNode::node_status(reason);
+    
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.7 2003/05/19 00:19:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.8 2003/05/21 05:32:52 pavlin Exp $"
 
 
 //
@@ -72,6 +72,13 @@ Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
     }
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
+    
+    //
+    // Set the node status.
+    // XXX: note that we don't really need to wait for MFEA,
+    // hence we are READY.
+    //
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
 }
 
 /**
@@ -107,6 +114,13 @@ Mld6igmpNode::start(void)
 	return (XORP_ERROR);
     
     //
+    // Set the node status.
+    // XXX: note that we don't really need to wait for MFEA,
+    // hence we are READY.
+    //
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
+    
+    //
     // Start the protocol with the kernel
     //
     if (start_protocol_kernel() != XORP_OK) {
@@ -117,11 +131,6 @@ Mld6igmpNode::start(void)
     
     // Start the mld6igmp_vifs
     start_all_vifs();
-    
-    //
-    // Perform misc. MLD6IGMP-specific start operations
-    //
-    // TODO: IMPLEMENT IT!
     
     return (XORP_OK);
 }
@@ -145,7 +154,7 @@ Mld6igmpNode::stop(void)
     //
     // Perform misc. MLD6IGMP-specific stop operations
     //
-    // TODO: IMPLEMENT IT!
+    // XXX: nothing to do
     
     // Stop the vifs
     stop_all_vifs();
@@ -157,10 +166,141 @@ Mld6igmpNode::stop(void)
 	XLOG_ERROR("Error stopping protocol with the kernel. Ignored.");
     }
     
+    // XXX: don't change the node status, because we are still ready
+    
     if (ProtoNode<Mld6igmpVif>::stop() < 0)
 	return (XORP_ERROR);
     
     return (XORP_OK);
+}
+
+/**
+ * Mld6igmpNode::is_waiting_for_mfea_startup:
+ * @: 
+ * 
+ * Test if waiting to complete registration with the MFEA.
+ * 
+ * Return value: True if waiting to complete registration with the MFEA,
+ * otherwise false.
+ **/
+bool
+Mld6igmpNode::is_waiting_for_mfea_startup() const
+{
+    return (_waiting_for_mfea_startup_events != 0);
+}
+
+void
+Mld6igmpNode::incr_waiting_for_mfea_startup_events()
+{
+    _waiting_for_mfea_startup_events++;
+}
+
+void
+Mld6igmpNode::decr_waiting_for_mfea_startup_events()
+{
+    XLOG_ASSERT(_waiting_for_mfea_startup_events > 0);
+    _waiting_for_mfea_startup_events--;
+    
+    if (_waiting_for_mfea_startup_events == 0) {
+	// If startup waiting is over, set node status to NOT_READY
+	if (ProtoNode<Mld6igmpVif>::node_status() == PROC_STARTUP)
+	    ProtoNode<Mld6igmpVif>::set_node_status(PROC_NOT_READY);
+    }
+}
+
+/**
+ * Mld6igmpNode::has_pending_down_units:
+ * @reason: return-by-reference string that contains human-readable
+ * information about the status.
+ * 
+ * Test if there is an unit that is in PENDING_DOWN state.
+ * 
+ * Return value: True if there is an unit that is in PENDING_DOWN state,
+ * otherwise false.
+ **/
+bool
+Mld6igmpNode::has_pending_down_units(string& reason)
+{
+    vector<Mld6igmpVif *>::iterator iter;
+    
+    //
+    // Test the interfaces
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	Mld6igmpVif *mld6igmp_vif = (*iter);
+	if (mld6igmp_vif == NULL)
+	    continue;
+	// TODO: XXX: PAVPAVPAV: vif pending-down state
+	// is not used/implemented yet
+	if (mld6igmp_vif->is_pending_down()) {
+	    reason = c_format("Vif %s is in state %s",
+			      mld6igmp_vif->name().c_str(),
+			      mld6igmp_vif->state_string());
+	    return (true);
+	}
+    }
+    
+    //
+    // TODO: XXX: PAVPAVPAV: test other units that may be waiting
+    // in PENDING_DOWN state.
+    //
+    
+    reason = "No pending-down units";
+    return (false);
+}
+
+/**
+ * Mld6igmpNode::node_status:
+ * @reason: return-by-reference string that contains human-readable
+ * information about the status.
+ * 
+ * Get the node status (see @ref ProcessStatus).
+ * 
+ * Return value: The node status (see @ref ProcessStatus).
+ **/
+ProcessStatus
+Mld6igmpNode::node_status(string& reason)
+{
+    ProcessStatus status = ProtoNode<Mld6igmpVif>::node_status();
+    
+    // Set the return message with the reason
+    reason = "";
+    switch (status) {
+    case PROC_NULL:
+	// Can't be running and in this state
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_STARTUP:
+	if (is_waiting_for_mfea_startup()) {
+	    reason = "Waiting for MFEA startup";
+	    break;
+	}
+	// Waiting for unknown reason
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_NOT_READY:
+	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
+	XLOG_UNFINISHED();
+	break;
+    case PROC_READY:
+	reason = c_format("Node is READY (running status %s)",
+			  ProtoState::state_string());
+	break;
+    case PROC_SHUTDOWN:
+	// Get the message about the shutdown progress
+	has_pending_down_units(reason);
+	break;
+    case PROC_FAILED:
+	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
+	XLOG_UNFINISHED();
+	break;
+    default:
+	// Unknown status
+	XLOG_UNREACHABLE();
+	break;
+    }
+    
+    return (status);
 }
 
 /**
@@ -327,10 +467,9 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
     
     const VifAddr vif_addr(addr, subnet_addr, broadcast_addr, peer_addr);
     
-    if (mld6igmp_vif->is_my_vif_addr(vif_addr)) {
-	return (XORP_OK);		// Already have this address
-    }
-    
+    //
+    // Check the arguments
+    //
     if (! addr.is_unicast()) {
 	err = c_format("Cannot add address on vif %s: "
 		       "invalid unicast address: %s",
@@ -338,7 +477,6 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
-    
     if ((addr.af() != family())
 	|| (subnet_addr.af() != family())
 	|| (broadcast_addr.af() != family())
@@ -350,10 +488,23 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    mld6igmp_vif->add_address(vif_addr);
+    VifAddr* node_vif_addr = mld6igmp_vif->find_address(addr);
     
-    XLOG_INFO("Added new address to vif %s: %s",
-	      mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
+    if (node_vif_addr != NULL) {
+	// Update the address
+	if (*node_vif_addr == vif_addr)
+	    return (XORP_OK);		// Already have this address
+	XLOG_INFO("Updated existing address on vif %s: old is %s new is %s",
+		  mld6igmp_vif->name().c_str(), node_vif_addr->str().c_str(),
+		  vif_addr.str().c_str());
+	*node_vif_addr = vif_addr;
+    } else {
+	// Add a new address
+	mld6igmp_vif->add_address(vif_addr);
+	
+	XLOG_INFO("Added new address to vif %s: %s",
+		  mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
+    }
     
     return (XORP_OK);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.7 2003/05/19 00:19:58 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.8 2003/05/21 05:32:52 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -78,9 +78,37 @@ public:
     /**
      * Stop the node operation.
      * 
+     * Stop the MLD or IGMP protocol.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+    
+    /**
+     * Test if waiting to complete registration with the MFEA.
+     * 
+     * @return true if waiting to complete registration with the MFEA,
+     * otherwise false.
+     */
+    bool is_waiting_for_mfea_startup() const;
+    
+    /**
+     * Test if there is an unit that is in PENDING_DOWN state.
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * information about the unit that is in PENDING_DOWN state (if any).
+     * @return true if there is an unit that is in PENDING_DOWN state,
+     * otherwise false.
+     */
+    bool	has_pending_down_units(string& reason);
+    
+    /**
+     * Get the node status (see @ref ProcessStatus).
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * information about the status.
+     * @return the node status (see @ref ProcessStatus).
+     */
+    ProcessStatus	node_status(string& reason);
     
     /**
      * Install a new MLD/IGMP vif.
@@ -506,8 +534,19 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
     
+    //
+    // Status-related methods
+    //
+    void incr_waiting_for_mfea_startup_events();
+    void decr_waiting_for_mfea_startup_events();
+    
 private:
     buffer_t	*_buffer_recv;		// Buffer for receiving messages
+    
+    //
+    // Status-related state
+    //
+    size_t	_waiting_for_mfea_startup_events;
     
     //
     // Debug and test-related state
