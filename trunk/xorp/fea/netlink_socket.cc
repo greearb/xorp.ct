@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.14 2003/11/03 07:38:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.15 2004/03/26 01:31:51 pavlin Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "libcomm/comm_api.h"
 
 #include <algorithm>
 
@@ -131,6 +133,11 @@ NetlinkSocket::start(int af)
 	XLOG_ERROR("Could not open netlink socket: %s", strerror(errno));
 	return (XORP_ERROR);
     }
+    //
+    // Increase the receiving buffer size of the socket to avoid
+    // loss of data from the kernel.
+    //
+    comm_sock_set_rcvbuf(_fd, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN);
     
     // TODO: do we want to make the socket non-blocking?
     
