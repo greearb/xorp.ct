@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.49 2004/04/15 16:13:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.50 2004/05/06 23:40:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,6 +39,12 @@ RibIpcHandler::~RibIpcHandler()
 {
     if(_v4_queue.busy() || _v6_queue.busy())
 	XLOG_WARNING("Deleting RibIpcHandler with callbacks pending");
+
+    /*
+    ** Flush static routes.
+    */
+    _plumbing_unicast->flush(this);
+    _plumbing_multicast->flush(this);
 
     set_plumbing(NULL, NULL);
 
