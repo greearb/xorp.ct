@@ -101,7 +101,7 @@ bin_PROGRAMS = xorp_rib
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_deletion
 
 # -- No-install Programs
-noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_client test_rib_direct test_rib_xrls test_redist test_deletion
+noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_direct test_rib_xrls test_redist test_deletion
 
 # -- No-install Libraries
 noinst_LIBRARIES = librib.a libribxrl.a
@@ -113,32 +113,29 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_bu
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
 main_routemap_LDADD = $(LDADD)
 
-xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
+xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
 xorp_rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
 
-test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_direct.cc
+test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_direct.cc
 test_rib_direct_LDADD = $(LDADD)
 
-test_rib_xrls_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_xrls.cc xrl_target.cc
+test_rib_xrls_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_xrls.cc xrl_target.cc
 test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
 
-test_register_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc test_register.cc
+test_register_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc test_register.cc
 test_register_LDADD = $(LDADD)
 
-test_register_xrls_SOURCES = rib_module.h parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh rib_manager.cc test_register_xrls.cc xrl_target.cc
+test_register_xrls_SOURCES = rib_module.h parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh rib_manager.cc test_register_xrls.cc xrl_target.cc
 test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_deletion_SOURCES = rib_module.h rt_tab_base.hh rt_tab_expect.hh rt_tab_origin.hh protocol.hh route.hh rt_tab_expect.cc test_deletion.cc
 test_deletion_LDADD = $(LDADD)
 
-test_rib_client_SOURCES = rib_module.h protocol.hh rib_client.hh route.hh test_rib_client.cc
-test_rib_client_LDADD = $(LDADD)
-
 test_redist_SOURCES = test_redist.cc
 test_redist_LDADD = ./librib.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
+librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
 libribxrl_a_SOURCES = redist_xrl.hh redist_xrl.cc
 
@@ -157,8 +154,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 librib_a_AR = $(AR) cru
 librib_a_LIBADD =
 am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
-	rib.$(OBJEXT) rib_client.$(OBJEXT) rt_tab_base.$(OBJEXT) \
-	rt_tab_deletion.$(OBJEXT) rt_tab_export.$(OBJEXT) \
+	rib.$(OBJEXT) rt_tab_base.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
 	rt_tab_extint.$(OBJEXT) rt_tab_log.$(OBJEXT) \
 	rt_tab_merged.$(OBJEXT) rt_tab_origin.$(OBJEXT) \
 	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
@@ -170,9 +166,9 @@ am_libribxrl_a_OBJECTS = redist_xrl.$(OBJEXT)
 libribxrl_a_OBJECTS = $(am_libribxrl_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = main_routemap$(EXEEXT) test_register$(EXEEXT) \
-	test_register_xrls$(EXEEXT) test_rib_client$(EXEEXT) \
-	test_rib_direct$(EXEEXT) test_rib_xrls$(EXEEXT) \
-	test_redist$(EXEEXT) test_deletion$(EXEEXT)
+	test_register_xrls$(EXEEXT) test_rib_direct$(EXEEXT) \
+	test_rib_xrls$(EXEEXT) test_redist$(EXEEXT) \
+	test_deletion$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_main_routemap_OBJECTS = main_routemap.$(OBJEXT) routemap.$(OBJEXT)
@@ -265,26 +261,6 @@ test_register_xrls_DEPENDENCIES = librib.a libribxrl.a \
 	$(top_builddir)/xrl/targets/libribbase.a \
 	$(top_builddir)/xrl/targets/libribclientbase.a
 test_register_xrls_LDFLAGS =
-am_test_rib_client_OBJECTS = test_rib_client.$(OBJEXT)
-test_rib_client_OBJECTS = $(am_test_rib_client_OBJECTS)
-test_rib_client_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a
-test_rib_client_LDFLAGS =
 am_test_rib_direct_OBJECTS = dummy_register_server.$(OBJEXT) \
 	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
 	test_rib_direct.$(OBJEXT)
@@ -366,11 +342,10 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
 @AMDEP_TRUE@	$(DEPDIR)/redist_xrl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rib_client.Po $(DEPDIR)/rib_manager.Po \
-@AMDEP_TRUE@	$(DEPDIR)/routemap.Po $(DEPDIR)/rt_tab_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_manager.Po $(DEPDIR)/routemap.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_deletion.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_expect.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_export.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po $(DEPDIR)/rt_tab_log.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Po \
@@ -379,7 +354,6 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_deletion.Po $(DEPDIR)/test_redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_register.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_register_xrls.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_rib_client.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_rib_direct.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_rib_xrls.Po $(DEPDIR)/vifmanager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
@@ -397,9 +371,8 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) \
 	$(main_routemap_SOURCES) $(test_deletion_SOURCES) \
 	$(test_redist_SOURCES) $(test_register_SOURCES) \
-	$(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) \
-	$(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) \
-	$(xorp_rib_SOURCES)
+	$(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) \
+	$(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -407,7 +380,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
+SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
 
 all: all-recursive
 
@@ -474,9 +447,6 @@ test_register$(EXEEXT): $(test_register_OBJECTS) $(test_register_DEPENDENCIES)
 test_register_xrls$(EXEEXT): $(test_register_xrls_OBJECTS) $(test_register_xrls_DEPENDENCIES) 
 	@rm -f test_register_xrls$(EXEEXT)
 	$(CXXLINK) $(test_register_xrls_LDFLAGS) $(test_register_xrls_OBJECTS) $(test_register_xrls_LDADD) $(LIBS)
-test_rib_client$(EXEEXT): $(test_rib_client_OBJECTS) $(test_rib_client_DEPENDENCIES) 
-	@rm -f test_rib_client$(EXEEXT)
-	$(CXXLINK) $(test_rib_client_LDFLAGS) $(test_rib_client_OBJECTS) $(test_rib_client_LDADD) $(LIBS)
 test_rib_direct$(EXEEXT): $(test_rib_direct_OBJECTS) $(test_rib_direct_DEPENDENCIES) 
 	@rm -f test_rib_direct$(EXEEXT)
 	$(CXXLINK) $(test_rib_direct_LDFLAGS) $(test_rib_direct_OBJECTS) $(test_rib_direct_LDADD) $(LIBS)
@@ -502,13 +472,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_deletion.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_expect.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_export.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_extint.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Po@am__quote@
@@ -519,7 +487,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_register_xrls.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_direct.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_xrls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vifmanager.Po@am__quote@

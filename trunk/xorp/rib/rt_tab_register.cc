@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.20 2004/04/01 19:54:13 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.21 2004/06/10 22:41:42 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -63,11 +63,11 @@ RouteRegister<A>::str() const
 
 template<class A>
 RegisterTable<A>::RegisterTable(const string& tablename, 
-			     RegisterServer* rs, 
+			     RegisterServer& register_server, 
 			     bool multicast)
     : RouteTable<A>(tablename),
       _parent(NULL),
-      _register_server(rs),
+      _register_server(register_server),
       _multicast(multicast)
 {
 }
@@ -494,7 +494,7 @@ RegisterTable<A>::notify_route_changed(
 	const string& protocol_origin = changed_route.protocol().name();
 	list<string>::const_iterator iter;
 	for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
-	    _register_server->send_route_changed(
+	    _register_server.send_route_changed(
 		*iter,
 		trie_iter.payload()->valid_subnet(),
 		nexthop_addr, metric, admin_distance,
@@ -515,7 +515,7 @@ RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>* >::itera
     list<string>::const_iterator iter;
     for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
 	debug_msg("we will send an invalidate to %s\n", (*iter).c_str());
-	_register_server->send_invalidate(*iter, valid_subnet, _multicast);
+	_register_server.send_invalidate(*iter, valid_subnet, _multicast);
     }
     delete trie_iter.payload();
     _ipregistry.erase(trie_iter);
@@ -525,7 +525,7 @@ template<class A>
 void
 RegisterTable<A>::flush() 
 { 
-    _register_server->flush(); 
+    _register_server.flush(); 
 }
 
 

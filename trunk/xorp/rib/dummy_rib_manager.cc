@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.10 2004/05/20 23:45:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.11 2004/06/10 22:41:37 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -158,54 +158,6 @@ RibManager::delete_vif_address(const string& vifname,
 void
 RibManager::make_errors_fatal()
 {
-}
-
-int
-RibManager::add_rib_client(const string& target_name, int family,
-			   bool unicast, bool multicast)
-{
-    UNUSED(target_name);
-    UNUSED(family);
-    UNUSED(unicast);
-    UNUSED(multicast);
-
-    return XORP_OK;
-}
-
-int
-RibManager::delete_rib_client(const string& target_name, int family,
-			      bool unicast, bool multicast)
-{
-    UNUSED(target_name);
-    UNUSED(family);
-    UNUSED(unicast);
-    UNUSED(multicast);
-
-    return XORP_OK;
-}
-
-int
-RibManager::enable_rib_client(const string& target_name, int family,
-			      bool unicast, bool multicast)
-{
-    UNUSED(target_name);
-    UNUSED(family);
-    UNUSED(unicast);
-    UNUSED(multicast);
-
-    return XORP_OK;
-}
-
-int
-RibManager::disable_rib_client(const string& target_name, int family,
-			       bool unicast, bool multicast)
-{
-    UNUSED(target_name);
-    UNUSED(family);
-    UNUSED(unicast);
-    UNUSED(multicast);
-
-    return XORP_OK;
 }
 
 void

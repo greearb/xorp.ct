@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.23 2004/06/10 14:01:15 hodson Exp $
+// $XORP: xorp/rib/rib.hh,v 1.24 2004/06/10 22:41:39 hodson Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -33,11 +33,9 @@
 #include "rt_tab_extint.hh"
 #include "rt_tab_redist.hh"
 #include "rt_tab_register.hh"
-#include "rt_tab_export.hh"
 
 
 class RegisterServer;
-class RibClient;
 class RibManager;
 
 enum RibTransportType {
@@ -83,15 +81,13 @@ public:
     void set_errors_are_fatal() { _errors_are_fatal = true; }
 
     /**
-     * Initialize the RIB's ExportTable so that the winning routes are
-     * exported to the RIB clients (e.g., the FEA).
+     * Initialize the RIB.
      * Note that it is an error to initialize the table twice.
      *
-     * @see ExportTable
-     * @param rib_clients_list a pointer to the list of RIB clients.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @param register_server the @ref RegisterServer to initialize
+     * the Rib with.
      */
-    int initialize_export(list<RibClient* >* rib_clients_list);
+    void initialize(RegisterServer& register_server);
 
     /**
      * Initialize the RIB's RedistTable at the end so that the
@@ -112,9 +108,11 @@ public:
      * information that affects specfic addresses.
      * Note that it is an error to initialize the table twice.
      *
+     * @param register_server the @ref RegisterServer to initialize
+     * the Rib with.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int initialize_register(RegisterServer* regserv);
+    int initialize_register(RegisterServer& register_server);
 
     /**
      * Add a new OriginTable.  Use is deprecated, except in test suites.
@@ -472,9 +470,9 @@ private:
 
     /**
      * track_forward trough the RouteTables' child pointers to find
-     * the last (i.e, nearest the ExportTable) table that matches the
-     * mask in @ref typemask.  Unlike track_back, if @ref rt doesn't
-     * match, but the next does, the track forward anyway.
+     * the last able that matches the mask in @ref typemask.
+     * Unlike track_back, if @ref rt doesn't match, but the next does,
+     * the track forward anyway.
      *
      * @param rt the routing table to start with.
      * @param typemask the bitwise-or of the routing table types that

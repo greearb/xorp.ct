@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.13 2004/05/20 22:18:18 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.14 2004/06/10 22:41:42 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -128,8 +128,8 @@ main (int /* argc */, char* argv[])
     Vif vif1("vif1");
     Vif vif2("vif2");
 
-    DummyRegisterServer regserv;
-    rib.initialize_register(&regserv);
+    DummyRegisterServer register_server;
+    rib.initialize(register_server);
     rib.add_igp_table("connected", "", "");
 
     rib.new_vif("vif0", vif0);
@@ -214,16 +214,16 @@ main (int /* argc */, char* argv[])
     rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), "", "", 1);
     if (verbose)
 	printf("##########################\n");
-    if (!regserv.verify_no_info())
+    if (!register_server.verify_no_info())
 	abort();
 
     // Add a route that should cause both registrations to be invalidated
     rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), "", "", 1);
-    if (!regserv.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
+    if (!register_server.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
-    if (!regserv.verify_invalidated("foo2 1.0.5.0/26 mcast:false"))
+    if (!register_server.verify_invalidated("foo2 1.0.5.0/26 mcast:false"))
 	abort();
-    if (!regserv.verify_no_info())
+    if (!register_server.verify_no_info())
 	abort();
 
     // Verify that the deregister now fails because the registrations
@@ -250,16 +250,16 @@ main (int /* argc */, char* argv[])
     // This one should have no effect.
     //
     rib.delete_route("ospf", IPv4Net("1.0.11.0", 24));
-    if (!regserv.verify_no_info())
+    if (!register_server.verify_no_info())
 	abort();
 
     // This one should cause the registrations to be invalidated
     rib.delete_route("ospf", IPv4Net("1.0.5.0", 24));
-    if (!regserv.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
+    if (!register_server.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
-    if (!regserv.verify_invalidated("foo2 1.0.5.0/26 mcast:false"))
+    if (!register_server.verify_invalidated("foo2 1.0.5.0/26 mcast:false"))
 	abort();
-    if (!regserv.verify_no_info())
+    if (!register_server.verify_no_info())
 	abort();
 
     // Test registration where the address doesn't resolve
@@ -268,7 +268,7 @@ main (int /* argc */, char* argv[])
     rib.delete_route("ebgp", IPv4Net("1.0.0.0", 20));
     rib.delete_route("static", IPv4Net("1.0.0.0", 16));
     rib.delete_route("ospf", IPv4Net("1.0.6.0", 24));
-    if (!regserv.verify_no_info())
+    if (!register_server.verify_no_info())
 	abort();
 
     // Register interest in all three non-existent ranges
@@ -286,11 +286,11 @@ main (int /* argc */, char* argv[])
 	printf("%s\n", rreg->str().c_str());
 
     rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), "", "", 3);
-    if (!regserv.verify_invalidated("foo 1.0.6.0/23 mcast:false"))
+    if (!register_server.verify_invalidated("foo 1.0.6.0/23 mcast:false"))
 	abort();
-    if (!regserv.verify_invalidated("foo2 1.0.6.0/23 mcast:false"))
+    if (!register_server.verify_invalidated("foo2 1.0.6.0/23 mcast:false"))
 	abort();
-    if (!regserv.verify_no_info())
+    if (!register_server.verify_no_info())
 	abort();
     //
     // Gracefully stop and exit xlog

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.32 2004/05/28 05:00:37 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.33 2004/06/10 22:41:42 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -28,7 +28,6 @@
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
-#include "rib_client.hh"
 #include "dummy_register_server.hh"
 #include "xrl_target.hh"
 
@@ -68,14 +67,13 @@ parser_main()
 
     // Rib Server component
     XrlStdRouter xrl_router(eventloop, "rib", fs.addr(), fs.port());
-    RibClient rib_client(xrl_router, "fea");
 
     RibManager rib_manager;
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
-    DummyRegisterServer regserv;
-    urib4.initialize_register(&regserv);
+    DummyRegisterServer register_server;
+    urib4.initialize_register(register_server);
 
     // Instantiated but not used
     RIB<IPv4> mrib4(MULTICAST, rib_manager, eventloop);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.10 2004/04/01 19:54:13 mjh Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.11 2004/06/10 22:41:42 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -260,9 +260,9 @@ private:
  * of interest in changes to certain routes.
  *
  * RegisterTable is a @ref RouteTable that is plumbed into the RIB
- * after all the @ref MergedTable and @ref ExtIntTable instances, but
- * before the @ref ExportTable.  Thus it seems all winning route
- * updates that will be propagated to the forwarding engine.
+ * after all the @ref MergedTable and @ref ExtIntTable instances.
+ * Thus it seems all winning route updates that will be propagated
+ * to the forwarding engine.
  *
  * It's purpose is to track route changes that affect specific
  * addresses in which routing protocols have expressed an interest,
@@ -281,15 +281,16 @@ public:
      *
      * @param tablename human-readable name for this table for
      * debugging purposes.
-     * @param rs pointer to the RIB's @ref RegisterServer instance.
-     * The RegisterServer handles IPC requests and responses related
+     * @param register_server a reference to the RIB's @ref RegisterServer
+     * instance. The RegisterServer handles IPC requests and responses related
      * to registration of interest.
      * @param multicast indicates whether or not this RegisterTable is in
      * a multicast RIB.  The information is needed when notifying a
      * routing protocol of a change, because the same route might be
      * in both unicast and multicast RIBs.
      */
-    RegisterTable(const string& tablename, RegisterServer* rs, bool multicast);
+    RegisterTable(const string& tablename, RegisterServer& register_server,
+		  bool multicast);
 
     /**
      * RegisterTable destructor
@@ -428,7 +429,7 @@ private:
     set<const ModuleData*, ModuleCmp>	_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;
     RouteTable<A>*			_parent;
-    RegisterServer*			_register_server;
+    RegisterServer&			_register_server;
     bool				_multicast;  // true if a multicast rib
 };
 

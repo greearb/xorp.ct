@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.27 2004/05/28 05:00:36 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.28 2004/06/10 22:41:42 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -29,7 +29,6 @@
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
-#include "rib_client.hh"
 #include "register_server.hh"
 #include "rib_manager.hh"
 #include "xrl_target.hh"
@@ -328,7 +327,6 @@ main(int /* argc */, char* argv[])
 
     // Rib Server component
     XrlStdRouter xrl_router(eventloop, "rib");
-    RibClient rib_client(xrl_router, "fea");
 
     // Rib Client component
     XrlStdRouter client_xrl_router(eventloop, "ribclient");
@@ -338,8 +336,8 @@ main(int /* argc */, char* argv[])
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
-    RegisterServer regserv(&xrl_router);
-    urib4.initialize_register(&regserv);
+    RegisterServer register_server(&xrl_router);
+    urib4.initialize(register_server);
     if (urib4.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
 	abort();

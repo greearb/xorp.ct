@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.9 2004/05/20 23:45:46 pavlin Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.10 2004/06/10 22:41:37 hodson Exp $
 
 #ifndef __RIB_DUMMY_RIB_MANAGER_HH__
 #define __RIB_DUMMY_RIB_MANAGER_HH__
@@ -29,7 +29,6 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "rib.hh"
-#include "rib_client.hh"
 #include "register_server.hh"
 #include "vifmanager.hh"
 #include "xrl_target.hh"
@@ -201,86 +200,6 @@ public:
     int delete_vif_address(const string& vifname,
 			   const IPv6& addr,
 			   string& err);
-
-    /**
-     * Find a RIB client.
-     *
-     * Find a RIB client for a given target name, address family, and
-     * unicast/multicast flags.
-     *
-     * @param target_name the target name of the RIB client.
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param unicast true if a client for the unicast RIB.
-     * @param multicast true if a client for the multicast RIB.
-     * @return a pointer to a valid @ref RibClient if found, otherwise NULL.
-     */
-    RibClient* find_rib_client(const string& target_name, int family,
-			       bool unicast, bool multicast);
-
-    /**
-     * Add a RIB client.
-     *
-     * Add a RIB client for a given target name, address family, and
-     * unicast/multicast flags.
-     *
-     * @param target_name the target name of the RIB client.
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param unicast true if a client for the unicast RIB.
-     * @param multicast true if a client for the multicast RIB.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_rib_client(const string& target_name, int family,
-		       bool unicast, bool multicast);
-
-    /**
-     * Delete a RIB client.
-     *
-     * Delete a RIB client for a given target name, address family, and
-     * unicast/multicast flags.
-     *
-     * @param target_name the target name of the RIB client.
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param unicast true if a client for the unicast RIB.
-     * @param multicast true if a client for the multicast RIB.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_rib_client(const string& target_name, int family,
-			  bool unicast, bool multicast);
-
-    /**
-     * Enable a RIB client.
-     *
-     * Enable a RIB client for a given target name, address family, and
-     * unicast/multicast flags.
-     *
-     * @param target_name the target name of the RIB client.
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param unicast true if a client for the unicast RIB.
-     * @param multicast true if a client for the multicast RIB.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int enable_rib_client(const string& target_name, int family,
-			  bool unicast, bool multicast);
-
-    /**
-     * Disable a RIB client.
-     *
-     * Disable a RIB client for a given target name, address family, and
-     * unicast/multicast flags.
-     *
-     * @param target_name the target name of the RIB client.
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param unicast true if a client for the unicast RIB.
-     * @param multicast true if a client for the multicast RIB.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int disable_rib_client(const string& target_name, int family,
-			   bool unicast, bool multicast);
 
     /**
      * Make some errors we'd normally mask fatal.  Should be used for

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.37 2004/06/10 22:41:39 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.38 2004/06/11 23:33:33 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -29,34 +29,6 @@
 #include "redist_xrl.hh"
 #include "redist_policy.hh"
 
-template <typename A>
-void
-initialize_rib(RIB<A>& 			rib,
-	       list<RibClient*>& 	rib_clients_list,
-	       RegisterServer& 		register_server)
-{
-    if (rib.initialize_export(&rib_clients_list) != XORP_OK) {
-	XLOG_FATAL("Could not initialize export table for %s",
-		   rib.name().c_str());
-    }
-    if (rib.initialize_register(&register_server) != XORP_OK) {
-	XLOG_FATAL("Could not initialize register table for %s",
-		   rib.name().c_str());
-    }
-    if (rib.initialize_redist_all("all") != XORP_OK) {
-	XLOG_FATAL("Could not initialize all-protocol redistribution "
-		   "table for %s",
-		   rib.name().c_str());
-    }
-    if (rib.add_igp_table("connected", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for %s",
-		   rib.name().c_str());
-    }
-    if (rib.add_igp_table("static", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for %s",
-		   rib.name().c_str());
-    }
-}
 
 RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
 		       const string& fea_target)
@@ -74,10 +46,10 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
 		      _vif_manager, this),
       _fea_target(fea_target)
 {
-    initialize_rib(_urib4, _urib4_clients_list, _register_server);
-    initialize_rib(_mrib4, _mrib4_clients_list, _register_server);
-    initialize_rib(_urib6, _urib6_clients_list, _register_server);
-    initialize_rib(_mrib6, _mrib6_clients_list, _register_server);
+    _urib4.initialize(_register_server);
+    _mrib4.initialize(_register_server);
+    _urib6.initialize(_register_server);
+    _mrib6.initialize(_register_server);
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
     _status_update_timer = _eventloop.new_periodic(1000, cb);
 }
@@ -85,11 +57,6 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
 RibManager::~RibManager()
 {
     stop();
-
-    delete_pointers_list(_urib4_clients_list);
-    delete_pointers_list(_mrib4_clients_list);
-    delete_pointers_list(_urib6_clients_list);
-    delete_pointers_list(_mrib6_clients_list);
 }
 
 int
@@ -145,27 +112,6 @@ RibManager::status_updater()
     default:
 	// TODO: XXX: PAVPAVPAV: more cases may need to be added
 	break;
-    }
-
-    //
-    // Check the unicast RIBs can still talk to the FEA
-    //
-    RibClient* fea_client;
-    fea_client = find_rib_client(_fea_target, AF_INET, true, false);
-    if (fea_client != NULL) {
-	if (fea_client->failed()) {
-	    _status_code = PROC_FAILED;
-	    _status_reason = "Fatal error talking to FEA (IPv4, unicast)";
-	    return false;
-	}
-    }
-    fea_client = find_rib_client(_fea_target, AF_INET6, true, false);
-    if (fea_client != NULL) {
-	if (fea_client->failed()) {
-	    _status_code = PROC_FAILED;
-	    _status_reason = "Fatal error talking to FEA (IPv6, unicast)";
-	    return false;
-	}
     }
 
     //
@@ -355,194 +301,6 @@ RibManager::delete_vif_address(const string& 	vifn,
 }
 
 
-//
-// Select the appropriate list of RIB clients
-//
-list<RibClient* >*
-RibManager::select_rib_clients_list(int family, bool unicast, bool multicast)
-{
-    if (! (unicast ^ multicast))
-	return (NULL);	// Only one of the flags must be set
-
-    //
-    // Select the appropriate list
-    //
-    switch (family) {
-    case AF_INET:
-	if (unicast)
-	    return (&_urib4_clients_list);
-	if (multicast)
-	    return (&_mrib4_clients_list);
-	break;
-    case AF_INET6:
-	if (unicast)
-	    return (&_urib6_clients_list);
-	if (multicast)
-	    return (&_mrib6_clients_list);
-	break;
-    default:
-	XLOG_FATAL("Invalid address family: %d", family);
-	break;
-    }
-
-    //
-    // Nothing found
-    //
-    return (NULL);
-}
-
-//
-// Find a RIB client for a given target name, address family, and
-// unicast/multicast flags.
-//
-RibClient*
-RibManager::find_rib_client(const string& target_name, int family,
-			    bool unicast, bool multicast)
-{
-    list<RibClient* >* rib_clients_list;
-
-    rib_clients_list = select_rib_clients_list(family, unicast, multicast);
-    if (rib_clients_list == NULL)
-	return (NULL);
-
-    //
-    // Search for a RIB client with the same target name
-    //
-    list<RibClient* >::iterator iter;
-    for (iter = rib_clients_list->begin();
-	 iter != rib_clients_list->end();
-	 ++iter) {
-	RibClient* rib_client = *iter;
-	if (rib_client->target_name() == target_name)
-	    return (rib_client);
-    }
-
-    //
-    // Nothing found
-    //
-    return (NULL);
-}
-
-//
-// Add a RIB client for a given target name, address family, and
-// unicast/multicast flags.
-//
-// Return: XORP_OK on success, otherwise XORP_ERROR.
-//
-int
-RibManager::add_rib_client(const string& target_name, int family,
-			   bool unicast, bool multicast)
-{
-    list<RibClient* >* rib_clients_list;
-
-    //
-    // Check if this RIB client has been added already
-    //
-    if (find_rib_client(target_name, family, unicast, multicast) != NULL)
-	return (XORP_OK);
-
-    //
-    // Find the list of RIB clients to add the new client to.
-    //
-    rib_clients_list = select_rib_clients_list(family, unicast, multicast);
-    if (rib_clients_list == NULL)
-	return (XORP_ERROR);
-
-    //
-    // Create a new RibClient, and add it to the list
-    //
-    RibClient* rib_client = new RibClient(_xrl_router, target_name);
-    rib_clients_list->push_back(rib_client);
-
-    return (XORP_OK);
-}
-
-//
-// Delete a RIB client for a given target name, address family, and
-// unicast/multicast flags.
-//
-// Return: XORP_OK on success, otherwise XORP_ERROR.
-//
-int
-RibManager::delete_rib_client(const string& target_name, int family,
-			      bool unicast, bool multicast)
-{
-    RibClient* rib_client;
-    list<RibClient* >* rib_clients_list;
-
-    //
-    // Find the RIB client
-    //
-    rib_client = find_rib_client(target_name, family, unicast, multicast);
-    if (rib_client == NULL)
-	return (XORP_ERROR);
-
-    //
-    // Find the list of RIB clients
-    //
-    rib_clients_list = select_rib_clients_list(family, unicast, multicast);
-    if (rib_clients_list == NULL)
-	return (XORP_ERROR);
-
-    list<RibClient* >::iterator iter;
-    iter = find(rib_clients_list->begin(),
-		rib_clients_list->end(),
-		rib_client);
-    XLOG_ASSERT(iter != rib_clients_list->end());
-    rib_clients_list->erase(iter);
-    delete rib_client;
-
-    return (XORP_OK);
-}
-
-//
-// Enable a RIB client for a given target name, address family, and
-// unicast/multicast flags.
-//
-// Return: XORP_OK on success, otherwise XORP_ERROR.
-//
-int
-RibManager::enable_rib_client(const string& target_name, int family,
-			      bool unicast, bool multicast)
-{
-    RibClient* rib_client;
-
-    //
-    // Find the RIB client
-    //
-    rib_client = find_rib_client(target_name, family, unicast, multicast);
-    if (rib_client == NULL)
-	return (XORP_ERROR);
-
-    rib_client->set_enabled(true);
-
-    return (XORP_OK);
-}
-
-//
-// Disable a RIB client for a given target name, address family, and
-// unicast/multicast flags.
-//
-// Return: XORP_OK on success, otherwise XORP_ERROR.
-//
-int
-RibManager::disable_rib_client(const string& target_name, int family,
-			       bool unicast, bool multicast)
-{
-    RibClient* rib_client;
-
-    //
-    // Find the RIB client
-    //
-    rib_client = find_rib_client(target_name, family, unicast, multicast);
-    if (rib_client == NULL)
-	return (XORP_ERROR);
-
-    rib_client->set_enabled(false);
-
-    return (XORP_OK);
-}
-
 void
 RibManager::make_errors_fatal()
 {
@@ -590,53 +348,6 @@ RibManager::target_death(const string& target_class,
     _urib6.target_death(target_class, target_instance);
     _mrib4.target_death(target_class, target_instance);
     _mrib6.target_death(target_class, target_instance);
-
-    //
-    // Remove any RibClients that died.
-    //
-    list<RibClient* >::iterator iter;
-    for (iter = _urib4_clients_list.begin();
-	 iter != _urib4_clients_list.end(); ++iter) {
-	if (((*iter)->target_name() == target_instance)
-	    || ((*iter)->target_name() == target_class)) {
-	    delete (*iter);
-	    _urib4_clients_list.erase(iter);
-	    break;
-	}
-    }
-
-    for (iter = _mrib4_clients_list.begin();
-	 iter != _mrib4_clients_list.end();
-	 ++iter) {
-	if (((*iter)->target_name() == target_instance)
-	    || ((*iter)->target_name() == target_class)) {
-	    delete (*iter);
-	    _mrib4_clients_list.erase(iter);
-	    break;
-	}
-    }
-
-    for (iter = _urib6_clients_list.begin();
-	 iter != _urib6_clients_list.end();
-	 ++iter) {
-	if (((*iter)->target_name() == target_instance)
-	    || ((*iter)->target_name() == target_class)) {
-	    delete (*iter);
-	    _urib6_clients_list.erase(iter);
-	    break;
-	}
-    }
-
-    for (iter = _mrib6_clients_list.begin();
-	 iter != _mrib6_clients_list.end();
-	 ++iter) {
-	if (((*iter)->target_name() == target_instance)
-	    || ((*iter)->target_name() == target_class)) {
-	    delete (*iter);
-	    _mrib6_clients_list.erase(iter);
-	    break;
-	}
-    }
 }
 
 static inline

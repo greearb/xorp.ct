@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.35 2004/07/02 05:03:51 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.36 2004/07/22 10:55:12 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -206,12 +206,6 @@ RIB<A>::find_or_create_peer_nexthop(const A& addr)
 // ----------------------------------------------------------------------------
 // Naming utility methods
 
-static inline const char*
-export_tablename()
-{
-    return "ExportToRibClients";
-}
-
 static inline string
 redist_tablename(const string& from_table)
 {
@@ -263,19 +257,30 @@ RIB<A>::~RIB()
 }
 
 template <typename A>
-int
-RIB<A>::initialize_export(list<RibClient* >* rib_clients_list)
+void
+RIB<A>::initialize(RegisterServer& register_server)
 {
-    ExportTable<A>* et = new ExportTable<A>(export_tablename(), 0,
-					    rib_clients_list);
-
-    if (add_table(et) != XORP_OK) {
-	XLOG_FATAL("Export already initialized.");
-	//delete et;
-	//return XORP_ERROR;
+    if (initialize_register(register_server) != XORP_OK) {
+	XLOG_FATAL("Could not initialize register table for %s",
+		   name().c_str());
     }
-    _final_table = et;
-    return XORP_OK;
+    //
+    // XXX: we must initialize the final RedistTable after the
+    // RegistTable has been initialized.
+    //
+    if (initialize_redist_all("all") != XORP_OK) {
+	XLOG_FATAL("Could not initialize all-protocol redistribution "
+		   "table for %s",
+		   name().c_str());
+    }
+    if (add_igp_table("connected", "", "") != XORP_OK) {
+	XLOG_FATAL("Could not add igp table \"connected\" for %s",
+		   name().c_str());
+    }
+    if (add_igp_table("static", "", "") != XORP_OK) {
+	XLOG_FATAL("Could not add igp table \"connected\" for %s",
+		   name().c_str());
+    }
 }
 
 template <typename A>
@@ -298,12 +303,18 @@ RIB<A>::initialize_redist_all(const string& all)
 	return XORP_ERROR;
     }
 
+    //
+    // Set the RedistTable as the final table
+    //
+    if (_final_table == NULL || _final_table == _register_table)
+	_final_table = r;
+
     return XORP_OK;
 }
 
 template <typename A>
 int
-RIB<A>::initialize_register(RegisterServer* regserv)
+RIB<A>::initialize_register(RegisterServer& register_server)
 {
     if (_register_table != NULL) {
 	XLOG_WARNING("Register table already initialized.");
@@ -311,7 +322,7 @@ RIB<A>::initialize_register(RegisterServer* regserv)
     }
 
     RegisterTable<A>* rt;
-    rt = new RegisterTable<A>("RegisterTable", regserv, _multicast);
+    rt = new RegisterTable<A>("RegisterTable", register_server, _multicast);
     if (add_table(rt) != XORP_OK) {
 	XLOG_WARNING("Add RegisterTable failed.");
 	delete rt;
@@ -319,11 +330,7 @@ RIB<A>::initialize_register(RegisterServer* regserv)
     }
     _register_table = rt;
 
-    if (find_table(export_tablename()) == NULL) {
-	// No ExportTable<A> - perhaps we're an MRIB.
-	if (_final_table != NULL) {
-	    XLOG_FATAL("No export table when initializing register table");
-	}
+    if (_final_table == NULL) {
 	_final_table = _register_table;
     } else {
 	_final_table->replumb(NULL, _register_table);
@@ -346,7 +353,9 @@ RIB<A>::new_origin_table(const string&	tablename,
 	XLOG_WARNING("Could not add origin table %s", tablename.c_str());
 	delete ot;
 	return XORP_ERROR;
-    } else if (_final_table == NULL) {
+    }
+
+    if (_final_table == NULL) {
 	_final_table = ot;
     }
 
@@ -976,9 +985,7 @@ RIB<A>::add_origin_table(const string& tablename,
     OriginTable<A>* new_table = static_cast<OriginTable<A>* >(find_table(tablename));
     if (_final_table == new_table) {
 	//
-	// This is the first table, so no need to plumb anything
-	// this won't occur if there's an ExportTable<A>, because that
-	// would have been created already.
+	// This is the first table, so no need to plumb anything.
 	//
 	debug_msg("first table\n");
 	return XORP_OK;
@@ -1045,22 +1052,21 @@ RIB<A>::add_origin_table(const string& tablename,
 	if ((egp_table == NULL) && (igp_table == NULL)) {
 	    //
 	    // There are tables, but neither IGP or EGP origin tables
-	    // Therefore the final table must be an ExportTable<A> or
-	    // a RegisterTable (MRIB's have no ExportTable<A>).
+	    // Therefore the final table must be a RedistTable
+	    // or a RegisterTable.
 	    //
-	    if (_final_table->type() != EXPORT_TABLE
-		&& _final_table->type() != REGISTER_TABLE) {
+	    if ((_final_table->type() != REDIST_TABLE)
+		&& (_final_table->type() != REGISTER_TABLE)) {
 		XLOG_UNREACHABLE();
 	    }
 
 	    //
 	    // There may be existing single-parent tables before the
-	    // ExportTable such as RegisterTable - track back to be
+	    // final table such as RegisterTable - track back to be
 	    // first of them.
 	    //
 	    RouteTable<A>* rt = track_back(_final_table,
-					   EXPORT_TABLE
-					   | REDIST_TABLE
+					   REDIST_TABLE
 					   | REGISTER_TABLE);
 
 	    //
@@ -1079,8 +1085,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	// of the ExtIntTable.
 	//
 	RouteTable<A>* next_table = track_back(_final_table,
-					       EXPORT_TABLE
-					       | REDIST_TABLE
+					       REDIST_TABLE
 					       | REGISTER_TABLE);
 	RouteTable<A>* existing_table = next_table->parent();
 	if (protocol_type == IGP) {
@@ -1097,7 +1102,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	    return XORP_ERROR;
 	}
 
-	if (_final_table->type() & (EXPORT_TABLE | REGISTER_TABLE)) {
+	if (_final_table->type() & (REDIST_TABLE | REGISTER_TABLE)) {
 	    ei_table->set_next_table(next_table);
 	    next_table->replumb(existing_table, ei_table);
 	} else {

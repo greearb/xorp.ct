@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.23 2004/05/21 00:02:55 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.24 2004/06/10 22:41:43 hodson Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -105,65 +105,6 @@ protected:
     XrlCmdError rib_0_1_start_rib();
 
     XrlCmdError rib_0_1_stop_rib();
-
-    /**
-     *  Add/delete/enable/disable a RIB client. Add/delete/enable/disable a RIB
-     *  client for a given target name, address family, and unicast/multicast
-     *  flags.
-     *
-     *  @param target_name the target name of the RIB client.
-     *
-     *  @param unicast true if a client for the unicast RIB.
-     *
-     *  @param multicast true if a client for the multicast RIB.
-     */
-    XrlCmdError rib_0_1_add_rib_client4(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_add_rib_client6(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_delete_rib_client4(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_delete_rib_client6(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_enable_rib_client4(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_enable_rib_client6(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_disable_rib_client4(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_disable_rib_client6(
-	// Input values,
-	const string&	target_name,
-	const bool&	unicast,
-	const bool&	multicast);
 
     /**
      *  Make errors fatal; used to detect errors we'd normally mask
