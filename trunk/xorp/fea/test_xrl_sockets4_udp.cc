@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.1 2003/12/17 00:04:48 hodson Exp $"
 
 #include <sysexits.h>
 
@@ -493,7 +493,7 @@ match_bytes_sent_received(TestSocket4UDP** pps /* sender */,
 }
 
 static void
-close_socket(TestSocket4UDP** ppu)
+local_close_socket(TestSocket4UDP** ppu)
 {
     TestSocket4UDP* pu = *ppu;
     if (pu->close() == false) {
@@ -618,7 +618,8 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     //
     // Close udp1
     //
-    ev.push_back(e.new_oneoff_after_ms(14000, callback(close_socket, &udp1)));
+    ev.push_back(e.new_oneoff_after_ms(14000, callback(local_close_socket,
+						       &udp1)));
 
     //
     // Check udp1 closed
