@@ -28,7 +28,7 @@ diverse groups.
 XORP divides into two subsystems. The user-level subsystem consists of the routing protocols themselves, along with routing
 information bases and support processes. The kernel-level subsystem manages the forwarding path and provides APIs for the user-level to access. The goal is for almost all of the user-level code to be agnostic as to the details of the forwarding path.
 
-For user-level XORP, we've developed a multi-process architecture with
+User-level XORP has a multi-process architecture, with
 one process per routing protocol, plus extra processes for management,
 configuration, and coordination.  To enable extensibility we designed
 a novel inter-process communication mechanism, XORP Resource
@@ -61,32 +61,24 @@ Locators (XRLs), for communication between these modules.
 Figure~\ref{fig:processes} shows how a XORP router's user-level processes
 and Click forwarding path fit together.
 The shared user-level processes are the XORP architecture's most innovative
-feature. Four core processes are particularly worthy of comment: the
-\emph{router manager},
-the \emph{ipc finder}, the \emph{routing information base}, and the 
-\emph{forwarding engine abstraction}.  
+feature. Four core processes are particularly worthy of comment.
 
 The \emph{router manager}
 process manages the router as a whole.  It maintains
-configuration information; starts other processes, such as routing
+configuration information; starts processes such as routing
 protocols, as required by the configuration; and restarts failed
 processes as necessary.
 
 The \emph{ipc finder} process stores mappings between abstracted application
-requests, such as ``How many interfaces does this router have?'', and the
+requests, such as ``What are this router's interfaces?'', and the
 particular IPC calls necessary to answer those requests.
 Think of it as an IPC redirector:
 when an application wishes to make an IPC
-call, it consults the finder to discover how to do it.  The
-application typically caches this information so future calls
-circumvent the finder.  Furthermore, the finder can instruct
-applications to update contact information.  Thus it is easy to change
+call, it consults the finder to discover how to do it.  Thus it is easy to change
 how application requests are handled at run-time.  We
-can trace XORP's communication pattern by asking the finder to map
+can also trace XORP's internal communications by asking the finder to map
 abstract requests to sequences of IPCs, some for tracing and some for
-doing the work.  XORP processes can communicate without
-bootstrapping using the finder, but since XRLs are relatively low cost we
-have not found this necessary to date.
+doing the work.  
 
 %% XXX This is duptext from Eddie and Orion editing at the same time.
 %% Either this or the next paragraph should go.
@@ -111,8 +103,7 @@ whether the forwarding plane is Click \cite{click} based, a conventional UNIX
 kernel, or an alternative method.  The FEA manages the networking
 interfaces and forwarding table in the router, and provides information to routing processes
 about the interface properties and events occurring on interfaces, such as an
-interface being taken down.  As with the finder, XORP processes can bypass the
-FEA when required.
+interface being taken down.
 
 
 \subsection{Extensibility}
@@ -125,35 +116,32 @@ itself.
 Open inter-process interfaces, built in to the system from the beginning,
 form the basic source of user-level XORP's extensibility.
 
-\subsubsection{XRLs}
-\def\xrl#1{\textsf{\small #1}}
+%
+\begin{floatingfigure}[r]{3.3in} %[h]
+%\vspace{-0.05in}
+\centerline{\psfig{figure=xrl.ps,width=3.2in}}
+\caption{An example XRL}
+\label{fig:xrl}
+\vspace{-0.1in}
+\end{floatingfigure}
 
-Most inter-process communication within XORP takes place via XRLs.  XRLs resemble the Web's URLs. They specify in
-human-readable form the type of IPC transport desired (the
+\def\xrl#1{\textsf{\small #1}} Most inter-process communication within
+XORP takes place via XRLs.  XRLs resemble the Web's URLs. They specify
+in human-readable form the type of IPC transport desired (the
 ``protocol''), the abstract name for the entity being communicated
 with, the method being invoked, and a list of named arguments.  Unlike
 URLs, they can also specify the nature of the response expected.
-
-As an example, the general form of one of the XRLs for the forwarding
-engine abstraction (FEA) process might be rendered in human readable
-form as:
-%
-\begin{figure}[h]
-\vspace{-0.05in}
-\centerline{\psfig{figure=xrl.ps,width=3.5in}}
-\vspace{-0.1in}
-\end{figure}
-
-\noindent The initial `\xrl{finder:}' portion specifies the protocol;
-in this case the actual protocol has not yet been resolved.
-The first time this XRL is called, the client XRL library
-contacts the finder, which responds with a redirection to a new XRL
-containing the actual protocol to be used, together with all the
-parameters needed to contact the current FEA.
-Subsequent communication then goes
-directly between the client and the FEA process.
-If the FEA restarts, the client's XRL calls to the old FEA will fail, and
-it can consult the finder to update the redirection.
+Figure \ref{fig:xrl} shows how the general form of one of the XRLs for
+the forwarding engine abstraction (FEA) process might be rendered in
+human readable form. The initial `\xrl{finder:}' portion specifies the
+protocol; in this case the actual protocol has not yet been resolved.
+The first time this XRL is called, the client XRL library contacts the
+finder, which responds with a redirection to a new XRL containing the
+actual protocol to be used, together with all the parameters needed to
+contact the current FEA.  Subsequent communication then goes directly
+between the client and the FEA process.  If the FEA restarts, the
+client's XRL calls to the old FEA will fail, and it can consult the
+finder to update the redirection.
 
 %The XRL library, which all of our processes link against, takes an XRL
 %and performs argument marshaling, then it invokes the specified transport
@@ -168,7 +156,7 @@ it can consult the finder to update the redirection.
 %generator exist, so most XRL clients never need to parse the human
 %readable form.
 
-The original motivation for XRLs was to encapsulate existing
+One motivation for XRLs was to encapsulate existing
 protocols within our consistent IPC framework.   For example, we
 might wish to run third-party software that uses SNMPv3 for
 configuration. 
@@ -205,10 +193,22 @@ available.
 
 To get more concrete, our configuration manager has a strict hierarchy
 of configuration parameters, which is directly reflected in our
-default CLI.  A fragment of a router configuration file might look
-like:
+default CLI.  The configuration manager takes a directory of template
+files, which define the possible configurable parameters for each XORP
+routing protocol, and generates mappings of configuration parameters
+to XRL dispatches.  The designer of a new routing protocol can simply
+add a template file specifying the new functionality provided.  The
+configuration manager can read the template file, discover the new
+functionality, and know how to communicate with the process to use it.
+The new functionality is then immediately available through the CLI.
 
-\begin{quotation}
+For example, a fragment of a router configuration file, and the
+corresponding part template file might look like:
+\vspace{-0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{multicols}{2}
 \noindent \sf \small protocols ospf \{\\
 \parindent 10pt 
 \indent     router-id: 128.16.64.1\\
@@ -222,16 +222,7 @@ like:
 \parindent 10pt 
 \indent     \}\\
 \}
-\end{quotation}
 
-The configuration manager takes a directory of template files, which
-define the possible configurable parameters for each XORP routing
-protocol, and generates mappings of configuration parameters to XRL
-dispatches.  The designer of a new routing protocol can simply add a
-template file specifying the new functionality provided.  Thus, the
-template entry for OSPF might contain the fragment:
-
-\begin{quotation}
 \noindent \sf \small hello-interval: uint \{ \\
 \parindent 10pt 
 \indent \%set: xrl ``ospf/ospf/1.0/set\_hello\_interval?\\
@@ -242,11 +233,9 @@ template entry for OSPF might contain the fragment:
 \parindent 60pt 
 \indent -$>$ interval:i32'';\\
 \}
-\end{quotation}
-
-The configuration manager can read the template file, discover the new
-functionality, and know how to communicate with the process to use it.
-The new functionality is then immediately available through the CLI.
+\end{multicols}
+\end{minipage}
+}
 
 \subsection{Robustness}
 
