@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.4 2003/06/17 23:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.5 2003/07/22 19:22:32 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -383,19 +383,29 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	}
 	
 	// Get the broadcast or point-to-point address
-	if (rti_info[RTAX_BRD] != NULL) {
+	bool has_broadcast_addr = false;
+	bool has_peer_addr = false;
+	if ((rti_info[RTAX_BRD] != NULL)
+	    && (rti_info[RTAX_BRD]->sa_family == AF_INET)) {
 	    IPv4 o(*rti_info[RTAX_BRD]);
 	    if (fa.broadcast()) {
 		fa.set_bcast(o);
+		has_broadcast_addr = true;
 	    } else if (fa.point_to_point()) {
 		fa.set_endpoint(o);
+		has_peer_addr = true;
 	    } else {
 		// We end up here, which is confusing on FBSD 4.6.2
 		debug_msg("Assuming this %s with flags 0x%08x is bcast\n",
 			  o.str().c_str(), ifa->ifam_flags);
 		fa.set_bcast(o);
+		has_broadcast_addr = true;
 	    }
 	}
+	if (! has_broadcast_addr)
+	    fa.set_broadcast(false);
+	if (! has_peer_addr)
+	    fa.set_point_to_point(false);
 	
 	// Mark as deleted if necessary
 	if (ifa->ifam_type == RTM_DELADDR)
@@ -424,10 +434,17 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	}
 	
 	// Get the point-to-point address
-        if ((rti_info[RTAX_BRD] != NULL) && fa.point_to_point()) {
-	    IPv6 o(*rti_info[RTAX_BRD]);
-	    fa.set_endpoint(o);
+	bool has_peer_addr = false;
+        if ((rti_info[RTAX_BRD] != NULL)
+	    && (rti_info[RTAX_BRD]->sa_family == AF_INET6)) {
+	    if (fa.point_to_point()) {
+		IPv6 o(*rti_info[RTAX_BRD]);
+		fa.set_endpoint(o);
+		has_peer_addr = true;
+	    }
         }
+	if (! has_peer_addr)
+	    fa.set_point_to_point(false);
 	
 #if 0	// TODO: don't get the flags?
 	do {
