@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.7 2003/03/14 12:32:57 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.8 2003/06/05 21:44:49 jcardona Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,13 +9,66 @@ This file contains XORP release notes (most recent releases first).
 Release 0.3 (2003/??/??)
 ========================
   ALL:
-    - 
+    - Compilation fixes for GCC3.3 on FreeBSD 4.8R.
+
+    - Cross directory build and gmake check support.
+
+    - Purge of abort() calls.  Replacement by XLOG_UNFINISHED and
+      XLOG_UNREACHABLE.
 
   LIBXORP:
-    - 
+    - Allocation without construction bug fixed in SelectorList code.  Fixes
+      potential for junk values and sanity checking when the number of active
+      file descriptors is large.
+
+    - Addition of status codes for XORP processes to report operational 
+      state (to the rtrmgr).
+
+    - Addition of XLOG_UNFINISHED and XLOG_UNREACHABLE to xlog.h.
+
+    - Explicitly disable copy constructor and assignment operator for
+      EventLoop.
 
   LIBXIPC:
-    - 
+    - Removal of 0.1 release Finder code and compatability shims that allowed
+      newer and older code to co-exist.  Renaming of "FinderNG" classes
+      and files to "Finder".
+
+    - Use of class and instance names and Finder policy for having a
+      primary instance in a class (first registered is primary, then second
+      in case first exits/fails, and so forth).
+
+    - Support for tunneling XRLs and XRL responses to and from the Finder. 
+
+    - Implementation event notification through the Finder using tunneled 
+      XRLs.  XRL Targets can now request to be notified of the birth and
+      death of other XRL Targets by the Finder.
+
+    - Reduced number of XrlErrors to hopefully simplify handling errors.  
+
+    - Addition of new enumated type XrlErrorCode and change 
+      XrlError::error_code method to return this type.  Allows compiler to
+      detect unhandled error types in switch statements (if default case is
+      not used).
+
+    - Finder clients no longer reconnect to the Finder should they lose their
+      connection per ${XORP}/docs/design_arch/error_handling.tex.
+
+    - Increased Finder timeout for call_xrl.
+
+    - Fix memory corruption following Finder transport error events.
+
+    - Convert all code to use FinderServer class when they need to instantiate
+      a Finder.
+
+    - More consistent handling of defaults on send and receive sides of Finder.
+
+    - Assorted minor clean-ups.
+
+    - Fix xrl_parser_input.cc handling of absolute file names.
+
+  XRL:
+    - Addition of get_status and shutdown methods to the common interface.
 
   RTRMGR:
     - 
@@ -34,6 +87,7 @@ Release 0.3 (2003/??/??)
 
   MLD/IGMP:
     - Protocol implementation testing completed
+
     - Misc. bug fixes
 
   PIM-SM:
@@ -48,6 +102,8 @@ Release 0.3 (2003/??/??)
     - Integrated with Net-SNMP agent
     - Implemented bgpVersion and bgpPeerTable from BGP4-MIB (RFC 1657)
 
+  RIP:
+    - Implementation started.
 
 Release 0.2 (2003/03/10)
 ========================
