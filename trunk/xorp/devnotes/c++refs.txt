@@ -51,3 +51,12 @@ grips with C++.
      template specialization magic.  There's not too much in the
      project that stems directly from this book, but it's mind blowing
      material.
+
+ * Technical Report on C++ Performance, ISO/IEC PDTR 18015,
+   WG 21 N1487=03-0070, 2003-08-11.  Available from:
+   http://www.research.att.com/~bs/performanceTR.pdf
+
+     Report on C++ overheads, performance, myths thereof, and
+     techniques for efficient C++.
+
+
