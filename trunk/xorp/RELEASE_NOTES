@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.43 2003/11/07 00:49:45 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.44 2003/11/19 00:35:25 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -43,7 +43,8 @@ Release ?.?? (200?/??/??)
     - 
 
   PIM-SM:
-    - 
+    - Updated to support the lastest PIM-SM spec
+      (draft-ietf-pim-sm-v2-new-09.{ps,txt})
 
   CLI:
     - 
