@@ -229,4 +229,8 @@ $(MANDIR) $(MANDIR)/man3 $(LIBDIR) $(INCDIR) $(BINDIR):
 	mkdir $@
 	chmod ugo+rx $@
 
-check:
+# Build 'all' for check since higher level check may cause binaries to be
+# built that need to link against libtecla.  This Makefile will typically have
+# been invoked with 'check' as an argument.
+
+check: all
