@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.17 2004/02/25 05:03:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.18 2004/02/25 15:20:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -298,6 +298,11 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
 	iter = _route_table.lookup_node(net);
 	assert(iter != _route_table.end());
+
+	//It's the responsibility of the recipient of a changed route
+	//to store or delete it.  We don't need it anymore (we found
+	//the cached copy) so we delete it.
+	rtmsg.route()->unref();
 
 	//the message we pass on needs to contain our cached
 	//route, because the MED info in it may not be in the original
