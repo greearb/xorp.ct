@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.1 2004/11/19 10:54:28 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.2 2004/11/23 00:53:20 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -91,7 +91,7 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* buf,
 
     // Payload.  XXX: Hello Nasty.
     struct iovec iov;
-    iov.iov_base = (caddr_t)const_cast<uint8_t *>(buf);
+    iov.iov_base = reinterpret_cast<caddr_t>(const_cast<uint8_t *>(buf));
     iov.iov_len = nbytes;
 
     // Message header.
@@ -100,7 +100,7 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* buf,
     mh.msg_namelen = sizeof(sdst);
     mh.msg_iov = &iov;
     mh.msg_iovlen = 1;
-    mh.msg_control = cmsgbuf;
+    mh.msg_control = reinterpret_cast<caddr_t>(const_cast<uint8_t *>(cmsgbuf));
     mh.msg_controllen = sizeof(cmsgbuf);
     mh.msg_flags = 0;
     return ::sendmsg(_fd, &mh, 0);
@@ -165,7 +165,7 @@ IoRawSocket6::recv(int /* fd */, SelectorMask /* m */)
     mh.msg_namelen = sizeof(ssrc);
     mh.msg_iov = &iov;
     mh.msg_iovlen = 1;
-    mh.msg_control = cmsgbuf;
+    mh.msg_control = reinterpret_cast<caddr_t>(const_cast<uint8_t *>(cmsgbuf));
     mh.msg_controllen = sizeof(cmsgbuf);
     mh.msg_flags = 0;
 
