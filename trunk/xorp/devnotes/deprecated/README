@@ -1,0 +1,8 @@
+The documents in this directory are deprecated, but may be of interest.
+
+error_handling.tex
+------------------
+
+Early thoughts on handling errors within a XORP router.  
+
+Superceded by ${XORP}/docs/design_arch/error_handling.tex
