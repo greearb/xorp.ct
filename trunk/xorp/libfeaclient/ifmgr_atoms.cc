@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.5 2003/10/22 21:09:31 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.6 2003/10/23 16:53:33 hodson Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -62,7 +62,7 @@ find_virtual_interface(IfMgrIfAtom* ifa, const string& vifname)
 
 
 static inline const IfMgrIPv4Atom*
-find_virtual_interface_addr(const IfMgrVifAtom* vifa, const IPv4 addr)
+find_virtual_interface_addr(const IfMgrVifAtom* vifa, const IPv4& addr)
 {
     const IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
     IfMgrVifAtom::V4Map::const_iterator ai = addrs.find(addr);
@@ -72,7 +72,7 @@ find_virtual_interface_addr(const IfMgrVifAtom* vifa, const IPv4 addr)
 }
 
 static inline IfMgrIPv4Atom*
-find_virtual_interface_addr(IfMgrVifAtom* vifa, const IPv4 addr)
+find_virtual_interface_addr(IfMgrVifAtom* vifa, const IPv4& addr)
 {
     IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
     IfMgrVifAtom::V4Map::iterator ai = addrs.find(addr);
@@ -137,7 +137,7 @@ IfMgrIfTree::find_vif(const string& ifname, const string& vifname)
 const IfMgrIPv4Atom*
 IfMgrIfTree::find_addr(const string& ifname,
 		       const string& vifname,
-		       const IPv4    addr) const
+		       const IPv4&   addr) const
 {
     const IfMgrIfAtom* ifa = find_interface(this, ifname);
     if (ifa == 0)
@@ -151,7 +151,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 IfMgrIPv4Atom*
 IfMgrIfTree::find_addr(const string& ifname,
 		       const string& vifname,
-		       const IPv4    addr)
+		       const IPv4&   addr)
 {
     IfMgrIfAtom* ifa = find_interface(this, ifname);
     if (ifa == 0)
@@ -213,6 +213,18 @@ IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
 	    );
 }
 
+const IfMgrVifAtom*
+IfMgrIfAtom::find_vif(const string& vifname) const
+{
+    return find_virtual_interface(this, vifname);
+}
+
+IfMgrVifAtom*
+IfMgrIfAtom::find_vif(const string& vifname)
+{
+    return find_virtual_interface(this, vifname);
+}
+
 
 // ----------------------------------------------------------------------------
 // IfMgrVifAtom methods
@@ -231,6 +243,30 @@ IfMgrVifAtom::operator==(const IfMgrVifAtom& o) const
 	    ipv4addrs()			== o.ipv4addrs()		&&
 	    ipv6addrs()			== o.ipv6addrs()
 	    );
+}
+
+const IfMgrIPv4Atom*
+IfMgrVifAtom::find_addr(const IPv4& addr) const
+{
+    return find_virtual_interface_addr(this, addr);
+}
+
+IfMgrIPv4Atom*
+IfMgrVifAtom::find_addr(const IPv4& addr)
+{
+    return find_virtual_interface_addr(this, addr);
+}
+
+const IfMgrIPv6Atom*
+IfMgrVifAtom::find_addr(const IPv6& addr) const
+{
+    return find_virtual_interface_addr(this, addr);
+}
+
+IfMgrIPv6Atom*
+IfMgrVifAtom::find_addr(const IPv6& addr)
+{
+    return find_virtual_interface_addr(this, addr);
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.9 2003/10/22 21:09:31 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.10 2003/10/23 16:54:06 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -101,7 +101,7 @@ public:
      */
     const IfMgrIPv4Atom* find_addr(const string& ifname,
 				   const string& vifname,
-				   const IPv4	 addr) const;
+				   const IPv4&	 addr) const;
 
     /**
      * Find IPv4 address structure.
@@ -110,9 +110,9 @@ public:
      * @param addr IPv4 address.
      * @return pointer to virtual interface structure on success, 0 otherwise.
      */
-    IfMgrIPv4Atom* find_addr(const string& ifname,
-			     const string& vifname,
-			     const IPv4	   addr);
+    IfMgrIPv4Atom* find_addr(const string&	ifname,
+			     const string&	vifname,
+			     const IPv4&	addr);
 
     /**
      * Find IPv6 address structure.
@@ -132,9 +132,9 @@ public:
      * @param addr IPv6 address.
      * @return pointer to virtual interface structure on success, 0 otherwise.
      */
-    IfMgrIPv6Atom* find_addr(const string& ifname,
-			     const string& vifname,
-			     const IPv6&   addr);
+    IfMgrIPv6Atom* find_addr(const string&	ifname,
+			     const string&	vifname,
+			     const IPv6&	addr);
 
     /**
      * Equality operator.
@@ -179,6 +179,8 @@ public:
 
     inline const VifMap& vifs() const			{ return _vifs; }
     inline VifMap& vifs()				{ return _vifs; }
+    const IfMgrVifAtom*	find_vif(const string& vifname) const;
+    IfMgrVifAtom*	find_vif(const string& vifname);
 
     bool operator==(const IfMgrIfAtom& o) const;
 
@@ -232,9 +234,13 @@ public:
 
     inline const V4Map&	ipv4addrs() const		{ return _v4addrs; }
     inline V4Map&	ipv4addrs() 			{ return _v4addrs; }
+    inline const IfMgrIPv4Atom*	find_addr(const IPv4& a) const;
+    inline IfMgrIPv4Atom*	find_addr(const IPv4& a);
 
     inline const V6Map&	ipv6addrs() const		{ return _v6addrs; }
     inline V6Map&	ipv6addrs() 			{ return _v6addrs; }
+    inline const IfMgrIPv6Atom*	find_addr(const IPv6& a) const;
+    inline IfMgrIPv6Atom*	find_addr(const IPv6& a);
 
     bool 		operator==(const IfMgrVifAtom& o) const;
 
