@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.12 2004/04/15 16:13:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.13 2004/05/07 11:45:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -254,7 +254,7 @@ DumpIterator<A>::peering_came_up(const PeerHandler *peer, uint32_t genid)
        before, so we need to record the GenID so we don't get confused
        between old and new routes */
 
-    list <PeerDumpState<A> >::iterator i;
+    typename list <PeerDumpState<A> >::iterator i;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
 	if (i->peer_handler() == peer) {
 	    // OK, we've heard about this one before, so nothing more needed.
