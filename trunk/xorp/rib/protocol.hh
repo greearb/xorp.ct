@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/protocol.hh,v 1.2 2003/02/25 04:05:20 mjh Exp $
+// $XORP: xorp/rib/protocol.hh,v 1.3 2003/03/10 23:20:55 hodson Exp $
 
 #ifndef __RIB_PROTOCOL_HH__
 #define __RIB_PROTOCOL_HH__
@@ -36,7 +36,7 @@ public:
      * protocol goes down and comes up, the genid should be
      * incremented).
      */
-    Protocol(string name, int proto_type, int genid);
+    Protocol(const string& name, int proto_type, int genid);
 
     /**
      * @return the protocol type: either IGP or EGP
@@ -48,7 +48,21 @@ public:
      */
     const string& name() const { return _name; }
 
+    /**
+     * Equality Operator
+     * 
+     * Two Protocol instances are equal if they match only in name.
+     * 
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand Protocol instance is equal to
+     * the right-hand protocol instance.
+     */
+    bool operator==(const Protocol& other) const {
+	return (name() == other.name());
+    }
+    
     void increment_genid() { _genid++; }
+    
 private:
     string _name;
 
@@ -57,15 +71,5 @@ private:
 
     int _genid;
 };
-
-
-/**
- * Two Protocol instances are equal if they match only in name.
- */
-inline bool
-operator == (Protocol a, Protocol b)
-{
-    return (a.name() == b.name());
-}
 
 #endif // __RIB_PROTOCOL_HH__
