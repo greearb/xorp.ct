@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.5 2003/06/03 10:54:21 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.6 2003/06/03 10:55:50 pavlin Exp $
 #
 
 #
@@ -78,7 +78,7 @@ exclude_files()
     	echo "exclude file usage" >&2
     fi
     excluded=`glob_files $1`
-    echo "excluded=$excluded" >&2
+    printf "Excluded files:\n  list=\"$excluded\"\n\n" >&2
     shift
 
     if [ -z "$excluded" ] ; then
@@ -119,18 +119,20 @@ xref()
 # Expects variables "lib", "files", "excludes", "xref" to be set.
 #
 kdocify() {
-    echo "Processing lib $lib"
-    echo "   Parameters files=\"$files\" excludes=\"$excludes\" xref=\"$xref\""
+    title="Processing lib $lib"
+    rule=`echo $title | tr '[A-Za-z -]' '='`
+    echo "$rule"
+    echo "$title"
+    echo "$rule"
+    printf "Parameters:\n  files=\"$files\" \n  excludes=\"$excludes\"\n  xref=\"$xref\"\n\n"
 
     excludes=${excludes:-NONE}
     FILES=`glob_files $files`
     FILES=`exclude_files "$excludes" "$FILES"`
     XREFS=`xref $xref`
     OUTDIR=${KDOC_DEST_DIR}/${KDOC_FORMAT}/${lib}
-
-    echo "Making $OUTDIR and reading $FILES"
     mkdir -p $OUTDIR
-
+    echo "Created output directory $OUTDIR"    
     echo ${FILES} |							      \
     kdoc --outputdir ${OUTDIR}						      \
 	 ${XREFS}         						      \
