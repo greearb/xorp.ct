@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.19 2003/09/10 21:37:06 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.20 2003/10/11 03:17:55 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -393,11 +393,13 @@ private:
     * Unicast Routing Table. SAFI = 1.
     */
     BGPPlumbing *_plumbing_unicast;
+    NextHopResolver<IPv4> *_next_hop_resolver_ipv4;
 
     /**
     * Multicast Routing Table. SAFI = 2.
     */
     BGPPlumbing *_plumbing_multicast;
+    NextHopResolver<IPv6> *_next_hop_resolver_ipv6;
 
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;

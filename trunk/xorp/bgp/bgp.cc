@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.15 2003/10/11 03:17:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.16 2003/10/13 23:42:25 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -57,12 +57,20 @@ BGPMain::BGPMain()
     }
 
     _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop(), *this);
+    _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
+							eventloop(),
+							*this);
+    _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
+							eventloop(),
+							*this);
     _plumbing_unicast = new BGPPlumbing("Unicast",
-					_xrl_router, _rib_ipc_handler,
-					eventloop(), *this);
+					_rib_ipc_handler,
+					*_next_hop_resolver_ipv4,
+					*_next_hop_resolver_ipv6);
     _plumbing_multicast = new BGPPlumbing("Multicast",
-					  _xrl_router, _rib_ipc_handler,
-					  eventloop(), *this);
+					  _rib_ipc_handler,
+					  *_next_hop_resolver_ipv4,
+					  *_next_hop_resolver_ipv6);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
 
     _process_watch = new ProcessWatch(_xrl_router, eventloop(),
@@ -134,6 +142,14 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting plumbing multicast\n");
     delete _plumbing_multicast;
+
+    debug_msg("-------------------------------------------\n");
+    debug_msg("Deleting next hop resolver IPv4\n");
+    delete _next_hop_resolver_ipv4;
+
+    debug_msg("-------------------------------------------\n");
+    debug_msg("Deleting next hop resolver IPv6\n");
+    delete _next_hop_resolver_ipv6;
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting process watcher\n");

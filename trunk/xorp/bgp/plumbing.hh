@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.14 2003/10/11 03:17:56 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.15 2003/10/13 23:42:26 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -37,8 +37,8 @@ class RouteTableReader;
 template <class A>
 class BGPPlumbingAF {
 public:
-    BGPPlumbingAF(const string& ribname, BGPPlumbing& master, XrlStdRouter *,
-		  EventLoop& eventloop, BGPMain& bgp);
+    BGPPlumbingAF(const string& ribname, BGPPlumbing& master,
+		  NextHopResolver<A>& next_hop_resolver);
     ~BGPPlumbingAF();
     int add_peering(PeerHandler* peer_handler);
     int stop_peering(PeerHandler* peer_handler);
@@ -97,7 +97,7 @@ private:
     string _ribname;
     BGPPlumbing& _master;
 
-    NextHopResolver<A> _next_hop_resolver;
+    NextHopResolver<A>& _next_hop_resolver;
 };
 
 
@@ -110,9 +110,10 @@ class RibIpcHandler;
 
 class BGPPlumbing {
 public:
-    BGPPlumbing(const string& safi, XrlStdRouter *,
+    BGPPlumbing(const string& safi,
 		RibIpcHandler* rib_handler,
-		EventLoop& eventloop, BGPMain& bgp);
+		NextHopResolver<IPv4>&,
+		NextHopResolver<IPv6>&);
     void set_my_as_number(const AsNum& my_AS_number);
 
     int add_peering(PeerHandler* peer_handler);
@@ -169,6 +170,9 @@ public:
     bool status(string& reason) const;
 private:
     RibIpcHandler *_rib_handler;
+
+    NextHopResolver<IPv4>& _next_hop_resolver_ipv4;
+    NextHopResolver<IPv6>& _next_hop_resolver_ipv6;
 
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.26 2003/10/11 03:17:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.27 2003/10/13 23:42:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,13 +28,16 @@
 #include "plumbing.hh"
 #include "bgp.hh"
 
-BGPPlumbing::BGPPlumbing(const string& safi, XrlStdRouter *xrl_router,
+BGPPlumbing::BGPPlumbing(const string& safi,
 			 RibIpcHandler* ribhandler,
-			 EventLoop& eventloop, BGPMain& bgp)
+			 NextHopResolver<IPv4>& next_hop_resolver_ipv4,
+			 NextHopResolver<IPv6>& next_hop_resolver_ipv6)
     : _rib_handler(ribhandler),
-    _plumbing_ipv4("(IPv4:" + safi + ")", *this, xrl_router, eventloop, bgp), 
-    _plumbing_ipv6("(IPv6:" + safi + ")", *this, xrl_router, eventloop, bgp),
-    _my_AS_number(AsNum::AS_INVALID)
+      _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
+      _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
+      _plumbing_ipv4("(IPv4:" + safi + ")", *this, _next_hop_resolver_ipv4),
+      _plumbing_ipv6("(IPv6:" + safi + ")", *this, _next_hop_resolver_ipv6),
+      _my_AS_number(AsNum::AS_INVALID)
 {
 }
 
@@ -217,12 +220,10 @@ BGPPlumbing::status(string& reason) const
 /***********************************************************************/
 
 template <class A>
-BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname, BGPPlumbing& master,
-				    XrlStdRouter *xrl_router,
-				    EventLoop& eventloop,
-				    BGPMain& bgp) 
-    : _ribname(ribname), _master(master), 
-    _next_hop_resolver(xrl_router, eventloop, bgp)
+BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
+				    BGPPlumbing& master,
+				    NextHopResolver<A>& next_hop_resolver)
+    : _ribname(ribname), _master(master), _next_hop_resolver(next_hop_resolver)
 {
     debug_msg("BGPPlumbingAF constructor called for RIB %s\n", 
 	      ribname.c_str());
