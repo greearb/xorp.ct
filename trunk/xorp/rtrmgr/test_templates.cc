@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.4 2003/06/09 23:59:05 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.5 2003/08/01 23:07:29 pavlin Exp $"
 
 #include <signal.h>
 
@@ -37,6 +37,7 @@
 //
 static const char* c_srcdir = getenv("srcdir");
 static const string srcdir = c_srcdir ? c_srcdir : ".";
+static const string default_xorp_root_dir = srcdir + "/..";
 static const string default_config_template_dir = srcdir + "/../etc/templates";
 static const string default_xrl_dir = srcdir + "/../xrl/targets";
 
@@ -94,7 +95,8 @@ main(int argc, char* const argv[])
     //read the router config template files
     TemplateTree *tt;
     try {
-	tt = new TemplateTree(srcdir, config_template_dir, xrl_dir);
+	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
+			      xrl_dir);
 	tt->display_tree();
 	delete tt;
     } catch (const XorpException&) {
