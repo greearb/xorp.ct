@@ -86,6 +86,12 @@ disable_interface()
     $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32=$1&ifname:txt=$2&enabled:bool=false"
 }
 
+configure_interface_from_system()
+{
+    echo -n "configure_interface_from_system" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/configure_interface_from_system?tid:u32=$1&ifname:txt=$2"
+}
+
 set_mac()
 {
     echo -n "set_mac" $*
