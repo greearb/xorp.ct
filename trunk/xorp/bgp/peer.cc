@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.69 2004/05/13 18:49:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.70 2004/05/23 04:03:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,7 +119,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg(pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
 	    _peerdata->dump_peer_data();
-	    event_openmess(&pac);
+	    event_openmess(pac);
 	    TIMESPENT_CHECK();
 	    break;
 	}
@@ -139,7 +139,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    UpdatePacket pac(buf, length);
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
-	    event_recvupdate(&pac);
+	    event_recvupdate(pac);
 	    TIMESPENT_CHECK();
 	    if(TIMESPENT_OVERLIMIT()) {
 		XLOG_WARNING("Processing packet took longer than %d second\n"
@@ -155,7 +155,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		_last_error[0] = pac.error_code();	// used for the MIB(?)
 		_last_error[1] = pac.error_subcode();
 		debug_msg(pac.str().c_str());
-		event_recvnotify();
+		event_recvnotify(pac);
 	    } catch (InvalidPacket& err) {
 		XLOG_WARNING("Received Invalid Notification Packet\n");
 		// We received a bad notification packet.  We don't
@@ -168,7 +168,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		NotificationPacket pac(CEASE);
 		_last_error[0] = pac.error_code();	// used for the MIB(?)
 		_last_error[1] = pac.error_subcode();
-		event_recvnotify();
+		event_recvnotify(pac);
 	    }
 	    TIMESPENT_CHECK();
 	    break;
@@ -467,7 +467,7 @@ BGPPeer::event_stop()			// EVENTBGPSTOP
  * The only states from which we enter here are STATECONNECT and STATEACTIVE
  */
 void
-BGPPeer::event_open()			// EVENTBGPTRANOPEN
+BGPPeer::event_open()	// EVENTBGPTRANOPEN
 { 
     switch(_state) {
     case STATEOPENSENT:
@@ -699,7 +699,7 @@ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
  * We receive an open packet.
  */
 void
-BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
+BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 {
     switch(_state) {
     case STATEIDLE:
@@ -712,7 +712,7 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
     case STATEOPENSENT:
 	// Process OPEN MESSAGE
 	try {
-	    check_open_packet(p);
+	    check_open_packet(&p);
 	    // We liked the open packet continue, trying to setup session.
 	    KeepAlivePacket kp;
 	    send_message(kp);
@@ -731,7 +731,7 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 		_peerdata->set_internal_peer(false);
 
 	    // Save the parameters from the open packet.
-	    _peerdata->save_parameters(p->parameter_list());
+	    _peerdata->save_parameters(p.parameter_list());
 
 	    // Compare 
 	    _peerdata->open_negotiation();
@@ -802,7 +802,7 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
  * We received an update message.
  */
 void
-BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
+BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 { 
     switch(_state) {
     case STATEIDLE:
@@ -823,7 +823,7 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 	break;
     }
     case STATEESTABLISHED: {
-	NotificationPacket *notification = check_update_packet(p);
+	NotificationPacket *notification = check_update_packet(&p);
 	if ( notification != 0 ) {	// bad message
 	    // Send Notification Message
 	    send_notification(*notification);
@@ -840,7 +840,7 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
 	if (!next_hop.is_zero()) {
 	    PathAttributeList<IPv4>& l = const_cast<
-		PathAttributeList<IPv4>&>(p->pa_list());
+		PathAttributeList<IPv4>&>(p.pa_list());
 	    PathAttributeList<IPv4>::iterator i;
 	    for (i = l.begin(); i != l.end(); i++) {
 		if (NEXT_HOP == (*i)->type()) {
@@ -850,7 +850,7 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 		}
 	    }
 	}
-	_handler->process_update_packet(p);
+	_handler->process_update_packet(&p);
 
 	break;
     }
@@ -865,8 +865,11 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
  * We received a notify message. Currently we ignore the payload.
  */
 void
-BGPPeer::event_recvnotify()			// EVENTRECNOTMESS
+BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 { 
+    XLOG_WARNING("In state %s received %s",  pretty_print_state(_state),
+		 p.str().c_str());
+
     switch(_state) {
     case STATEIDLE:
     case STATECONNECT:
@@ -882,7 +885,7 @@ BGPPeer::event_recvnotify()			// EVENTRECNOTMESS
 
     case STATEOPENSENT: {
 	// Send Notification Message with error code of FSM error.
-	XLOG_WARNING("FSM Error 1 event EVENTRECUPDATEMESS");
+	XLOG_WARNING("FSM received EVENTRECNOTMESS");
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
 	set_state(STATESTOPPED, true);

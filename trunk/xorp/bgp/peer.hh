@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.14 2004/05/11 01:14:56 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.15 2004/05/13 18:49:17 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -90,10 +90,10 @@ public:
     void event_connexp();		// EVENTCONNTIMEEXP
     void event_holdexp();		// EVENTHOLDTIMEEXP
     void event_keepexp();		// EVENTKEEPALIVEEXP
-    void event_openmess(const OpenPacket* p);	// EVENTRECOPENMESS
-    void event_keepmess();		// EVENTRECKEEPALIVEMESS
-    void event_recvupdate(const UpdatePacket *p); // EVENTRECUPDATEMESS
-    void event_recvnotify();		// EVENTRECNOTMESS
+    void event_openmess(const OpenPacket& p);	// EVENTRECOPENMESS
+    void event_keepmess();			// EVENTRECKEEPALIVEMESS
+    void event_recvupdate(const UpdatePacket& p); 	// EVENTRECUPDATEMESS
+    void event_recvnotify(const NotificationPacket& p); // EVENTRECNOTMESS
 
     void notify_peer_of_error(const int error, const int subcode,
 		const uint8_t*data = 0, const size_t len = 0);
