@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.10 2004/08/17 02:20:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.11 2004/09/01 18:12:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -318,18 +318,16 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     // we don't add it.
     //
     
-    string reason;
+    string errmsg;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
-			  strerror(errno));
-	XLOG_ERROR(reason.c_str());
+	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
 	return false;
     }
     if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
-					reason) < 0) {
-	XLOG_ERROR(reason.c_str());
+					errmsg) < 0) {
+	XLOG_ERROR("Error checking netlink request: %s", errmsg.c_str());
 	return false;
     }
 
@@ -432,18 +430,16 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     fte.net().masked_addr().copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    string reason;
+    string errmsg;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
-			  strerror(errno));
-	XLOG_ERROR(reason.c_str());
+	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
 	return false;
     }
     if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
-					reason) < 0) {
-	XLOG_ERROR(reason.c_str());
+					errmsg) < 0) {
+	XLOG_ERROR("Error checking netlink request: %s", errmsg.c_str());
 	return false;
     }
 
