@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_click.cc,v 1.6 2003/09/16 08:19:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_click.cc,v 1.7 2003/09/16 18:13:46 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -55,7 +55,7 @@ main(int argc, char *argv[])
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     int c;
-    const char *finder_host = "localhost";
+    const char *finder_host = FINDER_DEFAULT_HOST.str().c_str();
     const char *click_config_file = "/click/config";
     const char *click_module = 	"/usr/local/click/lib/click.ko";
     const char *fea_module = "/usr/local/click/lib/xorp.bo";

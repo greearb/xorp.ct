@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.19 2003/09/16 18:13:46 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.20 2004/04/15 16:13:30 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -792,7 +792,7 @@ main(int argc, char **argv)
     xlog_start();
 
     int c;
-    const char *finder_host = "localhost";
+    const char *finder_host = FINDER_DEFAULT_HOST.str().c_str();
     const char *server = SERVER;
     bool verbose = false;
     bool trace = false;
