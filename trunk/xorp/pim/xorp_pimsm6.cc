@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.2 2004/05/04 18:18:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.3 2004/05/05 06:23:30 pavlin Exp $"
 
 
 //
@@ -132,7 +132,7 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
     //
 #ifdef HAVE_IPV6_MULTICAST
     xrl_pimsm_node6.enable_pim();
-    xrl_pimsm_node6.startup();
+    // xrl_pimsm_node6.startup();
     xrl_pimsm_node6.enable_cli();
     xrl_pimsm_node6.start_cli();
 #endif

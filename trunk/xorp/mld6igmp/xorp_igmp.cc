@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xorp_igmp.cc,v 1.1 2004/05/04 00:11:29 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_igmp.cc,v 1.2 2004/05/05 06:24:47 pavlin Exp $"
 
 
 //
@@ -127,7 +127,7 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
     // Startup
     
     xrl_mld6igmp_node4.enable_mld6igmp();
-    xrl_mld6igmp_node4.startup();
+    // xrl_mld6igmp_node4.startup();
     xrl_mld6igmp_node4.enable_cli();
     xrl_mld6igmp_node4.start_cli();
 

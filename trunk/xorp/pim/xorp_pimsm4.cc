@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.1 2004/05/04 00:14:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.2 2004/05/05 06:23:30 pavlin Exp $"
 
 
 //
@@ -129,7 +129,7 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
     //
     // XXX: temporary enable the built-in CLI access
     xrl_pimsm_node4.enable_pim();
-    xrl_pimsm_node4.startup();
+    // xrl_pimsm_node4.startup();
     xrl_pimsm_node4.enable_cli();
     xrl_pimsm_node4.start_cli();
 
