@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.1 2004/09/17 13:50:53 abittau Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -33,7 +33,7 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify) :
 
     const SubnetRoute<A>* route = rtmsg.route();
 
-    readRouteNh(*route);
+    read_route_nexthop(*route);
     
     const PathAttributeList<A>* attr = route->attributes();
 
@@ -72,7 +72,7 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify) :
 
 template<>
 void
-BGPVarRW<IPv4>::readRouteNh(const SubnetRoute<IPv4>& route) {
+BGPVarRW<IPv4>::read_route_nexthop(const SubnetRoute<IPv4>& route) {
     initialize("network4",_ef.create(ElemIPv4Net::id,
 				     route.net().str().c_str()));
 
@@ -86,7 +86,7 @@ BGPVarRW<IPv4>::readRouteNh(const SubnetRoute<IPv4>& route) {
 
 template<>
 void
-BGPVarRW<IPv6>::readRouteNh(const SubnetRoute<IPv6>& route) {
+BGPVarRW<IPv6>::read_route_nexthop(const SubnetRoute<IPv6>& route) {
     initialize("network6",_ef.create(ElemIPv6Net::id,
 				     route.net().str().c_str()));
 
@@ -118,7 +118,7 @@ BGPVarRW<A>::single_write(const string& id, const Element& e) {
 	_ptags = e;
 	_wrote_ptags = true;
     }
-    if(writeNh(id,e))
+    if(write_nexthop(id,e))
 	return;
 
     const ElemU32* u32 = NULL;
@@ -204,7 +204,7 @@ BGPVarRW<A>::single_end() {
 
 template <>
 bool
-BGPVarRW<IPv4>::writeNh(const string& id, const Element& e) {
+BGPVarRW<IPv4>::write_nexthop(const string& id, const Element& e) {
 
     if(id == "nexthop4" && e.type() == ElemIPv4::id) {
 	const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
@@ -222,7 +222,7 @@ BGPVarRW<IPv4>::writeNh(const string& id, const Element& e) {
 
 template <>
 bool
-BGPVarRW<IPv6>::writeNh(const string& id, const Element& e) {
+BGPVarRW<IPv6>::write_nexthop(const string& id, const Element& e) {
 
     if(id == "nexthop6" && e.type() == ElemIPv6::id) {
 	const ElemIPv6* eip = dynamic_cast<const ElemIPv6*>(&e);

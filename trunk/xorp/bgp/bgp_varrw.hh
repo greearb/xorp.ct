@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.1 2004/09/17 13:50:53 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -68,7 +68,7 @@ private:
      *
      * @param route route to read addressed from.
      */
-    void readRouteNh(const SubnetRoute<A>& route);
+    void read_route_nexthop(const SubnetRoute<A>& route);
 
     /**
      * Attempts to write the nexthop address.
@@ -76,7 +76,7 @@ private:
      * @param e value to write.
      * @return true if value was written. False otherwise.
      */
-    bool writeNh(const string& id, const Element& e);
+    bool write_nexthop(const string& id, const Element& e);
 
     const InternalMessage<A>&	_orig_rtmsg;
    
