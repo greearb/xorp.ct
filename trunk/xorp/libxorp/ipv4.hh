@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.12 2003/09/30 18:42:40 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.13 2003/10/02 03:51:53 hodson Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -189,7 +189,7 @@ public:
      * @return bitwise OR of two addresses.
      */
     inline IPv4 operator|(const IPv4& other) const {
-	return IPv4((uint32_t)(_addr | other._addr));
+	return IPv4(_addr | other._addr);
     }
 
     /**
@@ -199,7 +199,7 @@ public:
      * @return bitwise AND of two addresses.
      */
     inline IPv4 operator&(const IPv4& other) const {
-	return IPv4((uint32_t)(_addr & other._addr));
+	return IPv4(_addr & other._addr);
     }
 
     /**
@@ -208,7 +208,7 @@ public:
      * @return eXclusive-OR of two addresses.
      */
     inline IPv4 operator^(const IPv4& other) const {
-	return IPv4((uint32_t)(_addr ^ other._addr));
+	return IPv4(_addr ^ other._addr);
     }
 
     /**
@@ -403,14 +403,14 @@ public:
      *
      * @return the value of this IPv4 address as an unsigned 32-bit integer.
      */
-    uint32_t addr() const               { return _addr; }
+    inline uint32_t addr() const               { return _addr; }
 
     /**
      * Set the address value.
      *
      * @param value unsigned 32-bit integer value to set the address to.
      */
-    void set_addr(uint32_t value)    { _addr = value; }
+    inline void set_addr(uint32_t value)    { _addr = value; }
 
     /**
      * Constant for address family
@@ -442,7 +442,7 @@ public:
      * @return the human-readable string with the IP protocol version of
      * this address.
      */
-    inline static string ip_version_str() { return "IPv4"; }
+    static const string& ip_version_str();
 
     /**
      * Extract bits from an address.

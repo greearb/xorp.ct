@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.8 2003/09/30 18:27:03 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.9 2003/10/02 03:51:53 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -419,6 +419,13 @@ IPv6::mask_len() const
 	}
     }
     return ctr;
+}
+
+const string&
+IPv6::ip_version_str()
+{
+    static const string IP_VERSION_STR("IPv6");
+    return IP_VERSION_STR;
 }
 
 const IPv6 IPv6Constants::zero("::");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.12 2003/09/30 18:42:40 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.13 2003/10/02 03:51:54 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -432,7 +432,7 @@ public:
      * @return the human-readable string with the IP protocol version of
      * this address.
      */
-    inline static string ip_version_str() { return "IPv6"; }
+    static const string& ip_version_str();
 
     /**
      * Extract bits from an address.

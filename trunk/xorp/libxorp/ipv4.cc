@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.8 2003/09/30 18:27:03 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.9 2003/10/02 03:51:53 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -20,7 +20,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
 
 IPv4::IPv4(const uint8_t *from_uint8)
 {
@@ -262,4 +261,11 @@ IPv4::is_linklocal_multicast() const
     uint32_t addr4 = ntohl(_addr);
 
     return (IN_MULTICAST(addr4) && (addr4 <= INADDR_MAX_LOCAL_GROUP));
+}
+
+const string&
+IPv4::ip_version_str()
+{
+    static const string IP_VERSION_STR("IPv4");
+    return IP_VERSION_STR;
 }
