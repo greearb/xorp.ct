@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.1 2003/09/10 03:19:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.2 2003/09/10 07:38:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -222,6 +222,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Generate a withdraw to remove the entry from the trie.
     */
+    delete data;
     delete bgpupdate;
     bgpupdate = new UpdatePacket();
     withdraw_nlri<A>(bgpupdate, net);
@@ -237,6 +238,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
 	return false;
     }
 
+    delete data;
     delete bgpupdate;	// Free up the packet.
     
     /*
