@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.2 2003/01/13 05:51:44 pavlin Exp $"
 
 
 //
@@ -182,7 +182,7 @@ int
 PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
 {
     IPvX	assert_group_addr(family());
-    uint32_t	route_metric, metric_preference;
+    uint32_t	metric_preference, route_metric;
     bool	rpt_bit = true;
     int		ret_value;
     
@@ -194,16 +194,16 @@ PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
     
     if (pim_mre->is_spt()) {
 	rpt_bit = false;
-	route_metric = pim_mre->route_metric_s();
 	metric_preference = pim_mre->metric_preference_s();
+	route_metric = pim_mre->route_metric_s();
     } else {
 	rpt_bit = true;
-	route_metric = pim_mre->route_metric_rp();
 	metric_preference = pim_mre->metric_preference_rp();
+	route_metric = pim_mre->route_metric_rp();
     }
     
     ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
-				route_metric, metric_preference);
+				metric_preference, route_metric);
     return (ret_value);
 }
 
@@ -214,7 +214,7 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     IPvX	assert_source_addr(family());
     IPvX	assert_group_addr(family());
     const IPvX	*rp_addr_ptr;
-    uint32_t	route_metric, metric_preference;
+    uint32_t	metric_preference, route_metric;
     int		ret_value;
     bool	rpt_bit = false;
     
@@ -234,11 +234,11 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
 	rpt_bit = false;
     else
 	rpt_bit = true;
-    route_metric = PIM_ASSERT_MAX_METRIC;
     metric_preference = PIM_ASSERT_MAX_METRIC_PREFERENCE;
+    route_metric = PIM_ASSERT_MAX_METRIC;
     
     ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
-				route_metric, metric_preference);
+				metric_preference, route_metric);
     return (ret_value);
 }
 
@@ -246,8 +246,8 @@ int
 PimVif::pim_assert_send(const IPvX& assert_source_addr,
 			const IPvX& assert_group_addr,
 			bool rpt_bit,
-			uint32_t route_metric,
-			uint32_t metric_preference)
+			uint32_t metric_preference,
+			uint32_t route_metric)
 {
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
