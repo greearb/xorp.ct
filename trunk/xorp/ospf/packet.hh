@@ -199,6 +199,7 @@ class PacketDecoder {
       */
     void register_decoder(Packet *packet);
 
+#if	0
     /**
      * Register the packet/decode routines
      *
@@ -209,6 +210,7 @@ class PacketDecoder {
     void register_decoder(Packet *packet,
 			  OspfTypes::Version version,
 			  OspfTypes::Type type);
+#endif
 
     /**
      * Decode byte stream.

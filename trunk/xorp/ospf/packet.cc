@@ -284,6 +284,7 @@ PacketDecoder::~PacketDecoder()
 	delete i->second;
 }
 
+#if	0
 void
 PacketDecoder::register_decoder(Packet *packet, OspfTypes::Version version,
 				OspfTypes::Type type)
@@ -297,6 +298,7 @@ PacketDecoder::register_decoder(Packet *packet, OspfTypes::Version version,
 	break;
     }
 }
+#endif
 
 void
 PacketDecoder::register_decoder(Packet *packet)
