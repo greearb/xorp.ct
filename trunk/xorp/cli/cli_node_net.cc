@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.23 2004/05/25 22:40:39 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.24 2004/05/26 12:10:26 pavlin Exp $"
 
 
 //
@@ -373,10 +373,29 @@ CliClient::start_connection()
 		       strerror(errno));
 	} else {
 	    // Set the window width and height
-	    set_window_width(window_size.ws_col);
-	    set_window_height(window_size.ws_row);
-	    gl_terminal_size(gl(), window_width(),
-			     window_height());
+	    uint16_t new_window_width, new_window_height;
+
+	    new_window_width = window_size.ws_col;
+	    new_window_height = window_size.ws_row;
+
+	    if (new_window_width > 0) {
+		set_window_width(new_window_width);
+	    } else {
+		cli_print(c_format("Invalid window width (%u); "
+				   "window width unchanged (%u)\n",
+				   new_window_width,
+				   reinterpret_cast<uint32_t>(window_width())));
+	    }
+	    if (new_window_height > 0) {
+		set_window_height(new_window_height);
+	    } else {
+		cli_print(c_format("Invalid window height (%u); "
+				   "window height unchanged (%u)\n",
+				   new_window_height,
+				   reinterpret_cast<uint32_t>(window_height())));
+	    }
+
+	    gl_terminal_size(gl(), window_width(), window_height());
 	    debug_msg("Client window size changed to width = %u "
 		      "height = %u\n",
 		      (uint32_t)window_width(),
@@ -666,14 +685,29 @@ CliClient::process_telnet_option(int val)
 		    new_window_width  += telnet_sb_buffer().data(2);
 		    new_window_height  = 256*telnet_sb_buffer().data(3);
 		    new_window_height += telnet_sb_buffer().data(4);
-		    set_window_width(new_window_width);
-		    set_window_height(new_window_height);
-		    gl_terminal_size(gl(), new_window_width,
-				     new_window_height);
+
+		    if (new_window_width > 0) {
+			set_window_width(new_window_width);
+		    } else {
+			cli_print(c_format("Invalid window width (%u); "
+					   "window width unchanged (%u)\n",
+					   new_window_width,
+					   reinterpret_cast<uint32_t>(window_width())));
+		    }
+		    if (new_window_height > 0) {
+			set_window_height(new_window_height);
+		    } else {
+			cli_print(c_format("Invalid window height (%u); "
+					   "window height unchanged (%u)\n",
+					   new_window_height,
+					   reinterpret_cast<uint32_t>(window_height())));
+		    }
+
+		    gl_terminal_size(gl(), window_width(), window_height());
 		    debug_msg("Client window size changed to width = %u "
 			      "height = %u\n",
-			      (uint32_t)window_width(),
-			      (uint32_t)window_height());
+			      reinterpret_cast<uint32_t>(window_width()),
+			      reinterpret_cast<uint32_t>(window_height()));
 		}
 		break;
 	    default:
