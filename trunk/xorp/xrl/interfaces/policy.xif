@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.1 2004/09/17 14:05:09 abittau Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -85,7 +85,6 @@ interface policy/0.1 {
 	 */
 	import ? protocol:txt & policies:txt
 	export ? protocol:txt & policies:txt
-
 
 	/**
 	 * Get current configuration of all policies.
