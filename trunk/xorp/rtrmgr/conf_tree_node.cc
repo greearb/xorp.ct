@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.50 2004/08/12 07:16:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.51 2004/08/19 00:20:19 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1096,6 +1096,20 @@ ConfigTreeNode::mark_subtree_as_committed()
     iter = _children.begin();
     while (iter != _children.end()) {
 	(*iter)->mark_subtree_as_committed();
+	++iter;
+    }
+}
+
+void
+ConfigTreeNode::mark_subtree_as_uncommitted()
+{
+    _existence_committed = false;
+    _value_committed = false;
+
+    list<ConfigTreeNode*>::iterator iter;
+    iter = _children.begin();
+    while (iter != _children.end()) {
+	(*iter)->mark_subtree_as_uncommitted();
 	++iter;
     }
 }

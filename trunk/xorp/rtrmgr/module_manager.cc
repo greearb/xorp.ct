@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.32 2004/06/10 22:41:52 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.33 2004/08/19 00:20:19 pavlin Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -31,11 +31,36 @@
 #include "libxorp/debug.h"
 
 #include "module_manager.hh"
+#include "conf_tree_node.hh"
+#include "master_conf_tree.hh"
 #include "template_commands.hh"
 
 
 static map<pid_t, string> module_pids;
 static multimap<string, Module*> module_paths;
+
+
+int
+restart_module(Module* module)
+{
+    XLOG_INFO("Restarting module %s ...", module->name().c_str());
+    XorpCallback1<void, bool>::RefPtr run_cb
+	= callback(module, &Module::module_run_done);
+    if (module->run(true, run_cb) < 0) {
+	XLOG_ERROR("Failed to restart module %s.", module->name().c_str());
+	return (XORP_ERROR);
+    }
+
+    MasterConfigTree* mct = module->module_manager().master_config_tree();
+    ConfigTreeNode* ctn = mct->find_config_module(module->name());
+    if (ctn != NULL) {
+	XLOG_INFO("Configuring module %s ...", module->name().c_str());
+	ctn->mark_subtree_as_uncommitted();
+	mct->execute();
+    }
+
+    return (XORP_OK);
+}
 
 static void
 child_handler(int x)
@@ -83,6 +108,14 @@ child_handler(int x)
 		module->abnormal_exit(child_wait_status);
 		module_paths.erase(path_iter);
 		path_iter = path_iter_next;
+		//
+		// Restart the module because it exited abnormally.
+		// It probably crashed.
+		//
+		if (module->status() == Module::MODULE_FAILED) {
+		    if (module->module_manager().do_restart())
+			restart_module(module);
+		}
 	    }
 	}
 	module_pids.erase(pid_iter);
@@ -106,6 +139,21 @@ child_handler(int x)
 	    module->killed();
 	    module_paths.erase(path_iter);
 	    path_iter = path_iter_next;
+	    //
+	    // XXX: if the child was killed by SIGTERM or SIGKILL, then
+	    // DO NOT restart it, because probably it was killed for a reason.
+	    //
+	    if (module->status() == Module::MODULE_FAILED) {
+		switch (sig) {
+		case SIGTERM:
+		case SIGKILL:
+		    break;
+		default:
+		    if (module->module_manager().do_restart())
+			restart_module(module);
+		    break;
+		}
+	    }
 	}
 	module_pids.erase(pid_iter);
     } else if (WIFSTOPPED(child_wait_status)) {
@@ -528,11 +576,13 @@ Module::str() const
     return s;
 }
 
-ModuleManager::ModuleManager(EventLoop& eventloop, bool verbose,
-			     const string& xorp_root_dir)
+ModuleManager::ModuleManager(EventLoop& eventloop, bool do_restart,
+			     bool verbose, const string& xorp_root_dir)
     : _eventloop(eventloop),
+      _do_restart(do_restart),
       _verbose(verbose),
-      _xorp_root_dir(xorp_root_dir)
+      _xorp_root_dir(xorp_root_dir),
+      _master_config_tree(NULL)
 {
 }
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.27 2004/05/30 01:17:47 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.28 2004/06/10 02:20:02 atanu Exp $
 ##
 
 # -- Real Programs
@@ -160,6 +160,7 @@ test_templates_SOURCES	+= y.tplt_tab.h
 test_templates_SOURCES	+= command_tree.hh
 test_templates_SOURCES	+= conf_tree.hh
 test_templates_SOURCES	+= conf_tree_node.hh
+test_templates_SOURCES	+= master_conf_tree.hh
 test_templates_SOURCES	+= module_commands.hh
 test_templates_SOURCES	+= module_manager.hh
 test_templates_SOURCES	+= path_segment.hh
@@ -180,6 +181,7 @@ test_templates_SOURCES	+= conf_tree.cc
 test_templates_SOURCES	+= conf_tree_node.cc
 test_templates_SOURCES	+= lex.boot.cc
 test_templates_SOURCES	+= lex.tplt.cc
+test_templates_SOURCES	+= master_conf_tree.cc
 test_templates_SOURCES	+= module_command.cc
 test_templates_SOURCES	+= module_manager.cc
 test_templates_SOURCES	+= task.cc
@@ -252,6 +254,7 @@ test_module_manager_SOURCES	+= y.tplt_tab.h
 test_module_manager_SOURCES	+= command_tree.hh
 test_module_manager_SOURCES	+= conf_tree.hh
 test_module_manager_SOURCES	+= conf_tree_node.hh
+test_module_manager_SOURCES	+= master_conf_tree.hh
 test_module_manager_SOURCES	+= module_commands.hh
 test_module_manager_SOURCES	+= module_manager.hh
 test_module_manager_SOURCES	+= path_segment.hh
@@ -269,6 +272,7 @@ test_module_manager_SOURCES	+= conf_tree.cc
 test_module_manager_SOURCES	+= conf_tree_node.cc
 test_module_manager_SOURCES	+= lex.boot.cc
 test_module_manager_SOURCES	+= lex.tplt.cc
+test_module_manager_SOURCES	+= master_conf_tree.cc
 test_module_manager_SOURCES	+= module_command.cc
 test_module_manager_SOURCES	+= module_manager.cc
 test_module_manager_SOURCES	+= task.cc

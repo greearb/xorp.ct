@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.10 2004/05/28 22:27:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.11 2004/06/10 22:41:55 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -51,7 +51,10 @@ main(int argc, char* const argv[])
     EventLoop eventloop; 
 
     // Start the module manager
-    ModuleManager mmgr(eventloop, /* verbose = */ true, ".");
+    ModuleManager mmgr(eventloop,
+		       false,	/* do_restart */
+		       true,	/* verbose = */ 
+		       ".");
     mmgr.new_module("finder", "../libxipc/xorp_finder");
 
     if (mmgr.module_has_started("finder") == true) {

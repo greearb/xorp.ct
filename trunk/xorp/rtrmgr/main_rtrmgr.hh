@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.7 2004/05/28 18:26:26 pavlin Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.8 2004/05/28 22:27:56 pavlin Exp $
 
 #ifndef __RTRMGR_MAIN_RTRMGR_HH__
 #define __RTRMGR_MAIN_RTRMGR_HH__
@@ -34,6 +34,7 @@ public:
 	   uint16_t bind_port,
 	   const string& save_hook,
 	   bool	do_exec,
+	   bool	do_restart,
 	   bool verbose,
 	   int32_t quit_time);
     int run();
@@ -63,6 +64,7 @@ private:
     string	_save_hook;
 
     bool	_do_exec;
+    bool	_do_restart;
     bool	_verbose;		// Set to true if output is verbose
     int32_t	_quit_time;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.24 2004/08/12 07:16:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.25 2004/08/19 00:20:19 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -50,6 +50,7 @@ public:
     void recursive_add_default_children();
     void set_value(const string& value, uid_t user_id);
     void mark_subtree_as_committed();
+    void mark_subtree_as_uncommitted();
     void command_status_callback(const Command* cmd, bool success);
 
     bool merge_deltas(uid_t user_id,

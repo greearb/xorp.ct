@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.50 2004/06/10 22:41:52 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.51 2004/08/19 00:44:08 pavlin Exp $"
 
 #include <signal.h>
 
@@ -52,6 +52,7 @@
 // Default values
 //
 static bool default_do_exec = true;
+static bool default_do_restart = false;
 static bool default_verbose = false;
 
 //
@@ -63,6 +64,7 @@ static string	xrl_targets_dir;
 static string	boot_file;
 static string	save_hook;
 static bool	do_exec = default_do_exec;
+static bool	do_restart = default_do_restart;
 static bool	verbose = default_verbose;
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FINDER_DEFAULT_PORT;
@@ -85,6 +87,7 @@ usage(const char* argv0)
     fprintf(stderr, "  -b <file> Specify boot file\n");
     fprintf(stderr, "  -s <app>  Specify save config file hook\n");
     fprintf(stderr, "  -n        Do not execute XRLs\n");
+    fprintf(stderr, "  -r        Restart failed processes (partially working; not recommended!)\n");
     fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
     fprintf(stderr, "  -q <secs> Set forced quit period\n");
@@ -104,6 +107,8 @@ display_defaults()
 	    xorp_xrl_targets_dir().c_str());
     fprintf(stderr, "  Execute Xrls               := %s\n",
 	    default_do_exec ? "true" : "false");
+    fprintf(stderr, "  Restart failed processes   := %s\n",
+	    default_do_restart ? "true" : "false");
     fprintf(stderr, "  Print verbose information  := %s\n",
 	    default_verbose ? "true" : "false");
 }
@@ -142,6 +147,7 @@ Rtrmgr::Rtrmgr(const string& template_dir,
 	       uint16_t bind_port,
 	       const string& save_hook,
 	       bool	do_exec,
+	       bool	do_restart,
 	       bool	verbose,
 	       int32_t quit_time)
     : _template_dir(template_dir),
@@ -151,6 +157,7 @@ Rtrmgr::Rtrmgr(const string& template_dir,
       _bind_port(bind_port),
       _save_hook(save_hook),
       _do_exec(do_exec),
+      _do_restart(do_restart),
       _verbose(verbose),
       _quit_time(quit_time),
       _ready(false),
@@ -198,6 +205,8 @@ Rtrmgr::run()
 	       xrl_targets_dir.c_str());
     XLOG_TRACE(_verbose, "Execute Xrls               := %s\n",
 	       do_exec ? "true" : "false");
+    XLOG_TRACE(_verbose, "Restart failed processes   := %s\n",
+	       do_restart ? "true" : "false");
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
 	       _verbose ? "true" : "false");
 
@@ -248,7 +257,8 @@ Rtrmgr::run()
     //
     // Start the module manager
     //
-    ModuleManager mmgr(eventloop, _verbose, xorp_binary_root_dir());
+    ModuleManager mmgr(eventloop, _do_restart, _verbose,
+		       xorp_binary_root_dir());
 
     try {
 	//
@@ -267,10 +277,12 @@ Rtrmgr::run()
 				    _verbose);
 	//
 	// XXX: note that theoretically we may receive an XRL before
-	// we call XrlRtrmgrInterface::set_master_config_tree().
+	// we call XrlRtrmgrInterface::set_master_config_tree()
+	// or ModuleManager::set_master_config_tree() below.
 	// For now we ignore that possibility...
 	//
 	xrt.set_master_config_tree(_mct);
+	mmgr.set_master_config_tree(_mct);
 
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
@@ -424,7 +436,7 @@ main(int argc, char* const argv[])
     save_hook           = "";
 
     int c;
-    while ((c = getopt(argc, argv, "t:b:s:x:i:p:q:nvh")) != EOF) {
+    while ((c = getopt(argc, argv, "t:b:s:x:i:p:q:nrvh")) != EOF) {
 	switch(c) {
 	case 't':
 	    template_dir = optarg;
@@ -443,6 +455,16 @@ main(int argc, char* const argv[])
 	    break;
 	case 'n':
 	    do_exec = false;
+	    break;
+	case 'r':
+	    //
+	    // Enable failed processes to be restarted by the rtrmgr.
+	    // Note: this option is not recommended, because it does
+	    // not work properly. E.g., if a process fails during
+	    // reconfiguration via xorpsh, then the rtrmgr itself may
+	    // coredump.
+	    //
+	    do_restart = true;
 	    break;
 	case 'v':
 	    verbose = true;
@@ -486,7 +508,8 @@ main(int argc, char* const argv[])
     // The main procedure
     //
     Rtrmgr rtrmgr(template_dir, xrl_targets_dir, boot_file, bind_addrs,
-		  bind_port, save_hook, do_exec, verbose, quit_time);
+		  bind_port, save_hook, do_exec, do_restart, verbose,
+		  quit_time);
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);

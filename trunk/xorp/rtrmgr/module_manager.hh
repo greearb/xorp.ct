@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.21 2004/05/28 22:27:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.22 2004/06/10 22:41:52 hodson Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -28,6 +28,7 @@
 #define NO_SETUID_ON_EXEC 0
 
 class EventLoop;
+class MasterConfigTree;
 class ModuleCommand;
 class ModuleManager;
 class XorpClient;
@@ -75,6 +76,8 @@ public:
     ModuleStatus status() const { return _status; }
     void terminate(XorpCallback0<void>::RefPtr cb);
     void terminate_with_prejudice(XorpCallback0<void>::RefPtr cb);
+    ModuleManager& module_manager() const { return _mmgr; }
+    const string& name() const { return _name; }
 
 private:
     void new_status(ModuleStatus new_status);
@@ -99,7 +102,7 @@ class ModuleManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
     
 public:
-    ModuleManager(EventLoop& eventloop, bool verbose,
+    ModuleManager(EventLoop& eventloop, bool do_restart, bool verbose,
 		  const string& xorp_root_dir);
     ~ModuleManager();
 
@@ -135,6 +138,15 @@ public:
      */
     int shell_execute(uid_t userid, const vector<string>& argv, 
 		      ModuleManager::CallBack cb, bool do_exec);
+    MasterConfigTree* master_config_tree() const { return _master_config_tree; }
+    void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
+
+    /**
+     * Test if processes that have failed should be restarted.
+     *
+     * @return true if failed processes should be restarted, otherwise false.
+     */
+    bool do_restart() const { return _do_restart; }
 
 private:
     Module* find_module(const string& module_name);
@@ -142,8 +154,10 @@ private:
 
     map<string, Module *> _modules;
     EventLoop&	_eventloop;
+    bool	_do_restart;
     bool	_verbose;	// Set to true if output is verbose
     string	_xorp_root_dir;	// The root of the XORP tree
+    MasterConfigTree*	_master_config_tree;
 };
 
 #endif // __RTRMGR_MODULE_MANAGER_HH__
