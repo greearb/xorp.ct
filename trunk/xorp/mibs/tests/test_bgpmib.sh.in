@@ -43,6 +43,8 @@ configure_snmp()
 	    >> ${SNMPDCONF} 
     LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
     export LD_LIBRARY_PATH
+    MIBDIRS=`(cd ${srcdir}/../textual; pwd)`
+    export MIBDIRS
 }
 onexit()
 {

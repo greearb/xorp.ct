@@ -4,13 +4,14 @@ How to configure your Net-SNMP agent to run with XORP
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 - You need Net-SNMP version 5.0.6 or greater
-- You must make libnetsnmpxorp.so accessible to your runtime loader.  Depending 
+- You must make libnetsnmpxorp.so accessible to your runtime loader.  Depending
   on your system, that requires one of the following:  
 	* Copying libnetsnmpxorp.so to your library directory (typically
 	  /usr/local/lib)
 		    OR
 	* Setting a linker environment variable (typically LD_LIBRARY_PATH) to
 	  point to the directory where the library is.
+
 
 To run the scripts in this directory
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -32,6 +33,11 @@ To run the scripts in this directory
   In that file you should define your user parameters.  Make sure that you
   define at least all the directives that you'll find in this directory's
   snmp.conf
+
+- You must make XORP textual mib files (xorp/mibs/textual/*.txt) accessible to
+  the Net-SNMP command line tools.  Either set the MIBDIRS (man snmpcmd(1)) 
+  environment variable to point to that directory or copy those files to your
+  mibs directory (default is /usr/local/share/snmp/mibs)
 
 Make snmpd responsive to Xrls
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
