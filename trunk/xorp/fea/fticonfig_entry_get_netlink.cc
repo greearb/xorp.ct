@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.7 2003/09/20 00:37:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.8 2003/09/20 06:48:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -218,7 +218,7 @@ FtiConfigEntryGetNetlink::nlsock_data(const uint8_t* , size_t )
 bool
 FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
 {
-#define RTMBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + 512)
+#define RTMBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + sizeof(struct rtattr) + 512)
     char		rtmbuf[RTMBUFSIZE];
     struct nlmsghdr	*nlh, *nlh_answer;
     struct sockaddr_nl	snl;
@@ -278,11 +278,10 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     // Add the 'ipaddr' address as an attribute
     rta_len = RTA_LENGTH(IPvX::addr_size(family));
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(rtmbuf)) {
-	XLOG_ERROR("AF_NETLINK buffer size error: %d instead of %d",
+	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
 		   sizeof(rtmbuf), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
-	return false;
     }
-    rtattr = reinterpret_cast<struct rtattr*>(((uint8_t *)nlh) + NLMSG_ALIGN(nlh->nlmsg_len));
+    rtattr = RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
     dst.copy_out(reinterpret_cast<uint8_t*>(RTA_DATA(rtattr)));
