@@ -22,6 +22,8 @@ interface redist_transaction6/0.1 {
 	abort_transaction ? tid:u32
 
 	/**
+	 * Add/delete a routing entry.
+	 *
 	 * @param tid the transaction ID of this transaction.
 	 * @param dst destination network.
 	 * @param nh nexthop router address.
