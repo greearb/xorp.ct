@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.11 2003/08/04 23:36:38 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.12 2003/11/04 23:38:04 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -189,8 +189,7 @@ Port<A>::push_packets()
     if (head == 0)
 	return;
 
-    if (io_handler()->send(head->address(), head->port(),
-			   head->data_ptr(), head->data_bytes())) {
+    if (io_handler()->send(head->address(), head->port(), head->data())) {
 	return;
     }
 
@@ -242,15 +241,14 @@ Port<A>::route_policy(const RouteEntry<A>& r) const
 
 template <typename A>
 void
-Port<A>::port_io_send_completion(const uint8_t*	rip_packet,
-				 bool		success)
+Port<A>::port_io_send_completion(bool success)
 {
     if (success == false) {
 	XLOG_ERROR("Send failed");
     }
 
     const RipPacket<A>* head = _packet_queue->head();
-    XLOG_ASSERT(head->data_ptr() == rip_packet);
+    XLOG_ASSERT(head != 0);
     _packet_queue->pop_head();
     push_packets();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.11 2003/08/01 04:08:12 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.12 2003/08/01 16:32:54 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -542,11 +542,9 @@ public:
      * Send completion notification.  Called by PortIO instance when a
      * send request is completed.
      *
-     * @param rip_packet pointer to RIP packet data requested to be sent.
      * @param success indication of whether send completed successfully.
      */
-    void port_io_send_completion(const uint8_t*	rip_packet,
-				 bool		success);
+    void port_io_send_completion(bool success);
 
     /**
      * Receive RIP packet.  Called by PortIO instance when a RIP packet
