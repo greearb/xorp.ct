@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.15 2002/12/09 11:33:47 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 
 /*
@@ -142,7 +142,8 @@ comm_sock_open(int domain, int type, int protocol)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_bind4(int sock, struct in_addr *my_addr, unsigned short my_port)
+comm_sock_bind4(int sock, const struct in_addr *my_addr,
+		unsigned short my_port)
 {
     int family;
     struct sockaddr_in sin_addr;
@@ -192,7 +193,8 @@ comm_sock_bind4(int sock, struct in_addr *my_addr, unsigned short my_port)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_bind6(int sock, struct in6_addr *my_addr, unsigned short my_port)
+comm_sock_bind6(int sock, const struct in6_addr *my_addr,
+		unsigned short my_port)
 {
     int family;
     struct sockaddr_in6 sin6_addr;
@@ -247,7 +249,8 @@ comm_sock_bind6(int sock, struct in6_addr *my_addr, unsigned short my_port)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_join4(int sock, struct in_addr *mcast_addr, struct in_addr *my_addr)
+comm_sock_join4(int sock, const struct in_addr *mcast_addr,
+		const struct in_addr *my_addr)
 {
     int family;
     struct ip_mreq imr;		/* the multicast join address */
@@ -301,7 +304,8 @@ comm_sock_join4(int sock, struct in_addr *mcast_addr, struct in_addr *my_addr)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_join6(int sock, struct in6_addr *mcast_addr, unsigned int my_ifindex)
+comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
+		unsigned int my_ifindex)
 {
     int family;
     struct ipv6_mreq imr6;	/* the multicast join address */
@@ -347,7 +351,7 @@ comm_sock_join6(int sock, struct in6_addr *mcast_addr, unsigned int my_ifindex)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_connect4(int sock, struct in_addr *remote_addr,
+comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 		   unsigned short remote_port)
 {
     int family;
@@ -401,7 +405,7 @@ comm_sock_connect4(int sock, struct in_addr *remote_addr,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_connect6(int sock, struct in6_addr *remote_addr,
+comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 		   unsigned short remote_port)
 {
     int family;
@@ -695,7 +699,7 @@ comm_set_ttl(int sock, int val)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-comm_set_iface4(int sock, struct in_addr *in_addr)
+comm_set_iface4(int sock, const struct in_addr *in_addr)
 {
     int family = socket2family(sock);
     struct in_addr my_addr;

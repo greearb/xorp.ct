@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.10 2002/12/09 11:33:46 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -129,7 +129,7 @@ extern int	comm_close(int sock);
  * @param my_port the local port to bind to (in network order).
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_tcp4(struct in_addr *my_addr,
+extern int	comm_bind_tcp4(const struct in_addr *my_addr,
 			       unsigned short my_port);
 
 #ifdef HAVE_IPV6
@@ -141,7 +141,7 @@ extern int	comm_bind_tcp4(struct in_addr *my_addr,
  * @param my_port the local port to bind to (in network order).
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_tcp6(struct in6_addr *my_addr,
+extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
 			       unsigned short my_port);
 #endif /* HAVE_IPV6 */
 
@@ -153,7 +153,7 @@ extern int	comm_bind_tcp6(struct in6_addr *my_addr,
  * @param my_port the local port to bind to (in network order).
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_udp4(struct in_addr *my_addr,
+extern int	comm_bind_udp4(const struct in_addr *my_addr,
 			       unsigned short my_port);
 
 #ifdef HAVE_IPV6
@@ -165,7 +165,7 @@ extern int	comm_bind_udp4(struct in_addr *my_addr,
  * @param my_port the local port to bind to (in network order).
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_udp6(struct in6_addr *my_addr,
+extern int	comm_bind_udp6(const struct in6_addr *my_addr,
 			       unsigned short my_port);
 #endif /* HAVE_IPV6 */
 
@@ -186,8 +186,8 @@ extern int	comm_bind_udp6(struct in6_addr *my_addr,
  * 
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_join_udp4(struct in_addr *mcast_addr,
-				    struct in_addr *join_if_addr,
+extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
+				    const struct in_addr *join_if_addr,
 				    unsigned short my_port,
 				    bool reuse_flag);
 
@@ -209,7 +209,7 @@ extern int	comm_bind_join_udp4(struct in_addr *mcast_addr,
  * 
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_join_udp6(struct in6_addr *mcast_addr,
+extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 				    uint join_if_addr,
 				    unsigned short my_port,
 				    bool reuse_flag);
@@ -225,7 +225,7 @@ extern int	comm_bind_join_udp6(struct in6_addr *mcast_addr,
  * @param remote_port the remote port to connect to.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_tcp4(struct in_addr *remote_addr,
+extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port);
 
 #ifdef HAVE_IPV6
@@ -240,7 +240,7 @@ extern int	comm_connect_tcp4(struct in_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_tcp6(struct in6_addr *remote_addr,
+extern int	comm_connect_tcp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port);
 #endif /* HAVE_IPV6 */
 
@@ -251,7 +251,7 @@ extern int	comm_connect_tcp6(struct in6_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_udp4(struct in_addr *remote_addr,
+extern int	comm_connect_udp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port);
 
 #ifdef HAVE_IPV6
@@ -262,7 +262,7 @@ extern int	comm_connect_udp4(struct in_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_connect_udp6(struct in6_addr *remote_addr,
+extern int	comm_connect_udp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port);
 #endif /* HAVE_IPV6 */
 
@@ -277,9 +277,9 @@ extern int	comm_connect_udp6(struct in6_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_connect_udp4(struct in_addr *local_addr,
+extern int	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       unsigned short local_port, 
-				       struct in_addr *remote_addr,
+				       const struct in_addr *remote_addr,
 				       unsigned short remote_port);
 
 #ifdef HAVE_IPV6
@@ -294,9 +294,9 @@ extern int	comm_bind_connect_udp4(struct in_addr *local_addr,
  * @param remote_port the remote port to connect to.
  * @return the new socket on success, otherwise XORP_ERROR.
  */
-extern int	comm_bind_connect_udp6(struct in6_addr *local_addr,
+extern int	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       unsigned short local_port, 
-				       struct in6_addr *remote_addr,
+				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port);
 #endif /* HAVE_IPV6 */
 
@@ -328,7 +328,7 @@ extern int	comm_sock_open(int domain, int type, int protocol);
  * @param my_port the port to bind to (in network order).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_bind4(int sock, struct in_addr *my_addr,
+extern int	comm_sock_bind4(int sock, const struct in_addr *my_addr,
 				unsigned short my_port);
 
 #ifdef HAVE_IPV6
@@ -341,7 +341,7 @@ extern int	comm_sock_bind4(int sock, struct in_addr *my_addr,
  * @param my_port the port to bind to (in network order).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_bind6(int sock, struct in6_addr *my_addr,
+extern int	comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 				unsigned short my_port);
 #endif /* HAVE_IPV6 */
 
@@ -354,8 +354,8 @@ extern int	comm_sock_bind6(int sock, struct in6_addr *my_addr,
  * If it is NULL, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_join4(int sock, struct in_addr *mcast_addr,
-				struct in_addr *my_addr);
+extern int	comm_sock_join4(int sock, const struct in_addr *mcast_addr,
+				const struct in_addr *my_addr);
 
 #ifdef HAVE_IPV6
 /**
@@ -367,7 +367,7 @@ extern int	comm_sock_join4(int sock, struct in_addr *mcast_addr,
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_join6(int sock, struct in6_addr *mcast_addr,
+extern int	comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 				unsigned int my_ifindex);
 #endif /* HAVE_IPV6 */
 
@@ -384,7 +384,7 @@ extern int	comm_sock_join6(int sock, struct in6_addr *mcast_addr,
  * @param remote_port the remote port to connect to.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_connect4(int sock, struct in_addr *remote_addr,
+extern int	comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 				   unsigned short remote_port);
 
 #ifdef HAVE_IPV6
@@ -401,7 +401,8 @@ extern int	comm_sock_connect4(int sock, struct in_addr *remote_addr,
  * @param remote_port the remote port to connect to.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_connect6(int sock, struct in6_addr *remote_addr,
+extern int	comm_sock_connect6(int sock,
+				   const struct in6_addr *remote_addr,
 				   unsigned short remote_port);
 #endif /* HAVE_IPV6 */
 
@@ -479,7 +480,7 @@ extern int	comm_set_ttl(int sock, int val);
  * a datagram is sent.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_iface4(int sock, struct in_addr *in_addr);
+extern int	comm_set_iface4(int sock, const struct in_addr *in_addr);
 
 #ifdef HAVE_IPV6
 /**

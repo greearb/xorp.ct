@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.13 2002/12/09 11:33:47 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 
 /*
@@ -162,7 +162,7 @@ comm_close(int sock)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_tcp4(struct in_addr *my_addr, unsigned short my_port)
+comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port)
 {
     int sock;
     
@@ -196,7 +196,7 @@ comm_bind_tcp4(struct in_addr *my_addr, unsigned short my_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_tcp6(struct in6_addr *my_addr, unsigned short my_port)
+comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port)
 {
     int sock;
     
@@ -230,7 +230,7 @@ comm_bind_tcp6(struct in6_addr *my_addr, unsigned short my_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_udp4(struct in_addr *my_addr, unsigned short my_port)
+comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port)
 {
     int sock;
     
@@ -256,7 +256,7 @@ comm_bind_udp4(struct in_addr *my_addr, unsigned short my_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_udp6(struct in6_addr *my_addr, unsigned short my_port)
+comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port)
 {
     int sock;
     
@@ -288,7 +288,8 @@ comm_bind_udp6(struct in6_addr *my_addr, unsigned short my_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_join_udp4(struct in_addr *mcast_addr, struct in_addr *join_if_addr,
+comm_bind_join_udp4(const struct in_addr *mcast_addr,
+		    const struct in_addr *join_if_addr,
 		    unsigned short my_port, bool reuse_flag)
 {
     int sock;
@@ -331,7 +332,7 @@ comm_bind_join_udp4(struct in_addr *mcast_addr, struct in_addr *join_if_addr,
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_join_udp6(struct in6_addr *mcast_addr, uint join_if_index,
+comm_bind_join_udp6(const struct in6_addr *mcast_addr, uint join_if_index,
 		    unsigned short my_port, bool reuse_flag)
 {
     int sock;
@@ -371,7 +372,8 @@ comm_bind_join_udp6(struct in6_addr *mcast_addr, uint join_if_index,
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_connect_tcp4(struct in_addr *remote_addr, unsigned short remote_port)
+comm_connect_tcp4(const struct in_addr *remote_addr,
+		  unsigned short remote_port)
 {
     int sock;
     
@@ -399,7 +401,8 @@ comm_connect_tcp4(struct in_addr *remote_addr, unsigned short remote_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_connect_tcp6(struct in6_addr *remote_addr, unsigned short remote_port)
+comm_connect_tcp6(const struct in6_addr *remote_addr,
+		  unsigned short remote_port)
 {
     int sock;
     
@@ -424,7 +427,8 @@ comm_connect_tcp6(struct in6_addr *remote_addr, unsigned short remote_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_connect_udp4(struct in_addr *remote_addr, unsigned short remote_port)
+comm_connect_udp4(const struct in_addr *remote_addr,
+		  unsigned short remote_port)
 {
     int sock;
     
@@ -449,7 +453,8 @@ comm_connect_udp4(struct in_addr *remote_addr, unsigned short remote_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_connect_udp6(struct in6_addr *remote_addr, unsigned short remote_port)
+comm_connect_udp6(const struct in6_addr *remote_addr,
+		  unsigned short remote_port)
 {
     int sock;
     
@@ -478,8 +483,10 @@ comm_connect_udp6(struct in6_addr *remote_addr, unsigned short remote_port)
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_connect_udp4(struct in_addr *local_addr, unsigned short local_port, 
-		       struct in_addr *remote_addr, unsigned short remote_port)
+comm_bind_connect_udp4(const struct in_addr *local_addr,
+		       unsigned short local_port, 
+		       const struct in_addr *remote_addr,
+		       unsigned short remote_port)
 {
     int sock;
     
@@ -510,8 +517,9 @@ comm_bind_connect_udp4(struct in_addr *local_addr, unsigned short local_port,
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_bind_connect_udp6(struct in6_addr *local_addr, unsigned short local_port, 
-		       struct in6_addr *remote_addr,
+comm_bind_connect_udp6(const struct in6_addr *local_addr,
+		       unsigned short local_port, 
+		       const struct in6_addr *remote_addr,
 		       unsigned short remote_port)
 {
     int sock;
