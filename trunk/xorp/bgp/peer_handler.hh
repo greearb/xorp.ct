@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.7 2003/10/11 03:17:56 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.8 2003/10/23 03:10:05 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -49,6 +49,28 @@ public:
      * received by this peer
      */
     int process_update_packet(const UpdatePacket *p);
+    
+    /**
+     * Given an update packet find all the NLRIs with <AFI,SAFI>
+     * specified and inject one by one into the plumbing.
+     *
+     * @param p - packet to tease apart
+     * @param safi - Subsequent address family identifier
+     *
+     * @return true if an <AFI,SAFI> was found.
+     */
+    template <typename A> bool add(const UpdatePacket *p,
+				   PathAttributeList<A>& pa_list,Safi safi);
+    /**
+     * Given an update packet find all the WITHDRAWs with <AFI,SAFI>
+     * specified and inject one by on into the plumbing.
+     *
+     * @param p - packet to tease apart
+     * @param safi - Subsequent address family identifier
+     *
+     * @return true if an <AFI,SAFI> was found.
+     */
+    template <typename A> bool withdraw(const UpdatePacket *p, Safi safi);
 
     /**
      * add_route and delete_route are called by the plumbing to

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.27 2003/10/28 21:01:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.28 2003/10/28 21:53:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,73 +100,67 @@ PeerHandler::peering_came_up()
     _plumbing_multicast->peering_came_up(this);
 }
 
-/*
- * process_update_packet is called when we've received an Update
- * message from the peer.  We break down the update into its pieces,
- * and pass the information into the plumbing to be stored in the
- * RibIn and distributed as required.  */
-
-int
-PeerHandler::process_update_packet(const UpdatePacket *p)
+template <>
+bool
+PeerHandler::add<IPv4>(const UpdatePacket *p,
+		       PathAttributeList<IPv4>& pa_list,
+		       Safi safi)
 {
-    debug_msg("Processing packet\n %s\n", p->str().c_str());
+    switch(safi) {
+    case SAFI_UNICAST: {
+	if (p->nlri_list().empty())
+	    return false;
 
-    /*
-    ** Loop through the path attributes:
-    **
-    ** 1) Find IPv6 Unicast MP_REACH_NLRI.
-    ** 2) Find IPv6 Unicast MP_UNREACH_NLRI.
-    ** 3) Construct two common path attribute lists (IPv4 and IPv6).
-    **
-    ** XXX
-    ** A single update packet can contain both IPv4 and IPv6
-    ** NLRIs. Each NLRI is sent through as a separate IPv4 or IPv6
-    ** subnet route. All the subnet routes that win the decision
-    ** process, arrive at the RibOut, and an attempt is made to build
-    ** a single update packet. Because we separate IPv4 and IPv6 a
-    ** single update packet carrying both will never be generated. 
-    */
-    
-    PathAttributeList<IPv4> pa_list4;
-    PathAttributeList<IPv6> pa_list6;
+	pa_list.rehash();
+	XLOG_ASSERT(pa_list.complete());
+	debug_msg("Built path attribute list: %s\n", pa_list.str().c_str());
 
-    MPReachNLRIAttribute<IPv6> *mpreach = 0;
-    MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
-    
-    bool ipv4 = false;
-    bool ipv6 = false;
-
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	
-	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
- 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
- 	    pa_list6.
-		add_path_attribute(IPv6NextHopAttribute(mpreach->nexthop()));
-	    continue;
+	BGPUpdateAttribList::const_iterator ni4;
+	ni4 = p->nlri_list().begin();
+	while (ni4 != p->nlri_list().end()) {
+	    SubnetRoute<IPv4>* msg_route 
+		= new SubnetRoute<IPv4>(ni4->net(), &pa_list, NULL);
+	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
+	    _plumbing_unicast->add_route(msg, this);
+	    msg_route->unref();
+	    ++ni4;
 	}
-	
-	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
-	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
-	    continue;
+    }
+	break;
+    case SAFI_MULTICAST: {
+	MPReachNLRIAttribute<IPv4> *mpreach = p->mpreach<IPv4>(safi);
+	if(!mpreach)
+	    return false;
+
+	pa_list.rehash();
+	XLOG_ASSERT(pa_list.complete());
+
+	list<IPNet<IPv4> >::const_iterator ni;
+	ni = mpreach->nlri_list().begin();
+	while (ni != mpreach->nlri_list().end()) {
+	    SubnetRoute<IPv4>* msg_route =
+		new SubnetRoute<IPv4>(*ni, &pa_list, NULL);
+	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
+	    _plumbing_multicast->add_route(msg, this);
+	    msg_route->unref();
+	    ++ni;
 	}
-
-	pa_list4.add_path_attribute(*pa);
-
-	/*
-	** Don't put an IPv4 next hop in the IPv6 path attribute list.
-	*/
-	if (NEXT_HOP != pa->type())
-	    pa_list6.add_path_attribute(*pa);
+    }
+	break;
     }
 
-    /*
-    ** IPv4 Withdraws
-    */
-    if (!p->wr_list().empty()) {
-	ipv4 = true;
+    return true;
+}
+
+template <>
+bool
+PeerHandler::withdraw<IPv4>(const UpdatePacket *p, Safi safi)
+{
+    switch(safi) {
+    case SAFI_UNICAST: {
+	if (p->wr_list().empty())
+	    return false;
+
 	BGPUpdateAttribList::const_iterator wi;
 	wi = p->wr_list().begin();
 	while (wi != p->wr_list().end()) {
@@ -174,66 +168,205 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	    ++wi;
 	}
     }
-
-    /*
-    ** IPv6 Withdraws
-    */
-    if (mpunreach) {
-	ipv6 = true;
-	list<IPNet<IPv6> >::const_iterator wi6;
-	wi6 = mpunreach->wr_list().begin();
-	while (wi6 != mpunreach->wr_list().end()) {
-	    _plumbing_unicast->delete_route(*wi6, this);
-	    ++wi6;
+	break;
+    case SAFI_MULTICAST: {
+	MPUNReachNLRIAttribute<IPv4> *mpunreach = p->mpunreach<IPv4>(safi);
+	if (!mpunreach)
+	    return false;
+    
+	list<IPNet<IPv4> >::const_iterator wi;
+	wi = mpunreach->wr_list().begin();
+	while (wi != mpunreach->wr_list().end()) {
+	    _plumbing_multicast->delete_route(*wi, this);
+	    ++wi;
 	}
     }
+	break;
+    }
 
-    /*
-    ** IPv4 Route add.
-    */
-    if (!p->nlri_list().empty()) {
-	ipv4 = true;
-	pa_list4.rehash();
-	XLOG_ASSERT(pa_list4.complete());
-	debug_msg("Built path attribute list: %s\n", pa_list4.str().c_str());
+    return true;
+}
 
-	BGPUpdateAttribList::const_iterator ni4;
-	ni4 = p->nlri_list().begin();
-	while (ni4 != p->nlri_list().end()) {
-	    SubnetRoute<IPv4>* msg_route 
-		= new SubnetRoute<IPv4>(ni4->net(), &pa_list4, NULL);
-	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
+template <>
+bool
+PeerHandler::add<IPv6>(const UpdatePacket *p,
+		       PathAttributeList<IPv6>& pa_list,
+		       Safi safi)
+{
+    MPReachNLRIAttribute<IPv6> *mpreach = p->mpreach<IPv6>(safi);
+    if(!mpreach)
+	return false;
+
+    pa_list.rehash();
+    XLOG_ASSERT(pa_list.complete());
+
+    list<IPNet<IPv6> >::const_iterator ni;
+    ni = mpreach->nlri_list().begin();
+    while (ni != mpreach->nlri_list().end()) {
+	SubnetRoute<IPv6>* msg_route =
+	    new SubnetRoute<IPv6>(*ni, &pa_list, NULL);
+	InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
+
+	switch(safi) {
+	case SAFI_UNICAST:
 	    _plumbing_unicast->add_route(msg, this);
-	    msg_route->unref();
-	    ++ni4;
+	    break;
+	case SAFI_MULTICAST:
+	    _plumbing_multicast->add_route(msg, this);
+	    break;
+	}
+	msg_route->unref();
+	++ni;
+    }
+
+    return false;
+}
+
+template <>
+bool
+PeerHandler::withdraw<IPv6>(const UpdatePacket *p, Safi safi)
+{
+    MPUNReachNLRIAttribute<IPv6> *mpunreach = p->mpunreach<IPv6>(safi);
+    if (!mpunreach)
+	return false;
+    
+    list<IPNet<IPv6> >::const_iterator wi;
+    wi = mpunreach->wr_list().begin();
+    while (wi != mpunreach->wr_list().end()) {
+	switch(safi) {
+	case SAFI_UNICAST:
+	    _plumbing_unicast->delete_route(*wi, this);
+	    break;
+	case SAFI_MULTICAST:
+	    _plumbing_multicast->delete_route(*wi, this);
+	    break;
+	}
+	++wi;
+    }
+
+    return true;
+}
+
+inline
+void
+set_if_true(bool& orig, bool now)
+{
+    if (now)
+	orig = true;
+}
+
+/*
+ * process_update_packet is called when we've received an Update
+ * message from the peer.  We break down the update into its pieces,
+ * and pass the information into the plumbing to be stored in the
+ * RibIn and distributed as required.
+ */
+
+int
+PeerHandler::process_update_packet(const UpdatePacket *p)
+{
+    debug_msg("Processing packet\n %s\n", p->str().c_str());
+
+    PathAttributeList<IPv4> pa_ipv4_unicast;
+    PathAttributeList<IPv4> pa_ipv4_multicast;
+    PathAttributeList<IPv6> pa_ipv6_unicast;
+    PathAttributeList<IPv6> pa_ipv6_multicast;
+
+    bool ipv4_unicast = false;
+    bool ipv4_multicast = false;
+    bool ipv6_unicast = false;
+    bool ipv6_multicast = false;
+
+    list <PathAttribute*>::const_iterator pai;
+    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
+	const PathAttribute* pa;
+	pa = *pai;
+	
+	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
+  	    MPReachNLRIAttribute<IPv6>* mpreach =
+		dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
+	    switch(mpreach->safi()) {
+	    case SAFI_UNICAST:
+		pa_ipv6_unicast.
+		  add_path_attribute(IPv6NextHopAttribute(mpreach->nexthop()));
+	    break;
+	    case SAFI_MULTICAST:
+		pa_ipv6_multicast.
+		  add_path_attribute(IPv6NextHopAttribute(mpreach->nexthop()));
+	    break;
+	    }
+	    continue;
+	}
+	
+	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
+	    continue;
+	}
+
+	if (dynamic_cast<MPReachNLRIAttribute<IPv4>*>(*pai)) {
+  	    MPReachNLRIAttribute<IPv4>* mpreach =
+		dynamic_cast<MPReachNLRIAttribute<IPv4>*>(*pai);
+	    switch(mpreach->safi()) {
+	    case SAFI_UNICAST:
+		XLOG_FATAL("AFI == IPv4 && SAFI == UNICAST???");
+// 		pa_ipv4_unicast.
+// 		  add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
+	    break;
+	    case SAFI_MULTICAST:
+		pa_ipv4_multicast.
+		  add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
+	    break;
+	    }
+	    continue;
+	}
+
+	if (dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(*pai)) {
+	    continue;
+	}
+
+	pa_ipv4_unicast.add_path_attribute(*pa);
+
+	/*
+	** The nexthop path attribute applies only to IPv4 Unicast case.
+	*/
+	if (NEXT_HOP != pa->type()) {
+	    pa_ipv4_multicast.add_path_attribute(*pa);
+	    pa_ipv6_unicast.add_path_attribute(*pa);
+	    pa_ipv6_multicast.add_path_attribute(*pa);
 	}
     }
 
-    /*
-    ** IPv6 Route add.
-    */
-    if (mpreach) {
-	ipv6 = true;
-	pa_list6.rehash();
-	XLOG_ASSERT(pa_list6.complete());
-	debug_msg("Built path attribute list: %s\n", pa_list6.str().c_str());
+    // IPv4 Unicast Withdraws
+    set_if_true(ipv4_unicast, withdraw<IPv4>(p, SAFI_UNICAST));
 
-	list<IPNet<IPv6> >::const_iterator ni6;
-	ni6 = mpreach->nlri_list().begin();
-	while (ni6 != mpreach->nlri_list().end()) {
-	    SubnetRoute<IPv6>* msg_route 
-		= new SubnetRoute<IPv6>(*ni6, &pa_list6, NULL);
-	    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
-	    _plumbing_unicast->add_route(msg, this);
-	    msg_route->unref();
-	    ++ni6;
-	}
-    }
+    // IPv4 Multicast Withdraws
+    set_if_true(ipv4_multicast, withdraw<IPv4>(p, SAFI_MULTICAST));
 
-    if (ipv4)
+    // IPv6 Unicast Withdraws
+    set_if_true(ipv6_unicast, withdraw<IPv6>(p, SAFI_UNICAST));
+
+    // IPv6 Multicast Withdraws
+    set_if_true(ipv6_multicast, withdraw<IPv6>(p, SAFI_MULTICAST));
+
+    // IPv4 Unicast Route add.
+    set_if_true(ipv4_unicast, add<IPv4>(p, pa_ipv4_unicast, SAFI_UNICAST));
+
+    // IPv4 Multicast Route add.
+    set_if_true(ipv4_multicast, add<IPv4>(p,pa_ipv4_multicast,SAFI_MULTICAST));
+
+    // IPv6 Unicast Route add.
+    set_if_true(ipv6_unicast, add<IPv6>(p, pa_ipv6_unicast, SAFI_UNICAST));
+
+    // IPv6 Multicast Route add.
+    set_if_true(ipv6_multicast, add<IPv6>(p,pa_ipv6_multicast,SAFI_MULTICAST));
+
+    if (ipv4_unicast)
 	_plumbing_unicast->push_ipv4(this);
-    if (ipv6)
+    if (ipv6_unicast)
 	_plumbing_unicast->push_ipv6(this);
+    if (ipv4_multicast)
+	_plumbing_multicast->push_ipv4(this);
+    if (ipv6_multicast)
+	_plumbing_multicast->push_ipv6(this);
     return 0;
 }
 
@@ -252,7 +385,7 @@ PeerHandler::start_packet(bool ibgp)
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi)
+PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
     XLOG_ASSERT(_packet != NULL);
@@ -270,15 +403,38 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi)
 	PathAttributeList<IPv4>::const_iterator pai;
 	pai = rt.attributes()->begin();
 	while (pai != rt.attributes()->end()) {
-	    debug_msg("Adding attribute\n");
-	    _packet->add_pathatt(**pai);
+	    debug_msg("Adding attribute %s\n", (*pai)->str().c_str());
+	    /*
+	    ** Don't put a multicast nexthop in the parameter list.
+	    */
+	    if (!(NEXT_HOP == (*pai)->type() && safi == SAFI_MULTICAST))
+		_packet->add_pathatt(**pai);
 	    ++pai;
+	}
+	if (SAFI_MULTICAST == safi) {
+	    MPReachNLRIAttribute<IPv4> mp(safi);
+	    mp.set_nexthop(rt.nexthop());
+	    _packet->add_pathatt(mp);
 	}
     }
 
     // add the NLRI information.
-    BGPUpdateAttrib nlri(rt.net());
-    _packet->add_nlri(nlri);
+    switch(safi) {
+    case SAFI_UNICAST: {
+	BGPUpdateAttrib nlri(rt.net());
+ 	XLOG_ASSERT(_packet->pa_list().nexthop() == rt.nexthop());
+	_packet->add_nlri(nlri);
+    }
+	break;
+    case SAFI_MULTICAST: {
+	XLOG_ASSERT(_packet->mpreach<IPv4>(SAFI_MULTICAST));
+	XLOG_ASSERT(_packet->mpreach<IPv4>(SAFI_MULTICAST)->nexthop() == 
+		    rt.nexthop());
+	_packet->mpreach<IPv4>(SAFI_MULTICAST)->add_nlri(rt.net());
+    }
+	break;
+    }
+
     return 0;
 }
 
@@ -298,7 +454,7 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 	debug_msg("First add on this packet\n");
 	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
 	// no, so add all the path attributes
-	PathAttributeList<IPv4>::const_iterator pai;
+	PathAttributeList<IPv6>::const_iterator pai;
 	pai = rt.attributes()->begin();
 	while (pai != rt.attributes()->end()) {
 	    debug_msg("Adding attribute\n");
@@ -315,6 +471,7 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
     }
 
     XLOG_ASSERT(_packet->mpreach<IPv6>(safi));
+    XLOG_ASSERT(_packet->mpreach<IPv6>(safi)->nexthop() == rt.nexthop());
     _packet->mpreach<IPv6>(safi)->add_nlri(rt.net());
 
     return 0;
@@ -343,7 +500,7 @@ PeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
+PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
     XLOG_ASSERT(_packet != NULL);
@@ -353,8 +510,24 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
 	start_packet(_ibgp);
     }
 
-    BGPUpdateAttrib wdr(rt.net());
-    _packet->add_withdrawn(wdr);
+    if (SAFI_MULTICAST == safi && 0 == _packet->mpunreach<IPv4>(safi)) {
+	MPUNReachNLRIAttribute<IPv4> mp(safi);
+	_packet->add_pathatt(mp);
+    }
+    
+    switch(safi) {
+    case SAFI_UNICAST: {
+	BGPUpdateAttrib wdr(rt.net());
+	_packet->add_withdrawn(wdr);
+    }
+	break;
+    case SAFI_MULTICAST: {
+	XLOG_ASSERT(_packet->mpunreach<IPv4>(SAFI_MULTICAST));
+	_packet->mpunreach<IPv4>(SAFI_MULTICAST)->add_withdrawn(rt.net());
+    }
+	break;
+    }
+
     return 0;
 }
 
@@ -364,11 +537,17 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
 
+    if (_packet->big_enough()) {
+	push_packet();
+	start_packet(_ibgp);
+    }
+
     if (0 == _packet->mpunreach<IPv6>(safi)) {
 	MPUNReachNLRIAttribute<IPv6> mp(safi);
 	_packet->add_pathatt(mp);
     }
 
+    XLOG_ASSERT(_packet->mpunreach<IPv6>(safi));
     _packet->mpunreach<IPv6>(safi)->add_withdrawn(rt.net());
 
     return 0;
