@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.23 2002/12/09 18:29:28 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -182,8 +182,8 @@ int
 PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
 {
     IPvX	assert_group_addr(family());
-    uint32_t	group_masklen;
     uint32_t	route_metric, metric_preference;
+    bool	rpt_bit = true;
     int		ret_value;
     
     if (! (pim_mre->is_sg() || pim_mre->is_wc()))
@@ -191,21 +191,19 @@ PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
     
     // Prepare the Assert data
     assert_group_addr  = pim_mre->group_addr();
-    group_masklen = IPvX::addr_bitlen(family());
     
     if (pim_mre->is_spt()) {
+	rpt_bit = false;
 	route_metric = pim_mre->route_metric_s();
 	metric_preference = pim_mre->metric_preference_s();
-	metric_preference &= ~PIM_ASSERT_RPT_BIT;
     } else {
+	rpt_bit = true;
 	route_metric = pim_mre->route_metric_rp();
 	metric_preference = pim_mre->metric_preference_rp();
-	metric_preference |= PIM_ASSERT_RPT_BIT;
     }
     
-    ret_value = pim_assert_send(assert_source_addr, assert_group_addr,
-				group_masklen, route_metric,
-				metric_preference);
+    ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
+				route_metric, metric_preference);
     return (ret_value);
 }
 
@@ -216,9 +214,9 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     IPvX	assert_source_addr(family());
     IPvX	assert_group_addr(family());
     const IPvX	*rp_addr_ptr;
-    uint32_t	group_masklen;
     uint32_t	route_metric, metric_preference;
     int		ret_value;
+    bool	rpt_bit = false;
     
     if (! (pim_mre->is_sg() || pim_mre->is_wc()))
 	return (XORP_ERROR);
@@ -232,29 +230,33 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
 	    assert_source_addr = *rp_addr_ptr;
     }
     assert_group_addr  = pim_mre->group_addr();
-    group_masklen = IPvX::addr_bitlen(family());
+    if (pim_mre->is_sg() && pim_mre->is_spt())
+	rpt_bit = false;
+    else
+	rpt_bit = true;
     route_metric = PIM_ASSERT_MAX_METRIC;
     metric_preference = PIM_ASSERT_MAX_METRIC_PREFERENCE;
-    if (pim_mre->is_sg() && pim_mre->is_spt())
-	metric_preference &= ~PIM_ASSERT_RPT_BIT;
-    else
-	metric_preference |= PIM_ASSERT_RPT_BIT;
     
-    ret_value = pim_assert_send(assert_source_addr, assert_group_addr,
-				group_masklen, route_metric,
-				metric_preference);
+    ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
+				route_metric, metric_preference);
     return (ret_value);
 }
 
 int
 PimVif::pim_assert_send(const IPvX& assert_source_addr,
 			const IPvX& assert_group_addr,
-			uint32_t group_masklen,
+			bool rpt_bit,
 			uint32_t route_metric,
 			uint32_t metric_preference)
 {
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
+    uint32_t group_masklen = IPvX::addr_bitlen(family());
+    
+    if (rpt_bit)
+	metric_preference |= PIM_ASSERT_RPT_BIT;
+    else
+	metric_preference &= ~PIM_ASSERT_RPT_BIT;
     
     // Write all data to the buffer
     PUT_ENCODED_GROUP_ADDR(family(), assert_group_addr, group_masklen,
