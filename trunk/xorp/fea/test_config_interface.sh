@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.1 2003/10/17 22:26:13 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.2 2003/10/17 23:53:44 pavlin Exp $
 #
 
 #
@@ -74,6 +74,10 @@ test_cleanup_interface4()
 
     # Add the address, and enable the interface
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
     fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
@@ -86,6 +90,10 @@ test_cleanup_interface4()
 
     # Delete the address, disable the interface, and reset the MTU
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} false
     fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} false
     fea_ifmgr_delete_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
@@ -95,6 +103,10 @@ test_cleanup_interface4()
     # Reset the MAC address to its original value
     # Note that the interface must be DOWN to set the MAC address
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_set_mac ${tid} ${IFNAME} ${MAC}
     fea_ifmgr_commit_transaction ${tid}
 }
@@ -104,6 +116,10 @@ test_enable_interface()
     echo "TEST: Enable interface ${IFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
@@ -116,6 +132,10 @@ test_disable_interface()
     echo "TEST: Disable interface ${IFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} false
     fea_ifmgr_commit_transaction ${tid}
@@ -126,6 +146,10 @@ test_set_interface_mtu()
     echo "TEST: Set MTU of interface ${IFNAME} to ${TEST_MTU}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_set_mtu ${tid} ${IFNAME} ${TEST_MTU}
     fea_ifmgr_commit_transaction ${tid}
@@ -137,12 +161,20 @@ test_set_interface_mac()
 
     # First make sure that the interface is DOWN
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} false
     fea_ifmgr_commit_transaction ${tid}
 
     # Set the interface MAC address
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_set_mac ${tid} ${IFNAME} ${TEST_MAC}
     fea_ifmgr_commit_transaction ${tid}
@@ -154,6 +186,10 @@ test_create_address4()
 
     # Add the address, and enable the interface
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
     fea_ifmgr_create_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
@@ -171,6 +207,10 @@ test_delete_address4()
 
     # Delete the address
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
     fea_ifmgr_delete_address4 ${tid} ${IFNAME} ${VIFNAME} ${ADDR}
