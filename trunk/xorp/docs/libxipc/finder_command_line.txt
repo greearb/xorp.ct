@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 Since knowledge of how to contact the Finder is a necessary bootstrap
 mechanism, each process should accept a command line argument to
 specify the host and port to be used to contact the Finder.

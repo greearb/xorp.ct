@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 This document describes the Xrl errors that currently exist
 libxipc/xrl_error.hh and describes the intended semantics.
 

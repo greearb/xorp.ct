@@ -1,3 +1,6 @@
+#
+# $XORP$
+#
 
 		XRL Security: An outline and starting point
 
