@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.9 2004/02/20 19:02:18 hodson Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.10 2004/06/10 22:41:15 hodson Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -154,28 +154,36 @@ public:
      *
      * @param when the absolute time when the timer expires.
      *
-     * @param flag_ptr pointer to a boolean variable that is set to
-     * false when this function is called and will be set to true when
-     * the @ref XorpTimer expires.
+     * @param flag_ptr pointer to a boolean variable that is to be set
+     *        when the timer expires.
+     *
+     * @param to_value value to set the boolean variable to.  Default value
+     * is true.
      *
      * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer set_flag_at(const TimeVal& when, bool* flag_ptr);
+    XorpTimer set_flag_at(const TimeVal& 	when,
+			  bool* 		flag_ptr,
+			  bool 			to_value = true);
 
     /**
      * Add a flag setting timer to the EventLoop.
      *
      * @param wait the relative time when the timer expires.
      *
-     * @param flag_ptr pointer to a boolean variable that is set to
-     * false when this function is called and will be set to true when
-     * the @ref XorpTimer expires.
+     * @param flag_ptr pointer to a boolean variable that is to be set
+     *        when the timer expires.
+     *
+     * @param to_value value to set the boolean variable to.  Default value
+     * is true.
      *
      * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer set_flag_after(const TimeVal& wait, bool* flag_ptr);
+    XorpTimer set_flag_after(const TimeVal& 	wait,
+			     bool* 		flag_ptr,
+			     bool 		to_value = true);
 
     /**
      * Add a flag setting timer to the EventLoop.
@@ -186,10 +194,16 @@ public:
      * false when this function is called and will be set to true when
      * the @ref XorpTimer expires.
      *
+     * @param flag_ptr pointer to a boolean variable that is to be set
+     *        when the timer expires.
+     *
+     * @param to_value value to set the boolean variable to.  Default value
+     * is true.
+     *
      * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer set_flag_after_ms(int ms, bool* flag_ptr);
+    XorpTimer set_flag_after_ms(int ms, bool* flag_ptr, bool to_value = true);
 
     /**
      * Create a custom timer associated with the EventLoop.
@@ -301,21 +315,21 @@ EventLoop::new_periodic(int period_ms, const PeriodicTimerCallback& pcb)
 }
 
 inline XorpTimer
-EventLoop::set_flag_at(const TimeVal& tv, bool *flag_ptr)
+EventLoop::set_flag_at(const TimeVal& tv, bool *flag_ptr, bool to_value)
 {
-    return _timer_list.set_flag_at(tv, flag_ptr);
+    return _timer_list.set_flag_at(tv, flag_ptr, to_value);
 }
 
 inline XorpTimer
-EventLoop::set_flag_after(const TimeVal& wait, bool *flag_ptr)
+EventLoop::set_flag_after(const TimeVal& wait, bool *flag_ptr, bool to_value)
 {
-    return _timer_list.set_flag_after(wait, flag_ptr);
+    return _timer_list.set_flag_after(wait, flag_ptr, to_value);
 }
 
 inline XorpTimer
-EventLoop::set_flag_after_ms(int ms, bool *flag_ptr)
+EventLoop::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value)
 {
-    return _timer_list.set_flag_after_ms(ms, flag_ptr);
+    return _timer_list.set_flag_after_ms(ms, flag_ptr, to_value);
 }
 
 inline bool

@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.16 2004/02/24 19:41:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.17 2004/06/10 22:41:21 hodson Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -244,34 +244,34 @@ TimerList::new_periodic(int interval, const PeriodicTimerCallback& cb)
 }
 
 static void
-set_flag_hook(bool* flag_ptr)
+set_flag_hook(bool* flag_ptr, bool to_value)
 {
     assert(flag_ptr);
-    *flag_ptr = true;
+    *flag_ptr = to_value;
 }
 
 XorpTimer
-TimerList::set_flag_at(const TimeVal& tv, bool *flag_ptr)
+TimerList::set_flag_at(const TimeVal& tv, bool *flag_ptr, bool to_value)
 {
     assert(flag_ptr);
     *flag_ptr = false;
-    return new_oneoff_at(tv, callback(set_flag_hook, flag_ptr));
+    return new_oneoff_at(tv, callback(set_flag_hook, flag_ptr, to_value));
 }
 
 XorpTimer
-TimerList::set_flag_after(const TimeVal& wait, bool *flag_ptr)
+TimerList::set_flag_after(const TimeVal& wait, bool *flag_ptr, bool to_value)
 {
     assert(flag_ptr);
     *flag_ptr = false;
-    return new_oneoff_after(wait, callback(set_flag_hook, flag_ptr));
+    return new_oneoff_after(wait, callback(set_flag_hook, flag_ptr, to_value));
 }
 
 XorpTimer
-TimerList::set_flag_after_ms(int ms, bool *flag_ptr)
+TimerList::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value)
 {
     assert(flag_ptr);
     *flag_ptr = false;
-    return new_oneoff_after_ms(ms, callback(set_flag_hook, flag_ptr));
+    return new_oneoff_after_ms(ms, callback(set_flag_hook, flag_ptr, to_value));
 }
 
 // Default XorpTimer and TimerList clock

@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.17 2003/09/26 23:56:14 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.18 2004/06/10 22:41:22 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -256,12 +256,13 @@ public:
      * @param when the absolute time when the timer expires.
      *
      * @param flag_ptr pointer to a boolean variable that is set to
-     * false when this function is called and will be set to true when
-     * the @ref XorpTimer expires.
+     * @ref to_value when the @ref XorpTimer expires.
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_at(const TimeVal& when, bool *flag_ptr);
+    XorpTimer set_flag_at(const TimeVal& 	 when,
+			  bool 			*flag_ptr,
+			  bool 			 to_value = true);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -269,12 +270,13 @@ public:
      * @param wait the relative time when the timer expires.
      *
      * @param flag_ptr pointer to a boolean variable that is set to
-     * false when this function is called and will be set to true when
-     * the @ref XorpTimer expires.
+     * @ref to_value when the @ref XorpTimer expires.
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_after(const TimeVal& wait, bool *flag_ptr);
+    XorpTimer set_flag_after(const TimeVal& 	 wait,
+			     bool 		*flag_ptr,
+			     bool 		 to_value = true);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -282,12 +284,13 @@ public:
      * @param ms the relative time in milliseconds when the timer expires.
      *
      * @param flag_ptr pointer to a boolean variable that is set to
-     * false when this function is called and will be set to true when
-     * the @ref XorpTimer expires.
+     * @ref to_value when the @ref XorpTimer expires.
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_after_ms(int ms, bool* flag_ptr);
+    XorpTimer set_flag_after_ms(int 	ms,
+				bool* 	flag_ptr,
+				bool 	to_value = true);
 
     /**
      * Custom XorpTimer creation method.  The @ref XorpTimer object created
