@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.7 2004/11/19 11:02:33 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.8 2004/11/23 00:53:19 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -62,7 +62,7 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
 
     if (nbytes < sizeof(struct ip)) {
 	XLOG_ERROR("attempting to write a raw ip packet of %u (<20) bytes.",
-		   (uint32_t)nbytes);
+		   XORP_UINT_CAST(nbytes));
 	return -1;
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.37 2005/02/24 02:47:40 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.38 2005/02/27 20:49:06 pavlin Exp $"
 
 
 //
@@ -928,7 +928,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     debug_msg("Received message from %s to %s: "
 	      "ip_ttl = %d ip_tos = %#x router_alert = %d rcvlen = %u\n",
 	      cstring(src), cstring(dst),
-	      ip_ttl, ip_tos, router_alert_bool, (uint32_t)rcvlen);
+	      ip_ttl, ip_tos, router_alert_bool, XORP_UINT_CAST(rcvlen));
     
     //
     // Check whether the node is up.

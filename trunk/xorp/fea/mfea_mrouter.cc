@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.21 2004/07/28 03:03:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.22 2005/02/25 18:46:11 pavlin Exp $"
 
 
 //
@@ -1904,7 +1904,7 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("mrouter_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
-			 nbytes, (uint32_t)sizeof(*igmpmsg));
+			 nbytes, XORP_UINT_CAST(sizeof(*igmpmsg)));
 	    return;		// Error
 	}
 	if (igmpmsg->im_mbz == 0) {
@@ -1935,7 +1935,8 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 	    XLOG_WARNING("mrouter_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes,
-			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld_hdr)));
+			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
+					    sizeof(struct mld_hdr))));
 	    return;		// Error
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.26 2004/12/08 01:41:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.27 2004/12/17 20:42:21 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -293,7 +293,7 @@ NetlinkSocket::force_read(string& error_msg)
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got, (uint32_t)sizeof(struct nlmsghdr));
+				 got, XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
 	}
 	
@@ -369,7 +369,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got, (uint32_t)sizeof(struct nlmsghdr));
+				 got, XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
 	}
 	
@@ -472,7 +472,7 @@ NetlinkSocket::force_recvmsg(int flags, string& error_msg)
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got, (uint32_t)sizeof(struct nlmsghdr));
+				 got, XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
 	}
 	

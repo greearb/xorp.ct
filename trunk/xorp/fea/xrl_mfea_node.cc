@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.37 2005/02/23 17:37:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.38 2005/02/24 00:50:15 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -2416,7 +2416,8 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 	// Invalid number of covered interfaces
 	string error_msg = c_format("Received 'add_mfc' with invalid "
 				    "'max_vifs_oiflist' = %u (expected <= %u)",
-				    max_vifs_oiflist, (uint32_t)mifset.size());
+				    max_vifs_oiflist,
+				    XORP_UINT_CAST(mifset.size()));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2477,7 +2478,8 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 	// Invalid number of covered interfaces
 	string error_msg = c_format("Received 'add_mfc' with invalid "
 				    "'max_vifs_oiflist' = %u (expected <= %u)",
-				    max_vifs_oiflist, (uint32_t)mifset.size());
+				    max_vifs_oiflist,
+				    XORP_UINT_CAST(mifset.size()));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

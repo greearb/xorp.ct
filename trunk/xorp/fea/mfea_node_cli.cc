@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.10 2004/09/23 18:40:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.11 2005/01/28 03:34:18 pavlin Exp $"
 
 
 //
@@ -220,17 +220,21 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    threshold_interval = mfea_dfe->threshold_interval();
 	    
 	    // The measured values
-	    if (mfea_dfe->is_threshold_in_packets())
-		s1 = c_format("%u", (uint32_t)mfea_dfe->measured_packets());
-	    else
+	    if (mfea_dfe->is_threshold_in_packets()) {
+		s1 = c_format("%u",
+			      XORP_UINT_CAST(mfea_dfe->measured_packets()));
+	    } else {
 		s1 = "?";
-	    if (mfea_dfe->is_threshold_in_bytes())
-		s2 = c_format("%u", (uint32_t)mfea_dfe->measured_bytes());
-	    else
+	    }
+	    if (mfea_dfe->is_threshold_in_bytes()) {
+		s2 = c_format("%u",
+			      XORP_UINT_CAST(mfea_dfe->measured_bytes()));
+	    } else {
 		s2 = "?";
+	    }
 	    measured_s = c_format("%u.%u|%s|%s",
-				  (uint32_t)start_time.sec(),
-				  (uint32_t)start_time.usec(),
+				  XORP_UINT_CAST(start_time.sec()),
+				  XORP_UINT_CAST(start_time.usec()),
 				  s1.c_str(), s2.c_str());
 	    
 	    // The entry type
@@ -249,8 +253,8 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    else
 		s2 = "?";
 	    thresh_s = c_format("%u.%u|%s|%s",
-				(uint32_t)threshold_interval.sec(),
-				(uint32_t)threshold_interval.usec(),
+				XORP_UINT_CAST(threshold_interval.sec()),
+				XORP_UINT_CAST(threshold_interval.usec()),
 				s1.c_str(), s2.c_str());
 	    
 	    // Remaining time
@@ -258,14 +262,14 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    if (now <= end) {
 		delta = end - now;
 		remain_s = c_format("%u.%u",
-				    (uint32_t)delta.sec(), 
-				    (uint32_t)delta.usec());
+				    XORP_UINT_CAST(delta.sec()),
+				    XORP_UINT_CAST(delta.usec()));
 	    } else {
 		// Negative time
 		delta = now - end;
 		remain_s = c_format("-%u.%u",
-				    (uint32_t)delta.sec(), 
-				    (uint32_t)delta.usec());
+				    XORP_UINT_CAST(delta.sec()),
+				    XORP_UINT_CAST(delta.usec()));
 	    }
 	    
 	    cli_print(c_format("  %-29s %-6s %-30s %-6s\n",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.30 2004/08/13 23:24:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.31 2005/02/27 20:49:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -637,7 +637,7 @@ PimMreTrackState::print_actions_num() const
 {
     for (size_t i = 0; i < INPUT_STATE_MAX; i++) {
 	list<PimMreAction>::const_iterator iter;
-	printf("Input action = %u Output actions =", (uint32_t)i);
+	printf("Input action = %u Output actions =", XORP_UINT_CAST(i));
 	for (iter = _output_action[i].begin();
 	     iter != _output_action[i].end();
 	     ++iter) {

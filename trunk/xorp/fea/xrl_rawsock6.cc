@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.1 2004/11/29 09:18:19 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -196,9 +196,9 @@ XrlRawSocket6Manager::send(const IPv6& src,
 	payload.size() > MAX_IP6_PKT_BYTES) {
 	return XrlCmdError::COMMAND_FAILED(
 	    c_format("Packet size, %u bytes, out of bounds %u-%u bytes)",
-		     (uint32_t)payload.size(),
-		     (uint32_t)MIN_IP6_PKT_BYTES,
-		     (uint32_t)MAX_IP6_PKT_BYTES)
+		     XORP_UINT_CAST(payload.size()),
+		     XORP_UINT_CAST(MIN_IP6_PKT_BYTES),
+		     XORP_UINT_CAST(MAX_IP6_PKT_BYTES))
 	    );
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.19 2004/08/25 06:23:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.20 2004/09/08 23:54:12 pavlin Exp $"
 
 
 //
@@ -1007,7 +1007,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
-			 nbytes, (uint32_t)sizeof(*igmpmsg));
+			 nbytes, XORP_UINT_CAST(sizeof(*igmpmsg)));
 	    return;		// Error
 	}
 	if (igmpmsg->im_mbz == 0) {
@@ -1029,7 +1029,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
 			 nbytes,
-			 (uint32_t)sizeof(struct icmp6_hdr));
+			 XORP_UINT_CAST(sizeof(struct icmp6_hdr)));
 	    return;		// Error
 	}
 #else
@@ -1041,7 +1041,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal or packet size %d is smaller than minimum size %u",
 			 nbytes,
-			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld_hdr)));
+			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
+					    sizeof(struct mld_hdr))));
 	    return;		// Error
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
@@ -1089,7 +1090,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	if (nbytes < (ssize_t)sizeof(*ip)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
-			 nbytes, (uint32_t)sizeof(*ip));
+			 nbytes, XORP_UINT_CAST(sizeof(*ip)));
 	    return;		// Error
 	}
 	src.copy_in(_from4);
@@ -1212,8 +1213,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		       "RX packet from %s has too short msg_controllen "
 		       "(%u instead of %u)",
 		       cstring(src),
-		       (uint32_t)controllen,
-		       (uint32_t)sizeof(struct cmsghdr));
+		       XORP_UINT_CAST(controllen),
+		       XORP_UINT_CAST(sizeof(struct cmsghdr)));
 	    return;		// Error
 	}
 	
@@ -1545,8 +1546,8 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		       mfea_vif->name().c_str(),
 		       src.str().c_str(),
 		       dst.str().c_str(),
-		       (uint32_t)datalen,
-		       (uint32_t)IO_BUF_SIZE);
+		       XORP_UINT_CAST(datalen),
+		       XORP_UINT_CAST(IO_BUF_SIZE));
 	    return (XORP_ERROR);
 	}
     	memcpy(_sndbuf1, databuf, datalen); // XXX: goes to _sndiov[1].iov_base
@@ -1724,8 +1725,8 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		       mfea_vif->name().c_str(),
 		       src.str().c_str(),
 		       dst.str().c_str(),
-		       (uint32_t)datalen,
-		       (uint32_t)IO_BUF_SIZE);
+		       XORP_UINT_CAST(datalen),
+		       XORP_UINT_CAST(IO_BUF_SIZE));
 	    return (XORP_ERROR);
 	}
 	memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base

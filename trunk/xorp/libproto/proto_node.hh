@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.26 2005/02/14 23:15:16 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.27 2005/02/24 02:19:10 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -615,7 +615,7 @@ ProtoNode<V>::node_status(string& reason_msg)
     case PROC_STARTUP:
 	// Get the message about the startup progress
 	reason_msg = c_format("Waiting for %u startup events",
-			      static_cast<uint32_t>(_startup_requests_n));
+			      XORP_UINT_CAST(_startup_requests_n));
 	break;
     case PROC_NOT_READY:
 	reason_msg = c_format("Waiting for configuration completion");
@@ -626,7 +626,7 @@ ProtoNode<V>::node_status(string& reason_msg)
     case PROC_SHUTDOWN:
 	// Get the message about the shutdown progress
 	reason_msg = c_format("Waiting for %u shutdown events",
-			      static_cast<uint32_t>(_shutdown_requests_n));
+			      XORP_UINT_CAST(_shutdown_requests_n));
 	break;
     case PROC_FAILED:
 	reason_msg = c_format("Node is PROC_FAILED");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.6 2004/06/10 22:40:57 hodson Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.7 2004/10/27 01:18:21 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -225,7 +225,7 @@ protected:
 
 	if (bufbytes < sizeof(struct ip)) {
 	    verbose_log("Ignoring short packet (%u bytes).\n",
-			(uint32_t)bufbytes);
+			XORP_UINT_CAST(bufbytes));
 	    return;
 	}
 
@@ -238,7 +238,7 @@ protected:
 	size_t payload_bytes = ntohs(hdr->ip_len) - 4 * hdr->ip_hl;
 	if (payload_bytes < sizeof(IcmpEchoHeader)) {
 	    verbose_log("Ignoring small ICMP packet (payload = %u bytes).\n",
-			(uint32_t)payload_bytes);
+			XORP_UINT_CAST(payload_bytes));
 	    return;
 	}
 
@@ -414,7 +414,7 @@ main(int argc, char* const* argv)
 	    e.run();
 
 	printf("Received %u good responses and %u bad responses.\n",
-	       (uint32_t)pinger.good(), (uint32_t)pinger.bad());
+	       XORP_UINT_CAST(pinger.good()), XORP_UINT_CAST(pinger.bad()));
 	if (pinger.good() == 0) {
 	    exit(EXIT_FAILURE);
 	}

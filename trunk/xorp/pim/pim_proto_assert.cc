@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.20 2004/06/10 22:41:33 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.21 2005/02/27 20:49:49 pavlin Exp $"
 
 
 //
@@ -150,7 +150,8 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 		     "instead of %u",
 		     PIMTYPE2ASCII(PIM_ASSERT),
 		     cstring(src), cstring(dst),
-		     group_mask_len, (uint32_t)IPvX::addr_bitlen(family()));
+		     group_mask_len,
+		     XORP_UINT_CAST(IPvX::addr_bitlen(family())));
 	return (XORP_ERROR);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.44 2005/02/15 02:08:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.45 2005/02/24 02:47:40 pavlin Exp $"
 
 
 //
@@ -1418,7 +1418,7 @@ MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
 	       "router_alert = %d rcvbuf = %p rcvlen = %u",
 	       xorp_module_name(family(), dst_module_id), vif_index,
 	       cstring(src), cstring(dst), ip_ttl, ip_tos, router_alert_bool,
-	       rcvbuf, (uint32_t)rcvlen);
+	       rcvbuf, XORP_UINT_CAST(rcvlen));
     
     //
     // Test if we should accept or drop the message

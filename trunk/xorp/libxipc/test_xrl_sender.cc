@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.9 2004/12/09 07:54:37 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.10 2005/02/01 05:35:13 pavlin Exp $"
 
 //
 // Test XRLs sender.
@@ -138,7 +138,7 @@ public:
     inline void print_xrl_sent() const {
 #if PRINT_DEBUG
 	if (! (_next_xrl_send_id % 10000))
-	    printf("Sending %u\n", (uint32_t)_next_xrl_send_id);
+	    printf("Sending %u\n", XORP_UINT_CAST(_next_xrl_send_id));
 #endif // PRINT_DEBUG
     }
 
@@ -146,7 +146,7 @@ public:
 #if PRINT_DEBUG
 	printf(".");
 	if (! (_next_xrl_recv_id % 10000))
-	    printf("Receiving %u\n", (uint32_t)_next_xrl_recv_id);
+	    printf("Receiving %u\n", XORP_UINT_CAST(_next_xrl_recv_id));
 #endif // PRINT_DEBUG
     }
 
@@ -460,7 +460,7 @@ public:
 #if PRINT_DEBUG
     	printf(".");
 	if (! (_received_xrls % 10000))
-	    printf("Received %u\n", (uint32_t)_received_xrls);
+	    printf("Received %u\n", XORP_UINT_CAST(_received_xrls));
 #endif // PRINT_DEBUG
     }
 

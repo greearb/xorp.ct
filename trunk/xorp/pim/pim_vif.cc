@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.40 2005/02/24 02:41:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.41 2005/02/27 20:49:50 pavlin Exp $"
 
 
 //
@@ -827,7 +827,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		     "too short data field (%u bytes)",
 		     cstring(src), cstring(dst),
 		     name().c_str(),
-		     (uint32_t)BUFFER_DATA_SIZE(buffer));
+		     XORP_UINT_CAST(BUFFER_DATA_SIZE(buffer)));
 	++_pimstat_bad_length_messages;
 	return (XORP_ERROR);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mrib.cc,v 1.4 2004/02/28 21:14:48 pavlin Exp $"
+#ident "$XORP: xorp/mrt/test_mrib.cc,v 1.5 2004/06/10 22:41:29 hodson Exp $"
 
 
 //
@@ -138,7 +138,7 @@ run_test1()
     
     // MribTable size
     printf("\n");
-    printf("MribTable size = %u\n", (uint32_t)mrib_table.size());
+    printf("MribTable size = %u\n", XORP_UINT_CAST(mrib_table.size()));
     printf("PASS\n");
     
     // All entries printout

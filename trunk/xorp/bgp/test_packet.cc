@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.6 2003/10/23 04:10:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.7 2004/06/10 22:40:37 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -277,15 +277,15 @@ UpdatePacket* BGPTestPacket::create_update()
 	
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(12));
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(13));
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(14));
     AsPath p;
     p.add_segment(as_seq);
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     BGPUpdateAttrib nlr_0(net[0]);
     BGPUpdateAttrib nlr_1(net[1]);	
     // nlr_0.dump();
@@ -310,15 +310,15 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
 	
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(12));
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(13));
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(14));
     AsPath p;
     p.add_segment(as_seq);
-    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     BGPUpdateAttrib nlr_0(net[0]);
     BGPUpdateAttrib nlr_1(net[1]);	
     // nlr_0.dump();

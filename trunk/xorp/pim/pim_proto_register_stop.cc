@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.10 2004/06/10 22:41:34 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.11 2005/02/27 20:49:49 pavlin Exp $"
 
 
 //
@@ -161,7 +161,8 @@ PimVif::pim_register_stop_process(const IPvX& rp_addr,
 		     "instead of %u",
 		     PIMTYPE2ASCII(PIM_REGISTER_STOP),
 		     cstring(rp_addr), cstring(domain_wide_addr()),
-		     group_mask_len, (uint32_t)IPvX::addr_bitlen(family()));
+		     group_mask_len,
+		     XORP_UINT_CAST(IPvX::addr_bitlen(family())));
 	return (XORP_ERROR);
     }
     
