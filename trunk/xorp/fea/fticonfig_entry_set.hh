@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.15 2004/12/01 03:28:08 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.16 2004/12/13 23:17:28 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -449,7 +449,7 @@ public:
     const map<IPv6Net, Fte6>& fte_table6() const { return _fte_table6; }
 
 private:
-    virtual void nexthop_port_mapper_event();
+    virtual void nexthop_port_mapper_event(bool is_mapping_changed);
 
     bool add_entry(const FteX& fte);
     bool delete_entry(const FteX& fte);

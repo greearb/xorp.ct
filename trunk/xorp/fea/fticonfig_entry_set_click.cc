@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.11 2004/12/08 01:41:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.12 2004/12/10 23:12:13 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -343,7 +343,8 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 }
 
 void
-FtiConfigEntrySetClick::nexthop_port_mapper_event()
+FtiConfigEntrySetClick::nexthop_port_mapper_event(bool is_mapping_changed)
 {
     // TODO: XXX: PAVPAVPAV: implement it!
+    UNUSED(is_mapping_changed);
 }

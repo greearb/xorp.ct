@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/nexthop_port_mapper.cc,v 1.5 2004/10/26 20:01:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/nexthop_port_mapper.cc,v 1.6 2004/10/26 21:57:15 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -310,13 +310,14 @@ void
 NexthopPortMapper::notify_observers()
 {
     list<NexthopPortMapperObserver *>::iterator iter;
+    bool changed = is_mapping_changed();
 
-    if (is_mapping_changed()) {
-	for (iter = _observers.begin(); iter != _observers.end(); ++iter) {
-	    NexthopPortMapperObserver* observer = *iter;
-	    observer->nexthop_port_mapper_event();
-	}
+    for (iter = _observers.begin(); iter != _observers.end(); ++iter) {
+	NexthopPortMapperObserver* observer = *iter;
+	observer->nexthop_port_mapper_event(changed);
+    }
 
+    if (changed) {
 	// Save a copy of the maps
 	_old_interface_map = _interface_map;
 	_old_ipv4_map = _ipv4_map;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.5 2004/10/27 00:19:17 pavlin Exp $
+// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.6 2004/10/27 00:40:25 pavlin Exp $
 
 #ifndef __FEA_NEXTHOP_PORT_MAPPER_HH__
 #define __FEA_NEXTHOP_PORT_MAPPER_HH__
@@ -223,8 +223,11 @@ class NexthopPortMapperObserver {
 public:
     /**
      * The next-hop port mapping has changed.
+     *
+     * @param is_mapping_changed if true, the port mapping has changed,
+     * otherwise it remains same (i.e., it has been only "touched").
      */
-    virtual void nexthop_port_mapper_event() = 0;
+    virtual void nexthop_port_mapper_event(bool is_mapping_changed) = 0;
 };
 
 #endif // __FEA_NEXTHOP_PORT_MAPPER_HH__
