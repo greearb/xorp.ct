@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.23 2004/03/01 10:02:41 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.24 2004/03/01 10:07:20 pavlin Exp $"
 
 
 //
@@ -516,12 +516,19 @@ Mld6igmpVif::update_primary_address(string& error_msg)
 	// address.
 	domain_wide_a = addr;
     }
+
     //
-    // XXX: if there is no link-local address to serve as a primary address,
-    // then use the domain-wide address as a primary address.
+    // XXX: In case of IPv6 if there is no link-local address we may try
+    // to use the the domain-wide address as a primary address,
+    // but the MLD spec is clear that the MLD messages are to be originated
+    // from a link-local address.
+    // Hence, only in case of IPv4 we assign the domain-wide address
+    // to the primary address.
     //
-    if (primary_a == IPvX::ZERO(family()))
-	primary_a = domain_wide_a;
+    if (is_ipv4()) {
+	if (primary_a == IPvX::ZERO(family()))
+	    primary_a = domain_wide_a;
+    }
 
     //
     // Check that the interface has a primary address.
