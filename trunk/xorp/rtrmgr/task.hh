@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.5 2003/05/02 22:33:54 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.6 2003/05/03 21:26:47 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -69,6 +69,8 @@ public:
     void xrl_done(bool success, string errmsg); 
     bool do_exec() const;
     XorpClient& xorp_client() const;
+
+    const string& name() const {return _name;}
 protected:
     void step1();
     void step1_done(bool success);
@@ -125,7 +127,13 @@ private:
     bool _global_do_exec; //false if we're never going to execute
                           //anything because we're in a debug mode
     bool _current_do_exec;
+
+    //_tasks provides fast access to a Task by name.
     map <string, Task*> _tasks;
+
+    //_tasklist maintains the execution order
+    list <Task*> _tasklist;
+
     CallBack _completion_cb;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.4 2003/04/23 21:09:32 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.5 2003/05/03 21:26:46 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -1219,7 +1219,7 @@ RouterCLI::commit_func(const char * ,
 	config_tree()->commit_changes(response, _xorpsh,
 				      callback(this, &RouterCLI::commit_done));
     if (!success) {
-	_changes_made = false;
+	//	_changes_made = false;
 	_cli_client.cli_print(c_format("%s", response.c_str()));
 	set_prompt("", "XORP> ");
 	apply_path_change();
@@ -1247,6 +1247,7 @@ void RouterCLI::commit_done(bool success, string errmsg) {
 	_cli_client.cli_print("Commit Failed\n");
 	_cli_client.cli_print(errmsg.c_str());
     } else {
+	_changes_made = false;
 	_cli_client.cli_print("OK\n");
 	_cli_client.cli_print(errmsg.c_str());
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.14 2003/05/01 07:55:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.15 2003/05/03 21:26:46 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -194,8 +194,10 @@ int Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
     }
     _do_exec = do_exec;
 
-    if (!_do_exec)
+    if (!_do_exec) {
+	cb->dispatch(true);
 	return XORP_OK;
+    }
 	
     signal(SIGCHLD, childhandler);
     _pid = fork();

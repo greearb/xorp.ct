@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.4 2003/04/23 04:24:35 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.5 2003/05/03 21:26:46 mjh Exp $"
 
+#define DEBUG_COMMIT
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
 #include "template_commands.hh"
@@ -103,7 +104,7 @@ void SlaveConfigTree::commit_phase2(const XrlError& e,
 				    CallBack cb,
 				    XorpShell* xorpsh) {
     if (!locked || (e != XrlError::OKAY())) {
-	cb->dispatch(XORP_ERROR, "Failed to get lock");
+	cb->dispatch(false, "Failed to get lock");
 	return;
     }
     //we managed to get the master lock
@@ -164,9 +165,10 @@ void SlaveConfigTree::commit_phase5(const XrlError& /*e*/,
 #endif
     if (success) {
 	_root_node.finalize_commit();
-	cb->dispatch(XORP_OK, "");
-    } else
-	cb->dispatch(XORP_ERROR, _commit_errmsg);
+	cb->dispatch(true, "");
+    } else {
+	cb->dispatch(false, _commit_errmsg);
+    }
 }
 
 bool SlaveConfigTree::get_deltas(const SlaveConfigTree& main_tree) {

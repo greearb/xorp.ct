@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.3 2003/03/10 23:21:02 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.4 2003/03/14 23:18:46 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/debug.h"
@@ -23,22 +23,27 @@
 #include "unexpanded_xrl.hh"
 #include "template_commands.hh"
 
-UnexpandedXrl::UnexpandedXrl(const ConfigTreeNode* node,
-			     const XrlAction* action) 
+UnexpandedXrl::UnexpandedXrl(const ConfigTreeNode& node,
+			     const XrlAction& action) 
     : _node(node),
       _action(action),
       _xrl(NULL)
 {
 }
 
-Xrl* UnexpandedXrl::xrl() {
+UnexpandedXrl::~UnexpandedXrl() {
+    if (_xrl != NULL)
+	delete _xrl;
+}
+
+/**
+ * expand expands the variables in the unexpanded xrl, and creates an
+ * XRL that we can actually send.  
+ */
+Xrl* UnexpandedXrl::expand() const {
     
     if (_xrl==NULL) {
-	string request;
-	if (_node)
-	    request = _action->expand_xrl_variables(*_node);
-	else
-	    request = _action->request();
+	string request = _action.expand_xrl_variables(_node);
 	debug_msg("XRL expanded to %s\n", request.c_str());
 	try {
 	    _xrl = new Xrl(request.c_str());
@@ -50,19 +55,17 @@ Xrl* UnexpandedXrl::xrl() {
     return _xrl;
 }
 
-/*
- * xrl_return_spec returns the return spec of the XRL as a string
+/**
+ * return_spec returns the return spec of the XRL as a string
  */
-string UnexpandedXrl::xrl_return_spec() const {
-    return _action->xrl_return_spec();
-}
-
-UnexpandedXrl::~UnexpandedXrl() {
-    if (_xrl != NULL)
-	delete _xrl;
+string UnexpandedXrl::return_spec() const {
+    return _action.xrl_return_spec();
 }
 
 string UnexpandedXrl::str() const {
-    string s = _action->str();
+    string s = _action.str();
     return s;
 }
+
+
+

@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.3 2003/03/10 23:21:03 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.4 2003/04/23 21:09:32 mjh Exp $"
 
+#define DEBUG_CONFIG_CHANGE
 #include "version.h"
 #include "libxipc/xrl_router.hh"
 #include "xrl_xorpsh_interface.hh"

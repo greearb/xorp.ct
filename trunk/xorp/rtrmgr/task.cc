@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.5 2003/05/02 22:33:53 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.6 2003/05/03 21:26:46 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -36,25 +36,32 @@ TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
 bool 
 TaskXrlItem::execute(string& errmsg)
 {
-    Xrl *xrl = _unexpanded_xrl.xrl();
+    printf("TaskXrlItem::execute\n");
+    printf("  %s\n", _unexpanded_xrl.str().c_str());
+    Xrl *xrl = _unexpanded_xrl.expand();
     if (xrl == NULL) {
 	errmsg = "Failed to expand XRL " + _unexpanded_xrl.str();
 	return false;
     }
 
-    string xrl_return_spec = _unexpanded_xrl.xrl_return_spec();
-    return _task.xorp_client().
+    string xrl_return_spec = _unexpanded_xrl.return_spec();
+
+    //for debugging purposes, record what we were doing
+    errmsg = _unexpanded_xrl.str();
+
+    _task.xorp_client().
 	send_now(*xrl, callback(this,
 				&TaskXrlItem::execute_done),
 		 xrl_return_spec, 
 		 _task.do_exec());
+    return true;
 }
 
 void
 TaskXrlItem::execute_done(const XrlError& err, 
 			  XrlArgs* xrlargs) 
 {
-
+    printf("TaskXrlItem::execute_done\n");
     if (err != XrlError::OKAY()) {
 	//XXXX handle XRL errors here
 	abort();
@@ -118,6 +125,7 @@ Task::add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb)
 void
 Task::run(CallBack cb)
 {
+    printf("Task::run %s\n", _modname.c_str());
     _task_complete_cb = cb;
     step1();
 }
@@ -125,6 +133,7 @@ Task::run(CallBack cb)
 void
 Task::step1() 
 {
+    printf("step1\n");
     if (_start_module) {
 	_taskmgr.module_manager()
 	    .start_module(_modname, do_exec(), 
@@ -137,6 +146,7 @@ Task::step1()
 void
 Task::step1_done(bool success) 
 {
+    printf("step1_done\n");
     if (success)
 	step2();
     else
@@ -146,6 +156,7 @@ Task::step1_done(bool success)
 void
 Task::step2()
 {
+    printf("step2\n");
     if (_start_module && (_validation != NULL)) {
 	_validation->validate(callback(this, &Task::step5_done));
     } else {
@@ -156,6 +167,7 @@ Task::step2()
 void
 Task::step2_done(bool success) 
 {
+    printf("step2_done\n");
     if (success)
 	step3();
     else
@@ -165,11 +177,15 @@ Task::step2_done(bool success)
 void 
 Task::step3()
 {
+    printf("step3\n");
     if (_xrls.empty()) {
 	step4();
     } else {
 	string errmsg;
+	printf("step3: execute\n");
 	if (_xrls.front().execute(errmsg) == false) {
+	    XLOG_WARNING("Failed to execute XRL: %s\n", errmsg.c_str());
+	    abort();
 	    task_fail(errmsg);
 	    return;
 	}
@@ -179,6 +195,7 @@ Task::step3()
 void
 Task::xrl_done(bool success, string errmsg) 
 {
+    printf("xrl_done\n");
     if (success) {
 	_xrls.pop_front();
 	step3();
@@ -190,6 +207,7 @@ Task::xrl_done(bool success, string errmsg)
 void
 Task::step4()
 {
+    printf("step4\n");
     if (_stop_module) {
 	_taskmgr.module_manager()
 	    .stop_module(_modname, callback(this, &Task::step4_done));
@@ -201,12 +219,14 @@ Task::step4()
 void
 Task::step4_done() 
 {
+    printf("step4_done\n");
     step5();
 }
 
 void
 Task::step5() 
 {
+    printf("step5\n");
     if (_stop_module && (_validation != NULL)) {
 	_validation->validate(callback(this, &Task::step5_done));
     } else {
@@ -217,6 +237,7 @@ Task::step5()
 void
 Task::step5_done(bool success) 
 {
+    printf("step5_done\n");
     if (success)
 	step6();
     else
@@ -226,6 +247,7 @@ Task::step5_done(bool success)
 void 
 Task::step6()
 {
+    printf("step6\n");
     debug_msg("Task done\n");
     _task_complete_cb->dispatch(true, "");
 }
@@ -267,6 +289,9 @@ TaskManager::reset() {
 	delete _tasks.begin()->second;
 	_tasks.erase(_tasks.begin());
     }
+    while (!_tasklist.empty()) {
+	_tasklist.pop_front();
+    }
 }
 
 int
@@ -274,7 +299,9 @@ TaskManager::add_module(const string& modname, const string& modpath,
 			Validation *validation)
 {
     if (_tasks.find(modname) == _tasks.end()) {
-	_tasks[modname] = new Task(modname, *this);
+	Task* newtask = new Task(modname, *this);
+	_tasks[modname] = newtask;
+	_tasklist.push_back(newtask);
     }
 
     if (_module_manager.module_exists(modname)) {
@@ -302,6 +329,12 @@ TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl,
 void
 TaskManager::run(CallBack cb) 
 {
+    printf("TaskManager::run, tasks: ");
+    list <Task*>::const_iterator i;
+    for (i = _tasklist.begin(); i != _tasklist.end(); i++) {
+	printf("%s ", (*i)->name().c_str());
+    }
+    printf("\n");
     _completion_cb = cb;
     run_task();
 }
@@ -309,23 +342,26 @@ TaskManager::run(CallBack cb)
 void 
 TaskManager::run_task() 
 {
-    if (_tasks.empty()) {
+    printf("TaskManager::run_task()\n");
+    if (_tasklist.empty()) {
+	printf("No more tasks to run\n");
 	_completion_cb->dispatch(true, "");
 	return;
     }
-    _tasks.begin()->second->run(callback(this, &TaskManager::task_done));
+    _tasklist.front()->run(callback(this, &TaskManager::task_done));
 }
 
 void 
 TaskManager::task_done(bool success, string errmsg) 
 {
+    printf("TaskManager::task_done\n");
     if (!success) {
+	printf("task failed\n");
 	_completion_cb->dispatch(false, errmsg);
 	reset();
 	return;
     }
-    delete _tasks.begin()->second;
-    _tasks.erase(_tasks.begin());
+    _tasklist.pop_front();
     run_task();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.11 2003/05/01 07:55:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.12 2003/05/03 21:26:47 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -36,10 +36,11 @@ XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrlrouter)
 {
 }
 
-int
+void
 XorpClient::send_now(const Xrl &xrl, XrlRouter::XrlCallback cb, 
 		     const string& xrl_return_spec,
-		     bool do_exec) {
+		     bool do_exec) 
+{
     if (do_exec) {
 	debug_msg("send_sync before sending\n");
 	_xrlrouter.send(xrl, cb);
@@ -48,13 +49,27 @@ XorpClient::send_now(const Xrl &xrl, XrlRouter::XrlCallback cb,
 	debug_msg("send_sync before sending\n");
 	debug_msg("DUMMY SEND: immediate callback dispatch\n");
 	if (!cb.is_empty()) {
-	    XrlArgs args = fake_return_args(xrl_return_spec);
-	    cb->dispatch(XrlError::OKAY(), &args);
+	    _delay_timer 
+		= _eventloop.new_oneoff_after_ms(0,
+		      callback(this, &XorpClient::fake_send_done, 
+			       xrl_return_spec, cb));
 	}
 	debug_msg("send_sync after sending\n");
     }
-    return XORP_OK;
 }
+
+/**
+ * fake_send_done decouples the XRL response callback for debug_mode calls
+ * to send_now, so that the callback doesn't happen until after
+ * send_now has returned.  
+ */
+void XorpClient::fake_send_done(string xrl_return_spec, 
+				XrlRouter::XrlCallback cb) 
+{
+    XrlArgs args = fake_return_args(xrl_return_spec);
+    cb->dispatch(XrlError::OKAY(), &args);
+}
+
 
 /* fake_return_args is purely needed for testing, so that XRLs that
    should return a value don't completely fail */
@@ -121,14 +136,17 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
     return xargs;
 }
 
+#if 0
 int
-XorpClient::send_xrl(const UnexpandedXrl& xrl, 
+XorpClient::send_xrl(const UnexpandedXrl& unexpanded_xrl, 
 		     XrlRouter::XrlCallback cb,
 		     bool do_exec)
 {
-    UNUSED(xrl);
-    UNUSED(cb);
-    UNUSED(do_exec);
+    Xrl* xrl = unexpanded_xrl.expand();
+    if (xrl == NULL)
+	return XORP_ERROR;
+    string return_spec = unexpanded_xrl.return_spec();
+    send_now(*xrl, cb, return_spec, do_exec);
     return XORP_OK;
 }
-
+#endif

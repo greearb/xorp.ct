@@ -12,14 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.9 2003/05/02 22:33:53 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.10 2003/05/03 21:26:46 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <grp.h>
 
+#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "master_conf_tree.hh"
 #include "template_tree_node.hh"
@@ -101,7 +103,6 @@ bool MasterConfigTree::parse(const string& configuration,
 }
 
 void MasterConfigTree::execute() {
-#if 0
     printf("##############################################################\n");
     printf("MasterConfigTree::execute\n");
     list <string> changed_modules = find_changed_modules();
@@ -111,6 +112,7 @@ void MasterConfigTree::execute() {
 	printf("%s ", (*i).c_str());
     }
     printf("\n");
+#if 0
 
     uint tid;
     tid = xorp_client().begin_transaction();
@@ -149,14 +151,21 @@ void MasterConfigTree::execute() {
 }
 
 void MasterConfigTree::config_done(bool success, string errmsg) {
+    printf("MasterConfigTree::config_done: ");
+    if (success)
+	printf("success\n");
+    else
+	printf("fail: %s\n", errmsg.c_str());
+
     if (!success) {
 	//XXXX find out what happened....
-	XLOG_FATAL(("Startup failed\n" + errmsg).c_str());
+	XLOG_FATAL(("Startup failed (" + errmsg + ")\n").c_str());
     }
     string errmsg2;
     if (check_commit_status(errmsg2) == false) {
 	XLOG_FATAL(errmsg2.c_str());
     }
+    printf("MasterConfigTree::config_done returning\n");
 }
 
 list <string>
@@ -287,7 +296,7 @@ MasterConfigTree::find_changed_modules() const {
 void
 MasterConfigTree::commit_changes_pass1(CallBack cb) {
     printf("##############################################################\n");
-    printf("MasterConfigTree::commit_changes\n");
+    printf("MasterConfigTree::commit_changes_pass1\n");
 
     list <string> changed_modules = find_changed_modules();
     list <string>::const_iterator i;
@@ -345,6 +354,8 @@ MasterConfigTree::commit_changes_pass1(CallBack cb) {
 
 void 
 MasterConfigTree::commit_pass1_done(bool success, string result) {
+    printf("##############################################################\n");
+    printf("## commit_pass1_done\n");
     if (success)
 	commit_changes_pass2();
     else {
@@ -355,6 +366,8 @@ MasterConfigTree::commit_pass1_done(bool success, string result) {
 
 void
 MasterConfigTree::commit_changes_pass2() {
+    printf("##############################################################\n");
+    printf("## commit_changes_pass2\n");
     /*******************************************************************/
     /* Pass 2: implement the changes                                   */
     /*******************************************************************/
@@ -370,6 +383,7 @@ MasterConfigTree::commit_changes_pass2() {
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
 	if (!module_config_start(*i, result)) {
+	    XLOG_ERROR("Commit failed in deciding startups\n");
 	    _commit_cb->dispatch(false, result);
 	    return;
 	}
@@ -380,12 +394,14 @@ MasterConfigTree::commit_changes_pass2() {
 				   /*do_commit = */true, 
 				   0, 0, result)) {
 	//abort the commit
+	XLOG_ERROR("Commit failed in config tree\n");
 	_commit_cb->dispatch(false, result);
 	return;
     }
 
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
 	if (!module_config_done(*i, result)) {
+	    XLOG_ERROR("Commit failed in deciding shutdowns\n");
 	    _commit_cb->dispatch(false, result);
 	    return;
 	}
@@ -396,6 +412,7 @@ MasterConfigTree::commit_changes_pass2() {
 				   &MasterConfigTree::commit_pass2_done));
     } catch (UnexpandedVariable& uvar) {
 	result = uvar.str();
+	XLOG_ERROR("Commit failed due to unexpanded variable\n");
 	_commit_cb->dispatch(false, result);
 	return;
     }
@@ -404,14 +421,23 @@ MasterConfigTree::commit_changes_pass2() {
 
 void 
 MasterConfigTree::commit_pass2_done(bool success, string result) {
+    printf("##############################################################\n");
+    printf("## commit_pass2_done\n");
+    if (success) 
+	printf("## commit seems successful\n");
+    else
+	printf("## commit failed: %s\n", result.c_str());
     _commit_cb->dispatch(success, result);
 }
 
 bool MasterConfigTree::check_commit_status(string &result) {
+    debug_msg("check_commit_status\n");
     bool success = _root_node.check_commit_status(result);
     if (success) {
 	//if the commit was successful, clear all the temporary state.
+	printf("commit was successful, finalizing...\n");
 	_root_node.finalize_commit();
+	printf("finalizing done\n");
     }
     return success;
 }

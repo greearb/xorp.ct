@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.14 2003/05/02 22:33:53 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.15 2003/05/03 21:26:46 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
-//#define DEBUG_COMMIT
+#define DEBUG_COMMIT
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -409,8 +409,6 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 #ifdef DEBUG_COMMIT
     printf("*****COMMIT CHANGES node >%s< >%s<\n", _path.c_str(),
 	   _value.c_str());
-    if (do_exec)
-	printf("do_exec\n");
     if (do_commit)
 	printf("do_commit\n");
     if (_existence_committed == false)
@@ -477,7 +475,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		cmd = _template->const_command("%allow");
 		if (cmd != NULL) {
 #ifdef DEBUG_COMMIT
-		    printf("found ALLOW command: %s\n", cmd->s().c_str());
+		    printf("found ALLOW command: %s\n", cmd->str().c_str());
 #endif
 		    try {
 			((const AllowCommand*)cmd)->execute(*this);
@@ -507,7 +505,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 #endif
 		} else {
 #ifdef DEBUG_COMMIT
-		    printf("found commands: %s\n", cmd->s().c_str());
+		    printf("found commands: %s\n", cmd->str().c_str());
 #endif
 		    int actions = 
 			cmd->execute(*this, task_manager);
@@ -555,7 +553,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    cmd = _template->const_command("%activate");
 	    if (cmd != NULL) {
 #ifdef DEBUG_COMMIT
-		printf("found commands: %s\n", cmd->s().c_str());
+		printf("found commands: %s\n", cmd->str().c_str());
 #endif
 		int actions = 
 		    cmd->execute(*this, task_manager);
