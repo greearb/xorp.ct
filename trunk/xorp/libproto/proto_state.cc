@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.8 2005/02/14 23:37:28 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.9 2005/02/15 00:00:41 pavlin Exp $"
 
 
 //
@@ -73,6 +73,8 @@ ProtoState::start()
 	return (XORP_ERROR);
     if (is_up())
 	return (XORP_OK);		// Already running
+
+    ProtoState::reset();
 
     if (ProtoState::startup() != true)
 	return (XORP_ERROR);
@@ -136,6 +138,15 @@ ProtoState::startup()
 
     if (ServiceBase::status() != SERVICE_READY)
 	return false;
+
+    return true;
+}
+
+bool
+ProtoState::reset()
+{
+    if (ServiceBase::status() != SERVICE_READY)
+	ServiceBase::set_status(SERVICE_READY);
 
     return true;
 }

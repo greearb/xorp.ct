@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_state.hh,v 1.3 2004/05/15 23:58:40 pavlin Exp $
+// $XORP: xorp/libproto/proto_state.hh,v 1.4 2004/06/10 22:41:04 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_STATE_HH__
@@ -189,6 +189,13 @@ private:
      * @return true on success, false on failure.
      */
     bool	shutdown();
+
+    /**
+     * Reset service to SERVICE_READY from whichever state it is in.
+     * 
+     * @return true on success, false on failure.
+     */
+    bool	reset();
 
     enum {
 	XORP_ENABLED	= 1 << 0	// Entity is enabled.
