@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.2 2003/03/06 22:24:30 mjh Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.3 2003/03/10 20:43:55 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -14,6 +14,12 @@ Release 0.2 (2003/03/10)
     - Source code compiles under GCC 3.2.1 and on Mac OS X 10.2.x (GCC 3.1)
       in addition to GCC 2.95.x and 2.96.
 
+  LIBXORP:
+    - Add libxorp/ref_trie.hh :
+      Implementation of a trie to support route
+      lookups.  Based on trie.hh, but with reference-counted storage
+      supporting delayed deletion.
+
   LIBXIPC:
     - Complete re-implementation of the XRL finder, so that
       registration/deregistration to the finder uses XRLs.
@@ -25,6 +31,9 @@ Release 0.2 (2003/03/10)
     - Re-implement how rtrmgr decides when to start processes.  This
       fixes a fex bugs in the dependency tracking - prior to this the
       RIB would not be started because it requires no direct configuration.
+
+  FEA:
+    - Bug fixes.
 
   RIB: 
     - Ensure that the originating protocol is propagated throughout
@@ -58,6 +67,12 @@ Release 0.2 (2003/03/10)
     - Added BGP/RIB/FEA integration tests.
 
     - Too many bug fixes to list.
+
+  MFEA:
+    - Minor bug fixes.
+
+  MLD/IGMP:
+    - No changes.
 
   PIM-SM:
     - PIM-SM Bootstrap mechanism reimplemented and tested.
