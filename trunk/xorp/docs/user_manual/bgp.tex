@@ -27,7 +27,7 @@ protocols \{\\
 \>\>bgp-id: {\it IPv4}\\
 \>\>local-as: {\it int(1..65535)}\\
 \\
-\>\>peer {\it IPv4} \{\\
+\>\>peer {\it text} \{\\
 \>\>\>local-ip: {\it IPv4}\\
 \>\>\>as: {\it int(1..65535)}\\
 \>\>\>next-hop: {\it IPv4}\\
@@ -57,6 +57,97 @@ protocols \{\\
 \end{minipage}
 }
 \vspace{0.1in}
+
+\noindent
+The configuration parameters are used as follows:
+\begin{description}
+\item{\tt protocols}: this delimits the configuation for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  BGP configuration is under the {\stt protocols} node in the
+  configuration.
+\item{\tt bgp}: this delimits the BGP configuration part of the XORP
+  router configuration.
+\item{\tt targetname} this is the name for this instance of BGP.  It
+  defaults to ``{\stt bgp}'', and it is not recommended that this
+  default is overridden under normal usage scenarios.
+\item{\tt bgp-id}: this is the BGP identifier for the BGP instance on
+  this router.  It is typically set to one of the router's IP
+  addresses, and it is normally required that this is globally unique.
+  The required format of the BGP ID is a dotted-decimal IPv4 address,
+  as mandated by the BGP specification.  This is required even if the
+  router only supports IPv6 forwarding.
+\item{\tt local-as}: this is the autonomous system number for the AS
+  in which this router resides.  Any peers of this router must be
+  configured to know this AS number - if there is a mismatch, a
+  peering will not be established.  It is a 16-bit integer.
+\item{\tt peer}: this delimits the configuration for a BGP peering
+  association with another router.  Most BGP routers will have
+  multiple peerings configured.  The peer ID is normally the IPv4
+  unicast address of the router we are peering with (the syntax allows
+  domain names for convenience, but this is {\it not} recommended in
+  production settings).  For IBGP peerings this will normally be an IP
+  address bound to the router's loopback address, so it is not
+  associated with a specific interface, meaning that the peering will
+  not go down if a single internal interface fails.  For EBGP
+  peerings, this will normally be the IP address of the peer router on
+  the interface over which we wish to exchange traffic, so that if the
+  interface goes down, the peering will drop.
+
+  For each configured {\stt peer}, the following
+  configuration options can be specified:
+\begin{description}
+\item{\tt local-ip}: This is the IP address on this router that we
+  will use for BGP connections to this peer.  It is mandatory to specify.
+\item{\tt as}: this gives the AS number of this peer.  This must match
+  the AS number that the peer itself advertises to us, or the BGP
+  peering will not be established.  It is a 16-bit integer, and is
+  mandatory to specify.
+\item{\tt next-hop}: this is the IPv4 address that we will as the
+  nexthop router address in routes that we send to this peer.
+  Typically this is only specified for EBGP peerings.
+\item{\tt local-port}: by default, BGP establishes its BGP connections
+  over a TCP connection between port 179 on the local router and port
+  179 on the remote router.  The local port for this peering can be
+  changed by modifying this attribute.
+\item{\tt peer-port}: The remote port for this peering can be
+  changed by modifying this attribute. See also: {\stt local-port}.
+\item{\tt holdtime}: This is the holdtime BGP should use when
+  negotiating the connection with this peer.  If no message is
+  received from a BGP peer during the negotiated holdtime, the
+  peering will be shut down.
+\item{\tt enabled}: This takes the value {\stt true} or {\stt false},
+  and indicates whether the peering is currently enabled.  This allows
+  a peering to be taken down temporarily without removing the
+  configuration.
+\item{\tt enable-ipv4-multicast}: this specifies that BGP should
+  negotiation multiprotocol support to allow separate routes to be
+  used for IPv4 unicast and IPv4 multicast.  Normally this would only
+  be enabled if PIM-SM multicast routing is running on the router.
+\item{\tt enable-ipv6-unicast}: this specifies that BGP should
+  negotiation multiprotocol support to allow IPv6 unicast routes to be
+  exchanged.
+\item{\tt enable-ipv6-multicast}: this specifies that BGP should
+  negotiate multiprotocol support to allow IPv6 multicast routes to be
+  exchanged separately from IPv6 unicast routes.  It is possible to
+  enable IPv6 multicast support without enabling IPv6 unicast support.
+\end{description}
+\item{\tt network4}: this specifies an IPv4 route to be advertised
+  into the BGP routing, originating from this router.  The parameter
+  is an IPv4 subnet in the format IPv4-address/prefix-length.  For
+  example {\stt 10.0.0.0/24}.
+\begin{description}
+\item{\tt next-hop}: this is the next-hop router IPv4 address to be used
+  in BGP advertisements for this route.  Typically it will be one of
+  the router's IP addresses.
+\item{\tt unicast}:
+\item{\tt multicast}:
+\end{description}
+
+\item{\tt network6}: this specifies an IPv6 route to be advertised
+  into the BGP routing, originating from this router.  The parameter
+  is an IPv6 subnet in the format IPv4-address/prefix-length.  For
+  example {\stt 10:0:0:10::/64}.
+\end{description}
 
 \subsection{Example Configurations}
 \vspace{0.1in}
