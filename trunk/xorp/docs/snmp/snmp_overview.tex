@@ -37,7 +37,7 @@
 
 \title{Using SNMP to manage XORP \\
 \vspace{1ex}
-Version 0.1}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
@@ -53,22 +53,23 @@ Version 0.1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-This document presents the architecture used to allow access to XORP's 
-management information via SNMP.  The SNMP standards define the protocol
-used to communicate between SNMP managers and agents, as well as the structure
-of the management information being accessed (MIB).  This document describes how that
-information is made accessible to the SNMP agent, how it is decomposed in 
-separate MIB modules, and how those modules are loaded/unloaded at runtime.
-The document concludes with a list of guidelines to assist protocol implementers
-in writing their own MIB modules for XORP.
+
+The SNMP standards \cite{snmp} define the protocol used to communicate between SNMP
+managers and agents, as well as the structure of the management information
+being accessed (MIB).  This document describes how XORP runtime data is made
+accessible to the SNMP agent, how it is decomposed in separate MIB modules, and
+how those modules are loaded/unloaded at runtime.  Also, a MIB development 
+framework is presented, which provides unified process to those writing new MIB
+modules for XORP.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The SNMP agent}
 
 XORP uses the extensible SNMP agent included in the Net-SNMP package \cite{net-snmp}.  
 Net-SNMP provides tools and libraries supporting the Simple Network Management
-Protocol.  The package is comprised of an extensible agent, an SNMP library and a
-set of command line tools to communicate with SNMP agents and managers. 
+Protocol.  The package is comprised of an extensible agent (\texttt{snmpd}), an SNMP
+library and a set of command line tools to communicate with SNMP agents and
+managers. 
 
 Management information is viewed as a collection of managed objects, residing in
 a virtual information store, termed the Management Information Base (MIB).  All
@@ -95,76 +96,135 @@ access routines that allow the SNMP agent to read or modify XORP's configuration
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{MIB module implementation}
-\label{sec:mib_module_implementation}
+\subsection{Dynamically loadable MIB modules}
+\label{sec:MIB_module_format}
 
 One of the guiding principles in XORP design is extensibility.  Protocols are
 implemented as independent Unix processes that may come and go.  Each protocol
 will have one or more associated MIB modules, so those modules should be made
-available to the agent without requiring recompilation.  
-As explained before, a MIB module contains the code that can access the
-management information described in a section of the MIB tree.  Making MIB
-modules accessible to the SNMP agent is commonly termed as ''extending the agent''.
+available to the SNMP agent without requiring recompilation.  Net-SNMP supports
+this strategy by allowing MIBs to be implemented as shared objects.  If your
+system supports shared libraries, Net-SNMP will be compiled with support for
+dynamically loadable MIB modules by default.  You can test if your Net-SNMP installation supports that option by looking for dlmod in the list printed by the command:
 
-Net-SNMP provides three ways to extend the agent:  scripts, dynamically loaded
-libraries and sub-agents.
+\begin{verbatim}
+$ net-snmp-config --snmpd-module-list
+\end{verbatim}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Scripts}
+There are three methods for loading/unloading MIB modules:  
 
-Net-SNMP allows runtime agent extension by means of PERL scripts.  In order to
-use XORP's IPC libraries to communicate to XORP processes, MIB modules must be
-written in C++.  So this alternative will not be used.
+\begin{enumerate}
+\item Using the dlmod directive in snmpd.conf 
+\item Sending SNMP set requests to the agent
+\item Using XORP's IPC methods (XRLs)
+\end{enumerate}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Dynamically loaded libraries}
-Net-SNMP allows the use of dynamically loaded libraries (\ie shared objects).
-The libraries must be located in a path accessible to the agent, and are
-loaded/unloaded by issuing a set of SNMP commands.  If the SNMP agent was
-started with the dynamic library support option, it does not even need to be
-restarted:  loading the library will make the new MIB module immediately
-accessible.
-All SNMP commands relate to one or more Object Identifiers (OIDs) in the MIB
-tree.  The information required to load/unload shared libraries (library name, 
-path name and load/unload command) is stored under the non Internet-standard branch 
-(enterprise-specific) of the MIB tree.
+The first option can only be used to load modules at startup.  This is what the man page for snmpd.conf tells you...
+
+\begin{verbatim}
+DYNAMICALLY LOADABLE MODULES
+	If the agent is built with support for the UCD-DLMOD-MIB it is  capable
+	of  loading  agent MIB modules dynamically at startup through the dlmod
+	directive and during runtime through use  of  the  UCD-DLMOD-MIB.   The
+	following directive loads the shared object module file PATH which uses
+	the module name prefix NAME.
+
+	dlmod NAME PATH
+\end{verbatim}
+
+
+To load MIBs using SNMP requests, a new row must be added to
+UCD-DLMOD-MIB::dlmodTable.  This involves finding an unused index to the table,
+setting the dlmodName and dlmodPath columns, and finally setting the column
+dlmodStatus to 'load'.  These steps are captured in the following lines:
+
+\begin{verbatim}
+$ snmpwalk localhost UCD-DLMOD-MIB::dlmodTable
+UCD-DLMOD-MIB::dlmodName.1 = STRING: xorp_if_mib_module
+UCD-DLMOD-MIB::dlmodPath.1 = STRING: /scratch/xorp/mibs/xorp_if_mib_module.so
+UCD-DLMOD-MIB::dlmodError.1 = STRING:
+UCD-DLMOD-MIB::dlmodStatus.1 = INTEGER: loaded(1)
+
+$ snmpset localhost UCD-DLMOD-MIB::dlmodStatus.2 i create
+UCD-DLMOD-MIB::dlmodStatus.2 = INTEGER: create(6)
+
+
+$ snmpset localhost UCD-DLMOD-MIB::dlmodName.2 s "bgp4_mib_1657" UCD-DLMOD-MIB::dlmodPath.2 s "/scratch/xorp/mibs/bgp4_mib_1657.so"
+UCD-DLMOD-MIB::dlmodName.2 = STRING: bgp4_mib_1657
+UCD-DLMOD-MIB::dlmodPath.2 = STRING: /scratch/xorp/mibs/bgp4_mib_1657.so
+
+$ snmpset localhost UCD-DLMOD-MIB::dlmodStatus.2 i load
+UCD-DLMOD-MIB::dlmodStatus.2 = INTEGER: load(4)
+
+$ snmpwalk localhost UCD-DLMOD-MIB::dlmodTable
+UCD-DLMOD-MIB::dlmodName.1 = STRING: xorp_if_mib_module
+UCD-DLMOD-MIB::dlmodName.2 = STRING: bgp4_mib_1657
+UCD-DLMOD-MIB::dlmodPath.1 = STRING: /scratch/xorp/mibs/xorp_if_mib_module.so
+UCD-DLMOD-MIB::dlmodPath.2 = STRING: /scratch/xorp/mibs/bgp4_mib_1657.so
+UCD-DLMOD-MIB::dlmodError.1 = STRING:
+UCD-DLMOD-MIB::dlmodError.2 = STRING:
+UCD-DLMOD-MIB::dlmodStatus.1 = INTEGER: loaded(1)
+UCD-DLMOD-MIB::dlmodStatus.2 = INTEGER: loaded(1)
+\end{verbatim}
+
+We've seen so far how to load MIBs when the agent is started, and at runtime via SNMP requests.  But XORP processes communicate to each other via XRLs, and it would be quite inconvenient for a process to require sending SNMP requests whenever it needs to load or unload a MIB.  This is why we've implemented an Xrl target into Net-SNMP.  After the module \texttt{xorp\_if\_mib\_module} is loaded, Net-SNMP can accept XRL's.  In particular the following XRLs should be used for loading/unloading MIBs:
+
+\begin{ttfamily}
+\begin{verbatim}
+finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt&abs_path:txt
+finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32
+\end{verbatim}
+\end{ttfamily}
+
+Dynamically loadable MIB modules written for the main SNMP agent can also be
+loaded by an SNMP sub-agent that communicates with the master agent via the
+AgentX protocol (\ref{}).  This should be useful in the event that you
+configure XORP to run distributed across multiple hosts but with one 
+master SNMP agent.  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Connecting Net-SNMP with XORP}
+
+
+We have written a special MIB module (\texttt{xorp\_if\_mib\_module}) that
+coordinates the communication between \texttt{snmpd} and XORP processes.  This
+module provides several classes that allow XORP MIB modules to be architected
+as if they were each executed as independent processes (although they all run
+in \texttt{snmpd}'s process space).  This should make MIB module design much easier to someone already familiar with the arquitecture of XORP processes.
  
-Libraries written for the main SNMP agent can also be loaded by an SNMP
-sub-agent that communicates with the master agent via the AgentX protocol (see
-next subsection).  This has the benefit that time invested in writing MIB modules in this format
-will not be wasted if AgentX is to be used for certain protocols in the project. 
+The class that does all the syncronization between XORP and Net-SNMP 
+is SnmpEventLoop, a subclass of EventLoop.  This singleton class is
+responsible for registering XORP event's with \texttt{snmpd}, so that the agent
+can respond to XORP activity.  Once this class is instantiated by
+\texttt{xorp\_if\_mib\_module}, it can be used by all the other MIB modules as
+if it was their own EventLoop.  Without it, MIB modules could not respond to
+XORP events, this is why this module must be loaded before any other, and
+should be the last XORP MIB module to be unloaded \footnote{rtld}.  Typically you would use the snmpd.conf file to load it at start up time.  
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{AgentX subagent}
-
-The need of extending SNMP agents at run-time has led vendors to develop a variety of
-''extensible agents''.  The AgentX standard \cite{AgentX} is being developed to allow
-interoperation of the different solutions.  Within the AgentX framework, an SNMP
-agent is defined to consist of:
-
-\begin{itemize}
-\item a single processing entity called the master agent, which sends
-      and receives SNMP protocol messages in an agent role (as
-      specified by the SNMP framework documents) but typically has
-      little or no direct access to management information.
-
-\item zero or more processing entities called subagents, which are
-      "shielded" from the SNMP protocol messages processed by the
-      master agent, but which have access to management information.
-\end{itemize}
-
-The master and subagent entities communicate via AgentX protocol messages, which
-can use either a network transport mechanism (\eg TCP), or a ''local'' mechanism
-(\eg shared memory, named pipes).  Since the AgentX protocol specifies no
-security (\ie all sessions are accepted), transport layer security should be
-used in the former case.
+The XORP interface MIB module also implements the XRL target (\cite{}) that
+allows the loading and unloading of other MIB modules.  
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Communicating with XORP}
+Figure \ref{fig:xorp-if-diag} illustrates the functionality implemented by 
+\texttt{xorp\_if\_mib\_module}.
 
-MIB modules will use XORP's IPC library \cite{xorp:xrl}.  Each MIB module has the
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=1\textwidth]{figs/snmp_fig2}
+  \end{center}
+  \caption{Role of xorp\_if\_mib\_module}
+  \label{fig:xorp-if-diag}
+\end{figure}
+
+
+
+
+\subsection{Modifying XORP's configuration}
+
+
+MIB modules use XORP's IPC library \cite{xorp:xrl}.  Each MIB module has the
 responsibility to pull the relevant management information from the appropriate
 process (\eg BGP MIB data from BGP process).  For that effect, the MIB module
 must implement the XRL Interface supported by the XRL targets it needs to
@@ -190,8 +250,14 @@ Figure \ref{fig:mib-class-diag} illustrates the architecture of MIB modules.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{A reference implementation of a MIB module}
 
-To be continued...
+So far we've talked about Net-SNMP configuration.  In this section we'll cover how to write a MIB module.  
 
+The first step should be writting or getting the ASN.1 MIB definition file.  If you are implementing an existing protocol, chances are that there is already a published RFC with the MIB definition for it.  In this release we have partially implemented the BGP4-MIB, which is published in RFC 1657.
+
+\subsection{Using delegated requests}
+\subsection{Using mib2c}
+\subsection{Configuring the agent}
+\subsection{Accessing the MIBS}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
