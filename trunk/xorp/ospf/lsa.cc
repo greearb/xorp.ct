@@ -33,6 +33,27 @@
 
 #include "ospf.hh"
 #include "lsa.hh"
+#include "fletcher_checksum.hh"
+
+/**
+ * Verify the checksum of an LSA.
+ *
+ * The cool part of this checksum algorithm is that it is not necessry
+ * to compare the computed checksum against the one in the packet; as
+ * the computed value should always be zero.
+ */
+inline
+bool
+verify_checksum(uint8_t *buf, size_t len, size_t offset = 0)
+{
+    int32_t x, y;
+    fletcher_checksum(buf, len, offset, x, y);
+    if (!(0 == x && 0 == y)) {
+	return false;
+    }
+
+    return true;
+}
 
 void
 Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket)
@@ -362,6 +383,10 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
 
+    // Verify the checksum.
+    if (!verify_checksum(buf, len))
+	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+
     RouterLsa *lsa;
     try {
 	lsa = new RouterLsa(version, buf, len);
@@ -370,9 +395,6 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	// Decode the LSA Header.
 	lsa->_header.decode_inline(buf);
 	
-	// Verify the checksum.
-	XLOG_UNFINISHED();
-
 	uint8_t flag = buf[header_length];
 	switch(version) {
 	case OspfTypes::V2:
