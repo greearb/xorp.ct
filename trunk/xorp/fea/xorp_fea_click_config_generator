@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP$
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.1 2004/11/30 13:11:37 pavlin Exp $
 #
 
 #
@@ -22,6 +22,7 @@
 BEGIN {
     iftree_interfaces_max = 0;
     iftree_vifs_max = 0;
+    is_click_enabled = 0;
     # XXX: default to user-level click
     is_kernel_click = 0;
     is_user_click = 1;
@@ -39,9 +40,16 @@ BEGIN {
     is_syntax_error = 0;
     config_level = 0;
     ignore_level[0] = 1;
+    is_level0_interfaces = 0;
+    is_level0_fea = 0;
+    is_level0_fea_level1_click = 0;
+    is_level0_fea_level1_click_level2_kernel_click = 0;
+    is_level0_fea_level1_click_level2_user_click = 0;
     is_ipv4_address = 0;
     is_ipv6_address = 0;
     max_xorp_rt_port = 0;
+    iftree_interfaces_targetname = "fea";
+    fea_targetname = "fea";
 }
 
 function calculate_state()
@@ -362,16 +370,31 @@ function process_statement(statement)
 	}
 
 	if (config_level == 0) {
-	    if (tokens[i] != "interfaces") {
-		ignore_level[0] = 1;
-	    } else {
+	    ignore_level[0] = 1;
+	    is_level0_interfaces = 0;
+	    is_level0_fea = 0;
+	    is_level0_fea_level1_click = 0;
+	    is_level0_fea_level1_click_level2_kernel_click = 0;
+	    is_level0_fea_level1_click_level2_user_click = 0;
+	    if (tokens[i] == "interfaces") {
 		ignore_level[0] = 0;
+		is_level0_interfaces = 1;
+	    }
+	    if (tokens[i] == "fea") {
+		ignore_level[0] = 0;
+		is_level0_fea = 1;
+		is_level0_fea_level1_click = 0;
+		is_level0_fea_level1_click_level2_kernel_click = 0;
+		is_level0_fea_level1_click_level2_user_click = 0;
 	    }
 	}
 	if (ignore_level[0])
 	    continue;
 
-	if (config_level == 1) {
+	#
+	# Configuration section: "interfaces {}"
+	#
+	if (is_level0_interfaces && (config_level == 1)) {
 	    if (tokens[i] == "targetname:") {
 		if (i == tokens_n)
 		    syntax_error("Missing target name");
@@ -394,7 +417,8 @@ function process_statement(statement)
 	    syntax_error("Invalid keyword");
 	}
 
-	if (config_level == 2) {
+
+	if (is_level0_interfaces && (config_level == 2)) {
 	    if (tokens[i] == "enabled:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
@@ -461,7 +485,7 @@ function process_statement(statement)
 	    syntax_error("Invalid keyword");
 	}
 
-	if (config_level == 3) {
+	if (is_level0_interfaces && (config_level == 3)) {
 	    if (tokens[i] == "enabled:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
@@ -504,7 +528,7 @@ function process_statement(statement)
 	    syntax_error("Invalid keyword");
 	}
 
-	if (config_level == 4) {
+	if (is_level0_interfaces && (config_level == 4)) {
 	    if (tokens[i] == "prefix-length:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
@@ -631,6 +655,103 @@ function process_statement(statement)
 	    }
 
 	    syntax_error("Invalid keyword");
+	}
+
+	#
+	# Configuration section: "fea {}"
+	#
+	if (is_level0_fea && (config_level == 1)) {
+	    if (tokens[i] == "targetname:") {
+		if (i == tokens_n)
+		    syntax_error("Missing target name");
+		i++;
+		v = tokens[i];
+		fea_targetname = v;
+		continue;
+	    }
+
+	    if (tokens[i] == "click") {
+		is_level0_fea_level1_click = 1;
+		is_level0_fea_level1_click_level2_kernel_click = 0;
+		is_level0_fea_level1_click_level2_user_click = 0;
+		continue;
+	    }
+
+	    # XXX: ignore the rest of the configuration
+	    continue;
+	}
+
+	if (is_level0_fea && is_level0_fea_level1_click &&
+	    (config_level == 2)) {
+
+	    if (tokens[i] == "enabled:") {
+		if (i == tokens_n)
+		    syntax_error("Missing value");
+		i++;
+		v = tokens[i];
+		if (v == "true")
+		    is_click_enabled = 1;
+		else
+		    is_click_enabled = 0;
+		continue;
+	    }
+
+	    if (tokens[i] == "kernel-click") {
+		is_level0_fea_level1_click_level2_kernel_click = 1;
+		is_level0_fea_level1_click_level2_user_click = 0;
+		continue;
+	    }
+
+	    if (tokens[i] == "user-click") {
+		is_level0_fea_level1_click_level2_kernel_click = 0;
+		is_level0_fea_level1_click_level2_user_click = 1;
+		continue;
+	    }
+
+	    # XXX: ignore the rest of the configuration
+	    continue;
+	}
+
+	if (is_level0_fea && is_level0_fea_level1_click &&
+	    is_level0_fea_level1_click_level2_kernel_click &&
+	    (config_level == 3)) {
+	    if (tokens[i] == "enabled:") {
+		if (i == tokens_n)
+		    syntax_error("Missing value");
+		i++;
+		v = tokens[i];
+		if (v == "true") {
+		    is_kernel_click = 1;
+		    is_user_click = 0;
+		} else {
+		    is_kernel_click = 0;
+		}
+		continue;
+	    }
+
+	    # XXX: ignore the rest of the configuration
+	    continue;
+	}
+
+	if (is_level0_fea && is_level0_fea_level1_click &&
+	    is_level0_fea_level1_click_level2_user_click &&
+	    (config_level == 3)) {
+	    if (tokens[i] == "enabled:") {
+		if (i == tokens_n)
+		    syntax_error("Missing value");
+		i++;
+		v = tokens[i];
+		if (v == "true") {
+		    is_kernel_click = 0;
+		    is_user_click = 1;
+		} else {
+		    is_user_click = 0;
+		}
+		continue;
+	    }
+
+	    # XXX: ignore the rest of the configuration
+	    continue;
 	}
     }
 }
