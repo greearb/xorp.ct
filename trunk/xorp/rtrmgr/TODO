@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.13 2003/12/03 20:13:54 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.14 2003/12/03 20:29:13 pavlin Exp $
 #
 
 Urgent
@@ -31,6 +31,20 @@ Configure Mode
 Operational Mode
 
  - Ensure commands only appear when modules are loaded.
+ - If signal SIGSTOP is delivered to a child process
+   (e.g., by kill -STOP <pid>), the child process will properly deliver
+   SIGCHLD to its parent process (i.e., the rtrmgr). Then the parent
+   process SIGCHLD handler (function child_handler() in module_manager.cc)
+   will properly set the child module status to stalled by
+   calling set_stalled() for the corresponding module.
+   However, if then we send signal SIGCONT to that child process,
+   then the child process will NOT deliver SIGCHLD to the rtrmgr.
+   As a result, the rtrmgr won't know that the child status is
+   not stalled anymore.
+   Find a solution of that problem. E.g., one possibility is that
+   every child process should have a handler for the SIGCONT signals,
+   and then it should explicitly deliver SIGCHLD signal to its parent
+   process (the rtrmgr).
 
 Other
  - Fix test_router_manager, because even if the path to the xorp_finder
