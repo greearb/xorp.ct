@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.12 2004/06/15 00:41:45 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.13 2004/06/15 19:17:19 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -24,11 +24,13 @@ process, not directly from the command line.
 For information how to configure MLD/IGMP see
 http://www.xorp.org/getting_started.html
 
-For testing and debugging purposes, MLD/IGMP can be manually started.  The
+Debugging with Stand-alone MLD/IGMP
+===================================
+
+For testing and debugging purposes, MLD/IGMP can be started manually.  The
 XORP MLD6/IGMP process assumes that the XRL finder and the MFEA
-are already running. However, the binary program ``test_mld6igmp'' already
-contains them as well, therefore it is sufficient to start only this
-program (as a root).
+are running. However, the binary program ``test_mld6igmp'' already contains
+them, therefore it is sufficient to start only ``test_mld6igmp'' (as a root).
 
 First, make sure that IP forwarding is enabled.
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
@@ -43,7 +45,7 @@ After ``test_mld6igmp'' is started, the MFEA and MLD/IGMP are
 disabled by default. To start them, and to configure their operation,
 as well as the MLD/IGMP operation, run script ``./configure_mld6igmp''.
 Note that it MUST be run from the ``${XORP}/mld6igmp'' directory.
-To run MLD/IGMP in IPv6 mode, then run ``./configure_mld6igmp -6'' instead.
+To run MLD/IGMP in IPv6 mode, then use ``./configure_mld6igmp -6'' instead.
 
 However, before running ``configure_mld6igmp'', you must configure
 it for each router:

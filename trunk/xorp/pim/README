@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.22 2004/06/15 00:52:33 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.23 2004/06/15 19:17:19 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -39,11 +39,13 @@ enable CONFIG_IP_MROUTE
  - IPv6: FreeBSD, NetBSD, OpenBSD, DragonFlyBSD
    No kernel options are required.
 
-For testing and debugging purposes, PIM-SM can be manually started.  The
+Debugging with Stand-alone PIM
+==============================
+
+For testing and debugging purposes, PIM-SM can be started manually.  The
 XORP PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
-are already running. However, the binary program ``./test_pim'' already
-contains them as well, therefore it is sufficient to start only this
-program (as a root).
+are running. However, the binary program ``test_pim'' already contains
+them, therefore it is sufficient to start only ``test_pim'' (as a root).
 
 First, make sure that IP forwarding is enabled.
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
@@ -58,7 +60,7 @@ After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
 disabled by default. To start them, and to configure their operation,
 as well as the PIM-SM operation, run script ``./configure_pim''.
 Note that it MUST be run from the ``${XORP}/pim'' directory.
-To run PIM-SM in IPv6 mode, then run ``./configure_pim -6'' instead.
+To run PIM-SM in IPv6 mode, then use ``./configure_pim -6'' instead.
 
 However, before running ``./configure_pim'', you must configure
 it for each router:
