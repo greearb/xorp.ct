@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.60 2004/12/30 11:13:08 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.61 2005/01/19 00:08:10 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2178,6 +2178,19 @@ RouterCLI::text_entry_func(const string& ,
 		string errmsg = c_format("ERROR: path \"%s\" "
 					 "is not valid.\n",
 					 makepath(path_segments).c_str());
+		_cli_client.cli_print(errmsg);
+		goto cleanup;
+	    }
+	    //
+	    // Test if some part of the configuration path is deprecated
+	    //
+	    const TemplateTreeNode* deprecated_ttn;
+	    deprecated_ttn = ttn->find_first_deprecated_ancestor();
+	    if (deprecated_ttn != NULL) {
+		string errmsg = c_format("ERROR: path \"%s\" "
+					 "is not valid: %s.\n",
+					 makepath(path_segments).c_str(),
+					 deprecated_ttn->deprecated_reason().c_str());
 		_cli_client.cli_print(errmsg);
 		goto cleanup;
 	    }
