@@ -1,0 +1,5 @@
+show bgp peers {
+	%command: bgp/tools/xorpsh_print_peers;
+	%module: bgp;
+	%opt_parameter: detail;
+}
