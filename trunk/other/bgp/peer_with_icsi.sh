@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: other/bgp/peer_with_icsi.sh,v 1.3 2003/08/27 22:43:36 atanu Exp $
+# $XORP: other/bgp/peer_with_icsi.sh,v 1.4 2003/10/21 05:21:35 atanu Exp $
 #
 
 #
@@ -114,7 +114,7 @@ bgp()
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     $BGP_FUNCS add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     # Enable Multiprotocol IPv6 support
-#    $BGP_FUNCS set_parameter $IPTUPLE MultiProtocolIPv6
+#    $BGP_FUNCS set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast
     # Rewrite the next hop onto our test net
     $BGP_FUNCS next_hop_rewrite_filter $IPTUPLE $NEXT_HOP_REWRITE1
 #    $BGP_FUNCS enable_peer $IPTUPLE
@@ -127,7 +127,7 @@ bgp()
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     $BGP_FUNCS add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     # Enable Multiprotocol IPv6 support
-    $BGP_FUNCS set_parameter $IPTUPLE MultiProtocolIPv6
+    $BGP_FUNCS set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast
     # Rewrite the next hop onto our test net
     $BGP_FUNCS next_hop_rewrite_filter $IPTUPLE $NEXT_HOP_REWRITE2
     $BGP_FUNCS enable_peer $IPTUPLE
