@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.7 2003/06/14 01:22:28 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.8 2003/06/16 19:50:01 jcardona Exp $
 
 #ifndef __MIBS_XORPEVENTLOOP_HH__
 #define __MIBS_XORPEVENTLOOP_HH__
 
+#include "fixconfigs.h"
 #include <set>
 #include <map>
 #include "libxorp/timeval.hh"
