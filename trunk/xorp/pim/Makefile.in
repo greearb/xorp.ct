@@ -117,8 +117,9 @@ noinst_LIBRARIES = libpim.a
 # FEA-specific end
 ### MRT libraries
 ### CLI libraries
+### XRL client for Profile
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.a $(top_builddir)/xrl/targets/libpimbase.a $(top_builddir)/mld6igmp/libmld6igmp.a $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/rib/librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeafibclientxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.a $(top_builddir)/xrl/targets/libpimbase.a $(top_builddir)/mld6igmp/libmld6igmp.a $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/rib/librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeafibclientxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 xorp_pimsm4_SOURCES = xorp_pimsm4.cc
@@ -198,6 +199,7 @@ test_pim_DEPENDENCIES = libpim.a \
 	$(top_builddir)/cli/libtecla/libtecla.a \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
 	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -256,6 +258,7 @@ xorp_pimsm4_DEPENDENCIES = libpim.a \
 	$(top_builddir)/cli/libtecla/libtecla.a \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
 	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -293,6 +296,7 @@ xorp_pimsm6_DEPENDENCIES = libpim.a \
 	$(top_builddir)/cli/libtecla/libtecla.a \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
 	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \

@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.48 2004/08/03 05:02:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.49 2004/08/03 18:09:13 pavlin Exp $"
+
+#define PROFILE_UTILS_REQUIRED
 
 #include "config.h"
 #include "fea_module.h"
@@ -26,6 +28,8 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+#include "xrl/interfaces/profile_client_xif.hh"
+#include "libxorp/profile.hh"
 
 #include "fticonfig.hh"
 #include "libfeaclient_bridge.hh"
@@ -39,11 +43,13 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   FtiConfig&  		 	ftic,
 			   InterfaceManager&	 	ifmgr,
 			   XrlIfConfigUpdateReporter&	xifcur,
+			   Profile&			profile,
 			   XrlRawSocket4Manager*	xrsm,
 			   LibFeaClientBridge*		lfcb,
 			   XrlSocketServer*		xss)
-    : XrlFeaTargetBase(&r), _xftm(e, ftic, &r), _xifmgr(e, ifmgr),
-      _xifcur(xifcur), _xrsm(xrsm), _lfcb(lfcb), _xss(xss), _done(false),
+    : XrlFeaTargetBase(&r), _xrl_router(r), _xftm(e, ftic, &r),
+      _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile), _xrsm(xrsm),
+      _lfcb(lfcb), _xss(xss), _done(false),
       _have_ipv4(false), _have_ipv6(false)
 {
     _have_ipv4 = _xftm.ftic().have_ipv4();
@@ -1872,5 +1878,80 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
     }
 
     svr = _xss->instance_name();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::profile_0_1_enable(const string& pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_profile.enable(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::profile_0_1_disable(const string&	pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_profile.disable(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlFeaTarget::profile_0_1_get_entries(const string& pname,
+				      const string& instance_name)
+{
+    debug_msg("profile variable %s instance %s\n", pname.c_str(),
+	      instance_name.c_str());
+
+    // Lock and initialize.
+    try {
+	_profile.lock_log(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    ProfileUtils::transmit_log(pname,
+			       dynamic_cast<XrlStdRouter *>(&_xrl_router),
+			       instance_name, &_profile);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::profile_0_1_clear(const string& pname)
+{
+    debug_msg("profile variable %s\n", pname.c_str());
+    try {
+	_profile.clear(pname);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::profile_0_1_list(string& info)
+{
+    debug_msg("\n");
+    
+    info = _profile.list();
     return XrlCmdError::OKAY();
 }

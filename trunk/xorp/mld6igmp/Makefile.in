@@ -120,7 +120,7 @@ xorp_igmp_SOURCES = xorp_igmp.cc
 xorp_mld_SOURCES = xorp_mld.cc
 
 test_mld6igmp_SOURCES = test_mld6igmp.cc
-test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a $(top_builddir)/libxorp/libxorp.a
+test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 libmld6igmp_a_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
@@ -182,6 +182,7 @@ test_mld6igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.a \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
 	$(top_builddir)/xrl/targets/libsocketserverbase.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_mld6igmp_LDFLAGS =

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/targets/fea.tgt,v 1.8 2004/03/15 23:28:06 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/fea.tgt,v 1.9 2004/05/13 08:05:36 pavlin Exp $ */
 
 #include "common.xif"
 #include "fea_fib.xif"
@@ -10,6 +10,7 @@
 #include "fea_rawpkt.xif"
 #include "socket4_locator.xif"
 #include "socket6_locator.xif"
+#include "profile.xif"
 
 target fea implements	common/0.1,					\
 			fea_fib/0.1,					\
@@ -20,4 +21,6 @@ target fea implements	common/0.1,					\
 			redist_transaction6/0.1,			\
 			raw_packet/0.1,					\
 			socket4_locator/0.1,				\
-			socket6_locator/0.1
+			socket6_locator/0.1,				\
+			profile/0.1
+			

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.35 2004/07/26 02:57:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.36 2004/07/26 08:42:46 pavlin Exp $"
 
 
 //
@@ -28,6 +28,7 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
+#include "libxorp/profile.hh"
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -200,12 +201,17 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     xss.startup();
 
     //
+    // Profile entity.
+    //
+    Profile profile;
+    
+    //
     // XRL Target
     //
     XrlFeaTarget xrl_fea_target(
 	eventloop,
 	xrl_std_router_fea,
-	fticonfig, ifm, xrl_ifc_reporter,
+	fticonfig, ifm, xrl_ifc_reporter, profile,
 	NULL, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 

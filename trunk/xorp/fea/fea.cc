@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.32 2004/09/10 02:17:07 bms Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.33 2004/09/10 02:17:30 bms Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
+#include "libxorp/profile.hh"
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_std_router.hh"
 
@@ -153,10 +154,16 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     xss.startup();
 
     //
+    // Profile entity.
+    //
+    Profile profile;
+
+    //
     // XRL Target
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
 				fticonfig, ifm, xrl_ifc_reporter,
+				profile,
 				0, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.9 2004/05/28 05:00:34 hodson Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.10 2004/06/10 22:40:57 hodson Exp $"
 
 
 //
@@ -27,6 +27,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/profile.hh"
 #include "libxorp/exceptions.hh"
 
 #include "libxipc/finder_server.hh"
@@ -192,10 +193,16 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     xss.startup();
 
     //
+    // Profile entity.
+    //
+    Profile profile;
+
+    //
     // XRL Target
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
 				fticonfig, ifm, xrl_ifc_reporter,
+				profile,
 				0, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 

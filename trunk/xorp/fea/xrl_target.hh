@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.37 2004/08/03 05:21:26 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.38 2004/08/03 18:09:13 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -27,6 +27,7 @@ class LibFeaClientBridge;
 class XrlIfConfigUpdateReporter;
 class XrlRawSocket4Manager;
 class XrlSocketServer;
+class Profile;
 
 class XrlFeaTarget : public XrlFeaTargetBase {
 public:
@@ -35,6 +36,7 @@ public:
 		 FtiConfig& 			ftic,
 		 InterfaceManager& 		ifmgr,
 		 XrlIfConfigUpdateReporter&	ifupd,
+		 Profile&			profile,
 		 XrlRawSocket4Manager*		xrsm	= 0,
 		 LibFeaClientBridge*		lfbr	= 0,
 		 XrlSocketServer*		xss	= 0);
@@ -858,13 +860,35 @@ public:
 	// Output value
 	string&	xrl_target);
 
+    XrlCmdError profile_0_1_enable(
+	// Input values,
+	const string&	pname);
+
+    XrlCmdError profile_0_1_disable(
+	// Input values,
+	const string&	pname);
+
+    XrlCmdError profile_0_1_get_entries(
+	// Input values,
+	const string&	pname,
+	const string&	instance_name);
+
+    XrlCmdError profile_0_1_clear(
+	// Input values,
+	const string&	pname);
+
+    XrlCmdError profile_0_1_list(
+	// Output values,
+	string&	info);
 private:
     bool have_ipv4() const { return (_have_ipv4); };
     bool have_ipv6() const { return (_have_ipv6); };
 
+    XrlRouter&		       	_xrl_router;
     XrlFtiTransactionManager	_xftm;
     XrlInterfaceManager 	_xifmgr;
     XrlIfConfigUpdateReporter&	_xifcur;
+    Profile&			_profile;
     XrlRawSocket4Manager*	_xrsm;
     LibFeaClientBridge*		_lfcb;
     XrlSocketServer*		_xss;

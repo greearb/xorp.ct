@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.25 2004/09/17 14:23:20 abittau Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.26 2004/09/28 03:52:31 atanu Exp $
 ##
 
 # Redefine the bin installation directory
@@ -61,6 +61,8 @@ LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
 LDADD		+= @CLI_CURSES_LIB@
 LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+### XRL client for Profile
+LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.a
 ### XORP misc libraries
 LDADD		+= $(top_builddir)/libproto/libproto.a
 LDADD		+= $(top_builddir)/libxipc/libfinder.a

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.39 2004/09/08 10:15:30 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.40 2004/09/14 15:09:22 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -69,6 +69,8 @@ xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.a
+### XRL client for Profile
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.a
 ### XORP misc libraries
 xorp_fea_LDADD		+= $(top_builddir)/libproto/libproto.a
 xorp_fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
@@ -114,6 +116,8 @@ test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.a
+### XRL client for Profile
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.a
 ### XORP misc libraries
 test_mfea_LDADD		+= $(top_builddir)/libproto/libproto.a
 test_mfea_LDADD		+= $(top_builddir)/libxipc/libfinder.a
