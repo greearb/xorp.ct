@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.1 2003/01/23 11:14:23 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.2 2003/03/05 01:18:48 pavlin Exp $
 #
 
 #
@@ -10,7 +10,8 @@
 
 . ../mfea/xrl_shell_lib.sh
 
-CLI_TARGET="CLI"
+# Conditionally set the target name
+CLI_TARGET=${CLI_TARGET:="CLI"}
 
 cli_enable_cli()
 {
