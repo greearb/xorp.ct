@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.26 2002/12/09 18:29:02 hodson Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -434,7 +434,7 @@ template<class V>
 inline V *
 ProtoNode<V>::vif_find_by_name(const string& name) const
 {
-    vector<V *>::const_iterator iter;
+    typename vector<V *>::const_iterator iter;
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
@@ -449,7 +449,7 @@ template<class V>
 inline V *
 ProtoNode<V>::vif_find_by_addr(const IPvX& ipaddr_test) const
 {
-    vector<V *>::const_iterator iter;
+    typename vector<V *>::const_iterator iter;
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
@@ -464,7 +464,7 @@ template<class V>
 inline V *
 ProtoNode<V>::vif_find_by_pif_index(uint16_t pif_index) const
 {
-    vector<V *>::const_iterator iter;
+    typename vector<V *>::const_iterator iter;
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
@@ -490,7 +490,7 @@ template<class V>
 inline V *
 ProtoNode<V>::vif_find_direct(const IPvX& ipaddr_test) const
 {
-    vector<V *>::const_iterator iter;
+    typename vector<V *>::const_iterator iter;
     
     for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
 	V *vif = *iter;
