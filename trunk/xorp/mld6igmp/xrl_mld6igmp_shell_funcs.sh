@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.11 2003/12/16 23:39:39 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.12 2003/12/20 01:43:35 pavlin Exp $
 #
 
 #
@@ -227,7 +227,6 @@ mld6igmp_log_trace_all()
     enable=$1
 
     echo "mld6igmp_log_trace_all" $*
-
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/log_trace_all"
     XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS

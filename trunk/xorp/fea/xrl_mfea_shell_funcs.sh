@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.7 2003/12/16 23:38:04 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.8 2003/12/20 01:43:34 pavlin Exp $
 #
 
 #
@@ -198,7 +198,6 @@ mfea_log_trace_all()
     enable=$1
 
     echo "mfea_log_trace_all" $*
-
     XRL="finder://$MFEA_TARGET/mfea/0.1/log_trace_all"
     XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
