@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.10 2003/06/26 22:17:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.11 2003/06/26 22:52:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -140,8 +140,8 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     //
     // Send a PIM Register to the RP
     //
-    pim_vif = pim_node().vif_find_direct(src);
-    if (pim_vif == NULL) {
+    pim_vif = pim_node().vif_find_same_subnet_or_p2p(src);
+    if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
 	XLOG_WARNING("RX WHOLEPKT signal from %s: src = %s dst = %s: "
 		     "no interface directly connected to source",
 		     src_module_instance_name.c_str(),
