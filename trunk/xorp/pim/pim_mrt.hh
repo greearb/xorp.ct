@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.6 2003/07/07 23:13:02 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.7 2003/07/12 01:14:38 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -259,6 +259,8 @@ public:
     void add_task_stop_vif(uint16_t vif_index);
     void add_task_add_pim_mre(PimMre *pim_mre);
     void add_task_delete_pim_mre(PimMre *pim_mre);
+    
+    void add_task_delete_pim_mfc(PimMfc *pim_mfc);
     
     list<PimMreTask *>& pim_mre_task_list() { return (_pim_mre_task_list); }
     

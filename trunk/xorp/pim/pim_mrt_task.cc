@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.11 2003/07/07 23:13:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.12 2003/07/12 01:14:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -21,6 +21,7 @@
 
 #include "pim_module.h"
 #include "pim_private.hh"
+#include "pim_mfc.hh"
 #include "pim_mre_task.hh"
 #include "pim_mrt.hh"
 #include "pim_node.hh"
@@ -1226,7 +1227,7 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
     if (iter != pim_mre_task_list().rend()) {
 	pim_mre_task = *iter;
 	if (pim_mre_task->input_state() == input_state) {
-	    pim_mre_task->add_pim_mre(pim_mre);
+	    pim_mre_task->add_pim_mre(pim_mre);		// XXX
 	    pim_mre_task->add_pim_mre_delete(pim_mre);	// XXX
 	    return;
 	}
@@ -1239,6 +1240,50 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
 			     input_state);
 	pim_mre_task->add_pim_mre(pim_mre);		// XXX
 	pim_mre_task->add_pim_mre_delete(pim_mre);	// XXX
+	add_task(pim_mre_task);
+	schedule_task(pim_mre_task);
+    } while (false);
+}
+
+void
+PimMrt::add_task_delete_pim_mfc(PimMfc *pim_mfc)
+{
+    PimMreTask *pim_mre_task = NULL;
+    
+    if (pim_mfc->is_task_delete_pending()) {
+	// The entry is already pending deletion.
+	// Shoudn't happen, but just in case...
+	return;
+    }
+    
+    //
+    // Mark the entry as pending deletion
+    //
+    pim_mfc->set_is_task_delete_pending(true);
+    
+    //
+    // If the lastest task is same, just
+    // reuse that task. Otherwise, allocate a new task.
+    //
+    list<PimMreTask *>::reverse_iterator iter;
+    iter = pim_mre_task_list().rbegin();
+    if (iter != pim_mre_task_list().rend()) {
+	pim_mre_task = *iter;
+	if (pim_mre_task->input_state()
+	    == PimMreTrackState::INPUT_STATE_IN_REMOVE_PIM_MFC) {
+	    pim_mre_task->add_pim_mfc(pim_mfc);		// XXX
+	    pim_mre_task->add_pim_mfc_delete(pim_mfc);	// XXX
+	    return;
+	}
+    }
+    
+    do {
+	// Schedule the PimMfc-related changes
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_IN_REMOVE_PIM_MFC);
+	pim_mre_task->add_pim_mfc(pim_mfc);		// XXX
+	pim_mre_task->add_pim_mfc_delete(pim_mfc);	// XXX
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
     } while (false);
