@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -146,9 +146,7 @@ bool
 RouteEntryOrigin<A>::associate(const Route* r)
 {
     XLOG_ASSERT(r != 0);
-    XLOG_ASSERT(_rtstore != 0);
-    if (_rtstore->routes.empty() == false &&
-	_rtstore->routes.find(r) != _rtstore->routes.end()) {
+    if (_rtstore->routes.find(r) != _rtstore->routes.end()) {
 	XLOG_FATAL("entry already exists");
 	return false;
     }
