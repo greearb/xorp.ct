@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.2 2003/02/25 18:58:50 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.3 2003/03/04 23:41:24 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -233,7 +233,8 @@ test_main(void)
 	}
 	verbose_log("succeeded\n");
     }
-
+    fc1.enable_xrls(id);
+    
     while (!expired)
 	e.run();
 
@@ -256,7 +257,6 @@ test_main(void)
     while (expired == false)
 	e.run();
     
-
     r = test_xrls_resolve(e, fc1, xrls); 
     if (r)
 	return r;

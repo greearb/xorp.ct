@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.5 2003/03/04 23:41:24 hodson Exp $"
 
 #include <stdlib.h>
 
@@ -148,11 +148,25 @@ test_main()
     party_a.add_handler("hello_world", callback(hello_world));
     party_a.add_handler("passback_integer", callback(passback_integer));
 
+    party_a.finalize();
+    
     // Create and configure "party_B"
     XrlRouter		party_b(event_loop, "party_B");
     XrlPFSUDPListener	listener_b(event_loop);
     party_b.add_listener(&listener_b);
+    party_b.finalize();
 
+    //
+    // Pause for a second to allow parties to register Xrls and enable them
+    // This is a bit slack but XrlRouter interface doesn't have enabled check
+    // for time being and finder does.
+    //
+    bool finito = false;
+    XorpTimer t = event_loop.set_flag_after_ms(1000, &finito);
+    while (finito == false) {
+	event_loop.run();
+    }
+    
     // "Party_B" send "hello world" to "Party_A"
     bool step1_done = false;
     Xrl x("party_A", "hello_world");
@@ -163,8 +177,8 @@ test_main()
     party_b.send(y, callback(got_integer, &step2_done));
 
     // Just run...
-    bool finito = false;
-    XorpTimer t = event_loop.set_flag_after_ms(5000, &finito);
+    finito = false;
+    t = event_loop.set_flag_after_ms(5000, &finito);
     while (step1_done == false || step2_done == false) {
 	event_loop.run();
 	if (finito) {
