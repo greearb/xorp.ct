@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.28 2004/12/10 23:19:25 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.29 2004/12/17 00:19:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -673,6 +673,8 @@ private:
 
     ClickConfigGenerator*	_kernel_click_config_generator;
     ClickConfigGenerator*	_user_click_config_generator;
+    bool			_has_kernel_click_config;
+    bool			_has_user_click_config;
     string			_generated_kernel_click_config;
     string			_generated_user_click_config;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.15 2004/12/10 23:19:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.16 2004/12/17 00:19:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -39,7 +39,9 @@ IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
       ClickSocket(ifc.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _kernel_click_config_generator(NULL),
-      _user_click_config_generator(NULL)
+      _user_click_config_generator(NULL),
+      _has_kernel_click_config(false),
+      _has_user_click_config(false)
 {
 }
 
@@ -664,10 +666,17 @@ IfConfigSetClick::execute_click_config_generator(string& error_msg)
     }
 
     //
+    // Cleanup
+    //
+    _has_kernel_click_config = false;
+    _has_user_click_config = false;
+    _generated_kernel_click_config.erase();
+    _generated_user_click_config.erase();
+
+    //
     // Execute the Click configuration generators
     //
     if (ClickSocket::is_kernel_click()) {
-	_generated_kernel_click_config.erase();
 	_kernel_click_config_generator = new ClickConfigGenerator(
 	    *this,
 	    kernel_generator_file);
@@ -679,7 +688,6 @@ IfConfigSetClick::execute_click_config_generator(string& error_msg)
 	}
     }
     if (ClickSocket::is_user_click()) {
-	_generated_user_click_config.erase();
 	_user_click_config_generator = new ClickConfigGenerator(
 	    *this,
 	    user_generator_file);
@@ -705,6 +713,10 @@ IfConfigSetClick::terminate_click_config_generator()
 	delete _user_click_config_generator;
 	_user_click_config_generator = NULL;
     }
+    _has_kernel_click_config = false;
+    _has_user_click_config = false;
+    _generated_kernel_click_config.erase();
+    _generated_user_click_config.erase();
 }
 
 void
@@ -713,9 +725,6 @@ IfConfigSetClick::click_config_generator_done(
     bool success,
     const string& error_msg)
 {
-    bool is_kernel_config = false;
-    bool is_user_config = false;
-
     // Check for errors
     XLOG_ASSERT((click_config_generator == _kernel_click_config_generator)
 		|| (click_config_generator == _user_click_config_generator));
@@ -728,15 +737,17 @@ IfConfigSetClick::click_config_generator_done(
     string command_stdout = click_config_generator->command_stdout();
 
     if (click_config_generator == _kernel_click_config_generator) {
-	is_kernel_config = true;
-	if (success)
+	if (success) {
+	    _has_kernel_click_config = true;
 	    _generated_kernel_click_config = command_stdout;
+	}
 	_kernel_click_config_generator = NULL;
     }
     if (click_config_generator == _user_click_config_generator) {
-	is_user_config = true;
-	if (success)
+	if (success) {
 	    _generated_user_click_config = command_stdout;
+	    _has_user_click_config = true;
+	}
 	_user_click_config_generator = NULL;
     }
     delete click_config_generator;
@@ -751,9 +762,9 @@ IfConfigSetClick::click_config_generator_done(
     }
 
     string write_error_msg;
-    if (write_generated_config(is_kernel_config,
+    if (write_generated_config(_has_kernel_click_config,
 			       _generated_kernel_click_config,
-			       is_user_config,
+			       _has_user_click_config,
 			       _generated_user_click_config,
 			       write_error_msg) != XORP_OK) {
 	XLOG_ERROR("Failed to write the Click configuration: %s",
@@ -762,9 +773,9 @@ IfConfigSetClick::click_config_generator_done(
 }
 
 int
-IfConfigSetClick::write_generated_config(bool is_kernel_config,
+IfConfigSetClick::write_generated_config(bool has_kernel_config,
 					 const string& kernel_config,
-					 bool is_user_config,
+					 bool has_user_config,
 					 const string& user_config,
 					 string& error_msg)
 {
@@ -772,8 +783,8 @@ IfConfigSetClick::write_generated_config(bool is_kernel_config,
     string handler = "hotconfig";
 
     if (ClickSocket::write_config(element, handler,
-				  is_kernel_config, kernel_config,
-				  is_user_config, user_config,
+				  has_kernel_config, kernel_config,
+				  has_user_config, user_config,
 				  error_msg)
 	!= XORP_OK) {
 	return (XORP_ERROR);
