@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.2 2003/06/02 23:20:17 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.3 2003/09/20 00:31:29 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -141,7 +141,7 @@ private:
     NetlinkSocket& operator=(const NetlinkSocket&);	// Not implemented
     NetlinkSocket(const NetlinkSocket&);		// Not implemented
 
-    static const size_t NLSOCK_BYTES = 8*1024; // Guess at largest sock message
+    static const size_t NLSOCK_BYTES = 8*1024; // Initial guess at msg size
 
     EventLoop&	 _e;
     int		 _fd;
@@ -149,9 +149,7 @@ private:
 
     uint16_t 	 _seqno;	// Seqno of next write()
     uint16_t	 _instance_no;  // Instance number of this netlink socket
-
-    uint8_t	 _buffer[NLSOCK_BYTES];
-
+    
     static uint16_t _instance_cnt;
     static pid_t    _pid;
 

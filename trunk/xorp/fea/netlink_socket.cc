@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.4 2003/09/20 00:34:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.5 2003/09/20 06:27:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -234,10 +234,23 @@ NetlinkSocket::sendto(const void* data, size_t nbytes, int flags,
 void
 NetlinkSocket::force_read()
 {
-    ssize_t got = 0;
+    vector<uint8_t> message;
+    vector<uint8_t> buffer(NLSOCK_BYTES);
+    size_t off = 0;
+    size_t last_mh_off = 0;
     
     for ( ; ; ) {
-	got = read(_fd, _buffer, NLSOCK_BYTES);
+	ssize_t got;
+	// Find how much data is queued in the first message
+	do {
+	    got = recv(_fd, &buffer[0], buffer.size(),
+		       MSG_DONTWAIT | MSG_PEEK);
+	    if ((got < 0) || (got < (ssize_t)buffer.size()))
+		break;		// The buffer is big enough
+	    buffer.resize(buffer.size() + NLSOCK_BYTES);
+	} while (true);
+	
+	got = read(_fd, &buffer[0], buffer.size());
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
@@ -245,7 +258,11 @@ NetlinkSocket::force_read()
 	    shutdown();
 	    return;
 	}
-	if (got < (ssize_t)sizeof(struct nlmsghdr)) {
+	message.resize(message.size() + got);
+	memcpy(&message[off], &buffer[0], got);
+	off += got;
+	
+	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
 	    XLOG_ERROR("Netlink socket read failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)sizeof(struct nlmsghdr));
@@ -254,19 +271,33 @@ NetlinkSocket::force_read()
 	}
 	
 	//
-	// Received message (probably) OK
+	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
-	const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(_buffer);
-	XLOG_ASSERT(mh->nlmsg_len <= NLSOCK_BYTES);
-	// XLOG_ASSERT((ssize_t)mh->nlmsg_len == got);
-	break;
+	bool is_end_of_message = true;
+	while (last_mh_off < off) {
+	    const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
+	    if (mh->nlmsg_flags & NLM_F_MULTI) {
+		is_end_of_message = false;
+		if (mh->nlmsg_type == NLMSG_DONE)
+		    is_end_of_message = true;
+	    }
+	    if (last_mh_off + mh->nlmsg_len <= off)
+		last_mh_off += mh->nlmsg_len;
+	    else
+		break;		// The last message is truncated
+	}
+	
+	if (is_end_of_message)
+	    break;
     }
+    XLOG_ASSERT(last_mh_off == message.size());
     
     //
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(_buffer, got);
+	(*i)->nlsock_data(&message[0], message.size());
     }
 }
 
@@ -274,10 +305,23 @@ void
 NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 			      socklen_t* fromlen)
 {
-    ssize_t got = 0;
+    vector<uint8_t> message;
+    vector<uint8_t> buffer(NLSOCK_BYTES);
+    size_t off = 0;
+    size_t last_mh_off = 0;
     
     for ( ; ; ) {
-	got = recvfrom(_fd, _buffer, NLSOCK_BYTES, flags, from, fromlen);
+	ssize_t got;
+	// Find how much data is queued in the first message
+	do {
+	    got = recv(_fd, &buffer[0], buffer.size(),
+		       MSG_DONTWAIT | MSG_PEEK);
+	    if ((got < 0) || (got < (ssize_t)buffer.size()))
+		break;		// The buffer is big enough
+	    buffer.resize(buffer.size() + NLSOCK_BYTES);
+	} while (true);
+	
+	got = recvfrom(_fd, &buffer[0], buffer.size(), flags, from, fromlen);
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
@@ -285,7 +329,11 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	    shutdown();
 	    return;
 	}
-	if (got < (ssize_t)sizeof(struct nlmsghdr)) {
+	message.resize(message.size() + got);
+	memcpy(&message[off], &buffer[0], got);
+	off += got;
+	
+	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
 	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)sizeof(struct nlmsghdr));
@@ -294,26 +342,43 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	}
 	
 	//
-	// Received message (probably) OK
+	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
-	const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(_buffer);
-	XLOG_ASSERT(mh->nlmsg_len <= NLSOCK_BYTES);
-	// XLOG_ASSERT((ssize_t)mh->nlmsg_len == got);
-	break;
+	bool is_end_of_message = true;
+	while (last_mh_off < off) {
+	    const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
+	    if (mh->nlmsg_flags & NLM_F_MULTI) {
+		is_end_of_message = false;
+		if (mh->nlmsg_type == NLMSG_DONE)
+		    is_end_of_message = true;
+	    }
+	    if (last_mh_off + mh->nlmsg_len <= off)
+		last_mh_off += mh->nlmsg_len;
+	    else
+		break;		// The last message is truncated
+	}
+	
+	if (is_end_of_message)
+	    break;
     }
+    XLOG_ASSERT(last_mh_off == message.size());
     
     //
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(_buffer, got);
+	(*i)->nlsock_data(&message[0], message.size());
     }
 }
 
 void
 NetlinkSocket::force_recvmsg(int flags)
 {
-    ssize_t		got = 0;
+    vector<uint8_t> message;
+    vector<uint8_t> buffer(NLSOCK_BYTES);
+    size_t off = 0;
+    size_t last_mh_off = 0;
     struct iovec	iov;
     struct msghdr	msg;
     struct sockaddr_nl	snl;
@@ -323,8 +388,8 @@ NetlinkSocket::force_recvmsg(int flags)
     snl.nl_family = AF_NETLINK;
     
     // Init the recvmsg() arguments
-    iov.iov_base = _buffer;
-    iov.iov_len = sizeof(_buffer);
+    iov.iov_base = &buffer[0];
+    iov.iov_len = buffer.size();
     msg.msg_name = &snl;
     msg.msg_namelen = sizeof(snl);
     msg.msg_iov = &iov;
@@ -334,6 +399,20 @@ NetlinkSocket::force_recvmsg(int flags)
     msg.msg_flags = 0;
     
     for ( ; ; ) {
+	ssize_t got;
+	// Find how much data is queued in the first message
+	do {
+	    got = recv(_fd, &buffer[0], buffer.size(),
+		       MSG_DONTWAIT | MSG_PEEK);
+	    if ((got < 0) || (got < (ssize_t)buffer.size()))
+		break;		// The buffer is big enough
+	    buffer.resize(buffer.size() + NLSOCK_BYTES);
+	} while (true);
+	
+	// Re-init the iov argument
+	iov.iov_base = &buffer[0];
+	iov.iov_len = buffer.size();
+	
 	got = recvmsg(_fd, &msg, flags);
 	if (got < 0) {
 	    if (errno == EINTR)
@@ -349,8 +428,12 @@ NetlinkSocket::force_recvmsg(int flags)
 	    shutdown();
 	    return;
 	}
-	if (got < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated: "
+	message.resize(message.size() + got);
+	memcpy(&message[off], &buffer[0], got);
+	off += got;
+	
+	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
+	    XLOG_ERROR("Netlink socket recvmsg failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)sizeof(struct nlmsghdr));
 	    shutdown();
@@ -358,19 +441,33 @@ NetlinkSocket::force_recvmsg(int flags)
 	}
 	
 	//
-	// Received message (probably) OK
+	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
-	const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(_buffer);
-	XLOG_ASSERT(mh->nlmsg_len <= NLSOCK_BYTES);
-	// XLOG_ASSERT((ssize_t)mh->nlmsg_len == got);
-	break;
+	bool is_end_of_message = true;
+	while (last_mh_off < off) {
+	    const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
+	    if (mh->nlmsg_flags & NLM_F_MULTI) {
+		is_end_of_message = false;
+		if (mh->nlmsg_type == NLMSG_DONE)
+		    is_end_of_message = true;
+	    }
+	    if (last_mh_off + mh->nlmsg_len <= off)
+		last_mh_off += mh->nlmsg_len;
+	    else
+		break;		// The last message is truncated
+	}
+	
+	if (is_end_of_message)
+	    break;
     }
+    XLOG_ASSERT(last_mh_off == message.size());
     
     //
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(_buffer, got);
+	(*i)->nlsock_data(&message[0], message.size());
     }
 }
 
