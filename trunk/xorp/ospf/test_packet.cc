@@ -167,11 +167,11 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
-decoder1(TestInfo& info)
+decoder1(TestInfo& info, OspfTypes::Version version)
 {
     PacketDecoder dec;
-    HelloPacket hello(OspfTypes::V2);
-    populate_helloV2(&hello);
+    HelloPacket hello(version);
+    populate_hello(&hello, version);
 
     size_t len;
     uint8_t *ptr = hello.encode(len);
@@ -189,15 +189,15 @@ decoder1(TestInfo& info)
 }
 
 bool
-decoder2(TestInfo& info)
+decoder2(TestInfo& info, OspfTypes::Version version)
 {
     PacketDecoder dec;
     // Install a decoder for hello packets.
-    Packet *hello_decoder = new HelloPacket(OspfTypes::V2);
+    Packet *hello_decoder = new HelloPacket(version);
     dec.register_decoder(hello_decoder);
 
-    HelloPacket hello(OspfTypes::V2);
-    populate_helloV2(&hello);
+    HelloPacket hello(version);
+    populate_hello(&hello, version);
 
     size_t len;
     uint8_t *ptr = hello.encode(len);
@@ -228,8 +228,10 @@ main(int argc, char **argv)
 	{"hello_print", callback(hello_packet_print)},
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
-	{"decoder1", callback(decoder1)},
-	{"decoder2", callback(decoder2)},
+	{"decoder1V2", callback(decoder1, OspfTypes::V2)},
+	{"decoder1V3", callback(decoder1, OspfTypes::V3)},
+	{"decoder2V2", callback(decoder2, OspfTypes::V2)},
+	{"decoder2V3", callback(decoder2, OspfTypes::V3)},
     };
 
     try {
