@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.3 2003/07/15 17:25:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -45,16 +45,6 @@ FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
 
 #else // HAVE_ROUTING_SOCKETS
 
-//
-// XXX: in FreeBSD, the flag to indicate routes that were generated through
-// cloning is RTF_WASCLONED, but in NetBSD the flag name is RTF_CLONED.
-// Hence, if necessary, define RTF_WASCLONED, so later we can use only
-// this flag name.
-//
-#if !defined(RTF_WASCLONED) && defined(RTF_CLONED)
-#define RTF_WASCLONED	RTF_CLONED
-#endif
-
 // Reading route(4) manual page is a good start for understanding this
 bool
 FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
@@ -76,16 +66,22 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 	    continue;
 	if (! (rtm->rtm_flags & RTF_UP))
 	    continue;
+#ifdef RTF_WASCLONED
 	if (rtm->rtm_flags & RTF_WASCLONED)
 	    continue;		// XXX: ignore cloned entries
+#endif
+#ifdef RTF_CLONED
+	if (rtm->rtm_flags & RTF_CLONED)
+	    continue;		// XXX: ignore cloned entries
+#endif
 #ifdef RTF_MULTICAST
 	if (rtm->rtm_flags & RTF_MULTICAST)
 	    continue;		// XXX: ignore multicast entries
-#endif // RTF_MULTICAST
+#endif
 #ifdef RTF_BROADCAST
 	if (rtm->rtm_flags & RTF_BROADCAST)
 	    continue;		// XXX: ignore broadcast entries
-#endif // RTF_BROADCAST
+#endif
 	
 	FteX fte(family);
 	if (RtmUtils::rtm_get_to_fte_cfg(fte, rtm) == true)
