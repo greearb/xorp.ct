@@ -12,17 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.15 2003/05/02 09:00:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.16 2003/05/22 20:37:53 hodson Exp $"
 
 #include <signal.h>
 
+#include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
-#include "rtrmgr_module.h"
-#include "libxorp/xlog.h"
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <net/if.h>
 
-#include "libxipc/finder_server.hh"
+#include "libxipc/sockutil.hh"
+#include "libxipc/finder.hh"
+#include "libxipc/finder_tcp_messenger.hh"
+#include "libxipc/finder_xrl_target.hh"
+#include "libxipc/permits.hh"
 #include "libxipc/xrl_std_router.hh"
 
 #include "template_tree_node.hh"
@@ -51,11 +58,10 @@ static void signalhandler(int) {
 }
 
 void
-usage(const char *name)
+usage()
 {
     fprintf(stderr,
-	"usage: %s [-n] [-b config.boot] [-t cfg_dir] [-x xrl_dir]\n",
-	    name);
+	"usage: rtrmgr [-n] [-b config.boot] [-t cfg_dir] [-x xrl_dir]\n");
     fprintf(stderr, "options:\n");
 
     fprintf(stderr, 
@@ -75,6 +81,34 @@ usage(const char *name)
 	    default_xrl_dir);
 
     exit(-1);
+}
+
+
+static bool
+valid_interface(const IPv4& addr)
+{
+    uint32_t naddr = if_count();
+    uint16_t any_up = 0;
+
+    for (uint32_t n = 1; n <= naddr; n++) {
+        string name;
+        in_addr if_addr;
+        uint16_t flags;
+
+        if (if_probe(n, name, if_addr, flags) == false)
+            continue;
+
+        any_up |= (flags & IFF_UP);
+
+        if (IPv4(if_addr) == addr && flags & IFF_UP) {
+            return true;
+        }
+    }
+
+    if (IPv4::ANY() == addr && any_up)
+        return true;
+
+    return false;
 }
 
 int
@@ -99,10 +133,12 @@ main(int argc, char* const argv[])
     const char*	config_template_dir = default_config_template_dir;
     const char*	xrl_dir 	    = default_xrl_dir;
     const char*	config_boot         = default_config_boot;
+    IPv4	bind_addr = IPv4::ANY();
+    uint16_t	bind_port = FINDER_NG_TCP_DEFAULT_PORT;
 
     int c;
 
-    while ((c = getopt (argc, argv, "t:b:x:n")) != EOF) {
+    while ((c = getopt (argc, argv, "t:b:x:i:p:n")) != EOF) {
 	switch(c) {  
 	case 't':
 	    config_template_dir = optarg;
@@ -116,9 +152,35 @@ main(int argc, char* const argv[])
 	case 'n':
 	    do_exec = false;
 	    break;
+	case 'p':
+	    bind_port = static_cast<uint16_t>(atoi(optarg));
+	    if (bind_port == 0) {
+		fprintf(stderr, "0 is not a valid port.\n");
+		exit(-1);
+	    }
+	    break;
+	case 'i':
+	    //
+	    // User is specifying which interface to bind finder to
+	    //
+	    try {
+		bind_addr = IPv4(optarg);
+		if (valid_interface(bind_addr) == false) {
+		    fprintf(stderr,
+			    "%s is not the address of an active interface.\n",
+			    optarg);
+		    exit(-1);
+		}
+	    } catch (const InvalidString&) {
+		fprintf(stderr, "%s is not a valid interface address.\n",
+			optarg);
+		usage();
+		exit(-1);
+	    }
+	    break;
 	case '?':
 	default:
-	    usage(argv[0]);
+	    usage();
 	}
     }
 
@@ -134,7 +196,6 @@ main(int argc, char* const argv[])
     tt->display_tree();
 #endif
 
-
     //signal handlers so we can clean up when we're killed
     signal(SIGTERM, signalhandler);
     signal(SIGINT, signalhandler);
@@ -145,17 +206,45 @@ main(int argc, char* const argv[])
     EventLoop eventloop; 
     randgen.add_eventloop(&eventloop);
 
-    /* Finder Server */
-    FinderServer fs(eventloop);
+    //
+    // Add preferred ipc address on host
+    //
+    add_permitted_host(if_get_preferred());
+    add_permitted_host(IPv4("127.0.0.1"));
+
+    //Start the finder.
+    //These are dynamically created so we have control over the
+    //deletion order.
+    Finder* finder;
+    FinderTcpListener* listener;
+    FinderXrlTarget* target;
+    XorpUnexpectedHandler x(xorp_unexpected_handler);
+    try {
+	finder = new Finder(eventloop);
+	listener = new FinderTcpListener(eventloop, *finder, 
+					 finder->commands(), 
+					 bind_addr, bind_port);
+	target = new FinderXrlTarget(*finder);
+    } catch (const InvalidPort& i) {
+	fprintf(stderr, "%s: a finder may already be running.\n",
+		i.why().c_str());
+	delete tt;
+	exit(-1);
+    } catch (...) {
+	xorp_catch_standard_exceptions();
+	delete tt;
+	exit(-1);
+    }
 
     //start the module manager
     ModuleManager mmgr(eventloop, /*verbose = */true);
-    try {
-	UserDB userdb;
-	userdb.load_password_file();
 
+    UserDB userdb;
+    userdb.load_password_file();
+
+    try {
 	//initialize the IPC mechanism
-	XrlStdRouter xrlrouter(eventloop, "rtrmgr", fs.addr(), fs.port());
+	XrlStdRouter xrlrouter(eventloop, "rtrmgr", bind_addr, bind_port);
 	XorpClient xclient(eventloop, xrlrouter);
 
 	//initialize the Task Manager
@@ -179,6 +268,11 @@ main(int argc, char* const argv[])
 	errcode = 1;
     }
 
+
+    /***********************************************************************/
+    /** shutdown everything                                               **/
+    /***********************************************************************/
+
     //Shut down child processes
     mmgr.shutdown();
 
@@ -187,7 +281,14 @@ main(int argc, char* const argv[])
 	eventloop.run();
     }
 
+    //delete the template tree
     delete tt;
+
+    //shutdown the finder
+    delete target;
+    delete listener;
+    delete finder;
+
     //
     // Gracefully stop and exit xlog
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.10 2003/05/10 00:01:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.11 2003/05/23 00:02:08 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -21,7 +21,7 @@
 #include "module_manager.hh"
 #include "xorp_client.hh"
 
-#define MAX_STATUS_RETRIES 10
+#define MAX_STATUS_RETRIES 30
 
 DelayValidation::DelayValidation(EventLoop& eventloop, uint32_t ms)
     : _eventloop(eventloop), _delay_in_ms(ms)
