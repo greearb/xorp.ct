@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.20 2003/05/31 16:35:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.21 2003/06/01 21:38:13 hodson Exp $"
 
 
 //
@@ -33,7 +33,12 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "cli/xrl_cli_node.hh"
-#include "mfea/xrl_mfea_node.hh"
+#include "fea/fticonfig.hh"
+#include "fea/ifmanager.hh"
+#include "fea/ifconfig.hh"
+#include "fea/xrl_ifupdate.hh"
+#include "fea/xrl_mfea_node.hh"
+#include "fea/xrl_target.hh"
 #include "rib/rib_manager.hh"
 #include "mld6igmp/xrl_mld6igmp_node.hh"
 #include "pim/xrl_pim_node.hh"
@@ -258,6 +263,57 @@ main(int argc, char *argv[])
 	//
 	// MFEA node
 	//
+	XrlStdRouter xrl_std_router_fea(eventloop,
+					xorp_module_name(AF_INET,
+							 XORP_MODULE_FEA),
+					finder_addr, finder_port);
+	//
+	// 1. FtiConfig
+	//
+	FtiConfig fticonfig(eventloop);
+	fticonfig.start();
+
+	//
+	// 2. Interface Configurator and reporters
+	//
+	XrlIfConfigUpdateReporter ifreporter(xrl_std_router_fea);
+	IfConfigErrorReporter iferr;
+
+	IfConfig ifconfig(eventloop, ifreporter, iferr);
+	ifconfig.start();
+
+	//
+	// 3. Interface manager
+	//
+	InterfaceManager ifm(ifconfig);
+
+	//
+	// 4. Raw Socket TODO
+	//
+
+	//
+	// 5. XRL Target
+	//
+	XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig,
+				    ifm, ifreporter, 0);
+
+#if DO_IPV4
+	XrlStdRouter xrl_std_router_mfea4(eventloop,
+					  xorp_module_name(AF_INET,
+							   XORP_MODULE_MFEA),
+					  finder_addr, finder_port);
+	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
+				   &xrl_std_router_mfea4, fticonfig);
+#else
+	XrlStdRouter xrl_std_router_mfea6(eventloop,
+					  xorp_module_name(AF_INET6,
+							   XORP_MODULE_MFEA),
+					  finder_addr, finder_port);
+	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
+				   &xrl_std_router_mfea6, fticonfig);
+#endif // ! DO_IPV4
+
+#if 0	// XXX: old MFEA
 #if DO_IPV4
 	XrlStdRouter xrl_std_router_mfea4(eventloop,
 					  xorp_module_name(AF_INET,
@@ -275,6 +331,7 @@ main(int argc, char *argv[])
 				   eventloop,
 				   &xrl_std_router_mfea6);
 #endif // ! DO_IPV4
+#endif // 0
 
 	//
 	// MLD6IGMP node
