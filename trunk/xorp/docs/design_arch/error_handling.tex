@@ -83,15 +83,15 @@ A \xorp router is made up of a number of distinct processes. There are
 dependencies between these processes. We define the critical
 dependencies and what action to take on detecting failure.
 
-The most critical component of a \xorp router is the Rtrmgr/\finder
+The most critical component of a \xorp router is the \rtrmgr/\finder
 process. One of the functions of this component is to start/re-start
 processes. If process A is dependent on the status (alive, dead,
 restarted) of process B, then process A registers this interest with
-the \finder. This dependency on the Rtrmgr/\finder for managing and
+the \finder. This dependency on the \rtrmgr/\finder for managing and
 monitoring process state mean that a \xorp router cannot survive the
 failure of this process. A \xorp process on detecting the loss of the
 \finder must exit. There is one exception to this rule the \xorpsh
-process, this will be discussed later [REF].
+process, this will be discussed later in section \ref{xorpsh}.
 
 Each process in a \xorp router is described and how it should behave
 when another process in the system fails. Processes can explicitly
@@ -128,30 +128,31 @@ dependent processes.
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
-Process fails &                &          &      &      &      &         &      &      &      &        \\\hline
-              & Rtrmgr/\finder & FEA      & MFEA & RIB  & IGMP & PIM     & BGP  & RIP  & OSPF & XORPSH \\\hline
-Rtrmgr/finder & /              & Withdraw & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Report \\
-              &                & All      &      &      &      &         &      &      &      & Problem\\
-              &                & Unicast  &      &      &      &         &      &      &      & Wait   \\
-              &                & Routes   &      &      &      &         &      &      &      &        \\
-              &                & Exit     &      &      &      &         &      &      &      &        \\\hline
-FEA           &  Restart       & /        & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Exit   \\\hline
-MFEA          &  Restart       & -        & /    & -    & Exit & Exit    & -    & -    & -    & -      \\\hline
-RIB           &  Restart       & Withdraw & /    & -    & Exit & Exit    & Exit & Exit & Exit & Exit   \\
-              &                & All      &      &      & (G)  & (G)     & (G)  & (G)  & (G)  & (G)    \\
-              &                & Unicast  &      &      &      &         &      &      &      &        \\
-              &                & Routes   &      &      &      &         &      &      &      &        \\\hline
-IGMP          &  Restart       & -        & -    & -    & /    & Delete  & -    & -    & -    & -      \\
-              &                &          &      &      &      & Local   &      &      &      &        \\
-              &                &          &      &      &      & Members &      &      &      &        \\
-              &                &          &      &      &      & After   &      &      &      &        \\
-              &                &          &      &      &      & Timeout &      &      &      &        \\\hline
-PIM           &  Restart       & -        & -    & -    & -    & /       & -    & -    & -    & -      \\\hline
-BGP           &  Restart       & -        & -    & -    & -    & -       & /    & -    & -    & -      \\\hline
-BGP           &  Restart       & -        & -    & -    & -    & -       & /    & -    & -    & -      \\\hline
-RIP           &  Restart       & -        & -    & -    & -    & -       & -    & /    & -    & -      \\\hline
-OSPF          &  Restart       & -        & -    & -    & -    & -       & -    & -    & /    & -      \\\hline
-XORPSH        &  Restart       & -        & -    & -    & -    & -       & -    & -    & -    & /      \\\hline
+Process fails   &                 &          &      &      &      &         &      &      &      &         \\\hline
+                & \rtrmgr/        & FEA      & MFEA & RIB  & IGMP & PIM     & BGP  & RIP  & OSPF & \xorpsh \\
+                & \finder         &          &      &      &      &         &      &      &      &         \\\hline
+\rtrmgr/        & /               & Withdraw & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Report  \\
+\finder         &                 & All      &      &      &      &         &      &      &      & Problem \\
+                &                 & Unicast  &      &      &      &         &      &      &      & Wait    \\
+                &                 & Routes   &      &      &      &         &      &      &      &         \\
+                &                 & Exit     &      &      &      &         &      &      &      &         \\\hline
+FEA             &  Restart        & /        & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & -       \\\hline
+MFEA            &  Restart        & -        & /    & -    & Exit & Exit    & -    & -    & -    & -       \\\hline
+RIB             &  Restart        & Withdraw & /    & -    & Exit & Exit    & Exit & Exit & Exit & -       \\
+                &                 & All      &      &      & (G)  & (G)     & (G)  & (G)  & (G)  &         \\
+                &                 & Unicast  &      &      &      &         &      &      &      &         \\
+                &                 & Routes   &      &      &      &         &      &      &      &         \\\hline
+IGMP            &  Restart        & -        & -    & -    & /    & Delete  & -    & -    & -    & -       \\
+                &                 &          &      &      &      & Local   &      &      &      &         \\
+                &                 &          &      &      &      & Members &      &      &      &         \\
+                &                 &          &      &      &      & After   &      &      &      &         \\
+                &                 &          &      &      &      & Timeout &      &      &      &         \\\hline
+PIM             &  Restart        & -        & -    & -    & -    & /       & -    & -    & -    & -       \\\hline
+BGP             &  Restart        & -        & -    & -    & -    & -       & /    & -    & -    & -       \\\hline
+BGP             &  Restart        & -        & -    & -    & -    & -       & /    & -    & -    & -       \\\hline
+RIP             &  Restart        & -        & -    & -    & -    & -       & -    & /    & -    & -       \\\hline
+OSPF            &  Restart        & -        & -    & -    & -    & -       & -    & -    & /    & -       \\\hline
+\xorpsh         &  Restart        & -        & -    & -    & -    & -       & -    & -    & -    & /       \\\hline
 \end{tabular}
 \end{center}
 \caption{\label{failure_table}Action to take on detecting process failure}
@@ -226,6 +227,14 @@ If the FEA dies the IS-IS process should exit immediately.
 The OSPF process should register interest in the FEA and the RIB. If
 the RIB dies then the OSPF process should attempt to exit gracefully.
 If the FEA dies the OSPF process should exit immediately.
+
+\subsection{\label{xorpsh}\xorpsh}
+
+The \xorpsh provides a command line interface to the XORP router.
+Other processes in the system exiting should never cause it to
+exit. The \rtrmgr/\finder process exiting should generate
+warning output to the user and then the \xorpsh should wait for the
+router to restart.
 
 \section{XRL Communication Error}
 Interprocess communication in \xorp is achieved using XRLs. In this
