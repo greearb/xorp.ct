@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.2 2003/08/25 16:59:10 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.3 2003/09/30 03:07:57 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -28,9 +28,9 @@
 static inline const IfMgrIfAtom*
 find_interface(const IfMgrIfTree* tree, const string& ifname)
 {
-    const IfMgrIfTree::IfMap& interfaces = tree->interfaces();
-    IfMgrIfTree::IfMap::const_iterator ii = interfaces.find(ifname);
-    if (interfaces.end() == ii)
+    const IfMgrIfTree::IfMap& ifs = tree->ifs();
+    IfMgrIfTree::IfMap::const_iterator ii = ifs.find(ifname);
+    if (ifs.end() == ii)
 	return 0;
     return &ii->second;
 }
@@ -38,9 +38,9 @@ find_interface(const IfMgrIfTree* tree, const string& ifname)
 static inline IfMgrIfAtom*
 find_interface(IfMgrIfTree* tree, const string& ifname)
 {
-    IfMgrIfTree::IfMap& interfaces = tree->interfaces();
-    IfMgrIfTree::IfMap::iterator ii = interfaces.find(ifname);
-    if (interfaces.end() == ii)
+    IfMgrIfTree::IfMap& ifs = tree->ifs();
+    IfMgrIfTree::IfMap::iterator ii = ifs.find(ifname);
+    if (ifs.end() == ii)
 	return 0;
     return &ii->second;
 }
@@ -199,7 +199,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 bool
 IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 {
-    return o.interfaces() == interfaces();
+    return o.ifs() == ifs();
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.6 2003/09/20 00:15:46 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.7 2003/09/30 03:07:57 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -48,12 +48,12 @@ public:
     /**
      * Interface collection accessor.
      */
-    inline const IfMap& interfaces() const		{ return _ifs; }
+    inline const IfMap& ifs() const			{ return _ifs; }
 
     /**
      * Interface collection accessor.
      */
-    inline IfMap& interfaces()				{ return _ifs; }
+    inline IfMap& ifs()					{ return _ifs; }
 
     /**
      * Clear all interface state.

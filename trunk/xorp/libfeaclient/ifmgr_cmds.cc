@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.5 2003/09/10 19:21:33 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.6 2003/09/30 03:07:57 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -127,14 +127,14 @@ IfMgrCommandBase::~IfMgrCommandBase()
 bool
 IfMgrIfAdd::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    IfMgrIfTree::IfMap& ifs = t.ifs();
     const string& n = ifname();
 
-    if (interfaces.find(n) != interfaces.end()) {
+    if (ifs.find(n) != ifs.end()) {
 	return true;	// Not a failure to add something that already exists
     }
     pair<IfMgrIfTree::IfMap::iterator, bool> r =
-	interfaces.insert( make_pair(n, IfMgrIfAtom(n)) );
+	ifs.insert( make_pair(n, IfMgrIfAtom(n)) );
     return r.second;
 }
 
@@ -160,12 +160,12 @@ IfMgrIfAdd::str() const
 bool
 IfMgrIfRemove::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    IfMgrIfTree::IfMap& ifs = t.ifs();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
-    if (i != interfaces.end()) {
-	interfaces.erase(i);
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i != ifs.end()) {
+	ifs.erase(i);
 	return true;
     }
     return false;
@@ -193,11 +193,11 @@ IfMgrIfRemove::str() const
 bool
 IfMgrIfSetEnabled::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    IfMgrIfTree::IfMap& ifs = t.ifs();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
-    if (i != interfaces.end()) {
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i != ifs.end()) {
 	IfMgrIfAtom& interface = i->second;
 	interface.set_enabled(en());
 	return true;
@@ -228,11 +228,11 @@ IfMgrIfSetEnabled::str() const
 bool
 IfMgrIfSetMtu::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    IfMgrIfTree::IfMap& ifs = t.ifs();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
-    if (i != interfaces.end()) {
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i != ifs.end()) {
 	IfMgrIfAtom& interface = i->second;
 	interface.set_mtu_bytes(mtu_bytes());
 	return true;
@@ -263,11 +263,11 @@ IfMgrIfSetMtu::str() const
 bool
 IfMgrIfSetMac::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    IfMgrIfTree::IfMap& ifs = t.ifs();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
-    if (i != interfaces.end()) {
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i != ifs.end()) {
 	IfMgrIfAtom& interface = i->second;
 	interface.set_mac(mac());
 	return true;
