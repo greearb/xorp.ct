@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.3 2003/06/05 09:29:24 pavlin Exp $
+# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.4 2003/06/06 08:46:36 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -101,6 +101,9 @@ the login shell is csh or tcsh):
    WHEN: 1 day before the release date
 
 17.TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
+         (NOTE: for the time being, do not do it yet, untill we have a
+         better idea about the particular purpose, if any, of
+         XORP_MODULE_VERSION).
    WHO:  Release manager
    WHEN: 1 day before the release date
 
