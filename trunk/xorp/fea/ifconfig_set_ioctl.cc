@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.14 2003/10/09 00:06:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.15 2003/10/11 19:47:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -246,7 +246,9 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     return (XORP_OK);
 
 #elif defined(SIOCSIFADDR) && defined(AF_LINK)
-    // XXX: NetBSD
+    // XXX: NetBSD and OpenBSD
+    // XXX: currently (NetBSD-1.6.1 and OpenBSD-3.3) do not support
+    // setting the MAC address, hence the code below will definitely fail.
     ifreq.ifr_addr.sa_family = AF_LINK;
     memcpy(ifreq.ifr_addr.sa_data, &ether_addr, ETHER_ADDR_LEN);
 #ifdef HAVE_SA_LEN
