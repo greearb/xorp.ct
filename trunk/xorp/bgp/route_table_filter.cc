@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.15 2003/11/05 20:25:20 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.16 2004/02/24 03:16:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,7 +28,8 @@
 template<class A>
 void
 BGPRouteFilter<A>::drop_message(const InternalMessage<A> *rtmsg,
-				bool &modified) const {
+				bool &modified) const
+{
     if (rtmsg->changed()) {
 	//It's the responsibility of the final recipient of a
 	//changed route to store it or free it.
@@ -44,7 +45,8 @@ BGPRouteFilter<A>::drop_message(const InternalMessage<A> *rtmsg,
 template<class A>
 void
 BGPRouteFilter<A>::propagate_flags(const InternalMessage<A> *rtmsg,
-				   InternalMessage<A> *new_rtmsg) const {
+				   InternalMessage<A> *new_rtmsg) const
+{
     if (rtmsg->push())
 	new_rtmsg->set_push();
     if (rtmsg->from_previous_peering())
@@ -436,9 +438,14 @@ FilterTable<A>::~FilterTable() {
 template<class A>
 int
 FilterTable<A>::add_route(const InternalMessage<A> &rtmsg, 
-			  BGPRouteTable<A> *caller) {
-    debug_msg("FilterTable<IPv%u>::add_route %x on %s\n", 
-	      A::ip_version(), (u_int)(&rtmsg), tablename().c_str());
+			  BGPRouteTable<A> *caller)
+{
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
 
     XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(_next_table != NULL);
@@ -473,9 +480,23 @@ template<class A>
 int
 FilterTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
 			      const InternalMessage<A> &new_rtmsg, 
-			      BGPRouteTable<A> *caller) {
-    debug_msg("FilterTable<A>::replace_route %x -> %x on %s\n",
-	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
+			      BGPRouteTable<A> *caller)
+{
+    debug_msg("\n         %s\n"
+	      "caller: %s\n"
+	      "old rtmsg: %p new rtmsg: %p "
+	      "old route: %p"
+	      "new route: %p"
+	      "old: %s\n new: %s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &old_rtmsg,
+	      &new_rtmsg,
+	      old_rtmsg.route(),
+	      new_rtmsg.route(),
+	      old_rtmsg.str().c_str(),
+	      new_rtmsg.str().c_str());
+
     XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(_next_table != NULL);
 
@@ -521,7 +542,8 @@ template<class A>
 int
 FilterTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
 			   BGPRouteTable<A> *caller,
-			   const PeerHandler *dump_peer) {
+			   const PeerHandler *dump_peer)
+{
     XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(_next_table != NULL);
 
@@ -543,7 +565,15 @@ FilterTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 template<class A>
 int
 FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			     BGPRouteTable<A> *caller) {
+			     BGPRouteTable<A> *caller)
+{
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
     XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(_next_table != NULL);
 
@@ -569,7 +599,8 @@ FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-FilterTable<A>::push(BGPRouteTable<A> *caller) {
+FilterTable<A>::push(BGPRouteTable<A> *caller)
+{
     XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(_next_table != NULL);
     return _next_table->push((BGPRouteTable<A>*)this);
@@ -577,7 +608,8 @@ FilterTable<A>::push(BGPRouteTable<A> *caller) {
 
 template<class A>
 const SubnetRoute<A>*
-FilterTable<A>::lookup_route(const IPNet<A> &net) const {
+FilterTable<A>::lookup_route(const IPNet<A> &net) const
+{
     //We should never get called with a route that gets modified by
     //our filters, because there's no persistent storage to return as
     //the result.  But we can get called with a route that gets
@@ -603,13 +635,15 @@ FilterTable<A>::lookup_route(const IPNet<A> &net) const {
 
 template<class A>
 void
-FilterTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use) {
+FilterTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
+{
     _parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
-FilterTable<A>::str() const {
+FilterTable<A>::str() const
+{
     string s = "FilterTable<A>" + tablename();
     return s;
 }
@@ -617,7 +651,8 @@ FilterTable<A>::str() const {
 
 template<class A>
 int
-FilterTable<A>::add_simple_AS_filter(const AsNum& as_num) {
+FilterTable<A>::add_simple_AS_filter(const AsNum& as_num)
+{
     SimpleASFilter<A>* AS_filter;
     AS_filter = new SimpleASFilter<A>(as_num);
     _filters.push_back(AS_filter);
@@ -626,7 +661,8 @@ FilterTable<A>::add_simple_AS_filter(const AsNum& as_num) {
 
 template<class A>
 int
-FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num) {
+FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num)
+{
     ASPrependFilter<A>* AS_prepender;
     AS_prepender = new ASPrependFilter<A>(as_num);
     _filters.push_back(AS_prepender);
@@ -635,7 +671,8 @@ FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num) {
 
 template<class A>
 int
-FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop) {
+FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop)
+{
     NexthopRewriteFilter<A>* nh_rewriter;
     nh_rewriter = new NexthopRewriteFilter<A>(nexthop);
     _filters.push_back(nh_rewriter);
@@ -644,7 +681,8 @@ FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop) {
 
 template<class A>
 int
-FilterTable<A>::add_ibgp_loop_filter() {
+FilterTable<A>::add_ibgp_loop_filter()
+{
     IBGPLoopFilter<A>* ibgp_filter;
     ibgp_filter = new IBGPLoopFilter<A>;
     _filters.push_back(ibgp_filter);
@@ -653,7 +691,8 @@ FilterTable<A>::add_ibgp_loop_filter() {
 
 template<class A>
 int
-FilterTable<A>::add_localpref_insertion_filter(uint32_t default_local_pref){
+FilterTable<A>::add_localpref_insertion_filter(uint32_t default_local_pref)
+{
     LocalPrefInsertionFilter<A> *localpref_filter;
     localpref_filter = new LocalPrefInsertionFilter<A>(default_local_pref);
     _filters.push_back(localpref_filter);
@@ -662,7 +701,8 @@ FilterTable<A>::add_localpref_insertion_filter(uint32_t default_local_pref){
 
 template<class A>
 int
-FilterTable<A>::add_localpref_removal_filter(){
+FilterTable<A>::add_localpref_removal_filter()
+{
     LocalPrefRemovalFilter<A> *localpref_filter;
     localpref_filter = new LocalPrefRemovalFilter<A>();
     _filters.push_back(localpref_filter);
@@ -681,7 +721,8 @@ FilterTable<A>::add_med_insertion_filter()
 
 template<class A>
 int
-FilterTable<A>::add_med_removal_filter(){
+FilterTable<A>::add_med_removal_filter()
+{
     MEDRemovalFilter<A> *med_filter;
     med_filter = new MEDRemovalFilter<A>();
     _filters.push_back(med_filter);
@@ -690,7 +731,8 @@ FilterTable<A>::add_med_removal_filter(){
 
 template<class A>
 int
-FilterTable<A>::add_unknown_filter(){
+FilterTable<A>::add_unknown_filter()
+{
     UnknownFilter<A> *unknown_filter;
     unknown_filter = new UnknownFilter<A>();
     _filters.push_back(unknown_filter);
@@ -699,7 +741,8 @@ FilterTable<A>::add_unknown_filter(){
 
 template<class A>
 const InternalMessage<A> *
-FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const {
+FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const 
+{
     const InternalMessage<A> *filtered_msg = rtmsg;
     bool modified_by_us = false;
     typename list <BGPRouteFilter<A> *>::const_iterator iter;
@@ -732,7 +775,8 @@ FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const {
 /* mechanisms to implement flow control in the output plumbing */
 template<class A>
 void 
-FilterTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
+FilterTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
+{
     XLOG_ASSERT(_next_table == next_table);
 
     _parent->output_state(busy, this);
@@ -740,7 +784,8 @@ FilterTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
 
 template<class A>
 bool 
-FilterTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
+FilterTable<A>::get_next_message(BGPRouteTable<A> *next_table)
+{
     XLOG_ASSERT(_next_table == next_table);
 
     return _parent->get_next_message(this);

@@ -12,36 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.19 2003/11/04 19:19:34 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.20 2004/02/24 03:16:56 atanu Exp $"
 
-//#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
-
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "route_table_fanout.hh"
 #include "route_table_dump.hh"
-
-template <class A>
-struct TypeName {
-    static const char* get() { return "Unknown"; }
-};
-
-template<> 
-inline const char* 
-TypeName<IPv4>::get() 
-{ 
-    return "IPv4";
-}
-
-template<> 
-inline const char*
-TypeName<IPv6>::get() 
-{
-    return "IPv6";
-}
-
 
 template<class A> 
 NextTableMap<A>::~NextTableMap()
@@ -103,7 +82,7 @@ NextTableMap<A>::erase(iterator& iter)
     typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
     BGPRouteTable<A>* t = iter.first();
     i = _next_tables.find(t);
-    assert(i != _next_tables.end());
+    XLOG_ASSERT(i != _next_tables.end());
     delete i->second;
     _next_tables.erase(i);
 #endif
@@ -169,8 +148,8 @@ int
 FanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
 			       const PeerHandler *ph) 
 {
-    debug_msg("FanoutTable<%s>::add_next_table %x %s\n",
-	      TypeName<A>::get(),
+    debug_msg("FanoutTable<IPv%u:%s>::add_next_table %x %s\n",
+	      A::ip_version(), pretty_string_safi(safi()),
 	      (u_int)new_next_table, new_next_table->tablename().c_str());
 
     if (_next_tables.find(new_next_table) != _next_tables.end()) {
@@ -208,11 +187,14 @@ int
 FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s\n", _tablename.c_str());
-    debug_msg("FanoutTable::add_route %x\n",
-	      (u_int)(&rtmsg));
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
 
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -223,12 +205,12 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	const PeerHandler *next_peer = i.second().peer_handler();
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
-	    debug_msg("FanoutTable<%s>::add_route %x.\n  Don't send back to %s\n",
-		      TypeName<A>::get(),
+	    debug_msg("FanoutTable<IPv%u%s>::add_route %x.\n  Don't send back to %s\n",
+		      A::ip_version(), pretty_string_safi(safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	} else {
-	    debug_msg("FanoutTable<%s>::add_route %x to %s\n",
-		      TypeName<A>::get(),
+	    debug_msg("FanoutTable<IPv%u%s>::add_route %x to %s\n",
+		      A::ip_version(), pretty_string_safi(safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 
 	    if (i.second().busy()) {
@@ -261,14 +243,25 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 			      const InternalMessage<A> &new_rtmsg,
 			      BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s\n", _tablename.c_str());
-    debug_msg("FanoutTable::replace_route %x -> %x\n",
-	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
+    debug_msg("\n         %s\n"
+	      "caller: %s\n"
+	      "old rtmsg: %p new rtmsg: %p "
+	      "old route: %p"
+	      "new route: %p"
+	      "old: %s\n new: %s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &old_rtmsg,
+	      &new_rtmsg,
+	      old_rtmsg.route(),
+	      new_rtmsg.route(),
+	      old_rtmsg.str().c_str(),
+	      new_rtmsg.str().c_str());
 
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
 
     const PeerHandler *origin_peer = old_rtmsg.origin_peer();
-    assert(origin_peer == new_rtmsg.origin_peer());
+    XLOG_ASSERT(origin_peer == new_rtmsg.origin_peer());
 
     int result = ADD_USED, r;
     list <PeerRoutePair<A>*> queued_peers;
@@ -278,8 +271,8 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
 	} else {
-	    debug_msg("FanoutTable<%s>::replace_route %x -> %x to %s\n",
-		      TypeName<A>::get(),
+	    debug_msg("FanoutTable<IPv%u:%s>::replace_route %x -> %x to %s\n",
+		      A::ip_version(), pretty_string_safi(safi()),
 		      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg),
 		      (i.first())->tablename().c_str());
 
@@ -310,7 +303,14 @@ int
 FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller) 
 {
-    assert(caller == _parent);
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+    
+    XLOG_ASSERT(caller == _parent);
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -319,12 +319,12 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
 	const PeerHandler *next_peer = i.second().peer_handler();
 	if (origin_peer == next_peer) {
-	    debug_msg("FanoutTable<%s>::delete_route %x.\n  Don't send back to %s\n",
-		      TypeName<A>::get(),
+	    debug_msg("FanoutTable<IPv%u:%s>::delete_route %x.\n  Don't send back to %s\n",
+		      A::ip_version(), pretty_string_safi(safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	} else {
-	    debug_msg("FanoutTable<%s>::delete_route %x to %s\n",
-		      TypeName<A>::get(),
+	    debug_msg("FanoutTable<IPv%u:%s>::delete_route %x to %s\n",
+		      A::ip_version(), pretty_string_safi(safi()),
 		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	    if (i.second().busy()) {
 		queued_peers.push_back(&(i.second()));
@@ -344,7 +344,7 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer) 
 {
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
     BGPRouteTable<A> *dump_child;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -353,7 +353,7 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	    break;
 	}
     }
-    assert(i.second().busy());
+    XLOG_ASSERT(i.second().busy());
 
     int result;
     result = dump_child->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
@@ -367,7 +367,7 @@ int
 FanoutTable<A>::push(BGPRouteTable<A> *caller) 
 {
     debug_msg("Push\n");
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
     list <PeerRoutePair<A>*> queued_peers;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -417,16 +417,17 @@ FanoutTable<A>::remove_dump_table(DumpTable<A> *dump_table)
 {
     typename set <DumpTable<A>*>::iterator i;
     i = _dump_tables.find(dump_table);
-    assert(i != _dump_tables.end());
+    XLOG_ASSERT(i != _dump_tables.end());
     _dump_tables.erase(i);
 }
 
 template<class A>
 int
 FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
-				  Safi safi)
+				  Safi safi,
+				  string ribname)
 {
-    assert(child_to_dump_to->type() != DUMP_TABLE);
+    XLOG_ASSERT(child_to_dump_to->type() != DUMP_TABLE);
 
     typename NextTableMap<A>::iterator i;
     PeerRoutePair<A> *peer_info = NULL;
@@ -440,7 +441,8 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
     XLOG_ASSERT(peer_info != NULL);
     const PeerHandler *peer_handler = peer_info->peer_handler();
 
-    string tablename = string("DumpTable") + TypeName<A>::get();
+    string tablename = string(ribname + "DumpTable" +
+			      peer_handler->peername());
     DumpTable<A>* dump_table =
 	new DumpTable<A>(tablename, peer_handler, peer_list,
 			 (BGPRouteTable<A>*)this, safi);
@@ -556,6 +558,9 @@ template<class A>
 void
 FanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
 {
+    debug_msg("%s \n next table: %s\n", tablename().c_str(),
+	      next_table->tablename().c_str());
+
     typename NextTableMap<A>::iterator i;
     i = _next_tables.find(next_table);
     XLOG_ASSERT(i != _next_tables.end());
@@ -566,8 +571,8 @@ FanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 	debug_msg("Fanout: Peer output state is BUSY\n");
     else {
 	// downstream must drain the queue using get_next_message or
-	// skip_entire_queue before we reset to output state to NOT BUSY
-	assert(peer_info->has_queued_data() == false);
+	// skip_entire_queue before we reset the output state to NOT BUSY
+	XLOG_ASSERT(peer_info->has_queued_data() == false);
 	debug_msg("Fanout: Peer output state is not busy\n");
     }
     peer_info->set_busy(busy);
@@ -621,7 +626,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	if (queue_ptr == _output_queue.begin())
 	    discard_possible = true;
 	queue_ptr++;
-	assert(queue_ptr != _output_queue.end());
+	XLOG_ASSERT(queue_ptr != _output_queue.end());
 	InternalMessage<A> new_rtmsg((*queue_ptr)->route(),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
@@ -719,10 +724,8 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	}
     }
 
-
     return peer_info->has_queued_data();
 }
-
 
 template<class A>
 void

@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.15 2003/10/31 02:57:21 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.16 2004/02/24 03:16:55 atanu Exp $"
 
-//#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -33,21 +33,26 @@ CacheTable<A>::CacheTable(string table_name,
 
 template<class A>
 void
-CacheTable<A>::flush_cache() {
-    debug_msg("CacheTable<A>::flush_cache on %s\n",
-	      tablename().c_str());
+CacheTable<A>::flush_cache()
+{
+    debug_msg("%s\n", tablename().c_str());
     _route_table.delete_all_nodes();
 }
 
 template<class A>
 int
-CacheTable<A>::add_route(const InternalMessage<A> &rtmsg, 
-			 BGPRouteTable<A> *caller) {
-    debug_msg("CacheTable<A>::add_route %x on %s\n",
-	   (u_int)(&rtmsg), tablename().c_str());
-    debug_msg("add route: %s\n", rtmsg.net().str().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			 BGPRouteTable<A> *caller)
+{
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     //a cache table is never going to be the last table
     IPNet<A> net = rtmsg.net();
@@ -67,9 +72,9 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//store it locally
 	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(msg_route->net(), *msg_route);
-	debug_msg("Caching route: %x net: %s atts: %x  %s\n", (uint)msg_route,
+	debug_msg("Caching route: %p net: %s atts: %p  %s\n", msg_route,
 	       msg_route->net().str().c_str(), 
-	       (uint)(msg_route->attributes()), 
+	       (msg_route->attributes()), 
 	       msg_route->str().c_str());
 
 	//progogate downstream
@@ -110,20 +115,32 @@ template<class A>
 int
 CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
 			     const InternalMessage<A> &new_rtmsg, 
-			     BGPRouteTable<A> *caller) {
-    debug_msg("CacheTable<A>::replace_route %x -> %x on %s\n",
-	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
-    debug_msg("replace route: %s\n", old_rtmsg.net().str().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+			     BGPRouteTable<A> *caller)
+{
+    debug_msg("\n         %s\n"
+	      "caller: %s\n"
+	      "old rtmsg: %p new rtmsg: %p "
+	      "old route: %p"
+	      "new route: %p"
+	      "old: %s\n new: %s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &old_rtmsg,
+	      &new_rtmsg,
+	      old_rtmsg.route(),
+	      new_rtmsg.route(),
+	      old_rtmsg.str().c_str(),
+	      new_rtmsg.str().c_str());
+
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     IPNet<A> net = old_rtmsg.net();
-    assert(net == new_rtmsg.net());
+    XLOG_ASSERT(net == new_rtmsg.net());
 
     SubnetRouteConstRef<A> *old_route_reference = NULL;
     const InternalMessage<A> *old_rtmsg_ptr = &old_rtmsg;
     int result = ADD_USED;
-
 
     //do we have the old route cached?
     if (old_rtmsg.changed()==true) {
@@ -207,13 +224,18 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 template<class A>
 int
 CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			    BGPRouteTable<A> *caller) {
+			    BGPRouteTable<A> *caller)
+{
 
-    debug_msg("table %s route = %s\n", _tablename.c_str(),
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
     IPNet<A> net = rtmsg.net();
 
     //do we already have this cached?

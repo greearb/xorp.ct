@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.38 2004/02/12 19:34:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.39 2004/02/24 03:16:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -36,9 +36,9 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
       _safi(safi),
-      _plumbing_ipv4("(IPv4:" + c_format("%d", safi) + ")", *this,
+      _plumbing_ipv4("[IPv4:" + string(pretty_string_safi(safi)) + "]", *this,
 		     _next_hop_resolver_ipv4),
-      _plumbing_ipv6("(IPv6:" + c_format("%d", safi)+ ")", *this, 
+      _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
 		     _next_hop_resolver_ipv6),
       _my_AS_number(AsNum::AS_INVALID)
 {
@@ -481,7 +481,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     /* TBD */
     
     /* 10. cause the routing table to be dumped to the new peer */
-    dump_entire_table(filter_out);
+    dump_entire_table(filter_out, _ribname);
     if(_awaits_push)
 	push(peer_handler);
 
@@ -500,8 +500,9 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
-	XLOG_FATAL("BGPPlumbingAF<IPv%u>::stop_peering: peer %#x not found",
-		A::ip_version(), (u_int)peer_handler);
+	XLOG_FATAL("BGPPlumbingAF<IPv%u,%s>::stop_peering: peer %#x not found",
+		   A::ip_version(),  pretty_string_safi(_master.safi()),
+		   (u_int)peer_handler);
     rt = iter->second;
     prevrt = rt;
     while (rt != _fanout_table) {
@@ -589,7 +590,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     rib_in = iter2->second;
     rib_in->ribin_peering_came_up();
 
-    dump_entire_table(filter_out);
+    dump_entire_table(filter_out, _ribname);
 
     if(_awaits_push)
 	push(peer_handler);
@@ -671,11 +672,12 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler)
 
 template <class A>
 void
-BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out)
+BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out, string ribname)
 {
-    debug_msg("BGPPlumbingAF<IPv%u>::dump_entire_table\n", A::ip_version());
+    debug_msg("BGPPlumbingAF<IPv%u:%s>::dump_entire_table\n",
+	      A::ip_version(), pretty_string_safi(_master.safi()));
 
-    _fanout_table->dump_entire_table(filter_out, _master.safi());
+    _fanout_table->dump_entire_table(filter_out, _master.safi(), ribname);
 
     DumpTable<A> *dump_table =
 	dynamic_cast<DumpTable<A> *>(filter_out->parent());
@@ -710,16 +712,18 @@ int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<IPv%u>::add_route\n", A::ip_version());
+    debug_msg("BGPPlumbingAF<IPv%u:%s>::add_route\n", A::ip_version(),
+	      pretty_string_safi(_master.safi()));
 
     int result = 0;
     RibInTable<A> *rib_in;
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
-	XLOG_FATAL("BGPPlumbingAF<IPv%u>: "
+	XLOG_FATAL("BGPPlumbingAF<IPv%u:%s>: "
 		   "add_route called for a PeerHandler "
-		   "that has no associated RibIn", A::ip_version());
+		   "that has no associated RibIn", A::ip_version(),
+		   pretty_string_safi(_master.safi()));
 
     rib_in = iter->second;
 

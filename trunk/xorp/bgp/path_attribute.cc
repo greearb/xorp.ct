@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.47 2004/02/19 04:22:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.48 2004/02/19 04:46:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1490,7 +1490,7 @@ PathAttributeList<A>::str() const
 {
     string s;
     for (const_iterator i = begin(); i != end() ; ++i)
-	s += (*i)->str() + "\n";
+	s += "\n\t" + (*i)->str();
     return s;
 }
 

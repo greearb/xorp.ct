@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.18 2003/11/05 20:25:20 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.19 2004/02/24 03:16:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -98,7 +98,11 @@ int
 RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			 BGPRouteTable<A> *caller)
 {
-    debug_msg("RibInTable<IPv%u>::add_route\n", A::ip_version());
+    debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
 
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;
@@ -179,6 +183,12 @@ int
 RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller)
 {
+    debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
     XLOG_ASSERT(caller == NULL);
     XLOG_ASSERT(rtmsg.origin_peer() == _peer);
     XLOG_ASSERT(_peer_is_up);

@@ -12,32 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.13 2003/10/23 03:10:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.14 2004/02/24 03:16:57 atanu Exp $"
 
-//#define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "route_table_ribout.hh"
 #include "peer_handler.hh"
-
-template <class A>
-struct TypeName {
-    static const char* get() { return "Unknown"; }
-};
-
-template<> 
-inline const char* 
-TypeName<IPv4>::get() 
-{
-    return "IPv4";
-}
-
-template<> 
-inline const char* 
-TypeName<IPv6>::get()
-{
-    return "IPv6";
-}
 
 template<class A>
 RibOutTable<A>::RibOutTable(string table_name,
@@ -105,11 +86,15 @@ int
 RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller) 
 {
-    debug_msg("RibOutTable<%s>::add_route %x for %s ", TypeName<A>::get(),
-	      (u_int)(&rtmsg), rtmsg.net().str().c_str());
-    debug_msg("on %s\n", _tablename.c_str());
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+    
     print_queue(_queue);
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
 
     // check the queue to see if there's a matching delete - if so we
     // can replace the delete with an add.
@@ -148,7 +133,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	// replace must be updated.
 	i++;
 	queued_entry = *i;
-	assert(queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
+	XLOG_ASSERT(queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
 	entry = new RouteQueueEntry<A>(rtmsg.route(), 
 				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
@@ -174,9 +159,9 @@ RibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 			      const InternalMessage<A> &new_rtmsg,
 			      BGPRouteTable<A> *caller) 
 {
-    debug_msg("RibOutTable<%s>::replace_route %x %x\n", TypeName<A>::get(),
+    debug_msg("%s::replace_route %x %x\n", tablename().c_str(),
 	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
-    assert(old_rtmsg.push() == false);
+    XLOG_ASSERT(old_rtmsg.push() == false);
 
     delete_route(old_rtmsg, caller);
     return add_route(new_rtmsg, caller);
@@ -187,12 +172,15 @@ int
 RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s\n", _tablename.c_str());
-    debug_msg("RibOutTable<%s>::delete_route %x\n", TypeName<A>::get(),
-	      (u_int)(rtmsg.route()));
-    debug_msg("Attribute: %x\n", (u_int)(rtmsg.route()->attributes()));
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      tablename().c_str(),
+	      caller->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
     print_queue(_queue);
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
 
     // check the queue to see if there's a matching entry.
 
@@ -229,7 +217,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	typename list<const RouteQueueEntry<A>*>::iterator i2 = i;
 	i++;
 	_queue.erase(i2);
-	assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
+	XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 	_queue.erase(i);
 	delete *i;
 
@@ -250,9 +238,9 @@ template<class A>
 int
 RibOutTable<A>::push(BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s\n", _tablename.c_str());
-    debug_msg("RibOutTable<%s>::push\n", TypeName<A>::get());
-    assert(caller == _parent);
+    debug_msg("%s\n", tablename().c_str());
+    XLOG_ASSERT(caller == _parent);
+
     // In push, we need to collect together all the SubnetRoutes that
     // have the same Path Attributes, and send them together in an
     // Update message.  We repeatedly do this until the queue is empty.
@@ -277,7 +265,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		// attributes on the new one of the pair.
 		Iter i2 = i;
 		i2++;
-		assert((*i2)->op() == RTQUEUE_OP_REPLACE_NEW);
+		XLOG_ASSERT((*i2)->op() == RTQUEUE_OP_REPLACE_NEW);
 		if (attributes == NULL)
 		    attributes = (*i2)->attributes();
 		if ((*i2)->attributes() == attributes) {
@@ -288,7 +276,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		    ctr++;
 		} else {
 		    ++i;
-		    assert(i != _queue.end());
+		    XLOG_ASSERT(i != _queue.end());
 		    ++i;
 		}
 	    } else {
@@ -311,7 +299,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	// session object for output
 	debug_msg("************************************\n");
 	debug_msg("* Outputting route to BGP peer\n");
-	debug_msg("* Attributes: \n%s", attributes->str().c_str());
+	debug_msg("* Attributes: %s\n", attributes->str().c_str());
 	i = tmp_queue.begin();
 	bool ibgp = (*i)->origin_peer()->ibgp();
 	_peer->start_packet(ibgp);
@@ -332,8 +320,8 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		const SubnetRoute<A> *old_route = (*i)->route();
 		const RouteQueueEntry<A> *old_queue_entry = (*i);
 		i++;
-		assert(i != tmp_queue.end());
-		assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
+		XLOG_ASSERT(i != tmp_queue.end());
+		XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 		const SubnetRoute<A> *new_route = (*i)->route();
 		_peer->replace_route(*old_route, *new_route, safi());
 		delete old_queue_entry;
@@ -375,9 +363,9 @@ template<class A>
 void
 RibOutTable<A>::output_no_longer_busy() 
 {
-    debug_msg("RibOut: output_no_longer_busy\n");
+    debug_msg("%s: output_no_longer_busy\n", tablename().c_str());
     if (_peer_busy == false) return;
-    debug_msg("RibOut: _peer_busy true->false\n");
+    debug_msg("%s: _peer_busy true->false\n", tablename().c_str());
 
     _peer_busy = false;
     while (1) {

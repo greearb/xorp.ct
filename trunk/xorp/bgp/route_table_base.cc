@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.2 2003/03/10 23:20:03 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.3 2004/02/24 03:16:55 atanu Exp $"
+
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/debug.h"
@@ -21,20 +24,12 @@
 
 #define DEBUG_ROUTE_TABLE
 
-template <class A>
-struct TypeName {
-    static const char* get() { return "Unknown"; }
-};
-template<> const char* TypeName<IPv4>::get() { return "IPv4"; }
-template<> const char* TypeName<IPv6>::get() { return "IPv6"; }
-
 template<class A>
-BGPRouteTable<A>::BGPRouteTable(string table_name, Safi safi) :
-    _tablename(table_name), _safi(safi)
+BGPRouteTable<A>::BGPRouteTable(string tablename, Safi safi)
+    : _tablename(tablename), _safi(safi)
 {
     _next_table = NULL;
-    debug_msg("Creating table %s for %s\n", _tablename.c_str(), 
-	      TypeName<A>::get());
+    debug_msg("Creating table %s\n", _tablename.c_str());
 }
 
 template<class A>
@@ -43,7 +38,8 @@ BGPRouteTable<A>::~BGPRouteTable()
 
 template<class A>
 bool
-BGPRouteTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
+BGPRouteTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
+{
     XLOG_ASSERT(_parent != NULL);
     return _parent->dump_next_route(dump_iter);
 }
@@ -52,14 +48,16 @@ template<class A>
 int
 BGPRouteTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
 			     BGPRouteTable<A> */*caller*/,
-			     const PeerHandler *peer) {
+			     const PeerHandler *peer)
+{
     XLOG_ASSERT(_next_table != NULL);
     return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, peer);
 }
 
 template<class A>
 void
-BGPRouteTable<A>::igp_nexthop_changed(const A& bgp_nexthop) {
+BGPRouteTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
+{
     XLOG_ASSERT(_parent != NULL);
     return _parent->igp_nexthop_changed(bgp_nexthop);
 }
@@ -67,7 +65,10 @@ BGPRouteTable<A>::igp_nexthop_changed(const A& bgp_nexthop) {
 template<class A>
 void
 BGPRouteTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				    BGPRouteTable<A> *caller) {
+				    BGPRouteTable<A> *caller)
+{
+    debug_msg("%s\n", _tablename.c_str());
+
     XLOG_ASSERT(_parent == caller);
     XLOG_ASSERT(_next_table != NULL);
     _next_table->peering_went_down(peer, genid, this);
@@ -85,10 +86,3 @@ BGPRouteTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template class BGPRouteTable<IPv4>;
 template class BGPRouteTable<IPv6>;
-
-
-
-
-
-
-

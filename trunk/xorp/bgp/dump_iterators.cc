@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.5 2003/05/23 00:02:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.6 2004/02/12 07:00:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -215,7 +215,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
        dump process.  true indicates that the change should be
        propagated downstream; false indicates it shouldn't because the
        dump will get to this eventually */
-    debug_msg("DumpIterator<A>::route_change_is_valid, peer:%p, pa:%s\n, gi:%d, op:%d\n",
+    debug_msg("DumpIterator<A>::route_change_is_valid, peer:%p, pa:%s , gi:%d, op:%d\n",
 	   origin_peer, net.str().c_str(), genid, op);
     switch (op) {
     case RTQUEUE_OP_DELETE:

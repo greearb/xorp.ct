@@ -12,12 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.7 2003/03/10 23:20:06 hodson Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.8 2003/05/23 00:02:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "subnet_route.hh"
-
 
 template<class A> AttributeManager<A> SubnetRoute<A>::_att_mgr;
 
@@ -216,7 +215,7 @@ SubnetRoute<A>::str() const {
     string s;
     s = "SubnetRoute:\n";
     s += "  Net: " + _net.str() + "\n";
-    s += "  PAList: " + _attributes->str() + "\n";
+    s += "  PAList: " + _attributes->str();
 #ifdef DEBUG_FLAGS
     if (is_winner()) {
 	s += "  route is winner";
