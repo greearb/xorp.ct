@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.6 2004/03/18 23:59:55 hodson Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.7 2004/03/21 03:14:08 hodson Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -497,6 +497,17 @@ extern int	comm_set_reuseport(int sock, int val);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_set_loopback(int sock, int val);
+
+/**
+ * Set/reset the TCP_MD5SIG option on a socket.
+ *
+ * XXX: if the OS doesn't support this option, XORP_ERROR is returned.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_tcpmd5(int sock, int val);
 
 /**
  * Set the TTL of the outgoing multicast packets on a socket.

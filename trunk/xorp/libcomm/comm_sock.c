@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.6 2004/03/18 23:59:56 hodson Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.7 2004/03/21 03:14:08 hodson Exp $"
 
 
 /*
@@ -746,6 +746,33 @@ comm_set_loopback(int sock, int val)
     }
 
     return (XORP_OK);
+}
+
+/**
+ * comm_set_tcpmd5:
+ * @sock: The socket whose option we want to set/reset.
+ * @val: If non-zero, the option will be set, otherwise will be reset.
+ *
+ * Set/reset the %TCP_MD5SIG option on a TCP socket.
+ * XXX: if the OS doesn't support this option, %XORP_ERROR is returned.
+ *
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+comm_set_tcpmd5(int sock, int val)
+{
+#ifdef TCP_MD5SIG /* XXX: Defined in tcp.h across Free/Net/OpenBSD */
+    if (setsockopt(sock, IPPROTO_TCP, TCP_MD5SIG, (void *)&val, sizeof(val))
+	< 0) {
+	XLOG_ERROR("Error %s TCP_MD5SIG on socket %d: %s",
+		   (val)? "set": "reset",  sock, strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+#else
+    return (XORP_ERROR);
+#endif
 }
 
 /**
