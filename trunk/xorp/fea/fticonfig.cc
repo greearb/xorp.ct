@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.28 2004/10/25 23:27:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.29 2004/10/26 23:58:29 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -36,11 +36,12 @@
 //
 
 
-FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
+FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
 		     NexthopPortMapper& nexthop_port_mapper)
     : _eventloop(eventloop),
       _profile(profile),
       _nexthop_port_mapper(nexthop_port_mapper),
+      _iftree(iftree),
       _ftic_entry_get_dummy(*this),
       _ftic_entry_get_rtsock(*this),
       _ftic_entry_get_netlink(*this),

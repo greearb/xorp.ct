@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.12 2004/10/02 19:49:50 atanu Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.13 2004/10/25 23:27:56 pavlin Exp $"
 
 
 //
@@ -152,14 +152,6 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     NexthopPortMapper nexthop_port_mapper;
 
     //
-    // FtiConfig
-    //
-    FtiConfig fticonfig(eventloop, profile, nexthop_port_mapper);
-    if (is_dummy)
-	fticonfig.set_dummy();
-    fticonfig.start();
-
-    //
     // Interface Configurator and reporters
     //
     XrlIfConfigUpdateReporter xrl_ifc_reporter(xrl_std_router_fea);
@@ -187,6 +179,14 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     //
     const IfTree& iftree = ifm.iftree();
     lfc_bridge.set_iftree(&iftree);
+
+    //
+    // FtiConfig
+    //
+    FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
+    if (is_dummy)
+	fticonfig.set_dummy();
+    fticonfig.start();
 
     //
     // Raw Socket TODO
