@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.52 2004/06/11 06:30:40 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.53 2004/06/12 00:37:05 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2647,15 +2647,13 @@ RouterCLI::op_mode_cmd_print(const string& result)
 void
 RouterCLI::op_mode_cmd_done(bool success, const string& error_msg)
 {
-    if (success) {
-	reenable_ui();
-    } else {
+    if (! success) {
 	_cli_client.cli_print("ERROR:\n");
 	if (!error_msg.empty())
 	    _cli_client.cli_print(error_msg + "\n");
-	silent_reenable_ui();
     }
     op_mode_cmd_tidy();
+    reenable_ui();
 }
 
 void
