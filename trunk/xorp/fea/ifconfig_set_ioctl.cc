@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.9 2003/09/27 06:17:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.10 2003/09/30 03:07:56 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -153,17 +153,25 @@ public:
 
 	memcpy(&ifreq_copy, &_ifreq, sizeof(ifreq_copy));
 
-#ifdef AF_LINK
-	// XXX: the *BSD folks
+#if defined(SIOCSIFLLADDR)
+	// XXX: FreeBSD
 	ifreq_copy.ifr_addr.sa_family = AF_LINK;
 	memcpy(ifreq_copy.ifr_addr.sa_data, &_ether_addr, ETHER_ADDR_LEN);
 #ifdef HAVE_SA_LEN
 	ifreq_copy.ifr_addr.sa_len = ETHER_ADDR_LEN;
 #endif
 	return ioctl(fd(), SIOCSIFLLADDR, &ifreq_copy);
-#endif // AF_LINK
 
-#ifdef SIOCSIFHWADDR
+#elif defined(SIOCSIFADDR) && defined(AF_LINK)
+	// XXX: NetBSD
+	ifreq_copy.ifr_addr.sa_family = AF_LINK;
+	memcpy(ifreq_copy.ifr_addr.sa_data, &_ether_addr, ETHER_ADDR_LEN);
+#ifdef HAVE_SA_LEN
+	ifreq_copy.ifr_addr.sa_len = ETHER_ADDR_LEN;
+#endif
+	return ioctl(fd(), SIOCSIFADDR, &ifreq_copy);
+
+#elif defined(SIOCSIFHWADDR)
 	// XXX: Linux
 	ifreq_copy.ifr_hwaddr.sa_family = ARPHRD_ETHER;
 	memcpy(ifreq_copy.ifr_hwaddr.sa_data, &_ether_addr, ETH_ALEN);
@@ -171,7 +179,10 @@ public:
 	ifreq_copy.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
 	return ioctl(fd(), SIOCSIFHWADDR, &ifreq_copy);
-#endif // SIOCSIFHWADDR
+
+#else
+#error No mechanism to set the MAC address on an interface
+#endif
     }
 
 private:
