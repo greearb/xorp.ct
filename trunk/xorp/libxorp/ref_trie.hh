@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.2 2003/01/21 03:52:32 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.3 2003/01/21 19:27:29 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -440,23 +440,7 @@ public:
     RefTrieIterator operator ++(int)		{ // postfix
 	//printf("postfix iterator: node was %p\n", _cur);
 	RefTrieIterator x = *this;
-	Node *oldnode = _cur;
-	_cur = _cur->next(_root);
-	if (_cur)
-	    _cur->incr_refcount();
-
-	//cleanup if this reduces the reference count on a deleted
-	//node to zero
-	if (oldnode) {
-	    oldnode->decr_refcount();
-	    if (oldnode->deleted() && oldnode->references()==0) {
-		//XXX uglyness alert.
-		//printf("erasing node %p from postfix increment\n", oldnode);
-		const_cast<RefTrie<A, Payload>*>(_trie)->
-		    set_root(oldnode->erase());
-	    }
-	}
-	//printf("postfix done, node now %p\n", _cur);
+	next();
 	return x;
     }
 
@@ -467,6 +451,12 @@ public:
      * @return position of iterator after increment.
      */
     RefTrieIterator& operator ++()		{ // prefix
+	next();
+	return *this;
+    }
+
+    void next() const
+    {
 	//printf("prefix iterator\n");
 	Node *oldnode = _cur;
 	_cur = _cur->next(_root);
@@ -484,15 +474,52 @@ public:
 		    set_root(oldnode->erase());
 	    }
 	}
-	return *this;
     }
 
-    Node *cur() const			{ return _cur;		};
+    inline void force_valid() const 
+    {
+	if (_cur && _cur->deleted())
+	    next();
+    }
 
-    bool operator==(const RefTrieIterator & x) const { return (_cur == x._cur); }
+    inline Node *cur() const { return _cur; }
 
-    Payload & payload()  		          { return _cur->p(); };
-    const Key & key()  		          { return _cur->k(); };
+    bool operator==(const RefTrieIterator & x) const 
+    { 
+	force_valid();
+	x.force_valid();
+	return (_cur == x._cur); 
+    }
+
+    bool operator!=(const RefTrieIterator & x) const 
+    { 
+	force_valid();
+	x.force_valid();
+	return (_cur != x._cur); 
+    }
+
+    Payload & payload() { 
+	/* Usage note: the node the iterator points at can be deleted.
+	   If there is any possibility that the node might have been
+	   deleted since the iterator was last examined, the user
+	   should compare this iterator with end() to force the
+	   iterator to move to the next undeleted node or move to
+	   end() if there is no undeleted node after the node that was
+	   deleted.  */
+	/* Implementation node: We could have put a call to force_valid
+           here, but the force_valid can move the iterator to the end
+           of the trie, which would cause _cur to become NULL.  Then
+           we'd have to assert here anyway.  Doing it this way makes
+           it more likely that a failure to check will be noticed
+           early */
+	assert(!_cur->deleted());
+	return _cur->p(); 
+    };
+    const Key & key() { 
+	/* see payload() for usage note*/
+	assert(!_cur->deleted());
+	return _cur->k(); 
+    };
 
     RefTrieIterator& operator=(const RefTrieIterator& x) 
     {
@@ -519,8 +546,11 @@ public:
 	return *this;
     }
 private:
-    Node	*_cur;
-    Key		_root;
+    mutable Node *_cur; /*this is mutable because const methods can
+			  cause the iterator to move from a deleted
+			  node to the first non-deleted node or
+			  end. */
+    Key _root;
     const RefTrie<A, Payload>* _trie;
 };
 
