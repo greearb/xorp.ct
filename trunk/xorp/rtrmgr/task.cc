@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.1 2003/05/01 07:55:28 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.2 2003/05/02 04:08:25 mjh Exp $"
 
 #include "task.hh"
 #include "module_manager.hh"
@@ -71,9 +71,9 @@ TaskXrlItem::execute_done(const XrlError& err,
 
 
 
-Task::Task(const string& name, XorpClient& xclient, bool do_exec) 
-    : _name(name), _xclient(xclient), _do_exec(do_exec),
-      _start_module(false), _stop_module(false), _mmgr(NULL)
+Task::Task(const string& name, TaskManager& taskmgr) 
+    : _name(name), _taskmgr(taskmgr),
+      _start_module(false), _stop_module(false)
 {
 }
 
@@ -84,26 +84,24 @@ Task::~Task()
 }
 
 void 
-Task::add_start_module(ModuleManager& mmgr, const string& modname,
+Task::add_start_module(const string& modname,
 		       Validation *validation)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
     _start_module = true;
     _modname = modname;
-    _mmgr = &mmgr;
     _validation = validation;
 }
 
 void 
-Task::add_stop_module(ModuleManager& mmgr, const string& modname,
+Task::add_stop_module(const string& modname,
 		      Validation *validation)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
     _start_module = true;
     _modname = modname;
-    _mmgr = &mmgr;
     _validation = validation;
 }
 
@@ -124,8 +122,9 @@ void
 Task::step1() 
 {
     if (_start_module) {
-	_mmgr->start_module(_modname, _do_exec, 
-			    callback(this, &Task::step1_done));
+	_taskmgr.module_manager()
+	    .start_module(_modname, do_exec(), 
+			   callback(this, &Task::step1_done));
     } else {
 	step2();
     }
@@ -188,7 +187,8 @@ void
 Task::step4()
 {
     if (_stop_module) {
-	_mmgr->stop_module(_modname, callback(this, &Task::step4_done));
+	_taskmgr.module_manager()
+	    .stop_module(_modname, callback(this, &Task::step4_done));
     } else {
 	step5();
     }
@@ -231,10 +231,21 @@ Task::task_fail(string errmsg)
     _task_complete_cb->dispatch(false, errmsg);
 }
 
+bool 
+Task::do_exec() const 
+{
+    return _taskmgr.do_exec();
+}
 
+XorpClient& 
+Task::xorp_client() const 
+{
+    return _taskmgr.xorp_client();
+}
 
-TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient)
-    : _mmgr(mmgr), _xorp_client(xclient)
+TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient, 
+			 bool do_exec)
+    : _mmgr(mmgr), _xorp_client(xclient), _do_exec(do_exec)
 {
 }
 

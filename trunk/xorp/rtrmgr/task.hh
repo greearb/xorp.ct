@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.1 2003/05/01 07:55:28 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.2 2003/05/02 04:08:25 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -25,6 +25,7 @@
 #include "xorp_client.hh"
 
 class Task;
+class TaskManager;
 
 class Validation {
 public:
@@ -56,17 +57,17 @@ class Task {
 public:
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
-    Task(const string& name, XorpClient& xorp_client, bool do_exec);
+    Task(const string& name, TaskManager& taskmgr);
     ~Task();
-    void add_start_module(ModuleManager& mmgr, const string& mod_name,
+    void add_start_module(const string& mod_name,
 			  Validation* validation);
-    void add_stop_module(ModuleManager& mmgr, const string& mod_name,
+    void add_stop_module(const string& mod_name,
 			 Validation* validation);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
     void run(CallBack cb);
     void xrl_done(bool success, string errmsg); 
-    bool do_exec() const {return _do_exec;}
-    XorpClient& xorp_client() const {return _xclient;}
+    bool do_exec() const;
+    XorpClient& xorp_client() const;
 protected:
     void step1();
     void step1_done(bool success);
@@ -87,29 +88,32 @@ protected:
     void task_fail(string errmsg);
 private:
     string _name; //the name of the task
-    XorpClient& _xclient;
-    bool _do_exec;
+    TaskManager& _taskmgr;
     string _modname; //the name of the module to start and stop
     bool _start_module;
     bool _stop_module;
     Validation* _validation; // the validation mechanism for the module 
                              // start or module stop
     list <TaskXrlItem> _xrls;
-    ModuleManager* _mmgr;
     CallBack _task_complete_cb; //the task completion callback
 };
 
 class TaskManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient);
+    TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient,
+			     bool do_exec);
     void run(CallBack cb);
+    XorpClient& xorp_client() const {return _xorp_client;}
+    ModuleManager& module_manager() const {return _mmgr;}
+    bool do_exec() const {return _do_exec;}
 private:
     void run_task();
     void task_done(bool success, string errmsg);
 
     ModuleManager& _mmgr;
     XorpClient& _xorp_client;
+    bool _do_exec;
     map <string, Task> _tasks;
     CallBack _completion_cb;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.12 2003/04/24 20:45:06 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.13 2003/04/25 19:14:04 mjh Exp $"
 
 #include <signal.h>
 
@@ -30,6 +30,7 @@
 #include "template_tree.hh"
 #include "master_conf_tree.hh"
 #include "module_manager.hh"
+#include "task.hh"
 #include "userdb.hh"
 #include "xrl_rtrmgr_interface.hh"
 #include "randomness.hh"
@@ -156,6 +157,9 @@ main(int argc, char* const argv[])
 	//initialize the IPC mechanism
 	XrlStdRouter xrlrouter(eventloop, "rtrmgr");
 	XorpClient xclient(eventloop, xrlrouter);
+
+	//initialize the Task Manager
+	TaskManager taskmgr(mmgr, xclient, do_exec);
 
 	//read the router startup configuration file,
 	//start the processes required, and initialize them
