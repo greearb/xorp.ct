@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.19 2004/09/15 18:43:57 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.20 2005/03/12 08:57:46 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -123,6 +123,7 @@ gmake check
 	  setenv CXXFLAGS -fno-stack-protector
 	  ./configure
     - The code compiles, and the internal tests appear to succeed.
+      Multicast routing seems to work.
     - The default datasize limit per user may not be sufficient to compile
       some parts of the code, hence you may need to increase the datasize
       limit.  If you see a compilation error like:
