@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.18 2003/09/16 08:13:10 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.19 2003/09/16 18:13:46 pavlin Exp $"
 
 
 //
@@ -170,7 +170,7 @@ main(int argc, char *argv[])
     // Get the finder hostname and port
     //
     if (finder_hostname_port != NULL) {
-	char buf[1024];
+	char buf[MAXHOSTNAMELEN + 1];
 	char *p;
 	struct hostent *h;
 
