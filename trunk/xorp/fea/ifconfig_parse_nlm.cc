@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.7 2003/10/05 19:08:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.8 2003/10/28 21:25:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -46,6 +46,8 @@
 // The information to parse is in NETLINK format
 // (e.g., obtained by netlink(7) sockets mechanism).
 //
+// Reading netlink(3) manual page is a good start for understanding this
+//
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
@@ -66,7 +68,6 @@ static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 				      const struct ifaddrmsg* ifaddrmsg,
 				      int rta_len, bool is_deleted);
 
-// Reading netlink(3) manual page is a good start for understanding this
 bool
 IfConfigGet::parse_buffer_nlm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
 {

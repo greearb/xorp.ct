@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.15 2003/10/03 00:14:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.16 2003/10/05 19:08:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -53,6 +53,8 @@
 // The information to parse is in RTM format
 // (e.g., obtained by routing sockets or by sysctl(3) mechanism).
 //
+// Reading route(4) manual page is a good start for understanding this
+//
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
@@ -72,7 +74,6 @@ static void rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
 				    IfTree& it);
 #endif
 
-// Reading route(4) manual page is a good start for understanding this
 bool
 IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
 {
