@@ -47,6 +47,7 @@ populate_helloV2(HelloPacket *hello)
     hello->set_router_id(IPv4("128.16.64.16"));
     hello->set_area_id(IPv4("4.3.2.1"));
     hello->set_auth_type(5);
+
     hello->set_network_mask(0x12345678);
     hello->set_hello_interval(9876);
     hello->set_options(0xfe);
@@ -70,6 +71,7 @@ populate_helloV3(HelloPacket *hello)
     hello->set_router_id(IPv4("128.16.64.16"));
     hello->set_area_id(IPv4("4.3.2.1"));
     hello->set_instance_id(5);
+
     hello->set_interface_id(0x12345678);
     hello->set_hello_interval(98760);
     hello->set_options(0xfefefe);
@@ -85,7 +87,7 @@ populate_helloV3(HelloPacket *hello)
 
 inline
 void
-populate_hello(HelloPacket *hello,  OspfTypes::Version version)
+populate_hello(HelloPacket *hello, OspfTypes::Version version)
 {
     switch(version) {
     case OspfTypes::V2:
@@ -95,6 +97,50 @@ populate_hello(HelloPacket *hello,  OspfTypes::Version version)
 	populate_helloV3(hello);
 	break;
     }
+}
+
+inline
+void
+populate_data_description(DataDescriptionPacket *ddp,
+			  OspfTypes::Version version)
+{
+    ddp->set_router_id(IPv4("128.16.64.16"));
+    ddp->set_area_id(IPv4("4.3.2.1"));
+
+    switch(version) {
+    case OspfTypes::V2:
+	ddp->set_auth_type(5);
+	break;
+    case OspfTypes::V3:
+	ddp->set_instance_id(5);
+	break;
+    }
+
+    ddp->set_interface_mtu(1500);
+    ddp->set_options(0xfe);
+    ddp->set_i_bit(true);
+    ddp->set_m_bit(true);
+    ddp->set_ms_bit(true);
+    ddp->set_dd_seqno(0x01020304);
+
+    // Create a LSA Header to add
+    Lsa_header header(version);
+
+    header.set_ls_age(500);
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(0xff);
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+    header.set_link_state_id(0x01020304);
+    header.set_advertising_router(0x04030201);
+    header.set_ls_sequence_number(0x0A0B0C0D);
+    header.set_ls_checksum(0x1234);
+    header.set_length(200);
+
+    ddp->get_lsa_headers().push_back(header);
 }
 
 bool
@@ -167,6 +213,78 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+data_description_packet_print(TestInfo& info)
+{
+    DataDescriptionPacket *ddp= new DataDescriptionPacket(OspfTypes::V2);
+    populate_data_description(ddp, OspfTypes::V2);
+
+    DOUT(info) << ddp->str() << endl;
+
+    delete ddp;
+
+    ddp = new DataDescriptionPacket(OspfTypes::V3);
+    populate_data_description(ddp, OspfTypes::V3);
+
+    DOUT(info) << ddp->str() << endl;
+
+    delete ddp;
+
+    return true;
+}
+
+bool
+data_description_packet_compare(TestInfo& info, OspfTypes::Version version)
+{
+    DataDescriptionPacket *ddp1= new DataDescriptionPacket(version);
+    populate_data_description(ddp1, version);
+
+    DOUT(info) << ddp1->str() << endl;
+
+    // Encode the Data Description Packet.
+    size_t len1;
+    uint8_t *ptr1 = ddp1->encode(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    DataDescriptionPacket *ddp2= new DataDescriptionPacket(version);
+
+    DataDescriptionPacket *ddp3 =
+	dynamic_cast<DataDescriptionPacket *>(ddp2->decode(ptr1, len1));
+
+    DOUT(info) << ddp3->str() << endl;
+
+    // Encode the second packet and compare.
+    size_t len2;
+    uint8_t *ptr2 = ddp3->encode(len2);
+    
+    if (len1 != len2) {
+	DOUT(info) << "Packet lengths don't match " <<
+	    len1 << " " << len2 << endl;
+	return false;
+    }
+    
+    if (0 != memcmp(ptr1, ptr2, len1)) {
+	for(size_t i = 0; i < len1; i++) {
+	    if (ptr1[i] != ptr2[i]) {
+		DOUT(info) << "mismatch at byte position " << i << endl;
+		DOUT(info) << "bytes " << (int)ptr1[i] << " " << 
+		    (int)ptr2[i] << endl;
+		break;
+	    }
+	}
+	return false;
+    }
+
+    delete ddp1;
+    delete ddp2;
+    delete ddp3;
+    delete ptr1;
+    delete ptr2;
+
+    return true;
+}
+
+bool
 decoder1(TestInfo& info, OspfTypes::Version version)
 {
     PacketDecoder dec;
@@ -226,8 +344,13 @@ main(int argc, char **argv)
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
     } tests[] = {
 	{"hello_print", callback(hello_packet_print)},
+	{"data_description_print", callback(data_description_packet_print)},
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
+	{"ddp_compareV2", callback(data_description_packet_compare,
+				   OspfTypes::V2)},
+	{"ddp_compareV3", callback(data_description_packet_compare,
+				   OspfTypes::V3)},
 	{"decoder1V2", callback(decoder1, OspfTypes::V2)},
 	{"decoder1V3", callback(decoder1, OspfTypes::V3)},
 	{"decoder2V2", callback(decoder2, OspfTypes::V2)},

@@ -547,20 +547,20 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
     }
 
     uint8_t flag = ptr[offset + bias + 3];
-    if (ptr[flag & 0x4])
-	set_i_bit(true);
+    if (flag & 0x4)
+	packet->set_i_bit(true);
     else
-	set_i_bit(false);
-    if (ptr[flag & 0x2])
-	set_m_bit(true);
+	packet->set_i_bit(false);
+    if (flag & 0x2)
+	packet->set_m_bit(true);
     else
-	set_m_bit(false);
-    if (ptr[flag & 0x1])
-	set_ms_bit(true);
+	packet->set_m_bit(false);
+    if (flag & 0x1)
+	packet->set_ms_bit(true);
     else
-	set_ms_bit(false);
-    set_dd_seqno(extract_32(&ptr[offset + bias + 4]));
-    size_t lsa_offset = 8 + bias;
+	packet->set_ms_bit(false);
+    packet->set_dd_seqno(extract_32(&ptr[offset + bias + 4]));
+    size_t lsa_offset = offset + 8 + bias;
 
     Lsa_header lsa_header(version);
 
@@ -622,7 +622,7 @@ DataDescriptionPacket::encode(size_t &len)
     ptr[offset + bias + 3] = flag;
 
     embed_32(&ptr[offset + bias + 4], get_dd_seqno());
-    size_t lsa_offset = 8 + bias;
+    size_t lsa_offset = offset + 8 + bias;
 
     list<Lsa_header> &li = get_lsa_headers();
     list<Lsa_header>::iterator i = li.begin();
@@ -643,10 +643,23 @@ DataDescriptionPacket::str() const
 {
     string output;
 
-    output = "Hello Packet:\n";
+    output = "Data Description Packet:\n";
     // Standard Header
     output += standard() + "\n";
     // Data Description Packet Specifics
+
+    output += c_format("\tInterface MTU %u\n", get_interface_mtu());
+    output += c_format("\tOptions %#x\n", get_options());
+    output += c_format("\tI-bit %s\n", get_i_bit() ? "true" : "false");
+    output += c_format("\tM-bit %s\n", get_m_bit() ? "true" : "false");
+    output += c_format("\tMS-bit %s\n", get_ms_bit() ? "true" : "false");
+    output += c_format("\tDD sequence number %u", get_dd_seqno());
+
+    list<Lsa_header> li = _lsa_headers;
+    list<Lsa_header>::iterator i = li.begin();
+    for (; i != li.end(); i++) {
+	output += "\n\t" + (*i).str();
+    }
 
     return output;
 }
