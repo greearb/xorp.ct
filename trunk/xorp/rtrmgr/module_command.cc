@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.23 2004/01/14 01:14:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.24 2004/05/18 00:05:12 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -55,8 +55,8 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
 			     const string& cmd_name)
     : Command(template_tree_node, cmd_name),
       _tt(template_tree),
-      _startcommit(NULL),
-      _endcommit(NULL),
+      _start_commit(NULL),
+      _end_commit(NULL),
       _status_method(NULL),
       _startup_method(NULL),
       _shutdown_method(NULL),
@@ -67,10 +67,10 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
 
 ModuleCommand::~ModuleCommand()
 {
-    if (_startcommit != NULL)
-	delete _startcommit;
-    if (_endcommit != NULL)
-	delete _endcommit;
+    if (_start_commit != NULL)
+	delete _start_commit;
+    if (_end_commit != NULL)
+	delete _end_commit;
     if (_status_method != NULL)
 	delete _status_method;
     if (_startup_method != NULL)
@@ -92,11 +92,11 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	xorp_throw(ParseError, "too few parameters to %modinfo");
     }
     string subcommand = action.front();
-    if ((subcommand == "startcommit")
-	|| (subcommand == "endcommit")
-	|| (subcommand == "statusmethod")
-	|| (subcommand == "startupmethod")
-	|| (subcommand == "shutdownmethod")) {
+    if ((subcommand == "start_commit")
+	|| (subcommand == "end_commit")
+	|| (subcommand == "status_method")
+	|| (subcommand == "startup_method")
+	|| (subcommand == "shutdown_method")) {
 	expected_action_size = 3;
     }
     if (action.size() > expected_action_size) {
@@ -137,8 +137,8 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	}
 	_default_target_name = strip_quotes(cmd, value);
 	template_tree_node().set_default_target_name(_default_target_name);
-    } else if (cmd == "startcommit") {
-	debug_msg("startcommit:\n");
+    } else if (cmd == "start_commit") {
+	debug_msg("start_commit:\n");
 	list<string>::const_iterator iter;
 	for (iter = action.begin(); iter != action.end(); ++iter)
 	    debug_msg(">%s< ", (*iter).c_str());
@@ -147,20 +147,21 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	list<string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front() == "xrl") {
-	    _startcommit = new XrlAction(template_tree_node(), newaction,
-					 xrldb);
+	    _start_commit = new XrlAction(template_tree_node(), newaction,
+					  xrldb);
 	} else {
-	    _startcommit = new Action(template_tree_node(), newaction);
+	    _start_commit = new Action(template_tree_node(), newaction);
 	}
-    } else if (cmd == "endcommit") {
+    } else if (cmd == "end_commit") {
 	list<string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front() == "xrl") {
-	    _endcommit = new XrlAction(template_tree_node(), newaction, xrldb);
+	    _end_commit = new XrlAction(template_tree_node(), newaction,
+					xrldb);
 	} else {
-	    _endcommit = new Action(template_tree_node(), newaction);
+	    _end_commit = new Action(template_tree_node(), newaction);
 	}
-    } else if (cmd == "statusmethod") {
+    } else if (cmd == "status_method") {
 	list<string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front() == "xrl") {
@@ -169,7 +170,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	} else {
 	    _status_method = new Action(template_tree_node(), newaction);
 	}
-    } else if (cmd == "startupmethod") {
+    } else if (cmd == "startup_method") {
 	list<string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front() == "xrl") {
@@ -178,7 +179,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	} else {
 	    _startup_method = new Action(template_tree_node(), newaction);
 	}
-    } else if (cmd == "shutdownmethod") {
+    } else if (cmd == "shutdown_method") {
 	list<string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front() == "xrl") {
@@ -297,14 +298,14 @@ int
 ModuleCommand::start_transaction(ConfigTreeNode& ctn,
 				 TaskManager& task_manager) const
 {
-    if (_startcommit == NULL)
+    if (_start_commit == NULL)
 	return XORP_OK;
 
     XrlRouter::XrlCallback cb = callback(this,
 					 &ModuleCommand::action_complete,
-					 &ctn, _startcommit,
+					 &ctn, _start_commit,
 					 string("start transaction"));
-    XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
+    XrlAction *xa = dynamic_cast<XrlAction*>(_start_commit);
     XLOG_ASSERT(xa != NULL);
 
     return xa->execute(ctn, task_manager, cb);
@@ -314,14 +315,14 @@ int
 ModuleCommand::end_transaction(ConfigTreeNode& ctn,
 			       TaskManager& task_manager) const
 {
-    if (_endcommit == NULL)
+    if (_end_commit == NULL)
 	return XORP_OK;
 
     XrlRouter::XrlCallback cb = callback(this,
 					 &ModuleCommand::action_complete,
-					 &ctn, _endcommit,
+					 &ctn, _end_commit,
 					 string("end transaction"));
-    XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
+    XrlAction *xa = dynamic_cast<XrlAction*>(_end_commit);
     XLOG_ASSERT(xa != NULL);
 
     return xa->execute(ctn, task_manager, cb);

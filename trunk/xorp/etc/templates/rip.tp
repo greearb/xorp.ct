@@ -47,8 +47,8 @@ protocols {
 	%modinfo:	depends			rib;
 	%modinfo:	path			"rip/xorp_rip";
 	%modinfo:	default_targetname	"rip";
-	%modinfo:	statusmethod xrl	"$(rip.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo:	shutdownmethod xrl	"$(rip.targetname)/common/0.1/shutdown";
+	%modinfo:	status_method xrl	"$(rip.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl	"$(rip.targetname)/common/0.1/shutdown";
 
 	interface @ {
 	    vif @ {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.1 2004/05/04 00:31:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.2 2004/05/18 01:06:47 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -27,8 +27,8 @@ protocols {
 	%modinfo: depends		mfea4;
 	%modinfo: path			"mld6igmp/xorp_igmp";
 	%modinfo: default_targetname	"mld6igmp";
-	%modinfo: statusmethod		xrl "$(igmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdownmethod	xrl "$(igmp.targetname)/common/0.1/shutdown";
+	%modinfo: status_method		xrl "$(igmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method	xrl "$(igmp.targetname)/common/0.1/shutdown";
 
 	%mandatory: targetname;
 

@@ -22,7 +22,7 @@ Configure Mode
    problem.
  - Implement the "help" and "quit" commands in the top-level xorpsh
    command tree.
- - The parsing of the return arguments of %modinfo statusmethod xrl method
+ - The parsing of the return arguments of %modinfo status_method xrl method
    is still hardcoded in task.cc: "status:u32&reason:txt"
    The status decoding should be completely based on the template
    specification.

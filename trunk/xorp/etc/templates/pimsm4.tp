@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.2 2004/05/16 07:15:17 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.3 2004/05/18 01:06:48 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -68,8 +68,8 @@ protocols {
 	%modinfo: depends		rib;
 	%modinfo: path			"pim/xorp_pimsm4";
 	%modinfo: default_targetname	"pim";
-	%modinfo: statusmethod		xrl "$(pimsm4.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdownmethod	xrl "$(pimsm4.targetname)/common/0.1/shutdown";
+	%modinfo: status_method		xrl "$(pimsm4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method	xrl "$(pimsm4.targetname)/common/0.1/shutdown";
 
 	%mandatory: targetname;
 

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.15 2004/01/15 01:25:40 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.17 2004/05/18 01:19:34 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -410,29 +410,42 @@ the value of the XRL target name that should be used by default when
 validating an XRL specification (\eg if the specification uses a variable
 inside that module to specify the XRL target name).
 
-\item {{\tt \%modinfo: startcommit }{\it method }{\it argument}}  \\
-The {\tt startcommit} subcommand takes two or more additional parameters, that
+\item {{\tt \%modinfo: start\_commit }{\it method }{\it argument}}  \\
+The {\tt start\_commit} subcommand takes two or more additional parameters,
+that 
 are used to specify the mechanism to be call before performing any change to
 the configuration of the module. The only method currently supported is
 {\tt xrl} which takes an XRL specification as an argument.
 
-\item {{\tt \%modinfo: endcommit }{\it method }{\it argument}}  \\
-The {\tt endcommit} subcommand takes two or more additional parameters, that
+\item {{\tt \%modinfo: end\_commit }{\it method }{\it argument}}  \\
+The {\tt end\_commit} subcommand takes two or more additional parameters, that
 are used to specify the mechanism to be called to complete any change to the
 configuration of the module. The only method currently supported is {\tt xrl}
 which takes an XRL specification as an argument.
-Both {\tt startcommit} and {\tt endcommit} are optional. They provide a way
+Both {\tt start\_commit} and {\tt end\_commit} are optional. They provide a way
 to make batch changes to a module configuration as an atomic operation.
 
-\item {{\tt \%modinfo: statusmethod }{\it method }{\it argument}}  \\
-The {\tt statusmethod} subcommand takes two or more additional parameters,
+\item {{\tt \%modinfo: status\_method }{\it method }{\it argument}}  \\
+The {\tt status\_method} subcommand takes two or more additional parameters,
 that are used to specify the mechanism to be used to discover the status of
 the module.
 The only method current supported is {\tt xrl} which takes an XRL
 specification as an argument.
 
-\item {{\tt \%modinfo: shutdownmethod }{\it method }{\it argument}}  \\
-The {\tt shutdownmethod} subcommand takes two or more additional parameters,
+\item {{\tt \%modinfo: startup\_method }{\it method }{\it argument}}  \\
+The {\tt startup\_method} subcommand takes two or more additional parameters,
+that are used to specify the mechanism to be used to gracefully startup the
+module. The only method current supported is {\tt xrl} which takes an XRL
+specification as an argument.
+Before the {\tt startup\_method} subcommand is called, it is expected
+that the process is in {\tt PROC\_STARTUP} state; after the subcommand
+is called the process should transition to the {\tt PROC\_READY} state.
+Note that this subcommand is optional and if it is not specified, then
+it is expected that the process will transition on its own to the
+{\tt PROC\_READY} state.
+
+\item {{\tt \%modinfo: shutdown\_method }{\it method }{\it argument}}  \\
+The {\tt shutdown\_method} subcommand takes two or more additional parameters,
 that are used to specify the mechanism to be used to gracefully shutdown the
 module. The only method current supported is {\tt xrl} which takes an XRL
 specification as an argument.

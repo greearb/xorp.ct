@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.24 2004/05/16 07:15:16 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.25 2004/05/18 01:06:47 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -42,8 +42,8 @@ protocols {
 	%modinfo: depends rib;
 	%modinfo: path "bgp/xorp_bgp";
 	%modinfo: default_targetname "bgp";
-	%modinfo: statusmethod xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdownmethod xrl "$(bgp.targetname)/common/0.1/shutdown";
+	%modinfo: status_method xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method xrl "$(bgp.targetname)/common/0.1/shutdown";
 
 	%mandatory: bgp-id;
 	%mandatory: local-as;

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.3 2004/05/16 07:15:18 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.4 2004/05/18 01:06:49 pavlin Exp $ */
 
 protocols {
     static {
@@ -33,8 +33,8 @@ protocols {
 	%modinfo: depends		rib;
 	%modinfo: path			"static_routes/xorp_static_routes";
 	%modinfo: default_targetname	"static_routes";
-	%modinfo: statusmethod		xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdownmethod	xrl "$(static.targetname)/common/0.1/shutdown";
+	%modinfo: status_method		xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method	xrl "$(static.targetname)/common/0.1/shutdown";
 
 	%mandatory: targetname;
 

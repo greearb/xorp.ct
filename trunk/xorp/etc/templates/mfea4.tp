@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea4.tp,v 1.1 2004/05/04 00:31:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea4.tp,v 1.2 2004/05/18 01:06:47 pavlin Exp $ */
 
 plumbing {
     mfea4 {
@@ -27,8 +27,8 @@ plumbing {
 	%modinfo: depends		fea;
 	%modinfo: path			"fea/xorp_fea";
 	%modinfo: default_targetname	"mfea";
-	%modinfo: statusmethod		xrl "$(mfea4.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdownmethod	xrl "$(mfea4.targetname)/common/0.1/shutdown";
+	%modinfo: status_method		xrl "$(mfea4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method	xrl "$(mfea4.targetname)/common/0.1/shutdown";
 
 	%mandatory: targetname;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.14 2004/01/13 00:47:08 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.15 2004/05/18 00:05:12 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -65,8 +65,8 @@ private:
     string		_module_exec_path;
     string		_default_target_name;
     list<string>	_depends;
-    Action*		_startcommit;
-    Action*		_endcommit;
+    Action*		_start_commit;
+    Action*		_end_commit;
     Action*		_status_method;
     Action*		_startup_method;
     Action*		_shutdown_method;

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/snmp.tp,v 1.7 2004/05/16 07:15:18 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.8 2004/05/18 01:06:49 pavlin Exp $ */
 
 protocols {
     snmp {
@@ -16,8 +16,8 @@ protocols {
 	%modinfo: provides xorp_if_mib; 
 	%modinfo: path "mibs/snmpdscripts/startsnmp";
 	%modinfo: default_targetname "xorp_if_mib";
-	%modinfo: statusmethod xrl "$(snmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdownmethod xrl "$(snmp.targetname)/common/0.1/shutdown";
+	%modinfo: status_method xrl "$(snmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method xrl "$(snmp.targetname)/common/0.1/shutdown";
 
 	targetname {
 	    %set:;
