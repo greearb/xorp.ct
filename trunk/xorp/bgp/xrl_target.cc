@@ -13,10 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.28 2004/09/17 13:50:56 abittau Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.29 2004/09/21 18:09:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+#define PROFILE_UTILS_REQUIRED
 
 #include "config.h"
 #include "bgp_module.h"
@@ -27,11 +28,13 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+#include "libxipc/xrl_error.hh"
+#include "xrl/interfaces/profile_client_xif.hh"
 
 #include "bgp.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
-#include "profile_vars.hh"
+//#include "profile_vars.hh"
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	: XrlBgpTargetBase(r),
@@ -957,8 +960,9 @@ XrlBgpTarget::profile_0_1_get_entries(const string& pname,
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
-    profile_transmit_log(pname,
-			 _bgp.get_router(), instance_name, &_bgp.profile());
+    ProfileUtils::transmit_log(pname,
+			       _bgp.get_router(), instance_name,
+			       &_bgp.profile());
 
     return XrlCmdError::OKAY();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.1 2004/09/21 17:59:47 atanu Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.2 2004/09/21 21:44:35 atanu Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -132,7 +132,25 @@ class Profile {
      *
      * @return true if this profile is enabled.
      */
-    bool enabled(const string& pname) throw(PVariableUnknown);
+    inline
+    bool
+    enabled(const string& pname) throw(PVariableUnknown)
+    {
+	// This is the most frequently called method hence make it
+	// inline. As an optimisation if no profiling is enabled don't
+	// perform any string maniplulation or lookups.
+
+	// If global profiling has not been enabled get out of here.
+	if (0 == _profile_cnt)
+	    return false;
+
+	profiles::iterator i = _profiles.find(pname);
+	// Catch any mispelt pnames.
+	if (i == _profiles.end())
+	    xorp_throw(PVariableUnknown, pname.c_str());
+
+	return i->second->enabled();
+    }
 
     /**
      * Add an entry to the profile log.
@@ -190,5 +208,79 @@ class Profile {
     int _profile_cnt;		// Number of variables that are enabled.
     profiles _profiles;
 };
+
+#ifdef	PROFILE_UTILS_REQUIRED
+/**
+ * Utility methods to be used by programs providing profiling.
+ */
+
+class ProfileUtils {
+ public:
+
+    static
+    void
+    transmit_log(const string& pname, XrlStdRouter *xrl_router,
+		 const string& instance_name,
+		 Profile *profile)
+    {
+	ProfileLogEntry ple;
+	if (profile->read_log(pname, ple)) {
+	    TimeVal t = ple.time();
+	    XrlProfileClientV0p1Client pc(xrl_router);
+	    pc.send_log(instance_name.c_str(),
+			pname, t.sec(), t.usec(), ple.loginfo(),
+			callback(ProfileUtils::transmit_callback, 
+				 pname, xrl_router, instance_name, profile));
+	} else {
+	    // Unlock the log entry.
+	    profile->release_log(pname);
+	    ProfileUtils::transmit_finished(pname, xrl_router, instance_name);
+	}
+    }
+
+    static
+    void
+    transmit_callback(const XrlError& error, const string pname,
+		      XrlStdRouter *xrl_router,
+		      const string instance_name,
+		      Profile *profile)
+    {
+	if (XrlError::OKAY() != error) {
+	    XLOG_WARNING(error.error_msg());
+	    // Unlock the log entry.
+	    profile->release_log(pname);
+	    return;
+	}
+	ProfileUtils::transmit_log(pname, xrl_router, instance_name, profile);
+    }
+
+    static
+    void
+    transmit_finished(const string& pname, XrlStdRouter *xrl_router,
+		      const string& instance_name)
+    {
+	debug_msg("pname = %s instance_name = %s\n", pname.c_str(),
+		  instance_name.c_str());
+
+	XrlProfileClientV0p1Client pc(xrl_router);
+	pc.send_finished(instance_name.c_str(), pname,
+			 callback(ProfileUtils::transmit_finished_callback,
+				  pname));
+    }
+
+    static
+    void
+    transmit_finished_callback(const XrlError& error,
+			       const string /*pname*/)
+    {
+	if (XrlError::OKAY() != error)
+	    XLOG_WARNING(error.error_msg());
+    }
+
+ private:    
+    ProfileUtils();		// Don't allow instantiation
+    ProfileUtils(const ProfileUtils&);
+};
+#endif // PROFILE_UTILS_REQUIRED
 
 #endif // __LIBXORP_TRACE_HH__

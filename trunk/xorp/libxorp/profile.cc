@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.2 2004/09/21 21:36:22 atanu Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.3 2004/09/21 21:44:35 atanu Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -50,21 +50,6 @@ Profile::create(const string& pname, const string& comment)
 
     ProfileState *p = new ProfileState(comment, false, false, new logentries);
     _profiles[pname] = ref_ptr<ProfileState>(p);
-}
-
-bool
-Profile::enabled(const string& pname) throw(PVariableUnknown)
-{
-    // If global profiling has not been enabled get out of here.
-    if (0 == _profile_cnt)
-	return false;
-
-    profiles::iterator i = _profiles.find(pname);
-    // Catch any mispelt pnames.
-    if (i == _profiles.end())
-	xorp_throw(PVariableUnknown, pname.c_str());
-
-    return i->second->enabled();
 }
 
 void
