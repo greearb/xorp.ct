@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.6 2003/03/05 20:02:46 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.7 2003/03/06 01:18:57 hodson Exp $"
 
 #include "libxorp/debug.h"
 
@@ -21,7 +21,8 @@
 #include "permits.hh"
 #include "xuid.hh"
 
-static class TraceFinder {
+static class TraceFinder
+{
 public:
     TraceFinder() {
 	_do_trace = !(getenv("FINDERTRACE") == 0);
@@ -47,8 +48,7 @@ do {									      \
 	XLOG_INFO(c_format("%s -> %s\n",				      \
 		  finder_tracer.context().c_str(), r.c_str()).c_str());	      \
     }									      \
-} while(0)
-
+} while (0)
 
 /**
  * Helper method to pass back consistent message when it is discovered that
@@ -105,7 +105,7 @@ FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
 {
     finder_trace_init("register_finder_client(\"%s\", \"%s\", \"%s\")",
 		      tgt_name.c_str(), class_name.c_str(),
-		      in_cookie.c_str());		      
+		      in_cookie.c_str());
 
     if (in_cookie.empty() == false) {
 	out_cookie = in_cookie;
@@ -113,7 +113,7 @@ FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
     } else {
 	out_cookie = make_cookie();
     }
-    
+
     if (_finder.add_target(tgt_name, class_name, out_cookie) == false) {
 	finder_trace_result("failed (already registered)");
 	return XrlCmdError::COMMAND_FAILED(c_format("%s already registered.",
@@ -146,7 +146,7 @@ FinderNGXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
 {
     finder_trace_init("set_finder_client_enabled(\"%s\", %s)",
 		      tgt_name.c_str(), (en) ? "true" : "false");
-    
+
     if (_finder.active_messenger_represents_target(tgt_name)) {
 	_finder.set_target_enabled(tgt_name, en);
 	finder_trace_result("okay");
@@ -182,7 +182,7 @@ FinderNGXrlTarget::finder_0_1_add_xrl(const string& xrl,
     finder_trace_init("add_xrl(\"%s\", \"%s\", \"%s\")",
 		      xrl.c_str(), protocol_name.c_str(),
 		      protocol_args.c_str());
-    
+
     // Construct unresolved Xrl
     try {
 	u = Xrl(xrl.c_str());
@@ -217,7 +217,7 @@ FinderNGXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
     Xrl u;
 
     finder_trace_init("remove_xrl(\"%s\")", xrl.c_str());
-    
+
     // Construct Xrl
     try {
 	u = Xrl(xrl.c_str());
@@ -248,7 +248,7 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
     finder_trace_init("resolve_xrl(\"%s\")", xrl.c_str());
 
     Xrl u;
-    
+
     // Construct Xrl
     try {
 	u = Xrl(xrl.c_str());
@@ -266,7 +266,7 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 	finder_trace_result("fail (xrl exists but is not enabled).");
 	return XrlCmdError::COMMAND_FAILED("Xrl target is not enabled.");
     }
-    
+
     const FinderNG::Resolveables* resolutions = _finder.resolve(u.target(),
 								u.str());
     if (0 == resolutions) {
@@ -340,7 +340,7 @@ FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
     const IPv4Hosts& hl = permitted_ipv4_hosts();
     for (IPv4Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
 	ipv4hosts.append(XrlAtom(*ci));
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -360,7 +360,7 @@ FinderNGXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
     const IPv6Hosts& hl = permitted_ipv6_hosts();
     for (IPv6Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
 	ipv6hosts.append(XrlAtom(*ci));
-    
+
     return XrlCmdError::OKAY();
 }
 
