@@ -277,6 +277,7 @@ a xorp config file and set passwords." 6 70
 
 
 
+	create_config
 	#finished creating manifest file
     fi
 
@@ -285,7 +286,7 @@ a xorp config file and set passwords." 6 70
 
 getiftype() {
     tempfile=$1
-    media=" (??)"
+    media="??"
     ${GREP} Ethernet ${tempfile} 1> /dev/null
     if [ $? -eq 0 ]; then
 	media="Ethernet"
@@ -390,4 +391,3 @@ create_config() {
 welcome
 test_floppy
 test_manifest
-create_config
