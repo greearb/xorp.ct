@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.16 2003/09/13 02:56:48 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.17 2003/11/12 19:10:07 pavlin Exp $"
 
 
 //
@@ -58,7 +58,8 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     : ProtoUnit(mld6igmp_node.family(), mld6igmp_node.module_id()),
       Vif(vif),
       _mld6igmp_node(mld6igmp_node),
-      _querier_addr(mld6igmp_node.family()),		// XXX: ANY
+      _primary_addr(IPvX::ZERO(mld6igmp_node.family())),
+      _querier_addr(IPvX::ZERO(mld6igmp_node.family())),
       _dummy_flag(false)
 {
     XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
@@ -173,16 +174,51 @@ Mld6igmpVif::start()
 	return (XORP_ERROR);
     if (! is_multicast_capable())
 	return (XORP_ERROR);
-    if (addr_ptr() == NULL)
-	return (XORP_ERROR);
-    if (! addr_ptr()->is_unicast())
+
+    //
+    // Get the primary address and the domain-wide reachable address.
+    // The primary address should be a link-local unicast address, and
+    // is used for transmitting the multicast control packets on the LAN.
+    // The domain-wide reachable address is the address that should be
+    // used if there is no link-local unicast address (e.g., in case of IPv4).
+    //
+    IPvX primary_a(IPvX::ZERO(family()));
+    IPvX domain_wide_a(IPvX::ZERO(family()));
+    list<VifAddr>::const_iterator iter;
+    for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
+	const VifAddr& vif_addr = *iter;
+	const IPvX& addr = vif_addr.addr();
+	if (! addr.is_unicast())
+	    continue;
+	if (addr.is_linklocal_unicast()) {
+	    primary_a = addr;
+	    continue;
+	}
+	// XXX: assume that everything else can be a domain-wide reachable
+	// address.
+	domain_wide_a = addr;
+    }
+    //
+    // XXX: if there is no link-local address to serve as a primary address,
+    // then use the domain-wide address as a primary address.
+    //
+    if (primary_a == IPvX::ZERO(family()))
+	primary_a = domain_wide_a;
+
+    //
+    // Check that the interface has a primary address.
+    // addresses.
+    //
+    if (primary_a == IPvX::ZERO(family()))
 	return (XORP_ERROR);
     
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
+
+    set_primary_addr(primary_a);
     
     // On startup, assume I am the MLD6IGMP Querier
-    _querier_addr = *addr_ptr(); // XXX: addr_ptr() is valid (tested above)
+    _querier_addr = primary_addr();
     _proto_flags |= MLD6IGMP_VIF_QUERIER;
     
     //
@@ -338,7 +374,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
     
-    XLOG_ASSERT(addr_ptr() != NULL);
+    XLOG_ASSERT(primary_addr() != IPvX::ZERO(family()));
     
     //
     // Prepare the MLD or IGMP header.
@@ -371,7 +407,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
 	    uint32_t next_header;
 	} pseudo_header;
 	
-	addr_ptr()->copy_out(pseudo_header.in6_src);
+	primary_addr().copy_out(pseudo_header.in6_src);
 	dst.copy_out(pseudo_header.in6_dst);
 	pseudo_header.pkt_len = ntohl(BUFFER_DATA_SIZE(buffer));
 	pseudo_header.next_header = htonl(IPPROTO_ICMPV6);
@@ -384,13 +420,13 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     
     XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
 	       proto_message_type2ascii(message_type),
-	       cstring(*addr_ptr()),
+	       cstring(primary_addr()),
 	       cstring(dst));
     
     //
     // Send the message
     //
-    ret_value = mld6igmp_node().mld6igmp_send(vif_index(), *addr_ptr(), dst,
+    ret_value = mld6igmp_node().mld6igmp_send(vif_index(), primary_addr(), dst,
 					      MINTTL, -1, true, buffer);
     
     return (ret_value);
@@ -400,7 +436,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       proto_message_type2ascii(message_type),
-	       cstring(*addr_ptr()),
+	       cstring(primary_addr()),
 	       cstring(dst));
     return (XORP_ERROR);
 }
