@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.7 2003/04/01 00:56:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.8 2003/04/02 18:57:02 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -305,9 +305,9 @@ PimMre::receive_register_stop()
     // Remove reg tunnel
     remove_register_tunnel();
     // Set Register-Stop timer
-    register_stop_tv.set(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
+    register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
     register_stop_tv = positive_random_uniform(register_stop_tv, 0.5);
-    register_probe_tv.set(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
+    register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
 	pim_node().event_loop().new_oneoff_after(
@@ -320,9 +320,9 @@ PimMre::receive_register_stop()
     // Register JoinPending state -> Register Prune state
     set_register_prune_state();
     // Set Register-Stop timer
-    register_stop_tv.set(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
+    register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
     register_stop_tv = positive_random_uniform(register_stop_tv, 0.5);
-    register_probe_tv.set(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
+    register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
 	pim_node().event_loop().new_oneoff_after(

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.10 2003/04/02 17:10:41 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.11 2003/04/02 18:57:02 pavlin Exp $"
 
 
 //
@@ -1150,7 +1150,7 @@ PimVif::vif_propagation_delay() const
     uint16_t delay;
     
     // XXX: lan_delay is in milliseconds
-    tv.set(_lan_delay.get() / 1000, (_lan_delay.get() % 1000) * 1000);
+    tv = TimeVal(_lan_delay.get() / 1000, (_lan_delay.get() % 1000) * 1000);
     
     if (! is_lan_delay_enabled())
 	return (tv);
@@ -1164,7 +1164,7 @@ PimVif::vif_propagation_delay() const
     }
     
     // XXX: delay is in milliseconds
-    tv.set(delay / 1000, (delay % 1000) * 1000);
+    tv = TimeVal(delay / 1000, (delay % 1000) * 1000);
     
     return (tv);
 }
@@ -1176,8 +1176,8 @@ PimVif::vif_override_interval() const
     uint16_t delay;
     
     // XXX: override_interval is in milliseconds
-    tv.set(_override_interval.get() / 1000,
-	   (_override_interval.get() % 1000) * 1000);
+    tv = TimeVal(_override_interval.get() / 1000,
+		 (_override_interval.get() % 1000) * 1000);
     
     if (! is_lan_delay_enabled())
 	return (tv);
@@ -1191,7 +1191,7 @@ PimVif::vif_override_interval() const
     }
     
     // XXX: delay is in milliseconds
-    tv.set(delay / 1000, (delay % 1000) * 1000);
+    tv = TimeVal(delay / 1000, (delay % 1000) * 1000);
     
     return (tv);
 }
@@ -1224,7 +1224,7 @@ PimVif::upstream_join_timer_t_suppressed() const
     static TimeVal tv;
     
     if (is_lan_suppression_state_enabled()) {
-	tv.set(_join_prune_period.get(), 0);
+	tv = TimeVal(_join_prune_period.get(), 0);
 	tv = random_uniform(
 	    tv * PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MIN,
 	    tv * PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MAX);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.12 2003/03/31 03:46:47 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.13 2003/04/01 02:00:04 pavlin Exp $"
 
 
 //
@@ -372,7 +372,7 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 	    usec = (IGMP_LAST_MEMBER_QUERY_COUNT * max_resp_time)
 		% IGMP_TIMER_SCALE;
 	    usec *= (1000000 / IGMP_TIMER_SCALE); // microseconds
-	    received_resp_tv.set(sec, usec);
+	    received_resp_tv = TimeVal(sec, usec);
 	    member_query->_member_query_timer.time_remaining(left_resp_tv);
 	    
 	    if (left_resp_tv > received_resp_tv) {

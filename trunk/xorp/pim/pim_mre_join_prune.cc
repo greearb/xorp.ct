@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.17 2003/04/01 00:56:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.18 2003/04/02 17:10:40 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1259,7 +1259,7 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
-    t_joinsuppress.set(holdtime, 0);
+    t_joinsuppress = TimeVal(holdtime, 0);
     if (t_suppressed < t_joinsuppress)
 	t_joinsuppress = t_suppressed;
     join_timer().time_remaining(tv_left);
@@ -1350,7 +1350,7 @@ PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
-    t_joinsuppress.set(holdtime, 0);
+    t_joinsuppress = TimeVal(holdtime, 0);
     if (t_suppressed < t_joinsuppress)
 	t_joinsuppress = t_suppressed;
     join_timer().time_remaining(tv_left);
@@ -1441,7 +1441,7 @@ PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
-    t_joinsuppress.set(holdtime, 0);
+    t_joinsuppress = TimeVal(holdtime, 0);
     if (t_suppressed < t_joinsuppress)
 	t_joinsuppress = t_suppressed;
     join_timer().time_remaining(tv_left);
