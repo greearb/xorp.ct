@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.46 2004/11/29 00:32:08 bms Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.47 2004/11/29 01:59:45 bms Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -22,7 +22,6 @@ tgt_files		+= fea_ifmgr_mirror.tgt
 tgt_files		+= fib2mrib.tgt
 tgt_files		+= finder.tgt
 tgt_files		+= finder_client.tgt
-tgt_files		+= firewall.tgt
 tgt_files		+= mfea.tgt
 tgt_files		+= mld6igmp.tgt
 tgt_files		+= ospf.tgt
@@ -67,7 +66,6 @@ noinst_LTLIBRARIES	+= libfeaifmgrmirrorbase.la
 noinst_LTLIBRARIES	+= libfib2mribbase.la
 noinst_LTLIBRARIES	+= libfinderbase.la
 noinst_LTLIBRARIES	+= libfinderclientbase.la
-noinst_LTLIBRARIES	+= libfirewallbase.la
 noinst_LTLIBRARIES	+= libmfeabase.la
 noinst_LTLIBRARIES	+= libmld6igmpbase.la
 noinst_LTLIBRARIES	+= libospfbase.la
@@ -185,12 +183,6 @@ libfinderclientbase_la_SOURCES = finder_client_base.hh finder_client_base.cc
 $(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_client.xif
-
-# FIREWALL (FEA)
-libfirewallbase_la_SOURCES = firewall_base.hh firewall_base.cc
-$(srcdir)/firewall_base.hh $(srcdir)/firewall_base.cc:			\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/firewall.xif
 
 # MFEA
 libmfeabase_la_SOURCES = mfea_base.hh mfea_base.cc
