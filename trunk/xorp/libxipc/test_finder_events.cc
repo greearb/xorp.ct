@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.10 2004/08/13 20:10:41 atanu Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.11 2004/08/14 05:49:45 pavlin Exp $"
 
 #include <list>
 #include <vector>
@@ -763,6 +763,7 @@ test_main(IPv4		 finder_addr,
 	test2(finder_addr, finder_port, burst_cnt, use_internal_finder);
 	ready = 0;
 	test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	break;
 	ready = 0;
 	test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
 	break;
