@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/pim_testsuite/Makefile.am,v 1.4 2003/01/11 01:59:59 pavlin Exp $
+## $XORP: xorp/docs/pim_testsuite/Makefile.am,v 1.5 2003/01/12 05:03:20 pavlin Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -29,6 +29,7 @@ pim_testsuite_FIGURES	=						\
 		figs/pim_test_4_5_sending_rp_join_prune_messages.eps	\
 		figs/pim_test_4_6_sending_wc_join_prune_messages.eps	\
 		figs/pim_test_4_7_sending_sg_join_prune_messages.eps	\
+		figs/pim_test_4_8_sg_rpt_periodic_messages.eps		\
 		figs/pim_test_6_1_single_bsr_election.eps		\
 		figs/pim_test_6_2_single_router_rpset.eps		\
 		figs/pim_test_6_3_bootstrap_timeout.eps			\
