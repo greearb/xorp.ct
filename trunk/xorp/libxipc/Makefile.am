@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.18 2003/05/09 19:36:14 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.19 2003/05/09 21:00:50 hodson Exp $
 ##
 
 # - The library
@@ -205,24 +205,24 @@ SDIR=$(srcdir)
 common_xif.%: $(IDIR)/common_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
 	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(IDIR)/$@ .
+	cd $(SDIR) && $(LN_S) $(IDIR)/$@ $(SDIR)
 
 finder_base.%: $(TDIR)/finder_base.%
 	cd $(TDIR) && $(MAKE) $(notdir $@)
 	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(TDIR)/$@ .
+	cd $(SDIR) && $(LN_S) $(TDIR)/$@ $(SDIR)
 
 finder_xif.%: $(IDIR)/finder_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
 	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(IDIR)/$@ .
+	cd $(SDIR) && $(LN_S) $(IDIR)/$@ $(SDIR)
 
 finder_client_base.%: $(TDIR)/finder_client_base.%
 	cd $(TDIR) && $(MAKE) $(notdir $@)
 	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(TDIR)/$@ .
+	cd $(SDIR) && $(LN_S) $(TDIR)/$@ $(SDIR)
 
 finder_client_xif.%: $(IDIR)/finder_client_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
 	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(IDIR)/$@ .
+	cd $(SDIR) && $(LN_S) $(IDIR)/$@ $(SDIR)
