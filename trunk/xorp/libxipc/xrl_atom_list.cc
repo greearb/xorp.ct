@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.4 2003/10/20 22:35:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.5 2004/06/10 22:41:10 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -51,6 +51,10 @@ const XrlAtom&
 XrlAtomList::get(size_t itemno) const throw (InvalidIndex)
 {
     list<XrlAtom>::const_iterator ci = _list.begin();
+
+    if (ci == _list.end()) {
+	xorp_throw(InvalidIndex, "Index out of range: empty list.");
+    }
     while (itemno != 0) {
 	ci++;
 	if (ci == _list.end()) {
@@ -66,6 +70,9 @@ XrlAtomList::remove(size_t itemno) throw (InvalidIndex)
 {
     list<XrlAtom>::iterator i = _list.begin();
 
+    if (i == _list.end()) {
+	xorp_throw(InvalidIndex, "Index out of range: empty list.");
+    }
     while (itemno != 0) {
 	i++;
 	if (i == _list.end()) {
