@@ -1,6 +1,32 @@
 #
-# $XORP: xorp/pim/TODO,v 1.3 2003/01/06 20:28:45 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.4 2003/01/10 20:01:45 pavlin Exp $
 #
+
+* TESTSUITE:
+  Perform test scenario (Section 4.6 Sending (*,G) Join/Prune Messages, Part G)
+  after test-generation of Assert messages is implemented and tested.
+
+* SPEC+IMPL:
+    DR--------R1----RP
+         |
+         R2
+ 
+  Lets assume R2 is sending (*,G) Join to R1 toward RP.
+  If R1 is restarted, right after the restart R2 will send Hello,
+  and then (*,G) Join. However, if we use the BSR mechanism, the
+  Hello+Bootstrap message by the DR to R1 will be delayed a bit
+  (up to Triggered_Hello_Delay). As a result, the R1 will receive
+  the (*,G) Join from R2, but it will not have RP-Set yet, and
+  therefore the (*,G) Join will be ignored.
+  
+  The fix should be that whenever a neighbor is forced to immediately
+  send a Hello message because of Join or Assert messages it has to send,
+  it must be the one to unicast the Bootstrap message(s) as well right
+  after the Hello (even though it might not be the DR).
+
+* IMPL: when a non-DR router is (re)started, right after the DR unicasts
+  to it the Bootstrap message, the non-DR might unicast it back.
+  Fix this so the Bootstrap message is not unicasted back.
 
 * IMPL+SPEC+TESTSUTE: if the MRIB.next_hop(RP) changes, should
   we send first the (*,*,RP) Join first, or the (*,*,RP) Prune first?
