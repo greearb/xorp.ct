@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.5 2004/03/18 13:11:26 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.6 2004/03/30 03:24:12 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -665,13 +665,42 @@ XrlStaticRoutesNode::inform_rib_route_change(const StaticRoute& static_route)
     }
 }
 
+/**
+ * Cancel a pending request to inform the RIB about a route change.
+ *
+ * @param static_route the route with the request that would be canceled.
+ */
+void
+XrlStaticRoutesNode::cancel_rib_route_change(const StaticRoute& static_route)
+{
+    list<StaticRoute>::iterator iter;
+
+    for (iter = _inform_rib_queue.begin();
+	 iter != _inform_rib_queue.end();
+	 ++iter) {
+	StaticRoute& tmp_static_route = *iter;
+	if (tmp_static_route == static_route)
+	    tmp_static_route.set_ignored(true);
+    }
+}
+
 void
 XrlStaticRoutesNode::send_rib_route_change()
 {
     bool success = false;
 
-    if (_inform_rib_queue.empty())
-	return;		// No more route changes to send
+    do {
+	// Pop-up all routes that are to be ignored
+	if (_inform_rib_queue.empty())
+	    return;		// No more route changes to send
+
+	StaticRoute& tmp_static_route = _inform_rib_queue.front();
+	if (tmp_static_route.is_ignored()) {
+	    _inform_rib_queue.pop_front();
+	    continue;
+	}
+	break;
+    } while (true);
 
     StaticRoute& static_route = _inform_rib_queue.front();
 

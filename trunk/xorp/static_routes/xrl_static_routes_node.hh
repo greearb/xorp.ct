@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.2 2004/02/17 22:57:12 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.3 2004/03/30 03:24:12 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -238,7 +238,7 @@ private:
     void ifmgr_startup();
     void ifmgr_shutdown();
 
-    const IfMgrIfTree& iftree() const { return _ifmgr.iftree(); }
+    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
     void rib_register_startup();
     void rib_register_shutdown();
@@ -249,6 +249,13 @@ private:
      * @param static_route the route with the information about the change.
      */
     void inform_rib_route_change(const StaticRoute& static_route);
+
+    /**
+     * Cancel a pending request to inform the RIB about a route change.
+     *
+     * @param static_route the route with the request that would be canceled.
+     */
+    void cancel_rib_route_change(const StaticRoute& static_route);
 
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
