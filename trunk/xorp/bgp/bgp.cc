@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.46 2004/12/17 01:31:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.47 2004/12/17 09:49:13 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -97,7 +97,9 @@ BGPMain::~BGPMain()
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
-    while (_peerlist->not_all_idle() || _rib_ipc_handler->busy()) {
+    while (_peerlist->not_all_idle() || _rib_ipc_handler->busy() ||
+	   DeleteAllNodes<IPv4>::running() || 
+	   DeleteAllNodes<IPv6>::running()) {
 	eventloop().run();
     }
     /*

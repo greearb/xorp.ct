@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.15 2004/06/10 22:40:33 hodson Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.16 2004/06/12 15:02:27 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -117,6 +117,8 @@ private:
 
 /**
  * @short Delete nodes in the cache table trie.
+ *
+ * Only one instance of this class exists at any time.
  */
 template<class A>
 class DeleteAllNodes {
@@ -124,32 +126,30 @@ public:
     typedef RefTrie<A, const CacheRoute<A> > RouteTable;
     typedef queue<RouteTable *> RouteTables;
 
-    DeleteAllNodes(const PeerHandler *peer, 
-		   RefTrie<A, const CacheRoute<A> > *route_table)
+    DeleteAllNodes(const PeerHandler *peer, RouteTable *route_table)
 	: _peer(peer) {
 
-	    bool empty = _route_tables.empty();
+ 	    bool empty = _route_tables.empty();
 	    _route_tables.push(route_table);
 
-	    if (empty) {
-		_deleter =  peer->eventloop().
-		    new_periodic(1000,
-				 callback(this,
-				       &DeleteAllNodes<A>::delete_some_nodes));
-	    } else {
-		delete this;
-	    }
+ 	    if (empty) {
+		delete_some_nodes();
+ 	    } else {
+ 		delete this;
+ 	    }
 	}
-
+    
     /**
      * Background task that deletes nodes it trie.
      *
      * @return true if there are routes to delete.
      */
-    bool delete_some_nodes() {
+    void delete_some_nodes() {
 	RouteTable *route_table = _route_tables.front();
 	typename RouteTable::iterator current = route_table->begin();
 	for(int i = 0; i < _deletions_per_call; i++) {
+	    // In theory if current is invalid then it will move to a
+	    // valid entry. Unlike the STL, which this isn't.
 	    route_table->erase(current);
 	    if (current == route_table->end()) {
 		_route_tables.pop();
@@ -158,11 +158,17 @@ public:
 	    }
 	}
 
-	bool empty = _route_tables.empty();
-	if (empty)
+	if (_route_tables.empty()) {
 	    delete this;
+	    return;
+	}
 
-	return !empty;
+	_deleter =  _peer->eventloop().
+	    new_oneoff_after_ms(1000,
+				callback(this,
+				       &DeleteAllNodes<A>::delete_some_nodes));
+
+	return;
     }
 
     /**
