@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.17 2003/05/24 23:35:27 mjh Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.18 2003/05/29 21:17:16 mjh Exp $"
+
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "libxorp/status_codes.h"
 #include "version.h"
@@ -377,8 +380,8 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 				 const IPv4&	nexthop,
 				 const uint32_t& metric)
 {
-    printf("#### XRL: ADD ROUTE net %s, nh: %s\n",
-	   network.str().c_str(), nexthop.str().c_str());
+    debug_msg("#### XRL: ADD ROUTE net %s, nh: %s\n",
+	      network.str().c_str(), nexthop.str().c_str());
     if (unicast && _urib4.add_route(protocol, network, nexthop, metric))
 	RETURN_FAIL("Could not add IPv4 route to unicast RIB");
 
@@ -445,8 +448,8 @@ XrlRibTarget::rib_0_1_delete_route4(const string& protocol,
 				    const bool&	multicast,
 				    const IPv4Net& network)
 {
-    printf("#### XRL: DELETE ROUTE net %s\n",
-	   network.str().c_str());
+    debug_msg("#### XRL: DELETE ROUTE net %s\n",
+	      network.str().c_str());
     if (unicast && _urib4.delete_route(protocol, network))
 	RETURN_FAIL("Could not delete IPv4 route from unicast RIB");
 
@@ -657,14 +660,14 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 					 IPv4&	nexthop,
 					 uint32_t& metric)
 {
-    printf("#### XRL: REGISTER INTEREST addr %s\n",
+    debug_msg("#### XRL: REGISTER INTEREST addr %s\n",
 	   addr.str().c_str());
     RouteRegister<IPv4>* rt_reg = _urib4.route_register(addr, target);
     if (rt_reg->route() == NULL) {
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix = realprefix = rt_reg->valid_subnet().prefix_len();
 	resolves = false;
-	printf("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
+	debug_msg("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
 	       rt_reg->valid_subnet().str().c_str());
     } else {
 	metric = rt_reg->route()->metric();
