@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.5 2003/07/22 19:22:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.6 2003/08/06 02:09:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -391,15 +391,10 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	    if (fa.broadcast()) {
 		fa.set_bcast(o);
 		has_broadcast_addr = true;
-	    } else if (fa.point_to_point()) {
+	    }
+	    if (fa.point_to_point()) {
 		fa.set_endpoint(o);
 		has_peer_addr = true;
-	    } else {
-		// We end up here, which is confusing on FBSD 4.6.2
-		debug_msg("Assuming this %s with flags 0x%08x is bcast\n",
-			  o.str().c_str(), ifa->ifam_flags);
-		fa.set_bcast(o);
-		has_broadcast_addr = true;
 	    }
 	}
 	if (! has_broadcast_addr)
