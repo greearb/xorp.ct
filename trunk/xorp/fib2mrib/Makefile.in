@@ -119,7 +119,7 @@ xorp_fib2mrib_SOURCES = xorp_fib2mrib.cc
 libfib2mrib_a_SOURCES = fib2mrib_module.h fib2mrib_node.hh xrl_fib2mrib_node.hh fib2mrib_node.cc xrl_fib2mrib_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = 
+EXTRA_DIST = command_fib2mrib
 
 
 ################################################################

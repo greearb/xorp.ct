@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fib2mrib/Makefile.am,v 1.1 2004/02/18 00:10:56 pavlin Exp $
+## $XORP: xorp/fib2mrib/Makefile.am,v 1.2 2004/03/18 13:17:21 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -47,7 +47,7 @@ libfib2mrib_a_SOURCES		+= fib2mrib_node.cc
 libfib2mrib_a_SOURCES		+= xrl_fib2mrib_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	  = 
+EXTRA_DIST	  = command_fib2mrib
 
 
 ################################################################
