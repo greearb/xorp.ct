@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.6 2003/10/03 00:14:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.7 2003/10/05 19:08:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -135,9 +135,9 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
 	    }
 	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWADDR)
-		nlm_newdeladdr_to_fea_cfg(ifc(), it, ifaddrmsg, rta_len, true);
-	    else
 		nlm_newdeladdr_to_fea_cfg(ifc(), it, ifaddrmsg, rta_len, false);
+	    else
+		nlm_newdeladdr_to_fea_cfg(ifc(), it, ifaddrmsg, rta_len, true);
 	    recognized = true;
 	}
 	break;
