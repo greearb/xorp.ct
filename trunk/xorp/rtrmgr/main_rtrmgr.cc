@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.8 2003/04/22 19:42:17 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.9 2003/04/22 23:43:01 mjh Exp $"
 
 #include <signal.h>
 
@@ -38,7 +38,7 @@
 //
 // Defaults
 //
-static bool 	   default_no_execute 	       = false;
+static bool 	   default_do_exec 	       = true;
 static const char* default_config_boot	       = "config.boot";
 static const char* default_config_template_dir = "../etc/templates";
 static const char* default_xrl_dir 	       = "../xrl/targets";
@@ -59,7 +59,7 @@ usage(const char *name)
 
     fprintf(stderr, 
 	    "\t-n		do not execute XRLs		[ %s ]\n",
-	    default_no_execute ? "true" : "false");
+	    default_do_exec ? "false" : "true");
 
     fprintf(stderr, 
 	    "\t-b config.boot	specify boot file 		[ %s ]\n",
@@ -94,7 +94,7 @@ main(int argc, char* const argv[])
 
     RandomGen randgen;    
 
-    bool no_execute = default_no_execute;
+    bool do_exec = default_do_exec;
     const char*	config_template_dir = default_config_template_dir;
     const char*	xrl_dir 	    = default_xrl_dir;
     const char*	config_boot         = default_config_boot;
@@ -113,7 +113,7 @@ main(int argc, char* const argv[])
 	    xrl_dir = optarg;
 	    break;
 	case 'n':
-	    no_execute = true;
+	    do_exec = false;
 	    break;
 	case '?':
 	default:
@@ -159,10 +159,9 @@ main(int argc, char* const argv[])
 
 	//read the router startup configuration file,
 	//start the processes required, and initialize them
-	MasterConfigTree ct(config_boot, tt, mmgr, xclient, no_execute);
-	XrlRtrmgrInterface rtrmgr_target(&xrlrouter, &userdb,
-					     &ct, eventloop,
-					     &randgen);
+	MasterConfigTree ct(config_boot, tt, mmgr, xclient, do_exec);
+	XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
+					 ct, eventloop, randgen);
 
 	//loop while handling configuration events and signals
 	while (running) {

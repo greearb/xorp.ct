@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.6 2003/04/22 19:42:18 mjh Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.7 2003/04/22 23:43:02 mjh Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -44,9 +44,9 @@ public:
     typedef XorpCallback2<void, int, const string&>::RefPtr CommitCallback;
     int start(CommitCallback ending_cb);
     int add_xrl(const UnexpandedXrl &xrl, XCCommandCallback cb, 
-		bool no_execute, uint32_t retries = 0, uint32_t retry_ms = 0);
+		bool do_exec, uint32_t retries = 0, uint32_t retry_ms = 0);
     int add_module_start(ModuleManager& mmgr, Module* module,
-			 XCCommandCallback cb, bool no_execute);
+			 XCCommandCallback cb, bool do_exec);
     
     void batch_item_done(XorpBatchItem* tran_xrl, bool status, 
 			 const string& errmsg);
@@ -65,21 +65,21 @@ private:
 
 class XorpBatchItem {
 public:
-    XorpBatchItem(XrlRouter::XrlCallback cb, bool no_execute);
+    XorpBatchItem(XrlRouter::XrlCallback cb, bool do_exec);
     virtual ~XorpBatchItem() {};
     virtual int execute(XorpClient& xclient, XorpBatch *batch, 
 			string& errmsg) = 0;
 protected:
     XCCommandCallback _callback;
     XorpBatch* _batch;
-    bool _no_execute;
+    bool _do_exec;
 };
 
 class XorpBatchXrlItem : public XorpBatchItem {
 public:
     XorpBatchXrlItem(const UnexpandedXrl&     xrl,
 		     const XCCommandCallback& cb,
-		     bool		      no_execute,
+		     bool		      do_exec,
 		     uint32_t		      retries = 0,
 		     uint32_t 		      retry_ms = 1000);
 
@@ -106,7 +106,7 @@ class XorpBatchModuleItem : public XorpBatchItem {
 public:
     XorpBatchModuleItem(ModuleManager& mmgr, Module* module,
 			bool start,
-			XCCommandCallback cb, bool no_execute);
+			XCCommandCallback cb, bool do_exec);
     int execute(XorpClient& xclient, XorpBatch *batch, 
 		string& errmsg);
     void response_callback(bool success, string errmsg);
@@ -124,15 +124,15 @@ public:
     int send_xrl(uint tid, 
 		 const UnexpandedXrl &xrl, 
 		 XrlRouter::XrlCallback cb,
-		 bool no_execute,
+		 bool do_exec,
 		 uint32_t retries = 0,
 		 uint32_t retry_ms = 0);
     int start_module(uint tid, ModuleManager& mmgr, Module* module,
-		     XCCommandCallback cb, bool no_execute);
+		     XCCommandCallback cb, bool do_exec);
     int stop_module(uint tid, ModuleManager& mmgr, Module* module,
-		    XCCommandCallback cb, bool no_execute);
+		    XCCommandCallback cb, bool do_exec);
     int send_now(const Xrl &xrl, XrlRouter::XrlCallback cb, 
-		 const string& expected_response, bool no_execute);
+		 const string& expected_response, bool do_exec);
     XrlArgs fake_return_args(const string& xrl_return_spec);
 
     uint begin_transaction();

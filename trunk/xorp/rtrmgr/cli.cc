@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.2 2003/03/10 23:20:58 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -32,7 +32,7 @@ RouterCLI::RouterCLI(XorpShell* xorpsh,
     _cli_client = &cli_client;
     _changes_made = false;
 
-    _current_config_node = config_tree()->root();
+    _current_config_node = &(config_tree()->root());
 
     _mode = CLI_MODE_NONE;
     operational_mode();

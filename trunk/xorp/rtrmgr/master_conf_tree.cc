@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.5 2003/03/10 23:20:59 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.6 2003/04/22 23:43:01 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,10 +33,10 @@ extern string booterrormsg(const char *s);
 
 MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt, 
 				   ModuleManager &mm,
-				   XorpClient &xclient, bool no_execute) 
+				   XorpClient &xclient, bool do_exec) 
     : ConfigTree(tt), _module_manager(mm), _xclient(xclient)
 {
-    _no_execute = no_execute;
+    _do_exec = do_exec;
 
     string configuration;
     string errmsg;
@@ -116,15 +116,15 @@ void MasterConfigTree::execute() {
     //configure the modules in the order of their dependencies
     _root_node.initialize_commit();
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_start(*i, tid, /*no_commit = */false, result)) {
+	if (!module_config_start(*i, tid, /*do_commit = */true, result)) {
 	    XLOG_FATAL(result.c_str());
 	}
 	if (!_root_node.commit_changes(_module_manager, *i, _xclient, tid,
-				       _no_execute, /*_no_commit=*/false,
+				       _do_exec, /*_do_commit=*/true,
 				       0, 0, result)) {
 	    XLOG_FATAL(("Initialization Failed\n" + result).c_str());
 	}
-	if (!module_config_done(*i, tid, /*no_commit = */false, result)) {
+	if (!module_config_done(*i, tid, /*do_commit = */true, result)) {
 	    XLOG_FATAL(result.c_str());
 	}
     }
@@ -295,19 +295,19 @@ MasterConfigTree::commit_changes(string &result,
     _root_node.initialize_commit();
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_start(*i, tid, /*no_commit = */true, result)) {
+	if (!module_config_start(*i, tid, /*do_commit = */false, result)) {
 	    return false;
 	}
 	if (_root_node.commit_changes(_module_manager, *i,
 				      _xclient, tid, 
-				      _no_execute, 
-				      /*no_commit = */true, 
+				      _do_exec, 
+				      /*do_commit = */false, 
 				      0, 0, 
 				      result) == false) {
 	    //something went wrong - return the error message.
 	    return false;
 	}
-	if (!module_config_done(*i, tid, /*no_commit = */true, result)) {
+	if (!module_config_done(*i, tid, /*do_commit = */false, result)) {
 	    return false;
 	}
     }
@@ -324,18 +324,18 @@ MasterConfigTree::commit_changes(string &result,
     result = "";
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_start(*i, tid, /*no_commit = */true, result)) {
+	if (!module_config_start(*i, tid, /*do_commit = */false, result)) {
 	    return false;
 	}
 	if (!_root_node.commit_changes(_module_manager, *i,
 				       _xclient, tid,
-				       _no_execute, 
-				       /*no_commit = */false, 
+				       _do_exec, 
+				       /*do_commit = */true, 
 				       0, 0, result)) {
 	    //abort the commit
 	    return false;
 	}
-	if (!module_config_done(*i, tid, /*no_commit = */true, result)) {
+	if (!module_config_done(*i, tid, /*do_commit = */false, result)) {
 	    return false;
 	}
     }
@@ -683,7 +683,7 @@ MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 
 bool
 MasterConfigTree::module_config_start(const string& module_name,
-				      uint tid, bool no_commit, 
+				      uint tid, bool do_commit, 
 				      string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
@@ -692,13 +692,13 @@ MasterConfigTree::module_config_start(const string& module_name,
 	return false;
     }
     cmd->execute(_xclient, tid, _module_manager, 
-		 _no_execute, no_commit);
+		 _do_exec, do_commit);
     return true;
 }
 
 bool
 MasterConfigTree::module_config_done(const string& module_name,
-				     uint tid, bool no_commit,
+				     uint tid, bool do_commit,
 				     string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
@@ -709,7 +709,7 @@ MasterConfigTree::module_config_done(const string& module_name,
     //XXX this is where we might stop a module if it were no longer needed.
     //TBD
     UNUSED(tid);
-    UNUSED(no_commit);
+    UNUSED(do_commit);
     return true;
 }
 

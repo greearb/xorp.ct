@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.13 2003/04/22 23:43:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.14 2003/04/23 00:28:39 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -22,7 +22,7 @@
 #include "libxipc/xrl_router.hh"
 #include "libxipc/xrl_router.hh"
 
-Action::Action(const list<string> &action) 
+Action::Action(const list<string>& action) 
     throw (ParseError) 
 {
 
@@ -110,7 +110,7 @@ Action::str() const {
 
 /***********************************************************************/
 
-XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb) 
+XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb) 
      throw (ParseError) : Action(action)
 {
     debug_msg("XrlAction constructor\n");
@@ -292,7 +292,7 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 int
 Action::execute(const ConfigTreeNode& ctn,
 		XorpClient *xclient,  uint tid,
-		bool no_execute, XCCommandCallback cb) const {
+		bool do_exec, XCCommandCallback cb) const {
 
     //go through the split command, doing variable substitution
     //put split words back together, and remove special "\n" characters
@@ -377,7 +377,7 @@ Action::execute(const ConfigTreeNode& ctn,
 	if ((args[1])[0]=='"' && args[1][args[1].size()-1]=='"')
 	    args[1] = args[1].substr(1,args[1].size()-2);
 	debug_msg("CALL XRL: %s\n", args[1].c_str());
-	result = xclient.run_command(tid, ctn, args[1], cb, no_execute);
+	result = xclient.run_command(tid, ctn, args[1], cb, do_exec);
 	if ((i>=4) && !(args[3].empty()))
 	    debug_msg("Need to do something here to get the response back\n");
     } else {
@@ -392,9 +392,9 @@ Action::execute(const ConfigTreeNode& ctn,
 #endif
 
 int
-XrlAction::execute(const ConfigTreeNode &ctn,
-		   XorpClient &xclient,  uint tid,
-		   bool no_execute, XCCommandCallback cb) const {
+XrlAction::execute(const ConfigTreeNode& ctn,
+		   XorpClient& xclient,  uint tid,
+		   bool do_exec, XCCommandCallback cb) const {
 
     //first, go back through and merge all the separate words in the
     //command back together.
@@ -446,7 +446,7 @@ XrlAction::execute(const ConfigTreeNode &ctn,
 	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
 
 	UnexpandedXrl x(&ctn, this);
-	result = xclient.send_xrl(tid, x, cb, no_execute);
+	result = xclient.send_xrl(tid, x, cb, do_exec);
 	debug_msg("result = %d\n", result);
     } else {
 	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
@@ -531,7 +531,7 @@ string XrlAction::affected_module() const {
     return _request.substr(0, end);
 }
 
-Command::Command(const string &cmd_name) {
+Command::Command(const string& cmd_name) {
     _cmd_name = cmd_name;
 }
 
@@ -543,7 +543,7 @@ Command::~Command() {
 }
 
 void 
-Command::add_action(const list <string> &action, const XRLdb& xrldb) {
+Command::add_action(const list <string>& action, const XRLdb& xrldb) {
     if (action.front()=="xrl") {
 	_actions.push_back(new XrlAction(action, xrldb));
     } else {
@@ -552,15 +552,15 @@ Command::add_action(const list <string> &action, const XRLdb& xrldb) {
 }
 
 int
-Command::execute(ConfigTreeNode &ctn,
-		 XorpClient &xclient, uint tid, bool no_execute) const {
+Command::execute(ConfigTreeNode& ctn,
+		 XorpClient& xclient, uint tid, bool do_exec) const {
     int result = 0;
     int actions = 0;
     list <Action*>::const_iterator i;
     for (i= _actions.begin(); i != _actions.end(); i++) {
 	const XrlAction *xa = dynamic_cast<const XrlAction*>(*i);
 	if (xa!=NULL) {
-	    result = xa->execute(ctn, xclient, tid, no_execute,
+	    result = xa->execute(ctn, xclient, tid, do_exec,
 				 callback(const_cast<Command*>(this), 
 					  &Command::action_complete, &ctn));
 	} else {
@@ -635,7 +635,7 @@ ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
 }
 
 void 
-ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb) 
+ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb) 
     throw (ParseError)
 {
     if ((action.size() == 3) 
@@ -714,20 +714,20 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
 }
 
 int 
-ModuleCommand::execute(XorpClient &xclient, uint tid,
-		       ModuleManager &module_manager, 
-		       bool no_execute, 
-		       bool no_commit) const {
-    debug_msg("ModuleCommand::execute %s (no_execute %d, no_commit %d)\n",
-	      _modname.c_str(), no_execute, no_commit);
-    if (no_commit == false) {
-	debug_msg("no_commit == false\n");
+ModuleCommand::execute(XorpClient& xclient, uint tid,
+		       ModuleManager& module_manager, 
+		       bool do_exec, 
+		       bool do_commit) const {
+    debug_msg("ModuleCommand::execute %s (do_exec %d, do_commit %d)\n",
+	      _modname.c_str(), do_exec, do_commit);
+    if (do_commit) {
+	debug_msg("do_commit == true\n");
 	//OK, we're actually going to do the commit
 
 	//find or create the module in the module manager
 	Module *m = module_manager.find_module(_modname);
 	if (m == NULL) {
-	    m = module_manager.new_module(this);
+	    m = module_manager.new_module(*this);
 	    if (m == NULL)
 		return XORP_ERROR;
 	} else {
@@ -737,9 +737,9 @@ ModuleCommand::execute(XorpClient &xclient, uint tid,
 
 	debug_msg("Starting module\n");
 	XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
-					    &ModuleCommand::exec_complete);
+					&ModuleCommand::exec_complete);
 	int r = xclient.start_module(tid, module_manager, m, cb,
-				      no_execute);
+				      do_exec);
 
 	XrlAction* xrl_procready = dynamic_cast<XrlAction*>(_procready);
 	if (xrl_procready) {
@@ -747,7 +747,7 @@ ModuleCommand::execute(XorpClient &xclient, uint tid,
 		      xrl_procready->request().c_str());
 	    int r2 = xclient.send_xrl(tid,
 				      UnexpandedXrl(0, xrl_procready),
-				      0, no_execute, 30, 250);
+				      0, do_exec, 30, 250);
 	    debug_msg("Send Xrl okay %d\n", r2 == XORP_OK);
 	}
 	return r;
@@ -759,11 +759,11 @@ ModuleCommand::execute(XorpClient &xclient, uint tid,
 }
 
 int 
-ModuleCommand::start_transaction(ConfigTreeNode &ctn,
-				 XorpClient &xclient,  uint tid, 
-				 bool no_execute, 
-				 bool no_commit) const {
-    if (_startcommit == NULL || no_commit)
+ModuleCommand::start_transaction(ConfigTreeNode& ctn,
+				 XorpClient& xclient,  uint tid, 
+				 bool do_exec, 
+				 bool do_commit) const {
+    if (_startcommit == NULL || do_commit == false)
 	return XORP_OK;
     debug_msg("\n\n****! start_transaction on %s \n", ctn.segname().c_str());
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
@@ -772,17 +772,17 @@ ModuleCommand::start_transaction(ConfigTreeNode &ctn,
 				    string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
     if (xa != NULL) {
-	return xa->execute(ctn, xclient, tid, no_execute, cb);
+	return xa->execute(ctn, xclient, tid, do_exec, cb);
     } 
     abort();
 }
 
 int 
-ModuleCommand::end_transaction(ConfigTreeNode &ctn,
-			       XorpClient &xclient,  uint tid, 
-			       bool no_execute, 
-			       bool no_commit) const {
-    if (_endcommit == NULL || no_commit)
+ModuleCommand::end_transaction(ConfigTreeNode& ctn,
+			       XorpClient& xclient,  uint tid, 
+			       bool do_exec, 
+			       bool do_commit) const {
+    if (_endcommit == NULL || do_commit == false)
 	return XORP_OK;
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 				    &ModuleCommand::action_complete,
@@ -790,7 +790,7 @@ ModuleCommand::end_transaction(ConfigTreeNode &ctn,
 				    string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
     if (xa != NULL) {
-	return xa->execute(ctn, xclient, tid, no_execute, cb);
+	return xa->execute(ctn, xclient, tid, do_exec, cb);
     } 
     abort();
 }
@@ -915,13 +915,13 @@ ModuleCommand::action_complete(const XrlError& err,
 }
 
 
-AllowCommand::AllowCommand(const string &cmd_name)
+AllowCommand::AllowCommand(const string& cmd_name)
     : Command(cmd_name)
 {
 }
 
 void 
-AllowCommand::add_action(const list <string> &action) 
+AllowCommand::add_action(const list <string>& action) 
     throw (ParseError)
 {
     debug_msg("AllowCommand::add_action\n");

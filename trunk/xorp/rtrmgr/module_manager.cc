@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.4 2003/03/10 23:21:00 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.5 2003/04/22 19:42:17 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -44,10 +44,10 @@ static void childhandler(int x) {
     module_pids[pid]->failed();
 }
 
-Module::Module(const ModuleCommand* cmd)
+Module::Module(const ModuleCommand& cmd)
+    : _cmd(cmd)
 {
-    _cmd = cmd;
-    _name = cmd->name();
+    _name = cmd.name();
 }
 
 int Module::set_execution_path(const string &path) {
@@ -106,14 +106,14 @@ int Module::set_execution_path(const string &path) {
     return XORP_OK;
 }
 
-int Module::run(bool no_execute)
+int Module::run(bool do_exec)
 {
     printf("**********************************************************\n");
     printf("running module: %s path: %s\n", _name.c_str(), _path.c_str());
     printf("**********************************************************\n");
-    _no_execute = no_execute;
+    _do_exec = do_exec;
 
-    if (_no_execute)
+    if (!_do_exec)
 	return XORP_OK;
 	
     signal(SIGCHLD, childhandler);
@@ -153,7 +153,7 @@ void Module::module_run_done(bool success) {
 
 Module::~Module() {
     printf("Shutting down %s\n", _name.c_str());
-    if (_no_execute)
+    if (!_do_exec)
 	return;
     if (_status != MODULE_FAILED) {
 	_status = MODULE_SHUTDOWN;
@@ -182,21 +182,6 @@ Module::failed() {
     printf("need to restart module %s\n", _name.c_str());
 }
 
-int 
-Module::start_transaction(XorpClient* /*_xclient*/, uint /*tid*/, 
-			  bool /*no_execute*/, bool /*no_commit*/) const {
-    //XXX
-    abort();
-    return XORP_OK;
-}
-
-int 
-Module::end_transaction(XorpClient* /*_xclient*/, uint /*tid*/, 
-			bool /*no_execute*/, bool /*no_commit*/) const {
-    //XXX
-    abort();
-    return XORP_OK;
-}
 
 string
 Module::str() const {
@@ -218,16 +203,16 @@ ModuleManager::~ModuleManager() {
 }
 
 Module *
-ModuleManager::new_module(const ModuleCommand* cmd) {
-    printf("ModuleManager::new_module %s\n", cmd->name().c_str());
-    string name = cmd->name();
+ModuleManager::new_module(const ModuleCommand& cmd) {
+    printf("ModuleManager::new_module %s\n", cmd.name().c_str());
+    string name = cmd.name();
     map<string, Module *>::iterator found_mod;
     found_mod = _modules.find(name);
     if (found_mod == _modules.end()) {
 	Module *newmod;
 	newmod = new Module(cmd);
 	_modules[name] = newmod;
-	if (newmod->set_execution_path(cmd->path()) != XORP_OK)
+	if (newmod->set_execution_path(cmd.path()) != XORP_OK)
 	    return NULL;
 	return newmod;
     } else {
@@ -237,8 +222,8 @@ ModuleManager::new_module(const ModuleCommand* cmd) {
 }
 
 int 
-ModuleManager::run_module(Module *m, bool no_execute) {
-    return m->run(no_execute);
+ModuleManager::run_module(Module& m, bool do_exec) {
+    return m.run(do_exec);
 }
 
 bool

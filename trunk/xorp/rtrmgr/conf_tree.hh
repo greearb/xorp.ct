@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.2 2003/03/10 23:20:59 hodson Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -47,8 +47,8 @@ public:
     string path_as_string(const list <string>& pathsegs) const;
     TemplateTreeNode *find_template(const list<string>& pathsegs) 
 	throw (ParseError);
-    ConfigTreeNode *root() {return &_root_node;}
-    const ConfigTreeNode *const_root() const {return &_root_node;}
+    ConfigTreeNode& root() {return _root_node;}
+    const ConfigTreeNode& const_root() const {return _root_node;}
     ConfigTreeNode *find_node(const list <string>& path);
     string show_subtree(const list <string>& pathsegs) const;
     string show_tree() const;

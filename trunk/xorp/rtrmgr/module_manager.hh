@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.4 2003/03/10 23:21:00 hodson Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.5 2003/04/22 19:42:17 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -41,31 +41,25 @@ public:
 
 class Module {
 public:
-    Module(const ModuleCommand* cmd);
+    Module(const ModuleCommand& cmd);
     int set_execution_path(const string &path);
     ~Module();
-    int run(bool no_execute);
+    int run(bool do_exec);
     void module_run_done(bool success);
-    int start_transaction(XorpClient* _xclient, uint tid, 
-			  bool no_execute, bool no_commit) const;
-    int end_transaction(XorpClient* _xclient, uint tid, 
-			bool no_execute, bool no_commit) const;
     void failed();
     bool is_running() const {return _running;}
     string str() const;
 private:
-    int do_transaction(XrlAction* xa, XorpClient* _xclient, uint tid, 
-		       bool no_execute, bool no_commit) const;
     string _name;
     string _path; //relative path
     string _expath; //absolute path
     bool _running;
     pid_t _pid;
     int _status;
-    bool _no_execute; //indicates we're running in debug mode, so
-                      //shouldn't actually start any processes
+    bool _do_exec; //false indicates we're running in debug mode, so
+                   //shouldn't actually start any processes
 
-    const ModuleCommand* _cmd;
+    const ModuleCommand& _cmd;
 };
 
 class ModuleManager {
@@ -73,8 +67,8 @@ public:
     ModuleManager(EventLoop& eventloop);
 
     ~ModuleManager();
-    Module *new_module(const ModuleCommand* cmd);
-    int run_module(Module *m, bool no_execute);
+    Module *new_module(const ModuleCommand& cmd);
+    int run_module(Module& m, bool do_exec);
     Module *find_module(const string &name);
     const Module *const_find_module(const string &name) const;
     bool module_running(const string &name) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.9 2003/04/02 17:10:39 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.10 2003/04/22 23:43:01 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -215,34 +215,34 @@ ConfigTreeNode::command_status_callback(Command *cmd, bool success) {
 
 bool
 ConfigTreeNode::merge_deltas(uid_t user_id,
-			     const ConfigTreeNode *delta_node, 
+			     const ConfigTreeNode& delta_node, 
 			     bool provisional_change,
 			     string& response) {
-    assert(_segname == delta_node->segname());
+    assert(_segname == delta_node.segname());
     if (_template != NULL) {
-	assert(type() == delta_node->type());
+	assert(type() == delta_node.type());
 	if (type() == NODE_VOID) {
 	} else {
-	    if (delta_node->is_leaf()) {
-		if (_value != delta_node->value()) {
+	    if (delta_node.is_leaf()) {
+		if (_value != delta_node.value()) {
 		    _has_value = true;
 		    if (provisional_change) {
 			_committed_value = _value;
-			_value = delta_node->value();
+			_value = delta_node.value();
 			_committed_user_id = _user_id;
 			_user_id = user_id;
 			_committed_modification_time = _modification_time;
 			TimerList::system_gettimeofday(&_modification_time);
 			_value_committed = false;
 		    } else {
-			_committed_value = delta_node->value();
-			_value = delta_node->value();
-			_committed_user_id = delta_node->user_id();
-			_user_id = delta_node->user_id();
+			_committed_value = delta_node.value();
+			_value = delta_node.value();
+			_committed_user_id = delta_node.user_id();
+			_user_id = delta_node.user_id();
 			_committed_modification_time = 
-			    delta_node->modification_time();
+			    delta_node.modification_time();
 			_modification_time = 
-			    delta_node->modification_time();
+			    delta_node.modification_time();
 			_value_committed = true;
 		    }
 		    _actions_pending = 0;
@@ -254,8 +254,8 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
     }
     
     list <ConfigTreeNode*>::const_iterator dci;
-    for (dci = delta_node->const_children().begin();
-	 dci != delta_node->const_children().end();
+    for (dci = delta_node.const_children().begin();
+	 dci != delta_node.const_children().end();
 	 dci++) {
 	ConfigTreeNode *delta_child = *dci;
 	
@@ -265,7 +265,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 	    ConfigTreeNode *my_child = *ci;
 	    if (my_child->segname() == delta_child->segname()) {
 		delta_child_done = true;
-		bool success = my_child->merge_deltas(user_id, delta_child,
+		bool success = my_child->merge_deltas(user_id, *delta_child,
 						      provisional_change,
 						      response);
 		if (success == false) {
@@ -284,7 +284,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 					  user_id);
 	    if (!provisional_change)
 		new_node->set_existence_committed(true);
-	    new_node->merge_deltas(user_id, delta_child, 
+	    new_node->merge_deltas(user_id, *delta_child, 
 				   provisional_change, response);
 	}
     }
@@ -293,13 +293,13 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 
 bool
 ConfigTreeNode::merge_deletions(uid_t user_id,
-				const ConfigTreeNode *deletion_node, 
+				const ConfigTreeNode& deletion_node, 
 				bool provisional_change,
 				string& response) {
-    assert(_segname == deletion_node->segname());
+    assert(_segname == deletion_node.segname());
     if (_template != NULL) {
-	assert(type() == deletion_node->type());
-	if (deletion_node->const_children().empty()) {
+	assert(type() == deletion_node.type());
+	if (deletion_node.const_children().empty()) {
 	    if (provisional_change) {
 		_deleted = true;
 		_value_committed = false;
@@ -311,8 +311,8 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
     }
     
     list <ConfigTreeNode*>::const_iterator dci;
-    for (dci = deletion_node->const_children().begin();
-	 dci != deletion_node->const_children().end();
+    for (dci = deletion_node.const_children().begin();
+	 dci != deletion_node.const_children().end();
 	 dci++) {
 	ConfigTreeNode *deletion_child = *dci;
 	
@@ -323,7 +323,7 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 	    if (my_child->segname() == deletion_child->segname()) {
 		deletion_child_done = true;
 		bool success = my_child->merge_deletions(user_id, 
-							 deletion_child,
+							 *deletion_child,
 							 provisional_change,
 							 response);
 		if (success == false) {
@@ -334,7 +334,7 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 	    }
 	}
 	if (deletion_child_done == false) {
-	    response = "Failed to delete node:\n   " + deletion_node->path()
+	    response = "Failed to delete node:\n   " + deletion_node.path()
 		+ "\nNode does not exist.\n";
 	    return false;
 	}
@@ -403,7 +403,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 			       string module,
 			       XorpClient& xclient, 
 			       uint tid,
-			       bool no_execute, bool no_commit, 
+			       bool do_exec, bool do_commit, 
 			       int depth, int last_depth,
 			       string& result) {
     bool success = true;
@@ -411,10 +411,10 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 #ifdef DEBUG_COMMIT
     printf("*****COMMIT CHANGES node >%s< >%s<\n", _path.c_str(),
 	   _value.c_str());
-    if (no_execute)
-	printf("no_execute\n");
-    if (no_commit)
-	printf("no_commit\n");
+    if (do_exec)
+	printf("do_exec\n");
+    if (do_commit)
+	printf("do_commit\n");
     if (_existence_committed == false)
 	printf("_existence_committed == false\n");
     if (_value_committed == false)
@@ -432,8 +432,8 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 	if (modcmd != NULL 
 	    && (modcmd->name() == module)) {
 	    if (modcmd->start_transaction(*this, xclient, tid,
-					  no_execute, 
-					  no_commit) != XORP_OK) {
+					  do_exec, 
+					  do_commit) != XORP_OK) {
 		result = "Start Transaction failed for module "
 		    + module + "\n";
 		return false;
@@ -445,7 +445,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 #endif
 	    //first handle deletions
 	    if (_deleted) {
-		if (no_commit) {
+		if (do_commit == false) {
 		    //no point in checking further
 		    return true;
 		} else {
@@ -460,7 +460,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 		    if (cmd != NULL && cmd->affects_module(module)) {
 			int actions = 
 			    cmd->execute(*this, xclient, tid,
-					 no_execute);
+					 do_exec);
 			if (actions < 0) {
 			    //bad stuff happenned
 			    //XXX now what?
@@ -488,9 +488,10 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 		    try {
 			((const AllowCommand*)cmd)->execute(*this);
 		    } catch (ParseError(&pe)) {
-			//commit_changes should always be run first with
-			//no_commit set, so there can be no Allow command errors.
-			assert(no_commit == true);
+			//commit_changes should always be run first
+			//with do_commit not set, so there can be no
+			//Allow command errors.
+			assert(do_commit == false);
 			result = "Bad value for \"" + path() + "\"\n";
 			result += "No changes have been committed.\n";
 			result += "Correct this error and try again.\n";
@@ -514,10 +515,10 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 #ifdef DEBUG_COMMIT
 		    printf("found commands: %s\n", cmd->s().c_str());
 #endif
-		    if (no_commit) {
+		    if (do_commit == false) {
 			int actions = 
 			    cmd->execute(*this, xclient, tid,
-					 /*no_execute*/true);
+					 /*do_exec = */false);
 			if (actions < 0) {
 			    result = "Parameter error for \"" + path() + "\"\n";
 			    result += "No changes have been committed.\n";
@@ -531,7 +532,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 		    } else {
 			int actions = 
 			    cmd->execute(*this, xclient, tid,
-					 no_execute);
+					 do_exec);
 			if (actions < 0) {
 			    //bad stuff happenned
 			    //XXX now what?
@@ -564,7 +565,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 	string child_response;
 	success =
 	    (*previter)->commit_changes(mm, module, xclient, tid, 
-					no_execute, no_commit,
+					do_exec, do_commit,
 					depth+1, last_depth, 
 					child_response);
 	result += child_response;
@@ -582,9 +583,9 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 #ifdef DEBUG_COMMIT
 		printf("found commands: %s\n", cmd->s().c_str());
 #endif
-		if (no_commit) {
+		if (do_commit == false) {
 		    int actions = 
-			cmd->execute(*this, xclient, tid, /*no_execute*/true);
+			cmd->execute(*this, xclient, tid, /*do_exec = */false);
 		    if (actions < 0) {
 			result = "Parameter error for \"" + path() + "\"\n";
 			result += "No changes have been committed.\n";
@@ -598,7 +599,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 		} else {
 		    int actions = 
 			cmd->execute(*this, 
-				     xclient, tid, no_execute);
+				     xclient, tid, do_exec);
 		    if (actions < 0) {
 			//bad stuff happenned
 			//XXX now what?
@@ -622,8 +623,8 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 		= dynamic_cast<const ModuleCommand*>(cmd);
 	    if (modcmd != NULL && (modcmd->name() == module)) {
 		if (modcmd->end_transaction(*this, xclient, tid,
-					    no_execute, 
-					    no_commit) != XORP_OK) {
+					    do_exec, 
+					    do_commit) != XORP_OK) {
 		    result = "End Transaction failed for module "
 			+ module + "\n";
 		    return false;
@@ -954,7 +955,7 @@ ConfigTreeNode::delete_subtree_silently() {
 
 void
 ConfigTreeNode::delete_subtree(XorpClient &xclient, uint tid, 
-			       bool no_execute) {
+			       bool do_exec) {
     /* we delete all the children of this node, then delete the node
        itself */
 #ifdef DEBUG_DELETE
@@ -964,20 +965,20 @@ ConfigTreeNode::delete_subtree(XorpClient &xclient, uint tid,
     /* delete_subtree calls remove_child, so we just iterate until no
        children are left */
     while (!_children.empty()) {
-	_children.front()->delete_subtree(xclient, tid, no_execute);
+	_children.front()->delete_subtree(xclient, tid, do_exec);
     }
 
     if (_parent != NULL)
 	_parent->remove_child(this);
 
-    if ((!no_execute) && _template != NULL) {
+    if (do_exec && _template != NULL) {
 	//finally, on the way back out, we run the %delete commands
 	const Command *cmd = _template->const_command("%delete");
 	if (cmd != NULL) {
 #ifdef DEBUG_DELETE
 	    printf("found commands: %s\n", cmd->s().c_str());
 #endif
-	    cmd->execute(*this, xclient, tid, no_execute);
+	    cmd->execute(*this, xclient, tid, do_exec);
 	}
     }
 

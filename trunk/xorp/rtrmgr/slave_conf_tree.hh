@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.2 2003/03/10 23:21:01 hodson Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.3 2003/04/22 23:43:01 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -67,11 +67,11 @@ public:
     bool get_deletions(const SlaveConfigTree &main_tree);
 
     //adaptors so we don't need to cast elsewhere
-    inline SlaveConfigTreeNode* root() {
-	return (SlaveConfigTreeNode*)(((ConfigTree*)this)->root());
+    inline SlaveConfigTreeNode& root() {
+	return (SlaveConfigTreeNode&)(((ConfigTree*)this)->root());
     }
-    inline const SlaveConfigTreeNode* const_root() const {
-	return (const SlaveConfigTreeNode*)
+    inline const SlaveConfigTreeNode& const_root() const {
+	return (const SlaveConfigTreeNode&)
 	    (((const ConfigTree*)this)->const_root());
     }
     inline SlaveConfigTreeNode *find_node(const list <string>& path) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.2 2003/03/10 23:21:01 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.3 2003/04/22 23:43:01 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
@@ -74,8 +74,8 @@ SlaveConfigTree::commit_changes(string &result,
     tid = _xclient.begin_transaction();
     _root_node.initialize_commit();
     if (_root_node.commit_changes(NULL, "", _xclient, tid, 
-				  /*no_execute*/true, 
-				  /*no_commit*/true, 
+				  /*do_exec = */false, 
+				  /*do_commit = */false, 
 				  0, 0, result) == false) {
 	//something went wrong - return the error message.
 	return false;
@@ -173,7 +173,7 @@ bool SlaveConfigTree::get_deltas(const SlaveConfigTree& main_tree) {
 #ifdef DEBUG_COMMIT
     printf("SlaveConfigTree::get_deltas\n");
 #endif
-    if (root()->get_deltas(*(main_tree.const_root())) > 0) {
+    if (root().get_deltas(main_tree.const_root()) > 0) {
 #ifdef DEBUG_COMMIT
 	printf("FOUND DELTAS:\n");
 	print();
@@ -187,7 +187,7 @@ bool SlaveConfigTree::get_deletions(const SlaveConfigTree& main_tree) {
 #ifdef DEBUG_COMMIT
     printf("SlaveConfigTree::get_deltas\n");
 #endif
-    if (root()->get_deletions(*(main_tree.const_root())) > 0) {
+    if (root().get_deletions(main_tree.const_root()) > 0) {
 #ifdef DEBUG_COMMIT
 	printf("FOUND DELETIONS:>>>>\n");
 	print();

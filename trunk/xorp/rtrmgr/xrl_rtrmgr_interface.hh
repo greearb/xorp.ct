@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.2 2003/03/10 23:21:03 hodson Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.3 2003/04/22 19:42:19 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -31,8 +31,8 @@ class RandomGen;
 
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
 public:
-    XrlRtrmgrInterface(XrlRouter* r, UserDB* db, MasterConfigTree *ct,
-		       EventLoop& eventloop, RandomGen *randgen);
+    XrlRtrmgrInterface(XrlRouter& r, UserDB& db, MasterConfigTree& ct,
+		       EventLoop& eventloop, RandomGen& randgen);
     ~XrlRtrmgrInterface();
     XrlCmdError common_0_1_get_target_name(// Output values,
 					   string& name);
@@ -151,10 +151,10 @@ private:
     XrlRtrmgrClientV0p1Client _client_interface;
     multimap <uint32_t, UserInstance*> _users;
     multimap <uint32_t, UserInstance*> _config_users;
-    UserDB *_userdb;
-    MasterConfigTree *_conf_tree;
+    UserDB& _userdb;
+    MasterConfigTree& _conf_tree;
     EventLoop& _eventloop;
-    RandomGen *_randgen;
+    RandomGen& _randgen;
 
     bool _exclusive; //indicates only one user allowed in config mode
 

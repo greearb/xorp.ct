@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.7 2003/03/14 23:18:46 hodson Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.8 2003/04/22 23:43:01 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -57,7 +57,7 @@ class XrlAction : public Action {
 public:
     XrlAction(const list<string> &cmd, const XRLdb& xrldb) throw (ParseError);
     int execute(const ConfigTreeNode& ctn,
-		XorpClient &xclient, uint tid, bool no_execute,
+		XorpClient &xclient, uint tid, bool do_exec,
 		XCCommandCallback cb) const;
     string expand_xrl_variables(const ConfigTreeNode& ctn) const;
     string xrl_return_spec() const {return _response;}
@@ -80,7 +80,7 @@ public:
     void add_action(const list <string> &action,
 			    const XRLdb& xrldb);
     int execute(ConfigTreeNode& ctn,
-		XorpClient &xclient, uint tid, bool no_execute) const ;
+		XorpClient &xclient, uint tid, bool do_exec) const ;
     void action_complete(const XrlError& err, 
 			 XrlArgs* xrlargs,
 			 ConfigTreeNode *ctn);
@@ -102,8 +102,8 @@ public:
     void set_depends(const string &depends);
     int  execute(XorpClient &xclient, uint tid,
 		 ModuleManager &module_manager, 
-		 bool no_execute, 
-		 bool no_commit) const;
+		 bool do_exec, 
+		 bool do_commit) const;
 
     bool execute_completed() const;
     
@@ -112,10 +112,10 @@ public:
     const list <string>& depends() const {return _depends;}
     int start_transaction(ConfigTreeNode& ctn,
 			  XorpClient& xclient,  uint tid, 
-			  bool no_execute, bool no_commit) const;
+			  bool do_exec, bool do_commit) const;
     int end_transaction(ConfigTreeNode& ctn,
 			XorpClient& xclient,  uint tid, 
-			bool no_execute, bool no_commit) const;
+			bool do_exec, bool do_commit) const;
     string str() const;
 
 protected:
