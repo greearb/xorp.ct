@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.14 2004/10/29 01:10:05 bms Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.15 2004/11/02 22:52:14 bms Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -46,6 +46,21 @@ public:
 	cout << _net.str() << " " << _nexthop.str() << " "
 	     << c_format("%d", _metric) << "\n";
 	return _rib.add_route(_tablename, _net, _nexthop, "", "",
+			      (uint32_t)_metric, PolicyTags());
+    }
+private:
+    RIB<IPv4>& _rib;
+};
+
+class DirectRouteVifAddCommand : public RouteVifAddCommand {
+public:
+    DirectRouteVifAddCommand(RIB<IPv4>& rib)
+	: RouteVifAddCommand(), _rib(rib) {}
+    int execute() {
+	cout << "RouteVifAddCommand::execute " << _tablename << " ";
+	cout << _net.str() << " " << _vifname << " " << _nexthop.str() << " "
+	     << c_format("%d", _metric) << "\n";
+	return _rib.add_route(_tablename, _net, _nexthop, "", _vifname,
 			      (uint32_t)_metric, PolicyTags());
     }
 private:

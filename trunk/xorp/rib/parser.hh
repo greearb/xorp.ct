@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.12 2004/10/29 01:10:05 bms Exp $
+// $XORP: xorp/rib/parser.hh,v 1.13 2004/11/02 22:52:14 bms Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -306,6 +306,25 @@ public:
 protected:
     string	_tablename;
     IPv4Net	_net;
+    IPv4	_nexthop;
+    int         _metric;
+};
+
+class RouteVifAddCommand : public Command {
+public:
+    RouteVifAddCommand() : Command("route vifadd ~String ~IPv4Net ~String ~IPv4 ~Int", 5) {
+	bind_string(0, _tablename);
+	bind_ipv4net(1, _net);
+	bind_string(2, _vifname);
+	bind_ipv4(3, _nexthop);
+	bind_int(4, _metric);
+    }
+    virtual int execute() = 0;
+
+protected:
+    string	_tablename;
+    IPv4Net	_net;
+    string	_vifname;
     IPv4	_nexthop;
     int         _metric;
 };

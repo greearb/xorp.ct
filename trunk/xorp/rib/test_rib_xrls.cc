@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.36 2004/10/06 21:21:07 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.37 2004/11/02 22:52:14 bms Exp $"
 
 #include "rib_module.h"
 
@@ -48,6 +48,7 @@ public:
 	add_command(new XrlDeleteEGPTableCommand(e, xrl_client, cv));
 
 	// The following do not exist in XRL interface so use direct methods
+	add_command(new DirectRouteVifAddCommand(rib));
 	add_command(new DirectRouteVerifyCommand(rib));
 	add_command(new DirectTableOriginCommand(rib));
 

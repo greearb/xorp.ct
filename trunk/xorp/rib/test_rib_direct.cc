@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.14 2004/10/06 21:21:07 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.15 2004/11/02 22:52:14 bms Exp $"
 
 #include "rib_module.h"
 
@@ -49,6 +49,7 @@ RibParser::RibParser(RIB<IPv4>& rib)
 
     add_command(new DirectRouteAddCommand(_rib));
     add_command(new DirectRouteDeleteCommand(_rib));
+    add_command(new DirectRouteVifAddCommand(_rib));
 
     add_command(new DirectRouteVerifyCommand(_rib));
     add_command(new DirectTableOriginCommand(_rib));
