@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.2 2003/03/10 23:20:52 hodson Exp $
+// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.3 2003/06/16 22:48:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_PROTO_JOIN_PRUNE_MESSAGE_HH__
@@ -98,6 +98,9 @@ public:
 				       + 2 * sizeof(uint16_t))
 		     + _jp_sources_n * (ENCODED_SOURCE_ADDR_SIZE(_family)));
     }
+    size_t extra_source_size() const {
+	return (ENCODED_SOURCE_ADDR_SIZE(_family));
+    }
     
     int		jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 			     uint8_t group_masklen,
@@ -105,7 +108,8 @@ public:
 			     action_jp_t action_jp, uint16_t holdtime,
 			     bool new_group_bool);
     int		mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr);
-    int		network_commit(PimNbr *pim_nbr, buffer_t *buffer);
+    int		network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr);
+    int		network_send(PimVif *pim_vif, const IPvX& target_nbr_addr);
     
     uint32_t	jp_groups_n() const		{ return (_jp_groups_n);  }
     uint32_t	jp_sources_n() const		{ return (_jp_sources_n); }
@@ -130,7 +134,7 @@ private:
 //
 class PimJpSources {
 public:
-    PimJpSources() {}
+    PimJpSources() : _j_n(0), _p_n(0) {}
     ~PimJpSources() {}
     
     list<IPvX>& j_list()		{ return (_j_list);		}
@@ -139,11 +143,11 @@ public:
     bool	p_list_found(const IPvX& ipaddr);
     bool	j_list_remove(const IPvX& ipaddr);
     bool	p_list_remove(const IPvX& ipaddr);
-    uint32_t	j_n()			{ return (_j_n);		}
+    uint32_t	j_n()	const		{ return (_j_n);		}
     void	set_j_n(uint32_t v)	{ _j_n = v;			}
     void	incr_j_n()		{ _j_n++;			}
     void	decr_j_n()		{ _j_n--;			}
-    uint32_t	p_n()			{ return (_p_n);		}
+    uint32_t	p_n()	const		{ return (_p_n);		}
     void	set_p_n(uint32_t v)	{ _p_n = v;			}
     void	incr_p_n()		{ _p_n++;			}
     void	decr_p_n()		{ _p_n--;			}
@@ -163,16 +167,16 @@ private:
 class PimJpGroup {
 public:
     PimJpGroup(PimJpHeader& jp_header, int family);
-    int		family()		{ return (_family);		}
+    int		family()	const	{ return (_family);		}
     PimJpHeader& jp_header()		{ return (_jp_header);		}
-    const IPvX&	group_addr()		{ return (_group_addr);		}
+    const IPvX&	group_addr()	const	{ return (_group_addr);		}
     void	set_group_addr(const IPvX& v) { _group_addr = v;	}
-    uint8_t	group_masklen()		{ return (_group_masklen);	}
+    uint8_t	group_masklen()	const	{ return (_group_masklen);	}
     void	set_group_masklen(uint8_t v) { _group_masklen = v;	}
     void	incr_jp_groups_n()	{ jp_header().incr_jp_groups_n();  }
     void	decr_jp_groups_n()	{ jp_header().decr_jp_groups_n();  }
-    uint32_t	j_sources_n()		{ return (_j_sources_n);	}
-    uint32_t	p_sources_n()		{ return (_p_sources_n);	}
+    uint32_t	j_sources_n()	const	{ return (_j_sources_n);	}
+    uint32_t	p_sources_n()	const	{ return (_p_sources_n);	}
     void	set_j_sources_n(uint32_t v) { _j_sources_n = v; }
     void	set_p_sources_n(uint32_t v) { _p_sources_n = v; }
     void	incr_j_sources_n()	{ _j_sources_n++; jp_header().incr_jp_sources_n(); }
@@ -184,7 +188,7 @@ public:
     PimJpSources *sg()			{ return (&_sg);		}
     PimJpSources *sg_rpt()		{ return (&_sg_rpt);		}
     
-    size_t message_size() {
+    size_t message_size() const {
 	return ( ENCODED_GROUP_ADDR_SIZE(_family)
 		 + 2 * sizeof(uint16_t)
 		 + (ENCODED_SOURCE_ADDR_SIZE(_family)
@@ -195,7 +199,8 @@ public:
     }
     
 private:
-    PimJpHeader& _jp_header;		// The J/P header for the groups to (re)send
+    PimJpHeader& _jp_header;		// The J/P header for the groups
+					//   to (re)send
     int		_family;		// The address family
     IPvX	_group_addr;		// The address of the multicast group
     uint8_t	_group_masklen;		// The 'group_addr' mask length

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.14 2003/05/31 07:03:33 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.15 2003/06/16 22:48:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -247,6 +247,8 @@ public:
     //
     // Functions for sending protocol messages.
     //
+    int		pim_send(const IPvX& dst, uint8_t message_type,
+			 buffer_t *buffer);
     int		pim_hello_send();
     int		pim_hello_first_send();
     int		pim_join_prune_send(PimNbr *pim_nbr, PimJpHeader *jp_header);
@@ -303,6 +305,9 @@ public:
     size_t	usage_by_pim_mre_task() const { return (_usage_by_pim_mre_task); }
     void	incr_usage_by_pim_mre_task();
     void	decr_usage_by_pim_mre_task();
+    
+    buffer_t	*buffer_send_prepare();
+    buffer_t	*buffer_send_prepare(buffer_t *buffer);
     
 private:
     // Private functions
@@ -424,9 +429,6 @@ private:
     size_t	_usage_by_pim_mre_task;	// Counter for usage by PimMreTask
     
     // Not-so handy private functions that should go somewhere else
-    // PIM control messages send functions
-    int		pim_send(const IPvX& dst, uint8_t message_type,
-			 buffer_t *buffer);
     // PIM control messages recv functions
     int		pim_hello_recv(PimNbr *pim_nbr, const IPvX& src,
 			       const IPvX& dst, buffer_t *buffer,
@@ -463,9 +465,6 @@ private:
 					  const IPvX& source_addr,
 					  const IPvX& group_addr,
 					  uint8_t group_masklen);
-    
-    buffer_t	*buffer_send_prepare();
-    buffer_t	*buffer_send_prepare(buffer_t *buffer);
 };
 
 //

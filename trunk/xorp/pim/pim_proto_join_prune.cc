@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.3 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.4 2003/06/16 22:48:03 pavlin Exp $"
 
 
 //
@@ -341,17 +341,13 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 }
 
 //
-// TODO: move to somewhere else?
+// Send Join/Prune message(s) to a PIM neighbor.
 //
 int
 PimVif::pim_join_prune_send(PimNbr *pim_nbr, PimJpHeader *jp_header)
 {
-    int ret_value = XORP_ERROR;
-    buffer_t *buffer = buffer_send_prepare();
-    if (jp_header->network_commit(pim_nbr, buffer) == XORP_OK) {
-	ret_value = pim_send(IPvX::PIM_ROUTERS(family()), PIM_JOIN_PRUNE,
-			     buffer);
-    }
+    int ret_value = jp_header->network_commit(this, pim_nbr->addr());
+    
     jp_header->reset();
     
     return (ret_value);

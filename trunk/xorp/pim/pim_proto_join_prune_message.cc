@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.9 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.10 2003/06/16 22:48:03 pavlin Exp $"
 
 
 //
@@ -164,8 +164,8 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     PimJpSources *jp_sources = NULL;
     
     if (! new_group_bool) {
-	// Allow to merge togeter all entries for the same group.
-	// Find the group entry
+	// Allow to merge together all entries for the same group.
+	// Try to find the group entry.
 	list<PimJpGroup *>::iterator iter;
 	for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
 	     ++iter) {
@@ -181,24 +181,16 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     if ( ! jp_group_found_bool) {
 	// Create a new entry
 	jp_group = new PimJpGroup(*this, family());
-#if 0	// TODO: if we want the (*,*,RP) messages to be in front the
-	// outgoing J/P messages, this is the place to take care of it.
-	// XXX: disable it for now
-	// XXX: the (*,*,RP) entries are first in the chain
-	if (mrt_entry_type == MRT_ENTRY_RP)
-	    _jp_groups_list.push_front(jp_group);
-	else
-#endif // 0
-	    _jp_groups_list.push_back(jp_group);
+	_jp_groups_list.push_back(jp_group);
 	jp_group->set_group_addr(group_addr);
 	jp_group->set_group_masklen(group_masklen);
 	incr_jp_groups_n();
     }
-    _holdtime = holdtime;	// XXX: older holdtime may be modified
+    _holdtime = holdtime;	// XXX: the older holdtime may be modified
     XLOG_ASSERT(jp_group != NULL);
     
     // Perform sanity check for conflicting entries,
-    // as well as find the type of entry.
+    // and at the same time find the type of entry.
     // XXX: the '?' entries in the J/P rules table are accepted
     // (see the J/P messages format section in the spec).
     switch(mrt_entry_type) {
@@ -222,26 +214,36 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 		return (XORP_OK);		// Already added; ignore.
 	    if (jp_group->wc()->p_list_found(source_addr))
 		return (XORP_ERROR);	// Combination not allowed
-	    // Remove redundant entries: (S,G,rpt)J
-	    jp_group->sg_rpt()->j_list_remove(source_addr);
+	    // Remove redundant entries: all (S,G,rpt)J
+	    while (! jp_group->sg_rpt()->j_list().empty()) {
+		const IPvX& addr = *jp_group->sg_rpt()->j_list().begin();
+		jp_group->sg_rpt()->j_list_remove(addr);
+	    }
 	} else {
 	    // (*,G) Prune
 	    if (jp_group->wc()->j_list_found(source_addr))
 		return (XORP_ERROR);	// Combination not allowed
 	    if (jp_group->wc()->p_list_found(source_addr))
 		return (XORP_OK);		// Already added; ignore.
-	    // Remove redundant entries: (S,G,rpt)J and (S,G,rpt)P
-	    jp_group->sg_rpt()->j_list_remove(source_addr);
-	    jp_group->sg_rpt()->p_list_remove(source_addr);
+	    // Remove redundant entries: all (S,G,rpt)J
+	    while (! jp_group->sg_rpt()->j_list().empty()) {
+		const IPvX& addr = *jp_group->sg_rpt()->j_list().begin();
+		jp_group->sg_rpt()->j_list_remove(addr);
+	    }
+	    // Remove redundant entries: all (S,G,rpt)P
+	    while (! jp_group->sg_rpt()->p_list().empty()) {
+		const IPvX& addr = *jp_group->sg_rpt()->p_list().begin();
+		jp_group->sg_rpt()->p_list_remove(addr);
+	    }
 	}
 	jp_sources = jp_group->wc();
 	break;
 	
     case MRT_ENTRY_SG_RPT:
 	if (action_jp == ACTION_JOIN) {
-	    if (jp_group->wc()->j_list_found(source_addr))
+	    if (! jp_group->wc()->j_list().empty())
 		return (XORP_OK);		// Redundant; ignore.
-	    if (jp_group->wc()->p_list_found(source_addr))
+	    if (! jp_group->wc()->p_list().empty())
 		return (XORP_OK);		// Redundant; ignore.
 	    // (S,G,rpt) Join
 	    if (jp_group->sg_rpt()->j_list_found(source_addr))
@@ -250,7 +252,7 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 		return (XORP_ERROR);	// Combination not allowed
 	} else {
 	    // (S,G,rpt) Prune
-	    if (jp_group->wc()->p_list_found(source_addr))
+	    if (! jp_group->wc()->p_list().empty())
 		return (XORP_OK);		// Redundant; ignore.
 	    if (jp_group->sg_rpt()->j_list_found(source_addr))
 		return (XORP_ERROR);	// Combination not allowed
@@ -689,20 +691,19 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     return (XORP_ERROR);
 }
 
-// XXX: @buffer must have been prepared in advance
 int
-PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
+PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 {
-    uint8_t	source_masklen;
-    uint32_t	flags;
-    IPvX	source_addr(family());
+    // const size_t max_packet_size = PIM_MAXPACKET(family());
+    const size_t max_packet_size = 500;
+    IPvX source_addr(family());
+    PimJpHeader jp_header(pim_node());
     list<PimJpGroup *>::iterator iter;
-    uint8_t sparse_bit = pim_node().proto_is_pimsm() ? ESADDR_S_BIT : 0;
     
+    //
     // Add first all (S,G,rpt) entries that need to be included
-    // with the (*,G) Join messages
-    // TODO: we must check message size, and eventually split the message
-    // when necessary.
+    // with the (*,G) Join messages.
+    //
     for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
 	 ++iter) {
 	list<IPvX>::iterator iter2;
@@ -774,7 +775,7 @@ PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
 	    add_prune_sg_rpt_label2:
 		do {
 		    //
-		    // XXX: check if we added already the entry because
+		    // XXX: check if already we added the entry because
 		    // of an (S,G) entry.
 		    //
 		    PimMre *pim_mre_sg = pim_mre_sg_rpt->sg_rpt_entry();
@@ -798,14 +799,301 @@ PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
 	}
     }
     
-    // Create the message
-    PUT_ENCODED_UNICAST_ADDR(family(), pim_nbr->addr(), buffer);
-    BUFFER_PUT_OCTET(0, buffer);			// Reserved
-    BUFFER_PUT_OCTET(_jp_groups_n, buffer);		// Number of groups
-    BUFFER_PUT_HOST_16(_holdtime, buffer);		// Holdtime
+    //
+    // Create the output message(s) and send them one-by-one.
+    //
+    for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
+	 ++iter) {
+	list<IPvX>::iterator iter2;
+	PimJpGroup *jp_group = *iter;
+	
+	//
+	// Check if the group number is too large
+	//
+	if (jp_header.jp_groups_n() == 0xff) {
+	    // Send what we have already
+	    if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		return (XORP_ERROR);
+	    jp_header.reset();
+	}
+	
+	//
+	// Check the result message size if we add this group
+	//
+	if (jp_header.message_size() + jp_group->message_size()
+	    > max_packet_size) {
+	    if (jp_header.jp_groups_n() > 0) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+	    }
+	}
+	
+	//
+	// Start adding the Join/Prune entries for the group
+	//
+	size_t j_sources_n = 0;		// Number of join sources per group
+	size_t p_sources_n = 0;		// Number of prune sources per group
+	
+	//
+	// Add as much (*,*,RP) Join/Prune sources (i.e., the RPs) as we can
+	//
+	// (*,*,RP) Join
+	for (iter2 = jp_group->rp()->j_list().begin();
+	     iter2 != jp_group->rp()->j_list().end();
+	     ++iter2) {
+	    if ((j_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    j_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_RP,
+				   ACTION_JOIN,
+				   _holdtime,
+				   false);
+	}
+	// (*,*,RP) Prune
+	for (iter2 = jp_group->rp()->p_list().begin();
+	     iter2 != jp_group->rp()->p_list().end();
+	     ++iter2) {
+	    if ((p_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    p_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_RP,
+				   ACTION_PRUNE,
+				   _holdtime,
+				   false);
+	}
+	
+	//
+	// Add as much (*,G) Join/Prune sources (i.e., the RPs) as we can
+	//
+	// (*,G) Join
+	for (iter2 = jp_group->wc()->j_list().begin();
+	     iter2 != jp_group->wc()->j_list().end();
+	     ++iter2) {
+	    if ((j_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    j_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_WC,
+				   ACTION_JOIN,
+				   _holdtime,
+				   false);
+	}
+	// (*,G) Prune
+	for (iter2 = jp_group->wc()->p_list().begin();
+	     iter2 != jp_group->wc()->p_list().end();
+	     ++iter2) {
+	    if ((p_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    p_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_WC,
+				   ACTION_PRUNE,
+				   _holdtime,
+				   false);
+	}
+	
+	//
+	// Add as much (S,G,rpt) Join/Prune sources as we can
+	//
+	// (S,G,rpt) Prune
+	// XXX: if we are sending (*,G) Join, and if we can fit only N
+	// (S,G,rpt) Prune entries, then we MUST choose to include
+	// the first N (numerically smallest) addresses.
+	// Hence, first we order the (S,G,rpt) addresses, and then we add them.
+	map<IPvX, IPvX> addrs_map;
+	map<IPvX, IPvX>::iterator map_iter;
+	// Order the addresses
+	for (iter2 = jp_group->sg_rpt()->p_list().begin();
+	     iter2 != jp_group->sg_rpt()->p_list().end();
+	     ++iter2) {
+	    source_addr = *iter2;
+	    addrs_map.insert(pair<IPvX, IPvX>(source_addr, source_addr));
+	}
+	// Add as much addresses as we can
+	for (map_iter = addrs_map.begin(); map_iter != addrs_map.end();
+	     ++map_iter) {
+	    if ((p_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+		// If we have (*,G) Join entry, do not add the rest of the
+		// (S,G,rpt) Prune entries.
+		if (! jp_group->wc()->j_list().empty())
+		    break;
+	    }
+	    p_sources_n++;
+	    source_addr = map_iter->second;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_SG_RPT,
+				   ACTION_PRUNE,
+				   _holdtime,
+				   false);
+	}
+	// (S,G,rpt) Join
+	for (iter2 = jp_group->sg_rpt()->j_list().begin();
+	     iter2 != jp_group->sg_rpt()->j_list().end();
+	     ++iter2) {
+	    if ((j_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    j_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_SG_RPT,
+				   ACTION_JOIN,
+				   _holdtime,
+				   false);
+	}
+
+	//
+	// Add as much (S,G) Join/Prune sources as we can
+	//
+	// (S,G) Join
+	for (iter2 = jp_group->sg()->j_list().begin();
+	     iter2 != jp_group->sg()->j_list().end();
+	     ++iter2) {
+	    if ((j_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    j_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_SG,
+				   ACTION_JOIN,
+				   _holdtime,
+				   false);
+	}
+	// (S,G) Prune
+	for (iter2 = jp_group->sg()->p_list().begin();
+	     iter2 != jp_group->sg()->p_list().end();
+	     ++iter2) {
+	    if ((p_sources_n == 0xffff)
+		|| (jp_header.message_size() + jp_header.extra_source_size()
+		    > max_packet_size)) {
+		// Send what we have already
+		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		    return (XORP_ERROR);
+		jp_header.reset();
+		j_sources_n = 0;
+		p_sources_n = 0;
+	    }
+	    p_sources_n++;
+	    source_addr = *iter2;
+	    jp_header.jp_entry_add(source_addr,
+				   jp_group->group_addr(),
+				   jp_group->group_masklen(),
+				   MRT_ENTRY_SG,
+				   ACTION_PRUNE,
+				   _holdtime,
+				   false);
+	}
+    }
     
-    // TODO: we must check message size, and eventually split the message
-    // when necessary.
+    // Sent the last fragment (if such)
+    if (jp_header.jp_groups_n() > 0) {
+	if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+	    return (XORP_ERROR);
+	jp_header.reset();
+    }
+    
+    return (XORP_OK);
+}
+
+int
+PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
+{
+    uint32_t	flags;
+    uint8_t	source_masklen;
+    IPvX	source_addr(family());
+    list<PimJpGroup *>::iterator iter;
+    uint8_t sparse_bit = pim_node().proto_is_pimsm() ? ESADDR_S_BIT : 0;
+    buffer_t *buffer = NULL;
+    
+    //
+    // Prepare a new buffer
+    //
+    buffer = pim_vif->buffer_send_prepare();
+    PUT_ENCODED_UNICAST_ADDR(family(), target_nbr_addr, buffer);
+    BUFFER_PUT_OCTET(0, buffer);		// Reserved
+    BUFFER_PUT_OCTET(_jp_groups_n, buffer);	// Number of groups
+    BUFFER_PUT_HOST_16(_holdtime, buffer);	// Holdtime
+    
+    //
+    // Prepare the message
+    //
     for (iter = _jp_groups_list.begin(); iter != _jp_groups_list.end();
 	 ++iter) {
 	list<IPvX>::iterator iter2;
@@ -902,6 +1190,14 @@ PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
 	}
     }
     
+    //
+    // Send the message
+    //
+    if (pim_vif->pim_send(IPvX::PIM_ROUTERS(family()), PIM_JOIN_PRUNE,
+			  buffer) < 0) {
+	return (XORP_ERROR);
+    }
+    
     return (XORP_OK);
     
  invalid_addr_family_error:
@@ -913,6 +1209,7 @@ PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
     return (XORP_ERROR);
     
  buflen_error:
+    XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL %s ERROR: packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_JOIN_PRUNE));
     
