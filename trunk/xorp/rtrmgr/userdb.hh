@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/userdb.hh,v 1.5 2004/05/28 22:28:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/userdb.hh,v 1.6 2004/06/10 22:41:55 hodson Exp $
 
 #ifndef __RTRMGR_USERDB_HH__
 #define __RTRMGR_USERDB_HH__
@@ -78,7 +78,7 @@ public:
     UserDB(bool verbose);
     ~UserDB();
 
-    User* add_user(uint32_t user_id, const string& username);
+    User* add_user(uint32_t user_id, const string& username, gid_t gid);
     void load_password_file();
     const User* find_user_by_user_id(uint32_t user_id) const;
     void remove_user(uint32_t user_id);

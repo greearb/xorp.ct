@@ -12,8 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.6 2004/05/28 22:28:00 pavlin Exp $"
-
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.7 2004/06/10 22:41:55 hodson Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
@@ -89,28 +88,37 @@ UserDB::load_password_file()
     pwent = getpwent();
     while (pwent != NULL) {
 	debug_msg("User: %s UID: %u\n", pwent->pw_name, pwent->pw_uid);
-	add_user(pwent->pw_uid, pwent->pw_name);
+	add_user(pwent->pw_uid, pwent->pw_name, pwent->pw_gid);
 	pwent = getpwent();
     }
     endpwent();
 }
 
 User* 
-UserDB::add_user(uint32_t user_id, const string& username)
+UserDB::add_user(uint32_t user_id, const string& username,
+		 gid_t pw_gid)
 {
     if (_users.find(user_id) == _users.end()) {
 	User* newuser = new User(user_id, username);
 	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
 	    debug_msg("group xorp exists, id=%d\n", grp->gr_gid);
-	    char **gr_mem = grp->gr_mem;
-	    while (*gr_mem != NULL) {
-		debug_msg("found user %s in group xorp\n", *gr_mem);
-		if (*gr_mem == username) {
-		    newuser->add_acl_capability("config");
-		    break;
+	    if (pw_gid == grp->gr_gid) {
+		/* is the user's default group is the "xorp" group */
+		debug_msg("user's default groyp is xorp\n");
+		newuser->add_acl_capability("config");
+	    } else {
+		/* if not, then check if they're listed in /etc/group as
+		   being in the xorp group */
+		char **gr_mem = grp->gr_mem;
+		while (*gr_mem != NULL) {
+		    debug_msg("found user %s in group xorp\n", *gr_mem);
+		    if (*gr_mem == username) {
+			newuser->add_acl_capability("config");
+			break;
+		    }
+		    gr_mem++;
 		}
-		gr_mem++;
 	    }
 	} else {
 	    XLOG_ERROR("Group \"xorp\" does not exist on this system.");
