@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.2 2003/05/02 22:33:53 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.3 2003/05/05 22:43:03 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -24,7 +24,9 @@
 
 ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
     : Command(cmd_name),
-      _tt(tt), _procready(NULL), _startcommit(NULL), _endcommit(NULL),
+      _tt(tt), 
+      _startcommit(NULL), _endcommit(NULL), 
+      _status_method(NO_STATUS_METHOD), 
       _execute_done(false)
 {
     assert(cmd_name == "%modinfo");
@@ -35,8 +37,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     throw (ParseError)
 {
     if ((action.size() == 3) 
-	&& ((action.front() == "ready")
-	    ||(action.front() == "startcommit")
+	&& ((action.front() == "startcommit")
 	    || (action.front() == "endcommit"))) {
 	//it's OK 
     } else if (action.size() != 2) {
@@ -95,13 +96,13 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	    _endcommit = new XrlAction(newaction, xrldb);
 	else
 	    _endcommit = new Action(newaction);
-    } else if (cmd == "ready") {
+    } else if (cmd == "statusmethod") {
 	list <string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front() == "xrl") {
-	    _procready = new XrlAction(newaction, xrldb);
+	    _status_method = STATUS_BY_XRL;
 	} else {
-	    _procready = new Action(newaction);
+	    throw ParseError("Unknown statusmethod " + newaction.front());
 	}
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
@@ -149,9 +150,14 @@ ModuleCommand::execute(TaskManager& taskmgr) const
 	return XORP_OK;
     }
 #endif
-    //XXX need to add a validation here
-    DelayValidation* dv = new DelayValidation(taskmgr.eventloop(), 2000);
-    return taskmgr.add_module(_modname, _modpath, dv);
+    if (_status_method == STATUS_BY_XRL) {
+	StatusReadyValidation* sv =
+	    new StatusReadyValidation(_modname, taskmgr);
+	return taskmgr.add_module(_modname, _modpath, sv);
+    } else {
+	DelayValidation* dv = new DelayValidation(taskmgr.eventloop(), 2000);
+	return taskmgr.add_module(_modname, _modpath, dv);
+    }
 }
 
 int 

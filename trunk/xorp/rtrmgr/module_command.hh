@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.1 2003/05/02 09:00:01 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.2 2003/05/02 22:33:53 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -23,6 +23,7 @@ class TaskManager;
 
 class ModuleCommand : public Command {
 public:
+    typedef enum {NO_STATUS_METHOD, STATUS_BY_XRL} StatusMethod;
     ModuleCommand(const string &cmd_name, TemplateTree& ct);
     ~ModuleCommand() {}
     void add_action(const list <string> &action,
@@ -40,6 +41,7 @@ public:
 			  TaskManager& task_manager) const;
     int end_transaction(ConfigTreeNode& ctn,
 			TaskManager& task_manager) const;
+    StatusMethod status_method() const { return _status_method;}
     string str() const;
 
 protected:
@@ -57,9 +59,9 @@ private:
     string _modname;
     string _modpath;
     list <string> _depends;
-    Action *_procready;
     Action *_startcommit;
     Action *_endcommit;
+    StatusMethod _status_method;
     bool _execute_done;
 };
 

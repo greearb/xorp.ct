@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.7 2003/05/04 06:25:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.8 2003/05/05 22:43:04 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 #include "task.hh"
 #include "module_manager.hh"
 #include "xorp_client.hh"
+
+#define MAX_STATUS_RETRIES 10
 
 DelayValidation::DelayValidation(EventLoop& eventloop, uint32_t ms)
     : _eventloop(eventloop), _delay_in_ms(ms)
@@ -35,6 +38,123 @@ void DelayValidation::validate(CallBack cb)
 void DelayValidation::timer_expired() 
 {
     _cb->dispatch(true);
+}
+
+StatusReadyValidation::StatusReadyValidation(const string& target, 
+					     TaskManager& taskmgr)
+    : _target(target), _task_manager(taskmgr), 
+    _retries(0)
+{
+}
+
+
+EventLoop&
+StatusReadyValidation::eventloop()
+{
+    return _task_manager.eventloop();
+}
+
+void 
+StatusReadyValidation::validate(CallBack cb)
+{
+    _cb = cb;
+    if (_task_manager.do_exec()) {
+	Xrl xrl(_target, "finder://" + _target + "/common/0.1/get_status");
+	string response = "status:bool&reason:txt";
+	_task_manager.xorp_client().
+	    send_now(xrl, callback(this, &StatusReadyValidation::xrl_done),
+		     response, true);
+    } else {
+	//when we're running with do_exec == false, we want to
+	//exercise most of the same machinery, but we want to ensure
+	//that the xrl_done response gets the right arguments even
+	//though we're not going to call the XRL
+	_retry_timer = 
+	    eventloop().new_oneoff_after_ms(1000,
+                callback(this, &StatusReadyValidation::dummy_response));
+    }
+}
+
+void 
+StatusReadyValidation::dummy_response()
+{
+    XrlError e = XrlError::OKAY();
+    XrlArgs a;
+    a.add_uint32("status", PROC_READY);
+    a.add_string("reason", string(""));
+    xrl_done(e, &a);
+}
+
+void
+StatusReadyValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
+{
+    if (e == XrlError::OKAY()) {
+	try {
+	    ProcessStatus status;
+	    status = (ProcessStatus)(xrlargs->get_uint32("status"));
+	    string reason;
+	    reason = xrlargs->get_string("reason");
+
+	    switch (status) {
+	    case PROC_NULL:
+	    case PROC_STARTUP:
+		//these are not valid responses.
+		XLOG_ERROR(("Bad status response; reason: " 
+			    + reason + "\n").c_str());
+		_cb->dispatch(false);
+		return;
+	    case PROC_FAILED:
+	    case PROC_SHUTDOWN:
+		_cb->dispatch(false);
+		return;
+	    case PROC_NOT_READY:
+		//got a valid response saying we should wait.
+		_retry_timer = 
+		    eventloop().new_oneoff_after_ms(1000,
+                         callback(this, &StatusReadyValidation::validate,_cb));
+		return;
+	    case PROC_READY:
+		//the process is ready
+		_cb->dispatch(true);
+		return;
+	    }
+	} catch (XrlArgs::XrlAtomNotFound) {
+	    //not a valid response
+	    XLOG_ERROR("Bad XRL response to get_status\n");
+	    _cb->dispatch(false);
+	    return;
+	}
+    } else if (e == XrlError::NO_FINDER()) {
+	//We're in trouble now! This shouldn't be able to happen.
+	abort();
+    } else if (e == XrlError::NO_SUCH_METHOD()) {
+	//The template file must have been wrong - the target doesn't
+	//support the common interface
+	XLOG_ERROR(("Target " + _target + 
+		    " doesn't support get_status\n").c_str());
+	
+	//Just return true and hope everything's OK
+	_cb->dispatch(true);
+    } else if ((e == XrlError::RESOLVE_FAILED())
+	       || (e == XrlError::SEND_FAILED()))  {
+	//RESOLVE_FAILED => It's not yet registered with the finder -
+	//retry after a short delay
+
+	//SEND_FAILED => ???  We're dealing with startup conditions
+	//here, so give the problem a chance to resolve itself.
+	_retries++;
+	if (_retries > MAX_STATUS_RETRIES) {
+	    _cb->dispatch(false);
+	}
+	_retry_timer = 
+	    eventloop().new_oneoff_after_ms(1000,
+                 callback(this, &StatusReadyValidation::validate, _cb));
+    } else {
+	XLOG_ERROR(("Error while validating process " 
+		    + _target + "\n").c_str());
+	XLOG_WARNING("Continuing anyway, cross your fingers...\n");
+	_cb->dispatch(true);
+    }
 }
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,

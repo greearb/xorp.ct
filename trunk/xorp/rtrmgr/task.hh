@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.7 2003/05/04 06:25:21 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.8 2003/05/05 22:43:04 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -27,6 +27,7 @@ class Task;
 class TaskManager;
 class XorpClient;
 class ModuleManager;
+class TaskManager;
 
 class Validation {
 public:
@@ -50,6 +51,22 @@ private:
     XorpTimer _timer;
 };
 
+class StatusReadyValidation : public Validation {
+public:
+    StatusReadyValidation(const string& target, 
+			  TaskManager& taskmgr);
+    void validate(CallBack cb);
+private:
+    void dummy_response();
+    void xrl_done(const XrlError& e, XrlArgs* xrlargs);
+    EventLoop& eventloop();
+
+    string _target;
+    TaskManager& _task_manager;
+    CallBack _cb;
+    XorpTimer _retry_timer;
+    uint32_t _retries;
+};
 
 class TaskXrlItem {
 public:
