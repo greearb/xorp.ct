@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.37 2003/09/05 00:39:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.38 2003/09/10 03:19:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -833,6 +833,17 @@ mrtd_debug_dump(const UpdatePacket* p, const IPv4Net& /*net*/,
 }
 
 void
+mrtd_replay_dump(const UpdatePacket* p,
+		const TimeVal& tv,
+		const string fname)
+{
+    size_t len;
+    const uint8_t *buf = p->encode(len);
+    mrtd_traffic_dump(buf, len , tv, fname);
+    delete [] buf;
+}
+
+void
 text_debug_dump(const UpdatePacket* p, const IPv4Net& net,
 		const TimeVal& /*tv*/,
 		const string fname)
@@ -845,8 +856,21 @@ text_debug_dump(const UpdatePacket* p, const IPv4Net& net,
     fclose(fp);
 }
 
+void
+text_replay_dump(const UpdatePacket* p,
+		const TimeVal& /*tv*/,
+		const string fname)
+{
+    FILE *fp = fopen(fname.c_str(), "a");
+    if(0 == fp)
+	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
+
+    fprintf(fp, "%s\n", p->str().c_str());
+    fclose(fp);
+}
+
 /*
-** peer dump <recv/sent> <mtrd/text> <traffic/routeview/current/debug> <fname>
+** peer dump <recv/sent> <mtrd/text> <traffic/routeview/replay/debug> <fname>
 ** 0    1    2           3           4                                 5
 */
 void
@@ -900,7 +924,17 @@ Peer::dump(const string& line, const vector<string>& words)
  	else
 	    *dumper = callback(text_traffic_dump, filename);
     } else if("routeview" == words[4]) {
-    } else if("current" == words[4]) {
+    } else if("replay" == words[4]) {
+	if("" == filename) {
+	    xorp_throw(InvalidString,
+		       c_format("no filename provided\n[%s]", line.c_str()));
+	}
+	Trie::ReplayWalker rw;
+	if(mrtd)
+	    rw = callback(mrtd_replay_dump, filename);
+	else
+	    rw = callback(text_replay_dump, filename);
+	op->replay_walk(rw);
     } else if("debug" == words[4]) {
 	if("" == filename) {
 	    xorp_throw(InvalidString,
@@ -915,7 +949,7 @@ Peer::dump(const string& line, const vector<string>& words)
     } else
 	xorp_throw(InvalidString,
 		   c_format(
-"\"traffic\" or \"routeview\" or \"current\" or \"debug\" accepted not <%s>\n[%s]",
+"\"traffic\" or \"routeview\" or \"replay\" or \"debug\" accepted not <%s>\n[%s]",
 			    words[4].c_str(), line.c_str()));
 	
 #if	0
