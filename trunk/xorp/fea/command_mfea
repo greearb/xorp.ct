@@ -1,34 +1,66 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/command_mfea,v 1.1 2003/06/03 21:54:42 pavlin Exp $
+# $XORP: xorp/fea/command_mfea,v 1.2 2003/10/15 18:54:28 pavlin Exp $
 #
 
 #
 # Send commands to a running MFEA process.
 #
 
-# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
-if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
-
-. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
-. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
-
 MODULE_NAME="MFEA"
 HOSTNAME=`hostname`
 
 echo "Sending command to $MODULE_NAME on $HOSTNAME..."
 
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
 #
-# The first argument should be the command to call.
+# The optional first argument should be either -4 or -6 to specify
+# IPv4 or IPv6 command
+# 
+# The next argument should be the command to call.
 # The rest of the arguments should be the arguments to the command to call.
 #
 
+usage()
+{
+	echo "Usage: $0 [-4 | -6 ] <xrl_command> [xrl_command_arguments ... ]"
+}
+
 if [ $# -lt 1 ] ; then
-	echo "Usage: $0 <xrl_command> [xrl_command_arguments ... ]"
+	usage;
 	exit 1
 fi
 
+case "${1}" in
+	-4)
+		if [ $# -lt 2 ] ; then
+			usage;
+			exit 1
+		fi
+		IP_VERSION=IPV4
+		shift
+		;;
+	-6)
+		if [ $# -lt 2 ] ; then
+			usage;
+			exit 1
+		fi
+		IP_VERSION=IPV6
+		shift
+		;;
+	*)
+		# XXX: IP version defaults to IPv4
+		IP_VERSION=IPV4
+		;;
+esac
+
+. ${srcdir}/../cli/xrl_cli_shell_funcs.sh
+. ${srcdir}/../fea/xrl_mfea_shell_funcs.sh
+
+
 $*
 
-exit 0
+exit $?
