@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.5 2003/07/21 18:05:55 hodson Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.6 2004/01/09 00:13:51 hodson Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -151,6 +151,8 @@ public:
 
     inline PortIO* io_handler();
 
+    inline const PortIO* io_handler() const;
+
     inline bool port_io_enabled() const;
 
 protected:
@@ -230,6 +232,13 @@ PortIOUserBase<A>::set_io_handler(PortIO* pio, bool set_owner)
 template <typename A>
 inline PortIOBase<A>*
 PortIOUserBase<A>::io_handler()
+{
+    return _pio;
+}
+
+template <typename A>
+inline const PortIOBase<A>*
+PortIOUserBase<A>::io_handler() const
 {
     return _pio;
 }

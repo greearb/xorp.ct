@@ -48,28 +48,148 @@ public:
     finder_event_observer_0_1_xrl_target_death(const string& class_name,
 					       const string& instance_name);
 
-    XrlCmdError rip4_0_1_add_rip_address(const string&	ifname,
-					 const string&	vifname,
-					 const IPv4&	addr);
+    XrlCmdError
+    rip4_0_1_add_rip_address(const string&	ifname,
+			     const string&	vifname,
+			     const IPv4&	addr);
 
-    XrlCmdError rip4_0_1_remove_rip_address(const string&	ifname,
-					    const string&	vifname,
-					    const IPv4&		addr);
+    XrlCmdError
+    rip4_0_1_remove_rip_address(const string&	ifname,
+				const string&	vifname,
+				const IPv4&	addr);
 
-    XrlCmdError rip4_0_1_set_rip_address_enabled(const string&	ifname,
-						 const string&	vifname,
-						 const IPv4&	addr,
-						 const bool&	enabled);
+    XrlCmdError
+    rip4_0_1_set_rip_address_enabled(const string&	ifname,
+				     const string&	vifname,
+				     const IPv4&	addr,
+				     const bool&	enabled);
 
-    XrlCmdError rip4_0_1_get_rip_address_enabled(const string&	ifname,
-						 const string&	vifname,
-						 const IPv4&	addr,
-						 bool&		enabled);
+    XrlCmdError
+    rip4_0_1_rip_address_enabled(const string&	ifname,
+				 const string&	vifname,
+				 const IPv4&	addr,
+				 bool&		enabled);
 
-    XrlCmdError rip4_0_1_get_rip_address_status(const string&	ifname,
+    XrlCmdError rip4_0_1_set_cost(const string&		ifname,
+				  const string&		vifname,
+				  const IPv4&		addr,
+				  const uint32_t&	cost);
+
+    XrlCmdError rip4_0_1_cost(const string&	ifname,
+			      const string&	vifname,
+			      const IPv4&	addr,
+			      uint32_t&		cost);
+
+    XrlCmdError rip4_0_1_set_horizon(const string&	ifname,
+				     const string&	vifname,
+				     const IPv4&	addr,
+				     const string&	horizon);
+
+    XrlCmdError rip4_0_1_horizon(const string&	ifname,
+				 const string&	vifname,
+				 const IPv4&	addr,
+				 string&	horizon);
+
+    XrlCmdError
+    rip4_0_1_set_route_expiry_seconds(const string&	ifname,
+				      const string&	vifname,
+				      const IPv4&	addr,
+				      const uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_route_expiry_seconds(const string&	ifname,
+				  const string&	vifname,
+				  const IPv4&	addr,
+				  uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_route_deletion_seconds(const string&	ifname,
+					const string&	vifname,
+					const IPv4&	addr,
+					const uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_route_deletion_seconds(const string&	ifname,
+				    const string&	vifname,
+				    const IPv4&		addr,
+				    uint32_t&		t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_table_request_seconds(const string&	ifname,
+				       const string&	vifname,
+				       const IPv4&	addr,
+				       const uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_table_request_seconds(const string&	ifname,
+				   const string&	vifname,
+				   const IPv4&		addr,
+				   uint32_t&		t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
+						  const string&	vifname,
+						  const IPv4&	addr,
+						  const uint32_t& t_secs);
+
+    XrlCmdError
+    rip4_0_1_unsolicited_response_min_seconds(const string&	ifname,
+						  const string&	vifname,
+						  const IPv4&	addr,
+						  uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_unsolicited_response_max_seconds(const string&	ifname,
+						  const string&	vifname,
+						  const IPv4&	addr,
+						  const uint32_t& t_secs);
+
+    XrlCmdError
+    rip4_0_1_unsolicited_response_max_seconds(const string&	ifname,
+					      const string&	vifname,
+					      const IPv4&	addr,
+					      uint32_t&		t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_triggered_update_min_seconds(const string&	ifname,
+					      const string&	vifname,
+					      const IPv4&	addr,
+					      const uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_triggered_update_min_seconds(const string&	ifname,
+					  const string&	vifname,
+					  const IPv4&	addr,
+					  uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_triggered_update_max_seconds(const string&	ifname,
+					      const string&	vifname,
+					      const IPv4&	addr,
+					      const uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_triggered_update_max_seconds(const string&	ifname,
+					  const string&	vifname,
+					  const IPv4&	addr,
+					  uint32_t&	t_secs);
+
+    XrlCmdError
+    rip4_0_1_set_interpacket_delay_milliseconds(const string&	ifname,
 						const string&	vifname,
 						const IPv4&	addr,
-						string&		status);
+						const uint32_t&	t_msecs);
+
+    XrlCmdError
+    rip4_0_1_interpacket_delay_milliseconds(const string&	ifname,
+					    const string&	vifname,
+					    const IPv4&		addr,
+					    uint32_t&		t_msecs);
+
+    XrlCmdError rip4_0_1_rip_address_status(const string&	ifname,
+					    const string&	vifname,
+					    const IPv4&		addr,
+					    string&		status);
 
     XrlCmdError rip4_0_1_add_static_route(const IPv4Net& 	network,
 					  const IPv4& 		nexthop,

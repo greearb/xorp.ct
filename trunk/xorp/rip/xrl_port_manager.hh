@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.3 2004/01/13 20:38:07 hodson Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.4 2004/02/12 19:10:41 hodson Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -101,6 +101,23 @@ public:
 			const A& 		src_addr,
 			uint16_t 		src_port,
 			const vector<uint8_t>& 	pdata);
+
+    /**
+     * Find RIP port associated with interface, vif, address tuple.
+     *
+     * @return pointer to port on success, 0 if port could not be found.
+     */
+    Port<A>* find_port(const string&	ifname,
+		       const string&	vifname,
+		       const A&		addr);
+    /**
+     * Find RIP port associated with interface, vif, address tuple.
+     *
+     * @return pointer to port on success, 0 if port could not be found.
+     */
+    const Port<A>* find_port(const string&	ifname,
+			     const string&	vifname,
+			     const A&		addr) const;
 
 protected:
     //

@@ -137,10 +137,10 @@ XrlRip4Target::rip4_0_1_set_rip_address_enabled(const string& ifname,
 }
 
 XrlCmdError
-XrlRip4Target::rip4_0_1_get_rip_address_enabled(const string& ifname,
-						const string& vifname,
-						const IPv4&   addr,
-						bool&	      enabled)
+XrlRip4Target::rip4_0_1_rip_address_enabled(const string& ifname,
+					    const string& vifname,
+					    const IPv4&   addr,
+					    bool&	  enabled)
 {
     enabled = s_enabled;
 
@@ -152,14 +152,301 @@ XrlRip4Target::rip4_0_1_get_rip_address_enabled(const string& ifname,
 }
 
 XrlCmdError
-XrlRip4Target::rip4_0_1_get_rip_address_status(const string& ifname,
-					       const string& vifname,
-					       const IPv4&   addr,
-					       string&	     status)
+XrlRip4Target::rip4_0_1_set_cost(const string&		ifname,
+				 const string&		vifname,
+				 const IPv4&		addr,
+				 const uint32_t&	cost)
+{
+    Port<IPv4>* p = _xpm.find_port(ifname, vifname, addr);
+    if (p == 0) {
+	return XrlCmdError::COMMAND_FAILED(c_format(
+		"RIP not running on %s/%s/%s",
+		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
+    }
+    if (cost > RIP_INFINITY) {
+	return XrlCmdError::COMMAND_FAILED(c_format(
+		"Cost must be less that RIP infinity (%u)",
+		RIP_INFINITY));
+    }
+    p->set_cost(cost);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_cost(const string&	ifname,
+			     const string&	vifname,
+			     const IPv4&	addr,
+			     uint32_t&		cost)
+{
+    const Port<IPv4>* p = _xpm.find_port(ifname, vifname, addr);
+    if (p == 0) {
+	return XrlCmdError::COMMAND_FAILED(c_format(
+		"RIP not running on %s/%s/%s",
+		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
+    }
+    cost = p->cost();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_horizon(const string&	ifname,
+				    const string&	vifname,
+				    const IPv4&		addr,
+				    const string&	horizon)
+{
+    Port<IPv4>* p = _xpm.find_port(ifname, vifname, addr);
+    if (p == 0) {
+	return XrlCmdError::COMMAND_FAILED(c_format(
+		"RIP not running on %s/%s/%s",
+		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
+    }
+    RipHorizon rh[3] = { NONE, SPLIT, SPLIT_POISON_REVERSE };
+    for (uint32_t i = 0; i < 3; ++i) {
+	if (string(rip_horizon_name(rh[i])) == horizon) {
+	    p->set_horizon(rh[i]);
+	    return XrlCmdError::OKAY();
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED(
+			c_format("Horizon type \"%s\" not recognized.",
+				 horizon.c_str()));
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_horizon(const string&	ifname,
+				const string&	vifname,
+				const IPv4&	addr,
+				string&		horizon)
+{
+    const Port<IPv4>* p = _xpm.find_port(ifname, vifname, addr);
+    if (p == 0) {
+	return XrlCmdError::COMMAND_FAILED(c_format(
+		"RIP not running on %s/%s/%s",
+		ifname.c_str(), vifname.c_str(), addr.str().c_str()));
+    }
+    horizon = rip_horizon_name(p->horizon());
+    return XrlCmdError::OKAY();
+}
+
+
+// ----------------------------------------------------------------------------
+// The following pair of macros are used in setting timer constants on
+// RIP ports.
+
+#define PORT_TIMER_SET_HANDLER(field, min_val, max_val)			\
+    Port<IPv4>* p = _xpm.find_port(ifname, vifname, addr);		\
+    if (p == 0)								\
+	return XrlCmdError::COMMAND_FAILED(c_format(			\
+	    "RIP not running on %s/%s/%s",				\
+	    ifname.c_str(), vifname.c_str(), addr.str().c_str()));	\
+    if (t < min_val) 							\
+	return XrlCmdError::COMMAND_FAILED(c_format(			\
+	    "value supplied less than permitted minimum (%u < %u)", 	\
+	    t, min_val));						\
+    if (t > max_val) 							\
+	return XrlCmdError::COMMAND_FAILED(c_format(			\
+	    "value supplied greater than permitted maximum (%u > %u)", 	\
+	    t, max_val));						\
+    if (p->constants().set_##field (t) == false)			\
+	return XrlCmdError::COMMAND_FAILED(				\
+	    "Failed to set value.");					\
+    return XrlCmdError::OKAY();
+
+#define PORT_TIMER_GET_HANDLER(field)					\
+    Port<IPv4>* p = _xpm.find_port(ifname, vifname, addr);		\
+    if (p == 0)								\
+	return XrlCmdError::COMMAND_FAILED(c_format(			\
+	    "RIP not running on %s/%s/%s",				\
+	    ifname.c_str(), vifname.c_str(), addr.str().c_str()));	\
+    t = p->constants().##field ();					\
+    return XrlCmdError::OKAY();
+
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_route_expiry_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t&	t
+						)
+{
+    PORT_TIMER_SET_HANDLER(expiry_secs, 10, 10000);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_route_expiry_seconds(
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv4&	addr,
+					     uint32_t&		t
+					     )
+{
+    PORT_TIMER_GET_HANDLER(expiry_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_route_deletion_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t&	t
+						)
+{
+    PORT_TIMER_SET_HANDLER(deletion_secs, 10, 10000);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_route_deletion_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(deletion_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_table_request_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t&	t
+						)
+{
+    PORT_TIMER_SET_HANDLER(table_request_period_secs, 1, 10000);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_table_request_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(table_request_period_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_unsolicited_response_min_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t& t
+						)
+{
+    PORT_TIMER_SET_HANDLER(unsolicited_response_min_secs, 1, 300);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_unsolicited_response_min_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(unsolicited_response_min_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_unsolicited_response_max_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t& t
+						)
+{
+    PORT_TIMER_SET_HANDLER(unsolicited_response_max_secs, 1, 600);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_unsolicited_response_max_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(unsolicited_response_max_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_triggered_update_min_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t&	t
+						)
+{
+    PORT_TIMER_SET_HANDLER(triggered_update_min_wait_secs, 1, 10000);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_triggered_update_min_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(triggered_update_min_wait_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_triggered_update_max_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t&	t
+						)
+{
+    PORT_TIMER_SET_HANDLER(triggered_update_max_wait_secs, 1, 10000);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_triggered_update_max_seconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(triggered_update_max_wait_secs);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_set_interpacket_delay_milliseconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						const uint32_t&	t
+						)
+{
+    PORT_TIMER_SET_HANDLER(interpacket_delay_ms, 10, 10000);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_interpacket_delay_milliseconds(
+						const string&	ifname,
+						const string&	vifname,
+						const IPv4&	addr,
+						uint32_t&	t
+						)
+{
+    PORT_TIMER_GET_HANDLER(interpacket_delay_ms);
+}
+
+XrlCmdError
+XrlRip4Target::rip4_0_1_rip_address_status(const string& ifname,
+					   const string& vifname,
+					   const IPv4&   addr,
+					   string&	 status)
 {
     status = (s_enabled) ? "running" : "not running";
 
-    debug_msg("rip4_0_1_get_rip_address_status %s/%s/%s -> %s\n",
+    debug_msg("rip4_0_1_rip_address_status %s/%s/%s -> %s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str(),
 	      status.c_str());
 

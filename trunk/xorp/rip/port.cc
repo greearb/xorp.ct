@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.16 2004/02/06 00:32:25 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.17 2004/02/12 19:08:55 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -515,9 +515,6 @@ Port<A>::parse_request(const Addr&			src_addr,
 	XLOG_INFO("Discarding RIP request: port io disabled.");
     }
 
-    XLOG_INFO("RIP request received from %s/%u entries %u",
-	      src_addr.str().c_str(), src_port, n_entries
-	      );
     if (n_entries == 1 && entries[0].is_table_request()) {
 	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    // if already doing unsolicited dump, then ignore

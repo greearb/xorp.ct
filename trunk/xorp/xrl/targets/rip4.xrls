@@ -66,7 +66,120 @@ finder://rip4/rip4/0.1/remove_rip_address?ifname:txt&vifname:txt&addr:ipv4
 
 finder://rip4/rip4/0.1/set_rip_address_enabled?ifname:txt&vifname:txt&addr:ipv4&enabled:bool
 
-finder://rip4/rip4/0.1/get_rip_address_enabled?ifname:txt&vifname:txt&addr:ipv4->enabled:bool
+finder://rip4/rip4/0.1/rip_address_enabled?ifname:txt&vifname:txt&addr:ipv4->enabled:bool
+
+/**
+ *  Set cost metric associated with address.
+ */
+finder://rip4/rip4/0.1/set_cost?ifname:txt&vifname:txt&addr:ipv4&cost:u32
+
+/**
+ *  Get cost metric associated with address.
+ */
+finder://rip4/rip4/0.1/cost?ifname:txt&vifname:txt&addr:ipv4->cost:u32
+
+/**
+ *  Set horizon type applied to routes advertised from address.
+ *
+ *  @param horizon name of horizon type. Permitted values: "none",
+ *  "poison-reverse" "split-horizon-poison-reverse"
+ */
+finder://rip4/rip4/0.1/set_horizon?ifname:txt&vifname:txt&addr:ipv4&horizon:txt
+
+/**
+ *  Get horizon type applied to routes advertised from address.
+ */
+finder://rip4/rip4/0.1/horizon?ifname:txt&vifname:txt&addr:ipv4->horizon:txt
+
+/**
+ *  Set period that routes associated with reception address will expire in the
+ *  absence of updates.
+ */
+finder://rip4/rip4/0.1/set_route_expiry_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Get period that routes associated with reception address will expire in the
+ *  absence of updates.
+ */
+finder://rip4/rip4/0.1/route_expiry_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set period that routes associated with reception address will be deleted
+ *  after they've expired.
+ */
+finder://rip4/rip4/0.1/set_route_deletion_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Get period that routes associated with reception address will be deleted
+ *  after they've expired.
+ */
+finder://rip4/rip4/0.1/route_deletion_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set period that route table requests should be sent from address when no
+ *  peers are associated with it.
+ */
+finder://rip4/rip4/0.1/set_table_request_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Set period that route table requests should be sent from address when no
+ *  peers are associated with it.
+ */
+finder://rip4/rip4/0.1/table_request_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set minimum period between the unsolicited sending of the routing table
+ *  from address.
+ */
+finder://rip4/rip4/0.1/set_unsolicited_response_min_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Get minimum period between the unsolicited sending of the routing table
+ *  from address.
+ */
+finder://rip4/rip4/0.1/unsolicited_response_min_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set maximum period between the unsolicited sending of the routing table
+ *  from address.
+ */
+finder://rip4/rip4/0.1/set_unsolicited_response_max_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Get maximum period between the unsolicited sending of the routing table
+ *  from address.
+ */
+finder://rip4/rip4/0.1/unsolicited_response_max_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set minimum period between sending triggered updates from address.
+ */
+finder://rip4/rip4/0.1/set_triggered_update_min_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Get minimum period between sending triggered updates from address.
+ */
+finder://rip4/rip4/0.1/triggered_update_min_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set maximum period between sending triggered updates from address.
+ */
+finder://rip4/rip4/0.1/set_triggered_update_max_seconds?ifname:txt&vifname:txt&addr:ipv4&t_secs:u32
+
+/**
+ *  Get maximum period between sending triggered updates from address.
+ */
+finder://rip4/rip4/0.1/triggered_update_max_seconds?ifname:txt&vifname:txt&addr:ipv4->t_secs:u32
+
+/**
+ *  Set the inter-packet delay between the output of packets from address.
+ */
+finder://rip4/rip4/0.1/set_interpacket_delay_milliseconds?ifname:txt&vifname:txt&addr:ipv4&t_msecs:u32
+
+/**
+ *  Get the inter-packet delay between the output of packets from address.
+ */
+finder://rip4/rip4/0.1/interpacket_delay_milliseconds?ifname:txt&vifname:txt&addr:ipv4->t_msecs:u32
 
 /**
  *  Get a textual description of the status of address RIP is running upon.
@@ -77,7 +190,7 @@ finder://rip4/rip4/0.1/get_rip_address_enabled?ifname:txt&vifname:txt&addr:ipv4-
  *
  *  @param addr the address to query.
  */
-finder://rip4/rip4/0.1/get_rip_address_status?ifname:txt&vifname:txt&addr:ipv4->status:txt
+finder://rip4/rip4/0.1/rip_address_status?ifname:txt&vifname:txt&addr:ipv4->status:txt
 
 /**
  *  Add a static route.

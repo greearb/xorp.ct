@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.2 2004/01/09 00:29:03 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.4 2004/02/12 19:10:41 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -60,8 +60,8 @@ address_enabled(const IfMgrIfTree&	iftree,
 template <typename A>
 struct port_has_address {
     inline port_has_address(const A& addr) : _addr(addr) {}
-    inline bool operator() (Port<A>*& p) {
-	PortIOBase<A>* io = p->io_handler();
+    inline bool operator() (const Port<A>* p) {
+	const PortIOBase<A>* io = p->io_handler();
 	return io && io->address() == _addr;
     }
 private:
@@ -228,6 +228,46 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
     Port<A>* p = *i;
     p->port_io_receive(src_addr, src_port, &pdata[0], pdata.size());
     return true;
+}
+
+template <typename A>
+Port<A>*
+XrlPortManager<A>::find_port(const string& 	ifname,
+			     const string& 	vifname,
+			     const A&		addr)
+{
+    typename PortManagerBase<A>::PortList::iterator pi;
+    pi = find_if(ports().begin(), ports().end(), port_has_address<A>(addr));
+    if (pi == ports().end()) {
+	return 0;
+    }
+
+    Port<A>* port = *pi;
+    PortIOBase<A>* port_io = port->io_handler();
+    if (port_io->ifname() != ifname || port_io->vifname() != vifname) {
+	return 0;
+    }
+    return port;
+}
+
+template <typename A>
+const Port<A>*
+XrlPortManager<A>::find_port(const string& 	ifname,
+			     const string& 	vifname,
+			     const A&		addr) const
+{
+    typename PortManagerBase<A>::PortList::const_iterator pi;
+    pi = find_if(ports().begin(), ports().end(), port_has_address<A>(addr));
+    if (pi == ports().end()) {
+	return 0;
+    }
+
+    const Port<A>* port = *pi;
+    const PortIOBase<A>* port_io = port->io_handler();
+    if (port_io->ifname() != ifname || port_io->vifname() != vifname) {
+	return 0;
+    }
+    return port;
 }
 
 template <typename A>

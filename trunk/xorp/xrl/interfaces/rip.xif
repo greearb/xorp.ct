@@ -28,10 +28,186 @@ interface rip4/0.1 {
 			    & addr:ipv4 				\
 			    & enabled:bool
 
-    get_rip_address_enabled ? ifname:txt				\
+    rip_address_enabled	    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4					\
 			    -> enabled:bool
+
+    /**
+     * Set cost metric associated with address.
+     */
+    set_cost		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv4 				\
+			    & cost:u32
+
+    /**
+     * Get cost metric associated with address.
+     */
+    cost		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv4					\
+			    -> cost:u32
+
+    /**
+     * Set horizon type applied to routes advertised from address.
+     * @param horizon name of horizon type.
+     * Permitted values: "none",
+     *			 "poison-reverse"
+     *			 "split-horizon-poison-reverse"
+     */
+    set_horizon		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv4 				\
+			    & horizon:txt
+
+    /**
+     * Get horizon type applied to routes advertised from address.
+     */
+    horizon		    ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv4 				\
+			    -> horizon:txt
+
+    /**
+     * Set period that routes associated with reception address will
+     * expire in the absence of updates.
+     */
+    set_route_expiry_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_secs:u32
+
+    /**
+     * Get period that routes associated with reception address will
+     * expire in the absence of updates.
+     */
+    route_expiry_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_secs:u32
+
+    /**
+     * Set period that routes associated with reception address will be
+     * deleted after they've expired.
+     */
+    set_route_deletion_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_secs:u32
+
+    /**
+     * Get period that routes associated with reception address will be
+     * deleted after they've expired.
+     */
+     route_deletion_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_secs:u32
+
+    /**
+     * Set period that route table requests should be sent from address
+     * when no peers are associated with it.
+     */
+    set_table_request_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_secs:u32
+
+    /**
+     * Set period that route table requests should be sent from address
+     * when no peers are associated with it.
+     */
+    table_request_seconds	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_secs:u32
+
+    /**
+     * Set minimum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    set_unsolicited_response_min_seconds  ? ifname:txt			\
+					  & vifname:txt			\
+					  & addr:ipv4			\
+					  & t_secs:u32
+    /**
+     * Get minimum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    unsolicited_response_min_seconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					-> t_secs:u32
+
+    /**
+     * Set maximum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    set_unsolicited_response_max_seconds	? ifname:txt		\
+						& vifname:txt		\
+						& addr:ipv4		\
+						& t_secs:u32
+
+    /**
+     * Get maximum period between the unsolicited sending of the routing
+     * table from address.
+     */
+    unsolicited_response_max_seconds  ?	ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					-> t_secs:u32
+
+    /**
+     * Set minimum period between sending triggered updates from address.
+     */
+    set_triggered_update_min_seconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					& t_secs:u32
+
+    /**
+     * Get minimum period between sending triggered updates from address.
+     */
+    triggered_update_min_seconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					-> t_secs:u32
+
+    /**
+     * Set maximum period between sending triggered updates from address.
+     */
+    set_triggered_update_max_seconds  ? ifname:txt			\
+				      & vifname:txt			\
+				      & addr:ipv4			\
+				      & t_secs:u32
+
+    /**
+     * Get maximum period between sending triggered updates from address.
+     */
+    triggered_update_max_seconds  ? ifname:txt			\
+				      & vifname:txt			\
+				      & addr:ipv4			\
+				      -> t_secs:u32
+
+    /**
+     * Set the inter-packet delay between the output of packets from
+     * address.
+     */
+    set_interpacket_delay_milliseconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					& t_msecs:u32
+
+    /**
+     * Get the inter-packet delay between the output of packets from
+     * address.
+     */
+    interpacket_delay_milliseconds	? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					-> t_msecs:u32
+
 
     /**
      * Get a textual description of the status of address RIP is running
@@ -41,10 +217,11 @@ interface rip4/0.1 {
      * @param vifname virtual interface owns the address.
      * @param addr the address to query.
      */
-    get_rip_address_status ? ifname:txt					\
-			   & vifname:txt				\
-			   & addr:ipv4					\
-			   -> status:txt
+    rip_address_status			? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					-> status:txt
+
 
     /**
      * Add a static route.

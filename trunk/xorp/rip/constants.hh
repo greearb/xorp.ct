@@ -105,11 +105,25 @@ struct RIP_AF_CONSTANTS<IPv6>
  */
 enum RipHorizon {
     // No filtering
-    NONE,
+    NONE		 = 0,
     // Don't a route origin its own routes.
-    SPLIT,
+    SPLIT		 = 1,
     // Show a route origin its own routes but with cost of infinity.
-    SPLIT_POISON_REVERSE
+    SPLIT_POISON_REVERSE = 2
+};
+
+inline static const char*
+rip_horizon_name(RipHorizon h)
+{
+    switch (h) {
+    case SPLIT_POISON_REVERSE:
+	return "split-horizon-poison-reverse";
+    case SPLIT:
+	return "split-horizon";
+    case NONE:
+	break;
+    }
+    return "none";
 };
 
 #endif // __RIP_CONSTANTS_HH__

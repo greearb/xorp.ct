@@ -113,8 +113,9 @@ public:
     /**
      * Set the route expiration time.
      * @param t the expiration time in seconds.
+     * @return true on success.
      */
-    inline void set_expiry_secs(uint32_t t);
+    inline bool set_expiry_secs(uint32_t t);
 
     /**
      * Get the route route expiration time.
@@ -139,8 +140,9 @@ public:
      * Set request packet transmission period.  Request packets are only
      * sent when there are no peers associated with a port.
      * @param t inter-packet interval in seconds.
+     * @return true on success.
      */
-    inline void set_table_request_period_secs(uint32_t t);
+    inline bool set_table_request_period_secs(uint32_t t);
 
     /**
      * Set request packet transmission period.
@@ -151,8 +153,9 @@ public:
     /**
      * Set minimum unsolicitied response time.
      * @param t minimum unsolicited response time in seconds.
+     * @return true on success.
      */
-    inline void set_unsolicited_response_min_secs(uint32_t t);
+    inline bool set_unsolicited_response_min_secs(uint32_t t);
 
     /**
      * Get minimum unsolicitied response time.
@@ -163,8 +166,9 @@ public:
     /**
      * Set maximum unsolicitied response time.
      * @param t maximum unsolicited response time in seconds.
+     * @return true on success.
      */
-    inline void set_unsolicited_response_max_secs(uint32_t t);
+    inline bool set_unsolicited_response_max_secs(uint32_t t);
 
     /**
      * Get maximum unsolicitied response time.
@@ -175,8 +179,9 @@ public:
     /**
      * Set the lower bound of the triggered update interval.
      * @param t the lower bound of the triggered update interval in seconds.
+     * @return true on success.
      */
-    inline void set_triggered_update_min_wait_secs(uint32_t t);
+    inline bool set_triggered_update_min_wait_secs(uint32_t t);
 
     /**
      * Get the lower bound of the triggered update interval.
@@ -187,8 +192,9 @@ public:
     /**
      * Set the upper bound of the triggered update interval.
      * @param t the upper bound of the triggered update interval in seconds.
+     * @return true on success.
      */
-    inline void set_triggered_update_max_wait_secs(uint32_t t);
+    inline bool set_triggered_update_max_wait_secs(uint32_t t);
 
     /**
      * Get the upper bound of the triggered update interval.
@@ -215,8 +221,9 @@ public:
      * route request packets that query specific routes.  Queries arriving
      * at a faster rate are ignored.
      * @param t the interquery delay in milliseconds.
+     * @return true on success.
      */
-    inline void	set_interquery_delay_ms(uint32_t t);
+    inline bool	set_interquery_delay_ms(uint32_t t);
 
     /**
      * Get the interquery gap.  This is the minimum temporal gap between
@@ -255,10 +262,13 @@ PortTimerConstants::PortTimerConstants()
 {
 }
 
-inline void
+inline bool
 PortTimerConstants::set_expiry_secs(uint32_t t)
 {
+    if (t == 0)
+	return false;
     _expiry_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -270,7 +280,7 @@ PortTimerConstants::expiry_secs() const
 inline bool
 PortTimerConstants::set_deletion_secs(uint32_t t)
 {
-    if (t < 1)
+    if (t == 0)
 	return false;
     _deletion_secs = t;
     return true;
@@ -282,10 +292,11 @@ PortTimerConstants::deletion_secs() const
     return _deletion_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_unsolicited_response_min_secs(uint32_t t)
 {
     _unsolicited_response_min_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -294,10 +305,11 @@ PortTimerConstants::unsolicited_response_min_secs()
     return _unsolicited_response_min_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_unsolicited_response_max_secs(uint32_t t)
 {
     _unsolicited_response_max_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -306,10 +318,13 @@ PortTimerConstants::unsolicited_response_max_secs()
     return _unsolicited_response_max_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_table_request_period_secs(uint32_t t)
 {
+    if (t == 0)
+	return false;
     _table_request_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -318,10 +333,11 @@ PortTimerConstants::table_request_period_secs() const
     return _table_request_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_triggered_update_min_wait_secs(uint32_t t)
 {
     _triggered_update_min_wait_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -330,10 +346,13 @@ PortTimerConstants::triggered_update_min_wait_secs() const
     return _triggered_update_min_wait_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_triggered_update_max_wait_secs(uint32_t t)
 {
+    if (t < triggered_update_min_wait_secs())
+	return false;
     _triggered_update_max_wait_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -357,10 +376,11 @@ PortTimerConstants::interpacket_delay_ms() const
     return _interpacket_msecs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_interquery_delay_ms(uint32_t t)
 {
     _interquery_msecs = t;
+    return true;
 }
 
 inline uint32_t

@@ -318,10 +318,10 @@ XrlRip4TargetBase::handle_rip4_0_1_set_rip_address_enabled(const XrlArgs& xa_inp
 }
 
 const XrlCmdError
-XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_enabled(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+XrlRip4TargetBase::handle_rip4_0_1_rip_address_enabled(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
 {
     if (xa_inputs.size() != 3) {
-	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/get_rip_address_enabled",
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/rip_address_enabled",
             (uint32_t)xa_inputs.size());
 	return XrlCmdError::BAD_ARGS();
     }
@@ -334,13 +334,13 @@ XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_enabled(const XrlArgs& xa_inp
     /* Return value declarations */
     bool enabled;
     try {
-	XrlCmdError e = rip4_0_1_get_rip_address_enabled(
+	XrlCmdError e = rip4_0_1_rip_address_enabled(
 	    xa_inputs.get_string("ifname"),
 	    xa_inputs.get_string("vifname"),
 	    xa_inputs.get_ipv4("addr"),
 	    enabled);
 	if (e != XrlCmdError::OKAY()) {
-	    XLOG_WARNING("Handling method for rip4/0.1/get_rip_address_enabled failed: %s",
+	    XLOG_WARNING("Handling method for rip4/0.1/rip_address_enabled failed: %s",
             		 e.str().c_str());
 	    return e;
         }
@@ -359,10 +359,700 @@ XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_enabled(const XrlArgs& xa_inp
 }
 
 const XrlCmdError
-XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_status(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+XrlRip4TargetBase::handle_rip4_0_1_set_cost(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_cost",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_cost(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("cost"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_cost failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_cost(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
 {
     if (xa_inputs.size() != 3) {
-	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/get_rip_address_status",
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/cost",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t cost;
+    try {
+	XrlCmdError e = rip4_0_1_cost(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    cost);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/cost failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("cost", cost);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_horizon(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_horizon",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_horizon(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_string("horizon"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_horizon failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_horizon(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/horizon",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    string horizon;
+    try {
+	XrlCmdError e = rip4_0_1_horizon(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    horizon);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/horizon failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("horizon", horizon);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_route_expiry_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_route_expiry_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_route_expiry_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_route_expiry_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_route_expiry_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/route_expiry_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_route_expiry_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/route_expiry_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_route_deletion_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_route_deletion_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_route_deletion_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_route_deletion_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_route_deletion_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/route_deletion_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_route_deletion_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/route_deletion_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_table_request_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_table_request_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_table_request_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_table_request_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_table_request_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/table_request_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_table_request_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/table_request_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_unsolicited_response_min_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_unsolicited_response_min_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_unsolicited_response_min_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_unsolicited_response_min_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_unsolicited_response_min_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/unsolicited_response_min_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_unsolicited_response_min_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/unsolicited_response_min_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_unsolicited_response_max_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_unsolicited_response_max_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_unsolicited_response_max_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_unsolicited_response_max_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_unsolicited_response_max_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/unsolicited_response_max_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_unsolicited_response_max_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/unsolicited_response_max_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_triggered_update_min_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_triggered_update_min_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_triggered_update_min_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_triggered_update_min_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_triggered_update_min_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/triggered_update_min_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_triggered_update_min_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/triggered_update_min_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_triggered_update_max_seconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_triggered_update_max_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_triggered_update_max_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_secs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_triggered_update_max_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_triggered_update_max_seconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/triggered_update_max_seconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_secs;
+    try {
+	XrlCmdError e = rip4_0_1_triggered_update_max_seconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_secs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/triggered_update_max_seconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_secs", t_secs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_set_interpacket_delay_milliseconds(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 4) {
+	XLOG_ERROR("Wrong number of arguments (%u != 4) handling rip4/0.1/set_interpacket_delay_milliseconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = rip4_0_1_set_interpacket_delay_milliseconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    xa_inputs.get_uint32("t_msecs"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/set_interpacket_delay_milliseconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_interpacket_delay_milliseconds(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/interpacket_delay_milliseconds",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    if (pxa_outputs == 0) {
+	XLOG_FATAL("Return list empty");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    uint32_t t_msecs;
+    try {
+	XrlCmdError e = rip4_0_1_interpacket_delay_milliseconds(
+	    xa_inputs.get_string("ifname"),
+	    xa_inputs.get_string("vifname"),
+	    xa_inputs.get_ipv4("addr"),
+	    t_msecs);
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for rip4/0.1/interpacket_delay_milliseconds failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Marshall return values */
+    try {
+	pxa_outputs->add("t_msecs", t_msecs);
+    } catch (const XrlArgs::XrlAtomFound& ) {
+	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlRip4TargetBase::handle_rip4_0_1_rip_address_status(const XrlArgs& xa_inputs, XrlArgs* pxa_outputs)
+{
+    if (xa_inputs.size() != 3) {
+	XLOG_ERROR("Wrong number of arguments (%u != 3) handling rip4/0.1/rip_address_status",
             (uint32_t)xa_inputs.size());
 	return XrlCmdError::BAD_ARGS();
     }
@@ -375,13 +1065,13 @@ XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_status(const XrlArgs& xa_inpu
     /* Return value declarations */
     string status;
     try {
-	XrlCmdError e = rip4_0_1_get_rip_address_status(
+	XrlCmdError e = rip4_0_1_rip_address_status(
 	    xa_inputs.get_string("ifname"),
 	    xa_inputs.get_string("vifname"),
 	    xa_inputs.get_ipv4("addr"),
 	    status);
 	if (e != XrlCmdError::OKAY()) {
-	    XLOG_WARNING("Handling method for rip4/0.1/get_rip_address_status failed: %s",
+	    XLOG_WARNING("Handling method for rip4/0.1/rip_address_status failed: %s",
             		 e.str().c_str());
 	    return e;
         }

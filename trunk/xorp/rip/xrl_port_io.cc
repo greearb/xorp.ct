@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.1 2004/01/09 00:28:13 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.3 2004/02/07 00:54:34 hodson Exp $"
 
-#define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #include "libxorp/debug.h"
 
 #include "constants.hh"

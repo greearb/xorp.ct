@@ -163,13 +163,276 @@ protected:
 	const IPv4&	addr,
 	const bool&	enabled) = 0;
 
-    virtual XrlCmdError rip4_0_1_get_rip_address_enabled(
+    virtual XrlCmdError rip4_0_1_rip_address_enabled(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
 	// Output values,
 	bool&	enabled) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set cost metric associated with address.
+     */
+    virtual XrlCmdError rip4_0_1_set_cost(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	cost) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get cost metric associated with address.
+     */
+    virtual XrlCmdError rip4_0_1_cost(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	cost) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set horizon type applied to routes advertised from address.
+     *
+     *  @param horizon name of horizon type. Permitted values: "none",
+     *  "poison-reverse" "split-horizon-poison-reverse"
+     */
+    virtual XrlCmdError rip4_0_1_set_horizon(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const string&	horizon) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get horizon type applied to routes advertised from address.
+     */
+    virtual XrlCmdError rip4_0_1_horizon(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	string&	horizon) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set period that routes associated with reception address will expire in
+     *  the absence of updates.
+     */
+    virtual XrlCmdError rip4_0_1_set_route_expiry_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get period that routes associated with reception address will expire in
+     *  the absence of updates.
+     */
+    virtual XrlCmdError rip4_0_1_route_expiry_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set period that routes associated with reception address will be
+     *  deleted after they've expired.
+     */
+    virtual XrlCmdError rip4_0_1_set_route_deletion_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get period that routes associated with reception address will be
+     *  deleted after they've expired.
+     */
+    virtual XrlCmdError rip4_0_1_route_deletion_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set period that route table requests should be sent from address when
+     *  no peers are associated with it.
+     */
+    virtual XrlCmdError rip4_0_1_set_table_request_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set period that route table requests should be sent from address when
+     *  no peers are associated with it.
+     */
+    virtual XrlCmdError rip4_0_1_table_request_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set minimum period between the unsolicited sending of the routing table
+     *  from address.
+     */
+    virtual XrlCmdError rip4_0_1_set_unsolicited_response_min_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get minimum period between the unsolicited sending of the routing table
+     *  from address.
+     */
+    virtual XrlCmdError rip4_0_1_unsolicited_response_min_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set maximum period between the unsolicited sending of the routing table
+     *  from address.
+     */
+    virtual XrlCmdError rip4_0_1_set_unsolicited_response_max_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get maximum period between the unsolicited sending of the routing table
+     *  from address.
+     */
+    virtual XrlCmdError rip4_0_1_unsolicited_response_max_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set minimum period between sending triggered updates from address.
+     */
+    virtual XrlCmdError rip4_0_1_set_triggered_update_min_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get minimum period between sending triggered updates from address.
+     */
+    virtual XrlCmdError rip4_0_1_triggered_update_min_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set maximum period between sending triggered updates from address.
+     */
+    virtual XrlCmdError rip4_0_1_set_triggered_update_max_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get maximum period between sending triggered updates from address.
+     */
+    virtual XrlCmdError rip4_0_1_triggered_update_max_seconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_secs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Set the inter-packet delay between the output of packets from address.
+     */
+    virtual XrlCmdError rip4_0_1_set_interpacket_delay_milliseconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	t_msecs) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get the inter-packet delay between the output of packets from address.
+     */
+    virtual XrlCmdError rip4_0_1_interpacket_delay_milliseconds(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	// Output values,
+	uint32_t&	t_msecs) = 0;
 
     /**
      *  Pure-virtual function that needs to be implemented to:
@@ -182,7 +445,7 @@ protected:
      *
      *  @param addr the address to query.
      */
-    virtual XrlCmdError rip4_0_1_get_rip_address_status(
+    virtual XrlCmdError rip4_0_1_rip_address_status(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
@@ -308,9 +571,49 @@ private:
 
     const XrlCmdError handle_rip4_0_1_set_rip_address_enabled(const XrlArgs& in, XrlArgs* out);
 
-    const XrlCmdError handle_rip4_0_1_get_rip_address_enabled(const XrlArgs& in, XrlArgs* out);
+    const XrlCmdError handle_rip4_0_1_rip_address_enabled(const XrlArgs& in, XrlArgs* out);
 
-    const XrlCmdError handle_rip4_0_1_get_rip_address_status(const XrlArgs& in, XrlArgs* out);
+    const XrlCmdError handle_rip4_0_1_set_cost(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_cost(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_horizon(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_horizon(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_route_expiry_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_route_expiry_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_route_deletion_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_route_deletion_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_table_request_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_table_request_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_unsolicited_response_min_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_unsolicited_response_min_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_unsolicited_response_max_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_unsolicited_response_max_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_triggered_update_min_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_triggered_update_min_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_triggered_update_max_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_triggered_update_max_seconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_set_interpacket_delay_milliseconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_interpacket_delay_milliseconds(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_rip4_0_1_rip_address_status(const XrlArgs& in, XrlArgs* out);
 
     const XrlCmdError handle_rip4_0_1_add_static_route(const XrlArgs& in, XrlArgs* out);
 
@@ -362,13 +665,93 @@ private:
 	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_rip_address_enabled)) == false) {
 	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_rip_address_enabled");
 	}
-	if (_cmds->add_handler("rip4/0.1/get_rip_address_enabled",
-	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_enabled)) == false) {
-	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/get_rip_address_enabled");
+	if (_cmds->add_handler("rip4/0.1/rip_address_enabled",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_rip_address_enabled)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/rip_address_enabled");
 	}
-	if (_cmds->add_handler("rip4/0.1/get_rip_address_status",
-	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_get_rip_address_status)) == false) {
-	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/get_rip_address_status");
+	if (_cmds->add_handler("rip4/0.1/set_cost",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_cost)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_cost");
+	}
+	if (_cmds->add_handler("rip4/0.1/cost",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_cost)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/cost");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_horizon",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_horizon)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_horizon");
+	}
+	if (_cmds->add_handler("rip4/0.1/horizon",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_horizon)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/horizon");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_route_expiry_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_route_expiry_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_route_expiry_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/route_expiry_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_route_expiry_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/route_expiry_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_route_deletion_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_route_deletion_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_route_deletion_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/route_deletion_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_route_deletion_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/route_deletion_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_table_request_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_table_request_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_table_request_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/table_request_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_table_request_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/table_request_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_unsolicited_response_min_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_unsolicited_response_min_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_unsolicited_response_min_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/unsolicited_response_min_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_unsolicited_response_min_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/unsolicited_response_min_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_unsolicited_response_max_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_unsolicited_response_max_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_unsolicited_response_max_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/unsolicited_response_max_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_unsolicited_response_max_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/unsolicited_response_max_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_triggered_update_min_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_triggered_update_min_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_triggered_update_min_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/triggered_update_min_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_triggered_update_min_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/triggered_update_min_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_triggered_update_max_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_triggered_update_max_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_triggered_update_max_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/triggered_update_max_seconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_triggered_update_max_seconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/triggered_update_max_seconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/set_interpacket_delay_milliseconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_set_interpacket_delay_milliseconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/set_interpacket_delay_milliseconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/interpacket_delay_milliseconds",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_interpacket_delay_milliseconds)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/interpacket_delay_milliseconds");
+	}
+	if (_cmds->add_handler("rip4/0.1/rip_address_status",
+	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_rip_address_status)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://rip4/rip4/0.1/rip_address_status");
 	}
 	if (_cmds->add_handler("rip4/0.1/add_static_route",
 	    callback(this, &XrlRip4TargetBase::handle_rip4_0_1_add_static_route)) == false) {
@@ -408,8 +791,28 @@ private:
 	_cmds->remove_handler("rip4/0.1/add_rip_address");
 	_cmds->remove_handler("rip4/0.1/remove_rip_address");
 	_cmds->remove_handler("rip4/0.1/set_rip_address_enabled");
-	_cmds->remove_handler("rip4/0.1/get_rip_address_enabled");
-	_cmds->remove_handler("rip4/0.1/get_rip_address_status");
+	_cmds->remove_handler("rip4/0.1/rip_address_enabled");
+	_cmds->remove_handler("rip4/0.1/set_cost");
+	_cmds->remove_handler("rip4/0.1/cost");
+	_cmds->remove_handler("rip4/0.1/set_horizon");
+	_cmds->remove_handler("rip4/0.1/horizon");
+	_cmds->remove_handler("rip4/0.1/set_route_expiry_seconds");
+	_cmds->remove_handler("rip4/0.1/route_expiry_seconds");
+	_cmds->remove_handler("rip4/0.1/set_route_deletion_seconds");
+	_cmds->remove_handler("rip4/0.1/route_deletion_seconds");
+	_cmds->remove_handler("rip4/0.1/set_table_request_seconds");
+	_cmds->remove_handler("rip4/0.1/table_request_seconds");
+	_cmds->remove_handler("rip4/0.1/set_unsolicited_response_min_seconds");
+	_cmds->remove_handler("rip4/0.1/unsolicited_response_min_seconds");
+	_cmds->remove_handler("rip4/0.1/set_unsolicited_response_max_seconds");
+	_cmds->remove_handler("rip4/0.1/unsolicited_response_max_seconds");
+	_cmds->remove_handler("rip4/0.1/set_triggered_update_min_seconds");
+	_cmds->remove_handler("rip4/0.1/triggered_update_min_seconds");
+	_cmds->remove_handler("rip4/0.1/set_triggered_update_max_seconds");
+	_cmds->remove_handler("rip4/0.1/triggered_update_max_seconds");
+	_cmds->remove_handler("rip4/0.1/set_interpacket_delay_milliseconds");
+	_cmds->remove_handler("rip4/0.1/interpacket_delay_milliseconds");
+	_cmds->remove_handler("rip4/0.1/rip_address_status");
 	_cmds->remove_handler("rip4/0.1/add_static_route");
 	_cmds->remove_handler("rip4/0.1/delete_static_route");
 	_cmds->remove_handler("socket4_user/0.1/recv_event");
