@@ -83,10 +83,14 @@ VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
 
 INTERFACES_DIR = $(top_srcdir)/xrl/interfaces
-noinst_LIBRARIES = libbgpbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestpeerbase.a libxorpshbase.a libbgp4mibbase.a
+TARGET_DIR = $(top_srcdir)/xrl/targets
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestpeerbase.a libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
+
+# BGP4MIB
+libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
 
 # CLI
 libclibase_a_SOURCES = cli_base.hh cli_base.cc
@@ -134,9 +138,6 @@ libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
 # XORPSH
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 
-# BGP4MIB
-libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
-
 # Add your target's library sources like this:
 # Test target
 libtestbase_a_SOURCES = test_base.hh test_base.cc
@@ -163,6 +164,8 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libbgpbase_a_LIBADD = 
 libbgpbase_a_OBJECTS =  bgp_base.o
+libbgp4mibbase_a_LIBADD = 
+libbgp4mibbase_a_OBJECTS =  bgp4_mib_base.o
 libclibase_a_LIBADD = 
 libclibase_a_OBJECTS =  cli_base.o
 libcoordbase_a_LIBADD = 
@@ -195,8 +198,6 @@ libtestpeerbase_a_LIBADD =
 libtestpeerbase_a_OBJECTS =  test_peer_base.o
 libxorpshbase_a_LIBADD = 
 libxorpshbase_a_OBJECTS =  xorpsh_base.o
-libbgp4mibbase_a_LIBADD = 
-libbgp4mibbase_a_OBJECTS =  bgp4_mib_base.o
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -218,8 +219,8 @@ DEP_FILES =  .deps/bgp4_mib_base.P .deps/bgp_base.P .deps/cli_base.P \
 .deps/mld6igmp_base.P .deps/ospf_base.P .deps/pim_base.P \
 .deps/rib_base.P .deps/ribclient_base.P .deps/rtrmgr_base.P \
 .deps/test_base.P .deps/test_peer_base.P .deps/xorpsh_base.P
-SOURCES = $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpshbase_a_SOURCES) $(libbgp4mibbase_a_SOURCES)
-OBJECTS = $(libbgpbase_a_OBJECTS) $(libclibase_a_OBJECTS) $(libcoordbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_OBJECTS) $(libfeabase_a_OBJECTS) $(libfinderbase_a_OBJECTS) $(libfinderclientbase_a_OBJECTS) $(libmfeabase_a_OBJECTS) $(libmld6igmpbase_a_OBJECTS) $(libospfbase_a_OBJECTS) $(libpimbase_a_OBJECTS) $(libribbase_a_OBJECTS) $(libribclientbase_a_OBJECTS) $(librtrmgrbase_a_OBJECTS) $(libtestbase_a_OBJECTS) $(libtestpeerbase_a_OBJECTS) $(libxorpshbase_a_OBJECTS) $(libbgp4mibbase_a_OBJECTS)
+SOURCES = $(libbgpbase_a_SOURCES) $(libbgp4mibbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+OBJECTS = $(libbgpbase_a_OBJECTS) $(libbgp4mibbase_a_OBJECTS) $(libclibase_a_OBJECTS) $(libcoordbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_OBJECTS) $(libfeabase_a_OBJECTS) $(libfinderbase_a_OBJECTS) $(libfinderclientbase_a_OBJECTS) $(libmfeabase_a_OBJECTS) $(libmld6igmpbase_a_OBJECTS) $(libospfbase_a_OBJECTS) $(libpimbase_a_OBJECTS) $(libribbase_a_OBJECTS) $(libribclientbase_a_OBJECTS) $(librtrmgrbase_a_OBJECTS) $(libtestbase_a_OBJECTS) $(libtestpeerbase_a_OBJECTS) $(libxorpshbase_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -261,6 +262,11 @@ libbgpbase.a: $(libbgpbase_a_OBJECTS) $(libbgpbase_a_DEPENDENCIES)
 	-rm -f libbgpbase.a
 	$(AR) cru libbgpbase.a $(libbgpbase_a_OBJECTS) $(libbgpbase_a_LIBADD)
 	$(RANLIB) libbgpbase.a
+
+libbgp4mibbase.a: $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_DEPENDENCIES)
+	-rm -f libbgp4mibbase.a
+	$(AR) cru libbgp4mibbase.a $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_LIBADD)
+	$(RANLIB) libbgp4mibbase.a
 
 libclibase.a: $(libclibase_a_OBJECTS) $(libclibase_a_DEPENDENCIES)
 	-rm -f libclibase.a
@@ -341,11 +347,6 @@ libxorpshbase.a: $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_DEPENDENCIES)
 	-rm -f libxorpshbase.a
 	$(AR) cru libxorpshbase.a $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_LIBADD)
 	$(RANLIB) libxorpshbase.a
-
-libbgp4mibbase.a: $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_DEPENDENCIES)
-	-rm -f libbgp4mibbase.a
-	$(AR) cru libbgp4mibbase.a $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_LIBADD)
-	$(RANLIB) libbgp4mibbase.a
 .cc.o:
 	$(CXXCOMPILE) -c $<
 
@@ -521,53 +522,79 @@ uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-bgp_base.hh: $(INTERFACES_DIR)/common.xif				\
-	$(INTERFACES_DIR)/bgp.xif					\
-	$(INTERFACES_DIR)/rib_client.xif
-cli_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/cli_manager.xif
-coord_base.hh: $(INTERFACES_DIR)/common.xif				\
-	       $(INTERFACES_DIR)/coord.xif 				\
-	       $(INTERFACES_DIR)/datain.xif
-demo_fea_if_client_base.hh: $(INTERFACES_DIR)/common.xif 		\
-			    $(INTERFACES_DIR)/fea_ifmgr_client.xif
-fea_base.hh: $(INTERFACES_DIR)/common.xif 				\
-	     $(INTERFACES_DIR)/fea_ifmgr.xif				\
-             $(INTERFACES_DIR)/fti.xif					\
-	     $(INTERFACES_DIR)/fea_rawpkt.xif
-finder_base.hh: $(INTERFACES_DIR)/common.xif 				\
+$(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
+		$(TARGET_DIR)/bgp.tgt					\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/bgp.xif				\
+		$(INTERFACES_DIR)/rib_client.xif
+$(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
+		$(INTERFACES_DIR)/common.xif
+$(srcdir)/cli_base.hh $(srcdir)/cli_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/cli_manager.xif
+$(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/coord.xif				\
+		$(INTERFACES_DIR)/datain.xif
+
+$(srcdir)/demo_fea_ifmgr_client_base.hh					\
+$(srcdir)/demo_fea_ifmgr_client_base.cc:				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_ifmgr_client.xif
+$(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_ifmgr.xif				\
+		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/fea_rawpkt.xif
+$(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
+		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder.xif				\
 		$(INTERFACES_DIR)/finder_event_notifier.xif
-finder_client_base.hh: $(INTERFACES_DIR)/common.xif 			\
-                       $(INTERFACES_DIR)/finder_client.xif
-mfea_base.hh: $(INTERFACES_DIR)/common.xif 				\
-              $(INTERFACES_DIR)/cli_processor.xif                       \
-              $(INTERFACES_DIR)/mfea.xif
-mld6igmp_base.hh: $(INTERFACES_DIR)/common.xif 				\
-                  $(INTERFACES_DIR)/cli_processor.xif 			\
-	          $(INTERFACES_DIR)/mfea_client.xif			\
-                  $(INTERFACES_DIR)/mld6igmp.xif
-ospf_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/ospf.xif
-pim_base.hh: $(INTERFACES_DIR)/common.xif 				\
-             $(INTERFACES_DIR)/cli_processor.xif			\
-	     $(INTERFACES_DIR)/mfea_client.xif				\
-	     $(INTERFACES_DIR)/mld6igmp_client.xif			\
-             $(INTERFACES_DIR)/fti.xif					\
-	     $(INTERFACES_DIR)/pim.xif
-rib_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/rib.xif
-ribclient_base.hh: $(INTERFACES_DIR)/rib_client.xif
-rtrmgr_base.hh:	$(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/rtrmgr.xif
-test_peer_base.hh: $(INTERFACES_DIR)/common.xif				\
+$(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder_client.xif
+$(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/mfea.xif
+$(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/cli_processor.xif 			\
+		$(INTERFACES_DIR)/mfea_client.xif			\
+		$(INTERFACES_DIR)/mld6igmp.xif
+$(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/ospf.xif
+$(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/cli_processor.xif			\
+		$(INTERFACES_DIR)/mfea_client.xif			\
+		$(INTERFACES_DIR)/mld6igmp_client.xif			\
+		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/pim.xif
+$(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rib.xif
+$(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
+		$(INTERFACES_DIR)/rib_client.xif
+$(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rtrmgr.xif
+$(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
-xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif				\
-	$(INTERFACES_DIR)/rtrmgr_client.xif
-bgp4_mib_base.hh: $(INTERFACES_DIR)/common.xif
+$(srcdir)/xorpsh_base.hh $(srcdir)/xorpsh_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rtrmgr_client.xif
 # This is a hack to rebuild files here when interfaces implemented by
 # rib target are touched.  It largely duplicates information inside rib.tgt
-test_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/test.xif
+$(srcdir)/test_base.hh $(srcdir)/test_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/test.xif
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@%_base.hh %_base.cc %.xrls: %.tgt $(TGTGEN_PY)
+@PY_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc $(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
 @PY_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
