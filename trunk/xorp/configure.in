@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.110 2004/08/31 19:28:49 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.111 2004/08/31 19:31:54 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1106,6 +1106,7 @@ AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
+#include <netinet/in.h>
 #include <netinet/ip_fw.h>
 ],
 [
