@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.7 2004/06/10 22:41:14 hodson Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.9 2004/09/24 04:52:21 pavlin Exp $"
 
 #include <signal.h>
 
@@ -181,22 +181,36 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
     _buffers.push_back(BufferInfo(b, b_bytes, off, cb));
 }
 
+static int write_call = 0;
+
 void
 AsyncFileWriter::write(int fd, SelectorMask m) 
 {
+    write_call++;
     assert(_buffers.empty() == false);
     assert(m == SEL_WR);
     assert(fd == _fd);
     BufferInfo& head = _buffers.front();
 
-    sig_t   saved_sigpipe = signal(SIGPIPE, SIG_IGN);
-    ssize_t done = ::write(_fd, head._buffer + head._offset,
-			   head._buffer_bytes - head._offset);
+    size_t out_bytes = head._buffer_bytes - head._offset;
+ retry:
+
+    sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+    ssize_t done = ::write(_fd, head._buffer + head._offset, out_bytes);
     signal(SIGPIPE, saved_sigpipe);
     if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
 	errno = 0;
 	return;
     }
+    if (done < 0 && errno == ENOBUFS) {
+	out_bytes /= 2;
+	if (out_bytes > 0)
+	    goto retry;
+	else {
+	    return;
+	}
+    }
+
     complete_transfer(done);
 }
 
