@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.13 2003/03/02 06:51:30 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.14 2003/03/03 06:18:43 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -12197,9 +12197,6 @@ In Part A, B, and C, the period of periodic transmission of the Cand-RP-Adv
 messages might be different from \verb=C-RP-Adv_Period=
 ({\PimsmCRPAdvPeriod}), though it must be smaller than
 \verb=C-RP_Timeout= ({\PimsmCRPTimeout}).
-In Part A, B, and C, the BS Timer in the RUT might expire earlier than
-3 * \verb=C-RP-Adv_Period= (3 * {\PimsmCRPAdvPeriod}), hence the RUT
-may stop transmitting Cand-RP-Adv messages right after the BS Timer expires.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Multicast Routing Table}
