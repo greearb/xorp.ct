@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.56 2005/02/12 08:09:08 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.57 2005/02/19 02:55:14 pavlin Exp $"
 
 
 //
@@ -172,7 +172,6 @@ PimNode::start()
     //
     // Update the node status
     //
-    // TODO: XXX: PAVPAVPAV: remove it?
     update_status();
 
     return (XORP_OK);
@@ -260,16 +259,6 @@ PimNode::stop()
 	return (XORP_ERROR);
 
     //
-    // De-register with the RIB
-    //
-    rib_register_shutdown();
-
-    //
-    // De-register with the MFEA
-    //
-    mfea_register_shutdown();
-
-    //
     // Set the node status
     //
     ProtoNode<PimVif>::set_node_status(PROC_SHUTDOWN);
@@ -298,6 +287,16 @@ PimNode::final_stop()
 
     if (ProtoNode<PimVif>::stop() < 0)
 	return (XORP_ERROR);
+
+    //
+    // De-register with the RIB
+    //
+    rib_register_shutdown();
+
+    //
+    // De-register with the MFEA
+    //
+    mfea_register_shutdown();
 
     return (XORP_OK);
 }
