@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.7 2003/04/22 23:27:17 hodson Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.8 2003/05/19 06:36:15 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -25,6 +25,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/status_codes.h"
 #include "proto_unit.hh"
 
 
@@ -63,7 +64,8 @@ public:
 	      EventLoop& init_eventloop)
 	: ProtoUnit(init_family, init_module_id),
 	  _eventloop(init_eventloop),
-	  _is_vif_setup_completed(false) {}
+	  _is_vif_setup_completed(false),
+	  _node_status(PROC_NULL) {}
     
     /**
      * Destructor
@@ -390,6 +392,20 @@ public:
 				    const uint8_t *sndbuf,
 				    size_t sndlen) = 0;
     
+    /**
+     * Get the node status (see @ref ProcessStatus).
+     * 
+     * @return the node status (see @ref ProcessStatus).
+     */
+    ProcessStatus node_status() const { return (_node_status); }
+    
+    /**
+     * Set the node status (see @ref ProcessStatus).
+     * 
+     * @param v the value to set the node status to.
+     */
+    void set_node_status(ProcessStatus v) { _node_status = v; }
+    
 private:
     // TODO: add vifs, etc
     
@@ -398,7 +414,9 @@ private:
     
     map<string, uint16_t> _vif_name2vif_index_map;
     
-    bool	_is_vif_setup_completed; // True if the vifs are setup
+    bool	_is_vif_setup_completed;	// True if the vifs are setup
+    
+    ProcessStatus	_node_status;		// The node status
 };
 
 //
