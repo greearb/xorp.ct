@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.2 2003/01/16 19:09:28 hodson Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.4 2003/01/25 01:11:22 mjh Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -368,7 +368,7 @@ public:
     bool operator==(const TrieIterator & x) const { return (_cur == x._cur); }
 
     Payload & payload()  		          { return _cur->p(); };
-    const Key & key()  		          { return _cur->k(); };
+    const Key & key() const 		          { return _cur->k(); };
 
 private:
     Node	*_cur;
