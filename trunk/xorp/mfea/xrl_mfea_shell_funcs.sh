@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.2 2003/02/08 09:18:27 pavlin Exp $
+# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.3 2003/03/03 02:00:22 pavlin Exp $
 #
 
 #
@@ -10,7 +10,8 @@
 
 . ../mfea/xrl_shell_lib.sh
 
-MFEA_TARGET="MFEA_4"
+# Conditionally set the target name
+MFEA_TARGET=${MFEA_TARGET:="MFEA_4"}
 
 mfea_enable_vif()
 {
