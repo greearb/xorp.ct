@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.58 2003/08/14 23:53:07 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.59 2003/08/28 00:34:36 pavlin Exp $
 #
+
+* IMPL: If a PimVif interface fails to start/stop/etc, then
+  the error message should be meaningful and contain the exact
+  reason for the failure. The same should apply for MLD/IGMP and MFEA.
 
 * IMPL+PIM_ARCH_DOCUMENT:
   - Add new class PimStat or so to keep statstics per vif, per node, etc.
