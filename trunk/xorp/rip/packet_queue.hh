@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_queue.hh,v 1.1 2003/07/21 18:03:04 hodson Exp $
+// $XORP: xorp/rip/packet_queue.hh,v 1.2 2003/08/01 04:08:12 hodson Exp $
 
 #ifndef __RIP_PACKET_QUEUE_HH__
 #define __RIP_PACKET_QUEUE_HH__
@@ -51,6 +51,11 @@ public:
      * sufficient space for new packet.
      */
     void enqueue_packet(const RipPacket<A>* pkt);
+
+    /**
+     * @return true if no packets are queued, false otherwise.
+     */
+    bool empty() const;
 
     /**
      * Peek at head packet if it exists.
