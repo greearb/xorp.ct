@@ -1,11 +1,11 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.12 2003/05/19 03:15:17 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.13 2003/05/21 03:53:38 pavlin Exp $
 ##
 
 
 bin_PROGRAMS		 = fea fea_dummy
-bin_PROGRAMS 		+= demo_fea_ifmgr_client
+bin_PROGRAMS 		+= demo_fea_ifmgr_client test_mfea
 check_PROGRAMS		 = test_rawsock4 test_ifmanager_transaction
 TESTS			 = $(check_PROGRAMS)
 
@@ -73,6 +73,34 @@ fea_dummy_LDADD		+= $(top_builddir)/libproto/libproto.a
 fea_dummy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 fea_dummy_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 fea_dummy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+
+test_mfea_SOURCES	= test_mfea.cc
+test_mfea_LDADD		= $(noinst_LIBRARIES)
+# FEA-specific begin
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+# FEA-specific end
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
+#test_mfea_LDADD	+= $(top_builddir)/xrl/interfaces/libcommonxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
+### MRT libraries
+test_mfea_LDADD		+= $(top_builddir)/mrt/libmrt.a
+### CLI libraries
+test_mfea_LDADD		+= $(top_builddir)/cli/libcli.a
+test_mfea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
+test_mfea_LDADD		+= -lcurses
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+### XORP misc libraries
+test_mfea_LDADD		+= $(top_builddir)/libproto/libproto.a
+test_mfea_LDADD		+= $(top_builddir)/libxipc/libfinder.a
+test_mfea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+test_mfea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
+test_mfea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 test_ifmanager_transaction_SOURCES  = test_ifmanager_transaction.cc
 test_ifmanager_transaction_SOURCES += iftree.cc
@@ -188,7 +216,11 @@ libfea_a_SOURCES	+= xrl_rawsock4.cc
 libfea_a_SOURCES	+= xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	 = test_xrls.sh
+EXTRA_DIST	 = DEVNOTES.mfea
+EXTRA_DIST	+= command_mfea
+EXTRA_DIST	+= configure_mfea
+EXTRA_DIST	+= test_xrls.sh
+EXTRA_DIST	+= xrl_mfea_shell_funcs.sh
 
 
 ################################################################
