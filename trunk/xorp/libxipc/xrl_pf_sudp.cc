@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.34 2004/10/13 06:03:29 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.35 2004/12/18 03:48:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -228,7 +228,7 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 		xorp_throw(XrlPFConstructorError,
 			   c_format("Could not create master socket: "
 				    "cannot set socket sending buffer to %d\n",
-				    SUDP_SEND_BUFFER_BYTES));
+				    XORP_INT_CAST(SUDP_SEND_BUFFER_BYTES)));
 	    }
 	    _eventloop.add_selector(sender_fd, SEL_RD,
 				    callback(&XrlPFSUDPSender::recv));
@@ -389,7 +389,8 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
     } else if (content_bytes + header_bytes != (size_t)read_bytes) {
 	debug_msg("header and data bytes != read_bytes (%u + %u != %d\n",
 		  XORP_UINT_CAST(header_bytes),
-		  XORP_UINT_CAST(content_bytes), read_bytes);
+		  XORP_UINT_CAST(content_bytes),
+		  XORP_INT_CAST(read_bytes));
     }
 
     debug_msg("Received %s\n", xuid.str().c_str());
@@ -483,7 +484,8 @@ XrlPFSUDPListener::recv(int fd, SelectorMask m)
 
     if (rbuf_bytes > SUDP_RECV_BUFFER_BYTES) {
 	debug_msg("Packet too large (%d > %d) bytes\n",
-		  rbuf_bytes, SUDP_RECV_BUFFER_BYTES);
+		  XORP_INT_CAST(rbuf_bytes),
+		  XORP_INT_CAST(SUDP_RECV_BUFFER_BYTES));
 	return;
     }
     rbuf[rbuf_bytes] = '\0';

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.7 2004/12/03 00:59:49 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.8 2004/12/03 01:06:10 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -174,7 +174,7 @@ IoRawSocket6::recv(int fd, SelectorMask m)
     mh.msg_flags = 0;
 
     ssize_t n = recvmsg(_fd, &mh, 0);
-    debug_msg("Read fd %d, %d bytes\n", _fd, n);
+    debug_msg("Read fd %d, %d bytes\n", _fd, XORP_INT_CAST(n));
     if (n <= 0) {
 	return;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.8 2004/11/23 00:53:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.9 2005/02/27 21:32:53 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -157,7 +157,8 @@ IoRawSocket4::recv(int /* fd */, SelectorMask /* m */)
     socklen_t from_len = sizeof(from);
     ssize_t n = recvfrom(_fd, &_recvbuf[0], RECVBUF_BYTES, 0,
 			 &from, &from_len);
-    debug_msg("Read fd %d, %d bytes, from_len %d\n", _fd, n, from_len);
+    debug_msg("Read fd %d, %d bytes, from_len %d\n", _fd,
+	      XORP_INT_CAST(n), from_len);
     if (n <= 0) {
 	return;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.20 2004/09/08 23:54:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.21 2005/02/27 21:32:52 pavlin Exp $"
 
 
 //
@@ -1007,7 +1007,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
-			 nbytes, XORP_UINT_CAST(sizeof(*igmpmsg)));
+			 XORP_INT_CAST(nbytes),
+			 XORP_UINT_CAST(sizeof(*igmpmsg)));
 	    return;		// Error
 	}
 	if (igmpmsg->im_mbz == 0) {
@@ -1040,7 +1041,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal or packet size %d is smaller than minimum size %u",
-			 nbytes,
+			 XORP_INT_CAST(nbytes),
 			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
 					    sizeof(struct mld_hdr))));
 	    return;		// Error
@@ -1090,7 +1091,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	if (nbytes < (ssize_t)sizeof(*ip)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
-			 nbytes, XORP_UINT_CAST(sizeof(*ip)));
+			 XORP_INT_CAST(nbytes),
+			 XORP_UINT_CAST(sizeof(*ip)));
 	    return;		// Error
 	}
 	src.copy_in(_from4);
@@ -1140,7 +1142,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet size from %s to %s with %d bytes instead of "
 		       "hdr+datalen=%d+%d=%d",
-		       cstring(src), cstring(dst), nbytes,
+		       cstring(src), cstring(dst),
+		       XORP_INT_CAST(nbytes),
 		       ip_hdr_len, ip_data_len, ip_hdr_len + ip_data_len);
 	    return;		// Error
 	}
@@ -1204,7 +1207,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	if (_rcvmh.msg_flags & MSG_CTRUNC) {
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet from %s with size of %d bytes is truncated",
-		       cstring(src), nbytes);
+		       cstring(src),
+		       XORP_INT_CAST(nbytes));
 	    return;		// Error
 	}
 	size_t controllen =  static_cast<size_t>(_rcvmh.msg_controllen);

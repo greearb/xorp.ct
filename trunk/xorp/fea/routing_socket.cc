@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.19 2004/12/17 20:42:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.20 2005/02/27 21:32:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -208,7 +208,7 @@ RoutingSocket::force_read(string& error_msg)
 				 "message truncated: "
 				 "received %d bytes instead of (at least) %u "
 				 "bytes",
-				 got,
+				 XORP_INT_CAST(got),
 				 XORP_UINT_CAST(sizeof(u_short) + 2 * sizeof(u_char)));
 	    return (XORP_ERROR);
 	}
