@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.2 2003/03/10 23:20:37 hodson Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.3 2003/05/18 23:16:06 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -94,7 +94,7 @@ Vif::Vif(const string& vifname, const string& ifname)
     set_loopback(false);
     set_multicast_capable(false);
     set_broadcast_capable(false);
-    set_underlying_vif_up(true);	// XXX: true by default
+    set_underlying_vif_up(false);
 }
 
 //
