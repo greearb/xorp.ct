@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.10 2003/03/30 03:50:44 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.11 2003/04/16 05:12:28 pavlin Exp $"
 
 
 //
@@ -77,7 +77,7 @@ UnixComm::UnixComm(MfeaNode& mfea_node, int ipproto, xorp_module_id module_id)
 {
     // Init Router Alert related option stuff
 #ifdef HAVE_IPV6
-    _rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD6 only (?)
+    _rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
 #ifndef HAVE_RFC2292BIS
     _raopt[0] = IP6OPT_ROUTER_ALERT;
     _raopt[1] = IP6OPT_RTALERT_LEN - 2;
@@ -2402,7 +2402,7 @@ UnixComm::is_multicast_capable(uint16_t vif_index) const
  * UnixComm::open_proto_socket:
  * @void: 
  * 
- * Register and 'start' a multicast protocol (IGMP, MLD6, PIM, etc)
+ * Register and 'start' a multicast protocol (IGMP, MLD, PIM, etc)
  * in the kernel.
  * XXX: This function will create the socket to receive the messages,
  * and will assign a function to start listening on that socket.
@@ -2479,15 +2479,15 @@ UnixComm::open_proto_socket(void)
 	if (_ipproto == IPPROTO_ICMPV6) {
 	    struct icmp6_filter filter;
 	    
-	    // Filter all non-MLD ICMP messages
+	    // Filter all non-MLD ICMPv6 messages
 	    ICMP6_FILTER_SETBLOCKALL(&filter);
-	    ICMP6_FILTER_SETPASS(ICMP6_MEMBERSHIP_QUERY, &filter);
-	    ICMP6_FILTER_SETPASS(ICMP6_MEMBERSHIP_REPORT, &filter);
-	    ICMP6_FILTER_SETPASS(ICMP6_MEMBERSHIP_REDUCTION, &filter);
-	    ICMP6_FILTER_SETPASS(MLD6_MTRACE_RESP, &filter);
-	    ICMP6_FILTER_SETPASS(MLD6_MTRACE, &filter);
+	    ICMP6_FILTER_SETPASS(MLD_LISTENER_QUERY, &filter);
+	    ICMP6_FILTER_SETPASS(MLD_LISTENER_REPORT, &filter);
+	    ICMP6_FILTER_SETPASS(MLD_LISTENER_DONE, &filter);
+	    ICMP6_FILTER_SETPASS(MLD_MTRACE_RESP, &filter);
+	    ICMP6_FILTER_SETPASS(MLD_MTRACE, &filter);
 #ifdef MLDV2_LISTENER_REPORT
-	    ICMP6_FILTER_SETPASS(MLD6V2_LISTENER_REPORT, &filter);
+	    ICMP6_FILTER_SETPASS(MLDV2_LISTENER_REPORT, &filter);
 #endif
 	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
 			   (void *)&filter, sizeof(filter)) < 0) {
