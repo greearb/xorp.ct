@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.8 2004/09/02 18:35:21 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.9 2004/09/02 18:44:43 pavlin Exp $"
 
 
 /*
@@ -253,7 +253,7 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
 
     return (sock);
 #else
-    comm_sock_no_ipv6("comm_bind_tcp6", my_addr, my_port);
+    comm_sock_no_ipv6("comm_bind_tcp6", my_addr, my_port, is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
@@ -316,7 +316,7 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port,
 
     return (sock);
 #else
-    comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_port);
+    comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_port, is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
@@ -431,8 +431,8 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 
     return (sock);
 #else
-    comm_sock_no_ipv6("comm_bind_join_udp6",
-		      mcast_addr, join_if_index, my_port, reuse_flag);
+    comm_sock_no_ipv6("comm_bind_join_udp6", mcast_addr, join_if_index,
+		      my_port, reuse_flag, is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
@@ -497,7 +497,8 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
 
     return (sock);
 #else
-    comm_sock_no_ipv6("comm_connect_tcp6", remote_addr, remote_port);
+    comm_sock_no_ipv6("comm_connect_tcp6", remote_addr, remote_port,
+		      is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
@@ -556,7 +557,8 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
 
     return (sock);
 #else
-    comm_sock_no_ipv6("comm_connect_udp6", remote_addr, remote_port);
+    comm_sock_no_ipv6("comm_connect_udp6", remote_addr, remote_port,
+		      is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
@@ -631,8 +633,8 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 
     return (sock);
 #else
-    comm_sock_no_ipv6("comm_bind_connect_udp6",
-		      local_addr, local_port, remote_addr, remote_port);
+    comm_sock_no_ipv6("comm_bind_connect_udp6", local_addr, local_port,
+		      remote_addr, remote_port, is_blocking);
     return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
 }
