@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.1 2004/10/21 00:44:22 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -269,7 +269,7 @@ ClickSocket::check_command_status(bool& is_warning, string& command_warning,
 	//
 	// Test the error code
 	//
-	if (error_code = CLICK_COMMAND_CODE_OK)
+	if (error_code == CLICK_COMMAND_CODE_OK)
 	    continue;
 
 	if ((error_code >= CLICK_COMMAND_CODE_WARNING_MIN)
