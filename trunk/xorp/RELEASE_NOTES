@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.37 2003/11/06 19:08:51 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.38 2003/11/06 19:47:41 hodson Exp $
 #
 
 		XORP RELEASE NOTES
@@ -50,7 +50,11 @@ Release 0.5 (2003/??/??)
     - No significant changes.
 
   BGP:
-    - 
+    - Supports multiprotocol IPv6.
+
+    - The code for multicast SAFI is enabled but is untested.
+
+    - A memory leak exists.
 
   MLD/IGMP:
     - 
