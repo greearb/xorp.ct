@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.18 2005/01/20 00:43:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.19 2005/01/27 00:22:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -241,16 +241,47 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
     //
     do {
 	NexthopPortMapper& m = ftic().nexthop_port_mapper();
-	port = m.lookup_nexthop_interface(fte.ifname(), fte.vifname());
-	if (port >= 0)
-	    break;
-	if (fte.nexthop().is_ipv4()) {
-	    port = m.lookup_nexthop_ipv4(fte.nexthop().get_ipv4());
+	const IPvX& nexthop = fte.nexthop();
+	bool lookup_nexthop_interface_first = true;
+
+	if (fte.is_connected_route()
+	    && (IPvXNet(nexthop, nexthop.addr_bitlen()) == fte.net())) {
+	    //
+	    // XXX: if a directly-connected route, then check whether the
+	    // next-hop address is same as the destination address. This
+	    // could be the case of either:
+	    // (a) the other side of a p2p link
+	    // OR
+	    // (b) a connected route for a /32 or /128 configured interface
+	    // We are interested in discovering case (b) only, but anyway
+	    // in both cases we then lookup the MextPortMapper by trying
+	    // first the nexthop address.
+	    //
+	    // Note that we don't want to map all "connected" routes
+	    // by the next-hop address, because typically the next-hop
+	    // address will be local IP address, and we don't want to
+	    // mis-route the traffic for all directly connected destinations
+	    // to the local delivery port of the Click lookup element.
+	    //
+	    lookup_nexthop_interface_first = false;
+	}
+	if (lookup_nexthop_interface_first) {
+	    port = m.lookup_nexthop_interface(fte.ifname(), fte.vifname());
 	    if (port >= 0)
 		break;
 	}
-	if (fte.nexthop().is_ipv6()) {
-	    port = m.lookup_nexthop_ipv6(fte.nexthop().get_ipv6());
+	if (nexthop.is_ipv4()) {
+	    port = m.lookup_nexthop_ipv4(nexthop.get_ipv4());
+	    if (port >= 0)
+		break;
+	}
+	if (nexthop.is_ipv6()) {
+	    port = m.lookup_nexthop_ipv6(nexthop.get_ipv6());
+	    if (port >= 0)
+		break;
+	}
+	if (! lookup_nexthop_interface_first) {
+	    port = m.lookup_nexthop_interface(fte.ifname(), fte.vifname());
 	    if (port >= 0)
 		break;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.16 2004/12/17 00:19:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.17 2004/12/17 05:49:42 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -959,12 +959,25 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     IfTreeInterface::VifMap::const_iterator vi;
     IfTreeVif::V4Map::const_iterator ai4;
     IfTreeVif::V6Map::const_iterator ai6;
-    int xorp_rt_port;
+    int xorp_rt_port, local_xorp_rt_port;
 
     //
-    // Generate the next-hop to port mapping
+    // Calculate the port for local delivery.
+    // XXX: The last port in xorp_rt is reserved for local delivery
     //
-    // XXX: last port in xorp_rt is reserved for local delivery
+    local_xorp_rt_port = 0;
+    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	const IfTreeInterface& fi = ii->second;
+	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
+	    local_xorp_rt_port++;
+	}
+    }
+
+    //
+    // Generate the next-hop to port mapping.
+    // Note that all local IP addresses are mapped to the port
+    // designated for local delivery.
+    //
     ifc().nexthop_port_mapper().clear();
     xorp_rt_port = 0;
     for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
@@ -976,7 +989,8 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 						      xorp_rt_port);
 	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
 		const IfTreeAddr4& fa4 = ai4->second;
-		ifc().nexthop_port_mapper().add_ipv4(fa4.addr(), xorp_rt_port);
+		ifc().nexthop_port_mapper().add_ipv4(fa4.addr(),
+						     local_xorp_rt_port);
 		IPv4Net ipv4net(fa4.addr(), fa4.prefix_len());
 		ifc().nexthop_port_mapper().add_ipv4net(ipv4net, xorp_rt_port);
 		if (fa4.point_to_point())
@@ -985,7 +999,8 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 	    }
 	    for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
 		const IfTreeAddr6& fa6 = ai6->second;
-		ifc().nexthop_port_mapper().add_ipv6(fa6.addr(), xorp_rt_port);
+		ifc().nexthop_port_mapper().add_ipv6(fa6.addr(),
+						     local_xorp_rt_port);
 		IPv6Net ipv6net(fa6.addr(), fa6.prefix_len());
 		ifc().nexthop_port_mapper().add_ipv6net(ipv6net, xorp_rt_port);
 		if (fa6.point_to_point())
