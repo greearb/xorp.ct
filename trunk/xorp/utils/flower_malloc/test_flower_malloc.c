@@ -29,19 +29,17 @@ allocs/watermark  total size/watermark     avg size  tracker_id [+]
        0/16                 0/100800         6300    36978 +
        0/5                  0/2500            500    36984 +
        0/120                0/252000         2100    36a6c +
-       2/2              12288/12288          6144    40291  
        0/1                  0/100             100    4c5f2  
 
 */
 
-#define LINES_IN_REF_REPORT 7
+#define LINES_IN_REF_REPORT 6
 uint32_t ref_report[LINES_IN_REF_REPORT][6] =
 { {  300,300     ,      90000,90000    ,      300 , 0},
   {    4,5       ,     280000,350000   ,    70000 , 0},
   {    0,16      ,          0,100800   ,     6300 , 0},
   {    0,5       ,          0,2500     ,      500 , 0},
   {    0,120     ,          0,252000   ,     2100 , 0},
-  {    2,2       ,      12288,12288    ,     6144 , 0},
   {    0,1       ,          0,100      ,      100 , 0},};
 
 /* exhuberance of notes, fast and throughout the entire range of the horn */
