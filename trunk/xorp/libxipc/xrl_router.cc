@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.27 2003/09/10 18:06:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.28 2003/09/11 19:24:40 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -152,10 +152,12 @@ XrlRouter::initialize(const char* class_name,
 				      finder_addr, finder_port);
 
     _instance_name = mk_instance_name(_e, class_name);
+
     _fc->attach_observer(this);
     if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
 	XLOG_FATAL("Failed to register target %s\n", class_name);
     }
+
     if (_icnt == 0)
 	XrlPFSenderFactory::startup();
     _icnt++;
@@ -168,8 +170,13 @@ XrlRouter::XrlRouter(EventLoop&  e,
     throw (InvalidAddress)
     : XrlDispatcher(class_name), _e(e)
 {
-    IPv4 finder_ip = finder_addr ? finder_host(finder_addr)
-	: FINDER_DEFAULT_HOST;
+    IPv4 finder_ip;
+    if (0 == finder_addr) {
+	finder_ip = FINDER_DEFAULT_HOST;
+    } else {
+	finder_ip = finder_host(finder_addr);
+    }
+
     if (0 == finder_port)
 	finder_port = FINDER_DEFAULT_PORT;
 
@@ -358,7 +365,7 @@ public:
     XrlCallbackChecker()
 	: _seqno(0)
     {}
-    
+
     void process_callback(const XrlError& e, XrlArgs* a, uint32_t seqno)
     {
 	map<uint32_t, XrlCallback>::iterator i = _cbs.find(seqno);
@@ -371,13 +378,15 @@ public:
 	}
 	ucb->dispatch(e, a);
     }
-    
+
     XrlCallback add_callback(const XrlCallback& ucb)
     {
 	_cbs[_seqno] = ucb;
 	return callback(this, &XrlCallbackChecker::process_callback, _seqno++);
     }
-    
+
+    uint32_t last_seqno() const { return _seqno - 1; }
+
 protected:
     map<uint32_t, XrlCallback> _cbs;
     uint32_t _seqno;
@@ -389,6 +398,11 @@ bool
 XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 {
     trace_xrl("Resolving xrl:", xrl);
+
+    if (_fc->connected() == false) {
+	user_cb->dispatch(XrlError::NO_FINDER(), 0);
+	return false;
+    }
 
 #ifdef USE_XRL_CALLBACK_CHECKER
     // Callback checker wrappers user callback with callback that
@@ -403,11 +417,19 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     // Finder directed Xrl - takes custom path through FinderClient.
     //
     if (xrl.protocol() == "finder" && xrl.target().substr(0,6) == "finder") {
-	_fc->forward_finder_xrl(xrl, xcb);
-	// XXX check for error.
-	return true;
+	if (_fc->forward_finder_xrl(xrl, xcb)) {
+	    return true;
+	}
+#ifdef USE_XRL_CALLBACK_CHECKER
+	cb_checker.process_callback(XrlError::NO_FINDER(), 0,
+				    cb_checker.last_seqno());
+#else
+	user_cb->dispatch(XrlError::NO_FINDER(), 0);
+#endif
+	fprintf(stderr, "NO FINDER");
+	return false;
     }
-    
+
     //
     // Fast path - Xrl resolution in cache and no Xrls ahead blocked on
     // on response from Finder.  Fast path cannot be taken if earlier Xrls
