@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.43 2004/11/03 22:18:01 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.44 2005/01/22 06:02:16 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -286,7 +286,7 @@ RIB<A>::initialize(RegisterServer& register_server)
 		   name().c_str());
     }
     if (add_igp_table("static", "", "") != XORP_OK) {
-	XLOG_FATAL("Could not add igp table \"connected\" for %s",
+	XLOG_FATAL("Could not add igp table \"static\" for %s",
 		   name().c_str());
     }
 }
@@ -305,7 +305,7 @@ RIB<A>::initialize_policy_redist()
     }
 
     _policy_redist_table =
-	new PolicyRedistTable<A>(_register_table,_rib_manager.xrl_router(),
+	new PolicyRedistTable<A>(_register_table, _rib_manager.xrl_router(),
 				 _rib_manager.policy_redist_map(),
 				 _multicast);
     if (add_table(_policy_redist_table) != XORP_OK) {
@@ -943,10 +943,10 @@ RedistTable<A>*
 RIB<A>::protocol_redist_table(const string& protocol)
 {
     RouteTable<A>* rt = find_table(redist_tablename(protocol));
-    if (rt) {
+    if (rt != NULL) {
 	return dynamic_cast<RedistTable<A>*>(rt);
     }
-    return 0;
+    return NULL;
 }
 
 template <typename A>
@@ -960,27 +960,28 @@ RIB<A>::add_igp_table(const string& tablename,
     if (r != XORP_OK)
 	return r;
 
-
-    const string* redistparent = &tablename;
-
-    if (tablename == "connected") {
-	r = add_policy_connected_table(tablename);
-	if (r != XORP_OK) {
-	    delete_origin_table(tablename, target_class, target_instance);
-	    return r;
-	}
-
-	redistparent = &PolicyConnectedTable<A>::table_name;
-    }
-
-
     // XXX For now we unconditionally plumb a RedistTable behind each
     // OriginTable.  We do this because the RedistTable needs to track
     // the routes within the OriginTable in order to be able to render
     // a dump when another protocol requests redistribution.
-    r = add_redist_table(*redistparent);
+    r = add_redist_table(tablename);
     if (r != XORP_OK) {
 	delete_origin_table(tablename, target_class, target_instance);
+	return r;
+    }
+    RouteTable<A>* rt = find_table(redist_tablename(tablename));
+    XLOG_ASSERT(rt != NULL);
+
+    if (tablename == "connected") {
+	r = add_policy_connected_table(rt->tablename());
+	if (r != XORP_OK) {
+	    delete_origin_table(tablename, target_class, target_instance);
+	    //
+	    // XXX: we don't delete the redist table but keep it around,
+	    // because delete_origin_table() does similar.
+	    //
+	    return r;
+	}
     }
 
     return r;
@@ -1006,7 +1007,10 @@ RIB<A>::add_egp_table(const string& tablename,
     r = add_redist_table(tablename);
     if (r != XORP_OK) {
 	delete_origin_table(tablename, target_class, target_instance);
+	return r;
     }
+    RouteTable<A>* rt = find_table(redist_tablename(tablename));
+    XLOG_ASSERT(rt != NULL);
 #endif
     return r;
 }
@@ -1022,11 +1026,11 @@ RIB<A>::add_policy_connected_table(const string& parent_tablename)
 	return XORP_ERROR;
     }
 
-    if (find_table(PolicyConnectedTable<A>::table_name))
+    if (find_table(PolicyConnectedTable<A>::table_name) != NULL)
 	return XORP_OK;
 
     PolicyConnectedTable<A>* pt = 
-	new PolicyConnectedTable<A>(parent,_rib_manager.policy_filters());
+	new PolicyConnectedTable<A>(parent, _rib_manager.policy_filters());
     if (add_table(pt) != XORP_OK) {
 	delete pt;
 	return XORP_ERROR;
@@ -1046,7 +1050,7 @@ RIB<A>::add_redist_table(const string& parent_tablename)
 	return XORP_ERROR;
     }
 
-    if (find_table(redist_tablename(parent_tablename)) != 0) {
+    if (find_table(redist_tablename(parent_tablename)) != NULL) {
 	return XORP_OK;		// RedistTable already exists, no sweat
     }
 
@@ -1429,10 +1433,10 @@ void
 RIB<A>::push_routes()
 {
     RouteTable<A>* rt = find_table(PolicyConnectedTable<A>::table_name);
-    XLOG_ASSERT(rt);
+    XLOG_ASSERT(rt != NULL);
 
     PolicyConnectedTable<A>* pct = dynamic_cast<PolicyConnectedTable<A>*>(rt);
-    XLOG_ASSERT(pct);
+    XLOG_ASSERT(pct != NULL);
 
     pct->push_routes();
 }
