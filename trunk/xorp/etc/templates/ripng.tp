@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.15 2004/06/21 18:06:05 hodson Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.16 2004/09/17 14:14:24 abittau Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -28,14 +28,19 @@ protocols {
 		}
 	    }
 	}
+
 /*
+ * TODO: temporary comment-out the new policy-based import/export and use
+ * the original mechanism until the policy-based config is fixed.
+ */
 	export @: txt {
 	    metric:u32	= 1 ;
 	    tag:u32	= 0 ;
 	}
-*/	
+/* TODO: the new policy-based mechanism
         import: txt;
         export: txt;
+*/
 
     }
 }
@@ -164,14 +169,17 @@ protocols {
 		}
 	    }
 	}
+
 /*
+ * TODO: temporary comment-out the new policy-based import/export and use
+ * the original mechanism until the policy-based config is fixed.
+ */
 	export @: txt {
 		%activate: xrl "$(ripng.targetname)/ripng/0.1/redist_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)";
 		%delete: xrl "$(ripng.targetname)/ripng/0.1/no_redist_protocol_routes?protocol_name:txt=$(@)";
 		%help: short "Export routes from another routing protocol." ;
 	}
-*/
-        
+/* TODO: the new policy-based mechanism        
 	import {
                 %delete: xrl "policy/policy/0.1/import?protocol:txt=$(ripng.targetname)&policies:txt=";
                 %set: xrl "policy/policy/0.1/import?protocol:txt=$(ripng.targetname)&policies:txt=$(@)";
@@ -180,6 +188,7 @@ protocols {
                 %delete: xrl "policy/policy/0.1/export?protocol:txt=$(ripng.targetname)&policies:txt=";
                 %set: xrl "policy/policy/0.1/export?protocol:txt=$(ripng.targetname)&policies:txt=$(@)";
         }
+*/
 
     }
 }
