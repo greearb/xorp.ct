@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.8 2004/11/12 02:44:42 bms Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.9 2004/11/23 22:43:43 bms Exp $
 ##
 
 # -- Real Programs
@@ -21,8 +21,6 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 test_spt_SOURCES	 = test_spt.cc
-test_spt_SOURCES	+= spt.hh
-test_spt_SOURCES	+= spt.cc
 
 # -- Library Sources
 libproto_la_SOURCES	 = libproto_module.h

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.55 2004/12/10 14:48:15 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.56 2004/12/14 22:43:11 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -130,41 +130,37 @@ test_mfea_LDADD		+= $(top_builddir)/libcomm/libcomm.la
 test_mfea_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for test_ifmanager_transaction
-test_ifmanager_transaction_SOURCES  = test_ifmanager_transaction.cc
-test_ifmanager_transaction_SOURCES += iftree.cc
-test_ifmanager_transaction_LDADD    = $(top_builddir)/libxorp/libxorp.la
+test_ifmanager_transaction_SOURCES	 = test_ifmanager_transaction.cc
+test_ifmanager_transaction_LDADD	 = $(noinst_LTLIBRARIES)
+test_ifmanager_transaction_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkages for test_rawsock4
-test_rawsock4_SOURCES	 = test_rawsock4.cc rawsock4.cc
-test_rawsock4_LDADD	 = $(top_builddir)/libxorp/libxorp.la
+test_rawsock4_SOURCES	 = test_rawsock4.cc
+test_rawsock4_LDADD	 = $(noinst_LTLIBRARIES)
+test_rawsock4_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for test_xrl_sockets
-test_xrl_sockets4_udp_SOURCES  = test_xrl_sockets4_udp.cc
-test_xrl_sockets4_udp_SOURCES += addr_table.hh
-test_xrl_sockets4_udp_SOURCES += xrl_socket_cmds.hh
-test_xrl_sockets4_udp_SOURCES += xrl_socket_server.hh
-test_xrl_sockets4_udp_SOURCES += addr_table.cc
-test_xrl_sockets4_udp_SOURCES += xrl_socket_cmds.cc
-test_xrl_sockets4_udp_SOURCES += xrl_socket_server.cc
+test_xrl_sockets4_udp_SOURCES	 = test_xrl_sockets4_udp.cc
 
-test_xrl_sockets4_udp_LDADD    = $(top_builddir)/xrl/interfaces/libsocket4userxif.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket4xif.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket6userxif.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket6xif.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/targets/libsocketserverbase.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/targets/libtestsocket4.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/libxipc/libxipc.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/libcomm/libcomm.la
-test_xrl_sockets4_udp_LDADD   += $(top_builddir)/libxorp/libxorp.la
+test_xrl_sockets4_udp_LDADD	 = $(noinst_LTLIBRARIES)
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for demo_fea_ifmgr_client
-demo_fea_ifmgr_client_SOURCES  = demo_fea_ifmgr_client.cc
-demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.la
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxipc/libxipc.la
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libcomm/libcomm.la
-demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.la
+demo_fea_ifmgr_client_SOURCES	 = demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_LDADD	 = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.la
+demo_fea_ifmgr_client_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
+demo_fea_ifmgr_client_LDADD	+= $(top_builddir)/libxipc/libxipc.la
+demo_fea_ifmgr_client_LDADD	+= $(top_builddir)/libcomm/libcomm.la
+demo_fea_ifmgr_client_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libfea_la_SOURCES	 = fea_module.h

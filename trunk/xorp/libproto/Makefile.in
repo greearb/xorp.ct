@@ -109,7 +109,7 @@ noinst_LTLIBRARIES = libproto.la
 LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
-test_spt_SOURCES = test_spt.cc spt.hh spt.cc
+test_spt_SOURCES = test_spt.cc
 
 # -- Library Sources
 libproto_la_SOURCES = libproto_module.h proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
@@ -132,7 +132,7 @@ bin_PROGRAMS =
 check_PROGRAMS = test_spt$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_test_spt_OBJECTS = test_spt.$(OBJEXT) spt.$(OBJEXT)
+am_test_spt_OBJECTS = test_spt.$(OBJEXT)
 test_spt_OBJECTS = $(am_test_spt_OBJECTS)
 test_spt_LDADD = $(LDADD)
 test_spt_DEPENDENCIES = libproto.la $(top_builddir)/libxorp/libxorp.la
@@ -147,8 +147,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/proto_node_cli.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_register.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_state.Plo $(DEPDIR)/proto_unit.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/spt.Plo $(DEPDIR)/spt.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_spt.Po
+@AMDEP_TRUE@	$(DEPDIR)/spt.Plo $(DEPDIR)/test_spt.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -237,7 +236,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_state.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_unit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spt.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_spt.Po@am__quote@
 
 distclean-depend:
