@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.15 2004/09/17 13:57:15 abittau Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.16 2005/02/01 09:17:54 pavlin Exp $"
 
 #include <set>
 
@@ -346,10 +346,11 @@ public:
 	    } else {
 		// Not a test peer net and not an other peer net
 		// ==> it's bogus
-		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
-			    rr.packet_entry(), p->max_entries(),
+		verbose_log("Failed Processing entry %u / %u %s cost %u\n",
+			    XORP_UINT_CAST(rr.packet_entry()),
+			    XORP_UINT_CAST(p->max_entries()),
 			    n.str().c_str(),
-			    cost);
+			    XORP_UINT_CAST(cost));
 		return false;
 	    }
 	}
@@ -359,13 +360,14 @@ public:
     bool valid_in_sum() const
     {
 	if (this->test_peer_routes_seen() != this->_tpn.size()) {
-	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
-			this->test_peer_routes_seen(), 
-			(int32_t)this->_tpn.size());
+	    verbose_log("Test routes seen (%u) does not match expected (%u)\n",
+			XORP_UINT_CAST(this->test_peer_routes_seen()),
+			XORP_UINT_CAST(this->_tpn.size()));
 	    return false;
 	}
-	verbose_log("total routes seen %d, test peer routes seen = %d\n",
-		    this->total_routes_seen(), this->test_peer_routes_seen());
+	verbose_log("total routes seen %u, test peer routes seen = %u\n",
+		    XORP_UINT_CAST(this->total_routes_seen()),
+		    XORP_UINT_CAST(this->test_peer_routes_seen()));
 	return this->test_peer_routes_seen() * 2 == this->total_routes_seen();
     }
 };
@@ -390,9 +392,11 @@ public:
 	    if (this->_opn.find(n) == this->_opn.end()) {
 		verbose_log("Saw own or alien route with split horizon\n");
 		// ==> it's bogus
-		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
-			    rr.packet_entry(), p->max_entries(),
-			    n.str().c_str(), cost);
+		verbose_log("Failed Processing entry %u / %u %s cost %u\n",
+			    XORP_UINT_CAST(rr.packet_entry()),
+			    XORP_UINT_CAST(p->max_entries()),
+			    n.str().c_str(),
+			    XORP_UINT_CAST(cost));
 		return false;
 	    }
 	}
@@ -402,12 +406,15 @@ public:
     bool valid_in_sum() const
     {
 	if (this->test_peer_routes_seen() != 0) {
-	    verbose_log("Test peer routes seen (%d) does not match expected "
-			"(%d)\n", this->test_peer_routes_seen(), 0);
+	    verbose_log("Test peer routes seen (%u) does not match expected "
+			"(%u)\n",
+			XORP_UINT_CAST(this->test_peer_routes_seen()),
+			XORP_UINT_CAST(0));
 	    return false;
 	}
-	verbose_log("total routes seen %d, test peer routes seen = %d\n",
-		    this->total_routes_seen(), this->test_peer_routes_seen());
+	verbose_log("total routes seen %u, test peer routes seen = %u\n",
+		    XORP_UINT_CAST(this->total_routes_seen()),
+		    XORP_UINT_CAST(this->test_peer_routes_seen()));
 	return this->total_routes_seen() == (uint32_t)this->_opn.size();
     }
 };
@@ -439,9 +446,11 @@ public:
 	    } else {
 		// Not a test peer net and not an other peer net
 		// ==> it's bogus
-		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
-			    rr.packet_entry(), p->max_entries(),
-			    n.str().c_str(), cost);
+		verbose_log("Failed Processing entry %u / %u %s cost %u\n",
+			    XORP_UINT_CAST(rr.packet_entry()),
+			    XORP_UINT_CAST(p->max_entries()),
+			    n.str().c_str(),
+			    XORP_UINT_CAST(cost));
 		return false;
 	    }
 	}
@@ -451,13 +460,14 @@ public:
     bool valid_in_sum() const
     {
 	if (this->test_peer_routes_seen() != this->_tpn.size()) {
-	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
-			this->test_peer_routes_seen(), 
-			(int32_t)this->_tpn.size());
+	    verbose_log("Test routes seen (%u) does not match expected (%u)\n",
+			XORP_UINT_CAST(this->test_peer_routes_seen()),
+			XORP_UINT_CAST(this->_tpn.size()));
 	    return false;
 	}
-	verbose_log("total routes seen %d, test peer routes seen = %d\n",
-		    this->total_routes_seen(), this->test_peer_routes_seen());
+	verbose_log("total routes seen %u, test peer routes seen = %u\n",
+		    XORP_UINT_CAST(this->total_routes_seen()),
+		    XORP_UINT_CAST(this->test_peer_routes_seen()));
 	return this->test_peer_routes_seen() * 2 == this->total_routes_seen();
     }
 };
