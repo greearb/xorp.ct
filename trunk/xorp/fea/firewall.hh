@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.8 2004/09/14 17:04:03 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.9 2004/09/16 10:39:01 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -34,7 +34,7 @@
  *
  * Intermediate representation of a XORP firewall rule entry.
  */
-template<typename N>
+template <typename N>
 class FwRule {
 public:
 	static const uint8_t	IP_PROTO_ANY = 255;

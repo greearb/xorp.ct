@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/firewall.cc,v 1.1 2004/09/14 15:08:22 bms Exp $"
+#ident "$XORP: xorp/fea/firewall.cc,v 1.2 2004/09/16 11:42:03 bms Exp $"
 
 #include "fea_module.h"
 
@@ -60,7 +60,7 @@ FirewallManager::set_fw_provider(const char* name)
 		} else {
 			return (XORP_ERROR);
 		}
-	} catch(InvalidFwProvider) {
+	} catch (InvalidFwProvider) {
 		return (XORP_ERROR);
 	}
 
