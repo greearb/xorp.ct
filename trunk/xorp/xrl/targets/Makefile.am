@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.8 2003/05/14 19:27:56 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.9 2003/05/16 16:52:09 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -94,7 +94,8 @@ libmfeabase_a_SOURCES = mfea_base.hh mfea_base.cc
 $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
-		$(INTERFACES_DIR)/mfea.xif
+		$(INTERFACES_DIR)/mfea.xif				\
+		$(INTERFACES_DIR)/fea_ifmgr_client.xif
 
 # MLD6IGMP
 libmld6igmpbase_a_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
