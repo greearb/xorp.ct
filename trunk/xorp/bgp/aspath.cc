@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.12 2003/01/28 20:09:21 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.13 2003/01/29 00:38:56 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,31 +54,30 @@ AsSegment::decode(const uint8_t *d)
 }
 
 /**
- * Convert from internal to external representation. It is
- * responsibility of the caller to free the returned block.
+ * Convert from internal to external representation.
  */
 const uint8_t *
-AsSegment::_encode(size_t &len) const
+AsSegment::encode(size_t &len, uint8_t *data) const
 {
     debug_msg("AsSegment encode\n");
-    len = 2; // number of header bytes
-
-    const_iterator iter = _aslist.begin();
-    for (;iter != _aslist.end(); ++iter)
-	len += 2;
+    assert(_entries <= 255);
     assert(_aslist.size() == _entries);		// XXX this is expensive
 
-    debug_msg("data size = %u\n", (uint32_t)len);
-    uint8_t *data = new uint8_t[len];
+    size_t i = wire_length();
+    const_iterator as;
 
-    size_t pos = 0;
-    data[pos++] = _type;
-    data[pos++] = _entries;
+    if (data == 0)
+	data = new uint8_t[i];
+    else
+	assert(len >= i);
+    len = i;
 
-    for (iter = _aslist.begin(); iter != _aslist.end(); ++iter) {
-	debug_msg("Encoding 16-bit As %d\n", iter->as());
-	iter->copy_out(&data[pos]);
-	pos += 2;
+    data[0] = _type;
+    data[1] = _entries;
+
+    for (i = 2, as = _aslist.begin(); as != _aslist.end(); i += 2, ++as) {
+	debug_msg("Encoding 16-bit As %d\n", as->as());
+	as->copy_out(data + i);
     }
 
     return data;
@@ -159,6 +158,8 @@ AsSegment::operator<(const AsSegment& him) const
     return false;
 }
 
+// XXX isn't this the same format as on the wire ???
+
 size_t
 AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
 {
@@ -168,10 +169,8 @@ AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
     *p = (uint8_t)_type;  p++;
     *p = (uint8_t)_entries; p++;
     const_iterator i;
-    for (i = _aslist.begin(); i!= _aslist.end(); i++) {
-	*p = i->as()/256; p++;
-	*p = i->as()&255; p++;
-    }
+    for (i = _aslist.begin(); i!= _aslist.end(); i++, p += 2)
+	i->copy_out(p);
 
     return (2 + _entries * 2);
 }
@@ -292,31 +291,38 @@ AsPath::str() const
     return s;
 }
 
-const uint8_t *
-AsPath::encode(size_t &len) const
+size_t
+AsPath::wire_length() const
 {
-    len = 0;
-    const uint8_t *bufs[_num_segments];
-    size_t i, lengths[_num_segments];
-
-    assert(_num_segments == _segments.size());	// XXX expensive
+    size_t l = 0;
     const_iterator iter = _segments.begin();
-    for (i=0; iter != _segments.end(); ++iter, ++i) {
-	bufs[i] = (*iter)._encode(lengths[i]);
-	len += lengths[i];
+
+    for (; iter != _segments.end(); ++iter)
+	l += iter->wire_length();
+    return l;
+}
+
+const uint8_t *
+AsPath::encode(size_t &len, uint8_t *buf) const
+{
+    assert(_num_segments == _segments.size());	// XXX expensive
+    const_iterator i;
+    size_t pos, l = wire_length();
+
+    // allocate or check the memory.
+    if (buf == 0)		// no buffer, allocate one
+	buf = new uint8_t[l];
+    else			// we got a buffer, make sure is large enough.
+	assert(len >= l);	// in fact, just abort if not so.
+    len = l;			// set the correct value.
+
+    // encode into the buffer
+    for (pos = 0, i = _segments.begin(); i != _segments.end(); ++i) {
+	l = i->wire_length();
+	i->encode(l, buf + pos);
+	pos += l;
     }
-
-    uint8_t* data = new uint8_t[len];
-    size_t pos = 0;
-
-    iter = _segments.begin();
-    for (i=0; iter != _segments.end(); ++iter, ++i) {
-	memcpy(&data[pos], bufs[i], lengths[i]);
-	delete[] bufs[i];
-	pos += lengths[i];
-    }
-
-    return data;
+    return buf;
 }
 
 void
@@ -369,11 +375,7 @@ void
 AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
 {
     //See RFC 1657, Page 15 for the encoding.
-    int buf_size = 0;
-    const_iterator i = _segments.begin();
-    for(i = _segments.begin(); i != _segments.end(); i++) {
-	buf_size += 2 + (i->as_size() * 2);
-    }
+    size_t buf_size = wire_length();
     if (buf_size > 2)
 	encode_buf.resize(buf_size);
     else {
@@ -388,6 +390,7 @@ AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
     }
 
     int ctr = 0;
+    const_iterator i = _segments.begin();
     for(i = _segments.begin(); i != _segments.end(); i++) {
 	ctr += i->encode_for_mib(&encode_buf[ctr], buf_size - ctr);
     }

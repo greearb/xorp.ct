@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.8 2003/01/27 19:21:24 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.9 2003/01/29 00:38:56 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -164,11 +164,18 @@ public:
     void decode(const uint8_t *d);
 
     /**
-     * Convert from internal to external representation. It is
-     * responsibility of the caller to free the returned block.
-     * @return pointer to the newly allocated block of data of size len.
+     * Convert from internal to external representation.
+     * If we do not pass a buffer (buf = 0), then the routine will
+     * allocate a new one; otherwise, len indicates the size of the
+     * input buffer, which must be large enough to store the encoding.
+     * @return the pointer to the buffer, len is the actual size.
      */
-    const uint8_t *_encode(size_t &len) const;
+    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
+
+    /**
+     * @return the length of the list on the wire.
+     */
+    size_t wire_length() const			{ return 2 + 2*_entries; }
 
     /**
      * @return string representation of the segment
@@ -260,9 +267,19 @@ public:
     size_t num_segments() const			{ return _num_segments; }
 
     /**
-     * From the internal representation, produce the external one.
+     * Convert from internal to external representation.
+     * If we do not pass a buffer (buf = 0), then the routine will
+     * allocate a new one; otherwise, len indicates the size of the
+     * input buffer, which must be large enough to store the encoding.
+     * @return the pointer to the buffer, len is the actual size.
      */
-    const uint8_t *encode(size_t &len) const;
+    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
+
+    /**
+     * @return the length of the list on the wire.
+     * XXX this should be made more efficient.
+     */
+    size_t wire_length() const;
 
     /**
      * Add the As number to the begining of the AS_SEQUENCE that starts
