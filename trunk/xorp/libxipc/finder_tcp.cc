@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.1 2003/01/21 18:51:36 hodson Exp $"
 
 #include <functional>
 
@@ -326,6 +326,11 @@ FinderTcpListenerBase::connect_hook(int fd, SelectorMask m)
     }
 
     if (accept) {
+	int fl = fcntl(fd, F_GETFL);
+	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
+	    XLOG_WARNING("Failed to set socket non-blocking.");
+	    return;
+	}
 	if (connection_event(fd) == true)
 	    return;
     } else {
