@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.11 2003/09/20 06:30:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.12 2003/09/20 07:00:56 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -135,7 +135,11 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		    XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			       if_name.c_str(), strerror(errno));
 		} else {
+#ifdef HAVE_IFR_IFINDEX
 		    if_index = ifridx.ifr_ifindex;
+#else
+		    if_index = ifridx.ifr_index;
+#endif
 		}
 	    }
 	    if (if_index > 0)
