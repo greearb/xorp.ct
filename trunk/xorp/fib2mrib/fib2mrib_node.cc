@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.11 2004/06/10 22:41:01 hodson Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.12 2004/07/26 06:30:01 pavlin Exp $"
 
 
 //
@@ -305,7 +305,7 @@ Fib2mribNode::tree_complete()
 void
 Fib2mribNode::updates_made()
 {
-    map<IPvXNet, Fib2mribRoute>::const_iterator route_iter;
+    multimap<IPvXNet, Fib2mribRoute>::const_iterator route_iter;
 
     for (route_iter = _fib2mrib_routes.begin();
 	 route_iter != _fib2mrib_routes.end();
@@ -731,7 +731,7 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Find the route and replace it
     //
-    map<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
     iter = _fib2mrib_routes.find(fib2mrib_route.network());
     if ((iter == _fib2mrib_routes.end())
 	|| (iter->second.network() != fib2mrib_route.network())) {
@@ -818,7 +818,7 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Find the route and delete it
     //
-    map<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
     iter = _fib2mrib_routes.find(fib2mrib_route.network());
     if ((iter == _fib2mrib_routes.end())
 	|| (iter->second.network() != fib2mrib_route.network())) {
