@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.31 2004/04/01 19:31:21 hodson Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.32 2004/04/10 07:47:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -828,100 +828,70 @@ XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_enable4(const string&	/* router_name */,
+XrlRibTarget::rib_0_1_redist_enable4(const string&	target_name,
 				     const string&	from,
-				     const string&	to,
-				     const bool&	unicast,
-				     const bool&	multicast,
-				     const string&	/* cookie */)
+				     const bool&	ucast,
+				     const bool&	mcast,
+				     const string&	cookie)
 {
-    if (unicast && _urib4.redist_enable(from, to) != XORP_OK) {
-	string err = c_format("Failed to enable unicast IPv4 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
+    if (_rib_manager->add_redist_xrl_output4(target_name, from, ucast, mcast,
+					    cookie) != XORP_OK) {
+	string err = c_format("Failed to enable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-
-    if (multicast && _mrib4.redist_enable(from, to) != XORP_OK) {
-	string err = c_format("Failed to enable multicast IPv4 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_enable6(const string&	/* router_name */,
+XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
 				     const string&	from,
-				     const string&	to,
-				     const bool&	unicast,
-				     const bool&	multicast,
-				     const string&	/* cookie */)
+				     const bool&	ucast,
+				     const bool&	mcast,
+				     const string&	cookie)
 {
-    if (unicast && _urib6.redist_enable(from, to) != XORP_OK) {
-	string err = c_format("Failed to enable unicast IPv6 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
+    if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
+					     cookie) != XORP_OK) {
+	string err = c_format("Failed to enable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-
-    if (multicast && _mrib6.redist_enable(from, to) != XORP_OK) {
-	string err = c_format("Failed to enable multicast IPv6 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_disable4(const string&	/* router_name */,
-				      const string&	from,
-				      const string&	to,
-				      const bool&	unicast,
-				      const bool&	multicast)
+XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
+				     const string&	from,
+				     const bool&	ucast,
+				     const bool&	mcast,
+				     const string&	cookie)
 {
-    if (unicast && _urib4.redist_disable(from, to) != XORP_OK) {
-	string err = c_format("Failed to disable unicast IPv4 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
+    if (_rib_manager->delete_redist_xrl_output4(target_name, from, ucast, mcast,
+						cookie) != XORP_OK) {
+	string err = c_format("Failed to disable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-
-    if (multicast && _mrib4.redist_disable(from, to) != XORP_OK) {
-	string err = c_format("Failed to disable multicast IPv4 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_disable6(const string&	/* router_name */,
-				      const string&	from,
-				      const string&	to,
-				      const bool&	unicast,
-				      const bool&	multicast)
+XrlRibTarget::rib_0_1_redist_disable6(const string&	target_name,
+				     const string&	from,
+				     const bool&	ucast,
+				     const bool&	mcast,
+				     const string&	cookie)
 {
-    if (unicast && _urib6.redist_disable(from, to) != XORP_OK) {
-	string err = c_format("Failed to disable unicast IPv6 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
+    if (_rib_manager->delete_redist_xrl_output6(target_name, from, ucast, mcast,
+						cookie) != XORP_OK) {
+	string err = c_format("Failed to disable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-
-    if (multicast && _mrib6.redist_disable(from, to) != XORP_OK) {
-	string err = c_format("Failed to disable multicast IPv6 redistribution "
-			      "from \"%s\" to \"%s\"",
-			      from.c_str(), to.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
     return XrlCmdError::OKAY();
 }
 

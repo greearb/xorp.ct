@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.17 2004/04/01 19:31:21 hodson Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.18 2004/04/10 07:47:19 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -439,9 +439,8 @@ protected:
 
     XrlCmdError rib_0_1_redist_enable4(
 	// Input values,
-	const string&	target,
-	const string&	from,
-	const string&	to,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
 	const string&	cookie
@@ -449,9 +448,8 @@ protected:
 
     XrlCmdError rib_0_1_redist_enable6(
 	// Input values,
-	const string&	target,
-	const string&	from,
-	const string&	to,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
 	const string&	cookie
@@ -459,19 +457,19 @@ protected:
 
     XrlCmdError rib_0_1_redist_disable4(
 	// Input values,
-	const string&	target,
-	const string&	from,
-	const string&	to,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
 	const bool&	unicast,
-	const bool&	multicast);
+	const bool&	multicast,
+	const string&	cookie);
 
     XrlCmdError rib_0_1_redist_disable6(
 	// Input values,
-	const string&	target,
-	const string&	from,
-	const string&	to,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
 	const bool&	unicast,
-	const bool&	multicast);
+	const bool&	multicast,
+	const string&	cookie);
 
     /**
      *  Register an interest in a route
