@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.9 2002/12/09 18:29:13 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 #include <fcntl.h>
 
@@ -102,7 +102,7 @@ run_test()
     AsyncFileWriter afw(e, s[0]);
     AsyncFileReader afr(e, s[1]);
 
-    uint8_t msg[MAX_BUFFER_BYTES];
+    static uint8_t msg[MAX_BUFFER_BYTES];
     const size_t msg_bytes = sizeof(msg) / sizeof(msg[0]);
 
     XorpTimer t = e.new_oneoff_after_ms(TIMEOUT_MS, callback(timeout));
