@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.14 2004/06/10 22:40:47 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.15 2004/08/03 03:51:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -78,7 +78,7 @@ FtiConfigEntryGetRtsock::stop()
 }
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -86,12 +86,12 @@ FtiConfigEntryGetRtsock::stop()
  * @return true on success, otherwise false
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route4(const IPv4& dst, Fte4& fte)
+FtiConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
     
-    ret_value = lookup_route(IPvX(dst), ftex);
+    ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.nexthop().get_ipv4(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
@@ -101,7 +101,7 @@ FtiConfigEntryGetRtsock::lookup_route4(const IPv4& dst, Fte4& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup a route by network address.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -109,12 +109,13 @@ FtiConfigEntryGetRtsock::lookup_route4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_entry4(const IPv4Net& dst, Fte4& fte)
+FtiConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
+						  Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
     
-    ret_value = lookup_entry(IPvXNet(dst), ftex);
+    ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.nexthop().get_ipv4(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
@@ -124,7 +125,7 @@ FtiConfigEntryGetRtsock::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 }
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -132,12 +133,12 @@ FtiConfigEntryGetRtsock::lookup_entry4(const IPv4Net& dst, Fte4& fte)
  * @return true on success, otherwise false;
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route6(const IPv6& dst, Fte6& fte)
+FtiConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
     
-    ret_value = lookup_route(IPvX(dst), ftex);
+    ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.nexthop().get_ipv6(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
@@ -147,7 +148,7 @@ FtiConfigEntryGetRtsock::lookup_route6(const IPv6& dst, Fte6& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup route by network address.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -155,12 +156,13 @@ FtiConfigEntryGetRtsock::lookup_route6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_entry6(const IPv6Net& dst, Fte6& fte)
+FtiConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
+						  Fte6& fte)
 { 
     FteX ftex(dst.af());
     bool ret_value = false;
     
-    ret_value = lookup_entry(IPvXNet(dst), ftex);
+    ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.nexthop().get_ipv6(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
@@ -171,13 +173,13 @@ FtiConfigEntryGetRtsock::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
-FtiConfigEntryGetRtsock::lookup_route(const IPvX& , FteX& )
+FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& , FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& , FteX& )
+FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& , FteX& )
 {
     return false;
 }
@@ -185,7 +187,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& , FteX& )
 #else // HAVE_ROUTING_SOCKETS
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -193,7 +195,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
+FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     char		buffer[buffer_size];
@@ -288,7 +290,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup route by network.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -296,7 +298,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
+FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     char		buffer[buffer_size];

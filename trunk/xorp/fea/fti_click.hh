@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_click.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/fti_click.hh,v 1.3 2004/06/10 22:40:46 hodson Exp $
 
 #ifndef __FEA_FTI_CLICK_HH__
 #define __FEA_FTI_CLICK_HH__
@@ -34,8 +34,8 @@ public:
     bool start_reading4();
     bool read_entry4(Fte4& fte);
 
-    bool lookup_route4(IPv4 addr, Fte4& fte);
-    bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    bool lookup_route_by_dest4(IPv4 addr, Fte4& fte);
+    bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     bool delete_all_entries6();
     bool delete_entry6(const Fte6& fte);
@@ -45,8 +45,8 @@ public:
     bool start_reading6();
     bool read_entry6(Fte6& fte);
 
-    bool lookup_route6(const IPv6& addr, Fte6& fte);
-    bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    bool lookup_route_by_dest6(const IPv6& addr, Fte6& fte);
+    bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
     void add_portmap(ClickPortmap cpm) {
 	_cpm = cpm;

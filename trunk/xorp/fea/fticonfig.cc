@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.18 2004/06/02 22:52:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.19 2004/06/10 22:40:47 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -316,19 +316,19 @@ FtiConfig::delete_all_entries4()
 }
 
 bool
-FtiConfig::lookup_route4(const IPv4& dst, Fte4& fte)
+FtiConfig::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     if (_ftic_entry_get == NULL)
 	return false;
-    return (_ftic_entry_get->lookup_route4(dst, fte));
+    return (_ftic_entry_get->lookup_route_by_dest4(dst, fte));
 }
 
 bool
-FtiConfig::lookup_entry4(const IPv4Net& dst, Fte4& fte)
+FtiConfig::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
     if (_ftic_entry_get == NULL)
 	return false;
-    return (_ftic_entry_get->lookup_entry4(dst, fte));
+    return (_ftic_entry_get->lookup_route_by_network4(dst, fte));
 }
 
 bool
@@ -372,19 +372,19 @@ FtiConfig::delete_all_entries6()
 }
 
 bool
-FtiConfig::lookup_route6(const IPv6& dst, Fte6& fte)
+FtiConfig::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     if (_ftic_entry_get == NULL)
 	return false;
-    return (_ftic_entry_get->lookup_route6(dst, fte));
+    return (_ftic_entry_get->lookup_route_by_dest6(dst, fte));
 }
 
 bool
-FtiConfig::lookup_entry6(const IPv6Net& dst, Fte6& fte)
+FtiConfig::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 {
     if (_ftic_entry_get == NULL)
 	return false;
-    return (_ftic_entry_get->lookup_entry6(dst, fte));
+    return (_ftic_entry_get->lookup_route_by_network6(dst, fte));
 }
 
 bool

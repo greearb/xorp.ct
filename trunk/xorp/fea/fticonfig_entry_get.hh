@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.12 2004/06/02 22:52:36 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.13 2004/06/10 22:40:47 hodson Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -55,44 +55,44 @@ public:
     virtual int stop() = 0;
     
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return bool on success, otherwise false.
      */
-    virtual bool lookup_route4(const IPv4& dst, Fte4& fte) = 0;
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte) = 0;
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte) = 0;
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte) = 0;
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route6(const IPv6& dst, Fte6& fte) = 0;
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte) = 0;
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte) = 0;
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte) = 0;
 
     /**
      * Parse information about routing entry information received from
@@ -162,44 +162,44 @@ public:
     virtual int stop();
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
 private:
 };
@@ -225,65 +225,65 @@ public:
     virtual int stop();
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
 private:
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route(const IPvX& dst, FteX& fte);
+    virtual bool lookup_route_by_dest(const IPvX& dst, FteX& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry(const IPvXNet& dst, FteX& fte);
+    virtual bool lookup_route_by_network(const IPvXNet& dst, FteX& fte);
 
     RoutingSocketReader _rs_reader;
 };
@@ -310,55 +310,55 @@ public:
     virtual int stop();
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
 private:
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route(const IPvX& dst, FteX& fte);
+    virtual bool lookup_route_by_dest(const IPvX& dst, FteX& fte);
 
     NetlinkSocketReader	_ns_reader;
 };

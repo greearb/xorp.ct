@@ -404,16 +404,16 @@ EOF
     $CALLXRL "finder://fea/redist_transaction4/0.1/delete_route?tid:u32=$1&network:ipv4net=$2"
 }
 
-lookup_route4()
+lookup_route_by_dest4()
 {
-    echo -n "lookup_route4" $* "-> " 
-    $CALLXRL "finder://fea/fti/0.2/lookup_route4?dst:ipv4=$1"
+    echo -n "lookup_route_by_dest4" $* "-> " 
+    $CALLXRL "finder://fea/fti/0.2/lookup_route_by_dest4?dst:ipv4=$1"
 }
 
-lookup_entry4()
+lookup_route_by_network4()
 {
-    echo -n "lookup_entry4" $* "-> " 
-    $CALLXRL "finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
+    echo -n "lookup_route_by_network4" $* "-> " 
+    $CALLXRL "finder://fea/fti/0.2/lookup_route_by_network4?dst:ipv4net=$1"
 }
 
 have_ipv4()

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.16 2004/06/10 22:40:47 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.17 2004/08/03 03:51:46 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -99,7 +99,7 @@ FtiConfigEntryGetNetlink::stop()
 }
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -107,12 +107,12 @@ FtiConfigEntryGetNetlink::stop()
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route4(const IPv4& dst, Fte4& fte)
+FtiConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
     
-    ret_value = lookup_route(IPvX(dst), ftex);
+    ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte4(ftex.net().get_ipv4net(), ftex.nexthop().get_ipv4(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
@@ -122,7 +122,7 @@ FtiConfigEntryGetNetlink::lookup_route4(const IPv4& dst, Fte4& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup route by network address.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -130,7 +130,8 @@ FtiConfigEntryGetNetlink::lookup_route4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_entry4(const IPv4Net& dst, Fte4& fte)
+FtiConfigEntryGetNetlink::lookup_route_by_network4(const IPv4Net& dst,
+						   Fte4& fte)
 {
     list<Fte4> fte_list4;
 
@@ -150,7 +151,7 @@ FtiConfigEntryGetNetlink::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 }
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -158,12 +159,12 @@ FtiConfigEntryGetNetlink::lookup_entry4(const IPv4Net& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route6(const IPv6& dst, Fte6& fte)
+FtiConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
     
-    ret_value = lookup_route(IPvX(dst), ftex);
+    ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
     fte = Fte6(ftex.net().get_ipv6net(), ftex.nexthop().get_ipv6(),
 	       ftex.ifname(), ftex.vifname(), ftex.metric(),
@@ -173,7 +174,7 @@ FtiConfigEntryGetNetlink::lookup_route6(const IPv6& dst, Fte6& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup route by network address.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -181,7 +182,8 @@ FtiConfigEntryGetNetlink::lookup_route6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_entry6(const IPv6Net& dst, Fte6& fte)
+FtiConfigEntryGetNetlink::lookup_route_by_network6(const IPv6Net& dst,
+						   Fte6& fte)
 { 
     list<Fte6> fte_list6;
 
@@ -203,7 +205,7 @@ FtiConfigEntryGetNetlink::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 #ifndef HAVE_NETLINK_SOCKETS
 
 bool
-FtiConfigEntryGetNetlink::lookup_route(const IPvX& , FteX& )
+FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
 {
     return false;
 }
@@ -211,7 +213,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& , FteX& )
 #else // HAVE_NETLINK_SOCKETS
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -219,7 +221,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
+FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + sizeof(struct rtattr) + 512;
     char		buffer[buffer_size];

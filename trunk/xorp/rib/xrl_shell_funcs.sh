@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.6 2004/02/06 22:44:13 pavlin Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.7 2004/05/20 23:45:46 pavlin Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -68,10 +68,10 @@ delete_route6()
     $CALLXRL "finder://rib/rib/0.1/delete_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4"
 }
 
-lookup_route4()
+lookup_route_by_dest4()
 {
-    echo -n "lookup_route4" $*
-    $CALLXRL "finder://rib/rib/0.1/lookup_route4?addr:ipv4=$1&unicast:bool=$2&multicast:bool=$3"
+    echo -n "lookup_route_by_dest4" $*
+    $CALLXRL "finder://rib/rib/0.1/lookup_route_by_dest4?addr:ipv4=$1&unicast:bool=$2&multicast:bool=$3"
 }
 
 # We have arguments.

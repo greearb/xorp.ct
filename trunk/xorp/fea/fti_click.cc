@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_click.cc,v 1.5 2004/06/10 22:40:46 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_click.cc,v 1.6 2004/08/03 03:51:46 pavlin Exp $"
 
 #include <unistd.h>
 #include <cstdio>
@@ -141,7 +141,7 @@ FtiClick::read_entry4(Fte4& fte)
 }
 
 bool
-FtiClick::lookup_route4(IPv4 addr, Fte4& fte)
+FtiClick::lookup_route_by_dest4(IPv4 addr, Fte4& fte)
 {
     string request = addr.str() + string("\n");
 
@@ -173,7 +173,7 @@ FtiClick::lookup_route4(IPv4 addr, Fte4& fte)
 }
 
 bool
-FtiClick::lookup_entry4(const IPv4Net& /* dst*/, Fte4& /*fte*/)
+FtiClick::lookup_route_by_network4(const IPv4Net& /* dst*/, Fte4& /*fte*/)
 {
     XLOG_ERROR("Not implemented yet");
 
@@ -211,13 +211,13 @@ FtiClick::read_entry6(Fte6&)
 }
 
 bool
-FtiClick::lookup_route6(const IPv6&, Fte6& )
+FtiClick::lookup_route_by_dest6(const IPv6&, Fte6& )
 {
     return false;
 }
 
 bool
-FtiClick::lookup_entry6(const IPv6Net&, Fte6& )
+FtiClick::lookup_route_by_network6(const IPv6Net&, Fte6& )
 {
     return false;
 }

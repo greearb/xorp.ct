@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.4 2004/07/29 23:46:37 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.5 2004/08/03 03:51:49 pavlin Exp $ */
 
 /*
  * Forwarding Table XRL interface.
@@ -19,7 +19,7 @@ interface fti/0.2 {
 	 * @param protocol_origin the name of the protocol that originated
 	 * this entry.
 	 */
-	lookup_route4 ? dst:ipv4 -> netmask:ipv4net &			\
+	lookup_route_by_dest4 ? dst:ipv4 -> netmask:ipv4net &		\
 				    nexthop:ipv4 &			\
 				    ifname:txt &			\
 				    vifname:txt &			\
@@ -40,7 +40,7 @@ interface fti/0.2 {
 	 * @param protocol_origin the name of the protocol that originated
 	 * this entry.
 	 */
-	lookup_route6 ? dst:ipv6 -> netmask:ipv6net &			\
+	lookup_route_by_dest6 ? dst:ipv6 -> netmask:ipv6net &		\
 				    nexthop:ipv6 &			\
 				    ifname:txt &			\
 				    vifname:txt &			\
@@ -61,7 +61,7 @@ interface fti/0.2 {
 	 * @param protocol_origin the name of the protocol that originated
 	 * this entry.
 	 */
-	lookup_entry4 ?  dst:ipv4net					\
+	lookup_route_by_network4 ?  dst:ipv4net				\
 		      -> nexthop:ipv4 &					\
 		    	 ifname:txt &					\
 			 vifname:txt &					\
@@ -82,7 +82,7 @@ interface fti/0.2 {
 	 * @param protocol_origin the name of the protocol that originated
 	 * this entry.
 	 */
-	lookup_entry6 ?  dst:ipv6net					\
+	lookup_route_by_network6 ?  dst:ipv6net				\
 		      -> nexthop:ipv6 &					\
 			 ifname:txt &					\
 			 vifname:txt &					\

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rib/rib.tex,v 1.11 2004/07/09 04:42:53 pavlin Exp $
+% $XORP: xorp/docs/rib/rib.tex,v 1.12 2004/07/24 01:09:52 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -204,7 +204,7 @@ but the general idea is illustrated by this example:
 
 Suppose the RIB contains routes for 1.0.0.0/16 and 1.0.2.0/24.  Now a
 routing protocol expresses an interest in address 1.0.1.1.  This
-matches against the entry for 1.0.0.0/16, so the answer contains
+matches against the routing entry for 1.0.0.0/16, so the answer contains
 1.0.0.0/16 and the related nexthop and metric.
 
 However we would like the routing protocol to be able to use the
@@ -320,9 +320,9 @@ OriginTable for that protocol.
 \subsection{Route Lookup}
 
 \begin{verbatim}
-lookup_route4 ? addr:ipv4 & unicast:bool & multicast:bool 
+lookup_route_by_dest4 ? addr:ipv4 & unicast:bool & multicast:bool 
         -> nexthop:ipv4
-lookup_route6 ? addr:ipv6 & unicast:bool & multicast:bool 
+lookup_route_by_dest6 ? addr:ipv6 & unicast:bool & multicast:bool 
         -> nexthop:ipv6
 \end{verbatim}
 

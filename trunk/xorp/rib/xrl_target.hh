@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.24 2004/06/10 22:41:43 hodson Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.25 2004/07/24 01:01:53 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -334,7 +334,7 @@ protected:
      *  otherwise. It is an error for the unicast and multicast fields to both
      *  be true or both false.
      */
-    XrlCmdError rib_0_1_lookup_route4(
+    XrlCmdError rib_0_1_lookup_route_by_dest4(
 	// Input values,
 	const IPv4&	addr,
 	const bool&	unicast,
@@ -355,7 +355,7 @@ protected:
      *  otherwise. It is an error for the unicast and multicast fields to both
      *  be true or both false.
      */
-    XrlCmdError rib_0_1_lookup_route6(
+    XrlCmdError rib_0_1_lookup_route_by_dest6(
 	// Input values,
 	const IPv6&	addr,
 	const bool&	unicast,

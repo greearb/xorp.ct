@@ -375,7 +375,7 @@ test3()
 	
     # Wait for the route changes to propogate.
     sleep 2
-    result=$(lookup_route4 10.10.10.10 true false)
+    result=$(lookup_route_by_dest4 10.10.10.10 true false)
     echo $result
 
     OIFS=$IFS
@@ -450,7 +450,7 @@ test4()
 	nlri 10.10.10.10/24 \
 	nlri 20.20.20.20/24
 
-    result=$(lookup_route4 10.10.10.10 true false)
+    result=$(lookup_route_by_dest4 10.10.10.10 true false)
     echo $result
 
     OIFS=$IFS
@@ -549,7 +549,7 @@ test5()
 
 	# Wait for the route changes to propogate.
         sleep 2
-	result=$(lookup_route4 10.10.10.10 true false)
+	result=$(lookup_route_by_dest4 10.10.10.10 true false)
 	echo $result
 
 	OIFS=$IFS

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.17 2004/07/29 23:46:36 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.18 2004/08/03 03:51:48 pavlin Exp $
 #
 
 #
@@ -430,7 +430,7 @@ config_cleanup_nexthop4()
 
     # Lookup the entry
     _nexthop=""
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	_nexthop=`get_xrl_variable_value "${_xrl_result}" nexthop:ipv4`
@@ -457,7 +457,7 @@ config_cleanup_nexthop6()
 
     # Lookup the entry
     _nexthop=""
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	_nexthop=`get_xrl_variable_value "${_xrl_result}" nexthop:ipv6`
@@ -502,14 +502,14 @@ subtest_add_route6()
     fea_redist_transaction6_commit_transaction ${tid}
 }
 
-subtest_lookup_entry4()
+subtest_lookup_route_by_network4()
 {
     local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "SUBTEST: Lookup nexthop for destination ${DEST4}"
 
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: routing entry was not found:"
@@ -562,14 +562,14 @@ subtest_lookup_entry4()
     echo "${_xrl_result}"
 }
 
-subtest_lookup_entry6()
+subtest_lookup_route_by_network6()
 {
     local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "SUBTEST: Lookup nexthop for destination ${DEST6}"
 
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: routing entry was not found:"
@@ -622,14 +622,14 @@ subtest_lookup_entry6()
     echo "${_xrl_result}"
 }
 
-subtest_lookup_route4()
+subtest_lookup_route_by_dest4()
 {
     local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "SUBTEST: Lookup route for destination ${DEST_HOST4}"
 
-    _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_dest4 ${DEST_HOST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: route was not found:"
@@ -682,14 +682,14 @@ subtest_lookup_route4()
     echo "${_xrl_result}"
 }
 
-subtest_lookup_route6()
+subtest_lookup_route_by_dest6()
 {
     local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "SUBTEST: Lookup route for destination ${DEST_HOST6}"
 
-    _xrl_result=`fea_fti_lookup_route6 ${DEST_HOST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_dest6 ${DEST_HOST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: route was not found:"
@@ -774,7 +774,7 @@ subtest_lookup_deleted_entry4()
 
     echo "SUBTEST: Lookup deleted entry for destination ${DEST4}"
 
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry was not deleted:"
@@ -791,7 +791,7 @@ subtest_lookup_deleted_entry6()
 
     echo "SUBTEST: Lookup deleted entry for destination ${DEST6}"
 
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry was not deleted:"
@@ -813,7 +813,7 @@ subtest_lookup_deleted_route4()
 	sleep 3
     fi
 
-    _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_dest4 ${DEST_HOST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	# OK: the entry was deleted
@@ -843,7 +843,7 @@ subtest_lookup_deleted_route6()
 	sleep 3
     fi
 
-    _xrl_result=`fea_fti_lookup_route6 ${DEST_HOST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_dest6 ${DEST_HOST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	# OK: the entry was deleted
@@ -871,8 +871,8 @@ test_add_delete_unicast_forwarding_entry4()
     _subtests=""
     _subtests="${_subtests} config_cleanup_nexthop4"
     _subtests="${_subtests} subtest_add_route4"
-    _subtests="${_subtests} subtest_lookup_entry4"
-    _subtests="${_subtests} subtest_lookup_route4"
+    _subtests="${_subtests} subtest_lookup_route_by_network4"
+    _subtests="${_subtests} subtest_lookup_route_by_dest4"
     _subtests="${_subtests} subtest_delete_route4"
     _subtests="${_subtests} subtest_lookup_deleted_entry4"
     # Comment-out the test below, because in case of Linux a cloned entry
@@ -897,8 +897,8 @@ test_add_delete_unicast_forwarding_entry6()
     _subtests=""
     _subtests="${_subtests} config_cleanup_nexthop6"
     _subtests="${_subtests} subtest_add_route6"
-    _subtests="${_subtests} subtest_lookup_entry6"
-    _subtests="${_subtests} subtest_lookup_route6"
+    _subtests="${_subtests} subtest_lookup_route_by_network6"
+    _subtests="${_subtests} subtest_lookup_route_by_dest6"
     _subtests="${_subtests} subtest_delete_route6"
     _subtests="${_subtests} subtest_lookup_deleted_entry6"
     # Comment-out the test below, because in case of Linux a cloned entry
@@ -929,14 +929,14 @@ test_delete_all_routes4()
     fea_redist_transaction4_commit_transaction ${tid}
 
     # Check that the routes were installed
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: routing entry for ${DEST4} was not found:"
 	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4_2} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4_2} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: routing entry for ${DEST4_2} was not found:"
@@ -954,14 +954,14 @@ test_delete_all_routes4()
     fea_redist_transaction4_commit_transaction ${tid}
 
     # Check that the routes were deleted
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry for ${DEST4} was not deleted:"
 	echo "${_xrl_result}"
 	return 1
     fi
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST4_2} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4_2} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry for ${DEST4_2} was not deleted:"
@@ -985,14 +985,14 @@ test_delete_all_routes6()
     fea_redist_transaction6_commit_transaction ${tid}
 
     # Check that the routes were installed
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: routing entry for ${DEST6} was not found:"
 	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6_2} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6_2} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: routing entry for ${DEST6_2} was not found:"
@@ -1010,14 +1010,14 @@ test_delete_all_routes6()
     fea_redist_transaction6_commit_transaction ${tid}
 
     # Check that the routes were deleted
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry for ${DEST6} was not deleted:"
 	echo "${_xrl_result}"
 	return 1
     fi
-    _xrl_result=`fea_fti_lookup_entry6 ${DEST6_2} 2>&1`
+    _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6_2} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry for ${DEST6_2} was not deleted:"

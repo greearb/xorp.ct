@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.13 2004/06/02 22:52:36 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.14 2004/06/10 22:40:47 hodson Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -159,24 +159,24 @@ public:
     virtual bool delete_all_entries4();
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route4(const IPv4& dst, Fte4& fte);
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry4(const IPv4Net& dst, Fte4& fte);
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
      * Obtain the unicast forwarding table.
@@ -225,24 +225,24 @@ public:
     virtual bool delete_all_entries6();
 
     /**
-     * Lookup a route.
+     * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_route6(const IPv6& dst, Fte6& fte);
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
-     * Lookup entry.
+     * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
      *
      * @return true on success, otherwise false.
      */
-    virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte);
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
     /**
      * Obtain the unicast forwarding table.

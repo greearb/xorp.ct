@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_dummy.cc,v 1.4 2004/06/02 22:52:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_dummy.cc,v 1.5 2004/06/10 22:40:47 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -66,7 +66,7 @@ FtiConfigEntryGetDummy::stop()
 }
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -74,7 +74,7 @@ FtiConfigEntryGetDummy::stop()
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_route4(const IPv4& dst, Fte4& fte)
+FtiConfigEntryGetDummy::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     Trie4::iterator ti = ftic().trie4().find(dst);
     if (ti != ftic().trie4().end()) {
@@ -86,7 +86,7 @@ FtiConfigEntryGetDummy::lookup_route4(const IPv4& dst, Fte4& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup route by network address.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -94,7 +94,7 @@ FtiConfigEntryGetDummy::lookup_route4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_entry4(const IPv4Net& dst, Fte4& fte)
+FtiConfigEntryGetDummy::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
     Trie4::iterator ti = ftic().trie4().find(dst);
     if (ti != ftic().trie4().end()) {
@@ -106,7 +106,7 @@ FtiConfigEntryGetDummy::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 }
 
 /**
- * Lookup a route.
+ * Lookup a route by destination address.
  *
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -114,7 +114,7 @@ FtiConfigEntryGetDummy::lookup_entry4(const IPv4Net& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_route6(const IPv6& dst, Fte6& fte)
+FtiConfigEntryGetDummy::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     Trie6::iterator ti = ftic().trie6().find(dst);
     if (ti != ftic().trie6().end()) {
@@ -126,7 +126,7 @@ FtiConfigEntryGetDummy::lookup_route6(const IPv6& dst, Fte6& fte)
 }
 
 /**
- * Lookup entry.
+ * Lookup route by network address.
  *
  * @param dst network address to resolve.
  * @param fte return-by-reference forwarding table entry.
@@ -134,7 +134,7 @@ FtiConfigEntryGetDummy::lookup_route6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_entry6(const IPv6Net& dst, Fte6& fte)
+FtiConfigEntryGetDummy::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
     Trie6::iterator ti = ftic().trie6().find(dst);
     if (ti != ftic().trie6().end()) {

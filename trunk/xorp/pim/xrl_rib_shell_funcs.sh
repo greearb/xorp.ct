@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.8 2004/05/20 23:45:45 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.9 2004/07/24 01:03:22 pavlin Exp $
 #
 
 #
@@ -305,34 +305,34 @@ rib_delete_route6()
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
-rib_lookup_route4()
+rib_lookup_route_by_dest4()
 {
     if [ $# -lt 3 ] ; then
-	echo "Usage: rib_lookup_route4 <addr:ipv4> <unicast:bool> <multicast:bool>"
+	echo "Usage: rib_lookup_route_by_dest4 <addr:ipv4> <unicast:bool> <multicast:bool>"
 	exit 1
     fi
     addr=$1
     unicast=$2
     multicast=$3
     
-    echo "rib_lookup_route4" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/lookup_route4"
+    echo "rib_lookup_route_by_dest4" $*
+    XRL="finder://$RIB_TARGET/rib/0.1/lookup_route_by_dest4"
     XRL_ARGS="?addr:ipv4=$addr&unicast:bool=$unicast&multicast:bool=$multicast"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
-rib_lookup_route6()
+rib_lookup_route_by_dest6()
 {
     if [ $# -lt 3 ] ; then
-	echo "Usage: rib_lookup_route6 <addr:ipv6> <unicast:bool> <multicast:bool>"
+	echo "Usage: rib_lookup_route_by_dest6 <addr:ipv6> <unicast:bool> <multicast:bool>"
 	exit 1
     fi
     addr=$1
     unicast=$2
     multicast=$3
     
-    echo "rib_lookup_route6" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/lookup_route6"
+    echo "rib_lookup_route_by_dest6" $*
+    XRL="finder://$RIB_TARGET/rib/0.1/lookup_route_by_dest6"
     XRL_ARGS="?addr:ipv6=$addr&unicast:bool=$unicast&multicast:bool=$multicast"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }

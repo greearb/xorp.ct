@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.37 2004/06/10 22:41:43 hodson Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.38 2004/07/24 01:01:53 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -569,12 +569,13 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_lookup_route4(// Input values,
-				    const IPv4&	addr,
-				    const bool&	unicast,
-				    const bool&	multicast,
-				    // Output values,
-				    IPv4& nexthop)
+XrlRibTarget::rib_0_1_lookup_route_by_dest4(
+    // Input values,
+    const IPv4&	addr,
+    const bool&	unicast,
+    const bool&	multicast,
+    // Output values,
+    IPv4& nexthop)
 {
     // if unicast and multicast then fail, can only look one place at time
     if (unicast == multicast) {
@@ -588,12 +589,13 @@ XrlRibTarget::rib_0_1_lookup_route4(// Input values,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_lookup_route6(// Input values,
-				    const IPv6&	addr,
-				    const bool&	unicast,
-				    const bool&	multicast,
-				    // Output values,
-				    IPv6& nexthop)
+XrlRibTarget::rib_0_1_lookup_route_by_dest6(
+    // Input values,
+    const IPv6&	addr,
+    const bool&	unicast,
+    const bool&	multicast,
+    // Output values,
+    IPv6& nexthop)
 {
     // Must look in exactly one RIB
     if (unicast == multicast) {

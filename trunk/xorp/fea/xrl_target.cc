@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.46 2004/08/03 03:01:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.47 2004/08/03 03:51:48 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1342,7 +1342,7 @@ XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
 // FTI Related
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_lookup_route4(
+XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
 	// Input values,
 	const IPv4&	dst,
 	// Output values,
@@ -1358,7 +1358,7 @@ XrlFeaTarget::fti_0_2_lookup_route4(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     Fte4 fte;
-    if (_xftm.ftic().lookup_route4(dst, fte) == true) {
+    if (_xftm.ftic().lookup_route_by_dest4(dst, fte) == true) {
 	netmask = fte.net();
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
@@ -1374,7 +1374,7 @@ XrlFeaTarget::fti_0_2_lookup_route4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_lookup_route6(
+XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
 	// Input values,
 	const IPv6&	dst,
 	// Output values,
@@ -1390,7 +1390,7 @@ XrlFeaTarget::fti_0_2_lookup_route6(
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     Fte6 fte;
-    if (_xftm.ftic().lookup_route6(dst, fte) == true) {
+    if (_xftm.ftic().lookup_route_by_dest6(dst, fte) == true) {
 	netmask = fte.net();
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
@@ -1406,7 +1406,7 @@ XrlFeaTarget::fti_0_2_lookup_route6(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_lookup_entry4(
+XrlFeaTarget::fti_0_2_lookup_route_by_network4(
 	// Input values,
 	const IPv4Net&	dst,
 	// Output values,
@@ -1421,7 +1421,7 @@ XrlFeaTarget::fti_0_2_lookup_entry4(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     Fte4 fte;
-    if (_xftm.ftic().lookup_entry4(dst, fte)) {
+    if (_xftm.ftic().lookup_route_by_network4(dst, fte)) {
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
@@ -1436,7 +1436,7 @@ XrlFeaTarget::fti_0_2_lookup_entry4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_lookup_entry6(
+XrlFeaTarget::fti_0_2_lookup_route_by_network6(
 	// Input values,
 	const IPv6Net&	dst,
 	// Output values,
@@ -1451,7 +1451,7 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     Fte6 fte;
-    if (_xftm.ftic().lookup_entry6(dst, fte)) {
+    if (_xftm.ftic().lookup_route_by_network6(dst, fte)) {
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();

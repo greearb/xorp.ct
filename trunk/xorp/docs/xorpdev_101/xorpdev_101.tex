@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev-101/xorpdev101.tex,v 1.3 2004/07/19 22:09:11 mjh Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.4 2004/07/22 17:13:17 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -1036,7 +1036,7 @@ interface rib/0.1 {
          * IPv4::ZERO otherwise.  It is an error for the unicast and multicast
          * fields to both be true or both false.
          */
-        lookup_route4 ? addr:ipv4 & unicast:bool & multicast:bool \
+        lookup_route_by_dest4 ? addr:ipv4 & unicast:bool & multicast:bool \
                 -> nexthop:ipv4
 ...
 }
@@ -1086,7 +1086,7 @@ e4CB;
      *  @param unicast look in unicast RIB.
      *  @param multicast look in multicast RIB.
      */
-    bool send_lookup_route4(
+    bool send_lookup_route_by_dest4(
         const char*     target_name,
         const IPv4&     addr,
         const bool&     unicast,
@@ -1194,8 +1194,8 @@ we passed into {\stt send\_add\_route4()}.
 \begin{lstlisting}[caption={Hypothetical callback for  {\stt
 	send\_lookup\_route4()} \label{lst:lookup} }]{} %
 void
-XrlStaticRoutesNode::lookup_route4_cb(const XrlError& xrl_error,
-                                      const IPv4* nexthop)
+XrlStaticRoutesNode::lookup_route_by_dest4_cb(const XrlError& xrl_error,
+                                              const IPv4* nexthop)
 {
     if (xrl_error == XrlError::OKAY()) {
         printf("the nexthop is %s\n", nexthop->str().c_str());

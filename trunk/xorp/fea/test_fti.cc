@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fti.cc,v 1.5 2004/06/10 22:40:57 hodson Exp $"
+#ident "$XORP: xorp/fea/test_fti.cc,v 1.6 2004/08/03 03:51:48 pavlin Exp $"
 
 #include <list>
 
@@ -37,7 +37,7 @@ pp_fte(Fte4& fte)
 }
 
 void
-lookup_route(Fti *fti, const char *addr)
+lookup_route_by_dest(Fti *fti, const char *addr)
 {
     Fte4 fte;
     struct in_addr in;
@@ -45,7 +45,7 @@ lookup_route(Fti *fti, const char *addr)
     printf("Lookup route %s\n", addr);
 
     in.s_addr = inet_addr(addr);
-    if (fti->lookup_route4(in.s_addr, fte))
+    if (fti->lookup_route_by_dest4(in.s_addr, fte))
 	pp_fte(fte);
     else
 	printf("lookup failed\n");
@@ -359,12 +359,12 @@ main(int argc, char *argv[])
     ** Lookup some routes
     */
     if (lookup)
-	lookup_route(&fti, lookup);
+	lookup_route_by_dest(&fti, lookup);
 
 #if	0
-    lookup_route(fti, "192.150.187.11");
-    lookup_route(fti, "128.16.64.16");
-    lookup_route(fti, "10.0.3.2");
+    lookup_route_by_dest(fti, "192.150.187.11");
+    lookup_route_by_dest(fti, "128.16.64.16");
+    lookup_route_by_dest(fti, "10.0.3.2");
 #endif
 
     /*

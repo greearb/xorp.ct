@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.34 2004/08/03 03:01:07 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.35 2004/08/03 03:51:48 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -569,7 +569,7 @@ public:
     // Forwarding Table Interface
     //
 
-    XrlCmdError fti_0_2_lookup_route4(
+    XrlCmdError fti_0_2_lookup_route_by_dest4(
 	// Input values,
 	const IPv4&	host,
 	// Output values,
@@ -581,7 +581,7 @@ public:
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
 
-    XrlCmdError fti_0_2_lookup_route6(
+    XrlCmdError fti_0_2_lookup_route_by_dest6(
 	// Input values,
 	const IPv6&	host,
 	// Output values,
@@ -593,7 +593,7 @@ public:
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
 
-    XrlCmdError fti_0_2_lookup_entry4(
+    XrlCmdError fti_0_2_lookup_route_by_network4(
 	// Input values,
 	const IPv4Net&	dst,
 	// Output values,
@@ -604,7 +604,7 @@ public:
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
 
-    XrlCmdError fti_0_2_lookup_entry6(
+    XrlCmdError fti_0_2_lookup_route_by_network6(
 	// Input values,
 	const IPv6Net&	dst,
 	// Output values,
