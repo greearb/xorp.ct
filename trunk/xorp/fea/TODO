@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.8 2003/06/03 22:00:09 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.9 2003/06/06 08:48:18 pavlin Exp $
 #
 
 * Do we need to include <asm/types.h> for Linux, when we include
@@ -60,11 +60,6 @@
 
 * The min. required TTL to forward on a MFC entry should be configurable
   per vif.
-
-* The receiving of kernel signals won't be activated if
-  UnixComm::open_proto_socket() is not called for IGMP/MLD.
-  Need to fix it such that add_selector() is called for
-  _mrouter_socket even if no IGMP/MLD is running.
 
 * Rename "functions" with "methods" in classes inside *.hh
   (e.g., "Private functions". Same for all *.hh in other directories:
@@ -127,7 +122,7 @@
   continue with the next interface.
 
 * If closing the _mrouter_socket, make sure that _proto_socket for
-  IGMP or ICMP6 is closed too.
+  IGMP or ICMP6 is closed too (??).
 
 * When sending a request using UnixComm, make sure we are using the
   right socket (e.g., IOCTL, etc)
