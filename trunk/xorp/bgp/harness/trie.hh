@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.6 2003/09/09 02:02:03 atanu Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.7 2003/09/10 03:19:26 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
@@ -23,22 +23,19 @@
 #include "trie_payload.hh"
 #include "real_trie.hh"
 
-    /*
-    ** The trie stores BGP update packets the trie index is the
-    ** NLRI. A BGP update packet can contain multiple NLRI's. To save
-    ** the overhead of storing an update packet multiple times in the
-    ** trie a single copy of the update packet is kept. The Payload is
-    ** a reference to this single copy. Each update packet is chained
-    ** together on a linked list. New update packets are added to the
-    ** end of the list. In theory this ordered chained list structure
-    ** should make is very simple to print out the current update
-    ** packets that constitute the routing table. The ordering is
-    ** important if the same NLRI is contained in two packets then the
-    ** later one should be used. One possible problem is that update
-    ** packets with withdraws only will not be stored.
-    */
-
-
+/**
+ * The trie stores BGP update packets the trie index is the
+ * NLRI. A BGP update packet can contain multiple NLRI's. To save
+ * the overhead of storing an update packet multiple times in the
+ * trie a single copy of the update packet is kept. The Payload is
+ * a reference to this single copy. Each update packet is chained
+ * together on a linked list. New update packets are added to the
+ * end of the list. In theory this ordered chained list structure
+ * should make is very simple to print out the current update
+ * packets that constitute the routing table. The ordering is
+ * important if the same NLRI is contained in two packets then the
+ * later one should be used.
+ */
 class Trie {
 public:
     Trie() : _first(0), _last(0), _update_cnt(0) {
@@ -56,15 +53,25 @@ public:
     void tree_walk_table(const TreeWalker_ipv4& tw) const;
     void tree_walk_table(const TreeWalker_ipv6& tw) const;
 
-//     void save_routing_table(FILE *fp) const;
+    typedef XorpCallback2<void, const UpdatePacket*,
+			  const TimeVal&>::RefPtr UpdateWalker;
+    
+    void update_walk(const UpdateWalker uw) const;
 
     uint32_t update_count() {
 	return _update_cnt;
     }
 
 private:
+    template <class A> void add(IPNet<A> net, TriePayload&);
+    template <class A> void del(IPNet<A> net, TriePayload&);
+
+    template <class A> void get_heads(RealTrie<A>*&, RealTrie<A>*&);
+
     RealTrie<IPv4> _head_ipv4;
+    RealTrie<IPv4> _head_ipv4_del;
     RealTrie<IPv6> _head_ipv6;
+    RealTrie<IPv6> _head_ipv6_del;
 
     TrieData *_first;
     TrieData *_last;
@@ -72,5 +79,5 @@ private:
     uint32_t _update_cnt;	// Number of update packets seen
 };
 
-
 #endif // __BGP_HARNESS_TRIE_HH__
+

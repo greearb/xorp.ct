@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.7 2003/09/10 03:19:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.8 2003/09/10 07:29:29 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -57,6 +57,10 @@ Trie::lookup(const IPv4Net& n) const
 	return 0;
 
     /*
+    ** Everything below here is sanity checking.
+    */
+
+    /*
     ** Look for this net in the matching update packet.
     */
     list <BGPUpdateAttrib>::const_iterator ni;
@@ -81,6 +85,10 @@ Trie::lookup(const IPv6Net& n) const
 
     if(0 == update)
 	return 0;
+
+    /*
+    ** Everything below here is sanity checking.
+    */
 
     /*
     ** Look for a multiprotocol path attribute.
@@ -126,15 +134,76 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
     _update_cnt++;
 
     TriePayload payload(tv, buf, len, _first, _last);
-    const UpdatePacket *update = payload.get();
+    const UpdatePacket *p = payload.get();
 
+    debug_msg("%s\n", p->str().c_str());
+
+    MPReachNLRIAttribute<IPv6> *mpreach = 0;
+    MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
+    
+    list <PathAttribute*>::const_iterator pai;
+    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
+	const PathAttribute* pa;
+	pa = *pai;
+	
+	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
+ 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
+	    continue;
+	}
+	
+	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
+	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
+	    continue;
+	}
+    }
+
+    /*
+    ** IPv4 Withdraws
+    */
+    if (!p->wr_list().empty()) {
+	BGPUpdateAttribList::const_iterator wi;
+	for(wi = p->wr_list().begin(); wi != p->wr_list().end(); wi++)
+	    del(wi->net(), payload);
+    }
+
+    /*
+    ** IPv6 Withdraws
+    */
+    if (mpunreach) {
+	list<IPNet<IPv6> >::const_iterator wi6;
+	for(wi6 = mpunreach->wr_list().begin();
+	    wi6 != mpunreach->wr_list().end(); wi6++) {
+	    del(*wi6, payload);
+	}
+    }
+
+    /*
+    ** IPv4 Route add.
+    */
+    if (!p->nlri_list().empty()) {
+	BGPUpdateAttribList::const_iterator ni4;
+	for(ni4 = p->nlri_list().begin(); ni4 != p->nlri_list().end(); ni4++)
+	    add(ni4->net(), payload);
+    }
+
+    /*
+    ** IPv6 Route add.
+    */
+    if (mpreach) {
+	list<IPNet<IPv6> >::const_iterator ni6;
+	for(ni6 = mpreach->nlri_list().begin();
+	    ni6 != mpreach->nlri_list().end(); ni6++)
+	    add(*ni6, payload);
+    }
+
+#if	0
     /*
     ** First process the withdraws, if any are present.
     */
     list <BGPUpdateAttrib>::const_iterator wi;
     wi = update->wr_list().begin();
     for(; wi != update->wr_list().end(); wi++)
-	_head_ipv4.del(wi->net());
+	del(wi->net(), payload);
 
     /*
     ** If there are no nlri's present then there is nothing to save so
@@ -148,17 +217,9 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
     */
     list <BGPUpdateAttrib>::const_iterator ni;
     ni = update->nlri_list().begin();
-    for(; ni != update->nlri_list().end(); ni++) {
-	/* If a previous entry exists remove it */
-	const UpdatePacket *up = lookup(ni->net().str());
-	if(up)
-	    if(!_head_ipv4.del(ni->net()))
-		XLOG_FATAL("Could not remove nlri: %s",
-			   ni->net().str().c_str());
-	if(!_head_ipv4.insert(ni->net(), payload))
-	    XLOG_FATAL("Could not add nlri: %s",
-		       ni->net().str().c_str());
-    }
+    for(; ni != update->nlri_list().end(); ni++)
+	add(ni->net(), payload);
+#endif
 }
 
 void
@@ -173,9 +234,72 @@ Trie::tree_walk_table(const TreeWalker_ipv6& tw) const
     _head_ipv6.tree_walk_table(tw);
 }
 
-// void
-// Trie::save_routing_table(FILE *fp) const
-// {
-//     _head_ipv4.print(fp);
-//     _head_ipv6.print(fp);
-// }
+void
+Trie::update_walk(const UpdateWalker uw) const
+{
+    for(const TrieData *p = _first; p; p = p->next())
+	uw->dispatch(p->data(), p->tv());
+}
+
+template <>
+void
+Trie::get_heads<IPv4>(RealTrie<IPv4>*& head, RealTrie<IPv4>*& del)
+{
+    head = &_head_ipv4;
+    del = &_head_ipv4_del;
+}
+
+template <>
+void
+Trie::get_heads<IPv6>(RealTrie<IPv6>*& head, RealTrie<IPv6>*& del)
+{
+    head = &_head_ipv6;
+    del = &_head_ipv6_del;
+}
+
+template <class A>
+void
+Trie::add(IPNet<A> net, TriePayload& payload)
+{
+    debug_msg("%s %s\n", net.str().c_str(), payload.get()->str().c_str());
+
+    RealTrie<A> *head, *del;
+    get_heads<A>(head, del);
+
+    /* If a previous entry exists remove it */
+    const UpdatePacket *up = lookup(net);
+    if(up)
+	if(!head->del(net))
+	    XLOG_FATAL("Could not remove nlri: %s", net.str().c_str());
+    if(!head->insert(net, payload))
+	XLOG_FATAL("Could not add nlri: %s", net.str().c_str());
+
+    /*
+    ** We save deleted state for replays. 
+    */
+    up = del->find(net).get();
+    if(up)
+	if(!del->del(net))
+	    XLOG_FATAL("Could not remove nlri: %s", net.str().c_str());
+}
+
+template <class A>
+void
+Trie::del(IPNet<A> net, TriePayload& payload)
+{
+    RealTrie<A> *head, *del;
+    get_heads<A>(head, del);
+
+    if(!head->del(net))
+	XLOG_WARNING("Could not delete %s", net.str().c_str());
+    /*
+    ** We save deleted state for replays. 
+    */
+    /* If a previous entry exists remove it */
+    const UpdatePacket *up = del->find(net).get();
+    if(up)
+	if(!del->del(net))
+	    XLOG_FATAL("Could not remove nlri: %s", net.str().c_str());
+    if(!del->insert(net, payload))
+	XLOG_FATAL("Could not add nlri: %s", net.str().c_str());
+}
