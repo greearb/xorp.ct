@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.1 2004/06/10 13:49:27 hodson Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.2 2004/06/10 22:41:43 hodson Exp $"
 
 #include "rib/rib_module.h"
 
@@ -339,8 +339,8 @@ ShowRoutesProcessor::request_redist_cb(const XrlError& xe)
     }
     set_status(FAILED,
 	       c_format("Request for routes to be redistributed from %s "
-			"declined: \"%s\"", _opts.protocol,
-			xe.note().c_str()));
+			"failed.\nPerhaps protocol is not active.",
+			_opts.protocol));
     return;
 }
 
@@ -681,11 +681,11 @@ main(int argc, char* const argv[])
 
 	if (srp.status() == FAILED) {
 	    if (srp.status_note().empty() == false) {
-		cerr << srp.status_note() << endl;
+		cout << srp.status_note() << endl;
 	    } else {
-		cerr << "Failed" << endl;
+		cout << "Failed" << endl;
 	    }
-	    cerr << endl;
+	    cout << endl;
 	}
 
     } catch (...) {
