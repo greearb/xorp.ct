@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.15 2003/08/07 00:36:37 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.16 2003/12/10 22:25:52 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -134,16 +134,6 @@ public:
      */
     inline V *vif_find_by_vif_index(uint16_t vif_index) const;
 
-    /**
-     * Find a virtual interface that belongs to the same subnet
-     * as a given subnet address.
-     * 
-     * @param subnet_test the subnet address to search by.
-     * @return the virtual interface that belongs to the same subnet
-     * address @ref subnet_test if found, otherwise NULL.
-     */
-    inline V *vif_find_same_subnet(const IPvXNet& subnet_test) const;
-    
     /**
      * Find a virtual interface that belongs to the same subnet
      * or point-to-point link as a given address.
@@ -648,24 +638,6 @@ ProtoNode<V>::vif_find_by_vif_index(uint16_t vif_index) const
 	// XXX: if vif_index becomes signed, we must check (vif_index >= 0)
 	return (_proto_vifs[vif_index]);
     }
-    return (NULL);
-}
-
-template<class V>
-inline V *
-ProtoNode<V>::vif_find_same_subnet(const IPvXNet& subnet_test) const
-{
-    typename vector<V *>::const_iterator iter;
-    
-    for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
-	V *vif = *iter;
-	if (vif == NULL)
-	    continue;
-	
-	if (vif->is_same_subnet(subnet_test))
-	    return (vif);
-    }
-    
     return (NULL);
 }
 
