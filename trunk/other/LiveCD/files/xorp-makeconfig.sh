@@ -40,6 +40,12 @@ GROUPSRC="${MNTDIR}/ETC/GROUP.TXT"
 GROUPDST="${ETCDIR}/group"
 XORPCFGSRC="${MNTDIR}/ETC/XORP.CFG"
 XORPCFGDST="${ETCDIR}/xorp.cfg"
+SSHDSASRC="${MNTDIR}/ETC/SSHDSA.TXT"
+SSHDSADST="${ETCDIR}/ssh/ssh_host_dsa_key"
+SSHRSASRC="${MNTDIR}/ETC/SSHRSA.TXT"
+SSHRSADST="${ETCDIR}/ssh/ssh_host_rsa_key"
+SSHV1SRC="${MNTDIR}/ETC/SSHV1.TXT"
+SSHV1DST="${ETCDIR}/ssh/ssh_host_key"
 USEFLOPPY="true"
 TITLE="XORP LiveCD"
 
@@ -58,6 +64,11 @@ FDFORMAT="/usr/sbin/fdformat"
 PASSWD="/usr/bin/passwd"
 CP="/bin/cp"
 MKDIR="/bin/mkdir"
+IFCONFIG="/sbin/ifconfig"
+AWK="/usr/bin/awk"
+RM="/bin/rm"
+CHMOD="/bin/chmod"
+CHOWN="/usr/sbin/chown"
 
 welcome() {
     ${DIALOG} --title "${TITLE}" --infobox "XORP LiveCD is starting..." 6 70 
@@ -214,8 +225,10 @@ a xorp config file and set passwords." 6 70
     ${PASSWD}
     ${DIALOG} --title "${TITLE}" --infobox "Enter the password for the \"xorp\" router user account." 5 70    
     ${PASSWD} -l xorp
+
     
     if [ ${USEFLOPPY} != "false" ]; then
+	${TOUCH} ${MANIFEST}
 	if [ ! -d ${MNTETC} ]; then
 	    ${MKDIR} -p ${MNTETC} 2> ${tempfile}
 	    if [ $? -ne 0 ]; then
@@ -228,11 +241,153 @@ a xorp config file and set passwords." 6 70
 	    err=`${CAT} ${tempfile}`
 	    ${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${PASSWDDST} to ${PASSWDSRC}\n${err}" 7 70    
 	    NOPASSWD="true"
+	else
+	    echo "${PASSWDSRC} ${PASSWDDST} 600 root wheel 0" >> ${MANIFEST} 
 	fi
+
+	
+	#Preserve the ssh host keys which were auto-generated
+	if [ -r ${SSHV1DST} ]; then
+	    ${CP} ${SSHV1DST} ${SSHV1SRC} 2> ${tempfile}
+	    if [ $? -ne 0 ]; then
+		err=`${CAT} ${tempfile}`
+		${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${SSHV1DST} to ${SSHV1SRC}\n${err}" 7 70    
+	    else
+		echo "${SSHV1SRC} ${SSHV1DST} 600 root wheel 0" >> ${MANIFEST} 
+	    fi
+	fi
+	if [ -r ${SSHDSADST} ]; then
+	    ${CP} ${SSHDSADST} ${SSHDSASRC} 2> ${tempfile}
+	    if [ $? -ne 0 ]; then
+		err=`${CAT} ${tempfile}`
+		${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${SSHDSADST} to ${SSHDSASRC}\n${err}" 7 70    
+	    else
+		echo "${SSHDSASRC} ${SSHDSADST} 600 root wheel 0" >> ${MANIFEST} 
+	    fi
+	fi
+	if [ -r ${SSHRSADST} ]; then
+	    ${CP} ${SSHRSADST} ${SSHRSASRC} 2> ${tempfile}
+	    if [ $? -ne 0 ]; then
+		err=`${CAT} ${tempfile}`
+		${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${SSHRSADST} to ${SSHRSASRC}\n${err}" 7 70    
+	    else
+		echo "${SSHRSASRC} ${SSHRSADST} 600 root wheel 0" >> ${MANIFEST} 
+	    fi
+	fi
+
+
+
+	#finished creating manifest file
     fi
+
     ${DIALOG} --title "${TITLE}" --msgbox "Configuration is complete." 5 70    
+}
+
+getiftype() {
+    tempfile=$1
+    media=" (??)"
+    ${GREP} Ethernet ${tempfile} 1> /dev/null
+    if [ $? -eq 0 ]; then
+	media="Ethernet"
+    fi
+    ${GREP} LOOPBACK ${tempfile} 1> /dev/null
+    if [ $? -eq 0 ]; then
+	media="Loopback interface"
+    fi
+    ${GREP} faith ${tempfile} 1> /dev/null
+    if [ $? -eq 0 ]; then
+	media="IPv6-to-IPv4 TCP relay"
+    fi
+    ${GREP} ppp ${tempfile} 1> /dev/null
+    if [ $? -eq 0 ]; then
+	media="Point-to-point protocol"
+    fi
+    ${GREP} sl0 ${tempfile} 1> /dev/null
+    if [ $? -eq 0 ]; then
+	media="Serial-line IP"
+    fi
+    echo ${media} > ${tempfile}
+}
+
+create_config() {
+    tempfile=`${MKTEMP} -t testflp` || exit 1
+    cmdfile=`${MKTEMP} -t iface` || exit 1
+    resfile=`${MKTEMP} -t iface-res` || exit 1
+    echo "$DIALOG --title \"${TITLE}\" --clear \\" > ${cmdfile}
+    echo "--checklist \"These are the active network interfaces in your machine. \\n\\" >> ${cmdfile}
+    echo "Choose the interfaces for XORP to manage.  If you don't\\n\\" >> ${cmdfile}
+    echo "know what these are, the defaults are probably OK.\\n\\" \
+	>> ${cmdfile}
+    echo "\\nHit TAB to select OK when you're done.\" -1 -1 10 \\" \
+	>> ${cmdfile}
+    count=0
+    iflist=`${IFCONFIG} -a | ${AWK} -F : '$2~/flags=/ {print $1}'`
+    for i in $iflist
+      do
+      ${IFCONFIG} $i > ${tempfile}
+      ${GREP} RUNNING ${tempfile} 1> /dev/null
+      if [ $? -eq 0 ]; then
+	  enabled="on"
+      else
+	  enabled="off"
+      fi
+      getiftype ${tempfile}
+      media=" (`cat ${tempfile}`)"
+      count=$((${count}+1))
+      echo "\"${count}\" \"$i$media\" \"$enabled\" \\" >> $cmdfile
+    done
+    echo "2> ${resfile}" >> ${cmdfile}
+    /bin/sh ${cmdfile}
+    result=`${CAT} ${resfile}`
+
+    count=0
+
+    #don't know why this would exist on a MFS, but delete it if it did.
+    if [ -e ${XORPCFGDST} ]; then
+	${RM} -f ${XORPCFGDST}
+    fi
+
+    ${TOUCH} ${XORPCFGDST} 2> ${tempfile}
+    if [ ! -e ${XORPCFGDST} ]; then
+	err=`cat ${tempfile}`
+	${DIALOG} --title "${TITLE}" --msgbox "Failed to create XORP config file ${XORPCFGDST}\n${err}" 7 70    
+	return
+    fi
+
+    echo "interfaces {" >> ${XORPCFGDST}
+	
+    for i in ${iflist}
+    do
+      count=$((${count}+1))
+      k="\"${count}\""
+      for j in ${result}
+      do
+	if [ $j = $k ]; then
+	    ${IFCONFIG} $i > ${tempfile}
+	    getiftype ${tempfile}
+	    media="`cat ${tempfile}`"
+	    echo "    interface $i {" >> ${XORPCFGDST}
+	    echo "        description: \"$media\"" >> ${XORPCFGDST}
+	    echo "        vif $i {" >> ${XORPCFGDST}
+	    echo "        }" >> ${XORPCFGDST}
+	    echo "    }" >> ${XORPCFGDST}
+	fi
+      done
+    done
+      
+    echo "}" >> ${XORPCFGDST}
+    ${CHOWN} xorp:xorp ${XORPCFGDST}
+    ${CHMOD} 664 ${XORPCFGDST}
+    ${CP} ${XORPCFGDST} ${XORPCFGSRC} 2> ${tempfile}
+    if [ $? -ne 0 ]; then
+	err=`${CAT} ${tempfile}`
+	${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${SSHRSADST} to ${SSHRSASRC}\n${err}" 7 70    
+    else
+	echo "${XORPCFGSRC} ${XORPCFGDST} 664 xorp xorp 0" >> ${MANIFEST} 
+    fi
 }
 
 welcome
 test_floppy
 test_manifest
+create_config
