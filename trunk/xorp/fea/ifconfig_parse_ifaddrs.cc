@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.5 2003/06/17 23:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.6 2003/08/06 02:10:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -54,7 +54,7 @@ bool
 IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 {
     u_short if_index = 0;
-    string if_name;
+    string if_name, alias_if_name;
     const ifaddrs *ifa;
     
     UNUSED(if_index);
@@ -66,21 +66,24 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    continue;
 	}
 	
+	//
 	// Get the interface name
+	//
 	char tmp_if_name[IFNAMSIZ+1];
 	strncpy(tmp_if_name, ifa->ifa_name, sizeof(tmp_if_name));
-#ifdef HOST_OS_SOLARIS
 	char *cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
-	    // Replace colon with null. Needed because in Solaris the
-	    // interface name changes for aliases
+	    // Replace colon with null. Needed because in Solaris and Linux
+	    // the interface name changes for aliases.
 	    *cptr = '\0';
 	}
-#endif // HOST_OS_SOLARIS
-	if_name = string(tmp_if_name);
+	if_name = string(ifa->ifa_name);
+	alias_if_name = string(tmp_if_name);
+	debug_msg("interface: %s\n", if_name.c_str());
+	debug_msg("alias interface: %s\n", alias_if_name.c_str());
 	
 	//
-	// Try to get the physical interface index
+	// Get the physical interface index
 	//
 	do {
 	    if_index = 0;
@@ -96,10 +99,6 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 #endif // AF_LINK
 	    
 #ifdef HAVE_IF_NAMETOINDEX
-	    // TODO: check whether for Solaris we have to use the
-	    // original interface name instead (i.e., the one that has
-	    // unique vif name per alias (see the ':' substitution
-	    // above).
 	    if_index = if_nametoindex(if_name.c_str());
 	    if (if_index > 0)
 		break;
@@ -119,7 +118,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		}
 		if (ioctl(s, SIOCGIFINDEX, &ifridx) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
-			       ifridx.ifr_name, strerror(errno));
+			      if_name.c_str(), strerror(errno));
 		} else {
 		    if_index = ifridx.ifr_ifindex;
 		}
@@ -132,76 +131,155 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    break;
 	} while (false);
 	if (if_index == 0) {
-	    // TODO: what to do? Shall I assign my own pseudo-indexes?
-	    XLOG_FATAL("Could not find index for interface %s",
+	    XLOG_FATAL("Could not find physical interface index "
+		       "for interface %s",
 		       if_name.c_str());
 	}
+	debug_msg("interface index: %d\n", if_index);
 	
 	//
 	// Add the interface (if a new one)
 	//
-	ifc().map_ifindex(if_index, if_name);
-	it.add_if(if_name);
-	IfTreeInterface& fi = it.get_if(if_name)->second;
+	ifc().map_ifindex(if_index, alias_if_name);
+	it.add_if(alias_if_name);
+	IfTreeInterface& fi = it.get_if(alias_if_name)->second;
 
 	//
 	// Get the MAC address
 	//
+	do {
 #ifdef AF_LINK
-	if ((ifa->ifa_addr != NULL)
-	    && (ifa->ifa_addr->sa_family == AF_LINK)) {
-	    // Link-level address
-	    const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(ifa->ifa_addr);
-	    if (sdl->sdl_type == IFT_ETHER) {
-		if (sdl->sdl_alen == sizeof(ether_addr)) {
-		    ether_addr ea;
-		    memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen, sdl->sdl_alen);
-		    fi.set_mac(EtherMac(ea));
-		} else if (sdl->sdl_alen != 0) {
-		    XLOG_ERROR("Address size %d uncatered for interface %s",
-			       sdl->sdl_alen, if_name.c_str());
+	    if ((ifa->ifa_addr != NULL)
+		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
+		// Link-level address
+		const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(ifa->ifa_addr);
+		if (sdl->sdl_type == IFT_ETHER) {
+		    if (sdl->sdl_alen == sizeof(ether_addr)) {
+			ether_addr ea;
+			memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
+			       sdl->sdl_alen);
+			fi.set_mac(EtherMac(ea));
+			break;
+		    } else if (sdl->sdl_alen != 0) {
+			XLOG_ERROR("Address size %d uncatered for interface %s",
+				   sdl->sdl_alen, if_name.c_str());
+		    }
 		}
 	    }
-	}
 #endif // AF_LINK
+
+#ifdef SIOCGIFHWADDR
+	    {
+		int s;
+		struct ifreq ifridx;
+		memset(&ifridx, 0, sizeof(ifridx));
+		strncpy(ifridx.ifr_name, if_name.c_str(),
+			sizeof(ifridx.ifr_name));
+	    
+		s = socket(AF_INET, SOCK_DGRAM, 0);
+		if (s < 0) {
+		    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+		}
+		if (ioctl(s, SIOCGIFHWADDR, &ifridx) < 0) {
+		    XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
+			      if_name.c_str(), strerror(errno));
+		} else {
+		    ether_addr ea;
+		    memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
+		    fi.set_mac(EtherMac(ea));
+		    close(s);
+		    break;
+		}
+		close(s);
+	    }
+#endif // SIOCGIFHWADDR
+	    
+	    break;
+	} while (false);
+	debug_msg("MAC address: %s\n", fi.mac().str().c_str());
 	
 	//
 	// Get the MTU
 	//
-#ifdef AF_LINK
-	if ((ifa->ifa_addr != NULL)
-	    && (ifa->ifa_addr->sa_family == AF_LINK)) {
+	do {
 	    int mtu = 0;
-	    // Link-level address
-	    if (ifa->ifa_data != NULL) {
-		struct if_data *if_data = (struct if_data *)ifa->ifa_data;
-		mtu = if_data->ifi_mtu;
-		if (mtu == 0) {
-		    XLOG_ERROR("Coudn't get the MTU for interface %s",
-			       if_name.c_str());
+	    
+#ifdef AF_LINK
+	    if ((ifa->ifa_addr != NULL)
+		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
+		// Link-level address
+		if (ifa->ifa_data != NULL) {
+		    struct if_data *if_data = (struct if_data *)ifa->ifa_data;
+		    mtu = if_data->ifi_mtu;
+		    if (mtu == 0) {
+			XLOG_ERROR("Couldn't get the MTU for interface %s",
+				   if_name.c_str());
+		    }
+		    fi.set_mtu(mtu);
+		    break;
 		}
-		fi.set_mtu(mtu);		
 	    }
-	}
 #endif // AF_LINK
+	    
+#ifdef SIOCGIFMTU
+	    {
+		int s;
+		struct ifreq ifridx;
+		memset(&ifridx, 0, sizeof(ifridx));
+		strncpy(ifridx.ifr_name, if_name.c_str(),
+			sizeof(ifridx.ifr_name));
+	    
+		s = socket(AF_INET, SOCK_DGRAM, 0);
+		if (s < 0) {
+		    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+		}
+		if (ioctl(s, SIOCGIFMTU, &ifridx) < 0) {
+		    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
+			      if_name.c_str(), strerror(errno));
+		} else {
+		    mtu = ifrcopy.ifr_mtu;
+		    fi.set_mtu(mtu);
+		    close(s);
+		    break;
+		}
+		close(s);
+	    }
+#endif // SIOCGIFMTU
+	    
+	    break;
+	} while (false);
+	debug_msg("MTU: %d\n", fi.mtu());
 	
 	//
 	// Get the flags
 	//
 	int flags = ifa->ifa_flags;
 	fi.set_enabled(flags & IFF_UP);
+	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
 	
-	debug_msg("%s flags %s\n",
-		  if_name.c_str(), IfConfigGet::iff_flags(flags).c_str());
 	// XXX: vifname == ifname on this platform
-	fi.add_vif(if_name);
-	IfTreeVif& fv = fi.get_vif(if_name)->second;
+	fi.add_vif(alias_if_name);
+	IfTreeVif& fv = fi.get_vif(alias_if_name)->second;
+	
+	//
+	// Set the physical interface index for the vif
+	//
 	fv.set_pif_index(if_index);
+	
+	//
+	// Set the vif flags
+	//
 	fv.set_enabled(fi.enabled() && (flags & IFF_UP));
 	fv.set_broadcast(flags & IFF_BROADCAST);
 	fv.set_loopback(flags & IFF_LOOPBACK);
 	fv.set_point_to_point(flags & IFF_POINTOPOINT);
 	fv.set_multicast(flags & IFF_MULTICAST);
+	debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
+	debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
+	debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");
+	debug_msg("vif point_to_point: %s\n", fv.point_to_point() ? "true"
+		  : "false");
+	debug_msg("vif multicast: %s\n", fv.multicast() ? "true" : "false");
 	
 	//
 	// Get the IP address, netmask, broadcast address, P2P destination
@@ -221,20 +299,25 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    bool has_peer_addr = false;
 	    
 	    // Get the IP address
-	    if (ifa->ifa_addr != NULL)
+	    if (ifa->ifa_addr != NULL) {
 		lcl_addr.copy_in(*ifa->ifa_addr);
+	    }
+	    debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	    
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
 		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_netmask;
 		subnet_mask.copy_in(sin->sin_addr);
 	    }
+	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the broadcast address
 	    if (fv.broadcast() && (ifa->ifa_broadaddr != NULL)) {
 		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_broadaddr;
 		broadcast_addr.copy_in(sin->sin_addr);
 		has_broadcast_addr = true;
+		debug_msg("Broadcast address: %s\n",
+			  broadcast_addr.str().c_str());
 	    }
 	    
 	    // Get the p2p address
@@ -242,7 +325,10 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_dstaddr;
 		peer_addr.copy_in(sin->sin_addr);
 		has_peer_addr = true;
+		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
 	    }
+	    
+	    debug_msg("\n");	// put an empty line between interfaces
 	    
 	    // Add the address
 	    fv.add_addr(lcl_addr);
@@ -275,22 +361,28 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    bool has_peer_addr = false;
 	    
 	    // Get the IP address
-	    if (ifa->ifa_addr != NULL)
+	    if (ifa->ifa_addr != NULL) {
 		lcl_addr.copy_in(*ifa->ifa_addr);
+	    }
 	    lcl_addr = kernel_ipv6_adjust(lcl_addr);
+	    debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	    
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
 		const sockaddr_in6 *sin6 = (sockaddr_in6 *)ifa->ifa_netmask;
 		subnet_mask.copy_in(sin6->sin6_addr);
 	    }
+	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the p2p address
 	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
 		const sockaddr_in6 *sin6 = (sockaddr_in6 *)ifa->ifa_dstaddr;
 		peer_addr.copy_in(sin6->sin6_addr);
 		has_peer_addr = true;
+		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
 	    }
+	    
+	    debug_msg("\n");	// put an empty line between interfaces
 	    
 	    // Add the address
 	    fv.add_addr(lcl_addr);
