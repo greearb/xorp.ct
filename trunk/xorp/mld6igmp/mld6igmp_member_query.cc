@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.6 2003/10/20 18:34:11 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.7 2003/11/12 19:10:07 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -148,7 +148,8 @@ MemberQuery::last_member_query_timer_timeout()
     //
     if (mld6igmp_vif().proto_is_igmp()) {
 	// TODO: XXX: ignore the fact that now there may be IGMPv1 routers?
-	mld6igmp_vif().mld6igmp_send(group(),
+	mld6igmp_vif().mld6igmp_send(mld6igmp_vif().primary_addr(),
+				     group(),
 				     IGMP_MEMBERSHIP_QUERY,
 				     (IGMP_LAST_MEMBER_QUERY_INTERVAL
 				      * IGMP_TIMER_SCALE),
@@ -161,7 +162,8 @@ MemberQuery::last_member_query_timer_timeout()
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (mld6igmp_vif().proto_is_mld6()) {
-	mld6igmp_vif().mld6igmp_send(group(),
+	mld6igmp_vif().mld6igmp_send(mld6igmp_vif().primary_addr(),
+				     group(),
 				     MLD_LISTENER_QUERY,
 				     (MLD_LAST_LISTENER_QUERY_INTERVAL
 				      * MLD_TIMER_SCALE),

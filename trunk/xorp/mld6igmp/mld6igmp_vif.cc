@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.17 2003/11/12 19:10:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.18 2004/02/22 03:15:46 pavlin Exp $"
 
 
 //
@@ -253,7 +253,8 @@ Mld6igmpVif::start()
     // Query all members on startup
     //
     if (proto_is_igmp()) {
-	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
+	mld6igmp_send(primary_addr(),
+		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
 		      is_igmpv1_mode() ?
 		      0
@@ -267,7 +268,8 @@ Mld6igmpVif::start()
     }
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
-	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
+	mld6igmp_send(primary_addr(),
+		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
 		      IPvX::ZERO(family()));
@@ -349,6 +351,7 @@ Mld6igmpVif::stop()
 
 /**
  * Mld6igmpVif::mld6igmp_send:
+ * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The MLD or IGMP type of the message.
  * @max_resp_time: The "Maximum Response Delay" or "Max Resp Time"
@@ -362,7 +365,8 @@ Mld6igmpVif::stop()
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_send(const IPvX& dst,
+Mld6igmpVif::mld6igmp_send(const IPvX& src,
+			   const IPvX& dst,
 			   uint8_t message_type,
 			   int max_resp_time,
 			   const IPvX& group_address)
@@ -374,7 +378,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
     
-    XLOG_ASSERT(primary_addr() != IPvX::ZERO(family()));
+    XLOG_ASSERT(src != IPvX::ZERO(family()));
     
     //
     // Prepare the MLD or IGMP header.
@@ -407,7 +411,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
 	    uint32_t next_header;
 	} pseudo_header;
 	
-	primary_addr().copy_out(pseudo_header.in6_src);
+	src.copy_out(pseudo_header.in6_src);
 	dst.copy_out(pseudo_header.in6_dst);
 	pseudo_header.pkt_len = ntohl(BUFFER_DATA_SIZE(buffer));
 	pseudo_header.next_header = htonl(IPPROTO_ICMPV6);
@@ -420,13 +424,13 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     
     XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
 	       proto_message_type2ascii(message_type),
-	       cstring(primary_addr()),
+	       cstring(src),
 	       cstring(dst));
     
     //
     // Send the message
     //
-    ret_value = mld6igmp_node().mld6igmp_send(vif_index(), primary_addr(), dst,
+    ret_value = mld6igmp_node().mld6igmp_send(vif_index(), src, dst,
 					      MINTTL, -1, true, buffer);
     
     return (ret_value);
@@ -436,7 +440,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       proto_message_type2ascii(message_type),
-	       cstring(primary_addr()),
+	       cstring(src),
 	       cstring(dst));
     return (XORP_ERROR);
 }

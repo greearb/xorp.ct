@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.22 2004/02/21 06:24:24 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.23 2004/02/22 03:13:19 pavlin Exp $"
 
 
 //
@@ -556,7 +556,8 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 			     &MemberQuery::member_query_timer_timeout);
 		
 		// Send group-specific query
-		mld6igmp_send(member_query->group(),
+		mld6igmp_send(primary_addr(),
+			      member_query->group(),
 			      MLD_LISTENER_QUERY,
 			      (MLD_LAST_LISTENER_QUERY_INTERVAL
 			       * MLD_TIMER_SCALE),

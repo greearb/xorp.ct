@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.7 2003/11/12 19:10:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.8 2004/02/22 03:13:20 pavlin Exp $"
 
 
 //
@@ -75,7 +75,8 @@ Mld6igmpVif::other_querier_timer_timeout()
     
     if (proto_is_igmp()) {
 	// Now I am the querier. Send a general membership query.
-	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
+	mld6igmp_send(primary_addr(),
+		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
 		      is_igmpv1_mode() ? 0:
 		      (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
@@ -90,7 +91,8 @@ Mld6igmpVif::other_querier_timer_timeout()
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Now I am the querier. Send a general membership query.
-	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
+	mld6igmp_send(primary_addr(),
+		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
 		      ipaddr_zero);
@@ -119,7 +121,8 @@ Mld6igmpVif::query_timer_timeout()
     
     if (proto_is_igmp()) {
 	// Send a general membership query
-	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
+	mld6igmp_send(primary_addr(),
+		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
 		      is_igmpv1_mode() ? 0:
 		      (IGMP_QUERY_RESPONSE_INTERVAL * IGMP_TIMER_SCALE),
@@ -135,7 +138,8 @@ Mld6igmpVif::query_timer_timeout()
 #if HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Send a general membership query
-	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
+	mld6igmp_send(primary_addr(),
+		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      is_igmpv1_mode() ? 0:
 		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.10 2003/10/20 18:34:11 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.11 2004/02/22 03:12:02 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -257,8 +257,9 @@ private:
     //
     // Not-so handy private functions that should go somewhere else
     //
-    int		mld6igmp_send(const IPvX& dst, uint8_t message_type,
-			      int max_resp_time, const IPvX& group_address);
+    int		mld6igmp_send(const IPvX& src, const IPvX& dst,
+			      uint8_t message_type, int max_resp_time,
+			      const IPvX& group_address);
     int		igmp_process(const IPvX& src, const IPvX& dst,
 			     int ip_ttl, int ip_tos, bool router_alert_bool,
 			     buffer_t *buffer);
