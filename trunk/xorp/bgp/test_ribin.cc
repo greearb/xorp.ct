@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.7 2002/12/09 18:28:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -281,12 +281,14 @@ int main(int, char** argv) {
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete sr1;
+    delete palist1;
 
     sr2 = new SubnetRoute<IPv4>(net2, palist2);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete sr2;
+    delete palist2;
 
 
     debug_table->write_separator();

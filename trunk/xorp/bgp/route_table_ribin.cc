@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.55 2002/12/09 18:28:48 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -34,6 +34,11 @@ BGPRibInTable<A>::BGPRibInTable(string table_name, const PeerHandler *peer)
     _parent = NULL;
 
     _nexthop_push_active = false;
+}
+
+template<class A>
+BGPRibInTable<A>::~BGPRibInTable() {
+    delete _route_table;
 }
 
 template<class A>

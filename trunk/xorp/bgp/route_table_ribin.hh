@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.30 2002/12/09 18:28:48 hodson Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -29,6 +29,7 @@ template<class A>
 class BGPRibInTable : public BGPRouteTable<A>  {
 public:
     BGPRibInTable(string tablename, const PeerHandler *peer);
+    ~BGPRibInTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
 
