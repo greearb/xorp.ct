@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.19 2003/07/07 18:46:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.20 2003/09/30 18:27:05 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -830,7 +830,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     // might be needed only if the spec allows to send (S,G,rpt) Prune
     // on the RPT tree when there is only (*,*,RP) state. This might
     // not be the true in case that Section 4.5.8 "(S,G,rpt) Periodic Messages"
-    // is fixed such that (S,G,rpt) Prune are sent only when there is (*,G)
+    // is modified such that (S,G,rpt) Prune are sent only when there is (*,G)
     // state.
     //
     return (compute_mrib_next_hop_rp());
@@ -854,7 +854,7 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     
     if (is_joined_state())
 	goto joined_state_label;
-    // All other states: just set the new upstream nbr.
+    // All other states: just set the new upstream neighbor
     set_mrib_next_hop_rp(new_pim_nbr);
     return;
     
@@ -864,6 +864,17 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     if (new_pim_nbr == old_pim_nbr)
 	return;				// Nothing changed
     
+    // Send Join(*,*,RP) to the new value of MRIB.next_hop(RP)
+    if (new_pim_nbr != NULL) {
+	bool new_group_bool = false; // Group together all (*,*,RP) entries
+	new_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
+				  IPvX::ip_multicast_base_address_mask_len(family()),
+				  MRT_ENTRY_RP,
+				  ACTION_JOIN,
+				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  new_group_bool);
+	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
+    }
     // Send Prune(*,*,RP) to the old value of MRIB.next_hop(RP)
     if (old_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
@@ -876,17 +887,6 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     }
     // Set the new upstream neighbor.
     set_mrib_next_hop_rp(new_pim_nbr);
-    // Send Join(*,*,RP) to the new value of MRIB.next_hop(RP)
-    if (new_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,*,RP) entries
-	new_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-				  IPvX::ip_multicast_base_address_mask_len(family()),
-				  MRT_ENTRY_RP,
-				  ACTION_JOIN,
-				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
-	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
-    }
     // Restart the JoinTimer
     join_timer() =
 	pim_node().eventloop().new_oneoff_after(
@@ -935,87 +935,12 @@ PimMre::recompute_mrib_next_hop_rp_gen_id_changed()
 }
 
 //
-// The MRIB.next_hop(RP(G)) has changed.
+// The current next hop towards the RP has changed due to an Assert.
 // Take the appropriate action.
 // Note: applies only for (*,G) entries
 //
 void
-PimMre::recompute_mrib_next_hop_rp_g_changed()
-{
-    PimNbr *old_pim_nbr, *new_pim_nbr;
-    uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
-    const IPvX *my_rp_addr_ptr = NULL;
-    
-    if (! is_wc())
-	return;
-    
-    new_pim_nbr = compute_mrib_next_hop_rp();
-    
-    if (is_joined_state())
-	goto joined_state_label;
-    // All other states: just set the new MRIB.next_hop(RP(G))
-    set_mrib_next_hop_rp(new_pim_nbr);
-    return;
-    
- joined_state_label:
-    // Joined state
-    if (new_pim_nbr == mrib_next_hop_rp())
-	return;				// Nothing changed
-    
-    // Send Prune(*,G) to the old value of RPF'(*,G)
-    old_pim_nbr = rpfp_nbr_wc();
-    if (old_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,G) entries
-	my_rp_addr_ptr = rp_addr_ptr();
-	if (my_rp_addr_ptr == NULL) {
-	    XLOG_WARNING("Sending Prune(*,G) to old upstream neighbor: "
-			 "RP for group %s: not found",
-			 cstring(group_addr()));
-	} else {
-	    // We have RP
-	    old_pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
-				      IPvX::addr_bitlen(family()),
-				      MRT_ENTRY_WC,
-				      ACTION_PRUNE,
-				      old_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				      new_group_bool);
-	}
-    }
-    // Set the new MRIB.next_hop(RP(G))
-    set_mrib_next_hop_rp(new_pim_nbr);
-    // Send Join(*,G) to the new value of MRIB.next_hop(RP(G))
-    if (new_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (*,G) entries
-	my_rp_addr_ptr = rp_addr_ptr();
-	if (my_rp_addr_ptr == NULL) {
-	    XLOG_WARNING("Sending Join(*,G) to new upstream neighbor: "
-			 "RP for group %s: not found",
-			 cstring(group_addr()));
-	} else {
-	    new_pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
-				      IPvX::addr_bitlen(family()),
-				      MRT_ENTRY_WC,
-				      ACTION_JOIN,
-				      new_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				      new_group_bool);
-	}
-	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
-    }
-    // Restart the JoinTimer
-    join_timer() =
-	pim_node().eventloop().new_oneoff_after(
-	    TimeVal(join_prune_period, 0),
-	    callback(this, &PimMre::join_timer_timeout));
-}
-
-//
-// The current next hop towards the RP has changed.
-// Take the appropriate action.
-// Note: applies only for (*,G) entries
-//
-// TODO: change due to MRIB should call a different function!!
-void
-PimMre::recompute_rpfp_nbr_wc_changed()
+PimMre::recompute_rpfp_nbr_wc_assert_changed()
 {
     PimNbr *old_pim_nbr, *new_pim_nbr;
     PimVif *pim_vif;
@@ -1027,7 +952,7 @@ PimMre::recompute_rpfp_nbr_wc_changed()
     
     if (is_joined_state())
 	goto joined_state_label;
-    // All other states: just set the new upstream nbr.
+    // All other states: just set the new upstream neighbor
     set_rpfp_nbr_wc(new_pim_nbr);
     return;
     
@@ -1055,6 +980,80 @@ PimMre::recompute_rpfp_nbr_wc_changed()
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
+}
+
+//
+// The current next hop towards the RP has changed not due to an Assert.
+// Take the appropriate action.
+// Note: applies only for (*,G) entries
+//
+void
+PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
+{
+    PimNbr *old_pim_nbr, *new_pim_nbr;
+    uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
+    const IPvX *my_rp_addr_ptr = NULL;
+    
+    if (! is_wc())
+	return;
+    
+    new_pim_nbr = compute_rpfp_nbr_wc();    
+    
+    if (is_joined_state())
+	goto joined_state_label;
+    // All other states: just set the new upstream neighbor
+    set_rpfp_nbr_wc(new_pim_nbr);
+    return;
+    
+ joined_state_label:
+    // Joined state
+    old_pim_nbr = rpfp_nbr_wc();
+    if (new_pim_nbr == old_pim_nbr)
+	return;				// Nothing changed
+    
+    // Send Join(*,G) to the new value of RPF'(*,G)
+    if (new_pim_nbr != NULL) {
+	bool new_group_bool = false; // Group together all (*,G) entries
+	my_rp_addr_ptr = rp_addr_ptr();
+	if (my_rp_addr_ptr == NULL) {
+	    XLOG_WARNING("Sending Join(*,G) to new upstream neighbor: "
+			 "RP for group %s: not found",
+			 cstring(group_addr()));
+	} else {
+	    new_pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
+				      IPvX::addr_bitlen(family()),
+				      MRT_ENTRY_WC,
+				      ACTION_JOIN,
+				      new_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				      new_group_bool);
+	}
+	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
+    }
+    
+    // Send Prune(*,G) to the old value of RPF'(*,G)
+    if (old_pim_nbr != NULL) {
+	bool new_group_bool = false; // Group together all (*,G) entries
+	my_rp_addr_ptr = rp_addr_ptr();
+	if (my_rp_addr_ptr == NULL) {
+	    XLOG_WARNING("Sending Prune(*,G) to old upstream neighbor: "
+			 "RP for group %s: not found",
+			 cstring(group_addr()));
+	} else {
+	    old_pim_nbr->jp_entry_add(*my_rp_addr_ptr, group_addr(),
+				      IPvX::addr_bitlen(family()),
+				      MRT_ENTRY_WC,
+				      ACTION_PRUNE,
+				      old_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				      new_group_bool);
+	}
+    }
+    // Set the new RPF'(*,G)
+    set_rpfp_nbr_wc(new_pim_nbr);
+    // Restart the JoinTimer
+    join_timer() =
+	pim_node().eventloop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
 }
 
 //
@@ -1098,72 +1097,13 @@ PimMre::recompute_rpfp_nbr_wc_gen_id_changed()
 }
 
 //
-// The MRIB.next_hop(S) has changed.
+// The current next hop towards the S has changed due to an Assert.
+//
 // Take the appropriate action.
 // Note: applies only for (S,G) entries
 //
 void
-PimMre::recompute_mrib_next_hop_s_changed()
-{
-    PimNbr *old_pim_nbr, *new_pim_nbr;
-    uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
-    
-    if (! is_sg())
-	return;
-    
-    new_pim_nbr = compute_mrib_next_hop_s();
-    
-    if (is_joined_state())
-	goto joined_state_label;
-    // All other states: just set the new MRIB.next_hop(S)
-    set_mrib_next_hop_s(new_pim_nbr);
-    return;
-    
- joined_state_label:
-    // Joined state
-    if (new_pim_nbr == mrib_next_hop_s())
-	return;				// Nothing changed
-    
-    // Send Prune(S,G) to the old value of RPF'(S,G)
-    old_pim_nbr = rpfp_nbr_sg();
-    if (old_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (S,G) entries
-	old_pim_nbr->jp_entry_add(source_addr(), group_addr(),
-				  IPvX::addr_bitlen(family()),
-				  MRT_ENTRY_SG,
-				  ACTION_PRUNE,
-				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
-    }
-    // Set the new MRIB.next_hop(S)
-    set_mrib_next_hop_s(new_pim_nbr);
-    // Send Join(S,G) to the new value of MRIB.next_hop(S)
-    if (new_pim_nbr != NULL) {
-	bool new_group_bool = false; // Group together all (S,G) entries
-	new_pim_nbr->jp_entry_add(source_addr(), group_addr(),
-				  IPvX::addr_bitlen(family()),
-				  MRT_ENTRY_SG,
-				  ACTION_JOIN,
-				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
-				  new_group_bool);
-	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
-    }
-    // Restart the JoinTimer
-    join_timer() =
-	pim_node().eventloop().new_oneoff_after(
-	    TimeVal(join_prune_period, 0),
-	    callback(this, &PimMre::join_timer_timeout));
-}
-
-//
-// The current next hop towards the S has changed.
-// Take the appropriate action.
-// Note: applies only for (S,G) entries
-//
-// TODO: change due to MRIB should call a different function!!
-//
-void
-PimMre::recompute_rpfp_nbr_sg_changed()
+PimMre::recompute_rpfp_nbr_sg_assert_changed()
 {
     PimNbr *old_pim_nbr, *new_pim_nbr;
     PimVif *pim_vif;
@@ -1175,7 +1115,7 @@ PimMre::recompute_rpfp_nbr_sg_changed()
     
     if (is_joined_state())
 	goto joined_state_label;
-    // All other states: just set the new upstream nbr.
+    // All other states: just set the new upstream neighbor
     set_rpfp_nbr_sg(new_pim_nbr);
     return;
     
@@ -1203,6 +1143,65 @@ PimMre::recompute_rpfp_nbr_sg_changed()
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
+}
+
+//
+// The current next hop towards the S has changed not due to an Assert.
+// Take the appropriate action.
+// Note: applies only for (S,G) entries
+//
+void
+PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
+{
+    PimNbr *old_pim_nbr, *new_pim_nbr;
+    uint16_t join_prune_period = PIM_JOIN_PRUNE_PERIOD_DEFAULT;
+    
+    if (! is_sg())
+	return;
+    
+    new_pim_nbr = compute_rpfp_nbr_sg();
+    
+    if (is_joined_state())
+	goto joined_state_label;
+    // All other states: just set the new upstream neighbor
+    set_rpfp_nbr_sg(new_pim_nbr);
+    return;
+    
+ joined_state_label:
+    // Joined state
+    old_pim_nbr = rpfp_nbr_sg();
+    if (new_pim_nbr == old_pim_nbr)
+	return;				// Nothing changed
+    
+    // Send Join(S,G) to the new value of RPF'(S,G)
+    if (new_pim_nbr != NULL) {
+	bool new_group_bool = false; // Group together all (S,G) entries
+	new_pim_nbr->jp_entry_add(source_addr(), group_addr(),
+				  IPvX::addr_bitlen(family()),
+				  MRT_ENTRY_SG,
+				  ACTION_JOIN,
+				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  new_group_bool);
+	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
+    }
+    
+    // Send Prune(S,G) to the old value of RPF'(S,G)
+    if (old_pim_nbr != NULL) {
+	bool new_group_bool = false; // Group together all (S,G) entries
+	old_pim_nbr->jp_entry_add(source_addr(), group_addr(),
+				  IPvX::addr_bitlen(family()),
+				  MRT_ENTRY_SG,
+				  ACTION_PRUNE,
+				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  new_group_bool);
+    }
+    // Set the new RPF'(S,G)
+    set_rpfp_nbr_sg(new_pim_nbr);
+    // Restart the JoinTimer
+    join_timer() =
+	pim_node().eventloop().new_oneoff_after(
+	    TimeVal(join_prune_period, 0),
+	    callback(this, &PimMre::join_timer_timeout));
 }
 
 //
@@ -1263,7 +1262,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     
     if (is_not_pruned_state())
 	goto not_pruned_state_label;
-    // All other states: just set the new upstream nbr.
+    // All other states: just set the new upstream neighbor
     set_rpfp_nbr_sg_rpt(new_pim_nbr);
     return;
     
