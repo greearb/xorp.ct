@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.16 2003/10/17 21:04:06 hodson Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.17 2004/04/06 07:13:06 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -163,9 +163,7 @@ public:
     inline IfMap& ifs() { return _ifs; }
 
     /**
-     * Align config such that only elements present in the config
-     * and a user supplied config are present.  State information is taken
-     * from supplied user config.
+     * Align user supplied configuration with the device configuration.
      *
      * Inside the FEA there may be multiple configuration representations,
      * typically one the user modifies and one that mirrors the hardware.
@@ -175,37 +173,33 @@ public:
      * the user config is restricted to configuration set by the user.
      * The alignment works as follows:
      * - if an item from the local tree is not in the other tree,
-     *   it is deleted in the local tree
+     *   it is marked as deleted in the local tree.
      * - if an item from the local tree is in the other tree,
      *   its state is copied from the other tree to the local tree.
      * - if an item from the other tree is not in the local tree, we do NOT
      *   copy it to the local tree.
      *
-     * @param user_config config to align state with.
-     * @param do_finalize_state if true, and if there are any items in the
-     * aligned config marked for deletion, then remove those items.
-     * More specifically, if true, then @ref IfTree::finalize_state()
-     * will be called at the end.
+     * @param other the configuration tree to align state with.
      * @return modified configuration structure.
      */
-    IfTree& align_with(const IfTree& user_config, bool do_finalize_state);
+    IfTree& align_with(const IfTree& other);
+
+    /**
+     * Prune bogus deleted state.
+     * 
+     * If an item from the local tree is marked as deleted, but is not
+     * in the other tree, then it is removed.
+     * 
+     * @param old_iftree the old tree with the state that is used as reference.
+     * @return the modified configuration tree.
+     */
+    IfTree& prune_bogus_deleted_state(const IfTree& old_iftree);
 
     /**
      * Delete interfaces labelled as ready for deletion, call finalize_state()
      * on remaining interfaces, and set state to NO_CHANGE.
      */
     void finalize_state();
-
-    /**
-     * Walk interfaces, vifs, and addresses and ignore state that is duplicated
-     * in the other tree:
-     * - if an item from the local tree is marked as CREATED or CHANGED,
-     *   and exactly same item is on the other tree, it is marked as NO_CHANGE
-     *
-     * @param o the other tree.
-     * @return return the result local tree.
-     */
-    IfTree& ignore_duplicates(const IfTree& o);
 
     /**
      * @return string representation of IfTree.

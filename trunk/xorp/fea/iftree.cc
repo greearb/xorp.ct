@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.19 2003/10/17 21:04:05 hodson Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.20 2004/04/06 07:13:06 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -263,19 +263,16 @@ IfTree::str() const
 //
 // Walk interfaces, vifs, and addresses and align them with the other tree:
 //  - if an item from the local tree is not in the other tree,
-//     it is deleted in the local tree
+//    it is marked as deleted in the local tree.
 //  - if an item from the local tree is in the other tree,
-//     its state is copied from the other tree to the local tree.
+//    its state is copied from the other tree to the local tree.
 //  - if an item from the other tree is not in the local tree, we do NOT
 //    copy it to the local tree.
-//
-// If do_finalize_state is true, at the end call finalize_state() on the
-// aligned local tree.
 //
 // Return the aligned local tree.
 //
 IfTree&
-IfTree::align_with(const IfTree& o, bool do_finalize_state)
+IfTree::align_with(const IfTree& o)
 {
     IfTree::IfMap::iterator ii;
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
@@ -332,78 +329,89 @@ IfTree::align_with(const IfTree& o, bool do_finalize_state)
 	}
     }
 
-    // Pass over and remove items marked for deletion
-    if (do_finalize_state)
-	finalize_state();
-
     return *this;
 }
 
-//
-// Walk interfaces, vifs, and addresses and ignore state that is duplicated
-// in the other tree:
-//  - if an item from the local tree is marked as CREATED or CHANGED,
-//    and exactly same item is on the other tree, it is marked as
-//    NO_CHANGE
-//
-// Return the result local tree.
-//
+/**
+ * Prune bogus deleted state.
+ * 
+ * If an item from the local tree is marked as deleted, but is not
+ * in the other tree, then it is removed.
+ * 
+ * @param old_iftree the old tree with the state that is used as reference.
+ * @return the modified configuration tree.
+ */
 IfTree&
-IfTree::ignore_duplicates(const IfTree& o)
+IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 {
     IfTree::IfMap::iterator ii;
-    for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
-	IfTreeInterface& i = ii->second;
-	IfTree::IfMap::const_iterator oi = o.get_if(i.ifname());
-
-	if (oi == o.ifs().end())
+    ii = _ifs.begin();
+    while (ii != _ifs.end()) {
+	const string& ifname = ii->second.ifname();
+	if (! ii->second.is_marked(DELETED)) {
+	    ++ii;
 	    continue;
-	if ((i.state() == CREATED) || (i.state() == CHANGED)) {
-	    if (i.is_same_state(oi->second))
-		i.mark(NO_CHANGE);
+	}
+	IfTree::IfMap::const_iterator oi;
+	oi = old_iftree.get_if(ifname);
+	if (oi == old_iftree.ifs().end()) {
+	    // Remove this item from the local tree
+	    _ifs.erase(ii++);
+	    continue;
 	}
 
 	IfTreeInterface::VifMap::iterator vi;
-	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
-	    IfTreeVif& v = vi->second;
-	    IfTreeInterface::VifMap::const_iterator ov
-		= oi->second.get_vif(v.vifname());
-
-	    if (ov == oi->second.vifs().end())
+	vi = ii->second.vifs().begin();
+	while (vi != ii->second.vifs().end()) {
+	    const string& vifname = vi->second.vifname();
+	    if (! vi->second.is_marked(DELETED)) {
+		++vi;
 		continue;
-	    if ((v.state() == CREATED) || (v.state() == CHANGED)) {
-		if (v.is_same_state(ov->second))
-		    v.mark(NO_CHANGE);
+	    }
+	    IfTreeInterface::VifMap::const_iterator ov;
+	    ov = oi->second.get_vif(vifname);
+	    if (ov == oi->second.vifs().end()) {
+		// Remove this item from the local tree
+		ii->second.vifs().erase(vi++);
+		continue;
 	    }
 
 	    IfTreeVif::V4Map::iterator ai4;
-	    for (ai4 = v.v4addrs().begin(); ai4 != v.v4addrs().end(); ++ai4) {
-		IfTreeAddr4& a4 = ai4->second;
-		IfTreeVif::V4Map::const_iterator oa4 =
-		    ov->second.get_addr(a4.addr());
-
-		if (oa4 == ov->second.v4addrs().end())
+	    ai4 = vi->second.v4addrs().begin();
+	    while (ai4 != vi->second.v4addrs().end()) {
+		if (! ai4->second.is_marked(DELETED)) {
+		    ++ai4;
 		    continue;
-		if ((a4.state() == CREATED) || (a4.state() == CHANGED)) {
-		    if (a4.is_same_state(oa4->second))
-			a4.mark(NO_CHANGE);
 		}
+		IfTreeVif::V4Map::const_iterator oa4;
+		oa4 = ov->second.get_addr(ai4->second.addr());
+		if (oa4 == ov->second.v4addrs().end()) {
+		    // Remove this item from the local tree
+		    vi->second.v4addrs().erase(ai4++);
+		    continue;
+		}
+		++ai4;
 	    }
 
 	    IfTreeVif::V6Map::iterator ai6;
-	    for (ai6 = v.v6addrs().begin(); ai6 != v.v6addrs().end(); ++ai6) {
-		IfTreeAddr6& a6 = ai6->second;
-		IfTreeVif::V6Map::const_iterator oa6 =
-		    ov->second.get_addr(a6.addr());
-
-		if (oa6 == ov->second.v6addrs().end())
+	    ai6 = vi->second.v6addrs().begin();
+	    while (ai6 != vi->second.v6addrs().end()) {
+		if (! ai6->second.is_marked(DELETED)) {
+		    ++ai6;
 		    continue;
-		if ((a6.state() == CREATED) || (a6.state() == CHANGED)) {
-		    if (a6.is_same_state(oa6->second))
-			a6.mark(NO_CHANGE);
 		}
+		IfTreeVif::V6Map::const_iterator oa6;
+		oa6 = ov->second.get_addr(ai6->second.addr());
+		if (oa6 == ov->second.v6addrs().end()) {
+		    // Remove this item from the local tree
+		    vi->second.v6addrs().erase(ai6++);
+		    continue;
+		}
+		++ai6;
 	    }
+	    ++vi;
 	}
+	++ii;
     }
 
     return *this;
