@@ -12,13 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.31 2003/11/04 02:27:19 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.32 2003/11/19 00:48:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
-
-// XXX - As soon as this works remove the define and make the code unconditonal
-#define FLOW_CONTROL
 
 // Give every XRL in flight the opportunity to timeout
 #define MAX_ERR_RETRIES FLYING_LIMIT
@@ -272,12 +269,10 @@ RibIpcHandler::push_packet()
 {
     debug_msg("RibIpcHandler::push packet\n");
 
-#ifdef	FLOW_CONTROL
     if(_v4_queue.busy() || _v6_queue.busy()) {
 	debug_msg("busy\n");
 	return PEER_OUTPUT_BUSY;
     }
-#endif
 
     debug_msg("not busy\n");
 
@@ -437,10 +432,8 @@ XrlQueue<A>::sendit()
 	    return;
 
 	if(_xrl_queue.empty()) {
-#ifdef	FLOW_CONTROL
 	    debug_msg("Output no longer busy\n");
 	    _rib_ipc_handler->output_no_longer_busy();
-#endif	
 	    return;
 	}
 
