@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.9 2004/06/07 18:16:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.10 2004/06/09 22:12:25 pavlin Exp $ */
 
 protocols {
     static {
@@ -58,6 +58,7 @@ protocols {
 	    %mandatory:	nexthop;
 
 	    %activate:	xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)";
 
 	    nexthop {
@@ -77,6 +78,7 @@ protocols {
 	    %mandatory:	nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)";
 
 	    nexthop {
@@ -96,6 +98,7 @@ protocols {
 	    %mandatory:	nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)";
 
 	    nexthop {
@@ -115,6 +118,7 @@ protocols {
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)";
 
 	    nexthop {
