@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.24 2003/08/27 23:50:22 jcardona Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.25 2003/08/27 23:53:41 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -21,10 +21,21 @@ Release 0.4 (2003/??/??)
     - 
 
   RTRMGR:
-    - 
+    - Now all relative paths to templates, xrl files, configuration
+      files, etc are computed relative to the root of the XORP tree.
+      The root is computed in the following order:
+      1. The shell environment XORP_ROOT (if exists).
+      2. The parent directory the rtrmgr is run from
+         (only if it contains the etc/templates and the xrl/targets
+         directories).
+      3. The XORP_ROOT value as defined in config.h (currently this is
+         the installation directory, and it defaults to /usr/local/xorp).
 
   XORPSH:
-    - 
+    - Now all relative paths to executable commands are computed
+      relative to the root of the XORP tree. The root is computed
+      similar to the rtrmgr root (see above), except that in step (2)
+      we consider the parent directory the xorpsh is run instead.
 
   FEA/MFEA:
     - Bug fix: if the multicast protocol to start/stop is PIM, then start/stop
@@ -73,7 +84,7 @@ Release 0.4 (2003/??/??)
       'j' scroll down one line, while 'k' scroll up one line.
 
   SNMP:
-    - Full implementation of BGP4-MIB module (RFC 1657) including traps
+    - Full implementation of BGP4-MIB module (RFC 1657) including traps.
 
   RIP:
     - 
