@@ -301,7 +301,7 @@ private:
     CliCommand *command_find(const string& token);
     CliCommand *multi_command_find(const string& command_line);
     
-    bool find_command_help(const string& command_line, string& ret_string);
+    bool find_command_help(const char *line, int word_end, string& ret_string);
     bool allow_cd() { return (_allow_cd); }
     
     

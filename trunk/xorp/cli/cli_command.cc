@@ -599,16 +599,18 @@ CliCommand::is_same_command(const string& token)
 }
 
 bool
-CliCommand::find_command_help(const string& command_line, string& ret_string)
+CliCommand::find_command_help(const char *line, int word_end,
+			      string& ret_string)
 {
     string token, token_line;
     bool ret_bool = false;
     bool no_space_at_end_bool;
     
-    if (command_line.empty())
-	return (false);
+    if ((line == NULL) || (word_end < 0)) {
+        return (false);
+    }
     
-    token_line = command_line;
+    token_line = string(line, word_end);
     token = pop_token(token_line);
     if (! is_same_prefix(token))
 	return (false);
@@ -647,14 +649,18 @@ CliCommand::find_command_help(const string& command_line, string& ret_string)
 	 ++iter) {
 	CliCommand *cli_command = *iter;
 	string tmp_token_line = copy_token(token) + token_line;
-	ret_bool |= cli_command->find_command_help(tmp_token_line, ret_string);
+	ret_bool |= cli_command->find_command_help(tmp_token_line.c_str(),
+						   tmp_token_line.length(),
+						   ret_string);
     }
     
     if (can_pipe() && (cli_command_pipe() != NULL)) {
 	// Add the pipe completions
 	string tmp_token_line = copy_token(token) + token_line;
-	ret_bool |= cli_command_pipe()->find_command_help(tmp_token_line,
-							  ret_string);
+	ret_bool |= cli_command_pipe()->find_command_help(
+	    tmp_token_line.c_str(),
+	    tmp_token_line.length(),
+	    ret_string);
     }
     
     return (ret_bool);

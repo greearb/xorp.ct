@@ -1028,18 +1028,17 @@ CliClient::command_line_help(const char *line, int word_end)
 {
     CliCommand *curr_cli_command = _current_cli_command;
     string command_help_string = "";
-    string command_line = string(line, word_end);
     bool found_bool = false;
     
     word_end--;			// XXX: exclude the '?' character
     cli_print("\nPossible completions:\n");
-    
+
     list<CliCommand *>::iterator iter;
     for (iter = curr_cli_command->child_command_list().begin();
 	 iter != curr_cli_command->child_command_list().end();
 	 ++iter) {
 	CliCommand *tmp_cli_command = *iter;
-	if (tmp_cli_command->find_command_help(command_line,
+	if (tmp_cli_command->find_command_help(line, word_end,
 					       command_help_string))
 	    found_bool = true;
     }
