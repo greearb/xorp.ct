@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.13 2004/06/10 22:40:32 hodson Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.14 2004/08/14 05:58:48 mjh Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -113,14 +113,15 @@ public:
     /**
      * @return the neighbours BGP ID as an integer for use by decision.
      */
-    virtual const IPv4& id() const		{ return _peer->peerdata()->id(); }
+    virtual const IPv4& id() const { return _peer->peerdata()->id(); }
 
     /**
-     * @return the neighbours IP address an as integer for use be
+     * @return the neighbours IP address an as integer for use by
      * decision.
      */
     uint32_t neighbour_address() const	{
-	return ntohl(_peer->peerdata()->iptuple().get_peer_addr().s_addr);
+	//return ntohl(_peer->peerdata()->iptuple().get_peer_addr().s_addr);
+	return id().addr();
     }
 
     const IPv4& my_v4_nexthop() const	{
