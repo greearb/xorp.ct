@@ -21,7 +21,6 @@
 #include <map>
 
 #include "libxorp/ref_ptr.hh"
-#include "libxorp/trie.hh"
 #include "route_entry.hh"
 
 class EventLoop;
