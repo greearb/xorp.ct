@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.50 2005/02/28 20:02:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.51 2005/03/03 18:50:31 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -727,8 +727,9 @@ RIB<A>::add_route(const string&		tablename,
     if (protocol->protocol_type() == IGP) {
 	// TODO: shouldn't the check apply for all protocols?
 	if (metric > 0xffff) {
-	    XLOG_WARNING("IGP metric value %u is greater than 0xffff",
-			 XORP_UINT_CAST(metric));
+	    XLOG_WARNING("IGP metric value %u is greater than 0xffff from "
+			 "table \"%s\"",  XORP_UINT_CAST(metric),
+			 tablename.c_str());
 	    metric &= 0xffff;
 	}
     }
