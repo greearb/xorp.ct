@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.25 2004/07/09 06:52:17 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.26 2004/07/09 06:53:59 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -344,6 +344,12 @@ the login shell is csh or tcsh):
 2900.	TASK: Send an anouncement email to xorp-announce@xorp.org
 	      and/or xorp-users@xorp.org about the new release 
 	WHO:  XORP project leader
+	WHEN: Right after the release
+
+========================================================================
+2950.	TASK: Update the FreshMeat XORP entry:
+               http://freshmeat.net/projects/xorp/
+	WHO:  Release manager
 	WHEN: Right after the release
 
 ========================================================================
