@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.16 2003/06/23 18:56:55 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.17 2003/07/15 00:46:49 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -225,12 +225,16 @@ public:
     ConfigParam<uint16_t>& hello_triggered_delay() { return (_hello_triggered_delay); }
     ConfigParam<uint16_t>& hello_period() { return (_hello_period); }
     ConfigParam<uint16_t>& hello_holdtime() { return (_hello_holdtime); }
-    ConfigParam<uint32_t>& genid() { return (_genid); }
     ConfigParam<uint32_t>& dr_priority() { return (_dr_priority); }
     ConfigParam<uint16_t>& lan_delay() { return (_lan_delay); }
     ConfigParam<uint16_t>& override_interval() { return (_override_interval); }
     ConfigParam<bool>& is_tracking_support_disabled() { return (_is_tracking_support_disabled); }
     ConfigParam<bool>& accept_nohello_neighbors() { return (_accept_nohello_neighbors); }
+    
+    //
+    // Hello-related non-configurable parameters
+    //
+    ConfigParam<uint32_t>& genid() { return (_genid); }
     
     //
     // Join/Prune-related configuration parameters
@@ -315,7 +319,7 @@ private:
     void	hello_once_timer_timeout();
     
     //
-    // Callbacks for configuration parameters
+    // Callbacks for configuration and non-configurable parameters
     //
     void	set_hello_period_callback(uint16_t v) {
 	uint16_t old_hello_holdtime_divided
@@ -332,10 +336,6 @@ private:
 	    _hello_period.set(new_hello_period);
 	_pim_nbr_me.set_hello_holdtime(_hello_holdtime.get());
     }
-    void	set_genid_callback(uint32_t v) {
-	_pim_nbr_me.set_genid(v);
-	_pim_nbr_me.set_is_genid_present(true);
-    }
     void	set_dr_priority_callback(uint32_t v) {
 	_pim_nbr_me.set_dr_priority(v);
 	_pim_nbr_me.set_is_dr_priority_present(true);
@@ -350,6 +350,10 @@ private:
     }
     void	set_is_tracking_support_disabled_callback(bool v) {
 	_pim_nbr_me.set_is_tracking_support_disabled(v);
+    }
+    void	set_genid_callback(uint32_t v) {
+	_pim_nbr_me.set_genid(v);
+	_pim_nbr_me.set_is_genid_present(true);
     }
     void	set_join_prune_period_callback(uint16_t v) {
 	_join_prune_holdtime.set(
@@ -402,7 +406,6 @@ private:
     ConfigParam<uint16_t> _hello_triggered_delay; // The Triggered_Hello_Delay
     ConfigParam<uint16_t> _hello_period;	// The Hello_Period
     ConfigParam<uint16_t> _hello_holdtime;	// The Hello_Holdtime
-    ConfigParam<uint32_t> _genid;		// The Generation ID
     ConfigParam<uint32_t> _dr_priority;		// The DR Priority
     ConfigParam<uint16_t> _lan_delay;		// The LAN Delay
     ConfigParam<uint16_t> _override_interval;	// The Override_Interval
@@ -410,6 +413,11 @@ private:
     ConfigParam<bool>	  _accept_nohello_neighbors; // If true, accept
 						// neighbors that didn't send
 						// a Hello message first
+    
+    //
+    // Hello-related non-configurable parameters
+    //
+    ConfigParam<uint32_t> _genid;		// The Generation ID
     
     //
     // Join/Prune-related configuration parameters

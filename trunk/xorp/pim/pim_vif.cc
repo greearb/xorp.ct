@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.16 2003/07/03 07:20:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.17 2003/07/15 00:46:50 pavlin Exp $"
 
 
 //
@@ -67,8 +67,6 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
 		    callback(this, &PimVif::set_hello_period_callback)),
       _hello_holdtime(PIM_HELLO_HELLO_HOLDTIME_DEFAULT,
 		      callback(this, &PimVif::set_hello_holdtime_callback)),
-      _genid(RANDOM(0xffffffffU),
-	     callback(this, &PimVif::set_genid_callback)),
       _dr_priority(PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT,
 		   callback(this, &PimVif::set_dr_priority_callback)),
       _lan_delay(LAN_DELAY_MSEC_DEFAULT,
@@ -80,6 +78,8 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
 				    callback(this,
 					     &PimVif::set_is_tracking_support_disabled_callback)),
       _accept_nohello_neighbors(false),
+      _genid(RANDOM(0xffffffffU),
+	     callback(this, &PimVif::set_genid_callback)),
       _join_prune_period(PIM_JOIN_PRUNE_PERIOD_DEFAULT,
 			 callback(this,
 				  &PimVif::set_join_prune_period_callback)),
@@ -136,16 +136,18 @@ PimVif::set_default_config()
     // Protocol version
     set_proto_version(proto_version_default());
     
-    // Hello-related parameters
+    // Hello-related configurable parameters
     hello_triggered_delay().reset();
     hello_period().reset();
     hello_holdtime().reset();
-    genid().set(RANDOM(0xffffffffU));
     dr_priority().reset();
     lan_delay().reset();
     override_interval().reset();
     is_tracking_support_disabled().reset();
     accept_nohello_neighbors().reset();
+    
+    // Hello-related non-configurable parameters
+    genid().set(RANDOM(0xffffffffU));
     
     // Join/Prune-related parameters
     _join_prune_period.reset();
