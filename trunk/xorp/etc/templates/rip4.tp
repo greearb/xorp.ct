@@ -13,9 +13,8 @@ protocols
 	    {
 		address @: ipv4
 		{
-		    enabled:			bool	= false ;
 		    cost:			uint	=   1;
-		    horizon:			text	= "split-horizon-poison-reverse";	/* XXX TODO constrain horizon to allowed values */
+		    horizon:			text    = "split-horizon-poison-reverse" ;
 		    route_expiry_secs:		uint	= 180 ;
 		    route_deletion_secs:	uint	= 120 ;
 		    triggered_update_min_secs:	uint	=   1 ;
@@ -24,6 +23,7 @@ protocols
 		    table_announce_max_secs:	uint	=  35 ;
 		    table_request_secs:		uint    =   1 ;
 		    interpacket_delay_msecs:	uint	=  50 ;
+		    enabled:			bool	= false ;
 		}
 	    }
 	}
@@ -56,6 +56,7 @@ protocols
 			%get: xrl "$(rip4.targetname)/rip4/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->cost:u32" ;
 		    }
 		    horizon {
+			%allow: $(@) "none" "split-horizon" "split-horizon-poison-reverse" ;
 			%set: xrl "$(rip4.targetname)/rip4/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&horizon:txt=$(@)" ;
 			%get: xrl "$(rip4.targetname)/rip4/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->horizon:txt" ;
 		    }
