@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2004 International Computer Science Institute
+// Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.5 2004/10/04 17:55:05 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.6 2004/10/04 18:38:32 pavlin Exp $"
 
 #include "bgp_module.h"
 

@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2004 International Computer Science Institute
+ * Copyright (c) 2001-2005 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.10 2004/06/10 22:41:33 hodson Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.11 2005/03/22 04:29:57 pavlin Exp $
  */
 
 

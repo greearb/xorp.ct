@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2004 International Computer Science Institute
+// Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.38 2004/12/18 03:48:52 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.39 2005/01/26 02:45:33 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 

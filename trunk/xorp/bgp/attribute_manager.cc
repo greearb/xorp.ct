@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2004 International Computer Science Institute
+// Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.7 2004/11/03 22:30:02 pavlin Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.8 2005/03/03 07:29:23 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"

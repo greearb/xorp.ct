@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2004 International Computer Science Institute
+// Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.2 2004/12/18 03:40:30 atanu Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.3 2005/03/03 07:45:04 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"

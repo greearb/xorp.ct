@@ -114,7 +114,7 @@ def output_header(args, dbg):
     from time import time, localtime, strftime
     print \
 """/*
- * Copyright (c) 2001-2004 International Computer Science Institute
+ * Copyright (c) 2001-2005 International Computer Science Institute
  * See LICENSE file for licensing, conditions, and warranties on use.
  *
  * This file is PROGRAMMATICALLY GENERATED.

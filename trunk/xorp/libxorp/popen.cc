@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-/* Copyright (c) 2001-2004 International Computer Science Institute
+/* Copyright (c) 2001-2005 International Computer Science Institute
  *
  *
  * This code is derived from the FreeBSD popen, which carried the following 
@@ -23,7 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.8 2004/06/12 00:29:11 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.1 2004/11/16 05:41:05 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/wait.h>

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2004 International Computer Science Institute
+// Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.11 2004/03/27 20:46:22 pavlin Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.12 2004/06/10 22:41:25 hodson Exp $
 
 #ifndef __MIBS_XORPEVENTS_HH__
 #define __MIBS_XORPEVENTS_HH__
