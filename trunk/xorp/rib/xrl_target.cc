@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.40 2004/09/17 14:00:05 abittau Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.41 2004/09/18 02:05:53 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -321,14 +321,18 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
 	!= XORP_OK) {
-	string err = "Could not add IPv4 route to unicast RIB";
+	string err = c_format("Could not add IPv4 route "
+			      "net %s, nexthop: %s to unicast RIB",
+			      network.str().c_str(), nexthop.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
     if (multicast &&
 	_mrib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
 	!= XORP_OK) {
-	string err = "Could not add IPv4 route to multicast RIB";
+	string err = c_format("Could not add IPv4 route "
+			      "net %s, nexthop: %s to multiast RIB",
+			      network.str().c_str(), nexthop.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -348,7 +352,9 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
 			 policytags)
 	!= XORP_OK) {
-	string err = "Could not add IPv6 route to unicast RIB";
+	string err = c_format("Could not add IPv6 route "
+			      "net %s, nexthop: %s to unicast RIB",
+			      network.str().c_str(), nexthop.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -356,7 +362,9 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 	_mrib6.add_route(protocol, network, nexthop, "", "", metric,
 			 policytags)
 	!= XORP_OK) {
-	string err = "Could not add IPv6 route to multicast RIB";
+	string err = c_format("Could not add IPv6 route "
+			      "net %s, nexthop: %s to multicast RIB",
+			      network.str().c_str(), nexthop.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
