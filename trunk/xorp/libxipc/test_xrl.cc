@@ -106,9 +106,9 @@ run_test()
 
 		x.args().add(tests[i].arg);
 		x.args().add(tests[j].arg);
-		s = x.str().c_str();
+		string srep = x.str();
 
-		Xrl sx(s);
+		Xrl sx(srep.c_str());
 		string nom = string(tests[i].testname) + string(" + ") +
 		    string(tests[j].testname);
 		failure = xrl_test(nom.c_str(), x, sx);
