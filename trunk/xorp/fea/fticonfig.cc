@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.15 2004/03/24 23:26:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.16 2004/03/24 23:34:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -83,18 +83,7 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
 
 FtiConfig::~FtiConfig()
 {
-    string error_msg;
-    
     stop();
-    
-    //
-    // Restore the old state in the underlying system
-    //
-    set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4, error_msg);
-#ifdef HAVE_IPV6
-    set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6, error_msg);
-    set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg);
-#endif // HAVE_IPV6
 }
 
 int
@@ -194,6 +183,8 @@ FtiConfig::start()
 int
 FtiConfig::stop()
 {
+    string error_msg;
+
     int ret_value = XORP_OK;
     
     if (_ftic_table_observer != NULL) {
@@ -220,6 +211,23 @@ FtiConfig::stop()
 	if (_ftic_entry_get->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
+
+    //
+    // Restore the old state in the underlying system
+    //
+    if (set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
+					error_msg) < 0) {
+	ret_value = XORP_ERROR;
+    }
+#ifdef HAVE_IPV6
+    if (set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
+					error_msg) < 0) {
+	ret_value = XORP_ERROR;
+    }
+    if (set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
+	ret_value = XORP_ERROR;
+    }
+#endif // HAVE_IPV6
     
     return (ret_value);
 }
