@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.2 2002/12/16 03:08:22 mjh Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.3 2002/12/16 22:39:20 atanu Exp $
 #
 
 #
@@ -462,11 +462,11 @@ test5()
 
     coord peer3 assert established
 
-    LONG_AS_PATH="1,2,3,4,5"
+    LONG_AS_PATH="$PEER1_AS,1,2,3,4,5"
 
     PACKET_A="packet update
 	origin 2
-	aspath 1
+	aspath $PEER1_AS
 	nexthop $NH1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
@@ -484,7 +484,7 @@ test5()
     coord peer1 trie sent lookup 10.10.10.0/24 \
 	aspath $LONG_AS_PATH
     coord peer2 trie recv lookup 10.10.10.0/24 \
-	aspath "65008,$LONG_AS_PATH"
+	aspath "$AS,$LONG_AS_PATH"
     coord peer3 trie recv lookup 10.10.10.0/24 \
 	aspath $LONG_AS_PATH 
 
@@ -492,11 +492,11 @@ test5()
 
     sleep 2
     coord peer1 trie sent lookup 10.10.10.0/24 \
-	aspath "1"
+	aspath "$PEER1_AS"
     coord peer2 trie recv lookup 10.10.10.0/24 \
-	aspath "65008,1"
+	aspath "$AS,$PEER1_AS"
     coord peer3 trie recv lookup 10.10.10.0/24 \
-	aspath "1" 
+	aspath "$PEER1_AS" 
 
 # At the end of the test we expect all the peerings to still be established.
     coord peer1 assert established
@@ -576,8 +576,8 @@ test6()
     coord peer3 assert established
 }
 
-TESTS_NOT_FIXED='test5 test4'
-TESTS='test1 test2 test3 test6'
+TESTS_NOT_FIXED=''
+TESTS='test1 test2 test3 test4 test5 test6'
 RIB="rib"
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
