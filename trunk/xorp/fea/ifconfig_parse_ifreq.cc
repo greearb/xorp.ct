@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.15 2003/09/30 18:27:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.16 2003/10/02 16:55:58 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -228,6 +228,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	} else {
 	    flags = ifrcopy.ifr_flags;
 	}
+	fi.set_if_flags(flags);
 	fi.set_enabled(flags & IFF_UP);
 	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
 	

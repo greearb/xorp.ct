@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.13 2003/09/30 18:27:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.14 2003/10/02 16:55:58 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -181,7 +181,13 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    XLOG_FATAL("Could not find IfTreeInterface named %s",
 		       if_name.c_str());
 	}
-	fi->set_enabled(ifm->ifm_flags & IFF_UP);
+
+	//
+	// Get the flags
+	//
+	int flags = ifm->ifm_flags;
+	fi->set_if_flags(flags);
+	fi->set_enabled(flags & IFF_UP);
 	debug_msg("enabled: %s\n", fi->enabled() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
@@ -199,11 +205,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	//
 	// Set the vif flags
 	//
-	fv->set_enabled(fi->enabled() && (ifm->ifm_flags & IFF_UP));
-	fv->set_broadcast(ifm->ifm_flags & IFF_BROADCAST);
-	fv->set_loopback(ifm->ifm_flags & IFF_LOOPBACK);
-	fv->set_point_to_point(ifm->ifm_flags & IFF_POINTOPOINT);
-	fv->set_multicast(ifm->ifm_flags & IFF_MULTICAST);
+	fv->set_enabled(fi->enabled() && (flags & IFF_UP));
+	fv->set_broadcast(flags & IFF_BROADCAST);
+	fv->set_loopback(flags & IFF_LOOPBACK);
+	fv->set_point_to_point(flags & IFF_POINTOPOINT);
+	fv->set_multicast(flags & IFF_MULTICAST);
 	debug_msg("vif enabled: %s\n", fv->enabled() ? "true" : "false");
 	debug_msg("vif broadcast: %s\n", fv->broadcast() ? "true" : "false");
 	debug_msg("vif loopback: %s\n", fv->loopback() ? "true" : "false");
@@ -349,6 +355,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     // Get the flags
     //
     int flags = ifm->ifm_flags;
+    fi.set_if_flags(flags);
     fi.set_enabled(flags & IFF_UP);
     debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
     
@@ -364,11 +371,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     //
     // Set the vif flags
     //
-    fv.set_enabled(fi.enabled() && (ifm->ifm_flags & IFF_UP));
-    fv.set_broadcast(ifm->ifm_flags & IFF_BROADCAST);
-    fv.set_loopback(ifm->ifm_flags & IFF_LOOPBACK);
-    fv.set_point_to_point(ifm->ifm_flags & IFF_POINTOPOINT);
-    fv.set_multicast(ifm->ifm_flags & IFF_MULTICAST);
+    fv.set_enabled(fi.enabled() && (flags & IFF_UP));
+    fv.set_broadcast(flags & IFF_BROADCAST);
+    fv.set_loopback(flags & IFF_LOOPBACK);
+    fv.set_point_to_point(flags & IFF_POINTOPOINT);
+    fv.set_multicast(flags & IFF_MULTICAST);
     debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
     debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
     debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");

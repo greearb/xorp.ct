@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.7 2003/09/30 18:27:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.8 2003/10/02 16:52:37 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -397,6 +397,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	} else {
 	    flags = ifreq.ifr_flags;
 	}
+	fi.set_if_flags(flags);
 	fi.set_enabled(flags & IFF_UP);
 	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
 	
