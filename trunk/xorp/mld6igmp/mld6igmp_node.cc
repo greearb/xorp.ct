@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.34 2005/02/12 08:09:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.35 2005/02/17 01:03:36 pavlin Exp $"
 
 
 //
@@ -149,7 +149,6 @@ Mld6igmpNode::start()
     //
     // Update the node status
     //
-    // TODO: XXX: PAVPAVPAV: remove it?
     update_status();
 
     return (XORP_OK);
@@ -230,11 +229,6 @@ Mld6igmpNode::stop()
 	return (XORP_ERROR);
 
     //
-    // De-register with the MFEA
-    //
-    mfea_register_shutdown();
-
-    //
     // Set the node status
     //
     ProtoNode<Mld6igmpVif>::set_node_status(PROC_SHUTDOWN);
@@ -263,6 +257,11 @@ Mld6igmpNode::final_stop()
 
     if (ProtoNode<Mld6igmpVif>::stop() < 0)
 	return (XORP_ERROR);
+
+    //
+    // De-register with the MFEA
+    //
+    mfea_register_shutdown();
 
     return (XORP_OK);
 }
