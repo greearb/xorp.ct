@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.31 2004/05/15 23:58:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.32 2004/05/18 22:15:17 pavlin Exp $"
 
 
 //
@@ -292,7 +292,7 @@ MfeaNode::final_stop()
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 
-    if (ProtoUnit::stop() < 0)
+    if (ProtoNode<MfeaVif>::stop() < 0)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -372,11 +372,6 @@ MfeaNode::status_change(ServiceBase*  service,
 	return;
     }
 
-    //
-    // TODO: XXX: PAVPAVPAV: a hack to update the node status
-    // as a work-around for a race condition within the rtrmgr
-    // whenever the set of interfaces is configured on startup.
-    // 
     if (service == ifmgr_mirror_service_base()) {
 	if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
 	    MfeaNode::decr_shutdown_requests_n();
@@ -391,6 +386,8 @@ MfeaNode::tree_complete()
     // XXX: we use same actions when the tree is completed or updates are made
     //
     updates_made();
+
+    decr_startup_requests_n();
 }
 
 void
@@ -666,11 +663,6 @@ MfeaNode::updates_made()
     
     // Done
     set_config_all_vifs_done(error_msg);
-
-    if ((ProtoNode<MfeaVif>::node_status() == PROC_STARTUP)
-	&& maxvifs() > 0) {
-	decr_startup_requests_n();
-    }
 }
 
 /**
