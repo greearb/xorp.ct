@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.4 2004/03/15 23:36:31 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.5 2004/03/18 13:11:26 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -418,7 +418,8 @@ XrlStaticRoutesNode::static_routes_0_1_add_route4(
     string error_msg;
 
     if (StaticRoutesNode::add_route4(unicast, multicast, network, nexthop,
-				     metric, error_msg) != XORP_OK) {
+				     "", "", metric, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -437,7 +438,8 @@ XrlStaticRoutesNode::static_routes_0_1_add_route6(
     string error_msg;
 
     if (StaticRoutesNode::add_route6(unicast, multicast, network, nexthop,
-				     metric, error_msg) != XORP_OK) {
+				     "", "", metric, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -457,7 +459,8 @@ XrlStaticRoutesNode::static_routes_0_1_replace_route4(
     string error_msg;
 
     if (StaticRoutesNode::replace_route4(unicast, multicast, network, nexthop,
-					 metric, error_msg) != XORP_OK) {
+					 "", "", metric, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -476,7 +479,8 @@ XrlStaticRoutesNode::static_routes_0_1_replace_route6(
     string error_msg;
 
     if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
-					 metric, error_msg) != XORP_OK) {
+					 "", "", metric, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -492,8 +496,8 @@ XrlStaticRoutesNode::static_routes_0_1_delete_route4(
 {
     string error_msg;
 
-    if (StaticRoutesNode::delete_route4(unicast, multicast, network,
-					error_msg) != XORP_OK) {
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -509,8 +513,120 @@ XrlStaticRoutesNode::static_routes_0_1_delete_route6(
 {
     string error_msg;
 
-    if (StaticRoutesNode::delete_route6(unicast, multicast, network,
-					error_msg) != XORP_OK) {
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Add/replace a static route by explicitly specifying the network
+ *  interface toward the destination.
+ *
+ *  @param unicast if true, then the route would be used for unicast
+ *  routing.
+ *
+ *  @param multicast if true, then the route would be used in the MRIB
+ *  (Multicast Routing Information Base) for multicast purpose (e.g.,
+ *  computing the Reverse-Path Forwarding information).
+ *
+ *  @param network the network address prefix this route applies to.
+ *
+ *  @param nexthop the address of the next-hop router for this route.
+ *
+ *  @param ifname of the name of the physical interface toward the
+ *  destination.
+ *
+ *  @param vifname of the name of the virtual interface toward the
+ *  destination.
+ *
+ *  @param metric the metric distance for this route.
+ */
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_add_interface_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    string error_msg;
+
+    if (StaticRoutesNode::add_route4(unicast, multicast, network, nexthop,
+				     ifname, vifname, metric, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_add_interface_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    string error_msg;
+
+    if (StaticRoutesNode::add_route6(unicast, multicast, network, nexthop,
+				     ifname, vifname, metric, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_replace_interface_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    string error_msg;
+
+    if (StaticRoutesNode::replace_route4(unicast, multicast, network, nexthop,
+					 ifname, vifname, metric, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_replace_interface_route6(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric)
+{
+
+    string error_msg;
+
+    if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
+					 ifname, vifname, metric, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -573,51 +689,107 @@ XrlStaticRoutesNode::send_rib_route_change()
     //
     if (static_route.is_add_route()) {
 	if (static_route.is_ipv4()) {
-	    success = _xrl_rib_client.send_add_route4(
-		_rib_target.c_str(),
-		StaticRoutesNode::protocol_name(),
-		static_route.unicast(),
-		static_route.multicast(),
-		static_route.network().get_ipv4net(),
-		static_route.nexthop().get_ipv4(),
-		static_route.metric(),
-		callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    if (static_route.is_interface_route()) {
+		success = _xrl_rib_client.send_add_interface_route4(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv4net(),
+		    static_route.nexthop().get_ipv4(),
+		    static_route.ifname(),
+		    static_route.vifname(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_add_route4(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv4net(),
+		    static_route.nexthop().get_ipv4(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    }
 	}
 	if (static_route.is_ipv6()) {
-	    success = _xrl_rib_client.send_add_route6(
-		_rib_target.c_str(),
-		StaticRoutesNode::protocol_name(),
-		static_route.unicast(),
-		static_route.multicast(),
-		static_route.network().get_ipv6net(),
-		static_route.nexthop().get_ipv6(),
-		static_route.metric(),
-		callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    if (static_route.is_interface_route()) {
+		success = _xrl_rib_client.send_add_interface_route6(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv6net(),
+		    static_route.nexthop().get_ipv6(),
+		    static_route.ifname(),
+		    static_route.vifname(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_add_route6(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv6net(),
+		    static_route.nexthop().get_ipv6(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    }
 	}
     }
 
     if (static_route.is_replace_route()) {
 	if (static_route.is_ipv4()) {
-	    success = _xrl_rib_client.send_replace_route4(
-		_rib_target.c_str(),
-		StaticRoutesNode::protocol_name(),
-		static_route.unicast(),
-		static_route.multicast(),
-		static_route.network().get_ipv4net(),
-		static_route.nexthop().get_ipv4(),
-		static_route.metric(),
-		callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    if (static_route.is_interface_route()) {
+		success = _xrl_rib_client.send_replace_interface_route4(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv4net(),
+		    static_route.nexthop().get_ipv4(),
+		    static_route.ifname(),
+		    static_route.vifname(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_replace_route4(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv4net(),
+		    static_route.nexthop().get_ipv4(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    }
 	}
 	if (static_route.is_ipv6()) {
-	    success = _xrl_rib_client.send_replace_route6(
-		_rib_target.c_str(),
-		StaticRoutesNode::protocol_name(),
-		static_route.unicast(),
-		static_route.multicast(),
-		static_route.network().get_ipv6net(),
-		static_route.nexthop().get_ipv6(),
-		static_route.metric(),
-		callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    if (static_route.is_interface_route()) {
+		success = _xrl_rib_client.send_replace_interface_route6(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv6net(),
+		    static_route.nexthop().get_ipv6(),
+		    static_route.ifname(),
+		    static_route.vifname(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    } else {
+		success = _xrl_rib_client.send_replace_route6(
+		    _rib_target.c_str(),
+		    StaticRoutesNode::protocol_name(),
+		    static_route.unicast(),
+		    static_route.multicast(),
+		    static_route.network().get_ipv6net(),
+		    static_route.nexthop().get_ipv6(),
+		    static_route.metric(),
+		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+	    }
 	}
     }
 

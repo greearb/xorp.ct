@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.1 2004/02/12 20:11:26 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.2 2004/02/17 22:57:12 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -160,6 +160,69 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv6Net&	network);
+
+    /**
+     *  Add/replace a static route by explicitly specifying the network
+     *  interface toward the destination.
+     *
+     *  @param unicast if true, then the route would be used for unicast
+     *  routing.
+     *
+     *  @param multicast if true, then the route would be used in the MRIB
+     *  (Multicast Routing Information Base) for multicast purpose (e.g.,
+     *  computing the Reverse-Path Forwarding information).
+     *
+     *  @param network the network address prefix this route applies to.
+     *
+     *  @param nexthop the address of the next-hop router for this route.
+     *
+     *  @param ifname of the name of the physical interface toward the
+     *  destination.
+     *
+     *  @param vifname of the name of the virtual interface toward the
+     *  destination.
+     *
+     *  @param metric the metric distance for this route.
+     */
+    XrlCmdError static_routes_0_1_add_interface_route4(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv4Net&	network,
+	const IPv4&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric);
+
+    XrlCmdError static_routes_0_1_add_interface_route6(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric);
+
+    XrlCmdError static_routes_0_1_replace_interface_route4(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv4Net&	network,
+	const IPv4&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric);
+
+    XrlCmdError static_routes_0_1_replace_interface_route6(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric);
 
     /**
      *  Enable/disable the StaticRoutes trace log for all operations.
