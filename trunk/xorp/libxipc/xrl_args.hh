@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.6 2003/06/19 00:44:43 hodson Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.7 2003/10/18 05:22:45 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -255,11 +255,39 @@ public:
 
     inline void clear()				{ _args.clear(); }
     inline bool empty()				{ return _args.empty(); }
+    inline void swap(XrlArgs& xa)		{ _args.swap(xa._args); }
+
+    /**
+     * Get number of bytes needed to pack atoms contained within
+     * instance.
+     */
+    size_t packed_bytes() const;
+
+    /**
+     * Pack contained atoms into a byte array.  The size of the byte
+     * array should be larger or equal to the value returned by
+     * packed_bytes().
+     *
+     * @param buffer buffer to receive data.
+     * @param buffer_bytes size of buffer.
+     * @return size of packed data on success, 0 on failure.
+     */
+    size_t pack(uint8_t* buffer, size_t buffer_bytes) const;
+
+    /**
+     * Unpack atoms from byte array into instance.  The atoms are
+     * appended to the list of atoms associated with instance.
+     *
+     * @param buffer to read data from.
+     * @param buffer_bytes size of buffer.  The size should exactly match
+     *        number of bytes of packed atoms, ie packed_bytes() value
+     *        used when packing.
+     * @return number of bytes turned into atoms on success, 0 on failure.
+     */
+    size_t unpack(const uint8_t* buffer, size_t buffer_bytes);
 
     // String serialization methods
     string str() const;
-
-    inline void swap(XrlArgs& xa)		{ _args.swap(xa._args); }
 
 protected:
     void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.5 2003/03/16 08:20:30 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.6 2003/08/21 23:46:30 hodson Exp $"
 
 #include <string.h>
 #include <stdio.h>
@@ -367,10 +367,9 @@ XrlArgs::remove_binary(const char* name) throw (XrlAtomNotFound)
     remove(XrlAtom(name, xrlatom_binary));
 }
 
-
-
 // ----------------------------------------------------------------------------
 // Append an existing XrlArgs
+
 XrlArgs&
 XrlArgs::add(const XrlArgs& args) throw (XrlAtomFound)
 {
@@ -448,6 +447,7 @@ XrlArgs::size() const
     return _args.size();
 }
 
+
 // ----------------------------------------------------------------------------
 // String serialization methods
 
@@ -483,3 +483,107 @@ XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
     }
 }
 
+
+// ----------------------------------------------------------------------------
+// Byte serialization methods
+
+//
+// Packed XrlArgs has a 4-byte header:
+// MSB is a 1-byte verification value.
+// LSB's contain count of arguments expected
+//
+
+static const uint32_t PACKING_CHECK_CODE = 0xcc;
+static const uint32_t PACKING_MAX_COUNT	 = 0x00ffffff;
+
+size_t
+XrlArgs::packed_bytes() const
+{
+    size_t total_bytes = 0;
+    for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {
+	total_bytes += ci->packed_bytes();
+    }
+    return total_bytes + 4;
+}
+
+size_t
+XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes) const
+{
+    size_t total_bytes = 0;
+
+    // Check space exists for header
+    if (buffer_bytes < 4) {
+	return 0;
+    }
+
+    // Pack header
+    uint32_t cnt = _args.size();
+    if (cnt > PACKING_MAX_COUNT) {
+	// log a message, bounds hit
+	return 0;
+    }
+
+    uint32_t header = (PACKING_CHECK_CODE << 24) | cnt;
+    header = htonl(header);
+    memcpy(buffer, &header, sizeof(header));
+    total_bytes += sizeof(header);
+
+    // Pack atoms
+    for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {
+	size_t atom_bytes = ci->pack(buffer + total_bytes,
+				     buffer_bytes - total_bytes);
+	if (atom_bytes == 0) {
+	    return 0;
+	}
+	total_bytes += atom_bytes;
+    }
+    return total_bytes;
+}
+
+size_t
+XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes)
+{
+    // Unpack header
+    if (buffer_bytes < 4)
+	return 0;
+
+    uint32_t header;
+    memcpy(&header, buffer, sizeof(header));
+    header = ntohl(header);
+
+    // Check header sanity
+    if ((header >> 24) != PACKING_CHECK_CODE) {
+	return 0;
+    }
+
+    uint32_t cnt = header & PACKING_MAX_COUNT;
+    size_t used_bytes = sizeof(header);
+    list<XrlAtom> atoms;
+
+    while (cnt != 0) {
+	atoms.push_back(XrlAtom());
+	XrlAtom& atom = atoms.back();
+	size_t atom_bytes = atom.unpack(buffer + used_bytes,
+					buffer_bytes - used_bytes);
+	if (atom_bytes == 0) {
+	    return 0;
+	}
+
+	used_bytes += atom_bytes;
+	if (used_bytes >= buffer_bytes) {
+	    // Greater than would be bad...
+	    assert(used_bytes == buffer_bytes);
+	    break;
+	}
+	--cnt;
+    }
+
+    if (cnt) {
+	// Unexpected truncation
+	return 0;
+    }
+
+    // Append atoms unpacked to existing atoms list
+    _args.splice(_args.end(), atoms);
+    return used_bytes;
+}
