@@ -535,8 +535,8 @@ class LinkStateRequestPacket : public Packet {
  */
 class LinkStateUpdatePacket : public Packet {
  public:
-    LinkStateUpdatePacket(OspfTypes::Version version)
-	: Packet(version)
+    LinkStateUpdatePacket(OspfTypes::Version version, LsaDecoder& lsa_decoder)
+	: Packet(version), _lsa_decoder(lsa_decoder)
     {}
 
     OspfTypes::Type get_type() const { return 4; }
@@ -550,6 +550,10 @@ class LinkStateUpdatePacket : public Packet {
      * @return true if the encoding succeeded.
      */
     bool encode(vector<uint8_t>& pkt);
+
+    list<Lsa::LsaRef>& get_lsas() {
+	return _lsas;
+    }
     
     /**
      * Generate a printable representation of the packet.
@@ -557,7 +561,12 @@ class LinkStateUpdatePacket : public Packet {
     string str() const;
     
  private:
-    list<Lsa::LsaRef> _lsas;
+    LsaDecoder& _lsa_decoder;	// LSA decoders.
+
+    // The packet contains a field with the number os LSAs that it
+    // contains we don't bother to store it.
+
+    list<Lsa::LsaRef> _lsas;	// The list of LSAs in the packet.
 };
 
 inline

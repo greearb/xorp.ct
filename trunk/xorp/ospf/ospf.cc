@@ -35,7 +35,7 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
     : _version(version), _io(io), _lsa_decoder(version), _peer_manager(*this),
       _database(*this)
 {
-    // Register the packets with the decoder.
+    // Register the LSAs and packets with the associated decoder.
     switch(get_version()) {
     case OspfTypes::V2:
 	_lsa_decoder.register_decoder(new RouterLsa(OspfTypes::V2));
@@ -43,6 +43,9 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
 	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V2));
 	_packet_decoder.
 	    register_decoder(new DataDescriptionPacket(OspfTypes::V2));
+	_packet_decoder.
+	    register_decoder(new LinkStateUpdatePacket(OspfTypes::V2,
+						       _lsa_decoder));
 	_packet_decoder.
 	    register_decoder(new LinkStateRequestPacket(OspfTypes::V2));
 	break;
@@ -52,6 +55,9 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
 	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V3));
 	_packet_decoder.
 	    register_decoder(new DataDescriptionPacket(OspfTypes::V3));
+	_packet_decoder.
+	    register_decoder(new LinkStateUpdatePacket(OspfTypes::V3,
+						       _lsa_decoder));
 	_packet_decoder.
 	    register_decoder(new LinkStateRequestPacket(OspfTypes::V3));
 	break;

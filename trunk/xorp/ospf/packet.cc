@@ -692,7 +692,6 @@ LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
 #endif
 
-
     // How many request are there?
     int requests = (len - offset) / ls.length();
 
@@ -761,15 +760,107 @@ LinkStateRequestPacket::str() const
 Packet *
 LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 {
+    OspfTypes::Version version = get_version();
+
+    LinkStateUpdatePacket *packet = new LinkStateUpdatePacket(version,
+							      _lsa_decoder);
+
+    size_t offset = packet->decode_standard_header(ptr, len);
     
+    // Verify that this packet is large enough to hold the smallest
+    // LSA that we are aware of.
+    size_t min_length = _lsa_decoder.min_length();
+
+    if ((len - offset) < min_length)
+	xorp_throw(BadPacket,
+		   c_format("Packet too short %u, must be at least %u",
+			    len,
+			    offset + min_length));
+
+#ifdef	DEBUG_RAW_PACKETS
+    debug_msg("\n%s", dump_packet(ptr, len).c_str());
+#endif
+
+    // How many LSAs are there?
+    size_t n_lsas = extract_32(&ptr[offset]);
+    // Step over # LSAs
+    offset += 4;
+
+    size_t lsa_length;
+
+    // If anything goes wrong the decoder will throw an exception.
+    for(size_t i = 0; i < n_lsas; i++) {
+	lsa_length = len - offset;
+	packet->get_lsas().
+	    push_back(_lsa_decoder.decode(&ptr[offset], lsa_length));
+	offset += lsa_length;
+    }
+
+    return packet;
 }
 
 bool
 LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
 {
+    size_t offset = get_standard_header_length();
+    // Make a pass over all the LSAs so we can compute the total
+    // length of the packet.
+    size_t n_lsas = 0;
+    size_t len = offset + 4;	// 4 == # LSAs
+    
+    list<Lsa::LsaRef> &lsas = get_lsas();
+    list<Lsa::LsaRef>::iterator i = lsas.begin();
+    for(; i != lsas.end(); i++, n_lsas++) {
+	(*i)->encode();
+	size_t lsa_len;
+	(*i)->lsa(lsa_len);
+	len += lsa_len;
+    }
+
+    pkt.resize(len);
+    uint8_t *ptr = &pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Put the specific Link State Update Packet information first as
+    // the standard header code will also add the checksum. This must
+    // be done last.
+    /**************************************/
+
+    embed_32(&ptr[offset], n_lsas);
+    offset += 4;
+
+    for(i = lsas.begin() ; i != lsas.end(); i++) {
+	size_t lsa_len;
+	uint8_t *lsa_ptr;
+	lsa_ptr = (*i)->lsa(lsa_len);
+	memcpy(&ptr[offset], lsa_ptr, lsa_len);
+	offset += lsa_len;
+    }
+    
+    if (offset != encode_standard_header(ptr, len)) {
+	XLOG_ERROR("Encode of %s failed", str().c_str());
+	return false;
+    }
+    
+    return true;
 }
 
 string
 LinkStateUpdatePacket::str() const
 {
+    string output;
 
+    output = "Link State Update Packet:\n";
+    // Standard Header
+    output += standard() + "\n";
+    // Link State Packet Specifics
+
+    list<Lsa::LsaRef> li = _lsas;
+    list<Lsa::LsaRef>::iterator i = li.begin();
+    for (; i != li.end(); i++) {
+	output += "\n\t" + (*i)->str();
+    }
+
+    return output;
+}
