@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.51 2002/12/09 18:28:47 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -123,11 +123,16 @@ BGPDecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     if (_parents.find(caller)==_parents.end())
 	abort();
 
+    debug_msg("DT:add_route %s\n", rtmsg.route()->str().c_str());
+
     //if the nexthop isn't resolvable, don't event consider the route
-    if (!resolvable(rtmsg.route()->attributes()->nexthop())) {
+    debug_msg("testing resolvability\n");
+    if (!resolvable(rtmsg.route()->nexthop())) {
 	cp(5);
+	debug_msg("route not resolvable\n");
     	return ADD_UNUSED;
     }
+    debug_msg("route resolvable\n");
 
     const SubnetRoute<A> *old_winner;
     const PeerHandler* old_winners_peer;
@@ -158,10 +163,10 @@ BGPDecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     if (new_is_best) {
 	cp(8);
 	rtmsg.route()->set_winner(true);
+	rtmsg.set_igp_metric(igp_distance(rtmsg.route()->nexthop()));
 
-	int result = ADD_USED;
-	if (_next_table != NULL)
-	    result = _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
+	int result;
+	result = _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 
 	if (result == ADD_USED || result == ADD_UNUSED) {
 	    cp(9);
@@ -186,9 +191,11 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     assert(_parents.find(caller)!=_parents.end());
     assert(old_rtmsg.net()==new_rtmsg.net());
 
+    debug_msg("DT:replace_route.\nOld route: %s\nNew Route: %s\n", old_rtmsg.route()->str().c_str(), new_rtmsg.route()->str().c_str());
     //if the new nexthop isn't resolvable, don't event consider the route
-    if (!resolvable(new_rtmsg.route()->attributes()->nexthop())) {
+    if (!resolvable(new_rtmsg.route()->nexthop())) {
 	cp(12);
+	debug_msg("new route isn't resolvable\n");
     	return delete_route(old_rtmsg, caller);
     }
 
@@ -278,6 +285,7 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	assert(old_winner != NULL);
 	InternalMessage<A> alt_rtmsg(old_winner, old_winners_peer,
 				     GENID_UNKNOWN);
+	alt_rtmsg.set_igp_metric(igp_distance(old_winner->nexthop()));
 	result = _next_table->add_route(alt_rtmsg, 
 					(BGPRouteTable<A>*)this);
 	//inform the RibIn the route is now being used.
@@ -301,6 +309,7 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	} else {
 	    cp(25);
 	}
+	new_rtmsg.set_igp_metric(igp_distance(new_rtmsg.route()->nexthop()));
 	result = _next_table->add_route(new_rtmsg, (BGPRouteTable<A>*)this);
     }
 
@@ -375,6 +384,7 @@ BGPDecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 				     peer_handler,
 				     GENID_UNKNOWN);
 	int add_result;
+	alt_rtmsg.set_igp_metric(igp_distance(best_route->nexthop()));
 	add_result = _next_table->add_route(alt_rtmsg, 
 					    (BGPRouteTable<A>*)this);
 	if (add_result == ADD_USED) {
@@ -436,7 +446,7 @@ BGPDecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 	    if (best_route == NULL) {
 		cp(38);
 		if (found_route->is_winner() || 
-		    resolvable(found_route->attributes()->nexthop())) {
+		    resolvable(found_route->nexthop())) {
 		    cp(39);
 		    best_route = found_route;
 		    best_routes_peer = i->second;
@@ -459,7 +469,7 @@ BGPDecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 		    best_routes_parent = i->first;
 		} else {
 		    cp(42);
-		    if (resolvable(found_route->attributes()->nexthop())) {
+		    if (resolvable(found_route->nexthop())) {
 			cp(43);
 			if (route_is_better(best_route, best_routes_peer,
 					    found_route, i->second)) {
@@ -617,6 +627,12 @@ BGPDecisionTable<A>::igp_distance(const A nexthop) const
     if(!_next_hop_resolver.lookup(nexthop, resolvable, metric))
 	XLOG_FATAL("This next hop must be known %s", nexthop.str().c_str());
 
+    if (resolvable)
+	debug_msg("Decision: IGP distance for %s is %d", nexthop.str().c_str(),
+	       metric);
+    else
+	debug_msg("Decision: IGP distance for %s is unknown", nexthop.str().c_str());
+
     cp(62);
     return metric;
 }
@@ -645,8 +661,8 @@ BGPDecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     /*
     ** Check if routes resolve.
     */
-    bool test_resolvable = resolvable(test_route->attributes()->nexthop());
-    bool our_resolvable = resolvable(our_route->attributes()->nexthop());
+    bool test_resolvable = resolvable(test_route->nexthop());
+    bool our_resolvable = resolvable(our_route->nexthop());
 
     /*We should never even call route_is_better if the test_route
       isn't resolvable */
@@ -784,8 +800,8 @@ BGPDecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     /*
     ** Compare IGP distances.
     */
-    int test_igp_distance = igp_distance(test_route->attributes()->nexthop());
-    int our_igp_distance = igp_distance(our_route->attributes()->nexthop());
+    int test_igp_distance = igp_distance(test_route->nexthop());
+    int our_igp_distance = igp_distance(our_route->nexthop());
     debug_msg("%d vs %d\n", our_igp_distance, test_igp_distance);
     if(test_igp_distance < our_igp_distance) {
 	cp(78);
@@ -851,6 +867,16 @@ BGPDecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     //this shouldn't happen because when a peer goes down, the dump
     //iterator should move on to other peers
     abort();
+}
+
+template<class A>
+int
+BGPDecisionTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
+			     BGPRouteTable<A> */*caller*/,
+			     const PeerHandler *peer) {
+    XLOG_ASSERT(_next_table != NULL);
+    rtmsg.set_igp_metric(igp_distance(rtmsg.route()->nexthop()));
+    return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, peer);
 }
 
 template<class A>

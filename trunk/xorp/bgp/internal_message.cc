@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/internal_message.cc,v 1.18 2002/12/09 18:28:42 hodson Exp $"
+#ident "$XORP: xorp/bgp/internal_message.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include <string>
 #include "bgp_module.h"
@@ -34,6 +34,7 @@ InternalMessage<A>::InternalMessage<A>(const SubnetRoute<A> *rte,
     _push = false;
     _from_previous_peering = false;
     _genid = genid;
+    _has_igp_metric = false;
 }
 
 template<class A>

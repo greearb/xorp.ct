@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.2 2002/12/15 04:09:28 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -189,7 +189,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
 
     BGPFilterTable<A>* filter_in =
 	new BGPFilterTable<A>(_ribname + "IpcChannelInputFilter",
-			      _ipc_rib_in_table);
+			      _ipc_rib_in_table, _next_hop_resolver);
     _ipc_rib_in_table->set_next_table(filter_in);
     
     BGPCacheTable<A>* cache_in = 
@@ -209,7 +209,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
 
     BGPFilterTable<A> *filter_out =
 	new BGPFilterTable<A>(ribname + "IpcChannelOutputFilter",
-			     _fanout_table);
+			     _fanout_table, _next_hop_resolver);
     _fanout_table->add_next_table(filter_out,NULL);
     _tables.insert(filter_out);
 
@@ -274,7 +274,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
 
     BGPFilterTable<A>* filter_in =
 	new BGPFilterTable<A>(_ribname + "PeerInputFilter" + peername,
-			      rib_in);
+			      rib_in, _next_hop_resolver);
     rib_in->set_next_table(filter_in);
     
     BGPCacheTable<A>* cache_in = 
@@ -301,7 +301,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
     
     BGPFilterTable<A>* filter_out =
 	new BGPFilterTable<A>(_ribname + "PeerOutputFilter" + peername,
-			      _fanout_table);
+			      _fanout_table, _next_hop_resolver);
     _fanout_table->add_next_table(filter_out, peer_handler);
     
     BGPCacheTable<A>* cache_out = 
@@ -336,12 +336,20 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
 	filter_out->add_AS_prepend_filter(my_AS_number);
     }
 
-    /* 3. configure next_hop rewriter for EBGP peers*/
+    /* 3. Configure MED filter.
+	  Remove old MED and add new one on transmission to EBGP peers. */
+    /* Note: this MUST come before the nexthop rewriter */
+    if (ibgp == false) {
+	filter_out->add_med_removal_filter();
+	filter_out->add_med_insertion_filter();
+    }
+
+    /* 4. configure next_hop rewriter for EBGP peers*/
     if (ibgp == false) {
 	filter_out->add_nexthop_rewrite_filter(my_nexthop);
     }
 
-    /* 4. Configure local preference filter.
+    /* 5. Configure local preference filter.
           Add LOCAL_PREF on receipt from EBGP peer. 
 	  Remove it on transmission to EBGP peers. */
     if (ibgp == false) {
@@ -351,18 +359,18 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
 	filter_out->add_localpref_removal_filter();
     }
 
-    /* 5. configure loop filter for IBGP peers */
+    /* 6. configure loop filter for IBGP peers */
     if (ibgp == true) {
 	filter_out->add_ibgp_loop_filter();
     }
 
-    /* 6. load up any configured filters */
+    /* 7. load up any configured filters */
     /* TBD */
 
-    /* 7. load up damping filters */
+    /* 8. load up damping filters */
     /* TBD */
     
-    /* 8. cause the routing table to be dumped to the new peer */
+    /* 9. cause the routing table to be dumped to the new peer */
     _fanout_table->dump_entire_table(filter_out);
     if(_awaits_push)
 	push(peer_handler);

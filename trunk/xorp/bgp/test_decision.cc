@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -184,6 +184,38 @@ int main(int, char** argv) {
     delete sr1;
     delete msg;
 
+    debug_table->write_separator();
+
+    // ================================================================
+    // Test1b: trivial add and delete
+    // ================================================================
+    // add a route - nexthop is unresolvable
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 1b");
+    debug_table->write_comment("ADD AND DELETE, NEXTHOP UNRESOLVABLE");
+    debug_table->write_comment("SENDING ADD FROM PEER 1");
+    next_hop_resolver.unset_nexthop_metric(nexthop1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin_table1->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING PUSH FROM PEER 1");
+    ribin_table1->push(NULL);
+    debug_table->write_separator();
+
+    // delete the route
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    debug_table->write_comment("SENDING DELETE FROM PEER 1");
+    ribin_table1->delete_route(*msg, NULL);
+    ribin_table1->push(NULL);
+    delete sr1;
+    delete msg;
+
+    next_hop_resolver.set_nexthop_metric(nexthop1, 27);
     debug_table->write_separator();
 
     // ================================================================

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
 
-// #define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+//#define DEBUG_LOGGING
+//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -49,6 +49,8 @@ BGPRouteFilter<A>::propagate_flags(const InternalMessage<A> *rtmsg,
 	new_rtmsg->set_push();
     if (rtmsg->from_previous_peering())
 	new_rtmsg->set_from_previous_peering();
+    if (rtmsg->has_igp_metric())
+	new_rtmsg->set_igp_metric(rtmsg->igp_metric());
 }
 
 /*************************************************************************/
@@ -264,9 +266,95 @@ LocalPrefRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
+MEDInsertionFilter<A>::
+MEDInsertionFilter<A>(NextHopResolver<A>& next_hop_resolver) 
+    : _next_hop_resolver(next_hop_resolver)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+MEDInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
+			      bool &modified) const
+{
+    debug_msg("MED insertion filter\n");
+    debug_msg("Route: %s\n", rtmsg->route()->str().c_str());
+    if (!rtmsg->has_igp_metric()) 
+	return rtmsg;
+
+    //Form a new path attribute list containing the new MED attribute
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+    MEDAttribute med_att(rtmsg->igp_metric());
+    palist.add_path_attribute(med_att);
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+    
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    XLOG_ASSERT(new_rtmsg->changed());
+
+    debug_msg("Route with local preference %s\n", new_rtmsg->str().c_str());
+
+    return new_rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
+MEDRemovalFilter<A>::MEDRemovalFilter<A>() 
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
+				 bool &modified) const
+{
+    debug_msg("MED removal filter\n");
+
+    //Form a new path attribute list containing the new AS path
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+    palist.remove_attribute_by_type(MED);
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+    
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    return new_rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
 BGPFilterTable<A>::BGPFilterTable(string table_name,  
-				  BGPRouteTable<A> *parent_table) 
-    : BGPRouteTable<A>("BGPFilterTable-" + table_name)
+				  BGPRouteTable<A> *parent_table,
+				  NextHopResolver<A>& next_hop_resolver) 
+    : BGPRouteTable<A>("BGPFilterTable-" + table_name),
+    _next_hop_resolver(next_hop_resolver)
 {
     _parent = parent_table;
 }
@@ -513,6 +601,25 @@ BGPFilterTable<A>::add_localpref_removal_filter(){
     LocalPrefRemovalFilter<A> *localpref_filter;
     localpref_filter = new LocalPrefRemovalFilter<A>();
     _filters.push_back(localpref_filter);
+    return 0;
+}
+
+template<class A>
+int
+BGPFilterTable<A>::add_med_insertion_filter()
+{
+    MEDInsertionFilter<A> *med_filter;
+    med_filter = new MEDInsertionFilter<A>(_next_hop_resolver);
+    _filters.push_back(med_filter);
+    return 0;
+}
+
+template<class A>
+int
+BGPFilterTable<A>::add_med_removal_filter(){
+    MEDRemovalFilter<A> *med_filter;
+    med_filter = new MEDRemovalFilter<A>();
+    _filters.push_back(med_filter);
     return 0;
 }
 

@@ -103,7 +103,7 @@ packet_coding_test_SOURCES = packet_coding_test.cc
 update_test_SOURCES = update_test.cc
 test_ribin_SOURCES = test_ribin.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc
 test_deletion_SOURCES = test_deletion.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc
-test_filter_SOURCES = test_filter.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc
+test_filter_SOURCES = test_filter.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc
 test_cache_SOURCES = test_cache.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc
 test_nhlookup_SOURCES = test_nhlookup.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc
 test_decision_SOURCES = test_decision.cc 	 route_table_debug.hh route_table_debug.cc dummy_next_hop_resolver.hh dummy_next_hop_resolver.cc dummy_main.cc
@@ -187,7 +187,8 @@ $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 test_deletion_LDFLAGS = 
-test_filter_OBJECTS =  test_filter.o route_table_debug.o dummy_main.o
+test_filter_OBJECTS =  test_filter.o route_table_debug.o dummy_main.o \
+dummy_next_hop_resolver.o
 test_filter_LDADD = $(LDADD)
 test_filter_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \

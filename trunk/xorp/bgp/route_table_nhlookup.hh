@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.11 2002/12/09 18:28:48 hodson Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -78,7 +78,6 @@ public:
     string str() const;
 private:
     //access the message queue by subnet or an address on the subnet
-    //XXX payload type should be const but c++ sucks
     Trie<A, const MessageQueueEntry<A> > _queue_by_net;
     //access the message queue by nexthop
     multimap <A, const MessageQueueEntry<A>*> _queue_by_nexthop;

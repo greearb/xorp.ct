@@ -12,12 +12,13 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.27 2002/12/09 18:28:48 hodson Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
 
 #include "route_table_base.hh"
+#include "next_hop_resolver.hh"
 
 template<class A>
 class BGPRouteFilter {
@@ -87,9 +88,8 @@ template<class A>
 class LocalPrefInsertionFilter : public BGPRouteFilter<A> {
 public:
     LocalPrefInsertionFilter(uint32_t default_local_pref);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
 private:
     uint32_t _default_local_pref;
 };
@@ -98,9 +98,27 @@ template<class A>
 class LocalPrefRemovalFilter : public BGPRouteFilter<A> {
 public:
     LocalPrefRemovalFilter();
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
+private:
+};
+
+template<class A>
+class MEDInsertionFilter : public BGPRouteFilter<A> {
+public:
+    MEDInsertionFilter(NextHopResolver<A>& next_hop_resolver);
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
+private:
+    NextHopResolver<A>& _next_hop_resolver;
+};
+
+template<class A>
+class MEDRemovalFilter : public BGPRouteFilter<A> {
+public:
+    MEDRemovalFilter();
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
 private:
 };
 
@@ -116,7 +134,8 @@ private:
 template<class A>
 class BGPFilterTable : public BGPRouteTable<A>  {
 public:
-    BGPFilterTable(string tablename, BGPRouteTable<A> *parent);
+    BGPFilterTable(string tablename, BGPRouteTable<A> *parent, 
+		   NextHopResolver<A>& next_hop_resolver);
     ~BGPFilterTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
@@ -145,10 +164,13 @@ public:
     int add_ibgp_loop_filter();
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
+    int add_med_insertion_filter();
+    int add_med_removal_filter();
 private:
     const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg) const;
     list <BGPRouteFilter<A> *> _filters;
+    NextHopResolver<A>& _next_hop_resolver;
 };
 
 #endif // __BGP_ROUTE_TABLE_FILTER_HH__

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.2 2002/12/13 18:46:54 atanu Exp $
 #
 
 #
@@ -261,7 +261,7 @@ test5()
 
 test6()
 {
-    ITER=100
+    ITER=5
     echo "TEST6 - Send an update packet on an EBGP $ITER times"
     PACKET='packet update
 	origin 1

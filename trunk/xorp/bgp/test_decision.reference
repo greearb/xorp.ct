@@ -26,6 +26,17 @@ Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] ******************************************
+[comment] TEST 1b
+[comment] ADD AND DELETE, NEXTHOP UNRESOLVABLE
+[comment] SENDING ADD FROM PEER 1
+[separator]-------------------------------------
+[comment] SENDING PUSH FROM PEER 1
+[PUSH]
+[separator]-------------------------------------
+[comment] SENDING DELETE FROM PEER 1
+[PUSH]
+[separator]-------------------------------------
+[comment] ******************************************
 [comment] TEST 2
 [comment] IDENTICAL ADD FROM TWO PEERS
 [comment] PEER1 HAS LOWEST NEIGHBOR ADDRESS

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.2 2002/12/14 05:31:55 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.3 2002/12/14 21:25:47 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -27,6 +27,7 @@
 #include "path_attribute_list.hh"
 #include "local_data.hh"
 #include "dump_iterators.hh"
+#include "dummy_next_hop_resolver.hh"
 
 
 int main(int, char** argv) {
@@ -42,6 +43,7 @@ int main(int, char** argv) {
     PeerHandler handler1("test1", &peer1, NULL);
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
+    DummyNextHopResolver<IPv4> next_hop_resolver;
 
     // Trivial plumbing. We're not testing the RibInTable here, so
     // mostly we'll just inject directly into the FilterTable, but we
@@ -49,7 +51,7 @@ int main(int, char** argv) {
     BGPRibInTable<IPv4> *ribin_table
 	= new BGPRibInTable<IPv4>("RIB-in", &handler1);
     BGPFilterTable<IPv4> *filter_table
-	= new BGPFilterTable<IPv4>("FILTER", ribin_table);
+	= new BGPFilterTable<IPv4>("FILTER", ribin_table, next_hop_resolver);
     ribin_table->set_next_table(filter_table);
     BGPDebugTable<IPv4>* debug_table
 	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)filter_table);

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.67 2002/12/09 09:43:53 pavlin Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 ##
 
 # -- Subdirectories
@@ -66,6 +66,7 @@ test_filter_SOURCES		 = test_filter.cc
 test_filter_SOURCES		+= route_table_debug.hh
 test_filter_SOURCES		+= route_table_debug.cc
 test_filter_SOURCES		+= dummy_main.cc
+test_filter_SOURCES		+= dummy_next_hop_resolver.cc
 
 test_cache_SOURCES		 = test_cache.cc 	
 test_cache_SOURCES		+= route_table_debug.hh

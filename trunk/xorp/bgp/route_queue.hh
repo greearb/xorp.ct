@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.2 2002/12/13 22:38:54 rizzo Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -39,6 +39,7 @@ public:
 	_op = op;
 	_route = new SubnetRoute<A>(*rt);
 	_origin_peer = 0;
+	_has_igp_metric = false;
     }
 
     //for push only
@@ -46,6 +47,7 @@ public:
 	assert(op == RTQUEUE_OP_PUSH);
 	_op = op;
 	_route = 0;
+	_has_igp_metric = false;
 	_origin_peer = origin_peer; // 0 is valid.
     }
 
@@ -63,6 +65,14 @@ public:
     void set_genid(uint32_t genid)		{ _genid = genid; 	}
     uint32_t genid() const			{ return _genid;	}
 
+    inline bool has_igp_metric() const {return _has_igp_metric;}
+    inline uint32_t igp_metric() const {return _igp_metric;}
+    inline void set_igp_metric(uint32_t metric) 
+    {
+	_igp_metric = metric;
+	_has_igp_metric = true;
+    }
+
     string str() const;
 private:
     RouteQueueOp _op;
@@ -76,6 +86,8 @@ private:
     const SubnetRoute<A> *_route;
     const PeerHandler *_origin_peer;
     uint32_t _genid;
+    bool _has_igp_metric;
+    uint32_t _igp_metric;
 };
 
 #endif // __BGP_ROUTE_QUEUE_HH__
