@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.19 2004/04/05 06:36:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.20 2004/06/10 22:40:53 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -58,7 +58,7 @@ bool
 IfConfigGet::parse_buffer_ifreq(IfTree& , int ,
 				const uint8_t* , size_t )
 {
-    return false
+    return false;
 }
 
 #else // HAVE_IOCTL_SIOCGIFCONF
