@@ -109,6 +109,23 @@ this possible race if the \finder fails or restarts all processes
 should exit. The assumption is that the \finder failing is a very low
 probability event.
 
+\subsection{Implementing process failure detection}
+
+The \finder process will send keepalive messages to all processes at
+thirty second intervals. If a process does not respond to a keepalive
+it is considered dead. The keepalive messages are sent over a reliable
+transport such as TCP. A process dieing should therefore be easy to
+detect. The \rtrmgr if it detects that a process has died will send a
+hint to the \finder that will immediately try and send a keepalive.
+Again if the process has died it should be easy to detect.
+
+If a process is not responding to keepalives but it is still alive it
+will be marked as dead and all interested processes will be notified.
+Most importantly the \rtrmgr will be notified and it will kill the
+running process and start a new process.
+
+\subsection{Actions to take on detecting process failure}
+
 Table \ref{failure_table} indicates what action a process should take
 on detecting failure in other processes. The ``(G)'' denotes that the
 process should attempt to exit gracefully. Figure \ref{failure_fig}
@@ -158,7 +175,7 @@ OSPF            &  Restart        & -        & -    & -    & -    & -       & - 
 \caption{\label{failure_table}Action to take on detecting process failure}
 \end{table}
 
-\subsection{\rtrmgr/\finder - Router manager}
+\subsubsection{\rtrmgr/\finder - Router manager}
 
 If the \rtrmgr/\finder dies then all bets are off and all processes
 should exit apart from the \xorpsh.
@@ -166,7 +183,7 @@ should exit apart from the \xorpsh.
 If a \xorp process exits unexpectedly the \rtrmgr/\finder should
 attempt to restart the process.
 
-\subsection{FEA - Forwarding Engine Abstraction}
+\subsubsection{FEA - Forwarding Engine Abstraction}
 
 The FEA primarily excepts routes from the RIB and places them in the
 kernel. The FEA should tag all routes that it has installed in the
@@ -178,11 +195,11 @@ the kernel.
 The FEA process should register interest in the RIB. If the RIB fails
 the FEA should withdraw all routes that the RIB has sent to it.
 
-\subsection{MFEA - Multicast Forwarding Engine Abstraction}
+\subsubsection{MFEA - Multicast Forwarding Engine Abstraction}
 
 TBD
 
-\subsection{RIB - Routing Information Base}
+\subsubsection{RIB - Routing Information Base}
 
 Routes from the routing processes are sent to the RIB the winners are
 sent to the FEA.
@@ -191,15 +208,15 @@ The RIB should register interest in the FEA. If the FEA fails the RIB
 should exit. All routing processes that interact with the RIB should
 on detecting the shutdown of the RIB also terminate gracefully.
 
-\subsection{IGMP}
+\subsubsection{IGMP}
 
 TBD
 
-\subsection{PIM}
+\subsubsection{PIM}
 
 TBD
 
-\subsection{BGP}
+\subsubsection{BGP}
 
 Currently the only other process in the system that the RIB interacts
 with is the RIB. If the BGP process detects that the RIB has died then
@@ -210,25 +227,25 @@ through FEA. At which time the BGP process should also register
 interest in the state of the FEA. If the BGP process detects the death
 of the FEA it should exit immediately.
 
-\subsection{RIP}
+\subsubsection{RIP}
 
 The RIP process should register interest in the FEA and the RIB. If
 the RIB dies then the RIP process should attempt to exit gracefully.
 If the FEA dies the RIP process should exit immediately.
 
-\subsection{IS-IS}
+\subsubsection{IS-IS}
 
 The IS-IS process should register interest in the FEA and the RIB. If
 the RIB dies then the IS-IS process should attempt to exit gracefully.
 If the FEA dies the IS-IS process should exit immediately.
 
-\subsection{OSPF}
+\subsubsection{OSPF}
 
 The OSPF process should register interest in the FEA and the RIB. If
 the RIB dies then the OSPF process should attempt to exit gracefully.
 If the FEA dies the OSPF process should exit immediately.
 
-\subsection{\label{xorpsh}\xorpsh}
+\subsubsection{\label{xorpsh}\xorpsh}
 
 The \xorpsh provides a command line interface to the XORP router.
 Other processes in the system exiting should never cause it to
