@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.10 2003/09/16 01:19:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.11 2003/11/06 22:10:33 hodson Exp $"
 
 
 //
@@ -857,7 +857,8 @@ ProtoComm::open_proto_socket()
 	    
 	    // Pass all ICMPv6 messages
 	    ICMP6_FILTER_SETPASSALL(&filter);	    
-	    
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 	    if (xorp_module_id() == XORP_MODULE_MLD6IGMP) {
 		// Filter all non-MLD ICMPv6 messages
 		ICMP6_FILTER_SETBLOCKALL(&filter);
@@ -870,6 +871,7 @@ ProtoComm::open_proto_socket()
 		ICMP6_FILTER_SETPASS(MLDV2_LISTENER_REPORT, &filter);
 #endif
 	    }
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
 			   (void *)&filter, sizeof(filter)) < 0) {
 		close_proto_socket();
@@ -1017,11 +1019,11 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     case IPPROTO_ICMPV6:
     {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
-	if (nbytes < (ssize_t)sizeof(struct mld_hdr)) {
+	if (nbytes < (ssize_t)sizeof(struct icmp6_hdr)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
 			 nbytes,
-			 (uint32_t)sizeof(struct mld_hdr));
+			 (uint32_t)sizeof(struct icmp6_hdr));
 	    return;		// Error
 	}
 #else
