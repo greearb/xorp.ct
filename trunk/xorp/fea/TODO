@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.14 2003/11/06 21:10:50 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.15 2004/04/11 19:29:38 pavlin Exp $
 #
 
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
@@ -47,6 +47,14 @@
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
+
+* During shutdown, the following code in MfeaNode::final_stop()
+  may actually return XORP_ERROR:
+
+    if (! (is_up() || is_pending_up() || is_pending_down()))
+        return (XORP_ERROR);
+  However, in case of PIM the above check is OK.
+  Investigate the problem and fix it.
 
 * The IPv4 raw packet input in case of OpenBSD has changed between versions.
   E.g., if (defined(__OpenBSD__) && (OpenBSD < 200311))

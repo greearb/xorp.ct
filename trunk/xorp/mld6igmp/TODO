@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.13 2003/09/10 21:38:55 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.14 2003/11/06 22:17:46 pavlin Exp $
 #
+
+* During shutdown, the following code in Mld6igmpNode::final_stop()
+  may actually return XORP_ERROR:
+
+    if (! (is_up() || is_pending_up() || is_pending_down()))
+        return (XORP_ERROR);
+  However, in case of PIM the above check is OK. Find the problem and fix it.
 
 * Implement RFC 3590 "Source Address Selection for the
   Multicast Listener Discovery (MLD) Protocol"
