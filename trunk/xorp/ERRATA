@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.6 2004/06/15 00:58:41 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.7 2004/06/15 17:38:09 atanu Exp $
 #
 
 		XORP ERRATA
@@ -7,10 +7,6 @@
   ALL:
     - Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
       The simplest work-around is to rerun gmake or not to use the -j flag.
-
-    - Overwriting the default installation prefix by running
-      "./configure --prefix=/path/to/xorp" currently does not work.
-      This will be fixed for XORP Release 1.0.
 
     - Some of the design documentation in ${XORP}/docs/ hasn't been updated
       for this release candidate. This will be fixed for XORP Release 1.0.
