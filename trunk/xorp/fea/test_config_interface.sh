@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.7 2003/10/24 02:20:35 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.8 2003/10/26 23:57:43 pavlin Exp $
 #
 
 #
@@ -44,6 +44,7 @@ HAVE_IPV6="true"	# XXX: may be overwritten by host configuration
 
 case ${HOSTNAME} in
 	xorp1)
+	HAVE_IPV6="true"
 	IFNAME="fxp3"
 	MAC="00:02:b3:10:e3:e7"
 	TEST_MAC="00:02:b3:10:e3:e8"
@@ -52,10 +53,10 @@ case ${HOSTNAME} in
 	VIF_FLAG_LOOPBACK="false"
 	VIF_FLAG_POINT_TO_POINT="false"
 	VIF_FLAG_MULTICAST="true"
-	HAVE_IPV6="true"
 	;;
 
 	xorp4)
+	HAVE_IPV6="false"
 	IFNAME="eth3"
 	MAC="00:04:5A:49:5D:11"
 	TEST_MAC="0:4:5a:49:5d:12"
@@ -64,19 +65,34 @@ case ${HOSTNAME} in
 	VIF_FLAG_LOOPBACK="false"
 	VIF_FLAG_POINT_TO_POINT="false"
 	VIF_FLAG_MULTICAST="true"
-	HAVE_IPV6="false"
 	;;
 
 	carp.icir.org)
-	IFNAME="eth1"
+	case ${OS} in
+	    Linux)
+	    HAVE_IPV6="false"
+	    IFNAME="eth1"
+	    PIF_INDEX="3"
+	    ;;
+
+	    OpenBSD)
+	    HAVE_IPV6="true"
+	    IFNAME="fxp0"
+	    PIF_INDEX="0"
+	    ;;
+
+	    *)
+	    echo "Unknown OS : ${OS}"
+	    exit 1
+	    ;;
+	esac
+
 	MAC="00:01:02:71:1B:48"
 	TEST_MAC="0:1:2:71:1b:49"
-	PIF_INDEX="3"
 	VIF_FLAG_BROADCAST="true"
 	VIF_FLAG_LOOPBACK="false"
 	VIF_FLAG_POINT_TO_POINT="false"
 	VIF_FLAG_MULTICAST="true"
-	HAVE_IPV6="false"
 	;;
 
 	*)

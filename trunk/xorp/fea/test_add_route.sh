@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.12 2003/10/24 02:20:35 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.13 2003/10/26 21:15:06 pavlin Exp $
 #
 
 #
@@ -49,25 +49,40 @@ HAVE_IPV6="true"	# XXX: may be overwritten by host configuration
 
 case ${HOSTNAME} in
     xorp1)
+    HAVE_IPV6="false"
     IFNAME="dc2"
     GATEWAY4="10.8.0.2"
     GATEWAY6="fe80:aaaa::1111"
     # TODO: IPv6 is temporary disabled
-    HAVE_IPV6="false"
     ;;
 
     xorp4)
+    HAVE_IPV6="false"
     IFNAME="eth6"
     GATEWAY4="10.8.0.1"
     GATEWAY6="fe80:aaaa::1111"
-    HAVE_IPV6="false"
     ;;
 
     carp.icir.org)
-    IFNAME="eth0"
+    case ${OS} in
+	Linux)
+	HAVE_IPV6="false"
+	IFNAME="eth0"
+	;;
+
+	OpenBSD)
+	HAVE_IPV6="false"
+	IFNAME="xl0"
+	;;
+
+	*)
+	echo "Unknown OS : ${OS}"
+	exit 1
+	;;
+    esac
+
     GATEWAY4="172.16.0.1"
     GATEWAY6="fe80:aaaa::1111"
-    HAVE_IPV6="false"
     ;;
 
     *)
