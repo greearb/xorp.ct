@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.24 2002/12/09 18:29:13 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -68,13 +68,36 @@ inline int
 SelectorList::Node::run_hooks(SelectorMask m, int fd)
 {
     int n = 0;
+
+    /*
+     * This is nasty.  We dispatch the callbacks here associated with
+     * the file descriptor fd.  Unfortunately these callbacks can
+     * manipulate the mask and callbacks associated with the
+     * descriptor, ie the data change beneath our feet.  At no time do
+     * we want to call a callback that has been removed so we can't
+     * just copy the data before starting the dispatch process.  We do
+     * not want to perform another callback here on a masked bit that
+     * we have already done a callback on.  We therefore keep track of
+     * the bits already matched with the variable already_matched.
+     *
+     * An alternate fix is to change the semantics of add_selector so
+     * there is one callback for each i/o event.
+     *
+     * Yet another alternative is to have an object, let's call it a
+     * Selector that is a handle state of a file descriptor: ie an fd, a
+     * mask, a callback and an enabled flag.  We would process the Selector
+     * state individually.  
+     */
+    SelectorMask already_matched = SelectorMask(0);
+
     for (int i = 0; i < SEL_MAX_IDX; i++) {
-	SelectorMask match = SelectorMask(_mask[i] & m);
+	SelectorMask match = SelectorMask(_mask[i] & m & ~already_matched);
 	if (match) {
 	    assert(_cb[i].is_empty() == false);
 	    _cb[i]->dispatch(fd, match);
 	    n++;
 	}
+	already_matched = SelectorMask(already_matched | match);
     }
     return n;
 }
@@ -112,8 +135,6 @@ SelectorList::add_selector(int			   fd,
 			   SelectorMask		   mask, 
 			   const SelectorCallback& scb)
 {
-    debug_msg("fd = %d\n", fd);
-
     if (fd < 0) {
 	return -1; 
     }
