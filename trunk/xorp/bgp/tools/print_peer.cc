@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.12 2004/06/10 22:40:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.13 2004/10/06 20:38:24 pavlin Exp $"
 
 #include "print_peer.hh"
 
@@ -306,6 +306,8 @@ PrintPeers::get_peer_timer_config_done(const XrlError& e,
 	printf("Failed to retrieve verbose data\n");
 	if (_more)
 	    get_peer_list_next();
+	else
+	    _done = true;
 	return;
     }
     _retry_interval = *retry_interval;
@@ -425,4 +427,3 @@ PrintPeers::do_verbose_peer_print()
 	_done = true;
     }
 }
-
