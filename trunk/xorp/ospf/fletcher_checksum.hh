@@ -13,48 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP"
-#include "config.h"
+// $XORP$
 
-#include "ospf_module.h"
-#include "libxorp/xorp.h"
-#include "fletcher_checksum.hh"
+#ifndef __OSPF_FLETCHER_CHECKSUM_HH__
+#define __OSPF_FLETCHER_CHECKSUM_HH__
 
-/*
-** return number modulo 255 most importantly convert negative numbers
-** to a ones complement representation.
-*/
-inline
-int32_t 
-onecomp(int32_t a)
-{
-	int32_t res;
+/**
+ * Compute a fletcher checksum
+ *
+ * @param bufp pointer to start of the buffer.
+ * @param length of the buffer.
+ * @param off Offset into the buffer where the checksum is placed.
+ * @param x output value checksum
+ * @param y output value checksum
+ */
+void fletcher_checksum(uint8_t *bufp, size_t len,
+		       size_t off, int32_t& x, int32_t& y);
 
-	res = a % 255;
-
-	if(res < 0)
-		res = 255 + res;
-
-	return res;
-}
-
-/*
-** generate iso checksums.
-*/
-void
-fletcher_checksum(uint8_t *bufp, size_t len, size_t off,
-		  int32_t& x, int32_t& y)
-{
-        int32_t c0 = 0, c1 = 0;
-
-	for(size_t i = 0; i < len; i++) {
-		c0 = bufp[i] + c0;
-		c1 = c1 + c0;
-	}
-	c0 %= 255;
-	c1 %= 255;
-
-	off += 1;	// C Arrays are from 0 not 1.
-	x = onecomp(-c1 + (len - off) * c0);
-	y = onecomp(c1 - (len - off + 1) * c0);
-}
+#endif // __OSPF_FLETCHER_CHECKSUM_HH__

@@ -14,9 +14,11 @@ bin_PROGRAMS	 = xorp_ospfv2 xorp_ospfv3
 
 # -- Test Programs
 TESTS		 = test_packet
+TESTS		+= test_checksum
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_packet
+noinst_PROGRAMS	 += test_checksum
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES	 = libospf.la
@@ -40,8 +42,11 @@ xorp_ospfv3_SOURCES		= xorp_ospfv3.cc
 
 test_packet_SOURCES		= test_packet.cc
 
+test_checksum_SOURCES		= test_checksum.cc
+
 # -- Library Sources
 libospf_la_SOURCES  = exceptions.hh
+libospf_la_SOURCES  += fletcher_checksum.hh
 libospf_la_SOURCES  += lsa.hh
 libospf_la_SOURCES  += ls_database_manager.hh
 libospf_la_SOURCES  += ospf.hh
@@ -52,6 +57,7 @@ libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 
 libospf_la_SOURCES  += ls_database_manager.cc
+libospf_la_SOURCES  += fletcher_checksum.cc
 libospf_la_SOURCES  += lsa.cc
 libospf_la_SOURCES  += ospf.cc
 libospf_la_SOURCES  += packet.cc
