@@ -86,10 +86,47 @@ This site is mirrored at the following locations:
 
 </table>
 </center>
-<hr noshade>
+
+<p>
+If you would like to run a mirror please send a request to
+feedback@xorp.org, with your IP address. We require your IP address to
+enable access and to create a wwwNNN.xorp.org DNS entry.
+
+<p>
+Currently 600MB of disk space is required. Each additional release
+will require on the order of 200MB (130MB of this is the LiveCD).
+<p>
+We are running a rsync server. You need to periodically (we suggest
+hourly) run the following script (or equivalent).
+<pre>
+#!/bin/sh
+
+# Pathname of the local mirror directory.
+XORP_ROOT=/usr/local/share/doc/apache
+XORP_MAIN=$XORP_ROOT/xorp
+XORP_RELEASES=$XORP_ROOT/xorp-releases
+
+rsync -a www.xorp.org::xorp $XORP_MAIN
+rsync -a www.xorp.org::xorp-releases $XORP_RELEASES
+</pre>
+
+<p>
+You will need to link the xorp-releases directory under the xorp
+directory. The complete magic if you are using Apache is:
+<pre>
+&lt;VirtualHost {your IP address here}>
+    ServerAdmin {your admin email address}
+    DocumentRoot /usr/local/www/data/xorp
+    ServerName {your xorp dns name}
+    ErrorLog /var/log/www-xorp-error_log
+    CustomLog /var/log/www-xorp-access_log common
+
+    Alias /releases "/usr/local/www/data/xorp-releases"
+&lt;/VirtualHost>
+</pre> <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.8 2004/07/14 22:21:06 pavlin Exp $.
-<br>Generated on 14/Jul/2004 at 15:24:31.</em>
+<br>Generated on 22/Jul/2004 at 18:30:17.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
