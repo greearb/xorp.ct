@@ -112,7 +112,7 @@ LDADD = $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la 
 #
 xorp_rtrmgr_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh generic_module_manager.hh master_conf_tree.hh master_conf_tree_node.hh master_template_tree.hh master_template_tree_node.hh module_commands.hh module_manager.hh path_segment.hh randomness.hh rtrmgr_error.hh task.hh template_base_command.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc generic_module_manager.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc master_conf_tree_node.cc master_template_tree.cc master_template_tree_node.cc module_command.cc module_manager.cc randomness.cc task.cc template_base_command.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
-xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.la $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la $(LDADD)
+xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.la $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(LDADD)
 
 #
 # xorpsh
@@ -241,6 +241,7 @@ am_xorp_rtrmgr_OBJECTS = conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 xorp_rtrmgr_OBJECTS = $(am_xorp_rtrmgr_OBJECTS)
 xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.la \
 	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \

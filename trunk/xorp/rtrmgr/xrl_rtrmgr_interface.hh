@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.17 2004/12/08 22:47:27 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.18 2004/12/21 23:43:15 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -22,6 +22,7 @@
 
 #include "xrl/targets/rtrmgr_base.hh"
 #include "xrl/interfaces/rtrmgr_client_xif.hh"
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 #include "generic_module_manager.hh"
 
@@ -164,6 +165,18 @@ public:
 	const string& target, 
 	const string& filename);
 
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    void finder_register_done(const XrlError& e, string clientname);
+
 private:
     typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
 
@@ -177,7 +190,9 @@ private:
     void initialize_client_state(uint32_t user_id, UserInstance *user);
     void send_client_state(uint32_t user_id, UserInstance *user);
 
+    XrlRouter& _xrl_router;
     XrlRtrmgrClientV0p2Client _client_interface;
+    XrlFinderEventNotifierV0p1Client _finder_notifier_interface;
     multimap<uint32_t, UserInstance*> _users;
     multimap<uint32_t, UserInstance*> _config_users;
     UserDB&		_userdb;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.30 2004/12/21 23:43:15 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.31 2004/12/23 22:47:46 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -36,7 +36,9 @@ XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
 				       RandomGen& randgen,
 				       Rtrmgr& rtrmgr) 
     : XrlRtrmgrTargetBase(&r),
+      _xrl_router(r),
       _client_interface(&r),
+      _finder_notifier_interface(&r),
       _userdb(userdb),
       _master_config_tree(NULL),
       _eventloop(eventloop), 
@@ -47,7 +49,6 @@ XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
       _lock_holder_token(""),
       _verbose(rtrmgr.verbose())
 {
-
 }
 
 XrlRtrmgrInterface::~XrlRtrmgrInterface()
@@ -232,6 +233,22 @@ void
 XrlRtrmgrInterface::initialize_client_state(uint32_t user_id, 
 					    UserInstance *user)
 {
+    // We need to register interest via the finder in the XRL target
+    // associated with this user instance, so that when the user
+    // instance goes away without deregistering, we can clean up the
+    // state we associated with them.
+
+    XrlFinderEventNotifierV0p1Client::RegisterInstanceEventInterestCB cb; 
+    cb = callback(this, &XrlRtrmgrInterface::finder_register_done,
+		  user->clientname());
+    _finder_notifier_interface.
+	send_register_class_event_interest("finder", 
+					   _xrl_router.instance_name(),
+					   user->clientname(), cb);
+    XLOG_TRACE(_verbose, 
+	       "registering interest in %s\n", user->clientname().c_str());
+
+
     //
     // We need to send the running config and module state to the
     // client, but we first need to return from the current XRL, so we
@@ -246,6 +263,15 @@ XrlRtrmgrInterface::initialize_client_state(uint32_t user_id,
              callback(this, &XrlRtrmgrInterface::send_client_state, 
 		      user_id, user));
     _background_tasks.push_front(t);
+}
+
+void 
+XrlRtrmgrInterface::finder_register_done(const XrlError& e, string clientname) 
+{
+    if (e != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to register with finder about XRL %s (err: %s)\n",
+		   clientname.c_str(), e.error_msg());
+    }
 }
 
 void
@@ -843,4 +869,46 @@ XrlRtrmgrInterface::generate_auth_token(const uint32_t& user_id,
     token += randomness;
 
     return token;
+}
+
+
+XrlCmdError 
+XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_birth(
+        const string&	target_class,
+	const string&	target_instance)
+{
+    XLOG_TRACE(_verbose, "XRL Birth: class %s instance %s\n",
+	       target_class.c_str(), target_instance.c_str());
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError 
+XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_death(
+	const string&	target_class,
+	const string&	target_instance)
+{
+    XLOG_TRACE(_verbose, "XRL Death: class %s instance %s\n",
+	       target_class.c_str(), target_instance.c_str());
+
+    multimap<uint32_t, UserInstance*>::iterator iter;
+    for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
+	UserInstance* user = iter->second;
+	if (user->clientname() == target_class) {
+	    debug_msg("removing user %s from list of config users\n",
+		      target_class.c_str());
+	    _config_users.erase(iter);
+	    break;
+	}
+    }
+    for (iter = _users.begin(); iter != _users.end(); ++iter) {
+	UserInstance* user = iter->second;
+	if (user->clientname() == target_class) {
+	    debug_msg("removing user %s from list of regular users\n",
+		      target_class.c_str());
+	    _users.erase(iter);
+	    break;
+	}
+    }
+    return XrlCmdError::OKAY();
 }

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.46 2004/12/23 17:33:13 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.47 2004/12/23 22:17:33 mjh Exp $
 ##
 
 # -- Real Programs
@@ -85,6 +85,7 @@ xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
 
 xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.la
 xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la
+xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 xorp_rtrmgr_LDADD	+= $(LDADD)
 
 #
