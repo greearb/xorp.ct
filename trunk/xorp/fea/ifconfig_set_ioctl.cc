@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.2 2003/05/14 01:13:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.3 2003/06/18 21:51:56 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -447,43 +447,65 @@ IfConfigSetIoctl::push_config(const IfTree& it)
 void
 IfConfigSetIoctl::push_if(const IfTreeInterface& i)
 {
-    if (i.mtu() && IfSetMTU(_s4, i.ifname(), i.mtu()).execute() < 0) {
-	ifc().er().interface_error(i.name(),
-				   c_format("Failed to set MTU of %d bytes (%s)",
-					    i.mtu(), strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
-
-    if (i.mac().empty())
-	return;
-
-    ether_addr ea;
-    try {
-	EtherMac em;
-	em = EtherMac(i.mac());
-	if (em.get_ether_addr(ea) == false) {
+    //
+    // Set the MTU
+    //
+    do {
+	if (i.mtu() == 0)
+	    break;		// XXX: ignore the MTU setup
+	
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	if ((ii != ifc().pulled_config().ifs().end())
+	    && (ii->second.mtu() == i.mtu()))
+	    break;		// Ignore: the MTU hasn't changed
+	
+	if (IfSetMTU(_s4, i.ifname(), i.mtu()).execute() < 0) {
 	    ifc().er().interface_error(i.name(),
-				       string("Expected Ethernet MAC address, "
-					      " got \"") + i.mac().str() +
-				       string("\"")); 
+				       c_format("Failed to set MTU of %d bytes (%s)",
+						i.mtu(), strerror(errno)));
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
 	}
-    } catch (const BadMac& bm) {
-	ifc().er().interface_error(i.name(), string("Invalid MAC address \"") + 
-				   i.mac().str() + string("\""));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
-
-    if (IfSetMac(_s4, i.ifname(), ea).execute() < 0) {
-	ifc().er().interface_error(i.name(),
-				   c_format("Failed to set MAC address (%s)",
-					    strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
+	break;
+    } while (false);
+    
+    //
+    // Set the MAC address
+    //
+    do {
+	if (i.mac().empty())
+	    break;
+	
+	ether_addr ea;
+	try {
+	    EtherMac em;
+	    em = EtherMac(i.mac());
+	    if (em.get_ether_addr(ea) == false) {
+		ifc().er().interface_error(
+		    i.name(),
+		    c_format("Expected Ethernet MAC address, got \"%s\"",
+			     i.mac().str().c_str()));
+		XLOG_ERROR(ifc().er().last_error().c_str());
+		return;
+	    }
+	} catch (const BadMac& bm) {
+	    ifc().er().interface_error(
+		i.name(),
+		c_format("Invalid MAC address \"%s\"", i.mac().str().c_str()));
+	    XLOG_ERROR(ifc().er().last_error().c_str());
+	    return;
+	}
+	
+	if (IfSetMac(_s4, i.ifname(), ea).execute() < 0) {
+	    ifc().er().interface_error(
+		i.name(),
+		c_format("Failed to set MAC address (%s)", strerror(errno)));
+	    XLOG_ERROR(ifc().er().last_error().c_str());
+	    return;
+	}
+	
+	break;
+    } while(false);
 }
 
 void
@@ -536,9 +558,9 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	// This is a lot of work!
 	//
 	IfTree::IfMap::iterator ii = ifc().live_config().get_if(i.ifname());
-	assert(ii != ifc().live_config().ifs().end());
+	XLOG_ASSERT(ii != ifc().live_config().ifs().end());
 	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
-	assert(vi != ii->second.vifs().end());
+	XLOG_ASSERT(vi != ii->second.vifs().end());
 	vi->second.add_addr(a.addr());
 	IfTreeVif::V4Map::iterator ai = vi->second.get_addr(a.addr());
 	ai->second = a;
@@ -561,7 +583,9 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	return;
     }
 
+    //
     // Check if interface flags need setting
+    //
     uint32_t reqmask = a.addr_flags();
     uint32_t curflags;
     if (IfGetFlags(_s4, i.ifname(), curflags).execute() < 0) {
@@ -585,19 +609,41 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	}
     }
 
-    IPv4 oaddr(IPv4::ZERO());
-    if (a.broadcast())
-	oaddr = a.bcast();
-    else if (a.point_to_point())
-	oaddr = a.endpoint();
-
-    IfSetAddr4 set_addr(_s4, i.ifname(), a.addr(), oaddr, a.prefix());
-    if (set_addr.execute() < 0) {
-	ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-				 c_format("Address configuration failed (%s)",
-					  strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-    }
+    //
+    // Set the address
+    //
+    do {
+	IPv4 oaddr(IPv4::ZERO());
+	if (a.broadcast())
+	    oaddr = a.bcast();
+	else if (a.point_to_point())
+	    oaddr = a.endpoint();
+	
+	uint32_t prefix = a.prefix();
+	
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	XLOG_ASSERT(ii != ifc().pulled_config().ifs().end());
+	IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
+	XLOG_ASSERT(vi != ii->second.vifs().end());
+	IfTreeVif::V4Map::const_iterator ai = vi->second.get_addr(a.addr());
+	
+	if ((ai != vi->second.v4addrs().end())
+	    && (ai->second.addr() == a.addr())
+	    && ((a.broadcast() && (ai->second.bcast() == a.bcast()))
+		|| (a.point_to_point() && (ai->second.endpoint() == a.endpoint())))
+	    && (ai->second.prefix() == prefix)) {
+	    break;		// Ignore: the address hasn't changed
+	}
+	IfSetAddr4 set_addr(_s4, i.ifname(), a.addr(), oaddr, prefix);
+	if (set_addr.execute() < 0) {
+	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
+				     c_format("Address configuration failed (%s)",
+					      strerror(errno)));
+	    XLOG_ERROR(ifc().er().last_error().c_str());
+	}
+	
+	break;
+    } while (false);
 }
 
 #ifdef HAVE_IPV6
@@ -616,9 +662,9 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	// This is a lot of work!
 	//
 	IfTree::IfMap::iterator ii = ifc().live_config().get_if(i.ifname());
-	assert(ii != ifc().live_config().ifs().end());
+	XLOG_ASSERT(ii != ifc().live_config().ifs().end());
 	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
-	assert(vi != ii->second.vifs().end());
+	XLOG_ASSERT(vi != ii->second.vifs().end());
 	vi->second.add_addr(a.addr());
 	IfTreeVif::V6Map::iterator ai = vi->second.get_addr(a.addr());
 	ai->second = a;
@@ -641,7 +687,9 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	return;
     }
 
+    //
     // Check if interface flags need setting
+    //
     uint32_t reqmask = a.addr_flags();
     uint32_t curflags;
     if (IfGetFlags(_s6, i.ifname(), curflags).execute() < 0) {
@@ -665,23 +713,42 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	}
     }
 
-    IPv6 oaddr(IPv6::ZERO());
-    if (a.point_to_point())
-	oaddr = a.endpoint();
-
-    // For whatever reason a prefix length of zero does not cut it, so
-    // initialize prefix to 64.  This is exactly as ifconfig does.
-    uint32_t prefix = a.prefix();
-    if (0 == prefix)
-	prefix = 64;
-
-    IfSetAddr6 set_addr(_s6, i.ifname(), a.addr(), oaddr, prefix);
-    if (set_addr.execute() < 0) {
-	ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-				 c_format("Address configuration failed (%s)",
-					  strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-    }
+    //
+    // Set the address
+    //
+    do {
+	IPv6 oaddr(IPv6::ZERO());
+	if (a.point_to_point())
+	    oaddr = a.endpoint();
+	
+	// XXX: for whatever reason a prefix length of zero does not cut it, so
+	// initialize prefix to 64.  This is exactly as ifconfig does.
+	uint32_t prefix = a.prefix();
+	if (0 == prefix)
+	    prefix = 64;
+	
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	XLOG_ASSERT(ii != ifc().pulled_config().ifs().end());
+	IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
+	XLOG_ASSERT(vi != ii->second.vifs().end());
+	IfTreeVif::V6Map::const_iterator ai = vi->second.get_addr(a.addr());
+	
+	if ((ai != vi->second.v6addrs().end())
+	    && (ai->second.addr() == a.addr())
+	    && ((a.point_to_point() && (ai->second.endpoint() == a.endpoint())))
+	    && (ai->second.prefix() == prefix)) {
+	    break;		// Ignore: the address hasn't changed
+	}
+	IfSetAddr6 set_addr(_s6, i.ifname(), a.addr(), oaddr, prefix);
+	if (set_addr.execute() < 0) {
+	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
+				     c_format("Address configuration failed (%s)",
+					      strerror(errno)));
+	    XLOG_ERROR(ifc().er().last_error().c_str());
+	}
+	
+	break;
+    } while (false);
 }
 #endif // HAVE_IPV6
 
