@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.4 2003/10/22 20:36:34 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.5 2003/10/22 21:45:37 pavlin Exp $
 #
 
 #
@@ -79,9 +79,9 @@ VIFNAME="${IFNAME}"
 #
 # Test functions
 #
-test_cleanup_interface()
+config_cleanup_interface()
 {
-    echo "TEST: Cleanup interface ${IFNAME}"
+    echo "INFO: Cleanup interface ${IFNAME}"
 
     #
     # To make sure that the interface is cleaned, first explicity
@@ -196,9 +196,9 @@ test_cleanup_interface()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_create_interface()
+subtest_create_interface()
 {
-    echo "TEST: Create interface ${IFNAME}"
+    echo "SUBTEST: Create interface ${IFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -209,9 +209,9 @@ test_create_interface()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_delete_interface()
+subtest_delete_interface()
 {
-    echo "TEST: Delete interface ${IFNAME}"
+    echo "SUBTEST: Delete interface ${IFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -222,11 +222,11 @@ test_delete_interface()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_is_interface_configured()
+subtest_is_interface_configured()
 {
     local _xrl_result _ret_value _ifnames _ifnames_list _found
 
-    echo "TEST: Check whether interface ${IFNAME} is configured"
+    echo "SUBTEST: Check whether interface ${IFNAME} is configured"
 
     _xrl_result=`fea_ifmgr_get_configured_interface_names 2>&1`
     _ret_value=$?
@@ -263,11 +263,11 @@ test_is_interface_configured()
     echo "${_xrl_result}"
 }
 
-test_is_interface_not_configured()
+subtest_is_interface_not_configured()
 {
     local _xrl_result _ret_value _ifnames _ifnames_list _found
 
-    echo "TEST: Check whether interface ${IFNAME} is not configured"
+    echo "SUBTEST: Check whether interface ${IFNAME} is not configured"
 
     _xrl_result=`fea_ifmgr_get_configured_interface_names 2>&1`
     _ret_value=$?
@@ -304,9 +304,30 @@ test_is_interface_not_configured()
     echo "${_xrl_result}"
 }
 
-test_enable_interface()
+test_configure_interface()
 {
-    echo "TEST: Enable interface ${IFNAME}"
+    local _ret_value _subtests
+
+    echo "TEST: Configure interface"
+
+    _subtests=""
+    _subtests="${_subtests} subtest_create_interface"
+    _subtests="${_subtests} subtest_is_interface_configured"
+    _subtests="${_subtests} subtest_delete_interface"
+    _subtests="${_subtests} subtest_is_interface_not_configured"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+subtest_enable_interface()
+{
+    echo "SUBTEST: Enable interface ${IFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -318,9 +339,9 @@ test_enable_interface()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_disable_interface()
+subtest_disable_interface()
 {
-    echo "TEST: Disable interface ${IFNAME}"
+    echo "SUBTEST: Disable interface ${IFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -331,11 +352,11 @@ test_disable_interface()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_is_interface_enabled()
+subtest_is_interface_enabled()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether interface ${IFNAME} is enabled"
+    echo "SUBTEST: Whether interface ${IFNAME} is enabled"
 
     _xrl_result=`fea_ifmgr_get_configured_interface_enabled ${IFNAME} 2>&1`
     _ret_value=$?
@@ -361,11 +382,11 @@ test_is_interface_enabled()
     echo "${_xrl_result}"
 }
 
-test_is_interface_disabled()
+subtest_is_interface_disabled()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether interface ${IFNAME} is disabled"
+    echo "SUBTEST: Whether interface ${IFNAME} is disabled"
 
     _xrl_result=`fea_ifmgr_get_configured_interface_enabled ${IFNAME} 2>&1`
     _ret_value=$?
@@ -391,9 +412,30 @@ test_is_interface_disabled()
     echo "${_xrl_result}"
 }
 
-test_set_interface_mtu()
+test_enable_disable_interface()
 {
-    echo "TEST: Set MTU on interface ${IFNAME} to ${TEST_MTU}"
+    local _ret_value _subtests
+
+    echo "TEST: Enable/disable interface"
+
+    _subtests=""
+    _subtests="${_subtests} subtest_enable_interface"
+    _subtests="${_subtests} subtest_is_interface_enabled"
+    _subtests="${_subtests} subtest_disable_interface"
+    _subtests="${_subtests} subtest_is_interface_disabled"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+subtest_set_interface_mtu()
+{
+    echo "SUBTEST: Set MTU on interface ${IFNAME} to ${TEST_MTU}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -405,11 +447,11 @@ test_set_interface_mtu()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_get_interface_mtu()
+subtest_get_interface_mtu()
 {
     local _xrl_result _ret_value _mtu
 
-    echo "TEST: Get MTU on interface ${IFNAME}"
+    echo "SUBTEST: Get MTU on interface ${IFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_mtu ${IFNAME} 2>&1`
     _ret_value=$?
@@ -435,9 +477,29 @@ test_get_interface_mtu()
     echo "${_xrl_result}"
 }
 
-test_set_interface_mac()
+test_set_interface_mtu()
 {
-    echo "TEST: Set MAC address on interface ${IFNAME} to ${TEST_MAC}"
+    local _ret_value _subtests
+
+    echo "TEST: Set interface MTU"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_interface"
+    _subtests="${_subtests} subtest_set_interface_mtu"
+    _subtests="${_subtests} subtest_get_interface_mtu"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+subtest_set_interface_mac()
+{
+    echo "SUBTEST: Set MAC address on interface ${IFNAME} to ${TEST_MAC}"
 
     #
     # XXX: Note that we must take the interface DOWN to set the MAC address
@@ -455,11 +517,11 @@ test_set_interface_mac()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_get_interface_mac()
+subtest_get_interface_mac()
 {
     local _xrl_result _ret_value _mac
 
-    echo "TEST: Get MAC address on interface ${IFNAME}"
+    echo "SUBTEST: Get MAC address on interface ${IFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_mac ${IFNAME} 2>&1`
     _ret_value=$?
@@ -485,9 +547,29 @@ test_get_interface_mac()
     echo "${_xrl_result}"
 }
 
-test_create_vif()
+test_set_interface_mac()
 {
-    echo "TEST: Create vif ${VIFNAME}"
+    local _ret_value _subtests
+
+    echo "TEST: Set interface MAC address"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_interface"
+    _subtests="${_subtests} subtest_set_interface_mac"
+    _subtests="${_subtests} subtest_get_interface_mac"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+subtest_create_vif()
+{
+    echo "SUBTEST: Create vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -499,9 +581,9 @@ test_create_vif()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_delete_vif()
+subtest_delete_vif()
 {
-    echo "TEST: Delete vif ${VIFNAME}"
+    echo "SUBTEST: Delete vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -512,11 +594,11 @@ test_delete_vif()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_is_vif_configured()
+subtest_is_vif_configured()
 {
     local _xrl_result _ret_value _vifs _vifs_list _found
 
-    echo "TEST: Check whether vif ${VIFNAME} is configured"
+    echo "SUBTEST: Check whether vif ${VIFNAME} is configured"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_names ${IFNAME} 2>&1`
     _ret_value=$?
@@ -553,11 +635,11 @@ test_is_vif_configured()
     echo "${_xrl_result}"
 }
 
-test_is_vif_not_configured()
+subtest_is_vif_not_configured()
 {
     local _xrl_result _ret_value _vifs _vifs_list _found
 
-    echo "TEST: Check whether vif ${VIFNAME} is not configured"
+    echo "SUBTEST: Check whether vif ${VIFNAME} is not configured"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_names ${IFNAME} 2>&1`
     _ret_value=$?
@@ -594,9 +676,30 @@ test_is_vif_not_configured()
     echo "${_xrl_result}"
 }
 
-test_enable_vif()
+test_configure_vif()
 {
-    echo "TEST: Enable vif ${VIFNAME}"
+    local _ret_value _subtests
+
+    echo "TEST: Configure vif"
+
+    _subtests=""
+    _subtests="${_subtests} subtest_create_vif"
+    _subtests="${_subtests} subtest_is_vif_configured"
+    _subtests="${_subtests} subtest_delete_vif"
+    _subtests="${_subtests} subtest_is_vif_not_configured"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+subtest_enable_vif()
+{
+    echo "SUBTEST: Enable vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -610,9 +713,9 @@ test_enable_vif()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_disable_vif()
+subtest_disable_vif()
 {
-    echo "TEST: Disable vif ${VIFNAME}"
+    echo "SUBTEST: Disable vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -623,11 +726,11 @@ test_disable_vif()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_is_vif_enabled()
+subtest_is_vif_enabled()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether vif ${VIFNAME} is enabled"
+    echo "SUBTEST: Whether vif ${VIFNAME} is enabled"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_enabled ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -653,11 +756,11 @@ test_is_vif_enabled()
     echo "${_xrl_result}"
 }
 
-test_is_vif_disabled()
+subtest_is_vif_disabled()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether vif ${VIFNAME} is disabled"
+    echo "SUBTEST: Whether vif ${VIFNAME} is disabled"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_enabled ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -683,11 +786,44 @@ test_is_vif_disabled()
     echo "${_xrl_result}"
 }
 
+test_enable_disable_vif()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Enable/disable vif"
+
+    _subtests=""
+    _subtests="${_subtests} subtest_enable_vif"
+    _subtests="${_subtests} subtest_is_vif_enabled"
+    _subtests="${_subtests} subtest_disable_vif"
+    _subtests="${_subtests} subtest_is_vif_disabled"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
 test_get_vif_pif_index()
 {
     local _xrl_result _ret_value _pif_index
 
     echo "TEST: Get physical interface index on vif ${VIFNAME}"
+
+    #
+    # First explicitly create the interface
+    #
+    tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_ifmgr_create_interface ${tid} ${IFNAME}
+    fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
+    fea_ifmgr_commit_transaction ${tid}
 
     _xrl_result=`fea_ifmgr_get_configured_vif_pif_index ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -778,9 +914,9 @@ test_get_vif_flags()
     echo "${_xrl_result}"
 }
 
-test_create_address4()
+subtest_create_address4()
 {
-    echo "TEST: Create address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Create address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -803,9 +939,9 @@ test_create_address4()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_create_address6()
+subtest_create_address6()
 {
-    echo "TEST: Create address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Create address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -825,9 +961,9 @@ test_create_address6()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_delete_address4()
+subtest_delete_address4()
 {
-    echo "TEST: Delete address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Delete address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     # Delete the address
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
@@ -839,9 +975,9 @@ test_delete_address4()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_delete_address6()
+subtest_delete_address6()
 {
-    echo "TEST: Delete address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Delete address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     # Delete the address
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
@@ -853,11 +989,11 @@ test_delete_address6()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_get_address4()
+subtest_get_address4()
 {
     local _xrl_result _ret_value _addresses _addresses_list _found
 
-    echo "TEST: Get IPv4 address on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get IPv4 address on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_addresses4 ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -894,11 +1030,11 @@ test_get_address4()
     echo "${_xrl_result}"
 }
 
-test_get_address6()
+subtest_get_address6()
 {
     local _xrl_result _ret_value _addresses _addresses_list _found
 
-    echo "TEST: Get IPv6 address on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get IPv6 address on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_addresses6 ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -935,11 +1071,11 @@ test_get_address6()
     echo "${_xrl_result}"
 }
 
-test_get_prefix4()
+subtest_get_prefix4()
 {
     local _xrl_result _ret_value _prefix_len
 
-    echo "TEST: Get prefix length on address ${ADDR4} on interface ${IFNAME} vif ${VIF}"
+    echo "SUBTEST: Get prefix length on address ${ADDR4} on interface ${IFNAME} vif ${VIF}"
 
     _xrl_result=`fea_ifmgr_get_configured_prefix4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
@@ -965,11 +1101,11 @@ test_get_prefix4()
     echo "${_xrl_result}"
 }
 
-test_get_prefix6()
+subtest_get_prefix6()
 {
     local _xrl_result _ret_value _prefix_len
 
-    echo "TEST: Get prefix length on address ${ADDR6} on interface ${IFNAME} vif ${VIF}"
+    echo "SUBTEST: Get prefix length on address ${ADDR6} on interface ${IFNAME} vif ${VIF}"
 
     _xrl_result=`fea_ifmgr_get_configured_prefix6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
     _ret_value=$?
@@ -995,11 +1131,11 @@ test_get_prefix6()
     echo "${_xrl_result}"
 }
 
-test_get_broadcast4()
+subtest_get_broadcast4()
 {
     local _xrl_result _ret_value _broadcast
 
-    echo "TEST: Get broadcast address on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get broadcast address on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     if [ "${VIF_FLAG_BROADCAST}" = "false" ] ; then
 	echo "INFO: ignoring: the interface is not broadcast-capable"
@@ -1030,11 +1166,11 @@ test_get_broadcast4()
     echo "${_xrl_result}"
 }
 
-test_get_endpoint4()
+subtest_get_endpoint4()
 {
     local _xrl_result _ret_value _endpoint
 
-    echo "TEST: Get endpoint address on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get endpoint address on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     if [ "${VIF_FLAG_POINT_TO_POINT}" = "false" ] ; then
 	echo "INFO: Test ignored: the interface is not point-to-point"
@@ -1065,11 +1201,11 @@ test_get_endpoint4()
     echo "${_xrl_result}"
 }
 
-test_get_endpoint6()
+subtest_get_endpoint6()
 {
     local _xrl_result _ret_value _endpoint
 
-    echo "TEST: Get endpoint address on address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get endpoint address on address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     if [ "${VIF_FLAG_POINT_TO_POINT}" = "false" ] ; then
 	echo "INFO: Test ignored: the interface is not point-to-point"
@@ -1100,12 +1236,12 @@ test_get_endpoint6()
     echo "${_xrl_result}"
 }
 
-test_get_address_flags4()
+subtest_get_address_flags4()
 {
     local _xrl_result _ret_value _enabled _broadcast _loopback _point_to_point
     local _multicast
 
-    echo "TEST: Get address flags on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get address flags on address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_address_flags4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
@@ -1151,12 +1287,12 @@ test_get_address_flags4()
     echo "${_xrl_result}"
 }
 
-test_get_address_flags6()
+subtest_get_address_flags6()
 {
     local _xrl_result _ret_value _enabled _broadcast _loopback _point_to_point
     local _multicast
 
-    echo "TEST: Get address flags on address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get address flags on address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_address_flags6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
     _ret_value=$?
@@ -1198,11 +1334,11 @@ test_get_address_flags6()
     echo "${_xrl_result}"
 }
 
-test_get_deleted_address4()
+subtest_get_deleted_address4()
 {
     local _xrl_result _ret_value _addresses _addresses_list _found
 
-    echo "TEST: Get deleted IPv4 address on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get deleted IPv4 address on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_addresses4 ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -1239,11 +1375,11 @@ test_get_deleted_address4()
     echo "${_xrl_result}"
 }
 
-test_get_deleted_address6()
+subtest_get_deleted_address6()
 {
     local _xrl_result _ret_value _addresses _addresses_list _found
 
-    echo "TEST: Get deleted IPv6 address on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Get deleted IPv6 address on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_vif_addresses6 ${IFNAME} ${VIFNAME} 2>&1`
     _ret_value=$?
@@ -1280,9 +1416,61 @@ test_get_deleted_address6()
     echo "${_xrl_result}"
 }
 
-test_enable_address4()
+test_create_address4()
 {
-    echo "TEST: Enable address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    local _ret_value _subtests
+
+    echo "TEST: Create IPv4 address"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_interface"
+    _subtests="${_subtests} subtest_create_address4"
+    _subtests="${_subtests} subtest_get_address4"
+    _subtests="${_subtests} subtest_get_prefix4"
+    _subtests="${_subtests} subtest_get_broadcast4"
+    _subtests="${_subtests} subtest_get_endpoint4"
+    _subtests="${_subtests} subtest_get_address_flags4"
+    _subtests="${_subtests} subtest_delete_address4"
+    _subtests="${_subtests} subtest_get_deleted_address4"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+test_create_address6()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Create IPv6 address"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_interface"
+    _subtests="${_subtests} subtest_create_address6"
+    _subtests="${_subtests} subtest_get_address6"
+    _subtests="${_subtests} subtest_get_prefix6"
+    _subtests="${_subtests} subtest_get_broadcast6"
+    _subtests="${_subtests} subtest_get_endpoint6"
+    _subtests="${_subtests} subtest_get_address_flags6"
+    _subtests="${_subtests} subtest_delete_address6"
+    _subtests="${_subtests} subtest_get_deleted_address6"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+subtest_enable_address4()
+{
+    echo "SUBTEST: Enable address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -1305,9 +1493,9 @@ test_enable_address4()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_enable_address6()
+subtest_enable_address6()
 {
-    echo "TEST: Enable address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Enable address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -1327,9 +1515,9 @@ test_enable_address6()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_disable_address4()
+subtest_disable_address4()
 {
-    echo "TEST: Disable address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Disable address ${ADDR4} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -1340,9 +1528,9 @@ test_disable_address4()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_disable_address6()
+subtest_disable_address6()
 {
-    echo "TEST: Disable address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Disable address ${ADDR6} on interface ${IFNAME} vif ${VIFNAME}"
 
     tid=`get_xrl_variable_value \`fea_ifmgr_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -1353,11 +1541,11 @@ test_disable_address6()
     fea_ifmgr_commit_transaction ${tid}
 }
 
-test_is_address_enabled4()
+subtest_is_address_enabled4()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether address ${ADDR4} is enabled on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Whether address ${ADDR4} is enabled on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_address_enabled4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
@@ -1383,11 +1571,11 @@ test_is_address_enabled4()
     echo "${_xrl_result}"
 }
 
-test_is_address_enabled6()
+subtest_is_address_enabled6()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether address ${ADDR6} is enabled on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Whether address ${ADDR6} is enabled on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_address_enabled6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
     _ret_value=$?
@@ -1413,12 +1601,12 @@ test_is_address_enabled6()
     echo "${_xrl_result}"
 }
 
-test_is_address_disabled4()
+subtest_is_address_disabled4()
 {
     local _xrl_result _ret_value _enabled
     local _xrl_result2 _ret_value2 _addresses _addresses_list _found
 
-    echo "TEST: Whether address ${ADDR4} is disabled on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Whether address ${ADDR4} is disabled on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_address_enabled4 ${IFNAME} ${VIFNAME} ${ADDR4} 2>&1`
     _ret_value=$?
@@ -1473,12 +1661,12 @@ test_is_address_disabled4()
     echo "${_xrl_result}"
 }
 
-test_is_address_disabled6()
+subtest_is_address_disabled6()
 {
     local _xrl_result _ret_value _enabled
     local _xrl_result2 _ret_value2 _addresses _addresses_list _found
 
-    echo "TEST: Whether address ${ADDR6} is disabled on interface ${IFNAME} vif ${VIFNAME}"
+    echo "SUBTEST: Whether address ${ADDR6} is disabled on interface ${IFNAME} vif ${VIFNAME}"
 
     _xrl_result=`fea_ifmgr_get_configured_address_enabled6 ${IFNAME} ${VIFNAME} ${ADDR6} 2>&1`
     _ret_value=$?
@@ -1533,63 +1721,73 @@ test_is_address_disabled6()
     echo "${_xrl_result}"
 }
 
+test_enable_disable_address4()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Enable/disable IPv4 address"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_interface"
+    _subtests="${_subtests} subtest_enable_address4"
+    _subtests="${_subtests} subtest_is_address_enabled4"
+    _subtests="${_subtests} subtest_disable_address4"
+    _subtests="${_subtests} subtest_is_address_disabled4"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+test_enable_disable_address6()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Enable/disable IPv6 address"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_interface"
+    _subtests="${_subtests} subtest_enable_address6"
+    _subtests="${_subtests} subtest_is_address_enabled6"
+    _subtests="${_subtests} subtest_disable_address6"
+    _subtests="${_subtests} subtest_is_address_disabled6"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
 #
 # The tests
 #
 TESTS=""
-TESTS="$TESTS test_cleanup_interface"
 # Interface and vif tests
-TESTS="$TESTS test_create_interface"
-TESTS="$TESTS test_is_interface_configured"
-TESTS="$TESTS test_delete_interface"
-TESTS="$TESTS test_is_interface_not_configured"
-TESTS="$TESTS test_enable_interface"
-TESTS="$TESTS test_is_interface_enabled"
-TESTS="$TESTS test_disable_interface"
-TESTS="$TESTS test_is_interface_disabled"
+TESTS="$TESTS test_configure_interface"
+TESTS="$TESTS test_enable_disable_interface"
 TESTS="$TESTS test_set_interface_mtu"
-TESTS="$TESTS test_get_interface_mtu"
 TESTS="$TESTS test_set_interface_mac"
-TESTS="$TESTS test_get_interface_mac"
-TESTS="$TESTS test_create_vif"
-TESTS="$TESTS test_is_vif_configured"
-TESTS="$TESTS test_delete_vif"
-TESTS="$TESTS test_is_vif_not_configured"
-TESTS="$TESTS test_enable_vif"
-TESTS="$TESTS test_is_vif_enabled"
-TESTS="$TESTS test_disable_vif"
-TESTS="$TESTS test_is_vif_disabled"
+TESTS="$TESTS test_configure_vif"
+TESTS="$TESTS test_enable_disable_vif"
 TESTS="$TESTS test_get_vif_pif_index"
 TESTS="$TESTS test_get_vif_flags"
 # IPv4 tests
 TESTS="$TESTS test_create_address4"
-TESTS="$TESTS test_get_address4"
-TESTS="$TESTS test_get_prefix4"
-TESTS="$TESTS test_get_broadcast4"
-TESTS="$TESTS test_get_endpoint4"
-TESTS="$TESTS test_get_address_flags4"
-TESTS="$TESTS test_delete_address4"
-TESTS="$TESTS test_get_deleted_address4"
-TESTS="$TESTS test_enable_address4"
-TESTS="$TESTS test_is_address_enabled4"
-TESTS="$TESTS test_disable_address4"
-TESTS="$TESTS test_is_address_disabled4"
+TESTS="$TESTS test_enable_disable_address4"
 # IPv6 tests
 if [ "${HAVE_IPV6}" = "true" ] ; then
-    TESTS="$TESTS test_create_address6"
-    TESTS="$TESTS test_get_address6"
-    TESTS="$TESTS test_get_prefix6"
-    TESTS="$TESTS test_get_endpoint6"
-    TESTS="$TESTS test_get_address_flags6"
-    TESTS="$TESTS test_delete_address6"
-    TESTS="$TESTS test_get_deleted_address6"
-    TESTS="$TESTS test_enable_address6"
-    TESTS="$TESTS test_is_address_enabled6"
-    TESTS="$TESTS test_disable_address6"
-    TESTS="$TESTS test_is_address_disabled6"
+    TESTS="$TESTS test_create_address4"
+    TESTS="$TESTS test_enable_disable_address4"
 fi
 # Clean-up the mess
-TESTS="$TESTS test_cleanup_interface"
+TESTS="$TESTS config_cleanup_interface"
 
 for t in ${TESTS} ; do
     $t

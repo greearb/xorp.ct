@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.9 2003/10/22 20:34:30 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.10 2003/10/22 22:15:28 pavlin Exp $
 #
 
 #
@@ -135,11 +135,11 @@ test_have_ipv6()
     echo "${_xrl_result}"
 }
 
-test_prepare_unicast_forwarding4()
+config_prepare_unicast_forwarding4()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Prepare IPv4 unicast forwarding tests (explicitly enable forwarding)"
+    echo "INFO: Prepare IPv4 unicast forwarding tests (explicitly enable forwarding)"
 
     _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 true 2>&1`
     _ret_value=$?
@@ -150,11 +150,11 @@ test_prepare_unicast_forwarding4()
     fi
 }
 
-test_prepare_unicast_forwarding6()
+config_prepare_unicast_forwarding6()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Prepare IPv6 unicast forwarding tests (explicitly enable forwarding)"
+    echo "INFO: Prepare IPv6 unicast forwarding tests (explicitly enable forwarding)"
 
     _xrl_result=`fea_fti_set_unicast_forwarding_enabled6 true 2>&1`
     _ret_value=$?
@@ -165,11 +165,11 @@ test_prepare_unicast_forwarding6()
     fi
 }
 
-test_enable_unicast_forwarding4()
+subtest_enable_unicast_forwarding4()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Enable IPv4 unicast forwarding"
+    echo "SUBTEST: Enable IPv4 unicast forwarding"
 
     _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 true 2>&1`
     _ret_value=$?
@@ -180,11 +180,11 @@ test_enable_unicast_forwarding4()
     fi
 }
 
-test_enable_unicast_forwarding6()
+subtest_enable_unicast_forwarding6()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Enable IPv6 unicast forwarding"
+    echo "SUBTEST: Enable IPv6 unicast forwarding"
 
     _xrl_result=`fea_fti_set_unicast_forwarding_enabled6 true 2>&1`
     _ret_value=$?
@@ -195,41 +195,41 @@ test_enable_unicast_forwarding6()
     fi
 }
 
-test_disable_unicast_forwarding4()
+subtest_disable_unicast_forwarding4()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Enable IPv4 unicast forwarding"
+    echo "SUBTEST: Disable IPv4 unicast forwarding"
 
     _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 false 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	echo "ERROR: cannot enable IPv4 unicast forwarding:"
+	echo "ERROR: cannot disable IPv4 unicast forwarding:"
 	echo "${_xrl_result}"
 	return 1
     fi
 }
 
-test_disable_unicast_forwarding6()
+subtest_disable_unicast_forwarding6()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Enable IPv6 unicast forwarding"
+    echo "SUBTEST: Disable IPv6 unicast forwarding"
 
     _xrl_result=`fea_fti_set_unicast_forwarding_enabled6 false 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	echo "ERROR: cannot enable IPv6 unicast forwarding:"
+	echo "ERROR: cannot disable IPv6 unicast forwarding:"
 	echo "${_xrl_result}"
 	return 1
     fi
 }
 
-test_get_enabled_unicast_forwarding4()
+subtest_get_enabled_unicast_forwarding4()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether IPv4 unicast forwarding is enabled"
+    echo "SUBTEST: Whether IPv4 unicast forwarding is enabled"
 
     _xrl_result=`fea_fti_get_unicast_forwarding_enabled4 2>&1`
     _ret_value=$?
@@ -255,11 +255,11 @@ test_get_enabled_unicast_forwarding4()
     echo "${_xrl_result}"
 }
 
-test_get_enabled_unicast_forwarding6()
+subtest_get_enabled_unicast_forwarding6()
 {
     local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether IPv6 unicast forwarding is enabled"
+    echo "SUBTEST: Whether IPv6 unicast forwarding is enabled"
 
     _xrl_result=`fea_fti_get_unicast_forwarding_enabled6 2>&1`
     _ret_value=$?
@@ -285,11 +285,11 @@ test_get_enabled_unicast_forwarding6()
     echo "${_xrl_result}"
 }
 
-test_get_disabled_unicast_forwarding4()
+subtest_get_disabled_unicast_forwarding4()
 {
-    local _xrl_result _ret_value _disabled
+    local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether IPv4 unicast forwarding is disabled"
+    echo "SUBTEST: Whether IPv4 unicast forwarding is disabled"
 
     _xrl_result=`fea_fti_get_unicast_forwarding_enabled4 2>&1`
     _ret_value=$?
@@ -315,11 +315,11 @@ test_get_disabled_unicast_forwarding4()
     echo "${_xrl_result}"
 }
 
-test_get_disabled_unicast_forwarding6()
+subtest_get_disabled_unicast_forwarding6()
 {
-    local _xrl_result _ret_value _disabled
+    local _xrl_result _ret_value _enabled
 
-    echo "TEST: Whether IPv6 unicast forwarding is disabled"
+    echo "SUBTEST: Whether IPv6 unicast forwarding is disabled"
 
     _xrl_result=`fea_fti_get_unicast_forwarding_enabled6 2>&1`
     _ret_value=$?
@@ -345,11 +345,55 @@ test_get_disabled_unicast_forwarding6()
     echo "${_xrl_result}"
 }
 
-test_cleanup_gateway4()
+test_enable_disable_unicast_forwarding4()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Enable/disable IPv4 unicast forwarding"
+
+    _subtests=""
+    _subtests="${_subtests} config_prepare_unicast_forwarding4"
+    _subtests="${_subtests} subtest_disable_unicast_forwarding4"
+    _subtests="${_subtests} subtest_get_disabled_unicast_forwarding4"
+    _subtests="${_subtests} subtest_enable_unicast_forwarding4"
+    _subtests="${_subtests} subtest_get_enabled_unicast_forwarding4"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+test_enable_disable_unicast_forwarding6()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Enable/disable IPv6 unicast forwarding"
+
+    _subtests=""
+    _subtests="${_subtests} config_prepare_unicast_forwarding6"
+    _subtests="${_subtests} subtest_disable_unicast_forwarding6"
+    _subtests="${_subtests} subtest_get_disabled_unicast_forwarding6"
+    _subtests="${_subtests} subtest_enable_unicast_forwarding6"
+    _subtests="${_subtests} subtest_get_enabled_unicast_forwarding6"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+config_cleanup_gateway4()
 {
     local _xrl_result _ret_value _gateway
 
-    echo "TEST: Cleanup gateway (if any) for destination ${DEST4}"
+    echo "INFO: Cleanup gateway (if any) for destination ${DEST4}"
 
     # Lookup the entry
     _gateway=""
@@ -359,7 +403,8 @@ test_cleanup_gateway4()
 	_gateway=`get_xrl_variable_value "${_xrl_result}" gateway:ipv4`
     fi
     if [ "${_gateway}" = "" ] ; then
-	echo "RESULT: No gateway to delete for destination ${DEST4}"
+	# No gateway to delete for destination ${DEST4}"
+	return 0
     else
 	tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
 	if [ "${tid}" = "" ] ; then
@@ -371,11 +416,11 @@ test_cleanup_gateway4()
     fi
 }
 
-test_cleanup_gateway6()
+config_cleanup_gateway6()
 {
     local _xrl_result _ret_value _gateway
 
-    echo "TEST: Cleanup gateway (if any) for destination ${DEST6}"
+    echo "INFO: Cleanup gateway (if any) for destination ${DEST6}"
 
     # Lookup the entry
     _gateway=""
@@ -385,7 +430,8 @@ test_cleanup_gateway6()
 	_gateway=`get_xrl_variable_value "${_xrl_result}" gateway:ipv6`
     fi
     if [ "${_gateway}" = "" ] ; then
-	echo "RESULT: No gateway to delete for destination ${DEST6}"
+	# No gateway to delete for destination ${DEST6}"
+	return 0
     else
 	tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
 	if [ "${tid}" = "" ] ; then
@@ -397,9 +443,9 @@ test_cleanup_gateway6()
     fi
 }
 
-test_add_entry4()
+subtest_add_entry4()
 {
-    echo "TEST: Add ${GATEWAY4} as gateway for destination ${DEST4}"
+    echo "SUBTEST: Add ${GATEWAY4} as gateway for destination ${DEST4}"
 
     tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -410,9 +456,9 @@ test_add_entry4()
     fea_fti_commit_transaction ${tid}
 }
 
-test_add_entry6()
+subtest_add_entry6()
 {
-    echo "TEST: Add ${GATEWAY6} as gateway for destination ${DEST6}"
+    echo "SUBTEST: Add ${GATEWAY6} as gateway for destination ${DEST6}"
 
     tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -423,12 +469,12 @@ test_add_entry6()
     fea_fti_commit_transaction ${tid}
 }
 
-test_lookup_entry4()
+subtest_lookup_entry4()
 {
     local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Lookup gateway for destination ${DEST4}"
+    echo "SUBTEST: Lookup gateway for destination ${DEST4}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
     _ret_value=$?
@@ -483,12 +529,12 @@ test_lookup_entry4()
     echo "${_xrl_result}"
 }
 
-test_lookup_entry6()
+subtest_lookup_entry6()
 {
     local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Lookup gateway for destination ${DEST6}"
+    echo "SUBTEST: Lookup gateway for destination ${DEST6}"
 
     _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
     _ret_value=$?
@@ -543,12 +589,12 @@ test_lookup_entry6()
     echo "${_xrl_result}"
 }
 
-test_lookup_route4()
+subtest_lookup_route4()
 {
     local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Lookup route for destination ${DEST_HOST4}"
+    echo "SUBTEST: Lookup route for destination ${DEST_HOST4}"
 
     _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST4} 2>&1`
     _ret_value=$?
@@ -603,12 +649,12 @@ test_lookup_route4()
     echo "${_xrl_result}"
 }
 
-test_lookup_route6()
+subtest_lookup_route6()
 {
     local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Lookup route for destination ${DEST_HOST6}"
+    echo "SUBTEST: Lookup route for destination ${DEST_HOST6}"
 
     _xrl_result=`fea_fti_lookup_route6 ${DEST_HOST6} 2>&1`
     _ret_value=$?
@@ -663,9 +709,9 @@ test_lookup_route6()
     echo "${_xrl_result}"
 }
 
-test_delete_entry4()
+subtest_delete_entry4()
 {
-    echo "TEST: Delete the gateway for destination ${DEST4}"
+    echo "SUBTEST: Delete the gateway for destination ${DEST4}"
 
     tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -676,9 +722,9 @@ test_delete_entry4()
     fea_fti_commit_transaction ${tid}
 }
 
-test_delete_entry6()
+subtest_delete_entry6()
 {
-    echo "TEST: Delete the gateway for destination ${DEST6}"
+    echo "SUBTEST: Delete the gateway for destination ${DEST6}"
 
     tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -689,11 +735,11 @@ test_delete_entry6()
     fea_fti_commit_transaction ${tid}
 }
 
-test_lookup_deleted_entry4()
+subtest_lookup_deleted_entry4()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Lookup deleted entry for destination ${DEST4}"
+    echo "SUBTEST: Lookup deleted entry for destination ${DEST4}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
     _ret_value=$?
@@ -706,11 +752,11 @@ test_lookup_deleted_entry4()
     return 0
 }
 
-test_lookup_deleted_entry6()
+subtest_lookup_deleted_entry6()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Lookup deleted entry for destination ${DEST6}"
+    echo "SUBTEST: Lookup deleted entry for destination ${DEST6}"
 
     _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
     _ret_value=$?
@@ -723,11 +769,11 @@ test_lookup_deleted_entry6()
     return 0
 }
 
-test_lookup_deleted_route4()
+subtest_lookup_deleted_route4()
 {
     local _xrl_result _ret_value _ipv4net
 
-    echo "TEST: Lookup deleted route for destination ${DEST_HOST4}"
+    echo "SUBTEST: Lookup deleted route for destination ${DEST_HOST4}"
 
     if [ "${OS}" = "Linux" ] ; then
 	echo "INFO: Sleeping for 3 seconds in case of Linux (to timeout any obsoleted cloned entries)..."
@@ -753,11 +799,11 @@ test_lookup_deleted_route4()
     return 1
 }
 
-test_lookup_deleted_route6()
+subtest_lookup_deleted_route6()
 {
     local _xrl_result _ret_value _ipv6net
 
-    echo "TEST: Lookup deleted route for destination ${DEST_HOST6}"
+    echo "SUBTEST: Lookup deleted route for destination ${DEST_HOST6}"
 
     if [ "${OS}" = "Linux" ] ; then
 	echo "INFO: Sleeping for 3 seconds in case of Linux (to timeout any obsoleted cloned entries)..."
@@ -781,6 +827,54 @@ test_lookup_deleted_route6()
     echo "ERROR: routing entry was not deleted:"
     echo "${_xrl_result}"
     return 1
+}
+
+test_add_delete_unicast_forwarding_entry4()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Add/delete IPv4 unicast forwarding entry"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_gateway4"
+    _subtests="${_subtests} subtest_add_entry4"
+    _subtests="${_subtests} subtest_lookup_entry4"
+    _subtests="${_subtests} subtest_lookup_route4"
+    _subtests="${_subtests} subtest_delete_entry4"
+    _subtests="${_subtests} subtest_lookup_deleted_entry4"
+    _subtests="${_subtests} subtest_lookup_deleted_route4"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
+}
+
+test_add_delete_unicast_forwarding_entry6()
+{
+    local _ret_value _subtests
+
+    echo "TEST: Add/delete IPv6 unicast forwarding entry"
+
+    _subtests=""
+    _subtests="${_subtests} config_cleanup_gateway6"
+    _subtests="${_subtests} subtest_add_entry6"
+    _subtests="${_subtests} subtest_lookup_entry6"
+    _subtests="${_subtests} subtest_lookup_route6"
+    _subtests="${_subtests} subtest_delete_entry6"
+    _subtests="${_subtests} subtest_lookup_deleted_entry6"
+    _subtests="${_subtests} subtest_lookup_deleted_route6"
+
+    for t in ${_subtests} ; do
+	$t
+	_ret_value=$?
+	if [ ${_ret_value} -ne 0 ] ; then
+	    return ${_ret_value}
+	fi
+    done
 }
 
 test_delete_all_entries4()
@@ -901,35 +995,15 @@ test_delete_all_entries6()
 TESTS=""
 TESTS="$TESTS test_have_ipv4"
 # Test IPv4 unicast forwarding enabling/disabling
-TESTS="$TESTS test_prepare_unicast_forwarding4"
-TESTS="$TESTS test_disable_unicast_forwarding4"
-TESTS="$TESTS test_get_disabled_unicast_forwarding4"
-TESTS="$TESTS test_enable_unicast_forwarding4"
-TESTS="$TESTS test_get_enabled_unicast_forwarding4"
+TESTS="$TESTS test_enable_disable_unicast_forwarding4"
 # Test adding/deleting and lookup of IPv4 forwarding entries
-TESTS="$TESTS test_cleanup_gateway4"
-TESTS="$TESTS test_add_entry4"
-TESTS="$TESTS test_lookup_entry4"
-TESTS="$TESTS test_lookup_route4"
-TESTS="$TESTS test_delete_entry4"
-TESTS="$TESTS test_lookup_deleted_entry4"
-TESTS="$TESTS test_lookup_deleted_route4"
+TESTS="$TESTS test_add_delete_unicast_forwarding_entry4"
 TESTS="$TESTS test_delete_all_entries4"
 if [ "${HAVE_IPV6}" = "true" ] ; then
     # Test IPv6 unicast forwarding enabling/disabling
-    TESTS="$TESTS test_prepare_unicast_forwarding6"
-    TESTS="$TESTS test_disable_unicast_forwarding6"
-    TESTS="$TESTS test_get_disabled_unicast_forwarding6"
-    TESTS="$TESTS test_enable_unicast_forwarding6"
-    TESTS="$TESTS test_get_enabled_unicast_forwarding6"
+    TESTS="$TESTS test_enable_disable_unicast_forwarding6"
     # Test adding/deleting and lookup of IPv6 forwarding entries
-    TESTS="$TESTS test_cleanup_gateway6"
-    TESTS="$TESTS test_add_entry6"
-    TESTS="$TESTS test_lookup_entry6"
-    TESTS="$TESTS test_lookup_route6"
-    TESTS="$TESTS test_delete_entry6"
-    TESTS="$TESTS test_lookup_deleted_entry6"
-    TESTS="$TESTS test_lookup_deleted_route6"
+    TESTS="$TESTS test_add_delete_unicast_forwarding_entry6"
     TESTS="$TESTS test_delete_all_entries6"
 fi
 
