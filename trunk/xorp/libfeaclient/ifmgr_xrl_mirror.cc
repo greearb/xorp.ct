@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.7 2004/04/22 01:11:50 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.8 2004/05/18 22:13:09 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -880,7 +880,6 @@ IfMgrXrlMirror::shutdown()
 	return false;
 
     set_status(SHUTTING_DOWN);
-    _iftree.clear();
     unregister_with_ifmgr();
 
     return true;
@@ -906,6 +905,13 @@ IfMgrXrlMirror::finder_ready_event()
 void
 IfMgrXrlMirror::tree_complete()
 {
+    if (status() != STARTING) {
+	// XXX In case shutdown is called or a failure occurs before
+	// tree_complete message is received.  If either happens we don't
+	// want to advertise the tree as complete.
+	return;
+    }
+
     set_status(RUNNING);
     list<IfMgrHintObserver*>::const_iterator ci;
     for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
@@ -917,6 +923,9 @@ IfMgrXrlMirror::tree_complete()
 void
 IfMgrXrlMirror::updates_made()
 {
+    if (status() & ServiceStatus(SHUTTING_DOWN | SHUTDOWN | FAILED))
+	return;
+
     list<IfMgrHintObserver*>::const_iterator ci;
     for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
 	IfMgrHintObserver* ho = *ci;
@@ -927,6 +936,9 @@ IfMgrXrlMirror::updates_made()
 bool
 IfMgrXrlMirror::attach_hint_observer(IfMgrHintObserver* o)
 {
+    if (status() & ServiceStatus(SHUTTING_DOWN | SHUTDOWN | FAILED))
+	return false;
+
     if (find(_hint_observers.begin(), _hint_observers.end(), o)
 	!= _hint_observers.end()) {
 	return false;
@@ -988,6 +1000,8 @@ IfMgrXrlMirror::unregister_with_ifmgr()
 void
 IfMgrXrlMirror::unregister_cb(const XrlError& e)
 {
+    _iftree.clear();
+
     if (e == XrlError::OKAY()) {
 	set_status(SHUTDOWN);
     } else {
