@@ -1,6 +1,12 @@
 #
-# $XORP: xorp/pim/TODO,v 1.25 2003/02/11 23:29:32 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.26 2003/02/25 01:38:48 pavlin Exp $
 #
+
+* IMPL+SPEC+TESTSUITE:
+  In the Bootstrap spec, if a Cand-BSR is in Candidate BSR state:
+  clarify what exactly means "Receive non-preferred BSM from Elected BSR".
+  I.e., non-preferred compared to the previous metrics of the elected BSR,
+  or non-preferred compared to the Cand-BSR itself?
 
 * IMPL+SPEC: If Cand-RP received by BSR, when to send the next BSM
   with the updated RP-Set? Currently, the spec doesn't say anything;
