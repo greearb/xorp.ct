@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.8 2003/10/02 16:49:51 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.9 2003/11/06 20:42:22 atanu Exp $
 #
 
 Urgent
@@ -41,8 +41,6 @@ Non-Urgent
 General
 
  - user database needs proper implementation of capabilities
- - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
-   and list all *.cc files there in alphabetical order
  - When the rtrmgr is running in no-exec mode do not instantiate a
    finder and XrlRouter.
  - Audit the number of symbols copied by strncpy in the lex/yacc
@@ -68,6 +66,8 @@ Done
    RESOLVED: Use Ctrl-C to interrupt xorpsh waiting for command completion.
  - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
    fail all authentication checks.  Handle this more gracefully.
+ - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
+   and list all *.cc files there in alphabetical order
 
 RESOLVED: restart is detected and user is advised to logout and login again.
 
