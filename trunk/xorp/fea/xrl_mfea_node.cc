@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.15 2003/09/23 03:35:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.16 2003/11/19 01:03:38 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -337,38 +337,39 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
     if (vif != NULL)
 	vif_name = vif->name();
     
-    switch (family()) {
-    case AF_INET:
-	XrlMfeaClientV0p1Client::send_add_mrib4(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv4net(),
-	    mrib.next_hop_router_addr().get_ipv4(),
-	    vif_name,
-	    mrib.next_hop_vif_index(),
-	    mrib.metric_preference(),
+    do {
+	if (MfeaNode::is_ipv4()) {
+	    XrlMfeaClientV0p1Client::send_add_mrib4(
+		dst_module_instance_name.c_str(),
+		my_xrl_target_name(),
+		mrib.dest_prefix().get_ipv4net(),
+		mrib.next_hop_router_addr().get_ipv4(),
+		vif_name,
+		mrib.next_hop_vif_index(),
+		mrib.metric_preference(),
+		mrib.metric(),
+		callback(this, &XrlMfeaNode::xrl_result_add_mrib));
+	    break;
+	}
+
+	if (MfeaNode::is_ipv6()) {
+	    XrlMfeaClientV0p1Client::send_add_mrib6(
+		dst_module_instance_name.c_str(),
+		my_xrl_target_name(),
+		mrib.dest_prefix().get_ipv6net(),
+		mrib.next_hop_router_addr().get_ipv6(),
+		vif_name,
+		mrib.next_hop_vif_index(),
+		mrib.metric_preference(),
 	    mrib.metric(),
-	    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	XrlMfeaClientV0p1Client::send_add_mrib6(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv6net(),
-	    mrib.next_hop_router_addr().get_ipv6(),
-	    vif_name,
-	    mrib.next_hop_vif_index(),
-	    mrib.metric_preference(),
-	    mrib.metric(),
-	    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-	break;
-#endif // HAVE_IPV6
-    default:
+		callback(this, &XrlMfeaNode::xrl_result_add_mrib));
+	    break;
+	}
+
 	XLOG_UNREACHABLE();
 	break;
-    }
-    
+    } while (false);
+
     return (XORP_OK);
 }
 
@@ -389,28 +390,29 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 			      xorp_module_id ,	// dst_module_id,
 			      const Mrib& mrib)
 {
-    switch (family()) {
-    case AF_INET:
-	XrlMfeaClientV0p1Client::send_delete_mrib4(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv4net(),
-	    callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	XrlMfeaClientV0p1Client::send_delete_mrib6(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    mrib.dest_prefix().get_ipv6net(),
-	    callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
-	break;
-#endif // HAVE_IPV6
-    default:
+    do {
+	if (MfeaNode::is_ipv4()) {
+	    XrlMfeaClientV0p1Client::send_delete_mrib4(
+		dst_module_instance_name.c_str(),
+		my_xrl_target_name(),
+		mrib.dest_prefix().get_ipv4net(),
+		callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
+	    break;
+	}
+
+	if (MfeaNode::is_ipv6()) {
+	    XrlMfeaClientV0p1Client::send_delete_mrib6(
+		dst_module_instance_name.c_str(),
+		my_xrl_target_name(),
+		mrib.dest_prefix().get_ipv6net(),
+		callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
+	    break;
+	}
+
 	XLOG_UNREACHABLE();
 	break;
-    }
-    
+    } while (false);
+
     return (XORP_OK);
 }
 
@@ -1477,37 +1479,39 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 	    if (vif != NULL)
 		vif_name = vif->name();
 	    is_sent = true;
-	    switch (family()) {
-	    case AF_INET:
-		XrlMfeaClientV0p1Client::send_add_mrib4(
-		    xrl_sender_name.c_str(),
-		    my_xrl_target_name(),
-		    mrib->dest_prefix().get_ipv4net(),
-		    mrib->next_hop_router_addr().get_ipv4(),
-		    vif_name,
-		    mrib->next_hop_vif_index(),
-		    mrib->metric_preference(),
-		    mrib->metric(),
-		    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-		break;
-#ifdef HAVE_IPV6
-	    case AF_INET6:
-		XrlMfeaClientV0p1Client::send_add_mrib6(
-		    xrl_sender_name.c_str(),
-		    my_xrl_target_name(),
-		    mrib->dest_prefix().get_ipv6net(),
-		    mrib->next_hop_router_addr().get_ipv6(),
-		    vif_name,
-		    mrib->next_hop_vif_index(),
-		    mrib->metric_preference(),
-		    mrib->metric(),
-		    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-		break;
-#endif // HAVE_IPV6
-	    default:
+
+	    do {
+		if (MfeaNode::is_ipv4()) {
+		    XrlMfeaClientV0p1Client::send_add_mrib4(
+			xrl_sender_name.c_str(),
+			my_xrl_target_name(),
+			mrib->dest_prefix().get_ipv4net(),
+			mrib->next_hop_router_addr().get_ipv4(),
+			vif_name,
+			mrib->next_hop_vif_index(),
+			mrib->metric_preference(),
+			mrib->metric(),
+			callback(this, &XrlMfeaNode::xrl_result_add_mrib));
+		    break;
+		}
+
+		if (MfeaNode::is_ipv6()) {
+		    XrlMfeaClientV0p1Client::send_add_mrib6(
+			xrl_sender_name.c_str(),
+			my_xrl_target_name(),
+			mrib->dest_prefix().get_ipv6net(),
+			mrib->next_hop_router_addr().get_ipv6(),
+			vif_name,
+			mrib->next_hop_vif_index(),
+			mrib->metric_preference(),
+			mrib->metric(),
+			callback(this, &XrlMfeaNode::xrl_result_add_mrib));
+		    break;
+		}
+
 		XLOG_UNREACHABLE();
 		break;
-	    }
+	    } while (false);
 	}
 	//
 	// Done
