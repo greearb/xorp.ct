@@ -1,10 +1,11 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.8 2004/06/04 04:47:04 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.9 2004/06/07 18:15:06 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
 
     interface @: txt {
 	enabled:	toggle = true;
+	/* discard:	bool = false; */
 	description:	txt = "";
 	mac:		macaddr;
 	mtu:		u32;
@@ -65,6 +66,13 @@ interfaces {
 	    %help:	short "Enable a network interface";
 	    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_interface_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&enabled:bool=$(@)";
 	}
+
+/*
+	discard {
+	    %help:	short "Configure a discard interface";
+	    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_interface_discard?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&discard:bool=$(@)";
+	}
+*/
 
 	default-system-config {
 	    %help:	short "Use default values from the system";
