@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.11 2003/06/26 22:52:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.12 2003/07/03 07:19:45 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -295,22 +295,9 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	       && (is_sptbit_set == false)) {
 	is_wrong_iif = false;
 	olist = pim_mre->inherited_olist_sg_rpt();
-	if (pim_mre->check_switch_to_spt_sg()) {
-	    if (pim_mre_sg == NULL) {
-		// XXX: create the (S,G) entry to initiate (S,G) Join
-		pim_mre_sg = pim_mre_find(src, dst, PIM_MRE_SG, PIM_MRE_SG);
-		pim_mre_sg->start_keepalive_timer();
-		is_keepalive_timer_restarted = true;
-		
-		// TODO: XXX: PAVPAVPAV: OK TO COMMENT?
-		// pim_mre_sg->recompute_is_could_register_sg();
-		// pim_mre_sg->recompute_is_join_desired_sg();
-	    }
+	if (pim_mre->check_switch_to_spt_sg(src, dst, pim_mre_sg)) {
 	    XLOG_ASSERT(pim_mre_sg != NULL);
-	    if (! is_keepalive_timer_restarted) {
-		pim_mre_sg->start_keepalive_timer();
-		is_keepalive_timer_restarted = true;
-	    }
+	    is_keepalive_timer_restarted = true;
 	}
     } else {
 	// # Note: RPF check failed
@@ -420,6 +407,7 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 			     bool is_leq_upcall)
 {
     PimMre *pim_mre;
+    PimMre *pim_mre_wc;
     PimMre *pim_mre_sg;
     PimMfc *pim_mfc;
     uint32_t lookup_flags
@@ -443,11 +431,6 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	       measured_packets, measured_bytes,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
-    
-    if (is_geq_upcall) {
-	// TODO: XXX: PAVPAVPAV: take care of this!!
-	return (XORP_OK);
-    }
     
     pim_mfc = pim_mfc_find(source_addr, group_addr, false);
     
@@ -475,6 +458,51 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	}
 	break;
     } while (false);
+    
+    //
+    // Get the (*,G) entry
+    //
+    pim_mre_wc = NULL;
+    do {
+	if (pim_mre == NULL)
+	    break;
+	if (pim_mre->is_sg()) {
+	    pim_mre_wc = pim_mre->wc_entry();
+	    break;
+	}
+	if (pim_mre->is_sg_rpt()) {
+	    pim_mre_wc = pim_mre->wc_entry();
+	    break;
+	}
+	if (pim_mre->is_wc()) {
+	    pim_mre_wc = pim_mre;
+	    break;
+	}
+	break;
+    } while (false);
+    
+    if (is_geq_upcall)
+	goto is_geq_upcall_label;
+    else
+	goto is_leq_upcall_label;
+    
+ is_geq_upcall_label:
+    //
+    // Received >= upcall
+    //
+    
+    if (pim_mre->is_wc()) {
+	// TODO: XXX: PAVPAVPAV: check if switch to SPT is desired.
+	// TODO: XXX: PAVPAVPAV: if true, remove the dataflow monitor
+    }
+    
+    return (XORP_OK);
+    
+    
+ is_leq_upcall_label:
+    //
+    // Received <= upcall
+    //
     
     //
     // Compute what is the expected value for the Keepalive Timer
@@ -546,11 +574,6 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	// No such PimMre entry. Silently delete the PimMfc entry.
 	delete pim_mfc;
 	return (XORP_ERROR);	// No such PimMre entry
-    }
-    
-    if (pim_mre->is_wc()) {
-	// TODO: XXX: PAVPAVPAV: check if switch to SPT is desired.
-	// TODO: XXX: PAVPAVPAV: if true, remove the dataflow monitor
     }
     
     return (XORP_OK);

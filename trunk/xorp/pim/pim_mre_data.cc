@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.6 2003/06/13 01:32:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.7 2003/07/07 23:13:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -81,11 +81,14 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
     }
 }
 
-// TODO: policy-defined SPT switch.
-// Here we should implement checking whether the bw is above a threshold
+// Policy-defined SPT switch.
+// Note: applies only for (*,G), (S,G), (S,G,rpt)
 bool
 PimMre::is_switch_to_spt_desired_sg() const
 {
+    if (! (is_wc() || is_sg() || is_sg_rpt()))
+	return (false);
+    
     if (! pim_node().is_switch_to_spt_enabled().get())
 	return (false);		// SPT-switch disabled
     
@@ -97,23 +100,31 @@ PimMre::is_switch_to_spt_desired_sg() const
     return (false);	// TODO: XXX: PAVPAVPAV: temp. no SPT-switch
 }
 
-// Return true if switch to SPT is desired, otherwise false.
-// XXX: PimMre::check_switch_to_spt_sg() does NOT restart the
-// KeepAliveTimer(S,G). Hence, this timer must be restarted by the function
-// that calls PimMre::check_switch_to_spt_sg()
-// XXX: can work for any entry, but should apply only
-// for (*,G), (S,G), (S,G,rpt)
+// Return true if switch to SPT is desired, and the Keepalive Timer was
+// restarted, otherwise false.
+// Note: applies only for (*,G), (S,G), (S,G,rpt)
 bool
-PimMre::check_switch_to_spt_sg()
+PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
+			       PimMre*& pim_mre_sg)
 {
     Mifset mifs;
+    
+    if (! (is_wc() || is_sg() || is_sg_rpt()))
+	return (false);
     
     mifs = pim_include_wc();
     mifs &= ~pim_exclude_sg();
     mifs |= pim_include_sg();
     
     if (mifs.any() && is_switch_to_spt_desired_sg()) {
-	// XXX: need to "restart KeepaliveTimer(S,G);" after return.
+	// restart KeepAliveTimer(S,G);
+	if (pim_mre_sg == NULL) {
+	    // XXX: create the (S,G) entry
+	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(src, dst,
+							   PIM_MRE_SG,
+							   PIM_MRE_SG);
+	}
+	pim_mre_sg->start_keepalive_timer();
 	return (true);
     }
     

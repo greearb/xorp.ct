@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.4 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.5 2003/06/13 01:32:33 pavlin Exp $"
 
 
 //
@@ -232,17 +232,17 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     
     olist = pim_mre->inherited_olist_sg();
     
-    if (olist.any() && pim_mre->is_switch_to_spt_desired_sg()) {
+    if (olist.any() && pim_mre->check_switch_to_spt_sg(inner_src, inner_dst,
+						       pim_mre_sg)) {
 	//
-	// XXX: the is_switch_to_spt_desired_sg() check is not in the spec,
+	// XXX: the check_switch_to_spt_sg() check is not in the spec,
 	// but we use it here to switch conditionally to the SPT.
 	// More specifically, the pseudo-code of
 	// "packet_arrives_on_rp_tunnel( pkt )" the line
 	//	restart KeepaliveTimer(S,G)
 	// has been changed to:
-	//	if (( inherited_olist(S,G) != NULL ) AND
-	//	    SwitchToSptDesired(S,G))
-	//	    restart KeepaliveTimer(S,G)
+	//	if( inherited_olist(S,G) != NULL )
+	//	    CheckSwitchToSpt(S,G)
 	// However, now we need to restart the KeepaliveTimer() in some
 	// of the code below to compensate for its conditional restart
 	// in its original place.
@@ -265,9 +265,8 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	// would become:
 	//
 	// if( I_am_RP( G ) && outer.dst == RP(G) ) {
-	//	if (( inherited_olist(S,G) != NULL ) AND
-	//	    SwitchToSptDesired(S,G))
-	//	    restart KeepaliveTimer(S,G)
+	//	if( inherited_olist(S,G) != NULL )
+	//	    CheckSwitchToSpt(S,G)
 	//	if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
 	//	    restart KeepaliveTimer(S,G)
 	//	    send RegisterStop(S,G) to outer.src
@@ -283,7 +282,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	//   ...
 	//
 	//  Note that with the above modification, an (S,G) state may still be
-	//  created at the RP even if the sender's bw is below a
+	//  created at the RP even if the sender's bandwidth is below a
 	//  threshold. E.g., if the RP has no downstream members for a group,
 	//  the RP will create (S,G) with NULL oifs per each active source for
 	//  that group. Thus, when new members join, the RP can immediately
@@ -292,18 +291,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	//  Register Stop timer at its DR expires.
 	//
 	
-	if (pim_mre_sg == NULL) {
-	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
-							   inner_dst,
-							   PIM_MRE_SG,
-							   PIM_MRE_SG);
-	}
-	pim_mre_sg->start_keepalive_timer();
 	is_keepalive_timer_restarted = true;
-	
-	// TODO: XXX: PAVPAVPAV: OK TO COMMENT?
-	// pim_mre_sg->recompute_is_could_register_sg();
-	// pim_mre_sg->recompute_is_join_desired_sg();
     }
     
     if ((! olist.any()) || ((pim_mre_sg != NULL) && pim_mre_sg->is_spt())) {

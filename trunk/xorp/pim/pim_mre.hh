@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.28 2003/07/07 18:46:58 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.29 2003/07/07 23:13:01 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -750,11 +750,11 @@ public:
     //
     // Note: applies only for (S,G)
     void	update_sptbit_sg(uint16_t iif_vif_index);
-    // TODO: XXX: PAVPAVPAV: clarify which states apply to:
+    // Note: applies only for (*,G), (S,G), (S,G,rpt)
     bool	is_switch_to_spt_desired_sg() const;
-    // Note: works for any entry, but should apply only
-    // for (*,G), (S,G), (S,G,rpt).
-    bool	check_switch_to_spt_sg();
+    // Note: applies only for (*,G), (S,G), (S,G,rpt)
+    bool	check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
+				       PimMre*& pim_mre_sg);
     
     
     //
