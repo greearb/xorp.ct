@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.25 2003/05/31 06:13:15 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.26 2003/09/30 18:24:03 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -40,7 +40,7 @@ Action::Action(const list<string>& action)
 	string word = (*ptr);
 	if (word[0]=='"' && word[word.size()-1]=='"')
 	    word = word.substr(1, word.size()-2);
-	for(u_int i = 0; i<word.length(); i++) {
+	for(uint32_t i = 0; i < word.length(); i++) {
 	    c = word[i];
 	    switch (mode) {
 	    case VAR:
@@ -185,12 +185,17 @@ XrlAction::XrlAction(const list<string>& action, const XRLdb& xrldb)
 }
 
 void
-XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
+XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb)
     const throw (ParseError)
 {
     XLOG_ASSERT(action.front() == "xrl");
-    action.pop_front();
-    string xrlstr =  action.front();
+
+    list<string>::const_iterator xrl_pos = ++action.begin();
+    if (xrl_pos == action.end()) {
+	xorp_throw(ParseError, "Expected xrl but none supplied.");
+    }
+
+    const string& xrlstr = *xrl_pos;
     debug_msg("checking XRL: %s\n", xrlstr.c_str());
 
     /*
@@ -201,22 +206,20 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
      */
     enum char_type {VAR, NON_VAR, QUOTE, ASSIGN};
     char_type mode = NON_VAR;
-    char *cleaned_xrl = new char[xrlstr.length()];
-    char *cp = cleaned_xrl;
+    string cleaned_xrl;
 
     /*trim quotes from around the XRL*/
-    u_int start=0;
-    u_int stop = xrlstr.length();
-    if (xrlstr[0]=='"' && xrlstr[xrlstr.length()-1]=='"') {
+    uint32_t start = 0;
+    uint32_t stop = xrlstr.length();
+    if (xrlstr[start] == '"' && xrlstr[stop - 1] == '"') {
 	start++; stop--;
     }
 
     /*copy the XRL, omitting the "=$(VARNAME)" parts */
-    for(u_int i=start; i<stop; i++) {
+    for(uint32_t i = start; i < stop; i++) {
 	switch (mode) {
 	case VAR:
-	    if ((xrlstr[i]=='$') || (xrlstr[i]=='`')) {
-		delete[] cleaned_xrl;
+	    if (xrlstr[i] == '$' || xrlstr[i] == '`') {
 		string err;
 		err = "Syntax error in XRL variable expansion;\n" +
 		    xrlstr + " contains bad variable definition.\n";
@@ -226,41 +229,38 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 		mode = NON_VAR;
 	    break;
 	case NON_VAR:
-	    if (xrlstr[i]=='=') {
+	    if (xrlstr[i] == '=') {
 		mode = ASSIGN;
 		break;
 	    }
-	    *cp = xrlstr[i];
-	    cp++;
+	    cleaned_xrl += xrlstr[i];
+	    // no break
 	case QUOTE:
-	    if (xrlstr[i]=='`')
+	    if (xrlstr[i] == '`')
 		mode = NON_VAR;
 	    break;
 	case ASSIGN:
-	    if (xrlstr[i]=='$') {
+	    if (xrlstr[i] == '$') {
 		mode = VAR;
 		break;
 	    }
-	    if (xrlstr[i]=='`') {
+	    if (xrlstr[i] == '`') {
 		mode = QUOTE;
 		break;
 	    }
-	    if (xrlstr[i]=='&') {
+	    if (xrlstr[i] == '&') {
 		mode = NON_VAR;
-		*cp = xrlstr[i];
-		cp++;
+		cleaned_xrl += xrlstr[i];
 		break;
 	    }
 	    break;
 	}
     }
 
-    *cp = '\0';
     if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
 	string err;
-	err = "Syntax error in XRL;\n" + string(cleaned_xrl) +
+	err = "Syntax error in XRL;\n" + cleaned_xrl +
 	    " is not valid XRL syntax.\n";
-	delete[] cleaned_xrl;
 	xorp_throw(ParseError, err);
     }
     XRLMatchType match = xrldb.check_xrl_exists(cleaned_xrl);
@@ -269,22 +269,19 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 	case MATCH_FAIL:
 	case MATCH_RSPEC: {
 	    string err;
-	    err = "Error in XRL spec;\n" + string(cleaned_xrl) +
+	    err = "Error in XRL spec;\n" + cleaned_xrl +
 		" is not specified in the XRL targets directory.\n";
-	    delete[] cleaned_xrl;
 	    xorp_throw(ParseError, err);
 	}
 	case MATCH_XRL: {
 	    string err;
-	    err = "Error in XRL spec;\n" + string(cleaned_xrl) +
+	    err = "Error in XRL spec;\n" + cleaned_xrl +
 		" has different return specification from that in the " +
 		"XRL targets directory.\n";
-	    delete[] cleaned_xrl;
 	    xorp_throw(ParseError, err);
 	}
-	case MATCH_ALL: {
-	    delete[] cleaned_xrl;
-	}
+	case MATCH_ALL:
+	    break;
     }
 }
 
@@ -301,7 +298,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
     for (ptr = _split_cmd.begin(); ptr != _split_cmd.end(); ptr++) {
 	string segment = *ptr;
 	//"\n" at start of segment indicates start of a word
-	if (segment[0]=='\n') {
+	if (segment[0] == '\n') {
 	    //store the previous word
 	    if (word != "") {
 		expanded_cmd.push_back(word);

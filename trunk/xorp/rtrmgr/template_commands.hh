@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.11 2003/05/02 09:00:02 mjh Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.12 2003/05/02 22:33:54 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -64,7 +64,7 @@ public:
 
     inline const string& request() const { return _request; }
 private:
-    void check_xrl_is_valid(list<string> cmd, 
+    void check_xrl_is_valid(const list<string>& cmd,
 			    const XRLdb& xrldb) const throw (ParseError);
     list <string> _split_request;
     string _request;
