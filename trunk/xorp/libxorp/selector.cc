@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.2 2003/01/16 15:35:06 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.3 2003/01/26 04:06:21 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -175,9 +175,9 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
 	}
     }
     _selector_entries[fd].clear(mask);
-    if (_selector_entries[fd].is_empty())
+    if (_selector_entries[fd].is_empty()) {
 	_descriptor_count --;
-
+    }
 }
 
 int
@@ -200,32 +200,45 @@ SelectorList::select(timeval* timeout)
 	return 0;
     }
 
-    int i, j;
-    for (i = 0, j = 0; i <= _maxfd; i++) {
+    // Build list of all possible file descriptors
+    static vector<int> fdtable;
+
+    if (fdtable.size() < _maxfd + 1)
+	fdtable.resize(_maxfd + 1);
+    size_t sz = _maxfd + 1;
+    for (size_t i = 0; i < sz; i++) {
+	fdtable[i] = i;
+    }
+
+    for (int j = 0; sz != 0 && j != n; ) {
+	// Pick a random file descriptor to check.  Store it and replace
+	// old position in vector with last element in vector.  Note, we
+	// use variable sz instead of playing with the fdtable vector size
+	// since the latter entails more operations.
+	int x = random() % sz;
+	int fd = fdtable[x];
+	fdtable[x] = fdtable[--sz];
+	
 	int mask = 0;
-	if (FD_ISSET(i, &testfds[SEL_RD_IDX])) {
+	if (FD_ISSET(fd, &testfds[SEL_RD_IDX])) {
 	    mask |= SEL_RD;
-	    FD_CLR(i, &testfds[SEL_RD_IDX]);	// paranoia
-	    j++;
+	    FD_CLR(fd, &testfds[SEL_RD_IDX]);	// paranoia
 	}
-	if (FD_ISSET(i, &testfds[SEL_WR_IDX])) {
+	if (FD_ISSET(fd, &testfds[SEL_WR_IDX])) {
 	    mask |= SEL_WR;
-	    FD_CLR(i, &testfds[SEL_WR_IDX]);	// paranoia
-	    j++;
+	    FD_CLR(fd, &testfds[SEL_WR_IDX]);	// paranoia
 	}
-	if (FD_ISSET(i, &testfds[SEL_EX_IDX])) {
+	if (FD_ISSET(fd, &testfds[SEL_EX_IDX])) {
 	    mask |= SEL_EX;
-	    FD_CLR(i, &testfds[SEL_EX_IDX]);	// paranoia
-	    j++;
+	    FD_CLR(fd, &testfds[SEL_EX_IDX]);	// paranoia
 	}
 	if (mask) {
-	    _selector_entries[i].run_hooks(SelectorMask(mask), i);
-	    if (j == n) 
-		break;	/* All fd's with data done */
+	    _selector_entries[fd].run_hooks(SelectorMask(mask), fd);
+	    j++;
 	}
     }
-    assert(j == n);
-    for (int i = 0; i < _maxfd; i++) {
+
+    for (int i = 0; i <= _maxfd; i++) {
 	assert(!FD_ISSET(i, &testfds[SEL_RD_IDX]));	// paranoia
 	assert(!FD_ISSET(i, &testfds[SEL_WR_IDX]));	// paranoia
 	assert(!FD_ISSET(i, &testfds[SEL_EX_IDX]));	// paranoia
