@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.10 2003/03/21 03:01:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.11 2003/03/22 04:29:46 pavlin Exp $"
 
 #include "version.h"
 #include "rib_module.h"
@@ -130,6 +130,10 @@ XrlRibTarget::rib_0_1_add_rib_client6(
 #ifndef HAVE_IPV6
     fail = true;
     reason = "IPv6 not supported";
+
+    UNUSED(target_name);
+    UNUSED(unicast);
+    UNUSED(multicast);
     
     return XrlCmdError::OKAY();
     
@@ -183,6 +187,10 @@ XrlRibTarget::rib_0_1_delete_rib_client6(
 #ifndef HAVE_IPV6
     fail = true;
     reason = "IPv6 not supported";
+
+    UNUSED(target_name);
+    UNUSED(unicast);
+    UNUSED(multicast);
     
     return XrlCmdError::OKAY();
     
@@ -237,6 +245,10 @@ XrlRibTarget::rib_0_1_enable_rib_client6(
 #ifndef HAVE_IPV6
     fail = true;
     reason = "IPv6 not supported";
+
+    UNUSED(target_name);
+    UNUSED(unicast);
+    UNUSED(multicast);
     
     return XrlCmdError::OKAY();
     
@@ -290,6 +302,10 @@ XrlRibTarget::rib_0_1_disable_rib_client6(
 #ifndef HAVE_IPV6
     fail = true;
     reason = "IPv6 not supported";
+
+    UNUSED(target_name);
+    UNUSED(unicast);
+    UNUSED(multicast);
     
     return XrlCmdError::OKAY();
     
