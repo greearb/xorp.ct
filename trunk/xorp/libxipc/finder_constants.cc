@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_constants.hh,v 1.3 2004/10/27 01:21:55 bms Exp $
+#ident "$XORP$"
 
-#ifndef __LIBXIPC_FINDER_CONSTANTS_HH__
-#define __LIBXIPC_FINDER_CONSTANTS_HH__
+#include "xrl_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/ipv4.hh"
 
-extern const uint16_t FINDER_DEFAULT_PORT;
-extern const IPv4 FINDER_DEFAULT_HOST;
+#include "finder_constants.hh"
 
-#endif // __LIBXIPC_FINDER_CONSTANTS_HH__
+const uint16_t FINDER_DEFAULT_PORT = 19999;
+const IPv4 FINDER_DEFAULT_HOST = IPv4::LOOPBACK();
