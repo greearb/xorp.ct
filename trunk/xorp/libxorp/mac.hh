@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.3 2003/10/11 03:34:45 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.4 2004/06/10 22:41:17 hodson Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -124,6 +124,20 @@ public:
      * @return true if s is valid, false otherwise.
      */
     static bool valid(const string& s);
+
+    /**
+     * Normalize the string representation of an EtherMac address.
+     *
+     * Convert the string with an EtherMAC address into
+     * an "struct ether_addr", and then back to a string.
+     * Thus, the string address representation is normalized
+     * to the system's internal preference. Example:
+     * "00:00:00:00:00:00" -> "0:0:0:0:0:0"
+     *
+     * @param s the string with the EtherMac address to normalize.
+     * @return a string with the normalized EtherMac address.
+     */
+    static string normalize(const string& s) throw (InvalidString);
 };
 
 inline bool

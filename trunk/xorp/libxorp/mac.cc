@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.5 2003/10/02 17:22:23 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.6 2004/06/10 22:41:17 hodson Exp $"
 
 #include "xorp.h"
 #include "mac.hh"
@@ -26,7 +26,7 @@ Mac::Mac(const string& s) throw (InvalidString)
 {
     // Empty string valid, nothing to do.
     if (_srep.empty())
-    return;
+	return;
 
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
@@ -35,11 +35,13 @@ Mac::Mac(const string& s) throw (InvalidString)
     //
     // Add new MyMac::valid methods here
     // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep))
+    if (EtherMac::valid(_srep)) {
+	_srep = EtherMac::normalize(_srep);
 	return;
+    }
 
     xorp_throw(InvalidString,
-	       c_format("Unknown Mac representation: %s", _srep.c_str()));
+	       c_format("Unknown Mac representation: %s", s.c_str()));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -47,30 +49,40 @@ Mac::Mac(const string& s) throw (InvalidString)
 
 EtherMac::EtherMac(const string& s) throw (InvalidString)
 {
-    set_rep(s);
-    if (valid(_srep)) 
+    if (valid(s)) {
+	string ns = EtherMac::normalize(s);
+	set_rep(ns);
 	return;
+    }
+
     xorp_throw(InvalidString,
-	       c_format("Bad EtherMac representation: %s", _srep.c_str()));
+	       c_format("Bad EtherMac representation: %s", s.c_str()));
 }
 
 EtherMac::EtherMac(const Mac& m) throw (BadMac)
 {
-    set_rep(m.str());
-    if (valid(_srep))
+    string s = m.str();
+
+    if (valid(s)) {
+	string ns = EtherMac::normalize(s);
+	set_rep(ns);
 	return;
+    }
+
     xorp_throw(BadMac,
-	       c_format("Bad EtherMac representation: %s", _srep.c_str()));
+	       c_format("Bad EtherMac representation: %s", s.c_str()));
 }
 
 EtherMac::EtherMac(const struct ether_addr& ea) throw (BadMac)
 {
+    //
     // XXX: we need to const_cast the ether_ntoa() argument,
-    // because in some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
+    // because on some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
     // declaration is broken.
-    const char* a = ether_ntoa(const_cast<struct ether_addr *>(&ea));
-    if (a) {
-	set_rep(a);
+    //
+    const char* ap = ether_ntoa(const_cast<struct ether_addr *>(&ea));
+    if (ap != NULL) {
+	set_rep(ap);
 	return;
     }
 
@@ -95,9 +107,9 @@ EtherMac::get_ether_addr(struct ether_addr& ea) const
     strncpy(buf, _srep.c_str(), sizeof(buf) - 1);
     buf[sizeof(buf) - 1] = '\0';
 
-    const struct ether_addr* p = ether_aton(buf);
-    if (p) {
-	memcpy(&ea, p, sizeof(ea));
+    const struct ether_addr* ep = ether_aton(buf);
+    if (ep != NULL) {
+	memcpy(&ea, ep, sizeof(ea));
 	return true;
     }
     return false;
@@ -114,6 +126,38 @@ EtherMac::valid(const string& s)
     strncpy(buf, s.c_str(), sizeof(buf) - 1);
     buf[sizeof(buf) - 1] = '\0';
 
-    return ether_aton(buf) != 0;
+    return (ether_aton(buf) != NULL);
 }
 
+string
+EtherMac::normalize(const string& s) throw (InvalidString)
+{
+    //
+    // XXX: work-around because of broken ether_aton() declarations that
+    // are missing the 'const' in the argument.
+    //
+    char buf[s.size() + 1];
+    strncpy(buf, s.c_str(), sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+
+    //
+    // Convert the string with an EtherMAC address into
+    // an "struct ether_addr", and then back to a string.
+    // Thus, the string address representation is normalized
+    // to the system's internal preference. Example:
+    // "00:00:00:00:00:00" -> "0:0:0:0:0:0"
+    //
+    struct ether_addr* ep;
+    ep = ether_aton(buf);
+    if (ep == NULL) {
+	xorp_throw(InvalidString,
+		   c_format("Bad EtherMac representation: %s", s.c_str()));
+    }
+    char* ap = ether_ntoa(ep);
+    if (ap == NULL) {
+	xorp_throw(InvalidString,
+		   c_format("Internal error: bad EtherMac representation: %s",
+			    s.c_str()));
+    }
+    return (string(ap));
+}
