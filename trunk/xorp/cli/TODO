@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/cli/TODO,v 1.2 2003/06/03 10:04:11 pavlin Exp $
+# $XORP: xorp/cli/TODO,v 1.3 2003/06/06 08:48:18 pavlin Exp $
 #
+
+* Currently, the functions of 'j' and 'k' in page mode are:
+  - 'j' scroll down one line
+  - 'k' scroll up one line
+  In some router vendors (e.g., Juniper), the key binding is just
+  the opposite. Hence, add hooks so the CLI behaves similar
+  as Juniper (if the user desires so).
 
 * If SPACE is pressed on empty line at the bottom of the terminal xterm
   window, and then Ctrl-D is pressed, the command completion help output
