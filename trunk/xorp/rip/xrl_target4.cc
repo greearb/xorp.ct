@@ -39,7 +39,8 @@ XrlRip4Target::~XrlRip4Target()
 void
 XrlRip4Target::set_status(ProcessStatus status, const string& note)
 {
-    _status = status;
+    debug_msg("Status Update %d -> %d: %s\n", _status, status, note.c_str());
+    _status 	 = status;
     _status_note = note;
 }
 
@@ -69,6 +70,7 @@ XrlRip4Target::common_0_1_get_status(uint32_t& status,
 XrlCmdError
 XrlRip4Target::common_0_1_shutdown()
 {
+    debug_msg("Shutdown requested.\n");
     _should_exit = true;
     return XrlCmdError::OKAY();
 }
