@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.4 2003/04/18 04:52:09 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.5 2003/05/15 14:54:26 hodson Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -202,7 +202,7 @@ public:
      * 
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_len = IPvXNet::ip_multicast_base_prefix(my_family);
+     *   IPvXNet my_prefix = IPvXNet::ip_multicast_base_prefix(my_family);
      * 
      * @param family the address family.
      * @return the multicast base prefix address for address
