@@ -139,17 +139,16 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
     printf("DT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
     if (_expected.empty()) {
-	fprintf(stderr, "ExpectTable: unexpected add_route received\n");
-	abort();
+	XLOG_FATAL("ExpectTable: unexpected add_route received");
     }
     if (_expected.front().matches_add(route)) {
 	_expected.pop_front();
 	return XORP_OK;
     }
-    fprintf(stderr, "ExpectTable: add_route received, but not what was expected\n");
-    fprintf(stderr, "Expected: %s\n", _expected.front().str().c_str());
-    fprintf(stderr, "Received: Add of %s\n", route.str().c_str());
-    abort();
+    XLOG_FATAL("ExpectTable: unexpected add_route received. "
+	       "Expected: %s; Received: Add of %s",
+	       _expected.front().str().c_str(),
+	       route.str().c_str());
     return XORP_ERROR;
 }
 
@@ -162,17 +161,16 @@ ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
     printf("DT[%s]: Deleting route %s\n", _tablename.c_str(),
 	   route->str().c_str());
     if (_expected.empty()) {
-	fprintf(stderr, "ExpectTable: unexpected delete_route received\n");
-	abort();
+	XLOG_FATAL("ExpectTable: unexpected delete_route received");
     }
     if (_expected.front().matches_delete(route)) {
 	_expected.pop_front();
 	return XORP_OK;
     }
-    fprintf(stderr, "ExpectTable: delete_route received, but not what was expected\n");
-    fprintf(stderr, "Expected: %s\n", _expected.front().str().c_str());
-    fprintf(stderr, "Received: Delete of %s\n", route->str().c_str());
-    abort();
+    XLOG_FATAL("ExpectTable: unexpected delete_route received. "
+	       "Expected: %s; Received: Delete of %s",
+	       _expected.front().str().c_str(),
+	       route->str().c_str());
     return XORP_ERROR;
 }
 
