@@ -206,7 +206,9 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
 	DEBUGMSGTL((BgpMib::the_instance().name(), "waiting for next row...\n"));
 	eventloop.run();  
     }
-     
+
+    eventloop.export_events(); 
+
     if (timeout) {
 	DEBUGMSGTL((BgpMib::the_instance().name(), "timeout while reading "
 		     "table...\n"));
