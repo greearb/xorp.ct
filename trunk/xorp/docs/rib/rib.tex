@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rib/rib.tex,v 1.12 2004/07/24 01:09:52 pavlin Exp $
+% $XORP: xorp/docs/rib/rib.tex,v 1.13 2004/08/03 05:02:53 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -397,7 +397,7 @@ it is not routable, the values of {\tt nexthop} and {\tt metric} are
 undefined.  {\tt real\_prefix\_len} returns the prefix length of the routing
 entry that matches the address in the request.  {\tt prefix\_len} returns
 the prefix length of the largest subnet that covers the address and is
-not overlayed by a more specific route.  Thus ${\tt prefix\_len} <= {\tt
+not overlayed by a more specific route.  Thus ${\tt prefix\_len} >= {\tt
 real\_prefix\_len}$ and {\tt addr} is an address within the subnet {\tt
 base\_addr/prefix\_len} which itself is a subset of the subnet {\tt
 base\_addr/real\_prefix\_len}.  
