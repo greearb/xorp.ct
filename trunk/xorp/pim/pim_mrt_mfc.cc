@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.2 2003/01/29 05:43:59 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -514,8 +514,11 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	}
     }
     
-    if (pim_mre == NULL)
+    if (pim_mre == NULL) {
+	// No such PimMre entry. Silently delete the PimMfc entry.
+	delete pim_mfc;
 	return (XORP_ERROR);	// No such PimMre entry
+    }
     
     if (pim_mre->is_wc()) {
 	// TODO: XXX: PAVPAVPAV: check if switch to SPT is desired.
