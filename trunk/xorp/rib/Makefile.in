@@ -1,6 +1,7 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -10,8 +11,9 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-# -- Real Programs
+@SET_MAKE@
 
+# -- Real Programs
 
 SHELL = @SHELL@
 
@@ -33,13 +35,9 @@ infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
-
-DESTDIR =
-
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-
 top_builddir = ..
 
 ACLOCAL = @ACLOCAL@
@@ -48,11 +46,11 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
 transform = @program_transform_name@
-
 NORMAL_INSTALL = :
 PRE_INSTALL = :
 POST_INSTALL = :
@@ -65,15 +63,20 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
+AMTAR = @AMTAR@
 AR = @AR@
+AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
 GMAKE = @GMAKE@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LN_S = @LN_S@
 MAINT = @MAINT@
-MAKEINFO = @MAKEINFO@
 MIBS = @MIBS@
+OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
 PACKAGE = @PACKAGE@
@@ -81,15 +84,23 @@ PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
 net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
+
+
+# -- Test Programs
 bin_PROGRAMS = rib main_routemap test_rib_client test_register test_register_xrls test_rib_direct test_rib_xrls
 
 # -- Test scripts
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_register
 
 noinst_LIBRARIES = librib.a
+
+# -- Libraries and library flags to link the binary programs
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a
 
 # -- Program Sources
@@ -97,446 +108,500 @@ main_routemap_SOURCES = routemap.hh routemap.cc main_routemap.cc
 
 rib_SOURCES = main_rib.cc
 rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
+
 test_rib_direct_SOURCES = parser.hh parser_direct_cmds.hh parser.cc test_rib_direct.cc dummy_register_server.hh dummy_register_server.cc
+
 test_rib_xrls_SOURCES = parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh parser.cc test_rib_xrls.cc dummy_register_server.hh dummy_register_server.cc
 test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
+
 test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register_server.cc
+
 test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc
 test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_rib_client_SOURCES = test_rib_client.cc
+
+# -- Library Sources
 librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
-EXTRA_DIST = commands test_rib_direct.sh test_rib_xrls.sh xrl_shell_funcs.sh
+
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
+
 
 ################################################################
-
 INCLUDES = -I$(top_srcdir)
+subdir = rib
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
-CONFIG_HEADER = ../config.h
-CONFIG_CLEAN_FILES =  test_rib_direct.sh test_rib_xrls.sh
-LIBRARIES =  $(noinst_LIBRARIES)
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES = test_rib_direct.sh test_rib_xrls.sh
+LIBRARIES = $(noinst_LIBRARIES)
 
+librib_a_AR = $(AR) cru
+librib_a_LIBADD =
+am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
+	rib.$(OBJEXT) rib_client.$(OBJEXT) rib_manager.$(OBJEXT) \
+	route.$(OBJEXT) rt_tab_base.$(OBJEXT) rt_tab_export.$(OBJEXT) \
+	rt_tab_extint.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
+	rt_tab_origin.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
+	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT) \
+	xrl_target.$(OBJEXT)
+librib_a_OBJECTS = $(am_librib_a_OBJECTS)
+bin_PROGRAMS = rib$(EXEEXT) main_routemap$(EXEEXT) \
+	test_rib_client$(EXEEXT) test_register$(EXEEXT) \
+	test_register_xrls$(EXEEXT) test_rib_direct$(EXEEXT) \
+	test_rib_xrls$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
 
-DEFS = @DEFS@ -I. -I$(srcdir) -I..
+am_main_routemap_OBJECTS = routemap.$(OBJEXT) main_routemap.$(OBJEXT)
+main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
+main_routemap_LDADD = $(LDADD)
+main_routemap_DEPENDENCIES = librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a
+main_routemap_LDFLAGS =
+am_rib_OBJECTS = main_rib.$(OBJEXT)
+rib_OBJECTS = $(am_rib_OBJECTS)
+rib_DEPENDENCIES = librib.a $(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/targets/libribbase.a
+rib_LDFLAGS =
+am_test_register_OBJECTS = test_register.$(OBJEXT) \
+	dummy_register_server.$(OBJEXT)
+test_register_OBJECTS = $(am_test_register_OBJECTS)
+test_register_LDADD = $(LDADD)
+test_register_DEPENDENCIES = librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a
+test_register_LDFLAGS =
+am_test_register_xrls_OBJECTS = test_register_xrls.$(OBJEXT)
+test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
+test_register_xrls_DEPENDENCIES = librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/targets/libribbase.a \
+	$(top_builddir)/xrl/targets/libribclientbase.a
+test_register_xrls_LDFLAGS =
+am_test_rib_client_OBJECTS = test_rib_client.$(OBJEXT)
+test_rib_client_OBJECTS = $(am_test_rib_client_OBJECTS)
+test_rib_client_LDADD = $(LDADD)
+test_rib_client_DEPENDENCIES = librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a
+test_rib_client_LDFLAGS =
+am_test_rib_direct_OBJECTS = parser.$(OBJEXT) test_rib_direct.$(OBJEXT) \
+	dummy_register_server.$(OBJEXT)
+test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
+test_rib_direct_LDADD = $(LDADD)
+test_rib_direct_DEPENDENCIES = librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a
+test_rib_direct_LDFLAGS =
+am_test_rib_xrls_OBJECTS = parser.$(OBJEXT) test_rib_xrls.$(OBJEXT) \
+	dummy_register_server.$(OBJEXT)
+test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
+test_rib_xrls_DEPENDENCIES = librib.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/targets/libribbase.a
+test_rib_xrls_LDFLAGS =
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-librib_a_LIBADD = 
-librib_a_OBJECTS =  protocol.o register_server.o rib.o rib_client.o \
-rib_manager.o route.o rt_tab_base.o rt_tab_export.o rt_tab_extint.o \
-rt_tab_merged.o rt_tab_origin.o rt_tab_redist.o rt_tab_register.o \
-vifmanager.o xrl_target.o
-PROGRAMS =  $(bin_PROGRAMS)
-
-rib_OBJECTS =  main_rib.o
-rib_DEPENDENCIES =  librib.a $(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a \
-$(top_builddir)/xrl/targets/libribbase.a
-rib_LDFLAGS = 
-main_routemap_OBJECTS =  routemap.o main_routemap.o
-main_routemap_LDADD = $(LDADD)
-main_routemap_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a
-main_routemap_LDFLAGS = 
-test_rib_client_OBJECTS =  test_rib_client.o
-test_rib_client_LDADD = $(LDADD)
-test_rib_client_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a
-test_rib_client_LDFLAGS = 
-test_register_OBJECTS =  test_register.o dummy_register_server.o
-test_register_LDADD = $(LDADD)
-test_register_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a
-test_register_LDFLAGS = 
-test_register_xrls_OBJECTS =  test_register_xrls.o
-test_register_xrls_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/xrl/targets/libribbase.a \
-$(top_builddir)/xrl/targets/libribclientbase.a
-test_register_xrls_LDFLAGS = 
-test_rib_direct_OBJECTS =  parser.o test_rib_direct.o \
-dummy_register_server.o
-test_rib_direct_LDADD = $(LDADD)
-test_rib_direct_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a
-test_rib_direct_LDFLAGS = 
-test_rib_xrls_OBJECTS =  parser.o test_rib_xrls.o \
-dummy_register_server.o
-test_rib_xrls_DEPENDENCIES =  librib.a \
-$(top_builddir)/xrl/interfaces/libftixif.a \
-$(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/xrl/interfaces/libribclientxif.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/xrl/targets/libribbase.a
-test_rib_xrls_LDFLAGS = 
-CXXFLAGS = @CXXFLAGS@
-CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/dummy_register_server.Po \
+@AMDEP_TRUE@	$(DEPDIR)/main_rib.Po $(DEPDIR)/main_routemap.Po \
+@AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
+@AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_client.Po $(DEPDIR)/rib_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route.Po $(DEPDIR)/routemap.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po $(DEPDIR)/rt_tab_export.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_redist.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_register.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_register.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_register_xrls.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_rib_client.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_rib_direct.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_rib_xrls.Po $(DEPDIR)/vifmanager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  README Makefile.am Makefile.in TODO test_rib_direct.sh.in \
-test_rib_xrls.sh.in
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(librib_a_SOURCES) $(main_routemap_SOURCES) \
+	$(rib_SOURCES) $(test_register_SOURCES) \
+	$(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) \
+	$(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
+DIST_COMMON = README Makefile.am Makefile.in TODO test_rib_direct.sh.in \
+	test_rib_xrls.sh.in
+SOURCES = $(librib_a_SOURCES) $(main_routemap_SOURCES) $(rib_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
 
+all: all-am
 
-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
-
-TAR = tar
-GZIP_ENV = --best
-DEP_FILES =  .deps/dummy_register_server.P .deps/main_rib.P \
-.deps/main_routemap.P .deps/parser.P .deps/protocol.P \
-.deps/register_server.P .deps/rib.P .deps/rib_client.P \
-.deps/rib_manager.P .deps/route.P .deps/routemap.P .deps/rt_tab_base.P \
-.deps/rt_tab_export.P .deps/rt_tab_extint.P .deps/rt_tab_merged.P \
-.deps/rt_tab_origin.P .deps/rt_tab_redist.P .deps/rt_tab_register.P \
-.deps/test_register.P .deps/test_register_xrls.P \
-.deps/test_rib_client.P .deps/test_rib_direct.P .deps/test_rib_xrls.P \
-.deps/vifmanager.P .deps/xrl_target.P
-SOURCES = $(librib_a_SOURCES) $(rib_SOURCES) $(main_routemap_SOURCES) $(test_rib_client_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES)
-OBJECTS = $(librib_a_OBJECTS) $(rib_OBJECTS) $(main_routemap_OBJECTS) $(test_rib_client_OBJECTS) $(test_register_OBJECTS) $(test_register_xrls_OBJECTS) $(test_rib_direct_OBJECTS) $(test_rib_xrls_OBJECTS)
-
-all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cc .o .s
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --gnu rib/Makefile
-
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
-	cd $(top_builddir) \
-	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
-
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  rib/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 test_rib_direct.sh: $(top_builddir)/config.status test_rib_direct.sh.in
-	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
 test_rib_xrls.sh: $(top_builddir)/config.status test_rib_xrls.sh.in
-	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= CONFIG_LINKS= $(SHELL) ./config.status
 
-mostlyclean-noinstLIBRARIES:
+AR = ar
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-
-distclean-noinstLIBRARIES:
-
-maintainer-clean-noinstLIBRARIES:
-
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
-	$(COMPILE) -c $<
-
-mostlyclean-compile:
-	-rm -f *.o core *.core
-
-clean-compile:
-
-distclean-compile:
-	-rm -f *.tab.c
-
-maintainer-clean-compile:
-
-librib.a: $(librib_a_OBJECTS) $(librib_a_DEPENDENCIES)
+librib.a: $(librib_a_OBJECTS) $(librib_a_DEPENDENCIES) 
 	-rm -f librib.a
-	$(AR) cru librib.a $(librib_a_OBJECTS) $(librib_a_LIBADD)
+	$(librib_a_AR) librib.a $(librib_a_OBJECTS) $(librib_a_LIBADD)
 	$(RANLIB) librib.a
-
-mostlyclean-binPROGRAMS:
-
-clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-
-distclean-binPROGRAMS:
-
-maintainer-clean-binPROGRAMS:
-
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
 uninstall-binPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
 	done
 
-rib: $(rib_OBJECTS) $(rib_DEPENDENCIES)
-	@rm -f rib
-	$(CXXLINK) $(rib_LDFLAGS) $(rib_OBJECTS) $(rib_LDADD) $(LIBS)
-
-main_routemap: $(main_routemap_OBJECTS) $(main_routemap_DEPENDENCIES)
-	@rm -f main_routemap
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+main_routemap$(EXEEXT): $(main_routemap_OBJECTS) $(main_routemap_DEPENDENCIES) 
+	@rm -f main_routemap$(EXEEXT)
 	$(CXXLINK) $(main_routemap_LDFLAGS) $(main_routemap_OBJECTS) $(main_routemap_LDADD) $(LIBS)
-
-test_rib_client: $(test_rib_client_OBJECTS) $(test_rib_client_DEPENDENCIES)
-	@rm -f test_rib_client
-	$(CXXLINK) $(test_rib_client_LDFLAGS) $(test_rib_client_OBJECTS) $(test_rib_client_LDADD) $(LIBS)
-
-test_register: $(test_register_OBJECTS) $(test_register_DEPENDENCIES)
-	@rm -f test_register
+rib$(EXEEXT): $(rib_OBJECTS) $(rib_DEPENDENCIES) 
+	@rm -f rib$(EXEEXT)
+	$(CXXLINK) $(rib_LDFLAGS) $(rib_OBJECTS) $(rib_LDADD) $(LIBS)
+test_register$(EXEEXT): $(test_register_OBJECTS) $(test_register_DEPENDENCIES) 
+	@rm -f test_register$(EXEEXT)
 	$(CXXLINK) $(test_register_LDFLAGS) $(test_register_OBJECTS) $(test_register_LDADD) $(LIBS)
-
-test_register_xrls: $(test_register_xrls_OBJECTS) $(test_register_xrls_DEPENDENCIES)
-	@rm -f test_register_xrls
+test_register_xrls$(EXEEXT): $(test_register_xrls_OBJECTS) $(test_register_xrls_DEPENDENCIES) 
+	@rm -f test_register_xrls$(EXEEXT)
 	$(CXXLINK) $(test_register_xrls_LDFLAGS) $(test_register_xrls_OBJECTS) $(test_register_xrls_LDADD) $(LIBS)
-
-test_rib_direct: $(test_rib_direct_OBJECTS) $(test_rib_direct_DEPENDENCIES)
-	@rm -f test_rib_direct
+test_rib_client$(EXEEXT): $(test_rib_client_OBJECTS) $(test_rib_client_DEPENDENCIES) 
+	@rm -f test_rib_client$(EXEEXT)
+	$(CXXLINK) $(test_rib_client_LDFLAGS) $(test_rib_client_OBJECTS) $(test_rib_client_LDADD) $(LIBS)
+test_rib_direct$(EXEEXT): $(test_rib_direct_OBJECTS) $(test_rib_direct_DEPENDENCIES) 
+	@rm -f test_rib_direct$(EXEEXT)
 	$(CXXLINK) $(test_rib_direct_LDFLAGS) $(test_rib_direct_OBJECTS) $(test_rib_direct_LDADD) $(LIBS)
-
-test_rib_xrls: $(test_rib_xrls_OBJECTS) $(test_rib_xrls_DEPENDENCIES)
-	@rm -f test_rib_xrls
+test_rib_xrls$(EXEEXT): $(test_rib_xrls_OBJECTS) $(test_rib_xrls_DEPENDENCIES) 
+	@rm -f test_rib_xrls$(EXEEXT)
 	$(CXXLINK) $(test_rib_xrls_LDFLAGS) $(test_rib_xrls_OBJECTS) $(test_rib_xrls_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_register_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_routemap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/protocol.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routemap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_export.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_extint.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_origin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_redist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_register.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_register.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_register_xrls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_direct.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_xrls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vifmanager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
 .cc.o:
-	$(CXXCOMPILE) -c $<
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
 
 tags: TAGS
 
-ID: $(HEADERS) $(SOURCES) $(LISP)
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  awk '    { files[$$0] = 1; } \
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
-	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $$unique $(LISP)
+	mkid -fID $$unique $(LISP)
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  awk '    { files[$$0] = 1; } \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
 
-mostlyclean-tags:
-
-clean-tags:
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
 
 distclean-tags:
-	-rm -f TAGS ID
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
 
-maintainer-clean-tags:
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
 
-distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
-subdir = rib
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)
-	here=`cd $(top_builddir) && pwd`; \
-	top_distdir=`cd $(top_distdir) && pwd`; \
-	distdir=`cd $(distdir) && pwd`; \
-	cd $(top_srcdir) \
-	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu rib/Makefile
 	@for file in $(DISTFILES); do \
-	  d=$(srcdir); \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
 	  else \
 	    test -f $(distdir)/$$file \
-	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
 	  fi; \
 	done
-
-DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
-
--include $(DEP_FILES)
-
-mostlyclean-depend:
-
-clean-depend:
-
-distclean-depend:
-	-rm -rf .deps
-
-maintainer-clean-depend:
-
-%.o: %.c
-	@echo '$(COMPILE) -c $<'; \
-	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
-	@-cp .deps/$(*F).pp .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*F).P; \
-	rm .deps/$(*F).pp
-
-%.lo: %.c
-	@echo '$(LTCOMPILE) -c $<'; \
-	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
-	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
-	  < .deps/$(*F).pp > .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*F).P; \
-	rm -f .deps/$(*F).pp
-
-%.o: %.cc
-	@echo '$(CXXCOMPILE) -c $<'; \
-	$(CXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
-	@-cp .deps/$(*F).pp .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*F).P; \
-	rm .deps/$(*F).pp
-
-%.lo: %.cc
-	@echo '$(LTCXXCOMPILE) -c $<'; \
-	$(LTCXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
-	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
-	  < .deps/$(*F).pp > .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*F).P; \
-	rm -f .deps/$(*F).pp
-check-TESTS: $(TESTS)
-	@failed=0; all=0; \
-	srcdir=$(srcdir); export srcdir; \
-	for tst in $(TESTS); do \
-	  if test -f $$tst; then dir=.; \
-	  else dir="$(srcdir)"; fi; \
-	  if $(TESTS_ENVIRONMENT) $$dir/$$tst; then \
-	    all=`expr $$all + 1`; \
-	    echo "PASS: $$tst"; \
-	  elif test $$? -ne 77; then \
-	    all=`expr $$all + 1`; \
-	    failed=`expr $$failed + 1`; \
-	    echo "FAIL: $$tst"; \
-	  fi; \
-	done; \
-	if test "$$failed" -eq 0; then \
-	  banner="All $$all tests passed"; \
-	else \
-	  banner="$$failed of $$all tests failed"; \
-	fi; \
-	dashes=`echo "$$banner" | sed s/./=/g`; \
-	echo "$$dashes"; \
-	echo "$$banner"; \
-	echo "$$dashes"; \
-	test "$$failed" -eq 0
-info-am:
-info: info-am
-dvi-am:
-dvi: dvi-am
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-installcheck-am:
-installcheck: installcheck-am
-install-exec-am: install-binPROGRAMS
-install-exec: install-exec-am
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
 
-install-data-am:
+installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+
+install: install-am
+install-exec: install-exec-am
 install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
-install: install-am
-uninstall-am: uninstall-binPROGRAMS
-uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
-all-redirect: all-am
+
+installcheck: installcheck-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
-installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(bindir)
-
-
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
 
 clean-generic:
 
 distclean-generic:
-	-rm -f Makefile $(CONFIG_CLEAN_FILES)
-	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-binPROGRAMS mostlyclean-tags \
-		mostlyclean-depend mostlyclean-generic
-
-mostlyclean: mostlyclean-am
-
-clean-am:  clean-noinstLIBRARIES clean-compile clean-binPROGRAMS \
-		clean-tags clean-depend clean-generic mostlyclean-am
-
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile \
-		distclean-binPROGRAMS distclean-tags distclean-depend \
-		distclean-generic clean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-binPROGRAMS \
-		maintainer-clean-tags maintainer-clean-depend \
-		maintainer-clean-generic distclean-am
-	@echo "This command is intended for maintainers to use;"
-	@echo "it deletes files that may require special tools to rebuild."
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-binPROGRAMS
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-binPROGRAMS distclean-binPROGRAMS \
-clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
-install-binPROGRAMS tags mostlyclean-tags distclean-tags clean-tags \
-maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
-clean-depend maintainer-clean-depend check-TESTS info-am info dvi-am \
-dvi check check-am installcheck-am installcheck install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+.PHONY: GTAGS all all-am check check-TESTS check-am clean \
+	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic tags \
+	uninstall uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
 test_rib_direct.sh: test_rib_direct
 
 test_rib_xrls.sh: test_rib_xrls
-
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
