@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.9 2003/07/11 22:10:59 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.10 2003/07/15 17:40:43 hodson Exp $
 ##
 
 noinst_LIBRARIES		 = librip.a
@@ -11,12 +11,14 @@ LDADD				+= $(top_builddir)/libxorp/libxorp.a
 noinst_PROGRAMS			 = $(TESTS)
 TESTS				 = test_auth
 TESTS				+= test_packets
+TESTS				+= test_request
 TESTS				+= test_route_walk
 TESTS				+= test_timers
 TESTS				+= test_update_queue
 
 test_auth_SOURCES		 = test_auth.cc
 test_packets_SOURCES		 = test_packets.cc
+test_request_SOURCES		 = test_request.cc
 test_route_walk_SOURCES		 = test_route_walk.cc
 test_timers_SOURCES		 = test_timers.cc
 test_update_queue_SOURCES	 = test_update_queue.cc
@@ -26,6 +28,7 @@ librip_a_SOURCES		 = rip_module.h
 librip_a_SOURCES		+= auth.hh
 librip_a_SOURCES		+= constants.hh
 librip_a_SOURCES		+= packets.hh
+librip_a_SOURCES		+= packet_queue.hh
 librip_a_SOURCES		+= peer.hh
 librip_a_SOURCES		+= port.hh
 librip_a_SOURCES		+= port_io.hh
@@ -36,6 +39,7 @@ librip_a_SOURCES		+= route_entry.hh
 librip_a_SOURCES		+= update_queue.hh
 
 librip_a_SOURCES		+= auth.cc
+librip_a_SOURCES		+= packet_queue.cc
 librip_a_SOURCES		+= peer.cc
 librip_a_SOURCES		+= port.cc
 librip_a_SOURCES		+= redist.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.3 2003/05/15 17:22:22 hodson Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.4 2003/07/17 16:11:03 hodson Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -71,6 +71,12 @@ public:
 		      size_t		rip_packet_bytes) = 0;
 
     /**
+     * Check if send request is pending.
+     * @return true if a send request is pending, false otherwise.
+     */
+    virtual bool pending() const = 0;
+
+    /**
      * Get Interface name associated with I/O.
      */
     inline const string& ifname() const { return _ifname; }
@@ -117,6 +123,7 @@ protected:
     string	_vifname;
     Addr	_addr;
     size_t	_max_rte_pp;
+    bool	_en;
 };
 
 
@@ -146,6 +153,8 @@ public:
 
     inline PortIO* io_handler();
 
+    inline bool port_io_enabled() const;
+
 protected:
     PortIO*	_pio;
     bool	_pio_owner;
@@ -162,7 +171,11 @@ PortIOBase<A>::PortIOBase(PortIOUser&	user,
 			  const string&	vifname,
 			  const Addr&	addr)
     : _user(user), _ifname(ifname), _vifname(vifname), _addr(addr),
-      _max_rte_pp(RIPv2_ROUTES_PER_PACKET)
+      _max_rte_pp(RIPv2_ROUTES_PER_PACKET), _en(true)
+{}
+
+template <typename A>
+PortIOBase<A>::~PortIOBase()
 {}
 
 template <>
@@ -207,8 +220,12 @@ template <typename A>
 inline bool
 PortIOUserBase<A>::set_io_handler(PortIO* pio, bool set_owner)
 {
-    _pio = pio;
-    _pio_owner = set_owner;
+    if (_pio == 0) {
+	_pio = pio;
+	_pio_owner = set_owner;
+	return true;
+    }
+    return false;
 }
 
 template <typename A>
@@ -216,6 +233,15 @@ inline PortIOBase<A>*
 PortIOUserBase<A>::io_handler()
 {
     return _pio;
+}
+
+template <typename A>
+inline bool
+PortIOUserBase<A>::port_io_enabled() const
+{
+    if (_pio)
+	return _pio->enabled();
+    return false;
 }
 
 #endif // __RIP_PEER_IO_HH__

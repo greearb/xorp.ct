@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.6 2003/07/09 00:11:02 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.7 2003/07/16 18:30:06 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -29,6 +29,8 @@
 #include "peer.hh"
 #include "port.hh"
 #include "port_manager.hh"
+
+#include "packet_queue.hh"
 #include "update_queue.hh"
 
 // ----------------------------------------------------------------------------
@@ -39,185 +41,9 @@ PortTimerConstants::PortTimerConstants()
       _deletion_secs(DEFAULT_DELETION_SECS),
       _triggered_update_min_wait_secs(DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS),
       _triggered_update_max_wait_secs(DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS),
-      _interpacket_msecs(DEFAULT_INTERPACKET_DELAY_MS)
+      _interpacket_msecs(DEFAULT_INTERPACKET_DELAY_MS),
+      _interquery_msecs(DEFAULT_INTERQUERY_GAP_MS)
 {
-}
-
-
-// ----------------------------------------------------------------------------
-// PortPacketQueue implementation
-
-/**
- * @short Structure to contain outbound packet state.
- */
-template <typename A>
-class PortPacket
-{
-protected:
-    A		    _addr;
-    uint16_t	    _port;
-    vector<uint8_t> _data;
-
-public:
-    PortPacket(const A& addr, uint16_t port)
-	: _addr(addr), _port(port)
-    {}
-    inline const A& address() const		{ return _addr; }
-    inline uint16_t port() const		{ return _port; }
-    inline vector<uint8_t>& data() 		{ return _data; }
-    inline const vector<uint8_t>& data() const	{ return _data; }
-    inline uint32_t size() const 		{ return _data.size(); }
-};
-
-/**
- * @short Outbound packet queue
- */
-template <typename A>
-class PortPacketQueue
-{
-public:
-    typedef list<PortPacket<A> > PacketQueue;
-public:
-    PortPacketQueue(Port<A>& p)
-	: _port(p), _buffered_bytes(0), _max_buffered_bytes(64000)
-    {}
-
-    /**
-     * Create a queued packet for a particular destination.  The packet
-     * is created in the PacketQueue.  This call must be followed by
-     * enqueue_packet() or discard_packet() before being called again.
-     *
-     * @return 0 if there is insufficient buffer space for a new packet.
-     */
-    PortPacket<A>* new_packet(const A& addr, uint16_t port);
-
-    /**
-     * Place packet in ready to sent queue.
-     */
-    void enqueue_packet(const PortPacket<A>* pkt);
-
-    /**
-     * Release state associated with packet.
-     */
-    void discard_packet(const PortPacket<A>* pkt);
-
-    /**
-     * Ack packet that has previously been sent.
-     * @param data pointer to data segment of packet.
-     */
-    void dequeue_packet(const uint8_t* data);
-
-    /**
-     * Flush queued packets.
-     */
-    void flush_packets();
-
-    /**
-     * Set the maximum amount of data to buffer.
-     */
-    void set_max_buffered_bytes(uint32_t mb);
-
-    /**
-     * Get the maximum amount of buffered data.
-     */
-    uint32_t max_buffered_bytes() const;
-
-    /**
-     * Get the current amount of buffered data.
-     */
-    uint32_t buffered_bytes() const;
-
-protected:
-    void push_queue();
-
-protected:
-    Port<A>&	_port;
-    XorpTimer	_pkt_timer;
-    PacketQueue _ready_packets;
-    PacketQueue _candidate_packet;
-    uint32_t	_buffered_bytes;
-    uint32_t	_max_buffered_bytes;
-};
-
-template <typename A>
-PortPacket<A>*
-PortPacketQueue<A>::new_packet(const A& addr, uint16_t port)
-{
-    XLOG_ASSERT(_candidate_packet.empty() == true);
-    if (_buffered_bytes >= _max_buffered_bytes) {
-	return 0;
-    }
-    _candidate_packet.push_back(PortPacket<A>(addr, port));
-    return &_candidate_packet.back();
-}
-
-template <typename A>
-void
-PortPacketQueue<A>::enqueue_packet(const PortPacket<A>* pkt)
-{
-    XLOG_ASSERT(_candidate_packet.empty() == false);
-    XLOG_ASSERT(pkt == &_candidate_packet.back());
-    _buffered_bytes += pkt->size();
-    _ready_packets.splice(_ready_packets.end(),
-			  _candidate_packet,
-			  _candidate_packet.begin());
-    push_queue();
-}
-
-template <typename A>
-void
-PortPacketQueue<A>::discard_packet(const PortPacket<A>* pkt)
-{
-    XLOG_ASSERT(_candidate_packet.empty() == false);
-    XLOG_ASSERT(pkt == &_candidate_packet.back());
-    _candidate_packet.erase(_candidate_packet.begin());
-}
-
-template <typename A>
-void
-PortPacketQueue<A>::dequeue_packet(const uint8_t* data)
-{
-    typename PacketQueue::iterator i = _ready_packets.begin();
-    while (i != _ready_packets.end()) {
-	if (&(i->data()[0]) == data) {
-	    _buffered_bytes -= i->size();
-	    _ready_packets.erase(i);
-	    return;
-	}
-	i++;
-    }
-    XLOG_WARNING("Could not free packet.");
-}
-
-template <typename A>
-void
-PortPacketQueue<A>::flush_packets()
-{
-    while (_ready_packets.empty() == false) {
-	_buffered_bytes -= _ready_packets.front().size();
-	_ready_packets.pop_front();
-    }
-}
-
-template <typename A>
-void
-PortPacketQueue<A>::set_max_buffered_bytes(uint32_t mbb)
-{
-    _max_buffered_bytes = mbb;
-}
-
-template <typename A>
-uint32_t
-PortPacketQueue<A>::max_buffered_bytes() const
-{
-    return _max_buffered_bytes;
-}
-
-template <typename A>
-uint32_t
-PortPacketQueue<A>::buffered_bytes() const
-{
-    return _buffered_bytes;
 }
 
 
@@ -235,7 +61,7 @@ Port<A>::Port(PortManagerBase<A>& pm)
        _adv_def_rt(false),
        _acc_def_rt(false)
 {
-    _packet_queue = new PortPacketQueue<A>(*this);
+    _packet_queue = new RipPacketQueue<A>();
 }
 
 template <typename A>
@@ -332,11 +158,60 @@ Port<A>::record_bad_route(const string&	why,
     }
 }
 
+static void
+noop()
+{}
+
 template <typename A>
 void
-Port<A>::port_io_send_completion(const uint8_t*	/* rip_packet */,
-				 bool		/* success */)
+Port<A>::block_queries()
 {
+    EventLoop& e = _pm.eventloop();
+    _query_blocked_timer
+	= e.new_oneoff_after_ms(constants().interquery_delay_ms(),
+				callback(noop));
+}
+
+template <typename A>
+bool
+Port<A>::queries_blocked() const
+{
+    return _query_blocked_timer.scheduled();
+}
+
+template <typename A>
+void
+Port<A>::push_packets()
+{
+    if (io_handler()->pending())
+	return;
+
+    const RipPacket<A>* head = _packet_queue->head();
+    if (head == 0)
+	return;
+
+    if (io_handler()->send(head->address(), head->port(),
+			   head->data_ptr(), head->data_size())) {
+	return;
+    }
+
+    XLOG_WARNING("Send failed: discarding outbound packets.");
+    _packet_queue->flush_packets();
+}
+
+template <typename A>
+void
+Port<A>::port_io_send_completion(const uint8_t*	rip_packet,
+				 bool		success)
+{
+    if (success == false) {
+	XLOG_ERROR("Send failed");
+    }
+
+    const RipPacket<A>* head = _packet_queue->head();
+    XLOG_ASSERT(head->data_ptr() == rip_packet);
+    _packet_queue->pop_head();
+    push_packets();
 }
 
 template <typename A>
@@ -389,11 +264,91 @@ AuthManager<IPv4>::auth_handler()
 
 template <>
 void
-Port<IPv4>::parse_request(const Addr&			/* src_addr */,
-			  uint16_t			/* src_port */,
-			  const PacketRouteEntry<IPv4>*	/* entries */,
-			  uint32_t			/* n_entries */)
+Port<IPv4>::parse_request(const Addr&			src_addr,
+			  uint16_t			src_port,
+			  const PacketRouteEntry<IPv4>*	entries,
+			  uint32_t			n_entries)
 {
+    if (port_io_enabled() == false) {
+	XLOG_INFO("Discarding RIP request: port io disabled.");
+    }
+
+    if (n_entries == 1 &&
+	entries[0].addr_family() == PacketRouteEntry<IPv4>::ADDR_FAMILY_DUMP) {
+	if (src_port == RIP_PORT) {
+	    // if already doing unsolicited dump, then ignore
+	    // set unsolicited timer timeout to zero to trigger port
+	    // route dump
+	} else {
+	    if (queries_blocked())
+		return;
+	    // if already doing a debug dump, then ignore
+	    // start debug route dump
+	    block_queries();
+	}
+	return;
+    }
+
+    if (queries_blocked())
+	return;
+
+    //
+    // Answer query
+    //
+    RipPacket<IPv4>* p = _packet_queue->new_packet(src_addr, src_port);
+    if (0 == p) {
+	XLOG_INFO("Could not allocate packet for route request response");
+	return;
+    }
+
+    if (n_entries > auth_handler()->max_routing_entries()) {
+	n_entries = auth_handler()->max_routing_entries();
+    }
+
+    size_t rip_packet_bytes = sizeof(RipPacketHeader);
+    rip_packet_bytes += (n_entries + auth_handler()->head_entries()) *
+	sizeof(PacketRouteEntry<IPv4>);
+
+    p->data().resize(rip_packet_bytes);
+
+    // Fill in header
+    RipPacketHeader* rph = new (p->data_ptr()) RipPacketHeader;
+    rph->initialize(RipPacketHeader::RESPONSE, 1);
+
+    uint32_t offset = sizeof(RipPacketHeader) +
+	auth_handler()->head_entries() * sizeof(PacketRouteEntry<IPv4>);
+
+    // Walk nets in supplied route entries and look them up
+    RouteDB<IPv4>& rdb = _pm.system().route_db();
+    for (uint32_t i = 0; i < n_entries; i++) {
+	const RouteEntry<IPv4>* r = rdb.find_route(entries[i].net());
+	PacketRouteEntry<IPv4>* pre =
+	    new (p->data_ptr() + offset) PacketRouteEntry<IPv4>;
+	if (r) {
+	    pre->initialize(r->tag(), r->net(), r->nexthop(), r->cost());
+	} else {
+	    pre->initialize(0, entries[i].net(), IPv4::ZERO(), RIP_INFINITY);
+	}
+	offset += sizeof(PacketRouteEntry<IPv4>);
+    }
+    XLOG_ASSERT(offset == rip_packet_bytes);
+
+    // Authenticate packet (this commonly forces a copy, and may force 2,
+    // auth api needs looking at).
+    vector<uint8_t> trailor;
+    PacketRouteEntry<IPv4>* fe =
+	reinterpret_cast<PacketRouteEntry<IPv4>*>(rph + 1);
+
+    if (auth_handler()->authenticate(p->data_ptr(), rip_packet_bytes,
+				     fe, trailor) != 0) {
+	p->data().insert(p->data().end(), trailor.begin(), trailor.end());
+	_packet_queue->enqueue_packet(p);
+	push_packets();
+    }  else {
+	XLOG_WARNING("Response packet authentication failed for query.");
+	_packet_queue->discard_packet(p);
+    }
+    block_queries();
 }
 
 template <>
@@ -416,7 +371,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 
     for (uint32_t i = 0; i < n_entries; i++) {
 	if (entries[i].addr_family() != AF_INET) {
-	    record_bad_route("bad inet family", src_addr, src_port, p);
+	    record_bad_route("bad address family", src_addr, src_port, p);
 	    continue;
 	}
 
@@ -504,7 +459,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     if (ph->valid_command() == false) {
 	record_bad_packet("Invalid command", src_address, src_port, p);
 	return;
-    } else if (ph->valid_version(2) == false) {
+    } else if (ph->valid_version(RipPacketHeader::IPv4_VERSION) == false) {
 	record_bad_packet(c_format("Invalid version (%d).", ph->version),
 			  src_address, src_port, p);
 	return;

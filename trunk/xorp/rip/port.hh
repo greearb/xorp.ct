@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.7 2003/07/09 22:29:07 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.8 2003/07/16 18:30:06 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -100,12 +100,29 @@ public:
      */
     inline uint32_t	interpacket_delay_ms() const;
 
+    /**
+     * Set the interquery gap.  This is the minimum temporal gap between
+     * route request packets that query specific routes.  Fast arriving
+     * queries are ignored.
+     * @parm t the interquery delay in milliseconds.
+     */
+    inline void		set_interquery_delay_ms(uint32_t t);
+
+    /**
+     * Get the interquery gap.  This is the minimum temporal gap between
+     * route request packets that query specific routes.  Fast arriving
+     * queries are ignored.
+     * @return the interquery delay in milliseconds.
+     */
+    inline uint32_t	interquery_delay_ms() const;
+
 protected:
     uint32_t _expiry_secs;
     uint32_t _deletion_secs;
     uint32_t _triggered_update_min_wait_secs;
     uint32_t _triggered_update_max_wait_secs;
     uint32_t _interpacket_msecs;
+    uint32_t _interquery_msecs;
 };
 
 
@@ -219,7 +236,7 @@ template <typename A>
 class Peer;
 
 template <typename A>
-class PortPacketQueue;
+class RipPacketQueue;
 
 /**
  * @short RIP Port
@@ -423,7 +440,25 @@ protected:
 			const PacketRouteEntry<A>* entries,
 			uint32_t		   n_entries);
 
-protected:
+    /**
+     * Block route queries for amount of time determined by
+     * @ref PortTimerConstants::interquery_delay_ms().
+     */
+    void block_queries();
+
+    /**
+     * Determine whether queries are currently blocked and should be
+     * discarded.
+     */
+    bool queries_blocked() const;
+
+    /**
+     * If I/O handler is not already sending a packet, take a packet from
+     * packet queue and send it.
+     */
+    void push_packets();
+
+public:
     /**
      * Send completion notification.  Called by PortIO instance when a
      * send request is completed.
@@ -461,18 +496,19 @@ protected:
     PeerList		_peers;			// Peers on Port
     XorpTimer		_us_timer;		// Unsolicited update timer
     XorpTimer		_tu_timer;		// Triggered update timer
+    XorpTimer		_query_blocked_timer;	// Rate limiting on queries
 
     UpdateQueue<A>&		 	  _update_queue;
     typename UpdateQueue<A>::ReadIterator _uq_iter;
 
     bool		_en;			// Enabled state
-    uint32_t		_cost;			// Cost metric of peer
+    uint32_t		_cost;			// Cost metric of port
     RipHorizon		_horizon;		// Port Horizon type
     bool		_advertise;		// Advertise IO port
     bool		_adv_def_rt;		// Advertise default route
     bool		_acc_def_rt;		// Accept default route
 
-    PortPacketQueue<A>*	_packet_queue;		// Outbound packet queue
+    RipPacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants
     PortCounters	_counters;		// Packet counters
 };
@@ -545,6 +581,18 @@ inline uint32_t
 PortTimerConstants::interpacket_delay_ms() const
 {
     return _interpacket_msecs;
+}
+
+inline void
+PortTimerConstants::set_interquery_delay_ms(uint32_t t)
+{
+    _interquery_msecs = t;
+}
+
+inline uint32_t
+PortTimerConstants::interquery_delay_ms() const
+{
+    return _interquery_msecs;
 }
 
 #endif // __RIP_PORT_HH__

@@ -94,15 +94,16 @@ LDFLAGS =
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 noinst_PROGRAMS = $(TESTS)
-TESTS = test_auth test_packets test_route_walk test_timers test_update_queue
+TESTS = test_auth test_packets test_request test_route_walk test_timers test_update_queue
 
 test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
+test_request_SOURCES = test_request.cc
 test_route_walk_SOURCES = test_route_walk.cc
 test_timers_SOURCES = test_timers.cc
 test_update_queue_SOURCES = test_update_queue.cc
 
-librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh update_queue.hh auth.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
+librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh packet_queue.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh update_queue.hh auth.cc packet_queue.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
 
 
 ################################################################
@@ -115,13 +116,13 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 librip_a_AR = $(AR) cru
 librip_a_LIBADD =
-am_librip_a_OBJECTS = auth.$(OBJEXT) peer.$(OBJEXT) port.$(OBJEXT) \
-	redist.$(OBJEXT) route_db.$(OBJEXT) route_entry.$(OBJEXT) \
-	update_queue.$(OBJEXT)
+am_librip_a_OBJECTS = auth.$(OBJEXT) packet_queue.$(OBJEXT) \
+	peer.$(OBJEXT) port.$(OBJEXT) redist.$(OBJEXT) \
+	route_db.$(OBJEXT) route_entry.$(OBJEXT) update_queue.$(OBJEXT)
 librip_a_OBJECTS = $(am_librip_a_OBJECTS)
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
-	test_route_walk$(EXEEXT) test_timers$(EXEEXT) \
-	test_update_queue$(EXEEXT)
+	test_request$(EXEEXT) test_route_walk$(EXEEXT) \
+	test_timers$(EXEEXT) test_update_queue$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 
 am_test_auth_OBJECTS = test_auth.$(OBJEXT)
@@ -134,6 +135,11 @@ test_packets_OBJECTS = $(am_test_packets_OBJECTS)
 test_packets_LDADD = $(LDADD)
 test_packets_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
 test_packets_LDFLAGS =
+am_test_request_OBJECTS = test_request.$(OBJEXT)
+test_request_OBJECTS = $(am_test_request_OBJECTS)
+test_request_LDADD = $(LDADD)
+test_request_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_request_LDFLAGS =
 am_test_route_walk_OBJECTS = test_route_walk.$(OBJEXT)
 test_route_walk_OBJECTS = $(am_test_route_walk_OBJECTS)
 test_route_walk_LDADD = $(LDADD)
@@ -157,10 +163,11 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/auth.Po $(DEPDIR)/peer.Po \
-@AMDEP_TRUE@	$(DEPDIR)/port.Po $(DEPDIR)/redist.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_db.Po $(DEPDIR)/route_entry.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_packets.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/auth.Po $(DEPDIR)/packet_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer.Po $(DEPDIR)/port.Po \
+@AMDEP_TRUE@	$(DEPDIR)/redist.Po $(DEPDIR)/route_db.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_entry.Po $(DEPDIR)/test_auth.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_packets.Po $(DEPDIR)/test_request.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
@@ -177,10 +184,11 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) \
-	$(test_packets_SOURCES) $(test_route_walk_SOURCES) \
-	$(test_timers_SOURCES) $(test_update_queue_SOURCES)
+	$(test_packets_SOURCES) $(test_request_SOURCES) \
+	$(test_route_walk_SOURCES) $(test_timers_SOURCES) \
+	$(test_update_queue_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES)
+SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES)
 
 all: all-am
 
@@ -211,6 +219,9 @@ test_auth$(EXEEXT): $(test_auth_OBJECTS) $(test_auth_DEPENDENCIES)
 test_packets$(EXEEXT): $(test_packets_OBJECTS) $(test_packets_DEPENDENCIES) 
 	@rm -f test_packets$(EXEEXT)
 	$(CXXLINK) $(test_packets_LDFLAGS) $(test_packets_OBJECTS) $(test_packets_LDADD) $(LIBS)
+test_request$(EXEEXT): $(test_request_OBJECTS) $(test_request_DEPENDENCIES) 
+	@rm -f test_request$(EXEEXT)
+	$(CXXLINK) $(test_request_LDFLAGS) $(test_request_OBJECTS) $(test_request_LDADD) $(LIBS)
 test_route_walk$(EXEEXT): $(test_route_walk_OBJECTS) $(test_route_walk_DEPENDENCIES) 
 	@rm -f test_route_walk$(EXEEXT)
 	$(CXXLINK) $(test_route_walk_LDFLAGS) $(test_route_walk_OBJECTS) $(test_route_walk_LDADD) $(LIBS)
@@ -228,6 +239,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/auth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/port.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist.Po@am__quote@
@@ -235,6 +247,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_entry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packets.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_route_walk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_update_queue.Po@am__quote@

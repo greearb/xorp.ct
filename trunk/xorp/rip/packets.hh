@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.4 2003/04/23 17:06:48 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.5 2003/07/16 18:27:09 hodson Exp $
 
 #ifndef __RIP_PACKETS_HH__
 #define __RIP_PACKETS_HH__
@@ -39,6 +39,8 @@ struct RipPacketHeader {
 
     static const uint8_t REQUEST  = 1;
     static const uint8_t RESPONSE = 2;
+    static const uint8_t IPv4_VERSION = 1;
+    static const uint8_t IPv6_VERSION = 2;
 };
 
 inline void
@@ -121,6 +123,7 @@ public:
     inline uint32_t metric() const		{ return ntohl(_metric); }
 
     static const uint16_t ADDR_FAMILY = 2;
+    static const uint16_t ADDR_FAMILY_DUMP = 0;
     static const uint16_t AUTH_ADDR_FAMILY = 0xffff;
 };
 
