@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.19 2003/08/21 23:49:13 fred Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.20 2003/09/22 05:45:56 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -40,7 +40,7 @@ xorp_fea_LDADD		+= $(top_builddir)/mrt/libmrt.a
 ### CLI libraries
 xorp_fea_LDADD		+= $(top_builddir)/cli/libcli.a
 xorp_fea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-xorp_fea_LDADD		+= -lcurses
+xorp_fea_LDADD		+= @CLI_CURSES_LIB@
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### XORP misc libraries
@@ -65,7 +65,7 @@ xorp_fea_dummy_LDADD	+= $(top_builddir)/mrt/libmrt.a
 ### CLI libraries
 xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libcli.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
-xorp_fea_dummy_LDADD	+= -lcurses
+xorp_fea_dummy_LDADD	+= @CLI_CURSES_LIB@
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libclibase.a
 ### XORP misc libraries
@@ -91,7 +91,7 @@ test_mfea_LDADD		+= $(top_builddir)/mrt/libmrt.a
 ### CLI libraries
 test_mfea_LDADD		+= $(top_builddir)/cli/libcli.a
 test_mfea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-test_mfea_LDADD		+= -lcurses
+test_mfea_LDADD		+= @CLI_CURSES_LIB@
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.10 2003/09/30 03:07:59 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.11 2003/09/30 14:59:32 hodson Exp $
 ##
 
 # -- Real Programs
@@ -41,7 +41,7 @@ LDADD		+= $(top_builddir)/mrt/libmrt.a
 ### CLI libraries
 LDADD		+= $(top_builddir)/cli/libcli.a
 LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-LDADD		+= -lcurses
+LDADD		+= @CLI_CURSES_LIB@
 LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.a

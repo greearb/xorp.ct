@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/cli/Makefile.am,v 1.4 2003/05/07 21:58:08 pavlin Exp $
+## $XORP: xorp/cli/Makefile.am,v 1.5 2003/07/30 23:43:27 pavlin Exp $
 ##
 
 # -- Subdirectories (directory ordering is important)
@@ -22,7 +22,7 @@ noinst_LIBRARIES = libcli.a
 ### CLI libraries
 LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-LDADD		+= -lcurses
+LDADD		+= @CLI_CURSES_LIB@
 LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.a

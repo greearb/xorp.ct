@@ -119,7 +119,7 @@ xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/
 #unexpanded_xrl shouldn't really be needed
 xorpsh_SOURCES = rtrmgr_module.h version.h util.hh xorpsh_main.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc y.opcmd_tab.cc lex.opcmd.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc slave_conf_tree_node.cc conf_tree.cc slave_module_manager.cc slave_conf_tree.cc xorp_client.cc xrldb.cc cli.cc command_tree.cc op_commands.cc popen.cc task.cc unexpanded_xrl.cc util.cc xrl_xorpsh_interface.cc
 
-xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
+xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
 
 test_templates_SOURCES = test_templates.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc command_tree.cc xorp_client.cc module_manager.cc util.cc task.cc
 test_templates_LDADD = $(LDADD)
