@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.14 2003/11/07 07:42:52 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.15 2004/01/05 23:50:21 hodson Exp $
 #
 
 #
@@ -11,6 +11,7 @@
 # Defaults
 #
 DEBUG=0
+: ${KDOC_CMD:="kdoc"}
 
 #
 # Kdoc format
@@ -134,7 +135,7 @@ kdocify() {
     mkdir -p $OUTDIR
     echo "Created output directory $OUTDIR"
     echo ${FILES} |							      \
-    kdoc --outputdir ${OUTDIR}						      \
+    ${KDOC_CMD} --outputdir ${OUTDIR}					      \
 	 ${XREFS}         						      \
 	 --format ${KDOC_FORMAT}					      \
 	 --strip-h-path        	       					      \
