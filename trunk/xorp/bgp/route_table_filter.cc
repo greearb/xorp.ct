@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.13 2003/09/10 21:37:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.14 2003/09/16 21:00:26 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -436,9 +436,8 @@ template<class A>
 int
 FilterTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			  BGPRouteTable<A> *caller) {
-    debug_msg("FilterTable<%s>::add_route %x on %s\n", 
-	      A::ip_version_str().c_str(),
-	      (u_int)(&rtmsg), tablename().c_str());
+    debug_msg("FilterTable<IPv%u>::add_route %x on %s\n", 
+	      A::ip_version(), (u_int)(&rtmsg), tablename().c_str());
 
     XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(_next_table != NULL);
