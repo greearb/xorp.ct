@@ -536,23 +536,22 @@ mostlyclean distclean maintainer-clean
 
 ################################################################ 
 
-y.tplt_tab.cc:   template.yy
+yacc:	.yacc_generated_files
+
+.yacc_generated_files: template.yy boot.yy op_commands.yy
 	yacc -d -p tplt -o y.tplt_tab.c template.yy
 	mv y.tplt_tab.c y.tplt_tab.cc
+	yacc -d -p boot -o y.boot_tab.c boot.yy
+	mv y.boot_tab.c y.boot_tab.cc
+	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy
+	mv y.opcmd_tab.c y.opcmd_tab.cc
+	touch .yacc_generated_files
 
 lex.tplt.cc:     template.ll y.tplt_tab.cc
 	flex -Ptplt -olex.tplt.cc template.ll
 
-y.boot_tab.cc:   boot.yy
-	yacc -d -p boot -o y.boot_tab.c boot.yy
-	mv y.boot_tab.c y.boot_tab.cc
-
 lex.boot.cc:     boot.ll y.boot_tab.cc
 	flex -Pboot -olex.boot.cc boot.ll 
-
-y.opcmd_tab.cc:   op_commands.yy
-	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy
-	mv y.opcmd_tab.c y.opcmd_tab.cc
 
 lex.opcmd.cc:     op_commands.ll y.opcmd_tab.cc
 	flex -Popcmd -olex.opcmd.cc op_commands.ll 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.4 2003/02/27 19:54:15 hodson Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.5 2003/03/11 01:02:59 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -130,24 +130,27 @@ EXTRA_DIST	 += fea.boot
 ## Note use of mv below.  Yacc also sucks, if the output filename
 ## does not end .c, it makes the generated header file the output
 ## filename plus .h.
+##
+## Due to portability issues with yacc, we don't build the yacc
+## generated files automatically.  If you touch the .yy files, you
+## need to explicitly "gmake yacc" to run yacc.
 
-y.tplt_tab.cc:   template.yy
+yacc:	.yacc_generated_files
+
+.yacc_generated_files: template.yy boot.yy op_commands.yy
 	yacc -d -p tplt -o y.tplt_tab.c template.yy
 	mv y.tplt_tab.c y.tplt_tab.cc
- 
-lex.tplt.cc:     template.ll y.tplt_tab.cc
-	flex -Ptplt -olex.tplt.cc template.ll
- 
-y.boot_tab.cc:   boot.yy
 	yacc -d -p boot -o y.boot_tab.c boot.yy
 	mv y.boot_tab.c y.boot_tab.cc
+	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy
+	mv y.opcmd_tab.c y.opcmd_tab.cc
+	touch .yacc_generated_files
+
+lex.tplt.cc:     template.ll y.tplt_tab.cc
+	flex -Ptplt -olex.tplt.cc template.ll
  
 lex.boot.cc:     boot.ll y.boot_tab.cc
 	flex -Pboot -olex.boot.cc boot.ll 
 
-y.opcmd_tab.cc:   op_commands.yy
-	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy
-	mv y.opcmd_tab.c y.opcmd_tab.cc
- 
 lex.opcmd.cc:     op_commands.ll y.opcmd_tab.cc
 	flex -Popcmd -olex.opcmd.cc op_commands.ll 
