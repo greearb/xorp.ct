@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.13 2003/09/25 02:19:43 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.14 2003/09/26 19:25:00 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -145,9 +145,11 @@ PimMfc::recompute_iif_olist_mfc()
     pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
 				     lookup_flags, 0);
     if (pim_mre == NULL) {
+	//
 	// No matching multicast routing entry. Remove the PimMfc entry.
 	// TODO: XXX: PAVPAVPAV: do we really want to remove the entry?
 	// E.g., just reset the olist, and leave the entry itself to timeout?
+	//
 	
 	set_has_forced_deletion(true);
 	entry_try_remove();
@@ -181,12 +183,14 @@ PimMfc::recompute_iif_olist_mfc()
     // XXX: this check should be even if the iif and oifs didn't change
     // TODO: track the reason and explain it.
     if (new_iif_vif_index == Vif::VIF_INDEX_INVALID) {
+	//
 	// TODO: XXX: PAVPAVPAV: completely remove the olist check and comments
 	// || new_olist.none()) {
 	// No incoming interface or outgoing interfaces.
 	// Remove the PimMfc entry.
 	// TODO: XXX: PAVPAVPAV: do we really want to remove the entry?
 	// E.g., just reset the olist, and leave the entry itself to timeout?
+	//
 	
 	set_has_forced_deletion(true);
 	entry_try_remove();
@@ -199,17 +203,26 @@ PimMfc::recompute_iif_olist_mfc()
     
     if ((old_iif_vif_index != Vif::VIF_INDEX_INVALID)
 	&& (old_olist.none())) {
+	//
 	// XXX: probably an entry that was installed to stop NOCACHE upcalls,
 	// or that was left around until the (S,G) NotJoined routing state
 	// expires. Just delete the PimMfc entry, and then later when we are
 	// forced to install a new PimMfc entry because of a NOCACHE upcall,
 	// we will set appropriately the SPT bit, etc.
+	//
 	
 	set_has_forced_deletion(true);
 	entry_try_remove();
 	return;
     }
-    
+
+    // If no outgoing interfaces, then remove the entry.
+    if (new_olist.none()) {
+	set_has_forced_deletion(true);
+	entry_try_remove();
+	return;
+    }
+
     // Set the new iif and the olist
     set_iif_vif_index(new_iif_vif_index);
     set_olist(new_olist);
