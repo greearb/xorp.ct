@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.27 2004/06/10 22:40:28 hodson Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.28 2004/08/06 01:41:17 bms Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -128,7 +128,8 @@ public:
      * Set peer TCP-MD5 password.
      *
      * @param iptuple iptuple.
-     * @param password The password to use for TCP-MD5 authentication; if this is the empty string, then authentication will be disabled.
+     * @param password The password to use for TCP-MD5 authentication;
+     * if this is the empty string, then authentication will be disabled.
      *
      * @return true on success.
      */
