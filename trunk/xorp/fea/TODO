@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.27 2004/12/15 18:48:43 bms Exp $
+# $XORP: xorp/fea/TODO,v 1.28 2005/01/28 03:34:17 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -54,11 +54,8 @@
   appears. In that case, we need to update properly the local cache
   that maps interface names to indexes.
 
-* Resurrect click based FEA.
-
 * The following files inside "fea" are not used?
-  click.hh click_glue.hh fti_click.hh ifconfig_click.hh
-  click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
+  test_fea.cc test_fti.cc test_ifmanager.cc
   Refactor them?
 
 * Parse and pass up Linux RTN_UNREACHABLE messages using the new resolve
