@@ -44,39 +44,9 @@
 #undef ENABLE_ADVANCED_MCAST_API
 
 /*
- * Define this if you have a /dev/urandom which can supply good random numbers.
- */
-#undef HAVE_DEV_URANDOM
-
-/*
  * Define this if you have <new>
  */
 #undef HAVE_NEW_HEADER
-
-/*
- * Define this if you have netinet/ether.h
- */
-#undef HAVE_NETINET_ETHER_H
-
-/*
- * Define this if you have netinet/if_ether.h
- */
-#undef HAVE_NETINET_IF_ETHER_H
-
-/*
- * Define this if you have net/ethernet.h
- */
-#undef HAVE_NET_ETHERNET_H
-
-/*
- * Define this if you have sys/ethernet.h
- */
-#undef HAVE_SYS_ETHERNET_H
-
-/**
- * Define this if you have md5global.h
- */
-#undef HAVE_MD5GLOBAL_H
 
 /*
  * Define this if you want IPv6 support.
@@ -94,27 +64,18 @@
 #undef IPV6_STACK_KAME
 
 /*
- * IPv4 structures that host may or may not have.
- */
-#undef HAVE_ST_IP_MREQN
-
-/*
- * IPv6 structures that host may or may not have.
- */
-#undef HAVE_ST_ADDRINFO
-#undef HAVE_GETIPNODEBYNAME
-
-/*
  * Define this if your struct sockaddr_in6 has sin6_len field.
  */
 #undef HAVE_SIN6_LEN
 
 /*
+ * Define this if you have struct ip_mreqn.
+ */
+#undef HAVE_ST_IP_MREQN
+
+/*
  * Define these if your C library is missing some functions...
  */
-#undef NEED_VSNPRINTF
-#undef NEED_INET_PTON
-#undef NEED_INET_NTOP
 #undef NEED_ETHER_ATON
 #undef NEED_ETHER_NTOA
 
@@ -186,6 +147,13 @@
 #undef HAVE_SYSCTL_NET_RT_DUMP
 
 /*
+ * Define this if your IPv4 header values are not modified on sending
+ * or receiving raw IPv4 raw packets.
+ */
+#undef IPV4_RAW_OUTPUT_IS_RAW
+#undef IPV4_RAW_INPUT_IS_RAW
+
+/*
  * Debugging:
  * DEBUG: general debugging
  * DEBUG_MEM: debug memory allocation
@@ -205,10 +173,6 @@ typedef RETSIGTYPE (*sig_t)(int);
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif /* HAVE_SOCKLEN_T */
-
-/* Raw socket raw values */
-#undef IPV4_RAW_OUTPUT_IS_RAW
-#undef IPV4_RAW_INPUT_IS_RAW
 
 /* KAME code likes to use INET6 to ifdef IPv6 code */
 #ifdef HAVE_IPV6

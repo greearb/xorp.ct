@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -92,8 +92,7 @@ libclibase_a_SOURCES = cli_base.hh cli_base.cc
 libcoordbase_a_SOURCES = coord_base.hh coord_base.cc
 
 # Demo FEA ifmgr client
-libdemofeaifmgrclientbase_a_SOURCES = demo_fea_ifmgr_client_base.hh	\
-				      demo_fea_ifmgr_client_base.cc
+libdemofeaifmgrclientbase_a_SOURCES = demo_fea_ifmgr_client_base.hh					      demo_fea_ifmgr_client_base.cc
 
 
 # FEA
@@ -204,7 +203,7 @@ VERSION = @VERSION@
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/bgp_base.P .deps/cli_base.P .deps/coord_base.P \
 .deps/demo_fea_ifmgr_client_base.P .deps/fea_base.P .deps/finder_base.P \

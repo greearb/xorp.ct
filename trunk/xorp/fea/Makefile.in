@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -78,20 +78,20 @@ PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 net_snmp_found = @net_snmp_found@
-@FEA_BUILD_RTSOCK_TRUE@host_programs = @FEA_BUILD_RTSOCK_TRUE@fea_rtsock
+@FEA_BUILD_RTSOCK_TRUE@host_programs = fea_rtsock
 @FEA_BUILD_RTSOCK_FALSE@host_programs = 
 
-@FEA_BUILD_RTSOCK_TRUE@fea_rtsock_SOURCES = @FEA_BUILD_RTSOCK_TRUE@fea_rtsock.cc
-@FEA_BUILD_RTSOCK_TRUE@fea_rtsock_LDADD = @FEA_BUILD_RTSOCK_TRUE@./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
-@FEA_BUILD_RTSOCK_TRUE@host_test_programs = @FEA_BUILD_RTSOCK_TRUE@test_ifconfig_rtsock
+@FEA_BUILD_RTSOCK_TRUE@fea_rtsock_SOURCES = fea_rtsock.cc
+@FEA_BUILD_RTSOCK_TRUE@fea_rtsock_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+@FEA_BUILD_RTSOCK_TRUE@host_test_programs = test_ifconfig_rtsock
 @FEA_BUILD_RTSOCK_FALSE@host_test_programs = 
 
-@FEA_BUILD_RTSOCK_TRUE@test_ifconfig_rtsock_SOURCES = @FEA_BUILD_RTSOCK_TRUE@test_ifconfig_rtsock.cc
-@FEA_BUILD_RTSOCK_TRUE@test_ifconfig_rtsock_LDADD = @FEA_BUILD_RTSOCK_TRUE@./libfea.a $(top_builddir)/libxorp/libxorp.a
-@FEA_BUILD_RTSOCK_TRUE@host_lib_sources = @FEA_BUILD_RTSOCK_TRUE@fti_rtsock.hh fti_rtsock.cc ifconfig_rtsock.hh ifconfig_rtsock.cc rtsock.hh rtsock.cc
+@FEA_BUILD_RTSOCK_TRUE@test_ifconfig_rtsock_SOURCES = test_ifconfig_rtsock.cc
+@FEA_BUILD_RTSOCK_TRUE@test_ifconfig_rtsock_LDADD = ./libfea.a $(top_builddir)/libxorp/libxorp.a
+@FEA_BUILD_RTSOCK_TRUE@host_lib_sources = fti_rtsock.hh fti_rtsock.cc ifconfig_rtsock.hh ifconfig_rtsock.cc rtsock.hh rtsock.cc
 @FEA_BUILD_RTSOCK_FALSE@host_lib_sources = 
-@FEA_BUILD_RTSOCK_TRUE@FEA_BINARY = @FEA_BUILD_RTSOCK_TRUE@fea_rtsock
-@FEA_BUILD_RTSOCK_FALSE@FEA_BINARY = @FEA_BUILD_RTSOCK_FALSE@fea_dummy
+@FEA_BUILD_RTSOCK_TRUE@FEA_BINARY = fea_rtsock
+@FEA_BUILD_RTSOCK_FALSE@FEA_BINARY = fea_dummy
 bin_PROGRAMS = fea fea_dummy $(host_programs) demo_fea_ifmgr_client
 check_PROGRAMS =  test_rawsock4 test_ifmanager_transaction $(host_test_programs)
 TESTS = $(check_PROGRAMS)
@@ -202,7 +202,7 @@ VERSION = @VERSION@
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/demo_fea_ifmgr_client.P .deps/fea.P .deps/fea_dummy.P \
 .deps/fea_rtsock.P .deps/fti_dummy.P .deps/fti_rtsock.P \
