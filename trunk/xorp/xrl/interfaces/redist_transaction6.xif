@@ -1,0 +1,48 @@
+interface redist_transaction6/0.1 {
+
+	/**
+	 * Start transaction.
+	 * 
+	 * @param tid the transaction ID to use for this transaction.
+	 */
+	start_transaction -> tid:u32
+
+	/**
+	 * Commit transaction.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	commit_transaction ? tid:u32
+
+	/**
+	 * Abort transaction.
+	 * 
+	 * @param tid the transaction ID of this transaction.
+	 */
+	abort_transaction ? tid:u32
+
+	/**
+	 * @param tid the transaction ID of this transaction.
+	 * @param dst destination network.
+	 * @param nh nexthop router address.
+	 * @param ifname interface name associated with nexthop.
+	 * @param vifname virtual interface name with nexthop.
+	 * @param metric origin routing protocol metric for route.
+	 * @param ad administrative distance of origin routing protocol.
+	 * @param cookie value set be requestor to identify redistribution
+	 *        source.  Typical value is the originating protocol name.
+	 */
+	add_route ? tid:u32						\
+		  & dst:ipv6net						\
+		  & nh:ipv6						\
+		  & ifname:txt						\
+		  & vifname:txt						\
+		  & metric:u32						\
+		  & ad:u32						\
+		  & cookie:txt
+
+	delete_route ? tid:u32						\
+		     & network:ipv6net					\
+		     & cookie:txt
+}
+

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.17 2004/03/15 23:26:41 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.18 2004/04/01 19:03:59 hodson Exp $
 ##
 
 ###############################################################################
@@ -128,6 +128,15 @@ libredist4xif_a_SOURCES = redist4_xif.hh redist4_xif.cc
 
 noinst_LIBRARIES += libredist6xif.a
 libredist6xif_a_SOURCES = redist6_xif.hh redist6_xif.cc
+
+# Transaction-based Redistribution Interface to Routing Protocols
+noinst_LIBRARIES += libredisttransaction4xif.a
+libredisttransaction4xif_a_SOURCES  = redist_transaction4_xif.hh
+libredisttransaction4xif_a_SOURCES += redist_transaction4_xif.cc
+
+noinst_LIBRARIES += libredisttransaction6xif.a
+libredisttransaction6xif_a_SOURCES  = redist_transaction6_xif.hh
+libredisttransaction6xif_a_SOURCES += redist_transaction6_xif.cc
 
 # RIB Interface to Routing Protocols
 noinst_LIBRARIES += libribxif.a
