@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.1 2003/12/17 00:04:48 hodson Exp $"
 
 #include <algorithm>
 
@@ -21,7 +21,7 @@
 
 #include "ifconfig_addr_table.hh"
 
-IfConfigAddressTable::IfConfigAddressTable(IfTree& iftree)
+IfConfigAddressTable::IfConfigAddressTable(const IfTree& iftree)
     : _iftree(iftree)
 {
     get_valid_addrs(_v4addrs, _v6addrs);

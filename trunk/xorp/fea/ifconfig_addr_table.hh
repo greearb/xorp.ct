@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.1 2003/12/17 00:04:48 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
@@ -37,7 +37,7 @@ public:
      * IfConfigUpdateReporter to receive updates in order to function
      * correctly.
      */
-    IfConfigAddressTable(IfTree& iftree);
+    IfConfigAddressTable(const IfTree& iftree);
     ~IfConfigAddressTable();
 
     /**
@@ -104,7 +104,7 @@ protected:
     inline void update();
 
 protected:
-    IfTree& _iftree;
+    const IfTree& _iftree;
     set<IPv4> _v4addrs;
     set<IPv6> _v6addrs;
 };
