@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.1 2004/05/06 17:59:53 hodson Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.2 2004/05/12 08:28:50 pavlin Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -32,7 +32,7 @@ class RedistXrlOutput : public RedistOutput<A>
 {
 public:
     typedef RedistXrlTask<A>	Task;
-    typedef list<Task*> TaskQueue;
+    typedef list<Task*>		TaskQueue;
 
 public:
     /**
@@ -51,25 +51,17 @@ public:
 		    XrlRouter& 		xrl_router,
 		    const string& 	from_protocol,
 		    const string& 	xrl_target_name,
-		    const string&	cookie,
-		    bool		is_xrl_transaction_output);
+		    const string&	cookie);
     ~RedistXrlOutput();
 
     void add_route(const IPRouteEntry<A>& ipr);
     void delete_route(const IPRouteEntry<A>& ipr);
 
-    void task_completed(Task* task);
+    virtual void task_completed(Task* task);
     void task_failed_fatally(Task* task);
 
     inline const string& xrl_target_name() const;
     inline const string& cookie() const;
-
-    uint32_t tid() const { return _tid; }
-    void set_tid(uint32_t v) { _tid = v; }
-    bool transaction_in_progress() const { return _transaction_in_progress; }
-    void set_transaction_in_progress(bool v) { _transaction_in_progress = v; }
-    bool transaction_in_error() const { return _transaction_in_error; }
-    void set_transaction_in_error(bool v) { _transaction_in_error = v; }
 
 public:
     static const uint32_t HI_WATER	 = 100;
@@ -78,7 +70,7 @@ public:
     static const uint32_t RETRY_PAUSE_MS = 100;
 
 protected:
-    void start_running_tasks();
+    virtual void start_running_tasks();
     void start_next_task();
 
     inline void 	incr_task_count();
@@ -88,15 +80,53 @@ protected:
     inline void		enqueue_task(Task* task);
     inline void		dequeue_task(Task* task);
 
-private:
+protected:
     XrlRouter&	_xrl_router;
     string	_from_protocol;
     string	_target_name;
     string	_cookie;
-    bool	_is_xrl_transaction_output;
 
     TaskQueue	_tasks;
     uint32_t	_n_tasks;
+};
+
+
+/**
+ * Route Redistributor output that sends route add and deletes to
+ * remote redistribution target via the redist_transaction{4,6} xrl
+ * interfaces.
+ */
+template <typename A>
+class RedistTransactionXrlOutput : public RedistXrlOutput<A>
+{
+public:
+    typedef typename RedistXrlOutput<A>::Task Task;
+
+public:
+    RedistTransactionXrlOutput(Redistributor<A>*	redistributor,
+			       XrlRouter& 		xrl_router,
+			       const string& 		from_protocol,
+			       const string& 		xrl_target_name,
+			       const string&		cookie);
+
+    void add_route(const IPRouteEntry<A>& ipr);
+    void delete_route(const IPRouteEntry<A>& ipr);
+
+    void task_completed(Task* task);
+
+    inline uint32_t tid() const;
+    inline void set_tid(uint32_t v);
+
+    inline bool transaction_in_progress() const;
+    inline void set_transaction_in_progress(bool v);
+
+    inline bool transaction_in_error() const;
+    inline void set_transaction_in_error(bool v);
+
+protected:
+    void start_running_tasks();
+
+protected:
     uint32_t	_tid;
     bool	_transaction_in_progress;
     bool	_transaction_in_error;
@@ -118,6 +148,52 @@ const string&
 RedistXrlOutput<A>::cookie() const
 {
     return _cookie;
+}
+
+
+// ----------------------------------------------------------------------------
+// Inline RedistrTransactionXrlOutput methods
+
+template <typename A>
+inline uint32_t
+RedistTransactionXrlOutput<A>::tid() const
+{
+    return _tid;
+}
+
+template <typename A>
+inline void
+RedistTransactionXrlOutput<A>::set_tid(uint32_t v)
+{
+    _tid = v;
+}
+
+template <typename A>
+inline bool
+RedistTransactionXrlOutput<A>::transaction_in_progress() const
+{
+    return _transaction_in_progress;
+}
+
+template <typename A>
+inline void
+RedistTransactionXrlOutput<A>::set_transaction_in_progress(bool v)
+{
+    _transaction_in_progress = v;
+}
+
+template <typename A>
+inline bool
+RedistTransactionXrlOutput<A>::transaction_in_error() const
+{
+    return _transaction_in_error;
+}
+
+template <typename A>
+inline void
+RedistTransactionXrlOutput<A>::set_transaction_in_error(bool v)
+{
+    _transaction_in_error = v;
 }
 
 #endif // __RIB_REDIST_XRL_HH__

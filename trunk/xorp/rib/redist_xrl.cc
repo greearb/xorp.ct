@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.6 2004/05/13 06:06:26 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.7 2004/05/13 07:13:27 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -113,53 +113,6 @@ private:
     uint32_t  _p_ms;
 };
 
-template <typename A>
-class AddTransactionRoute : public AddRoute<A> {
-public:
-    AddTransactionRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr)
-	: AddRoute<A>(parent, ipr) {}
-    virtual bool dispatch(XrlRouter& xrl_router);
-};
-
-template <typename A>
-class DeleteTransactionRoute : public DeleteRoute<A> {
-public:
-    DeleteTransactionRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr)
-	: DeleteRoute<A>(parent, ipr) {}
-    virtual bool dispatch(XrlRouter& xrl_router);
-};
-
-template <typename A>
-class StartTransaction : public RedistXrlTask<A> {
-public:
-    StartTransaction(RedistXrlOutput<A>* parent)
-	: RedistXrlTask<A>(parent) {}
-    virtual bool dispatch(XrlRouter&  xrl_router);
-    void dispatch_complete(const XrlError& xe, const uint32_t* tid);
-};
-
-template <typename A>
-class CommitTransaction : public RedistXrlTask<A> {
-public:
-    CommitTransaction(RedistXrlOutput<A>* parent, uint32_t tid)
-	: RedistXrlTask<A>(parent), _tid(tid) {}
-    virtual bool dispatch(XrlRouter&  xrl_router);
-    void dispatch_complete(const XrlError& xe);
-private:
-    uint32_t _tid;
-};
-
-template <typename A>
-class AbortTransaction : public RedistXrlTask<A> {
-public:
-    AbortTransaction(RedistXrlOutput<A>* parent, uint32_t tid)
-	: RedistXrlTask<A>(parent), _tid(tid) {}
-    virtual bool dispatch(XrlRouter&  xrl_router);
-    void dispatch_complete(const XrlError& xe);
-private:
-    uint32_t _tid;
-};
-
 
 // ----------------------------------------------------------------------------
 // AddRoute implementation
@@ -177,10 +130,12 @@ template <>
 bool
 AddRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 {
+    RedistXrlOutput<IPv4>* p = this->parent();
+
     XrlRedist4V0p1Client cl(&xrl_router);
-    return cl.send_add_route(this->parent()->xrl_target_name().c_str(),
+    return cl.send_add_route(p->xrl_target_name().c_str(),
 			     _net, _nh, _ifname, _vifname, _metric,
-			     _admin_distance, this->parent()->cookie(),
+			     _admin_distance, p->cookie(),
 			     callback(this, &AddRoute<IPv4>::dispatch_complete)
 			     );
 }
@@ -189,10 +144,12 @@ template <>
 bool
 AddRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 {
+    RedistXrlOutput<IPv6>* p = this->parent();
+
     XrlRedist6V0p1Client cl(&xrl_router);
-    return cl.send_add_route(this->parent()->xrl_target_name().c_str(),
+    return cl.send_add_route(p->xrl_target_name().c_str(),
 			     _net, _nh, _ifname, _vifname, _metric,
-			     _admin_distance, this->parent()->cookie(),
+			     _admin_distance, p->cookie(),
 			     callback(this, &AddRoute<IPv6>::dispatch_complete)
 			     );
 
@@ -233,10 +190,12 @@ template <>
 bool
 DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 {
+    RedistXrlOutput<IPv4>* p = this->parent();
+
     XrlRedist4V0p1Client cl(&xrl_router);
     return cl.send_delete_route(
-		this->parent()->xrl_target_name().c_str(),
-		_net, this->parent()->cookie(),
+		p->xrl_target_name().c_str(),
+		_net, p->cookie(),
 		callback(this, &DeleteRoute<IPv4>::dispatch_complete)
 		);
 }
@@ -245,10 +204,12 @@ template <>
 bool
 DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 {
+    RedistXrlOutput<IPv6>* p = this->parent();
+
     XrlRedist6V0p1Client cl(&xrl_router);
     return cl.send_delete_route(
-		this->parent()->xrl_target_name().c_str(),
-		_net, this->parent()->cookie(),
+		p->xrl_target_name().c_str(),
+		_net, p->cookie(),
 		callback(this, &DeleteRoute<IPv6>::dispatch_complete)
 		);
 }
@@ -301,269 +262,6 @@ Pause<A>::expire()
 
 
 // ----------------------------------------------------------------------------
-// AddTransactionRoute implementation
-
-template <>
-bool
-AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
-{
-    if (this->parent()->transaction_in_error()
-	|| ! this->parent()->transaction_in_progress()) {
-	XLOG_ERROR("Transaction error: failed to redistribute "
-		   "route add for %s",
-		   _net.str().c_str());
-	this->signal_complete_ok();
-	return true;	// XXX: we return true to avoid retransmission
-    }
-
-    XrlRedistTransaction4V0p1Client cl(&xrl_router);
-    return cl.send_add_route(this->parent()->xrl_target_name().c_str(),
-			     this->parent()->tid(),
-			     _net, _nh, _ifname, _vifname, _metric,
-			     _admin_distance, this->parent()->cookie(),
-			     _protocol_origin,
-			     callback(dynamic_cast<AddRoute<IPv4>* >(this),
-				      &AddRoute<IPv4>::dispatch_complete)
-			     );
-}
-
-template <>
-bool
-AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
-{
-    if (this->parent()->transaction_in_error()
-	|| ! this->parent()->transaction_in_progress()) {
-	XLOG_ERROR("Transaction error: failed to redistribute "
-		   "route add for %s",
-		   _net.str().c_str());
-	this->signal_complete_ok();
-	return true;	// XXX: we return true to avoid retransmission
-    }
-
-    XrlRedistTransaction6V0p1Client cl(&xrl_router);
-    return cl.send_add_route(this->parent()->xrl_target_name().c_str(),
-			     this->parent()->tid(),
-			     _net, _nh, _ifname, _vifname, _metric,
-			     _admin_distance, this->parent()->cookie(),
-			     _protocol_origin,
-			     callback(dynamic_cast<AddRoute<IPv6>* >(this),
-				      &AddRoute<IPv6>::dispatch_complete)
-			     );
-
-}
-
-
-// ----------------------------------------------------------------------------
-// DeleteTransactionRoute implementation
-
-template <>
-bool
-DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
-{
-    if (this->parent()->transaction_in_error()
-	|| ! this->parent()->transaction_in_progress()) {
-	XLOG_ERROR("Transaction error: failed to redistribute "
-		   "route delete for %s",
-		   _net.str().c_str());
-	this->signal_complete_ok();
-	return true;	// XXX: we return true to avoid retransmission
-    }
-
-    XrlRedistTransaction4V0p1Client cl(&xrl_router);
-    return cl.send_delete_route(
-		this->parent()->xrl_target_name().c_str(),
-		this->parent()->tid(),
-		_net, this->parent()->cookie(),
-		callback(dynamic_cast<DeleteRoute<IPv4>* >(this),
-			 &DeleteRoute<IPv4>::dispatch_complete)
-		);
-}
-
-template <>
-bool
-DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
-{
-    if (this->parent()->transaction_in_error()
-	|| ! this->parent()->transaction_in_progress()) {
-	XLOG_ERROR("Transaction error: failed to redistribute "
-		   "route delete for %s",
-		   _net.str().c_str());
-	this->signal_complete_ok();
-	return true;	// XXX: we return true to avoid retransmission
-    }
-
-    XrlRedistTransaction6V0p1Client cl(&xrl_router);
-    return cl.send_delete_route(
-		this->parent()->xrl_target_name().c_str(),
-		this->parent()->tid(),
-		_net, this->parent()->cookie(),
-		callback(dynamic_cast<DeleteRoute<IPv6>* >(this),
-			 &DeleteRoute<IPv6>::dispatch_complete)
-		);
-}
-
-
-// ----------------------------------------------------------------------------
-// StartTransaction implementation
-
-template <>
-bool
-StartTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
-{
-    this->parent()->set_tid(0);
-    this->parent()->set_transaction_in_progress(true);
-    this->parent()->set_transaction_in_error(false);
-
-    XrlRedistTransaction4V0p1Client cl(&xrl_router);
-    return cl.send_start_transaction(
-	this->parent()->xrl_target_name().c_str(),
-	callback(this, &StartTransaction<IPv4>::dispatch_complete));
-}
-
-template <>
-bool
-StartTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
-{
-    this->parent()->set_tid(0);
-    this->parent()->set_transaction_in_progress(true);
-    this->parent()->set_transaction_in_error(false);
-
-    XrlRedistTransaction6V0p1Client cl(&xrl_router);
-    return cl.send_start_transaction(
-	this->parent()->xrl_target_name().c_str(),
-	callback(this, &StartTransaction<IPv6>::dispatch_complete));
-}
-
-template <typename A>
-void
-StartTransaction<A>::dispatch_complete(const XrlError& xe, const uint32_t* tid)
-{
-    if (xe == XrlError::OKAY()) {
-	this->parent()->set_tid(*tid);
-	this->signal_complete_ok();
-	return;
-    } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to start transaction");
-	this->parent()->set_transaction_in_progress(false);
-	this->parent()->set_transaction_in_error(true);
-	this->signal_complete_ok();
-	return;
-    }
-    // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during start transaction \"%s\"",
-	       xe.str().c_str());
-
-    this->signal_fatal_failure();
-}
-
-
-// ----------------------------------------------------------------------------
-// CommitTransaction implementation
-
-template <>
-bool
-CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
-{
-    this->parent()->set_tid(0);	// XXX: reset the tid
-    this->parent()->set_transaction_in_progress(false);
-    this->parent()->set_transaction_in_error(false);
-
-    XrlRedistTransaction4V0p1Client cl(&xrl_router);
-    return cl.send_commit_transaction(
-	this->parent()->xrl_target_name().c_str(),
-	_tid,
-	callback(this, &CommitTransaction<IPv4>::dispatch_complete));
-}
-
-template <>
-bool
-CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
-{
-    this->parent()->set_tid(0);	// XXX: reset the tid
-    this->parent()->set_transaction_in_progress(false);
-    this->parent()->set_transaction_in_error(false);
-
-    XrlRedistTransaction6V0p1Client cl(&xrl_router);
-    return cl.send_commit_transaction(
-	this->parent()->xrl_target_name().c_str(),
-	_tid,
-	callback(this, &CommitTransaction<IPv6>::dispatch_complete));
-}
-
-template <typename A>
-void
-CommitTransaction<A>::dispatch_complete(const XrlError& xe)
-{
-    if (xe == XrlError::OKAY()) {
-	this->signal_complete_ok();
-	return;
-    } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to commit transaction");
-	this->signal_complete_ok();
-	return;
-    }
-    // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during commit transaction \"%s\"",
-	       xe.str().c_str());
-
-    this->signal_fatal_failure();
-}
-
-
-// ----------------------------------------------------------------------------
-// AbortTransaction implementation
-
-template <>
-bool
-AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
-{
-    this->parent()->set_tid(0);	// XXX: reset the tid
-    this->parent()->set_transaction_in_progress(false);
-    this->parent()->set_transaction_in_error(false);
-
-    XrlRedistTransaction4V0p1Client cl(&xrl_router);
-    return cl.send_abort_transaction(
-	this->parent()->xrl_target_name().c_str(),
-	_tid,
-	callback(this, &AbortTransaction<IPv4>::dispatch_complete));
-}
-
-template <>
-bool
-AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
-{
-    this->parent()->set_tid(0);	// XXX: reset the tid
-    this->parent()->set_transaction_in_progress(false);
-    this->parent()->set_transaction_in_error(false);
-
-    XrlRedistTransaction6V0p1Client cl(&xrl_router);
-    return cl.send_abort_transaction(
-	this->parent()->xrl_target_name().c_str(),
-	_tid,
-	callback(this, &AbortTransaction<IPv6>::dispatch_complete));
-}
-
-template <typename A>
-void
-AbortTransaction<A>::dispatch_complete(const XrlError& xe)
-{
-    if (xe == XrlError::OKAY()) {
-	this->signal_complete_ok();
-	return;
-    } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to abort transaction");
-	this->signal_complete_ok();
-	return;
-    }
-    // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during abort transaction \"%s\"",
-	       xe.str().c_str());
-
-    this->signal_fatal_failure();
-}
-
-
-// ----------------------------------------------------------------------------
 // RedistXrlOutput implementation
 
 template <typename A>
@@ -571,13 +269,10 @@ RedistXrlOutput<A>::RedistXrlOutput(Redistributor<A>*	redistributor,
 				    XrlRouter&		xrl_router,
 				    const string&	from_protocol,
 				    const string&	xrl_target_name,
-				    const string&	cookie,
-				    bool		is_xrl_transaction_output)
+				    const string&	cookie)
     : RedistOutput<A>(redistributor), _xrl_router(xrl_router),
       _from_protocol(from_protocol), _target_name(xrl_target_name),
-      _cookie(cookie), _is_xrl_transaction_output(is_xrl_transaction_output),
-      _n_tasks(0), _tid(0), _transaction_in_progress(false),
-      _transaction_in_error(false)
+      _cookie(cookie), _n_tasks(0)
 {
 }
 
@@ -640,23 +335,8 @@ template <typename A>
 void
 RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
-    if (! _is_xrl_transaction_output) {
-	// Don't do transaction output
-	enqueue_task(new AddRoute<A>(this, ipr));
-	if (task_count() == 1) {
-	    start_running_tasks();
-	}
-	return;
-    }
-
-    // Do transaction output
-    bool did_start_transaction = false;
-    if (! _transaction_in_progress) {
-	enqueue_task(new StartTransaction<A>(this));
-	did_start_transaction = true;
-    }
-    enqueue_task(new AddTransactionRoute<A>(this, ipr));
-    if (did_start_transaction && (task_count() == 2)) {
+    enqueue_task(new AddRoute<A>(this, ipr));
+    if (task_count() == 1) {
 	start_running_tasks();
     }
 }
@@ -665,23 +345,8 @@ template <typename A>
 void
 RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
-    if (! _is_xrl_transaction_output) {
-	// Don't do transaction output
-	enqueue_task(new DeleteRoute<A>(this, ipr));
-	if (task_count() == 1) {
-	    start_running_tasks();
-	}
-	return;
-    }
-
-    // Do transaction output
-    bool did_start_transaction = false;
-    if (! _transaction_in_progress) {
-	enqueue_task(new StartTransaction<A>(this));
-	did_start_transaction = true;
-    }
-    enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
-    if (did_start_transaction && (task_count() == 2)) {
+    enqueue_task(new DeleteRoute<A>(this, ipr));
+    if (task_count() == 1) {
 	start_running_tasks();
     }
 }
@@ -690,10 +355,7 @@ template <typename A>
 void
 RedistXrlOutput<A>::start_running_tasks()
 {
-    if (! _is_xrl_transaction_output)
-	XLOG_ASSERT(task_count() == 1);
-    else
-	XLOG_ASSERT(task_count() == 2);
+    XLOG_ASSERT(task_count() == 1);
     start_next_task();
 }
 
@@ -729,16 +391,6 @@ RedistXrlOutput<A>::task_completed(RedistXrlTask<A>* task)
 	start_next_task();
 	return;
     }
-
-    if (_is_xrl_transaction_output && _transaction_in_progress) {
-	//
-	// If transaction in progress, and this is the last add/delete,
-	// then send "commit transaction".
-	//
-	enqueue_task(new CommitTransaction<A>(this, _tid));
-	start_next_task();
-	return;
-    }
 }
 
 template <typename A>
@@ -752,5 +404,433 @@ RedistXrlOutput<A>::task_failed_fatally(RedistXrlTask<A>* task)
     this->announce_fatal_error();
 }
 
+
+// ----------------------------------------------------------------------------
+// RedistTransactionXrlOutput Commands
+
+template <typename A>
+class AddTransactionRoute : public AddRoute<A> {
+public:
+    AddTransactionRoute(RedistTransactionXrlOutput<A>* parent,
+			const IPRouteEntry<A>& ipr)
+	: AddRoute<A>(parent, ipr) {}
+    virtual bool dispatch(XrlRouter& xrl_router);
+};
+
+template <typename A>
+class DeleteTransactionRoute : public DeleteRoute<A> {
+public:
+    DeleteTransactionRoute(RedistTransactionXrlOutput<A>* parent,
+			   const IPRouteEntry<A>& ipr)
+	: DeleteRoute<A>(parent, ipr) {}
+    virtual bool dispatch(XrlRouter& xrl_router);
+};
+
+template <typename A>
+class StartTransaction : public RedistXrlTask<A> {
+public:
+    StartTransaction(RedistTransactionXrlOutput<A>* parent)
+	: RedistXrlTask<A>(parent) {}
+    virtual bool dispatch(XrlRouter&  xrl_router);
+    void dispatch_complete(const XrlError& xe, const uint32_t* tid);
+};
+
+template <typename A>
+class CommitTransaction : public RedistXrlTask<A> {
+public:
+    CommitTransaction(RedistTransactionXrlOutput<A>* parent, uint32_t tid)
+	: RedistXrlTask<A>(parent), _tid(tid) {}
+    virtual bool dispatch(XrlRouter&  xrl_router);
+    void dispatch_complete(const XrlError& xe);
+private:
+    uint32_t _tid;
+};
+
+template <typename A>
+class AbortTransaction : public RedistXrlTask<A> {
+public:
+    AbortTransaction(RedistTransactionXrlOutput<A>* parent, uint32_t tid)
+	: RedistXrlTask<A>(parent), _tid(tid) {}
+    virtual bool dispatch(XrlRouter&  xrl_router);
+    void dispatch_complete(const XrlError& xe);
+private:
+    uint32_t _tid;
+};
+
+
+// ----------------------------------------------------------------------------
+// AddTransactionRoute implementation
+
+template <>
+bool
+AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv4>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
+
+    if (p->transaction_in_error() || ! p->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route add for %s", _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
+    XrlRedistTransaction4V0p1Client cl(&xrl_router);
+    return cl.send_add_route(p->xrl_target_name().c_str(),
+			     p->tid(),
+			     _net, _nh, _ifname, _vifname, _metric,
+			     _admin_distance, p->cookie(),
+			     _protocol_origin,
+			     callback(static_cast<AddRoute<IPv4>*>(this),
+				      &AddRoute<IPv4>::dispatch_complete)
+			     );
+}
+
+template <>
+bool
+AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv6>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
+
+    if (p->transaction_in_error() || ! p->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route add for %s", _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
+    XrlRedistTransaction6V0p1Client cl(&xrl_router);
+    return cl.send_add_route(p->xrl_target_name().c_str(),
+			     p->tid(),
+			     _net, _nh, _ifname, _vifname, _metric,
+			     _admin_distance, p->cookie(),
+			     _protocol_origin,
+			     callback(static_cast<AddRoute<IPv6>*>(this),
+				      &AddRoute<IPv6>::dispatch_complete)
+			     );
+}
+
+
+// ----------------------------------------------------------------------------
+// DeleteTransactionRoute implementation
+
+template <>
+bool
+DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv4>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
+
+    if (p->transaction_in_error() || ! p->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route delete for %s", _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
+    XrlRedistTransaction4V0p1Client cl(&xrl_router);
+    return cl.send_delete_route(
+	p->xrl_target_name().c_str(),
+	p->tid(),
+	_net, p->cookie(),
+	callback(static_cast<DeleteRoute<IPv4>*>(this),
+		 &DeleteRoute<IPv4>::dispatch_complete)
+	);
+}
+
+template <>
+bool
+DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv6>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
+
+    if (p->transaction_in_error() || ! p->transaction_in_progress()) {
+	XLOG_ERROR("Transaction error: failed to redistribute "
+		   "route delete for %s", _net.str().c_str());
+	this->signal_complete_ok();
+	return true;	// XXX: we return true to avoid retransmission
+    }
+
+    XrlRedistTransaction6V0p1Client cl(&xrl_router);
+    return cl.send_delete_route(
+	p->xrl_target_name().c_str(),
+	p->tid(),
+	_net, p->cookie(),
+	callback(static_cast<DeleteRoute<IPv6>*>(this),
+		 &DeleteRoute<IPv6>::dispatch_complete)
+	);
+}
+
+
+// ----------------------------------------------------------------------------
+// StartTransaction implementation
+
+template <>
+bool
+StartTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv4>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
+
+    p->set_tid(0);
+    p->set_transaction_in_progress(true);
+    p->set_transaction_in_error(false);
+
+    XrlRedistTransaction4V0p1Client cl(&xrl_router);
+    return cl.send_start_transaction(
+	p->xrl_target_name().c_str(),
+	callback(this, &StartTransaction<IPv4>::dispatch_complete));
+}
+
+template <>
+bool
+StartTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv6>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
+
+    p->set_tid(0);
+    p->set_transaction_in_progress(true);
+    p->set_transaction_in_error(false);
+
+    XrlRedistTransaction6V0p1Client cl(&xrl_router);
+    return cl.send_start_transaction(
+	p->xrl_target_name().c_str(),
+	callback(this, &StartTransaction<IPv6>::dispatch_complete));
+}
+
+template <typename A>
+void
+StartTransaction<A>::dispatch_complete(const XrlError& xe, const uint32_t* tid)
+{
+    RedistTransactionXrlOutput<A>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<A>*>(this->parent());
+    if (xe == XrlError::OKAY()) {
+	p->set_tid(*tid);
+	this->signal_complete_ok();
+	return;
+    } else if (xe == XrlError::COMMAND_FAILED()) {
+	XLOG_ERROR("Failed to start transaction");
+	p->set_transaction_in_progress(false);
+	p->set_transaction_in_error(true);
+	this->signal_complete_ok();
+	return;
+    }
+    // For now all errors are signalled fatal
+    XLOG_ERROR("Fatal error during start transaction \"%s\"",
+	       xe.str().c_str());
+
+    this->signal_fatal_failure();
+}
+
+
+// ----------------------------------------------------------------------------
+// CommitTransaction implementation
+
+template <>
+bool
+CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv4>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
+
+    p->set_tid(0);	// XXX: reset the tid
+    p->set_transaction_in_progress(false);
+    p->set_transaction_in_error(false);
+
+    XrlRedistTransaction4V0p1Client cl(&xrl_router);
+    return cl.send_commit_transaction(
+	p->xrl_target_name().c_str(),
+	_tid,
+	callback(this, &CommitTransaction<IPv4>::dispatch_complete));
+}
+
+template <>
+bool
+CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv6>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
+
+    p->set_tid(0);	// XXX: reset the tid
+    p->set_transaction_in_progress(false);
+    p->set_transaction_in_error(false);
+
+    XrlRedistTransaction6V0p1Client cl(&xrl_router);
+    return cl.send_commit_transaction(
+	p->xrl_target_name().c_str(),
+	_tid,
+	callback(this, &CommitTransaction<IPv6>::dispatch_complete));
+}
+
+template <typename A>
+void
+CommitTransaction<A>::dispatch_complete(const XrlError& xe)
+{
+    if (xe == XrlError::OKAY()) {
+	this->signal_complete_ok();
+	return;
+    } else if (xe == XrlError::COMMAND_FAILED()) {
+	XLOG_ERROR("Failed to commit transaction");
+	this->signal_complete_ok();
+	return;
+    }
+    // For now all errors are signalled fatal
+    XLOG_ERROR("Fatal error during commit transaction \"%s\"",
+	       xe.str().c_str());
+
+    this->signal_fatal_failure();
+}
+
+
+// ----------------------------------------------------------------------------
+// AbortTransaction implementation
+
+template <>
+bool
+AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv4>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
+
+    p->set_tid(0);	// XXX: reset the tid
+    p->set_transaction_in_progress(false);
+    p->set_transaction_in_error(false);
+
+    XrlRedistTransaction4V0p1Client cl(&xrl_router);
+    return cl.send_abort_transaction(
+	p->xrl_target_name().c_str(),
+	_tid,
+	callback(this, &AbortTransaction<IPv4>::dispatch_complete));
+}
+
+template <>
+bool
+AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
+{
+    RedistTransactionXrlOutput<IPv6>* p =
+	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
+
+    p->set_tid(0);	// XXX: reset the tid
+    p->set_transaction_in_progress(false);
+    p->set_transaction_in_error(false);
+
+    XrlRedistTransaction6V0p1Client cl(&xrl_router);
+    return cl.send_abort_transaction(
+	p->xrl_target_name().c_str(),
+	_tid,
+	callback(this, &AbortTransaction<IPv6>::dispatch_complete));
+}
+
+template <typename A>
+void
+AbortTransaction<A>::dispatch_complete(const XrlError& xe)
+{
+    if (xe == XrlError::OKAY()) {
+	this->signal_complete_ok();
+	return;
+    } else if (xe == XrlError::COMMAND_FAILED()) {
+	XLOG_ERROR("Failed to abort transaction");
+	this->signal_complete_ok();
+	return;
+    }
+    // For now all errors are signalled fatal
+    XLOG_ERROR("Fatal error during abort transaction \"%s\"",
+	       xe.str().c_str());
+
+    this->signal_fatal_failure();
+}
+
+
+// ----------------------------------------------------------------------------
+// RedistTransactionXrlOutput implementation
+
+template <typename A>
+RedistTransactionXrlOutput<A>::RedistTransactionXrlOutput(
+				Redistributor<A>*	redistributor,
+				XrlRouter&		xrl_router,
+				const string&		from_protocol,
+				const string&		xrl_target_name,
+				const string&		cookie
+				)
+    : RedistXrlOutput<A>(redistributor, xrl_router, from_protocol,
+			 xrl_target_name, cookie),
+      _tid(0),
+      _transaction_in_progress(false),
+      _transaction_in_error(false)
+{
+}
+
+template <typename A>
+void
+RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
+{
+    bool did_start_transaction = false;
+
+    if (! transaction_in_progress()) {
+	enqueue_task(new StartTransaction<A>(this));
+	did_start_transaction = true;
+    }
+    enqueue_task(new AddTransactionRoute<A>(this, ipr));
+    if (did_start_transaction && (this->task_count() == 2)) {
+	start_running_tasks();
+    }
+}
+
+template <typename A>
+void
+RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
+{
+    bool did_start_transaction = false;
+
+    if (! transaction_in_progress()) {
+	enqueue_task(new StartTransaction<A>(this));
+	did_start_transaction = true;
+    }
+    enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
+    if (did_start_transaction && (this->task_count() == 2)) {
+	this->start_running_tasks();
+    }
+}
+
+template <typename A>
+void
+RedistTransactionXrlOutput<A>::start_running_tasks()
+{
+    // At start we expect a start transaction followed by an add or delete
+    XLOG_ASSERT(this->task_count() == 2);
+    this->start_next_task();
+}
+
+template <typename A>
+void
+RedistTransactionXrlOutput<A>::task_completed(Task* task)
+{
+    dequeue_task(task);
+    if (this->task_count() != 0) {
+	this->start_next_task();
+	return;
+    }
+
+    if (transaction_in_progress()) {
+	//
+	// If transaction in progress, and this is the last add/delete,
+	// then send "commit transaction".
+	//
+	enqueue_task(new CommitTransaction<A>(this, _tid));
+	this->start_next_task();
+	return;
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+// Instantiations
+
 template class RedistXrlOutput<IPv4>;
 template class RedistXrlOutput<IPv6>;
+
+template class RedistTransactionXrlOutput<IPv4>;
+template class RedistTransactionXrlOutput<IPv6>;

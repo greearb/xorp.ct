@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.30 2004/05/12 08:28:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.31 2004/05/12 21:55:22 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -636,9 +636,16 @@ redist_enable_xrl_output(EventLoop&	eventloop,
     Redistributor<A>* redist = new Redistributor<A>(eventloop,
 						    redist_name);
     redist->set_redist_table(rt);
-    redist->set_output(new RedistXrlOutput<A>(redist, rtr, protocol,
-					      to_xrl_target, cookie,
-					      is_xrl_transaction_output));
+    if (is_xrl_transaction_output) {
+	redist->set_output(
+		    new RedistTransactionXrlOutput<A>(redist, rtr,
+						      protocol, to_xrl_target,
+						      cookie)
+		    );
+    } else {
+	redist->set_output(new RedistXrlOutput<A>(redist, rtr, protocol,
+						  to_xrl_target, cookie));
+    }
     return XORP_OK;
 }
 
