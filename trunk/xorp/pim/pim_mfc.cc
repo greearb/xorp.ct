@@ -216,13 +216,6 @@ PimMfc::recompute_iif_olist_mfc()
 	return;
     }
 
-    // If no outgoing interfaces, then remove the entry.
-    if (new_olist.none()) {
-	set_has_forced_deletion(true);
-	entry_try_remove();
-	return;
-    }
-
     // Set the new iif and the olist
     set_iif_vif_index(new_iif_vif_index);
     set_olist(new_olist);
