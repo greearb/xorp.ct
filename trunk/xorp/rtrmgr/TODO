@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.4 2003/07/16 16:37:27 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.5 2003/08/01 22:49:52 pavlin Exp $
 #
 
 Urgent
@@ -21,7 +21,6 @@ Configure Mode
  - Implement the "help" and "quit" commands in the top-level xorpsh
    command tree.
 
-
 Operational Mode
 
  - Ensure commands only appear when modules are loaded.
@@ -29,6 +28,10 @@ Operational Mode
 Other
  - Fix test_router_manager, because even if the path to the xorp_finder
    binary is incorrect, it doesn't report an error.
+
+ - Restart code is broken, currently exits because of an Xrl failure
+   when xorp_rtrmgr goes away.  Want to stick around, announce absence
+   of xorp_rtrmgr and gracefully re-connect when it restarts.
 
 Non-Urgent
 ==========
@@ -47,8 +50,6 @@ Configure Mode
 
 Operational Mode
 
-
-
 Done
 ====
 
@@ -58,7 +59,7 @@ Done
  - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
    fail all authentication checks.  Handle this more gracefully.
 
-RESOLVED: restart is detected and user is advised to logout and login again.  
+RESOLVED: restart is detected and user is advised to logout and login again.
 
  - TemplateTree destructor doesn't clean up properly.
 
