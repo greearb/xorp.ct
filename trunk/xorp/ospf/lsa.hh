@@ -67,8 +67,6 @@ class LsaTransmit : class Transmit {
 }
 #endif
 
-class BadPacket;
-
 /**
  * LSA Header.
  */
