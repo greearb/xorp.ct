@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_reader.hh,v 1.1 2003/01/24 00:53:06 mjh Exp $
 
 #ifndef __ROUTE_TABLE_READER_HH__
 #define __ROUTE_TABLE_READER_HH__
@@ -28,14 +28,16 @@ class ReaderIxTuple {
 public:
     ReaderIxTuple(const IPv4& peer_id,
 		  BGPTrie<A>::iterator route_iter, const RibInTable* _ribin);
-    const A& base_addr() const;
-    uint32_t prefix_len() const;
-    IPNet<A> net() const;
+    const A& base_addr() const {return _net.base_addr();}
+    uint32_t prefix_len() const {return _net.prefix_len();}
+    IPNet<A> net() const {return _net;}
+    bool is_consistent() const;
     const IPv4& peer_id() const {return _peer_id;}
     RibInTable* ribin() const {return _ribin;}
     bool operator<(const ReaderIxTuple& them) const;
-    const BGPTrie<A>::iterator& iterator() const {return _route_iter;}
+    const BGPTrie<A>::iterator& route_iterator() const {return _route_iter;}
 private:
+    IPNet<A> _net;
     IPv4 _peer_id;
     BGPTrie<A>::iterator _route_iter;
     RibInTable* _ribin;

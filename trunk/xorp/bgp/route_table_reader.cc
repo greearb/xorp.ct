@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.1 2003/01/24 00:53:06 mjh Exp $"
 
 #include "bgp_module.h"
 #include "route_table_reader.hh"
@@ -23,13 +23,7 @@ ReaderIxTable<A>::ReaderIxTuple(const IPv4& peer_id,
 				const RibInTable* ribin)
     : _peer_id(peer_id), _route_iter(route_iter), _ribin(ribin) 
 {
-}
-
-template <class A>
-IPNet<A>
-ReaderIxTable<A>::net() const
-{
-    assert(_route_iter != _ribin->trie().end());
+    _net = _route_iter->key();
 }
 
 template <class A>
@@ -69,6 +63,22 @@ ReaderIxTable<A>::operator<(const ReaderIxTuple& them) const
 }
 
 template <class A>
+bool
+ReaderIxTuple<A>::is_consistent() const {
+    if (_route_iter == _ribin->trie().end()) {
+	// the route we were pointing at has been deleted, and there
+	// are no routes after this in the trie.
+	return false;
+    }
+    if (_route_iter->key() != _net) {
+	// the route we were pointing at has been deleted, and the
+	// iterator now points to a later subnet in the trie.
+	return false;
+    }
+    return true;
+}
+
+template <class A>
 RouteTableReader<A>::RouteTableReader(const list <RibInTable*>& ribins) 
 {
     typename list <RibInTable*>::const_iterator i;
@@ -78,8 +88,7 @@ RouteTableReader<A>::RouteTableReader(const list <RibInTable*>& ribins)
 	    BGPTrie<A>::iterator ti = (*i)->trie().begin();
 	    IPNet<A> net = ti.net();
 	    IPv4 peer_id = (*i)->peer_handler()->peer()->peer_id();
-	    _peer_readers.insert(ReaderIxTuple<A>(net, peer_id, ti, (*i),
-						  table_version));
+	    _peer_readers.insert(ReaderIxTuple<A>(peer_id, ti, (*i));
 	}
     }
 }
@@ -89,12 +98,41 @@ bool
 RouteTableReader<A>::get_next(SubnetRoute<A>*& route, IPv4& peer_id) 
 {
     typename set <ReaderIxTuple>::iterator i;
-    i = _peer_readers.begin();
-    if (i == _peer_readers.end()) {
-	return false;
+    while (1) {
+	i = _peer_readers.begin();
+	if (i == _peer_readers.end()) {
+	    return false;
+	}
+	ReaderIxTuple<A>* reader = &(*i);
+	
+	if (reader->is_consistent()) {
+	    //return the route and the peer_id from the reader
+	    route = reader->route_iterator().payload();
+	    peer_id = reader->peer_id;
+
+	    //if necessary, prepare this peer's reader for next time
+	    reader->route_iterator()++;
+	    if (reader->route_iterator() != reader->ribin()->trie().end()) {
+		_peer_readers.insert(ReaderIxTuple<A>(reader->peer_id(),
+						      reader->route_iterator(),
+						      reader->ribin()));
+	    }
+
+	    //remove the obsolete reader
+	    _peer_readers.erase(i);
+	    return true;
+	}
+
+	//the iterator was inconsistent, so we need to re-insert a
+	//consistent version into the set and try again.
+	if (reader->route_iterator() != reader->ribin()->trie().end()) {
+	    _peer_readers.insert(ReaderIxTuple<A>(reader->peer_id(),
+						  reader->route_iterator(),
+						  reader->ribin()));
+	}
+	//remove the obsolete reader
+	_peer_readers.erase(i);
     }
-    ReaderIxTuple<A>* reader = &(*i);
-    //XXX
 }
 
 
