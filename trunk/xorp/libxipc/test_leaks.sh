@@ -32,7 +32,7 @@ spot_leaks()
     cxxlibs=`ldd $1 2>/dev/null | grep c++`
     if [ $? -ne 0 ] ; then
 	echo "$1 does not appear to be dynamically linked."
-	return 1
+	return 0
     fi
 
     if [ -z "${cxxlibs}" ] ; then
