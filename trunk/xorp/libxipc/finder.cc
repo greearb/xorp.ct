@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.14 2003/11/13 19:05:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.15 2004/06/10 22:41:05 hodson Exp $"
 
 #include <set>
 
@@ -503,12 +503,14 @@ Finder::add_target(const string& cls,
 	      cookie.c_str());
 
     TargetTable::const_iterator ci = _targets.find(tgt);
-    if (ci->second.messenger() == _active_messenger) {
-	debug_msg("already registered by messenger.\n");
-	return true;
-    } else if (ci != _targets.end()) {
-	debug_msg("Fail registered by another messenger.");
-	return false;
+    if (ci != _targets.end()) {
+	if (ci->second.messenger() == _active_messenger) {
+	    debug_msg("already registered by messenger.\n");
+	    return true;
+	} else {
+	    debug_msg("Fail registered by another messenger.");
+	    return false;
+	}
     }
 
     pair<TargetTable::iterator, bool> r =
