@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.15 2005/01/14 01:35:15 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.16 2005/01/21 01:59:49 atanu Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -888,7 +888,7 @@ XrlAtom::pack_list(uint8_t* buffer, size_t buffer_bytes) const
 {
     size_t done = 0;
 
-    size_t nelem = htonl(_list->size());
+    uint32_t nelem = htonl(_list->size());
     static_assert(sizeof(nelem) == 4);
 
     memcpy(buffer, &nelem, sizeof(nelem));
