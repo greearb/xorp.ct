@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.28 2003/07/03 23:52:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.29 2003/08/05 22:14:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -661,7 +661,7 @@ void
 Peer::expect(const string& line, const vector<string>& words)
     throw(InvalidString)
 {
-    if(words.size() < 2)
+    if(words.size() < 3)
 	xorp_throw(InvalidString,
 		   c_format("Insufficient arguments:\n[%s]", line.c_str()));
 
