@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.11 2003/05/29 17:59:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.12 2003/09/27 22:32:46 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -191,9 +191,11 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 		matches = true;
 	    }
 	} else {
-	    if (iter.payload()->route()->net() == changed_net)
+	    if (iter.payload()->route()  
+		&& iter.payload()->route()->net() == changed_net) {
 		notify_invalidated(iter);
 		matches = true;
+	    }
 	}
 	iter = nextiter;
     }
