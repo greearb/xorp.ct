@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.2 2003/05/05 19:34:00 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.3 2003/05/14 01:13:43 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -39,10 +39,13 @@ public:
      * @param rtattr the pointer to the first rtattr entry.
      * @param rta_len the length of all rtattr entries.
      * @param rta_array the array with the pointers to store the result.
+     * @param rta_array_n the maximum entry number to store
+     * in the @param rta_array[] array.
      */
-    static void get_rta_attr(const struct rtattr* rtattr, int rta_len,
-			     const struct rtattr* rta_array[]);
-
+    static void get_rtattr(const struct rtattr* rtattr, int rta_len,
+			   const struct rtattr* rta_array[],
+			   size_t rta_array_n);
+    
     /**
      * Extract the routing information from netlink message.
      * 

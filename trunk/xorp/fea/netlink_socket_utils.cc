@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.3 2003/05/14 01:13:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.4 2003/05/22 01:05:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -142,17 +142,17 @@ NlmUtils::nlm_msg_type(uint32_t m)
 }
 
 void
-NlmUtils::get_rta_attr(const struct rtattr* rtattr, int rta_len,
-		       const struct rtattr* rta_array[])
+NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
+		     const struct rtattr* rta_array[], size_t rta_array_n)
 {
     while (RTA_OK(rtattr, rta_len)) {
-	if (rtattr->rta_type <= RTA_MAX)
+	if (rtattr->rta_type < rta_array_n)
 	    rta_array[rtattr->rta_type] = rtattr;
 	rtattr = RTA_NEXT(const_cast<struct rtattr *>(rtattr), rta_len);
     }
     
     if (rta_len) {
-	XLOG_WARNING("get_rta_attr() failed: AF_NETLINK deficit in rtattr: "
+	XLOG_WARNING("get_rtattr() failed: AF_NETLINK deficit in rtattr: "
 		     "%d rta_len remaining",
 		     rta_len);
     }
@@ -191,7 +191,8 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
     rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
-    NlmUtils::get_rta_attr(rtattr, rta_len, rta_array);
+    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
+			 sizeof(rta_array) / sizeof(rta_array[0]));
 
     //
     // Get the destination
