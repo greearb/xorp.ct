@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.11 2003/03/16 08:20:33 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.12 2003/04/02 22:58:57 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -66,6 +66,8 @@ public:
     bool send(const Xrl& xrl, const XrlCallback& cb);
 
     bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
+
+    EventLoop& eventloop() {return _e;}
 
 protected:
     void resolve_callback(const XrlError&		e,
