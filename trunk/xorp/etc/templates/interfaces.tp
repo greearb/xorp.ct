@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.10 2004/11/05 02:41:05 bms Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.11 2004/11/05 03:39:40 bms Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -93,7 +93,7 @@ interfaces {
 	vif @: txt {
 	    %help:	short "Configure a virtual interface";
 	    %create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_vif?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(@)";
-	    %delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_vif?ifname:txt=$(interface.@)&tid:u32=$(interfaces.TID)&vif:txt=$(@)";
+	    %delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_vif?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(@)";
 	    %list:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_names?ifname:txt=$(interface.@)->vifs:list";
 
 	    enabled {
