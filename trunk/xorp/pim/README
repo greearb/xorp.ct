@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.6 2002/12/09 22:31:28 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -114,11 +114,11 @@ the BGP testing framework.
 Status
 ======
 
-Currently (note: December 5, 2002), the PIM-SM implementation is based
+Currently (note: March 4, 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-05.{ps,txt} (The core PIM-SM specification).
- * draft-ietf-pim-sm-bsr-02.{ps,txt} (The Bootstrap mechanism).
+ * draft-ietf-pim-sm-bsr-03.{ps,txt} (The Bootstrap mechanism).
 
 The only major features not implemented yet are SSM support and security.
 
