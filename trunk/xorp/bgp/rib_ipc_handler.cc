@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.28 2003/10/23 03:10:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.29 2003/10/23 10:54:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -20,7 +20,7 @@
 // XXX - As soon as this works remove the define and make the code unconditonal
 #define FLOW_CONTROL
 
-// Give every XRL in flight the opportnity to timeout
+// Give every XRL in flight the opportunity to timeout
 #define MAX_ERR_RETRIES FLYING_LIMIT
 
 #include "bgp_module.h"
@@ -31,11 +31,12 @@
 RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop, 
 			     BGPMain& bgp) 
     : PeerHandler("RIBIpcHandler", NULL, NULL, NULL), 
-    _ribname(""),
-      _xrl_router(xrl_router), _eventloop(eventloop),
-    _interface_failed(false),
-    _v4_queue(this, xrl_router, &bgp),
-    _v6_queue(this, xrl_router, &bgp)
+      _ribname(""),
+      _xrl_router(xrl_router),
+      _eventloop(eventloop),
+      _interface_failed(false),
+      _v4_queue(this, xrl_router, &bgp),
+      _v6_queue(this, xrl_router, &bgp)
 {
 }
 
@@ -78,19 +79,19 @@ RibIpcHandler::register_ribname(const string& r)
     //ebgp - v4
     //name - "ebgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_add_egp_table4(_ribname.c_str(),
 		"ebgp", _xrl_router->class_name(),
-                 _xrl_router->instance_name(), true, false,
+                 _xrl_router->instance_name(), true, true,
                  callback(this, 
 			  &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v4
     //name - "ibgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_add_egp_table4(_ribname.c_str(),
 		"ibgp", _xrl_router->class_name(),
-                _xrl_router->instance_name(), true, false,
+                _xrl_router->instance_name(), true, true,
 		callback(this, 
 			 &RibIpcHandler::rib_command_done,"add_table"));
 
@@ -98,19 +99,19 @@ RibIpcHandler::register_ribname(const string& r)
     //ebgp - v6
     //name - "ebgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_add_egp_table6(_ribname.c_str(),
                 "ebgp",  _xrl_router->class_name(),
-                _xrl_router->instance_name(), true, false,
+                _xrl_router->instance_name(), true, true,
 		callback(this, 
  		         &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v6
     //name - "ibgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_add_egp_table6(_ribname.c_str(),
 		"ibgp", _xrl_router->class_name(),
-                _xrl_router->instance_name(), true, false,
+                _xrl_router->instance_name(), true, true,
 		callback(this,
 			 &RibIpcHandler::rib_command_done,"add_table"));
 
@@ -126,22 +127,22 @@ RibIpcHandler::unregister_rib()
     //ebgp - v4
     //name - "ebgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_delete_egp_table4(_ribname.c_str(),
 			       "ebgp", _xrl_router->class_name(),
                                _xrl_router->instance_name(),
-			       true, false,
+			       true, true,
 			       callback(this,
 					&RibIpcHandler::rib_command_done,
 					"delete_table"));
     //ibgp - v4
     //name - "ibgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_delete_egp_table4(_ribname.c_str(),
 			       "ibgp", _xrl_router->class_name(),
                                _xrl_router->instance_name(), 
-			       true, false,
+			       true, true,
 			       callback(this,
 					&RibIpcHandler::rib_command_done,
 					"delete_table"));
@@ -150,11 +151,11 @@ RibIpcHandler::unregister_rib()
     //ebgp - v6
     //name - "ebgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_delete_egp_table6(_ribname.c_str(),
  			       "ebgp", _xrl_router->class_name(),
                                _xrl_router->instance_name(), 
-			       true, false,
+			       true, true,
  			       callback(this,
  				  	&RibIpcHandler::rib_command_done,
  					"delete_table"));
@@ -162,11 +163,11 @@ RibIpcHandler::unregister_rib()
     //ibgp - v6
     //name - "ibgp"
     //unicast - true
-    //multicast - false
+    //multicast - true
     rib.send_delete_egp_table6(_ribname.c_str(),
  			       "ibgp", _xrl_router->class_name(),
                                _xrl_router->instance_name(), 
-			       true, false,
+			       true, true,
  			       callback(this,
  					&RibIpcHandler::rib_command_done,
  					"delete_table"));
@@ -183,27 +184,27 @@ RibIpcHandler::start_packet(bool ibgp)
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi) 
+RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv4) %x\n", (u_int)(&rt));
 
     if("" == _ribname)
 	return 0;
 
-    _v4_queue.queue_add_route(_ribname, _ibgp, rt.net(), rt.nexthop());
+    _v4_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop());
 
     return 0;
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi)
+RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
 
     if ("" == _ribname)
 	return 0;
 
-    _v6_queue.queue_add_route(_ribname, _ibgp, rt.net(), rt.nexthop());
+    _v6_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop());
 
     return 0;
 }
@@ -231,27 +232,27 @@ RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 }
 
 int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
+RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
 
     if("" == _ribname)
 	return 0;
 
-    _v4_queue.queue_delete_route(_ribname, _ibgp, rt.net());
+    _v4_queue.queue_delete_route(_ribname, _ibgp, safi, rt.net());
 
     return 0;
 }
 
 int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi)
+RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
     UNUSED(rt);
     if("" == _ribname)
 	return 0;
 
-    _v6_queue.queue_delete_route(_ribname, _ibgp, rt.net());
+    _v6_queue.queue_delete_route(_ribname, _ibgp, safi, rt.net());
 
     return 0;
 }
@@ -374,8 +375,8 @@ XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
 
 template<class A>
 void
-XrlQueue<A>::queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
-			 const A& nexthop)
+XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
+			     const IPNet<A>& net, const A& nexthop)
 {
     if (_interface_failed)
 	return;
@@ -385,6 +386,7 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
     q.add = true;
     q.ribname = ribname;
     q.ibgp = ibgp;
+    q.safi = safi;
     q.net = net;
     q.nexthop = nexthop;
     q.id = _id++;
@@ -396,7 +398,8 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
 
 template<class A>
 void
-XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, const IPNet<A>& net)
+XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
+				const IPNet<A>& net)
 {
     if (_interface_failed)
 	return;
@@ -406,6 +409,7 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, const IPNet<A>& net)
     q.add = false;
     q.ribname = ribname;
     q.ibgp = ibgp;
+    q.safi = safi;
     q.net = net;
     q.id = _id++;
 
@@ -479,22 +483,35 @@ bool
 XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 {
     bool sent;
+    bool unicast = false;
+    bool multicast = false;
+
+    switch(q.safi) {
+    case SAFI_UNICAST:
+	unicast = true;
+	break;
+    case SAFI_MULTICAST:
+	multicast = true;
+	break;
+    }
 
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
 	sent = rib.send_add_route4(q.ribname.c_str(),
 			    bgp,
-			    true, false,
+			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
 				     q.id, "add_route"));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route4(q.ribname.c_str(),
-			       bgp,
-			       true, false, q.net,
-			       ::callback(this, &XrlQueue::route_command_done,
-					  q.id, "delete_route"));
+				      bgp,
+				      unicast, multicast,
+				      q.net,
+				      ::callback(this,
+						 &XrlQueue::route_command_done,
+						 q.id, "delete_route"));
     }
 
     return sent;
@@ -505,12 +522,23 @@ bool
 XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 {
     bool sent;
+    bool unicast = false;
+    bool multicast = false;
+
+    switch(q.safi) {
+    case SAFI_UNICAST:
+	unicast = true;
+	break;
+    case SAFI_MULTICAST:
+	multicast = true;
+	break;
+    }
 
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
 	sent = rib.send_add_route6(q.ribname.c_str(),
 			    bgp,
-			    true, false,
+			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
 				     q.id, "add_route"));
@@ -518,7 +546,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route6(q.ribname.c_str(),
 			       bgp,
-			       true, false,
+			       unicast, multicast,
 			       q.net,
 			       callback(this, &XrlQueue::route_command_done,
 					q.id, "delete_route"));

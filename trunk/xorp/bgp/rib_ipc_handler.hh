@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.14 2003/10/11 03:17:56 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.15 2003/10/23 03:10:05 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -35,10 +35,11 @@ public:
     XrlQueue(RibIpcHandler *rib_ipc_handler, XrlStdRouter *xrl_router,
 	     BGPMain *_bgp);
 
-    void queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
+    void queue_add_route(string ribname, bool ibgp, Safi, const IPNet<A>& net,
 			 const A& nexthop);
 
-    void queue_delete_route(string ribname, bool ibgp, const IPNet<A>& net);
+    void queue_delete_route(string ribname, bool ibgp, Safi,
+			    const IPNet<A>& net);
 
     bool busy();
 private:
@@ -52,6 +53,7 @@ private:
 	bool add;
 	string ribname;
 	bool ibgp;
+	Safi safi;
 	IPNet<A> net;
 	A nexthop;
 	uint32_t id;
