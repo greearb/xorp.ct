@@ -52,6 +52,15 @@
 /* Define to 1 if netinet6/nd6.h is not C++ friendly */
 #undef HAVE_BROKEN_CXX_NETINET6_ND6_H
 
+/* Define to 1 if you have an IPF host build environment */
+#undef HAVE_FIREWALL_IPF
+
+/* Define to 1 if you have an IPFW build environment */
+#undef HAVE_FIREWALL_IPFW
+
+/* Define to 1 if you have an IPTABLES build environment */
+#undef HAVE_FIREWALL_IPTABLES
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
@@ -81,6 +90,9 @@
 
 /* Define to 1 if you have IPv6 multicast routing */
 #undef HAVE_IPV6_MULTICAST_ROUTING
+
+/* Define to 1 if you have RFC2367 key sockets (PF_KEY_V2) */
+#undef HAVE_KEY_SOCKETS
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
