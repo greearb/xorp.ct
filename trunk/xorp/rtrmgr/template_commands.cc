@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.32 2003/12/02 09:38:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.33 2003/12/19 20:30:20 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -27,7 +27,7 @@
 #include "task.hh"
 
 Action::Action(TemplateTreeNode& template_tree_node,
-	       const list<string>& action) throw (ParseError)
+	       const list<string>& action)
     : _template_tree_node(template_tree_node)
 {
     string cur("\n");
@@ -425,6 +425,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 template<class TreeNode>
 string
 XrlAction::expand_xrl_variables(const TreeNode& tn) const
+    throw (UnexpandedVariable)
 {
     string word;
     string expanded_var;
@@ -711,5 +712,5 @@ AllowCommand::str() const
 //
 // Template explicit instatiation
 //
-template string XrlAction::expand_xrl_variables<class ConfigTreeNode>(const ConfigTreeNode&) const;
-template string XrlAction::expand_xrl_variables<class TemplateTreeNode>(const TemplateTreeNode&) const;
+template string XrlAction::expand_xrl_variables<class ConfigTreeNode>(const ConfigTreeNode&) const throw (UnexpandedVariable);
+template string XrlAction::expand_xrl_variables<class TemplateTreeNode>(const TemplateTreeNode&) const throw (UnexpandedVariable);

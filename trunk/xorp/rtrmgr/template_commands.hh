@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.15 2003/11/19 23:04:51 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.16 2003/12/02 09:38:58 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -47,8 +47,7 @@ private:
 
 class Action {
 public:
-    Action(TemplateTreeNode& template_tree_node,
-	   const list<string>& cmd) throw (ParseError);
+    Action(TemplateTreeNode& template_tree_node, const list<string>& action);
     virtual ~Action() {};
 
     string str() const;
@@ -64,18 +63,18 @@ private:
 
 class XrlAction : public Action {
 public:
-    XrlAction(TemplateTreeNode& template_tree_node, const list<string>& cmd,
+    XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
 	      const XRLdb& xrldb) throw (ParseError);
 
     int execute(const ConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
-    template<class TreeNode> string expand_xrl_variables(const TreeNode& tn) const;
+    template<class TreeNode> string expand_xrl_variables(const TreeNode& tn) const throw (UnexpandedVariable);
     string xrl_return_spec() const { return _response; }
     string affected_module(const ConfigTreeNode& ctn) const;
     inline const string& request() const { return _request; }
 
 private:
-    void check_xrl_is_valid(const list<string>& cmd,
+    void check_xrl_is_valid(const list<string>& action,
 			    const XRLdb& xrldb) const throw (ParseError);
     list<string>	_split_request;
     string		_request;
