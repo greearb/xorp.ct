@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.2 2003/01/13 20:40:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.3 2003/01/23 08:42:42 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -125,8 +125,11 @@ PimMre::set_i_am_assert_loser_state(uint16_t vif_index)
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
     
-    if (is_i_am_assert_loser_state(vif_index))
-	return;			// Nothing changed
+    // XXX: we always perform the setting, because we always want to add
+    // the INPUT_STATE_ASSERT_STATE_* task in case the assert winner
+    // has changed.
+    // if (is_i_am_assert_loser_state(vif_index))
+    //	return;			// Nothing changed
     
     _i_am_assert_winner_state.reset(vif_index);
     _i_am_assert_loser_state.set(vif_index);
