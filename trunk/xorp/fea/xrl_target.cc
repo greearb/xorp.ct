@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.2 2002/12/14 23:42:51 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -557,6 +557,36 @@ XrlFeaTarget::ifmgr_0_1_delete_address4(
 }
 
 XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
+					// Input values,
+					const uint32_t&	tid,
+					const string&	ifname,
+					const string&	vifname,
+					const IPv4&	address,
+					const bool&	en)
+{
+    IfTree& it = _xifmgr.iftree();
+    return _xifmgr.add(tid,
+		       new SetAddr4Enabled(it, ifname, vifname, address, en));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_address_enabled4(
+					     // Input values,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv4&	address,
+					     bool&		enabled)
+{
+    const IfTreeAddr4* fa = 0;
+    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, address, fa);
+    if (e == XrlCmdError::OKAY())
+	enabled = fa->enabled();
+
+    return e;
+}
+
+XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_prefix4(
 				    // Input values,
 				    const uint32_t&	tid,
@@ -621,6 +651,36 @@ XrlFeaTarget::ifmgr_0_1_delete_address6(
 {
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new RemoveAddr6(it, ifname, vifname, address));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
+					     // Input values,
+					     const uint32_t&	tid,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv6&	address,
+					     const bool&	en)
+{
+    IfTree& it = _xifmgr.iftree();
+    return _xifmgr.add(tid,
+		       new SetAddr6Enabled(it, ifname, vifname, address, en));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_address_enabled6(
+					     // Input values,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv6&	address,
+					     bool&		enabled)
+{
+    const IfTreeAddr6* fa = 0;
+    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, address, fa);
+    if (e == XrlCmdError::OKAY())
+	enabled = fa->enabled();
+
+    return e;
 }
 
 XrlCmdError

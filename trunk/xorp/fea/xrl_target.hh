@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.24 2002/12/09 18:29:01 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -200,6 +200,28 @@ public:
 	const string&	vif,
 	const IPv4&	address);
 
+    XrlCmdError ifmgr_0_1_set_address4(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	ifname,
+	const string&	vif,
+	const IPv4&	address);
+
+    XrlCmdError ifmgr_0_1_set_address_enabled4(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	ifname,
+	const string&	vif,
+	const IPv4&	address,
+	const bool&	en);
+
+    XrlCmdError ifmgr_0_1_get_address_enabled4(
+	// Input values,
+	const string&	ifname,
+	const string&	vif,
+	const IPv4&	address,
+	bool&		enabled);
+    
     XrlCmdError ifmgr_0_1_set_prefix4(
 	// Input values,
 	const uint32_t&	tid,
@@ -276,6 +298,21 @@ public:
 	const string&	vif,
 	const IPv6&	address);
 
+    XrlCmdError ifmgr_0_1_set_address_enabled6(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	ifname,
+	const string&	vif,
+	const IPv6&	address,
+	const bool&	enabled);
+
+    XrlCmdError ifmgr_0_1_get_address_enabled6(
+	// Input values,
+	const string&	ifname,
+	const string&	vif,
+	const IPv6&	address,
+	bool&		enabled);
+    
     XrlCmdError ifmgr_0_1_set_prefix6(
 	// Input values,
 	const uint32_t&	tid,
