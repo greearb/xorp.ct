@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.28 2003/09/18 19:08:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.29 2003/09/19 15:01:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,6 +41,7 @@
 #include "xrl_error.hh"
 #include "xrl_pf_sudp.hh"
 #include "xrl_dispatcher.hh"
+#include "xuid.hh"
 #include "sockutil.hh"
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.19 2003/09/16 19:06:36 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.20 2003/09/18 19:08:00 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -20,13 +20,16 @@
 #define __LIBXIPC_XRL_PF_HH__
 
 #include <string>
-#include "xrl.hh"
-#include "xuid.hh"
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
 #include "libxorp/selector.hh"
 #include "libxorp/exceptions.hh"
+
+class Xrl;
+class XrlError;
+class XrlArgs;
+class XrlDispatcher;
 
 class XrlPFConstructorError : public XorpReasonedException
 {
@@ -36,24 +39,20 @@ public:
     {}
 };
 
-class XrlDispatcher;
-
 class XrlPFListener
 {
 public:
-    XrlPFListener(EventLoop& e, XrlDispatcher* d = 0)
-	: _eventloop(e), _dispatcher(d) {}
-    virtual ~XrlPFListener() {}
+    XrlPFListener(EventLoop& e, XrlDispatcher* d = 0);
+    virtual ~XrlPFListener();
 
     virtual const char*	address() const = 0;
 
     virtual const char*	protocol() const = 0;
 
-    inline bool set_dispatcher(const XrlDispatcher* d);
+    bool set_dispatcher(const XrlDispatcher* d);
 
-    inline const XrlDispatcher* dispatcher() const { return _dispatcher; }
-
-    EventLoop& eventloop() const { return _eventloop; }
+    inline const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
+    inline EventLoop& eventloop() const			{ return _eventloop; }
 
     virtual bool response_pending() const = 0;
 
@@ -62,6 +61,7 @@ protected:
     const XrlDispatcher* _dispatcher;
 };
 
+
 // ----------------------------------------------------------------------------
 // XrlPFSender
 
@@ -72,10 +72,8 @@ public:
     XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr SendCallback;
 
 public:
-    XrlPFSender(EventLoop& e, const char* address = "")
-	: _eventloop(e), _address(address) {}
-
-    virtual ~XrlPFSender() {}
+    XrlPFSender(EventLoop& e, const char* address);
+    virtual ~XrlPFSender();
 
     virtual void send(const Xrl& x, const SendCallback& cb) = 0;
     virtual bool sends_pending() const = 0;
@@ -89,18 +87,5 @@ protected:
     EventLoop& _eventloop;
     string _address;
 };
-
-// ----------------------------------------------------------------------------
-// Inline XrlPFListener Methods
-
-inline bool
-XrlPFListener::set_dispatcher(const XrlDispatcher* d)
-{
-    if (_dispatcher == 0) {
-	_dispatcher = d;
-	return true;
-    }
-    return false;
-}
 
 #endif // __LIBXIPC_XRL_PF_HH__

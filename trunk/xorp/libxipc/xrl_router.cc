@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.30 2003/09/16 19:06:36 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.31 2003/09/18 19:08:00 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -322,7 +322,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	    if (s->alive()) {
 		goto __got_sender;
 	    }
-	    XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\"",
+	    XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\")",
 		      s->protocol(), s->address().c_str());
 	    XrlPFSenderFactory::destroy_sender(s);
 	    _senders.erase(i);

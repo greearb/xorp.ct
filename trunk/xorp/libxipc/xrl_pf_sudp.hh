@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.13 2003/09/16 19:06:36 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.14 2003/09/18 19:08:00 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_SUDP_HH__
 #define __LIBXIPC_XRL_PF_SUDP_HH__
 
 #include "xrl_pf.hh"
+
+class XUID;
 
 // ----------------------------------------------------------------------------
 // XRL Protocol Family : Simplest UDP

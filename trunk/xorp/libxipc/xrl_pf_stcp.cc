@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.25 2003/09/16 23:04:43 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.26 2003/09/18 19:08:00 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -31,6 +31,8 @@
 
 #include "sockutil.hh"
 #include "header.hh"
+
+#include "xrl.hh"
 #include "xrl_error.hh"
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_stcp_ph.hh"
@@ -40,11 +42,6 @@ const char* XrlPFSTCPSender::_protocol   = "stcp";
 const char* XrlPFSTCPListener::_protocol = "stcp";
 
 static const uint32_t DEFAULT_SENDER_KEEPALIVE_MS = 10000;
-
-RequestState::~RequestState()
-{
-    debug_msg("~RequestState (%p - seqno %d)\n", this, seqno);
-}
 
 
 // ----------------------------------------------------------------------------
@@ -342,9 +339,12 @@ STCPRequestHandler::die(const char *reason, bool verbose)
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
 
-XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlDispatcher* x, uint16_t port)
+XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
+				     XrlDispatcher* x,
+				     uint16_t	    port)
     throw (XrlPFConstructorError)
-    : XrlPFListener(e, x), _fd(-1), _address_slash_port() {
+    : XrlPFListener(e, x), _fd(-1), _address_slash_port()
+{
 
     if ((_fd = create_listening_ip_socket(TCP, port)) < 1) {
 	xorp_throw(XrlPFConstructorError, strerror(errno));
@@ -418,6 +418,51 @@ XrlPFSTCPListener::response_pending() const
 }
 
 
+/**
+ * @short Sender state for tracking Xrl's forwarded by TCP.
+ *
+ * At some point this class should be re-factored:
+ *
+ * (1) to have accessors/modifiers rather than public member variables
+ *
+ * (2) to hold rendered Xrl in wire format rather than as an Xrl since
+ * the existing scheme requires additional copy operations.
+ */
+struct RequestState {
+public:
+    typedef XrlPFSender::SendCallback Callback;
+
+public:
+    RequestState(XrlPFSTCPSender* p,
+		 uint32_t	  seqno,
+		 const Xrl&	  x,
+		 const Callback&  cb)
+	: _p(p), _sn(seqno), _x(x), _cb(cb)
+    {}
+
+    inline bool		    has_seqno(uint32_t n) const { return _sn == n; }
+    inline XrlPFSTCPSender* parent() const		{ return _p; }
+    inline uint32_t	    seqno() const		{ return _sn; }
+    inline Xrl&		    xrl() 			{ return _x; }
+    inline Callback&	    cb() 			{ return _cb; }
+
+    ~RequestState()
+    {
+	debug_msg("~RequestState (%p - seqno %d)\n", this, seqno());
+    }
+
+private:
+    RequestState(const RequestState&);			// Not implemented
+    RequestState& operator=(const RequestState&);	// Not implemented
+
+private:
+    XrlPFSTCPSender*	_p;				// parent
+    uint32_t		_sn;				// sequence number
+    Xrl			_x;
+    Callback		_cb;
+};
+
+
 // ----------------------------------------------------------------------------
 // Xrl Simple TCP protocol family sender -> -> -> XRLPFSTCPSender
 
@@ -483,21 +528,27 @@ XrlPFSTCPSender::die(const char* reason)
     close(_fd);
     _fd = -1;
 
-    for (list<ref_ptr<RequestState> >::iterator i = _requests_pending.begin();
-	i != _requests_pending.end(); i++) {
-	ref_ptr<RequestState> rp = *i;
-	if (rp->cb.is_empty() == false)
-	    rp->cb->dispatch(XrlError::SEND_FAILED(), 0);
-    }
-    _requests_pending.clear();
+    list<ref_ptr<RequestState> > tmp_sent;
+    tmp_sent.splice(tmp_sent.begin(), _requests_sent);
+    debug_msg("Sent requests outstanding = %d\n", (int)tmp_sent.size());
 
-    for (list<ref_ptr<RequestState> >::iterator i = _requests_sent.begin();
-	i != _requests_sent.end(); i++) {
-	ref_ptr<RequestState> rp = *i;
-	if (rp->cb.is_empty() == false)
-	    rp->cb->dispatch(XrlError::SEND_FAILED(), 0);
+    while (tmp_sent.empty() == false) {
+	ref_ptr<RequestState>& rp = tmp_sent.front();
+	if (rp->cb().is_empty() == false)
+	    rp->cb()->dispatch(XrlError::SEND_FAILED(), 0);
+	tmp_sent.pop_front();
     }
-    _requests_sent.clear();
+
+    list<ref_ptr<RequestState> > tmp_pending;
+    tmp_pending.splice(tmp_pending.begin(), _requests_pending);
+    debug_msg("Pending requests outstanding= %d\n", (int)tmp_pending.size());
+
+    while (tmp_pending.empty() == false) {
+	ref_ptr<RequestState>& rp = tmp_pending.front();
+	if (rp->cb().is_empty() == false)
+	    rp->cb()->dispatch(XrlError::SEND_FAILED(), 0);
+	tmp_pending.pop_front();
+    }
 }
 
 void
@@ -509,16 +560,15 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 	return;
     }
 
-    if (_requests_pending.empty() == true &&
-	_keepalive_in_progress == false) {
-	_requests_pending.push_back(new RequestState(this, _current_seqno++, x, cb));
-
+    bool push = (_requests_pending.empty() == true &&
+		 _keepalive_in_progress == false);
+    _requests_pending.push_back(
+				new RequestState(this, _current_seqno++, x, cb)
+				);
+    if (push) {
 	send_first_request();
     } else {
-	// Already sending a request or doing keepalive
 	assert(_writer->running() == true);
-
-	_requests_pending.push_back(new RequestState(this, _current_seqno++, x, cb));
     }
 }
 
@@ -559,7 +609,7 @@ XrlPFSTCPSender::send_first_request()
     // Render data as ascii
     list< ref_ptr<RequestState> >::iterator i = _requests_pending.begin();
     ref_ptr<RequestState>& r = *i;
-    string xrl_ascii = r->xrl.str();
+    string xrl_ascii = r->xrl().str();
 
     // Size outgoing packet accordingly
     size_t packet_size = sizeof(STCPPacketHeader) + xrl_ascii.size();
@@ -568,7 +618,7 @@ XrlPFSTCPSender::send_first_request()
     // Configure header
     STCPPacketHeader* sph =
 	reinterpret_cast<STCPPacketHeader*>(&_request_packet[0]);
-    sph->initialize(r->seqno, STCP_PT_REQUEST, XrlError::OKAY(),
+    sph->initialize(r->seqno(), STCP_PT_REQUEST, XrlError::OKAY(),
 		    xrl_ascii.size());
 
     // Copy-in payload
@@ -654,13 +704,14 @@ XrlPFSTCPSender::dispatch_reply()
     }
     assert(rs != _requests_sent.end());
 
+    XrlPFSender::SendCallback& cb = rs->get()->cb();
     try {
 	XrlArgs response(xrl_data);
-	rs->get()->cb->dispatch(rcv_err, &response);
+	cb->dispatch(rcv_err, &response);
     } catch (InvalidString& ) {
 	XrlError xe (XrlError::INTERNAL_ERROR().error_code(),
 		    "corrupt xrl response");
-	rs->get()->cb->dispatch(xe, 0);
+	cb->dispatch(xe, 0);
 	debug_msg("Corrupt response: %s\n", xrl_data);
     }
 

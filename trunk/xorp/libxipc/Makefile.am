@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.28 2003/07/17 00:28:33 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.29 2003/07/31 21:59:39 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -144,6 +144,7 @@ libxipc_a_SOURCES += xrl_atom_list.cc
 libxipc_a_SOURCES += xrl_args.cc
 libxipc_a_SOURCES += xrl_cmd_map.cc
 libxipc_a_SOURCES += xrl_dispatcher.cc
+libxipc_a_SOURCES += xrl_pf.cc
 libxipc_a_SOURCES += xrl_pf_factory.cc
 libxipc_a_SOURCES += xrl_pf_inproc.cc
 libxipc_a_SOURCES += xrl_pf_stcp.cc

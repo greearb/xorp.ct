@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.15 2003/09/16 19:06:36 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.16 2003/09/18 19:08:00 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
 
 #include "xrl_pf.hh"
 #include "libxorp/asyncio.hh"
+
+class Xrl;
 
 // ----------------------------------------------------------------------------
 // XRL Protocol Family : Simplest TCP
@@ -55,28 +57,7 @@ private:
     static const uint32_t _timeout_period;
 };
 
-/**
- * @short Sender state for tracking Xrl's forwarded by TCP.
- */
-struct RequestState {
-    XrlPFSTCPSender*		parent;
-    uint32_t			seqno;
-    Xrl				xrl;
-    XrlPFSender::SendCallback	cb;
-
-    RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x,
-		 const XrlPFSender::SendCallback& scb)
-	: parent(p), seqno(sno), xrl(x), cb(scb)
-    {}
-
-    ~RequestState();
-
-    bool has_seqno(uint32_t n) const { return seqno == n; }
-
-private:
-    RequestState(const RequestState&);
-    RequestState& operator=(const RequestState&);
-};
+class RequestState;
 
 /**
  * @short Sender of Xrls by TCP.
