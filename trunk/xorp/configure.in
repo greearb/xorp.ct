@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.45 2003/06/06 19:21:10 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.46 2003/06/09 23:42:49 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -476,6 +476,7 @@ AC_LANG_C
 AC_SEARCH_LIBS(socket, socket)
 AC_SEARCH_LIBS(inet_addr, nsl)
 AC_SEARCH_LIBS(dlopen, dl)
+AC_SEARCH_LIBS(hstrerror, resolv)
 
 dnl Replace main with a function in -lc:
 dnl AC_CHECK_LIB(c, main)
@@ -498,7 +499,7 @@ AC_HEADER_STDC
 dnl
 dnl Check for misc. header files
 dnl
-AC_CHECK_HEADERS(sys/cdefs.h sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h)
+AC_CHECK_HEADERS(sys/cdefs.h sys/ioctl.h sys/sockio.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h)
 
 dnl
 dnl XXX ether_addr is defined in one of the following header files:
