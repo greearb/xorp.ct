@@ -12,10 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.18 2003/06/07 01:16:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.19 2003/06/09 22:14:19 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+
+#include "libxorp/xorp.h"
 
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -28,10 +30,8 @@
 
 #include <string>
 
-#include "config.h"
 #include "xrl_module.h"
 
-#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"

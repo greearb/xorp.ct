@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.16 2003/06/03 19:10:31 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.17 2003/06/09 22:14:19 hodson Exp $"
+
+#include "libxorp/xorp.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,8 +25,6 @@
 #include <map>
 #include <algorithm>
 
-#include "config.h"
-#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
