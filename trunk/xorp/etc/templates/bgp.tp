@@ -9,6 +9,7 @@ protocols {
       as: uint;
       next-hop: ipv4;
       holdtime: uint=120;
+      disable: bool = false;
     }
   }
 }
@@ -42,6 +43,9 @@ protocols {
       holdtime {
       }
       next-hop {
+      }
+      disable {
+        %set: xrl "bgp/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=$(@)";
       }
     }
   }
