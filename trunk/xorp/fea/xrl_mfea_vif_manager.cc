@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.1 2003/05/19 03:15:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.2 2003/05/19 06:54:07 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -406,14 +406,9 @@ XrlMfeaVifManager::xrl_result_get_all_vif_addresses4(
     string ifname,
     string vifname) 
 {
-    if (family() != AF_INET) {
-	// Unexpected response
-	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_all_vif_addresses4 for interface %s, vif %s: "
-		     "unexpected family",
-		     ifname.c_str(), vifname.c_str());
+    // If unexpected address family response, then silently ignore it
+    if (family() != AF_INET)
 	return;
-    }
     
     if (_vifs_remaining == 0) {
 	// Unexpected response
@@ -453,28 +448,13 @@ XrlMfeaVifManager::xrl_result_get_all_vif_addresses6(
     string ifname,
     string vifname) 
 {
-    //
-    // Verify the address family
-    //
-    do {
-	bool is_invalid_family = false;
-	
+    // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
+    if (family() != AF_INET6)
+	return;
 #else
-	is_invalid_family = true;
+    return;
 #endif
-	
-	if (is_invalid_family) {
-	    // Unexpected response: invalid address family
-	    XLOG_WARNING("Received unexpected XRL response for "
-			 "get_all_vif_addresses6 for interface %s, vif %s: "
-			 "unexpected family",
-			 ifname.c_str(), vifname.c_str());
-	    return;
-	}
-    } while (false);
     
     if (_vifs_remaining == 0) {
 	// Unexpected response
@@ -729,14 +709,9 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags4(const XrlError& e,
 						     string vifname,
 						     IPv4 addr)
 {
-    if (family() != AF_INET) {
-	// Unexpected response
-	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_all_address_flags4 for interface %s, vif %s: "
-		     "unexpected family",
-		     ifname.c_str(), vifname.c_str());
+    // If unexpected address family response, then silently ignore it
+    if (family() != AF_INET)
 	return;
-    }
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
@@ -808,28 +783,13 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags6(const XrlError& e,
 						     string vifname,
 						     IPv6 addr)
 {
-    //
-    // Verify the address family
-    //
-    do {
-	bool is_invalid_family = false;
-	
+    // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
+    if (family() != AF_INET6)
+	return;
 #else
-	is_invalid_family = true;
+    return;
 #endif
-	
-	if (is_invalid_family) {
-	    // Unexpected response: invalid address family
-	    XLOG_WARNING("Received unexpected XRL response for "
-			 "get_all_address_flags6 for interface %s, vif %s: "
-			 "unexpected family",
-			 ifname.c_str(), vifname.c_str());
-	    return;
-	}
-    } while (false);
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
@@ -891,14 +851,9 @@ XrlMfeaVifManager::xrl_result_get_all_prefix4(const XrlError& e,
 					      string ifname, string vifname,
 					      IPv4 addr) 
 {
-    if (family() != AF_INET) {
-	// Unexpected response
-	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_all_prefix4 for interface %s, vif %s: "
-		     "unexpected family",
-		     ifname.c_str(), vifname.c_str());
+    // If unexpected address family response, then silently ignore it
+    if (family() != AF_INET)
 	return;
-    }
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
@@ -947,28 +902,13 @@ XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
 					      string ifname, string vifname,
 					      IPv6 addr) 
 {
-    //
-    // Verify the address family
-    //
-    do {
-	bool is_invalid_family = false;
-	
+    // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
-	if (family() != AF_INET6)
-	    is_invalid_family = true;
+    if (family() != AF_INET6)
+	return;
 #else
-	is_invalid_family = true;
+    return;
 #endif
-	
-	if (is_invalid_family) {
-	    // Unexpected response: invalid address family
-	    XLOG_WARNING("Received unexpected XRL response for "
-			 "get_all_prefix6 for interface %s, vif %s: "
-			 "unexpected family",
-			 ifname.c_str(), vifname.c_str());
-	    return;
-	}
-    } while (false);
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
@@ -1017,14 +957,9 @@ XrlMfeaVifManager::xrl_result_get_all_broadcast4(const XrlError& e,
 						 string ifname, string vifname,
 						 IPv4 addr) 
 {
-    if (family() != AF_INET) {
-	// Unexpected response
-	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_all_broadcast4 for interface %s, vif %s: "
-		     "unexpected family",
-		     ifname.c_str(), vifname.c_str());
+    // If unexpected address family response, then silently ignore it
+    if (family() != AF_INET)
 	return;
-    }
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
@@ -1073,14 +1008,9 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint4(const XrlError& e,
 						string ifname, string vifname,
 						IPv4 addr) 
 {
-    if (family() != AF_INET) {
-	// Unexpected response
-	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_all_endpoint4 for interface %s, vif %s: "
-		     "unexpected family",
-		     ifname.c_str(), vifname.c_str());
+    // If unexpected address family response, then silently ignore it
+    if (family() != AF_INET)
 	return;
-    }
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
@@ -1129,14 +1059,13 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
 						string ifname, string vifname,
 						IPv6 addr) 
 {
-    if (family() != AF_INET) {
-	// Unexpected response
-	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_all_endpoint6 for interface %s, vif %s: "
-		     "unexpected family",
-		     ifname.c_str(), vifname.c_str());
+    // If unexpected address family response, then silently ignore it
+#ifdef HAVE_IPV6
+    if (family() != AF_INET6)
 	return;
-    }
+#else
+    return;
+#endif
     
     if (_addrs_remaining == 0) {
 	// Unexpected response
