@@ -45,7 +45,8 @@ test_packet_SOURCES		= test_packet.cc
 test_checksum_SOURCES		= test_checksum.cc
 
 # -- Library Sources
-libospf_la_SOURCES  = exceptions.hh
+libospf_la_SOURCES  = area_router.hh
+libospf_la_SOURCES  += exceptions.hh
 libospf_la_SOURCES  += fletcher_checksum.hh
 libospf_la_SOURCES  += lsa.hh
 libospf_la_SOURCES  += ls_database_manager.hh
@@ -56,6 +57,7 @@ libospf_la_SOURCES  += peer.hh
 libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 
+libospf_la_SOURCES  += area_router.cc
 libospf_la_SOURCES  += ls_database_manager.cc
 libospf_la_SOURCES  += fletcher_checksum.cc
 libospf_la_SOURCES  += lsa.cc
