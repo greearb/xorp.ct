@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.18 2003/05/27 04:27:29 mjh Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.19 2003/05/27 17:47:15 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -132,7 +132,7 @@ VifManager::update_state()
 void
 VifManager::set_vif_state()
 {
-    map<string, Vif *>::const_iterator iter, vif_iter;
+    map<string, Vif *>::const_iterator vif_iter;
     string err;
     
     //
@@ -158,13 +158,16 @@ VifManager::set_vif_state()
     //
     // Add new vifs, and update existing ones
     //
-    for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
-	Vif* vif = iter->second;
+    for (vif_iter = _vifs_by_name.begin();
+	 vif_iter != _vifs_by_name.end();
+	 ++vif_iter) {
+	Vif* vif = vif_iter->second;
 	Vif* node_vif = NULL;
 	
-	vif_iter = _saved_vifs_by_name.find(vif->name());
-	if (vif_iter != _saved_vifs_by_name.end())
-	    node_vif = vif_iter->second;
+	map<string, Vif *>::const_iterator tmp_vif_iter;
+	tmp_vif_iter = _saved_vifs_by_name.find(vif->name());
+	if (tmp_vif_iter != _saved_vifs_by_name.end())
+	    node_vif = tmp_vif_iter->second;
 	
 	//
 	// Add a new vif
