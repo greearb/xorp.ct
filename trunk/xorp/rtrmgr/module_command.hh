@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.6 2003/05/30 18:22:25 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.7 2003/05/30 23:57:09 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -36,6 +36,7 @@ public:
     Validation* startup_validation(TaskManager &taskmgr) const;
     Validation* ready_validation(TaskManager &taskmgr) const;
     Validation* shutdown_validation(TaskManager &taskmgr) const;
+    Shutdown* shutdown_method(TaskManager &taskmgr) const;
 
     //bool execute_completed() const;
     

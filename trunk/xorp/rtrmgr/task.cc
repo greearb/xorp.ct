@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.17 2003/05/30 23:57:10 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.18 2003/05/31 06:13:15 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -291,6 +291,69 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     }
 }
 
+Shutdown::Shutdown(const string& modname, TaskManager& taskmgr) 
+    : _modname(modname), _task_manager(taskmgr) 
+{
+}
+
+
+EventLoop&
+Shutdown::eventloop() const
+{
+    return _task_manager.eventloop();
+}
+
+XrlShutdown::XrlShutdown(const string& modname, TaskManager& taskmgr) 
+    : Shutdown(modname, taskmgr)
+{
+}
+
+void 
+XrlShutdown::shutdown(CallBack cb)
+{
+    _cb = cb;
+    if (_task_manager.do_exec()) {
+	Xrl xrl(_modname, "common/0.1/shutdown");
+	printf("XRL: >%s<\n", xrl.str().c_str());
+	string response = "";
+	_task_manager.xorp_client().
+	    send_now(xrl, callback(this, &XrlShutdown::shutdown_done),
+		     response, true);
+    } else {
+	//when we're running with do_exec == false, we want to
+	//exercise most of the same machinery, but we want to ensure
+	//that the xrl_done response gets the right arguments even
+	//though we're not going to call the XRL
+	printf("XRL: dummy call to %s common/0.1/shutdown\n", 
+	       _modname.c_str());
+	_dummy_timer = 
+	    eventloop().new_oneoff_after_ms(1000,
+                callback(this, &XrlShutdown::dummy_response));
+    }
+}
+
+void 
+XrlShutdown::dummy_response()
+{
+    XrlError e = XrlError::OKAY();
+    XrlArgs a;
+    shutdown_done(e, &a);
+}
+
+void 
+XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrlargs)
+{
+    UNUSED(xrlargs);
+    if ((err == XrlError::OKAY())
+	|| (err == XrlError::RESOLVE_FAILED())) {
+	//success - either it said it would shutdown, or it's already gone.
+	_cb->dispatch(true);
+    } else {
+	//we may have to kill it.
+	_cb->dispatch(false);
+    }
+}
+
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 const XrlRouter::XrlCallback& cb, Task& task) 
@@ -443,7 +506,8 @@ Task::Task(const string& name, TaskManager& taskmgr)
     : _name(name), _taskmgr(taskmgr),
       _start_module(false), _stop_module(false), 
       _start_validation(NULL), _ready_validation(NULL), 
-      _shutdown_validation(NULL), _config_done(false)
+      _shutdown_validation(NULL), _shutdown_method(NULL), 
+      _config_done(false)
 {
 }
 
@@ -455,6 +519,8 @@ Task::~Task()
 	delete _ready_validation;
     if (_shutdown_validation != NULL)
 	delete _shutdown_validation;
+    if (_shutdown_method != NULL)
+	delete _shutdown_method;
 }
 
 void 
@@ -470,13 +536,17 @@ Task::start_module(const string& modname,
 
 void 
 Task::shutdown_module(const string& modname,
-		      Validation *validation)
+		      Validation *validation, 
+		      Shutdown *shutdown)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
+    assert(_shutdown_validation == NULL);
+    assert(_shutdown_method == NULL);
     _stop_module = true;
     _modname = modname;
     _shutdown_validation = validation;
+    _shutdown_method = shutdown;
 }
 
 void
@@ -502,7 +572,7 @@ Task::run(CallBack cb)
 void
 Task::step1_start() 
 {
-    printf("step1\n");
+    printf("step1 (%s)\n", _modname.c_str());
     if (_start_module) {
 	_taskmgr.module_manager()
 	    .start_module(_modname, do_exec(), 
@@ -515,7 +585,7 @@ Task::step1_start()
 void
 Task::step1_done(bool success) 
 {
-    printf("step1_done\n");
+    printf("step1_done (%s)\n", _modname.c_str());
     if (success)
 	step2_wait();
     else
@@ -525,7 +595,7 @@ Task::step1_done(bool success)
 void
 Task::step2_wait()
 {
-    printf("step2\n");
+    printf("step2 (%s)\n", _modname.c_str());
     if (_start_module && (_start_validation != NULL)) {
 	_start_validation->validate(callback(this, &Task::step2_done));
     } else {
@@ -536,7 +606,7 @@ Task::step2_wait()
 void
 Task::step2_done(bool success) 
 {
-    printf("step2_done\n");
+    printf("step2_done (%s)\n", _modname.c_str());
     if (success)
 	step3_config();
     else
@@ -546,7 +616,7 @@ Task::step2_done(bool success)
 void 
 Task::step3_config()
 {
-    printf("step3\n");
+    printf("step3 (%s)\n", _modname.c_str());
     if (_xrls.empty()) {
 	step4_wait();
     } else {
@@ -576,7 +646,7 @@ Task::step3_config()
 void
 Task::xrl_done(bool success, bool fatal, string errmsg) 
 {
-    printf("xrl_done\n");
+    printf("xrl_done (%s)\n", _modname.c_str());
     if (success) {
 	_xrls.pop_front();
 	_config_done = true;
@@ -589,7 +659,7 @@ Task::xrl_done(bool success, bool fatal, string errmsg)
 void
 Task::step4_wait()
 {
-    printf("step4\n");
+    printf("step4 (%s)\n", _modname.c_str());
     if (_ready_validation && _config_done) {
 	_ready_validation->validate(callback(this, &Task::step4_done));
     } else {
@@ -611,26 +681,35 @@ Task::step4_done(bool success)
 void
 Task::step5_stop()
 {
-    printf("step5\n");
+    printf("step5 (%s)\n", _modname.c_str());
     if (_stop_module) {
-	_taskmgr.module_manager()
-	    .stop_module(_modname, callback(this, &Task::step5_done));
+	if (_shutdown_method != NULL) {
+	    _shutdown_method->shutdown(callback(this, &Task::step5_done));
+	} else {
+	    step6_wait();
+	}
     } else {
-	step6_wait();
+	step7_report();
     }
 }
 
 void
-Task::step5_done() 
+Task::step5_done(bool success) 
 {
-    printf("step5_done\n");
-    step6_wait();
+    printf("step5_done (%s)\n", _modname.c_str());
+    if (success) {
+	step6_wait();
+    } else {
+	XLOG_WARNING(("Can't subtly stop process " + _modname).c_str());
+	_taskmgr.module_manager()
+	    .kill_module(_modname, callback(this, &Task::step6_wait));
+    }
 }
 
 void
 Task::step6_wait() 
 {
-    printf("step5\n");
+    printf("step6 (%s)\n", _modname.c_str());
     if (_stop_module && (_shutdown_validation != NULL)) {
 	_shutdown_validation->validate(callback(this, &Task::step6_done));
     } else {
@@ -641,19 +720,22 @@ Task::step6_wait()
 void
 Task::step6_done(bool success) 
 {
-    printf("step6_done\n");
-    if (!success) {
+    printf("step6_done (%s)\n", _modname.c_str());
+    if (success) {
+	step7_report();
+    } else {
+	XLOG_WARNING(("Can't validate stop of process " + _modname).c_str());
 	//An error here isn't fatal - module manager will simply kill
 	//the process less subtly.
-	XLOG_WARNING(("Can't validate stop of process " + _modname).c_str());
+	_taskmgr.module_manager()
+	    .kill_module(_modname, callback(this, &Task::step7_report));
     }
-    step7_report();
 }
 
 void 
 Task::step7_report()
 {
-    printf("step7\n");
+    printf("step7 (%s)\n", _modname.c_str());
     debug_msg("Task done\n");
     _task_complete_cb->dispatch(true, "");
 }
@@ -760,15 +842,22 @@ TaskManager::shutdown_module(const string& modname)
     Task& t(find_task(modname));
     XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
     t.shutdown_module(modname, 
-		      _module_commands[modname]->shutdown_validation(*this));
+		      _module_commands[modname]->shutdown_validation(*this),
+		      _module_commands[modname]->shutdown_method(*this));
+    _shutdown_order.push_front(&t);
 }
 
 void
 TaskManager::run(CallBack cb) 
 {
+    printf("TaskManager::run, tasks (old order): ");
+    list <Task*>::const_iterator i;
+    for (i = _tasklist.begin(); i != _tasklist.end(); i++) {
+	printf("%s ", (*i)->name().c_str());
+    }
+    printf("\n");
     reorder_tasks();
     printf("TaskManager::run, tasks: ");
-    list <Task*>::const_iterator i;
     for (i = _tasklist.begin(); i != _tasklist.end(); i++) {
 	printf("%s ", (*i)->name().c_str());
     }
@@ -783,25 +872,27 @@ TaskManager::reorder_tasks()
     //we re-order the task list so that process shutdowns (which are
     //irreversable) occur last.
     list <Task*> configs;
-    list <Task*> shutdowns;
     while (!_tasklist.empty()) {
 	Task *t = _tasklist.front();
 	if (t->will_shutdown_module()) {
-	    //reverse the order of shutdowns so they're in reverse
-	    //dependency order
-	    shutdowns.push_front(t);
-	} else
+	    //we already have a list of the correct order to shutdown
+	    //modules in _shutdown_order
+	} else {
 	    configs.push_back(t);
+	}
 	_tasklist.pop_front();
     }
 
+    //re-build the tasklist
     while (!configs.empty()) {
 	_tasklist.push_back(configs.front());
 	configs.pop_front();
     }
-    while (!shutdowns.empty()) {
-	_tasklist.push_back(shutdowns.front());
-	shutdowns.pop_front();
+    list <Task*>::const_iterator i;
+    for (i = _shutdown_order.begin(); 
+	 i != _shutdown_order.end();
+	 i++) {
+	_tasklist.push_back(*i);
     }
 }
 
@@ -869,7 +960,7 @@ TaskManager::kill_process(const string& modname)
     //XXX We really should try to restart the failed process, but for
     //now we'll just kill it.
     XorpCallback0<void>::RefPtr null_cb;
-    _module_manager.stop_module(modname, null_cb);
+    _module_manager.kill_module(modname, null_cb);
 }
 
 EventLoop&

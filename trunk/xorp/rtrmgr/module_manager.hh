@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.12 2003/04/25 19:14:04 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.13 2003/05/01 07:55:28 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -96,7 +96,7 @@ public:
     bool new_module(const string& mod_name, const string& path);
     int start_module(const string& mod_name, bool do_exec, 
 		   XorpCallback1<void, bool>::RefPtr cb);
-    int stop_module(const string& mod_name, 
+    int kill_module(const string& mod_name, 
 		   XorpCallback0<void>::RefPtr cb);
     void module_shutdown_done();
     bool module_exists(const string &name) const;

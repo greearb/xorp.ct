@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.13 2003/05/30 23:57:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.14 2003/05/31 06:13:15 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -149,6 +149,7 @@ MasterConfigTree::find_changed_modules() const {
 
 list <string>
 MasterConfigTree::find_active_modules() const {
+    printf("Find active modules\n");
     set <string> active_modules;
     _root_node.find_active_modules(active_modules);
     list <string> ordered_modules;
@@ -158,13 +159,16 @@ MasterConfigTree::find_active_modules() const {
 
 list <string>
 MasterConfigTree::find_inactive_modules() const {
+    printf("Find inactive modules\n");
     set <string> all_modules;
     list <string> ordered_all_modules;
+    printf("All modules:\n");
     _root_node.find_all_modules(all_modules);
     order_module_list(all_modules, ordered_all_modules);
 
     set <string> active_modules;
     list <string> ordered_active_modules;
+    printf("Active modules:\n");
     _root_node.find_active_modules(active_modules);
     order_module_list(active_modules, ordered_active_modules);
 
@@ -182,6 +186,16 @@ MasterConfigTree::find_inactive_modules() const {
 	}
 	XLOG_ASSERT(i != ordered_all_modules.end());
     }
+
+    printf("Inactive Module Order: ");
+    list <string>::const_iterator final_i;
+    for (final_i = ordered_all_modules.begin();
+	 final_i != ordered_all_modules.end();
+	 final_i++) {
+	printf("%s ", final_i->c_str());
+    }
+    printf("\n");
+
     return ordered_all_modules;
 }
 
@@ -305,6 +319,15 @@ MasterConfigTree::order_module_list(const set <string>& module_set,
     for (i = no_info.begin(); i!=no_info.end(); i++) {
 	ordered_modules.push_back(*i);
     }
+
+    printf("Module Order: ");
+    list <string>::const_iterator final_i;
+    for (final_i = ordered_modules.begin();
+	 final_i != ordered_modules.end();
+	 final_i++) {
+	printf("%s ", final_i->c_str());
+    }
+    printf("\n");
     return;
 }
 

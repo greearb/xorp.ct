@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.16 2003/05/04 06:25:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.17 2003/05/23 00:02:08 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -337,7 +337,7 @@ ModuleManager::start_module(const string&name, bool do_exec,
 }
 
 int 
-ModuleManager::stop_module(const string&name, 
+ModuleManager::kill_module(const string&name, 
 			   XorpCallback0<void>::RefPtr cb) 
 {
     Module *m =  find_module(name);

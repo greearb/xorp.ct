@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.14 2003/05/30 23:57:10 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.15 2003/05/31 06:13:15 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -101,6 +101,30 @@ private:
 				const string& reason);
 };
 
+class Shutdown {
+public:
+    typedef XorpCallback1<void, bool>::RefPtr CallBack;
+    Shutdown(const string& modname, TaskManager& taskmgr);
+    virtual ~Shutdown() {}
+    virtual void shutdown(CallBack cb) = 0;
+    EventLoop& eventloop() const;
+protected:
+    string _modname;
+    TaskManager& _task_manager;
+};
+
+class XrlShutdown : public Shutdown {
+public:
+    XrlShutdown(const string& modname, TaskManager& taskmgr);
+    virtual ~XrlShutdown() {}
+    void shutdown(CallBack cb);
+private:
+    void dummy_response();
+    void shutdown_done(const XrlError& err, XrlArgs* xrlargs);
+    CallBack _cb;
+    XorpTimer _dummy_timer;
+};
+
 class TaskXrlItem {
 public:
     TaskXrlItem(const UnexpandedXrl& uxrl,
@@ -127,7 +151,7 @@ public:
     void start_module(const string& mod_name,
 		      Validation* validation);
     void shutdown_module(const string& mod_name,
-			 Validation* validation);
+			 Validation* validation, Shutdown* shutdown);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
     void set_ready_validation(Validation* validation);
     Validation* ready_validation() const {
@@ -157,7 +181,7 @@ protected:
     void step4_done(bool success);
 
     void step5_stop();
-    void step5_done();
+    void step5_done(bool success);
 
     void step6_wait();
     void step6_done(bool success);
@@ -176,6 +200,7 @@ private:
                                    // reconfiguration
     Validation* _shutdown_validation;  // the validation mechanism for the 
                                        // module shutdown
+    Shutdown* _shutdown_method;
     list <TaskXrlItem> _xrls;
     bool _config_done; //true if we changed the module's config
     CallBack _task_complete_cb; //the task completion callback
@@ -227,6 +252,8 @@ private:
 
     //_tasklist maintains the execution order
     list <Task*> _tasklist;
+    //_shutdown_order maintains the shutdown ordering
+    list <Task*> _shutdown_order;
 
     map <string, const ModuleCommand*> _module_commands;
 

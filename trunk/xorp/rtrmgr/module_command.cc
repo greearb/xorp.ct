@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.11 2003/05/30 18:22:25 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.12 2003/05/30 23:57:09 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -155,6 +155,17 @@ ModuleCommand::shutdown_validation(TaskManager &taskmgr) const
 	return new StatusShutdownValidation(_modname, taskmgr);
     } else {
 	return new DelayValidation(taskmgr.eventloop(), 2000);
+    }
+}
+
+Shutdown*
+ModuleCommand::shutdown_method(TaskManager &taskmgr) const
+{
+    if (_shutdown_method == SHUTDOWN_BY_XRL) {
+	return new XrlShutdown(_modname, taskmgr);
+    } else {
+	//we can always kill it from the module manager.
+	return NULL;
     }
 }
 
