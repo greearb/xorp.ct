@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.22 2003/09/04 03:07:41 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.23 2003/09/04 18:03:25 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -100,7 +100,7 @@ public:
      * itself. The wire format representation will not be used by the
      * caller.
      */
-    virtual PathAttribute *clone() = 0;
+    virtual PathAttribute *clone() const = 0;
 
     /*
      * The destructor, invoked after the derived class' destructors,
@@ -248,7 +248,7 @@ class OriginAttribute : public PathAttribute
 public:
     OriginAttribute(OriginType t);
     OriginAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -271,7 +271,7 @@ public:
 
     ASPathAttribute(const AsPath& p);
     ASPathAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const				{
 	return "AS Path Attribute " + as_path().str();
@@ -294,7 +294,7 @@ class NextHopAttribute : public PathAttribute
 public:
     NextHopAttribute(const A& n);
     NextHopAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const				{
 	return "Next Hop Attribute " + _next_hop.str();
@@ -321,7 +321,7 @@ class MEDAttribute : public PathAttribute
 public:
     MEDAttribute(const uint32_t med);
     MEDAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -341,7 +341,7 @@ class LocalPrefAttribute : public PathAttribute
 public:
     LocalPrefAttribute(const uint32_t localpref);
     LocalPrefAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -363,7 +363,7 @@ class AtomicAggAttribute : public PathAttribute
 public:
     AtomicAggAttribute();
     AtomicAggAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const				{
 	return "Atomic Aggregate Attribute";
@@ -377,7 +377,7 @@ class AggregatorAttribute : public PathAttribute
 public:
     AggregatorAttribute(const IPv4& speaker, const AsNum& as);
     AggregatorAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -396,7 +396,7 @@ public:
     typedef set <uint32_t>::const_iterator const_iterator;
     CommunityAttribute();
     CommunityAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -419,7 +419,7 @@ public:
      */
     MPReachNLRIAttribute();
     MPReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -464,7 +464,7 @@ public:
      */
     MPUNReachNLRIAttribute();
     MPUNReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 
@@ -485,7 +485,7 @@ class UnknownAttribute : public PathAttribute
 {
 public:
     UnknownAttribute(const uint8_t* d) throw(CorruptMessage);
-    PathAttribute *clone();
+    PathAttribute *clone() const;
 
     string str() const;
 protected:

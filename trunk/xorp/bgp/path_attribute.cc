@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.30 2003/09/04 04:16:30 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.31 2003/09/04 18:03:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -70,7 +70,7 @@ OriginAttribute::OriginAttribute(OriginType t)
 }
 
 PathAttribute *
-OriginAttribute::clone()
+OriginAttribute::clone() const
 {
     return new OriginAttribute(origin());
 }
@@ -144,7 +144,7 @@ ASPathAttribute::ASPathAttribute(const AsPath& p)
 }
 
 PathAttribute *
-ASPathAttribute::clone()
+ASPathAttribute::clone() const
 {
     return new ASPathAttribute(as_path());
 }
@@ -186,7 +186,7 @@ NextHopAttribute<A>::NextHopAttribute<A>(const A& n)
 
 template <class A>
 PathAttribute *
-NextHopAttribute<A>::clone()
+NextHopAttribute<A>::clone() const
 {
     return new NextHopAttribute(nexthop());
 }
@@ -236,7 +236,7 @@ MEDAttribute::MEDAttribute(const uint32_t med)
 }
 
 PathAttribute *
-MEDAttribute::clone()
+MEDAttribute::clone() const
 {
     return new MEDAttribute(med());
 }
@@ -281,7 +281,7 @@ LocalPrefAttribute::LocalPrefAttribute(const uint32_t localpref)
 }
 
 PathAttribute *
-LocalPrefAttribute::clone()
+LocalPrefAttribute::clone() const
 {
     return new LocalPrefAttribute(localpref());
 }
@@ -326,7 +326,7 @@ AtomicAggAttribute::AtomicAggAttribute()
 }
 
 PathAttribute *
-AtomicAggAttribute::clone()
+AtomicAggAttribute::clone() const
 {
     return new AtomicAggAttribute();
 }
@@ -359,7 +359,7 @@ AggregatorAttribute::AggregatorAttribute(const IPv4& speaker,
 }
 
 PathAttribute *
-AggregatorAttribute::clone()
+AggregatorAttribute::clone() const
 {
     return new AggregatorAttribute(route_aggregator(), aggregator_as());
 }
@@ -408,7 +408,7 @@ CommunityAttribute::CommunityAttribute()
 }
 
 PathAttribute *
-CommunityAttribute::clone()
+CommunityAttribute::clone() const
 {
     CommunityAttribute *ca = new CommunityAttribute();
     for(const_iterator i = community_set().begin(); 
@@ -562,7 +562,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
 
 template <class A>
 PathAttribute *
-MPReachNLRIAttribute<A>::clone()
+MPReachNLRIAttribute<A>::clone() const
 {
     // Cheat go through the wire format to make the copy.
     return new MPReachNLRIAttribute(data());
@@ -734,7 +734,7 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute()
 
 template <class A>
 PathAttribute *
-MPUNReachNLRIAttribute<A>::clone()
+MPUNReachNLRIAttribute<A>::clone() const
 {
     // Cheat go through the wire format to make the copy.
     return new MPUNReachNLRIAttribute(data());
@@ -811,7 +811,7 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d)
 }
 
 PathAttribute *
-UnknownAttribute::clone()
+UnknownAttribute::clone() const
 {
     return new UnknownAttribute(data());
 }
@@ -1074,8 +1074,7 @@ template<class A>
 void
 PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 {
-    size_t l;
-    PathAttribute *a = PathAttribute::create(att.data(), att.wire_size(), l);
+    PathAttribute *a = att.clone();
     // store a reference to the mandatory attributes, ignore others
     switch (att.type()) {
     default:
@@ -1093,53 +1092,6 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 	_nexthop_att = (NextHopAttribute<A> *)a;
 	break;
     }
-    // Keep the list sorted
-    debug_msg("++ add_path_attribute %s\n", att.str().c_str());
-    if (!empty()) {
-	iterator i;
-	for (i = begin(); i != end(); i++)
-	    if ( *(*i) > *a) {
-		insert(i, a);
-		memset(_hash, 0, 16);
-		return;
-	    }
-    }
-    // list empty, or tail insertion:
-    push_back(a);
-    memset(_hash, 0, 16);
-}
-
-template<>
-void
-PathAttributeList<IPv6>::add_path_attribute(const PathAttribute &att)
-{
-    size_t l;
-    PathAttribute *a = PathAttribute::create(att.data(), att.wire_size(), l);
-    // store a reference to the mandatory attributes, ignore others
-    switch (att.type()) {
-    default:
-	break;
-
-    case ORIGIN:
-	_origin_att = (OriginAttribute *)a;
-	break;
-
-    case AS_PATH:
-	_aspath_att = (ASPathAttribute *)a;
-	break;
-
-#if	0
-    case NEXT_HOP:
-	_nexthop_att = (NextHopAttribute<A> *)a;
-	break;
-#endif
-    }
-    if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(a)) {
-	MPReachNLRIAttribute<IPv6> *mpreach = 
-	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(a);
-	_nexthop_att =  mpreach->nexthop_att();
-    }
-
     // Keep the list sorted
     debug_msg("++ add_path_attribute %s\n", att.str().c_str());
     if (!empty()) {

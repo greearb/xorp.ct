@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.35 2003/09/04 03:11:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.36 2003/09/04 18:03:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1259,7 +1259,7 @@ public:
 
     };
     
-    PathAttribute *clone() { XLOG_UNREACHABLE(); }
+    PathAttribute *clone() const { XLOG_UNREACHABLE(); }
 private:
     static const uint8_t _valid[];
 };
