@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.27 2004/04/28 15:56:47 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.28 2004/05/06 23:07:02 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -842,6 +842,10 @@ RIB<A>::add_redist_table(const string& parent_tablename)
 	XLOG_WARNING("add_redist_table: parent table %s does not exist",
 		     parent_tablename.c_str());
 	return XORP_ERROR;
+    }
+
+    if (find_table(redist_tablename(parent_tablename)) != 0) {
+	return XORP_OK;		// RedistTable already exists, no sweat
     }
 
     RedistTable<A>* r;
