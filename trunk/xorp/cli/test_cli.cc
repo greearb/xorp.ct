@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.32 2004/12/09 07:54:34 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.33 2005/02/01 00:06:40 pavlin Exp $"
 
 
 //
@@ -108,196 +108,98 @@ cli_node()
     return (*global_cli_node);
 }
 
-int
-main(int argc, char *argv[])
+static void
+cli_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 {
-    int ch;
-    const char *argv0 = argv[0];
-    char *finder_hostname_port = NULL;
-    IPv4 finder_addr = FinderConstants::FINDER_DEFAULT_HOST();
-    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+    string error_msg;
+    EventLoop eventloop;
 
     //
-    // Initialize and start xlog
+    // Init stuff
     //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);	// Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
 
     //
-    // Get the program options
+    // Start our own finder
     //
-    while ((ch = getopt(argc, argv, "F:h")) != -1) {
-	switch (ch) {
-	case 'F':
-	    // Finder hostname and port
-	    finder_hostname_port = optarg;
-	    break;
-	case 'h':
-	case '?':
-	    // Help
-	    usage(argv0, 0);
-	    break;
-	default:
-	    usage(argv0, 1);
-	    break;
-	}
-    }
-    argc -= optind;
-    argv += optind;
-    if (argc != 0) {
-	usage(argv0, 1);
-	// NOTREACHED
-    }
-
-    //
-    // Get the finder hostname and port
-    //
-    if (finder_hostname_port != NULL) {
-	char buf[MAXHOSTNAMELEN + 1];
-	char *p;
-	struct hostent *h;
-
-	// Get the finder address
-	strcpy(buf, finder_hostname_port);
-	p = strrchr(buf, ':');
-	if (p != NULL)
-	    *p = '\0';
-	h = gethostbyname(buf);
-	if (h == NULL) {
-	    fprintf(stderr, "Can't resolve IP address for %s: %s\n",
-		    buf, hstrerror(h_errno));
-	    usage(argv0, 1);
-	}
-
+    FinderServer *finder = NULL;
+    if (start_finder) {
 	try {
-	    IPvX addr(h->h_addrtype, (uint8_t *)h->h_addr_list[0]);
-	    finder_addr = addr.get_ipv4();
-	} catch (const InvalidFamily&) {
-	    fprintf(stderr, "Invalid finder address family: %d\n",
-		    h->h_addrtype);
-	    usage(argv0, 1);
-	} catch (const InvalidCast&) {
-	    fprintf(stderr,
-		    "Invalid finder address family: %d (expected IPv4)\n",
-		    h->h_addrtype);
-	    usage(argv0, 1);
-	}
-
-	// Get the finder port
-	strcpy(buf, finder_hostname_port);
-	p = strrchr(buf, ':');
-	if (p != NULL) {
-	    p++;
-	    finder_port = static_cast<uint16_t>(atoi(p));
-	    if (finder_port == 0) {
-		fprintf(stderr, "Invalid finder port: %d\n", finder_port);
-		usage(argv0, 1);
-	    }
+	    finder = new FinderServer(eventloop, IPv4(finder_hostname),
+				      finder_port);
+	} catch (const InvalidPort&) {
+	    XLOG_FATAL("Could not start in-process Finder");
 	}
     }
 
     //
     // The main body
     //
-    try {
-	Foo f;
-	EventLoop eventloop;
+    Foo f;
 
-	//
-	// Finder
-	//
-	FinderServer *finder = NULL;
-	if (finder_hostname_port == NULL) {
-	    // Start our own finder
-	    try {
-		finder = new FinderServer(eventloop, finder_addr, finder_port);
-	    } catch (const InvalidPort&) {
-		XLOG_FATAL("Could not start in-process Finder");
-	    }
-	    finder_addr = finder->addr();
-	    finder_port = finder->port();
-	}
+    //
+    // CLI
+    //
+    // XXX: we use a single CLI node to handle both IPv4 and IPv6
+    CliNode cli_node(AF_INET, XORP_MODULE_CLI, eventloop);
+    cli_node.set_cli_port(12000);
 
-	//
-	// CLI
-	//
-	// XXX: we use a single CLI node to handle both IPv4 and IPv6
-	CliNode cli_node(AF_INET, XORP_MODULE_CLI, eventloop);
-	cli_node.set_cli_port(12000);
+    //
+    // CLI access
+    //
+    IPvXNet enable_ipvxnet1("127.0.0.1/32");
+    // IPvXNet enable_ipvxnet2("192.150.187.0/25");
+    IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
+    //
+    cli_node.add_enable_cli_access_from_subnet(enable_ipvxnet1);
+    // cli_node.add_enable_cli_access_from_subnet(enable_ipvxnet2);
+    cli_node.add_disable_cli_access_from_subnet(disable_ipvxnet1);
 
-	//
-	// CLI access
-	//
-	IPvXNet enable_ipvxnet1("127.0.0.1/32");
-	// IPvXNet enable_ipvxnet2("192.150.187.0/25");
-	IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
-	//
-	cli_node.add_enable_cli_access_from_subnet(enable_ipvxnet1);
-	// cli_node.add_enable_cli_access_from_subnet(enable_ipvxnet2);
-	cli_node.add_disable_cli_access_from_subnet(disable_ipvxnet1);
-
-	//
-	// Create and configure the CLI XRL interface
-	//
-	XrlStdRouter xrl_std_router_cli(eventloop, cli_node.module_name(),
-					finder_addr, finder_port);
-	XrlCliNode xrl_cli_node(&xrl_std_router_cli, cli_node);
-	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli);
+    //
+    // Create and configure the CLI XRL interface
+    //
+    XrlStdRouter xrl_std_router_cli(eventloop, cli_node.module_name(),
+				    finder_hostname, finder_port);
+    XrlCliNode xrl_cli_node(&xrl_std_router_cli, cli_node);
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli);
 
 #if 0
 #ifdef HAVE_IPV6
-	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
-	cli_node6.set_cli_port(12000);
-	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
-					 finder_addr, finder_port);
-	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
-	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli6);
+    CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
+    cli_node6.set_cli_port(12000);
+    XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
+				     finder_hostname, finder_port);
+    XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli6);
 #endif // HAVE_IPV6
 #endif // 0
 
 
-	//
-	// XXX: CLI test-specific setup
-	//
-	global_cli_node = &cli_node;
-	add_my_cli_commands(cli_node);
-	// add_my_cli_commands(cli_node6);
+    //
+    // XXX: CLI test-specific setup
+    //
+    global_cli_node = &cli_node;
+    add_my_cli_commands(cli_node);
+    // add_my_cli_commands(cli_node6);
 
-	//
-	// Start the nodes
-	//
-	cli_node.enable();
-	cli_node.start();
-	// cli_node6.enable();
-	// cli_node6.start();
+    //
+    // Start the nodes
+    //
+    cli_node.enable();
+    cli_node.start();
+    // cli_node6.enable();
+    // cli_node6.start();
 
-	// Test timer
-	XorpTimer wakeywakey = eventloop.new_periodic(1000, callback(wakeup_hook));
-	XorpTimer wakeywakey2 = eventloop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
-	XorpTimer wakeywakey3 = eventloop.new_periodic(2000, callback(f, &Foo::print));
+    // Test timer
+    XorpTimer wakeywakey = eventloop.new_periodic(1000, callback(wakeup_hook));
+    XorpTimer wakeywakey2 = eventloop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
+    XorpTimer wakeywakey3 = eventloop.new_periodic(2000, callback(f, &Foo::print));
 
-	//
-	// Main loop
-	//
-	for (;;) {
-	    eventloop.run();
-	}
-
-    } catch(...) {
-	xorp_catch_standard_exceptions();
+    //
+    // Main loop
+    //
+    for (;;) {
+	eventloop.run();
     }
-
-    //
-    // Gracefully stop and exit xlog
-    //
-    xlog_stop();
-    xlog_exit();
-
-    exit (0);
 }
 
 static bool
@@ -585,3 +487,75 @@ add_my_cli_commands(CliNode& cli_node)
     return (XORP_OK);
 }
 
+int
+main(int argc, char *argv[])
+{
+    int ch;
+    string::size_type idx;
+    const char *argv0 = argv[0];
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);	// Least verbose messages
+    // XXX: verbosity of the error messages temporary increased
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    //
+    // Get the program options
+    //
+    while ((ch = getopt(argc, argv, "F:h")) != -1) {
+	switch (ch) {
+	case 'F':
+	    // Finder hostname and port
+	    idx = finder_hostname.find(':');
+	    if (idx != string::npos) {
+		if (idx + 1 >= finder_hostname.length()) {
+		    // No port number
+		    usage(argv0, 1);
+		    // NOTREACHED
+		}
+		char* p = &finder_hostname[idx + 1];
+		finder_port = static_cast<uint16_t>(atoi(p));
+		finder_hostname = finder_hostname.substr(0, idx);
+	    }
+	    break;
+	case 'h':
+	case '?':
+	    // Help
+	    usage(argv0, 0);
+	    break;
+	default:
+	    usage(argv0, 1);
+	    break;
+	}
+    }
+    argc -= optind;
+    argv += optind;
+    if (argc != 0) {
+	usage(argv0, 1);
+	// NOTREACHED
+    }
+
+    //
+    // Run everything
+    //
+    try {
+	cli_main(finder_hostname.c_str(), finder_port, true);
+    } catch(...) {
+	xorp_catch_standard_exceptions();
+    }
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    exit (0);
+}
