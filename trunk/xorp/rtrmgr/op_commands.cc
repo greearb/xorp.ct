@@ -321,10 +321,12 @@ OpCommand::prefix_matches(const list<string>& path_parts,
     return true;
 }
 
-map<string, string>
-OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree) const
+void
+OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
+		       map<string, string>& return_matches,
+		       bool& is_executable) const
 {
-    map<string, string> matches;
+    is_executable = false;
 
     list<string>::const_iterator ci = _cmd_parts.begin();
     for (size_t i = 0; i < wordnum; i++) {
@@ -336,10 +338,9 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree) const
 	// Add all the optional parameters
 	map<string, string>::const_iterator opi;
 	for (opi = _opt_params.begin(); opi != _opt_params.end(); ++opi) {
-	    matches.insert(*opi);
+	    return_matches.insert(*opi);
 	}
-	// Add empty string to imply hitting enter is also OK
-	matches.insert(make_pair("", ""));
+	is_executable = true;
     } else {
 	string match = *ci;
 	if (match[0] == '$') {
@@ -349,13 +350,12 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree) const
 	    conf_tree->expand_varname_to_matchlist(match, varmatches);
 	    list<string>::const_iterator vi;
 	    for (vi = varmatches.begin(); vi != varmatches.end(); ++vi) {
-		matches.insert(make_pair(*vi, _help_string));
+		return_matches.insert(make_pair(*vi, _help_string));
 	    }
 	} else {
-	    matches.insert(make_pair(match, _help_string));
+	    return_matches.insert(make_pair(match, _help_string));
 	}
     }
-    return matches;
 }
 
 void
@@ -644,27 +644,28 @@ OpCommandList::top_level_commands() const
 }
 
 map<string, string>
-OpCommandList::childlist(const string& path, bool& make_executable) const
+OpCommandList::childlist(const string& path, bool& is_executable) const
 {
     map<string, string> children;
     list<string> path_parts = split(path, ' ');
 
-    make_executable = false;
+    is_executable = false;
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_cmds.begin(); iter != _op_cmds.end(); ++iter) {
 	const OpCommand* op_command = *iter;
 	if (op_command->prefix_matches(path_parts, _conf_tree)) {
 	    map<string, string> matches;
-	    matches = op_command->get_matches(path_parts.size(), _conf_tree);
+	    bool tmp_is_executable;
+	    op_command->get_matches(path_parts.size(), _conf_tree,
+				    matches, tmp_is_executable);
+	    if (tmp_is_executable)
+		is_executable = true;
 	    map<string, string>::iterator mi;
 	    for (mi = matches.begin(); mi != matches.end(); ++mi) {
 		string command_string = mi->first;
 		string help_string = mi->second;
-		if (command_string == "") {
-		    make_executable = true;
-		} else {
-		    children.insert(make_pair(command_string, help_string));
-		}
+		XLOG_ASSERT(command_string != "");
+		children.insert(make_pair(command_string, help_string));
 	    }
 	}
     }

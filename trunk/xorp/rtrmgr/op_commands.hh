@@ -73,8 +73,9 @@ public:
     bool operator==(const OpCommand& them) const;
     bool prefix_matches(const list<string>& path_parts,
 			SlaveConfigTree* sct) const;
-    map<string, string> get_matches(size_t wordnum,
-				    SlaveConfigTree* sct) const;
+    void get_matches(size_t wordnum, SlaveConfigTree* sct,
+		     map<string, string>& return_matches,
+		     bool& is_executable) const;
     void remove_instance(OpInstance* instance) const;
 
 private:
@@ -108,7 +109,7 @@ public:
     void display_list() const;
     set<string> top_level_commands() const;
     map<string, string> childlist(const string& path,
-				  bool& make_executable) const;
+				  bool& is_executable) const;
 
 private:
     bool find_executable(const string& filename, string& executable) const;
