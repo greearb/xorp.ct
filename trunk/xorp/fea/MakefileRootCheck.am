@@ -1,0 +1,20 @@
+## Process this file with automake to produce Makefile.in.
+##
+## $XORP: xorp/fea/Makefile.am,v 1.28 2003/10/17 22:26:12 pavlin Exp $
+##
+
+#
+# This makefile contains information about tests that must be run as a root
+#
+
+# -- Test Programs and scripts
+#TESTS			 = test_add_route.sh test_config_interface.sh
+
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
+
+# A hook to propagate the "-f filename" argument
+AM_MAKEFLAGS		= -f MakefileRootCheck
