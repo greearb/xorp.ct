@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_click.cc,v 1.6 2005/01/20 00:43:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_click.cc,v 1.7 2005/03/05 01:41:23 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -54,13 +54,11 @@ FtiConfigTableSetClick::~FtiConfigTableSetClick()
 int
 FtiConfigTableSetClick::start(string& error_msg)
 {
-    if (_is_running)
+    if (! ClickSocket::is_enabled())
 	return (XORP_OK);
 
-    if (! ClickSocket::is_enabled()) {
-	error_msg = c_format("Click is not enabled");
-	return (XORP_ERROR);	// XXX: Not enabled
-    }
+    if (_is_running)
+	return (XORP_OK);
 
     if (ClickSocket::start(error_msg) < 0)
 	return (XORP_ERROR);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.12 2005/02/27 21:32:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.13 2005/03/05 01:41:27 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) CLI implementation
@@ -72,6 +72,9 @@ MfeaNodeCli::~MfeaNodeCli()
 int
 MfeaNodeCli::start()
 {
+    if (! is_enabled())
+	return (XORP_OK);
+
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
