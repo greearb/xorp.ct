@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.5 2003/03/10 23:19:58 hodson Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.6 2004/02/12 07:00:49 atanu Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -35,6 +35,7 @@ public:
 	       const IPNet<A>& last_net,
 	       uint32_t genid);
     ~DownedPeer();
+    string str() const;
     const PeerHandler* peer_handler() const { return _peer; }
     bool routes_dumped() const { return _routes_dumped; }
     const IPNet<A>& last_net() const { return _last_net_before_down; }
@@ -55,6 +56,7 @@ class DumpIterator {
 public:
     DumpIterator(const PeerHandler* peer,
 		 const list <const PeerHandler*>& peers_to_dump);
+    string str() const;
     void route_dump(const InternalMessage<A> &rtmsg);
     const PeerHandler* current_peer() const { return *_current_peer; }
     const PeerHandler* peer_to_dump_to() const { return _peer; }

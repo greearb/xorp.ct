@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.6 2004/02/12 07:00:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.7 2004/02/25 05:03:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,6 +34,18 @@ DownedPeer<A>::DownedPeer<A>(const PeerHandler* peer,
 	_last_net_before_down = last_net;
     _genid = genid;
     _delete_complete = false;
+
+    debug_msg("%s", str().c_str());
+}
+
+template <class A>
+string
+DownedPeer<A>::str() const
+{
+    return c_format("peer: %p routes_dumped: %s last_net: %s, genid: %d\n",
+		    _peer, _routes_dumped ? "true" : "false",
+		    _last_net_before_down.str().c_str(), _genid);
+
 }
 
 template <class A>
@@ -42,10 +54,11 @@ DownedPeer<A>::~DownedPeer<A>()
 }
 
 template <class A>
-DumpIterator<A>::DumpIterator<A>(
-			 const PeerHandler* peer,
+DumpIterator<A>::DumpIterator<A>(const PeerHandler* peer,
 			 const list <const PeerHandler*>& peers_to_dump)
 {
+    debug_msg("peer: %p\n", peer);
+
     _peer = peer;
     list <const PeerHandler*>::const_iterator i;
     int ctr = 0;
@@ -61,6 +74,14 @@ DumpIterator<A>::DumpIterator<A>(
     _route_iterator_is_valid = false;
     //    _rib_version = 0;
     _routes_dumped_on_current_peer = false;
+}
+
+template <class A>
+string
+DumpIterator<A>::str() const
+{
+    return c_format("peer: %p last dumped net %s", _peer,
+		    _last_dumped_net.str().c_str());
 }
 
 template <class A>
@@ -196,6 +217,7 @@ DumpIterator<A>::waiting_for_deletion_completion() const
     typename list <DownedPeer<A> >::const_iterator i;
     bool wait = false;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
+	debug_msg("downed peers: %s\n", i->str().c_str());
 	if (i->delete_complete() == false)
 	    wait = true;
     }
@@ -215,8 +237,8 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
        dump process.  true indicates that the change should be
        propagated downstream; false indicates it shouldn't because the
        dump will get to this eventually */
-    debug_msg("DumpIterator<A>::route_change_is_valid, peer:%p, pa:%s , gi:%d, op:%d\n",
-	   origin_peer, net.str().c_str(), genid, op);
+    debug_msg("peer:%p, pa:%s , gi:%d, op:%d\n",
+	      origin_peer, net.str().c_str(), genid, op);
     switch (op) {
     case RTQUEUE_OP_DELETE:
 	debug_msg("DELETE\n");
@@ -243,11 +265,13 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    return false;
 	}
 	if (net <= _last_dumped_net) {
-	    debug_msg("we've dumped this route\n");
+	    debug_msg("we've dumped this route: %s last dumped: %s\n",
+		      net.str().c_str(), _last_dumped_net.str().c_str());
 	    /*we've already dumped this route*/
 	    return true;
 	} else {
-	    debug_msg("we'll dump this route later\n");
+	    debug_msg("we'll dump this route later. last dumped: %s\n",
+		      _last_dumped_net.str().c_str());
 	    /*we'll dump this later */
 	    return false;
 	}
@@ -284,7 +308,8 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 			    if (net <= dpi->last_net()) {
 				/* we'd already dumped this route, and now
 				   it's being deleted */
-				debug_msg("we'd already dumped this route\n");
+		debug_msg("we've dumped this route: %s last dumped: %s\n",
+			  net.str().c_str(), dpi->last_net().str().c_str());
 				return true;
 			    } else {
 				/* we'd not dumped this one yet */
