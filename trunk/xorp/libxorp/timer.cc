@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.2 2003/01/16 19:09:28 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.3 2003/03/10 23:20:36 hodson Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -106,6 +106,18 @@ TimerNode::schedule_at(const timeval& t)
 }
 
 void
+TimerNode::schedule_after(const timeval& interval)
+{
+    assert(_list);
+    unschedule();
+
+    timeval now;
+    _list->current_time(now);
+    _expires = now + interval;
+    _list->schedule_node(this);
+}
+
+void
 TimerNode::schedule_after_ms(int ms)
 {
     assert(_list);
@@ -177,6 +189,15 @@ TimerList::new_oneoff_at(const timeval &tv, const OneoffTimerCallback& cb)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
     n->schedule_at(tv);
+    return XorpTimer(n);
+}
+
+XorpTimer
+TimerList::new_oneoff_after(const timeval& interval, 
+			    const OneoffTimerCallback& cb)
+{
+    TimerNode* n = new OneoffTimerNode2(this, cb);
+    n->schedule_after(interval);
     return XorpTimer(n);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.4 2003/03/10 23:20:36 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.5 2003/03/27 01:51:57 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -70,6 +70,12 @@ public:
      * Schedule the @ref XorpTimer object at a given time.
      */
     void schedule_at(const timeval& when);
+
+    /**
+     * Schedule the @ref XorpTimer object amount described in timeval
+     * structure after the current time.
+     */
+    void schedule_after(const timeval& wait);
 
     /**
      * Schedule the @ref XorpTimer object.
@@ -179,6 +185,17 @@ public:
      */
     XorpTimer new_oneoff_at(const timeval& when, 
 			    const OneoffTimerCallback& ocb);
+
+    /**
+     * Create a XorpTimer that will be scheduled once.
+     *
+     * @param interval the relative time when the timer expires.
+     * @param ocb callback object that is invoked when timer expires.
+     *
+     * @return the @ref XorpTimer created.
+     */
+    XorpTimer new_oneoff_after(const timeval& interval, 
+			       const OneoffTimerCallback& ocb);
 
     /**
      * Create a XorpTimer that will be scheduled once.
@@ -305,6 +322,7 @@ protected:
     const timeval& expiry() const	{ return _expires; }
     
     void schedule_at(const timeval&);
+    void schedule_after(const timeval&);
     void schedule_after_ms(int x_ms);
     void reschedule_after_ms(int x_ms);
     void unschedule();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.2 2003/03/10 23:20:31 hodson Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.3 2003/03/27 01:51:57 hodson Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -104,6 +104,17 @@ public:
      */
     XorpTimer new_oneoff_at(const timeval& when, 
 			    const OneoffTimerCallback& ocb);
+
+    /**
+     * Add a new one-off timer to the EventLoop.
+     * 
+     * @param wait time to wait relative to now from when the timer expires.
+     * @param ocb callback object that is invoked when timer expires.
+     * @return a @ref XorpTimer object that must be assigned to remain 
+     * scheduled.
+     */
+    XorpTimer new_oneoff_after(const timeval& wait, 
+			       const OneoffTimerCallback& ocb);
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -240,6 +251,13 @@ inline XorpTimer
 EventLoop::new_oneoff_at(const timeval &tv, const OneoffTimerCallback& ocb)
 {
     return _timer_list.new_oneoff_at(tv, ocb);
+}
+
+inline XorpTimer
+EventLoop::new_oneoff_after(const timeval&	       wait, 
+			    const OneoffTimerCallback& ocb)
+{
+    return _timer_list.new_oneoff_after(wait, ocb);
 }
 
 inline XorpTimer
