@@ -276,7 +276,7 @@ public:
 		   REQUESTED_ROUTES * sizeof(PacketRouteEntry<IPv4>));
 
 	RipPacketHeader* rph = new (&(buf[0])) RipPacketHeader();
-	rph->initialize(RipPacketHeader::REQUEST, 1);
+	rph->initialize(RipPacketHeader::REQUEST, 2);
 
 	set<IPv4Net>::const_iterator n = _testnets.begin();
 	for (uint32_t i = 0; i < REQUESTED_ROUTES; i++) {
