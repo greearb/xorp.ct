@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.25 2004/02/26 08:47:14 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.26 2004/04/29 23:35:43 pavlin Exp $"
 
 
 //
@@ -217,7 +217,7 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
 				       eventloop,
 				       &xrl_std_router_mld6igmp4,
 				       xorp_module_name(AF_INET,
-							XORP_MODULE_MLD6IGMP));
+							XORP_MODULE_MFEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mld6igmp4);
 
 #ifdef HAVE_IPV6
@@ -230,7 +230,7 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
 				       eventloop,
 				       &xrl_std_router_mld6igmp6,
 				       xorp_module_name(AF_INET6,
-							XORP_MODULE_MLD6IGMP));
+							XORP_MODULE_MFEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mld6igmp6);
 #endif // HAVE_IPV6
 
@@ -261,7 +261,6 @@ main(int argc, char *argv[])
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
