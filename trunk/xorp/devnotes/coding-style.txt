@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/devnotes/coding-style.txt,v 1.2 2003/03/16 07:30:43 pavlin Exp $
 #
 
 	Provisional XORP C++ coding style
@@ -55,6 +55,19 @@ from our default coding styles that all are equally peturbed.
 	bool foo() { return _some_value; }
   to:
 	bool foo() {return some_value;}
+
+- REFERENCE AND POINTER ANNOTATIONS
+
+  Prefer:
+
+	foo(int& x) and bar(int* y)
+
+  to:
+
+	foo(int &x) and bar(int *y)
+
+  The former appears to be more widely used in C++ literature and so we go
+  with this for the sake of consistency.
 
 - COMMENTS
 
