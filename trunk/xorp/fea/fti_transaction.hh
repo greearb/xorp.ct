@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.7 2004/08/03 03:51:46 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.8 2004/08/03 07:48:44 pavlin Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -55,7 +55,7 @@ public:
 		 const string&	vifname,
 		 uint32_t	metric,
 		 uint32_t	admin_distance,
-		 bool		xorp_route = true)
+		 bool		xorp_route)
 	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
 					      metric, admin_distance,
 					      xorp_route) {}
@@ -111,7 +111,7 @@ public:
 		 const string&	vifname,
 		 uint32_t	metric,
 		 uint32_t	admin_distance,
-		 bool		xorp_route = true)
+		 bool		xorp_route)
 	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
 					      metric, admin_distance,
 					      xorp_route) {}
