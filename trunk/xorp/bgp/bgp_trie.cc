@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.13 2004/06/10 22:40:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.14 2004/10/30 00:20:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -116,7 +116,6 @@ BgpTrie<A>::erase(const IPNet& net)
 	    _pathmap.erase(pmi);
 	    debug_msg(" and erasing chain\n");
 	} else {			// there are other nodes
-	    _pathmap.erase(pmi);
 	    _pathmap[found->attributes()] = found->next();
 	    found->unchain();
 	    debug_msg(" chain remains but head moved\n");
