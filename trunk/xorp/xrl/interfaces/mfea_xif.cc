@@ -34,7 +34,7 @@ XrlMfeaV0p1Client::unmarshall_have_multicast_routing4(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -72,7 +72,7 @@ XrlMfeaV0p1Client::unmarshall_have_multicast_routing6(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -116,7 +116,7 @@ XrlMfeaV0p1Client::unmarshall_add_protocol4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -152,7 +152,7 @@ XrlMfeaV0p1Client::unmarshall_add_protocol6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -188,7 +188,7 @@ XrlMfeaV0p1Client::unmarshall_delete_protocol4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -224,7 +224,7 @@ XrlMfeaV0p1Client::unmarshall_delete_protocol6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -264,7 +264,7 @@ XrlMfeaV0p1Client::unmarshall_start_protocol_vif4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -304,7 +304,7 @@ XrlMfeaV0p1Client::unmarshall_start_protocol_vif6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -344,7 +344,7 @@ XrlMfeaV0p1Client::unmarshall_stop_protocol_vif4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -384,7 +384,7 @@ XrlMfeaV0p1Client::unmarshall_stop_protocol_vif6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -422,7 +422,7 @@ XrlMfeaV0p1Client::unmarshall_allow_signal_messages(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -460,7 +460,7 @@ XrlMfeaV0p1Client::unmarshall_allow_mrib_messages(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -502,7 +502,7 @@ XrlMfeaV0p1Client::unmarshall_join_multicast_group4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -544,7 +544,7 @@ XrlMfeaV0p1Client::unmarshall_join_multicast_group6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -586,7 +586,7 @@ XrlMfeaV0p1Client::unmarshall_leave_multicast_group4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -628,7 +628,7 @@ XrlMfeaV0p1Client::unmarshall_leave_multicast_group6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -674,7 +674,7 @@ XrlMfeaV0p1Client::unmarshall_add_mfc4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -720,7 +720,7 @@ XrlMfeaV0p1Client::unmarshall_add_mfc6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -756,7 +756,7 @@ XrlMfeaV0p1Client::unmarshall_delete_mfc4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -792,7 +792,7 @@ XrlMfeaV0p1Client::unmarshall_delete_mfc6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -844,7 +844,7 @@ XrlMfeaV0p1Client::unmarshall_send_protocol_message4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -896,7 +896,7 @@ XrlMfeaV0p1Client::unmarshall_send_protocol_message6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -948,7 +948,7 @@ XrlMfeaV0p1Client::unmarshall_add_dataflow_monitor4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1000,7 +1000,7 @@ XrlMfeaV0p1Client::unmarshall_add_dataflow_monitor6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1052,7 +1052,7 @@ XrlMfeaV0p1Client::unmarshall_delete_dataflow_monitor4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1104,7 +1104,7 @@ XrlMfeaV0p1Client::unmarshall_delete_dataflow_monitor6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1140,7 +1140,7 @@ XrlMfeaV0p1Client::unmarshall_delete_all_dataflow_monitor4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1176,7 +1176,7 @@ XrlMfeaV0p1Client::unmarshall_delete_all_dataflow_monitor6(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1210,7 +1210,7 @@ XrlMfeaV0p1Client::unmarshall_enable_vif(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1242,7 +1242,7 @@ XrlMfeaV0p1Client::unmarshall_start_vif(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1274,7 +1274,7 @@ XrlMfeaV0p1Client::unmarshall_stop_vif(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1306,7 +1306,7 @@ XrlMfeaV0p1Client::unmarshall_enable_all_vifs(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1336,7 +1336,7 @@ XrlMfeaV0p1Client::unmarshall_start_all_vifs(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1366,7 +1366,7 @@ XrlMfeaV0p1Client::unmarshall_stop_all_vifs(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1398,7 +1398,7 @@ XrlMfeaV0p1Client::unmarshall_enable_mfea(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1428,7 +1428,7 @@ XrlMfeaV0p1Client::unmarshall_start_mfea(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1458,7 +1458,7 @@ XrlMfeaV0p1Client::unmarshall_stop_mfea(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1490,7 +1490,7 @@ XrlMfeaV0p1Client::unmarshall_enable_cli(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1520,7 +1520,7 @@ XrlMfeaV0p1Client::unmarshall_start_cli(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1550,7 +1550,7 @@ XrlMfeaV0p1Client::unmarshall_stop_cli(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1582,7 +1582,7 @@ XrlMfeaV0p1Client::unmarshall_log_trace_all(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1612,7 +1612,7 @@ XrlMfeaV0p1Client::unmarshall_get_mrib_table_default_metric_preference(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -1652,7 +1652,7 @@ XrlMfeaV0p1Client::unmarshall_set_mrib_table_default_metric_preference(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1682,7 +1682,7 @@ XrlMfeaV0p1Client::unmarshall_reset_mrib_table_default_metric_preference(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1712,7 +1712,7 @@ XrlMfeaV0p1Client::unmarshall_get_mrib_table_default_metric(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -1752,7 +1752,7 @@ XrlMfeaV0p1Client::unmarshall_set_mrib_table_default_metric(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -1782,7 +1782,7 @@ XrlMfeaV0p1Client::unmarshall_reset_mrib_table_default_metric(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }

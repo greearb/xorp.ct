@@ -50,7 +50,7 @@ XrlRawPacketV0p1Client::unmarshall_send4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -84,7 +84,7 @@ XrlRawPacketV0p1Client::unmarshall_send_raw4(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -122,7 +122,7 @@ XrlRawPacketV0p1Client::unmarshall_register_vif_receiver(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -160,7 +160,7 @@ XrlRawPacketV0p1Client::unmarshall_unregister_vif_receiver(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }

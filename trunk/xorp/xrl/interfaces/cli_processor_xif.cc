@@ -44,7 +44,7 @@ XrlCliProcessorV0p1Client::unmarshall_process_command(
 	cb->dispatch(e, 0, 0, 0, 0);
 	return;
     } else if (a && a->size() != 4) {
-	XLOG_ERROR("Wrong number of arguments (%u != 4)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 4);
 	cb->dispatch(XrlError::BAD_ARGS(), 0, 0, 0, 0);
 	return;
     }

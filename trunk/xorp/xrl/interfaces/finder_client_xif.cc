@@ -34,7 +34,7 @@ XrlFinderClientV0p2Client::unmarshall_hello(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -66,7 +66,7 @@ XrlFinderClientV0p2Client::unmarshall_remove_xrl_from_cache(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -98,7 +98,7 @@ XrlFinderClientV0p2Client::unmarshall_remove_xrls_for_target_from_cache(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -130,7 +130,7 @@ XrlFinderClientV0p2Client::unmarshall_dispatch_tunneled_xrl(
 	cb->dispatch(e, 0, 0);
 	return;
     } else if (a && a->size() != 2) {
-	XLOG_ERROR("Wrong number of arguments (%u != 2)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 2);
 	cb->dispatch(XrlError::BAD_ARGS(), 0, 0);
 	return;
     }

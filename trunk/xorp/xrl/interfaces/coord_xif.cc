@@ -36,7 +36,7 @@ XrlCoordV0p1Client::unmarshall_command(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -68,7 +68,7 @@ XrlCoordV0p1Client::unmarshall_status(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -106,7 +106,7 @@ XrlCoordV0p1Client::unmarshall_pending(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }

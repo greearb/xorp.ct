@@ -38,7 +38,7 @@ XrlTestPeerV0p1Client::unmarshall_register(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -70,7 +70,7 @@ XrlTestPeerV0p1Client::unmarshall_packetisation(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -104,7 +104,7 @@ XrlTestPeerV0p1Client::unmarshall_connect(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -138,7 +138,7 @@ XrlTestPeerV0p1Client::unmarshall_listen(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -170,7 +170,7 @@ XrlTestPeerV0p1Client::unmarshall_send(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -200,7 +200,7 @@ XrlTestPeerV0p1Client::unmarshall_disconnect(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -230,7 +230,7 @@ XrlTestPeerV0p1Client::unmarshall_reset(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }
@@ -260,7 +260,7 @@ XrlTestPeerV0p1Client::unmarshall_terminate(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }

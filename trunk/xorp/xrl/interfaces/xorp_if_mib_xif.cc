@@ -38,7 +38,7 @@ XrlXorpIfMibV0p1Client::unmarshall_load_mib(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -78,7 +78,7 @@ XrlXorpIfMibV0p1Client::unmarshall_unload_mib(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }

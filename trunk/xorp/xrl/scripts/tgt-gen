@@ -104,21 +104,25 @@ def target_declare_handlers(methods):
              % cpp_name(x.name())
     return s;
 
+def target_declare_handler_hooks():
+    s = "    void add_handlers(); \n    void remove_handlers();\n"
+    return s
+
 def target_handler_hooks(cls, name, methods):
-    s = "    void add_handlers()\n    {\n"
+    s = "void\n%s::add_handlers()\n{\n" % cls
     for m in methods:
         s += "\tif (_cmds->add_handler(\"%s\", " % m.name()
         s += "\n%scallback(this, &%s::handle_%s)) == false) {\n" % \
              (xorp_indent(3), cls, cpp_name(m.name()))
-        s += "\t    XLOG_ERROR(\"Failed to xrl handler finder://%s/%s\");\n\t}\n" % \
+        s += "\t    XLOG_ERROR(\"Failed to xrl handler finder://%%s/%%s\", \"%s\", \"%s\");\n\t}\n" % \
               (name, m.name())
     s += "\t_cmds->finalize();\n"
-    s += "    }\n\n"
+    s += "}\n\n"
 
-    s += "    void remove_handlers()\n    {\n"
+    s += "void\n%s::remove_handlers()\n{\n" %cls
     for m in methods:
         s += "\t_cmds->remove_handler(\"%s\");\n" % m.name()
-    s += "    }\n"
+    s += "}\n"
 
     return s;
 
@@ -135,8 +139,8 @@ def target_handler_methods(cls, name, methods):
         s += "{"
         s += """
     if (xa_inputs.size() != %d) {
-	XLOG_ERROR(\"Wrong number of arguments (%%u != %d) handling %s\",
-            (uint32_t)xa_inputs.size());
+	XLOG_ERROR(\"Wrong number of arguments (%%u != %%u) handling %%s\",
+            %d, (uint32_t)xa_inputs.size(), \"%s\");
 	return XrlCmdError::BAD_ARGS();
     }
 """ % (len(m.args()), len(m.args()), m.name())
@@ -166,8 +170,8 @@ def target_handler_methods(cls, name, methods):
 
         s += \
 """	if (e != XrlCmdError::OKAY()) {
-	    XLOG_WARNING(\"Handling method for %s failed: %%s\",
-            		 e.str().c_str());
+	    XLOG_WARNING(\"Handling method for %%s failed: %%s\",
+            		 \"%s\", e.str().c_str());
 	    return e;
         }
 """ % m.name()
@@ -265,7 +269,7 @@ protected:
     s += target_virtual_fns(methods)
     s += "private:\n"
     s += target_declare_handlers(methods)
-    s += target_handler_hooks(cls, tgt_name, methods)
+    s += target_declare_handler_hooks()
 
     s += "};\n"
 
@@ -313,6 +317,8 @@ bool
 
 """ % (cls, cls, cls, cls, cls)
     s += target_handler_methods(cls, tgt_name, methods)
+    s += target_handler_hooks(cls, tgt_name, methods)
+
     return s
 
 def generate_target_methods(tgt, interfaces):

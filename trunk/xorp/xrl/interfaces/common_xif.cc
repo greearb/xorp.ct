@@ -34,7 +34,7 @@ XrlCommonV0p1Client::unmarshall_get_target_name(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -72,7 +72,7 @@ XrlCommonV0p1Client::unmarshall_get_version(
 	cb->dispatch(e, 0);
 	return;
     } else if (a && a->size() != 1) {
-	XLOG_ERROR("Wrong number of arguments (%u != 1)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 1);
 	cb->dispatch(XrlError::BAD_ARGS(), 0);
 	return;
     }
@@ -110,7 +110,7 @@ XrlCommonV0p1Client::unmarshall_get_status(
 	cb->dispatch(e, 0, 0);
 	return;
     } else if (a && a->size() != 2) {
-	XLOG_ERROR("Wrong number of arguments (%u != 2)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 2);
 	cb->dispatch(XrlError::BAD_ARGS(), 0, 0);
 	return;
     }
@@ -150,7 +150,7 @@ XrlCommonV0p1Client::unmarshall_shutdown(
 	cb->dispatch(e);
 	return;
     } else if (a && a->size() != 0) {
-	XLOG_ERROR("Wrong number of arguments (%u != 0)", (uint32_t)a->size());
+	XLOG_ERROR("Wrong number of arguments (%u != %u)", (uint32_t)a->size(), 0);
 	cb->dispatch(XrlError::BAD_ARGS());
 	return;
     }

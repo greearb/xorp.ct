@@ -98,7 +98,7 @@ def implement_unmarshall(cls, method_no, method):
     s += "\tcb->dispatch(e%s);\n" % fail_args
     s += "\treturn;\n"
     s += "    } else if (a && a->size() != %d) {\n" % len(method.rargs())
-    s += "\tXLOG_ERROR(\"Wrong number of arguments (%%u != %d)\", (uint32_t)a->size());\n" % len(method.rargs())
+    s += "\tXLOG_ERROR(\"Wrong number of arguments (%%u != %%u)\", (uint32_t)a->size(), %d);\n" % len(method.rargs())
     s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
     s += "\treturn;\n"
     s += "    }\n"
