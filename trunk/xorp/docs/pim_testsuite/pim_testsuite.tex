@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.5 2003/01/12 05:03:21 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.6 2003/01/27 09:28:27 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -6731,6 +6731,9 @@ Group           Source          RP              Flags
     PIM include SG:           ..............
     PIM exclude SG:           ..............
 \end{verbatim}
+
+  Further, the periodic (*,G) Join messages sent by the RUT on LAN2 to
+  neighbor TR2 must not contain (S,G,rpt) Prune anymore.
 
 \end{itemize}
 
