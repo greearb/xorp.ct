@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.4 2003/05/15 15:53:05 hodson Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.5 2003/05/23 13:59:10 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -160,9 +160,13 @@ public:
      * the user config is restricted to configuration set by the user.
      *
      * @param user_config config to align state with.
+     * @param do_finalize_state if true, and if there are any items in the
+     * aligned config marked for deletion, then remove those items.
+     * More specifically, if true, then @ref IfTree::finalize_state()
+     * will be called at the end.
      * @return modified configuration structure.
      */
-    IfTree& align_with(const IfTree& user_config);
+    IfTree& align_with(const IfTree& user_config, bool do_finalize_state);
     
     /**
      * Delete interfaces labelled as ready for deletion, call finalize_state()
@@ -229,6 +233,20 @@ public:
 	set_if_flags(o.if_flags());
 	set_mtu(o.mtu());
 	set_mac(o.mac());
+    }
+    
+    /**
+     * Test if the interface-specific internal state is same.
+     * 
+     * @param o the IfTreeInterface to compare against.
+     * @return true if the interface-specific internal state is same.
+     */
+    inline bool is_same_state(const IfTreeInterface& o)
+    {
+	return ((enabled() == o.enabled())
+		&& (if_flags() == o.if_flags())
+		&& (mtu() == o.mtu())
+		&& (mac() == o.mac()));
     }
     
     void finalize_state();
@@ -338,6 +356,22 @@ public:
 	set_vif_flags(o.vif_flags());
     }
 
+    /**
+     * Test if the vif-specific internal state is same.
+     * 
+     * @param o the IfTreeVif to compare against.
+     * @return true if the vif-specific internal state is same.
+     */
+    inline bool is_same_state(const IfTreeVif& o)
+    {
+	return ((enabled() == o.enabled())
+		&& (broadcast() == o.broadcast())
+		&& (loopback() == o.loopback())
+		&& (point_to_point() == o.point_to_point())
+		&& (multicast() == o.multicast())
+		&& (vif_flags() == o.vif_flags()));
+    }
+
     void finalize_state();
 
     string str() const;
@@ -420,9 +454,42 @@ public:
 
     /**
      * Set the endpoint address of a point-to-point link.
-     * @param eaddr the endpoint address.
+     * @param oaddr the endpoint address.
      */
-    void set_endpoint(const IPv4& eaddr);
+    void set_endpoint(const IPv4& oaddr);
+
+    /**
+     * Copy state of internal variables from another IfTreeAddr4.
+     */
+    inline void copy_state(const IfTreeAddr4& o)
+    {
+	set_enabled(o.enabled());
+	set_broadcast(o.broadcast());
+	set_loopback(o.loopback());
+	set_point_to_point(o.point_to_point());
+	set_multicast(o.multicast());
+	set_addr_flags(o.addr_flags());
+	set_endpoint(o.endpoint());
+	set_prefix(o.prefix());
+    }
+    
+    /**
+     * Test if the address-specific internal state is same.
+     * 
+     * @param o the IfTreeAddr4 to compare against.
+     * @return true if the address-specific internal state is same.
+     */
+    inline bool is_same_state(const IfTreeAddr4& o)
+    {
+	return ((enabled() == o.enabled())
+		&& (broadcast() == o.broadcast())
+		&& (loopback() == o.loopback())
+		&& (point_to_point() == o.point_to_point())
+		&& (multicast() == o.multicast())
+		&& (addr_flags() == o.addr_flags())
+		&& (endpoint() == o.endpoint())
+		&& (prefix() == o.prefix()));
+    }
 
     void finalize_state();
 
@@ -438,7 +505,7 @@ protected:
     bool	_multicast;
     uint32_t	_addr_flags;
 
-    IPv4	_oaddr;	  // Other address - p2p endpoint or bcast addr
+    IPv4	_oaddr;		// Other address - p2p endpoint or bcast addr
     uint32_t	_prefix;
 };
 
@@ -486,6 +553,37 @@ public:
 
     void set_endpoint(const IPv6& oaddr);
 
+    /**
+     * Copy state of internal variables from another IfTreeAddr6.
+     */
+    inline void copy_state(const IfTreeAddr6& o)
+    {
+	set_enabled(o.enabled());
+	set_loopback(o.loopback());
+	set_point_to_point(o.point_to_point());
+	set_multicast(o.multicast());
+	set_addr_flags(o.addr_flags());
+	set_endpoint(o.endpoint());
+	set_prefix(o.prefix());
+    }
+
+    /**
+     * Test if the address-specific internal state is same.
+     * 
+     * @param o the IfTreeAddr6 to compare against.
+     * @return true if the address-specific internal state is same.
+     */
+    inline bool is_same_state(const IfTreeAddr6& o)
+    {
+	return ((enabled() == o.enabled())
+		&& (loopback() == o.loopback())
+		&& (point_to_point() == o.point_to_point())
+		&& (multicast() == o.multicast())
+		&& (addr_flags() == o.addr_flags())
+		&& (endpoint() == o.endpoint())
+		&& (prefix() == o.prefix()));
+    }
+
     void finalize_state();
 
     string str() const;
@@ -499,7 +597,7 @@ protected:
     bool	_multicast;
     uint32_t	_addr_flags;
 
-    IPv6	_oaddr;	  // Other address - p2p endpoint
+    IPv6	_oaddr;		// Other address - p2p endpoint
     uint32_t	_prefix;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.7 2003/05/23 16:52:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.8 2003/05/23 19:49:28 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -133,10 +133,13 @@ IfTree::str() const
 //  - if an item from the other tree is not in the local tree, we do NOT
 //    copy it to the local tree.
 //
+// If do_finalize_state is true, at the end call finalize_state() on the
+// aligned local tree.
+//
 // Return the aligned local tree.
 //
 IfTree&
-IfTree::align_with(const IfTree& o)
+IfTree::align_with(const IfTree& o, bool do_finalize_state)
 {
     IfTree::IfMap::iterator ii;
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
@@ -147,7 +150,8 @@ IfTree::align_with(const IfTree& o)
 	    ii->second.mark(DELETED);
 	    continue;
 	} else {
-	    ii->second.copy_state(oi->second);
+	    if (! ii->second.is_same_state(oi->second))
+		ii->second.copy_state(oi->second);
 	}
 
 	IfTreeInterface::VifMap::iterator vi;
@@ -160,7 +164,8 @@ IfTree::align_with(const IfTree& o)
 		vi->second.mark(DELETED);
 		continue;
 	    } else {
-		vi->second.copy_state(ov->second);
+		if (! vi->second.is_same_state(ov->second))
+		    vi->second.copy_state(ov->second);
 	    }
 
 	    IfTreeVif::V4Map::iterator ai4;
@@ -171,7 +176,8 @@ IfTree::align_with(const IfTree& o)
 		if (oa4 == ov->second.v4addrs().end()) {
 		    ai4->second.mark(DELETED);
 		} else {
-		    ai4->second = oa4->second;
+		    if (! ai4->second.is_same_state(oa4->second))
+			ai4->second.copy_state(oa4->second);
 		}
 	    }
 
@@ -183,14 +189,16 @@ IfTree::align_with(const IfTree& o)
 		if (oa6 == ov->second.v6addrs().end()) {
 		    ai6->second.mark(DELETED);
 		} else {
-		    ai6->second = oa6->second;
+		    if (! ai6->second.is_same_state(oa6->second))
+			ai6->second.copy_state(oa6->second);
 		}
 	    }
 	}
     }
 
     // Pass over and remove items marked for deletion
-    finalize_state();
+    if (do_finalize_state)
+	finalize_state();
     
     return *this;
 }
@@ -389,13 +397,13 @@ IfTreeAddr4::bcast() const
 }
 
 void
-IfTreeAddr4::set_endpoint(const IPv4& eaddr)
+IfTreeAddr4::set_endpoint(const IPv4& oaddr)
 {
     set_broadcast(false);
     set_point_to_point(false);
-    if (eaddr != IPv4::ZERO())
+    if (oaddr != IPv4::ZERO())
 	set_point_to_point(true);
-    _oaddr = eaddr;
+    _oaddr = oaddr;
     mark(CHANGED);
 }
 
@@ -447,12 +455,12 @@ IfTreeAddr6::set_prefix(uint32_t prefix)
 }
 
 void
-IfTreeAddr6::set_endpoint(const IPv6& eaddr)
+IfTreeAddr6::set_endpoint(const IPv6& oaddr)
 {
     set_point_to_point(false);
-    if (eaddr != IPv6::ZERO())
+    if (oaddr != IPv6::ZERO())
 	set_point_to_point(true);
-    _oaddr = eaddr;
+    _oaddr = oaddr;
     mark(CHANGED);
 }
 
