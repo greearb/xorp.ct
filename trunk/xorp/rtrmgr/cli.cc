@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.39 2004/05/31 07:59:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.41 2004/06/01 04:39:54 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -31,7 +31,6 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "util.hh"
-
 
 RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose)
     : _xorpsh(xorpsh),
@@ -1698,7 +1697,7 @@ RouterCLI::text_entry_func(const string& ,
 		string errmsg = c_format("ERROR: argument \"%s\" "
 					 "is not a valid \"%s\".\n",
 					 argv[0].c_str(),
-					 tag_ttn->segname().c_str());
+					 tag_ttn->typestr().c_str());
 		_cli_client.cli_print(errmsg);
 		return (XORP_ERROR);
 	    }
@@ -1999,6 +1998,7 @@ RouterCLI::text_entry_func(const string& ,
 		// take the first that has valid syntax.
 		//
 		// TODO: we really ought to check the allow commands here
+		string cand_types;
 		list<TemplateTreeNode*>::const_iterator tti;
 		for (tti = ttn->children().begin();
 		     tti != ttn->children().end();
@@ -2007,12 +2007,20 @@ RouterCLI::text_entry_func(const string& ,
 			data_ttn = (*tti);
 			break;
 		    }
+		    if (! cand_types.empty())
+			cand_types += " or ";
+		    cand_types += c_format("\"%s\"",
+					   (*tti)->typestr().c_str());
 		}
 		if (data_ttn == NULL) {
+		    if (ttn->type() != NODE_VOID) {
+			cand_types = c_format("\"%s\"",
+					      ttn->typestr().c_str());
+		    }
 		    string errmsg = c_format("ERROR: argument \"%s\" "
-					     "is not a valid \"%s\".\n",
+					     "is not a valid %s.\n",
 					     value.c_str(),
-					     ttn->segname().c_str());
+					     cand_types.c_str());
 		    _cli_client.cli_print(errmsg);
 		    goto cleanup;
 		}
@@ -2036,7 +2044,7 @@ RouterCLI::text_entry_func(const string& ,
 		    string errmsg = c_format("ERROR: argument \"%s\" "
 					     "is not a valid \"%s\".\n",
 					     value.c_str(),
-					     ttn->segname().c_str());
+					     ttn->typestr().c_str());
 		    _cli_client.cli_print(errmsg);
 		    goto cleanup;
 		}
@@ -2346,7 +2354,8 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     if (ttn->type_match(argv[0]) == false) {
 	string result = c_format("ERROR: argument \"%s\" "
 				 "is not a valid \"%s\".",
-				 argv[0].c_str(), ttn->typestr().c_str());
+				 argv[0].c_str(),
+				 ttn->typestr().c_str());
 	return result;
     }
 
