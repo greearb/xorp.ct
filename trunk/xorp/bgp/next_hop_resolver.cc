@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.19 2003/06/17 06:44:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.20 2003/09/16 21:00:26 hodson Exp $"
 
-//#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -786,6 +786,10 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
  	      error.str().c_str(), *resolves, addr->str().c_str(),
 	      *prefix_len, *real_prefix_len, actual_nexthop->str().c_str(), *metric,
 	      comment.c_str());
+
+
+    XLOG_ASSERT((*real_prefix_len > 0) && 
+		(*real_prefix_len <= A::addr_bitlen()));
 
     /*
     ** Make sure that there is something on our queue.
