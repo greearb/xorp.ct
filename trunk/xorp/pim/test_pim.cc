@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.3 2003/01/23 11:14:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.4 2003/01/23 11:22:37 pavlin Exp $"
 
 
 //
@@ -241,8 +241,8 @@ main(int argc, char *argv[])
 	XrlPimNode xrl_pimsm_node4(AF_INET, X_MODULE_PIMSM, event_loop,
 				   &xrl_pimsm_xrlstdrouter4);
 	// XXX: print the PimMre state dependency (for debug purpose)
-	// xrl_pimsm_node4.pim_mrt().track_state_print_actions_num();
 	// xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
+	// xrl_pimsm_node4.pim_mrt().track_state_print_actions_num();
 	// exit (0);
 #if 0
 	XrlStdRouter xrl_pimsm_xrlstdrouter6(event_loop,

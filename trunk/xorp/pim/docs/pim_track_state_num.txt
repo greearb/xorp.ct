@@ -1,4 +1,4 @@
-Input action = 0 Output actions = 4/(*,*,RP) 39/(*,*,RP) 0/(*,G) 5/(*,G) 11/(*,G) 41/(*,G) 22/(*,G) 20/(*,G) 24/(*,G) 26/(*,G) 1/(S,G) 2/(S,G,rpt) 6/(S,G) 7/(S,G,rpt) 16/(S,G,rpt) 12/(S,G) 15/(S,G,rpt) 13/(S,G,rpt) 14/(S,G) 19/(S,G) 21/(S,G) 23/(S,G) 32/(S,G) 37/(S,G,rpt) 38/(S,G) 3/(MFC) 17/(MFC)
+Input action = 0 Output actions = 4/(*,*,RP) 39/(*,*,RP) 0/(*,G) 5/(*,G) 11/(*,G) 41/(*,G) 22/(*,G) 20/(*,G) 24/(*,G) 26/(*,G) 1/(S,G) 2/(S,G,rpt) 6/(S,G) 7/(S,G,rpt) 16/(S,G,rpt) 12/(S,G) 15/(S,G,rpt) 13/(S,G,rpt) 14/(S,G) 18/(S,G) 19/(S,G) 21/(S,G) 23/(S,G) 32/(S,G) 37/(S,G,rpt) 38/(S,G) 3/(MFC) 17/(MFC)
 Input action = 1 Output actions = 4/(*,*,RP) 39/(*,*,RP) 5/(*,G) 11/(*,G) 41/(*,G) 22/(*,G) 20/(*,G) 24/(*,G) 26/(*,G) 6/(S,G) 7/(S,G,rpt) 16/(S,G,rpt) 12/(S,G) 15/(S,G,rpt) 13/(S,G,rpt) 14/(S,G) 19/(S,G) 21/(S,G) 23/(S,G) 32/(S,G) 37/(S,G,rpt) 38/(S,G) 17/(MFC)
 Input action = 2 Output actions = 8/(S,G) 9/(S,G,rpt) 16/(S,G,rpt) 12/(S,G) 42/(S,G) 13/(S,G,rpt) 14/(S,G) 18/(S,G) 19/(S,G) 21/(S,G) 23/(S,G) 25/(S,G) 32/(S,G) 17/(MFC)
 Input action = 3 Output actions = 39/(*,*,RP) 41/(*,G) 13/(S,G,rpt) 14/(S,G) 37/(S,G,rpt) 38/(S,G)
