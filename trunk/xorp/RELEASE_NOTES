@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.17 2003/06/26 19:00:33 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.18 2003/06/26 22:20:50 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -52,7 +52,9 @@ Release 0.4 (2003/??/??)
       average, per (S,G) or (*,G) routing entry).
 
   CLI:
-    - 
+    - On exit, restore the original terminal flags in case of stdio-based
+      CLI access. This should fix a bug when running xorpsh from sh/bash
+      and pressing Ctrl-D leaves sh/bash in non-echo mode. 
 
   SNMP:
     - 
