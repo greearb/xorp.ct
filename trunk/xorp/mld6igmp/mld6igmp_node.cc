@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.31 2004/08/06 00:33:57 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.32 2004/08/24 19:01:47 pavlin Exp $"
 
 
 //
@@ -63,7 +63,7 @@
 Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
 			   EventLoop& eventloop)
     : ProtoNode<Mld6igmpVif>(family, module_id, eventloop),
-      _is_log_trace(true)		// XXX: default to print trace logs
+      _is_log_trace(false)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MLD6IGMP);
     if (module_id != XORP_MODULE_MLD6IGMP) {

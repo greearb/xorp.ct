@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.38 2004/07/28 03:03:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.39 2004/08/03 03:51:47 pavlin Exp $"
 
 
 //
@@ -83,7 +83,7 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
       _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
       _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
       _mfea_dft(*this),
-      _is_log_trace(true),		// XXX: default to print trace logs
+      _is_log_trace(false),
       _ftic(ftic)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MFEA);
