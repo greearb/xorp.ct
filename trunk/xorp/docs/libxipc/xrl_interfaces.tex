@@ -36,7 +36,7 @@
 
 \title{XRL Interfaces: Specifications and Tools \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
@@ -72,11 +72,11 @@ following revisions.
 \section{Terminology}
 
 We define an \emph{XRL Target} as something that XRL requests can be
-directed to do in order to be executed.  Multiple XRL targets can
+directed to in order to be executed.  Multiple XRL targets can
 exist within a single process, though there will typically be one
 target per process.  Each XRL Target has an associated name and a set
 of IPC mechanisms that it supports.  At start-up each target registers
-it's name and IPC mechanisms with the Finder, so other targets are
+its name and IPC mechanisms with the Finder, so other targets are
 able to direct requests to it.
 
 We define an \emph{XRL Interface} to be a set of related methods that
@@ -123,7 +123,7 @@ set of XRL methods associated with it.
    \}
 }
 
-\smallskip Each item in the XRL Method list consists of a method name, it's
+\smallskip Each item in the XRL Method list consists of a method name, its
 dispatch arguments, and return arguments specified in the default XRL
 text form.  An example of this is shown in listing \ref{lst:eg-interface}.
 
@@ -138,7 +138,7 @@ lines.  [NB This usage of spacing is not currently supported
 elsewhere in the project - to be fixed.]
 
 C-style comments are valid anywhere with interface specification files
-and kdoc comments can be used to describe the XRL, it's arguments, and
+and kdoc comments can be used to describe the XRL, its arguments, and
 return values.  Each kdoc comment is associated with the next XRL
 found in a specification file.  All kdoc tags are valid with the
 exception of \textbf{@return} which is used by kdoc to describe C/C++
@@ -184,11 +184,11 @@ and related library source file to simplify invoking the XRL's of that
 interface.  Each XRL Interface specification generates an XRL
 Interface Client C++ class.  The generated C++ class has a send method
 for each XRL in the XRL interface specification and takes care of
-argument marshalling when the XRL is dispatch and when it returns.
+argument marshalling when the XRL is dispatched and when it returns.
 
 A fragment of generated code is shown in listing \ref{lst:client-code}.
 This code is generated from the Xrl Interface presented in listing
-\ref{lst:eg-interface}.  The Xrl Interface Client C++ has constructor
+\ref{lst:eg-interface}.  The Xrl Interface Client C++ has a constructor
 that takes a XrlRouter object that holds the necessary state to
 correlate the XRLs being called with the return values.  Each XRL
 specified in the XRL Interface has a send method.  The send method
@@ -199,7 +199,7 @@ the XRL returns.
 The type of the XRL callback is determined by the return type
 specification of the XRL.  Since the syntax for the callback is awkward,
 a typedef is used in the class method.  The relevant typedef appears
-immediately before each send method.  When called the first callback
+immediately before each send method.  When called, the first callback
 argument of the callback is an {\tt XrlError} object.  If the value is
 {\tt XrlError::OKAY()} then return values from the XRL will be pointed
 to by the following arguments (\eg. const string* for string argument).
