@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.2 2004/02/19 04:33:12 hodson Exp $
+// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.3 2004/03/10 23:18:43 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_CMDS_HH__
 #define __FEA_XRL_SOCKET_CMDS_HH__
@@ -68,7 +68,7 @@ private:
 };
 
 template <>
-void
+inline void
 SocketUserSendRecvEvent<IPv4>::set_source(const IPv4::SockAddrType& sin,
 					  socklen_t sin_len)
 {
@@ -79,7 +79,7 @@ SocketUserSendRecvEvent<IPv4>::set_source(const IPv4::SockAddrType& sin,
 }
 
 template <>
-void
+inline void
 SocketUserSendRecvEvent<IPv6>::set_source(const IPv6::SockAddrType& sin6,
 					  socklen_t sin6_len)
 {
