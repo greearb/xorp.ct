@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.28 2004/03/11 00:05:29 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.29 2004/05/03 23:11:58 hodson Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -41,8 +41,8 @@ LDFLAGS				 =
 LDADD				 = $(top_builddir)/libxorp/libxorp.a
 
 # -- Real Program Sources
-
-xorp_rip_SOURCES		 = xorp_rip.cc
+xorp_rip_CXXFLAGS		 = -DINSTANTIATE_IPV4
+xorp_rip_SOURCES		 = xorp_rip_main.cc
 xorp_rip_SOURCES		+= xrl_target_common.hh
 xorp_rip_SOURCES		+= xrl_target_rip.hh
 xorp_rip_SOURCES		+= xrl_target_rip.cc
@@ -60,7 +60,8 @@ xorp_rip_LDADD			+= $(top_builddir)/libxipc/libxipc.a
 xorp_rip_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 xorp_rip_LDADD			+= $(top_builddir)/libxorp/libxorp.a
 
-xorp_ripng_SOURCES		 = xorp_ripng.cc
+xorp_ripng_CXXFLAGS		 = -DINSTANTIATE_IPV6
+xorp_ripng_SOURCES		 = xorp_rip_main.cc
 xorp_ripng_SOURCES		+= xrl_target_common.hh
 xorp_ripng_SOURCES		+= xrl_target_ripng.hh
 xorp_ripng_SOURCES		+= xrl_target_ripng.cc

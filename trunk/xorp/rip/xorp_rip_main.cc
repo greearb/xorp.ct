@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xorp_rip_common.hh,v 1.5 2004/04/02 00:27:57 mjh Exp $
-
-#ifndef __RIP_XORP_RIP_COMMON_HH__
-#define __RIP_XORP_RIP_COMMON_HH__
+#ident "$XORP: xorp/rip/xorp_rip.cc,v 1.2 2004/02/20 01:22:04 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -38,7 +35,6 @@
 #include "rip/xrl_process_spy.hh"
 #include "rip/xrl_redist_manager.hh"
 #include "rip/xrl_rib_notifier.hh"
-#include "rip/xorp_rip_common.hh"
 
 #include "rip/xrl_target_rip.hh"
 #include "rip/xrl_target_ripng.hh"
@@ -214,130 +210,163 @@ parse_finder_args(const string& host_colon_port, string& host, uint16_t& port)
     }
     return true;
 }
+
+static void
+usage(const char* name)
+{
+    fprintf(stderr, "Usage: %s [options]\n", name);
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -F <host>[:<port>]  Specify Finder host and port\n");
+    fprintf(stderr, "  -h                  Display this information\n");
+}
 
 
+/**
+ * Class implementing RIP body.
+ */
 template <typename A>
 class XorpRip
 {
-protected:
-    void
-    run(const string& finder_host, uint16_t finder_port)
-    {
-	XorpUnexpectedHandler catch_all(xorp_unexpected_handler);
-	try {
-	    EventLoop		e;
-	    System<A>		rip_system(e);
-	    XrlStdRouter	xsr(e, XrlTarget<A>::name(),
-				    finder_host.c_str(), finder_port);
-	    XrlProcessSpy	xps(xsr);
-	    IfMgrXrlMirror	ixm(e, xrl_fea_name());
-	    XrlPortManager<A>	xpm(rip_system, xsr, ixm);
-	    XrlRedistManager<A>	xrm(rip_system, xsr);
-
-	    bool stop_requested(false);
-	    typename XrlTarget<A>::Type xrlt(e, xsr, xps, xpm, xrm,
-					     stop_requested);
-
-	    while (xsr.ready() == false) {
-		e.run();
-	    }
-
-	    Service2XrlTargetStatus<A> smon(xrlt);
-
-	    // Start up process spy
-	    xps.startup();
-	    smon.add_service(&xps);
-
-	    XrlRibNotifier<A> xn(e, rip_system.route_db().update_queue(), xsr);
-	    xn.startup();
-	    smon.add_service(&xn);
-
-	    // Start up interface mirror
-	    ixm.startup();
-	    smon.add_service(&ixm);
-
-	    // Start up xrl port manager
-	    xpm.startup();
-	    smon.add_service(&xpm);
-
-	    // Start up xrl redist manager
-	    xrm.startup();
-	    smon.add_service(&xrm);
-
-	    while (stop_requested == false &&
-		   smon.have_status(FAILED) == false) {
-		e.run();
-	    }
-
-	    xps.shutdown();
-	    xn.shutdown();
-	    ixm.shutdown();
-	    xpm.shutdown();
-	    xrm.shutdown();
-
-	    bool flag(false);
-	    XorpTimer t = e.set_flag_after_ms(5000, &flag);
-	    while (flag == false &&
-		   smon.have_status(ServiceStatus(~(FAILED|SHUTDOWN)))) {
-		printf("x");
-		e.run();
-	    }
-
-	    smon.remove_service(&xps);
-	    smon.remove_service(&xn);
-	    smon.remove_service(&ixm);
-	    smon.remove_service(&xpm);
-
-	    rip_system.route_db().flush_routes();
-	} catch (...) {
-	    xorp_catch_standard_exceptions();
-	}
-    }
-
-    void
-    usage(const char* name)
-    {
-	fprintf(stderr, "Usage: %s [options]\n", name);
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -F <host>[:<port>]  Specify Finder host and port\n");
-	fprintf(stderr, "  -h                  Display this information\n");
-    }
+public:
+    typedef typename XrlTarget<A>::Type XrlTargetType;
 
 public:
-    int main(int argc, char * const argv[])
-    {
-	xlog_init(argv[0], NULL);
-	xlog_set_verbose(XLOG_VERBOSE_LOW);
-	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-	xlog_add_default_output();
-	xlog_start();
+    XorpRip();
 
-	string		finder_host = FINDER_DEFAULT_HOST.str();
-	uint16_t	finder_port = FINDER_DEFAULT_PORT;
-	bool		do_run = true;
+    int main(int argc, char* const argv[]);
 
-	int ch;
-	while ((ch = getopt(argc, argv, "F:")) != -1) {
-	    switch (ch) {
-	    case 'F':
-		do_run = parse_finder_args(optarg, finder_host, finder_port);
-		break;
-	    default:
-		usage(argv[0]);
-		do_run = false;
-	    }
-	}
+protected:
+    void run(const string& finder_host, uint16_t finder_port);
 
-	if (do_run)
-	    run(finder_host, finder_port);
-
-	//
-	// Gracefully stop and exit xlog
-	//
-	xlog_stop();
-	xlog_exit();
-	return 0;
-    }
+protected:
+    bool _stop_flag;
 };
 
-#endif // __RIP_XORP_RIP_COMMON_HH__
+
+template <typename A>
+XorpRip<A>::XorpRip()
+    : _stop_flag(false)
+{
+}
+
+template <typename A>
+void
+XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
+{
+    XorpUnexpectedHandler catch_all(xorp_unexpected_handler);
+    try {
+	EventLoop		e;
+	System<A>		rip_system(e);
+	XrlStdRouter		xsr(e, XrlTarget<A>::name(),
+				    finder_host.c_str(), finder_port);
+	XrlProcessSpy		xps(xsr);
+	IfMgrXrlMirror 		ixm(e, xrl_fea_name());
+	XrlPortManager<A>	xpm(rip_system, xsr, ixm);
+	XrlRedistManager<A>	xrm(rip_system, xsr);
+
+	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, _stop_flag);
+
+	while (xsr.ready() == false) {
+	    e.run();
+	}
+
+	Service2XrlTargetStatus<A> smon(xrlt);
+
+	// Start up process spy
+	xps.startup();
+	smon.add_service(&xps);
+
+	XrlRibNotifier<A> xn(e, rip_system.route_db().update_queue(), xsr);
+	xn.startup();
+	smon.add_service(&xn);
+
+	// Start up interface mirror
+	ixm.startup();
+	smon.add_service(&ixm);
+
+	// Start up xrl port manager
+	xpm.startup();
+	smon.add_service(&xpm);
+
+	// Start up xrl redist manager
+	xrm.startup();
+	smon.add_service(&xrm);
+
+	while (_stop_flag == false && smon.have_status(FAILED) == false) {
+	    e.run();
+	}
+
+	xps.shutdown();
+	xn.shutdown();
+	ixm.shutdown();
+	xpm.shutdown();
+	xrm.shutdown();
+
+	bool flag(false);
+	XorpTimer t = e.set_flag_after_ms(5000, &flag);
+	while (flag == false &&
+	       smon.have_status(ServiceStatus(~(FAILED|SHUTDOWN)))) {
+	    printf("x");
+	    e.run();
+	}
+
+	smon.remove_service(&xps);
+	smon.remove_service(&xn);
+	smon.remove_service(&ixm);
+	smon.remove_service(&xpm);
+
+	rip_system.route_db().flush_routes();
+    } catch (...) {
+	xorp_catch_standard_exceptions();
+    }
+}
+
+template <typename A>
+int
+XorpRip<A>::main(int argc, char * const argv[])
+{
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    string	finder_host = FINDER_DEFAULT_HOST.str();
+    uint16_t	finder_port = FINDER_DEFAULT_PORT;
+    bool	do_run 	    = true;
+
+    int ch;
+    while ((ch = getopt(argc, argv, "F:")) != -1) {
+	switch (ch) {
+	case 'F':
+	    do_run = parse_finder_args(optarg, finder_host, finder_port);
+	    break;
+	default:
+	    usage(argv[0]);
+	    do_run = false;
+	}
+    }
+
+    if (do_run)
+	run(finder_host, finder_port);
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+    return 0;
+}
+
+
+int
+main(int argc, char* const argv[])
+{
+#if defined(INSTANTIATE_IPV4)
+    XorpRip<IPv4> xorp_rip;
+#elif defined(INSTANTIATE_IPV6)
+    XorpRip<IPv6> xorp_rip;
+#endif
+    return xorp_rip.main(argc, argv);
+}
+

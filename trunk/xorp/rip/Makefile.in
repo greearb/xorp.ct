@@ -111,12 +111,13 @@ LDFLAGS =
 #LDADD				 = ./librip.a
 LDADD = $(top_builddir)/libxorp/libxorp.a
 
-
 # -- Real Program Sources
-xorp_rip_SOURCES = xorp_rip.cc xrl_target_common.hh xrl_target_rip.hh xrl_target_rip.cc
+xorp_rip_CXXFLAGS = -DINSTANTIATE_IPV4
+xorp_rip_SOURCES = xorp_rip_main.cc xrl_target_common.hh xrl_target_rip.hh xrl_target_rip.cc
 xorp_rip_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/libripbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
-xorp_ripng_SOURCES = xorp_ripng.cc xrl_target_common.hh xrl_target_ripng.hh xrl_target_ripng.cc
+xorp_ripng_CXXFLAGS = -DINSTANTIATE_IPV6
+xorp_ripng_SOURCES = xorp_rip_main.cc xrl_target_common.hh xrl_target_ripng.hh xrl_target_ripng.cc
 xorp_ripng_LDADD = ./libripngxrl.a ./libripng.a $(top_builddir)/xrl/targets/libripngbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket6locatorxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Test Program Sources
@@ -248,7 +249,8 @@ test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)
 test_update_queue_DEPENDENCIES = ./librip.a ./libripng.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_update_queue_LDFLAGS =
-am_xorp_rip_OBJECTS = xorp_rip.$(OBJEXT) xrl_target_rip.$(OBJEXT)
+am_xorp_rip_OBJECTS = xorp_rip-xorp_rip_main.$(OBJEXT) \
+	xorp_rip-xrl_target_rip.$(OBJEXT)
 xorp_rip_OBJECTS = $(am_xorp_rip_OBJECTS)
 xorp_rip_DEPENDENCIES = ./libripxrl.a ./librip.a \
 	$(top_builddir)/xrl/targets/libripbase.a \
@@ -264,7 +266,8 @@ xorp_rip_DEPENDENCIES = ./libripxrl.a ./librip.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 xorp_rip_LDFLAGS =
-am_xorp_ripng_OBJECTS = xorp_ripng.$(OBJEXT) xrl_target_ripng.$(OBJEXT)
+am_xorp_ripng_OBJECTS = xorp_ripng-xorp_rip_main.$(OBJEXT) \
+	xorp_ripng-xrl_target_ripng.$(OBJEXT)
 xorp_ripng_OBJECTS = $(am_xorp_ripng_OBJECTS)
 xorp_ripng_DEPENDENCIES = ./libripngxrl.a ./libripng.a \
 	$(top_builddir)/xrl/targets/libripngbase.a \
@@ -324,9 +327,10 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_rip.Po $(DEPDIR)/xorp_ripng.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_target_rip.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_target_ripng.Po
+@AMDEP_TRUE@	$(DEPDIR)/xorp_rip-xorp_rip_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_rip-xrl_target_rip.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_ripng-xorp_rip_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -466,9 +470,13 @@ test_timers$(EXEEXT): $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES)
 test_update_queue$(EXEEXT): $(test_update_queue_OBJECTS) $(test_update_queue_DEPENDENCIES) 
 	@rm -f test_update_queue$(EXEEXT)
 	$(CXXLINK) $(test_update_queue_LDFLAGS) $(test_update_queue_OBJECTS) $(test_update_queue_LDADD) $(LIBS)
+xorp_rip-xorp_rip_main.$(OBJEXT): xorp_rip_main.cc
+xorp_rip-xrl_target_rip.$(OBJEXT): xrl_target_rip.cc
 xorp_rip$(EXEEXT): $(xorp_rip_OBJECTS) $(xorp_rip_DEPENDENCIES) 
 	@rm -f xorp_rip$(EXEEXT)
 	$(CXXLINK) $(xorp_rip_LDFLAGS) $(xorp_rip_OBJECTS) $(xorp_rip_LDADD) $(LIBS)
+xorp_ripng-xorp_rip_main.$(OBJEXT): xorp_rip_main.cc
+xorp_ripng-xrl_target_ripng.$(OBJEXT): xrl_target_ripng.cc
 xorp_ripng$(EXEEXT): $(xorp_ripng_OBJECTS) $(xorp_ripng_DEPENDENCIES) 
 	@rm -f xorp_ripng$(EXEEXT)
 	$(CXXLINK) $(xorp_ripng_LDFLAGS) $(xorp_ripng_OBJECTS) $(xorp_ripng_LDADD) $(LIBS)
@@ -519,10 +527,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_route_walk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_update_queue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ripng.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target_rip.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target_ripng.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip-xorp_rip_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip-xrl_target_rip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ripng-xorp_rip_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -934,6 +942,54 @@ libripxrl_a-xrl_rib_notifier.obj: xrl_rib_notifier.cc
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_rib_notifier.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_rib_notifier.obj `cygpath -w xrl_rib_notifier.cc`
+
+xorp_rip-xorp_rip_main.o: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_rip-xorp_rip_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xorp_rip_main.o `test -f xorp_rip_main.cc || echo '$(srcdir)/'`xorp_rip_main.cc
+
+xorp_rip-xorp_rip_main.obj: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_rip-xorp_rip_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xorp_rip_main.obj `cygpath -w xorp_rip_main.cc`
+
+xorp_rip-xrl_target_rip.o: xrl_target_rip.cc
+@AMDEP_TRUE@	source='xrl_target_rip.cc' object='xorp_rip-xrl_target_rip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xrl_target_rip.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xrl_target_rip.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xrl_target_rip.o `test -f xrl_target_rip.cc || echo '$(srcdir)/'`xrl_target_rip.cc
+
+xorp_rip-xrl_target_rip.obj: xrl_target_rip.cc
+@AMDEP_TRUE@	source='xrl_target_rip.cc' object='xorp_rip-xrl_target_rip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xrl_target_rip.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xrl_target_rip.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xrl_target_rip.obj `cygpath -w xrl_target_rip.cc`
+
+xorp_ripng-xorp_rip_main.o: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_ripng-xorp_rip_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xorp_rip_main.o `test -f xorp_rip_main.cc || echo '$(srcdir)/'`xorp_rip_main.cc
+
+xorp_ripng-xorp_rip_main.obj: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_ripng-xorp_rip_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xorp_rip_main.obj `cygpath -w xorp_rip_main.cc`
+
+xorp_ripng-xrl_target_ripng.o: xrl_target_ripng.cc
+@AMDEP_TRUE@	source='xrl_target_ripng.cc' object='xorp_ripng-xrl_target_ripng.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xrl_target_ripng.o `test -f xrl_target_ripng.cc || echo '$(srcdir)/'`xrl_target_ripng.cc
+
+xorp_ripng-xrl_target_ripng.obj: xrl_target_ripng.cc
+@AMDEP_TRUE@	source='xrl_target_ripng.cc' object='xorp_ripng-xrl_target_ripng.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xrl_target_ripng.obj `cygpath -w xrl_target_ripng.cc`
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
