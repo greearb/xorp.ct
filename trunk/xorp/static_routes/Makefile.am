@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.8 2004/11/12 02:44:50 bms Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.9 2005/01/29 07:14:32 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -27,16 +27,16 @@ LDADD		 = $(noinst_LTLIBRARIES)
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libstaticroutesbase.la
 ### XORP misc libraries
+LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
-LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
 
 # -- Program Sources
 xorp_static_routes_SOURCES = xorp_static_routes.cc
