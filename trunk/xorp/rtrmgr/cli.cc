@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.46 2004/06/02 03:57:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.47 2004/06/02 04:15:35 hodson Exp $"
 
 
 #include <pwd.h>
@@ -948,16 +948,15 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	}
 	if ((*cmd_iter)->has_command()) {
 	    com = current_cli_node.add_command(cmd_name, help, cb);
-	    com->set_can_pipe(can_pipe);
 	} else {
 	    com = current_cli_node.add_command(cmd_name, help);
-	    com->set_can_pipe(can_pipe);
 	}
 	if (com == NULL) {
 	    XLOG_FATAL("add_command %s failed", cmd_name.c_str());
-	} else {
-	    com->set_global_name(subpath);
 	}
+
+	com->set_can_pipe(can_pipe);
+	com->set_global_name(subpath);
 	add_command_subtree(*com, *(*cmd_iter), cb, path, depth + 1, can_pipe);
     }
 }
@@ -2147,8 +2146,14 @@ RouterCLI::text_entry_func(const string& ,
 	    //
 	    path_segments.push_back(new_path_segments.front());
 	    ttn = config_tree()->find_template(path_segments);
+	    if (ttn == NULL) {
+		string errmsg = c_format("ERROR: path \"%s\" "
+					 "is not valid.\n",
+					 makepath(path_segments).c_str());
+		_cli_client.cli_print(errmsg);
+		goto cleanup;
+	    }
 
-	    XLOG_ASSERT(ttn != NULL);
 	    XLOG_TRACE(_verbose, "creating node %s\n", ttn->segname().c_str());
 	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
 					  makepath(path_segments),
