@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.41 2003/11/06 21:11:57 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.42 2003/11/06 21:28:22 atanu Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 0.5 (2003/??/??)
+Release 0.5 (2003/11/06)
 ========================
   ALL:
     - New library libfeaclient to simplify interface configuration
@@ -20,9 +20,13 @@ Release 0.5 (2003/??/??)
       status changes (e.g.start, shutdown).  It also provides an
       interface for observers to be notified of state changes.
 
+    - Addition of ctype(3) wrappers that work properly even if the
+      value of the int argument is not representable as an unsigned
+      char and doesn't have the value of EOF.
 
   LIBXIPC:
     - Minor refactoring and code clean-up.
+
     - Fixes to XrlAtom binary marshalling methods and test code for
       checking this functionality in future.
 
@@ -41,12 +45,27 @@ Release 0.5 (2003/??/??)
     - Minor code cleanup.
 
   XORPSH:
-    - 
+    - No significant changes.
 
   FEA/MFEA:
-    - Add Linux Netlink support for writing network interface information,
+    - Added Linux Netlink support for writing network interface information,
       and routing entries to the kernel, and for observing the change of
       that information in the kernel.
+
+    - Completed support for Linux /proc parsing to return network interface
+      information.
+
+    - Added support for NetBSD and OpenBSD to the unicast FEA.
+
+    - Added compilation-time check whether the underlying system
+      supports IPv6 multicast and IPv6 multicast routing, and isolate
+      the compilation of all MFEA code that is specific to IPv6 multicast
+      and IPv6 multicast routing.
+
+    - Added support for run-time check whether the underlying system
+      supports IPv4 or IPv6 multicast routing.
+
+    - Various bug fixes and cleanup
 
   RIB: 
     - No significant changes.
@@ -61,13 +80,19 @@ Release 0.5 (2003/??/??)
     - A memory leak exists.
 
   MLD/IGMP:
-    - 
+    - No significant changes.
 
   PIM-SM:
-    - 
+    - A bug fix related to the removal of timed-out multicast forwarding
+      entries.
 
   CLI:
-    - 
+    - Change slightly the command-line editing, so now Ctrl-W deletes
+      the word before the cursor. Before, Ctrl-W would delete the
+      whole line
+    - Apply a fix to libtecla in network mode such that
+      keyboard-generated signals are not propagated to the process
+      we have connected to.
 
   SNMP:
     - No significant changes.
@@ -486,6 +511,7 @@ Release 0.3 (2003/06/09)
 
   SNMP:
     - Integrated with Net-SNMP agent.
+
     - Implemented bgpVersion and bgpPeerTable from BGP4-MIB (RFC 1657).
 
   RIP:
