@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.12 2003/06/06 01:34:09 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.13 2003/06/06 02:08:54 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -37,6 +37,10 @@ Release 0.3 (2003/06/06)
 
     - Replacement of traditional struct timeval with TimeVal class.  TimeVal
       comes with constructors and numerous helper methods.
+
+    - IPvXNet methods renaming:
+      get_ipv4Net() -> get_ipv4net()
+      get_ipv6Net() -> get_ipv6net()
 
   LIBXIPC:
     - Removal of 0.1 release Finder code and compatability shims that allowed
