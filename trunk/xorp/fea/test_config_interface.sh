@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.10 2003/10/30 19:44:11 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.11 2004/05/21 19:32:41 pavlin Exp $
 #
 
 #
@@ -91,7 +91,7 @@ case ${HOSTNAME} in
 
 	NetBSD)
 	HAVE_IPV6="true"
-	IFNAME="xl0"
+	IFNAME="ex0"
 	PIF_INDEX="1"
 	;;
 
