@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_merged.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/rt_tab_merged.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
 
 #ifndef __RIB_RT_TAB_MERGED_HH__
 #define __RIB_RT_TAB_MERGED_HH__
@@ -64,7 +64,7 @@ public:
      * @param route the new route
      * @param caller the parent table sending the new route
      */
-    int add_route(const IPRouteEntry<A> &route, 
+    int add_route(const IPRouteEntry<A>& route, 
 		  RouteTable<A> *caller);
 
     /**
@@ -88,7 +88,7 @@ public:
      * @param net the subnet to look up.
      * @return a pointer to the route entry if it exists, NULL otherwise.  
      */
-    const IPRouteEntry<A> *lookup_route(const IPNet<A> &net) const;
+    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -103,7 +103,7 @@ public:
      * @return a pointer to the best most specific route entry if any
      * entry matches, NULL otherwise.  
      */
-    const IPRouteEntry<A> *lookup_route(const A &addr) const;
+    const IPRouteEntry<A> *lookup_route(const A& addr) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -119,7 +119,7 @@ public:
      * relevant answer.  It is up to the recipient of this pointer to
      * free the associated memory.  
      */
-    RouteRange<A> *lookup_route_range(const A &addr) const;
+    RouteRange<A> *lookup_route_range(const A& addr) const;
 
     /**
      * @return MERGED_TABLE

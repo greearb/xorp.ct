@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.3 2003/03/10 23:20:57 hodson Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.4 2003/03/15 02:28:40 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -38,10 +38,10 @@ VifManager::VifManager(XrlRouter& xrl_rtr, EventLoop& eventloop,
 VifManager::~VifManager() 
 {
     map <string, Vif*>::iterator i;
-    for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); i++) {
+    for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); ++i) {
 	delete i->second;
     }
-    for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); i++) {
+    for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); ++i) {
 	_vifs_by_name.erase(i);
     }
 }
@@ -90,7 +90,7 @@ VifManager::register_if_spy()
 void
 VifManager::register_if_spy_done(const XrlError& e) 
 {
-    if (e==XrlError::OKAY()) {
+    if (e == XrlError::OKAY()) {
 	// The registration was successful.  Now we need to query the
 	// entries that are already there.  First, find out the set of
 	// configured interfaces.
@@ -109,7 +109,7 @@ VifManager::register_if_spy_done(const XrlError& e)
     // for the FEA.  Retry every two seconds.  If after ten seconds we
     // still can't register, give up.  It's a higher level issue as to
     // whether failing to register is a fatal error.
-    if (e==XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
+    if (e == XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
 	debug_msg("Register Interface Spy: RESOLVE_FAILED\n");
 	_register_retry_counter++;
 	OneoffTimerCallback cb;
@@ -125,7 +125,7 @@ void
 VifManager::interface_names_done(const XrlError& e, const XrlAtomList* alist) 
 {
     printf("interface_names_done\n");
-    if (e==XrlError::OKAY()) {
+    if (e == XrlError::OKAY()) {
 	printf("OK\n");
 	for (u_int i = 0; i < alist->size(); i++) {
 	    // Spin through the list of interfaces, and fire off
@@ -187,7 +187,7 @@ void
 VifManager::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
 				  string ifname, string vifname) 
 {
-    if (e==XrlError::OKAY()) {
+    if (e == XrlError::OKAY()) {
 	for (u_int i = 0; i < alist->size(); i++) {
 	    XrlAtom atom = alist->get(i);
 	    IPv4 addr = atom.ipv4();
@@ -364,7 +364,7 @@ VifManager::vifaddr4_done(const XrlError& e, const uint32_t* prefix_len,
 {
     UNUSED(ifname);
 
-    if (e==XrlError::OKAY()) {
+    if (e == XrlError::OKAY()) {
 
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
@@ -384,7 +384,7 @@ VifManager::vifaddr4_done(const XrlError& e, const uint32_t* prefix_len,
 				addr.str().c_str(), *prefix_len,
 				vifname.c_str()).c_str());
 	}
-    } else if (e!=XrlError::COMMAND_FAILED()) {
+    } else if (e != XrlError::COMMAND_FAILED()) {
 	_addrs_remaining--;
     } else {
 	XLOG_ERROR(("Failed to get prefix_len for address "
@@ -411,7 +411,7 @@ VifManager::vifaddr4_deleted(const string& ifname, const string& vifname,
 		    "\n").c_str());
 	return;
     }
-     Vif* vif = _vifs_by_name[vifname];
+     Vif *vif = _vifs_by_name[vifname];
      vif->delete_address(addr);
 
      string err;
@@ -443,14 +443,14 @@ VifManager::vifaddr6_done(const XrlError& e, const uint32_t* prefix_len,
 {
     UNUSED(ifname);
 
-    if (e==XrlError::OKAY()) {
+    if (e == XrlError::OKAY()) {
 
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
 	    return;
 	}
-	Vif* vif = _vifs_by_name[vifname];
+	Vif *vif = _vifs_by_name[vifname];
 	printf("adding address %s prefix_len %d to vif %s\n",
 	       addr.str().c_str(), *prefix_len, vifname.c_str());
 	vif->add_address(addr, IPvXNet(addr, *prefix_len),
@@ -463,7 +463,7 @@ VifManager::vifaddr6_done(const XrlError& e, const uint32_t* prefix_len,
 				addr.str().c_str(), *prefix_len,
 				vifname.c_str()).c_str());
 	}
-    } else if (e!=XrlError::COMMAND_FAILED()) {
+    } else if (e != XrlError::COMMAND_FAILED()) {
 	_addrs_remaining--;
     } else {
 	XLOG_ERROR(("Failed to get prefix_len for address "
@@ -490,7 +490,7 @@ VifManager::vifaddr6_deleted(const string& ifname, const string& vifname,
 		    "\n").c_str());
 	return;
     }
-     Vif* vif = _vifs_by_name[vifname];
+     Vif *vif = _vifs_by_name[vifname];
      vif->delete_address(addr);
 
      string err;

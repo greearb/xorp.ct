@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.3 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.4 2003/03/15 02:28:38 pavlin Exp $"
 
 #include "rib_module.h"
 #include "fea_client.hh"
@@ -46,7 +46,7 @@ ExportTable<A>::~ExportTable<A>() {
 
 template<class A>
 int
-ExportTable<A>::add_route(const IPRouteEntry<A> &route,
+ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 			  RouteTable<A> *caller) 
 {
     if (caller != _parent)
@@ -90,14 +90,14 @@ ExportTable<A>::flush()
 
 template<class A>
 const IPRouteEntry<A> *
-ExportTable<A>::lookup_route(const IPNet<A> &net) const 
+ExportTable<A>::lookup_route(const IPNet<A>& net) const 
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
 const IPRouteEntry<A> *
-ExportTable<A>::lookup_route(const A &addr) const 
+ExportTable<A>::lookup_route(const A& addr) const 
 {
     return _parent->lookup_route(addr);
 }
@@ -111,14 +111,14 @@ ExportTable<A>::replumb(RouteTable<A> *old_parent,
     if (_parent == old_parent) {
 	_parent = new_parent;
     } else {
-	/*shouldn't be possible*/
+	// shouldn't be possible
 	abort();
     }
 }
 
 template<class A>
 RouteRange<A>*
-ExportTable<A>::lookup_route_range(const A &addr) const 
+ExportTable<A>::lookup_route_range(const A& addr) const 
 {
     return _parent->lookup_route_range(addr);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.4 2003/03/10 23:20:54 hodson Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.5 2003/03/15 02:28:37 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -22,7 +22,7 @@
 #include "rib_manager.hh"
 
 int 
-main (int /*argc*/, char *argv[]) 
+main (int /* argc */, char *argv[]) 
 {
     //
     // Initialize and start xlog

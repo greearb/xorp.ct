@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.5 2003/03/10 23:20:55 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.6 2003/03/15 02:28:38 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -88,7 +88,7 @@ template<class A> inline Vif*
 RIB<A>::find_vif(const A& addr)
 {
     map<const string, Vif>::iterator mi;
-    for(mi = _vifs.begin(); mi != _vifs.end(); mi++) {
+    for (mi = _vifs.begin(); mi != _vifs.end(); ++mi) {
 	Vif& v = mi->second;
 	if (v.is_my_addr(addr)) 
 	    return &v;
@@ -131,7 +131,8 @@ template<class A> inline IPPeerNextHop<A>*
 RIB<A>::find_or_create_peer_nexthop(const A& addr)
 {
     IPPeerNextHop<A>* nh = find_peer_nexthop(addr);
-    if (nh) return nh;
+    if (nh)
+	return nh;
     typedef map<const A,IPPeerNextHop<A> > C;		// ugly, but convenient
     typename C::value_type vt(addr, addr);
     typename C::iterator i = _peer_nexthops.insert(_peer_nexthops.end(), vt);
@@ -202,7 +203,7 @@ RIB<A>::initialize_export(FeaClient *fea)
 template<class A>
 RIB<A>::~RIB<A>()
 {
-    while(_tables.size() != 0) {
+    while (_tables.size() != 0) {
 	delete _tables.begin()->second;
 	_tables.erase(_tables.begin());
     }
@@ -366,7 +367,7 @@ RIB<A>::add_vif_address(const string&	vifname,
     }
     vi->second.add_address(VifAddr(addr, subnet, A::ZERO(), A::ZERO()));
     //add a route for this subnet
-    add_route("connected", subnet, addr, /*best possible metric*/0);
+    add_route("connected", subnet, addr, /* best possible metric */ 0);
     return 0;
 }
 
@@ -427,9 +428,9 @@ int RIB<A>::add_route(const string& tablename,
 	return -1;
     }
 
-    //Find the vif so we can see if the nexthop is a peer.  first
-    //lookup the nexthop addr, and see it's the subnet is a directly
-    //conencted one.
+    // Find the vif so we can see if the nexthop is a peer.  first
+    // lookup the nexthop addr, and see it's the subnet is a directly
+    // conencted one.
     const IPRouteEntry<A>* re = _final_table->lookup_route(nexthop_addr);
     if (re) {
 	//We found a route.  Is the subnet directly connected?
@@ -442,7 +443,7 @@ int RIB<A>::add_route(const string& tablename,
 	} else {
 	    debug_msg("**not directly connected route found for nexthop\n");
 	    IPNextHop<A>* nh = find_or_create_external_nexthop(nexthop_addr);
-	    ot->add_route(IPRouteEntry<A>(net, /*No vif*/NULL, nh, 
+	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nh, 
 					  *proto, metric));
 	    flush();
 	    return 0;
@@ -450,9 +451,9 @@ int RIB<A>::add_route(const string& tablename,
     }
 
     debug_msg("** no route\n");
-    //We failed to find a route.  One final possibility is that this
-    //route is the route for a directly connected subnet, so we need
-    //to test all the Vifs to see if this is the case.
+    // We failed to find a route.  One final possibility is that this
+    // route is the route for a directly connected subnet, so we need
+    // to test all the Vifs to see if this is the case.
     Vif* vif = find_vif(nexthop_addr);
     debug_msg("Vif %p\n", vif);
     IPNextHop<A>* nh;
@@ -463,7 +464,7 @@ int RIB<A>::add_route(const string& tablename,
     }
     assert(nh->addr() == nexthop_addr);
 
-    //only accept the least significant 16 bits of metric
+    // only accept the least significant 16 bits of metric
     if (metric > 0xffff) {
 	XLOG_WARNING(c_format("IGP metric value %d is greater than 2^16\n", 
 			      metric).c_str());
@@ -484,19 +485,21 @@ RIB<A>::replace_route(const string& tablename,
 		      uint32_t metric) 
 {
     RouteTable<A>* rt = find_table(tablename);
-    if (0 == rt) return -1; /* Table does not exist */
+    if (0 == rt)
+	return -1; // Table does not exist
 
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>*>(rt);
-    if (0 == ot) return -1; /* Table is not an origin table */
+    if (0 == ot)
+	return -1; // Table is not an origin table
 
     int response = ot->delete_route(net);
 
-    if (response!=0) {
+    if (response != 0) {
 	return response;
     }
     response = add_route(tablename, net, nexthop_addr, metric);
 
-    //no need to flush here, as add_route will do it for us
+    // no need to flush here, as add_route will do it for us
 
     return response;
 }
@@ -506,10 +509,12 @@ int
 RIB<A>::delete_route(const string& tablename, const IPNet<A>& net) 
 {
     RouteTable<A>* rt = find_table(tablename);
-    if (0 == rt) return -1; /* Table does not exist */
+    if (0 == rt)
+	return -1; // Table does not exist
 
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>*>(rt);
-    if (0 == ot) return -1; /* Table is not an origin table */
+    if (0 == ot)
+	return -1; // Table is not an origin table
 
     int result = ot->delete_route(net);
     flush();
@@ -594,7 +599,7 @@ inline static const A& addr_zero(const A&)
 template<>
 inline static const IPv4& addr_zero(const IPv4&)
 {
-    static IPv4 z = IPv4::ZERO(); /* Needs an instance to return a temporary */
+    static IPv4 z = IPv4::ZERO(); // Needs an instance to return a temporary
     return z;
 }
 
@@ -613,26 +618,30 @@ RIB<A>::lookup_route(const A& lookupaddr)
 }
 
 template<class A> RouteRange<A>*
-RIB<A>::route_range_lookup(const A& lookupaddr) {
+RIB<A>::route_range_lookup(const A& lookupaddr)
+{
     return _final_table->lookup_route_range( lookupaddr );
 }
 
 template<class A> RouteRegister<A> *
-RIB<A>::route_register(const A& lookupaddr, const string& module) {
+RIB<A>::route_register(const A& lookupaddr, const string& module)
+{
     debug_msg("registering %s\n", lookupaddr.str().c_str());
     return _register_table->register_route_range(lookupaddr, module);
 }
 
 template<class A> 
 bool
-RIB<A>::route_deregister(const IPNet<A>& subnet, const string &module) {
+RIB<A>::route_deregister(const IPNet<A>& subnet, const string& module)
+{
     debug_msg("deregistering %s\n", subnet.str().c_str());
     return _register_table->deregister_route_range(subnet, module);
 }
 
 template<class A> 
 int
-RIB<A>::redist_enable(const string& fromtable, const string& totable) {
+RIB<A>::redist_enable(const string& fromtable, const string& totable)
+{
     // We can redistribute from any RouteTable<A>;
     RouteTable<A>* fromtab = find_table(fromtable);
     if (fromtab == 0) {
@@ -687,23 +696,26 @@ RIB<A>::redist_disable(const string& fromtable, const string& totable)
 
 template<class A> 
 int 
-RIB<A>::add_igp_table(const string& tablename) {
+RIB<A>::add_igp_table(const string& tablename)
+{
     debug_msg("add_igp_table %s\n", tablename.c_str());
     return add_origin_table(tablename, IGP);
 }
 
 template<class A> 
 int
-RIB<A>::add_egp_table(const string& tablename) {
+RIB<A>::add_egp_table(const string& tablename)
+{
     debug_msg("add_egp_table %s\n", tablename.c_str());
     return add_origin_table(tablename, EGP);
 }
 
-/* All the magic is in add_origin_table - XXX split into smaller units (?) */
+// All the magic is in add_origin_table - XXX split into smaller units (?)
 
 template<class A> 
 int
-RIB<A>::add_origin_table(const string& tablename, int type) {
+RIB<A>::add_origin_table(const string& tablename, int type)
+{
     debug_msg("add_origin_table %s type: %dn\n",
 	      tablename.c_str(), type);
 
@@ -715,7 +727,7 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
 	proto->increment_genid();
     }
 
-    /* Check if table exists and check type if so */
+    // Check if table exists and check type if so
     RouteTable<A>* rt = find_table(tablename);
     if (rt) {
 	if (dynamic_cast<OriginTable<A>*>(rt) == 0) {
@@ -723,7 +735,7 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
 		       "not is an OriginTable.", tablename.c_str());
 	    return -1;
 	} else {
-	    return 0; 	    /* table already exists, use that */
+	    return 0; 	    // table already exists, use that
 	}
     }
 
@@ -734,29 +746,31 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
 
     OriginTable<A>* new_table = static_cast<OriginTable<A>*>(find_table(tablename));
     if (_final_table == new_table) {
-	/* this is the first table, so no need to plumb anything*/
-	/* this won't occur if there's an ExportTable<A>, because that
-           would have been created already*/
+	// this is the first table, so no need to plumb anything
+	// this won't occur if there's an ExportTable<A>, because that
+	// would have been created already
 	debug_msg("first table\n");
 	return 0;
     } 
 
-    /* There are existing tables, so we need to do some plumbing */
-    /* Three possibilities:
-     *  1. there are existing EGP tables but no existing IGP table
-     *  2. there are both existing EGP and existing IGP tables
-     *  3. there are existing IGP tables but no existing EGP table
-     *
-     * If we're adding an IGP table:
-     * we can handle 2 and 3 the same, adding a MergedTable, but 1
-     * requires we construct an ExtInt table instead.  
-     *
-     * If we're adding an EGP table:
-     * we can handle 1 and 2 the same, adding a MergedTable, but 3
-     * requires we construct an ExtInt table instead.  
-     */
+    //
+    // There are existing tables, so we need to do some plumbing
+    //
+    // Three possibilities:
+    //  1. there are existing EGP tables but no existing IGP table
+    //  2. there are both existing EGP and existing IGP tables
+    //  3. there are existing IGP tables but no existing EGP table
+    //
+    // If we're adding an IGP table:
+    // we can handle 2 and 3 the same, adding a MergedTable, but 1
+    // requires we construct an ExtInt table instead.  
+    //
+    // If we're adding an EGP table:
+    // we can handle 1 and 2 the same, adding a MergedTable, but 3
+    // requires we construct an ExtInt table instead.  
+    //
 
-    /* First step: find out what tables already exist */
+    // First step: find out what tables already exist
     RouteTable<A>* igp_table = 0;
     RouteTable<A>* egp_table = 0;
     ExtIntTable<A>* ei_table = 0;
@@ -764,14 +778,14 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
     typedef typename map<string, RouteTable<A> *>::iterator Iter;
     Iter rtpair = _tables.begin();
     for (rtpair = _tables.begin(); rtpair != _tables.end(); ++rtpair) {
-	/*skip the new table!*/
+	// skip the new table!
 	if (rtpair->second == new_table) {
 	    continue;
 	}
 
 	OriginTable<A>* ot = dynamic_cast<OriginTable<A>*>(rtpair->second);
 	if (ot) {
-	    /* XXX igp() as a method name (?) */
+	    // XXX igp() as a method name (?)
 	    if (ot->igp() == IGP) {
 		igp_table = ot;
 	    } else if (ot->igp() == EGP) {
@@ -787,43 +801,45 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
     }
 
 
-    /* depending on which tables already exist, we may need to create
-       a MergedTable or an ExtInt table */
+    //
+    // depending on which tables already exist, we may need to create
+    // a MergedTable or an ExtInt table
+    //
     if (((igp_table == 0) && (type == IGP)) || 
 	((egp_table == 0) && (type == EGP))) {
-	/*we're going to need to create an ExtInt table*/
+	// we're going to need to create an ExtInt table
 
 	if (ei_table) {
-	    /* sanity check: we've found an ExtIntTable, when there
-	      weren't both IGP and EGP tables*/
+	    // sanity check: we've found an ExtIntTable, when there
+	    // weren't both IGP and EGP tables
 	    abort();
 	}
 
 	if ((egp_table == 0) && (igp_table == 0)) {
-	    /* There are tables, but neither IGP or EGP origin tables */
-	    /* Therefore the final table must be an ExportTable<A> or 
-	       a RegisterTable (MRIB's have no ExportTable<A>) */
+	    // There are tables, but neither IGP or EGP origin tables
+	    // Therefore the final table must be an ExportTable<A> or 
+	    // a RegisterTable (MRIB's have no ExportTable<A>)
 	    if (_final_table->type() != EXPORT_TABLE 
 		&& _final_table->type() != REGISTER_TABLE) {
 		abort();
 	    }
 
-	    /* there may be existing single-parent tables before the
-               ExportTable such as RegisterTable - track back to be
-               first of them. */
+	    // there may be existing single-parent tables before the
+	    // ExportTable such as RegisterTable - track back to be
+	    // first of them.
 	    RouteTable<A>* rt = track_back(_final_table, 
 					   EXPORT_TABLE | REGISTER_TABLE);
 
-	    /* new plumb our new table in ahead of the first
-               single-parent table */
+	    // new plumb our new table in ahead of the first
+	    // single-parent table
 	    rt->replumb(0, new_table);
 	    new_table->set_next_table(rt);
 	    //	    print_rib();
 	    return 0;
 	}
 
-	/* Find the appropriate existng table to be a parent of the
-           ExtIntTable */
+	// Find the appropriate existng table to be a parent of the
+	// ExtIntTable
 	RouteTable<A>* next_table = track_back(_final_table,
 					       EXPORT_TABLE | REGISTER_TABLE);
 	RouteTable<A>* existing_table = next_table->parent();
@@ -836,7 +852,7 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
 	    ei_table = new ExtIntTable<A>(einame, new_table, existing_table);
 	}
 
-	/* XXX Added table to list of resources (was not done previously) */
+	// XXX Added table to list of resources (was not done previously)
 	if (ei_table == 0) {
 	    XLOG_ERROR("Failed to create ExtIntTable \"%s\".", einame.c_str());
 	    return -1;
@@ -853,18 +869,20 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
 	    _final_table = ei_table;
 	}
 
-	//print_rib();
+	// print_rib();
 	return 0;
     }
 
-    /* We're going to need to create a MergedTable */
+    //
+    // We're going to need to create a MergedTable
+    //
 
     RouteTable<A>* existing_table = (type == IGP) ? igp_table : egp_table;
     RouteTable<A>* next_table = existing_table->next_table();
     RouteTable<A>* new_prev_table = track_forward(existing_table, 
 						  REDIST_TABLE);
 
-    /* Skip past any RedistTables */
+    // Skip past any RedistTables
     if (new_prev_table != existing_table) {
 	existing_table = new_prev_table;
 	next_table = existing_table->next_table();
@@ -884,13 +902,14 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
     if (next_table != 0)
 	next_table->replumb(existing_table, merged_table);
 
-    /* It's possible existing_table was the last table - if so, then it
-     * isn't anymore. 
-     */
+    //
+    // It's possible existing_table was the last table - if so, then it
+    //  isn't anymore. 
+    //
     if (_final_table == existing_table)
 	_final_table = merged_table;
 
-    //print_rib();
+    // print_rib();
     return 0;
 }
 
@@ -910,20 +929,22 @@ template <class A> int
 RIB<A>::delete_origin_table(const string& tablename) 
 {
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>*>(find_table(tablename));
-    if (0 == ot) return -1;
+    if (0 == ot)
+	return -1;
 
-    /* Remove all the routes this table used to originate, but keep table */
+    // Remove all the routes this table used to originate, but keep table
     ot->delete_all_routes();
     return 0;
 }
 
-/*
- * Given a single-parent table, track back to the last matching table
- * before this one 
- */
+//
+// Given a single-parent table, track back to the last matching table
+// before this one 
+//
 
 template<class A>
-RouteTable<A> *RIB<A>::track_back(RouteTable<A> *rt, int typemask) const {
+RouteTable<A> *RIB<A>::track_back(RouteTable<A> *rt, int typemask) const
+{
 
     if (rt == 0 || (rt->type() & typemask) == 0) {
 	return rt;
@@ -937,16 +958,18 @@ RouteTable<A> *RIB<A>::track_back(RouteTable<A> *rt, int typemask) const {
     return rt;
 }
 
-/*
- * track forward to the last matching table, or return this table if
- * the next table doesn't match */
+//
+// track forward to the last matching table, or return this table if
+// the next table doesn't match
+//
 
 template<class A>
-RouteTable<A> *RIB<A>::track_forward(RouteTable<A> *rt, int typemask) const {
+RouteTable<A> *RIB<A>::track_forward(RouteTable<A> *rt, int typemask) const
+{
     debug_msg("here1\n");
     RouteTable<A>* next;
     if (0 == rt) {
-	/* XXX not the same test as track back (deliberate ?) */
+	// XXX not the same test as track back (deliberate ?)
 	return rt;
     }
     next = rt->next_table();
@@ -969,7 +992,8 @@ RouteTable<A> *RIB<A>::track_forward(RouteTable<A> *rt, int typemask) const {
 
 
 template<class A>
-void RIB<A>::print_rib() const {
+void RIB<A>::print_rib() const
+{
 #ifdef DEBUG_LOGGING
     typedef typename map<string, RouteTable<A> *>::const_iterator CI;
     CI pair;
@@ -988,7 +1012,7 @@ void RIB<A>::print_rib() const {
 	++pair;
     }
     printf("==============================================================\n");
-#endif /* DEBUG_LOGGING */
+#endif // DEBUG_LOGGING
 }
 
 

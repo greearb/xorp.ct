@@ -12,24 +12,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/routemap.cc,v 1.2 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/routemap.cc,v 1.3 2003/03/15 02:28:38 pavlin Exp $"
 
 #include "rib_module.h"
 #include "routemap.hh"
 
-RouteMap::RouteMap(string mapname) {
+RouteMap::RouteMap(const string& mapname)
+{
     _mapname = mapname;
 }
 
 int
-RouteMap::add_rule(RMRule *const rule) {
+RouteMap::add_rule(RMRule *rule)
+{
 #ifdef NOTDEF
-    if (_ruleset[rule->seq()]!=NULL) {
+    if (_ruleset[rule->seq()] != NULL) {
 	cerr << "Attempt to add duplicate rule number " << rule->seq() 
 	     << " to RouteMap " << _mapname << "\n";
 	return -1;
     }
 #endif
+    
     typedef list<RMRule*>::iterator CI;
     CI ptr = _ruleset.begin();
     while (ptr != _ruleset.end()) {
@@ -47,10 +50,11 @@ RouteMap::add_rule(RMRule *const rule) {
     return 0;
 }
 
-std::string
-RouteMap::str() const {
+string
+RouteMap::str() const
+{
     string result;
-    result = "";
+    
     typedef list<RMRule*>::const_iterator CI;
     CI ptr = _ruleset.begin();
     while (ptr != _ruleset.end()) {
@@ -60,16 +64,19 @@ RouteMap::str() const {
     return result;
 }
 
-RMRule::RMRule(int seq, RMMatch *match, RMAction *action) {
+RMRule::RMRule(int seq, RMMatch *match, RMAction *action)
+{
   _seq = seq;
   _match = match;
   _action = action;
 }
 
-std::string 
-RMRule::str() const {
+string 
+RMRule::str() const
+{
     string result;
     char buf[20];
+    
     snprintf(buf, 20, "%d", _seq);
     result = " permit ";
     result += buf;
@@ -79,31 +86,41 @@ RMRule::str() const {
     return result;
 }
 
-RMMatch::RMMatch() {
+RMMatch::RMMatch()
+{
 }
 
-RMMatchIPAddr::RMMatchIPAddr(IPv4Net &ipv4net) {
+RMMatchIPAddr::RMMatchIPAddr(const IPv4Net& ipv4net)
+{
     _ipv4net = ipv4net;
 }
 
-std::string RMMatchIPAddr::str() const {
+string
+RMMatchIPAddr::str() const
+{
     string result;
+    
     result = "match ip-address " + _ipv4net.str();
     return result;
 }
 
-bool RMMatchIPAddr::match_route(RouteEntry &re) {
+bool
+RMMatchIPAddr::match_route(const RouteEntry& re) const
+{
     cout << "comparing " << re.str() << "\n";
-    return TRUE;
+    return true;
 }
 
-RMAction::RMAction() {
-    //nothing happens here
+RMAction::RMAction()
+{
+    // nothing happens here
 }
 
-std::string 
-RMAction::str() const {
+string 
+RMAction::str() const
+{
     string result;
+    
     result = "no modification";
     return result;
 }

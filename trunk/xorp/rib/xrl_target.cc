@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.4 2003/03/10 23:20:58 hodson Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.5 2003/03/15 02:28:40 pavlin Exp $"
 
 #include "version.h"
 #include "rib_module.h"
@@ -24,7 +24,7 @@
 #define RETURN_FAIL(x) return XrlCmdError::COMMAND_FAILED(x)
 
 XrlCmdError
-XrlRibTarget::common_0_1_get_target_name(string &name)
+XrlRibTarget::common_0_1_get_target_name(string& name)
 {
     name = XrlRibTargetBase::name();
     return XrlCmdError::OKAY();
@@ -283,7 +283,7 @@ XrlRibTarget::rib_0_1_lookup_route4(// Input values,
 				    // Output values,
 				    IPv4& nexthop)
 {
-    /* if unicast and multicast then fail, can only look one place at time */
+    // if unicast and multicast then fail, can only look one place at time
     if (unicast == multicast) {
 	nexthop = IPv4::ZERO();
     } else if (unicast) {
@@ -302,7 +302,7 @@ XrlRibTarget::rib_0_1_lookup_route6(// Input values,
 				    // Output values,
 				    IPv6& nexthop)
 {
-    /* Must look in exactly one RIB */
+    // Must look in exactly one RIB
     if (unicast == multicast) {
 	nexthop = IPv6::ZERO();
     } else if (unicast) {
@@ -316,14 +316,14 @@ XrlRibTarget::rib_0_1_lookup_route6(// Input values,
 XrlCmdError
 XrlRibTarget::rib_0_1_new_vif(const string& name)
 {
-    /*
-     * One vif per RIB or one shared VifStore ? Latter as no guarantee that
-     * all vifs have valid IPv4/IPv6/Unicast/Multicast meaning
-     */
+    //
+    // One vif per RIB or one shared VifStore ? Latter as no guarantee that
+    // all vifs have valid IPv4/IPv6/Unicast/Multicast meaning
+    //
 
     Vif v(name);
 
-    /* XXX probably want something more selective (eg rib selector) */
+    // XXX probably want something more selective (eg rib selector)
     if (_urib4.new_vif(name, v))
 	RETURN_FAIL(c_format("Failed to add vif \"%s\" to unicast IPv4 rib",
 			     name.c_str()));
@@ -445,6 +445,7 @@ XrlRibTarget::rib_0_1_redist_disable6(const string&	from,
 	RETURN_FAIL(c_format("Failed to disable multicast IPv6 redistribution "
 			     "from \"%s\" to \"%s\"",
 			     from.c_str(), to.c_str()));
+    
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/routemap.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/routemap.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
 
 #ifndef __RIB_ROUTEMAP_HH__
 #define __RIB_ROUTEMAP_HH__
@@ -34,9 +34,10 @@ class RMRule;
  */
 class RouteMap {
 public:
-    RouteMap(string mapname);
-    int add_rule(RMRule *const rule);
-    std::string str() const;
+    RouteMap(const string& mapname);
+    int add_rule(RMRule *rule);
+    string str() const;
+    
 private:
     string _mapname;
     list <RMRule*> _ruleset;
@@ -48,17 +49,15 @@ private:
 class RMRule {
 public:
     RMRule(int seq, RMMatch *match, RMAction *action);
-    int seq() const {return _seq;}
-    std::string str() const;
+    int seq() const { return _seq; }
+    string str() const;
+    
+    bool operator<(const RMRule& other) const { return (seq() < other.seq()); }
+    
 private:
     int _seq;
     RMMatch *_match;
     RMAction *_action;
-};
-
-inline bool
-operator<(RMRule a, RMRule b) {
-    return (a.seq() < b.seq());
 };
 
 /**
@@ -68,8 +67,9 @@ class RMMatch {
 public:
     RMMatch();
     virtual ~RMMatch() {};
-    virtual std::string str() const = 0;
-    virtual bool match_route(RouteEntry &re) = 0;
+    virtual string str() const = 0;
+    virtual bool match_route(const RouteEntry& re) const = 0;
+    
 private:
 };
 
@@ -78,10 +78,11 @@ private:
  */
 class RMMatchIPAddr : public RMMatch {
 public:
-    RMMatchIPAddr(IPv4Net &ipv4net);
+    RMMatchIPAddr(const IPv4Net& ipv4net);
     ~RMMatchIPAddr() {};
-    std::string str() const;
-    bool match_route(RouteEntry &re);
+    string str() const;
+    bool match_route(const RouteEntry& re) const;
+    
 private:
     IPv4Net _ipv4net;
 };
@@ -92,7 +93,8 @@ private:
 class RMAction {
 public:
     RMAction();
-    std::string str() const;
+    string str() const;
+    
 private:
 };
 

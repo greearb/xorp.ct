@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.2 2003/03/10 23:20:54 hodson Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -28,9 +28,9 @@ public:
 	: TableOriginCommand(), _rib(rib) {}
     int execute() {
 	cout << "TableOriginCommand::execute " << _tablename << "\n";
-	/* On the context of this test code, we don't care whether it's an
-	 * IGP or an EGP, because we do the plumbing explicitly.  So it's
-	 * safe to just say it's an IGP, even if its not */
+	// On the context of this test code, we don't care whether it's an
+	// IGP or an EGP, because we do the plumbing explicitly.  So it's
+	// safe to just say it's an IGP, even if its not
 	return _rib.new_origin_table(_tablename, _admin_distance, IGP);
     }
 private:

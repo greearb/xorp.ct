@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.7 2003/03/10 23:20:54 hodson Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.8 2003/03/15 02:28:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,8 +40,8 @@ static const char *server = "fea";
 // queuing transaction operations in the FTI.  Not a biggie, but it
 // makes this end harder to comprehend.
 
-/* ------------------------------------------------------------------------- */
-/* Synchronous Xrl code */
+// -------------------------------------------------------------------------
+// Synchronous Xrl code
 
 /**
  * Base class for synchronous FTI interaction.  Handles start and commit
@@ -126,17 +126,17 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t* tid)
 void
 SyncFtiCommand::command_complete(const XrlError& e)
 {
-    if(e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) {
 	XLOG_WARNING("Command failed: %s", e.str().c_str());
 	commit();
 	return;
     }
 
-    /*
-    ** More commands may have arrived lets check.
-    */
+    //
+    // More commands may have arrived lets check.
+    //
     SyncFtiCommand *task = get_next();
-    if(task) {
+    if (task) {
 	task->send_command(_tid,
 			   callback(this, &SyncFtiCommand::command_complete));
 	return;
@@ -167,8 +167,8 @@ void SyncFtiCommand::commit_complete(const XrlError& e)
     done();
 }
 
-/* ------------------------------------------------------------------------- */
-/* Synchronous AddRoute4 command */
+// -------------------------------------------------------------------------
+// Synchronous AddRoute4 command
 
 class AddRoute4 : public SyncFtiCommand {
 public:
@@ -194,8 +194,8 @@ private:
     string  _vifname;
 };
 
-/* ------------------------------------------------------------------------- */
-/* Synchronous DeleteRoute4 command */
+// -------------------------------------------------------------------------
+// Synchronous DeleteRoute4 command
 
 class DeleteRoute4 : public SyncFtiCommand {
 public:
@@ -212,8 +212,8 @@ private:
     IPv4Net _dest;
 };
 
-/* ------------------------------------------------------------------------- */
-/* Synchronous AddRoute6 command */
+// -------------------------------------------------------------------------
+// Synchronous AddRoute6 command
 
 class AddRoute6 : public SyncFtiCommand {
 public:
@@ -239,8 +239,8 @@ private:
     string  _vifname;
 };
 
-/* ------------------------------------------------------------------------- */
-/* Synchronous DeleteRoute6 command */
+// -------------------------------------------------------------------------
+// Synchronous DeleteRoute6 command
 
 class DeleteRoute6 : public SyncFtiCommand {
 public:
@@ -257,9 +257,8 @@ private:
     IPv6Net _dest;
 };
 
-/* ---------------------------------------------------------------------- */
-/* Utilities to extract destination, gateway, and vifname from a route
- * entry. */
+// ----------------------------------------------------------------------
+// Utilities to extract destination, gateway, and vifname from a route entry.
 
 template<typename A> inline const IPNet<A>&
 dest(const IPRouteEntry<A>& re)
@@ -286,8 +285,8 @@ ifname(const IPRouteEntry<A>& re)
     return re.vif()->ifname();
 }
 
-/* ------------------------------------------------------------------------- */
-/* FeaClient */
+// -------------------------------------------------------------------------
+// FeaClient
 
 FeaClient::FeaClient(XrlRouter& rtr, uint32_t	max_ops)
     : _xrl_router(rtr), _busy(false), _max_ops(max_ops), _enabled(true)
@@ -391,7 +390,7 @@ FeaClient::get_next()
 
     _completed_tasks.push_back(_tasks.front());
     _tasks.erase(_tasks.begin());
-    if(_tasks.empty() || ++_op_count >= _max_ops)
+    if (_tasks.empty() || ++_op_count >= _max_ops)
 	return 0;
 
     debug_msg("Get next found one\n");
@@ -408,10 +407,10 @@ FeaClient::transaction_completed()
 
     _busy = false;
 
-    while(!_completed_tasks.empty())
+    while (!_completed_tasks.empty())
 	_completed_tasks.erase(_completed_tasks.begin());
 	
-    if(!_tasks.empty())
+    if (!_tasks.empty())
 	start();
 }
 

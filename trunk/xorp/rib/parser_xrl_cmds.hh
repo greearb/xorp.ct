@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.2 2003/03/10 23:20:55 hodson Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -26,7 +26,7 @@ enum XrlCompletion {
     XRL_FAILED  = -1
 };
 
-/* Simple handler - most of RIB interface just returns true/false */
+// Simple handler - most of RIB interface just returns true/false
 
 static void 
 pass_fail_handler(const XrlError& e, XrlCompletion* c) 

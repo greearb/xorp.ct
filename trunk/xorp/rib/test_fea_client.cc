@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.3 2003/03/10 23:20:57 hodson Exp $"
+#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.4 2003/03/15 02:28:39 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -27,7 +27,8 @@ static bool
 send_fea_commands(FeaClient* fc, int *pcount)
 {
     int& count = *pcount;
-    count ++;
+    
+    count++;
     fc->delete_route(IPv4Net("128.16.8.8/16"));
     fc->add_route(IPv4Net("128.16.8.8/16"), IPv4("128.16.8.1"), "if0", "vif0");
     cout << "Sending fea commands" << endl;
@@ -54,7 +55,7 @@ fea_client_test()
 
 int main(int, char* argv[])
 {
-   //
+    //
     // Initialize and start xlog
     //
     xlog_init(argv[0], NULL);

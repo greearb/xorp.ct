@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.4 2003/03/10 23:20:55 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.5 2003/03/15 02:28:38 pavlin Exp $"
 
 #include "config.h"
 
@@ -62,7 +62,7 @@ RibManager::RibManager()
 void
 RibManager::run_event_loop() 
 {
-    while(1)
+    while (true)
 	_event_loop.run();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.4 2003/03/10 23:20:57 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.5 2003/03/15 02:28:40 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -42,8 +42,7 @@ public:
 	const IPv4&	addr, 
 	const uint32_t&	prefix_len, 
 	const IPv4&	nexthop, 
-	const uint32_t&	metric) 
-    {
+	const uint32_t&	metric) {
 	IPv4Net net(addr, prefix_len);
 	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %d\n",
 	       net.str().c_str(), nexthop.str().c_str(), metric);
@@ -57,10 +56,10 @@ public:
 
     XrlCmdError rib_client_0_1_route_info_changed6(
 	// Input values, 
-        const IPv6&	/*addr*/, 
-	const uint32_t&	/*prefix_len*/, 
-	const IPv6&	/*nexthop*/, 
-	const uint32_t&	/*metric*/) {
+        const IPv6&	/* addr */, 
+	const uint32_t&	/* prefix_len */, 
+	const IPv6&	/* nexthop */, 
+	const uint32_t&	/* metric */) {
 	return XrlCmdError::OKAY();
     }
 
@@ -80,25 +79,28 @@ public:
 
     XrlCmdError rib_client_0_1_route_info_invalid6(
 	// Input values,
-        const IPv6&	/*addr*/, 
-	const uint32_t&	/*prefix_len*/) {
+        const IPv6&	/* addr */, 
+	const uint32_t&	/* prefix_len */) {
 	return XrlCmdError::OKAY();
     }
     bool verify_invalidated(const string& invalid);
     bool verify_changed(const string& changed);
     bool verify_no_info();
+
 private:
     set <string> _invalidated;
     set <string> _changed;
 };
 
 bool 
-RibClientTarget::verify_invalidated(const string& invalid) {
+RibClientTarget::verify_invalidated(const string& invalid)
+{
     set <string>::iterator i;
+    
     i = _invalidated.find(invalid);
-    if (i==_invalidated.end()) {
+    if (i == _invalidated.end()) {
 	printf("EXPECTED: >%s<\n", invalid.c_str());
-	for (i=_invalidated.begin(); i!= _invalidated.end(); i++)
+	for (i = _invalidated.begin(); i !=  _invalidated.end(); ++i)
 	    printf("INVALIDATED: >%s<\n", i->c_str());
 	return false;
     }
@@ -107,12 +109,14 @@ RibClientTarget::verify_invalidated(const string& invalid) {
 }
 
 bool 
-RibClientTarget::verify_changed(const string& changed) {
+RibClientTarget::verify_changed(const string& changed)
+{
     set <string>::iterator i;
+    
     i = _changed.find(changed);
-    if (i==_changed.end()) {
+    if (i == _changed.end()) {
 	printf("EXPECTED: >%s<\n", changed.c_str());
-	for (i=_invalidated.begin(); i!= _invalidated.end(); i++)
+	for (i = _invalidated.begin(); i !=  _invalidated.end(); ++i)
 	    printf("CHANGED: >%s<\n", i->c_str());
 	return false;
     }
@@ -120,26 +124,31 @@ RibClientTarget::verify_changed(const string& changed) {
     return true;
 }
 
-bool RibClientTarget::verify_no_info() {
+bool RibClientTarget::verify_no_info()
+{
     if (_changed.empty() && _invalidated.empty())
 	return true;
     return false;
 }
 
 
-
 bool xrl_done_flag = false;
-void xrl_done(const XrlError& e) {
-    if (e==XrlCmdError::OKAY()) {
+
+void
+xrl_done(const XrlError& e)
+{
+    if (e == XrlCmdError::OKAY()) {
 	xrl_done_flag = true;
 	return;
     }
     abort();
 }
 
-int add_igp_table(XrlRibV0p1Client& client, 
-		  EventLoop& loop, 
-		  const string& tablename) {
+int
+add_igp_table(XrlRibV0p1Client& client, 
+	      EventLoop& loop, 
+	      const string& tablename)
+{
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
     client.send_add_igp_table4("rib", tablename, true, false, cb);
@@ -151,9 +160,11 @@ int add_igp_table(XrlRibV0p1Client& client,
     return 0;
 }
 
-int add_egp_table(XrlRibV0p1Client& client, 
-		  EventLoop& loop, 
-		  const string& tablename) {
+int
+add_egp_table(XrlRibV0p1Client& client, 
+	      EventLoop& loop, 
+	      const string& tablename)
+{
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
     client.send_add_egp_table4("rib", tablename, true, false, cb);
@@ -165,10 +176,12 @@ int add_egp_table(XrlRibV0p1Client& client,
     return 0;
 }
 
-int add_vif(XrlRibV0p1Client& client, 
-	    EventLoop& loop, 
-	    const string& vifname, 
-	    IPv4 myaddr, IPNet<IPv4> net) {
+int
+add_vif(XrlRibV0p1Client& client, 
+	EventLoop& loop, 
+	const string& vifname, 
+	IPv4 myaddr, IPNet<IPv4> net)
+{
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
     client.send_new_vif("rib", vifname, cb);
@@ -188,10 +201,12 @@ int add_vif(XrlRibV0p1Client& client,
     return 0;
 }
 
-int add_route(XrlRibV0p1Client& client, 
-	      EventLoop& loop, 
-	      const string& protocol, 
-	      IPNet<IPv4> net, IPv4 nexthop, uint32_t metric) {
+int
+add_route(XrlRibV0p1Client& client, 
+	  EventLoop& loop, 
+	  const string& protocol, 
+	  IPNet<IPv4> net, IPv4 nexthop, uint32_t metric)
+{
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
     client.send_add_route4("rib", protocol, true, false, 
@@ -204,14 +219,16 @@ int add_route(XrlRibV0p1Client& client,
     return 0;
 }
 
-int delete_route(XrlRibV0p1Client& client, 
-		 EventLoop& loop, 
-		 const string& protocol, 
-		 IPNet<IPv4> net) {
+int
+delete_route(XrlRibV0p1Client& client, 
+	     EventLoop& loop, 
+	     const string& protocol, 
+	     IPNet<IPv4> net)
+{
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
     client.send_delete_route4("rib", protocol, true, false, 
-			   net, cb);
+			      net, cb);
 
     xrl_done_flag = false;
     while (xrl_done_flag == false) {
@@ -220,17 +237,19 @@ int delete_route(XrlRibV0p1Client& client,
     return 0;
 }
 
-void register_done(const XrlError& e, 
-		   const bool* resolves, 
-		   const IPv4* base_addr, 
-		   const uint32_t* prefix, 
-		   const uint32_t* /*realprefix*/, 
-		   const IPv4* nexthop, 
-		   const uint32_t* metric, 
-		   bool expected_resolves,
-		   IPv4Net expected_net, 
-		   IPv4 expected_nexthop,
-		   uint32_t expected_metric) {
+void
+register_done(const XrlError& e, 
+	      const bool* resolves, 
+	      const IPv4* base_addr, 
+	      const uint32_t* prefix, 
+	      const uint32_t* /* realprefix */, 
+	      const IPv4* nexthop, 
+	      const uint32_t* metric, 
+	      bool expected_resolves,
+	      IPv4Net expected_net, 
+	      IPv4 expected_nexthop,
+	      uint32_t expected_metric)
+{
     assert(e == XrlCmdError::OKAY());
     if (expected_resolves) {
 	assert(*resolves);
@@ -248,13 +267,15 @@ void register_done(const XrlError& e,
     xrl_done_flag = true;
 }
 
-int register_interest(XrlRibV0p1Client& client, 
-		      EventLoop& loop, 
-		      IPv4 addr,
-		      bool expected_resolves,
-		      IPNet<IPv4> expected_net,
-		      IPv4 expected_nexthop,
-		      uint32_t expected_metric) {
+int
+register_interest(XrlRibV0p1Client& client, 
+		  EventLoop& loop, 
+		  const IPv4& addr,
+		  bool expected_resolves,
+		  const IPNet<IPv4>& expected_net,
+		  const IPv4& expected_nexthop,
+		  uint32_t expected_metric)
+{
     XorpCallback7<void, const XrlError&, const bool*, const IPv4*, 
 	const uint32_t*, const uint32_t*, const IPv4*, 
 	const uint32_t*>::RefPtr cb;
@@ -270,7 +291,9 @@ int register_interest(XrlRibV0p1Client& client,
 }
 
 
-int main (int /* argc */, char *argv[]) {
+int
+main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //
@@ -283,18 +306,18 @@ int main (int /* argc */, char *argv[]) {
 
     EventLoop event_loop;
 
-    /* Finder Server */
+    // Finder Server
     FinderServer fs(event_loop);
 
-    /* Rib Server component */
+    // Rib Server component
     XrlStdRouter xrl_rtr(event_loop, "rib");
     FeaClient fea(xrl_rtr);
 
-    /* Rib Client component */
+    // Rib Client component
     XrlStdRouter client_xrl_rtr(event_loop, "ribclient");
     RibClientTarget ribclienttarget(&client_xrl_rtr);
 
-    /* RIB Instantiations for XrlRibTarget */
+    // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST);
     RegisterServer regserv(&xrl_rtr);
     urib4.initialize_register(&regserv);
@@ -303,7 +326,7 @@ int main (int /* argc */, char *argv[]) {
 	abort();
     }
 
-    /* Instantiated but not used */
+    // Instantiated but not used
     RIB<IPv4> mrib4(MULTICAST);
     mrib4.add_igp_table("connected");
     RIB<IPv6> urib6(UNICAST);

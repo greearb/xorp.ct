@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.5 2003/03/10 23:20:57 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.6 2003/03/15 02:28:40 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -43,8 +43,7 @@ public:
     XrlRibParser(EventLoop&	   e, 
 		 XrlRibV0p1Client& xrl_client, 
 		 RIB<IPv4>&	   rib,
-		 XrlCompletion&    cv)
-    {
+		 XrlCompletion&    cv) {
 	add_command(new XrlRouteAddCommand(e, xrl_client, cv));
 	add_command(new XrlRouteDeleteCommand(e, xrl_client, cv));
 	add_command(new XrlRedistEnableCommand(e, xrl_client, cv));
@@ -54,15 +53,14 @@ public:
 	add_command(new XrlAddEGPTableCommand(e, xrl_client, cv));
 	add_command(new XrlDeleteEGPTableCommand(e, xrl_client, cv));
 
-	/* The following do not exist in XRL interface so use direct methods */
+	// The following do not exist in XRL interface so use direct methods
 	add_command(new DirectRouteVerifyCommand(rib));
 	add_command(new DirectTableOriginCommand(rib));
 	add_command(new DirectTableMergedCommand(rib));
 	add_command(new DirectTableExtIntCommand(rib));
 
-	/* XXX The following should probably use XRL's but punting for
-	 * time being .
-	 */
+	// XXX The following should probably use XRL's but punting for
+	// time being.
 	add_command(new DirectEtherVifCommand(rib));
     }
 };
@@ -72,19 +70,19 @@ parser_main()
 {
     EventLoop event_loop;
 
-    /* Finder Server */
+    // Finder Server
     TestFinderServer fs(event_loop);
 
-    /* Rib Server component */
+    // Rib Server component
     XrlStdRouter xrl_rtr(event_loop, "rib");
     FeaClient fea(xrl_rtr);
 
-    /* RIB Instantiations for XrlRibTarget */
+    // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST);
     DummyRegisterServer regserv;
     urib4.initialize_register(&regserv);
 
-    /* Instantiated but not used */
+    // Instantiated but not used
     RIB<IPv4> mrib4(MULTICAST);
     RIB<IPv6> urib6(UNICAST);
     RIB<IPv6> mrib6(MULTICAST);
@@ -94,16 +92,17 @@ parser_main()
 
     XrlRibV0p1Client xrl_client(&xrl_rtr);
 
-    /* Variable used to signal completion of Xrl parse completion */
+    // Variable used to signal completion of Xrl parse completion
     XrlCompletion cv;
     XrlRibParser parser(event_loop, xrl_client, urib4, cv);
 
     string cmd;
     int line = 0;
 
-    while (feof(stdin)==0) {
+    while (feof(stdin) == 0) {
 	getline(cin, cmd);
-	if (feof(stdin)!=0) break;
+	if (feof(stdin)!=0)
+	    break;
 	line++;
 	cout << line << ": " << cmd << endl;
 
@@ -118,7 +117,9 @@ parser_main()
     }
 }
 
-int main (int /* argc */, char *argv[]) {
+int
+main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //

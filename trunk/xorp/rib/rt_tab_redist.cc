@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.2 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.3 2003/03/15 02:28:39 pavlin Exp $"
 
 #include "rib_module.h"
 #include "rt_tab_redist.hh"
@@ -27,23 +27,23 @@ RedistTable<A>::RedistTable<A>(const string&   tablename,
     _from_table = from_table;
     _to_table = to_table;
 
-    //plumb ourselves into the table graph
+    // plumb ourselves into the table graph
     _next_table = _from_table->next_table();
     _from_table->set_next_table(this);
     if (_next_table != NULL)
 	_next_table->replumb(from_table, this);
 }
-    
+
 template<class A>
 RedistTable<A>::~RedistTable<A>() 
 {
-    //unplumb ourselves from the table graph
+    // unplumb ourselves from the table graph
     _from_table->set_next_table(_next_table);
 }
 
 template<class A>
 int
-RedistTable<A>::add_route(const IPRouteEntry<A> &route, 
+RedistTable<A>::add_route(const IPRouteEntry<A>& route, 
 		       RouteTable<A> *caller) 
 {
     if (caller != _from_table)
@@ -72,14 +72,14 @@ RedistTable<A>::delete_route(const IPRouteEntry<A> *route,
 
 template<class A>
 const IPRouteEntry<A> *
-RedistTable<A>::lookup_route(const IPNet<A> &net) const 
+RedistTable<A>::lookup_route(const IPNet<A>& net) const 
 {
     return _from_table->lookup_route(net);
 }
 
 template<class A>
 const IPRouteEntry<A> *
-RedistTable<A>::lookup_route(const A &addr) const 
+RedistTable<A>::lookup_route(const A& addr) const 
 {
     return _from_table->lookup_route(addr);
 }
@@ -92,14 +92,14 @@ RedistTable<A>::replumb(RouteTable<A> *old_parent,
     if (_from_table == old_parent) {
 	_from_table = new_parent;
     } else {
-	/*shouldn't be possible*/
+	// shouldn't be possible
 	abort();
     }
 }
 
 template<class A>
 RouteRange<A>* 
-RedistTable<A>::lookup_route_range(const A &addr) const 
+RedistTable<A>::lookup_route_range(const A& addr) const 
 {
     return _from_table->lookup_route_range(addr);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.2 2003/03/10 23:20:54 hodson Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.3 2003/03/15 02:28:38 pavlin Exp $"
 
 #include <stdexcept>
 
@@ -89,7 +89,8 @@ DatumVariableBinding*
 Command::find_binding(int n) 
 {
     map<int, DatumVariableBinding*>::iterator mi = _bindings.find(n);
-    if (mi == _bindings.end()) return 0;
+    if (mi == _bindings.end())
+	return 0;
     return mi->second;
 }
 
@@ -141,7 +142,9 @@ Command::set_arg(int n, Datum *d) throw (Parse_error)
 // ----------------------------------------------------------------------------
 // Parser methods
 
-Parser::Parser () : _separator(' ') {
+Parser::Parser()
+    : _separator(' ')
+{
     set_separator(' ');
     add_argtype(new IntArgumentParser());
     add_argtype(new StringArgumentParser());
@@ -227,7 +230,8 @@ single_space(const string& s)
 }
 
 static string
-blat_control(const string& s) {
+blat_control(const string& s)
+{
     string tmp(s);
     for (size_t i = 0; i < s.size(); i++) {
 	if (isascii(s[i]) == false || iscntrl(s[i]))
@@ -236,20 +240,22 @@ blat_control(const string& s) {
     return tmp;
 }
 
-static string prepare_line(const string& s) {
+static string prepare_line(const string& s)
+{
     return ltrim(rtrim(single_space(blat_control(s))));
 }
 
 // ----------------------------------------------------------------------------
 
 int 
-Parser::parse(const string &s) const 
+Parser::parse(const string& s) const 
 {
     debug_msg("-------------------------------------------------------\n");
     debug_msg("Parser::parse: %s\n", s.c_str());
 
     string str = prepare_line(s);
-    if (str[0] == '#') return 0;
+    if (str[0] == '#')
+	return 0;
 
     typedef map<string, Command*>::const_iterator CI;
     CI rpair = _templates.lower_bound(str);
@@ -310,22 +316,26 @@ Parser::parse(const string &s) const
 }
 
 int 
-Parser::split_into_words(const string& str, vector<string>& words) const{
+Parser::split_into_words(const string& str, vector<string>& words) const
+{
     int word=0;
     int len;
     string tmpstr(str);
+    
     try {
-	while (1) {
+	while (true) {
 	    //remove leading whitespace
-	    while(tmpstr.at(0) == ' ' && tmpstr.length() > 0) {
+	    while (tmpstr.at(0) == ' ' && tmpstr.length() > 0) {
 		tmpstr.erase(0,1);
 	    }
-	    if (tmpstr.length()==0) break;
+	    if (tmpstr.length() == 0)
+		break;
 	    len = tmpstr.find_first_of(' ');
-	    words[word] = tmpstr.substr(0,len);
-	    tmpstr.erase(0,len);
+	    words[word] = tmpstr.substr(0, len);
+	    tmpstr.erase(0, len);
 	    word++;
-	    if (tmpstr.length()==0) break;
+	    if (tmpstr.length() == 0)
+		break;
 	}
     }
     catch (out_of_range) {
@@ -333,7 +343,8 @@ Parser::split_into_words(const string& str, vector<string>& words) const{
     return word;
 }
 
-bool Parser::add_argtype(ArgumentParser *arg) {
+bool Parser::add_argtype(ArgumentParser *arg)
+{
     debug_msg("Parser::add_argtype %s\n", arg->name().c_str());
     if (arg->name()[0] != '~') {
 	XLOG_FATAL("ArgumentParser Type names must begin with ~\n");

@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.4 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.5 2003/03/15 02:28:39 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -55,25 +55,27 @@ OriginTable<A>::~OriginTable<A>()
 
 template<class A>
 int
-OriginTable<A>::add_route(const IPRouteEntry<A> &route)
+OriginTable<A>::add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("OT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
     cp(2);
+    //
     // The actual map holds pointers, but we also do allocation and
     // deallocation here. The reason for this is that using the map to
     // hold objects themselves results in us doing too many copies on
     // lookup, but we also don't want the table to be referencing
     // something external that may go away.
+    //
     IPRouteEntry<A> *routecopy = new IPRouteEntry<A>(route);
     routecopy->set_admin_distance(_admin_distance);
 
 #if 0
-    /*
-     * BGP can send multiple add routes for the same entry without any
-     * corresponding deletes. So if this route is already in the table
-     * remove it.
-     */
+    //
+    // BGP can send multiple add routes for the same entry without any
+    // corresponding deletes. So if this route is already in the table
+    // remove it.
+    //
     if (lookup_route(route.net()))
 	delete_route(route.net());
 #else
@@ -102,7 +104,7 @@ OriginTable<A>::add_route(const IPRouteEntry<A> &route)
 }
 
 template<class A>
-int OriginTable<A>::delete_route(const IPNet<A> &net)
+int OriginTable<A>::delete_route(const IPNet<A>& net)
 {
     debug_msg("OT[%s]: Deleting route %s\n", _tablename.c_str(),
 	   net.str().c_str());
@@ -144,7 +146,7 @@ void OriginTable<A>::delete_all_routes()
 
 template<class A>
 const IPRouteEntry<A> *
-OriginTable<A>::lookup_route(const IPNet<A> &net) const
+OriginTable<A>::lookup_route(const IPNet<A>& net) const
 {
     cp(6);
     debug_msg("------------------\nlookup_route in table %s\n",
@@ -157,7 +159,7 @@ OriginTable<A>::lookup_route(const IPNet<A> &net) const
 
 template<class A>
 const IPRouteEntry<A>*
-OriginTable<A>::lookup_route(const A &addr) const
+OriginTable<A>::lookup_route(const A& addr) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
 	tablename().c_str());
@@ -175,7 +177,7 @@ OriginTable<A>::lookup_route(const A &addr) const
 
 template<class A>
 RouteRange<A>*
-OriginTable<A>::lookup_route_range(const A &addr) const
+OriginTable<A>::lookup_route_range(const A& addr) const
 {
     const IPRouteEntry<A>* route;
     typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
@@ -213,10 +215,4 @@ typedef OriginTable<IPv4> IPv4OriginTable;
 
 template class OriginTable<IPv6>;
 typedef OriginTable<IPv6> IPv6OriginTable;
-
-
-
-
-
-
 

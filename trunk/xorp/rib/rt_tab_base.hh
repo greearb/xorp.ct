@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -79,7 +79,7 @@ public:
      * replace route with the entry from rr if it is better, (XXX why ?)
      * shrink the intervals if the other one is smaller.
      */
-    void merge(const RouteRange* his_rr)	{
+    void merge(const RouteRange *his_rr)	{
 	    const IPRouteEntry<A> *rrr = his_rr->route();
 
 	    if (_route == NULL)
@@ -105,8 +105,8 @@ public:
     }
 
     // returns the largest subnet contained in the range.
-    IPNet<A> minimal_subnet() const		{
-	    for (u_int bits = 0; bits <= A::addr_bitlen(); bits++) {
+    IPNet<A> minimal_subnet() const {
+	    for (size_t bits = 0; bits <= A::addr_bitlen(); bits++) {
 		IPNet<A> net(_req_addr, bits);
 		if (net.masked_addr() >= _bottom && net.top_addr() <= _top)
 		    return net; // we got it.
@@ -144,29 +144,29 @@ private:
  * RouteTables take route lookup requests from their _next_table, and
  * pass on those requests to their parents.  If more than one parent
  * has a response, only the best is returned as the answer.  
-*/
+ */
 template<class A>
 class RouteTable {
 public:
     RouteTable(const string& name) : _tablename(name), _next_table(0) {}
     virtual ~RouteTable() {}
 
-    virtual int add_route(const IPRouteEntry<A> &route,
+    virtual int add_route(const IPRouteEntry<A>& route,
 			  RouteTable *caller) = 0;
     virtual int delete_route(const IPRouteEntry<A> *,
 			     RouteTable *caller) = 0;
     virtual const
-    IPRouteEntry<A> *lookup_route(const IPNet<A> &net) const = 0;
+    IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const = 0;
 
     virtual const
-    IPRouteEntry<A> *lookup_route(const A &addr) const = 0;
+    IPRouteEntry<A> *lookup_route(const A& addr) const = 0;
 
-    virtual RouteRange<A> *lookup_route_range(const A &addr) const = 0;
+    virtual RouteRange<A> *lookup_route_range(const A& addr) const = 0;
 
-    void set_next_table(RouteTable* next_table) { _next_table = next_table; }
+    void set_next_table(RouteTable *next_table) { _next_table = next_table; }
     RouteTable *next_table() { return _next_table; }
 
-    /* parent is only supposed to be called on single-parent tables*/
+    // parent is only supposed to be called on single-parent tables
     virtual RouteTable *parent() { abort(); }
 
     virtual int type() const = 0;

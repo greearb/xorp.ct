@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.5 2003/03/15 02:28:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.6 2003/03/15 03:13:11 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -133,6 +133,7 @@ RegisterServer::add_entry_to_queue(const string& modname,
     NotifyQueue *queue;
     map <string, NotifyQueue*>::iterator qmi;
     bool new_queue;
+    
     qmi = _queuemap.find(modname);
     if (qmi == _queuemap.end()) {
 	_queuemap[modname] = new NotifyQueue(modname);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.2 2003/03/10 23:20:55 hodson Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.3 2003/03/15 03:13:11 pavlin Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
@@ -224,9 +224,9 @@ public:
 	      const string& modname,
 	      NotifyQueue::XrlCompleteCB& cb);
 private:
-    IPNet<A> _net; /* the valid_subnet from the RouteRegister
-		    * instance.  The other end already knows the
-		    * route's full subnet */
+    IPNet<A> _net;	// the valid_subnet from the RouteRegister
+			// instance.  The other end already knows the
+			// route's full subnet
     bool _multicast;
 };
 

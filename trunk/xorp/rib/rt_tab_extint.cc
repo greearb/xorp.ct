@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.4 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.5 2003/03/15 02:28:39 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -38,7 +38,7 @@ ExtIntTable<A>::ExtIntTable<A>(const string&  tablename,
 }
 
 template<class A>
-int ExtIntTable<A>::add_route(const IPRouteEntry<A> &route,
+int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 			      RouteTable<A> *caller) 
 {
     debug_msg("EIT[%s]: Adding route %s\n", _tablename.c_str(),
@@ -129,8 +129,8 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A> &route,
 	    }
 	}
     } else {
-	fprintf(stderr, "ExtIntTable::add_route called from a class that \
-isn't a component of this override table\n");
+	fprintf(stderr, "ExtIntTable::add_route called from a class that "
+		"isn't a component of this override table\n");
 	abort();
     }
     return 0;
@@ -138,7 +138,7 @@ isn't a component of this override table\n");
 
 template<class A>
 const ResolvedIPRouteEntry<A> *
-ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A> &route,
+ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A>& route,
 					const IPRouteEntry<A> *nhroute) 
 {
     cp(10);
@@ -162,7 +162,6 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A> &route,
 			       ResolvedIPRouteEntry<A> *>
 			       (nhroute, resolved_route));
     resolved_route->set_backlink(backlink);
-
 
     return resolved_route;
 }
@@ -229,8 +228,8 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A> *route,
 	    _ip_route_table.erase(found->net());
 	    _ip_igp_parents.erase(found->backlink());
 
-	    /* delete the route's IGP parent from _resolving_routes if
-	       no-one's using it anymore */
+	    // delete the route's IGP parent from _resolving_routes if
+	    // no-one's using it anymore
 	    if (lookup_by_igp_parent(found->igp_parent()) == NULL) {
 		cp(17);
 		_resolving_routes.erase(found->igp_parent()->net());
@@ -261,7 +260,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A> *route,
 
 template<class A>
 const ResolvedIPRouteEntry<A> *
-ExtIntTable<A>::lookup_in_resolved_table(const IPNet<A> &net) 
+ExtIntTable<A>::lookup_in_resolved_table(const IPNet<A>& net) 
 {
     debug_msg("------------------\nlookup_route in resolved table %s\n", tablename().c_str());
     typename Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
@@ -274,7 +273,7 @@ ExtIntTable<A>::lookup_in_resolved_table(const IPNet<A> &net)
 
 template<class A>
 void
-ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A> &nhroute) 
+ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nhroute) 
 {
     typedef typename map<A, const IPRouteEntry<A> *>::iterator CI;
 
@@ -293,7 +292,7 @@ ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A> &nhroute)
 	    cp(21);
 	    // the unresolved nexthop matches our subnet
 	    debug_msg("resolve_unresolved_nexthops: resolving %s\n",
-		   (*rpair->second).str().c_str());
+		      (*rpair->second).str().c_str());
 
 	    // we're going to erase rpair, so preserve the state.
 	    const IPRouteEntry<A> *unresolved_route = rpair->second;
@@ -412,7 +411,7 @@ ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A> *route,
 
 template<class A>
 void
-ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A> &new_route) 
+ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route) 
 {
     debug_msg("recalculate_nexthops: %s\n", new_route.str().c_str());
     const IPRouteEntry<A> *old_route;
@@ -441,13 +440,13 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A> &new_route)
 	if (new_route.net().contains(nexthop)) {
 	    cp(39);
 	    debug_msg("found route using this nh:\n    %s\n",
-		   found->str().c_str());
+		      found->str().c_str());
 	    // erase from table first to prevent lookups on this entry
 	    _ip_route_table.erase(found->net());
 	    _ip_igp_parents.erase(found->backlink());
 
-	    /* delete the route's IGP parent from _resolving_routes if
-	       no-one's using it anymore */
+	    // delete the route's IGP parent from _resolving_routes if
+	    // no-one's using it anymore
 	    if (lookup_by_igp_parent(found->igp_parent()) == NULL) {
 		cp(40);
 		_resolving_routes.erase(found->igp_parent()->net());
@@ -482,7 +481,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A> &new_route)
 
 template<class A>
 const IPRouteEntry<A> *
-ExtIntTable<A>::lookup_route(const IPNet<A> &ipv4net) const 
+ExtIntTable<A>::lookup_route(const IPNet<A>& ipv4net) const 
 {
     const IPRouteEntry<A> *int_found;
     const IPRouteEntry<A> *ext_found;
@@ -523,14 +522,14 @@ ExtIntTable<A>::lookup_route(const IPNet<A> &ipv4net) const
 
 template<class A>
 const IPRouteEntry<A> *
-ExtIntTable<A>::lookup_route(const A &addr) const 
+ExtIntTable<A>::lookup_route(const A& addr) const 
 {
     const IPRouteEntry<A> *ext_found = NULL, *int_found;
     list <const IPRouteEntry<A>*> found;
     cp(48);
     debug_msg("ExtIntTable::lookup_route\n");
 
-    //lookup locally, and in both internal and external tables
+    // lookup locally, and in both internal and external tables
     typename Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
     iter = _ip_route_table.find(addr);
     if (iter != _ip_route_table.end()) {
@@ -542,8 +541,8 @@ ExtIntTable<A>::lookup_route(const A &addr) const
 	found.push_back(int_found);
 
     ext_found = _ext_table->lookup_route(addr);
-    //check that the external route has a local nexthop (if it doesn't
-    //we expect the version in local_found to have a local nexthop)
+    // check that the external route has a local nexthop (if it doesn't
+    // we expect the version in local_found to have a local nexthop)
     if (ext_found != NULL 
 	&& ext_found->nexthop()->type() == EXTERNAL_NEXTHOP) {
 	ext_found = NULL;
@@ -554,7 +553,7 @@ ExtIntTable<A>::lookup_route(const A &addr) const
     if (found.empty())
 	return NULL;
 
-    //retain only the routes with the longest prefix
+    // retain only the routes with the longest prefix
     uint32_t longest_prefix = 0;
     typename list <const IPRouteEntry<A>*>::iterator i, i2;
     for (i = found.begin(); i != found.end(); i++) {
@@ -574,7 +573,7 @@ ExtIntTable<A>::lookup_route(const A &addr) const
 	return found.front();
     }
     
-    //retain only the routes with the lowest admin_distance
+    // retain only the routes with the lowest admin_distance
     int lowest_ad = 0xffff;
     for (i = found.begin(); i != found.end(); i++) {
 	if ((*i)->admin_distance() < lowest_ad) {
@@ -593,14 +592,14 @@ ExtIntTable<A>::lookup_route(const A &addr) const
 	return found.front();
     }
 
-    //this shouldn't happen.
+    // this shouldn't happen.
     XLOG_ERROR("ExtIntTable has multiple routes with same prefix_len and same admin_distance\n");
     return found.front();
 }
 
 template<class A>
 const IPRouteEntry<A> *
-ExtIntTable<A>::lookup_route_in_igp_parent(const IPNet<A> &ipnet) const 
+ExtIntTable<A>::lookup_route_in_igp_parent(const IPNet<A>& ipnet) const 
 {
     const IPRouteEntry<A> *found;
     found = _int_table->lookup_route(ipnet);
@@ -614,7 +613,7 @@ ExtIntTable<A>::lookup_route_in_igp_parent(const IPNet<A> &ipnet) const
 
 template<class A>
 const IPRouteEntry<A> *
-ExtIntTable<A>::lookup_route_in_igp_parent(const A &addr) const 
+ExtIntTable<A>::lookup_route_in_igp_parent(const A& addr) const 
 {
     const IPRouteEntry<A> *found;
     found = _int_table->lookup_route(addr);
@@ -629,7 +628,7 @@ ExtIntTable<A>::lookup_route_in_igp_parent(const A &addr) const
 template<class A>
 void
 ExtIntTable<A>::replumb(RouteTable<A> *old_parent,
-		     RouteTable<A> *new_parent) 
+			RouteTable<A> *new_parent) 
 {
     cp(62);
     if (_ext_table == old_parent) {
@@ -639,14 +638,14 @@ ExtIntTable<A>::replumb(RouteTable<A> *old_parent,
 	cp(64);
 	_int_table = new_parent;
     } else {
-	/*shouldn't be possible*/
+	// shouldn't be possible
 	abort();
     }
 }
 
 template<class A>
 RouteRange<A>*
-ExtIntTable<A>::lookup_route_range(const A &addr) const
+ExtIntTable<A>::lookup_route_range(const A& addr) const
 {
     // what do the parents think the answer is?
     RouteRange<A>* int_rr = _int_table->lookup_route_range(addr);
@@ -665,11 +664,13 @@ ExtIntTable<A>::lookup_route_range(const A &addr) const
     _ip_route_table.find_bounds(addr, bottom_addr, top_addr);
     RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
 
+    //
     // If there's a matching routing in _ip_route_table, there'll also
     // be one in _ext_table.  But our version has the correct nexthop.
     // We still need to merge in the result of lookup_route_range on
     // _ext_table though, because the upper and lower bounds there may
     // be tighter than the ones we'd find ourselves.
+    //
 
     rr->merge(int_rr);
     delete(int_rr);

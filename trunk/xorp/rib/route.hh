@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.5 2003/03/10 23:20:55 hodson Exp $
+// $XORP: xorp/rib/route.hh,v 1.6 2003/03/15 03:30:25 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -303,9 +303,9 @@ private:
     mutable const IPRouteEntry<A>* _igp_parent;
     mutable const IPRouteEntry<A>* _egp_parent;
 
-    /* _backlink is used for removing the corresponding entry from the
-       RouteTable's map that is indexed by igp_parent.  Without it,
-       route deletion would be expensive*/
+    // _backlink is used for removing the corresponding entry from the
+    // RouteTable's map that is indexed by igp_parent.  Without it,
+    // route deletion would be expensive
     typename RouteBackLink::iterator _backlink;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.2 2003/01/17 03:46:42 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.3 2003/03/10 23:20:56 hodson Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -73,7 +73,7 @@ public:
      * @param route the new route
      * @param caller the parent table sending the new route
      */
-    int add_route(const IPRouteEntry<A> &route, RouteTable<A> *caller);
+    int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
     /**
      * An delete_route request from a parent table also causes a
@@ -99,7 +99,7 @@ public:
      * @param net the subnet to look up.
      * @return a pointer to the route entry if it exists, NULL otherwise.
      */
-    const IPRouteEntry<A> *lookup_route(const IPNet<A> &net) const;
+    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -115,7 +115,7 @@ public:
      * @return a pointer to the best most specific route entry if any
      * entry matches and its nexthop resolves, NULL otherwise.
      */
-    const IPRouteEntry<A> *lookup_route(const A &addr) const;
+    const IPRouteEntry<A> *lookup_route(const A& addr) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -132,7 +132,7 @@ public:
      * relevant answer.  It is up to the recipient of this pointer to
      * free the associated memory.
      */
-    RouteRange<A> *lookup_route_range(const A &addr) const;
+    RouteRange<A> *lookup_route_range(const A& addr) const;
 
     /**
      * @return EXTINT_TABLE
@@ -156,17 +156,17 @@ private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink RouteBackLink;
 
     const ResolvedIPRouteEntry<A> *
-         lookup_in_resolved_table(const IPNet<A> &ipv4net);
+         lookup_in_resolved_table(const IPNet<A>& ipv4net);
 
-    void resolve_unresolved_nexthops(const IPRouteEntry<A> &route);
+    void resolve_unresolved_nexthops(const IPRouteEntry<A>& route);
 
     const ResolvedIPRouteEntry<A> *
-         resolve_and_store_route(const IPRouteEntry<A> &route,
+         resolve_and_store_route(const IPRouteEntry<A>& route,
 				 const IPRouteEntry<A> *nhroute);
 
     bool delete_unresolved_nexthop(const IPRouteEntry<A> *route);
 
-    void recalculate_nexthops(const IPRouteEntry<A> &route);
+    void recalculate_nexthops(const IPRouteEntry<A>& route);
 
     const ResolvedIPRouteEntry<A> *
         lookup_by_igp_parent(const IPRouteEntry<A> *route);
@@ -176,22 +176,22 @@ private:
 				  const ResolvedIPRouteEntry<A> *previous);
 
     const IPRouteEntry<A> *
-        lookup_route_in_igp_parent(const IPNet<A> &subnet) const;
+        lookup_route_in_igp_parent(const IPNet<A>& subnet) const;
     const IPRouteEntry<A> *
-        lookup_route_in_igp_parent(const A &addr) const;
+        lookup_route_in_igp_parent(const A& addr) const;
 
     RouteTable<A>* _ext_table;
     RouteTable<A>* _int_table;
     Trie<A, const ResolvedIPRouteEntry<A>*> _ip_route_table;
     multimap<A, const IPRouteEntry<A>*> _ip_unresolved_nexthops;
 
-    /* _ip_igp_parents gives us a fast way of finding a route
-       affected by a change in an igp parent route*/
+    // _ip_igp_parents gives us a fast way of finding a route
+    // affected by a change in an igp parent route
     multimap<const IPRouteEntry<A>*,
 	     ResolvedIPRouteEntry<A> *> _ip_igp_parents;
 
-    /* _resolving_routes is a Trie of all the routes that are used to
-       resolve external routes */
+    // _resolving_routes is a Trie of all the routes that are used to
+    // resolve external routes
     Trie<A, const IPRouteEntry<A>*> _resolving_routes;
 };
 

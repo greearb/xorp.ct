@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.4 2003/03/10 23:20:55 hodson Exp $
+// $XORP: xorp/rib/rib.hh,v 1.5 2003/03/15 02:37:59 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -283,7 +283,8 @@ public:
      * @return true on successful deregistration, false if the entry
      * to be deregistered was not found.
      */
-    virtual bool route_deregister(const IPNet<A> &subnet, const string &module);
+    virtual bool route_deregister(const IPNet<A>& subnet,
+				  const string& module);
 
     /**
      * Enable Redistribution.

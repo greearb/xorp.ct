@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
@@ -56,7 +56,7 @@ public:
      * @param caller the @ref RouteTable calling this method. This
      * must be the same as _parent
      */
-    int add_route(const IPRouteEntry<A> &route, RouteTable<A> *caller);
+    int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
     /**
      * delete_route is called when a route is removed from the
@@ -72,19 +72,19 @@ public:
      * lookup a route in this RIB. This request is simply passed on
      * unchanged to the parent.  
      */
-    const IPRouteEntry<A> *lookup_route(const IPNet<A> &net) const ;
+    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const ;
 
     /**
      * lookup a route in this RIB. This request is simply passed on
      * unchanged to the parent.  
      */
-    const IPRouteEntry<A> *lookup_route(const A &addr) const;
+    const IPRouteEntry<A> *lookup_route(const A& addr) const;
 
     /**
      * lookup a route range in this RIB. This request is simply passed
      * on unchanged to the parent.  
      */
-    RouteRange<A> *lookup_route_range(const A &addr) const;
+    RouteRange<A> *lookup_route_range(const A& addr) const;
 
     /**
      * @return EXPORT_TABLE
@@ -117,8 +117,10 @@ public:
      * replace a route).  flush is called explicitly after the end of
      * a batch of changes to allow events to be queued and then
      * amalgamated in the ExportTable to reduce unnecessary changes
-     * reaching the FEA. */
+     * reaching the FEA.
+     */
     void flush();
+    
 private:
     RouteTable<A>* _parent;
     FeaClient * _fea;

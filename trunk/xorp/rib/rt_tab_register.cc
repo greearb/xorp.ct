@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.5 2003/03/10 23:20:57 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.6 2003/03/15 02:28:39 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -58,7 +58,7 @@ RouteRegister<A>::str() const
 
 template<class A>
 bool
-RegisterTable<A>::find_matches(const IPRouteEntry<A> &route)
+RegisterTable<A>::find_matches(const IPRouteEntry<A>& route)
 {
     bool matches = false;
 
@@ -103,7 +103,7 @@ RegisterTable<A>::find_matches(const IPRouteEntry<A> &route)
 template<class A>
 bool
 RegisterTable<A>::notify_relevant_modules(bool add,
-					  const IPRouteEntry<A> &changed_route)
+					  const IPRouteEntry<A>& changed_route)
 {
     bool matches = false;
     IPNet<A> changed_net = changed_route.net();
@@ -136,14 +136,15 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 	if (add)
 	    notify_invalidated(iter);
 	else {
-	    /*this can't happen because registrations can't be
-              overlapped by more specific routes*/
+	    // this can't happen because registrations can't be
+	    // overlapped by more specific routes
 	    abort();
 	}
 	return true;
     }
     debug_msg("NRM: no less specific match\n");
 
+    //
     // find any children.
     // Example:
     // we have routes 1.0.0.0/20,  1.0.0.0/24, and 1.0.2/24
@@ -155,6 +156,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
     // - route 1.0.0.0/20 is deleted.
     // in either case the registration should be invalidated and the
     // client should re-register
+    //
     iter = _ipregistry.search_subtree(changed_net);
     while (iter != _ipregistry.end()) {
 	debug_msg("NRM: found child\n");
@@ -183,7 +185,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 
 template<class A>
 int
-RegisterTable<A>::add_route(const IPRouteEntry<A> &route,
+RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
 			    RouteTable<A> *caller)
 {
     debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
@@ -193,8 +195,7 @@ RegisterTable<A>::add_route(const IPRouteEntry<A> &route,
     if (_next_table != NULL)
 	_next_table->add_route(route, this);
 
-    notify_relevant_modules(true/*it's an add*/, route);
-
+    notify_relevant_modules(true /* it's an add */, route);
 
     debug_msg("Add route called on register table %s\n", _tablename.c_str());
     return 0;
@@ -213,7 +214,7 @@ RegisterTable<A>::delete_route(const IPRouteEntry<A> *route,
     if (_next_table != NULL)
 	_next_table->delete_route(route, this);
 
-    notify_relevant_modules(false/*it's a delete*/, *route);
+    notify_relevant_modules(false /* it's a delete */, *route);
     debug_msg("Delete route called on register table\n");
     debug_msg("After:\n");
     print();
@@ -222,24 +223,24 @@ RegisterTable<A>::delete_route(const IPRouteEntry<A> *route,
 
 template<class A>
 RouteRegister<A> *
-RegisterTable<A>::add_registration(const IPNet<A> &net,
+RegisterTable<A>::add_registration(const IPNet<A>& net,
 				   const IPRouteEntry<A> *route,
-				   const string &module)
+				   const string& module)
 {
-    /*add the registered module name to the list of module names if
-      it's not there already*/
+    // add the registered module name to the list of module names if
+    // it's not there already
     const ModuleData *newmod = new ModuleData(module);
     set<const ModuleData*, ModuleCmp>::iterator mod_iter;
     mod_iter = _module_names.find(newmod);
     if (mod_iter == _module_names.end()) {
 	_module_names.insert(newmod);
     } else {
-	/* it already existed*/
+	// it already existed
 	delete newmod;
 	newmod = *mod_iter;
     }
 
-    /*do we have an existing registry for this subnet?*/
+    // do we have an existing registry for this subnet?
     typename Trie<A, RouteRegister<A>*>::iterator iter, next_iter;
     iter = _ipregistry.lookup_node(net);
     RouteRegister<A> *rr;
@@ -253,19 +254,21 @@ RegisterTable<A>::add_registration(const IPNet<A> &net,
 	    debug_msg("[REGT] Add registration for net %s, NULL route, module %s\n",
 		   net.str().c_str(), module.c_str());
 
-	/* We might have some old registrations for more specific
-           subsets of this subnet.  If we do, we must invalidate them
-           now.  This might happen if the following occurs:
-             We have two routes:  1.0.0.0/16 and 1.0.0.0/24.
-             We have two addresses that register interest: 1.0.0.1 and 1.0.1.0
-           This causes us to create registrations:
-                 a)  1.0.0.0/24 on route 1.0.0.0/24
-                 b)  1.0.1.0/24 on route 1.0.0.0/16
-           Now the route for 1.0.0.0/24 is deleted, and (a) is invalidated.
-           1.0.0.1 re-registers, and this entry will be created:
-                 c) 1.0.0.0/16 on 1.0.0.0/16.
-           But (b) is still registered.  So we need to detect this here,
-	   and invalidate it, so it can pick up the new entry. */
+	//
+	// We might have some old registrations for more specific
+	// subsets of this subnet.  If we do, we must invalidate them
+	//   now.  This might happen if the following occurs:
+	//   We have two routes:  1.0.0.0/16 and 1.0.0.0/24.
+	//   We have two addresses that register interest: 1.0.0.1 and 1.0.1.0
+	// This causes us to create registrations:
+	//       a)  1.0.0.0/24 on route 1.0.0.0/24
+	//       b)  1.0.1.0/24 on route 1.0.0.0/16
+	// Now the route for 1.0.0.0/24 is deleted, and (a) is invalidated.
+	// 1.0.0.1 re-registers, and this entry will be created:
+	//       c) 1.0.0.0/16 on 1.0.0.0/16.
+	// But (b) is still registered.  So we need to detect this here,
+	// and invalidate it, so it can pick up the new entry.
+	//
 	iter = _ipregistry.search_subtree(net);
 	while (iter != _ipregistry.end()) {
 	    next_iter = iter;
@@ -291,8 +294,8 @@ RegisterTable<A>::add_registration(const IPNet<A> &net,
 
 template<class A>
 bool
-RegisterTable<A>::delete_registration(const IPNet<A> &net,
-				      const string &module)
+RegisterTable<A>::delete_registration(const IPNet<A>& net,
+				      const string& module)
 {
     const ModuleData *tmpmod = new ModuleData(module);
     set<const ModuleData*, ModuleCmp>::iterator mod_iter;
@@ -342,8 +345,8 @@ RegisterTable<A>::delete_registration(const IPNet<A> &net,
 //this is the method to be called to register a route
 template<class A>
 RouteRegister<A>*
-RegisterTable<A>::register_route_range(const A &addr,
-				       const string &module)
+RegisterTable<A>::register_route_range(const A& addr,
+				       const string& module)
 {
     debug_msg("*****\nRRR: register_route_range: %s\n", addr.str().c_str());
     RouteRange<A> *rrange;
@@ -360,11 +363,11 @@ RegisterTable<A>::register_route_range(const A &addr,
     return rreg;
 }
 
-//this is the method to be called to deregister a route
+// this is the method to be called to deregister a route
 template<class A>
 bool
-RegisterTable<A>::deregister_route_range(const IPNet<A> subnet,
-					 const string &module)
+RegisterTable<A>::deregister_route_range(const IPNet<A>& subnet,
+					 const string& module)
 {
     return delete_registration(subnet, module);
 }
@@ -390,7 +393,7 @@ RegisterTable<A>::print()
 #ifdef DEBUG_LOGGING
     printf("%s\n", str().c_str());
     typename Trie<A, RouteRegister<A>*>::iterator i;
-    for (i = _ipregistry.begin(); i != _ipregistry.end(); i++) {
+    for (i = _ipregistry.begin(); i != _ipregistry.end(); ++i) {
 	printf("----\n");
 	printf("%s\n", i.payload()->str().c_str());
     }
@@ -401,7 +404,7 @@ template<class A>
 void
 RegisterTable<A>::notify_route_changed(
     typename Trie<A, RouteRegister<A>*>::iterator iter,
-    const IPRouteEntry<A> &changed_route)
+    const IPRouteEntry<A>& changed_route)
 {
     list <string> module_names = iter.payload()->module_names();
     list <string>::const_iterator i;
@@ -426,7 +429,7 @@ RegisterTable<A>::notify_route_changed(
 	notify_invalidated(iter);
     } else {
 	uint32_t metric = changed_route.global_metric();
-	for (i = module_names.begin(); i != module_names.end(); i++) {
+	for (i = module_names.begin(); i != module_names.end(); ++i) {
 	    _register_server
 		->send_route_changed(*i,
 				     iter.payload()->valid_subnet(),
@@ -443,7 +446,7 @@ RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>*>::iterat
     list <string>::const_iterator i;
     IPNet<A> valid_subnet = iter.payload()->valid_subnet();
     debug_msg("notify_invalidated: %s\n", valid_subnet.str().c_str());
-    for (i = module_names.begin(); i != module_names.end(); i++) {
+    for (i = module_names.begin(); i != module_names.end(); ++i) {
 	debug_msg("we will send an invalidate to %s\n", (*i).c_str());
 	_register_server->send_invalidate(*i, valid_subnet, _mcast);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.4 2003/03/10 23:20:58 hodson Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.5 2003/03/15 02:37:59 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -70,7 +70,7 @@ public:
     /**
      * Set test-mode - don't try to communicate with the FEA
      */
-    void no_fea() {_no_fea = true;}
+    void no_fea() { _no_fea = true; }
 
     /**
      * Start the process of registering with the FEA, etc
@@ -173,16 +173,16 @@ private:
 
     bool _no_fea;
 
-    XrlRouter &_xrl_rtr;
-    EventLoop &_eventloop;
+    XrlRouter& _xrl_rtr;
+    EventLoop& _eventloop;
     RibManager *_rib_manager;
     XrlIfmgrV0p1Client _ifmgr_client;
     XorpTimer _register_retry_timer;
     State _state;
     int _register_retry_counter;
 
-    /* the following variables keep track of how many answers we're
-       still expecting from various pipelined queries to the FEA */
+    // the following variables keep track of how many answers we're
+    // still expecting from various pipelined queries to the FEA
     int _interfaces_remaining;
     int _vifs_remaining;
     int _addrs_remaining;

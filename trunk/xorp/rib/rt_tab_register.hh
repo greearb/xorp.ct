@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.2 2003/01/17 03:46:42 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.3 2003/03/10 23:20:57 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -36,13 +36,13 @@ public:
      * @param modulename the XRL target name of the module that
      * requested notification about a route change.  
      */
-    ModuleData(const string &modulename) :
+    ModuleData(const string& modulename) :
 	_modulename(modulename), _is_set(0)	{ }
 
     /**
      * @return the XRL target name of the module
      */
-    const string & name() const			{ return _modulename;	}
+    const string& name() const			{ return _modulename;	}
 
     /**
      * @return true if the XRL module needs to be notified about a change.
@@ -59,7 +59,7 @@ public:
      * Clear state indicating the XRL module needs to be notified about
      * a change.  
      */
-    void clear() const				{ _is_set = false;	}
+    void clear() const 				{ _is_set = false;	}
 
     /**
      * @return string representation of this ModuleData for debugging purposes
@@ -70,30 +70,40 @@ public:
 	    return s;
     }
 
+    /**
+     * Comparison operator for ModuleData class.
+     * 
+     * Two ModuleData instances are considered equal if they refer
+     * to the same XRL target, irrespective of the state of their flags.
+     * 
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is considered equal to the
+     * right-hand operand (i.e., if both operands refer to the same XRL
+     * target).
+     */
+    bool operator==(const ModuleData& other) const {
+	return name() == other.name();
+    }
+
+    /**
+     * Less-than operator for ModuleData class.
+     * 
+     * This is needed so that ModuleData instances can be stored in
+     * some STL containers.  
+     * 
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is considered smaller than the
+     * right-hand operand.
+     */
+    bool operator<(const ModuleData& other) const {
+	return name() < other.name();
+    }
+    
 private:
     string _modulename;
     mutable bool _is_set;
 };
 
-/**
- * Comparison operator for ModuleData classes.  Two ModuleData
- * instances are considered equal if they refer to the same XRL
- * target, irrespective of the state of their flags.  
- */
-inline bool operator==(const ModuleData &a, const ModuleData &b)
-{
-    return a.name() == b.name();
-}
-
-
-/**
- * Less-than operator for ModuleData classes.  This is needed so that
- * ModuleData instances can be stored in some STL containers.  
- */
-inline bool operator<(const ModuleData &a, const ModuleData &b)
-{
-    return a.name() < b.name();
-}
 
 
 /**
@@ -145,11 +155,10 @@ public:
      * @param module the ModuleData instance refering to the routing
      * protocol that registered interest.
      */
-    RouteRegister(const IPNet<A> &valid_subnet, 
+    RouteRegister(const IPNet<A>& valid_subnet, 
 		  const IPRouteEntry<A> *route,
 		  const ModuleData *module) :
-	_valid_subnet(valid_subnet), _route(route)	
-    {
+	_valid_subnet(valid_subnet), _route(route) {
 	    _modules.insert(module);
     }
 
@@ -169,8 +178,7 @@ public:
      * additional routing protocol that just registered interest.
      * @return false if the module was already registered, true otherwise.  
      */
-    bool add_registrant(const ModuleData *module) 
-    {
+    bool add_registrant(const ModuleData *module) {
 	    debug_msg("add_registrant: Module: %s\n", module->str().c_str());
 	    if (_modules.find(module) != _modules.end())
 		return false;
@@ -193,10 +201,9 @@ public:
      * this registration changes.  It marks the original instances of
      * the ModuleData as needing nitification.  
      */
-    void mark_modules() const			
-    {
+    void mark_modules() const {
 	    set<const ModuleData*>::iterator i;
-	    for ( i = _modules.begin(); i != _modules.end(); ++i)
+	    for (i = _modules.begin(); i != _modules.end(); ++i)
 		(*i)->set();
     }
 
@@ -209,7 +216,7 @@ public:
      * @return the subnet of this RouteRegister's route for which this
      * registration is valid 
      */
-    inline const IPNet<A> &valid_subnet() const { return _valid_subnet; }
+    inline const IPNet<A>& valid_subnet() const { return _valid_subnet; }
 
     /**
      * @return the RouteRegister's route
@@ -220,8 +227,7 @@ public:
      * @return the module names interested in this RouteRegister as a
      * list of strings 
      */
-    list <string> module_names() const		
-    {
+    list <string> module_names() const {
 	    list <string> names;
 	    set <const ModuleData*, ModuleCmp>::const_iterator i;
 	    for (i = _modules.begin(); i != _modules.end(); ++i)
@@ -233,13 +239,14 @@ public:
      * @return this RouteRegister as a string for debugging purposes
      */
     string str() const;
+    
 private:
-    set <const ModuleData*, ModuleCmp> _modules;
-    /* _net duplicates the storage of this in the RegisterTable map -
-       not very efficient */
+    set<const ModuleData*, ModuleCmp> _modules;
+    // _net duplicates the storage of this in the RegisterTable map -
+    // not very efficient
     IPNet<A> _valid_subnet;
-    /* _valid_subnet is the subset of _route->net() that this
-       registration is valid for */
+    // _valid_subnet is the subset of _route->net() that this
+    // registration is valid for
     const IPRouteEntry<A> *_route;
 };
 
@@ -322,7 +329,7 @@ public:
      * Lookup a route in the RIB.  This request will be propagated to
      * the parent table unchanged.  
      */
-    const IPRouteEntry<A>* lookup_route(const A &addr) const {
+    const IPRouteEntry<A>* lookup_route(const A& addr) const {
 	    return _parent->lookup_route(addr);
     }
 
@@ -331,7 +338,7 @@ public:
      * propagated to the parent table unchanged.  It is not expected
      * this will be called, but not prohibited.  
      */
-    RouteRange<A>* lookup_route_range(const A &addr) const {
+    RouteRange<A>* lookup_route_range(const A& addr) const {
 	    return _parent->lookup_route_range(addr);
     }
 
@@ -381,8 +388,8 @@ public:
      * subset of this route (including the address of interest) for
      * which this answer also applies.
      */
-    RouteRegister<A>* register_route_range(const A &addr,
-					   const string &module);
+    RouteRegister<A>* register_route_range(const A& addr,
+					   const string& module);
 
     /**
      * deregister_route_range is called to de-register interest in routing
@@ -395,8 +402,8 @@ public:
      * @return bool true if the registration was found and removed,
      * false otherwise.
      */
-    bool deregister_route_range(const IPNet<A> subnet,
-				const string &module);
+    bool deregister_route_range(const IPNet<A>& subnet,
+				const string& module);
 
     /**
      * @return REGISTER_TABLE
@@ -407,22 +414,20 @@ public:
      * Cause the register server to push out queued changes to the
      * routing protocols.  
      */
-    void flush() 
-    {
-	_register_server->flush();
-    }
+    void flush() { _register_server->flush(); }
+    
 private:
     RouteRegister<A>* add_registration(const IPNet<A>& net,
 				       const IPRouteEntry<A>* route,
-				       const string &module);
-    bool delete_registration(const IPNet<A>& net, const string &module);
+				       const string& module);
+    bool delete_registration(const IPNet<A>& net, const string& module);
     bool notify_relevant_modules(bool add,
-				 const IPRouteEntry<A> &changed_route);
+				 const IPRouteEntry<A>& changed_route);
     bool find_matches(const IPRouteEntry<A>& route);
 
     void notify_invalidated(typename Trie<A, RouteRegister<A>*>::iterator iter);
     void notify_route_changed(typename Trie<A, RouteRegister<A>*>::iterator iter,
-			      const IPRouteEntry<A> &changed_route);
+			      const IPRouteEntry<A>& changed_route);
 
     set<const ModuleData*, ModuleCmp> _module_names;
     Trie<A, RouteRegister<A>*> _ipregistry;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.2 2003/01/17 03:46:41 pavlin Exp $
+// $XORP: xorp/rib/parser.hh,v 1.3 2003/03/10 23:20:54 hodson Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -205,16 +205,17 @@ public:
     int  num_args() const { return _nargs; }
 
 protected:
-    /** 
-     * Abort if number of args in syntax string does not matches
-     * number given. 
-     */
+    //
+    // Abort if number of args in syntax string does not matches
+    //  number given. 
+    //
     void check_syntax();
 
     void set_last_arg(int n) { _last_arg = n; }
-    /* bind positional argument to Datum type so when argument n arrives, it
-     * can be decoded into a member variable 
-     */
+    //
+    // bind positional argument to Datum type so when argument n arrives, it
+    // can be decoded into a member variable 
+    //
     void bind(int n, DatumVariableBinding* b);
     void bind_int(int n, int& i);
     void bind_string(int n, string& s);

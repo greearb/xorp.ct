@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.2 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.3 2003/03/15 02:28:39 pavlin Exp $"
 
 #include "rib_module.h"
 #include "rt_tab_merged.hh"
@@ -42,13 +42,14 @@ MergedTable<A>::MergedTable<A>(const string&  tablename,
 template <class A>
 int
 MergedTable<A>::
-add_route(const IPRouteEntry<A> &route, RouteTable<A> *caller)
+add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller)
 {
     debug_msg("MT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
 
     cp(2);
-    if (_next_table == NULL) return -1;
+    if (_next_table == NULL)
+	return -1;
     cp(3);
     cp(4);
     RouteTable<A> *other_table;
@@ -85,7 +86,8 @@ int
 MergedTable<A>::delete_route(const IPRouteEntry<A> *route,
 			       RouteTable<A> *caller) 
 {
-    if (_next_table == NULL) return -1;
+    if (_next_table == NULL)
+	return -1;
     RouteTable<A> *other_table;
     cp(10);
     if (caller == _table_b) {
@@ -122,7 +124,7 @@ MergedTable<A>::delete_route(const IPRouteEntry<A> *route,
 
 template <class A>
 const IPRouteEntry<A> *
-MergedTable<A>::lookup_route(const IPNet<A> &net) const 
+MergedTable<A>::lookup_route(const IPNet<A>& net) const 
 {
     const IPRouteEntry<A> *found_a, *found_b;
     found_a = _table_a->lookup_route(net);
@@ -149,7 +151,7 @@ MergedTable<A>::lookup_route(const IPNet<A> &net) const
 
 template <class A>
 const IPRouteEntry<A> *
-MergedTable<A>::lookup_route(const A &addr) const 
+MergedTable<A>::lookup_route(const A& addr) const 
 {
     const IPRouteEntry<A> *found_b, *found_a;
 
@@ -165,9 +167,11 @@ MergedTable<A>::lookup_route(const A &addr) const
 	return found_b;
     }
 
+    //
     // The route was in both tables.  We need to do longest match
     // unless the prefixes are the same, when we take the route with the
     // lowest admin distance
+    //
     int hi_prefix, lo_prefix;
     hi_prefix = found_b->net().prefix_len();
     lo_prefix = found_a->net().prefix_len();
@@ -203,14 +207,14 @@ MergedTable<A>::replumb(RouteTable<A> *old_parent,
 	cp(27);
 	_table_b = new_parent;
     } else {
-	/*shouldn't be possible*/
+	/// shouldn't be possible
 	abort();
     }
 }
 
 template<class A>
 RouteRange<A>*
-MergedTable<A>::lookup_route_range(const A &addr) const 
+MergedTable<A>::lookup_route_range(const A& addr) const 
 {
     RouteRange<A>* lo_rr = _table_a->lookup_route_range(addr);
     RouteRange<A>* hi_rr = _table_b->lookup_route_range(addr);

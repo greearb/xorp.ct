@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.2 2003/03/10 23:20:57 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
@@ -40,10 +40,11 @@ public:
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
-    int type() const {return REDIST_TABLE;}
-    RouteTable<A>* parent() {return _from_table;}
+    int type() const { return REDIST_TABLE; }
+    RouteTable<A>* parent() { return _from_table; }
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
+    
 private:
     RouteTable<A>* _from_table;
     OriginTable<A>* _to_table;
