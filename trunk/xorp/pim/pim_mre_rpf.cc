@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.27 2004/06/10 22:41:31 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.28 2004/07/26 08:40:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -216,13 +216,6 @@ PimMre::set_nbr_mrib_next_hop_rp(PimNbr *v)
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
 	pim_node().delete_pim_mre_no_pim_nbr(this);
     }
-    
-    //
-    // Set RPF'(*,G) if necessary
-    //
-    if (is_wc()) {
-	set_rpfp_nbr_wc(compute_rpfp_nbr_wc());
-    }
 }
 
 // Note: applies only for (S,G)
@@ -254,13 +247,6 @@ PimMre::set_nbr_mrib_next_hop_s(PimNbr *v)
     }
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
 	pim_node().delete_pim_mre_no_pim_nbr(this);
-    }
-    
-    //
-    // Set RPF'(S,G) if necessary
-    //
-    if (is_sg()) {
-	set_rpfp_nbr_sg(compute_rpfp_nbr_sg());
     }
 }
 
@@ -941,7 +927,6 @@ PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
     }
 }
 
-
 //
 // The NBR(RPF_interface(RP(G)), MRIB.next_hop(RP(G))) has changed.
 // Take the appropriate action.
@@ -960,7 +945,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_wc_changed()
     if (old_pim_nbr == new_pim_nbr)
 	return;				// Nothing changed
 
-    set_nbr_mrib_next_hop_rp(new_pim_nbr);    
+    set_nbr_mrib_next_hop_rp(new_pim_nbr);
 }
 
 //
