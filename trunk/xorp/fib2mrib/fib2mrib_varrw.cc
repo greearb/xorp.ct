@@ -13,7 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.1 2005/02/11 04:21:39 pavlin Exp $"
+
+#include "fib2mrib_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "fib2mrib_module.h"
 #include "fib2mrib_varrw.hh"
