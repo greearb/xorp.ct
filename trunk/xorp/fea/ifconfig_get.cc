@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.3 2004/06/10 22:40:51 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.4 2004/08/17 02:20:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -53,6 +53,12 @@ void
 IfConfigGet::register_ifc_primary()
 {
     _ifc.register_ifc_get_primary(this);
+}
+
+void
+IfConfigGet::register_ifc_secondary()
+{
+    _ifc.register_ifc_get_secondary(this);
 }
 
 int
