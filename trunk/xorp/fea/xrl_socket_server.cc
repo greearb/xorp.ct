@@ -292,18 +292,6 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     ssize_t rsz = recvfrom(fd, &cmd->data()[0], cmd->data().size(), 0,
 			   &sa, &sa_len);
 
-    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
-    IPv4 	src_addr(sin);
-    uint16_t 	src_port(ntohs(sin.sin_port));
-
-    if (_ss.address_table().address_valid(src_addr)) {
-	// Looks like one of ours, drop it silently.
-	// This should only be invoked for multicast packets where
-	// setting loopback failed.
-	delete cmd;
-	return;
-    }
-
     if (rsz < 0) {
 	delete cmd;
 	ref_ptr<XrlSocketCommandBase> ecmd = new
@@ -316,6 +304,10 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     cmd->data().resize(rsz);
 
     XLOG_ASSERT(sa.sa_family == AF_INET);
+    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
+
+    IPv4 	src_addr(sin);
+    uint16_t 	src_port(ntohs(sin.sin_port));
 
     cmd->set_source_host(src_addr);
     cmd->set_source_port(src_port);
@@ -907,9 +899,6 @@ XrlSocketServer::socket4_0_1_send_to(const string&		sockid,
 			     reinterpret_cast<const sockaddr*>(&sai),
 			     sizeof(sai));
 
-	    fprintf(stderr, "send_to %s/%u %u bytes errno = %d\n",
-		    remote_addr.str().c_str(), remote_port,
-		    reinterpret_cast<uint32_t>(data.size()), errno);
 	    if (out == (int)data.size()) {
 		return XrlCmdError::OKAY();
 	    }
