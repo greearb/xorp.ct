@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.48 2005/02/01 01:46:45 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.49 2005/03/05 01:29:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1027,7 +1027,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
     } else {
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix_len = rt_reg->valid_subnet().prefix_len();
+	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
 	NextHop *nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
@@ -1091,7 +1091,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
     } else {
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix_len = rt_reg->valid_subnet().prefix_len();
+	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
 	NextHop *nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
