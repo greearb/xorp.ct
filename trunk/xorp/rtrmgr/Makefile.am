@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.2 2003/02/21 22:54:32 mjh Exp $
 ##
+
+# -- Subdirectories
+SUBDIRS = . tools
 
 # -- Real Programs
 bin_PROGRAMS	 = rtrmgr xorpsh

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.2 2003/02/04 20:08:37 mjh Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.3 2003/02/09 03:40:19 mjh Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -25,9 +25,11 @@
 #include "libxipc/xrl_args.hh"
 #include "xrl/interfaces/bgp_xif.hh"
 
+
 class PrintRoutes : public XrlBgpV0p2Client {
 public:
-    PrintRoutes(bool verbose, int interval);
+    enum detail_t {SUMMARY, NORMAL, DETAIL};
+    PrintRoutes(detail_t verbose, int interval);
     void get_v4_route_list_start();
     void get_v4_route_list_start_done(const XrlError& e, 
 				   const uint32_t* token);
@@ -48,7 +50,7 @@ private:
     void timer_expired() { _done = true;}
     EventLoop _eventloop;
     XrlStdRouter _xrl_rtr;
-    bool _verbose;
+    detail_t _verbose;
     uint32_t _token;
     bool _done;
     uint32_t _count;

@@ -80,53 +80,36 @@ RANLIB = @RANLIB@
 RIP = @RIP@
 RIP_OS = @RIP_OS@
 
-bin_PROGRAMS = print_peers xorpsh_print_peers print_routes xorpsh_print_routes
+bin_PROGRAMS = show_interfaces
 
-noinst_PROGRAMS = 
-noinst_LIBRARIES = 
+# -- Test Programs
+#bin_PROGRAMS	+=
+
+#TESTS		 = 
+
+#noinst_PROGRAMS = $(TESTS)
+
+#EXTRA_DIST	 = 
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libbgpxif.a
-print_peers_SOURCES = print_peer.cc print_peer.hh print_peers.cc
-xorpsh_print_peers_SOURCES = print_peer.cc print_peer.hh xorpsh_print_peers.cc
-print_routes_SOURCES = print_routes.cc  print_routes.hh  print_routes_main.cc 
-print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.a
-xorpsh_print_routes_SOURCES = print_routes.cc print_routes.hh xorpsh_print_routes.cc
-xorpsh_print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.a
+LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+show_interfaces_SOURCES = show_interfaces.hh show_interfaces.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(noinst_LIBRARIES)
-
-PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS =  $(bin_PROGRAMS)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I../..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
-print_peers_OBJECTS =  print_peer.o print_peers.o
-print_peers_LDADD = $(LDADD)
-print_peers_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
+show_interfaces_OBJECTS =  show_interfaces.o
+show_interfaces_LDADD = $(LDADD)
+show_interfaces_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libbgpxif.a
-print_peers_LDFLAGS = 
-xorpsh_print_peers_OBJECTS =  print_peer.o xorpsh_print_peers.o
-xorpsh_print_peers_LDADD = $(LDADD)
-xorpsh_print_peers_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libbgpxif.a
-xorpsh_print_peers_LDFLAGS = 
-print_routes_OBJECTS =  print_routes.o print_routes_main.o
-print_routes_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libbgpxif.a $(top_builddir)/bgp/libbgp.a
-print_routes_LDFLAGS = 
-xorpsh_print_routes_OBJECTS =  print_routes.o xorpsh_print_routes.o
-xorpsh_print_routes_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/xrl/interfaces/libbgpxif.a $(top_builddir)/bgp/libbgp.a
-xorpsh_print_routes_LDFLAGS = 
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+show_interfaces_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -145,31 +128,20 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/print_peer.P .deps/print_peers.P .deps/print_routes.P \
-.deps/print_routes_main.P .deps/xorpsh_print_peers.P \
-.deps/xorpsh_print_routes.P
-SOURCES = $(print_peers_SOURCES) $(xorpsh_print_peers_SOURCES) $(print_routes_SOURCES) $(xorpsh_print_routes_SOURCES)
-OBJECTS = $(print_peers_OBJECTS) $(xorpsh_print_peers_OBJECTS) $(print_routes_OBJECTS) $(xorpsh_print_routes_OBJECTS)
+DEP_FILES =  .deps/show_interfaces.P
+SOURCES = $(show_interfaces_SOURCES)
+OBJECTS = $(show_interfaces_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .cc .o .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --gnu bgp/tools/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu rtrmgr/tools/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-
-mostlyclean-noinstLIBRARIES:
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-
-distclean-noinstLIBRARIES:
-
-maintainer-clean-noinstLIBRARIES:
 
 mostlyclean-binPROGRAMS:
 
@@ -196,15 +168,6 @@ uninstall-binPROGRAMS:
 	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
-mostlyclean-noinstPROGRAMS:
-
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-
-distclean-noinstPROGRAMS:
-
-maintainer-clean-noinstPROGRAMS:
-
 .s.o:
 	$(COMPILE) -c $<
 
@@ -221,21 +184,9 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-print_peers: $(print_peers_OBJECTS) $(print_peers_DEPENDENCIES)
-	@rm -f print_peers
-	$(CXXLINK) $(print_peers_LDFLAGS) $(print_peers_OBJECTS) $(print_peers_LDADD) $(LIBS)
-
-xorpsh_print_peers: $(xorpsh_print_peers_OBJECTS) $(xorpsh_print_peers_DEPENDENCIES)
-	@rm -f xorpsh_print_peers
-	$(CXXLINK) $(xorpsh_print_peers_LDFLAGS) $(xorpsh_print_peers_OBJECTS) $(xorpsh_print_peers_LDADD) $(LIBS)
-
-print_routes: $(print_routes_OBJECTS) $(print_routes_DEPENDENCIES)
-	@rm -f print_routes
-	$(CXXLINK) $(print_routes_LDFLAGS) $(print_routes_OBJECTS) $(print_routes_LDADD) $(LIBS)
-
-xorpsh_print_routes: $(xorpsh_print_routes_OBJECTS) $(xorpsh_print_routes_DEPENDENCIES)
-	@rm -f xorpsh_print_routes
-	$(CXXLINK) $(xorpsh_print_routes_LDFLAGS) $(xorpsh_print_routes_OBJECTS) $(xorpsh_print_routes_LDADD) $(LIBS)
+show_interfaces: $(show_interfaces_OBJECTS) $(show_interfaces_DEPENDENCIES)
+	@rm -f show_interfaces
+	$(CXXLINK) $(show_interfaces_LDFLAGS) $(show_interfaces_OBJECTS) $(show_interfaces_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 
@@ -270,14 +221,14 @@ maintainer-clean-tags:
 
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
-subdir = bgp/tools
+subdir = rtrmgr/tools
 
 distdir: $(DISTFILES)
 	here=`cd $(top_builddir) && pwd`; \
 	top_distdir=`cd $(top_distdir) && pwd`; \
 	distdir=`cd $(distdir) && pwd`; \
 	cd $(top_srcdir) \
-	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu bgp/tools/Makefile
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu rtrmgr/tools/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
@@ -358,7 +309,7 @@ install-am: all-am
 install: install-am
 uninstall-am: uninstall-binPROGRAMS
 uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(PROGRAMS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -375,28 +326,22 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-binPROGRAMS \
-		mostlyclean-noinstPROGRAMS mostlyclean-compile \
+mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-compile \
 		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-binPROGRAMS clean-noinstPROGRAMS \
-		clean-compile clean-tags clean-depend clean-generic \
-		mostlyclean-am
+clean-am:  clean-binPROGRAMS clean-compile clean-tags clean-depend \
+		clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-binPROGRAMS \
-		distclean-noinstPROGRAMS distclean-compile \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+distclean-am:  distclean-binPROGRAMS distclean-compile distclean-tags \
+		distclean-depend distclean-generic clean-am
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-binPROGRAMS \
-		maintainer-clean-noinstPROGRAMS \
+maintainer-clean-am:  maintainer-clean-binPROGRAMS \
 		maintainer-clean-compile maintainer-clean-tags \
 		maintainer-clean-depend maintainer-clean-generic \
 		distclean-am
@@ -405,12 +350,8 @@ maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
-mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
+.PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
-mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
-clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \
@@ -421,6 +362,10 @@ uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+
+# -- Library Sources
+
+# -- Extra files and directories to add to the distribution
 
 ################################################################
 
