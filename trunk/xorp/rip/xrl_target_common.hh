@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.9 2004/03/24 19:14:09 atanu Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.10 2004/05/03 23:11:58 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -275,7 +275,10 @@ public:
 
     XrlCmdError redistx_0_1_add_route(const IPNet<A>&		net,
 				      const A&			nexthop,
-				      const uint32_t&		global_metric,
+				      const string&		ifname,
+				      const string&		vifname,
+				      const uint32_t&		metric,
+				      const uint32_t&		ad,
 				      const string&		cookie);
 
     XrlCmdError redistx_0_1_delete_route(const IPNet<A>&	net,
@@ -1127,7 +1130,10 @@ template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 					     const A&		nexthop,
-					     const uint32_t&	/* g_metric */,
+					     const string&	/* ifname */,
+					     const string&	/* vifname */,
+					     const uint32_t&	/* metric */,
+					     const uint32_t&	/* admin_d */,
 					     const string&	cookie)
 {
     // We use cookie of the protocol name to make find the relevant redist table simple.

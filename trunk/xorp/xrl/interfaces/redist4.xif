@@ -1,8 +1,21 @@
 interface redist4/0.1 {
 
-	add_route ? network:ipv4net					\
-		  & nexthop:ipv4					\
-		  & global_metric:u32					\
+	/**
+	 * @param dst destination network.
+	 * @param nh nexthop router address.
+	 * @param ifname interface name associated with nexthop.
+	 * @param vifname virtual interface name with nexthop.
+	 * @param metric origin routing protocol metric for route.
+	 * @param ad administrative distance of origin routing protocol.
+	 * @param cookie value set be requestor to identify redistribution
+	 *        source.  Typical value is the originating protocol name.
+	 */
+	add_route ? dst:ipv4net						\
+		  & nh:ipv4						\
+		  & ifname:txt						\
+		  & vifname:txt						\
+		  & metric:u32						\
+		  & ad:u32						\
 		  & cookie:txt
 
 	delete_route ? network:ipv4net					\

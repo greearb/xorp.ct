@@ -467,10 +467,14 @@ XrlRipngTarget::ripng_0_1_no_import_protocol_routes(const string& protocol)
 XrlCmdError
 XrlRipngTarget::redist6_0_1_add_route(const IPv6Net&	net,
 				      const IPv6&	nexthop,
-				      const uint32_t&	global_metric,
+				      const string&	ifname,
+				      const string&	vifname,
+				      const uint32_t&	metric,
+				      const uint32_t&	admin_distance,
 				      const string&	cookie)
 {
-    return _ct->redistx_0_1_add_route(net, nexthop, global_metric, cookie);
+    return _ct->redistx_0_1_add_route(net, nexthop, ifname, vifname, metric,
+				      admin_distance, cookie);
 }
 
 XrlCmdError

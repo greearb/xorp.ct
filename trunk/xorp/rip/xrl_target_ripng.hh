@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.9 2004/03/09 22:17:07 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.10 2004/05/03 23:11:58 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -278,7 +278,10 @@ public:
 
     XrlCmdError redist6_0_1_add_route(const IPv6Net&		net,
 				      const IPv6&		nexthop,
-				      const uint32_t&		global_metric,
+				      const string&		ifname,
+				      const string&		vifname,
+				      const uint32_t&		metric,
+				      const uint32_t&		admin_distance,
 				      const string&		cookie);
 
     XrlCmdError redist6_0_1_delete_route(const IPv6Net&		net,
