@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.17 2004/09/13 20:37:48 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.18 2004/09/15 18:47:26 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -32,6 +32,10 @@ public:
     
     virtual void register_ifc_primary();
     virtual void register_ifc_secondary();
+    virtual void set_primary() { _is_primary = true; }
+    virtual void set_secondary() { _is_primary = false; }
+    virtual bool is_primary() const { return _is_primary; }
+    virtual bool is_secondary() const { return !_is_primary; }
 
     /**
      * Start operation.
@@ -125,6 +129,10 @@ protected:
      * @param flags the flags to set on the vif.
      * @param is_up if true, the vif is UP, otherwise is DOWN.
      * @param is_deleted if true, the vif is deleted.
+     * @param broadcast if true, the vif is broadcast capable.
+     * @param loopback if true, the vif corresponds to the loopback interface.
+     * @param point_to_point if true, the vif is a point-to-point interface.
+     * @param multicast if true, the vif is multicast capable.
      * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -134,6 +142,10 @@ protected:
 			   uint32_t flags,
 			   bool is_up,
 			   bool is_deleted,
+			   bool broadcast,
+			   bool loopback,
+			   bool point_to_point,
+			   bool multicast,
 			   string& errmsg) = 0;
 
     /**
@@ -223,6 +235,7 @@ private:
 			  const IfTreeAddr6& a);
 
     IfConfig&	_ifc;
+    bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
 class IfConfigSetDummy : public IfConfigSet {
@@ -274,6 +287,10 @@ private:
 			   uint32_t flags,
 			   bool is_up,
 			   bool is_deleted,
+			   bool broadcast,
+			   bool loopback,
+			   bool point_to_point,
+			   bool multicast,
 			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
@@ -341,6 +358,10 @@ private:
 			   uint32_t flags,
 			   bool is_up,
 			   bool is_deleted,
+			   bool broadcast,
+			   bool loopback,
+			   bool point_to_point,
+			   bool multicast,
 			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
@@ -431,6 +452,10 @@ private:
 			   uint32_t flags,
 			   bool is_up,
 			   bool is_deleted,
+			   bool broadcast,
+			   bool loopback,
+			   bool point_to_point,
+			   bool multicast,
 			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.29 2004/09/01 18:20:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.30 2004/09/13 20:37:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -100,8 +100,10 @@ int
 IfConfig::register_ifc_get_primary(IfConfigGet *ifc_get)
 {
     _ifc_gets.clear();
-    if (ifc_get != NULL)
+    if (ifc_get != NULL) {
 	_ifc_gets.push_back(ifc_get);
+	ifc_get->set_primary();
+    }
 
     return (XORP_OK);
 }
@@ -110,8 +112,10 @@ int
 IfConfig::register_ifc_set_primary(IfConfigSet *ifc_set)
 {
     _ifc_sets.clear();
-    if (ifc_set != NULL)
+    if (ifc_set != NULL) {
 	_ifc_sets.push_back(ifc_set);
+	ifc_set->set_primary();
+    }
 
     return (XORP_OK);
 }
@@ -120,8 +124,10 @@ int
 IfConfig::register_ifc_observer_primary(IfConfigObserver *ifc_observer)
 {
     _ifc_observers.clear();
-    if (ifc_observer != NULL)
+    if (ifc_observer != NULL) {
 	_ifc_observers.push_back(ifc_observer);
+	ifc_observer->set_primary();
+    }
 
     return (XORP_OK);
 }
@@ -129,8 +135,10 @@ IfConfig::register_ifc_observer_primary(IfConfigObserver *ifc_observer)
 int
 IfConfig::register_ifc_get_secondary(IfConfigGet *ifc_get)
 {
-    if (ifc_get != NULL)
+    if (ifc_get != NULL) {
 	_ifc_gets.push_back(ifc_get);
+	ifc_get->set_secondary();
+    }
 
     return (XORP_OK);
 }
@@ -138,8 +146,10 @@ IfConfig::register_ifc_get_secondary(IfConfigGet *ifc_get)
 int
 IfConfig::register_ifc_set_secondary(IfConfigSet *ifc_set)
 {
-    if (ifc_set != NULL)
+    if (ifc_set != NULL) {
 	_ifc_sets.push_back(ifc_set);
+	ifc_set->set_secondary();
+    }
 
     return (XORP_OK);
 }
@@ -147,8 +157,10 @@ IfConfig::register_ifc_set_secondary(IfConfigSet *ifc_set)
 int
 IfConfig::register_ifc_observer_secondary(IfConfigObserver *ifc_observer)
 {
-    if (ifc_observer != NULL)
+    if (ifc_observer != NULL) {
 	_ifc_observers.push_back(ifc_observer);
+	ifc_observer->set_secondary();
+    }
 
     return (XORP_OK);
 }

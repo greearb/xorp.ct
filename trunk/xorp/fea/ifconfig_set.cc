@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.14 2004/09/13 20:37:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.15 2004/09/15 18:47:26 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -35,7 +35,8 @@
 
 IfConfigSet::IfConfigSet(IfConfig& ifc)
     : _is_running(false),
-      _ifc(ifc)
+      _ifc(ifc),
+      _is_primary(true)
 {
     
 }
@@ -202,28 +203,29 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
     // Set the flags
     //
     do {
-	uint32_t curr_flags = 0;
+	uint32_t pulled_flags = 0;
 	uint32_t new_flags;
-	bool curr_up, new_up, deleted, enabled;
+	bool pulled_up, new_up, deleted, enabled;
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
 
 	deleted = i.is_marked(IfTreeItem::DELETED);
 	enabled = i.enabled();
 
-	// Get the current flags
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	// Get the flags from the pulled config
 	if (ii != ifc().pulled_config().ifs().end())
-	    curr_flags = ii->second.if_flags();
-	new_flags = curr_flags;
+	    pulled_flags = ii->second.if_flags();
+	new_flags = pulled_flags;
 
-	curr_up = curr_flags & IFF_UP;
-	if (curr_up && (deleted || !enabled))
+	pulled_up = pulled_flags & IFF_UP;
+	if (pulled_up && (deleted || !enabled))
 	    new_flags &= ~IFF_UP;
-	if ( (!curr_up) && enabled)
+	if ( (!pulled_up) && enabled)
 	    new_flags |= IFF_UP;
-	if (curr_flags == new_flags)
-	    break;		// XXX: nothing changed
-	new_up = (new_flags & IFF_UP)? true : false;
 
+	if (is_primary() && (new_flags == pulled_flags))
+	    break;		// XXX: nothing changed
+
+	new_up = (new_flags & IFF_UP)? true : false;
 	if (config_interface(i.ifname(), if_index, new_flags, new_up,
 			     deleted, errmsg)
 	    < 0) {
@@ -240,17 +242,27 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
     // Set the MTU
     //
     do {
-	if (i.mtu() == 0)
+	uint32_t new_mtu = i.mtu();
+	uint32_t pulled_mtu = 0;
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+
+	if (ii != ifc().pulled_config().ifs().end())
+	    pulled_mtu = ii->second.mtu();
+
+	if (is_secondary() && (new_mtu == 0)) {
+	    // Get the MTU from the pulled config
+	    new_mtu = pulled_mtu;
+	}
+
+	if (new_mtu == 0)
 	    break;		// XXX: ignore the MTU setup
 
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-	if ((ii != ifc().pulled_config().ifs().end())
-	    && (ii->second.mtu() == i.mtu()))
+	if (is_primary() && (new_mtu == pulled_mtu))
 	    break;		// Ignore: the MTU hasn't changed
 
-	if (set_interface_mtu(i.ifname(), if_index, i.mtu(), errmsg) < 0) {
+	if (set_interface_mtu(i.ifname(), if_index, new_mtu, errmsg) < 0) {
 	    errmsg = c_format("Failed to set MTU to %u bytes: %s",
-			      i.mtu(), errmsg.c_str());
+			      new_mtu, errmsg.c_str());
 	    ifc().er().interface_error(i.name(), errmsg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
@@ -262,15 +274,27 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
     // Set the MAC address
     //
     do {
-	if (i.mac().empty())
-	    break;
-
+	Mac new_mac = i.mac();
+	Mac pulled_mac;
 	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-	if ((ii != ifc().pulled_config().ifs().end())
-	    && (ii->second.mac() == i.mac()))
-	    break;		// Ignore: the MAC hasn't changed
+
+	if (ii != ifc().pulled_config().ifs().end())
+	    pulled_mac = ii->second.mac();
+
+	if (is_secondary() && new_mac.empty()) {
+	    // Get the MAC from the pulled config
+	    new_mac = pulled_mac;
+	}
+
+	if (new_mac.empty())
+	    break;		// XXX: ignore the MAC setup
+
+	if (is_primary() && (new_mac == pulled_mac))
+	    break;		// Ignore: the MTU hasn't changed
 	
-	if (ii->second.enabled()) {
+	if (is_primary()
+	    && (ii != ifc().pulled_config().ifs().end())
+	    && ii->second.enabled()) {
 	    //
 	    // XXX: we don't allow the set the MAC address if the interface
 	    // is not DOWN.
@@ -281,20 +305,21 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
 	}
+
 	struct ether_addr ea;
 	try {
 	    EtherMac em;
-	    em = EtherMac(i.mac());
+	    em = EtherMac(new_mac);
 	    if (em.get_ether_addr(ea) == false) {
 		errmsg = c_format("Expected Ethernet MAC address, got \"%s\"",
-				  i.mac().str().c_str());
+				  new_mac.str().c_str());
 		ifc().er().interface_error(i.name(), errmsg);
 		XLOG_ERROR(ifc().er().last_error().c_str());
 		return;
 	    }
 	} catch (const BadMac& bm) {
 	    errmsg = c_format("Invalid MAC address \"%s\"",
-			      i.mac().str().c_str());
+			      new_mac.str().c_str());
 	    ifc().er().interface_error(i.name(), errmsg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
@@ -346,31 +371,64 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
     // Set the flags
     //
     do {
-	uint32_t curr_flags = 0;
+	uint32_t pulled_flags = 0;
 	uint32_t new_flags;
-	bool curr_up, new_up, deleted, enabled;
+	bool pulled_up, new_up, deleted, enabled;
+	bool pulled_broadcast = false;
+	bool pulled_loopback = false;
+	bool pulled_point_to_point = false;
+	bool pulled_multicast = false;
+	bool new_broadcast = false;
+	bool new_loopback = false;
+	bool new_point_to_point = false;
+	bool new_multicast = false;
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
 
 	deleted = (i.is_marked(IfTreeItem::DELETED) |
 		   v.is_marked(IfTreeItem::DELETED));
 	enabled = i.enabled() & v.enabled();
 
-	// Get the current flags
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	// Get the flags from the pulled config
 	if (ii != ifc().pulled_config().ifs().end())
-	    curr_flags = ii->second.if_flags();
-	new_flags = curr_flags;
+	    pulled_flags = ii->second.if_flags();
+	new_flags = pulled_flags;
 
-	curr_up = curr_flags & IFF_UP;
-	if (curr_up && (deleted || !enabled))
+	pulled_up = pulled_flags & IFF_UP;
+	if (pulled_up && (deleted || !enabled))
 	    new_flags &= ~IFF_UP;
-	if ( (!curr_up) && enabled)
+	if ( (!pulled_up) && enabled)
 	    new_flags |= IFF_UP;
-	if (curr_flags == new_flags)
-	    break;		// XXX: nothing changed
-	new_up = (new_flags & IFF_UP)? true : false;
 
+	if (is_primary() && (new_flags == pulled_flags))
+	    break;		// XXX: nothing changed
+
+	// Set the vif flags
+	if (ii != ifc().pulled_config().ifs().end()) {
+	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
+	    if (vi != ii->second.vifs().end()) {
+		pulled_broadcast = vi->second.broadcast();
+		pulled_loopback = vi->second.loopback();
+		pulled_point_to_point = vi->second.point_to_point();
+		pulled_multicast = vi->second.multicast();
+	    }
+	}
+	if (is_primary()) {
+	    new_broadcast = v.broadcast();
+	    new_loopback = v.loopback();
+	    new_point_to_point = v.point_to_point();
+	    new_multicast = v.multicast();
+	}
+	if (is_secondary()) {
+	    new_broadcast = pulled_broadcast;
+	    new_loopback = pulled_loopback;
+	    new_point_to_point = pulled_point_to_point;
+	    new_multicast = pulled_multicast;
+	}
+
+	new_up = (new_flags & IFF_UP)? true : false;
 	if (config_vif(i.ifname(), v.vifname(), if_index, new_flags, new_up,
-		       deleted, errmsg)
+		       deleted, new_broadcast, new_loopback,
+		       new_point_to_point, new_multicast, errmsg)
 	    < 0) {
 	    errmsg = c_format("Failed to configure vif: %s", errmsg.c_str());
 	    ifc().er().vif_error(i.ifname(), v.vifname(), errmsg);
@@ -458,6 +516,8 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	// Test if a new address
 	bool new_address = true;
 	do {
+	    if (is_secondary())
+		break;
 	    if (ap == NULL)
 		break;
 	    if (ap->addr() != a.addr())
@@ -566,6 +626,8 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	// Test if a new address
 	bool new_address = true;
 	do {
+	    if (is_secondary())
+		break;
 	    if (ap == NULL)
 		break;
 	    if (ap->addr() != a.addr())

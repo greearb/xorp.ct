@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.28 2004/09/13 20:37:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.29 2004/09/15 18:47:26 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -229,14 +229,23 @@ IfConfigSetIoctl::config_vif(const string& ifname,
 			     uint32_t flags,
 			     bool is_up,
 			     bool is_deleted,
+			     bool broadcast,
+			     bool loopback,
+			     bool point_to_point,
+			     bool multicast,
 			     string& errmsg)
 {
     debug_msg("config_vif "
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s)\n",
+	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
+	      "point_to_point = %s multicast = %s)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, flags,
 	      (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false");
+	      (is_deleted)? "true" : "false",
+	      (broadcast)? "true" : "false",
+	      (loopback)? "true" : "false",
+	      (point_to_point)? "true" : "false",
+	      (multicast)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -244,6 +253,10 @@ IfConfigSetIoctl::config_vif(const string& ifname,
     UNUSED(flags);
     UNUSED(is_up);
     UNUSED(is_deleted);
+    UNUSED(broadcast);
+    UNUSED(loopback);
+    UNUSED(point_to_point);
+    UNUSED(multicast);
 
     errmsg = "method not supported";
 
@@ -448,14 +461,23 @@ IfConfigSetIoctl::config_vif(const string& ifname,
 			     uint32_t flags,
 			     bool is_up,
 			     bool is_deleted,
+			     bool broadcast,
+			     bool loopback,
+			     bool point_to_point,
+			     bool multicast,
 			     string& errmsg)
 {
     debug_msg("config_vif "
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s)\n",
+	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
+	      "point_to_point = %s multicast = %s)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, flags,
 	      (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false");
+	      (is_deleted)? "true" : "false",
+	      (broadcast)? "true" : "false",
+	      (loopback)? "true" : "false",
+	      (point_to_point)? "true" : "false",
+	      (multicast)? "true" : "false");
 
     // XXX: nothing to do
 
@@ -465,6 +487,10 @@ IfConfigSetIoctl::config_vif(const string& ifname,
     UNUSED(flags);
     UNUSED(is_up);
     UNUSED(is_deleted);
+    UNUSED(broadcast);
+    UNUSED(loopback);
+    UNUSED(point_to_point);
+    UNUSED(multicast);
     UNUSED(errmsg);
 
     return (XORP_OK);

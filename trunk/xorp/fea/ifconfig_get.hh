@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.13 2004/08/17 02:20:09 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.14 2004/09/01 18:22:37 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -37,6 +37,10 @@ public:
     
     virtual void register_ifc_primary();
     virtual void register_ifc_secondary();
+    virtual void set_primary() { _is_primary = true; }
+    virtual void set_secondary() { _is_primary = false; }
+    virtual bool is_primary() const { return _is_primary; }
+    virtual bool is_secondary() const { return !_is_primary; }
     
     /**
      * Start operation.
@@ -135,6 +139,7 @@ protected:
     
 private:
     IfConfig&	_ifc;
+    bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
 class IfConfigGetDummy : public IfConfigGet {

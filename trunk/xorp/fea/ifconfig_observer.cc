@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer.cc,v 1.3 2004/06/10 22:40:52 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer.cc,v 1.4 2004/08/17 02:20:10 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -32,7 +32,8 @@
 
 IfConfigObserver::IfConfigObserver(IfConfig& ifc)
     : _is_running(false),
-      _ifc(ifc)
+      _ifc(ifc),
+      _is_primary(true)
 {
     
 }
@@ -46,4 +47,10 @@ void
 IfConfigObserver::register_ifc_primary()
 {
     _ifc.register_ifc_observer_primary(this);
+}
+
+void
+IfConfigObserver::register_ifc_secondary()
+{
+    _ifc.register_ifc_observer_secondary(this);
 }
