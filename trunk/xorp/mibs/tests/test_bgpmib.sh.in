@@ -22,10 +22,28 @@ set -e
 # set -x
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
+XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
 
 . ${BGP_SRCDIR}/harness/xrl_shell_funcs.sh ""
 . ${BGP_SRCDIR}/xrl_shell_funcs.sh ""
 
+configure_snmp()
+{
+    # these two variables are used by the tests
+    export SNMPCONF='-c xorp -v 2c'
+    export SNMPHOST=localhost:51515
+
+    # the rest is to configure the snmp agent
+    SNMPDCONF=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.conf
+    SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.log
+    SNMPDDBG=bgp4_mib_1657,xorp_if_mib_module
+    echo 'rwcommunity xorp' > ${SNMPDCONF}
+    echo "dlmod xorp_if_mib_module "					\
+	 "${XORP_TOP_BUILDDIR}/mibs/xorp_if_mib_module.so"		\
+	    >> ${SNMPDCONF} 
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
+    export LD_LIBRARY_PATH
+}
 onexit()
 {
     last=$?
@@ -127,14 +145,14 @@ test1()
     ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
 
     echo -n getting the BGP version...
-    bgp_ver=`snmpget localhost  BGP4-MIB::bgpVersion.0 | sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
+    bgp_ver=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpVersion.0 | sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
     
     if [ "${bgp_ver}" != '"4"' ]; then exit 1; fi
  
     echo "${bgp_ver}"
 
     echo 'walking through the values of the BGP peer table... '
-    snmpwalk localhost  BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
+    snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgpPeerTable > bgpPeerTable1.tmp
     cat bgpPeerTable1.tmp
 
     # confirm that we have established a connection with the real peer
@@ -145,12 +163,12 @@ test1()
     fi
 
     echo 'reading the entire BGP peer table at once... '
-    snmptable -CB -CH -Cf "," localhost  BGP4-MIB::bgpPeerTable \
+    snmptable ${SNMPCONF} -CB -CH -Cf "," ${SNMPHOST}  BGP4-MIB::bgpPeerTable \
         > bgpPeerTable2.tmp
     cat bgpPeerTable2.tmp
 
     echo -n 'read again to check the variables that change with time... '
-    snmpwalk localhost  BGP4-MIB::bgpPeerTable > bgpPeerTable3.tmp
+    snmpwalk ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpPeerTable > bgpPeerTable3.tmp
 
     # verify that only one peer has bgpPeerFsmEstablishedTime is changing 
     tmp=`diff -y  bgpPeerTable{1,3}.tmp | grep FsmEstablishedTime | wc -l` 
@@ -188,15 +206,9 @@ TIME_WAIT=`time_wait_seconds`
 
 if [ ${START_PROGRAMS} = "yes" ]
 then
-    # Prepare snmp call variables
-    DBGTOK=bgp4_mib_1657,xorp_if_mib_module
-    . ${srcdir}/../snmpconfig/snmpenv.sh
-    SNMPCFG=${NEW_SNMPD_CONF}
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
-    export LD_LIBRARY_PATH
     SNMPD=@snmpd@
     if [ "$SNMPD" = "not_found" ]; then exit 1; fi
-
+    configure_snmp
     CXRL="$CALLXRL -r 10"
     BGP_BUILDDIR=${XORP_TOP_BUILDDIR}/bgp
     ${XORP_TOP_BUILDDIR}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
@@ -204,7 +216,7 @@ then
     ${BGP_BUILDDIR}/bgp = $CXRL finder://bgp/common/0.1/get_target_name
     ${BGP_BUILDDIR}/harness/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BGP_BUILDDIR}/harness/coord = $CXRL finder://coord/common/0.1/get_target_name
-    ${SNMPD} -f -l ${XORP_BUILDDIR}/mibs/tests/snmp.log -D${DBGTOK} -c ${SNMPCFG} -r localhost:51515 = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
 EOF
     trap '' 0
     exit $?
