@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.4 2004/09/08 09:52:04 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.5 2004/09/08 10:09:15 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -24,6 +24,8 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6net.hh"
 #include "libxorp/ipvxnet.hh"
+
+#include <vector>
 
 /**************************************************************************/
 
@@ -136,8 +138,8 @@ typedef FwRule<IPvXNet> FwRuleX;
 
 /**************************************************************************/
 
-typedef vector<FwRule4 *> FwTable4;
-typedef vector<FwRule6 *> FwTable6;
+typedef vector<FwRule4*> FwTable4;
+typedef vector<FwRule6*> FwTable6;
 
 class FwProvider;
 class XrlFirewallTarget;
@@ -156,6 +158,16 @@ public:
 	inline FwTable6& get_fwtable6() { return _fwtable6; }
 
 	friend class XrlFirewallTarget;
+
+	// attempt to create a new instance of a firewall provider,
+	// and migrate all rules to this provider at runtime.
+	//
+	// this routine should catch the exception if we can't.
+	//
+	int set_fw_provider(const char* name);
+
+	// XXX: we need a means for a provider to 'take ownership'
+	// of the tables.
 
 private:
 	// Underlying firewall provider interface in use, or NULL
@@ -192,8 +204,8 @@ public:
 	/* General provider interface */
 	virtual bool get_enabled() const = 0;
 	virtual int set_enabled(bool enabled) = 0;
-	virtual const string& get_provider_name() const = 0;
-	virtual const string& get_provider_version() const = 0;
+	virtual const char* get_provider_name() const = 0;
+	virtual const char* get_provider_version() const = 0;
 
 	/* IPv4 firewall provider interface */
 	virtual int add_rule4(FwRule4& rule) = 0;
@@ -206,8 +218,6 @@ public:
 	virtual int delete_rule6(FwRule6& rule) = 0;
 	virtual uint32_t get_num_xorp_rules6() const = 0;
 	virtual uint32_t get_num_system_rules6() const = 0;
-
-	/* XXX: What about rule retrieval? */
 
 protected:
 	FirewallManager&	_m;	// Back-reference to XRL target and
