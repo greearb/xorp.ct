@@ -43,6 +43,9 @@ route verify 10.0.2.2 de2 10.0.2.1 0
 #
 #-------------------------------------------------------------------
 #add static routes
+# add default entry and verify it
+route add static 0.0.0.0/0 10.0.0.1 0
+route verify 128.26.0.1 de0 10.0.0.1 0
 route add static 128.16.0.0/16 10.0.1.2 1
 route verify 128.16.0.1 de1 10.0.1.2 1
 #
@@ -58,6 +61,10 @@ route verify 128.16.128.1 de1 10.0.1.2 1
 #
 #-------------------------------------------------------------------
 #check basic deletion works
+# delete the default entry and verify it
+route delete static 0.0.0.0/0
+route verify 128.26.0.1 discard 0.0.0.0 0
+#
 route delete static 128.16.64.0/20
 route verify 128.16.64.1 de1 10.0.1.2 1
 #OK, add it back again
