@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_rtsock.cc,v 1.2 2003/05/28 21:50:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_netlink.cc,v 1.1 2003/10/14 02:17:12 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -113,9 +113,29 @@ FtiConfigTableObserverNetlink::stop()
 void
 FtiConfigTableObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
 {
-    // TODO: XXX: PAVPAVPAV: use it?
-    UNUSED(data);
-    UNUSED(nbytes);
+    list<FteX> fte_list;
+
+    //
+    // Get the IPv4 routes
+    //
+    ftic().ftic_table_get().parse_buffer_nlm(AF_INET, fte_list, data, nbytes,
+					     false);
+    if (! fte_list.empty()) {
+	// TODO: XXX: PAVPAVPAV: use the result!
+    }
+    fte_list.clear();
+
+#ifdef HAVE_IPV6
+    //
+    // Get the IPv6 routes
+    //
+    ftic().ftic_table_get().parse_buffer_nlm(AF_INET6, fte_list, data, nbytes,
+					     false);
+    if (! fte_list.empty()) {
+	// TODO: XXX: PAVPAVPAV: use the result!
+    }
+    fte_list.clear();
+#endif // HAVE_IPV6
 }
 
 void
