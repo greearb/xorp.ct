@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.7 2003/09/24 01:11:38 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.8 2003/10/24 00:02:24 hodson Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
@@ -61,30 +61,30 @@ public:
 
     /**
      * Add an xrl target to list of those that will receive interface
-     * event notifications about all interfaces.
+     * event notifications about all system interfaces.
      *
      * @param xrl_target the xrl target to be added.
      * @return true on success, false if target already listed.
      */
-    bool add_all_interfaces_reportee(const string& xrl_target);
+    bool add_system_interfaces_reportee(const string& xrl_target);
 
     /**
      * Test if an xrl target is on the list of those that will receive
-     * interface event notifications about all interfaces.
+     * interface event notifications about all system interfaces.
      *
      * @param xrl_target the xrl target to be tested.
      * @return true if xrl target is on the list, otherwise false.
      */
-    bool has_all_interfaces_reportee(const string& xrl_target) const;
+    bool has_system_interfaces_reportee(const string& xrl_target) const;
 
     /**
      * Remove an xrl target from the list of those that receive interface
-     * event notifications about all interfaces.
+     * event notifications about all system interfaces.
      *
      * @param xrl_target the xrl target to be removed.
      * @return true on success, false if target is not listed.
      */
-    bool remove_all_interfaces_reportee(const string& xrl_target);
+    bool remove_system_interfaces_reportee(const string& xrl_target);
 
     /**
      * Send announcement of interface update.
@@ -92,12 +92,12 @@ public:
      * @param ifname the name of the interface updated.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
-     * @param is_all_interfaces_reportee true if the update is for reportee
-     * that expect event notifications about all interfaces.
+     * @param is_system_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all system interfaces.
      */
     void interface_update(const string& ifname,
 			  const Update& u,
-			  bool		is_all_interfaces_reportee);
+			  bool		is_system_interfaces_reportee);
 
     /**
      * Send announcement of a vif update.
@@ -106,13 +106,13 @@ public:
      * @param vifname the name of the vif updated.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
-     * @param is_all_interfaces_reportee true if the update is for reportee
-     * that expect event notifications about all interfaces.
+     * @param is_system_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all system interfaces.
      */
     void vif_update(const string&	ifname,
 		    const string&	vifname,
 		    const Update&	u,
-		    bool		is_all_interfaces_reportee);
+		    bool		is_system_interfaces_reportee);
 
     /**
      * Send announcement of a vif address update.
@@ -122,14 +122,14 @@ public:
      * @param addr the updated address.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
-     * @param is_all_interfaces_reportee true if the update is for reportee
-     * that expect event notifications about all interfaces.
+     * @param is_system_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all system interfaces.
      */
     void vifaddr4_update(const string&	ifname,
 			 const string&	vifname,
 			 const IPv4&	addr,
 			 const Update&	u,
-			 bool		is_all_interfaces_reportee);
+			 bool		is_system_interfaces_reportee);
 
     /**
      * Send announcement of a vif address update.
@@ -139,14 +139,14 @@ public:
      * @param addr the updated address.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
-     * @param is_all_interfaces_reportee true if the update is for reportee
-     * that expect event notifications about all interfaces.
+     * @param is_system_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all system interfaces.
      */
     void vifaddr6_update(const string&	ifname,
 			 const string&	vifname,
 			 const IPv6&	addr,
 			 const Update&	u,
-			 bool		is_all_interfaces_reportee);
+			 bool		is_system_interfaces_reportee);
 
     /**
      * @return true if we have config changes in flight
@@ -162,7 +162,7 @@ protected:
 protected:
     XrlRouter&	_rtr;
     TgtList	_configured_interfaces_tgts;	// Targets for configured vifs
-    TgtList	_all_interfaces_tgts;		// Targets for all vifs
+    TgtList	_system_interfaces_tgts;	// Targets for all system vifs
     uint32_t    _in_flight;
 };
 

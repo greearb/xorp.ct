@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.1 2003/10/14 21:56:27 hodson Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.2 2003/10/17 21:03:26 hodson Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
@@ -90,24 +90,24 @@ public:
 protected:
     void interface_update(const string& ifname,
 			  const Update& update,
-			  bool 		is_all_interfaces_reportee);
+			  bool 		is_system_interfaces_reportee);
 
     void vif_update(const string& ifname,
 		    const string& vifname,
 		    const Update& update,
-		    bool	  is_all_interfaces_reportee);
+		    bool	  is_system_interfaces_reportee);
 
     void vifaddr4_update(const string& ifname,
 			 const string& vifname,
 			 const IPv4&   addr,
 			 const Update& update,
-			 bool	       is_all_interfaces_reportee);
+			 bool	       is_system_interfaces_reportee);
 
     void vifaddr6_update(const string& ifname,
 			 const string& vifname,
 			 const IPv6&   addr,
 			 const Update& update,
-			 bool	       is_all_interfaces_reportee);
+			 bool	       is_system_interfaces_reportee);
 
 protected:
     IfMgrXrlReplicationManager* _rm;

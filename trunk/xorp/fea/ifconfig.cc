@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.16 2003/10/11 22:13:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.17 2003/10/14 01:36:26 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -173,51 +173,51 @@ IfConfig::pull_config()
 
 void
 IfConfig::report_update(const IfTreeInterface& fi,
-			bool is_all_interfaces_reportee)
+			bool is_system_interfaces_reportee)
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fi.state(), u))
-	_ur.interface_update(fi.ifname(), u, is_all_interfaces_reportee);
+	_ur.interface_update(fi.ifname(), u, is_system_interfaces_reportee);
 }
 
 void
 IfConfig::report_update(const IfTreeInterface&	fi,
 			const IfTreeVif&	fv,
-			bool  is_all_interfaces_reportee)
+			bool  is_system_interfaces_reportee)
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fv.state(), u))
 	_ur.vif_update(fi.ifname(), fv.vifname(), u,
-		       is_all_interfaces_reportee);
+		       is_system_interfaces_reportee);
 }
 
 void
 IfConfig::report_update(const IfTreeInterface&	fi,
 			const IfTreeVif&	fv,
 			const IfTreeAddr4&	fa,
-			bool  is_all_interfaces_reportee)
+			bool  is_system_interfaces_reportee)
 
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fa.state(), u))
 	_ur.vifaddr4_update(fi.ifname(), fv.vifname(), fa.addr(), u,
-			    is_all_interfaces_reportee);
+			    is_system_interfaces_reportee);
 }
 
 void
 IfConfig::report_update(const IfTreeInterface&	fi,
 			const IfTreeVif&	fv,
 			const IfTreeAddr6&	fa,
-			bool is_all_interfaces_reportee)
+			bool is_system_interfaces_reportee)
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fa.state(), u))
 	_ur.vifaddr6_update(fi.ifname(), fv.ifname(), fa.addr(), u,
-			    is_all_interfaces_reportee);
+			    is_system_interfaces_reportee);
 }
 
 void
-IfConfig::report_updates(const IfTree& it, bool is_all_interfaces_reportee)
+IfConfig::report_updates(const IfTree& it, bool is_system_interfaces_reportee)
 {
     //
     // Walk config looking for changes to report
@@ -226,25 +226,25 @@ IfConfig::report_updates(const IfTree& it, bool is_all_interfaces_reportee)
 	 ii != it.ifs().end(); ++ii) {
 
 	const IfTreeInterface& interface = ii->second;
-	report_update(interface, is_all_interfaces_reportee);
+	report_update(interface, is_system_interfaces_reportee);
 
 	IfTreeInterface::VifMap::const_iterator vi;
 	for (vi = interface.vifs().begin();
 	     vi != interface.vifs().end(); ++vi) {
 
 	    const IfTreeVif& vif = vi->second;
-	    report_update(interface, vif, is_all_interfaces_reportee);
+	    report_update(interface, vif, is_system_interfaces_reportee);
 
 	    for (IfTreeVif::V4Map::const_iterator ai = vif.v4addrs().begin();
 		 ai != vif.v4addrs().end(); ai++) {
 		const IfTreeAddr4& addr = ai->second;
-		report_update(interface, vif, addr, is_all_interfaces_reportee);
+		report_update(interface, vif, addr, is_system_interfaces_reportee);
 	    }
 
 	    for (IfTreeVif::V6Map::const_iterator ai = vif.v6addrs().begin();
 		 ai != vif.v6addrs().end(); ai++) {
 		const IfTreeAddr6& addr = ai->second;
-		report_update(interface, vif, addr, is_all_interfaces_reportee);
+		report_update(interface, vif, addr, is_system_interfaces_reportee);
 	    }
 	}
     }

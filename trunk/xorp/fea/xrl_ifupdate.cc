@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.4 2003/05/23 23:35:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.5 2003/09/24 01:11:38 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -78,13 +78,13 @@ XrlIfConfigUpdateReporter::add_reportee(const string& tgt)
 }
 
 bool
-XrlIfConfigUpdateReporter::add_all_interfaces_reportee(const string& tgt)
+XrlIfConfigUpdateReporter::add_system_interfaces_reportee(const string& tgt)
 {
-    if (find(_all_interfaces_tgts.begin(),
-	     _all_interfaces_tgts.end(), tgt)
-	!= _all_interfaces_tgts.end())
+    if (find(_system_interfaces_tgts.begin(),
+	     _system_interfaces_tgts.end(), tgt)
+	!= _system_interfaces_tgts.end())
 	return false;
-    _all_interfaces_tgts.push_back(tgt);
+    _system_interfaces_tgts.push_back(tgt);
     return true;
 }
 
@@ -97,11 +97,11 @@ XrlIfConfigUpdateReporter::has_reportee(const string& tgt) const
 }
 
 bool
-XrlIfConfigUpdateReporter::has_all_interfaces_reportee(const string& tgt) const
+XrlIfConfigUpdateReporter::has_system_interfaces_reportee(const string& tgt) const
 {
-    return (find(_all_interfaces_tgts.begin(),
-		 _all_interfaces_tgts.end(), tgt)
-	    != _all_interfaces_tgts.end());
+    return (find(_system_interfaces_tgts.begin(),
+		 _system_interfaces_tgts.end(), tgt)
+	    != _system_interfaces_tgts.end());
 }
 
 bool
@@ -116,26 +116,26 @@ XrlIfConfigUpdateReporter::remove_reportee(const string& tgt)
 }
 
 bool
-XrlIfConfigUpdateReporter::remove_all_interfaces_reportee(const string& tgt)
+XrlIfConfigUpdateReporter::remove_system_interfaces_reportee(const string& tgt)
 {
-    TgtList::iterator ti = find(_all_interfaces_tgts.begin(),
-				_all_interfaces_tgts.end(), tgt);
-    if (ti == _all_interfaces_tgts.end())
+    TgtList::iterator ti = find(_system_interfaces_tgts.begin(),
+				_system_interfaces_tgts.end(), tgt);
+    if (ti == _system_interfaces_tgts.end())
 	return false;
-    _all_interfaces_tgts.erase(ti);
+    _system_interfaces_tgts.erase(ti);
     return true;
 }
 
 void
 XrlIfConfigUpdateReporter::interface_update(const string& ifname,
 					    const Update& u,
-					    bool  is_all_interfaces_reportee)
+					    bool  is_system_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
     TgtList *tgts = NULL;
     
-    if (is_all_interfaces_reportee)
-	tgts = &_all_interfaces_tgts;
+    if (is_system_interfaces_reportee)
+	tgts = &_system_interfaces_tgts;
     else
 	tgts = &_configured_interfaces_tgts;
     
@@ -150,13 +150,13 @@ void
 XrlIfConfigUpdateReporter::vif_update(const string& ifname,
 				      const string& vifname,
 				      const Update& u,
-				      bool  is_all_interfaces_reportee)
+				      bool  is_system_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
     TgtList *tgts = NULL;
     
-    if (is_all_interfaces_reportee)
-	tgts = &_all_interfaces_tgts;
+    if (is_system_interfaces_reportee)
+	tgts = &_system_interfaces_tgts;
     else
 	tgts = &_configured_interfaces_tgts;
 
@@ -172,13 +172,13 @@ XrlIfConfigUpdateReporter::vifaddr4_update(const string& ifname,
 					   const string& vifname,
 					   const IPv4&	 ip,
 					   const Update& u,
-					   bool  is_all_interfaces_reportee)
+					   bool  is_system_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
     TgtList *tgts = NULL;
     
-    if (is_all_interfaces_reportee)
-	tgts = &_all_interfaces_tgts;
+    if (is_system_interfaces_reportee)
+	tgts = &_system_interfaces_tgts;
     else
 	tgts = &_configured_interfaces_tgts;
 
@@ -194,13 +194,13 @@ XrlIfConfigUpdateReporter::vifaddr6_update(const string& ifname,
 					   const string& vifname,
 					   const IPv6&	 ip,
 					   const Update& u,
-					   bool  is_all_interfaces_reportee)
+					   bool  is_system_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
     TgtList *tgts = NULL;
     
-    if (is_all_interfaces_reportee)
-	tgts = &_all_interfaces_tgts;
+    if (is_system_interfaces_reportee)
+	tgts = &_system_interfaces_tgts;
     else
 	tgts = &_configured_interfaces_tgts;
 
