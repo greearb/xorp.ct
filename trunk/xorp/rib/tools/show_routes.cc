@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.6 2004/11/02 14:01:33 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.7 2004/12/09 07:54:40 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -202,14 +202,18 @@ protected:
 
 ShowRoutesProcessor::ShowRoutesProcessor(EventLoop&		e,
 					 ShowRoutesOptions&	o)
-    : _e(e), _opts(o)
+    : _e(e),
+      _opts(o),
+      _rtr(NULL)
 {
-    _rtr = 0;
 }
 
 ShowRoutesProcessor::~ShowRoutesProcessor()
 {
-    delete _rtr;
+    if (_rtr != NULL) {
+	delete _rtr;
+	_rtr = NULL;
+    }
 }
 
 bool
@@ -220,7 +224,8 @@ ShowRoutesProcessor::startup()
     }
 
     // Create XrlRouter
-    _rtr = new XrlStdRouter(_e, "show_routes",
+    string process = c_format("show_routes<%d>", getpid());
+    _rtr = new XrlStdRouter(_e, process.c_str(),
 			    _opts.finder_host.c_str(), _opts.finder_port);
 
     // Glue the router to the Xrl methods class exports
@@ -241,12 +246,12 @@ ShowRoutesProcessor::startup()
 bool
 ShowRoutesProcessor::shutdown()
 {
+    // Withdraw the Xrl methods
+    this->set_command_map(NULL);
+
     ServiceStatus st = this->status();
     if (st == FAILED || st == SHUTTING_DOWN || st == SHUTDOWN)
 	return false;
-
-    // Withdraw the Xrl methods
-    this->set_command_map(NULL);
 
     set_status(SHUTTING_DOWN);
     step_1000_request_cease();
@@ -683,6 +688,7 @@ main(int argc, char* const argv[])
 	}
 
 	if (srp.status() == FAILED) {
+	    srp.shutdown();
 	    if (srp.status_note().empty() == false) {
 		cout << srp.status_note() << endl;
 	    } else {
