@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-// $XORP: xorp/ospfd/xorp/ospf_config.h,v 1.2 2003/03/10 23:20:46 hodson Exp $
+// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.6 2003/05/29 18:36:29 pavlin Exp $
 
 #ifndef __XORP_OSPF_XORP_XRL_TARGET_HH__
 #define __XORP_OSPF_XORP_XRL_TARGET_HH__
@@ -59,6 +59,11 @@ public:
     XrlCmdError common_0_1_get_status(// Output values,
 				      uint32_t& status,
 				      string&	reason);
+
+    /**
+     * shutdown cleanly
+     */
+    XrlCmdError common_0_1_shutdown();
 
     /* OSPFD Global Configuration ------------------------------------------ */
 

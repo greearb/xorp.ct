@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-#ident "$XORP: xorp/ospfd/xorp/ospf_config.C,v 1.2 2003/05/29 17:58:33 pavlin Exp $"
+#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.4 2003/05/29 18:37:23 pavlin Exp $"
 
 #include <time.h>
 #include <vector>
@@ -163,6 +163,14 @@ XrlOspfTarget::common_0_1_get_status(// Output values,
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+XrlOspfTarget::common_0_1_shutdown()
+{
+    //XXXX need to log correct status
+    //give ospf 30 seconds to shut down
+    ospf()->shutdown(30);
+    return XrlCmdError::OKAY();
+}
 
 
 // ----------------------------------------------------------------------------
@@ -199,6 +207,7 @@ XrlOspfTarget::ospf_0_1_set_router_id(
     if (ospf() && ospf()->my_id() == id) {
 	// Nothing to be done
 	string reason = c_format("Router ID already set to %u.", id); 
+
 	return XrlCmdError::COMMAND_FAILED(reason);
     }
 
