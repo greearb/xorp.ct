@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.12 2003/05/14 01:13:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.13 2003/05/14 09:37:55 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -164,7 +164,23 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_interface_enabled(
+XrlFeaTarget::ifmgr_0_1_get_all_interface_enabled(
+					      // Input values,
+					      const string&	ifname,
+					      // Output values,
+					      bool&		enabled)
+{
+    const IfTreeInterface* fi = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	enabled = fi->enabled();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
 					      // Input values,
 					      const string&	ifname,
 					      // Output values,
@@ -180,7 +196,22 @@ XrlFeaTarget::ifmgr_0_1_get_interface_enabled(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_mac(
+XrlFeaTarget::ifmgr_0_1_get_all_mac(
+				// Input values,
+				const string& ifname,
+				Mac&	    mac)
+{
+    const IfTreeInterface* fi = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	mac = fi->mac();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_mac(
 				// Input values,
 				const string& ifname,
 				Mac&	    mac)
@@ -195,7 +226,22 @@ XrlFeaTarget::ifmgr_0_1_get_mac(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_mtu(
+XrlFeaTarget::ifmgr_0_1_get_all_mtu(
+				// Input values,
+				const string&	ifname,
+				uint32_t&		mtu)
+{
+    const IfTreeInterface* fi = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	mtu = fi->mtu();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
 				// Input values,
 				const string&	ifname,
 				uint32_t&		mtu)
@@ -210,7 +256,24 @@ XrlFeaTarget::ifmgr_0_1_get_mtu(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_vif_enabled(
+XrlFeaTarget::ifmgr_0_1_get_all_vif_enabled(
+					// Input values,
+					const string& ifname,
+					const string& vifname,
+					// Output values,
+					bool&	    enabled)
+{
+    const IfTreeVif* fv = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_vif(ifname, vifname, fv);
+
+    if (e == XrlCmdError::OKAY())
+	enabled = fv->enabled();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
 					// Input values,
 					const string& ifname,
 					const string& vifname,
@@ -227,7 +290,25 @@ XrlFeaTarget::ifmgr_0_1_get_vif_enabled(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_prefix4(
+XrlFeaTarget::ifmgr_0_1_get_all_prefix4(
+				    // Input values,
+				    const string&	ifname,
+				    const string&	vifname,
+				    const IPv4&	addr,
+				    // Output values,
+				    uint32_t&	prefix)
+{
+    const IfTreeAddr4* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
+
+    if (e == XrlCmdError::OKAY())
+	prefix = fa->prefix();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
@@ -245,7 +326,26 @@ XrlFeaTarget::ifmgr_0_1_get_prefix4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_broadcast4(
+XrlFeaTarget::ifmgr_0_1_get_all_broadcast4(
+				       // Input values,
+				       const string&	ifname,
+				       const string&	vifname,
+				       const IPv4&	addr,
+				       // Output values,
+				       IPv4&		broadcast)
+{
+    const IfTreeAddr4* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
+
+    if (e != XrlCmdError::OKAY())
+	return e;
+
+    broadcast = fa->bcast();
+    return _xifmgr.addr_valid(ifname, vifname, "broadcast", broadcast);
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
 				       // Input values,
 				       const string&	ifname,
 				       const string&	vifname,
@@ -264,7 +364,26 @@ XrlFeaTarget::ifmgr_0_1_get_broadcast4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_endpoint4(
+XrlFeaTarget::ifmgr_0_1_get_all_endpoint4(
+				      // Input values,
+				      const string&	ifname,
+				      const string&	vifname,
+				      const IPv4&	addr,
+				      // Output values,
+				      IPv4&		endpoint)
+{
+    const IfTreeAddr4* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
+
+    if (e != XrlCmdError::OKAY())
+	return e;
+
+    endpoint = fa->endpoint();
+    return _xifmgr.addr_valid(ifname, vifname, "endpoint", endpoint);
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
@@ -283,7 +402,25 @@ XrlFeaTarget::ifmgr_0_1_get_endpoint4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_prefix6(
+XrlFeaTarget::ifmgr_0_1_get_all_prefix6(
+				    // Input values,
+				    const string&	ifname,
+				    const string&	vifname,
+				    const IPv6&	addr,
+				    // Output values,
+				    uint32_t&	prefix)
+{
+    const IfTreeAddr6* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
+
+    if (e == XrlCmdError::OKAY())
+	prefix = fa->prefix();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
@@ -301,7 +438,26 @@ XrlFeaTarget::ifmgr_0_1_get_prefix6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_endpoint6(
+XrlFeaTarget::ifmgr_0_1_get_all_endpoint6(
+				      // Input values,
+				      const string&	ifname,
+				      const string&	vifname,
+				      const IPv6&		addr,
+				      // Output values,
+				      IPv6&		endpoint)
+{
+    const IfTreeAddr6* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, addr, fa);
+
+    if (e != XrlCmdError::OKAY())
+	return e;
+
+    endpoint = fa->endpoint();
+    return  _xifmgr.addr_valid(ifname, vifname, "endpoint", endpoint);
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
@@ -361,7 +517,34 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_address_flags4(
+XrlFeaTarget::ifmgr_0_1_get_all_address_flags4(
+				       // Input values
+				       const string& ifname,
+				       const string& vif,
+				       const IPv4&   address,
+				       // Output values
+				       bool& up,
+				       bool& broadcast,
+				       bool& loopback,
+				       bool& point_to_point,
+				       bool& multicast)
+{
+    const IfTreeAddr4* fa;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vif, address, fa);
+    if (e != XrlCmdError::OKAY())
+	return e;
+
+    up = fa->enabled();
+    broadcast = fa->broadcast();
+    loopback = fa->loopback();
+    point_to_point = fa->point_to_point();
+    multicast = fa->multicast();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
 				       // Input values
 				       const string& ifname,
 				       const string& vif,
@@ -388,7 +571,32 @@ XrlFeaTarget::ifmgr_0_1_get_address_flags4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_address_flags6(
+XrlFeaTarget::ifmgr_0_1_get_all_address_flags6(
+				       // Input values
+				       const string& ifname,
+				       const string& vif,
+				       const IPv6&   address,
+				       // Output values
+				       bool& up,
+				       bool& loopback,
+				       bool& point_to_point,
+				       bool& multicast)
+{
+    const IfTreeAddr6* fa;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vif, address, fa);
+    if (e != XrlCmdError::OKAY())
+	return e;
+
+    up = fa->enabled();
+    loopback = fa->loopback();
+    point_to_point = fa->point_to_point();
+    multicast = fa->multicast();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
 				       // Input values
 				       const string& ifname,
 				       const string& vif,
@@ -607,7 +815,23 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_address_enabled4(
+XrlFeaTarget::ifmgr_0_1_get_all_address_enabled4(
+					     // Input values,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv4&	address,
+					     bool&		enabled)
+{
+    const IfTreeAddr4* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, address, fa);
+    if (e == XrlCmdError::OKAY())
+	enabled = fa->enabled();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
 					     // Input values,
 					     const string&	ifname,
 					     const string&	vifname,
@@ -704,7 +928,23 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_address_enabled6(
+XrlFeaTarget::ifmgr_0_1_get_all_address_enabled6(
+					     // Input values,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv6&	address,
+					     bool&		enabled)
+{
+    const IfTreeAddr6* fa = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_addr(ifname, vifname, address, fa);
+    if (e == XrlCmdError::OKAY())
+	enabled = fa->enabled();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
 					     // Input values,
 					     const string&	ifname,
 					     const string&	vifname,
