@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -52,58 +52,81 @@ FtiConfigTableGet::parse_buffer_nlm(int, list<FteX>& , const uint8_t* ,
 #else // HAVE_NETLINK_SOCKETS
 
 
-// Reading route(4) manual page is a good start for understanding this
+// Reading netlink(3) manual page is a good start for understanding this
 bool
 FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 				    const uint8_t* buf, size_t buf_bytes)
 {
-    const nlmsghdr* nlh = reinterpret_cast<const nlmsghdr *>(buf);
-    const uint8_t* last = buf + buf_bytes;
+    const nlmsghdr* nlh;
+    bool recognized = false;
     
-    for (const uint8_t* ptr = buf; ptr < last; ptr += nlh->nlmsg_len) {
-    	nlh = reinterpret_cast<const nlmsghdr*>(ptr);
-	const struct rtmsg *rtmsg;
-	int rta_len;
+    for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
+	 NLMSG_OK(nlh, buf_bytes);
+	 nlh = NLMSG_NEXT(nlh, buf_bytes)) {
+	caddr_t nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
-	// Message type check
-	if (nlh->nlmsg_type == NLMSG_ERROR) {
-	    struct nlmsgerr *err = (struct nlmsgerr*)NLMSG_DATA(const_cast<nlmsghdr*>(nlh));
+	switch (nlh->nlmsg_type) {
+	case NLMSG_ERROR:
+	{
+	    const struct nlmsgerr* err;
+	    
+	    err = reinterpret_data<const struct nlmsgerr*>(nlmsg_data);
 	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
-		XLOG_ERROR("AF_NETLINK ERROR message truncated");
-	    } else {
-		errno = -err->error;
-		XLOG_ERROR("AF_NETLINK ERROR message: %s", strerror(errno));
+		XLOG_ERROR("AF_NETLINK nlmsgerr length error");
+		break;
 	    }
-	    continue;
+	    errno = -err->error;
+	    XLOG_ERROR("AF_NETLINK NLMSG_ERROR message: %s", strerror(errno));
 	}
+	break;
 	
-	if (nlh->nlmsg_type == NLMSG_DONE)
-	    return true;			// Done
-	if (nlh->nlmsg_type == NLMSG_NOOP)
-	    continue;
-	if (nlh->nlmsg_type != RTM_NEWROUTE)
-	    continue;
-	
-	rtmsg = (struct rtmsg *)NLMSG_DATA(const_cast<nlmsghdr*>(nlh));
-	rta_len = nlh->nlmsg_len - NLMSG_LENGTH(sizeof(*rtmsg));
-	if (rta_len < 0) {
-	    XLOG_ERROR("AF_NETLINK rtmsg length error");
-	    continue;
+	case NLMSG_DONE:
+	{
+	    if (! recognized)
+		return false;
+	    return true;
 	}
-	if (rtmsg->rtm_family != family)
-	    continue;
+	break;
 	
-	if (rtmsg->rtm_flags & RTM_F_CLONED)
-	    continue;		// XXX: ignore cloned entries
-	if (rtmsg->rtm_type == RTN_MULTICAST)
-	    continue;		// XXX: ignore multicast entries
-	if (rtmsg->rtm_type == RTN_BROADCAST)
-	    continue;		// XXX: ignore broadcast entries
+	case NLMSG_NOOP:
+	    break;
+	    
+	case RTM_NEWROUTE:
+	{
+	    const struct rtmsg* rtmsg;
+	    int rta_len = RTM_PAYLOAD(nlh->nlmsg_len);
+	    
+	    if (rta_len < 0) {
+		XLOG_ERROR("AF_NETLINK rtmsg length error");
+		break;
+	    }
+	    rtmsg = reinterpret_cast<const struct rtmsg*>(nlmsg_data);
+	    if (rtmsg->rtm_family != family)
+		break;
+	    if (rtmsg->rtm_flags & RTM_F_CLONED)
+		break;		// XXX: ignore cloned entries
+	    if (rtmsg->rtm_type == RTN_MULTICAST)
+		break;		// XXX: ignore multicast entries
+	    if (rtmsg->rtm_type == RTN_BROADCAST)
+		break;		// XXX: ignore broadcast entries
+	    
+	    FteX fte(family);
+	    if (NlmUtils::nlm_get_to_fte_cfg(fte, rtmsg, rta_len) == true) {
+		fte_list.push_back(fte);
+		recognized = true;
+	    }
+	}
+	break;
 	
-	FteX fte(family);
-	if (NlmUtils::nlm_get_to_fte_cfg(fte, rtmsg, rta_len) == true)
-	    fte_list.push_back(fte);
+	default:
+	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
+		      NlmUtils::nlm_msg_type(nlh->nlmmsg_type).c_str(),
+		      nlh->nlmsg_type, nlh->nlmsg_len);
+	}
     }
+    
+    if (! recognized)
+	return false;
     
     return true;
 }
