@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.3 2003/01/28 03:21:52 rizzo Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.4 2003/01/28 19:15:17 rizzo Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -54,10 +54,15 @@ public:
      */
     explicit AsNum(const uint32_t value) : _as(value)	{
 	// XXX remove when we support 32-bit AS
-	assert(value < 0xffff);
+	assert(value <= 0xffff);
     }
  
     explicit AsNum(const uint16_t value) : _as(value)	{}
+
+    explicit AsNum(int value)				{
+	assert(value >= 0 && value <= 0xffff);
+	_as = value;
+    }
 
     /**
      * construct from a 2-byte buffer in memory
@@ -128,7 +133,5 @@ private:
     uint32_t _as;		// The value of the AS number
 
     AsNum(); // forbidden
-    AsNum(int); // forbidden
-
 };
 #endif // __LIBXORP_ASNUM_HH__
