@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.6 2003/06/06 19:09:21 hodson Exp $
+# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.7 2003/06/06 23:05:48 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -15,144 +15,175 @@ Steps to perform before and after a software release (note that
 some of the commands like "setenv" and "unsetenv" assume that
 the login shell is csh or tcsh):
 
-1. TASK: Decide the next release date, and the wish-list of the set of
-   features it should have.
-   WHO:  Everyone
-   WHEN: Approximately one week after the previous release
-   MISC: Write the wish-list to xorp/devnotes/WORKPLAN
-         (under section "Next Release")
+========================================================================
+0100.	TASK: Decide the next release date, and the wish-list of the set
+	      of features it should have.
+	WHO:  Everyone
+	WHEN: Approximately one week after the previous release
+	MISC: Write the wish-list to xorp/devnotes/WORKPLAN
+	      (under section "Next Release")
 
-2. TASK: Status check. If necessary, revise the set of features to be included
-   in the next release.
-   WHO:  Everyone
-   WHEN: 2-3 weeks before the release date
+========================================================================
+0200.	TASK: Status check. If necessary, revise the set of features to
+	      be included in the next release.
+	WHO:  Everyone
+	WHEN: 2-3 weeks before the release date
 
-3. TASK: Stop adding new features.
-   WHO:  Everyone
-   WHEN: 1 week before the release date
+========================================================================
+0300.	TASK: Stop adding new features.
+	WHO:  Everyone
+	WHEN: 1 week before the release date
 
-4. TASK: Testing (including memory leak checks), final polishing of the code.
-   WHO:  Everyone
-   WHEN: 7 days - 1 day before the release date
+========================================================================
+0400.	TASK: Testing (including memory leak checks), final polishing
+	      of the code. 
+	WHO:  Everyone
+	WHEN: 7 days - 1 day before the release date
 
-5. TASK: Update the documentation in xorp/docs
-   WHO:  Everyone
-   WHEN: 7 days - 1 day before the release date
-   MISC: After a document is reviewed, bump-up Version in the front-page
-         to correspond to the new release version.
+========================================================================
+0500.	TASK: Update the documentation in xorp/docs
+	WHO:  Everyone
+	WHEN: 7 days - 1 day before the release date
+	MISC: After a document is reviewed, bump-up Version in the
+	      front-page to correspond to the new release version.
 
-6. TASK: Stop cron job on www.xorp.org that automatically updates the XORP
-         web pages from the CVS repository
-   WHO:  Release manager
-   WHEN: 1 day before the release date
-   COMMANDS:
-	ssh www.xorp.org
-	sudo crontab -u pavlin -e
-	# Comment-out the line with update-www.xorp.org
+========================================================================
+0600.	TASK: Stop cron job on www.xorp.org that automatically updates
+	      the XORP web pages from the CVS repository.
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	COMMANDS:
+ ssh www.xorp.org
+ sudo crontab -u pavlin -e
+ # Comment-out the line with update-www.xorp.org
 
-7. TASK: Send email to xorp-dev@xorp.org to remain everyone about TODO
-         items before the release
-   WHO:  Release manager
-   WHEN: 1 day before the release date
-   MISC: - Include the list below about tasks for everyone
-         - Include info about when everyone should stop committing code
+========================================================================
+0700.	TASK: Send email to xorp-dev@xorp.org to remain everyone about
+	      TODO items before the release
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: - Include the list below about tasks for everyone
+	      - Include info about when everyone should stop committing
+		code
 
-8. TASK: Prune old entries in xorp/foo/TODO files
-   WHO:  Everyone
-   WHEN: 1 day before the release date
+========================================================================
+0800.	TASK: Prune old entries in xorp/foo/TODO files
+	WHO:  Everyone
+	WHEN: 1 day before the release date
 
-9. TASK: Update xorp/foo/README files
-   WHO:  Everyone
-   WHEN: 1 day before the release date
+========================================================================
+0900.	TASK: Update xorp/foo/README files
+	WHO:  Everyone
+	WHEN: 1 day before the release date
 
-10.TASK: Edit the Web pages in www/
-   WHO:  Release manager
-   WHEN: 1 day before the release date
-   MISC: - Add an entry for the new release to www/downloads.html
-           (set the definition for Release tag to $ReleaseTag as defined
-           later)
-         - If necessary, update www/license.html to add a new copyright year
+========================================================================
+1000.	TASK: Edit the Web pages in www/
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: - Add an entry for the new release to www/downloads.html
+		(set the definition for Release tag to $ReleaseTag as
+		defined later)
+	      - If necessary, update www/license.html to add a new
+		copyright year
 
-11.TASK: Update the status Web page in xorp/docs/status.html
-   WHO:  Everyone
-   WHEN: 1 day before the release date
+========================================================================
+1100.	TASK: Update the status Web page in xorp/docs/status.html
+	WHO:  Everyone
+	WHEN: 1 day before the release date
 
-12.TASK: Update xorp/RELEASE_NOTES
-   WHO:  Everyone
-   WHEN: 1 day before the release date
+========================================================================
+1200.	TASK: Update xorp/RELEASE_NOTES
+	WHO:  Everyone
+	WHEN: 1 day before the release date
 
-13.TASK: Modify the date on the front page on all documents in xorp/docs to
-         be set to the release date
-   WHO:  Release manager
-   WHEN: 1 day before the release date
+========================================================================
+1300.	TASK: Modify the date on the front page on all documents in
+	      xorp/docs to be set to the release date
+	WHO:  Release manager
+	WHEN: 1 day before the release date
 
-14.TASK: Add a new year to the copyright license (only if necessary)
-   WHO:  Release manager
-   WHEN: 1 day before the release date
-   MISC: All files in xorp/
+========================================================================
+1400.	TASK: Add a new year to the copyright license (only if
+	      necessary) 
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: All files in xorp/
 
-15.TASK: Update the documentation index Web page in xorp/docs/index.html
-   WHO:  Release manager
-   WHEN: 1 day before the release date
-   MISC: Modify the document version and date
+========================================================================
+1500.	TASK: Update the documentation index Web page in
+	      xorp/docs/index.html
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: Modify the document version and date
 
-16.TASK: Update xorp/README
-   WHO:  Release manager
-   WHEN: 1 day before the release date
+========================================================================
+1600.	TASK: Update xorp/README
+	WHO:  Release manager
+	WHEN: 1 day before the release date
 
-17.TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
-         (NOTE: for the time being, do not do it yet, untill we have a
-         better idea about the particular purpose, if any, of
-         XORP_MODULE_VERSION).
-   WHO:  Release manager
-   WHEN: 1 day before the release date
+========================================================================
+1700.	TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
+	      (NOTE: for the time being, do not do it yet, untill we
+	      have a better idea about the particular purpose, if any,
+	      of XORP_MODULE_VERSION).
+	WHO:  Release manager
+	WHEN: 1 day before the release date
 
-18.TASK: Update xorp/docs/kdoc/gen-kdoc.sh
-   WHO:  Release manager
-   WHEN: 1 day before the release date
-   MISC: If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add new
-          subdirectories.
+========================================================================
+1800.	TASK: Update xorp/docs/kdoc/gen-kdoc.sh
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add new
+	      subdirectories.
 
-19.TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
-   WHO:  XORP tinderbox manager
-   WHEN: 4 hours before intended release time
+========================================================================
+1900.	TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
+	WHO:  XORP tinderbox manager
+	WHEN: 4 hours before intended release time
 
-20.TASK: Send email to xorp-dev@xorp.org that the release process has started.
-   WHO:  Release manager
-   WHEN: 2 hours before intended release time
+========================================================================
+2000.	TASK: Send email to xorp-dev@xorp.org that the release process
+	      has started. 
+	WHO:  Release manager
+	WHEN: 2 hours before intended release time
 
-21.TASK: Bump-up the release version number
-   WHO:  Release manager
-   WHEN: Release time
-   COMMANDS:
-	# Edit xorp/README
-	# Edit xorp/RELEASE_NOTES
-	# Edit xorp/VERSION
-	# Edit xorp/configure.in (the second argument in AM_INIT_AUTOMAKE()
-	./bootstrap
-	cvs commit -m "Prepare XORP for release: bump-up version number"
+========================================================================
+2100.	TASK: Bump-up the release version number
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # Edit xorp/README
+ # Edit xorp/RELEASE_NOTES
+ # Edit xorp/VERSION
+ # Edit xorp/configure.in (the second argument in AM_INIT_AUTOMAKE() 
+ ./bootstrap
+ cvs commit -m "Prepare XORP for release: bump-up version number"
 
-22.TASK: Verify that the code compiles and passes all tests.
-   WHO:  Release manager
-   WHEN: Release time
-   COMMANDS: On each supported platform:
-	cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
-	cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co data
-	cd xorp
-	script
-	./configure
-	gmake
-	gmake check
-	cd docs
-	gmake
+========================================================================
+2200.	TASK: Verify that the code compiles and passes all tests.
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # On each supported platform:
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co data
+ cd xorp
+ script
+ ./configure
+ gmake
+ gmake check
+ # Check the document building only on the primary development platform: 
+ cd docs
+ gmake
 
-23.TASK: Add CVS tag to the source code
-   WHO:  Release manager
-   WHEN: Release time
-   COMMANDS:
-	# In the command below, if the new release is, say, 0.5,
-	# then $ReleaseTag must be RELEASE_0_5
-	# The release tag is defined in the third line below:
+========================================================================
+2300.	TASK: Add CVS tag to the source code
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # In the command below, if the new release is, say, 0.5,
+ # then $ReleaseTag must be RELEASE_0_5
+ # The release tag is defined in the third line below:
  cd xorp
  cvs update VERSION
  setenv ReleaseTag RELEASE_`cat VERSION | sed 'y/./_/' | sed 'y/-/_/'`
@@ -161,13 +192,14 @@ the login shell is csh or tcsh):
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag www
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag data
 
-24.TASK: Prepare sofware and documentation tarballs for distribution
-   WHO:  Release manager
-   WHEN: Release time
-   COMMANDS:
-	# In the command below, if the new release is, say, 0.5,
-	# then $ReleaseVersion must be 0.5
-	# The release version defined in the first line below:
+========================================================================
+2400.	TASK: Prepare sofware and documentation tarballs for distribution
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # In the command below, if the new release is, say, 0.5,
+ # then $ReleaseVersion must be 0.5
+ # The release version defined in the first line below:
  # Commands continue from the previous task
  setenv ReleaseVersion `cat VERSION`
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs export -r $ReleaseTag xorp
@@ -190,10 +222,11 @@ the login shell is csh or tcsh):
  mv docs-$ReleaseVersion.tar.gz ..
  cd ..
 
-25.TASK: Copy the tarballs to the web server
-   WHO:  Release manager
-   WHEN: Release time
-   COMMANDS:
+========================================================================
+2500.	TASK: Copy the tarballs to the web server
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
  # Commands continue from the previous task
  scp -p xorp-$ReleaseVersion.tar.gz www.xorp.org:~/
  scp -p docs-$ReleaseVersion.tar.gz www.xorp.org:~/
@@ -210,10 +243,11 @@ the login shell is csh or tcsh):
  tar zxvf docs-$ReleaseVersion.tar.gz
  mv docs-$ReleaseVersion docs
 
-26.TASK: Update the links in the web server
-   WHO:  Release manager
-   WHEN: Release time
-   COMMANDS:
+========================================================================
+2600.	TASK: Update the links in the web server
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
  # Commands continue from the previous task
  cd ..
  cvs update
@@ -222,28 +256,36 @@ the login shell is csh or tcsh):
  unsetenv ReleaseTag
  unsetenv ReleaseVersion
 
-27.TASK: Start cron job on www.xorp.org that automatically updates the XORP
-         web pages from the CVS repository
-   WHO:  Release manager
-   WHEN: Right after the release
-   COMMANDS:
-	ssh www.xorp.org
-	sudo crontab -u pavlin -e
-	# Uncomment the line with update-www.xorp.org
+========================================================================
+2700.	TASK: Start cron job on www.xorp.org that automatically updates
+	      the XORP web pages from the CVS repository
+	WHO:  Release manager
+	WHEN: Right after the release
+	COMMANDS:
+ ssh www.xorp.org
+ sudo crontab -u pavlin -e
+ # Uncomment the line with update-www.xorp.org
 
-28.TASK: Send email to xorp-dev@xorp.org that the release process has
-         completed.
-   WHO:  Release manager
-   WHEN: Right after the release
+========================================================================
+2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
+	      completed.
+	WHO:  Release manager
+	WHEN: Right after the release
 
-29.TASK: Send an anouncement email to xorp-users@xorp.org about the new release
-   WHO:  XORP project leader
-   WHEN: Right after the release
+========================================================================
+2900.	TASK: Send an anouncement email to xorp-users@xorp.org about the
+	      new release 
+	WHO:  XORP project leader
+	WHEN: Right after the release
 
-30.TASK: Start the XORP tinderbox crontab job (only if it was stopped earlier)
-   WHO:  XORP tinderbox manager
-   WHEN: Right after the release
+========================================================================
+3000.	TASK: Start the XORP tinderbox crontab job (only if it was
+	      stopped earlier) 
+	WHO:  XORP tinderbox manager
+	WHEN: Right after the release
 
-31.TASK: Jupiter
-   WHO:  Everyone
-   WHEN: Right after the release
+========================================================================
+3100.	TASK: Jupiter
+	WHO:  Everyone
+	WHEN: Right after the release
+
