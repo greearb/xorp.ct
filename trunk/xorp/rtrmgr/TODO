@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.22 2004/06/04 23:36:23 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.23 2004/06/08 22:42:08 pavlin Exp $
 #
 
 Urgent
@@ -85,6 +85,8 @@ Configure Mode
  - Check whetner UNIX shell environment $PAGER exists and is a valid
    command. If "yes", then pipe the output through it instead of
    the built-in pager.
+ - Add facility to redirect the log messages to a file with filename that
+   is configurable within the XORP config file.
 
 Operational Mode
  - Add template specification for "show" output: fields formatting, etc.
