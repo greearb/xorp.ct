@@ -72,7 +72,7 @@ class PeerOut {
     /**
      * Used by external and internal entities to transmit packets.
      */
-    bool transmit(TransmitRef tr);
+    bool transmit(Transmit::TransmitRef tr);
 
     /**
      * Packets for this peer are received here.
@@ -95,11 +95,13 @@ class PeerOut {
     // In order to maintain the requirement for an interpacket gap,
     // all outgoing packets are appended to this queue. Then they are
     // read off the queue and transmitted at the interpacket gap rate.
-    queue<TransmitRef>	 _transmit_queue;	
+    queue<Transmit::TransmitRef> _transmit_queue;	
 
     void bring_up_peering();
     void take_down_peering();
 };
+
+const uint32_t HELLO_INTERVAL = 1000;	// Default hello interval in ms.
 
 /**
  * A peer represents a single area and is bound to a PeerOut.
@@ -108,7 +110,8 @@ template <typename A>
 class Peer {
  public:
     Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area) 
-	: _ospf(ospf), _peerout(peerout), _area(area)
+	: _ospf(ospf), _peerout(peerout), _area(area),
+	  _hello_interval(HELLO_INTERVAL), _hello_packet(ospf.get_version())
     {}
 
     /**
@@ -126,6 +129,9 @@ class Peer {
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
     OspfTypes::AreaID _area;		// Area that we are represent.
 
+    uint32_t  _hello_interval;		// Time between sending hello messages.
+    XorpTimer _hello_timer;		// Timer used to fire hello messages.
+
     enum PeerState {
 	Down,
 	Attempt,
@@ -137,8 +143,13 @@ class Peer {
 	Full
     };
 
-    PeerState _state;
+    PeerState _state;			// The state of this peer.
 
+    HelloPacket _hello_packet;		// The hello packet we will send.
+
+    void start_hello_timer();
+
+    bool send_hello_packet();
 };
 
 #endif // __OSPF_PEER_HH__

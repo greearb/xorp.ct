@@ -33,6 +33,8 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#include "libxorp/eventloop.hh"
+
 #include "ospf.hh"
 #include "peer.hh"
 
@@ -102,6 +104,26 @@ PeerOut<A>::set_state(bool state)
     }
 }
 
+/**
+ * XXX
+ * The outgoing packets should be queued on the transmit queue, for
+ * the time being just send them straight out.
+ */
+template <typename A>
+bool
+PeerOut<A>::transmit(Transmit::TransmitRef tr)
+{
+    do {
+	if (!tr->valid())
+	    return true;
+	size_t len;
+	uint8_t *ptr = tr->generate(len);
+	_ospf.transmit(_interface, _vif, ptr, len);
+    } while(tr->multiple());
+
+    return true;
+}
+
 template <typename A>
 void
 PeerOut<A>::bring_up_peering()
@@ -134,12 +156,42 @@ void
 Peer<A>::start()
 {
     _state = Down;
+
+    // Start sending hello packets.
+    start_hello_timer();
 }
 
 template <typename A>
 void
 Peer<A>::stop()
 {
+    _hello_timer.clear();
+}
+
+template <typename A>
+void
+Peer<A>::start_hello_timer()
+{
+    // XXX - The hello packet should have all its parameters set.
+
+    _hello_timer = _ospf.get_eventloop().
+	new_periodic(_hello_interval, 
+		     callback(this, &Peer<A>::send_hello_packet));
+}
+
+template <typename A>
+bool
+Peer<A>::send_hello_packet()
+{
+    vector<uint8_t> pkt;
+    _hello_packet.encode(pkt);
+    SimpleTransmit *transmit = new SimpleTransmit(pkt);
+
+    Transmit::TransmitRef tr(transmit);
+
+    _peerout.transmit(tr);
+
+    return true;
 }
 
 template class PeerOut<IPv4>;
