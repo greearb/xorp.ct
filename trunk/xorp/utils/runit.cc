@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.2 2003/01/16 19:26:41 pavlin Exp $"
 
 #include "config.h"
 
@@ -346,6 +346,7 @@ main(int argc, char *argv[])
     */
     for(unsigned int i = 0; i < commands.size(); i++) {
 	commands[i]._pid = spawn(commands[i]._command, output);
+	sleep(1);
 	if("" != commands[i]._wait_command) {
 	    wait_command = commands[i]._wait_command;
 	    wait_command_pid = spawn(commands[i]._wait_command.c_str(),
