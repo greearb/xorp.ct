@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/etc/templates/rib.cmds,v 1.1 2004/06/11 23:34:59 hodson Exp $ */
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.2 2004/06/12 14:50:20 hodson Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -22,13 +22,13 @@ show route table {
 show route table ipv4 unicast connected {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show routes from connected interfaces";
+     %tag: HELP "Show IPv4 routes from connected interfaces";
 }
 
 show route table ipv6 unicast connected {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show routes from connected interfaces";
+     %tag: HELP "Show IPv6 routes from connected interfaces";
 }
 
 
@@ -39,25 +39,25 @@ show route table ipv6 unicast connected {
 show route table ipv4 unicast static {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show static routes";
+     %tag: HELP "Show IPv4 static routes";
 }
 
 show route table ipv6 unicast static {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show static routes";
+     %tag: HELP "Show IPv6 static routes";
 }
 
 show route table ipv4 multicast static {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show static routes";
+     %tag: HELP "Show IPv4 MRIB static routes";
 }
 
 show route table ipv6 multicast static {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show static routes";
+     %tag: HELP "Show IPv6 MRIB static routes";
 }
 
 
@@ -68,13 +68,13 @@ show route table ipv6 multicast static {
 show route table ipv4 multicast fib2mrib {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show unicast routes for multicast extracted from kernel";
+     %tag: HELP "Show IPv4 unicast routes for multicast extracted from kernel";
 }
 
 show route table ipv6 multicast fib2mrib {
      %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show unicast routes for multicast extracted from kernel";
+     %tag: HELP "Show IPv6 unicast routes for multicast extracted from kernel";
 }
 
 
@@ -85,49 +85,49 @@ show route table ipv6 multicast fib2mrib {
 show route table ipv4 unicast ibgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show iBGP routes";
+     %tag: HELP "Show IPv4 iBGP routes";
 }
 
 show route table ipv4 unicast ebgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show eBGP routes";
+     %tag: HELP "Show IPv4 eBGP routes";
 }
 
 show route table ipv4 multicast ibgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show iBGP routes";
+     %tag: HELP "Show IPv4 iBGP MBGP routes";
 }
 
 show route table ipv4 multicast ebgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show eBGP routes";
+     %tag: HELP "Show IPv4 eBGP MBGP routes";
 }
 
 show route table ipv6 unicast ibgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show iBGP routes";
+     %tag: HELP "Show IPv6 iBGP routes";
 }
 
 show route table ipv6 unicast ebgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show eBGP routes";
+     %tag: HELP "Show IPv6 eBGP routes";
 }
 
 show route table ipv6 multicast ibgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show iBGP routes";
+     %tag: HELP "Show IPv6 iBGP MBGP routes";
 }
 
 show route table ipv6 multicast ebgp {
      %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
      %module: rib;
-     %tag: HELP "Show eBGP routes";
+     %tag: HELP "Show IPv6 eBGP MBGP routes";
 }
 
 
@@ -172,23 +172,23 @@ show route table ipv6 unicast ripng winners {
 show route table ipv4 unicast final {
      %command: "rib/tools/show_routes ribout $4 $5 all" %help: HELP;
      %module: rib;
-     %tag: HELP "Show winning routes";
+     %tag: HELP "Show IPv4 winning routes";
 }
 
 show route table ipv6 unicast final {
      %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
      %module: rib;
-     %tag: HELP "Show winning routes";
+     %tag: HELP "Show IPv6 winning routes";
 }
 
 show route table ipv4 multicast final {
      %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
      %module: rib;
-     %tag: HELP "Show winning routes";
+     %tag: HELP "Show IPv4 MRIB winning routes";
 }
 
 show route table ipv6 multicast final {
      %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
      %module: rib;
-     %tag: HELP "Show winning routes";
+     %tag: HELP "Show IPv6 MRIB winning routes";
 }
