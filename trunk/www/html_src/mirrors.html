@@ -31,39 +31,4 @@ This site is mirrored at the following locations:
 </center>
 
 <p>
-If you would like to run a mirror please send a request to
-feedback@xorp.org, with your IP address. We require your IP address to
-enable access and to create a wwwNNN.xorp.org DNS entry.
-
-<p>
-Currently 600MB of disk space is required. Each additional release
-will require on the order of 200MB (130MB of this is the LiveCD).
-<p>
-We are running a rsync server. You need to periodically (we suggest
-hourly) run the following script (or equivalent).
-<pre>
-#!/bin/sh
-
-# Pathname of the local mirror directory.
-XORP_ROOT=/usr/local/share/doc/apache
-XORP_MAIN=$XORP_ROOT/xorp
-XORP_RELEASES=$XORP_ROOT/xorp-releases
-
-rsync -a www.xorp.org::xorp $XORP_MAIN
-rsync -a www.xorp.org::xorp-releases $XORP_RELEASES
-</pre>
-
-<p>
-You will need to link the xorp-releases directory under the xorp
-directory. The complete magic if you are using Apache is:
-<pre>
-&lt;VirtualHost {your IP address here}>
-    ServerAdmin {your admin email address}
-    DocumentRoot /usr/local/www/data/xorp
-    ServerName {your xorp dns name}
-    ErrorLog /var/log/www-xorp-error_log
-    CustomLog /var/log/www-xorp-access_log common
-
-    Alias /releases "/usr/local/www/data/xorp-releases"
-&lt;/VirtualHost>
-</pre>
+If you would like to run a mirror <a href=mirror_operation.html>see</a>

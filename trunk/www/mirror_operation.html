@@ -9,7 +9,7 @@
 <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
 <link rel="stylesheet" type="text/css" href="xorp.css">
 
-<title>XORP Mirror Sites</title>
+<title>Operating a Mirror</title>
 </head>
 
 <body>
@@ -30,7 +30,7 @@
 <dt>Getting XORP</dt>
 <dd ><a href="livecd.html">Download Live CD</a></dd>
 <dd ><a href="downloads.html">Download Code</a></dd>
-<dd  id="selected"><a href="mirrors.html">Mirror Sites</a></dd>
+<dd ><a href="mirrors.html">Mirror Sites</a></dd>
 <dd ><a href="http://xorpc.icir.org/cgi-bin/cvsweb.cgi/xorp/">Browse Code</a></dd>
 <dd ><a href="status.html">Software Status</a></dd>
 </dl>
@@ -48,7 +48,7 @@
 <dl>
 <dt>Community</dt>
 <dd ><a href="contributing.html">Contributing</a></dd>
-<dd ><a href="mirror_operation.html">Operating a mirror</a></dd>
+<dd  id="selected"><a href="mirror_operation.html">Operating a mirror</a></dd>
 <dd ><a href="people.html">Developers</a></dd>
 <dd ><a href="cvs.html">Source Repository</a></dd>
 <dd ><a href="mailing_lists.html">Mailing Lists</a></dd>
@@ -56,44 +56,63 @@
 </dl>
 </div> <!-- end of div id="navbar" -->
 <div id="main">
-<h1>XORP Mirror Sites</h1>
+<h1>Operating a Mirror</h1>
+<p>
+If you would like to run a mirror please send a request to
+feedback@xorp.org, with your IP address. We require your IP address to
+enable access and to create a wwwNNN.xorp.org DNS entry.
 
 <p>
-This site is mirrored at the following locations:
-<p>
-<center>
-<!-- Table starts here -->
-
-<table border="0" cellpadding="4">
-
-<tr>
-<th>Name</th>
-<th>Location</th>
-<th>Status</th>
-</tr>
-
-<tr class="odd">
-<td>&nbsp;<a href="http://www.xorp.org/">www.xorp.org</a>&nbsp;</td>
-<td><a href="http://www.icir.org/">ICIR</a> at ICSI, Berkeley, CA, USA&nbsp;</td>
-<td align="center">Primary Site</a>
-</td>
-</tr>
-
-<tr class="even">
-<td>&nbsp;<a href="http://www2.xorp.org/">www2.xorp.org</a>&nbsp;</td>
-<td><a href="http://www.cs.ucl.ac.uk/">UCL</a>, London, UK</td>
-<td align="center">Secondary (continuously&nbsp;updated)</td>
-</tr>
-
-</table>
-</center>
+Currently 600MB of disk space is required. Each additional release
+will require on the order of 200MB (130MB of this is the LiveCD).
 
 <p>
-If you would like to run a mirror <a href=mirror_operation.html>see</a>
-<hr noshade>
+We are running an <a href="http://samba.anu.edu.au/rsync/">anonymous
+rsync server</a>. You need to periodically (we suggest hourly) run the
+following script (or equivalent).
+
+<pre>
+#!/bin/sh
+
+# Pathname of the local mirror directory.
+XORP_ROOT=/usr/local/www
+XORP_MAIN=$XORP_ROOT/xorp
+XORP_RELEASES=$XORP_ROOT/xorp-releases
+
+rsync -a www.xorp.org::xorp $XORP_MAIN
+rsync -a www.xorp.org::xorp-releases $XORP_RELEASES
+</pre>
+
+<p>
+For logistic reasons we maintain two trees, one is auto-generated
+(main web pages) the other (release data) is maintained manually. On
+our Apache web server we use the "Alias" command to link the release
+data into place. The simpler option is to copy both trees to the same
+directory, but then the potentially dangerous "--delete" option could
+not be used with rsync.
+
+<p>
+It would be simplest from our point of view if mirrors are run as <a
+href="http://httpd.apache.org/docs/vhosts/">virtual hosts</a>, rather
+than as a subtree of an existing server.
+
+<p>
+The solution (if you are running an Apache server) is:
+
+<pre>
+&lt;VirtualHost {your IP address here}&gt;
+    ServerAdmin {your admin email address}
+    DocumentRoot /usr/local/www/xorp
+    ServerName {your xorp dns name}
+    ErrorLog /var/log/www-xorp-error_log
+    CustomLog /var/log/www-xorp-access_log common
+
+    Alias /releases "/usr/local/www/xorp-releases"
+&lt;/VirtualHost&gt;
+</pre> <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.8 2004/07/14 22:21:06 pavlin Exp $.
-<br>Generated on 23/Jul/2004 at 11:48:37.</em>
+<br>Generated on 23/Jul/2004 at 15:10:14.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
