@@ -8,16 +8,6 @@
  */
 interface finder_event_notifier/0.1 {
 	/**
-	 * Register interest in all events.
-	 */
-	register_all_event_interest ? requester_instance:txt
-
-	/**
-	 * Deregister interest in all events.
-	 */
-	deregister_all_event_interest ? requester_instance:txt
-
-	/**
 	 * Register interest in events relating to a particular class.
 	 */
 	register_class_event_interest ? requester_instance:txt & class_name:txt
