@@ -1,63 +1,66 @@
 #
-# $XORP: xorp/rib/TODO,v 1.7 2003/11/06 19:02:05 atanu Exp $
+# $XORP: xorp/rib/TODO,v 1.8 2004/02/06 22:58:44 atanu Exp $
 #
 
 RIB To Do List
 =======================
 
-1. ExtIntTable needs some re-writing to be more symetric so that
+o ExtIntTable needs some re-writing to be more symetric so that
 recursive BGP nexthop lookups are possible.
 
-2. VIF configuration should be automatic, by communicating directly
+o VIF configuration should be automatic, by communicating directly
 with the FEA.
 
-3. ExportTable needs a queue adding to rate control changes to the FEA
+o ExportTable needs a queue adding to rate control changes to the FEA
 when the FEA is not keeping up.
 
-4. ExportTable should amalgamate deletes and adds in its queue for the
+o ExportTable should amalgamate deletes and adds in its queue for the
 same route.
 
-5. RegisterServer should amalgamate deletes and adds in its queue for
-the same route.  
+o RegisterServer should amalgamate deletes and adds in its queue for
+the same route.
 
-6. RegisterServer should be smarter about the use of flush().
+o RegisterServer should be smarter about the use of flush().
 
-7. Route redistribution needs finishing.
+o Route filters are needed for route redistribution.
 
-8. Route filters are needed for route redistribution.
+o Change OriginTable to hold data rather than pointers in the Trie.
 
-9. Change OriginTable to hold data rather than pointers in the Trie.
+o Better, more extensive test suites.
 
-10. Better, more extensive test suites.
-
-12. Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
+o Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
     RIB clients.
 
-13. Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.
+o Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.
 
-14. Rething the logic computing whether a route is directly connected
+o Rething the logic computing whether a route is directly connected
     (e.g., when we use Vif::is_same_subnet() or Vif::is_same_p2p()):
     if vif is down, then the route is NOT directly connected?
 
-15. Make test_rib_client.cc work properly
+o Make test_rib_client.cc work properly
 
-16. Repeated adding and deleting of a table does not work. 
-$ bgp/harness/test_routing2.sh -t test6.
+o Prune Export Table code.  This can be done with Redist Table using
+  an export specific output, ie one that adds start and end
+  transaction around route add / delete xrls.
 
-17. Use ref_trie.hh not trie.hh.
+o Repeated adding and deleting of a table does not work.
+  $ bgp/harness/test_routing2.sh -t test6.
 
-18. The RIB provides a "register_interest[46]/deregister_interest[46]"
+o Use ref_trie.hh not trie.hh.
+
+o The RIB provides a "register_interest[46]/deregister_interest[46]"
 interface for routes. The response to the register_interest call
 returns the requested answer. However, if a previous response becomes
 invalid the invalidation call comes via the rib_client interface. The
 client process can therefore information about a route via two
 different channels. This can mean that messages on one channel can
-overtake messages on the other channel. 
+overtake messages on the other channel.
 
 Therefore registering interest should not return the answer the answer
 should come later via the rib_client interface.
 
 Done
 =======================
-11. Add new interface for PIM simply be able to get all the routes.
+o Add new interface for PIM simply be able to get all the routes.
 
+o Add route redistribution.
