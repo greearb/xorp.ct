@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.19 2003/03/10 23:19:56 hodson Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.20 2003/11/06 03:00:30 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,7 +45,7 @@ AsSegment::decode(const uint8_t *d)
     size_t n = d[1];
     clear();
     _type = (ASPathSegType)d[0];
-    assert(_type == AS_SET || _type == AS_SEQUENCE);
+    XLOG_ASSERT(_type == AS_NONE || _type == AS_SET || _type == AS_SEQUENCE);
     // XXX more error checking ?
 
     d += 2;	// skip header, d points to the raw data now.
@@ -60,8 +60,8 @@ const uint8_t *
 AsSegment::encode(size_t &len, uint8_t *data) const
 {
     debug_msg("AsSegment encode\n");
-    assert(_entries <= 255);
-    assert(_aslist.size() == _entries);		// XXX this is expensive
+    XLOG_ASSERT(_entries <= 255);
+    XLOG_ASSERT(_aslist.size() == _entries);	// XXX this is expensive
 
     size_t i = wire_size();
     const_iterator as;
@@ -69,7 +69,7 @@ AsSegment::encode(size_t &len, uint8_t *data) const
     if (data == 0)
 	data = new uint8_t[i];
     else
-	assert(len >= i);
+	XLOG_ASSERT(len >= i);
     len = i;
 
     data[0] = _type;
@@ -95,7 +95,7 @@ AsSegment::first_asnum() const
 		    "from an AS Path that starts with an AS_SET "
 		    "not an AS_SEQUENCE\n"); 
     }
-    assert(!_aslist.empty());
+    XLOG_ASSERT(!_aslist.empty());
     return _aslist.front();
 }
 
@@ -180,7 +180,7 @@ size_t
 AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
 {
     //See RFC 1657, Page 15 for the encoding
-    assert(buf_size >= (2 + _entries * 2));
+    XLOG_ASSERT(buf_size >= (2 + _entries * 2));
     uint8_t *p = buf;
     *p = (uint8_t)_type;  p++;
     *p = (uint8_t)_entries; p++;
@@ -275,7 +275,7 @@ AsPath::decode(const uint8_t *d, size_t l)
     _path_len = 0;
     while (l > 0) {		// grab segments
 	size_t len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
-	assert(len <= l);
+	XLOG_ASSERT(len <= l);
 
 	AsSegment s(d);
 	add_segment(s);
@@ -337,7 +337,7 @@ AsPath::wire_size() const
 const uint8_t *
 AsPath::encode(size_t &len, uint8_t *buf) const
 {
-    assert(_num_segments == _segments.size());	// XXX expensive
+    XLOG_ASSERT(_num_segments == _segments.size());	// XXX expensive
     const_iterator i;
     size_t pos, l = wire_size();
 
@@ -345,7 +345,7 @@ AsPath::encode(size_t &len, uint8_t *buf) const
     if (buf == 0)		// no buffer, allocate one
 	buf = new uint8_t[l];
     else			// we got a buffer, make sure is large enough.
-	assert(len >= l);	// in fact, just abort if not so.
+	XLOG_ASSERT(len >= l);	// in fact, just abort if not so.
     len = l;			// set the correct value.
 
     // encode into the buffer
@@ -367,7 +367,7 @@ AsPath::prepend_as(const AsNum &asn)
 	_segments.push_front(seg);
 	_num_segments++;
     } else {
-	assert(_segments.front().type() == AS_SEQUENCE);
+	XLOG_ASSERT(_segments.front().type() == AS_SEQUENCE);
 	_segments.front().prepend_as(asn);
     }
     _path_len++;	// in both cases the length increases by one.
