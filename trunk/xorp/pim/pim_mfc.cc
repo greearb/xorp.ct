@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.5 2003/02/05 05:20:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.6 2003/02/05 05:22:47 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -127,12 +127,12 @@ PimMfc::recompute_iif_olist_mfc()
     Mifset new_olist;
     uint16_t old_iif_vif_index = iif_vif_index();
     Mifset old_olist = olist();
-    uint32_t lookup_flags
-	= PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
+    uint32_t lookup_flags;
+    PimMre *pim_mre, *pim_mre_sg;
     
-    PimMre *pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
-					     lookup_flags, 0);
-    
+    lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
+    pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+				     lookup_flags, 0);
     if (pim_mre == NULL) {
 	// No matching multicast routing entry. Remove the PimMfc entry.
 	// TODO: XXX: PAVPAVPAV: do we really want to remove the entry?
@@ -141,6 +141,20 @@ PimMfc::recompute_iif_olist_mfc()
 	
 	return;
     }
+    
+    // Get the (S,G) PimMre entry (if exists)
+    pim_mre_sg = NULL;
+    do {
+	if (pim_mre->is_sg()) {
+	    pim_mre_sg = pim_mre;
+	    break;
+	}
+	if (pim_mre->is_sg_rpt()) {
+	    pim_mre_sg = pim_mre->sg_entry();
+	    break;
+	}
+	break;
+    } while (false);
     
     // Compute the iif and the olist
     if (pim_mre->is_sg()
@@ -160,6 +174,13 @@ PimMfc::recompute_iif_olist_mfc()
 	// Remove the PimMfc entry.
 	// TODO: XXX: PAVPAVPAV: do we really want to remove the entry?
 	// E.g., just reset the olist, and leave the entry itself to timeout?
+	
+	// Cancel the (S,G) Keepalive Timer
+	if ((pim_mre_sg != NULL) && pim_mre_sg->is_keepalive_timer_running()) {
+	    pim_mre_sg->cancel_keepalive_timer();
+	    pim_mre_sg->entry_try_remove();
+	}
+	
 	delete this;	// XXX: this will remove it from the kernel
 	
 	return;
@@ -177,6 +198,13 @@ PimMfc::recompute_iif_olist_mfc()
 	// expires. Just delete the PimMfc entry, and then later when we are
 	// forced to install a new PimMfc entry because of NOCACHE upcall,
 	// we will set appropriately the SPT bit, etc.
+	
+	// Cancel the (S,G) Keepalive Timer
+	if ((pim_mre_sg != NULL) && pim_mre_sg->is_keepalive_timer_running()) {
+	    pim_mre_sg->cancel_keepalive_timer();
+	    pim_mre_sg->entry_try_remove();
+	}
+	
 	delete this;
 	
 	return;
