@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.11 2003/08/21 23:49:14 fred Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.12 2003/09/22 05:45:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -27,7 +27,6 @@
 //
 // Network interfaces related configuration.
 //
-
 
 static bool
 map_changes(const IfTreeItem::State&		fci,
@@ -75,7 +74,7 @@ int
 IfConfig::register_ifc_get(IfConfigGet *ifc_get)
 {
     _ifc_get = ifc_get;
-    
+
     return (XORP_OK);
 }
 
@@ -83,7 +82,7 @@ int
 IfConfig::register_ifc_set(IfConfigSet *ifc_set)
 {
     _ifc_set = ifc_set;
-    
+
     return (XORP_OK);
 }
 
@@ -91,7 +90,7 @@ int
 IfConfig::register_ifc_observer(IfConfigObserver *ifc_observer)
 {
     _ifc_observer = ifc_observer;
-    
+
     return (XORP_OK);
 }
 
@@ -101,7 +100,7 @@ IfConfig::set_dummy()
     register_ifc_get(&_ifc_get_dummy);
     register_ifc_set(&_ifc_set_dummy);
     register_ifc_observer(&_ifc_observer_dummy);
-    
+
     return (XORP_OK);
 }
 
@@ -120,13 +119,13 @@ IfConfig::start()
 	if (_ifc_observer->start() < 0)
 	    return (XORP_ERROR);
     }
-    
+
     _live_config = pull_config();
     _live_config.finalize_state();
-    
+
     debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
     debug_msg("\nEnd configuration read.\n");
-    
+
     return (XORP_OK);
 }
 
@@ -147,7 +146,7 @@ IfConfig::stop()
 	if (_ifc_get->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
-    
+
     return (ret_value);
 }
 
@@ -270,14 +269,14 @@ const char *
 IfConfig::get_ifname(uint32_t index)
 {
     IfIndex2NameMap::const_iterator i = _ifnames.find(index);
-    
+
     if (_ifnames.end() == i) {
 	char name_buf[IF_NAMESIZE];
 	const char* ifname = if_indextoname(index, name_buf);
-	
+
 	if (ifname)
 	    map_ifindex(index, ifname);
-	
+
 	return ifname;
     }
     return i->second.c_str();
@@ -287,10 +286,10 @@ IfTreeInterface *
 IfConfig::get_if(IfTree& it, const string& ifname)
 {
     IfTree::IfMap::iterator ii = it.get_if(ifname);
-    
+
     if (it.ifs().end() == ii)
 	return NULL;
-    
+
     return &ii->second;
 }
 
@@ -298,23 +297,110 @@ IfTreeVif *
 IfConfig::get_vif(IfTree& it, const string& ifname, const string& vifname)
 {
     IfTreeInterface* fi = get_if(it, ifname);
-    
+
     if (NULL == fi)
 	return NULL;
-    
+
     IfTreeInterface::VifMap::iterator vi = fi->get_vif(vifname);
     if (fi->vifs().end() == vi)
 	return NULL;
-    
+
     return &vi->second;
 }
 
-// -------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// IfConfigUpdateReplicator
+
+IfConfigUpdateReplicator::~IfConfigUpdateReplicator()
+{
+}
+
+bool
+IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
+{
+    if (find(_reporters.begin(), _reporters.end(), rp) != _reporters.end())
+	return false;
+    _reporters.push_back(rp);
+    return true;
+}
+
+bool
+IfConfigUpdateReplicator::remove_reporter(IfConfigUpdateReporterBase* rp)
+{
+    list<IfConfigUpdateReporterBase*>::iterator i = find(_reporters.begin(),
+							 _reporters.end(),
+							 rp);
+    if (i == _reporters.end())
+	return false;
+    _reporters.erase(i);
+    return true;
+}
+
+void
+IfConfigUpdateReplicator::interface_update(const string& ifname,
+					   const Update& update,
+					   bool		 all)
+{
+    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+    while (i != _reporters.end()) {
+	IfConfigUpdateReporterBase*& r = *i;
+	r->interface_update(ifname, update, all);
+	++i;
+    }
+}
+
+void
+IfConfigUpdateReplicator::vif_update(const string& ifname,
+				     const string& vifname,
+				     const Update& update,
+				     bool	   all)
+{
+    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+    while (i != _reporters.end()) {
+	IfConfigUpdateReporterBase*& r = *i;
+	r->vif_update(ifname, vifname, update, all);
+	++i;
+    }
+}
+
+void
+IfConfigUpdateReplicator::vifaddr4_update(const string& ifname,
+					  const string& vifname,
+					  const IPv4&   addr,
+					  const Update& update,
+					  bool		all)
+{
+    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+    while (i != _reporters.end()) {
+	IfConfigUpdateReporterBase*& r = *i;
+	r->vifaddr4_update(ifname, vifname, addr, update, all);
+	++i;
+    }
+}
+
+void
+IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
+					  const string& vifname,
+					  const IPv6&   addr,
+					  const Update& update,
+					  bool		all)
+{
+    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+    while (i != _reporters.end()) {
+	IfConfigUpdateReporterBase*& r = *i;
+	r->vifaddr6_update(ifname, vifname, addr, update, all);
+	++i;
+    }
+}
+
+
+// ----------------------------------------------------------------------------
 // IfConfigErrorReporter methods
 
 IfConfigErrorReporter::IfConfigErrorReporter()
 {
-    
+
 }
 
 void
