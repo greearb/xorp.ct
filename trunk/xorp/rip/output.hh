@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/output.hh,v 1.1 2003/08/01 04:08:11 hodson Exp $
 
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
@@ -40,8 +40,23 @@ public:
     typedef IPNet<A>			Net;
 
 public:
-    OutputBase(EventLoop& e, Port<A>& port, PacketQueue<A>& pkt_queue);
+    OutputBase(EventLoop&	e,
+	       Port<A>&		port,
+	       PacketQueue<A>&	pkt_queue,
+	       const A&		ip_addr,
+	       uint16_t		ip_port);
+
     virtual ~OutputBase() {};
+
+    /**
+     * Accessor for destination IP address applied to output packets.
+     */
+    inline const A& ip_addr() const			{ return _ip_addr; }
+
+    /**
+     * Accessor for destination IP port applied to output packets.
+     */
+    inline uint16_t ip_port() const			{ return _ip_port; }
 
     /**
      * @return true if output process is generating packets.
@@ -79,14 +94,19 @@ protected:
     EventLoop&		_e;
     Port<A>&		_port;	    // Port associated with output
     PacketQueue<A>&	_pkt_queue; // Place for generated packets to go
+    const A		_ip_addr;   // IP address for output packets
+    const uint16_t	_ip_port;   // IP port for output packets
     XorpTimer		_op_timer;  // Timer invoking output_packet()
 };
 
 template <typename A>
 OutputBase<A>::OutputBase(EventLoop&	  e,
 			  Port<A>&	  port,
-			  PacketQueue<A>& pkt_queue)
-    : _e(e), _port(port), _pkt_queue(pkt_queue)
+			  PacketQueue<A>& pkt_queue,
+			  const A&	  ip_addr,
+			  uint16_t	  ip_port)
+    : _e(e), _port(port), _pkt_queue(pkt_queue),
+      _ip_addr(ip_addr), _ip_port(ip_port)
 {
 }
 

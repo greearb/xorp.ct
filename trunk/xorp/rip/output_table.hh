@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/output_table.hh,v 1.1 2003/08/01 04:08:11 hodson Exp $
 
 #ifndef __RIP_OUTPUT_TABLE_HH__
 #define __RIP_OUTPUT_TABLE_HH__
@@ -38,8 +38,11 @@ public:
     OutputTable(EventLoop&	e,
 		Port<A>&	port,
 		PacketQueue<A>&	pkt_queue,
-		RouteDB<A>&	rdb)
-	: OutputBase<A>(e, port, pkt_queue), _rw(rdb), _rw_valid(false)
+		RouteDB<A>&	rdb,
+		const A&	ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),
+		uint16_t	ip_port = RIP_AF_CONSTANTS<A>::IP_PORT)
+	: OutputBase<A>(e, port, pkt_queue, ip_addr, ip_port),
+	  _rw(rdb), _rw_valid(false)
     {}
 
 protected:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.1 2003/08/01 04:08:11 hodson Exp $"
 
 #include "output_table.hh"
 #include "packet_assembly.hh"
@@ -30,7 +30,7 @@ OutputTable<A>::output_packet()
     _rw.resume();
 
     ResponsePacketAssembler<A> rpa(_port);
-    RipPacket<A>* pkt = new RipPacket<A>(A::ZERO(), 0);
+    RipPacket<A>* pkt = new RipPacket<A>(ip_addr(), ip_port());
     rpa.packet_start(pkt);
 
     uint32_t done = 0;
