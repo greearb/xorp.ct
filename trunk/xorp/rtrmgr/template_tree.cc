@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.8 2003/11/17 00:21:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.9 2003/11/17 19:34:32 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -90,7 +90,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	    globfree(&pglob);
 	    exit(1);
 	}
-	if (_path_segs.size() != 0) {
+	if (_path_segments.size() != 0) {
 	    fprintf(stderr, "Error: file %s is not terminated properly\n",
 		    pglob.gl_pathv[i]);
 	    globfree(&pglob);
@@ -114,20 +114,20 @@ void TemplateTree::extend_path(string segment, bool is_tag) {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("extend_path %s\n", segment.c_str());
 #endif
-    _path_segs.push_back(PathSegment(segment,is_tag));
+    _path_segments.push_back(PathSegment(segment,is_tag));
 }
 
 void
 TemplateTree::pop_path() {
-    if (_seg_lengths.size()==0) {
+    if (_segment_lengths.size()==0) {
 	xorp_throw(ParseError, "Mismatched braces");
     }
-    int segs_to_pop = _seg_lengths.front();
+    int segments_to_pop = _segment_lengths.front();
 #ifdef DEBUG_TEMPLATE_PARSER
-    printf("pop_path: %d\n", segs_to_pop);
+    printf("pop_path: %d\n", segments_to_pop);
 #endif
-    _seg_lengths.pop_front();
-    for(int i =0; i<segs_to_pop; i++) {
+    _segment_lengths.pop_front();
+    for(int i =0; i<segments_to_pop; i++) {
 	_current_node = _current_node->parent();
     }
 #ifdef DEBUG_TEMPLATE_PARSER
@@ -139,8 +139,8 @@ string
 TemplateTree::path_as_string() {
     string path;
     typedef list<PathSegment>::iterator CI;
-    CI ptr = _path_segs.begin();
-    while (ptr != _path_segs.end()) {
+    CI ptr = _path_segments.begin();
+    while (ptr != _path_segments.end()) {
 	if (path == "") {
 	    path = ptr->segname();
 	} else {
@@ -199,8 +199,8 @@ TemplateTree::push_path(int type, char* cinit) {
     printf("push_path\n");
 #endif
     list <PathSegment>::const_iterator iter;
-    iter = _path_segs.begin();
-    int len = _path_segs.size();
+    iter = _path_segments.begin();
+    int len = _path_segments.size();
     for (int i = 0; i< len-1; i++) {
 	//add all except the last segment
 	add_untyped_node(iter->segname(), iter->is_tag());
@@ -208,10 +208,10 @@ TemplateTree::push_path(int type, char* cinit) {
     }
     add_node(iter->segname(), type, cinit);
 
-    _seg_lengths.push_front(len);
+    _segment_lengths.push_front(len);
 
-    while (_path_segs.size()>0)
-	_path_segs.pop_front();
+    while (_path_segments.size()>0)
+	_path_segments.pop_front();
 }
 
 void
@@ -257,7 +257,7 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
     printf("add_node: segment=%s type: %d\n", segment.c_str(), type);
     printf("cn=%p\n", _current_node);
 #endif
-    string varname = _path_segs.back().segname();
+    string varname = _path_segments.back().segname();
     if (varname == "@") {
 	if (_current_node->is_tag()) {
 	    //parent node is a tag
@@ -310,10 +310,10 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
 }
 
 TemplateTreeNode*
-TemplateTree::find_node(const list<string>& segs) {
+TemplateTree::find_node(const list<string>& path_segments) {
     TemplateTreeNode* ttn = _root;
     list <string>::const_iterator i;
-    for (i=segs.begin(); i!= segs.end(); ++i) {
+    for (i=path_segments.begin(); i!= path_segments.end(); ++i) {
 	list <TemplateTreeNode*> matches;
 	list <TemplateTreeNode*>::const_iterator ti;
 

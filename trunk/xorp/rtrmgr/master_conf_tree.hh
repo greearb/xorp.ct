@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.10 2003/05/31 06:13:15 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.11 2003/11/18 23:03:56 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -22,7 +22,6 @@
 #include <set>
 #include "config.h"
 #include "libxorp/xorp.h"
-#include "master_conf_tree_node.hh"
 #include "task.hh"
 #include "parse_error.hh"
 #include "conf_tree.hh"
@@ -34,12 +33,12 @@ class ConfTemplate;
 class MasterConfigTree :public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    MasterConfigTree(const string& conffile, TemplateTree *ct,
+    MasterConfigTree(const string& config_file, TemplateTree *ct,
 		     ModuleManager& mmgr, XorpClient& xclient,
 		     bool global_do_exec);
-    bool read_file(string& configuration, const string& conffile,
+    bool read_file(string& configuration, const string& config_file,
 		   string& errmsg);
-    bool parse(const string& configuration, const string& conffile);
+    bool parse(const string& configuration, const string& config_file);
     void execute();
     void config_done(bool success, string errmsg);
 
@@ -51,7 +50,7 @@ public:
     bool commit_in_progress() const {return _commit_in_progress;}
     bool check_commit_status(string &response);
     string discard_changes();
-    string mark_subtree_for_deletion(const list <string>& pathsegs, 
+    string mark_subtree_for_deletion(const list <string>& path_segments, 
 				     uid_t user_id);
     void delete_entire_config();
     bool lock_node(const string& node, uid_t user_id, uint32_t timeout, 
@@ -61,14 +60,6 @@ public:
     bool save_to_file(const string& filename, uid_t user_id, string& errmsg);
     bool load_from_file(const string& filename, uid_t user_id,
 			string& errmsg, string& deltas, string& deletions);
-    
-    /*adaptors so we don't need casts elsewhere*/
-    MasterConfigTreeNode *root() { 
-	return (MasterConfigTreeNode*)(&_root_node);
-    }
-    const MasterConfigTreeNode *const_root() const {
-	return (const MasterConfigTreeNode*)(&_root_node);
-    }
 
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,

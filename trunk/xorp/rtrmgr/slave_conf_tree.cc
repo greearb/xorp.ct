@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.8 2003/09/30 18:24:03 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.9 2003/11/17 19:34:31 pavlin Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -43,15 +43,16 @@ SlaveConfigTree::SlaveConfigTree(const string& configuration,
     _root_node.mark_subtree_as_committed();
 }
 
-int SlaveConfigTree::parse(const string& configuration,
-			   const string& conffile) {
+bool
+SlaveConfigTree::parse(const string& configuration,
+			   const string& config_file) {
     try {
-	((ConfigTree*)this)->parse(configuration, conffile);
+	((ConfigTree*)this)->parse(configuration, config_file);
     } catch (ParseError &pe) {
 	booterror(pe.why().c_str());
 	exit(1);
     }
-    return 0;
+    return true;
 }
 
 bool
@@ -215,9 +216,9 @@ SlaveConfigTree::discard_changes() {
 }
 
 string
-SlaveConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
+SlaveConfigTree::mark_subtree_for_deletion(const list <string>& path_segments,
 				    uid_t user_id) {
-    SlaveConfigTreeNode *found = find_node(pathsegs);
+    SlaveConfigTreeNode *found = find_node(path_segments);
     if (found == NULL)
 	return "ERROR";
 

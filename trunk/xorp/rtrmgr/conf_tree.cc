@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.7 2003/09/30 18:24:02 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.8 2003/11/18 23:03:56 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -22,61 +22,70 @@
 #include "conf_tree.hh"
 #include "util.hh"
 
-extern int init_bootfile_parser(const char *configuration,
-				const char *filename, ConfigTree *c);
+extern int init_bootfile_parser(const char* configuration,
+				const char* filename, ConfigTree* c);
 extern int parse_bootfile();
-extern int booterror(const char *s);
+extern int booterror(const char* s);
 
 /*************************************************************************
  * Config File class
  *************************************************************************/
 
-ConfigTree::ConfigTree(TemplateTree *tt) {
-    _template_tree = tt;
-    _current_node = &_root_node;
+ConfigTree::ConfigTree(TemplateTree* tt)
+    : _template_tree(tt),
+      _current_node(&_root_node)
+{
+
 }
 
-ConfigTree::~ConfigTree() {
-    //_root_node will handle the deletion of all the tree nodes
+ConfigTree::~ConfigTree()
+{
+    // XXX: _root_node will handle the deletion of all the tree nodes
 }
 
-ConfigTree& ConfigTree::operator=(const ConfigTree& orig_tree) {
+ConfigTree&
+ConfigTree::operator=(const ConfigTree& orig_tree)
+{
     _root_node.clone_subtree(orig_tree.const_root());
     return *this;
 }
 
-int ConfigTree::parse(const string& configuration, const string& conffile) {
-    init_bootfile_parser(configuration.c_str(), conffile.c_str(), this);
+bool
+ConfigTree::parse(const string& configuration, const string& config_file)
+{
+    init_bootfile_parser(configuration.c_str(), config_file.c_str(), this);
     parse_bootfile();
-    return 0;
+    return true;
 }
 
 void ConfigTree::add_default_children() {
     _root_node.recursive_add_default_children();
 }
 
-TemplateTreeNode *ConfigTree::find_template(const list <string>& pathsegs)
+TemplateTreeNode *ConfigTree::find_template(const list <string>& path_segments)
     throw (ParseError)
 {
-    debug_msg("----------------------------------------------------------\n");
-    debug_msg("looking for template for \"%s\"\n",
-	   path_as_string(pathsegs).c_str());
     TemplateTreeNode *ttn;
 
-    ttn = _template_tree->find_node(pathsegs);
+    debug_msg("----------------------------------------------------------\n");
+    debug_msg("looking for template for \"%s\"\n",
+	      path_as_string(path_segments).c_str());
+
+    ttn = _template_tree->find_node(path_segments);
     return ttn;
 
 }
 
 list<string>
-ConfigTree::path_as_segs() const {
-    list <string> path_segs;
+ConfigTree::path_as_segments() const
+{
+    list<string> path_segments;
     ConfigTreeNode* ctn = _current_node;
     while (ctn->parent() != NULL) {
-	path_segs.push_front(ctn->segname());
+	path_segments.push_front(ctn->segname());
 	ctn = ctn->parent();
     }
-    return path_segs;
+    return path_segments;
 }
 
 string
@@ -94,10 +103,10 @@ ConfigTree::current_path_as_string() const {
 }
 
 string
-ConfigTree::path_as_string(const list <string>& pathsegs) const {
+ConfigTree::path_as_string(const list <string>& path_segments) const {
     string path;
     list <string>::const_iterator i;
-    for (i = pathsegs.begin(); i!= pathsegs.end(); ++i) {
+    for (i = path_segments.begin(); i!= path_segments.end(); ++i) {
 	if (path.empty())
 	    path = *i;
 	else
@@ -108,14 +117,14 @@ ConfigTree::path_as_string(const list <string>& pathsegs) const {
 
 void
 ConfigTree::extend_path(const string &segment) {
-    _path_segs.push_back(segment);
+    _path_segments.push_back(segment);
 }
 
 void
 ConfigTree::pop_path() {
-    int segs_to_pop = _seg_lengths.front();
-    _seg_lengths.pop_front();
-    for(int i =0; i<segs_to_pop; i++) {
+    int segments_to_pop = _segment_lengths.front();
+    _segment_lengths.pop_front();
+    for(int i =0; i < segments_to_pop; i++) {
 	_current_node = _current_node->parent();
     }
 }
@@ -123,20 +132,20 @@ ConfigTree::pop_path() {
 void
 ConfigTree::push_path() {
     string path = current_path_as_string();
-    string nodename = _path_segs.back();
+    string nodename = _path_segments.back();
 
     //keep track of how many segments comprise this frame so we can
     //pop the right number later
-    int len = _path_segs.size();
-    _seg_lengths.push_front(len);
+    int len = _path_segments.size();
+    _segment_lengths.push_front(len);
 
     list <string>::const_iterator i;
-    for (i = _path_segs.begin(); i != _path_segs.end(); i++) {
+    for (i = _path_segments.begin(); i != _path_segments.end(); i++) {
 	add_node(*i);
     }
 
-    while (_path_segs.size()>0)
-	_path_segs.pop_front();
+    while (_path_segments.size()>0)
+	_path_segments.pop_front();
 }
 
 void
@@ -166,9 +175,9 @@ ConfigTree::add_node(const string& segment) {
     if (found != NULL) {
 	_current_node = found;
     } else {
-	list<string> pathsegs = path_as_segs();
-	pathsegs.push_back(segment);
-	TemplateTreeNode *ttn = find_template(pathsegs);
+	list<string> path_segments = path_as_segments();
+	path_segments.push_back(segment);
+	TemplateTreeNode *ttn = find_template(path_segments);
 	if (ttn == NULL) {
 	    booterror("No template found in template map");
 	    exit(1);
@@ -282,13 +291,13 @@ ConfigTree::terminal_value(char *value, int type) {
 }
 
 const ConfigTreeNode*
-ConfigTree::find_config_node(const list <string>& pathsegs) const {
+ConfigTree::find_config_node(const list <string>& path_segments) const {
     const ConfigTreeNode *found = &_root_node;
     const ConfigTreeNode *found2 = found;
     list <string>::const_iterator pi;
     list <ConfigTreeNode *>::const_iterator ci;
     int i = 0;
-    for (pi = pathsegs.begin(); pi != pathsegs.end(); pi++) {
+    for (pi = path_segments.begin(); pi != path_segments.end(); pi++) {
 	i++;
 	for (ci = found->const_children().begin();
 	     ci != found->const_children().end();
@@ -307,8 +316,8 @@ ConfigTree::find_config_node(const list <string>& pathsegs) const {
 
 
 string
-ConfigTree::show_subtree(const list <string>& pathsegs) const {
-    const ConfigTreeNode *found = find_config_node(pathsegs);
+ConfigTree::show_subtree(const list <string>& path_segments) const {
+    const ConfigTreeNode *found = find_config_node(path_segments);
     if (found == NULL)
 	return "ERROR";
 

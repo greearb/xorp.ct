@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.6 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.7 2003/09/30 18:24:03 hodson Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -403,7 +403,7 @@ OpCommandList::OpCommandList(const string &templatedirname,
 	    globfree(&pglob);
 	    exit(1);
 	}
-	if (_path_segs.size() != 0) {
+	if (_path_segments.size() != 0) {
 	    fprintf(stderr, "Error: file %s is not terminated properly\n",
 		    pglob.gl_pathv[i]);
 	    globfree(&pglob);
@@ -507,14 +507,14 @@ OpCommandList::append_path(const string& s)
 {
     if (s[0] == '$')
 	check_variable_name(s);
-    _path_segs.push_back(s);
+    _path_segments.push_back(s);
     return XORP_OK;
 }
 
 int
 OpCommandList::push_path()
 {
-    _current_cmd = new_op_command(_path_segs);
+    _current_cmd = new_op_command(_path_segments);
     return XORP_OK;
 }
 
@@ -523,8 +523,8 @@ OpCommandList::pop_path()
 {
     // In the OpCommand file, we don't currently allow nesting, so just
     // clear the path.
-    while (!_path_segs.empty()) {
-	_path_segs.pop_front();
+    while (!_path_segments.empty()) {
+	_path_segments.pop_front();
     }
     return XORP_OK;
 }

@@ -114,7 +114,7 @@ LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(
 #
 # xorp_rtrmgr
 #
-xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh master_conf_tree.hh master_conf_tree_node.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh randomness.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc master_conf_tree_node.cc module_command.cc module_manager.cc randomness.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh master_conf_tree.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh randomness.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc module_command.cc module_manager.cc randomness.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
 xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a $(LDADD)
 
@@ -138,7 +138,7 @@ test_templates_LDADD = $(LDADD)
 #
 # test_sample_config
 #
-test_sample_config_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh master_conf_tree.hh master_conf_tree_node.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc master_conf_tree.cc master_conf_tree_node.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_sample_config.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+test_sample_config_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh master_conf_tree.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc master_conf_tree.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_sample_config.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
 test_sample_config_LDADD = $(LDADD)
 
@@ -185,12 +185,12 @@ test_module_manager_LDFLAGS =
 am_test_sample_config_OBJECTS = command_tree.$(OBJEXT) \
 	conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) lex.boot.$(OBJEXT) \
 	lex.tplt.$(OBJEXT) master_conf_tree.$(OBJEXT) \
-	master_conf_tree_node.$(OBJEXT) module_command.$(OBJEXT) \
-	module_manager.$(OBJEXT) task.$(OBJEXT) \
-	template_commands.$(OBJEXT) template_tree.$(OBJEXT) \
-	template_tree_node.$(OBJEXT) test_sample_config.$(OBJEXT) \
-	unexpanded_xrl.$(OBJEXT) util.$(OBJEXT) xorp_client.$(OBJEXT) \
-	xrldb.$(OBJEXT) y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
+	module_command.$(OBJEXT) module_manager.$(OBJEXT) \
+	task.$(OBJEXT) template_commands.$(OBJEXT) \
+	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
+	test_sample_config.$(OBJEXT) unexpanded_xrl.$(OBJEXT) \
+	util.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
+	y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
 test_sample_config_OBJECTS = $(am_test_sample_config_OBJECTS)
 test_sample_config_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -213,13 +213,13 @@ test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
 test_templates_LDFLAGS =
 am_xorp_rtrmgr_OBJECTS = conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	lex.boot.$(OBJEXT) lex.tplt.$(OBJEXT) main_rtrmgr.$(OBJEXT) \
-	master_conf_tree.$(OBJEXT) master_conf_tree_node.$(OBJEXT) \
-	module_command.$(OBJEXT) module_manager.$(OBJEXT) \
-	randomness.$(OBJEXT) task.$(OBJEXT) template_commands.$(OBJEXT) \
-	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
-	unexpanded_xrl.$(OBJEXT) userdb.$(OBJEXT) util.$(OBJEXT) \
-	xorp_client.$(OBJEXT) xrl_rtrmgr_interface.$(OBJEXT) \
-	xrldb.$(OBJEXT) y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
+	master_conf_tree.$(OBJEXT) module_command.$(OBJEXT) \
+	module_manager.$(OBJEXT) randomness.$(OBJEXT) task.$(OBJEXT) \
+	template_commands.$(OBJEXT) template_tree.$(OBJEXT) \
+	template_tree_node.$(OBJEXT) unexpanded_xrl.$(OBJEXT) \
+	userdb.$(OBJEXT) util.$(OBJEXT) xorp_client.$(OBJEXT) \
+	xrl_rtrmgr_interface.$(OBJEXT) xrldb.$(OBJEXT) \
+	y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
 xorp_rtrmgr_OBJECTS = $(am_xorp_rtrmgr_OBJECTS)
 xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.a \
 	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
@@ -262,7 +262,6 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/lex.boot.Po $(DEPDIR)/lex.opcmd.Po \
 @AMDEP_TRUE@	$(DEPDIR)/lex.tplt.Po $(DEPDIR)/main_rtrmgr.Po \
 @AMDEP_TRUE@	$(DEPDIR)/master_conf_tree.Po \
-@AMDEP_TRUE@	$(DEPDIR)/master_conf_tree_node.Po \
 @AMDEP_TRUE@	$(DEPDIR)/module_command.Po \
 @AMDEP_TRUE@	$(DEPDIR)/module_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/op_commands.Po $(DEPDIR)/popen.Po \
@@ -379,7 +378,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.tplt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rtrmgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/master_conf_tree.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/master_conf_tree_node.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/module_command.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/module_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/op_commands.Po@am__quote@

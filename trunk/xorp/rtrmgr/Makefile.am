@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.21 2003/11/18 23:03:56 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.22 2003/11/19 00:28:07 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -43,7 +43,6 @@ xorp_rtrmgr_SOURCES	+= conf_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree_node.hh
 xorp_rtrmgr_SOURCES	+= main_rtrmgr.hh
 xorp_rtrmgr_SOURCES	+= master_conf_tree.hh
-xorp_rtrmgr_SOURCES	+= master_conf_tree_node.hh
 xorp_rtrmgr_SOURCES	+= module_commands.hh
 xorp_rtrmgr_SOURCES	+= module_manager.hh
 xorp_rtrmgr_SOURCES	+= parse_error.hh
@@ -66,7 +65,6 @@ xorp_rtrmgr_SOURCES	+= lex.boot.cc
 xorp_rtrmgr_SOURCES	+= lex.tplt.cc
 xorp_rtrmgr_SOURCES	+= main_rtrmgr.cc
 xorp_rtrmgr_SOURCES	+= master_conf_tree.cc
-xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
 xorp_rtrmgr_SOURCES	+= module_command.cc
 xorp_rtrmgr_SOURCES	+= module_manager.cc
 xorp_rtrmgr_SOURCES	+= randomness.cc
@@ -217,7 +215,6 @@ test_sample_config_SOURCES	+= conf_tree.hh
 test_sample_config_SOURCES	+= conf_tree_node.hh
 test_sample_config_SOURCES	+= main_rtrmgr.hh
 test_sample_config_SOURCES	+= master_conf_tree.hh
-test_sample_config_SOURCES	+= master_conf_tree_node.hh
 test_sample_config_SOURCES	+= module_commands.hh
 test_sample_config_SOURCES	+= module_manager.hh
 test_sample_config_SOURCES	+= parse_error.hh
@@ -237,7 +234,6 @@ test_sample_config_SOURCES	+= conf_tree_node.cc
 test_sample_config_SOURCES	+= lex.boot.cc
 test_sample_config_SOURCES	+= lex.tplt.cc
 test_sample_config_SOURCES	+= master_conf_tree.cc
-test_sample_config_SOURCES	+= master_conf_tree_node.cc
 test_sample_config_SOURCES	+= module_command.cc
 test_sample_config_SOURCES	+= module_manager.cc
 test_sample_config_SOURCES	+= task.cc

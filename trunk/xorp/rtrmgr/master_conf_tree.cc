@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.19 2003/11/17 19:34:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.20 2003/11/18 23:03:56 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,7 +37,7 @@ extern string booterrormsg(const char *s);
  * Master Config Tree class
  *************************************************************************/
 
-MasterConfigTree::MasterConfigTree(const string& conffile,
+MasterConfigTree::MasterConfigTree(const string& config_file,
 				   TemplateTree *tt,
 				   ModuleManager& mmgr,
 				   XorpClient& xclient,
@@ -48,11 +48,11 @@ MasterConfigTree::MasterConfigTree(const string& conffile,
 {
     string configuration;
     string errmsg;
-    if (!read_file(configuration, conffile, errmsg)) {
+    if (!read_file(configuration, config_file, errmsg)) {
 	XLOG_ERROR(errmsg.c_str());
 	xorp_throw0(InitError);
     }
-    if (!parse(configuration, conffile)) {
+    if (! parse(configuration, config_file)) {
 	printf("throwing InitError\n");
 	xorp_throw0(InitError);
     }
@@ -69,13 +69,13 @@ MasterConfigTree::MasterConfigTree(const string& conffile,
 
 bool
 MasterConfigTree::read_file(string& configuration,
-			    const string& conffile,
+			    const string& config_file,
 			    string& errmsg)
 {
-    FILE* file = fopen(conffile.c_str(), "r");
+    FILE* file = fopen(config_file.c_str(), "r");
     if (file == NULL) {
 	errmsg = c_format("Failed to open config file: %s\n",
-			  conffile.c_str());
+			  config_file.c_str());
 	return false;
     }
     static const uint32_t MCT_READBUF = 8192;
@@ -95,10 +95,10 @@ MasterConfigTree::read_file(string& configuration,
 
 bool
 MasterConfigTree::parse(const string& configuration,
-			const string& conffile)
+			const string& config_file)
 {
     try {
-	((ConfigTree*)this)->parse(configuration, conffile);
+	((ConfigTree*)this)->parse(configuration, config_file);
 	string s = show_tree();
 	printf("== MasterConfigTree::parse yields ==\n%s\n"
 	       "====================================\n", s.c_str());
@@ -513,10 +513,10 @@ MasterConfigTree::discard_changes()
 }
 
 string
-MasterConfigTree::mark_subtree_for_deletion(const list <string>& pathsegs,
+MasterConfigTree::mark_subtree_for_deletion(const list <string>& path_segments,
 					    uid_t user_id)
 {
-    ConfigTreeNode *found = find_node(pathsegs);
+    ConfigTreeNode *found = find_node(path_segments);
     if (found == NULL)
 	return "ERROR";
 
@@ -789,14 +789,14 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     diff_configs(new_tree, delta_tree, deletion_tree);
 
     string response;
-    if (!root()->merge_deltas(user_id, delta_tree.const_root(),
-			      /*provisional change*/true, response)) {
+    if (!root().merge_deltas(user_id, delta_tree.const_root(),
+			     /*provisional change*/true, response)) {
 	discard_changes();
 	errmsg = response;
 	return false;
     }
-    if (!root()->merge_deletions(user_id, deletion_tree.const_root(),
-				 /*provisional change*/true, response)) {
+    if (!root().merge_deletions(user_id, deletion_tree.const_root(),
+				/*provisional change*/true, response)) {
 	discard_changes();
 	errmsg = response;
 	return false;

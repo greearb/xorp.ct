@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.21 2003/11/17 19:34:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.22 2003/11/18 23:03:56 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -1059,18 +1059,16 @@ ConfigTreeNode::find_node(list <string>& path) {
     return NULL;
 }
 
-bool 
-ConfigTreeNode::expand_expression(const string& expr, 
-				  string& value) const {
-    if (expr[0]!='`')
-	return false;
-    if (expr[expr.size()-1]!='`')
+bool
+ConfigTreeNode::expand_expression(const string& expr, string& value) const
+{
+    if ((expr[0] != '`') || (expr[expr.size() - 1] != '`'))
 	return false;
 
-    //trim quotes
-    string expression = expr.substr(1, expr.size()-2);
+    // trim quotes
+    string expression = expr.substr(1, expr.size() - 2);
 
-    //XXXXXX quick and very dirty hack
+    // XXX: quick and very dirty hack
     if (expression != "~$(@)")
 	return false;
     string tmpvalue;
@@ -1120,7 +1118,7 @@ ConfigTreeNode::get_module_name_by_variable(const string& varname) const
     return "";		// XXX: nothing found
 }
 
-bool 
+bool
 ConfigTreeNode::expand_variable(const string& varname, 
 				string& value) const {
 #ifdef DEBUG_VARIABLES

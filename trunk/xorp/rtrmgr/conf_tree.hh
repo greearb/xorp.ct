@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.4 2003/04/23 22:52:07 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.5 2003/11/18 23:03:56 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
 
+#include "libxorp/xorp.h"
 #include <map>
 #include <list>
 #include <set>
-#include "config.h"
-#include "libxorp/xorp.h"
+
 #include "conf_tree_node.hh"
 #include "module_manager.hh"
 #include "xorp_client.hh"
@@ -35,21 +35,22 @@ class ConfigTree {
 public:
     ConfigTree(TemplateTree *tt);
     ~ConfigTree();
+
     ConfigTree& operator=(const ConfigTree& orig_tree);
-    int parse(const string& configuration, const string& conffile);
+    bool parse(const string& configuration, const string& config_file);
     void push_path();
-    void extend_path(const string &segment);
+    void extend_path(const string& segment);
     void pop_path();
     void add_node(const string& nodename);
-    void terminal_value(char *value, int type);
-    list <string> path_as_segs() const;
-    TemplateTreeNode *find_template(const list<string>& pathsegs) 
+    void terminal_value(char* value, int type);
+    list<string> path_as_segments() const;
+    TemplateTreeNode* find_template(const list<string>& path_segments)
 	throw (ParseError);
-    ConfigTreeNode& root() {return _root_node;}
-    const ConfigTreeNode& const_root() const {return _root_node;}
-    ConfigTreeNode *find_node(const list <string>& path);
+    ConfigTreeNode& root() { return _root_node; }
+    const ConfigTreeNode& const_root() const { return _root_node; }
+    ConfigTreeNode* find_node(const list<string>& path);
     const ConfigTreeNode* find_config_module(const string& module_name) const;
-    string show_subtree(const list <string>& pathsegs) const;
+    string show_subtree(const list<string>& path_segments) const;
     string show_tree() const;
     string show_unannotated_tree() const;
     void print() const;
@@ -60,23 +61,23 @@ public:
 			 bool provisional_change, string& response);
 
     void expand_varname_to_matchlist(const string& varname, 
-    				     list <string>& matches) const;
+    				     list<string>& matches) const;
     void retain_different_nodes(const ConfigTree& them,
 				bool retain_changed_values);
     void retain_common_nodes(const ConfigTree& them);
     void add_default_children();
+
 protected:
-    string path_as_string(const list <string>& pathsegs) const;
+    string path_as_string(const list<string>& path_segments) const;
     string current_path_as_string() const;
-    const ConfigTreeNode* 
-        find_config_node(const list <string>& pathsegs) const;
+    const ConfigTreeNode* find_config_node(const list<string>& path_segments) const;
 
-
-    string _conffile;
-    TemplateTree *_template_tree;
-    ConfigTreeNode _root_node, *_current_node;
-    list <string> _path_segs;
-    list <int> _seg_lengths;
+    string		_config_file;
+    TemplateTree*	_template_tree;
+    ConfigTreeNode	_root_node;
+    ConfigTreeNode*	_current_node;
+    list<string>	_path_segments;
+    list<int>		_segment_lengths;
 };
 
 #endif // __RTRMGR_CONF_TREE_HH__

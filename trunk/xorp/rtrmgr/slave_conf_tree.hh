@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.4 2003/04/23 04:24:35 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.5 2003/05/03 21:26:46 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -40,8 +40,8 @@ public:
     SlaveConfigTree(XorpClient& xclient);
     SlaveConfigTree(const string& configuration, TemplateTree *ct,
 		    XorpClient& xclient);
-    int parse(const string& configuration, 
-	      const string& conffile);
+    bool parse(const string& configuration, 
+	       const string& config_file);
     bool commit_changes(string &response,
 			XorpShell& xorpsh,
 			CallBack cb);
@@ -61,7 +61,7 @@ public:
 		       CallBack cb,
 		       XorpShell* xorpsh);
     string discard_changes();
-    string mark_subtree_for_deletion(const list <string>& pathsegs, 
+    string mark_subtree_for_deletion(const list <string>& path_segments, 
 				     uid_t user_id);
 
     bool get_deltas(const SlaveConfigTree &main_tree);

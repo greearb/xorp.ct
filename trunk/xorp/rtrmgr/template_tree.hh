@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.4 2003/05/10 23:23:03 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.5 2003/08/01 23:07:29 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -43,8 +43,7 @@ public:
     void push_path(int type, char *initializer);
     void add_untyped_node(string segment, bool is_tag);
     void add_node(const string &segment, int type, char *initializer);
-    TemplateTreeNode *find_node(const list<string>& segs);
-    TemplateTreeNode *find_node_approx(const string &path, int segs);
+    TemplateTreeNode *find_node(const list<string>& path_segments);
     string path_as_string();
     void add_cmd(char *cmd);
     void add_cmd_action(string cmd, const list<string> &action);
@@ -65,8 +64,8 @@ private:
     TemplateTreeNode	*_root;
     TemplateTreeNode	*_current_node;
     map <string, ModuleCommand *> _registered_modules;
-    list <PathSegment>	_path_segs;
-    list <int>		_seg_lengths;
+    list<PathSegment>	_path_segments;
+    list<int>		_segment_lengths;
     XRLdb		_xrldb;
     ModuleManager	*mmgr;
     string		_xorp_root_dir;	// The root of the XORP tree
