@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.9 2004/08/04 04:46:52 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.10 2004/09/02 02:34:40 pavlin Exp $"
 
 
 /*
@@ -82,7 +82,7 @@
  * Return value: The open socket on success, otherwise %XORP_ERROR.
  **/
 int
-comm_sock_open(int domain, int type, int protocol, bool is_blocking)
+comm_sock_open(int domain, int type, int protocol, int is_blocking)
 {
     int sock;
     int flags;
@@ -462,7 +462,7 @@ comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
  **/
 int
 comm_sock_connect4(int sock, const struct in_addr *remote_addr,
-		   unsigned short remote_port, bool is_blocking)
+		   unsigned short remote_port, int is_blocking)
 {
     int family;
     struct sockaddr_in sin_addr;
@@ -520,7 +520,7 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
  **/
 int
 comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
-		   unsigned short remote_port, bool is_blocking)
+		   unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
     int family;
@@ -941,7 +941,7 @@ comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
     if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
 		   (void *)&desired_bufsize, sizeof(desired_bufsize)) < 0) {
 	desired_bufsize -= delta;
-	while (true) {
+	while (1) {
 	    if (delta > 1)
 		delta /= 2;
 
@@ -991,7 +991,7 @@ comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
     if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
 		   (void *)&desired_bufsize, sizeof(desired_bufsize)) < 0) {
 	desired_bufsize -= delta;
-	while (true) {
+	while (1) {
 	    if (delta > 1)
 		delta /= 2;
 

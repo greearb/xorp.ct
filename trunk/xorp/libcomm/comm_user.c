@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.7 2004/09/02 02:34:40 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.8 2004/09/02 18:35:21 pavlin Exp $"
 
 
 /*
@@ -76,7 +76,7 @@
 int
 comm_init(void)
 {
-    static bool init_flag = false;
+    static int init_flag = 0;
 
     if (init_flag)
 	return (XORP_OK);
@@ -87,7 +87,7 @@ comm_init(void)
     sigignore(SIGPIPE); /* Solaris compilation warning workaround */
 #endif /* !HOST_OS_SOLARIS */
 
-    init_flag = true;
+    init_flag = 1;
 
     return (XORP_OK);
 }
@@ -129,7 +129,7 @@ comm_ipv6_present(void)
  * Return value: The new socket on success, otherwsise %XORP_ERROR.
  **/
 int
-comm_open_tcp(int family, bool is_blocking)
+comm_open_tcp(int family, int is_blocking)
 {
     int sock;
 
@@ -152,7 +152,7 @@ comm_open_tcp(int family, bool is_blocking)
  * Return value: The new socket on success, otherwsise %XORP_ERROR.
  **/
 int
-comm_open_udp(int family, bool is_blocking)
+comm_open_udp(int family, int is_blocking)
 {
     int sock;
 
@@ -195,7 +195,7 @@ comm_close(int sock)
  **/
 int
 comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
-	       bool is_blocking)
+	       int is_blocking)
 {
     int sock;
 
@@ -231,7 +231,7 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
  **/
 int
 comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
-	       bool is_blocking)
+	       int is_blocking)
 {
 #ifdef HAVE_IPV6
     int sock;
@@ -273,7 +273,7 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
  **/
 int
 comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
-	       bool is_blocking)
+	       int is_blocking)
 {
     int sock;
 
@@ -302,7 +302,7 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
  **/
 int
 comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port,
-	       bool is_blocking)
+	       int is_blocking)
 {
 #ifdef HAVE_IPV6
     int sock;
@@ -352,7 +352,7 @@ int
 comm_bind_join_udp4(const struct in_addr *mcast_addr,
 		    const struct in_addr *join_if_addr,
 		    unsigned short my_port,
-		    bool reuse_flag, bool is_blocking)
+		    int reuse_flag, int is_blocking)
 {
     int sock;
 
@@ -406,7 +406,7 @@ int
 comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 		    unsigned int join_if_index,
 		    unsigned short my_port,
-		    bool reuse_flag, bool is_blocking)
+		    int reuse_flag, int is_blocking)
 {
 #ifdef HAVE_IPV6
     int sock;
@@ -453,7 +453,7 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
  **/
 int
 comm_connect_tcp4(const struct in_addr *remote_addr,
-		  unsigned short remote_port, bool is_blocking)
+		  unsigned short remote_port, int is_blocking)
 {
     int sock;
 
@@ -483,7 +483,7 @@ comm_connect_tcp4(const struct in_addr *remote_addr,
  **/
 int
 comm_connect_tcp6(const struct in6_addr *remote_addr,
-		  unsigned short remote_port, bool is_blocking)
+		  unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
     int sock;
@@ -515,7 +515,7 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
  **/
 int
 comm_connect_udp4(const struct in_addr *remote_addr,
-		  unsigned short remote_port, bool is_blocking)
+		  unsigned short remote_port, int is_blocking)
 {
     int sock;
 
@@ -542,7 +542,7 @@ comm_connect_udp4(const struct in_addr *remote_addr,
  **/
 int
 comm_connect_udp6(const struct in6_addr *remote_addr,
-		  unsigned short remote_port, bool is_blocking)
+		  unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
     int sock;
@@ -580,7 +580,7 @@ int
 comm_bind_connect_udp4(const struct in_addr *local_addr,
 		       unsigned short local_port,
 		       const struct in_addr *remote_addr,
-		       unsigned short remote_port, bool is_blocking)
+		       unsigned short remote_port, int is_blocking)
 {
     int sock;
 
@@ -615,7 +615,7 @@ int
 comm_bind_connect_udp6(const struct in6_addr *local_addr,
 		       unsigned short local_port,
 		       const struct in6_addr *remote_addr,
-		       unsigned short remote_port, bool is_blocking)
+		       unsigned short remote_port, int is_blocking)
 {
 #ifdef HAVE_IPV6
     int sock;
