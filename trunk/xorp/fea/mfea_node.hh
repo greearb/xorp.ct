@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.6 2003/06/02 02:17:19 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.7 2003/06/17 23:13:39 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -1153,6 +1153,13 @@ public:
     int		get_mrib_table(Mrib **mrib_table);
     
     /**
+     * Get a reference to the mrouter (@ref MfeaMrouter).
+     * 
+     * @return a reference to the mrouter (@ref MfeaMrouter).
+     */
+    MfeaMrouter& mfea_mrouter() { return (_mfea_mrouter); }
+    
+    /**
      * Get a reference to the dataflow table (@ref MfeaDft).
      * 
      * @return a reference to the dataflow table (@ref MfeaDft).
@@ -1193,7 +1200,7 @@ public:
      * @param is_enabled if true, trace log is enabled, otherwise is disabled.
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
-    
+
 private:
     // Private methods
     void mrib_table_read_timer_timeout();
