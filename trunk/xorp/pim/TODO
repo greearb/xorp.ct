@@ -1,6 +1,18 @@
 #
-# $XORP: xorp/pim/TODO,v 1.11 2003/01/28 00:54:39 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.12 2003/01/30 01:48:17 pavlin Exp $
 #
+
+* Modify the "pim show join" CLI output NOT to print (S,G) and (S,G,rpt)
+  specific state for (*,*,RP) and (*,G) state. If necessary, modify
+  the (S,G) and (S,G,rpt) output NOT to print (*,*,RP) and (*,G)
+  specific state.
+
+* IMPL: lost_assert(S,G,rpt,I) (i.e., PimMre::lost_assert_sg_rpt()) should
+  be computable for (S,G) state as well. Plug-in this modification for the
+  dependency tracking machinery.
+  Check whether lost_assert(S,G,I)
+  shoulc be computable for (S,G,rpt) state as well. Check
+  whether other (S,G) and (S,G,rpt) methods need to be dual-computable.
 
 * IMPL: Rename all methods named recompute_foo_changed() to recompute_foo()
 
