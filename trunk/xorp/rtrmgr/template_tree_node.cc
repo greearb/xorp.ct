@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.8 2003/11/17 00:21:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.9 2003/11/17 19:34:32 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -216,6 +216,39 @@ bool TemplateTreeNode::name_is_variable() const {
     if (_segname[0]!='$' || _segname[1]!='(')
 	return false;
     return true;
+}
+
+bool
+TemplateTreeNode::expand_variable(const string& varname, string& value) const
+{
+    const TemplateTreeNode* varname_node;
+    varname_node = find_varname_node(varname);
+
+    if (varname_node == NULL)
+	return false;
+
+    list<string> var_parts;
+    split_up_varname(varname, var_parts);
+    string nodename = var_parts.back();
+
+    XLOG_ASSERT(varname_node->segname() == nodename);
+    if (! varname_node->has_default())
+	return false;		// XXX: the variable has no default value
+    value = varname_node->default_str();
+    return true;
+}
+
+bool
+TemplateTreeNode::expand_expression(const string& expr, string& value) const
+{
+    //
+    // XXX: for now we cannot expand expressions like "~$(@)" using
+    // the template tree only.
+    //
+    UNUSED(expr);
+    UNUSED(value);
+
+    return false;
 }
 
 string

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.4 2003/05/10 23:23:04 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.5 2003/11/17 00:21:51 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -98,6 +98,8 @@ public:
     bool has_default() const {return _has_default;}
     bool check_variable_name(const vector<string>& parts, uint part) const;
     string get_default_target_name_by_variable(const string& varname) const;
+    bool expand_variable(const string& varname, string& value) const;
+    bool expand_expression(const string& expr, string& value) const;
 
 protected:
     void add_child(TemplateTreeNode* child);
