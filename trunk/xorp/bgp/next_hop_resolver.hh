@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.19 2003/07/31 23:37:13 jcardona Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.20 2003/09/30 03:07:55 pavlin Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -211,7 +211,7 @@ public:
      */
     bool status(string& reason) const;
 protected:
-    DecisionTable<A> *_decision;
+    list<DecisionTable<A> *> _decision;
 private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.22 2003/09/21 00:14:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.23 2003/09/30 03:07:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -48,7 +48,7 @@ template <class A>
 void
 NextHopResolver<A>::add_decision(DecisionTable<A> *decision)
 {
-    _decision = decision;
+    _decision.push_back(decision);
 }
 
 template <class A>
@@ -234,10 +234,13 @@ void
 NextHopResolver<A>::next_hop_changed(A addr)
 {
     debug_msg("next hop: %s\n", addr.str().c_str());
-    if (_decision)
-	_decision->igp_nexthop_changed(addr);
-    else
-	XLOG_FATAL("No pointer to the decision table.");
+
+    if (_decision.empty())
+	XLOG_FATAL("No pointers to the decision tables.");
+
+    typename list<DecisionTable<A> *>::iterator i;
+    for(i = _decision.begin(); i != _decision.end(); i++)
+	(*i)->igp_nexthop_changed(addr);
 }
 
 template <class A>
@@ -246,8 +249,8 @@ NextHopResolver<A>::next_hop_changed(A addr, bool old_resolves,
 				     uint32_t old_metric)
 {
     debug_msg("next hop: %s\n", addr.str().c_str());
-    if (!_decision)
-	XLOG_FATAL("No pointer to the decision table.");
+    if (_decision.empty())
+	XLOG_FATAL("No pointers to the decision tables.");
 
     bool resolvable;
     uint32_t metric;
@@ -264,8 +267,11 @@ NextHopResolver<A>::next_hop_changed(A addr, bool old_resolves,
     if (resolvable && metric != old_metric)
 	changed = true;
 
-    if (changed)
-	_decision->igp_nexthop_changed(addr);
+    if (changed) {
+	typename list<DecisionTable<A> *>::iterator i;
+	for(i = _decision.begin(); i != _decision.end(); i++)
+	    (*i)->igp_nexthop_changed(addr);
+    }
 }
 
 template <class A>
