@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.29 2003/09/04 03:07:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.30 2003/09/04 04:16:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -67,6 +67,12 @@ OriginAttribute::OriginAttribute(OriginType t)
 	: PathAttribute(Transitive, ORIGIN), _origin(t)
 {
     encode();
+}
+
+PathAttribute *
+OriginAttribute::clone()
+{
+    return new OriginAttribute(origin());
 }
 
 OriginAttribute::OriginAttribute(const uint8_t* d)
@@ -137,6 +143,11 @@ ASPathAttribute::ASPathAttribute(const AsPath& p)
     encode();
 }
 
+PathAttribute *
+ASPathAttribute::clone()
+{
+    return new ASPathAttribute(as_path());
+}
 
 ASPathAttribute::ASPathAttribute(const uint8_t* d)
 	throw(CorruptMessage)
@@ -171,6 +182,13 @@ NextHopAttribute<A>::NextHopAttribute<A>(const A& n)
 	: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
 {
     encode();
+}
+
+template <class A>
+PathAttribute *
+NextHopAttribute<A>::clone()
+{
+    return new NextHopAttribute(nexthop());
 }
 
 template <class A>
@@ -217,6 +235,12 @@ MEDAttribute::MEDAttribute(const uint32_t med)
     encode();
 }
 
+PathAttribute *
+MEDAttribute::clone()
+{
+    return new MEDAttribute(med());
+}
+
 MEDAttribute::MEDAttribute(const uint8_t* d) throw(CorruptMessage)
     : PathAttribute(d)
 {
@@ -254,6 +278,12 @@ LocalPrefAttribute::LocalPrefAttribute(const uint32_t localpref)
 	: PathAttribute(Transitive, LOCAL_PREF), _localpref(localpref)
 {
     encode();
+}
+
+PathAttribute *
+LocalPrefAttribute::clone()
+{
+    return new LocalPrefAttribute(localpref());
 }
 
 LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
@@ -295,6 +325,12 @@ AtomicAggAttribute::AtomicAggAttribute()
     set_header(0);	// this is all encode() has to do
 }
 
+PathAttribute *
+AtomicAggAttribute::clone()
+{
+    return new AtomicAggAttribute();
+}
+
 AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
@@ -320,6 +356,12 @@ AggregatorAttribute::AggregatorAttribute(const IPv4& speaker,
 		_speaker(speaker), _as(as)            
 {
     encode();
+}
+
+PathAttribute *
+AggregatorAttribute::clone()
+{
+    return new AggregatorAttribute(route_aggregator(), aggregator_as());
 }
 
 AggregatorAttribute::AggregatorAttribute(const uint8_t* d)
@@ -362,6 +404,18 @@ CommunityAttribute::CommunityAttribute()
 	: PathAttribute((Flags)(Optional | Transitive), COMMUNITY)
 {
     encode();
+
+}
+
+PathAttribute *
+CommunityAttribute::clone()
+{
+    CommunityAttribute *ca = new CommunityAttribute();
+    for(const_iterator i = community_set().begin(); 
+	i != community_set().end(); i++)
+	ca->add_community(*i);
+
+    return ca;
 }
 
 CommunityAttribute::CommunityAttribute(const uint8_t* d)
@@ -504,6 +558,14 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
     _safi = SAFI_NLRI_UNICAST;
 
     encode();
+}
+
+template <class A>
+PathAttribute *
+MPReachNLRIAttribute<A>::clone()
+{
+    // Cheat go through the wire format to make the copy.
+    return new MPReachNLRIAttribute(data());
 }
 
 template <>
@@ -670,6 +732,14 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute()
     encode();
 }
 
+template <class A>
+PathAttribute *
+MPUNReachNLRIAttribute<A>::clone()
+{
+    // Cheat go through the wire format to make the copy.
+    return new MPUNReachNLRIAttribute(data());
+}
+
 template <>
 MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
@@ -738,6 +808,12 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d)
     _size = length(d);
     _data = new uint8_t[wire_size()];
     memcpy(_data, d, wire_size());
+}
+
+PathAttribute *
+UnknownAttribute::clone()
+{
+    return new UnknownAttribute(data());
 }
 
 string
