@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.12 2005/01/14 01:26:14 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.13 2005/01/18 23:56:45 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -156,7 +156,7 @@ interfaces {
 	    }
 
 	    address @: ipv6 {
-		%help:		short "Configure an IPv4 address";
+		%help:		short "Configure an IPv6 address";
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 		%list:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$(interface.@)&vif:txt->addresses:list";
