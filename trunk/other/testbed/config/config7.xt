@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/config7.xt,v 1.1.1.1 2002/12/11 23:55:13 hodson Exp $
+# $XORP: other/testbed/config/config7.xt,v 1.2 2002/12/14 00:26:52 pavlin Exp $
 #
 # Shared testbed configuration:
 #
@@ -28,11 +28,11 @@
 #
 # Click compliant 4.5 kernel
 kernel[/home/xorpc/u2/freebsd4.5.usr/src/sys/compile/XORP-4.3/kernel.debug] =
-      xorp0, xorp6
+      xorp0
 
 #
 # Pavlin's FreeBSD multicast kernel
-kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp1, xorp2, xorp3
+kernel[/home/xorpc/u2/homes/pavlin/kernel] = xorp1, xorp2, xorp3, xorp6
 
 #
 # Pavlin's Linux multicast kernel
