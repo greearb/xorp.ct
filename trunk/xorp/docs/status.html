@@ -23,15 +23,10 @@ doesn't yet work.
 
 <DT><B>FEA</B>
 
-<DD>The FEA for FreeBSD and the dummy FEA for testing purposes are
-basically complete .  The FEA for Click doesn't currently work.  The
-FEA for Linux doesn't exist.
-
-<P>
-<DT><B>MFEA</B>
-<DD>For the time being, multicast routing is handled by a separate FEA.
-The Multicast FEA for FreeBSD and Linux is basically complete.
-The MFEA for Click doesn't exist.
+<DD>The unicast FEA for FreeBSD and the dummy FEA for testing purposes
+are basically complete.  The FEA for Click doesn't currently work.  The
+FEA for Linux doesn't exist.  The multicast FEA (MFEA) for FreeBSD and
+Linux is basically complete.  The MFEA for Click doesn't exist.
 
 <P>
 <DT><B>BGP</B>
@@ -58,7 +53,7 @@ doesn't work.  OSPFd is IPv4 only.
 <P>
 <DT><B>RIP</B>
 
-<DD>Port to XORP not yet done.
+<DD>Implementation started.
 
 <P>
 <DT><B>IS-IS</B>
@@ -76,8 +71,9 @@ probably there are still some bugs. The SSM support is not yet started.
 <P>
 <DT><B>IGMP</B>
 
-<DD>The IGMPv1 and v2 implementation is reasonably complete, but
-testing continues.  The IGMPv3 implementation is not yet started.
+<DD>The IGMPv1 and v2 implementation is reasonably complete and fairly
+well tested, though there are still various minor things that need
+polishing.  The IGMPv3 implementation is not yet started.
 
 <P>
 <DT><B>MLD</B>
@@ -115,7 +111,7 @@ configured to start the SNMP agent and to load MIB modules.
 <!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
 <!-- hhmts start -->
 <small>
-Last modified: $XORP: xorp/docs/status.html,v 1.4 2003/05/16 21:13:48 pavlin Exp $
+Last modified: $XORP: xorp/docs/status.html,v 1.5 2003/06/05 18:37:19 jcardona Exp $
 </small>
 <!-- hhmts end -->
 
