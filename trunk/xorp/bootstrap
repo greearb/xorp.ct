@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.18 2004/11/20 01:27:23 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.19 2004/11/20 01:31:59 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -183,7 +183,7 @@ run ${AUTOHEADER} ${autoheader_options}
 run ${AUTOMAKE} --add-missing --copy
 
 run cd mibs
-run ${AUTOMAKE} --add-missing --copy
+run ${AUTOMAKE} --add-missing --copy --foreign
 run cd ..
 
 #

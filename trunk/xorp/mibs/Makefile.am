@@ -3,39 +3,30 @@
 ## # $Header$
 ##
 
-#
-# This Makefile builds all the shared object files in this directory but
-# without using libtool.  This forces us to use some hacks to build the
-# libraries, such as declare them as programs, and override the linker
-# default settings.
-#
+# All of the following shared objects will be installed in
+# @pkglibdir@ rather than @libdir@ as they use the pkglib prefix.
+# This can be changed by setting pkglibdir directly.
 
 # --- Options
-AUTOMAKE_OPTIONS	= foreign
 ETAGS_ARGS		= --c++
 
 SUBDIRS				 = snmpdscripts tests
 
 #
-# This is the only shared object that needs to be installed.
-# By default it will be installed in directory @pkglibdir@ which
-# in our case defaults to $(libdir)/xorp
-# If we want to change the installation directory to something else,
-# then we need to redefine pkglibdir. E.g.:
-#pkglibdir=@libdir@
+# libnetsnmpxorp contains the bindings which XORP MIB modules need to
+# talk to the system's SNMP agent. It needs to be installed by default
+# to support the MIB modules. It also brings in link-time dependencies
+# on the XORP core libraries.
 #
-
 pkglib_LTLIBRARIES		 = libnetsnmpxorp.la
-
 #
-# These are the mib modules that will be loaded by the snmp agent.  They need
-# not to be installed. Add the MIB modules that you write to this list.
-# XXX: These can't be marked noinst if they are to be linked as shared
-# libraries.
+# These are the mib modules that will be loaded by the snmp agent. If
+# we are configured --with-snmp, these will be installed at build-time.
+# Add the MIB modules that you write to this list.
 #
-lib_LTLIBRARIES			 = bgp4_mib_1657.la
-lib_LTLIBRARIES			+= ospf_mib_1850.la
-lib_LTLIBRARIES			+= xorp_if_mib_module.la
+pkglib_LTLIBRARIES		+= bgp4_mib_1657.la
+pkglib_LTLIBRARIES		+= ospf_mib_1850.la
+pkglib_LTLIBRARIES		+= xorp_if_mib_module.la
 
 # -- Test Programs
 

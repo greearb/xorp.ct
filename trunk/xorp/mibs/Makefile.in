@@ -13,12 +13,9 @@
 
 @SET_MAKE@
 
-#
-# This Makefile builds all the shared object files in this directory but
-# without using libtool.  This forces us to use some hacks to build the
-# libraries, such as declare them as programs, and override the linker
-# default settings.
-#
+# All of the following shared objects will be installed in
+# @pkglibdir@ rather than @libdir@ as they use the pkglib prefix.
+# This can be changed by setting pkglibdir directly.
 
 # --- Options
 
@@ -96,29 +93,22 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-AUTOMAKE_OPTIONS = foreign
 ETAGS_ARGS = --c++
 
 SUBDIRS = snmpdscripts tests
 
-
 #
-# This is the only shared object that needs to be installed.
-# By default it will be installed in directory @pkglibdir@ which
-# in our case defaults to $(libdir)/xorp
-# If we want to change the installation directory to something else,
-# then we need to redefine pkglibdir. E.g.:
-#pkglibdir=@libdir@
+# libnetsnmpxorp contains the bindings which XORP MIB modules need to
+# talk to the system's SNMP agent. It needs to be installed by default
+# to support the MIB modules. It also brings in link-time dependencies
+# on the XORP core libraries.
 #
-pkglib_LTLIBRARIES = libnetsnmpxorp.la
-
 #
-# These are the mib modules that will be loaded by the snmp agent.  They need
-# not to be installed. Add the MIB modules that you write to this list.
-# XXX: These can't be marked noinst if they are to be linked as shared
-# libraries.
+# These are the mib modules that will be loaded by the snmp agent. If
+# we are configured --with-snmp, these will be installed at build-time.
+# Add the MIB modules that you write to this list.
 #
-lib_LTLIBRARIES = bgp4_mib_1657.la ospf_mib_1850.la xorp_if_mib_module.la
+pkglib_LTLIBRARIES = libnetsnmpxorp.la bgp4_mib_1657.la ospf_mib_1850.la xorp_if_mib_module.la
 
 
 # -- Test Programs
@@ -172,7 +162,7 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../config/mkinstalldirs
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(lib_LTLIBRARIES) $(pkglib_LTLIBRARIES)
+LTLIBRARIES = $(pkglib_LTLIBRARIES)
 
 bgp4_mib_1657_la_DEPENDENCIES = ./libnetsnmpxorp.la \
 	../xrl/targets/libbgp4mibbase.la ../xrl/interfaces/libbgpxif.la
@@ -279,25 +269,6 @@ $(srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(srcdir)/configure.in $(ACLOCAL_M4)
 
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ configure.in 
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
-install-libLTLIBRARIES: $(lib_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$p $(DESTDIR)$(libdir)/$$p"; \
-	    $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$p $(DESTDIR)$(libdir)/$$p; \
-	  else :; fi; \
-	done
-
-uninstall-libLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  echo " $(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p"; \
-	  $(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
-	done
-
-clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
 install-pkglibLTLIBRARIES: $(pkglib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
@@ -318,13 +289,13 @@ uninstall-pkglibLTLIBRARIES:
 clean-pkglibLTLIBRARIES:
 	-test -z "$(pkglib_LTLIBRARIES)" || rm -f $(pkglib_LTLIBRARIES)
 bgp4_mib_1657.la: $(bgp4_mib_1657_la_OBJECTS) $(bgp4_mib_1657_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(bgp4_mib_1657_la_LDFLAGS) $(bgp4_mib_1657_la_OBJECTS) $(bgp4_mib_1657_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(pkglibdir) $(bgp4_mib_1657_la_LDFLAGS) $(bgp4_mib_1657_la_OBJECTS) $(bgp4_mib_1657_la_LIBADD) $(LIBS)
 libnetsnmpxorp.la: $(libnetsnmpxorp_la_OBJECTS) $(libnetsnmpxorp_la_DEPENDENCIES) 
 	$(CXXLINK) -rpath $(pkglibdir) $(libnetsnmpxorp_la_LDFLAGS) $(libnetsnmpxorp_la_OBJECTS) $(libnetsnmpxorp_la_LIBADD) $(LIBS)
 ospf_mib_1850.la: $(ospf_mib_1850_la_OBJECTS) $(ospf_mib_1850_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(ospf_mib_1850_la_LDFLAGS) $(ospf_mib_1850_la_OBJECTS) $(ospf_mib_1850_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(pkglibdir) $(ospf_mib_1850_la_LDFLAGS) $(ospf_mib_1850_la_OBJECTS) $(ospf_mib_1850_la_LIBADD) $(LIBS)
 xorp_if_mib_module.la: $(xorp_if_mib_module_la_OBJECTS) $(xorp_if_mib_module_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(xorp_if_mib_module_la_LDFLAGS) $(xorp_if_mib_module_la_OBJECTS) $(xorp_if_mib_module_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(pkglibdir) $(xorp_if_mib_module_la_LDFLAGS) $(xorp_if_mib_module_la_OBJECTS) $(xorp_if_mib_module_la_LIBADD) $(LIBS)
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
@@ -608,7 +579,7 @@ check: check-recursive
 all-am: Makefile $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(pkglibdir)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
 
 install: install-recursive
 install-exec: install-exec-recursive
@@ -635,8 +606,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-pkglibLTLIBRARIES mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-pkglibLTLIBRARIES mostlyclean-am
 
 dist-all: distdir
 	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
@@ -656,7 +627,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-libLTLIBRARIES install-pkglibLTLIBRARIES
+install-exec-am: install-pkglibLTLIBRARIES
 
 install-info: install-info-recursive
 
@@ -673,29 +644,27 @@ mostlyclean: mostlyclean-recursive
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
-	uninstall-pkglibLTLIBRARIES
+uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-pkglibLTLIBRARIES clean-recursive dist \
-	dist-all distcheck distclean distclean-compile distclean-depend \
-	distclean-generic distclean-libtool distclean-recursive \
-	distclean-tags distdir dvi dvi-am dvi-recursive info info-am \
-	info-recursive install install-am install-data install-data-am \
-	install-data-recursive install-exec install-exec-am \
-	install-exec-recursive install-info install-info-am \
-	install-info-recursive install-libLTLIBRARIES install-man \
+	clean clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-pkglibLTLIBRARIES clean-recursive dist dist-all distcheck \
+	distclean distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
+	dvi dvi-am dvi-recursive info info-am info-recursive install \
+	install-am install-data install-data-am install-data-recursive \
+	install-exec install-exec-am install-exec-recursive \
+	install-info install-info-am install-info-recursive install-man \
 	install-pkglibLTLIBRARIES install-recursive install-strip \
 	installcheck installcheck-am installdirs installdirs-am \
 	installdirs-recursive maintainer-clean maintainer-clean-generic \
 	maintainer-clean-recursive mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
 	tags tags-recursive uninstall uninstall-am uninstall-info-am \
-	uninstall-info-recursive uninstall-libLTLIBRARIES \
-	uninstall-pkglibLTLIBRARIES uninstall-recursive
+	uninstall-info-recursive uninstall-pkglibLTLIBRARIES \
+	uninstall-recursive
 
 
 .NOTPARALLEL:
