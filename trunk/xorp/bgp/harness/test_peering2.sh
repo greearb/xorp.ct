@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.36 2004/11/15 22:06:02 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.37 2005/03/07 21:48:12 atanu Exp $
 #
 
 #
@@ -102,7 +102,9 @@ reset()
     # see the end of the stream. So add an arbitary delay until the BGP process
     # sees the end of the stream. If we don't do this connection attempts will
     # be rejected by the the BGP process, causing the tests to fail.
-    sleep 10
+    SLEEPY=30
+    echo "sleeping for $SLEEPY seconds"
+    sleep $SLEEPY
 }
 
 bgp_not_established()
