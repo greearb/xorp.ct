@@ -96,7 +96,7 @@ test_floppy() {
 "This machine does not appear to have a floppy drive installed.\n\n\
 This means you will be unable to save configuration files when \n\n\
 using XORP, but you can still configure the router while it is \n\n\
-running." 8 70
+running." 10 70
             USEFLOPPY="false"
             return
         fi
@@ -123,6 +123,7 @@ floppy was damaged, or because the floppy is not DOS formatted." 12 70
         ;;
         2)
 	USEFLOPPY="false"
+	return
 	;;
         3)
 	format_floppy
@@ -168,6 +169,7 @@ Perhaps the floppy is write protected?\n\n\What do you want to do about the flop
         ;;
         2)
 	USEFLOPPY="false"
+	return
 	;;
         3)
 	${REBOOT}
@@ -214,7 +216,7 @@ test_manifest() {
 	    ${DIALOG} --title "${TITLE}" --infobox "Manifest file found.\n\nXORP is starting." 5 60
 	    return
 	fi
-	if [ ${FORMATDONE} != "false" ]; then
+	if [ ${FORMATDONE} = "true" -o ${USEFLOPPY} = "false" ]; then
 	    ${DIALOG} --title "${TITLE}" --msgbox "The next steps are to create a xorp config file and set passwords." 5 70    
 	else
 	    ${DIALOG} --title "${TITLE}" --msgbox "The floppy does not contain a XORP file manifest.\n\
@@ -224,7 +226,7 @@ We will need to create a xorp config file and set passwords." 7 70
 	${DIALOG} --title "${TITLE}" --msgbox \
 "Even though we can't save the config for next time, we still \n\
 need to create an initial config.  The next steps are to create\n\
-a xorp config file and set passwords." 6 70    
+a xorp config file and set passwords." 8 70    
     fi
     ${DIALOG} --title "${TITLE}" --infobox "Enter the root password." 5 70    
     ${PASSWD}
@@ -282,9 +284,10 @@ a xorp config file and set passwords." 6 70
 
 
 
-	create_config
-	#finished creating manifest file
     fi
+
+    create_config
+    #finished creating manifest file
 
     ${DIALOG} --title "${TITLE}" --msgbox "Configuration is complete." 5 70    
 }
@@ -360,6 +363,7 @@ create_config() {
 	return
     fi
 
+    echo "/*XORP Configuration File*/" >> ${XORPCFGDST}
     echo "interfaces {" >> ${XORPCFGDST}
 	
     for i in ${iflist}
@@ -384,12 +388,14 @@ create_config() {
     echo "}" >> ${XORPCFGDST}
     ${CHOWN} xorp:xorp ${XORPCFGDST}
     ${CHMOD} 664 ${XORPCFGDST}
-    ${CP} ${XORPCFGDST} ${XORPCFGSRC} 2> ${tempfile}
-    if [ $? -ne 0 ]; then
-	err=`${CAT} ${tempfile}`
-	${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${SSHRSADST} to ${SSHRSASRC}\n${err}" 7 70    
-    else
-	echo "${XORPCFGSRC} ${XORPCFGDST} 664 xorp xorp 0" >> ${MANIFEST} 
+    if [ ${USEFLOPPY} != "false" ]; then
+	${CP} ${XORPCFGDST} ${XORPCFGSRC} 2> ${tempfile}
+	if [ $? -ne 0 ]; then
+	    err=`${CAT} ${tempfile}`
+	    ${DIALOG} --title "${TITLE}" --msgbox "Failed to copy ${SSHRSADST} to ${SSHRSASRC}\n${err}" 7 70    
+	else
+	    echo "${XORPCFGSRC} ${XORPCFGDST} 664 xorp xorp 0" >> ${MANIFEST} 
+	fi
     fi
 }
 

@@ -11,30 +11,6 @@ LOG_FILE=/var/log/floppy_mount.log
 FILE_LIST="/etc/passwd:644 /etc/xorp.cfg:644 /etc/group:644"
 CFG_FILE=/etc/xorp.cfg
 
-discover_interfaces() {
-
-	echo "interfaces {" > $CFG_FILE
-
-	for i in `ifconfig -a | awk -F : '$2~/flags=/ {print $1}'`
-	do
-      		echo "    interface $i {" >> $CFG_FILE
-		if [ "${i}" != "lo0" ]; then
-		    echo "        description: \"detected interface\"" >> $CFG_FILE
-		else
-		    echo "        description: \"loopback interface\"" >> $CFG_FILE
-		fi
-       		echo "    }"  >> $CFG_FILE
-       		echo " ">> $CFG_FILE
-	done
-
-	echo "}" >> $CFG_FILE
-
-	echo  "fea {" >> $CFG_FILE
-	echo  "    enable-unicast-forwarding4: true" >> $CFG_FILE
-	echo "}" >> $CFG_FILE
-
-}
-
 copy_files_in () {
 	/usr/local/xorp/bin/xorp_load.py -mode loadin $MNT_PNT/manifest.dat
 }
@@ -74,8 +50,8 @@ mount_fd() {
 	    	echo "OK"
 	    	copy_files_in
 	    	sync
-    	    	echo -n "Unmounting floppy disk... "
-	    	umount $MNT_PNT 1>$LOG_FILE 2>$LOG_FILE
+    	    	#echo -n "Unmounting floppy disk... "
+	    	#umount $MNT_PNT 1>$LOG_FILE 2>$LOG_FILE
 	    	
 		if [ $? -eq 0 ]; then 
 	    		echo "OK"
@@ -83,8 +59,7 @@ mount_fd() {
 	    		echo "FAIL"
 		fi
 	else
-	    echo "FAILED to load any config from floppy, creating config."
-	    discover_interfaces
+	    echo "FAILED to load any config from floppy."
       	fi
 }
 
