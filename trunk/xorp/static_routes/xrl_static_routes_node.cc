@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.11 2004/05/07 01:59:48 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.12 2004/05/07 02:01:52 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -136,8 +136,7 @@ XrlStaticRoutesNode::send_rib_registration()
     bool success = true;
 
     if (! _is_rib_igp_table4_registered) {
-	bool success4;
-	success4 = _xrl_rib_client.send_add_igp_table4(
+	success = _xrl_rib_client.send_add_igp_table4(
 	    _rib_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
 	    _class_name,
@@ -146,16 +145,15 @@ XrlStaticRoutesNode::send_rib_registration()
 	    true,	/* multicast */
 	    callback(this,
 		     &XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb));
-	if (success4 != true) {
-	    XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
-		"Will try again.");
-	    success = false;
-	}
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
+		   "Will try again.");
+	goto start_timer_label;
     }
 
     if (! _is_rib_igp_table6_registered) {
-	bool success6;
-	success6 = _xrl_rib_client.send_add_igp_table6(
+	success = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
 	    _class_name,
@@ -164,11 +162,11 @@ XrlStaticRoutesNode::send_rib_registration()
 	    true,	/* multicast */
 	    callback(this,
 		     &XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb));
-	if (success6 != true) {
-	    XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
-		"Will try again.");
-	    success = false;
-	}
+	if (success)
+	    return;
+	XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
+		   "Will try again.");
+	goto start_timer_label;
     }
 
     if (! success) {
@@ -176,6 +174,7 @@ XrlStaticRoutesNode::send_rib_registration()
 	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+    start_timer_label:
 	_rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlStaticRoutesNode::send_rib_registration));
@@ -188,6 +187,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table4_registered = true;
+	send_rib_registration();
 	StaticRoutesNode::decr_startup_requests_n();
 	return;
     }
@@ -218,6 +218,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table6_registered = true;
+	send_rib_registration();
 	StaticRoutesNode::decr_startup_requests_n();
 	return;
     }
@@ -714,7 +715,7 @@ XrlStaticRoutesNode::cancel_rib_route_change(const StaticRoute& static_route)
 void
 XrlStaticRoutesNode::send_rib_route_change()
 {
-    bool success = false;
+    bool success = true;
 
     do {
 	// Pop-up all routes that are to be ignored
@@ -734,11 +735,15 @@ XrlStaticRoutesNode::send_rib_route_change()
     //
     // Check whether we have already registered with the RIB
     //
-    if (static_route.is_ipv4() && (! _is_rib_igp_table4_registered))
-	goto error_label;
+    if (static_route.is_ipv4() && (! _is_rib_igp_table4_registered)) {
+	success = false;
+	goto start_timer_label;
+    }
 
-    if (static_route.is_ipv6() && (! _is_rib_igp_table6_registered))
-	goto error_label;
+    if (static_route.is_ipv6() && (! _is_rib_igp_table6_registered)) {
+	success = false;
+	goto start_timer_label;
+    }
 
     //
     // Send the appropriate XRL
@@ -757,6 +762,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.vifname(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_add_route4(
 		    _rib_target.c_str(),
@@ -767,6 +774,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.nexthop().get_ipv4(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
 	if (static_route.is_ipv6()) {
@@ -782,6 +791,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.vifname(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_add_route6(
 		    _rib_target.c_str(),
@@ -792,6 +803,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.nexthop().get_ipv6(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
     }
@@ -810,6 +823,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.vifname(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_replace_route4(
 		    _rib_target.c_str(),
@@ -820,6 +835,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.nexthop().get_ipv4(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
 	if (static_route.is_ipv6()) {
@@ -835,6 +852,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.vifname(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    } else {
 		success = _xrl_rib_client.send_replace_route6(
 		    _rib_target.c_str(),
@@ -845,6 +864,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.nexthop().get_ipv6(),
 		    static_route.metric(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	    }
 	}
     }
@@ -858,6 +879,8 @@ XrlStaticRoutesNode::send_rib_route_change()
 		static_route.multicast(),
 		static_route.network().get_ipv4net(),
 		callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	}
 	if (static_route.is_ipv6()) {
 	    success = _xrl_rib_client.send_delete_route6(
@@ -867,15 +890,23 @@ XrlStaticRoutesNode::send_rib_route_change()
 		static_route.multicast(),
 		static_route.network().get_ipv6net(),
 		callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
+		if (success)
+		    return;
 	}
     }
 
     if (! success) {
-    error_label:
 	//
 	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to %s route for %s with the RIB. "
+		   "Will try again.",
+		   (static_route.is_add_route())? "add"
+		   : (static_route.is_replace_route())? "replace"
+		   : "delete",
+		   static_route.network().str().c_str());
+    start_timer_label:
 	_inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlStaticRoutesNode::send_rib_route_change));

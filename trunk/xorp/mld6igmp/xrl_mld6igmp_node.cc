@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.26 2004/04/30 23:07:01 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.27 2004/05/30 03:41:22 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -173,33 +173,25 @@ XrlMld6igmpNode::send_mfea_registration()
     //
     if (! _is_mfea_add_protocol_registered) {
 	if (Mld6igmpNode::is_ipv4()) {
-	    bool success4;
-	    success4 = _xrl_mfea_client.send_add_protocol4(
+	    success = _xrl_mfea_client.send_add_protocol4(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_add_protocol_cb));
-	    if (success4 != true) {
-		XLOG_ERROR("Failed to register with the MFEA. "
-			   "Will try again.");
-		success = false;
-	    }
+	    if (success)
+		return;
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
-	    bool success6;
-	    success6 = _xrl_mfea_client.send_add_protocol6(
+	    success = _xrl_mfea_client.send_add_protocol6(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_add_protocol_cb));
-	    if (success6 != true) {
-		XLOG_ERROR("Failed to register with the MFEA. "
-			   "Will try again.");
-		success = false;
-	    }
+	    if (success)
+		return;
 	}
     }
 
@@ -208,6 +200,8 @@ XrlMld6igmpNode::send_mfea_registration()
 	// If an error, then start a timer to try again
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to register with the MFEA. "
+		   "Will try again.");
 	_mfea_registration_timer = Mld6igmpNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlMld6igmpNode::send_mfea_registration));
@@ -221,6 +215,7 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_add_protocol_registered = true;
+	send_mfea_registration();
 	Mld6igmpNode::decr_startup_requests_n();
 	return;
     }
@@ -262,11 +257,8 @@ XrlMld6igmpNode::send_mfea_deregistration()
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_delete_protocol_cb));
-	    if (success4 != true) {
-		XLOG_ERROR("Failed to deregister with the MFEA. "
-			   "Will give up.");
+	    if (success4 != true)
 		success = false;
-	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -277,15 +269,14 @@ XrlMld6igmpNode::send_mfea_deregistration()
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_delete_protocol_cb));
-	    if (success6 != true) {
-		XLOG_ERROR("Failed to deregister with the MFEA. "
-			   "Will give up.");
+	    if (success6 != true)
 		success = false;
-	    }
 	}
     }
 
     if (! success) {
+	XLOG_ERROR("Failed to deregister with the MFEA. "
+		   "Will give up.");
 	Mld6igmpNode::set_status(FAILED);
 	Mld6igmpNode::update_status();
     }
@@ -354,7 +345,7 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
 void
 XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 {
-    bool success = false;
+    bool success = true;
     Mld6igmpVif *mld6igmp_vif = NULL;
 
     if (_start_stop_protocol_kernel_vif_queue.empty())
@@ -366,12 +357,14 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
     //
     // Check whether we have already registered with the MFEA
     //
-    if (! _is_mfea_add_protocol_registered)
-	goto error_label;
+    if (! _is_mfea_add_protocol_registered) {
+	success = false;
+	goto start_timer_label;
+    }
 
     mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot %s in the kernel vif with vif_index %d: "
+	XLOG_ERROR("Cannot %s protocol vif with vif_index %d with the MFEA: "
 		   "no such vif",
 		   (is_start)? "start" : "stop",
 		   vif_index);
@@ -390,7 +383,10 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    Mld6igmpNode::incr_startup_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_startup_requests_n();
+		return;
+	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -402,7 +398,10 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    Mld6igmpNode::incr_startup_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_startup_requests_n();
+		return;
+	    }
 	}
     } else {
 	// Stop a vif with the MFEA
@@ -415,7 +414,10 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -427,16 +429,23 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		mld6igmp_vif->name(),
 		vif_index,
 		callback(this, &XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
     }
-    
+
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s protocol vif %s with the MFEA. "
+		   "Will try again.",
+		   (is_start)? "start" : "stop",
+		   mld6igmp_vif->name().c_str());
+    start_timer_label:
 	_start_stop_protocol_kernel_vif_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
@@ -451,11 +460,11 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlErr
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
 	_start_stop_protocol_kernel_vif_queue.pop_front();
+	send_start_stop_protocol_kernel_vif();
 	if (is_start)
 	    Mld6igmpNode::decr_startup_requests_n();
 	else
 	    Mld6igmpNode::decr_shutdown_requests_n();
-	send_start_stop_protocol_kernel_vif();
 	return;
     }
 
@@ -526,32 +535,35 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
 void
 XrlMld6igmpNode::send_join_leave_multicast_group()
 {
-    bool success = false;
+    bool success = true;
     Mld6igmpVif *mld6igmp_vif = NULL;
 
     if (_join_leave_multicast_group_queue.empty())
 	return;			// No more changes
 
     JoinLeaveMulticastGroup& group = _join_leave_multicast_group_queue.front();
+    bool is_join = group.is_join();
 
     //
     // Check whether we have already registered with the MFEA
     //
-    if (! _is_mfea_add_protocol_registered)
-	goto error_label;
+    if (! _is_mfea_add_protocol_registered) {
+	success = false;
+	goto start_timer_label;
+    }
 
     mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(group.vif_index());
     if (mld6igmp_vif == NULL) {
 	XLOG_ERROR("Cannot %s group %s on vif with vif_index %d: "
 		   "no such vif",
-		   (group.is_join())? "join" : "leave",
+		   (is_join)? "join" : "leave",
 		   cstring(group.multicast_group()),
 		   group.vif_index());
 	_join_leave_multicast_group_queue.pop_front();
 	return;
     }
 
-    if (group.is_join()) {
+    if (is_join) {
 	// Join a multicast group on a vif with the MFEA
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_join_multicast_group4(
@@ -563,7 +575,10 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    Mld6igmpNode::incr_startup_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_startup_requests_n();
+		return;
+	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -576,7 +591,10 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    Mld6igmpNode::incr_startup_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_startup_requests_n();
+		return;
+	    }
 	}
     } else {
 	// Leave a multicast group on a vif with the MFEA
@@ -590,7 +608,10 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -603,15 +624,24 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
-	    Mld6igmpNode::incr_shutdown_requests_n();
+	    if (success) {
+		Mld6igmpNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
     }
+
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
+		   "Will try again.",
+		   (is_join)? "join" : "leave",
+		   cstring(group.multicast_group()),
+		   mld6igmp_vif->name().c_str());
+    start_timer_label:
 	_join_leave_multicast_group_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
@@ -626,11 +656,11 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& 
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
 	_join_leave_multicast_group_queue.pop_front();
+	send_join_leave_multicast_group();
 	if (is_join)
 	    Mld6igmpNode::decr_startup_requests_n();
 	else
 	    Mld6igmpNode::decr_shutdown_requests_n();
-	send_join_leave_multicast_group();
 	return;
     }
 
@@ -725,7 +755,7 @@ XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
 void
 XrlMld6igmpNode::send_add_delete_membership()
 {
-    bool success = false;
+    bool success = true;
     Mld6igmpVif *mld6igmp_vif = NULL;
 
     if (_send_add_delete_membership_queue.empty())
@@ -736,15 +766,15 @@ XrlMld6igmpNode::send_add_delete_membership()
 
     mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(membership.vif_index());
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot send %s to %s for (%s,%s) on vif "
-		   "with vif_index %d: no such vif",
+	XLOG_ERROR("Cannot send %s for (%s,%s) on vif "
+		   "with vif_index %d to %s: no such vif",
 		   (is_add)? "add_membership" : "delete_membership",
-		   membership.dst_module_instance_name().c_str(),
 		   cstring(membership.source()),
 		   cstring(membership.group()),
-		   membership.vif_index());
+		   membership.vif_index(),
+		   membership.dst_module_instance_name().c_str());
 	_send_add_delete_membership_queue.pop_front();
-	goto error_label;
+	goto start_timer_label;
     }
 
     if (is_add) {
@@ -758,6 +788,8 @@ XrlMld6igmpNode::send_add_delete_membership()
 		membership.source().get_ipv4(),
 		membership.group().get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb));
+	    if (success)
+		return;
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -769,6 +801,8 @@ XrlMld6igmpNode::send_add_delete_membership()
 		membership.source().get_ipv6(),
 		membership.group().get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb));
+	    if (success)
+		return;
 	}
     } else {
 	// Send delete_membership to the client protocol
@@ -781,6 +815,8 @@ XrlMld6igmpNode::send_add_delete_membership()
 		membership.source().get_ipv4(),
 		membership.group().get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb));
+	    if (success)
+		return;
 	}
 
 	if (Mld6igmpNode::is_ipv6()) {
@@ -792,15 +828,24 @@ XrlMld6igmpNode::send_add_delete_membership()
 		membership.source().get_ipv6(),
 		membership.group().get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb));
+	    if (success)
+		return;
 	}
     }
-    
+
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to send %s for (%s,%s) on vif %s to %s. "
+		   "Will try again.",
+		   (is_add)? "add_membership" : "delete_membership",
+		   cstring(membership.source()),
+		   cstring(membership.group()),
+		   mld6igmp_vif->name().c_str(),
+		   membership.dst_module_instance_name().c_str());
+    start_timer_label:
 	_send_add_delete_membership_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlMld6igmpNode::send_add_delete_membership));

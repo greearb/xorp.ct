@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.51 2004/05/18 06:54:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.52 2004/05/30 03:41:23 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -256,33 +256,25 @@ XrlPimNode::send_mfea_registration()
     //
     if (! _is_mfea_add_protocol_registered) {
 	if (PimNode::is_ipv4()) {
-	    bool success4;
-	    success4 = _xrl_mfea_client.send_add_protocol4(
+	    success = _xrl_mfea_client.send_add_protocol4(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		callback(this, &XrlPimNode::mfea_client_send_add_protocol_cb));
-	    if (success4 != true) {
-		XLOG_ERROR("Failed to register with the MFEA. "
-			   "Will try again.");
-		success = false;
-	    }
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
-	    bool success6;
-	    success6 = _xrl_mfea_client.send_add_protocol6(
+	    success = _xrl_mfea_client.send_add_protocol6(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		callback(this, &XrlPimNode::mfea_client_send_add_protocol_cb));
-	    if (success6 != true) {
-		XLOG_ERROR("Failed to register with the MFEA. "
-			   "Will try again.");
-		success = false;
-	    }
+	    if (success)
+		return;
 	}
     }
 
@@ -291,6 +283,8 @@ XrlPimNode::send_mfea_registration()
 	// If an error, then start a timer to try again
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to register with the MFEA. "
+		   "Will try again.");
 	_mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_mfea_registration));
@@ -309,6 +303,8 @@ XrlPimNode::send_mfea_registration()
 	    true,			// XXX: enable
 	    callback(this,
 		     &XrlPimNode::mfea_client_send_allow_signal_messages_cb));
+	if (success)
+	    return;
     }
 
     if (! success) {
@@ -316,6 +312,9 @@ XrlPimNode::send_mfea_registration()
 	// If an error, then start a timer to try again
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to enable the receiving of kernel signal messages "
+		   "with the MFEA. "
+		   "Will try again.");
 	_mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_mfea_registration));
@@ -335,6 +334,8 @@ XrlPimNode::send_mfea_registration()
 	    true,			// XXX: enable
 	    callback(this,
 		     &XrlPimNode::mfea_client_send_allow_mrib_messages_cb));
+	if (success)
+	    return;
     }
 
     if (! success) {
@@ -342,6 +343,9 @@ XrlPimNode::send_mfea_registration()
 	// If an error, then start a timer to try again
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to enable the receiving of MRIB messages "
+		   "with the MFEA. "
+		   "Will try again.");
 	_mfea_registration_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_mfea_registration));
@@ -355,6 +359,7 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_add_protocol_registered = true;
+	send_mfea_registration();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -386,6 +391,7 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_allow_signal_messages_registered = true;
+	send_mfea_registration();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -416,6 +422,7 @@ XrlPimNode::mfea_client_send_allow_mrib_messages_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_allow_mrib_messages_registered = true;
+	send_mfea_registration();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -457,11 +464,8 @@ XrlPimNode::send_mfea_deregistration()
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		callback(this, &XrlPimNode::mfea_client_send_delete_protocol_cb));
-	    if (success4 != true) {
-		XLOG_ERROR("Failed to deregister with the MFEA. "
-			   "Will give up.");
+	    if (success4 != true)
 		success = false;
-	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -472,15 +476,14 @@ XrlPimNode::send_mfea_deregistration()
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		callback(this, &XrlPimNode::mfea_client_send_delete_protocol_cb));
-	    if (success6 != true) {
-		XLOG_ERROR("Failed to deregister with the MFEA. "
-			   "Will give up.");
+	    if (success6 != true)
 		success = false;
-	    }
 	}
     }
 
     if (! success) {
+	XLOG_ERROR("Failed to deregister with the MFEA. "
+		   "Will give up.");
 	PimNode::set_status(FAILED);
 	PimNode::update_status();
     }
@@ -517,8 +520,7 @@ XrlPimNode::send_rib_registration()
     if ((! _is_rib_client_registered)
 	&& (!  PimNode::is_receive_mrib_from_mfea())) {
 	if (PimNode::is_ipv4()) {
-	    bool success4;
-	    success4 = _xrl_rib_client.send_redist_transaction_enable4(
+	    success = _xrl_rib_client.send_redist_transaction_enable4(
 		_rib_target.c_str(),
 		my_xrl_target_name(),
 		string("all"),		// TODO: XXX: hard-coded value
@@ -526,16 +528,12 @@ XrlPimNode::send_rib_registration()
 		true,		/* multicast */
 		string("all"),		// TODO: XXX: hard-coded value
 		callback(this, &XrlPimNode::rib_client_send_redist_transaction_enable_cb));
-	    if (success4 != true) {
-		XLOG_ERROR("Failed to register with the RIB. "
-			   "Will try again.");
-		success = false;
-	    }
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
-	    bool success6;
-	    success6 = _xrl_rib_client.send_redist_transaction_enable6(
+	    success = _xrl_rib_client.send_redist_transaction_enable6(
 		_rib_target.c_str(),
 		my_xrl_target_name(),
 		string("all"),		// TODO: XXX: hard-coded value
@@ -543,11 +541,8 @@ XrlPimNode::send_rib_registration()
 		true,		/* multicast */
 		string("all"),		// TODO: XXX: hard-coded value
 		callback(this, &XrlPimNode::rib_client_send_redist_transaction_enable_cb));
-	    if (success6 != true) {
-		XLOG_ERROR("Failed to register with the RIB. "
-			   "Will try again.");
-		success = false;
-	    }
+	    if (success)
+		return;
 	}
     }
 
@@ -556,6 +551,8 @@ XrlPimNode::send_rib_registration()
 	// If an error, then start a timer to try again
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
+	XLOG_ERROR("Failed to register with the RIB. "
+		   "Will try again.");
 	_rib_registration_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_rib_registration));
@@ -569,6 +566,7 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(const XrlError& xrl_err
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_client_registered = true;
+	send_rib_registration();
 	PimNode::decr_startup_requests_n();
 	return;
     }
@@ -612,11 +610,8 @@ XrlPimNode::send_rib_deregistration()
 		true,		/* multicast */
 		string("all"),		// TODO: XXX: hard-coded value
 		callback(this, &XrlPimNode::rib_client_send_redist_transaction_disable_cb));
-	    if (success4 != true) {
-		XLOG_ERROR("Failed to deregister with the RIB. "
-			   "Will give up.");
+	    if (success4 != true)
 		success = false;
-	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -629,15 +624,14 @@ XrlPimNode::send_rib_deregistration()
 		true,		/* multicast */
 		string("all"),		// TODO: XXX: hard-coded value
 		callback(this, &XrlPimNode::rib_client_send_redist_transaction_disable_cb));
-	    if (success6 != true) {
-		XLOG_ERROR("Failed to deregister with the RIB. "
-			   "Will give up.");
+	    if (success6 != true)
 		success = false;
-	    }
 	}
     }
 
     if (! success) {
+	XLOG_ERROR("Failed to deregister with the RIB. "
+		   "Will give up.");
 	PimNode::set_status(FAILED);
 	PimNode::update_status();
     }
@@ -706,7 +700,7 @@ XrlPimNode::stop_protocol_kernel_vif(uint16_t vif_index)
 void
 XrlPimNode::send_start_stop_protocol_kernel_vif()
 {
-    bool success = false;
+    bool success = true;
     PimVif *pim_vif = NULL;
 
     if (_start_stop_protocol_kernel_vif_queue.empty())
@@ -718,17 +712,19 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
     //
     // Check whether we have already registered with the MFEA
     //
-    if (! _is_mfea_add_protocol_registered)
-	goto error_label;
+    if (! _is_mfea_add_protocol_registered) {
+	success = false;
+	goto start_timer_label;
+    }
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot %s in the kernel vif with vif_index %d: "
+	XLOG_ERROR("Cannot %s protocol vif with vif_index %d with the MFEA: "
 		   "no such vif",
 		   (is_start)? "start" : "stop",
 		   vif_index);
 	_start_stop_protocol_kernel_vif_queue.pop_front();
-	goto error_label;
+	goto start_timer_label;
     }
 
     if (is_start) {
@@ -742,7 +738,10 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    PimNode::incr_startup_requests_n();
+	    if (success) {
+		PimNode::incr_startup_requests_n();
+		return;
+	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -754,7 +753,10 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    PimNode::incr_startup_requests_n();
+	    if (success) {
+		PimNode::incr_startup_requests_n();
+		return;
+	    }
 	}
     } else {
 	// Stop a vif with the MFEA
@@ -767,7 +769,10 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    PimNode::incr_shutdown_requests_n();
+	    if (success) {
+		PimNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -779,16 +784,23 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb));
-	    PimNode::incr_shutdown_requests_n();
+	    if (success) {
+		PimNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
     }
-    
+
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s protocol vif %s with the MFEA. "
+		   "Will try again.",
+		   (is_start)? "start" : "stop",
+		   pim_vif->name().c_str());
+    start_timer_label:
 	_start_stop_protocol_kernel_vif_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
@@ -803,11 +815,11 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& x
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
 	_start_stop_protocol_kernel_vif_queue.pop_front();
+	send_start_stop_protocol_kernel_vif();
 	if (is_start)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	send_start_stop_protocol_kernel_vif();
 	return;
     }
 
@@ -878,32 +890,35 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
 void
 XrlPimNode::send_join_leave_multicast_group()
 {
-    bool success = false;
+    bool success = true;
     PimVif *pim_vif = NULL;
 
     if (_join_leave_multicast_group_queue.empty())
 	return;			// No more changes
 
     JoinLeaveMulticastGroup& group = _join_leave_multicast_group_queue.front();
+    bool is_join = group.is_join();
 
     //
     // Check whether we have already registered with the MFEA
     //
-    if (! _is_mfea_add_protocol_registered)
-	goto error_label;
+    if (! _is_mfea_add_protocol_registered) {
+	success = false;
+	goto start_timer_label;
+    }
 
     pim_vif = PimNode::vif_find_by_vif_index(group.vif_index());
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot %s group %s on vif with vif_index %d: "
 		   "no such vif",
-		   (group.is_join())? "join" : "leave",
+		   (is_join)? "join" : "leave",
 		   cstring(group.multicast_group()),
 		   group.vif_index());
 	_join_leave_multicast_group_queue.pop_front();
-	return;
+	goto start_timer_label;
     }
 
-    if (group.is_join()) {
+    if (is_join) {
 	// Join a multicast group on a vif with the MFEA
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_join_multicast_group4(
@@ -915,7 +930,10 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    PimNode::incr_startup_requests_n();
+	    if (success) {
+		PimNode::incr_startup_requests_n();
+		return;
+	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -928,7 +946,10 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    PimNode::incr_startup_requests_n();
+	    if (success) {
+		PimNode::incr_startup_requests_n();
+		return;
+	    }
 	}
     } else {
 	// Leave a multicast group on a vif with the MFEA
@@ -942,7 +963,10 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    PimNode::incr_shutdown_requests_n();
+	    if (success) {
+		PimNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -955,15 +979,24 @@ XrlPimNode::send_join_leave_multicast_group()
 		group.vif_index(),
 		group.multicast_group().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
-	    PimNode::incr_shutdown_requests_n();
+	    if (success) {
+		PimNode::incr_shutdown_requests_n();
+		return;
+	    }
 	}
     }
+
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
+		   "Will try again.",
+		   (is_join)? "join" : "leave",
+		   cstring(group.multicast_group()),
+		   pim_vif->name().c_str());
+    start_timer_label:
 	_join_leave_multicast_group_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_join_leave_multicast_group));
@@ -978,11 +1011,11 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_e
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
 	_join_leave_multicast_group_queue.pop_front();
+	send_join_leave_multicast_group();
 	if (is_join)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	send_join_leave_multicast_group();
 	return;
     }
 
@@ -1033,7 +1066,7 @@ XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 void
 XrlPimNode::send_add_delete_mfc()
 {
-    bool success = false;
+    bool success = true;
 
     if (_add_delete_mfc_queue.empty())
 	return;			// No more changes
@@ -1052,8 +1085,10 @@ XrlPimNode::send_add_delete_mfc()
     //
     // Check whether we have already registered with the MFEA
     //
-    if (! _is_mfea_add_protocol_registered)
-	goto error_label;
+    if (! _is_mfea_add_protocol_registered) {
+	success = false;
+	goto start_timer_label;
+    }
 
     if (is_add) {
 	// Add a MFC with the MFEA
@@ -1069,6 +1104,8 @@ XrlPimNode::send_add_delete_mfc()
 		max_vifs_oiflist,
 		mfc.rp_addr().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1083,6 +1120,8 @@ XrlPimNode::send_add_delete_mfc()
 		max_vifs_oiflist,
 		mfc.rp_addr().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+	    if (success)
+		return;
 	}
     } else {
 	// Delete a MFC with the MFEA
@@ -1093,6 +1132,8 @@ XrlPimNode::send_add_delete_mfc()
 		mfc.source_addr().get_ipv4(),
 		mfc.group_addr().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1102,15 +1143,22 @@ XrlPimNode::send_add_delete_mfc()
 		mfc.source_addr().get_ipv6(),
 		mfc.group_addr().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
+	    if (success)
+		return;
 	}
     }
-    
+
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s MFC entry for (%s,%s) with the MFEA. "
+		   "Will try again.",
+		   (is_add)? "add" : "delete",
+		   cstring(mfc.source_addr()),
+		   cstring(mfc.group_addr()));
+    start_timer_label:
 	_add_delete_mfc_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_add_delete_mfc));
@@ -1238,7 +1286,7 @@ XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 void
 XrlPimNode::send_add_delete_dataflow_monitor()
 {
-    bool success = false;
+    bool success = true;
 
     if (_add_delete_dataflow_monitor_queue.empty())
 	return;			// No more changes
@@ -1250,8 +1298,10 @@ XrlPimNode::send_add_delete_dataflow_monitor()
     //
     // Check whether we have already registered with the MFEA
     //
-    if (! _is_mfea_add_protocol_registered)
-	goto error_label;
+    if (! _is_mfea_add_protocol_registered) {
+	success = false;
+	goto start_timer_label;
+    }
 
     if (is_delete_all) {
 	// Delete all dataflow monitors for a source and a group addresses
@@ -1262,6 +1312,8 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		monitor.source_addr().get_ipv4(),
 		monitor.group_addr().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1271,6 +1323,8 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		monitor.source_addr().get_ipv6(),
 		monitor.group_addr().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+	    if (success)
+		return;
 	}
     } else {
 	if (is_add) {
@@ -1290,6 +1344,8 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
 		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
 	    }
 
 	    if (PimNode::is_ipv6()) {
@@ -1307,6 +1363,8 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
 		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
 	    }
 	} else {
 	    // Delete a dataflow monitor with the MFEA
@@ -1325,6 +1383,8 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
 		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
 	    }
 
 	    if (PimNode::is_ipv6()) {
@@ -1342,16 +1402,24 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    monitor.is_geq_upcall(),
 		    monitor.is_leq_upcall(),
 		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
 	    }
 	}
     }
 
     if (! success) {
-    error_label:
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s dataflow entry for (%s,%s) with the MFEA. "
+		   "Will try again.",
+		   (is_delete_all)? "delete all" : (is_add)? "add" : "delete",
+		   cstring(monitor.source_addr()),
+		   cstring(monitor.group_addr()));
+
+    start_timer_label:
 	_add_delete_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_add_delete_dataflow_monitor));
@@ -1448,7 +1516,7 @@ XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
 void
 XrlPimNode::send_add_delete_protocol_mld6igmp()
 {
-    bool success = false;
+    bool success = true;
     PimVif *pim_vif = NULL;
 
     if (_add_delete_protocol_mld6igmp_queue.empty())
@@ -1459,12 +1527,12 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot %s with the MLD6IGMP vif with vif_index %d: "
+	XLOG_ERROR("Cannot %s vif with vif_index %d with the MLD6IGMP: "
 		   "no such vif",
 		   (is_add)? "add" : "delete",
 		   vif_index);
 	_add_delete_protocol_mld6igmp_queue.pop_front();
-	return;
+	goto start_timer_label;
     }
 
     if (is_add) {
@@ -1481,6 +1549,8 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb));
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1492,6 +1562,8 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb));
+	    if (success)
+		return;
 	}
     } else {
 	//
@@ -1507,6 +1579,8 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb));
+	    if (success)
+		return;
 	}
 
 	if (PimNode::is_ipv6()) {
@@ -1518,14 +1592,21 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		pim_vif->name(),
 		vif_index,
 		callback(this, &XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb));
+	    if (success)
+		return;
 	}
     }
-    
+
     if (! success) {
         //
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Cannot %s vif %s with the MLD6IGMP. "
+		   "Will try again.",
+		   (is_add)? "add" : "delete",
+		   pim_vif->name().c_str());
+    start_timer_label:
 	_add_delete_protocol_mld6igmp_queue_timer = PimNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
@@ -1540,11 +1621,11 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError&
     // If success, then send the next change
     if (xrl_error == XrlError::OKAY()) {
 	_add_delete_protocol_mld6igmp_queue.pop_front();
+	send_add_delete_protocol_mld6igmp();
 	if (is_add)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	send_add_delete_protocol_mld6igmp();
 	return;
     }
 
@@ -1616,8 +1697,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 	snd_vector[i] = sndbuf[i];
     
     if (PimNode::is_ipv4()) {
-	bool success4;
-	success4 = _xrl_mfea_client.send_send_protocol_message4(
+	success = _xrl_mfea_client.send_send_protocol_message4(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
@@ -1631,16 +1711,12 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 	    router_alert_bool,
 	    snd_vector,
 	    callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
-	if (success4 != true) {
-	    XLOG_ERROR("Failed to send a protocol message on vif %s",
-		       pim_vif->name().c_str());
-	    success = false;
-	}
+	if (success)
+	    return (XORP_OK);
     }
 
     if (PimNode::is_ipv6()) {
-	bool success6;
-	success6 = _xrl_mfea_client.send_send_protocol_message6(
+	success = _xrl_mfea_client.send_send_protocol_message6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
@@ -1654,15 +1730,15 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 	    router_alert_bool,
 	    snd_vector,
 	    callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
-	if (success6 != true) {
-	    XLOG_ERROR("Failed to send a protocol message on vif %s",
-		       pim_vif->name().c_str());
-	    success = false;
-	}
+	if (success)
+	    return (XORP_OK);
     }
 
-    if (! success)
+    if (! success) {
+	XLOG_ERROR("Failed to send a protocol message on vif %s",
+		   pim_vif->name().c_str());
 	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }

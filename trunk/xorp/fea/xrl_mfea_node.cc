@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.27 2004/05/20 20:52:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.28 2004/05/30 03:41:22 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -278,7 +278,7 @@ XrlMfeaNode::send_set_mrib_done(const string& dst_module_instance_name,
 void
 XrlMfeaNode::send_add_delete_mrib()
 {
-    bool success = false;
+    bool success = true;
     MfeaVif *mfea_vif = NULL;
     string vif_name;
 
@@ -288,18 +288,20 @@ XrlMfeaNode::send_add_delete_mrib()
     const SendAddDeleteMrib& add_delete_mrib = _send_add_delete_mrib_queue.front();
     const Mrib& mrib = add_delete_mrib.mrib();
     bool is_add = add_delete_mrib.is_add();
+    bool is_done = add_delete_mrib.is_done();
 
     mfea_vif = MfeaNode::vif_find_by_vif_index(mrib.next_hop_vif_index());
     if (mfea_vif != NULL)
 	vif_name = mfea_vif->name();
 
-    if (add_delete_mrib.is_done()) {
+    if (is_done) {
 	// Signal that we are done with add/delete of MRIB entries
 	success = _xrl_mfea_client_client.send_set_mrib_done(
 	    add_delete_mrib.dst_module_instance_name().c_str(),
 	    my_xrl_target_name(),
 	    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
-
+	if (success)
+	    return;
     } else {
 	if (is_add) {
 	    // Add MRIB entry
@@ -314,6 +316,8 @@ XrlMfeaNode::send_add_delete_mrib()
 		    mrib.metric_preference(),
 		    mrib.metric(),
 		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+		if (success)
+		    return;
 	    }
 	    if (MfeaNode::is_ipv6()) {
 		success = _xrl_mfea_client_client.send_add_mrib6(
@@ -326,6 +330,8 @@ XrlMfeaNode::send_add_delete_mrib()
 		    mrib.metric_preference(),
 		    mrib.metric(),
 		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+		if (success)
+		    return;
 	    }
 	} else {
 	    // Delete MRIB entry
@@ -335,6 +341,8 @@ XrlMfeaNode::send_add_delete_mrib()
 		    my_xrl_target_name(),
 		    mrib.dest_prefix().get_ipv4net(),
 		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+		if (success)
+		    return;
 	    }
 	    if (MfeaNode::is_ipv6()) {
 		success = _xrl_mfea_client_client.send_delete_mrib6(
@@ -342,6 +350,8 @@ XrlMfeaNode::send_add_delete_mrib()
 		    my_xrl_target_name(),
 		    mrib.dest_prefix().get_ipv6net(),
 		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+		if (success)
+		    return;
 	    }
 	}
     }
@@ -351,6 +361,10 @@ XrlMfeaNode::send_add_delete_mrib()
         // If an error, then start a timer to try again
         // TODO: XXX: the timer value is hardcoded here!!
         //
+	XLOG_ERROR("Failed to %s MRIB entry to %s. "
+		   "Will try again.",
+		   (is_done)? "finish sending" : (is_add)? "add" : "delete",
+		   add_delete_mrib.dst_module_instance_name().c_str());
 	_send_add_delete_mrib_queue_timer = MfeaNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlMfeaNode::send_add_delete_mrib));
