@@ -1,13 +1,9 @@
 \section{Satisfying Diverse Users}
 
-We now return to examine how XORP might satisfy the different user
+\noindent We now return to examine how XORP might satisfy the different user
 bases we mentioned earlier.
 
-\subsection{Network Research}
-
-%There are a lot of very smart people in the network research
-%community, but it's difficult for many of these people to do experiments
-%that give meaningful results.  
+\vspace{0.1in}\noindent\textbf{Network Research:}
 A lot of work happens in simulation,
 but often it's hard to know whether the simulation bears much
 relationship to reality.  There's really no substitute for trying
@@ -44,15 +40,13 @@ believe this scipting ability is unique as an enabler for novel uses of
 existing router code.
 \end{itemize}
 
-\subsection{XORP as a Low-Cost Router}
-
+\vspace{0.1in}\noindent\textbf{XORP as a Low-Cost Router:}
 There are many organizations that need router functionality, but
 cannot justify buying an expensive commercial router.  Although there
 are cheap home routers available these days, they are not really
 intended to run any non-trivial routing configuration.  A modern \$300
 PC has enough forwarding capability to saturate a few 100Mb/s network
-links, and ethernet NICs are extremely cheap, so with a little
-knowledge, it's very viable to build your own PC-based router.
+links, it's very viable to build your own PC-based router.
 
 The goal is that you shouldn't need to know anything about how XORP
 works internally to run it as a router.  XORP has a single unified
@@ -84,8 +78,7 @@ realise this goal only with extensive feedback from our users with
 regards to what works well in the real world, and what doesn't.
 
 
-\subsection{XORP for Equipment Vendors}
-
+\vspace{0.1in}\noindent\textbf{XORP for Equipment Vendors:}
 Once XORP has proven itself as a stable software stack for PC routers,
 and its functionality and feature set filled out fully, we hope it
 will prove an attractive alternative to commercial stacks for network
@@ -103,13 +96,11 @@ isolation between all the higher level routing functionality and the
 underlying operating system and forwarding engines.  This should make
 XORP comparatively easy to port to new platforms.
 
-\subsection{XORP for Network Application Writers}
-
+\vspace{0.1in}\noindent\textbf{XORP for Network Application Writers}:
 In the long run, we hope that XORP will enable a class of software
 that currently doesn't exist: the \textit{router application}.  Currently,
 there is no market for third party software for mainstream commercial
-router platforms.  This is clearly because there are no open APIs for
-commercial router platforms.  
+router platforms.  This is clearly because of the lack of open APIs.
 
 We believe that XORP's extensible architecture is a possible solution
 to this problem.  XORP's novel inter-process communication mechanism,

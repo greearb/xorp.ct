@@ -1,4 +1,4 @@
-\section{The XORP Vision}
+\section{The Vision}
 
 XORP stands for eXtensible Open Router Platform.  It is called an {\it
 extensible} router platform for good reason.  We believe that only by
@@ -58,8 +58,8 @@ Locators (XRLs), for communication between these modules.
 \vspace{-0.1in}
 \end{floatingfigure}
 
-Figure~\ref{fig:processes} shows how a XORP router's user-level processes
-and Click forwarding path fit together.
+Figure~\ref{fig:processes} shows a XORP router's user-level processes
+and forwarding engine.
 The shared user-level processes are the XORP architecture's most innovative
 feature. Four core processes are particularly worthy of comment.
 
@@ -69,7 +69,7 @@ configuration information; starts processes such as routing
 protocols, as required by the configuration; and restarts failed
 processes as necessary.
 
-The \emph{ipc finder} process stores mappings between abstracted application
+The \emph{ipc finder} process stores mappings between application
 requests, such as ``What are this router's interfaces?'', and the
 particular IPC calls necessary to answer those requests.
 Think of it as an IPC redirector:
@@ -131,17 +131,14 @@ in human-readable form the type of IPC transport desired (the
 ``protocol''), the abstract name for the entity being communicated
 with, the method being invoked, and a list of named arguments.  Unlike
 URLs, they can also specify the nature of the response expected.
-Figure \ref{fig:xrl} shows how the general form of one of the XRLs for
-the forwarding engine abstraction (FEA) process might be rendered in
-human readable form. The initial `\xrl{finder:}' portion specifies the
+Figure \ref{fig:xrl} shows one of the XRLs for
+the forwarding engine abstraction (FEA) process in
+human readable form. The initial `\xrl{finder:}' tag specifies the
 protocol; in this case the actual protocol has not yet been resolved.
-The first time this XRL is called, the client XRL library contacts the
-finder, which responds with a redirection to a new XRL containing the
-actual protocol to be used, together with all the parameters needed to
-contact the current FEA.  Subsequent communication then goes directly
-between the client and the FEA process.  If the FEA restarts, the
-client's XRL calls to the old FEA will fail, and it can consult the
-finder to update the redirection.
+The first time this XRL is called, the client contacts the
+finder, which redirects to a new XRL containing the
+actual protocol and parameters to be used to
+contact the current FEA.  Subsequent communication bypasses the finder.
 
 %The XRL library, which all of our processes link against, takes an XRL
 %and performs argument marshaling, then it invokes the specified transport
@@ -218,11 +215,13 @@ corresponding part template file might look like:
 \parindent 30pt 
 \indent         hello-interval: 30\\
 \parindent 20pt 
+\vspace{-0.1in}
 \indent       \}\\
 \parindent 10pt 
+\vspace{-0.1in}
 \indent     \}\\
 \}
-
+\eject
 \noindent \sf \small hello-interval: uint \{ \\
 \parindent 10pt 
 \indent \%set: xrl ``ospf/ospf/1.0/set\_hello\_interval?\\
