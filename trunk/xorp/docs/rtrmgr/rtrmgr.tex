@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.14 2004/01/15 00:29:05 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.15 2004/01/15 01:25:40 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -837,18 +837,24 @@ loaded from another set of template files.  A simple example might be:
 
 \begin{verbatim}
 show interface $(interfaces.interface.*) {
-        %command: show_interface;
+        %command: "path/to/show_interface" %help: HELP;
         %module: fea;
-        %opt_parameter: brief;
-        %opt_parameter: detail;
-        %opt_parameter: extensive;
+        %opt_parameter: "brief" %help: BRIEF;
+        %opt_parameter: "detail" %help: DETAIL;
+        %opt_parameter: "extensive" %help: EXTENSIVE;
+        %tag: HELP "Show network interface information";
+        %tag: BRIEF "Show brief network interface information";
+        %tag: DETAIL "Show detailed network interface information";
+        %tag: EXTENSIVE "Show extensive network interface information";
 }
 show vif $(interfaces.interface.*.vif.*) {
-        %command: show_vif;
+        %command: "path/to/show_vif" %help: "Show vif information";
         %module: fea;
-        %opt_parameter: brief;
-        %opt_parameter: detail;
-        %opt_parameter: extensive;
+        %opt_parameter: "brief" %help: "Show brief vif information";
+        %opt_parameter: "detail" %help: DETAIL;
+        %opt_parameter: "extensive" %help: EXTENSIVE;
+        %tag: DETAIL "Show detailed vif information";
+        %tag: EXTENSIVE "Show extensive vif information";
 }
 \end{verbatim}
 
@@ -890,6 +896,28 @@ defaults to ``/usr/local/xorp'').
 The command {\tt \%module} indicates that this command should only be
 available through the CLI when the router configuration has required
 that the named module has been started.
+
+The command {\tt \%help} is used to specify the CLI help for each
+CLI command or the optional parameters.
+It must be on the same line as the {\tt \%command} or the
+{\tt \%opt\_parameter} commands. If the argument after the {\tt \%help}
+command is in quotes, then it contains the help string itself.
+Otherwise, the argument is the name of the tag that contains the help
+string.
+
+The command {\tt \%tag} is used to specify the help string associated
+with each tag. For example, statement:
+
+\begin{verbatim}
+        %command: "path/to/show_vif" %help: HELP;
+        %tag: HELP "Show vif information";
+\end{verbatim}
+
+is equvalent with:
+
+\begin{verbatim}
+        %command: "path/to/show_vif" %help: "Show vif information";
+\end{verbatim}
 
 \textit{Note: currently there is no security mechanism restricting
 access to operational mode commands beyond the restrictions imposed by
