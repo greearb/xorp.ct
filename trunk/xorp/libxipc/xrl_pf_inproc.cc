@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.4 2003/01/17 00:49:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.5 2003/01/26 04:06:20 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -26,6 +26,8 @@
 #include "config.h"
 
 #include "libxorp/debug.h"
+#include "libxorp/c_format.hh"
+
 #include "xrl_error.hh"
 #include "xrl_pf_inproc.hh"
 
@@ -105,22 +107,21 @@ split_inproc_address(const char* address,
 // XrlPFInProcSender
 
 XrlPFInProcSender::XrlPFInProcSender(EventLoop& e, const char* address)
-    throw (XrlPFConstructorError) : XrlPFSender(e, address)
+    throw (XrlPFConstructorError)
+    : XrlPFSender(e, address)
 {
     string hname;
     uint32_t pid, iid;
 
     if (split_inproc_address(address, hname, pid, iid) == false) {
-	debug_msg("XrlPFInProcSender() Invalid address %s\n", address);
-	throw XrlPFConstructorError();
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Invalid address: %s", address));
     } else if (hname != this_host()) {
-	debug_msg("XrlPFInProcSender() Wrong host %s != %s\n",
-		  hname.c_str(), this_host().c_str());
-	throw XrlPFConstructorError();
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Wrong host: %s != %s",
+			    hname.c_str(), this_host().c_str()));
     } else if (pid != (uint32_t)getpid()) {
-	debug_msg("XrlPFInProcSender() Wrong process %d != %d\n",
-		  pid, getpid());
-	throw XrlPFConstructorError();
+	xorp_throw(XrlPFConstructorError, "Bad process id");
     }
     _listener_no = iid;
 }

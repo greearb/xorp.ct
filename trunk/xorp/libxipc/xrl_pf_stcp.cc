@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.6 2003/01/24 05:53:51 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.7 2003/01/26 04:06:21 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -337,19 +337,19 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m, uint16_t port)
     : XrlPFListener(e, m), _fd(-1), _address_slash_port() {
 
     if ((_fd = create_listening_ip_socket(TCP, port)) < 1) {
-	throw XrlPFConstructorError(strerror(errno));
+	xorp_throw(XrlPFConstructorError, strerror(errno));
     }
 
     string addr;
     if (get_local_socket_details(_fd, addr, port) == false) {
         close(_fd);
-        throw XrlPFConstructorError(strerror(errno));
+        xorp_throw(XrlPFConstructorError, strerror(errno));
     }
 
     if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
 	debug_msg("failed to go non-blocking\n");
         close(_fd);
-        throw XrlPFConstructorError(strerror(errno));
+        xorp_throw(XrlPFConstructorError, strerror(errno));
     }
 
     _address_slash_port = address_slash_port(addr, port);
@@ -414,22 +414,27 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
 {
     _fd = create_connected_ip_socket(TCP, addr_slash_port);
     if (_fd <= 0) {
-	debug_msg("Could not connect to address/port %s\n", addr_slash_port);
-	throw XrlPFConstructorError();
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Could not connect to %s\n", addr_slash_port));
     }
     debug_msg("stcp sender fd = %d\n", _fd);
 
     if (fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL) | O_NONBLOCK) < 0) {
-	debug_msg("failed to go non-blocking\n");
         close(_fd);
-        throw XrlPFConstructorError(strerror(errno));
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Failed to set fd non-blocking: %s\n",
+			    strerror(errno)));
     }
 
     _reader = new AsyncFileReader(e, _fd);
+    if (0 == _reader) {
+        xorp_throw(XrlPFConstructorError, "Could not allocate reader.");
+    }
+
     _writer = new AsyncFileWriter(e, _fd);
-    if (_reader == 0 || _writer == 0) {
-	debug_msg("Could not allocated reader or writer\n");
-        throw XrlPFConstructorError();
+    if (0 == _writer) {
+	delete _reader;
+        xorp_throw(XrlPFConstructorError, "Could not allocate writer.");
     }
 
     prepare_for_reply_header();

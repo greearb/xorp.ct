@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.5 2003/01/08 18:35:38 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.6 2003/01/17 00:49:12 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -27,16 +27,13 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
 #include "libxorp/selector.hh"
+#include "libxorp/exceptions.hh"
 
-// Constructor exception that should be used by classes derived from
-// XrlPFListener and XrlPFSender.
-
-struct XrlPFConstructorError : public exception {
-    XrlPFConstructorError(const char* reason = "Not specified")
-	: _reason(reason) {}
-    const char* xrl_what() { return _reason; }
-protected:
-    const char* _reason;
+class XrlPFConstructorError : public XorpReasonedException {
+public:
+    XrlPFConstructorError(const char* file, size_t line, const string& reason)
+	: XorpReasonedException("XrlPFConstructorError", file, line, reason)
+    {}
 };
 
 class XrlPFListener {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.5 2003/01/24 06:10:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.6 2003/01/26 04:06:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,6 +35,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
+#include "libxorp/exceptions.hh"
 
 #include "header.hh"
 #include "xrl_error.hh"
@@ -179,16 +180,16 @@ int XrlPFSUDPSender::instance_count;
 map<const XUID, XrlPFSender::Request> XrlPFSUDPSender::requests_pending;
 
 XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
-    throw (XrlPFConstructorError) :
-    XrlPFSender(e, address_slash_port) {
-
+    throw (XrlPFConstructorError)
+    : XrlPFSender(e, address_slash_port)
+{
     string addr;
     uint16_t port;
 
     if (split_address_slash_port(address_slash_port, addr, port) != true ||
 	address_lookup(addr, _destination.sin_addr) != true) {
-	debug_msg("Garbage address/port %s\n", address_slash_port);
-	throw XrlPFConstructorError();
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Bad destination: %s\n", address_slash_port));
     }
 #ifdef HAVE_SIN_LEN
     _destination.sin_len = sizeof(_destination);
@@ -203,8 +204,9 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	    _event_loop.add_selector(sender_fd, SEL_RD,
 				     callback(&XrlPFSUDPSender::recv));
 	} else {
-	    debug_msg("Could not create master socket: %s\n", strerror(errno));
-	    throw XrlPFConstructorError();
+	    xorp_throw(XrlPFConstructorError,
+		       c_format("Could not create master socket: %s\n",
+				strerror(errno)));
 	}
     }
     instance_count++;
@@ -327,17 +329,22 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 
 XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m)
     throw (XrlPFConstructorError)
-    : XrlPFListener(e, m) {
-
+    : XrlPFListener(e, m)
+{
     debug_msg("XrlPFSUDPListener\n");
-    if ((_fd = create_listening_ip_socket(UDP)) < 0)
-	throw XrlPFConstructorError(strerror(errno));
+    if ((_fd = create_listening_ip_socket(UDP)) < 0) {
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Could not allocate listening IP socket: %s",
+			    strerror(errno)));
+    }
 
     string addr;
     uint16_t port;
     if (get_local_socket_details(_fd, addr, port) == false) {
         close(_fd);
-        throw XrlPFConstructorError(strerror(errno));
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Could not get local socket details: %s",
+			    strerror(errno)));
     }
     _address_slash_port = address_slash_port(addr, port);
 
