@@ -2,7 +2,7 @@
 #
 # 
 
-@snmpd@ -f -Dbgp4_mib_1657,xorp_if_mib_module,dlmod,SnmpEventLoop,usmUser 
+@snmpd@ -f -Dxorp_if_mib_module,dlmod,usmUser 
 
 
 # useful debug tokens that can be appended to the -D list
