@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.8 2004/03/17 08:13:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.9 2004/03/17 08:17:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -59,7 +59,6 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 				    bool is_nlm_get_only)
 {
     const struct nlmsghdr* nlh;
-    bool recognized = false;
     
     for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
 	 NLMSG_OK(nlh, buf_bytes);
@@ -83,9 +82,7 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	
 	case NLMSG_DONE:
 	{
-	    if (! recognized)
-		return false;
-	    return true;
+	    return true;	// XXX: OK even if there were no entries
 	}
 	break;
 	
@@ -127,7 +124,6 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	    if (NlmUtils::nlm_get_to_fte_cfg(fte, nlh, rtmsg, rta_len)
 		== true) {
 		fte_list.push_back(fte);
-		recognized = true;
 	    }
 	}
 	break;
@@ -139,10 +135,7 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	}
     }
     
-    if (! recognized)
-	return false;
-    
-    return true;
+    return true;	// XXX: OK even if there were no entries
 }
 
 #endif // HAVE_NETLINK_SOCKETS

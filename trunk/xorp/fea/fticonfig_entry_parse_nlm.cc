@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.7 2004/03/17 07:25:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.8 2004/03/17 08:13:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,7 +58,6 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
 				    size_t buf_bytes, bool is_nlm_get_only)
 {
     const struct nlmsghdr* nlh;
-    bool recognized = false;
     
     for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
 	 NLMSG_OK(nlh, buf_bytes);
@@ -82,9 +81,7 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
 	
 	case NLMSG_DONE:
 	{
-	    if (! recognized)
-		return false;
-	    return true;
+	    return false;	// XXX: entry not found
 	}
 	break;
 	
@@ -117,7 +114,7 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
 		break;		// XXX: ignore multicast entries
 	    if (rtmsg->rtm_type == RTN_BROADCAST)
 		break;		// XXX: ignore broadcast entries
-	    
+
 	    return (NlmUtils::nlm_get_to_fte_cfg(fte, nlh, rtmsg, rta_len));
 	}
 	break;
@@ -129,10 +126,7 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
 	}
     }
     
-    if (! recognized)
-	return false;
-    
-    return true;
+    return false;
 }
 
 #endif // HAVE_NETLINK_SOCKETS
