@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.42 2004/03/09 05:04:14 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.43 2004/03/09 05:51:52 mjh Exp $"
 
 #include <signal.h>
 
@@ -24,6 +24,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <net/if.h>
+#include <glob.h>
 
 #include "libxipc/sockutil.hh"
 #include "libxipc/finder_server.hh"
@@ -56,6 +57,7 @@ static bool	running = false;
 static string	template_dir;
 static string	xrl_dir;
 static string	boot_file;
+static string	save_hook;
 static bool	do_exec = default_do_exec;
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FINDER_DEFAULT_PORT;
@@ -76,6 +78,7 @@ usage(const char* argv0)
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -d        Display defaults\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
+    fprintf(stderr, "  -s <app>  Specify save config file hook\n");
     fprintf(stderr, "  -n        Do not execute XRLs\n");
     fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
@@ -130,6 +133,7 @@ Rtrmgr::Rtrmgr(const string& template_dir,
 	       const string& boot_file,
 	       const list<IPv4>& bind_addrs,
 	       uint16_t bind_port,
+	       const string& save_hook,
 	       bool	do_exec,
 	       int32_t quit_time)
     : _template_dir(template_dir),
@@ -137,6 +141,7 @@ Rtrmgr::Rtrmgr(const string& template_dir,
       _boot_file(boot_file),
       _bind_addrs(bind_addrs),
       _bind_port(bind_port),
+      _save_hook(save_hook),
       _do_exec(do_exec),
       _quit_time(quit_time),
       _ready(false),
@@ -163,6 +168,15 @@ Rtrmgr::run()
     // Initialize the event loop
     //
     EventLoop eventloop;
+
+    // 
+    // Validate the save hook is sane
+    //
+    if (validate_save_hook() != XORP_OK) {
+	XLOG_ERROR("xorp_rtrmgr save hook %s is not executable", 
+		   _save_hook.c_str());
+	return (1);
+    }
 
     //
     // Read the router config template files
@@ -313,6 +327,60 @@ Rtrmgr::ready() const {
 }
 
 int
+Rtrmgr::validate_save_hook() {
+    if (_save_hook.empty())
+	return XORP_OK;
+    string expanded_path;
+    if (_save_hook[0] != '/') {
+	// we're going to call glob, but don't want to allow wildcard expansion
+	for (size_t i = 0; i < _save_hook.length(); i++) {
+	    char c = _save_hook[i];
+	    if ((c == '*') || (c == '?') || (c == '[')) {
+		string err = _save_hook + ": bad filename";
+		XLOG_ERROR(err.c_str());
+		return XORP_ERROR;
+	    }
+	}
+	glob_t pglob;
+	glob(_save_hook.c_str(), GLOB_TILDE, NULL, &pglob);
+	if (pglob.gl_pathc != 1) {
+	    string err(_save_hook + ": File does not exist.");
+	    XLOG_ERROR(err.c_str());
+	    return XORP_ERROR;
+	}
+	expanded_path = pglob.gl_pathv[0];
+	globfree(&pglob);
+    } else {
+	expanded_path = _save_hook;
+    }
+
+    struct stat sb;
+    if (stat(expanded_path.c_str(), &sb) < 0) {
+	string err = expanded_path + ": ";
+	switch (errno) {
+	case ENOTDIR:
+	    err += "A component of the path prefix is not a directory.";
+	    break;
+	case ENOENT:
+	    err += "File does not exist.";
+	    break;
+	case EACCES:
+	    err += "Permission denied.";
+	    break;
+	case ELOOP:
+	    err += "Too many symbolic links.";
+	    break;
+	default:
+	    err += "Unknown error accessing file.";
+	}
+	XLOG_ERROR(err.c_str());
+	return XORP_ERROR;
+    }
+    _save_hook = expanded_path;
+    return XORP_OK;
+}
+
+int
 main(int argc, char* const argv[])
 {
     int errcode = 0;
@@ -341,15 +409,19 @@ main(int argc, char* const argv[])
     template_dir	= xorp_template_dir();
     xrl_dir		= xorp_xrl_targets_dir();
     boot_file		= xorp_boot_file();
+    save_hook           = "";
 
     int c;
-    while ((c = getopt(argc, argv, "t:b:x:i:p:q:ndh")) != EOF) {
+    while ((c = getopt(argc, argv, "t:b:s:x:i:p:q:ndh")) != EOF) {
 	switch(c) {
 	case 't':
 	    template_dir = optarg;
 	    break;
 	case 'b':
 	    boot_file = optarg;
+	    break;
+	case 's':
+	    save_hook = optarg;
 	    break;
 	case 'x':
 	    xrl_dir = optarg;
@@ -402,7 +474,7 @@ main(int argc, char* const argv[])
     // The main procedure
     //
     Rtrmgr rtrmgr(template_dir, xrl_dir, boot_file, bind_addrs,
-		  bind_port, do_exec, quit_time);
+		  bind_port, save_hook, do_exec, quit_time);
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);

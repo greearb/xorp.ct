@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.17 2004/03/09 05:51:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.18 2004/03/20 18:45:32 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -618,7 +618,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 	    "Save was NOT performed.\n";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    if (_conf_tree->save_to_file(filename, user_id, response)) {
+    if (_conf_tree->save_to_file(filename, user_id, 
+				 _rtrmgr.save_hook(), response)) {
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED(response);

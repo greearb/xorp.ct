@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.4 2004/03/09 05:04:14 mjh Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.5 2004/03/09 05:51:52 mjh Exp $
 
 #ifndef __MAIN_RTRMGR_HH__
 #define __MAIN_RTRMGR_HH__
@@ -24,16 +24,33 @@ public:
 	   const string& boot_file,
 	   const list<IPv4>& bind_addrs,
 	   uint16_t bind_port,
+	   const string& save_hook,
 	   bool	do_exec,
 	   int32_t quit_time);
     int run();
     bool ready() const;
+    const string& save_hook() const {return _save_hook;}
 private:
+    int validate_save_hook();
     string _template_dir;
     string _xrl_dir;
     string _boot_file;
     list<IPv4> _bind_addrs;
     uint16_t _bind_port;
+
+    /**
+     * _save_hook should either be an empty string, or should contain
+     * the path to an executable.  When the config file is saved from
+     * rtrmgr, if _save_hook is non-empty, the executable will be run
+     * with the userid of the user that executed the save.  The only
+     * parameter to the executable will be the full path of the file
+     * that has just been saved.  The purpose of the save hook is to
+     * allow the preservation of saved config files when XORP is
+     * running out of a memory filesystem,, such as when run from a
+     * live CD. 
+     */
+    string _save_hook;
+
     bool _do_exec;
     int32_t _quit_time;
 

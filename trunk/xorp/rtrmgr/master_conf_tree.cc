@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.28 2004/01/06 02:56:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.29 2004/01/13 00:44:09 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -604,6 +604,7 @@ MasterConfigTree::unlock_node(const string& /* node */, uid_t /* user_id */)
 bool
 MasterConfigTree::save_to_file(const string& filename,
 			       uid_t user_id,
+			       const string& save_hook,
 			       string& errmsg)
 {
     errmsg = "";
@@ -765,11 +766,22 @@ MasterConfigTree::save_to_file(const string& filename,
 	return false;
     }
 
+    run_save_hook(save_hook, filename);
+
     errmsg += "Save complete\n";
     seteuid(orig_uid);
     setegid(orig_gid);
     umask(orig_mask);
     return true;
+}
+
+void
+MasterConfigTree::run_save_hook(const string& save_hook,
+				const string& filename) const
+{
+    if (save_hook.empty())
+	return;
+    printf("run_save_hook: %s %s\n", save_hook.c_str(), filename.c_str());
 }
 
 bool
