@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.30 2005/01/31 21:53:13 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.31 2005/03/01 02:43:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -550,8 +550,10 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     */
     for (i=alternatives.begin(); i!=alternatives.end();) {
 	if (!resolvable(i->route()->nexthop())) {
+	    i->route()->set_nexthop_resolved(false);
 	    i = alternatives.erase(i);
 	} else {
+	    i->route()->set_nexthop_resolved(true);
 	    i++;
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.19 2004/06/10 22:40:36 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.20 2004/11/04 06:59:00 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -200,10 +200,17 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
-	// XXX this probably shouldn't happen.
-	XLOG_UNREACHABLE();
-
-	// if it does, then here's how to handle it:
+	// The happens when a route with the same nexthop has been
+	// introduced on two peers.
+	// The RIB-IN sends a delete followed by an add. If this is
+	// the better route then the other peer will send an add then
+	// a delete.
+	// RIB-IN				RIB-OUT
+	// Peer A -> delete<A>
+	//					add<B>
+	// Peer A -> add<A>
+	//					delete<B>
+	
 	_queue.erase(i);
 	delete queued_entry;
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
