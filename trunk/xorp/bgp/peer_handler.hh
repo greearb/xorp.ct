@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.10 2003/11/04 02:27:19 mjh Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.11 2003/11/05 06:39:44 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -98,8 +98,17 @@ public:
     AsNum AS_number() const		{ return _peer->peerdata()->as(); }
     const string& peername() const	{ return _peername; }
     bool ibgp() const			{
+	if (0 == _peer)	{
+	    XLOG_ASSERT(originate_route_handler());
+	    return false;
+	}
 	return _peer->peerdata()->get_internal_peer();
     }
+
+    /**
+     * @return true if this is the originate route handler.
+     */
+    virtual bool originate_route_handler() const {return false;}
 
     /**
      * @return the neighbours BGP ID as an integer for use by decision.
