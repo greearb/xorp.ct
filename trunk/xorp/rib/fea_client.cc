@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.9 2003/03/16 07:18:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.10 2003/03/17 23:32:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,7 +71,7 @@ public:
 	= 0;
 
 protected:
-    void start_complete(const XrlError& e, const uint32_t* tid);
+    void start_complete(const XrlError& e, const uint32_t *tid);
 
     void command_complete(const XrlError& e);
 
@@ -105,13 +105,14 @@ SyncFtiCommand::start(const CompletionCallback& cb,
 {
     _completion_cb = cb;
     _get_next_cb = gncb;
-    _fticlient.
-	send_start_transaction(server,
-			       callback(this, &SyncFtiCommand::start_complete));
+    _fticlient.send_start_transaction(server,
+				      callback(
+					  this,
+					  &SyncFtiCommand::start_complete));
 }
 
 void
-SyncFtiCommand::start_complete(const XrlError& e, const uint32_t* tid)
+SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
 {
     debug_msg("start completed\n");
     if (e == XrlError::OKAY()) {
@@ -136,7 +137,7 @@ SyncFtiCommand::command_complete(const XrlError& e)
     // More commands may have arrived lets check.
     //
     SyncFtiCommand *task = get_next();
-    if (task) {
+    if (task != NULL) {
 	task->send_command(_tid,
 			   callback(this, &SyncFtiCommand::command_complete));
 	return;
@@ -149,15 +150,16 @@ void
 SyncFtiCommand::commit()
 {
     debug_msg("commit\n");
-    _fticlient.
-	send_commit_transaction(server,
-				_tid,
-				callback(this,
-					 &SyncFtiCommand::commit_complete));
+    _fticlient.send_commit_transaction(server,
+				       _tid,
+				       callback(
+					   this,
+					   &SyncFtiCommand::commit_complete));
     debug_msg("Sending Commit\n");
 }
 
-void SyncFtiCommand::commit_complete(const XrlError& e)
+void
+SyncFtiCommand::commit_complete(const XrlError& e)
 {
     debug_msg("Commit completed\n");
     if (e != XrlError::OKAY()) {
@@ -256,26 +258,30 @@ private:
 // ----------------------------------------------------------------------
 // Utilities to extract destination, gateway, and vifname from a route entry.
 
-template<typename A> inline const IPNet<A>&
+template<typename A>
+inline const IPNet<A>&
 dest(const IPRouteEntry<A>& re)
 {
     return re.net();
 }
 
-template<typename A> inline const A&
+template<typename A>
+inline const A&
 gw(const IPRouteEntry<A>& re)
 {
     IPNextHop<A>* nh = reinterpret_cast<IPNextHop<A>*>(re.nexthop());
     return nh->addr();
 }
 
-template<typename A> inline const string&
+template<typename A>
+inline const string&
 vifname(const IPRouteEntry<A>& re)
 {
     return re.vif()->name();
 }
 
-template<typename A> inline const string&
+template<typename A>
+inline const string&
 ifname(const IPRouteEntry<A>& re)
 {
     return re.vif()->ifname();
@@ -286,10 +292,12 @@ ifname(const IPRouteEntry<A>& re)
 
 FeaClient::FeaClient(XrlRouter& rtr, uint32_t	max_ops)
     : _xrl_router(rtr), _busy(false), _max_ops(max_ops), _enabled(true)
-{}
+{
+}
 
 FeaClient::~FeaClient()
-{}
+{
+}
 
 void
 FeaClient::set_enabled(bool en)
@@ -387,7 +395,7 @@ FeaClient::get_next()
     _completed_tasks.push_back(_tasks.front());
     _tasks.erase(_tasks.begin());
     if (_tasks.empty() || ++_op_count >= _max_ops)
-	return 0;
+	return NULL;
 
     debug_msg("Get next found one\n");
 
