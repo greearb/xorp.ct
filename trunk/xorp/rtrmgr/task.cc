@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.18 2003/05/31 06:13:15 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.19 2003/05/31 22:33:28 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -471,9 +471,7 @@ TaskXrlItem::execute_done(const XrlError& err,
                                      callback(this, &TaskXrlItem::resend));
 		return;
 	    }
-	} else if ((err == XrlError::INTERNAL_ERROR())
-		   || (err == XrlError::SYSCALL_FAILED())
-		   || (err == XrlError::FAILED_UNKNOWN())) {
+	} else if (err == XrlError::INTERNAL_ERROR()) {
 	    //Something bad happened but it's not clear what.  Don't
 	    //consider these to be fatal errors, but they may well
 	    //prove to be so.  XXX revisit this issue when we've more
