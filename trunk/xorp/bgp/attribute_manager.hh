@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/attribute_manager.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/attribute_manager.hh,v 1.2 2003/01/31 23:39:40 mjh Exp $
 
 #ifndef __BGP_ATTRIBUTE_MANAGER_HH__
 #define __BGP_ATTRIBUTE_MANAGER_HH__
 
 #include <set>
-#include "path_attribute_list.hh"
+#include "path_attribute.hh"
 
 template <class A>
 class StoredAttributeList {

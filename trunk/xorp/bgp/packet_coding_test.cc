@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.16 2003/01/29 23:38:12 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.17 2003/02/07 05:53:06 rizzo Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
-#include "path_attribute_list.hh"
+#include "path_attribute.hh"
 
 //---start---- this really was in test.hh
 
@@ -470,8 +470,7 @@ test_announce_packet()
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
-    assert(receivedpacket.wr_list().begin()
-	   == receivedpacket.wr_list().end());
+    assert(receivedpacket.wr_list().empty());
 
     //check the NLRI
     BGPUpdateAttribList::const_iterator ni;

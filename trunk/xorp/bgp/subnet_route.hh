@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.5 2003/02/07 22:55:21 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.6 2003/02/08 01:32:59 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
 
-#include "path_attribute_list.hh"
+#include "path_attribute.hh"
 #include "attribute_manager.hh"
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4net.hh"

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.8 2003/01/26 17:55:48 rizzo Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.9 2003/01/29 22:17:09 rizzo Exp $
 ##
 
 # -- Subdirectories
@@ -123,7 +123,6 @@ libbgp_a_SOURCES += next_hop_resolver.hh
 libbgp_a_SOURCES += packet.hh
 libbgp_a_SOURCES += parameter.hh
 libbgp_a_SOURCES += path_attribute.hh
-libbgp_a_SOURCES += path_attribute_list.hh
 libbgp_a_SOURCES += peer.hh
 libbgp_a_SOURCES += peer_data.hh
 libbgp_a_SOURCES += peer_handler.hh
@@ -162,7 +161,6 @@ libbgp_a_SOURCES += open_packet.cc
 libbgp_a_SOURCES += packet.cc
 libbgp_a_SOURCES += parameter.cc
 libbgp_a_SOURCES += path_attribute.cc
-libbgp_a_SOURCES += path_attribute_list.cc
 libbgp_a_SOURCES += peer.cc
 libbgp_a_SOURCES += peer_data.cc
 libbgp_a_SOURCES += peer_handler.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.2 2003/01/24 19:50:10 rizzo Exp $"
 
 #include <sys/time.h>
 
@@ -23,7 +23,7 @@
 #include "libxorp/xlog.h"
 
 #include "main.hh"
-#include "path_attribute_list.hh"
+#include "path_attribute.hh"
 #include "iptuple.hh"
 
 EventLoop BGPMain::_eventloop;
