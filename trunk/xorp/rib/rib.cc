@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.34 2004/06/30 02:07:09 atanu Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.35 2004/07/02 05:03:51 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -385,6 +385,12 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 	    if (ai->addr().is_ipv4()) {
 		add_route("connected", ai->subnet_addr().get_ipv4net(),
 			  ai->addr().get_ipv4(), "", "", 0);
+		if (new_vif->is_p2p() && (ai->peer_addr() != IPv4::ZERO())) {
+		    add_route("connected",
+			      IPv4Net(ai->peer_addr().get_ipv4(),
+				      IPv4::addr_bitlen()),
+			      ai->addr().get_ipv4(), "", "", 0);
+		}
 	    }
 	}
 
@@ -415,6 +421,12 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 	    if (ai->addr().is_ipv6()) {
 		add_route("connected", ai->subnet_addr().get_ipv6net(),
 			  ai->addr().get_ipv6(), "", "", 0);
+		if (new_vif->is_p2p() && (ai->peer_addr() != IPv6::ZERO())) {
+		    add_route("connected",
+			      IPv6Net(ai->peer_addr().get_ipv6(),
+				      IPv6::addr_bitlen()),
+			      ai->addr().get_ipv6(), "", "", 0);
+		}
 	    }
 	}
 
