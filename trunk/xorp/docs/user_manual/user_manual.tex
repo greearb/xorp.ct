@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/user_manual.tex,v 1.5 2004/08/01 20:46:39 mjh Exp $
+% $XORP: xorp/docs/user_manual/user_manual.tex,v 1.6 2004/08/04 16:50:55 mjh Exp $
 %
 
 \documentclass[11pt]{book}
@@ -64,7 +64,7 @@ Version 1.0}
 \date{July 21, 2004}
 
 %% Control the fonts and formatting used in the table of contents.
-\usepackage[titles]{xorp-toc}
+\usepackage[titles]{xorp_toc}
 %% Aesthetic spacing redefines to cancel the effects of parskip
 \setlength{\cftbeforechapskip}{2ex}
 \setlength{\cftbeforesecskip}{-1.5ex}
@@ -85,18 +85,16 @@ Version 1.0}
 \input{config_overview}
 \input{interfaces}
 \input{forwarding}
-\input{unicastrouting}
-\input{staticroutes}
+\input{unicast_routing}
+\input{static_routes}
 \input{rip}
 \input{bgp}
-\input{multicastrouting}
+\input{multicast_routing}
 \input{igmp}
 \input{pimsm}
-\input{mcasttopology}
+\input{multicast_topology}
 \input{snmp}
 \input{users}
 \input{diagnostics}
 
 \end{document}
-
-

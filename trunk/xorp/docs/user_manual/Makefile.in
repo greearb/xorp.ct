@@ -123,10 +123,11 @@ DOCS = user_manual
 
 user_manual_LATEX = user_manual.tex cli_intro.tex config_overview.tex \
 			  preface.tex interfaces.tex forwarding.tex \
-			unicastrouting.tex\
-			staticroutes.tex rip.tex bgp.tex \
-			multicastrouting.tex igmp.tex pimsm.tex\
-			mcasttopology.tex snmp.tex users.tex diagnostics.tex \
+			unicast_routing.tex \
+			static_routes.tex rip.tex bgp.tex \
+			multicast_routing.tex igmp.tex pimsm.tex \
+			multicast_topology.tex snmp.tex users.tex \
+			diagnostics.tex \
 			glossary.tex
 
 user_manual_FIGURES = figs/xorpsh.ps

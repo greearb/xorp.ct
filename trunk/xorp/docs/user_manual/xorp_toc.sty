@@ -16,7 +16,7 @@
 %%         now at: peter.r.wilson@boeing.com
 %% 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{xorp-toc}[1999/09/19 v1.0 parameterised ToC, etc., typesetting]
+\ProvidesPackage{xorp_toc}[1999/09/19 v1.0 parameterised ToC, etc., typesetting]
 \RequirePackage{stdclsdv}
 \providecommand{\PRWPackageNote}[2]{%
   \GenericWarning{%
@@ -29,26 +29,26 @@
   \PRWPackageNote{#1}{#2\@gobble}%
 }
 \ifSCDnodivs
-  \PackageWarning{xorp-toc}%
+  \PackageWarning{xorp_toc}%
     {I don't recognize any sectional divisions so I'll do nothing}
   \renewcommand{\SCDquit}{\endinput}
 \fi
 \SCDquit
 \ifSCDknownclass\else
-  \PackageWarning{xorp-toc}%
+  \PackageWarning{xorp_toc}%
     {I don't recognize the class but I'll do my best}
   \ifSCDnodivs
-    \PackageWarning{xorp-toc}%
+    \PackageWarning{xorp_toc}%
       {I don't recognize any sectional divisions so I'll do nothing}
     \renewcommand{\SCDquit}{\endinput}
   \else
     \ifSCDchapter
-      \PRWPackageNoteNoLine{xorp-toc}{The document class has chapter divisions}
+      \PRWPackageNoteNoLine{xorp_toc}{The document class has chapter divisions}
     \else
       \ifSCDsection
-        \PRWPackageNoteNoLine{xorp-toc}{The document class has section divisions}
+        \PRWPackageNoteNoLine{xorp_toc}{The document class has section divisions}
       \else
-        \PackageWarning{xorp-toc}%
+        \PackageWarning{xorp_toc}%
           {The class has neither chapters nor sections, so I'll do nothing}
         \renewcommand{\SCDquit}{\endinput}
       \fi
@@ -61,9 +61,9 @@
   \@ifpackageloaded{tocbibind}{\@cfttocbibindtrue}{\@cfttocbibindfalse}
   \if@cfttocbibind
     \@ifpackagelater{tocbibind}{1998/11/16}{}{%
-      \PackageWarning{xorp-toc}{%
+      \PackageWarning{xorp_toc}{%
 You are using a version of the tocbibind package\MessageBreak
-that is not compatible with xorp-toc.\MessageBreak
+that is not compatible with xorp_toc.\MessageBreak
 The results may be surprising.\MessageBreak
 Consider installing the current version of tocbibind.}}
   \fi
@@ -630,4 +630,4 @@ Consider installing the current version of tocbibind.}}
     {\protect\contentsline{#2}{\protect\numberline{#3}{\protect\ignorespaces #4}}{#5}}}
 \endinput
 %%
-%% End of file `xorp-toc.sty'.
+%% End of file `xorp_toc.sty'.
