@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.8 2003/07/16 18:30:06 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.9 2003/07/21 18:05:55 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
