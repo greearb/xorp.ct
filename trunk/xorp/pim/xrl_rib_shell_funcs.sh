@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.2 2003/03/25 00:46:24 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.3 2003/06/03 18:52:19 pavlin Exp $
 #
 
 #
@@ -14,8 +14,22 @@
 
 . ../utils/xrl_shell_lib.sh
 
+#
 # Conditionally set the target name
-RIB_TARGET=${RIB_TARGET:="RIB"}
+#
+IP_VERSION=${IP_VERSION:?"IP_VERSION undefined. Must be defined to either IPV4 or IPV6"}
+case "${IP_VERSION}" in
+	IPV4)
+		RIB_TARGET=${RIB_TARGET:="RIB"}
+		;;
+	IPV6)
+		RIB_TARGET=${RIB_TARGET:="RIB"}
+		;;
+	*)
+		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+		exit 1
+esac
+
 
 rib_enable_rib()
 {
