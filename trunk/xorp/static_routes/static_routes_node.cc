@@ -13,16 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.22 2005/02/14 23:17:53 pavlin Exp $"
-
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.23 2005/02/15 01:51:39 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
 //
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
-
 
 #include "static_routes_module.h"
 
@@ -302,14 +297,17 @@ StaticRoutesNode::tree_complete()
 void
 StaticRoutesNode::updates_made()
 {
-    list<StaticRoute>::const_iterator route_iter;
+    list<StaticRoute>::iterator route_iter;
 
     for (route_iter = _static_routes.begin();
 	 route_iter != _static_routes.end();
 	 ++route_iter) {
-	const StaticRoute& static_route = *route_iter;
+	StaticRoute& static_route = *route_iter;
 	bool is_old_interface_up = false;
 	bool is_new_interface_up = false;
+	bool is_old_directly_connected = false;
+	bool is_new_directly_connected = false;
+	bool is_new_up = false;
 
 	if (static_route.is_interface_route()) {
 	    //
@@ -324,27 +322,32 @@ StaticRoutesNode::updates_made()
 					       static_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
 		is_new_interface_up = true;
-	} else {
-	    //
-	    // Calculate whether the next-hop router was directly connected
-	    // before and now.
-	    //
-	    if (is_directly_connected(_iftree, static_route.nexthop()))
-		is_old_interface_up = true;
-	    if (is_directly_connected(ifmgr_iftree(), static_route.nexthop()))
-		is_new_interface_up = true;
+	}
+	//
+	// Calculate whether the next-hop router was directly connected
+	// before and now.
+	//
+	if (is_directly_connected(_iftree, static_route.nexthop()))
+	    is_old_directly_connected = true;
+	if (is_directly_connected(ifmgr_iftree(), static_route.nexthop()))
+	    is_new_directly_connected = true;
+
+	if ((is_old_interface_up == is_new_interface_up)
+	    && (is_old_directly_connected == is_new_directly_connected)) {
+	    continue;			// Nothing changed
 	}
 
 	if (is_old_interface_up == is_new_interface_up)
-	    continue;			// Nothing changed
+	    is_new_up = is_new_directly_connected;
+	else
+	    is_new_up = is_new_interface_up;
 
-	if (is_new_interface_up) {
+	if (is_new_up) {
 	    //
 	    // The interface is now up, hence add the route
 	    //
 	    inform_rib_route_change(static_route);
-	}
-	if (! is_new_interface_up) {
+	} else {
 	    //
 	    // The interface went down, hence cancel all pending requests,
 	    // and withdraw the route.
@@ -364,13 +367,13 @@ StaticRoutesNode::updates_made()
 }
 
 bool
-StaticRoutesNode::is_directly_connected(const IfMgrIfTree& if_tree,
+StaticRoutesNode::is_directly_connected(const IfMgrIfTree& iftree,
 					const IPvX& addr) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = if_tree.ifs().begin();
-	 if_iter != if_tree.ifs().end();
+    for (if_iter = iftree.ifs().begin();
+	 if_iter != iftree.ifs().end();
 	 ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
@@ -643,12 +646,19 @@ int
 StaticRoutesNode::add_route(const StaticRoute& static_route,
 			    string& error_msg)
 {
+    StaticRoute updated_route = static_route;
+
+    //
+    // Update the route
+    //
+    update_route(_iftree, updated_route);
+
     //
     // Check the entry
     //
-    if (static_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) {
 	error_msg = c_format("Cannot add route for %s: %s",
-			     static_route.network().str().c_str(),
+			     updated_route.network().str().c_str(),
 			     error_msg.c_str());
 	return XORP_ERROR;
     }
@@ -659,23 +669,24 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     list<StaticRoute>::iterator iter;
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
 	StaticRoute& tmp_route = *iter;
-	if (tmp_route.network() != static_route.network())
+	if (tmp_route.network() != updated_route.network())
 	    continue;
-	if ((tmp_route.unicast() != static_route.unicast())
-	    || (tmp_route.multicast() != static_route.multicast())) {
+	if ((tmp_route.unicast() != updated_route.unicast())
+	    || (tmp_route.multicast() != updated_route.multicast())) {
 	    continue;
 	}
 	error_msg = c_format("Cannot add %s route for %s: "
 			     "the route already exists",
-			     (static_route.unicast())? "unicast" : "multicast",
-			     static_route.network().str().c_str());
+			     (updated_route.unicast())?
+			     "unicast" : "multicast",
+			     updated_route.network().str().c_str());
 	return XORP_ERROR;
     }
 
     //
     // Add the route
     //
-    _static_routes.push_back(static_route);
+    _static_routes.push_back(updated_route);
 
     //
     // Do policy filtering
@@ -686,16 +697,16 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     // We do not want to modify original route, so we may re-filter routes on
     // filter configuration changes. Hence, copy route.
     //
-    StaticRoute route_copy = added_route;
+    StaticRoute copy_route = added_route;
     
-    bool accepted = do_filtering(route_copy);
+    bool accepted = do_filtering(copy_route);
 
     // Tag the original route as filtered or not
     added_route.set_filtered(!accepted);
 
     // Inform RIB about the possibly modified route if it was accepted 
     if (accepted)
-	inform_rib(route_copy);
+	inform_rib(copy_route);
 
     return XORP_OK;
 }
@@ -712,12 +723,19 @@ int
 StaticRoutesNode::replace_route(const StaticRoute& static_route,
 				string& error_msg)
 {
+    StaticRoute updated_route = static_route;
+
+    //
+    // Update the route
+    //
+    update_route(_iftree, updated_route);
+
     //
     // Check the entry
     //
-    if (static_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) {
 	error_msg = c_format("Cannot replace route for %s: %s",
-			     static_route.network().str().c_str(),
+			     updated_route.network().str().c_str(),
 			     error_msg.c_str());
 	return XORP_ERROR;
     }
@@ -728,10 +746,10 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     list<StaticRoute>::iterator iter;
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
 	StaticRoute& tmp_route = *iter;
-	if (tmp_route.network() != static_route.network())
+	if (tmp_route.network() != updated_route.network())
 	    continue;
-	if ((tmp_route.unicast() != static_route.unicast())
-	    || (tmp_route.multicast() != static_route.multicast())) {
+	if ((tmp_route.unicast() != updated_route.unicast())
+	    || (tmp_route.multicast() != updated_route.multicast())) {
 	    continue;
 	}
 
@@ -739,31 +757,31 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 	// Route found. Overwrite its value.
 	//
 	bool was_filtered = tmp_route.is_filtered();
-	tmp_route = static_route;
+	tmp_route = updated_route;
 
 	// Do policy filtering
-	StaticRoute route_copy = static_route;
-	bool accepted = do_filtering(route_copy);
+	StaticRoute copy_route = updated_route;
+	bool accepted = do_filtering(copy_route);
 	tmp_route.set_filtered(!accepted);
 
 	// Decide what to do
 	if (accepted) {
 	    if (was_filtered) {
-		route_copy.set_add_route();
+		copy_route.set_add_route();
 	    } else {
 	    }
 	} else {
 	    if (was_filtered) {
 		return XORP_OK;
 	    } else {
-		route_copy.set_delete_route();
+		copy_route.set_delete_route();
 	    }
 	}
 	
 	//
 	// Inform the RIB about the change
 	//
-	inform_rib(route_copy);
+	inform_rib(copy_route);
 
 	return XORP_OK;
     }
@@ -773,8 +791,8 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     //
     error_msg = c_format("Cannot replace %s route for %s: "
 			 "no such route",
-			 (static_route.unicast())? "unicast" : "multicast",
-			 static_route.network().str().c_str());
+			 (updated_route.unicast())? "unicast" : "multicast",
+			 updated_route.network().str().c_str());
     return XORP_ERROR;
 }
 
@@ -790,12 +808,19 @@ int
 StaticRoutesNode::delete_route(const StaticRoute& static_route,
 			       string& error_msg)
 {
+    StaticRoute updated_route = static_route;
+
+    //
+    // Update the route
+    //
+    update_route(_iftree, updated_route);
+
     //
     // Check the entry
     //
-    if (static_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) {
 	error_msg = c_format("Cannot delete route for %s: %s",
-			     static_route.network().str().c_str(),
+			     updated_route.network().str().c_str(),
 			     error_msg.c_str());
 	return XORP_ERROR;
     }
@@ -806,10 +831,10 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     list<StaticRoute>::iterator iter;
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
 	StaticRoute& tmp_route = *iter;
-	if (tmp_route.network() != static_route.network())
+	if (tmp_route.network() != updated_route.network())
 	    continue;
-	if ((tmp_route.unicast() != static_route.unicast())
-	    || (tmp_route.multicast() != static_route.multicast())) {
+	if ((tmp_route.unicast() != updated_route.unicast())
+	    || (tmp_route.multicast() != updated_route.multicast())) {
 	    continue;
 	}
 
@@ -837,8 +862,8 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     //
     error_msg = c_format("Cannot delete %s route for %s: "
 			 "no such route",
-			 (static_route.unicast())? "unicast" : "multicast",
-			 static_route.network().str().c_str());
+			 (updated_route.unicast())? "unicast" : "multicast",
+			 updated_route.network().str().c_str());
     return XORP_ERROR;
 }
 
@@ -930,6 +955,24 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 	if (is_directly_connected(_iftree, route.nexthop()))
 	    inform_rib_route_change(route);
     }
+}
+
+/**
+ * Update a route received from the user configuration.
+ *
+ * Currently, this method is a no-op.
+ *
+ * @param iftree the tree with the interface state to update the route.
+ * @param route the route to update.
+ * @return true if the route was updated, otherwise false.
+ */
+bool
+StaticRoutesNode::update_route(const IfMgrIfTree& iftree, StaticRoute& route)
+{
+    UNUSED(iftree);
+    UNUSED(route);
+
+    return (false);
 }
 
 bool
