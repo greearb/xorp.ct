@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.18 2004/03/02 18:02:34 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.19 2004/03/02 19:48:22 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -375,6 +375,16 @@ protected:
      * Record packet arrival.  Updates port and peer counters.
      */
     void record_packet(Peer<A>* p);
+
+    /**
+     * Record response packet arrival.
+     */
+    void record_response_packet(Peer<A>* p);
+
+    /**
+     * Record request packet arrival.
+     */
+    void record_request_packet(Peer<A>* p);
 
     /**
      * Record bad packet.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.25 2004/03/02 18:02:34 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.26 2004/03/02 19:48:22 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -138,28 +138,20 @@ template <typename A>
 Peer<A>*
 Port<A>::peer(const Addr& addr)
 {
-    typename PeerList::iterator i = _peers.begin();
-    while (i != _peers.end()) {
-	if ((*i)->address() == addr) {
-	    return *i;
-	}
-	++i;
-    }
-    return 0;
+    typename PeerList::iterator i = i = find_if(_peers.begin(), _peers.end(),
+						peer_has_address<A>(addr));
+
+    return (i == _peers.end()) ? 0 : *i;
 }
 
 template <typename A>
 const Peer<A>*
 Port<A>::peer(const Addr& addr) const
 {
-    typename PeerList::const_iterator i = _peers.begin();
-    while (i != _peers.end()) {
-	if ((*i)->address() == addr) {
-	    return *i;
-	}
-	++i;
-    }
-    return 0;
+    typename PeerList::const_iterator i  = find_if(_peers.begin(),
+						   _peers.end(),
+						   peer_has_address<A>(addr));
+    return (i == _peers.end()) ? 0 : *i;
 }
 
 template <typename A>
@@ -354,7 +346,31 @@ Port<A>::record_packet(Peer<A>* p)
 {
     counters().incr_packets_recv();
     if (p) {
+	EventLoop& e = _pm.eventloop();
+	TimeVal now;
+	e.current_time(now);
 	p->counters().incr_packets_recv();
+	p->set_last_active(now);
+    }
+}
+
+template <typename A>
+void
+Port<A>::record_response_packet(Peer<A>* p)
+{
+    counters().incr_update_packets_recv();
+    if (p) {
+	p->counters().incr_update_packets_recv();
+    }
+}
+
+template <typename A>
+void
+Port<A>::record_request_packet(Peer<A>* p)
+{
+    counters().incr_table_requests_recv();
+    if (p) {
+	p->counters().incr_table_requests_recv();
     }
 }
 
@@ -788,11 +804,12 @@ Port<A>::port_io_receive(const A&	src_address,
 #endif
 
     if (src_port == RIP_PORT && ph->command == RipPacketHeader::RESPONSE) {
+	record_response_packet(p);
 	parse_response(src_address, src_port, entries, n_entries);
     } else {
 	XLOG_ASSERT(ph->command == RipPacketHeader::REQUEST);
 	if (src_port == RIP_PORT) {
-	    counters().incr_table_requests_recv();
+	    record_request_packet(p);
 	} else {
 	    counters().incr_non_rip_requests_recv();
 	}

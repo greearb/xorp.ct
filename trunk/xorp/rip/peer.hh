@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/peer.hh,v 1.3 2003/07/09 00:11:02 hodson Exp $
+// $XORP: xorp/rip/peer.hh,v 1.4 2004/03/02 19:48:22 hodson Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -25,8 +25,8 @@
  */
 struct PeerCounters {
 public:
-    PeerCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
-		     _bad_auth_packets(0)
+    PeerCounters() : _packets_recv(0), _updates_recv(0), _requests_recv(0),
+		     _bad_routes(0), _bad_packets(0), _bad_auth_packets(0)
     {}
 
     /**
@@ -38,6 +38,26 @@ public:
      * Increment the total number of packets received.
      */
     inline void incr_packets_recv()		{ _packets_recv++; }
+
+    /**
+     * Get the total number of update packets received.
+     */
+    inline uint32_t update_packets_recv() const	{ return _updates_recv; }
+
+    /**
+     * Increment the total number of update packets received.
+     */
+    inline void incr_update_packets_recv()	{ _updates_recv++; }
+
+    /**
+     * Get the total number of table request packets received.
+     */
+    inline uint32_t table_requests_recv() const	{ return _requests_recv; }
+
+    /**
+     * Increment the total number of table request packets received.
+     */
+    inline void incr_table_requests_recv()	{ _requests_recv++; }
 
     /**
      * Get the number of bad routes received (eg invalid metric,
@@ -72,6 +92,8 @@ public:
 
 protected:
     uint32_t _packets_recv;
+    uint32_t _updates_recv;
+    uint32_t _requests_recv;
     uint32_t _bad_routes;
     uint32_t _bad_packets;
     uint32_t _bad_auth_packets;
@@ -146,6 +168,25 @@ protected:
     Addr		_addr;
     PeerCounters	_counters;
     TimeVal		_last_active;
+};
+
+
+/**
+ * Unary Function Predicate class for use with STL to determine if a
+ * peer has an address.
+ */
+template <typename A>
+struct peer_has_address {
+    peer_has_address(const A& addr) : _a(addr) {}
+
+    inline bool
+    operator() (const Peer<A>& p) const{ return p.address() == _a; }
+
+    inline bool
+    operator() (const Peer<A>* p) const { return p->address() == _a; }
+
+private:
+    A _a;
 };
 
 #endif // __RIP_PEER_HH__

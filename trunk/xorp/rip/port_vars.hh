@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_vars.hh,v 1.3 2004/03/02 18:02:34 hodson Exp $
+// $XORP: xorp/rip/port_vars.hh,v 1.4 2004/03/02 19:48:22 hodson Exp $
 
 #ifndef __RIP_PORT_VARS_HH__
 #define __RIP_PORT_VARS_HH__
@@ -24,7 +24,8 @@
  */
 struct PortCounters {
 public:
-    PortCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
+    PortCounters() : _packets_recv(0), _requests_recv(0),
+		     _bad_routes(0), _bad_packets(0),
 		     _bad_auth_packets(0), _tr_sent(0), _tr_recv(),
 		     _triggered_updates(0), _unsol_updates(0), _nr_req_recv(0),
 		     _nr_updates(0)
@@ -39,6 +40,16 @@ public:
      * Increment the total number of packets received.
      */
     inline void incr_packets_recv()		{ _packets_recv++; }
+
+    /**
+     * Get total number of update packets received.
+     */
+    inline uint32_t update_packets_recv() const { return _updates_recv; }
+
+    /**
+     * Increment total number of update packets received.
+     */
+    inline void incr_update_packets_recv() { _updates_recv++; }
 
     /**
      * Get the number of bad routes received (eg invalid metric,
@@ -133,6 +144,8 @@ public:
 
 protected:
     uint32_t _packets_recv;
+    uint32_t _requests_recv;
+    uint32_t _updates_recv;
     uint32_t _bad_routes;
     uint32_t _bad_packets;
     uint32_t _bad_auth_packets;
