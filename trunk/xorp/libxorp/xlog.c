@@ -13,7 +13,7 @@
  * legally binding. 
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.3 2003/03/10 23:20:38 hodson Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.4 2003/05/16 17:28:16 hodson Exp $"
 
 
 /*
@@ -1107,10 +1107,12 @@ x_vasprintf(char **ret, const char *format, va_list ap)
 	 * buffer size and allocate it, but anyway we try one more time
 	 */
 	buf_ptr = malloc(buf_size);
+	if (buf_ptr == NULL)
+	    break;		/* Cannot allocate memory */
 	buf_ptr[0] = '\0';
 	ret_size = vsnprintf(buf_ptr, buf_size, format, ap);
 	if (ret_size < 0)
-	    break;
+	    break;		/* Cannot format the string */
 	if ((size_t)ret_size < buf_size) {
 	    *ret = buf_ptr;
 	    return (ret_size);
@@ -1121,9 +1123,10 @@ x_vasprintf(char **ret, const char *format, va_list ap)
     }
     
     /*
-     * Error: cannot allocate enough memory
+     * Error: cannot format the string or cannot allocate enough memory
      */
-    
+    if (buf_ptr != NULL)
+	free(buf_ptr);
     *ret = NULL;
     
     return (-1);
