@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.10 2003/04/24 20:45:06 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.11 2003/04/24 23:43:47 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -46,6 +46,7 @@ rtrmgr_SOURCES	+= userdb.cc
 rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
 rtrmgr_SOURCES	+= randomness.cc
 rtrmgr_SOURCES	+= unexpanded_xrl.cc
+rtrmgr_SOURCES  += task.cc
 
 rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a 
 rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 

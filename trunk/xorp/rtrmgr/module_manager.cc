@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.12 2003/04/25 18:19:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.13 2003/04/25 19:14:04 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -67,19 +67,24 @@ Module::~Module()
 }
 
 void
-Module::terminate() 
+Module::terminate(XorpCallback0<void>::RefPtr cb) 
 {
     if (_verbose)
 	printf("Shutting down %s\n", _name.c_str());
 
-    if (!_do_exec)
+    if (!_do_exec) {
+	cb->dispatch();
 	return;
+    }
 
-    if (_status == MODULE_NOT_STARTED)
+    if (_status == MODULE_NOT_STARTED) {
+	cb->dispatch();
 	return;
+    }
 
     if (_status == MODULE_FAILED) {
 	_status = MODULE_NOT_STARTED;
+	cb->dispatch();
 	return;
     }
 
@@ -90,18 +95,20 @@ Module::terminate()
 
     _shutdown_timer =
 	_mmgr.eventloop().new_oneoff_after_ms(2000, 
-             callback(this, &Module::terminate_with_prejudice));
+             callback(this, &Module::terminate_with_prejudice, cb));
 }
 
 void
-Module::terminate_with_prejudice()
+Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 {
     printf("terminate_with_prejudice\n");
     if (_status == MODULE_FAILED) {
 	_status = MODULE_NOT_STARTED;
+	cb->dispatch();
 	return;
     }
     if (_status == MODULE_NOT_STARTED) {
+	cb->dispatch();
 	return;
     }
 
@@ -109,6 +116,10 @@ Module::terminate_with_prejudice()
     //if it still hasn't exited, kill it properly.
     kill(_pid, SIGKILL);
     _status = MODULE_NOT_STARTED;
+
+    //we'll give it a couple more seconds to really go away
+    _shutdown_timer =
+	_mmgr.eventloop().new_oneoff_after_ms(2000, cb);
 }
 
 
@@ -311,12 +322,22 @@ ModuleManager::new_module(const string& name, const string& path)
 }
 
 int 
-ModuleManager::run_module(const string&name, bool do_exec, 
-			  XorpCallback1<void, bool>::RefPtr cb) 
+ModuleManager::start_module(const string&name, bool do_exec,
+			    XorpCallback1<void, bool>::RefPtr cb) 
 {
     Module *m =  find_module(name);
     assert (m != NULL);
     return m->run(do_exec, cb);
+}
+
+int 
+ModuleManager::stop_module(const string&name, 
+			   XorpCallback0<void>::RefPtr cb) 
+{
+    Module *m =  find_module(name);
+    assert (m != NULL);
+    m->terminate(cb);
+    return XORP_OK;
 }
 
 bool
@@ -385,8 +406,14 @@ ModuleManager::shutdown()
     debug_msg("ModuleManager::shutdown\n");
     map<string, Module *>::iterator i;
     for (i = _modules.begin(); i != _modules.end(); i++) {
-	i->second->terminate();
+	i->second->terminate(callback(this, 
+				      &ModuleManager::module_shutdown_done));
     }
+}
+
+void ModuleManager::module_shutdown_done()
+{
+    //XXX
 }
 
 bool

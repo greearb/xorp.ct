@@ -97,7 +97,7 @@ TESTS = test_templates test_sample_config test_module_manager
 
 noinst_PROGRAMS = $(TESTS)
 LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
-rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc
+rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc task.cc
 rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
 #unexpanded_xrl shouldn't really be needed
 xorpsh_SOURCES = rtrmgr_module.h version.h xorpsh_main.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc y.opcmd_tab.cc lex.opcmd.cc template_tree.cc template_tree_node.cc template_commands.cc conf_tree_node.cc slave_conf_tree_node.cc conf_tree.cc slave_module_manager.cc  slave_conf_tree.cc xorp_client.cc xrldb.cc cli.cc command_tree.cc op_commands.cc popen.cc split.cc xrl_xorpsh_interface.cc unexpanded_xrl.cc
@@ -123,7 +123,7 @@ rtrmgr_OBJECTS =  y.tplt_tab.o lex.tplt.o y.boot_tab.o lex.boot.o \
 main_rtrmgr.o template_tree.o template_tree_node.o template_commands.o \
 conf_tree_node.o conf_tree.o master_conf_tree_node.o master_conf_tree.o \
 module_manager.o xorp_client.o xrldb.o split.o userdb.o \
-xrl_rtrmgr_interface.o randomness.o unexpanded_xrl.o
+xrl_rtrmgr_interface.o randomness.o unexpanded_xrl.o task.o
 rtrmgr_DEPENDENCIES =  $(top_builddir)/xrl/targets/librtrmgrbase.a \
 $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
 $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a \
@@ -189,11 +189,12 @@ DEP_FILES =  .deps/cli.P .deps/command_tree.P .deps/conf_tree.P \
 .deps/master_conf_tree_node.P .deps/module_manager.P \
 .deps/op_commands.P .deps/popen.P .deps/randomness.P \
 .deps/slave_conf_tree.P .deps/slave_conf_tree_node.P \
-.deps/slave_module_manager.P .deps/split.P .deps/template_commands.P \
-.deps/template_tree.P .deps/template_tree_node.P \
-.deps/test_module_manager.P .deps/test_sample_config.P \
-.deps/test_templates.P .deps/unexpanded_xrl.P .deps/userdb.P \
-.deps/xorp_client.P .deps/xorpsh_main.P .deps/xrl_rtrmgr_interface.P \
+.deps/slave_module_manager.P .deps/split.P .deps/task.P \
+.deps/template_commands.P .deps/template_tree.P \
+.deps/template_tree_node.P .deps/test_module_manager.P \
+.deps/test_sample_config.P .deps/test_templates.P \
+.deps/unexpanded_xrl.P .deps/userdb.P .deps/xorp_client.P \
+.deps/xorpsh_main.P .deps/xrl_rtrmgr_interface.P \
 .deps/xrl_xorpsh_interface.P .deps/xrldb.P .deps/y.boot_tab.P \
 .deps/y.opcmd_tab.P .deps/y.tplt_tab.P
 SOURCES = $(rtrmgr_SOURCES) $(xorpsh_SOURCES) $(test_templates_SOURCES) $(test_sample_config_SOURCES) $(test_module_manager_SOURCES)

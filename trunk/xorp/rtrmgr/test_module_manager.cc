@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.3 2003/04/25 03:39:03 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.4 2003/04/25 19:14:04 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree.hh"
@@ -54,7 +54,7 @@ main(int argc, char* const argv[])
     XorpCallback1<void, bool>::RefPtr cb;
     cb = callback(&module_run_done);
     waiting = true;
-    mmgr.run_module("finder", true, cb);
+    mmgr.start_module("finder", true, cb);
 
     printf("Verifying finder starting\n");
     if (mmgr.module_has_started("finder") != true) {

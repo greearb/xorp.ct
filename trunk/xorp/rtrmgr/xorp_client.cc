@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.9 2003/04/23 04:24:36 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.10 2003/04/24 23:43:48 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -227,7 +227,7 @@ XorpBatchModuleItem::execute(XorpClient& /*xclient*/, XorpBatch *batch,
 	XorpCallback1<void, bool>::RefPtr cb;
 	cb = callback(this, &XorpBatchModuleItem::response_callback,
 		      string(""));
-	if (_mmgr.run_module(_mod_name, _do_exec, cb) == XORP_OK) {
+	if (_mmgr.start_module(_mod_name, _do_exec, cb) == XORP_OK) {
 	    return XORP_OK;
 	} else {
 	    //we failed - trigger the callback immediately
