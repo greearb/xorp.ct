@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.7 2004/06/15 17:38:09 atanu Exp $
+# $XORP: xorp/ERRATA,v 1.8 2004/06/17 05:33:37 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -49,6 +49,17 @@
 
       The error is harmless and can be ignored.
 
+    - If a vif has been enabled with the startup configuration file,
+      and then is disabled and enabled again via xorpsh, then
+      the enabling will not start the operations on that vif.
+      E.g., the "show mfea interface" xorpsh command will show the
+      vif status as DOWN, and its status cannot be changed to UP.
+      The problem is caused by a mismatch between how the enable/disable
+      state is handled by the rtrmgr and by the MFEA module itself.
+      This will be fixed for XORP Release 1.1
+      Currently, there is no work-around except that restarting the
+      rtrmgr with all enabled interfaces again.
+
   RIB: 
     - If an interface address is deleted, the RIB may trigger the following
       error in the FEA:
@@ -97,12 +108,34 @@
 
         echo 200 > /proc/sys/net/ipv4/igmp_max_memberships
 
+    - If a vif has been enabled with the startup configuration file,
+      and then is disabled and enabled again via xorpsh, then
+      the enabling will not start the operations on that vif.
+      E.g., the "show igmp interface" xorpsh command will show the
+      vif status as DOWN, and its status cannot be changed to UP.
+      The problem is caused by a mismatch between how the enable/disable
+      state is handled by the rtrmgr and by the MLD/IGMP module itself.
+      This will be fixed for XORP Release 1.1
+      Currently, there is no work-around except that restarting the
+      rtrmgr with all enabled interfaces again.
+
   PIM-SM:
     - If the kernel does not support PIM-SM, or if PIM-SM is not enabled
       in the kernel, then running PIM-SM will fail with the following
       error message:
         [ 2004/06/12 10:26:41  ERROR xorp_fea:444 MFEA +529 mfea_mrouter.cc
         start_mrt ] setsockopt(MRT_INIT, 1) failed: Operation not supported
+
+    - If a vif has been enabled with the startup configuration file,
+      and then is disabled and enabled again via xorpsh, then
+      the enabling will not start the operations on that vif.
+      E.g., the "show pim interface" xorpsh command will show the
+      vif status as DOWN, and its status cannot be changed to UP.
+      The problem is caused by a mismatch between how the enable/disable
+      state is handled by the rtrmgr and by the PIM-SM module itself.
+      This will be fixed for XORP Release 1.1
+      Currently, there is no work-around except that restarting the
+      rtrmgr with all enabled interfaces again.
 
   FIB2MRIB:
     - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
