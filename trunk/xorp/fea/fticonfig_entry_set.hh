@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.16 2004/12/13 23:17:28 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.17 2004/12/14 00:14:18 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -20,6 +20,8 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
+#include "libxorp/time_slice.hh"
+#include "libxorp/timer.hh"
 
 #include "fte.hh"
 #include "nexthop_port_mapper.hh"
@@ -454,10 +456,26 @@ private:
     bool add_entry(const FteX& fte);
     bool delete_entry(const FteX& fte);
 
+    // Methods related to reinstalling all IPv4 and IPv6 forwarding entries
+    void start_task_reinstall_all_entries();
+    void run_task_reinstall_all_entries();
+    bool reinstall_all_entries4();
+    bool reinstall_all_entries6();
+
     ClickSocketReader _cs_reader;
 
     map<IPv4Net, Fte4>	_fte_table4;
     map<IPv6Net, Fte6>	_fte_table6;
+
+    // State related to reinstalling all IPv4 and IPv6 forwarding entries
+    XorpTimer _reinstall_all_entries_timer;
+    TimeSlice _reinstall_all_entries_time_slice;
+    bool _start_reinstalling_fte_table4;
+    bool _is_reinstalling_fte_table4;
+    bool _start_reinstalling_fte_table6;
+    bool _is_reinstalling_fte_table6;
+    IPv4Net _reinstalling_ipv4net;
+    IPv6Net _reinstalling_ipv6net;
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_SET_HH__

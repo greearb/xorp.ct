@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.12 2004/12/10 23:12:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.13 2004/12/14 00:14:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -35,7 +35,14 @@
 FtiConfigEntrySetClick::FtiConfigEntrySetClick(FtiConfig& ftic)
     : FtiConfigEntrySet(ftic),
       ClickSocket(ftic.eventloop()),
-      _cs_reader(*(ClickSocket *)this)
+      _cs_reader(*(ClickSocket *)this),
+      _reinstall_all_entries_time_slice(100000, 20),	// 100ms, test every 20th iter
+      _start_reinstalling_fte_table4(false),
+      _is_reinstalling_fte_table4(false),
+      _start_reinstalling_fte_table6(false),
+      _is_reinstalling_fte_table6(false),
+      _reinstalling_ipv4net(IPv4::ZERO(), 0),
+      _reinstalling_ipv6net(IPv6::ZERO(), 0)
 {
 }
 
@@ -345,6 +352,132 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 void
 FtiConfigEntrySetClick::nexthop_port_mapper_event(bool is_mapping_changed)
 {
-    // TODO: XXX: PAVPAVPAV: implement it!
+    //
+    // XXX: always reinstall all entries, because they were lost
+    // when the new Click config was written.
+    //
+    start_task_reinstall_all_entries();
     UNUSED(is_mapping_changed);
+}
+
+void
+FtiConfigEntrySetClick::start_task_reinstall_all_entries()
+{
+    // Initialize the reinstalling from the beginning
+    _start_reinstalling_fte_table4 = true;
+    _is_reinstalling_fte_table4 = false;
+    _start_reinstalling_fte_table6 = true;
+    _is_reinstalling_fte_table6 = false;
+
+    run_task_reinstall_all_entries();
+}
+
+void
+FtiConfigEntrySetClick::run_task_reinstall_all_entries()
+{
+    _reinstall_all_entries_time_slice.reset();
+
+    //
+    // Reinstall all IPv4 entries. If the time slice expires, then schedule
+    // a timer to continue later.
+    //
+    if (_start_reinstalling_fte_table4 || _is_reinstalling_fte_table4) {
+	if (reinstall_all_entries4() == true) {
+	    _reinstall_all_entries_timer = ftic().eventloop().new_oneoff_after(
+		TimeVal(0, 1),
+		callback(this, &FtiConfigEntrySetClick::run_task_reinstall_all_entries));
+	    return;
+	}
+    }
+
+    //
+    // Reinstall all IPv6 entries. If the time slice expires, then schedule
+    // a timer to continue later.
+    //
+    if (_start_reinstalling_fte_table6 || _is_reinstalling_fte_table6) {
+	if (reinstall_all_entries6() == true) {
+	    _reinstall_all_entries_timer = ftic().eventloop().new_oneoff_after(
+		TimeVal(0, 1),
+		callback(this, &FtiConfigEntrySetClick::run_task_reinstall_all_entries));
+	    return;
+	}
+    }
+
+    return;
+}
+
+bool
+FtiConfigEntrySetClick::reinstall_all_entries4()
+{
+    map<IPv4Net, Fte4>::const_iterator iter4, iter4_begin, iter4_end;
+
+    // Set the begin and end iterators
+    if (_start_reinstalling_fte_table4) {
+	iter4_begin = _fte_table4.begin();
+    } else if (_is_reinstalling_fte_table4) {
+	iter4_begin = _fte_table4.lower_bound(_reinstalling_ipv4net);
+    } else {
+	return (false);		// XXX: nothing to do
+    }
+    iter4_end = _fte_table4.end();
+
+    _start_reinstalling_fte_table4 = false;
+    _is_reinstalling_fte_table4 = true;
+
+    for (iter4 = iter4_begin; iter4 != iter4_end; ) {
+	const FteX& ftex = FteX(iter4->second);
+	++iter4;
+	add_entry(ftex);
+	if (_reinstall_all_entries_time_slice.is_expired()) {
+	    // Time slice has expired. Save state if necessary and return.
+	    if (iter4 != iter4_end) {
+		const Fte4& fte4_next = iter4->second;
+		_reinstalling_ipv4net = fte4_next.net();
+	    } else {
+		_is_reinstalling_fte_table4 = false;
+	    }
+	    return (true);
+	}
+    }
+    _is_reinstalling_fte_table4 = false;
+
+    return (false);
+}
+
+bool
+FtiConfigEntrySetClick::reinstall_all_entries6()
+{
+    map<IPv6Net, Fte6>::const_iterator iter6, iter6_begin, iter6_end;
+
+    // Set the begin and end iterators
+    if (_start_reinstalling_fte_table6) {
+	iter6_begin = _fte_table6.begin();
+    } else if (_is_reinstalling_fte_table6) {
+	iter6_begin = _fte_table6.lower_bound(_reinstalling_ipv6net);
+    } else {
+	return (false);		// XXX: nothing to do
+    }
+    iter6_end = _fte_table6.end();
+
+    _start_reinstalling_fte_table6 = false;
+    _is_reinstalling_fte_table6 = true;
+
+    for (iter6 = iter6_begin; iter6 != iter6_end; ) {
+	const FteX& ftex = FteX(iter6->second);
+	++iter6;
+	add_entry(ftex);
+	if (_reinstall_all_entries_time_slice.is_expired()) {
+	    // Time slice has expired. Save state if necessary and return.
+	    if (iter6 != iter6_end) {
+		const Fte6& fte6_next = iter6->second;
+		_reinstalling_ipv6net = fte6_next.net();
+	    } else {
+		_is_reinstalling_fte_table6 = false;
+	    }
+	    return (true);
+	}
+    }
+    _is_reinstalling_fte_table6 = false;
+
+    return (false);
 }
