@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.13 2003/09/05 02:44:44 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.14 2003/09/05 03:18:13 atanu Exp $
 #
 
 #
@@ -112,6 +112,7 @@ OPEN_ERROR=2
 UNACCEPTHOLDTIME=6
 
 UPDATEMSGERR=3		# Update error
+    MALATTRLIST=1       # Malformed Attribute List
 MISSWATTR=3		# Missing Well-known Attribute
 
 reset()
@@ -779,10 +780,42 @@ test25()
     coord peer1 assert established
 }
 
+test26()
+{
+    echo "TEST26"
+    echo "	1) Establish an EBGP IPV6 peering"
+    echo "	2) Send an IPv4 and IPv6 update packet repeat both nexthops"
+
+    coord reset
+    coord target $HOST $PORT4
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER4_AS holdtime 0 id 192.150.187.100 ipv6 true
+
+    PACKET="packet update
+	origin 1
+	aspath $PEER4_AS
+	nexthop 20.20.20.20
+	nexthop 20.20.20.20
+	nlri 10.10.10.0/24
+	nexthop6 20:20:20:20:20:20:20:20
+	nexthop6 20:20:20:20:20:20:20:20
+	nlri6 2000::/3"
+    
+    coord peer1 expect packet notify $UPDATEMSGERR $MALATTRLIST
+	
+    coord peer1 send $PACKET
+
+    sleep 2
+    coord peer1 assert queue 0
+
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
     test12 test13 test14 test15 test16 test17 test18 test19 test20 test21
-    test22 test23 test24 test25'
+    test22 test23 test24 test25 test26'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
