@@ -12,18 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.24 2004/09/01 18:12:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.25 2004/10/02 19:49:50 atanu Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/profile.hh"
 
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
 
+#include "profile_vars.hh"
 #include "fticonfig.hh"
 
 #define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
@@ -485,6 +487,10 @@ FtiConfig::add_entry4(const Fte4& fte)
     if (_ftic_entry_sets.empty())
 	return (false);
 
+    if (_profile.enabled(profile_route_out))
+	_profile.log(profile_route_out,
+		     c_format("add %s", fte.net().str().c_str()));
+
     for (ftic_entry_set_iter = _ftic_entry_sets.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets.end();
 	 ++ftic_entry_set_iter) {
@@ -503,6 +509,10 @@ FtiConfig::delete_entry4(const Fte4& fte)
 
     if (_ftic_entry_sets.empty())
 	return (false);
+
+    if (_profile.enabled(profile_route_out))
+	_profile.log(profile_route_out,
+		     c_format("delete %s", fte.net().str().c_str()));
 
     for (ftic_entry_set_iter = _ftic_entry_sets.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets.end();
@@ -618,6 +628,10 @@ FtiConfig::add_entry6(const Fte6& fte)
     if (_ftic_entry_sets.empty())
 	return (false);
 
+    if (_profile.enabled(profile_route_out))
+	_profile.log(profile_route_out,
+		     c_format("add %s", fte.net().str().c_str()));
+
     for (ftic_entry_set_iter = _ftic_entry_sets.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets.end();
 	 ++ftic_entry_set_iter) {
@@ -636,6 +650,10 @@ FtiConfig::delete_entry6(const Fte6& fte)
 
     if (_ftic_entry_sets.empty())
 	return (false);
+
+    if (_profile.enabled(profile_route_out))
+	_profile.log(profile_route_out,
+		     c_format("delete %s", fte.net().str().c_str()));
 
     for (ftic_entry_set_iter = _ftic_entry_sets.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets.end();
