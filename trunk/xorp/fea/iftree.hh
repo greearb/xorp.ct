@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.7 2003/06/17 23:14:28 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.8 2003/08/10 22:01:24 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -470,7 +470,7 @@ public:
     void set_bcast(const IPv4& baddr);
 
     /**
-     * Get the broadcast address.
+     * Get the endpoint address of a point-to-point link.
      * @return the broadcast address or IPv4::ZERO() if there is no
      * broadcast address set.
      */
@@ -496,10 +496,10 @@ public:
 	set_endpoint(o.endpoint());
 	set_prefix(o.prefix());
     }
-    
+
     /**
      * Test if the address-specific internal state is same.
-     * 
+     *
      * @param o the IfTreeAddr4 to compare against.
      * @return true if the address-specific internal state is same.
      */
@@ -593,7 +593,7 @@ public:
 
     /**
      * Test if the address-specific internal state is same.
-     * 
+     *
      * @param o the IfTreeAddr6 to compare against.
      * @return true if the address-specific internal state is same.
      */
@@ -633,7 +633,7 @@ protected:
 inline IfTree::IfMap::iterator
 IfTree::get_if(const string& ifn)
 {
-    return _ifs.find(ifn); 
+    return _ifs.find(ifn);
 }
 
 inline IfTree::IfMap::const_iterator
@@ -646,14 +646,14 @@ IfTree::get_if(const string& ifn) const
 // Inline IfTreeInterface methods
 //
 
-inline IfTreeInterface::VifMap::iterator 
+inline IfTreeInterface::VifMap::iterator
 IfTreeInterface::get_vif(const string& vifname)
 {
     return _vifs.find(vifname);
 }
 
-inline 
-IfTreeInterface::VifMap::const_iterator 
+inline
+IfTreeInterface::VifMap::const_iterator
 IfTreeInterface::get_vif(const string& vifname) const
 {
     return _vifs.find(vifname);
@@ -663,27 +663,27 @@ IfTreeInterface::get_vif(const string& vifname) const
 // Inline IfTreeVif methods
 //
 
-inline IfTreeVif::V4Map::iterator 
-IfTreeVif::get_addr(const IPv4& a) 
-{ 
+inline IfTreeVif::V4Map::iterator
+IfTreeVif::get_addr(const IPv4& a)
+{
     return _v4addrs.find(a);
 }
 
-inline IfTreeVif::V6Map::iterator 
-IfTreeVif::get_addr(const IPv6& a) 
-{ 
+inline IfTreeVif::V6Map::iterator
+IfTreeVif::get_addr(const IPv6& a)
+{
     return _v6addrs.find(a);
 }
 
-inline IfTreeVif::V4Map::const_iterator 
+inline IfTreeVif::V4Map::const_iterator
 IfTreeVif::get_addr(const IPv4& a) const
-{ 
+{
     return _v4addrs.find(a);
 }
 
-inline IfTreeVif::V6Map::const_iterator 
+inline IfTreeVif::V6Map::const_iterator
 IfTreeVif::get_addr(const IPv6& a) const
-{ 
+{
     return _v6addrs.find(a);
 }
 
