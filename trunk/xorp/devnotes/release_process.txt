@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.26 2004/07/09 06:53:59 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.27 2004/07/14 03:11:41 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -259,6 +259,8 @@ the login shell is csh or tcsh):
  # Commands continue from the previous task
  setenv ReleaseVersion `cat VERSION`
  echo $ReleaseVersion
+ mkdir tmp
+ cd tmp
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs export -r $ReleaseTag xorp
  mv xorp xorp-$ReleaseVersion
  tar zcvf xorp-$ReleaseVersion.tar.gz xorp-$ReleaseVersion
