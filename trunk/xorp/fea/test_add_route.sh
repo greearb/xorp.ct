@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.7 2003/10/21 23:18:48 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.8 2003/10/21 23:27:53 pavlin Exp $
 #
 
 #
@@ -76,6 +76,10 @@ test_have_ipv4()
 	echo "${_xrl_result}"
 	return 1
     fi
+
+    #
+    # Check the result
+    #
     _result=`get_xrl_variable_value "${_xrl_result}" result:bool`
     if [ "${_result}" != "true" ] ; then
 	echo "ERROR: result is ${_result}; expecting true"
@@ -93,9 +97,9 @@ test_prepare_unicast_forwarding4()
 {
     local _xrl_result _ret_value
 
-    echo "TEST: Prepare IPv4 unicast forwarding tests (explicitly disable forwarding)"
+    echo "TEST: Prepare IPv4 unicast forwarding tests (explicitly enable forwarding)"
 
-    _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 false 2>&1`
+    _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 true 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
 	echo "ERROR: cannot prepare IPv4 unicast forwarding tests:"
@@ -147,6 +151,10 @@ test_get_enabled_unicast_forwarding4()
 	echo "${_xrl_result}"
 	return 1
     fi
+
+    #
+    # Check the result
+    #
     _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
     if [ "${_enabled}" != "true" ] ; then
 	echo "ERROR: enabled is ${_enabled}; expecting true"
@@ -158,7 +166,6 @@ test_get_enabled_unicast_forwarding4()
     #
     echo "RESULT:"
     echo "${_xrl_result}"
-    
 }
 
 test_get_disabled_unicast_forwarding4()
@@ -174,6 +181,10 @@ test_get_disabled_unicast_forwarding4()
 	echo "${_xrl_result}"
 	return 1
     fi
+
+    #
+    # Check the result
+    #
     _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
     if [ "${_enabled}" != "false" ] ; then
 	echo "ERROR: enabled is ${_enabled}; expecting false"
@@ -185,14 +196,13 @@ test_get_disabled_unicast_forwarding4()
     #
     echo "RESULT:"
     echo "${_xrl_result}"
-    
 }
 
 test_cleanup_gateway4()
 {
     local _xrl_result _ret_value _gateway
 
-    echo "TEST: Clean-up gateway (if any) for destination ${DEST}"
+    echo "TEST: Cleanup gateway (if any) for destination ${DEST}"
 
     # Lookup the entry
     _gateway=""
@@ -247,7 +257,7 @@ test_lookup_entry4()
     _metric=`get_xrl_variable_value ${_xrl_result} metric:u32`
     _admin_distance=`get_xrl_variable_value ${_xrl_result} admin_distance:u32`
     _protocol_origin=`get_xrl_variable_value ${_xrl_result} protocol_origin:txt`
-    
+
     #
     # Check the result
     #
@@ -307,7 +317,7 @@ test_lookup_route4()
     _metric=`get_xrl_variable_value ${_xrl_result} metric:u32`
     _admin_distance=`get_xrl_variable_value ${_xrl_result} admin_distance:u32`
     _protocol_origin=`get_xrl_variable_value ${_xrl_result} protocol_origin:txt`
-    
+
     #
     # Check the result
     #
@@ -468,10 +478,10 @@ TESTS=""
 TESTS="$TESTS test_have_ipv4"
 #
 TESTS="$TESTS test_prepare_unicast_forwarding4"
-TESTS="$TESTS test_enable_unicast_forwarding4"
-TESTS="$TESTS test_get_enabled_unicast_forwarding4"
 TESTS="$TESTS test_disable_unicast_forwarding4"
 TESTS="$TESTS test_get_disabled_unicast_forwarding4"
+TESTS="$TESTS test_enable_unicast_forwarding4"
+TESTS="$TESTS test_get_enabled_unicast_forwarding4"
 #
 TESTS="$TESTS test_cleanup_gateway4"
 TESTS="$TESTS test_add_entry4"
