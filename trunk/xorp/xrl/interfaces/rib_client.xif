@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib_client.xif,v 1.2 2003/03/17 23:21:00 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib_client.xif,v 1.3 2003/03/29 19:03:12 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface, client interface for
@@ -21,7 +21,7 @@ interface rib_client/0.1 {
 	 * @param admin_distance the administratively defined distance
 	 * toward the address.
 	 * @param protocol_origin the name of the protocol that originated
-	 * this entry.
+	 * this routing entry.
 	 */
 	route_info_changed4 ? addr:ipv4 & prefix_len:u32 &		\
 			      nexthop:ipv4 & metric:u32 &		\

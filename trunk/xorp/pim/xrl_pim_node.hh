@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.42 2004/07/28 05:13:56 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.43 2004/08/03 03:01:07 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -553,7 +553,7 @@ protected:
      *  source. Typical value is the originating protocol name.
      *
      *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
+     *  routing entry.
      */
     XrlCmdError redist_transaction4_0_1_add_route(
 	// Input values,
@@ -635,7 +635,7 @@ protected:
      *  source. Typical value is the originating protocol name.
      *
      *  @param protocol_origin the name of the protocol that originated this
-     *  entry.
+     *  routing entry.
      */
     XrlCmdError redist_transaction6_0_1_add_route(
 	// Input values,
