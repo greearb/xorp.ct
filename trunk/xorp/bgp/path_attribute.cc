@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.20 2003/04/16 08:05:08 hodson Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.21 2003/05/23 00:02:06 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -590,7 +590,7 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
 {
-    if (!optional() || !transitive())
+    if (!optional() /*|| !transitive()*/)
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Unknown attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
