@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.11 2004/05/07 11:45:07 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.12 2004/05/14 21:34:57 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -22,7 +22,6 @@
 #include "peer_route_pair.hh"
 #include "route_queue.hh"
 
-#define NEWMAP
 
 template<class A> class DumpTable;
 
@@ -30,27 +29,15 @@ template<class A>
 class NextTableMapIterator {
 public:
     NextTableMapIterator() {};
-#ifdef NEWMAP
-    NextTableMapIterator(const typename multimap<uint32_t, PeerRoutePair<A>*>::iterator& iter) {
+    NextTableMapIterator(const typename multimap<uint32_t, PeerTableInfo<A>*>::iterator& iter) {
 	_iter = iter;
     }
     BGPRouteTable<A>* first() {
 	return _iter->second->route_table();
     }
-    PeerRoutePair<A>& second() {
+    PeerTableInfo<A>& second() {
 	return *(_iter->second);
     }
-#else
-    NextTableMapIterator(const typename map <BGPRouteTable<A>*, PeerRoutePair<A>*>::iterator& iter) {
-	_iter = iter;
-    }
-    BGPRouteTable<A>* first() {
-	return _iter->first;
-    }
-    PeerRoutePair<A>& second() {
-	return *(_iter->second);
-    }
-#endif
     inline void operator ++(int) {
 	_iter++;
     }
@@ -58,11 +45,7 @@ public:
 	return _iter == them._iter;
     }
 private:
-#ifdef NEWMAP
-    typename multimap <uint32_t, PeerRoutePair<A>*>::iterator _iter;
-#else
-    typename map <BGPRouteTable<A>*, PeerRoutePair<A>*>::iterator _iter;
-#endif
+    typename multimap <uint32_t, PeerTableInfo<A>*>::iterator _iter;
 };
 
 /**
@@ -80,14 +63,14 @@ public:
     NextTableMap() {};
     ~NextTableMap();
     void insert(BGPRouteTable<A> *next_table,
-		const PeerHandler *ph);
+		const PeerHandler *ph, uint32_t genid);
     void erase(iterator& iter);
     iterator find(BGPRouteTable<A> *next_table);
     iterator begin();
     iterator end();
 private:
-    map<BGPRouteTable<A> *, PeerRoutePair<A>* > _next_tables;
-    multimap<uint32_t, PeerRoutePair<A>* > _next_table_order;
+    map<BGPRouteTable<A> *, PeerTableInfo<A>* > _next_tables;
+    multimap<uint32_t, PeerTableInfo<A>* > _next_table_order;
 };
 
 template<class A>
@@ -95,8 +78,10 @@ class FanoutTable : public BGPRouteTable<A>  {
 public:
     FanoutTable(string tablename, Safi safi, BGPRouteTable<A> *parent);
     int add_next_table(BGPRouteTable<A> *next_table,
-		       const PeerHandler *ph);
+		       const PeerHandler *ph, uint32_t genid);
     int remove_next_table(BGPRouteTable<A> *next_table);
+    int replace_next_table(BGPRouteTable<A> *old_next_table,
+			   BGPRouteTable<A> *new_next_table);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,
@@ -130,18 +115,17 @@ public:
 private:
     void add_to_queue(RouteQueueOp operation,
 		      const InternalMessage<A> &rtmsg,
-		      const list<PeerRoutePair<A>*>& queued_peers);
+		      const list<PeerTableInfo<A>*>& queued_peers);
     void add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
 			      const InternalMessage<A> &new_rtmsg,
-			      const list<PeerRoutePair<A>*>& queued_peers);
-    void add_push_to_queue(const list<PeerRoutePair<A>*>& queued_peers,
+			      const list<PeerTableInfo<A>*>& queued_peers);
+    void add_push_to_queue(const list<PeerTableInfo<A>*>& queued_peers,
 			   const PeerHandler *origin_peer);
-    void set_queue_positions(const list<PeerRoutePair<A>*>& queued_peers);
+    void set_queue_positions(const list<PeerTableInfo<A>*>& queued_peers);
     void skip_entire_queue(BGPRouteTable<A> *next_table);
 
     void add_dump_table(DumpTable<A> *dump_table); 
     void remove_dump_table(DumpTable<A> *dump_table);
-    //    map<BGPRouteTable<A> *, PeerRoutePair<A> > _next_tables;
     NextTableMap<A> _next_tables;
 
     list <const RouteQueueEntry<A>*> _output_queue;

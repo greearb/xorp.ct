@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.46 2004/05/05 18:35:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.47 2004/05/07 03:09:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -319,7 +319,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _master.safi(),
 			   _fanout_table,
 			   _next_hop_resolver);
-    _fanout_table->add_next_table(filter_out, _master.rib_handler());
+    _fanout_table->add_next_table(filter_out, _master.rib_handler(),
+				  _ipc_rib_in_table->genid());
     _tables.insert(filter_out);
 
     CacheTable<A> *cache_out =
@@ -428,7 +429,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			   _master.safi(),
 			   _fanout_table,
 			   _next_hop_resolver);
-    _fanout_table->add_next_table(filter_out, peer_handler);
+    _fanout_table->add_next_table(filter_out, peer_handler,
+				  rib_in->genid());
     
     CacheTable<A>* cache_out = 
 	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
@@ -585,6 +587,16 @@ int
 BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) 
 {
 
+    //bring the RibIn back up
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
+    iter2 = _in_map.find(peer_handler);
+    if (iter2 == _in_map.end())
+	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
+		   peer_handler);
+    RibInTable<A> *rib_in;
+    rib_in = iter2->second;
+    rib_in->ribin_peering_came_up();
+
     //plumb the output branch back into the fanout table
     BGPRouteTable<A> *rt, *prevrt;
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
@@ -605,19 +617,10 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     FilterTable<A> *filter_out = dynamic_cast<FilterTable<A> *>(prevrt);
     XLOG_ASSERT(filter_out != NULL);
 
-    _fanout_table->add_next_table(filter_out, peer_handler);
+    _fanout_table->add_next_table(filter_out, peer_handler, rib_in->genid());
     filter_out->set_parent(_fanout_table);
 
-    //bring the RibIn back up
-    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
-    iter2 = _in_map.find(peer_handler);
-    if (iter2 == _in_map.end())
-	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
-		   peer_handler);
-    RibInTable<A> *rib_in;
-    rib_in = iter2->second;
-    rib_in->ribin_peering_came_up();
-
+    //do the route dump
     dump_entire_table(filter_out, _ribname);
 
     if(_awaits_push)

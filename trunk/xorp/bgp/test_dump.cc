@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.34 2004/05/08 16:46:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.35 2004/05/13 20:31:46 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -125,15 +125,18 @@ test_dump(TestInfo& /*info*/)
 
     DebugTable<IPv4>* debug_table1
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);
-    fanout_table->add_next_table(debug_table1, &handler1);
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
 
     DebugTable<IPv4>* debug_table2
 	 = new DebugTable<IPv4>("D2", (BGPRouteTable<IPv4>*)fanout_table);
-    fanout_table->add_next_table(debug_table2, &handler2);
+    fanout_table->add_next_table(debug_table2, &handler2, 
+				 ribin_table2->genid());
 
     DebugTable<IPv4>* debug_table3
 	 = new DebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
-    fanout_table->add_next_table(debug_table3, &handler3);
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
 
     debug_table1->set_output_file(filename);
     debug_table1->set_canned_response(ADD_USED);
@@ -284,9 +287,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -364,9 +368,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -463,9 +468,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -500,9 +506,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 2 UP");
-    fanout_table->add_next_table(debug_table2, &handler2);
-    debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table2, &handler2, 
+				 ribin_table2->genid());
+    debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -551,9 +558,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -595,9 +603,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 2 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table2, &handler2);
-    debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table2, &handler2, 
+				 ribin_table2->genid());
+    debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -638,9 +647,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO IMMEDIATE CHANGE");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -671,9 +681,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -724,9 +735,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -761,9 +773,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 2 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table2, &handler2);
-    debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table2, &handler2, 
+				 ribin_table2->genid());
+    debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -814,9 +827,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -847,9 +861,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 2 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table2, &handler2);
-    debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table2, &handler2, 
+				 ribin_table2->genid());
+    debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -899,9 +914,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -924,9 +940,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 2 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table2, &handler2);
-    debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table2, &handler2, 
+				 ribin_table2->genid());
+    debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -935,9 +952,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -987,9 +1005,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1163,9 +1182,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1305,9 +1325,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1335,9 +1356,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST, "ribname");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
@@ -1378,9 +1400,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1494,16 +1517,18 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP AGAIN, BUT SKIP DUMPING TO IT");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1589,9 +1614,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1681,9 +1707,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -1765,17 +1792,19 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
@@ -1866,17 +1895,19 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
 
     debug_table1->write_separator();
     debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
@@ -1955,16 +1986,18 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -2056,9 +2089,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
@@ -2073,9 +2107,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -2164,9 +2199,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
@@ -2184,9 +2220,10 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
     debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
-    fanout_table->add_next_table(debug_table1, &handler1);
-    debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table1, &handler1, 
+				 ribin_table1->genid());
+    debug_table1->set_parent(fanout_table);
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
@@ -2267,9 +2304,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
-    fanout_table->add_next_table(debug_table3, &handler3);
-    debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
+    fanout_table->add_next_table(debug_table3, &handler3, 
+				 ribin_table3->genid());
+    debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("**ONLY ONE COPY**");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.20 2004/05/08 16:46:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.21 2004/05/14 21:34:57 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -528,23 +528,18 @@ DumpTable<A>::unplumb_self()
 		|| (this->_parent == NULL && _dump_active == false));
     _dump_active = false;
 
-#ifdef NOTDEF
-    // if the output isn't busy, tell the fanout table so it won't
-    // queue changes anymore
-    if (this->_parent != NULL) {
-	this->_parent->output_state(_output_busy,
-			      static_cast<BGPRouteTable<A>*>(this));
-	XLOG_ASSERT(this->_parent->type() == FANOUT_TABLE);
-    }
-#endif
     this->_next_table->set_parent(this->_parent);
     cp(41);
     if (this->_parent != NULL) {
 	cp(42);
 	FanoutTable<A> *ftp = dynamic_cast<FanoutTable<A>*>(this->_parent);
 	XLOG_ASSERT(ftp);
+#ifdef NOTDEF
 	ftp->remove_next_table(static_cast<BGPRouteTable<A>*>(this));
 	ftp->add_next_table(this->_next_table, _peer);
+#endif
+	ftp->replace_next_table(static_cast<BGPRouteTable<A>*>(this), 
+				this->_next_table);
     }
     // ensure we can't continue to operate
     this->_next_table = reinterpret_cast<BGPRouteTable<A>*>(0xd0d0);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.18 2003/11/04 02:27:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.19 2004/02/24 03:16:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -63,11 +63,11 @@ test_fanout(TestInfo& /*info*/)
 
     DebugTable<IPv4>* debug_table1
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);
-    fanout_table->add_next_table(debug_table1, &handler1);
+    fanout_table->add_next_table(debug_table1, &handler1, 1);
 
     DebugTable<IPv4>* debug_table2
 	 = new DebugTable<IPv4>("D2", (BGPRouteTable<IPv4>*)fanout_table);
-    fanout_table->add_next_table(debug_table2, &handler2);
+    fanout_table->add_next_table(debug_table2, &handler2, 1);
 
     debug_table1->set_output_file(filename);
     debug_table1->set_canned_response(ADD_USED);
@@ -345,7 +345,7 @@ test_fanout(TestInfo& /*info*/)
 
     DebugTable<IPv4>* debug_table3
 	 = new DebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
-    fanout_table->add_next_table(debug_table3, &handler3);
+    fanout_table->add_next_table(debug_table3, &handler3, 1);
 
     debug_table3->set_output_file(debug_table1->output_file());
     debug_table3->set_canned_response(ADD_USED);
