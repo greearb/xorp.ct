@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.8 2003/03/15 02:28:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.9 2003/03/16 07:18:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -107,7 +107,7 @@ SyncFtiCommand::start(const CompletionCallback& cb,
     _get_next_cb = gncb;
     _fticlient.
 	send_start_transaction(server,
-			       callback(this,&SyncFtiCommand::start_complete));
+			       callback(this, &SyncFtiCommand::start_complete));
 }
 
 void
@@ -181,8 +181,7 @@ public:
 	  _ifname(ifname), _vifname(vifname)
     {}
 
-    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
-    {
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
 	_fticlient.send_add_entry4(server, tid, _dest, _gw,
 				   _ifname, _vifname, cb);
     }
@@ -203,8 +202,7 @@ public:
 	: SyncFtiCommand(rtr), _dest(dest)
     {}
 
-    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
-    {
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
 	_fticlient.send_delete_entry4(server, tid, _dest, cb);
     }
 
@@ -226,8 +224,7 @@ public:
 	  _ifname(ifname), _vifname(vifname)
     {}
 
-    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
-    {
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
 	_fticlient.send_add_entry6(server, tid, _dest, _gw, _ifname,
 				   _vifname, cb);
     }
@@ -248,8 +245,7 @@ public:
 	: SyncFtiCommand(rtr), _dest(dest)
     {}
 
-    void send_command(uint32_t tid, const CommandCompleteCallback& cb)
-    {
+    void send_command(uint32_t tid, const CommandCompleteCallback& cb) {
 	_fticlient.send_delete_entry6(server, tid, _dest, cb);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.4 2003/03/15 02:28:40 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.5 2003/03/16 07:19:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -105,10 +105,12 @@ VifManager::register_if_spy_done(const XrlError& e)
 	return;
     }
 
-    // if the resolve failed, it could be that we got going too quickly
+    //
+    // If the resolve failed, it could be that we got going too quickly
     // for the FEA.  Retry every two seconds.  If after ten seconds we
     // still can't register, give up.  It's a higher level issue as to
     // whether failing to register is a fatal error.
+    //
     if (e == XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
 	debug_msg("Register Interface Spy: RESOLVE_FAILED\n");
 	_register_retry_counter++;
@@ -127,7 +129,7 @@ VifManager::interface_names_done(const XrlError& e, const XrlAtomList* alist)
     printf("interface_names_done\n");
     if (e == XrlError::OKAY()) {
 	printf("OK\n");
-	for (u_int i = 0; i < alist->size(); i++) {
+	for (size_t i = 0; i < alist->size(); i++) {
 	    // Spin through the list of interfaces, and fire off
 	    // requests in parallel for all the Vifs on each interface
 	    XrlAtom atom = alist->get(i);
@@ -152,7 +154,7 @@ VifManager::vif_names_done(const XrlError& e, const XrlAtomList* alist,
     printf("vif_names_done\n");
     UNUSED(ifname);
     if (e==XrlError::OKAY()) {
-	for (u_int i = 0; i < alist->size(); i++) {
+	for (size_t i = 0; i < alist->size(); i++) {
 	    // Spin through all the Vifs on this interface, and fire
 	    // off requests in parallel for all the addresses on each
 	    // Vif.
@@ -188,7 +190,7 @@ VifManager::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
 				  string ifname, string vifname) 
 {
     if (e == XrlError::OKAY()) {
-	for (u_int i = 0; i < alist->size(); i++) {
+	for (size_t i = 0; i < alist->size(); i++) {
 	    XrlAtom atom = alist->get(i);
 	    IPv4 addr = atom.ipv4();
 	    vifaddr4_created(ifname, vifname, addr);

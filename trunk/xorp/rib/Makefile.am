@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.3 2003/03/04 23:41:25 hodson Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.4 2003/03/15 02:28:37 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -26,8 +26,8 @@ LDADD			+= $(top_builddir)/libxipc/libfinder.a
 LDADD			+= $(top_builddir)/libxipc/libxipc.a
 LDADD			+= $(top_builddir)/libcomm/libcomm.a
 LDADD			+= $(top_builddir)/libxorp/libxorp.a
-LDADD		        += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
-LDADD		        += $(top_builddir)/xrl/interfaces/libribclientxif.a
+LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+LDADD			+= $(top_builddir)/xrl/interfaces/libribclientxif.a
 
 # -- Program Sources
 main_routemap_SOURCES	 = routemap.hh routemap.cc main_routemap.cc

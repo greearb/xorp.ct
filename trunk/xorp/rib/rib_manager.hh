@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.4 2003/03/10 23:20:55 hodson Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.5 2003/03/16 07:18:58 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -44,8 +44,11 @@ class RibManager {
 public:
     /**
      * RibManager constructor
+     * 
+     * @param event_loop the event loop to user.
+     * @param xrl_std_router the XRL router to use.
      */
-    RibManager();
+    RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router);
 
     /**
      * Run the RIB process's main event loop.  This should only return
@@ -121,7 +124,7 @@ public:
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
      */
-    int add_vif_addr(const string& vifname, 
+    int add_vif_addr(const string& vifname,
 		     const IPv6& addr,
 		     const IPNet<IPv6>& net,
 		     string& err);
@@ -143,12 +146,13 @@ public:
 
     void set_fea_enabled(bool en);
     bool fea_enabled() const;
+    
 private:
-    EventLoop _event_loop;
-    XrlStdRouter _xrl_rtr;
+    EventLoop& _event_loop;	// The event loop to use
+    XrlStdRouter& _xrl_rtr;
     FeaClient _fea;
     RegisterServer _rserv;
-
+    
     RIB<IPv4> _urib4;
     RIB<IPv4> _mrib4;
     RIB<IPv6> _urib6;
@@ -158,4 +162,5 @@ private:
     XrlRibTarget _xrt;
 
 };
+
 #endif // __RIB_RIB_MANAGER_HH__

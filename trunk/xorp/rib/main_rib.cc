@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.5 2003/03/15 02:28:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.6 2003/03/16 07:18:57 pavlin Exp $"
 
 #include <sysexits.h>
 
-#include "config.h"
-
 #include "rib_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "rib_manager.hh"
 
 int 
@@ -36,7 +38,16 @@ main (int /* argc */, char *argv[])
 
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	RibManager rib_manager;
+	//
+	// Init stuff
+	//
+	EventLoop event_loop;
+	XrlStdRouter xrl_std_router_rib(event_loop, "rib");
+	    
+	//
+	// The RIB manager
+	//
+	RibManager rib_manager(event_loop, xrl_std_router_rib);
 	rib_manager.run_event_loop();
     } catch (...) {
 	xorp_catch_standard_exceptions();

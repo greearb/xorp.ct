@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.4 2003/03/15 02:28:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.5 2003/03/16 07:18:58 pavlin Exp $"
 
 #include "rib_module.h"
 #include "fea_client.hh"
@@ -24,8 +24,8 @@
 
 template<class A>
 ExportTable<A>::ExportTable<A>(const string&  tablename,
-			       RouteTable<A>* parent,
-			       FeaClient*     fea)
+			       RouteTable<A>  *parent,
+			       FeaClient      *fea)
     : RouteTable<A>(tablename)
 {
     _parent = parent;

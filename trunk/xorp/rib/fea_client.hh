@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.6 2003/03/10 23:20:54 hodson Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.7 2003/03/15 02:37:59 pavlin Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -109,9 +109,11 @@ public:
      */
     void delete_route(const IPv6Net& re);
 
+    //
     // The methods below are compatibility methods used by the
     // ExportTable - they are implemented in terms of the methods
     // above.
+    //
 
     /**
      * Communicate the addition of a new IPv4 route to the FEA.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.3 2003/03/16 07:18:58 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
@@ -60,7 +60,7 @@ public:
 
     /**
      * delete_route is called when a route is removed from the
-     * the RIB, and this needs to be communicated to the FEA
+     * the RIB, and this needs to be communicated to the FEA.
      * 
      * @param route the @ref RouteEntry for the route being deleted.
      * @param caller the @ref RouteTable calling this method. This
