@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.7 2003/09/20 00:23:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.8 2003/09/26 22:07:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -24,12 +24,23 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+
 #include <net/if.h>
+#include <net/if_arp.h>
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
+
+#ifdef HAVE_NETINET_IN_VAR_H
+#include <netinet/in_var.h>
+#endif
 #ifdef HAVE_NETINET6_IN6_VAR_H
 #include <netinet6/in6_var.h>
+#endif
+#ifdef HAVE_NETINET6_ND6_H
+// XXX: a hack because <netinet6/nd6.h> is not C++ friendly
+#define prf_ra in6_prflags::prf_ra
+#include <netinet6/nd6.h>
 #endif
 
 #include "ifconfig.hh"
@@ -107,6 +118,7 @@ public:
 protected:
     int fd() const { return _fd; }
 
+private:
     int _fd;
 };
 
@@ -129,30 +141,42 @@ protected:
 /**
  * @short Class to set MAC address on an interface.
  */
-// TODO: XXX: PAVPAVPAV: this won't work on Linux!!
-#ifdef SIOCSIFLLADDR
 class IfSetMac : public IfReq {
 public:
-    IfSetMac(int fd, const string& ifname, const struct ether_addr& ea)
-	: IfReq(fd, ifname) {
+    IfSetMac(int fd, const string& ifname, const struct ether_addr& ether_addr)
+	: IfReq(fd, ifname),
+	  _ether_addr(ether_addr) {
+    }
+
+    int execute() const {
+	struct ifreq ifreq_copy;	// A local copy
+
+	memcpy(&ifreq_copy, &_ifreq, sizeof(ifreq_copy));
+
+#ifdef AF_LINK
+	// XXX: the *BSD folks
+	ifreq_copy.ifr_addr.sa_family = AF_LINK;
+	memcpy(ifreq_copy.ifr_addr.sa_data, &_ether_addr, ETHER_ADDR_LEN);
 #ifdef HAVE_SA_LEN
-	_ifreq.ifr_addr.sa_len = ETHER_ADDR_LEN;
+	ifreq_copy.ifr_addr.sa_len = ETHER_ADDR_LEN;
 #endif
-	_ifreq.ifr_addr.sa_family = AF_LINK;
-	memcpy(_ifreq.ifr_addr.sa_data, &ea, ETHER_ADDR_LEN);
+	return ioctl(fd(), SIOCSIFLLADDR, &ifreq_copy);
+#endif // AF_LINK
+
+#ifdef SIOCSIFHWADDR
+	// XXX: Linux
+	ifreq_copy.ifr_hwaddr.sa_family = ARPHRD_ETHER;
+	memcpy(ifreq_copy.ifr_hwaddr.sa_data, &_ether_addr, ETH_ALEN);
+#ifdef HAVE_SA_LEN
+	ifreq_copy.ifr_hwaddr.sa_len = ETH_ALEN;
+#endif
+	return ioctl(fd(), SIOCSIFHWADDR, &ifreq_copy);
+#endif // SIOCSIFHWADDR
     }
-    int execute() const { return ioctl(_fd, SIOCSIFLLADDR, &_ifreq); }
+
+private:
+    struct ether_addr _ether_addr;	// The Ethernet address
 };
-#else
-class IfSetMac : public IfReq {
-public:
-    IfSetMac(int fd, const string& ifname, const struct ether_addr& ea)
-	: IfReq(fd, ifname) {
-	UNUSED(ea);
-    }
-    int execute() const { return -1; }
-};
-#endif // ! SIOCSIFLLADDR
 
 /**
  * @short Class to set MTU on interface.
@@ -163,7 +187,7 @@ public:
 	: IfReq(fd, ifname) {
 	_ifreq.ifr_mtu = mtu;
     }
-    int execute() const { return ioctl(_fd, SIOCSIFMTU, &_ifreq); }
+    int execute() const { return ioctl(fd(), SIOCSIFMTU, &_ifreq); }
 };
 
 /**
@@ -175,7 +199,7 @@ public:
 	IfReq(fd, ifname) {
 	_ifreq.ifr_flags = flags;
     }
-    int execute() const { return ioctl(_fd, SIOCSIFFLAGS, &_ifreq); }
+    int execute() const { return ioctl(fd(), SIOCSIFFLAGS, &_ifreq); }
 };
 
 /**
@@ -186,90 +210,124 @@ public:
     IfGetFlags(int fd, const string& ifname, uint32_t& flags) :
 	IfReq(fd, ifname), _flags(flags) {
     }
+
     int execute() const {
-	int r = ioctl(_fd, SIOCGIFFLAGS, &_ifreq);
+	int r = ioctl(fd(), SIOCGIFFLAGS, &_ifreq);
 	if (r >= 0) {
 	    static_assert(sizeof(_ifreq.ifr_flags) == 2);
 	    _flags = _ifreq.ifr_flags & 0xffff;
 	    debug_msg("%s: Got flags %s (0x%08x)\n",
-		      ifname(), IfConfigGet::iff_flags(_flags).c_str(), _flags);
+		      ifname(),
+		      IfConfigGet::iff_flags(_flags).c_str(),
+		      _flags);
 	}
 	return r;
     }
 
-protected:
+private:
     uint32_t& _flags;
 };
 
 /**
  * @short class to set IPv4 interface addresses
+ *
+ * Note: if the system has ioctl(SIOCAIFADDR) (e.g., FreeBSD), then
+ * the interface address is added as an alias, otherwise it overwrites the
+ * previous address (if such exists).
  */
-// TODO: XXX: PAVPAVPAV: This won't work on Lunux!!!
-#ifdef SIOCAIFADDR
 class IfSetAddr4 : public IfIoctl {
 public:
-    IfSetAddr4(int fd, const string& ifname,
+    IfSetAddr4(int fd, const string& ifname, uint16_t if_index, bool is_p2p,
 	       const IPv4& addr, const IPv4& dst_or_bcast, size_t prefix)
-	: IfIoctl(fd) {
-	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	addr.copy_out(_ifra.ifra_addr);
-	dst_or_bcast.copy_out(_ifra.ifra_broadaddr);
-	IPv4::make_prefix(prefix).copy_out(_ifra.ifra_mask);
+	: IfIoctl(fd),
+	  _ifname(ifname),
+	  _if_index(if_index),
+	  _is_p2p(is_p2p),
+	  _addr(addr),
+	  _dst_or_bcast(dst_or_bcast),
+	  _prefix(prefix) {
 	debug_msg("IfSetAddr4 "
-		  "(fd = %d, ifname = %s, addr = %s, dst %s, prefix %u)\n",
+		  "(fd = %d, ifname = %s addr = %s dst/bcast = %s prefix = %u)\n",
 		  fd, ifname.c_str(),
 		  addr.str().c_str(), dst_or_bcast.str().c_str(),
 		  (uint32_t)prefix);
     }
 
-    int execute() const { return ioctl(_fd, SIOCAIFADDR, &_ifra); }
+    int execute() const {
+#ifdef SIOCAIFADDR
+	//
+	// Add an alias address
+	//
+	struct in_aliasreq ifra;
 
-protected:
-    struct ifaliasreq _ifra;
-};
-#else
-class IfSetAddr4 : public IfIoctl {
-public:
-    IfSetAddr4(int fd, const string& ifname,
-	       const IPv4& addr, const IPv4& dst_or_bcast, size_t prefix)
-	: IfIoctl(fd) {
-	UNUSED(ifname);
-	UNUSED(addr);
-	UNUSED(dst_or_bcast);
-	UNUSED(prefix);
+	memset(&ifra, 0, sizeof(ifra));
+	strncpy(ifra.ifra_name, _ifname.c_str(), sizeof(ifra.ifra_name));
+	_addr.copy_out(ifra.ifra_addr);
+	if (_is_p2p)
+	    _dst_or_bcast.copy_out(ifra.ifra_dstaddr);
+	else
+	    _dst_or_bcast.copy_out(ifra.ifra_broadaddr);
+	IPv4::make_prefix(_prefix).copy_out(ifra.ifra_mask);
+
+	return ioctl(fd(), SIOCAIFADDR, &ifra);
+#endif // SIOCAIFADDR
+
+	//
+	// Set a new address
+	//
+	int ret_value;
+	struct ifreq ifreq;
+
+	memset(&ifreq, 0, sizeof(ifreq));
+	strncpy(ifreq.ifr_name, _ifname.c_str(), sizeof(ifreq.ifr_name));
+
+	// Set the address
+	_addr.copy_out(ifreq.ifr_addr);
+	ret_value = ioctl(fd(), SIOCSIFADDR, &ifreq);
+	if (ret_value < 0)
+	    return ret_value;
+
+	// Set the netmask
+	IPv4::make_prefix(_prefix).copy_out(ifreq.ifr_addr);
+	ret_value = ioctl(fd(), SIOCSIFNETMASK, &ifreq);
+	if (ret_value < 0)
+	    return ret_value;
+
+	// Set the p2p or broadcast address
+	if (_is_p2p) {
+	    _dst_or_bcast.copy_out(ifreq.ifr_dstaddr);
+	    ret_value = ioctl(fd(), SIOCSIFDSTADDR, &ifreq);
+	} else {
+	    _dst_or_bcast.copy_out(ifreq.ifr_broadaddr);
+	    ret_value = ioctl(fd(), SIOCSIFBRDADDR, &ifreq);
+	}
+	return ret_value;
     }
 
-    int execute() const { return -1; }
-    
-protected:
-    
+private:
+    string	_ifname;		// The interface name
+    uint16_t	_if_index;		// The interface index
+    bool	_is_p2p;		// True if point-to-point interface
+    IPv4	_addr;			// The local address
+    IPv4	_dst_or_bcast;		// The p2p dest addr or the bcast addr
+    size_t	_prefix;		// The prefix length
 };
-
-#endif // ! SIOCAIFADDR
 
 /**
  * @short class to set IPv6 interface addresses
  */
-// TODO: XXX: PAVPAVPAV: this won't work on MacOS X!!
 #ifdef HAVE_IPV6
-#ifdef SIOCAIFADDR_IN6
 class IfSetAddr6 : public IfIoctl {
 public:
-    IfSetAddr6(int fd, const string& ifname,
+    IfSetAddr6(int fd, const string& ifname, uint16_t if_index, bool is_p2p,
 	       const IPv6& addr, const IPv6& endpoint, size_t prefix)
-	: IfIoctl(fd) {
-	memset(&_ifra, 0, sizeof(_ifra));
-	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	addr.copy_out(_ifra.ifra_addr);
-
-	if (IPv6::ZERO() != endpoint)
-	    endpoint.copy_out(_ifra.ifra_dstaddr);
-
-	IPv6::make_prefix(prefix).copy_out(_ifra.ifra_prefixmask);
-
-	// The following should use ND6_INFINITE_LIFETIME
-	_ifra.ifra_lifetime.ia6t_vltime = _ifra.ifra_lifetime.ia6t_pltime = ~0;
-
+	: IfIoctl(fd),
+	  _ifname(ifname),
+	  _if_index(if_index),
+	  _is_p2p(is_p2p),
+	  _addr(addr),
+	  _endpoint(endpoint),
+	  _prefix(prefix) {
 	debug_msg("IfSetAddr6 "
 		  "(fd = %d, ifname = %s, addr = %s, dst %s, prefix %u)\n",
 		  fd, ifname.c_str(), addr.str().c_str(),
@@ -277,86 +335,137 @@ public:
     }
 
     int execute() const {
-	return ioctl(_fd, SIOCAIFADDR_IN6, &_ifra);
-    }
+#ifdef SIOCAIFADDR_IN6
+	//
+	// Add an alias address
+	//
+	struct in6_aliasreq ifra;
 
-protected:
-    struct in6_aliasreq _ifra;
-};
+	memset(&ifra, 0, sizeof(ifra));
+	strncpy(ifra.ifra_name, _ifname.c_str(), sizeof(ifra.ifra_name));
+	_addr.copy_out(ifra.ifra_addr);
+	if (_is_p2p)
+	    _endpoint.copy_out(ifra.ifra_dstaddr);
+	IPv6::make_prefix(_prefix).copy_out(ifra.ifra_prefixmask);
+	ifra.ifra_lifetime.ia6t_vltime = ND6_INFINITE_LIFETIME;
+	ifra.ifra_lifetime.ia6t_pltime = ND6_INFINITE_LIFETIME;
 
-#else // ! SIOCAIFADDR_IN6
-class IfSetAddr6 : public IfIoctl {
-public:
-    IfSetAddr6(int fd, const string& ifname,
-	       const IPv6& addr, const IPv6& endpoint, size_t prefix)
-	: IfIoctl(fd) {
-	
-	UNUSED(ifname);
-	UNUSED(addr);
-	UNUSED(endpoint);
-	UNUSED(prefix);
-    }
+	return ioctl(fd(), SIOCAIFADDR_IN6, &ifra);
+#endif // SIOCAIFADDR_IN6
 
-    int execute() const { return -1; }
+	//
+	// Set a new address
+	//
+#ifndef SIOCAIFADDR_IN6
+	//
+	// XXX: Linux uses a weird struct in6_ifreq to do this, and this
+	// name clashes with the KAME in6_ifreq.
+	// For now, we don't make this code specific only to Linux.
+	//
+	int ret_value;
+	struct in6_ifreq in6_ifreq;
 
-protected:
+	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
+	in6_ifreq.ifr6_ifindex = _if_index;
 
-};
+	// Set the address and the prefix length
+	_addr.copy_out(in6_ifreq.ifr6_addr);
+	in6_ifreq.ifr6_prefixlen = _prefix;
+	ret_value = ioctl(fd(), SIOCSIFADDR, &in6_ifreq);
+	if (ret_value < 0)
+	    return ret_value;
+
+	// Set the p2p address
+	if (_is_p2p) {
+	    _endpoint.copy_out(in6_ifreq.ifr6_addr);
+	    ret_value = ioctl(fd(), SIOCSIFDSTADDR, &ifreq);
+	}
+	return ret_value;
 #endif // ! SIOCAIFADDR_IN6
+    }
+
+private:
+    string	_ifname;		// The interface name
+    uint16_t	_if_index;		// The interface index
+    bool	_is_p2p;		// True if point-to-point interface
+    IPv6	_addr;			// The local address
+    IPv6	_endpoint;		// The p2p dest addr
+    size_t	_prefix;		// The prefix length
+};
 #endif // HAVE_IPV6
 
 /**
- * @short class to set IPv4 interface addresses
+ * @short class to delete IPv4 interface addresses
  */
 class IfDelAddr4 : public IfReq {
 public:
-    IfDelAddr4(int fd, const string& ifname, const IPv4& addr)
+    IfDelAddr4(int fd, const string& ifname, uint16_t if_index,
+	       const IPv4& addr, size_t prefix)
 	: IfReq(fd, ifname) {
 	addr.copy_out(_ifreq.ifr_addr);
 	debug_msg("IfDelAddr4(fd = %d, ifname = %s, addr = %s)\n",
 		  fd, ifname.c_str(), addr.str().c_str());
+	UNUSED(if_index);
+	UNUSED(prefix);
     }
 
-    int execute() const { return ioctl(_fd, SIOCDIFADDR, &_ifreq); }
+    int execute() const { return ioctl(fd(), SIOCDIFADDR, &_ifreq); }
 
-protected:
+private:
 };
 
 /**
- * @short class to set IPv6 interface addresses
+ * @short class to delete IPv6 interface addresses
  */
 #ifdef HAVE_IPV6
-// TODO: XXX: PAVPAVPAV: this won't work on Linux!!
-#ifndef HOST_OS_LINUX
 class IfDelAddr6 : public IfIoctl {
 public:
-    IfDelAddr6(int fd, const string& ifname, const IPv6& addr) : IfIoctl(fd) {
-	strncpy(_ifra.ifra_name, ifname.c_str(), sizeof(_ifra.ifra_name));
-	addr.copy_out(_ifra.ifra_addr);
-	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s)\n",
-		  fd, ifname.c_str(), addr.str().c_str());
+    IfDelAddr6(int fd, const string& ifname, uint16_t if_index,
+	       const IPv6& addr, size_t prefix)
+	: IfIoctl(fd),
+	  _ifname(ifname),
+	  _if_index(if_index),
+	  _addr(addr),
+	  _prefix(prefix) {
+	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s prefix = %d)\n",
+		  fd, ifname.c_str(), addr.str().c_str(), prefix);
     }
 
-    int execute() const { return ioctl(_fd, SIOCDIFADDR, &_ifra); }
+    int execute() const {
+#ifdef SIOCDIFADDR_IN6
+	struct in6_ifreq in6_ifreq;
 
-protected:
-    struct ifaliasreq _ifra;
-};
-#else
-class IfDelAddr6 : public IfIoctl {
-public:
-    IfDelAddr6(int fd, const string& ifname, const IPv6& addr) : IfIoctl(fd) {
-	UNUSED(ifname);
-	UNUSED(addr);
-	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s)\n",
-		  fd, ifname.c_str(), addr.str().c_str());
+	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
+	strncpy(in6_ifreq.ifr_name, _ifname.c_str(),
+		sizeof(in6_ifreq.ifr_name));
+	_addr.copy_out(in6_ifreq.ifr_addr);
+
+	return ioctl(fd(), SIOCDIFADDR_IN6, &in6_ifreq);
+#endif // SIOCDIFADDR_IN6
+
+#ifndef SIOCDIFADDR_IN6
+	//
+	// XXX: Linux uses a weird struct in6_ifreq to do this, and this
+	// name clashes with the KAME in6_ifreq.
+	// For now, we don't make this code specific only to Linux.
+	//
+	struct in6_ifreq in6_ifreq;
+
+	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
+	in6_ifreq.ifr6_ifindex = _if_index;
+	_addr.copy_out(in6_ifreq.ifr6_addr);
+	in6_ifreq.ifr6_prefixlen = _prefix;
+
+	return ioctl(fd(), SIOCDIFADDR, &in6_ifreq);
+#endif // !SIOCDIFADDR_IN6
     }
 
-    int execute() const { return -1; }
-
-protected:
+private:
+    string	_ifname;		// The interface name
+    uint16_t	_if_index;		// The interface index
+    IPv6	_addr;			// The local address
+    size_t	_prefix;		// The prefix length
 };
-#endif // HOST_OS_LINUX
 #endif // HAVE_IPV6
 
 bool
@@ -552,11 +661,11 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	if (IfDelAddr4(_s4, i.ifname(), a.addr()).execute()) {
-	    string reason = 
-		c_format("Failed to delete address (%s): %s",
-			 (deleted) ? "deleted" : "not enabled",
-			 (errno) ? strerror(errno) : "not sys err");
+	IfDelAddr4 del_addr(_s4, i.ifname(), v.pif_index(), a.addr(), a.prefix());
+	if (del_addr.execute() < 0) {
+	    string reason = c_format("Failed to delete address (%s): %s",
+				     (deleted) ? "deleted" : "not enabled",
+				     strerror(errno));
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(), reason);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
@@ -598,7 +707,8 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	    break;		// Ignore: the address hasn't changed
 	}
 	
-	IfSetAddr4 set_addr(_s4, i.ifname(), a.addr(), oaddr, prefix);
+	IfSetAddr4 set_addr(_s4, i.ifname(), v.pif_index(), a.point_to_point(),
+			    a.addr(), oaddr, prefix);
 	if (set_addr.execute() < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     c_format("Address configuration failed (%s)",
@@ -640,11 +750,11 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	if (IfDelAddr6(_s6, i.ifname(), a.addr()).execute()) {
-	    string reason = 
-		c_format("Failed to delete address (%s): %s",
-			 (deleted) ? "deleted" : "not enabled",
-			 (errno) ? strerror(errno) : "not sys err");
+	IfDelAddr6 del_addr(_s6, i.ifname(), v.pif_index(), a.addr(), a.prefix());
+	if (del_addr.execute() < 0) {
+	    string reason = c_format("Failed to delete address (%s): %s",
+				     (deleted) ? "deleted" : "not enabled",
+				     strerror(errno));
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(), reason);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
@@ -687,7 +797,8 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	    break;		// Ignore: the address hasn't changed
 	}
 	
-	IfSetAddr6 set_addr(_s6, i.ifname(), a.addr(), oaddr, prefix);
+	IfSetAddr6 set_addr(_s6, i.ifname(), v.pif_index(), a.point_to_point(),
+			    a.addr(), oaddr, prefix);
 	if (set_addr.execute() < 0) {
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     c_format("Address configuration failed (%s)",
