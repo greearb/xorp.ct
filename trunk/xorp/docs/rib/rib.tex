@@ -10,13 +10,13 @@
 
 \title{XORP Routing Information Base (RIB) Process \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 5, 2003}
 
 %\twocolumn
 \begin{document}
@@ -96,6 +96,11 @@ protocol, stores the route, and propagates it downstream.  It also
 answers {\tt lookup\_route} requests from downstream from the routes it
 has stored.
 
+An OriginTable for the ``connected'' protocol always exists, to handle
+routes for directly connected interfaces.  It gets it's information
+via the VifManager from the Forwarding Engine Abstraction (FEA)
+process.
+
 \subsection{MergeTable}
 
 A MergeTable has two upstream (parent) tables and one downstream
@@ -105,7 +110,9 @@ Multiple OriginTables may hold different routes for the same subnet.
 Thus, when an {\tt add\_route} request reaches a MergeTable from one
 parent, the MergeTable performs a route lookup on the other parent to
 see if the route already exists.  If it does, then the new route is
-only propagated if it is better than the existing route.
+only propagated if it is better than the existing route, where
+``better'' is determined based on the relative administrative distance
+of the routes.
 
 Similarly, if a {\tt delete\_route} request reaches a MergeTable, it
 performs a route lookup on the other parent table.  If the route being
@@ -133,10 +140,11 @@ ExtIntTable does the same comparisons that happen with a MergeTable.
 However, it also checks to see if the nexthop is an immediate
 neighbor.  If it is not, then the ExtIntTable attempts to find a route
 that indicates which immediate neighbor to use to reach the nexthop,
-and the nexthop propagated downstream will be that of this immediate
-neighbor.  If no route exists to the nexthop, the route will not be
-propagated downstream, but will be stored in a table of unresolved
-routes in case it a route that arrives later can cause it to resolve.
+and the nexthop in the route that is propagated downstream will be
+that of this immediate neighbor.  If no route exists to the nexthop,
+the route will not be propagated downstream, but will be stored in a
+table of unresolved routes in case it a route that arrives later can
+cause it to resolve.
 
 Each RIB only contains a single ExtIntTable.
 
@@ -183,9 +191,13 @@ The ExportTable exists to communicate to the FEA the changes
 that make it through to the end of the tree of tables.  Only the
 unicast RIBs have an ExportTable.
 
+Routes for directly connected subnets (from the ``connected''
+OriginTable) are not propagated back to the FEA, as it already knows
+about these.
+
 \subsection{RedistTable}
 
-{\it Note, Nov 2002: RedistTable is unfinished.}
+{\it Note, March 2003: RedistTable is unfinished.}
 
 A RedistTable can by dynamically plumbed into the tree of tables at
 any point, but it is most likely to be inserted immediately after an
@@ -287,8 +299,8 @@ redist_disable4 ? from:txt & to:txt & unicast:bool & multicast:bool
 redist_disable6 ? from:txt & to:txt & unicast:bool & multicast:bool
 \end{verbatim}
 These XRLs are intended to be used to enable route redistribution
-between routing protocols.  However, this interface is currently (Nov
-2002) incomplete and should not be used.
+between routing protocols.  However, this interface is currently
+(March 2003) incomplete and should not be used.
 
 \subsection{Registration of Interest in Routes}
 \label{reg}
