@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.1 2003/12/17 00:04:49 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -824,20 +824,42 @@ XrlSocketServer::socket4_0_1_send_with_flags(
     V4Sockets::const_iterator ci;
     for (ci = _v4sockets.begin(); ci != _v4sockets.end(); ++ci) {
 	RemoteSocket<IPv4>* rs = ci->get();
-	if (rs->sockid() == sockid) {
-	    int flags = 0;
-	    if (out_of_band)
-		flags |= MSG_OOB;
-	    if (end_of_record)
-		flags |= MSG_EOR;
-	    if (end_of_file)
-		flags |= MSG_EOF;
-	    int out = send(rs->fd(), &data[0], data.size(), flags);
-	    if (out == (int)data.size()) {
-		return XrlCmdError::OKAY();
-	    }
-	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	if (rs->sockid() != sockid)
+	    continue;
+
+	int flags = 0;
+#ifdef MSG_OOB
+	if (out_of_band)
+	    flags |= MSG_OOB;
+#else
+	if (out_of_band)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_OOB\n");
+#endif
+
+#ifdef MSG_EOR
+	if (end_of_record)
+	    flags |= MSG_EOR;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_EOR\n");
+#endif
+
+#ifdef MSG_EOF
+	if (end_of_file)
+	    flags |= MSG_EOF;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_file, "
+			 "but platform has no MSG_EOF\n");
+#endif
+
+	int out = send(rs->fd(), &data[0], data.size(), flags);
+	if (out == (int)data.size()) {
+	    return XrlCmdError::OKAY();
 	}
+	return XrlCmdError::COMMAND_FAILED(strerror(errno));
     }
     return XrlCmdError::COMMAND_FAILED("Socket not found");
 }
@@ -889,29 +911,50 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
     V4Sockets::const_iterator ci;
     for (ci = _v4sockets.begin(); ci != _v4sockets.end(); ++ci) {
 	RemoteSocket<IPv4>* rs = ci->get();
-	if (rs->sockid() == sockid) {
-	    sockaddr_in sai;
-	    remote_addr.copy_out(sai);
-	    if (remote_port > 0xffff) {
-		return XrlCmdError::COMMAND_FAILED("Port out of range.");
-	    }
-	    sai.sin_port = htons(static_cast<uint16_t>(remote_port));
+	if (rs->sockid() != sockid)
+	    continue;
 
-	    int flags = 0;
-	    if (out_of_band)
-		flags |= MSG_OOB;
-	    if (end_of_record)
-		flags |= MSG_EOR;
-	    if (end_of_file)
-		flags |= MSG_EOF;
-	    int out = sendto(rs->fd(), &data[0], data.size(), flags,
-			     reinterpret_cast<const sockaddr*>(&sai),
-			     sizeof(sai));
-	    if (out == (int)data.size()) {
-		return XrlCmdError::OKAY();
-	    }
-	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	sockaddr_in sai;
+	remote_addr.copy_out(sai);
+	if (remote_port > 0xffff) {
+	    return XrlCmdError::COMMAND_FAILED("Port out of range.");
 	}
+	sai.sin_port = htons(static_cast<uint16_t>(remote_port));
+
+	int flags = 0;
+#ifdef MSG_OOB
+	if (out_of_band)
+	    flags |= MSG_OOB;
+#else
+	if (out_of_band)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_OOB\n");
+#endif
+
+#ifdef MSG_EOR
+	if (end_of_record)
+	    flags |= MSG_EOR;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_EOR\n");
+#endif
+
+#ifdef MSG_EOF
+	if (end_of_file)
+	    flags |= MSG_EOF;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_file, "
+			 "but platform has no MSG_EOF\n");
+#endif
+	int out = sendto(rs->fd(), &data[0], data.size(), flags,
+			 reinterpret_cast<const sockaddr*>(&sai),
+			 sizeof(sai));
+	if (out == (int)data.size()) {
+	    return XrlCmdError::OKAY();
+	}
+	return XrlCmdError::COMMAND_FAILED(strerror(errno));
     }
     return XrlCmdError::COMMAND_FAILED("Socket not found");
 }
