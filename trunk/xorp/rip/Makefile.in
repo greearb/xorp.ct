@@ -138,7 +138,7 @@ test_route_walk_SOURCES = test_route_walk.cc
 test_route_walk_LDADD = ./librip.a ./libripng.a $(LDADD)
 
 test_timers_SOURCES = test_timers.cc
-test_timers_LDADD = ./librip.a $(LDADD)
+test_timers_LDADD = ./librip.a ./libripng.a $(LDADD)
 
 test_update_queue_SOURCES = test_update_queue.cc
 test_update_queue_LDADD = ./librip.a $(LDADD)
@@ -241,7 +241,8 @@ test_route_walk_DEPENDENCIES = ./librip.a ./libripng.a \
 test_route_walk_LDFLAGS =
 am_test_timers_OBJECTS = test_timers.$(OBJEXT)
 test_timers_OBJECTS = $(am_test_timers_OBJECTS)
-test_timers_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_timers_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/libxorp/libxorp.a
 test_timers_LDFLAGS =
 am_test_update_queue_OBJECTS = test_update_queue.$(OBJEXT)
 test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)

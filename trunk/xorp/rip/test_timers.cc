@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.3 2003/04/21 15:39:36 hodson Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.4 2003/06/09 22:15:33 hodson Exp $"
+
+#include <set>
 
 #include "rip_module.h"
-
 #include "libxorp/xlog.h"
 
 #include "libxorp/c_format.hh"
@@ -77,19 +78,42 @@ print_twirl(void)
 
 
 // ----------------------------------------------------------------------------
+template <typename A>
+struct Address {
+    static A me();
+    static A peer();
+};
+
+template <>
+IPv4 Address<IPv4>::me()		{ return IPv4("10.0.0.1"); }
+
+template <>
+IPv4 Address<IPv4>::peer()		{ return IPv4("10.10.0.1"); }
+
+template <>
+IPv6 Address<IPv6>::me()		{ return IPv6("10::1"); }
+
+template <>
+IPv6 Address<IPv6>::peer()		{ return IPv6("1010::1"); }
+
+
+// ----------------------------------------------------------------------------
 // Spoof Port that supports just a single Peer
 //
 
-class SpoofPort4 : public Port<IPv4> {
+template <typename A>
+class SpoofPort : public Port<A> {
 public:
-    SpoofPort4(PortManagerBase<IPv4>& pm, IPv4 addr) : Port<IPv4>(pm)
+    SpoofPort(PortManagerBase<A>& pm, A addr) : Port<A>(pm)
     {
-	_peers.push_back(new Peer<IPv4>(*this, addr));
-	verbose_log("Constructing SpoofPort4 instance\n");
+	_peers.push_back(new Peer<A>(*this, addr));
+	verbose_log("Constructing SpoofPort<IPv%u> instance\n",
+		    A::ip_version());
     }
-    ~SpoofPort4()
+    ~SpoofPort()
     {
-	verbose_log("Destructing SpoofPort4 instance\n");
+	verbose_log("Destructing SpoofPort<IPv%u> instance\n",
+		    A::ip_version());
 	while (_peers.empty() == false) {
 	    delete _peers.front();
 	    _peers.pop_front();
@@ -102,28 +126,29 @@ public:
 // contains a single Peer.
 //
 
-class SpoofPortManager4 : public PortManagerBase<IPv4> {
+template <typename A>
+class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager4(System<IPv4>& s) : PortManagerBase<IPv4>(s)
+    SpoofPortManager(System<A>& s) : PortManagerBase<A>(s)
     {
-	_ports.push_back(new SpoofPort4(*this, IPv4("10.0.0.1")));
+	_ports.push_back(new SpoofPort<A>(*this, Address<A>::me()));
     }
 
-    ~SpoofPortManager4()
+    ~SpoofPortManager()
     {
 	while (!_ports.empty()) {
 	    delete _ports.front();
 	    _ports.pop_front();
 	}
     }
-    
-    Port<IPv4>* the_port()
+
+    Port<A>* the_port()
     {
 	XLOG_ASSERT(_ports.size() == 1);
 	return _ports.front();
     }
 
-    Peer<IPv4>* the_peer()
+    Peer<A>* the_peer()
     {
 	XLOG_ASSERT(_ports.size() == 1);
 	XLOG_ASSERT(_ports.front()->peers().size() == 1);
@@ -132,34 +157,120 @@ public:
 };
 
 
+// ----------------------------------------------------------------------------
+// Network making utilities
+
+static uint32_t
+fake_random()
+{
+    static uint64_t r = 883652921;
+    r = r * 37 + 1;
+    r = r & 0xffffffff;
+    return r & 0xffffffff;
+}
+
+static void
+make_nets(set<IPv4Net>& nets, uint32_t n)
+{
+    uint32_t fails = 0;
+    uint32_t done = 0;
+    uint32_t iter = 0;
+    // attempt at deterministic nets sequence
+    while (done != n) {
+	IPv4 addr(htonl(fake_random()));
+	IPv4Net net = IPv4Net(addr, 1 + (iter % 23) + (fake_random() % 8));
+	if (nets.find(net) == nets.end()) {
+	    nets.insert(net);
+	    fails = 0;
+	    done++;
+	} else {
+	    // Does not occur with test parameters in practice
+	    if (++fails == 5) {
+		verbose_log("Failed to generate nets (size = %u).\n", done);
+	    }
+	}
+	iter++;
+    }
+}
+
+static void
+make_nets(set<IPv6Net>& nets, uint32_t n)
+{
+    uint32_t fails = 0;
+    uint32_t done = 0;
+    uint32_t iter = 0;
+    // attempt at deterministic nets sequence
+    while (done != n) {
+	uint32_t x[4];
+	x[0] = htonl(fake_random());
+	x[1] = x[0];
+	x[2] = x[0];
+	x[3] = x[0];
+	IPv6 addr(x);
+	IPv6Net net = IPv6Net(addr, 1 + fake_random() % IPv6::ADDR_BITLEN);
+	if (nets.find(net) == nets.end()) {
+	    nets.insert(net);
+	    fails = 0;
+	    done++;
+	} else {
+	    // Does not occur with test parameters in practice
+	    if (++fails == 5) {
+		verbose_log("Failed to generate nets (size = %u).\n", done);
+	    }
+	}
+	iter++;
+    }
+}
+
+template <typename A>
+struct RouteInjector : public unary_function<A,void>
+{
+    RouteInjector(RouteDB<A>& r, const A& my_addr, uint32_t cost,
+		  Peer<A>* peer)
+	: _r(r), _m(my_addr), _c(cost), _p(peer), _injected(0) {}
+
+    void operator() (const IPNet<A>& net)
+    {
+	if (_r.update_route(net, _m, _c, 0, _p) == true)
+	    _injected++;
+	else
+	    verbose_log("Failed to update %s\n", net.str().c_str());
+    }
+    uint32_t injected() const { return _injected; }
+
+protected:
+    RouteDB<A>& _r;
+    A		_m;
+    uint32_t	_c;
+    Peer<A>*	_p;
+    uint32_t	_injected;
+};
+
+
 //----------------------------------------------------------------------------
 // The test
 
+template <typename A>
 static int
 test_main()
 {
-    EventLoop		e;
-    System<IPv4>	rip_system(e);
-    SpoofPortManager4	spm(rip_system);
+    const uint32_t n_routes = N_TEST_ROUTES;
+    set<IPNet<A> > nets;
+    make_nets(nets, n_routes);
 
-    RouteDB<IPv4>& rdb = rip_system.route_db();
-    Peer<IPv4>* peer = spm.the_peer();
+    EventLoop		e;
+    System<A>		rip_system(e);
+    SpoofPortManager<A>	spm(rip_system);
+
+    RouteDB<A>& 	rdb  = rip_system.route_db();
+    Peer<A>* 		peer = spm.the_peer();
 
     // Fix up time constants for the impatient.
     spm.the_port()->constants().set_expiry_secs(3);
     spm.the_port()->constants().set_deletion_secs(2);
-    
-    const uint32_t n_routes = N_TEST_ROUTES;
-    for (uint32_t i = 0; i < n_routes; i++) {
-	IPv4 addr(htonl((128 << 24) + (i << 8) + (random() % 255)));
-	size_t mlen  = size_t(24 + random() % 9);
-	IPv4Net net(addr, mlen);
-	verbose_log("Adding route to %s\n", net.str().c_str());
-	if (rdb.update_route(net, IPv4("10.0.10.1"), 1, 0, peer) == false) {
-	    verbose_log("Route caused no update\n");
-	    return 1;
-	}
-    }
+
+    for_each(nets.begin(), nets.end(),
+	     RouteInjector<A>(rdb, Address<A>::me(), 1, peer));
 
     if (peer->route_count() != n_routes) {
 	verbose_log("Routes lost (count %u != %u)\n",
@@ -171,7 +282,7 @@ test_main()
 	// Quick route dump test
 	TimeVal t1, t2;
 	e.current_time(t1);
-	vector<RouteDB<IPv4>::ConstDBRouteEntry> l;
+	vector<typename RouteDB<A>::ConstDBRouteEntry> l;
 	rdb.dump_routes(l);
 	e.current_time(t2);
 	t2 -= t1;
@@ -182,7 +293,7 @@ test_main()
 	// Quick route dump test
 	TimeVal t1, t2;
 	e.current_time(t1);
-	vector<const RouteEntryOrigin<IPv4>::Route*> l;
+	vector<const typename RouteEntryOrigin<A>::Route*> l;
 	peer->dump_routes(l);
 	e.current_time(t2);
 	t2 -= t1;
@@ -193,14 +304,14 @@ test_main()
 	// Quick route dump test
 	TimeVal t1, t2;
 	e.current_time(t1);
-	vector<RouteDB<IPv4>::ConstDBRouteEntry> l;
+	vector<typename RouteDB<A>::ConstDBRouteEntry> l;
 	rdb.dump_routes(l);
 	e.current_time(t2);
 	t2 -= t1;
 	fprintf(stderr, "route db route dump took %d.%06d seconds\n",
 		t2.sec(), t2.usec());
     }
-    
+
     const PortTimerConstants& ptc = peer->port().constants();
     uint32_t timeout_secs = ptc.expiry_secs() + ptc.deletion_secs() + 5;
 
@@ -223,14 +334,14 @@ test_main()
 	verbose_log("Routes did not clean up\n");
 	return 1;
     }
-    
+
     return 0;
 }
 
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -246,7 +357,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -295,13 +406,14 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	rval = test_main();
+	rval  = test_main<IPv4>();
+	rval |= test_main<IPv6>();
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
         rval = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
