@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.22 2003/06/13 01:32:32 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.23 2003/06/13 01:49:08 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -682,13 +682,13 @@ public:
     // Note: applies only for (*,G)
     bool	process_assert_tracking_desired_wc(uint16_t vif_index,
 						   bool new_value);
-    // Note: applies only for (S,G)
+    // Note: applies only for (S,G) and (S,G,rpt)
     const Mifset& could_assert_sg() const;
     // Note: applies only for (S,G)
     bool	recompute_could_assert_sg();
     // Note: applies only for (S,G)
     bool	process_could_assert_sg(uint16_t vif_index, bool new_value);
-    // Note: applies only for (*,G) and (S,G)
+    // Note: applies for all entries
     const Mifset& could_assert_wc() const;
     // Note: applies only for (*,G)
     bool	recompute_could_assert_wc();
@@ -715,6 +715,11 @@ public:
 	uint16_t vif_index,
 	const IPvX& nbr_addr);
     
+    // Assert rate-limiting stuff
+    // TODO: XXX: PAVPAVPAV: not used yet.
+    Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
+    XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
+						// support
     
     //
     // MISC. info
@@ -836,11 +841,6 @@ public:
 	else
 	    _flags &= ~PIM_MRE_TASK_DELETE_DONE;
     }
-    
-    // TODO: stuff that needs to be adapted or removed
-    Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
-    XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
-						// support
     
 private:
     uint32_t	_flags;			// Various flags (see PIM_MRE_*) above
