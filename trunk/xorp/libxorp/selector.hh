@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.4 2003/03/27 01:51:57 hodson Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.5 2003/04/02 02:53:51 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -123,6 +123,24 @@ public:
      * callbacks registered.  
      */
     inline size_t descriptor_count() const { return _descriptor_count; }
+
+    /**
+     * Get a copy of the current list of monitored file descriptors in 
+     * Unix fd_set format
+     *
+     * @param the selected mask as @ref SelectorMask (SEL_RD, SEL_WR, or SEL_EX) 
+     *
+     * @return the selected fd_set 
+     */
+     void get_fd_set(SelectorMask selected_mask, fd_set& fds) const;
+
+     /**
+     * Get a the value of the largets monitored file descriptor 
+     *
+     * @return the maximum fd 
+     */
+    int get_max_fd() const;
+
 
 protected:
     void callback_bad_descriptors();
