@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.3 2003/05/16 19:23:17 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.4 2003/06/02 02:17:18 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -47,10 +47,10 @@ class VifCount;
 
 
 /**
- * @short A class for socket I/O communication.
+ * @short A class for multicast routing related I/O communication.
  * 
- * Each protocol 'registers' for socket I/O and gets assigned one object
- * of this class.
+ * In case of UNIX kernels, we cannot have more than one MfeaMrouter
+ * per address family (i.e., one per IPv4, and one per IPv6).
  */
 class MfeaMrouter : public ProtoUnit {
 public:
@@ -81,6 +81,13 @@ public:
     int		stop();
     
     /**
+     * Get the protocol that would be used in case of mrouter socket.
+     * 
+     * Return value: the protocol number on success, otherwise XORP_ERROR.
+     **/
+    int		kernel_mrouter_ipproto() const;
+    
+    /**
      * Get the mrouter socket.
      * 
      * The mrouter socket is used for various multicast-related access.
@@ -99,6 +106,16 @@ public:
      * @return the socket value on success, otherwise XORP_ERROR.
      */
     int		open_mrouter_socket();
+    
+    /**
+     * Adopt control over the mrouter socket.
+     * 
+     * When the @see MfeaMrouter adopts control over the mrouter socket,
+     * it is the one that will be reading from that socket.
+     * 
+     * @return the socket value on success, otherwise XORP_ERROR.
+     */
+    int		adopt_mrouter_socket();
     
     /**
      * Close the mrouter socket.
@@ -330,6 +347,17 @@ public:
 	return (_mrt_api_mrt_mfc_bw_upcall);
     }
     
+    /**
+     * Process a call from the kernel (e.g., "nocache", "wrongiif", "wholepkt")
+     * XXX: It is OK for im_src/im6_src to be 0 (for 'nocache' or 'wrongiif'),
+     *	just in case the kernel supports (*,G) MFC.
+     * 
+     * @param databuf the data buffer.
+     * @param datalen the length of the data in @ref databuf.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		kernel_call_process(uint8_t *databuf, size_t datalen);
+    
 private:
     // Private functions
     MfeaNode&	mfea_node() const	{ return (_mfea_node);	}
@@ -343,9 +371,6 @@ private:
      * @param m mask representing event type.
      */
     void	mrouter_socket_read(int fd, SelectorMask m);
-    
-    int		kernel_call_process(uint8_t *databuf, size_t datalen);
-    
     
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to

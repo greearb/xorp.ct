@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.6 2003/05/21 05:32:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.7 2003/06/02 02:17:18 pavlin Exp $"
 
 
 //
@@ -59,6 +59,7 @@
 #include "mfea_kernel_messages.hh"
 #include "mfea_osdep.hh"
 #include "mfea_mrouter.hh"
+#include "mfea_proto_comm.hh"
 
 
 //
@@ -192,16 +193,9 @@ MfeaMrouter::start(void)
     if (open_mrouter_socket() < 0)
 	return (XORP_ERROR);
     
-    // Start the multicast routing in the kernel.
+    // Start the multicast routing in the kernel
     if (start_mrt() < 0)
 	return (XORP_ERROR);
-    
-    // Assign a function to read from this socket
-    if (mfea_node().eventloop().add_selector(_mrouter_socket, SEL_RD,
-				callback(this, &MfeaMrouter::mrouter_socket_read))
-	== false) {
-	return (XORP_ERROR);
-    }
     
     return (XORP_OK);
 }
@@ -220,10 +214,39 @@ MfeaMrouter::stop(void)
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
     
+    // Stop the multicast routing in the kernel
     stop_mrt();
+    
+    // Close kernel multicast routing access socket
     close_mrouter_socket();
     
     return (XORP_OK);
+}
+
+/**
+ * MfeaMrouter::kernel_mrouter_ipproto:
+ * @: 
+ * 
+ * Get the protocol that would be used in case of mrouter socket.
+ * 
+ * Return value: the protocol number on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaMrouter::kernel_mrouter_ipproto() const
+{
+    switch (family()) {
+    case AF_INET:
+	return (IPPROTO_IGMP);
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	return (IPPROTO_ICMPV6);
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	return (XORP_ERROR);
+    }
+    
+    return (XORP_ERROR);
 }
 
 /**
@@ -237,31 +260,53 @@ MfeaMrouter::stop(void)
 int
 MfeaMrouter::open_mrouter_socket(void)
 {
-    int kernel_mrouter_ipproto = -1;
-    
     if (_mrouter_socket >= 0)
 	return (_mrouter_socket);
     
-    // The socket protocol is different for IPv4 and IPv6
-    switch (family()) {
-    case AF_INET:
-	kernel_mrouter_ipproto = IPPROTO_IGMP;
+    //
+    // XXX: if we have already IGMP or ICMPV6 socket, then reuse it
+    //
+    do {
+	ProtoComm *proto_comm;
+	proto_comm = mfea_node().proto_comm_find_by_ipproto(kernel_mrouter_ipproto());
+	if (proto_comm == NULL)
+	    break;
+	_mrouter_socket = proto_comm->proto_socket();
+	if (_mrouter_socket >= 0)
+	    return (_mrouter_socket);
 	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	kernel_mrouter_ipproto = IPPROTO_ICMPV6;
-	break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
-    }
+    } while (false);
     
-    if ( (_mrouter_socket = socket(family(), SOCK_RAW, kernel_mrouter_ipproto))
+    if ( (_mrouter_socket = socket(family(), SOCK_RAW,
+				   kernel_mrouter_ipproto()))
 	 < 0) {
 	XLOG_ERROR("Cannot open mrouter socket: %s", strerror(errno));
 	return (XORP_ERROR);
     }
+    
+    if (adopt_mrouter_socket() < 0)
+	return (XORP_ERROR);
+    
+    return (_mrouter_socket);
+}
+
+/**
+ * MfeaMrouter::adopt_mrouter_socket:
+ * @void: 
+ * 
+ * Adopt control over the mrouter socket.
+ * When the #MfeaMrouter adopts control over the mrouter socket,
+ * it is the one that will be reading from that socket.
+ * 
+ * Return value: The adopted socket value on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaMrouter::adopt_mrouter_socket(void)
+{
+    if (_mrouter_socket < 0)
+	return (XORP_ERROR);
+    
+    XLOG_ASSERT(is_up());
     
     // Set receiving buffer size
     if (comm_sock_set_rcvbuf(_mrouter_socket, SO_RCV_BUF_SIZE_MAX,
@@ -297,6 +342,18 @@ MfeaMrouter::open_mrouter_socket(void)
 	return (XORP_ERROR);
     }
     
+    // Assign a function to read from this socket
+    if (mfea_node().eventloop().add_selector(_mrouter_socket, SEL_RD,
+				callback(this,
+					 &MfeaMrouter::mrouter_socket_read))
+	== false) {
+	XLOG_ERROR("Cannot add mrouter socket to the set of sockets "
+		   "to read from in the event loop");
+	close(_mrouter_socket);
+	_mrouter_socket = -1;
+	return (XORP_ERROR);
+    }
+    
     return (_mrouter_socket);
 }
 
@@ -314,7 +371,24 @@ MfeaMrouter::close_mrouter_socket(void)
     if (_mrouter_socket < 0)
 	return (XORP_ERROR);
     
-    // Remove it just in case, even though it may not be select()-ed
+    //
+    // XXX: if we have already IGMP or ICMPV6 socket, then we must be
+    // using the same socket, hence don't close it.
+    //
+    do {
+	ProtoComm *proto_comm;
+	proto_comm = mfea_node().proto_comm_find_by_ipproto(kernel_mrouter_ipproto());
+	if (proto_comm == NULL)
+	    break;
+	// If there is already IGMP or ICMPV6 socket, then don't close it.
+	if (_mrouter_socket == proto_comm->proto_socket()) {
+	    _mrouter_socket = -1;
+	    return (XORP_OK);
+	}
+	break;
+    } while (false);
+    
+    // Remove the function for reading from this socket    
     mfea_node().eventloop().remove_selector(_mrouter_socket);
     
     // Close the socket and reset it to -1
@@ -666,9 +740,10 @@ MfeaMrouter::add_multicast_vif(uint16_t vif_index)
 	    return (XORP_ERROR);
 	}
 	mfea_vif->addr_ptr()->copy_out(vc.vifc_lcl_addr);
-	// TODO: do we need to copy the remote address if we don't need
-	// to support IPIP tunnels?
-	// vif_addr->peer_addr().copy_out(vc.vifc_rmt_addr);
+	//
+	// XXX: no need to copy any remote address to vc.vifc_rmt_addr,
+	// because we don't (need to) support IPIP tunnels.
+	//
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_VIF,
 		       (void *)&vc, sizeof(vc)) < 0) {
 	    XLOG_ERROR("setsockopt(MRT_ADD_VIF, vif %s) failed: %s",
@@ -1580,11 +1655,10 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 
 /**
  * kernel_call_process:
- * @family: The address family.
  * @databuf: The data buffer.
  * @datalen: The length of the data in 'databuf'.
  * 
- * Process a call from the kernel (e.g. "nocache", "wrongiif", "wholepkt")
+ * Process a call from the kernel (e.g., "nocache", "wrongiif", "wholepkt")
  * XXX: It is OK for im_src/im6_src to be 0 (for 'nocache' or 'wrongiif'),
  *	just in case the kernel supports (*,G) MFC.
  * 

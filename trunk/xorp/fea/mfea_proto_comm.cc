@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.5 2003/06/19 01:25:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.6 2003/07/03 07:05:42 pavlin Exp $"
 
 
 //
@@ -756,13 +756,27 @@ ProtoComm::open_proto_socket(void)
     if (_ipproto < 0)
 	return (XORP_ERROR);
     
-    if (_proto_socket < 0) {
+    // If necessary, open the protocol socket
+    do {
+	if (_proto_socket >= 0)
+	    break;
+	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
+	    // XXX: reuse the mrouter socket
+	    _proto_socket = mfea_node().mfea_mrouter().mrouter_socket();
+	    if (_proto_socket >= 0) {
+		// XXX: we are taking control over the mrouter socket,
+		// hence remove it from the select()-ed sockets.
+		mfea_node().eventloop().remove_selector(_proto_socket);
+		break;
+	    }
+	}
 	if ( (_proto_socket = socket(family(), SOCK_RAW, _ipproto)) < 0) {
 	    XLOG_ERROR("Cannot open ipproto %d raw socket stream: %s",
 		       _ipproto, strerror(errno));
 	    return (XORP_ERROR);
 	}
-    }
+    } while (false);
+    
     // Set various socket options
     // Lots of input buffering
     if (comm_sock_set_rcvbuf(_proto_socket, SO_RCV_BUF_SIZE_MAX,
@@ -854,6 +868,21 @@ ProtoComm::close_proto_socket(void)
     // Remove it just in case, even though it may not be select()-ed
     mfea_node().eventloop().remove_selector(_proto_socket);
     
+    // If this is the mrouter socket, then don't close it
+    do {
+	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
+	    if (_proto_socket == mfea_node().mfea_mrouter().mrouter_socket()) {
+		if (mfea_node().mfea_mrouter().adopt_mrouter_socket() >= 0)
+		    //
+		    // XXX: the control over the socket passed
+		    // to the MfeaMrouter
+		    //
+		    return (XORP_OK);
+	    }
+	}
+	break;
+    } while (false);
+    
     close(_proto_socket);
     _proto_socket = -1;
     
@@ -871,7 +900,7 @@ ProtoComm::close_proto_socket(void)
 void
 ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 {
-    int		nbytes;
+    ssize_t	nbytes;
     int		ip_hdr_len = 0;
     int		ip_data_len = 0;
     IPvX	src(family());
@@ -921,7 +950,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	struct igmpmsg *igmpmsg;
 	
 	igmpmsg = (struct igmpmsg *)_rcvbuf0;
-	if (nbytes < (int)sizeof(*igmpmsg)) {
+	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes, (uint32_t)sizeof(*igmpmsg));
@@ -932,7 +961,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    // XXX: Packets sent up from kernel to daemon have
 	    //      igmpmsg->im_mbz = ip->ip_p = 0
 	    //
-	    return; // OK: kernel signals are received and processed elsewhere
+	    mfea_node().mfea_mrouter().kernel_call_process(_rcvbuf0, nbytes);
+	    return;		// OK
 	}
 	break;
     }
@@ -942,8 +972,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	struct mrt6msg *mrt6msg;
 	
 	mrt6msg = (struct mrt6msg *)_rcvbuf0;
-	if ((nbytes < (int)sizeof(*mrt6msg))
-	    && (nbytes < (int)sizeof(struct mld_hdr))) {
+	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
+	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes,
@@ -964,7 +994,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    // April 2000, FreeBSD-4.0) which don't have the
 	    //     'icmp6_type = 0' mechanism.
 	    //
-	    return; // OK: kernel signals are received and processed elsewhere
+	    mfea_node().mfea_mrouter().kernel_call_process(_rcvbuf0, nbytes);
+	    return;		// OK
 	}
 	break;
     }
@@ -989,7 +1020,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	
 	// Input check
 	ip = (struct ip *)_rcvbuf0;
-	if (nbytes < (int)sizeof(*ip)) {
+	if (nbytes < (ssize_t)sizeof(*ip)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
 			 nbytes, (uint32_t)sizeof(*ip));
