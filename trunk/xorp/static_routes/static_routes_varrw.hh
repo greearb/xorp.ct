@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.1 2004/09/17 13:58:24 abittau Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
@@ -31,16 +32,17 @@ public:
      */
     StaticRoutesVarRW(StaticRoute& route);
 
-    // SingleVarRW inteface: 
+    // SingleVarRW inteface:
     void single_start();
     void single_write(const string& id, const Element& e);
     void single_end();
    
 
 private:
-    StaticRoute& _route;
-    ElementFactory _ef;
-    bool _v4;
+    StaticRoute&	_route;
+    ElementFactory	_ef;
+    bool		_is_ipv4;
+    bool		_is_ipv6;
 };
 
 #endif // __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
