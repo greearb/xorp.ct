@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.20 2003/09/02 22:02:23 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.21 2003/10/01 21:18:50 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -170,7 +170,7 @@ Module::set_execution_path(const string& path)
 
     if (stat(_expath.c_str(), &sb) < 0) {
 	string err = _expath + ": ";
-	switch errno {
+	switch (errno) {
 	case ENOTDIR:
 	    err += "A component of the path prefix is not a directory.";
 	    break;
