@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.42 2002/12/09 18:29:21 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -1101,7 +1101,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
-			     (const uint8_t *)(protocol_message.begin()),
+			     &protocol_message[0],
 			     protocol_message.size());
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
@@ -1172,7 +1172,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
-			     (const uint8_t *)protocol_message.begin(),
+			     &protocol_message[0],
 			     protocol_message.size());
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
