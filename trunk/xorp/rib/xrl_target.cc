@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.46 2004/10/04 22:26:49 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.47 2004/10/05 01:25:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -326,7 +326,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 	      multicast ? "true" : "false",
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
-	      metric);
+	      XORP_UINT_CAST(metric));
  
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().log(profile_route_ribin,
@@ -336,7 +336,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 					     multicast ? "m" : "",
 					     network.str().c_str(),
 					     nexthop.str().c_str(),
-					     metric));
+					     XORP_UINT_CAST(metric)));
     
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
@@ -376,7 +376,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 					     multicast ? "m" : "",
 					     network.str().c_str(),
 					     nexthop.str().c_str(),
-					     metric));
+					     XORP_UINT_CAST(metric)));
 
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
@@ -418,7 +418,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 					     multicast ? "m" : "",
 					     network.str().c_str(),
 					     nexthop.str().c_str(),
-					     metric));
+					     XORP_UINT_CAST(metric)));
 
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, "", "",
@@ -456,7 +456,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 					     multicast ? "m" : "",
 					     network.str().c_str(),
 					     nexthop.str().c_str(),
-					     metric));
+					     XORP_UINT_CAST(metric)));
 
     if (unicast &&
 	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
@@ -985,7 +985,7 @@ XrlRibTarget::rib_0_1_deregister_interest4(// Input values,
 				    "prefix %s/%u",
 				    target.c_str(),
 				    addr.str().c_str(),
-				    prefix_len);
+				    XORP_UINT_CAST(prefix_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::OKAY();
@@ -1044,7 +1044,7 @@ XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
 				    "prefix %s/%u",
 				    target.c_str(),
 				    addr.str().c_str(),
-				    prefix_len);
+				    XORP_UINT_CAST(prefix_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::OKAY();
