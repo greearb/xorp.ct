@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.3 2003/03/10 23:20:49 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.4 2004/02/25 00:35:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table implementation.
@@ -237,12 +237,6 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre->set_sg(true);
 	    pim_mre = _pim_mrt_sg.insert(pim_mre);
 	    
-	    // Set source-related state
-	    if (pim_node().is_directly_connected(source))
-		pim_mre->set_directly_connected_s(true);
-	    else
-		pim_mre->set_directly_connected_s(false);
-	    
 	    // Set the pointer to the corresponding (*,G) entry (if exists);
 	    pim_mre->set_wc_entry(pim_mre_find(source, group, PIM_MRE_WC, 0));
 
@@ -269,7 +263,11 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 		|| (pim_mre->rpfp_nbr_sg() == NULL)) {
 		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
 	    }
-	    
+
+	    // Set source-related state
+	    bool v = pim_mre->compute_is_directly_connected_s();
+	    pim_mre->set_directly_connected_s(v);
+
 	    // Add a task to handle any CPU-intensive operations
 	    // XXX: not needed for this entry.
 	    // add_task_add_pim_mre(pim_mre);
@@ -286,12 +284,6 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre = new PimMre(*this, source, group);
 	    pim_mre->set_sg_rpt(true);
 	    pim_mre = _pim_mrt_sg_rpt.insert(pim_mre);
-	    
-	    // Set source-related state
-	    if (pim_node().is_directly_connected(source))
-		pim_mre->set_directly_connected_s(true);
-	    else
-		pim_mre->set_directly_connected_s(false);
 	    
 	    // Set the pointer to the corresponding (*,G) entry (if exists);
 	    pim_mre->set_wc_entry(pim_mre_find(source, group, PIM_MRE_WC, 0));
@@ -317,7 +309,11 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    if (pim_mre->rpfp_nbr_sg_rpt() == NULL) {
 		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
 	    }
-	    
+
+	    // Set source-related state
+	    bool v = pim_mre->compute_is_directly_connected_s();
+	    pim_mre->set_directly_connected_s(v);
+
 	    // Set the starting state in the upstream state machine
 	    if (pim_mre->is_rpt_join_desired_g())
 		pim_mre->set_not_pruned_state();
