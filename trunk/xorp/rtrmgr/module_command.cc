@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.18 2003/11/18 23:03:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.19 2003/11/21 20:11:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -90,26 +90,30 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	template_tree_node().set_module_name(_module_name);
     } else if (cmd == "depends") {
 	if (_module_name.empty()) {
-	    xorp_throw(ParseError, "\"depends\" must be preceded by \"provides\"");
+	    xorp_throw(ParseError,
+		       "\"depends\" must be preceded by \"provides\"");
 	}
 	_depends.push_back(value);
     } else if (cmd == "path") {
 	if (_module_name == "") {
-	    xorp_throw(ParseError, "\"path\" must be preceded by \"provides\"");
+	    xorp_throw(ParseError,
+		       "\"path\" must be preceded by \"provides\"");
 	}
 	if (_module_exec_path != "") {
 	    xorp_throw(ParseError, "duplicate \"path\" subcommand");
 	}
-	if (value[0]=='"')
+	if (value[0] == '"')
 	    _module_exec_path = value.substr(1, value.length() - 2);
 	else
 	    _module_exec_path = value;
     } else if (cmd == "default_targetname") {
 	if (_module_name == "") {
-	    xorp_throw(ParseError, "\"default_targetname\" must be preceded by \"provides\"");
+	    xorp_throw(ParseError,
+		       "\"default_targetname\" must be preceded by \"provides\"");
 	}
 	if (_default_target_name != "") {
-	    xorp_throw(ParseError, "duplicate \"default_targetname\" subcommand");
+	    xorp_throw(ParseError,
+		       "duplicate \"default_targetname\" subcommand");
 	}
 	if (value[0] == '"')
 	    _default_target_name = value.substr(1, value.length() - 2);
@@ -121,53 +125,58 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	template_tree_node().set_default_target_name(_default_target_name);
     } else if (cmd == "startcommit") {
 	debug_msg("startcommit:\n");
-	list <string>::const_iterator i;
-	for (i=action.begin(); i!=action.end(); i++)
-	    debug_msg(">%s< ", (*i).c_str());
+	list<string>::const_iterator iter;
+	for (iter = action.begin(); iter != action.end(); ++iter)
+	    debug_msg(">%s< ", (*iter).c_str());
 	debug_msg("\n");
-	list <string> newaction = action;
+
+	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front()=="xrl")
+	if (newaction.front() == "xrl") {
 	    _startcommit = new XrlAction(template_tree_node(), newaction,
 					 xrldb);
-	else
+	} else {
 	    _startcommit = new Action(template_tree_node(), newaction);
+	}
     } else if (cmd == "endcommit") {
-	list <string> newaction = action;
+	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front()=="xrl")
+	if (newaction.front() == "xrl") {
 	    _endcommit = new XrlAction(template_tree_node(), newaction, xrldb);
-	else
+	} else {
 	    _endcommit = new Action(template_tree_node(), newaction);
+	}
     } else if (cmd == "statusmethod") {
-	list <string> newaction = action;
+	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front()=="xrl")
+	if (newaction.front() == "xrl") {
 	    _status_method = new XrlAction(template_tree_node(), newaction,
 					   xrldb);
-	else
+	} else {
 	    _status_method = new Action(template_tree_node(), newaction);
+	}
     } else if (cmd == "shutdownmethod") {
-	list <string> newaction = action;
+	list<string> newaction = action;
 	newaction.pop_front();
-	if (newaction.front()=="xrl")
+	if (newaction.front() == "xrl") {
 	    _shutdown_method = new XrlAction(template_tree_node(), newaction,
 					     xrldb);
-	else
+	} else {
 	    _shutdown_method = new Action(template_tree_node(), newaction);
+	}
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
 	xorp_throw(ParseError, err);
     }
 }
 
-#ifdef NOTDEF
+#if 0
 int
 ModuleCommand::execute(TaskManager& taskmgr) const
 {
     return taskmgr.add_module(*this);
 }
-#endif
+#endif // 0
 
 Validation*
 ModuleCommand::startup_validation(TaskManager &taskmgr) const
@@ -225,7 +234,7 @@ ModuleCommand::shutdown_method(TaskManager &taskmgr) const
 	else
 	    return NULL;
     } else {
-	//we can always kill it from the module manager.
+	// We can always kill it from the module manager.
 	return NULL;
     }
 }
@@ -236,13 +245,13 @@ ModuleCommand::start_transaction(ConfigTreeNode& ctn,
 {
     if (_startcommit == NULL)
 	return XORP_OK;
-    XrlRouter::XrlCallback cb
-	= callback(const_cast<ModuleCommand*>(this),
-		   &ModuleCommand::action_complete,
-		   &ctn, _startcommit,
-		   string("start transaction"));
+
+    XrlRouter::XrlCallback cb = callback(const_cast<ModuleCommand*>(this),
+					 &ModuleCommand::action_complete,
+					 &ctn, _startcommit,
+					 string("start transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
-    assert(xa != NULL);
+    XLOG_ASSERT(xa != NULL);
 
     return xa->execute(ctn, task_manager, cb);
 }
@@ -253,13 +262,13 @@ ModuleCommand::end_transaction(ConfigTreeNode& ctn,
 {
     if (_endcommit == NULL)
 	return XORP_OK;
-    XrlRouter::XrlCallback cb
-	= callback(const_cast<ModuleCommand*>(this),
-		   &ModuleCommand::action_complete,
-		   &ctn, _endcommit,
-		   string("end transaction"));
+
+    XrlRouter::XrlCallback cb = callback(const_cast<ModuleCommand*>(this),
+					 &ModuleCommand::action_complete,
+					 &ctn, _endcommit,
+					 string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
-    assert(xa != NULL);
+    XLOG_ASSERT(xa != NULL);
 
     return xa->execute(ctn, task_manager, cb);
 }
@@ -268,8 +277,9 @@ string
 ModuleCommand::str() const
 {
     string tmp;
-    tmp= "ModuleCommand: provides: " + _module_name + "\n";
-    tmp+="               path: " + _module_exec_path + "\n";
+
+    tmp  = "ModuleCommand: provides: " + _module_name + "\n";
+    tmp += "               path: " + _module_exec_path + "\n";
     typedef list<string>::const_iterator CI;
     CI ptr = _depends.begin();
     while (ptr != _depends.end()) {
@@ -279,7 +289,7 @@ ModuleCommand::str() const
     return tmp;
 }
 
-#ifdef NOTDEF
+#if 0
 bool
 ModuleCommand::execute_completed() const
 {
@@ -287,13 +297,13 @@ ModuleCommand::execute_completed() const
 }
 
 void
-ModuleCommand::exec_complete(const XrlError& /*err*/,
+ModuleCommand::exec_complete(const XrlError& /* err */,
 			     XrlArgs*)
 {
     debug_msg("ModuleCommand::exec_complete\n");
     _execute_done = true;
 }
-#endif
+#endif // 0
 
 void
 ModuleCommand::action_complete(const XrlError& err,
@@ -303,15 +313,17 @@ ModuleCommand::action_complete(const XrlError& err,
 			       string cmd)
 {
     debug_msg("ModuleCommand::action_complete\n");
+
     if (err == XrlError::OKAY()) {
-	//XXX does this make sense?
-	if (!args->empty()) {
+	// XXX does this make sense?
+	if (! args->empty()) {
 	    debug_msg("ARGS: %s\n", args->str().c_str());
-	    list <string> specargs;
+
+	    list<string> specargs;
 	    XrlAction* xa = dynamic_cast<XrlAction*>(action);
-	    assert(xa != NULL);
+	    XLOG_ASSERT(xa != NULL);
 	    string s = xa->xrl_return_spec();
-	    while (1) {
+	    while (true) {
 		string::size_type start = s.find("&");
 		if (start == string::npos) {
 		    specargs.push_back(s);
@@ -321,25 +333,27 @@ ModuleCommand::action_complete(const XrlError& err,
 		debug_msg("specargs: %s\n", s.substr(0, start).c_str());
 		s = s.substr(start+1, s.size()-(start+1));
 	    }
-	    list <string>::const_iterator i;
-	    for(i = specargs.begin(); i!= specargs.end(); i++) {
-		string::size_type eq = i->find("=");
+	    list<string>::const_iterator iter;
+	    for (iter = specargs.begin(); iter != specargs.end(); ++iter) {
+		string::size_type eq = iter->find("=");
 		if (eq == string::npos) {
 		    continue;
 		} else {
-		    XrlAtom atom(i->substr(0, eq).c_str());
+		    XrlAtom atom(iter->substr(0, eq).c_str());
 		    debug_msg("atom name=%s\n", atom.name().c_str());
-		    string varname = i->substr(eq+1, i->size()-(eq+1));
+		    string varname = iter->substr(eq + 1,
+						  iter->size() - (eq + 1));
 		    debug_msg("varname=%s\n", varname.c_str());
 		    XrlAtom returned_atom;
 		    try {
 			returned_atom = args->item(atom.name());
 		    } catch (XrlArgs::XrlAtomNotFound& x) {
-			//XXX
+			// XXX
 			XLOG_UNFINISHED();
 		    }
 		    string value = returned_atom.value();
-		    debug_msg("found atom = %s\n", returned_atom.str().c_str());
+		    debug_msg("found atom = %s\n",
+			      returned_atom.str().c_str());
 		    debug_msg("found value = %s\n", value.c_str());
 		    ctn->set_variable(varname, value);
 		}
@@ -348,8 +362,8 @@ ModuleCommand::action_complete(const XrlError& err,
 	return;
     } else {
 	UNUSED(cmd);
-	//There was an error.  There's nothing we can so here - errors
-	//are handled in the TaskManager.
+	// There was an error.  There's nothing we can so here - errors
+	// are handled in the TaskManager.
 	return;
     }
 }
