@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.14 2003/02/08 09:16:40 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.15 2003/03/10 23:20:00 hodson Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -237,10 +237,15 @@ public:
     ~NotificationPacket()			{ delete[] _error_data; }
     uint8_t error_code() const { return _error_code; }
     uint8_t error_subcode() const { return _error_subcode; }
-    /*
-    ** Verify that the supplied error code and subcode are legal.
+    /**
+    * Verify that the supplied error code and subcode are legal.
     */
     static bool validate_error_code(const int error, const int subcode);
+    /**
+     * Generate a human readable error string.
+     */
+    static string pretty_print_error_code(const int error, const int subcode,
+					  const uint8_t* error_data = 0);
     const uint8_t* error_data() const { return _error_data; }
     const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
     string str() const;

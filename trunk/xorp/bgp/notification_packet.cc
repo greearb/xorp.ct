@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.12 2003/01/30 04:10:58 pavlin Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.13 2003/03/10 23:20:00 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -154,29 +154,29 @@ NotificationPacket::validate_error_code(const int error,
 }
 
 string
-NotificationPacket::str() const
+NotificationPacket::pretty_print_error_code(const int error, const int subcode,
+					    const uint8_t* error_data)
 {
     string s;
-    s = "Notification Packet: ";
 
-    switch (_error_code) {
+    switch (error) {
     case MSGHEADERERR:
 	s += "Message Header Error: ";
-	switch (_error_subcode) {
+	switch (subcode) {
 	case CONNNOTSYNC:
 	    s += "Connection Not Synchronized";
 	    break;
 	case BADMESSLEN:
-	    if (_error_data != NULL)
+	    if (error_data != NULL)
 		s += c_format("Bad Message Length - field: %d",
-			      ntohs((uint16_t &)*_error_data));
+			      ntohs((uint16_t &)*error_data));
 	    else
 		s += "Bad Message Length: ";
 	    break;
 	case BADMESSTYPE:
-	    if (_error_data != NULL)
+	    if (error_data != NULL)
 		s += c_format("Bad Message Type - field : %d",
-			      (uint8_t &) *_error_data);
+			      (uint8_t &) *error_data);
 	    else
 		s += "Bad Message Type";
 	    break;
@@ -184,11 +184,11 @@ NotificationPacket::str() const
 	break;
     case OPENMSGERROR:
 	s += "OPEN Message Error: ";
-	switch (_error_subcode) {
+	switch (subcode) {
 	case UNSUPVERNUM:
-	    if (_error_data != NULL)
+	    if (error_data != NULL)
 		s += c_format("Unsupported Version Number. Min supported Version is %d",
-			      ntohs((uint16_t &)*_error_data));
+			      ntohs((uint16_t &)*error_data));
 	    else
 		s += "Unsupported Version Number.";
 	    break;
@@ -211,21 +211,21 @@ NotificationPacket::str() const
 	break;
     case UPDATEMSGERR:
 	s += "UPDATE Message Error: ";
-	switch (_error_subcode) {
+	switch (subcode) {
 	case MALATTRLIST:
 	    s += "Malformed Attribute List.";
 	    break;
 	case UNRECOGWATTR:
-	    if (_error_data != NULL)
+	    if (error_data != NULL)
 		s += c_format("Unrecognized Well-known Attribute, Type %d",
-			      _error_data[0]);
+			      error_data[0]);
 	    else
 		s += "Unrecognized Well-known Attribute, NO ERROR DATA SUPPLIED";
 	    break;
 	case MISSWATTR:
-	    if (_error_data != NULL)
+	    if (error_data != NULL)
 		s += c_format("Missing Well-known Attribute, Type %d",
-			      _error_data[0]);
+			      error_data[0]);
 	    else
 		s += "Missing Well-known Attribute, NO ERROR DATA SUPPLIED";
 	    break;
@@ -262,7 +262,16 @@ NotificationPacket::str() const
 	s += "Cease.";
 	break;
     }
-    return s + "\n";
+
+    return s;
+}
+
+string
+NotificationPacket::str() const
+{
+    return "Notification Packet: " +
+	pretty_print_error_code(_error_code, _error_subcode, _error_data) +
+	"\n";
 }
 
 bool
