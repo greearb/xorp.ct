@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.24 2003/08/28 00:00:08 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.25 2003/09/16 21:00:25 hodson Exp $
 ##
 
 # -- Subdirectories
@@ -13,11 +13,16 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = xorp_bgp
 
 # -- Test Programs
-TESTS		 = aspath_test test_packet_coding isolation_tests
+TESTS		 = test_packet
+TESTS		+= test_plumbing
+#TESTS		+= update_test
+TESTS		+= aspath_test
+TESTS		+= test_packet_coding
+TESTS		+= isolation_tests
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_packet
-noinst_PROGRAMS	+= plumbing_test
+noinst_PROGRAMS	+= test_plumbing
 noinst_PROGRAMS	+= update_test
 noinst_PROGRAMS	+= aspath_test
 noinst_PROGRAMS	+= test_packet_coding
@@ -43,11 +48,11 @@ xorp_bgp_SOURCES		+= main.cc
 
 test_packet_SOURCES		 = test_test.hh test_packet.cc
 
-plumbing_test_SOURCES		 = plumbing_test.hh
-plumbing_test_SOURCES		+= plumbing_test.cc
-plumbing_test_SOURCES		+= bgp.hh
-plumbing_test_SOURCES		+= bgp.cc
-plumbing_test_DEPENDENCIES	 = libbgp.a
+test_plumbing_SOURCES		 = test_plumbing.hh
+test_plumbing_SOURCES		+= test_plumbing.cc
+test_plumbing_SOURCES		+= bgp.hh
+test_plumbing_SOURCES		+= bgp.cc
+test_plumbing_DEPENDENCIES	 = libbgp.a
 
 aspath_test_SOURCES		 = aspath_test.cc
 test_packet_coding_SOURCES	 = test_packet_coding.cc
