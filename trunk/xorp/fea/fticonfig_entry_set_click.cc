@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.20 2005/02/25 05:27:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.21 2005/03/05 01:41:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -216,6 +216,9 @@ bool
 FtiConfigEntrySetClick::add_entry(const FteX& fte)
 {
     int port = -1;
+    string element;
+    string handler = "add";
+    string error_msg;
 
     debug_msg("add_entry "
 	      "(network = %s nexthop = %s)",
@@ -226,13 +229,16 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 	if (fte.nexthop().is_ipv4()) {
 	    if (! ftic().have_ipv4())
 		return (false);
+	    element = "_xorp_rt4";
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! ftic().have_ipv6())
 		return (false);
+	    element = "_xorp_rt6";
 	    break;
 	}
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
 
@@ -308,9 +314,6 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 			  fte.nexthop().str().c_str(),
 			  port);
     }
-    string element = "_xorp_rt";
-    string handler = "add";
-    string error_msg;
 
     //
     // XXX: here we always write the same config to both kernel and
@@ -334,6 +337,9 @@ bool
 FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 {
     int port = -1;
+    string element;
+    string handler = "remove";
+    string error_msg;
 
     debug_msg("delete_entry "
 	      "(network = %s nexthop = %s)",
@@ -344,13 +350,16 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 	if (fte.nexthop().is_ipv4()) {
 	    if (! ftic().have_ipv4())
 		return (false);
+	    element = "_xorp_rt4";
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! ftic().have_ipv6())
 		return (false);
+	    element = "_xorp_rt6";
 	    break;
 	}
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
 
@@ -411,9 +420,6 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 			      port);
 	}
     }
-    string element = "_xorp_rt";
-    string handler = "remove";
-    string error_msg;
 
     //
     // XXX: here we always write the same config to both kernel and
