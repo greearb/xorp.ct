@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.3 2003/05/19 17:54:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.4 2003/05/19 23:35:09 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -47,7 +47,7 @@ XrlMfeaVifManager::XrlMfeaVifManager(MfeaNode& mfea_node,
     enable();	// XXX: by default the XrlMfeaVifManager is always enabled
 }
 
-XrlMfeaVifManager::~XrlMfeaVifManager() 
+XrlMfeaVifManager::~XrlMfeaVifManager()
 {
     stop();
     
@@ -228,7 +228,7 @@ XrlMfeaVifManager::set_vif_state()
 }
 
 void
-XrlMfeaVifManager::clean_out_old_state() 
+XrlMfeaVifManager::clean_out_old_state()
 {
     if (_no_fea)
 	return;
@@ -259,7 +259,7 @@ XrlMfeaVifManager::xrl_result_unregister_client(const XrlError& e)
 }
 
 void
-XrlMfeaVifManager::register_if_spy() 
+XrlMfeaVifManager::register_if_spy()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(this, &XrlMfeaVifManager::xrl_result_register_client);
@@ -268,7 +268,7 @@ XrlMfeaVifManager::register_if_spy()
 }
 
 void
-XrlMfeaVifManager::xrl_result_register_client(const XrlError& e) 
+XrlMfeaVifManager::xrl_result_register_client(const XrlError& e)
 {
     if (_no_fea) {
 	_state = READY;
@@ -308,7 +308,7 @@ XrlMfeaVifManager::xrl_result_register_client(const XrlError& e)
 void
 XrlMfeaVifManager::xrl_result_get_all_interface_names(
     const XrlError& e,
-    const XrlAtomList* alist) 
+    const XrlAtomList* alist)
 {
     if (e == XrlError::OKAY()) {
 	for (size_t i = 0; i < alist->size(); i++) {
@@ -406,7 +406,7 @@ XrlMfeaVifManager::xrl_result_get_all_vif_addresses4(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname,
-    string vifname) 
+    string vifname)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -448,7 +448,7 @@ XrlMfeaVifManager::xrl_result_get_all_vif_addresses6(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname,
-    string vifname) 
+    string vifname)
 {
     // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
@@ -491,7 +491,7 @@ XrlMfeaVifManager::xrl_result_get_all_vif_addresses6(
 
 void
 XrlMfeaVifManager::interface_update(const string& ifname,
-				    const uint32_t& event) 
+				    const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -512,7 +512,7 @@ XrlMfeaVifManager::interface_update(const string& ifname,
 
 void
 XrlMfeaVifManager::vif_update(const string& ifname, const string& vifname,
-			      const uint32_t& event) 
+			      const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -534,7 +534,7 @@ void
 XrlMfeaVifManager::vifaddr4_update(const string& ifname,
 				   const string& vifname,
 				   const IPv4& addr,
-				   const uint32_t& event) 
+				   const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -555,7 +555,7 @@ void
 XrlMfeaVifManager::vifaddr6_update(const string& ifname,
 				   const string& vifname,
 				   const IPv6& addr,
-				   const uint32_t& event) 
+				   const uint32_t& event)
 {
     switch (event) {
     case IF_EVENT_CREATED:
@@ -573,7 +573,7 @@ XrlMfeaVifManager::vifaddr6_update(const string& ifname,
 }
 
 void
-XrlMfeaVifManager::interface_deleted(const string& ifname) 
+XrlMfeaVifManager::interface_deleted(const string& ifname)
 {
     // Reomve all vifs for the same interface name
     multimap<string, Vif*>::iterator iter;
@@ -586,7 +586,7 @@ XrlMfeaVifManager::interface_deleted(const string& ifname)
 }
 
 void
-XrlMfeaVifManager::vif_deleted(const string& ifname, const string& vifname) 
+XrlMfeaVifManager::vif_deleted(const string& ifname, const string& vifname)
 {
     debug_msg("vif_deleted %s %s\n", ifname.c_str(), vifname.c_str());
     
@@ -617,7 +617,7 @@ XrlMfeaVifManager::vif_deleted(const string& ifname, const string& vifname)
 }
 
 void
-XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname) 
+XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
 {
     debug_msg("vif_created: %s\n", vifname.c_str());
     
@@ -639,7 +639,7 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
 void
 XrlMfeaVifManager::vifaddr4_created(const string& ifname,
 				    const string& vifname,
-				    const IPv4& addr) 
+				    const IPv4& addr)
 {
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr4_created on unknown vif: %s", vifname.c_str());
@@ -671,7 +671,7 @@ XrlMfeaVifManager::vifaddr4_created(const string& ifname,
 void
 XrlMfeaVifManager::vifaddr6_created(const string& ifname,
 				    const string& vifname,
-				    const IPv6& addr) 
+				    const IPv6& addr)
 {
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr6_created on unknown vif: %s", vifname.c_str());
@@ -853,7 +853,7 @@ void
 XrlMfeaVifManager::xrl_result_get_all_prefix4(const XrlError& e,
 					      const uint32_t* prefix_len,
 					      string ifname, string vifname,
-					      IPv4 addr) 
+					      IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -905,7 +905,7 @@ void
 XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
 					      const uint32_t* prefix_len,
 					      string ifname, string vifname,
-					      IPv6 addr) 
+					      IPv6 addr)
 {
     // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
@@ -961,7 +961,7 @@ void
 XrlMfeaVifManager::xrl_result_get_all_broadcast4(const XrlError& e,
 						 const IPv4* broadcast,
 						 string ifname, string vifname,
-						 IPv4 addr) 
+						 IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -1013,7 +1013,7 @@ void
 XrlMfeaVifManager::xrl_result_get_all_endpoint4(const XrlError& e,
 						const IPv4* endpoint,
 						string ifname, string vifname,
-						IPv4 addr) 
+						IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -1065,7 +1065,7 @@ void
 XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
 						const IPv6* endpoint,
 						string ifname, string vifname,
-						IPv6 addr) 
+						IPv6 addr)
 {
     // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
@@ -1120,7 +1120,7 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
 void
 XrlMfeaVifManager::vifaddr4_deleted(const string& ifname,
 				    const string& vifname,
-				    const IPv4& addr) 
+				    const IPv4& addr)
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
@@ -1136,7 +1136,7 @@ XrlMfeaVifManager::vifaddr4_deleted(const string& ifname,
 void
 XrlMfeaVifManager::vifaddr6_deleted(const string& ifname,
 				    const string& vifname,
-				    const IPv6& addr) 
+				    const IPv6& addr)
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {

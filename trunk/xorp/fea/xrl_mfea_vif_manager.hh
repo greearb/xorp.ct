@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.2 2003/05/19 06:54:07 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.3 2003/05/19 23:34:32 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -222,18 +222,22 @@ private:
 					   IPv6 addr);
     void xrl_result_get_all_prefix4(const XrlError& e,
 				    const uint32_t* prefix_len,
-				    string ifname, string vifname, IPv4 addr);
+				    string ifname, string vifname,
+				    IPv4 addr);
     void xrl_result_get_all_prefix6(const XrlError& e,
 				    const uint32_t* prefix_len,
-				string ifname, string vifname, IPv6 addr);
+				    string ifname, string vifname,
+				    IPv6 addr);
     void xrl_result_get_all_broadcast4(const XrlError& e,
 				       const IPv4* broadcast,
 				       string ifname, string vifname,
 				       IPv4 addr);
-    void xrl_result_get_all_endpoint4(const XrlError& e, const IPv4* endpoint,
+    void xrl_result_get_all_endpoint4(const XrlError& e,
+				      const IPv4* endpoint,
 				      string ifname, string vifname,
 				      IPv4 addr);
-    void xrl_result_get_all_endpoint6(const XrlError& e, const IPv6* endpoint,
+    void xrl_result_get_all_endpoint6(const XrlError& e,
+				      const IPv6* endpoint,
 				      string ifname, string vifname,
 				      IPv6 addr);
     void vifaddr4_deleted(const string& ifname, const string& vifname,
