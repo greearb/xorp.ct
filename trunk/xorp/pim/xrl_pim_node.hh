@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.35 2004/03/02 00:32:33 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.36 2004/03/18 00:47:18 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -34,6 +34,7 @@
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "pim_node.hh"
 #include "pim_node_cli.hh"
+#include "pim_mfc.hh"
 
 
 //
@@ -43,19 +44,29 @@ class XrlPimNode : public PimNode,
 		   public XrlPimTargetBase,
 		   public PimNodeCli {
 public:
-    XrlPimNode(int family, xorp_module_id module_id,
-	       EventLoop& eventloop, XrlRouter* xrl_router)
-	: PimNode(family, module_id, eventloop),
-	  XrlPimTargetBase(xrl_router),
-	  PimNodeCli(*static_cast<PimNode *>(this)),
-	  _mrib_transaction_manager(eventloop),
-	  _xrl_cli_manager_client(xrl_router),
-	  _xrl_mfea_client(xrl_router),
-	  _xrl_rib_client(xrl_router),
-	  _xrl_mld6igmp_client(xrl_router)
-    { }
-    virtual ~XrlPimNode() { PimNode::stop(); PimNodeCli::stop(); }
-    
+    XrlPimNode(int family,
+	       xorp_module_id module_id,
+	       EventLoop& eventloop,
+	       XrlRouter* xrl_router,
+	       const string& mfea_target,
+	       const string& rib_target,
+	       const string& mld6igmp_target);
+    virtual ~XrlPimNode();
+
+    /**
+     * Startup the node operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool	startup();
+
+    /**
+     * Shutdown the node operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool	shutdown();
+
     //
     // XrlPimNode front-end interface
     //
@@ -71,98 +82,12 @@ public:
     int disable_bsr();
     int start_bsr();
     int stop_bsr();
-    
-    
-protected:
-    //
-    // Protocol node methods
-    //
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl,int ip_tos,  bool router_alert_bool,
-		   const uint8_t * sndbuf, size_t sndlen);
-    void xrl_result_send_protocol_message(const XrlError& xrl_error);
-    
-    int start_protocol_kernel();
-    void xrl_result_add_protocol_mfea(const XrlError& xrl_error);
-    void xrl_result_allow_signal_messages(const XrlError& xrl_error);
-    void xrl_result_allow_mrib_messages(const XrlError& xrl_error);
-    void xrl_result_add_rib_client(const XrlError& xrl_error);
-    
-    int stop_protocol_kernel();
-    void xrl_result_delete_protocol_mfea(const XrlError& xrl_error);
-    
-    int start_protocol_kernel_vif(uint16_t vif_index);
-    void xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error);
 
-    int stop_protocol_kernel_vif(uint16_t vif_index);
-    void xrl_result_stop_protocol_kernel_vif(const XrlError& xrl_error);
-    
-    int join_multicast_group(uint16_t vif_index,
-			     const IPvX& multicast_group);
-    void xrl_result_join_multicast_group(const XrlError& xrl_error);
-    
-    int leave_multicast_group(uint16_t vif_index,
-			      const IPvX& multicast_group);
-    void xrl_result_leave_multicast_group(const XrlError& xrl_error);
-    
-    int add_mfc_to_kernel(const PimMfc& pim_mfc);
-    void xrl_result_add_mfc_to_kernel(const XrlError& xrl_error);
-    
-    int delete_mfc_from_kernel(const PimMfc& pim_mfc);
-    void xrl_result_delete_mfc_from_kernel(const XrlError& xrl_error);
-    
-    int add_dataflow_monitor(const IPvX& source_addr,
-			     const IPvX& group_addr,
-			     uint32_t threshold_interval_sec,
-			     uint32_t threshold_interval_usec,
-			     uint32_t threshold_packets,
-			     uint32_t threshold_bytes,
-			     bool is_threshold_in_packets,
-			     bool is_threshold_in_bytes,
-			     bool is_geq_upcall,
-			     bool is_leq_upcall);
-    void xrl_result_add_dataflow_monitor(const XrlError& xrl_error);
-    
-    int delete_dataflow_monitor(const IPvX& source_addr,
-				const IPvX& group_addr,
-				uint32_t threshold_interval_sec,
-				uint32_t threshold_interval_usec,
-				uint32_t threshold_packets,
-				uint32_t threshold_bytes,
-				bool is_threshold_in_packets,
-				bool is_threshold_in_bytes,
-				bool is_geq_upcall,
-				bool is_leq_upcall);
-    void xrl_result_delete_dataflow_monitor(const XrlError& xrl_error);
-    
-    int delete_all_dataflow_monitor(const IPvX& source_addr,
-				    const IPvX& group_addr);
-    void xrl_result_delete_all_dataflow_monitor(const XrlError& xrl_error);
-
-    int add_protocol_mld6igmp(uint16_t vif_index);
-    void xrl_result_add_protocol_mld6igmp(const XrlError& xrl_error);
-    
-    int delete_protocol_mld6igmp(uint16_t vif_index);
-    void xrl_result_delete_protocol_mld6igmp(const XrlError& xrl_error);
-    
-    //
-    // Protocol node CLI methods
-    //
-    int add_cli_command_to_cli_manager(const char *command_name,
-				       const char *command_help,
-				       bool is_command_cd,
-				       const char *command_cd_prompt,
-				       bool is_command_processor);
-    void xrl_result_add_cli_command(const XrlError& xrl_error);
-    int delete_cli_command_from_cli_manager(const char *command_name);
-    void xrl_result_delete_cli_command(const XrlError& xrl_error);
-    
+protected:    
     //
     // XRL target methods
     //
+
     /**
      *  Get name of Xrl Target
      */
@@ -2381,18 +2306,248 @@ protected:
 	uint32_t&	value);
 
 private:
-    const string& my_xrl_target_name() {
-	return XrlPimTargetBase::name();
-    }
-    
-    int family() const { return (PimNode::family()); }
-    
-    TransactionManager	_mrib_transaction_manager;
 
-    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    void mfea_register_startup();
+    void mfea_register_shutdown();
+    void rib_register_startup();
+    void rib_register_shutdown();
+
+    void send_mfea_registration();
+    void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
+    void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
+    void mfea_client_send_allow_mrib_messages_cb(const XrlError& xrl_error);
+    void send_mfea_deregistration();
+    void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
+
+    void send_rib_registration();
+    void rib_client_send_add_rib_client_cb(const XrlError& xrl_error);
+    void send_rib_deregistration();
+    void rib_client_send_delete_rib_client_cb(const XrlError& xrl_error);
+
+    //
+    // Protocol node methods
+    //
+    int start_protocol_kernel_vif(uint16_t vif_index);
+    int stop_protocol_kernel_vif(uint16_t vif_index);
+    void send_start_stop_protocol_kernel_vif();
+    void mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error);
+
+    int join_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
+    int leave_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
+    void send_join_leave_multicast_group();
+    void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
+
+    int add_mfc_to_kernel(const PimMfc& pim_mfc);
+    int delete_mfc_from_kernel(const PimMfc& pim_mfc);
+    void send_add_delete_mfc();
+    void mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error);
+
+    int add_dataflow_monitor(const IPvX& source_addr,
+			     const IPvX& group_addr,
+			     uint32_t threshold_interval_sec,
+			     uint32_t threshold_interval_usec,
+			     uint32_t threshold_packets,
+			     uint32_t threshold_bytes,
+			     bool is_threshold_in_packets,
+			     bool is_threshold_in_bytes,
+			     bool is_geq_upcall,
+			     bool is_leq_upcall);
+    int delete_dataflow_monitor(const IPvX& source_addr,
+				const IPvX& group_addr,
+				uint32_t threshold_interval_sec,
+				uint32_t threshold_interval_usec,
+				uint32_t threshold_packets,
+				uint32_t threshold_bytes,
+				bool is_threshold_in_packets,
+				bool is_threshold_in_bytes,
+				bool is_geq_upcall,
+				bool is_leq_upcall);
+    int delete_all_dataflow_monitor(const IPvX& source_addr,
+				    const IPvX& group_addr);
+    void send_add_delete_dataflow_monitor();
+    void mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error);
+
+    int add_protocol_mld6igmp(uint16_t vif_index);
+    int delete_protocol_mld6igmp(uint16_t vif_index);
+    void send_add_delete_protocol_mld6igmp();
+    void mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError& xrl_error);
+
+    int	proto_send(const string& dst_module_instance_name,
+		   xorp_module_id dst_module_id,
+		   uint16_t vif_index,
+		   const IPvX& src, const IPvX& dst,
+		   int ip_ttl,int ip_tos,  bool router_alert_bool,
+		   const uint8_t* sndbuf, size_t sndlen);
+    void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
+    
+    //
+    // Protocol node CLI methods
+    //
+    int add_cli_command_to_cli_manager(const char *command_name,
+				       const char *command_help,
+				       bool is_command_cd,
+				       const char *command_cd_prompt,
+				       bool is_command_processor);
+    void cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error);
+    void xrl_result_add_cli_command(const XrlError& xrl_error);
+    int delete_cli_command_from_cli_manager(const char *command_name);
+    void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
+    
+    const string& my_xrl_target_name() { return XrlPimTargetBase::name(); }
+    int family() const { return PimNode::family(); }
+
+    /**
+     * Class for handling the queue of Join/Leave multicast group requests
+     */
+    class JoinLeaveMulticastGroup {
+    public:
+	JoinLeaveMulticastGroup(uint16_t vif_index,
+				const IPvX& multicast_group,
+				bool is_join)
+	    : _vif_index(vif_index),
+	      _multicast_group(multicast_group),
+	      _is_join(is_join) {}
+	uint16_t vif_index() const { return _vif_index; }
+	const IPvX& multicast_group() const { return _multicast_group; }
+	bool is_join() const { return _is_join; }
+
+    private:
+	uint16_t	_vif_index;
+	IPvX		_multicast_group;
+	bool		_is_join;
+    };
+
+    /**
+     * Class for handling the queue of Add/Delete dataflow monitor requests
+     */
+    class AddDeleteDataflowMonitor {
+    public:
+	AddDeleteDataflowMonitor(const IPvX& source_addr,
+				 const IPvX& group_addr,
+				 uint32_t threshold_interval_sec,
+				 uint32_t threshold_interval_usec,
+				 uint32_t threshold_packets,
+				 uint32_t threshold_bytes,
+				 bool is_threshold_in_packets,
+				 bool is_threshold_in_bytes,
+				 bool is_geq_upcall,
+				 bool is_leq_upcall,
+				 bool is_add)
+	    : _source_addr(source_addr),
+	      _group_addr(group_addr),
+	      _threshold_interval_sec(threshold_interval_sec),
+	      _threshold_interval_usec(threshold_interval_usec),
+	      _threshold_packets(threshold_packets),
+	      _threshold_bytes(threshold_bytes),
+	      _is_threshold_in_packets(is_threshold_in_packets),
+	      _is_threshold_in_bytes(is_threshold_in_bytes),
+	      _is_geq_upcall(is_geq_upcall),
+	      _is_leq_upcall(is_leq_upcall),
+	      _is_add(is_add),
+	      _is_delete_all(false) {}
+	AddDeleteDataflowMonitor(const IPvX& source_addr,
+				 const IPvX& group_addr)
+	    : _source_addr(source_addr),
+	      _group_addr(group_addr),
+	      _threshold_interval_sec(0),
+	      _threshold_interval_usec(0),
+	      _threshold_packets(0),
+	      _threshold_bytes(0),
+	      _is_threshold_in_packets(false),
+	      _is_threshold_in_bytes(false),
+	      _is_geq_upcall(false),
+	      _is_leq_upcall(false),
+	      _is_add(false),
+	      _is_delete_all(true) {}
+
+	const IPvX& source_addr() const { return _source_addr; }
+	const IPvX& group_addr() const { return _group_addr; }
+	uint32_t threshold_interval_sec() const { return _threshold_interval_sec; }
+	uint32_t threshold_interval_usec() const { return _threshold_interval_usec; }
+	uint32_t threshold_packets() const { return _threshold_packets; }
+	uint32_t threshold_bytes() const { return _threshold_bytes; }
+	bool is_threshold_in_packets() const { return _is_threshold_in_packets; }
+	bool is_threshold_in_bytes() const { return _is_threshold_in_bytes; }
+	bool is_geq_upcall() const { return _is_geq_upcall; }
+	bool is_leq_upcall() const { return _is_leq_upcall; }
+	bool is_add() const { return _is_add; }
+	bool is_delete_all() const { return _is_delete_all; }
+
+    private:
+	IPvX		_source_addr;
+	IPvX		_group_addr;
+	uint32_t	_threshold_interval_sec;
+	uint32_t	_threshold_interval_usec;
+	uint32_t	_threshold_packets;
+	uint32_t	_threshold_bytes;
+	bool		_is_threshold_in_packets;
+	bool		_is_threshold_in_bytes;
+	bool		_is_geq_upcall;
+	bool		_is_leq_upcall;
+	bool		_is_add;
+	bool		_is_delete_all;
+    };
+
+    /**
+     * Class for handling the queue of Add/Delete MFC requests
+     */
+    class AddDeleteMfc {
+    public:
+	AddDeleteMfc(const PimMfc& pim_mfc, bool is_add)
+	    : _source_addr(pim_mfc.source_addr()),
+	      _group_addr(pim_mfc.group_addr()),
+	      _rp_addr(pim_mfc.rp_addr()),
+	      _iif_vif_index(pim_mfc.iif_vif_index()),
+	      _olist(pim_mfc.olist()),
+	      _olist_disable_wrongvif(pim_mfc.olist_disable_wrongvif()),
+	      _is_add(is_add) {}
+
+	const IPvX& source_addr() const { return _source_addr; }
+	const IPvX& group_addr() const { return _group_addr; }
+	const IPvX& rp_addr() const { return _rp_addr; }
+	uint16_t iif_vif_index() const { return _iif_vif_index; }
+	const Mifset& olist() const { return _olist; }
+	const Mifset& olist_disable_wrongvif() const { return _olist_disable_wrongvif; }
+	bool is_add() const { return _is_add; }
+
+    private:
+	IPvX		_source_addr;
+	IPvX		_group_addr;
+	IPvX		_rp_addr;
+	uint16_t	_iif_vif_index;
+	Mifset		_olist;
+	Mifset		_olist_disable_wrongvif;
+	bool		_is_add;
+    };
+
+    const string		_class_name;
+    const string		_instance_name;
+
+    TransactionManager		_mrib_transaction_manager;
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlRibV0p1Client		_xrl_rib_client;
     XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;
+    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    const string		_mfea_target;
+    const string		_rib_target;
+    const string		_mld6igmp_target;
+    bool			_is_mfea_add_protocol_registered;
+    bool			_is_mfea_allow_signal_messages_registered;
+    bool			_is_mfea_allow_mrib_messages_registered;
+    bool			_is_rib_client_registered;
+    XorpTimer			_mfea_registration_timer;
+    XorpTimer			_rib_registration_timer;
+
+    list<pair<uint16_t, bool> >	_start_stop_protocol_kernel_vif_queue;
+    XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
+    list<JoinLeaveMulticastGroup> _join_leave_multicast_group_queue;
+    XorpTimer			_join_leave_multicast_group_queue_timer;
+    list<AddDeleteMfc>		_add_delete_mfc_queue;
+    XorpTimer			_add_delete_mfc_queue_timer;
+    list<AddDeleteDataflowMonitor> _add_delete_dataflow_monitor_queue;
+    XorpTimer			_add_delete_dataflow_monitor_queue_timer;
+    list<pair<uint16_t, bool> >	_add_delete_protocol_mld6igmp_queue;
+    XorpTimer			_add_delete_protocol_mld6igmp_queue_timer;
 };
 
 #endif // __PIM_XRL_PIM_NODE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.39 2004/03/04 01:46:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.40 2004/04/05 03:18:31 pavlin Exp $"
 
 
 //
@@ -66,16 +66,17 @@
 PimNode::PimNode(int family, xorp_module_id module_id,
 		 EventLoop& eventloop)
     : ProtoNode<PimVif>(family, module_id, eventloop),
-    _pim_mrt(*this),
-    _pim_mrib_table(*this),
-    _pim_bsr(*this),
-    _rp_table(*this),
-    _pim_scope_zone_table(*this),
-    _is_switch_to_spt_enabled(false),	// XXX: disabled by defailt
-    _switch_to_spt_threshold_interval_sec(0),
-    _switch_to_spt_threshold_bytes(0),
-    _is_log_trace(true),		// XXX: default to print trace logs
-    _test_jp_header(*this)
+      _pim_mrt(*this),
+      _pim_mrib_table(*this),
+      _pim_bsr(*this),
+      _rp_table(*this),
+      _pim_scope_zone_table(*this),
+      _is_switch_to_spt_enabled(false),	// XXX: disabled by defailt
+      _switch_to_spt_threshold_interval_sec(0),
+      _switch_to_spt_threshold_bytes(0),
+      _is_receive_mrib_from_mfea(false),
+      _is_log_trace(true),		// XXX: default to print trace logs
+      _test_jp_header(*this)
 {
     // TODO: XXX: PIMDM not implemented yet
     XLOG_ASSERT(module_id == XORP_MODULE_PIMSM);
@@ -90,13 +91,16 @@ PimNode::PimNode(int family, xorp_module_id module_id,
     _pim_register_vif_index = Vif::VIF_INDEX_INVALID;
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
-    
+
     //
-    // Set the node status.
-    // XXX: note that we don't really need to wait for MFEA and MLD6IGMP,
-    // hence we are READY.
+    // Set the node status
     //
-    ProtoNode<PimVif>::set_node_status(PROC_READY);
+    ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
+
+    //
+    // Set myself as an observer when the node status changes
+    //
+    set_observer(this);
 }
 
 /**
@@ -108,6 +112,11 @@ PimNode::PimNode(int family, xorp_module_id module_id,
  **/
 PimNode::~PimNode()
 {
+    //
+    // Unset myself as an observer when the node status changes
+    //
+    unset_observer(this);
+
     stop();
     
     //
@@ -127,6 +136,8 @@ PimNode::~PimNode()
  * Start the PIM protocol.
  * TODO: This function should not start the protocol operation on the
  * interfaces. The interfaces must be activated separately.
+ * After the startup operations are completed,
+ * PimNode::final_start() is called to complete the job.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
@@ -136,25 +147,49 @@ PimNode::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoNode<PimVif>::start() < 0)
+    if (ProtoNode<PimVif>::pending_start() < 0)
 	return (XORP_ERROR);
-    
+
     //
-    // Set the node status.
-    // XXX: note that we don't really need to wait for MFEA and MLD6IGMP,
-    // hence we are READY.
+    // Register with the MFEA
     //
-    ProtoNode<PimVif>::set_node_status(PROC_READY);
-    
+    mfea_register_startup();
+
     //
-    // Start the protocol with the kernel
+    // Register with the RIB
     //
-    if (start_protocol_kernel() != XORP_OK) {
-	XLOG_ERROR("Error starting protocol with the kernel");
+    rib_register_startup();
+
+    //
+    // Set the node status
+    //
+    ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
+    update_status();
+
+    return (XORP_OK);
+}
+
+/**
+ * PimNode::final_start:
+ * @: 
+ * 
+ * Complete the start-up of the PIM protocol.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+PimNode::final_start()
+{
+#if 0	// TODO: XXX: PAVPAVPAV
+    if (! is_pending_up())
+	return (XORP_ERROR);
+#endif
+
+    if (ProtoNode<PimVif>::start() < 0) {
 	ProtoNode<PimVif>::stop();
 	return (XORP_ERROR);
     }
-    
+
     // Start the pim_vifs
     start_all_vifs();
     
@@ -163,7 +198,7 @@ PimNode::start()
 	if (_pim_bsr.start() < 0)
 	    return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -188,10 +223,8 @@ PimNode::start()
 int
 PimNode::stop()
 {
-    if (is_down()) {
-	ProtoNode<PimVif>::set_node_status(PROC_DONE);
+    if (is_down())
 	return (XORP_OK);
-    }
 
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
@@ -204,15 +237,24 @@ PimNode::stop()
     // Stop the vifs
     stop_all_vifs();
     
-    // XXX: don't change the node status, because we are still ready
-    
     if (ProtoNode<PimVif>::pending_stop() < 0)
 	return (XORP_ERROR);
+
+    //
+    // De-register with the RIB
+    //
+    rib_register_shutdown();
+
+    //
+    // De-register with the MFEA
+    //
+    mfea_register_shutdown();
 
     //
     // Set the node status
     //
     ProtoNode<PimVif>::set_node_status(PROC_SHUTDOWN);
+    update_status();
 
     return (XORP_OK);
 }
@@ -228,95 +270,13 @@ PimNode::stop()
 int
 PimNode::final_stop()
 {
-    int ret_value = XORP_OK;
-    
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
-    
-    //
-    // Stop the protocol with the kernel
-    //
-    if (stop_protocol_kernel() != XORP_OK) {
-	XLOG_ERROR("Error stopping protocol with the kernel. Ignored.");
-    }
-    
+
     if (ProtoUnit::stop() < 0)
-	ret_value = XORP_ERROR;
+	return (XORP_ERROR);
 
-    //
-    // Set the node status
-    //
-    ProtoNode<PimVif>::set_node_status(PROC_DONE);
-    
-    return (ret_value);
-}
-
-/**
- * PimNode::is_waiting_for_mfea_startup:
- * @: 
- * 
- * Test if waiting to complete registration with the MFEA.
- * 
- * Return value: True if waiting to complete registration with the MFEA,
- * otherwise false.
- **/
-bool
-PimNode::is_waiting_for_mfea_startup() const
-{
-    return (_waiting_for_mfea_startup_events != 0);
-}
-
-/**
- * PimNode::is_waiting_for_mld6igmp_startup:
- * @: 
- * 
- * Test if waiting to complete registration with the MLD6IGMP.
- * 
- * Return value: True if waiting to complete registration with the MLD6IGMP,
- * otherwise false.
- **/
-bool
-PimNode::is_waiting_for_mld6igmp_startup() const
-{
-    return (_waiting_for_mld6igmp_startup_events != 0);
-}
-
-void
-PimNode::incr_waiting_for_mfea_startup_events()
-{
-    _waiting_for_mfea_startup_events++;
-}
-
-void
-PimNode::decr_waiting_for_mfea_startup_events()
-{
-    XLOG_ASSERT(_waiting_for_mfea_startup_events > 0);
-    _waiting_for_mfea_startup_events--;
-    
-    if (_waiting_for_mfea_startup_events == 0) {
-	// If startup waiting is over, set node status to NOT_READY
-	if (ProtoNode<PimVif>::node_status() == PROC_STARTUP)
-	    ProtoNode<PimVif>::set_node_status(PROC_NOT_READY);
-    }
-}
-
-void
-PimNode::incr_waiting_for_mld6igmp_startup_events()
-{
-    _waiting_for_mld6igmp_startup_events++;
-}
-
-void
-PimNode::decr_waiting_for_mld6igmp_startup_events()
-{
-    XLOG_ASSERT(_waiting_for_mld6igmp_startup_events > 0);
-    _waiting_for_mld6igmp_startup_events--;
-    
-    if (_waiting_for_mld6igmp_startup_events == 0) {
-	// If startup waiting is over, set node status to NOT_READY
-	if (ProtoNode<PimVif>::node_status() == PROC_STARTUP)
-	    ProtoNode<PimVif>::set_node_status(PROC_NOT_READY);
-    }
+    return (XORP_OK);
 }
 
 /**
@@ -360,67 +320,36 @@ PimNode::has_pending_down_units(string& reason_msg)
     return (false);
 }
 
-/**
- * PimNode::node_status:
- * @reason_msg: return-by-reference string that contains human-readable
- * information about the status.
- * 
- * Get the node status (see @ref ProcessStatus).
- * 
- * Return value: The node status (see @ref ProcessStatus).
- **/
-ProcessStatus
-PimNode::node_status(string& reason_msg)
+void
+PimNode::status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status)
 {
-    ProcessStatus status = ProtoNode<PimVif>::node_status();
-    
-    // Set the return message with the reason
-    reason_msg = "";
-    switch (status) {
-    case PROC_NULL:
-	// Can't be running and in this state
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_STARTUP:
-	if (is_waiting_for_mfea_startup()) {
-	    reason_msg = "Waiting for MFEA startup";
-	    break;
+    XLOG_ASSERT(this == service);
+
+    if ((old_status == STARTING) && (new_status == RUNNING)) {
+	// The startup process has completed
+	if (final_start() < 0) {
+	    XLOG_ERROR("Cannot complete the startup process; "
+		       "current state is %s",
+		       ProtoNode<PimVif>::state_string());
+	    return;
 	}
-	if (is_waiting_for_mld6igmp_startup()) {
-	    reason_msg = c_format("Waiting for %s startup",
-				  xorp_module_name(family(),
-						   XORP_MODULE_MLD6IGMP));
-	    break;
-	}
-	// Waiting for unknown reason
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_NOT_READY:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
-	break;
-    case PROC_READY:
-	reason_msg = c_format("Node is READY (running status %s)",
-			      ProtoState::state_string());
-	break;
-    case PROC_SHUTDOWN:
-	// Get the message about the shutdown progress
-	has_pending_down_units(reason_msg);
-	break;
-    case PROC_FAILED:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
-	break;
-    case PROC_DONE:
-	// Process has completed operation
-	break;
-    default:
-	// Unknown status
-	XLOG_UNREACHABLE();
-	break;
+	ProtoNode<PimVif>::set_node_status(PROC_READY);
+	return;
     }
-    
-    return (status);
+
+    if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	// The shutdown process has completed
+	final_stop();
+	// Set the node status
+	ProtoNode<PimVif>::set_node_status(PROC_DONE);
+	return;
+    }
+
+    //
+    // TODO: check if there was an error
+    //
 }
 
 /**

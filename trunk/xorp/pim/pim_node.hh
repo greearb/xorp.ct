@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.33 2004/03/02 00:32:32 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.34 2004/03/04 01:46:37 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -57,7 +57,7 @@ class PimNbr;
  * There should be one node per PIM instance. There should be
  * one instance per address family.
  */
-class PimNode : public ProtoNode<PimVif> {
+class PimNode : public ProtoNode<PimVif>, public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
@@ -78,6 +78,9 @@ public:
     
     /**
      * Start the node operation.
+     * 
+     * After the startup operations are completed,
+     * @ref PimNode::final_start() is called to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -103,31 +106,25 @@ public:
     int		stop();
     
     /**
+     * Completely start the node operation.
+     * 
+     * This method should be called after @ref PimNode::start()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		final_start();
+
+    /**
      * Completely stop the node operation.
      * 
-     * This method should be called after @ref PimNode::stop() to complete
-     * the job.
+     * This method should be called after @ref PimNode::stop()
+     * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop();
 
-    /**
-     * Test if waiting to complete registration with the MFEA.
-     * 
-     * @return true if waiting to complete registration with the MFEA,
-     * otherwise false.
-     */
-    bool is_waiting_for_mfea_startup() const;
-    
-    /**
-     * Test if waiting to complete registration with the MLD6IGMP.
-     * 
-     * @return true if waiting to complete registration with the MLD6IGMP,
-     * otherwise false.
-     */
-    bool is_waiting_for_mld6igmp_startup() const;
-    
     /**
      * Test if there is an unit that is in PENDING_DOWN state.
      * 
@@ -139,15 +136,6 @@ public:
      */
     bool	has_pending_down_units(string& reason_msg);
 
-    /**
-     * Get the node status (see @ref ProcessStatus).
-     * 
-     * @param reason_msg return-by-reference string that contains
-     * human-readable information about the status.
-     * @return the node status (see @ref ProcessStatus).
-     */
-    ProcessStatus	node_status(string& reason_msg);
-    
     /**
      * Install a new PIM vif.
      * 
@@ -411,26 +399,6 @@ public:
 				    size_t	  // sndlen
 	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
 
-    /**
-     * Start the protocol with the kernel.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start_protocol_kernel() = 0;
-
-    /**
-     * Stop the protocol with the kernel.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop_protocol_kernel() = 0;
-    
     /**
      * Start a protocol vif with the kernel.
      * 
@@ -1101,13 +1069,10 @@ public:
 	return (_switch_to_spt_threshold_bytes);
     }
 
-    //
-    // Status-related methods
-    //
-    void incr_waiting_for_mfea_startup_events();
-    void decr_waiting_for_mfea_startup_events();
-    void incr_waiting_for_mld6igmp_startup_events();
-    void decr_waiting_for_mld6igmp_startup_events();
+    bool is_receive_mrib_from_mfea() const {
+	return (_is_receive_mrib_from_mfea);
+    }
+    void set_receive_mrib_from_mfea(bool v) { _is_receive_mrib_from_mfea = v; }
 
     //
     // Statistics-related counters and values
@@ -1244,6 +1209,48 @@ public:
     int pimstat_rx_prune_sg_rpt_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
     
 private:
+    /**
+     * A method invoked when the status of a service changes.
+     * 
+     * @param service the service whose status has changed.
+     * @param old_status the old status.
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status);
+
+    /**
+     * Initiate registration with the MFEA.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void mfea_register_startup() = 0;
+
+    /**
+     * Initiate de-registration with the MFEA.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void mfea_register_shutdown() = 0;
+
+    /**
+     * Initiate registration with the RIB.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void rib_register_startup() = 0;
+
+    /**
+     * Initiate de-registration with the RIB.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void rib_register_shutdown() = 0;
     
     PimMrt	_pim_mrt;		// PIM Multicast Routing Table
     PimMribTable _pim_mrib_table;	// PIM Multicast Routing Information Base table
@@ -1265,13 +1272,9 @@ private:
     ConfigParam<bool>		_is_switch_to_spt_enabled;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_interval_sec;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_bytes;
-    
-    //
-    // Status-related state
-    //
-    size_t	_waiting_for_mfea_startup_events;
-    size_t	_waiting_for_mld6igmp_startup_events;
-    
+
+    bool			_is_receive_mrib_from_mfea;
+
     //
     // Debug and test-related state
     //
