@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.26 2004/05/21 08:08:02 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.27 2004/05/30 01:17:47 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -291,9 +291,7 @@ test_module_manager_LDADD 	 = $(LDADD)
 EXTRA_DIST	 = Notes
 EXTRA_DIST	+= boot.ll
 EXTRA_DIST	+= boot.yy
-EXTRA_DIST	+= config.boot
 EXTRA_DIST	+= config.boot.sample
-EXTRA_DIST	+= config.boot.xorp0
 EXTRA_DIST	+= op_commands.ll
 EXTRA_DIST	+= op_commands.yy
 EXTRA_DIST	+= template.ll

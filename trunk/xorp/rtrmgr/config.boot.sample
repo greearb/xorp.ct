@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.7 2004/05/16 07:15:16 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.8 2004/06/08 01:00:11 atanu Exp $ */
 
 
 interfaces {
@@ -17,6 +17,18 @@ interfaces {
 fea {
     enable-unicast-forwarding4: true
     /* enable-unicast-forwarding6: true */
+}
+
+protocols {
+    rip {
+	interface fxp0 {
+	    vif fxp0 {
+		address 192.150.187.100 {
+		    enabled: true
+		}
+	    }
+	}
+    }
 }
 
 /*
@@ -43,6 +55,12 @@ protocols {
 	    as: 65000
 	    holdtime: 90
 	    next-hop: 192.150.187.100
+	    enabled: true
+
+	    enable-ipv4-multicast
+
+            enable-ipv6-unicast
+            enable-ipv6-multicast
 	}
 
 	network4 192.150.187.100/25 {
@@ -58,3 +76,19 @@ protocols {
 	}
     }
 }
+
+/*
+ * See xorp/mibs/snmpdscripts/README on how to configure Net-SNMP in your host
+ * before uncommenting the snmp section below.
+ * Also check that the "bgp4_mib_1657.so" exists in the correct location.
+ */
+
+/* 
+protocols {
+    snmp {
+	mib-module bgp4_mib_1657 {
+	    abs-path: "/usr/local/xorp/mibs/bgp4_mib_1657.so"
+	}
+    }
+}
+*/

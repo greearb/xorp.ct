@@ -149,7 +149,7 @@ test_module_manager_LDADD = $(LDADD)
 # -- Library Sources
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = Notes boot.ll boot.yy config.boot config.boot.sample config.boot.xorp0 op_commands.ll op_commands.yy template.ll templatey.yy
+EXTRA_DIST = Notes boot.ll boot.yy config.boot.sample op_commands.ll op_commands.yy template.ll templatey.yy
 
 
 ################################################################
