@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.28 2004/06/25 12:32:09 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.29 2005/03/04 03:57:03 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -2630,6 +2630,9 @@ test_decision(TestInfo& /*info*/)
     delete ribin_table1;
     delete ribin_table2;
     delete ribin_table3;
+    delete nhlookup_table1;
+    delete nhlookup_table2;
+    delete nhlookup_table3;
     delete palist1;
     delete palist2;
     delete palist3;
