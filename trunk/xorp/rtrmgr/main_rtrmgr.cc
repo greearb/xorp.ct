@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.41 2004/02/26 15:28:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.42 2004/03/09 05:04:14 mjh Exp $"
 
 #include <signal.h>
 
@@ -138,7 +138,9 @@ Rtrmgr::Rtrmgr(const string& template_dir,
       _bind_addrs(bind_addrs),
       _bind_port(bind_port),
       _do_exec(do_exec),
-      _quit_time(quit_time)
+      _quit_time(quit_time),
+      _ready(false),
+      _mct(NULL)
 {
 }
 
@@ -221,7 +223,7 @@ Rtrmgr::run()
 	RandomGen randgen;
 	UserDB userdb;
 	userdb.load_password_file();
-	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen);
+	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen, *this);
 	{
 	    // Wait until the XrlRouter becomes ready
 	    bool timed_out = false;
@@ -236,14 +238,13 @@ Rtrmgr::run()
 	    }
 	}
 
-	MasterConfigTree* mct = new MasterConfigTree(boot_file, tt,
-						     mmgr, xclient, _do_exec);
+	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec);
 	//
 	// XXX: note that theoretically we may receive an XRL before
 	// we call XrlRtrmgrInterface::set_conf_tree().
 	// For now we ignore that possibility...
 	//
-	xrt.set_conf_tree(mct);
+	xrt.set_conf_tree(_mct);
 
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
@@ -253,30 +254,32 @@ Rtrmgr::run()
 					      callback(signalhandler, 0));
 	}
 
+	_ready = true;
 	//
 	// Loop while handling configuration events and signals
 	//
 	while (running) {
 	    fflush(stdout);
 	    eventloop.run();
-	    if (mct->config_failed())
+	    if (_mct->config_failed())
 		running = false;
 	}
 	fflush(stdout);
+	_ready = false;
 
 	//
 	// Shutdown everything
 	//
 
 	// Delete the configuration
-	mct->delete_entire_config();
+	_mct->delete_entire_config();
 
 	// Wait until changes due to deleting config have finished
 	// being applied.
-	while (eventloop.timers_pending() && (mct->commit_in_progress())) {
+	while (eventloop.timers_pending() && (_mct->commit_in_progress())) {
 	    eventloop.run();
 	}
-	delete mct;
+	delete _mct;
     } catch (const InitError& e) {
 	XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
 		   e.why().c_str());
@@ -298,6 +301,15 @@ Rtrmgr::run()
     delete fs;
 
     return (errcode);
+}
+
+bool 
+Rtrmgr::ready() const {
+    if (!_ready)
+	return false;
+    if (_mct->commit_in_progress())
+	return false;
+    return true;
 }
 
 int

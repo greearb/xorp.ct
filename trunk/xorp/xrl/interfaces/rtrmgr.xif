@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.8 2002/09/30 05:09:43 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
  
 /*
  * Router Manager XRL interface.
@@ -22,7 +22,7 @@ interface rtrmgr/0.1 {
 
     get_config_users ? token:txt -> users:list
 
-    get_running_config ? token:txt -> config:txt
+    get_running_config ? token:txt -> ready:bool & config:txt
 
     apply_config_change ? token:txt & target:txt & deltas:txt & deletions:txt
 

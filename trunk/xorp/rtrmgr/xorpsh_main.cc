@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.22 2004/01/14 08:26:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.24 2004/02/28 04:38:56 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -181,8 +181,7 @@ XorpShell::run()
 
     _mode = MODE_INITIALIZING;
 
-    _rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
-				callback(this, &XorpShell::receive_config));
+    request_config();
 
     while (_got_config == false) {
 #ifdef DEBUG_STARTUP
@@ -260,13 +259,30 @@ XorpShell::generic_done(const XrlError& e)
     exit(1);
 }
 
+void 
+XorpShell::request_config()
+{
+    _rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
+                             callback(this, &XorpShell::receive_config));
+}
+
 void
-XorpShell::receive_config(const XrlError& e, const string* config)
+XorpShell::receive_config(const XrlError& e, const bool* ready,
+			  const string* config)
 {
     if (e == XrlError::OKAY()) {
-	_configuration = *config;
-	_got_config = true;
-	return;
+	if (*ready) {
+	    _configuration = *config;
+	    _got_config = true;
+	    return;
+	} else {
+	    /* the rtrmgr is not ready to pass us a config - typically
+               this is because it is in the process of reconfiguring */
+	    _repeat_request_timer = 
+		eventloop().new_oneoff_after_ms(1000,
+                              callback(this, &XorpShell::request_config));
+	    return;
+	}
     }
 
     if ((e == XrlError::COMMAND_FAILED()) && (e.note() == "AUTH_FAIL")) {

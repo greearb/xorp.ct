@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.9 2003/12/02 09:39:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.10 2004/01/13 01:17:32 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -56,7 +56,9 @@ public:
     void register_done(const XrlError& e, const string* token,
 		       const uint32_t* pid);
     void generic_done(const XrlError& e);
-    void receive_config(const XrlError& e, const string* config);
+    void request_config();
+    void receive_config(const XrlError& e, const bool* ready,
+			const string* config);
 
     typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
     void enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
@@ -130,6 +132,8 @@ private:
 					// messages from commit
 
     uint32_t		_rtrmgr_pid;
+
+    XorpTimer           _repeat_request_timer;
 };
 
 #endif // __RTRMGR_XORPSH_MAIN_HH__

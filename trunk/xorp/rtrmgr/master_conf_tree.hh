@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.15 2004/01/05 23:40:07 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.16 2004/01/13 00:44:09 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -67,7 +67,6 @@ public:
     bool save_to_file(const string& filename, uid_t user_id, string& errmsg);
     bool load_from_file(const string& filename, uid_t user_id, string& errmsg,
 			string& deltas, string& deletions);
-
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
 		      ConfigTree& deletion_tree);

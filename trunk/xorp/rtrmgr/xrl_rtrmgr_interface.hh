@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.8 2003/09/16 09:35:18 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.9 2003/12/02 09:39:00 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -29,13 +29,14 @@ class RandomGen;
 class User;
 class UserDB;
 class UserInstance;
+class Rtrmgr;
 
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
 public:
     XrlRtrmgrInterface(XrlRouter& r, UserDB& db, EventLoop& eventloop,
-		       RandomGen& randgen);
+		       RandomGen& randgen, Rtrmgr& rtrmgr);
     ~XrlRtrmgrInterface();
 
     void set_conf_tree(MasterConfigTree* v) { _conf_tree = v; }
@@ -99,6 +100,7 @@ public:
 	// Input values, 
 	const string& token, 
 	// Output values, 
+	bool& ready,
 	string&	config);
 
     XrlCmdError rtrmgr_0_1_apply_config_change(
@@ -172,6 +174,7 @@ private:
     MasterConfigTree*	_conf_tree;
     EventLoop&		_eventloop;
     RandomGen&		_randgen;
+    Rtrmgr&             _rtrmgr;
 
     bool	_exclusive;  // Indicates only one user allowed in config mode
 

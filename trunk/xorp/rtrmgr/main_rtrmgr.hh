@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.4 2004/03/09 05:04:14 mjh Exp $
 
 #ifndef __MAIN_RTRMGR_HH__
 #define __MAIN_RTRMGR_HH__
@@ -27,6 +27,7 @@ public:
 	   bool	do_exec,
 	   int32_t quit_time);
     int run();
+    bool ready() const;
 private:
     string _template_dir;
     string _xrl_dir;
@@ -35,6 +36,9 @@ private:
     uint16_t _bind_port;
     bool _do_exec;
     int32_t _quit_time;
+
+    bool _ready;
+    MasterConfigTree* _mct;
 };
 
 #endif // __MAIN_RTRMGR_HH__

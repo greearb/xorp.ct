@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.15 2003/12/15 22:35:09 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.16 2004/02/06 02:11:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -21,18 +21,21 @@
 #include "libxorp/status_codes.h"
 #include "userdb.hh"
 #include "master_conf_tree.hh"
+#include "main_rtrmgr.hh"
 #include "xrl_rtrmgr_interface.hh"
 #include "randomness.hh"
 
 XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
 				       EventLoop& eventloop,
-				       RandomGen& randgen) 
+				       RandomGen& randgen,
+				       Rtrmgr& rtrmgr) 
     : XrlRtrmgrTargetBase(&r),
       _client_interface(&r),
       _userdb(userdb),
       _conf_tree(NULL),
       _eventloop(eventloop), 
       _randgen(randgen),
+      _rtrmgr(rtrmgr),
       _exclusive(false),
       _config_locked(false),
       _lock_holder((uint32_t)-1)
@@ -317,13 +320,20 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
 	// Input values, 
 	const string&	token, 
 	// Output values, 
+	bool& ready,
 	string&	config)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-    config = _conf_tree->show_tree();
+    if (_rtrmgr.ready()) {
+	ready = true;
+	config = _conf_tree->show_tree();
+    } else {
+	ready = false;
+	config = "";
+    }
     return XrlCmdError::OKAY();
 }
 
