@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.15 2003/06/24 23:49:59 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.16 2003/06/25 18:57:52 atanu Exp $
 #
 
 #
@@ -95,45 +95,30 @@ reset()
 
 bgp_not_established()
 {
-    while ../tools/print_peers -v | grep 'Peer State: ESTABLISHED'
+    for i in peer1 peer2
     do
-	sleep 1
+	status $i
+	while status $i | grep established
+	do
+	    sleep 2
+	done
     done
 }
 
-bgp_updates_received()
+bgp_peer_updates_received()
 {
-    ../tools/print_peers  -v |
-    grep "Updates Received" | awk "NR == $1 {print \$3}"  | sed 's/,//'
-}
-
-bgp_all_updates_received()
-{
-    rec1=a
-    rec2=b
-    until [ $rec1 == $rec2 ]
+    while :
     do
-	rec1=$(bgp_updates_received $1)
-	sleep 1
-	rec2=$(bgp_updates_received $1)
-    done
-}
+	# debug
+	status $1
 
-bgp_updates_sent()
-{
-    ../tools/print_peers  -v |
-    grep "Updates Sent" | awk "NR == $1 {print \$6}"
-}
-
-bgp_all_updates_sent()
-{
-    rec1=a
-    rec2=b
-    until [ $rec1 == $rec2 ]
-    do
-	rec1=$(bgp_updates_sent $1)
-	sleep 1
-	rec2=$(bgp_updates_sent $1)
+	a=$(status $1)
+	sleep 2
+	b=$(status $1)
+	if [ "$a" = "$b" ]
+	then
+	    break
+	fi
     done
 }
 
@@ -185,11 +170,12 @@ test2()
     # Wait for the file to be transmitted by the test peer.
     while pending | grep true
     do
-	sleep 1
+	sleep 2
     done
 
-    # Wait for the BGP process to receive all the updates
-    bgp_all_updates_received 2
+    # Bring up peer1 and wait for it to receive all the updates
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    bgp_peer_updates_received peer1
 
     # Bring up another peering to test the dump code.
     for i in 1 2
@@ -198,14 +184,17 @@ test2()
 	coord target $HOST $PORT1
 	coord initialise attach peer1
 
-	echo "Sleeping for ten seconds"
-	sleep 10
+	# Wait for the peering to be dropped
+	while status peer1 | grep established
+	do
+	    sleep 2
+	done
 
 	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
 	coord peer1 assert established
 
-	# Wait for the BGP process to send all the updates
-	bgp_all_updates_sent 1
+	# Wait for the BGP process to send all the updates to peer1
+	bgp_peer_updates_received peer1
     done
 
     coord target $HOST $PORT2
@@ -215,7 +204,7 @@ test2()
     coord peer2 assert established
 
     # Tearing out peer2 will cause all the routes to be withdrawn, wait
-    bgp_all_updates_sent 1
+    bgp_peer_updates_received peer1
 
     # Make sure that the connections are still established.
     coord peer1 assert established
@@ -251,14 +240,58 @@ test3()
     NOBLOCK=true coord peer2 disconnect
 
     # Wait for the BGP to stabilise
-    bgp_all_updates_sent 1
+    bgp_peer_updates_received peer1
 
     # Make sure that the peer1 connection is still established
     coord peer1 assert established
 }
 
+test4()
+{
+    TFILE=$1
+
+    echo "TEST4:"
+    echo "      1) Start injecting a saved feed (peer2) - $TFILE" 
+    echo "      2) Immediately bring up a second peering (peer1) "
+
+    # Reset the peers
+    reset
+
+    result=$(status peer1)
+    echo "$result"
+
+    # Establish the EBGP peering.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 assert established
+
+    # send in the saved file
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE
+
+    # Bring up a second peering and wait for all the updates to arrive
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+
+    while :
+    do
+	# debug
+	status peer1
+	status peer2
+
+	a=$(status peer1)
+	sleep 2
+	b=$(status peer1)
+	if [ "$a" = "$b" ]
+	then
+	    break
+	fi
+    done
+
+    # Make sure that the peer1 connection is still established
+    coord peer1 assert established
+    coord peer2 assert established
+}
+
 TESTS_NOT_FIXED='test3'
-TESTS='test1 test2'
+TESTS='test1 test2 test4'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`

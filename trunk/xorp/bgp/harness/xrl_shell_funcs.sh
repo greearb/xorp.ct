@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.5 2003/06/24 20:47:28 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.6 2003/06/24 23:30:43 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../../libxipc/call_xrl -w 10}
@@ -33,6 +33,13 @@ coord()
     done
 
     return -1
+}
+
+status()
+{
+#    echo -n "Status $* "
+    $CALLXRL "finder://coord/coord/0.1/status?peer:txt=$1" |
+    sed -e 's/^status:txt=//' -e 's/+/ /g'
 }
 
 pending()
