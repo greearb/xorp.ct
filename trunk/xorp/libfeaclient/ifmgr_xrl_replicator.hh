@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.4 2003/10/14 21:47:17 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.5 2004/06/03 17:27:34 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 #define __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
@@ -43,7 +43,8 @@
  * queue processing stops and the IfMgrXrlReplicator instance should in
  * most cases be destructed.
  */
-class IfMgrXrlReplicator : public IfMgrCommandSinkBase {
+class IfMgrXrlReplicator :
+    public IfMgrCommandSinkBase, public CallbackSafeObject  {
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
 
@@ -111,7 +112,7 @@ class IfMgrXrlReplicationManager;
  * which causes their destruction.
  */
 class IfMgrManagedXrlReplicator :
-    public IfMgrXrlReplicator, public CallbackSafeObject {
+    public IfMgrXrlReplicator {
 public:
     IfMgrManagedXrlReplicator(IfMgrXrlReplicationManager& manager,
 			      XrlSender&		 sender,
