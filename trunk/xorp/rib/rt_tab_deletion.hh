@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.5 2004/02/11 08:48:48 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.6 2004/03/28 17:56:06 hodson Exp $
 
 #ifndef __RIB_RT_TAB_DELETION_HH__
 #define __RIB_RT_TAB_DELETION_HH__
@@ -137,7 +137,7 @@ public:
      */
     string str() const;
 
-    RouteTable* parent() { return _parent; }
+    RouteTable<A>* parent() { return _parent; }
 
 private:
     RouteTable<A>*	_parent;
