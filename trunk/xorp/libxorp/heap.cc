@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.5 2003/04/02 04:41:11 hodson Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.6 2003/04/02 04:46:53 hodson Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"
@@ -178,7 +178,7 @@ Heap::pop_obj(void *obj)
         _p[father] = _p[max_entry] ;
         push(father); /* this one cannot fail */
     }
-    verify();
+    DBG(verify());
 }
 
 #if 1
