@@ -1,37 +1,39 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.26 2004/02/20 21:19:10 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.27 2004/02/22 03:03:12 hodson Exp $
 ##
 
+SUBDIRS 			 = . tools
+
 # Redefine the bin installation directory
-bindir = $(prefix)/$(subdir)
+bindir				 = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS	 = xorp_rip xorp_ripng
+bin_PROGRAMS			 = xorp_rip xorp_ripng
 
 # -- Test Programs
-TESTS		 = test_auth
-TESTS		+= test_packets
-TESTS		+= test_request
-TESTS		+= test_route_walk
-TESTS		+= test_timers
-TESTS		+= test_update_queue
-TESTS		+= test_outputs
+TESTS				 = test_auth
+TESTS				+= test_packets
+TESTS				+= test_request
+TESTS				+= test_route_walk
+TESTS				+= test_timers
+TESTS				+= test_update_queue
+TESTS				+= test_outputs
 
 # -- No-install Programs
-noinst_PROGRAMS	 = test_auth
-noinst_PROGRAMS	+= test_packets
-noinst_PROGRAMS	+= test_request
-noinst_PROGRAMS	+= test_route_walk
-noinst_PROGRAMS	+= test_timers
-noinst_PROGRAMS	+= test_update_queue
-noinst_PROGRAMS	+= test_outputs
+noinst_PROGRAMS	 		 = test_auth
+noinst_PROGRAMS			+= test_packets
+noinst_PROGRAMS			+= test_request
+noinst_PROGRAMS			+= test_route_walk
+noinst_PROGRAMS			+= test_timers
+noinst_PROGRAMS			+= test_update_queue
+noinst_PROGRAMS			+= test_outputs
 
 # -- No-install Libraries
-noinst_LIBRARIES  = librip.a
-noinst_LIBRARIES += libripng.a
-noinst_LIBRARIES += libripxrl.a
-noinst_LIBRARIES += libripngxrl.a
+noinst_LIBRARIES		 = librip.a
+noinst_LIBRARIES		+= libripng.a
+noinst_LIBRARIES		+= libripxrl.a
+noinst_LIBRARIES		+= libripngxrl.a
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS				 =
