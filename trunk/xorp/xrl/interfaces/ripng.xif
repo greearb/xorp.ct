@@ -288,6 +288,22 @@ interface ripng/0.1 {
 					& addr:ipv6			\
 					-> status:txt
 
+    /**
+     * Get the list of peers associated with interface / vif / address.
+     */
+    get_peers				? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> peers:list
+
+    /**
+     * Get list of all peers known to RIP.  There is a 1-to-1 correspondence
+     * between the items in the lists of peers, ifnames, vifnames, addrs.
+     */
+    get_all_peers			-> peers:list			\
+					& ifnames:list			\
+					& vifnames:list			\
+					& addrs:list
 
     /**
      * Add a static route.

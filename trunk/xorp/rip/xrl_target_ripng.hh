@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.4 2004/02/27 22:14:13 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.5 2004/03/01 19:53:57 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -242,6 +242,16 @@ public:
 					     const IPv6&	addr,
 					     string&		status);
 
+    XrlCmdError ripng_0_1_get_peers(const string&		ifname,
+				    const string&		vifname,
+				    const IPv6&			addr,
+				    XrlAtomList&		peers);
+
+    XrlCmdError ripng_0_1_get_all_peers(XrlAtomList&	peers,
+					XrlAtomList&	ifnames,
+					XrlAtomList&	vifnames,
+					XrlAtomList&	addrs);
+
     XrlCmdError ripng_0_1_add_static_route(const IPv6Net& 	network,
 					   const IPv6& 		nexthop,
 					   const uint32_t& 	cost);
@@ -265,7 +275,6 @@ public:
 
     XrlCmdError socket6_user_0_1_close_event(const string&	sockid,
 					     const string&	reason);
-
 protected:
     EventLoop& 			_e;
     XrlRipCommonTarget<IPv6>* 	_ct;

@@ -490,6 +490,25 @@ XrlRipTarget::rip_0_1_rip_address_status(const string&	ifn,
     return _ct->ripx_0_1_rip_address_status(ifn, vifn, a, status);
 }
 
+
+XrlCmdError
+XrlRipTarget::rip_0_1_get_peers(const string&	ifn,
+				const string&	vifn,
+				const IPv4&	a,
+				XrlAtomList&	peers)
+{
+    return _ct->ripx_0_1_get_peers(ifn, vifn, a, peers);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_get_all_peers(XrlAtomList&	peers,
+				    XrlAtomList&	ifnames,
+				    XrlAtomList&	vifnames,
+				    XrlAtomList&	addrs)
+{
+    return _ct->ripx_0_1_get_all_peers(peers, ifnames, vifnames, addrs);
+}
+
 XrlCmdError
 XrlRipTarget::rip_0_1_add_static_route(const IPv4Net& 	network,
 				       const IPv4& 	nexthop,

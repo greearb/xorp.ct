@@ -4,7 +4,7 @@
 o Add HopCount check on received RIPng packets.
 
 o Add accessors for counters, listing peers, getting peer counters,
-  etc.  These for the basis for operational commands.
+  etc.  These form the basis for operational commands.
 
 o Add Operational commands.
 

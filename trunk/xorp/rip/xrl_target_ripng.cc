@@ -407,6 +407,24 @@ XrlRipngTarget::ripng_0_1_rip_address_status(const string&	ifn,
 }
 
 XrlCmdError
+XrlRipngTarget::ripng_0_1_get_peers(const string&	ifn,
+				    const string&	vifn,
+				    const IPv6&		a,
+				    XrlAtomList&	peers)
+{
+    return _ct->ripx_0_1_get_peers(ifn, vifn, a, peers);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_get_all_peers(XrlAtomList&	peers,
+					XrlAtomList&	ifnames,
+					XrlAtomList&	vifnames,
+					XrlAtomList&	addrs)
+{
+    return _ct->ripx_0_1_get_all_peers(peers, ifnames, vifnames, addrs);
+}
+
+XrlCmdError
 XrlRipngTarget::ripng_0_1_add_static_route(const IPv6Net& 	network,
 					   const IPv6& 		nexthop,
 					   const uint32_t& 	cost)

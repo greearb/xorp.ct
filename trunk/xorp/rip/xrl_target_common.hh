@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.2 2004/02/27 22:14:12 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.3 2004/03/01 19:53:57 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
 
 #include "libxorp/status_codes.h"
+
+#include "peer.hh"
 
 class XrlProcessSpy;
 template<typename A> class XrlPortManager;
@@ -236,6 +238,16 @@ public:
 					    const string&	vifname,
 					    const A&		addr,
 					    string&		status);
+
+    XrlCmdError ripx_0_1_get_peers(const string& ifname,
+				   const string& vifname,
+				   const A&	 addr,
+				   XrlAtomList&	 peers);
+
+    XrlCmdError ripx_0_1_get_all_peers(XrlAtomList& peers,
+				       XrlAtomList& ifnames,
+				       XrlAtomList& vifnames,
+				       XrlAtomList& addrs);
 
     XrlCmdError ripx_0_1_add_static_route(const IPNet<A>& 	network,
 					  const A&	 	nexthop,
@@ -906,6 +918,57 @@ XrlRipCommonTarget<A>::ripx_0_1_rip_address_status(const string&	ifn,
 
     return XrlCmdError::OKAY();
 }
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_get_peers(const string&	ifn,
+					  const string&	vifn,
+					  const A&	addr,
+					  XrlAtomList&	peers)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifn, vifn, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    typename Port<A>::PeerList::const_iterator pi = p->peers().begin();
+    while (pi != p->peers().end()) {
+	const Peer<A>* peer = *pi;
+	peers.append(XrlAtom(peer->address()));
+	++pi;
+    }
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_get_all_peers(XrlAtomList&	peers,
+					      XrlAtomList&	ifnames,
+					      XrlAtomList&	vifnames,
+					      XrlAtomList&	addrs)
+{
+    const typename PortManagerBase<A>::PortList & ports = _xpm.const_ports();
+    typename PortManagerBase<A>::PortList::const_iterator pci;
+
+    for (pci = ports.begin(); pci != ports.end(); ++pci) {
+	const Port<A>* port = *pci;
+	const PortIOBase<A>* pio = port->io_handler();
+	if (pio == 0) {
+	    continue;
+	}
+
+	typename Port<A>::PeerList::const_iterator pi;
+	for (pi = port->peers().begin(); pi != port->peers().end(); ++pi) {
+	    const Peer<A>* peer = *pi;
+	    peers.append    ( XrlAtom(peer->address()) );
+	    ifnames.append  ( XrlAtom(pio->ifname())   );
+	    vifnames.append ( XrlAtom(pio->vifname())  );
+	    addrs.append    ( XrlAtom(pio->address())  );
+	}
+    }
+    return XrlCmdError::OKAY();
+}
+
 
 template <typename A>
 XrlCmdError
