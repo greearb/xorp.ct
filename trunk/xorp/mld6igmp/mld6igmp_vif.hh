@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.6 2003/03/31 03:57:41 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.7 2003/04/01 00:56:16 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
 
 
 //
-// IGMP and MLD6 virtual interface definition.
+// IGMP and MLD virtual interface definition.
 //
 
 
@@ -46,12 +46,12 @@
 class	MemberQuery;
 
 /**
- * @short A class for MLD6/IGMP-specific virtual interface.
+ * @short A class for MLD/IGMP-specific virtual interface.
  */
 class Mld6igmpVif : public ProtoUnit, public Vif {
 public:
     /**
-     * Constructor for a given MLD6/IGMP node and a generic virtual interface.
+     * Constructor for a given MLD/IGMP node and a generic virtual interface.
      * 
      * @param mld6igmp_node the @ref Mld6igmpNode this interface belongs to.
      * @param vif the generic Vif interface that contains various information.
@@ -68,7 +68,7 @@ public:
      * 
      * The protocol version must be in the interval
      * [IGMP_VERSION_MIN, IGMP_VERSION_MAX]
-     * or [MLD6_VERSION_MIN, MLD6_VERSION_MAX]
+     * or [MLD_VERSION_MIN, MLD_VERSION_MAX]
      * 
      * @param proto_version the protocol version to set.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -76,14 +76,14 @@ public:
     int		set_proto_version(int proto_version);
     
     /**
-     *  Start MLD6/IGMP on a single virtual interface.
+     *  Start MLD/IGMP on a single virtual interface.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start();
     
     /**
-     *  Stop MLD6/IGMP on a single virtual interface.
+     *  Stop MLD/IGMP on a single virtual interface.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -227,7 +227,7 @@ private:
     XorpTimer	_other_querier_timer;	// To timeout the (other) 'querier'
     XorpTimer	_query_timer;		// Timer to send queries
     XorpTimer	_igmpv1_router_present_timer;	// IPGPv1 router present timer
-						// XXX: does not apply to MLD6
+						// XXX: does not apply to MLD
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
     list<MemberQuery *> _members;	// List of all groups with members

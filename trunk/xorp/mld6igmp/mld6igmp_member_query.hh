@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.2 2003/03/10 23:20:42 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.3 2003/03/31 03:46:47 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
 #define __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
 
 
 //
-// IGMP and MLD6 membership definitions.
+// IGMP and MLD membership definitions.
 //
 
 
@@ -111,7 +111,7 @@ private:
     IPvX	_last_reported_host;	// The host who last reported as member
     XorpTimer	_member_query_timer;	// Timer to query for hosts members
     XorpTimer	_last_member_query_timer;   // Timer to expire this entry
-    XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD6
+    XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD
 };
 
 

@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.12 2003/04/02 22:58:57 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.13 2003/04/03 00:24:01 hodson Exp $"
 
 
 //
-// MLD6 and IGMP test program.
+// MLD and IGMP test program.
 //
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.2 2003/03/10 23:20:42 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.3 2003/03/31 03:46:47 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -56,7 +56,7 @@
  * @source: The entry source address. It could be NULL for (*,G) entries.
  * @group: The entry group address.
  * 
- * Create a (S,G) or (*,G) entry used by IGMP or MLD6 to query host members.
+ * Create a (S,G) or (*,G) entry used by IGMP or MLD to query host members.
  * 
  * Return value: 
  **/
@@ -162,13 +162,13 @@ MemberQuery::last_member_query_timer_timeout()
 #ifdef HAVE_IPV6
     if (mld6igmp_vif().proto_is_mld6()) {
 	mld6igmp_vif().mld6igmp_send(group(),
-				     MLD6_LISTENER_QUERY,
-				     (MLD6_LAST_LISTENER_QUERY_INTERVAL
-				      * MLD6_TIMER_SCALE),
+				     MLD_LISTENER_QUERY,
+				     (MLD_LAST_LISTENER_QUERY_INTERVAL
+				      * MLD_TIMER_SCALE),
 				     group());
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().event_loop().new_oneoff_after(
-		TimeVal(MLD6_LAST_LISTENER_QUERY_INTERVAL, 0),
+		TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
 		callback(this, &MemberQuery::last_member_query_timer_timeout));
     }
 #endif // HAVE_IPV6

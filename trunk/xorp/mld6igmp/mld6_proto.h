@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.2 2003/03/10 23:20:42 hodson Exp $
  */
 
 
@@ -39,12 +39,42 @@
 /*
  * Constants definitions
  */
-/* MLD6 versions definition */
-#define MLD6_V1					1
-#define MLD6_VERSION_MIN			MLD6_V1
-#define MLD6_VERSION_MAX			MLD6_V1
-#define MLD6_VERSION_DEFAULT			MLD6_V1
+/* MLD versions definition */
+#define MLD_V1					1
+#define MLD_VERSION_MIN				MLD_V1
+#define MLD_VERSION_MAX				MLD_V1
+#define MLD_VERSION_DEFAULT			MLD_V1
 
+/*
+ * Backward-compatibility definitions.
+ * On newer systems, all MLD-related definitions use
+ * mld_xxx and MLD_XXX instead of mld6_xxx and MLD6_XXX.
+ */
+#ifndef MLD_LISTENER_QUERY
+#define MLD_LISTENER_QUERY		MLD6_LISTENER_QUERY
+#endif
+#ifndef MLD_LISTENER_REPORT
+#define MLD_LISTENER_REPORT		MLD6_LISTENER_REPORT
+#endif
+#ifndef MLD_LISTENER_DONE
+#define MLD_LISTENER_DONE		MLD6_LISTENER_DONE
+#endif
+#ifndef MLD_MTRACE_RESP
+#define MLD_MTRACE_RESP			MLD6_MTRACE_RESP
+#endif
+#ifndef MLD_MTRACE
+#define MLD_MTRACE			MLD6_MTRACE
+#endif
+#ifndef MLDV2_LISTENER_REPORT
+#define MLDV2_LISTENER_REPORT		MLD6V2_LISTENER_REPORT
+#endif
+#ifndef MLD_MINLEN
+#  ifdef HAVE_MLD_HDR
+#    define MLD_MINLEN	(sizeof(struct mld_hdr))
+#  else
+#    define MLD_MINLEN	(sizeof(struct mld6_hdr))
+#  endif
+#endif /* ! MLD_MINLEN */
 
 /*
  * Constans for Multicast Listener Discovery protocol for IPv6.
@@ -52,42 +82,42 @@
  * XXX: Several of these, especially the robustness variable, should be
  * variables and not constants.
  */
-#define	MLD6_ROBUSTNESS_VARIABLE		2
-#define	MLD6_QUERY_INTERVAL			125
-#define	MLD6_QUERY_RESPONSE_INTERVAL		10
-#define	MLD6_MULTICAST_LISTENER_INTERVAL	(MLD6_ROBUSTNESS_VARIABLE     \
-						* MLD6_QUERY_INTERVAL	      \
-						+ MLD6_QUERY_RESPONSE_INTERVAL)
-#define	MLD6_OTHER_QUERIER_PRESENT_INTERVAL	(MLD6_ROBUSTNESS_VARIABLE     \
-						* MLD6_QUERY_INTERVAL	      \
-					+ MLD6_QUERY_RESPONSE_INTERVAL / 2)
-#define	MLD6_STARTUP_QUERY_INTERVAL		(MLD6_QUERY_INTERVAL / 4)
-#define	MLD6_STARTUP_QUERY_COUNT		MLD6_ROBUSTNESS_VARIABLE
-#define	MLD6_LAST_LISTENER_QUERY_INTERVAL	1
-#define	MLD6_LAST_LISTENER_QUERY_COUNT		MLD6_ROBUSTNESS_VARIABLE
-#ifndef MLD6_TIMER_SCALE
-/* the mld6 max. response delay is in 1000th of seconds */
-#define MLD6_TIMER_SCALE			1000
+#define	MLD_ROBUSTNESS_VARIABLE			2
+#define	MLD_QUERY_INTERVAL			125
+#define	MLD_QUERY_RESPONSE_INTERVAL		10
+#define	MLD_MULTICAST_LISTENER_INTERVAL		(MLD_ROBUSTNESS_VARIABLE      \
+						* MLD_QUERY_INTERVAL	      \
+						+ MLD_QUERY_RESPONSE_INTERVAL)
+#define	MLD_OTHER_QUERIER_PRESENT_INTERVAL	(MLD_ROBUSTNESS_VARIABLE      \
+						* MLD_QUERY_INTERVAL	      \
+					+ MLD_QUERY_RESPONSE_INTERVAL / 2)
+#define	MLD_STARTUP_QUERY_INTERVAL		(MLD_QUERY_INTERVAL / 4)
+#define	MLD_STARTUP_QUERY_COUNT			MLD_ROBUSTNESS_VARIABLE
+#define	MLD_LAST_LISTENER_QUERY_INTERVAL	1
+#define	MLD_LAST_LISTENER_QUERY_COUNT		MLD_ROBUSTNESS_VARIABLE
+#ifndef MLD_TIMER_SCALE
+/* the MLD max. response delay is in 1000th of seconds */
+#define MLD_TIMER_SCALE				1000
 #endif
 
 /*
  * Structures, typedefs and macros
  */
 /*
- * The ASCII names of the MLD6 protocol control messages
+ * The ASCII names of the MLD protocol control messages
  */
-#define MLD6TYPE2ASCII(t)						\
-(((t) == MLD6_LISTENER_QUERY) ?						\
-    "MLD6_LISTENER_QUERY"						\
-    : ((t) == MLD6_LISTENER_REPORT) ?					\
-	"MLD6_LISTENER_REPORT"						\
-	: ((t) == MLD6_LISTENER_DONE) ?					\
-	    "MLD6_LISTENER_DONE"					\
-	    : ((t) == MLD6_MTRACE_RESP) ?				\
-		"MLD6_MTRACE_RESP"					\
-		: ((t) == MLD6_MTRACE) ?				\
-		    "MLD6_MTRACE"					\
-		    : "MLD6_type_unknown")
+#define MLDTYPE2ASCII(t)						\
+(((t) == MLD_LISTENER_QUERY) ?						\
+    "MLD_LISTENER_QUERY"						\
+    : ((t) == MLD_LISTENER_REPORT) ?					\
+	"MLD_LISTENER_REPORT"						\
+	: ((t) == MLD_LISTENER_DONE) ?					\
+	    "MLD_LISTENER_DONE"						\
+	    : ((t) == MLD_MTRACE_RESP) ?				\
+		"MLD_MTRACE_RESP"					\
+		: ((t) == MLD_MTRACE) ?					\
+		    "MLD_MTRACE"					\
+		    : "MLD_type_unknown")
 
 /*
  * Global variables

@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.3 2003/03/13 00:32:05 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.4 2003/03/18 02:44:35 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
 
 
 //
-// IGMP and MLD6 node definition.
+// IGMP and MLD node definition.
 //
 
 
@@ -45,7 +45,7 @@ class IPvXNet;
 class Mld6igmpVif;
 
 /**
- * @short The MLD6/IGMP node class.
+ * @short The MLD/IGMP node class.
  * 
  * There should be one node per MLD or IGMP instance. There should be
  * one instance per address family.
@@ -83,7 +83,7 @@ public:
     int		stop();
     
     /**
-     * Install a new MLD6/IGMP vif.
+     * Install a new MLD/IGMP vif.
      * 
      * @param vif vif information about new Mld6igmpVif to install.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -91,7 +91,7 @@ public:
     int		add_vif(const Vif& vif);
     
     /**
-     * Install a new MLD6/IGMP vif.
+     * Install a new MLD/IGMP vif.
      * 
      * @param vif_name the name of the new vif.
      * @param vif_index the vif index of the new vif.
@@ -100,7 +100,7 @@ public:
     int		add_vif(const char *vif_name, uint32_t vif_index);
     
     /**
-     * Delete an existing MLD6/IGMP vif.
+     * Delete an existing MLD/IGMP vif.
      * 
      * @param vif_name the name of the vif to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -151,37 +151,37 @@ public:
 				const IPvX& addr);
     
     /**
-     * Start MLD6/IGMP on all enabled interfaces.
+     * Start MLD/IGMP on all enabled interfaces.
      * 
-     * @return the number of virtual interfaces MLD6/IGMP was started on,
+     * @return the number of virtual interfaces MLD/IGMP was started on,
      * or XORP_ERROR if error occured.
      */
     int		start_all_vifs();
     
     /**
-     * Stop MLD6/IGMP on all interfaces it was running on.
+     * Stop MLD/IGMP on all interfaces it was running on.
      * 
-     * @return he number of virtual interfaces MLD6/IGMP was stopped on,
+     * @return he number of virtual interfaces MLD/IGMP was stopped on,
      * or XORP_ERROR if error occured.
      */
     int		stop_all_vifs();
     
     /**
-     * Enable MLD6/IGMP on all interfaces.
+     * Enable MLD/IGMP on all interfaces.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		enable_all_vifs();
     
     /**
-     * Disable MLD6/IGMP on all interfaces.
+     * Disable MLD/IGMP on all interfaces.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		disable_all_vifs();
     
     /**
-     * Delete all MLD6/IGMP vifs.
+     * Delete all MLD/IGMP vifs.
      */
     void	delete_all_vifs();
     
@@ -248,7 +248,7 @@ public:
 			      buffer_t *buffer);
     
     /**
-     * Receive signal message: not used by MLD6/IGMP.
+     * Receive signal message: not used by MLD/IGMP.
      */
     int	signal_message_recv(const string&	, // src_module_instance_name,
 			    xorp_module_id	, // src_module_id,
@@ -261,7 +261,7 @@ public:
 	) { XLOG_ASSERT(false); return (XORP_ERROR); }
     
     /**
-     * Send signal message: not used by MLD6/IGMP.
+     * Send signal message: not used by MLD/IGMP.
      */
     int	signal_message_send(const string&	, // dst_module_instance_name,
 			    xorp_module_id	, // dst_module_id,

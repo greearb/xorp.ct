@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.11 2003/04/01 02:00:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.12 2003/04/02 19:51:13 hodson Exp $"
 
 
 //
@@ -58,7 +58,7 @@
  * @dst: The message destination address.
  * @buffer: The buffer with the message.
  * 
- * Process MLD6 message and pass the control to the type-specific functions.
+ * Process MLD message and pass the control to the type-specific functions.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -74,7 +74,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     //
     // Message length check.
     //
-    if (BUFFER_DATA_SIZE(buffer) < sizeof(struct mld6_hdr)) {
+    if (BUFFER_DATA_SIZE(buffer) < MLD_MINLEN) {
 	XLOG_WARNING("RX %s from %s to %s: "
 		     "too short data field (%u bytes)",
 		     module_name(),
@@ -118,7 +118,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     // Protocol version check.
     //
     //
-    // XXX: MLD6 messages do not have an explicit field for protocol version.
+    // XXX: MLD messages do not have an explicit field for protocol version.
     // Protocol version check is performed later, per (some) message type.
     //
     
@@ -142,9 +142,9 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     // TTL (aka. Hop-limit in IPv6) and Router Alert option check.
     //
     switch (message_type) {
-    case MLD6_LISTENER_QUERY:
-    case MLD6_LISTENER_REPORT:
-    case MLD6_LISTENER_DONE:
+    case MLD_LISTENER_QUERY:
+    case MLD_LISTENER_REPORT:
+    case MLD_LISTENER_DONE:
 	if (ip_ttl != 1) {
 	    XLOG_WARNING("RX %s from %s to %s: "
 			 "ip_ttl = %d instead of %d",
@@ -157,7 +157,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	// if the option is missing and we are running in secure mode.
 	//
 	break;
-    case MLD6_MTRACE:
+    case MLD_MTRACE:
 	// TODO: perform the appropriate checks
 	break;
     default:
@@ -170,9 +170,9 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     // Source and destination address check.
     //
     switch (message_type) {
-    case MLD6_LISTENER_QUERY:
-    case MLD6_LISTENER_REPORT:
-    case MLD6_LISTENER_DONE:
+    case MLD_LISTENER_QUERY:
+    case MLD_LISTENER_REPORT:
+    case MLD_LISTENER_DONE:
 	// Destination must be multicast
 	if (! dst.is_multicast()) {
 	    XLOG_WARNING("RX %s from %s to %s: "
@@ -195,7 +195,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	// TODO: Multicast address scope check for IPv6
 	//
 	break;
-    case MLD6_MTRACE:
+    case MLD_MTRACE:
 	// TODO: perform the appropriate checks
 	break;
     default:
@@ -208,9 +208,9 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     // Message-specific checks.
     //
     switch (message_type) {
-    case MLD6_LISTENER_QUERY:
-    case MLD6_LISTENER_REPORT:
-    case MLD6_LISTENER_DONE:
+    case MLD_LISTENER_QUERY:
+    case MLD_LISTENER_REPORT:
+    case MLD_LISTENER_DONE:
 	// Inner multicast address scope check
 	group_address.copy_out(in6_addr);
 	if (IN6_IS_ADDR_MC_NODELOCAL(&in6_addr)) {
@@ -222,7 +222,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	    return (XORP_ERROR);
 	}
 	break;
-    case MLD6_MTRACE:
+    case MLD_MTRACE:
 	/* TODO: perform the appropriate checks */
 	break;
     default:
@@ -232,28 +232,28 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     //
     // Origin router neighbor check.
     //
-    // XXX: in MLD6 we don't need such check
+    // XXX: in MLD we don't need such check
     
     //
     // Process each message, based on its type.
     //
     switch (message_type) {
-    case MLD6_LISTENER_QUERY:
+    case MLD_LISTENER_QUERY:
 	mld6_listener_query_recv(src, dst,
 				 message_type, max_resp_time,
 				 group_address, buffer);
 	break;
-    case MLD6_LISTENER_REPORT:
+    case MLD_LISTENER_REPORT:
 	mld6_listener_report_recv(src, dst,
 				  message_type, max_resp_time,
 				  group_address, buffer);
 	break;
-    case MLD6_LISTENER_DONE:
+    case MLD_LISTENER_DONE:
 	mld6_listener_done_recv(src, dst,
 				message_type, max_resp_time,
 				group_address, buffer);
 	break;
-    case MLD6_MTRACE:
+    case MLD_MTRACE:
 	mld6_mtrace_recv(src, dst,
 			 message_type, max_resp_time,
 			 group_address, buffer);
@@ -278,11 +278,11 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD6 header.
- * @group_address: The Group Address from the MLD6 message.
+ * @max_resp_time: The Maximum Response Time from the MLD header.
+ * @group_address: The Group Address from the MLD message.
  * @buffer: The buffer with the rest of the message.
  * 
- * Receive and process MLD6_LISTENER_QUERY message from another router.
+ * Receive and process MLD_LISTENER_QUERY message from another router.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -308,7 +308,7 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
 	_other_querier_timer =
 	    mld6igmp_node().event_loop().new_oneoff_after(
-		TimeVal(MLD6_OTHER_QUERIER_PRESENT_INTERVAL, 0),
+		TimeVal(MLD_OTHER_QUERIER_PRESENT_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
     
@@ -336,11 +336,11 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 	    TimeVal received_resp_tv;
 	    TimeVal left_resp_tv;
 	    
-	    sec = (MLD6_LAST_LISTENER_QUERY_COUNT * max_resp_time)
-		/ MLD6_TIMER_SCALE;
-	    usec = (MLD6_LAST_LISTENER_QUERY_COUNT * max_resp_time)
-		% MLD6_TIMER_SCALE;
-	    usec *= (1000000 / MLD6_TIMER_SCALE); // microseconds
+	    sec = (MLD_LAST_LISTENER_QUERY_COUNT * max_resp_time)
+		/ MLD_TIMER_SCALE;
+	    usec = (MLD_LAST_LISTENER_QUERY_COUNT * max_resp_time)
+		% MLD_TIMER_SCALE;
+	    usec *= (1000000 / MLD_TIMER_SCALE); // microseconds
 	    received_resp_tv = TimeVal(sec, usec);
 	    member_query->_member_query_timer.time_remaining(left_resp_tv);
 	    
@@ -368,11 +368,11 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD6 header.
- * @group_address: The Group Address from the MLD6 message.
+ * @max_resp_time: The Maximum Response Time from the MLD header.
+ * @group_address: The Group Address from the MLD message.
  * @buffer: The buffer with the rest of the message.
  * 
- * Receive and process MLD6_LISTENER_REPORT
+ * Receive and process MLD_LISTENER_REPORT
  * message from a host.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
@@ -427,7 +427,7 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
     
     member_query->_member_query_timer =
 	mld6igmp_node().event_loop().new_oneoff_after(
-	    TimeVal(MLD6_MULTICAST_LISTENER_INTERVAL, 0),
+	    TimeVal(MLD_MULTICAST_LISTENER_INTERVAL, 0),
 	    callback(member_query, &MemberQuery::member_query_timer_timeout));
 
     return (XORP_OK);
@@ -441,11 +441,11 @@ Mld6igmpVif::mld6_listener_report_recv(const IPvX& src,
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD6 header.
- * @group_address: The Group Address from the MLD6 message.
+ * @max_resp_time: The Maximum Response Time from the MLD header.
+ * @group_address: The Group Address from the MLD message.
  * @buffer: The buffer with the rest of the message.
  * 
- * Receive and process MLD6_LISTENER_DONE message from a host.
+ * Receive and process MLD_LISTENER_DONE message from a host.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -477,21 +477,21 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 	    if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
 		member_query->_member_query_timer =
 		    mld6igmp_node().event_loop().new_oneoff_after(
-			TimeVal(MLD6_LAST_LISTENER_QUERY_INTERVAL
-				* MLD6_LAST_LISTENER_QUERY_COUNT),
+			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL
+				* MLD_LAST_LISTENER_QUERY_COUNT),
 			0),
 		    callback(member_query,
 			     &MemberQuery::member_query_timer_timeout);
 		
 		// Send group-specific query
 		mld6igmp_send(member_query->group(),
-			      MLD6_LISTENER_QUERY,
-			      (MLD6_LAST_LISTENER_QUERY_INTERVAL
-			       * MLD6_TIMER_SCALE),
+			      MLD_LISTENER_QUERY,
+			      (MLD_LAST_LISTENER_QUERY_INTERVAL
+			       * MLD_TIMER_SCALE),
 			      member_query->group());
 		member_query->_last_member_query_timer =
 		    mld6igmp_node().event_loop().new_oneoff_after(
-			TimeVal(MLD6_LAST_LISTENER_QUERY_INTERVAL, 0),
+			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
 			callback(member_query,
 				 &MemberQuery::last_member_query_timer_timeout));
 	    }
@@ -512,11 +512,11 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD6 header.
- * @group_address: The Group Address from the MLD6 message.
+ * @max_resp_time: The Maximum Response Time from the MLD header.
+ * @group_address: The Group Address from the MLD message.
  * @buffer: The buffer with the rest of the message.
  * 
- * Receive and process MLD6_MTRACE message.
+ * Receive and process MLD_MTRACE message.
  * TODO: is it the new message sent by 'mtrace'??
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.

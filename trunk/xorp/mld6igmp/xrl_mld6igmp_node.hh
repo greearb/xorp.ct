@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.10 2003/03/25 01:21:47 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.11 2003/03/25 06:55:08 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -429,7 +429,7 @@ protected:
     }
     
     //
-    // MRIB-related add/delete/done: not used by MLD6 or IGMP.
+    // MRIB-related add/delete/done: not used by MLD or IGMP.
     //
     XrlCmdError mfea_client_0_1_add_mrib4(
 	// Input values, 
@@ -487,7 +487,7 @@ protected:
 
     //
     // A signal that a dataflow-related pre-condition is true:
-    // not used by MLD6 or IGMP.
+    // not used by MLD or IGMP.
     //
     XrlCmdError mfea_client_0_1_recv_dataflow_signal4(
 	// Input values, 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.6 2003/03/18 02:44:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.7 2003/03/31 03:46:48 pavlin Exp $"
 
 
 //
@@ -72,7 +72,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
     } else {
 #ifdef HAVE_IPV6
-	set_proto_version_default(MLD6_VERSION_DEFAULT);
+	set_proto_version_default(MLD_VERSION_DEFAULT);
 #else
 	XLOG_ASSERT(false);
 #endif
@@ -123,8 +123,8 @@ Mld6igmpVif::set_proto_version(int proto_version)
     
 #ifdef HAVE_IPV6
     if (proto_is_mld6()) {
-	if ((proto_version < MLD6_VERSION_MIN)
-	    || (proto_version > MLD6_VERSION_MAX))
+	if ((proto_version < MLD_VERSION_MIN)
+	    || (proto_version > MLD_VERSION_MAX))
 	return (XORP_ERROR);
     }
 #endif // HAVE_IPV6
@@ -159,7 +159,7 @@ Mld6igmpVif::proto_is_ssm(void) const
  * Mld6igmpVif::start:
  * @void: 
  * 
- * Start MLD6 or IGMP on a single virtual interface.
+ * Start MLD or IGMP on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -230,13 +230,13 @@ Mld6igmpVif::start(void)
     } else {
 #ifdef HAVE_IPV6
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		      MLD6_LISTENER_QUERY,
-		      (MLD6_QUERY_RESPONSE_INTERVAL * MLD6_TIMER_SCALE),
+		      MLD_LISTENER_QUERY,
+		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
 		      IPvX::ZERO(family()));
-	_startup_query_count = MAX(MLD6_ROBUSTNESS_VARIABLE - 1, 0);
+	_startup_query_count = MAX(MLD_ROBUSTNESS_VARIABLE - 1, 0);
 	_query_timer =
 	    mld6igmp_node().event_loop().new_oneoff_after(
-		TimeVal(MLD6_STARTUP_QUERY_INTERVAL, 0),
+		TimeVal(MLD_STARTUP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
 #endif // HAVE_IPV6
     }
@@ -248,7 +248,7 @@ Mld6igmpVif::start(void)
  * Mld6igmpVif::stop:
  * @void: 
  * 
- * Stop MLD6 or IGMP on a single virtual interface.
+ * Stop MLD or IGMP on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -312,14 +312,14 @@ Mld6igmpVif::stop(void)
 /**
  * Mld6igmpVif::mld6igmp_send:
  * @dst: The message destination address.
- * @message_type: The MLD6 or IGMP type of the message.
+ * @message_type: The MLD or IGMP type of the message.
  * @max_resp_time: The "Maximum Response Delay" or "Max Resp Time"
- * field in the MLD6 or IGMP headers respectively (in the particular protocol
+ * field in the MLD or IGMP headers respectively (in the particular protocol
  * resolution).
  * @group_address: The "Multicast Address" or "Group Address" field
- * in the MLD6 or IGMP headers respectively.
+ * in the MLD or IGMP headers respectively.
  * 
- * Send MLD6 or IGMP message.
+ * Send MLD or IGMP message.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -337,14 +337,14 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
 	return (XORP_ERROR);
     
     //
-    // Prepare the MLD6 or IGMP header.
+    // Prepare the MLD or IGMP header.
     //
     buffer = buffer_send_prepare();
     BUFFER_PUT_OCTET(message_type, buffer);	// The message type
     if (proto_is_igmp())
 	BUFFER_PUT_OCTET(max_resp_time, buffer);
     else
-	BUFFER_PUT_OCTET(0, buffer);		// XXX: Always 0 for MLD6
+	BUFFER_PUT_OCTET(0, buffer);		// XXX: Always 0 for MLD
     BUFFER_PUT_HOST_16(0, buffer);		// Zero the checksum field
     
     if (proto_is_mld6()) {
@@ -413,7 +413,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
  * IP option set.
  * @buffer: The buffer with the received message.
  * 
- * Receive MLD6 or IGMP message and pass it for processing.
+ * Receive MLD or IGMP message and pass it for processing.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -518,7 +518,7 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
  * @void: 
  * 
  * Tests if the interface is running in IGMPv1 mode.
- * XXX: applies only to IGMP, and not to MLD6.
+ * XXX: applies only to IGMP, and not to MLD.
  * 
  * Return value: true if the interface is running in IGMPv1 mode,
  * otherwise false.
@@ -546,7 +546,7 @@ Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 	return (IGMPTYPE2ASCII(message_type));
 #ifdef HAVE_IPV6
     if (proto_is_mld6())
-	return (MLD6TYPE2ASCII(message_type));
+	return (MLDTYPE2ASCII(message_type));
 #endif
     
     return ("Unknown protocol message");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.3 2003/03/10 23:20:42 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.4 2003/03/18 02:44:35 pavlin Exp $"
 
 
 //
@@ -94,7 +94,7 @@ Mld6igmpNode::~Mld6igmpNode(void)
  * Mld6igmpNode::start:
  * @void: 
  * 
- * Start the MLD6 or IGMP protocol.
+ * Start the MLD or IGMP protocol.
  * TODO: This function should not start the protocol operation on the
  * interfaces. The interfaces must be activated separately.
  * 
@@ -130,7 +130,7 @@ Mld6igmpNode::start(void)
  * Mld6igmpNode::stop:
  * @void: 
  * 
- * Stop the MLD6 or IGMP protocol.
+ * Stop the MLD or IGMP protocol.
  * XXX: This function, unlike start(), will stop the protocol
  * operation on all interfaces.
  * 
@@ -167,7 +167,7 @@ Mld6igmpNode::stop(void)
  * Mld6igmpNode::add_vif:
  * @vif: Information about new Mld6igmpVif to install.
  * 
- * Install a new MLD6/IGMP vif.
+ * Install a new MLD/IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -195,7 +195,7 @@ Mld6igmpNode::add_vif(const Vif& vif)
  * @vif_name: The name of the new vif.
  * @vif_index: The vif index of the new vif.
  * 
- * Install a new MLD6/IGMP vif. If the vif exists, nothing is installed.
+ * Install a new MLD/IGMP vif. If the vif exists, nothing is installed.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -225,7 +225,7 @@ Mld6igmpNode::add_vif(const char *vif_name, uint32_t vif_index)
  * Mld6igmpNode::delete_vif:
  * @vif_name: The name of the vif to delete.
  * 
- * Delete an existing MLD6/IGMP vif.
+ * Delete an existing MLD/IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -399,9 +399,9 @@ Mld6igmpNode::delete_vif_addr(const char *vif_name,
  * Mld6igmpNode::start_all_vifs:
  * @void: 
  * 
- * Start MLD6/IGMP on all enabled interfaces.
+ * Start MLD/IGMP on all enabled interfaces.
  * 
- * Return value: The number of virtual interfaces MLD6/IGMP was started on,
+ * Return value: The number of virtual interfaces MLD/IGMP was started on,
  * or %XORP_ERROR if error occured.
  **/
 int
@@ -425,9 +425,9 @@ Mld6igmpNode::start_all_vifs(void)
  * Mld6igmpNode::stop_all_vifs:
  * @void: 
  * 
- * Stop MLD6/IGMP on all interfaces it was running on.
+ * Stop MLD/IGMP on all interfaces it was running on.
  * 
- * Return value: The number of virtual interfaces MLD6/IGMP was stopped on,
+ * Return value: The number of virtual interfaces MLD/IGMP was stopped on,
  * or %XORP_ERROR if error occured.
  **/
 int
@@ -451,7 +451,7 @@ Mld6igmpNode::stop_all_vifs(void)
  * Mld6igmpNode::enable_all_vifs:
  * @void: 
  * 
- * Enable MLD6/IGMP on all interfaces.
+ * Enable MLD/IGMP on all interfaces.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -474,7 +474,7 @@ Mld6igmpNode::enable_all_vifs(void)
  * Mld6igmpNode::disable_all_vifs:
  * @void: 
  * 
- * Disable MLD6/IGMP on all interfaces. All running interfaces are stopped
+ * Disable MLD/IGMP on all interfaces. All running interfaces are stopped
  * first.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
@@ -500,7 +500,7 @@ Mld6igmpNode::disable_all_vifs(void)
  * Mld6igmpNode::delete_all_vifs:
  * @void: 
  * 
- * Delete all MLD6IGMP vifs.
+ * Delete all MLD/IGMP vifs.
  **/
 void
 Mld6igmpNode::delete_all_vifs(void)
@@ -614,7 +614,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
  * packet of the outgoung message.
  * @buffer: The #buffer_t data buffer with the message to send.
  * 
- * Send a MLD6 or IGMP message.
+ * Send a MLD or IGMP message.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
