@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.30 2005/03/25 04:31:13 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.31 2005/03/25 04:51:38 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -76,7 +76,9 @@ the login shell is csh or tcsh):
  # Edit xorp/README
  # Edit xorp/RELEASE_NOTES
  # Edit xorp/VERSION
- # Edit xorp/configure.in (the second argument in AM_INIT_AUTOMAKE() 
+ # Edit all relevant configure.in (the second argument in AM_INIT_AUTOMAKE()):
+        xorp/configure.in
+        xorp/mibs/configure.in
  cd xorp
  ./bootstrap
  cvs commit -m "Prepare XORP for release: bump-up version number"
