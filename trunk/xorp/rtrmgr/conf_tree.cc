@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.14 2004/01/13 00:40:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.15 2004/03/11 22:31:44 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -226,9 +226,10 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 
     // Special case for bool types to avoid needing to type "true"
     if (svalue == "" && (type == NODE_VOID)) {
-	if (ctn->type() == NODE_BOOL)
+	if (ctn->type() == NODE_BOOL) {
 	    type = NODE_BOOL;
 	    svalue = "true";
+	}
     }
     if ((ctn->type() == NODE_TEXT) && (type == NODE_TEXT)) {
 	// Trim the quotes
