@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.2 2002/12/17 10:03:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.3 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -74,7 +74,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     int		rcvd_family;
     IPvX	target_nbr_addr(family());
     IPvX	source_addr(family()), group_addr(family());
-    uint32_t	source_masklen, group_masklen;
+    uint8_t	source_masklen, group_masklen;
     uint8_t	group_addr_reserved_flags;
     int		groups_n, sources_n, sources_j_n, sources_p_n;
     uint8_t	source_flags;

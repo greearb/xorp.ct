@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.8 2003/04/01 00:56:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.9 2003/05/21 05:32:54 pavlin Exp $"
 
 
 //
@@ -70,7 +70,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     IPvX	rp_addr(family());
     int		rcvd_family;
     IPvX	group_addr(family());
-    uint32_t	group_masklen;
+    uint8_t	group_masklen;
     IPvXNet	group_prefix(family());
     uint8_t	group_addr_reserved_flags;
     PimBsr&	pim_bsr = pim_node().pim_bsr();

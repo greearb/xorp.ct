@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.13 2003/06/01 02:14:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.14 2003/06/01 02:46:44 pavlin Exp $"
 
 
 //
@@ -1358,7 +1358,7 @@ PimNode::config_static_rp_done(string& reason)
 //
 int
 PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
-			   uint32_t group_masklen,
+			   uint8_t group_masklen,
 			   mrt_entry_type_t mrt_entry_type,
 			   action_jp_t action_jp, uint16_t holdtime,
 			   bool new_group_bool)

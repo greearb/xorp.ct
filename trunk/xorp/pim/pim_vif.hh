@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.13 2003/04/01 00:56:24 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.14 2003/05/31 07:03:33 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -457,12 +457,12 @@ private:
 				   const IPvX& dst,
 				   const IPvX& assert_source_addr,
 				   const IPvX& assert_group_addr,
-				   uint32_t assert_group_masklen,
+				   uint8_t assert_group_masklen,
 				   AssertMetric *assert_metric);
     int		pim_register_stop_process(const IPvX& rp_addr,
 					  const IPvX& source_addr,
 					  const IPvX& group_addr,
-					  uint32_t group_masklen);
+					  uint8_t group_masklen);
     
     buffer_t	*buffer_send_prepare();
     buffer_t	*buffer_send_prepare(buffer_t *buffer);

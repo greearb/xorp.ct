@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.4 2003/04/01 00:56:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.5 2003/04/22 23:27:24 hodson Exp $"
 
 //
 // PIM neigbor routers handling
@@ -116,7 +116,7 @@ PimNbr::vif_index() const
 
 int
 PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-		     uint32_t group_masklen,
+		     uint8_t group_masklen,
 		     mrt_entry_type_t mrt_entry_type,
 		     action_jp_t action_jp, uint16_t holdtime,
 		     bool new_group_bool)

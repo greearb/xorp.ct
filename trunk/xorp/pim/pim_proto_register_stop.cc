@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.3 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.4 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -67,7 +67,7 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
 {
     int rcvd_family;
     uint8_t group_addr_reserved_flags;
-    uint32_t group_masklen;
+    uint8_t group_masklen;
     IPvX source_addr(family()), group_addr(family());
     
     //
@@ -143,7 +143,7 @@ int
 PimVif::pim_register_stop_process(const IPvX& rp_addr,
 				  const IPvX& source_addr,
 				  const IPvX& group_addr,
-				  uint32_t group_masklen)
+				  uint8_t group_masklen)
 {
     uint32_t	lookup_flags;
     PimMre	*pim_mre;
@@ -192,7 +192,7 @@ PimVif::pim_register_stop_send(const IPvX& dr_addr,
 			       const IPvX& source_addr,
 			       const IPvX& group_addr)
 {
-    uint32_t group_masklen = IPvX::addr_bitlen(family());
+    uint8_t group_masklen = IPvX::addr_bitlen(family());
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
     

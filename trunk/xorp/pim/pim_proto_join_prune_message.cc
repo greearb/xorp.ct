@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.8 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.9 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -154,7 +154,7 @@ PimJpGroup::PimJpGroup(PimJpHeader& jp_header, int family)
 // @new_group_bool: if true, create a new PimJpGroup().
 int
 PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-			  uint32_t group_masklen,
+			  uint8_t group_masklen,
 			  mrt_entry_type_t mrt_entry_type,
 			  action_jp_t action_jp, uint16_t holdtime,
 			  bool new_group_bool)
@@ -312,7 +312,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     uint32_t	lookup_flags = 0, create_flags = 0;
     uint16_t	vif_index;
     uint16_t	holdtime;
-    uint32_t	source_masklen, group_masklen;
+    uint8_t	source_masklen, group_masklen;
     IPvX	source_addr(family()), group_addr(family());
     list<PimJpGroup *>::iterator iter;
     PimMre	*pim_mre;
@@ -693,7 +693,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 int
 PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
 {
-    uint32_t	source_masklen;
+    uint8_t	source_masklen;
     uint32_t	flags;
     IPvX	source_addr(family());
     list<PimJpGroup *>::iterator iter;

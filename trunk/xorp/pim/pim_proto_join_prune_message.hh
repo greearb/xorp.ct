@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.2 2003/03/10 23:20:52 hodson Exp $
 
 
 #ifndef __PIM_PIM_PROTO_JOIN_PRUNE_MESSAGE_HH__
@@ -100,7 +100,7 @@ public:
     }
     
     int		jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-			     uint32_t group_masklen,
+			     uint8_t group_masklen,
 			     mrt_entry_type_t mrt_entry_type,
 			     action_jp_t action_jp, uint16_t holdtime,
 			     bool new_group_bool);
@@ -168,7 +168,7 @@ public:
     const IPvX&	group_addr()		{ return (_group_addr);		}
     void	set_group_addr(const IPvX& v) { _group_addr = v;	}
     uint8_t	group_masklen()		{ return (_group_masklen);	}
-    void	set_group_masklen(uint32_t v) { _group_masklen = v;	}
+    void	set_group_masklen(uint8_t v) { _group_masklen = v;	}
     void	incr_jp_groups_n()	{ jp_header().incr_jp_groups_n();  }
     void	decr_jp_groups_n()	{ jp_header().decr_jp_groups_n();  }
     uint32_t	j_sources_n()		{ return (_j_sources_n);	}
@@ -198,7 +198,7 @@ private:
     PimJpHeader& _jp_header;		// The J/P header for the groups to (re)send
     int		_family;		// The address family
     IPvX	_group_addr;		// The address of the multicast group
-    uint32_t	_group_masklen;		// The 'group_addr' mask length
+    uint8_t	_group_masklen;		// The 'group_addr' mask length
     uint32_t	_j_sources_n;		// The total number of Joined sources
     uint32_t	_p_sources_n;		// The total number of Pruned sources
     // The lists for each type of entry: (*,*,RP), (*,G), (S,G), (S,G,rpt)

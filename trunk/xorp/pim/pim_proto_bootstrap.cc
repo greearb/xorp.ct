@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.5 2003/03/10 23:20:50 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.6 2003/05/21 05:32:54 pavlin Exp $"
 
 
 //
@@ -69,7 +69,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     IPvX	bsr_addr(family());
     uint8_t	hash_masklen, bsr_priority;
     uint16_t	fragment_tag;
-    uint32_t	group_masklen = 0;
+    uint8_t	group_masklen = 0;
     BsrZone	*bsr_zone = NULL;
     BsrZone	*active_bsr_zone;
     size_t	group_prefix_n = 0;
