@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.26 2004/02/11 08:48:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.27 2004/03/24 19:14:08 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -150,7 +150,7 @@ VifManager::set_vif_state()
 	    continue;		// XXX: don't delete the PIM Register vif
 	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
 	    // Delete the interface
-	    string vif_name = node_vif->name();
+	    const string& vif_name = node_vif->name();
 	    _rib_manager->delete_vif(vif_name, error_msg);
 	    _saved_vifs_by_name.erase(node_vif->name());
 	    delete node_vif;
@@ -629,15 +629,26 @@ VifManager::vifaddr6_update(const string& ifname,
 void
 VifManager::interface_deleted(const string& ifname)
 {
+    list<string> delete_vifs_list;
+
     debug_msg("interface_deleted %s\n", ifname.c_str());
-    
-    // Reomve all vifs for the same interface name
-    multimap<string, Vif* >::iterator iter;
+
+    //
+    // Remove all vifs for the same interface name
+    //
+    multimap<string, Vif*>::iterator iter;
     iter = _vifs_by_interface.find(ifname);
-    for (; iter != _vifs_by_interface.end(); ++iter) {
+    for ( ; iter != _vifs_by_interface.end(); ++iter) {
 	if (iter->first != ifname)
 	    break;
-	vif_deleted(ifname, iter->second->name());
+	delete_vifs_list.push_back(iter->second->name());
+    }
+    list<string>::iterator vif_name_iter;
+    for (vif_name_iter = delete_vifs_list.begin();
+	 vif_name_iter != delete_vifs_list.end();
+	 ++vif_name_iter) {
+	const string& vif_name = *vif_name_iter;
+	vif_deleted(ifname, vif_name);
     }
 }
 
