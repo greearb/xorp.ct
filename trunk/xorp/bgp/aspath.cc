@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.8 2003/01/27 19:21:24 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.9 2003/01/28 01:11:36 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,7 +50,7 @@ AsSegment::decode(const uint8_t *d)
 
     d += 2;	// skip header, d points to the raw data now.
     for (size_t i = 0; i < n; d += 2, i++)
-	add_as((uint16_t)((d[0] << 8) + d[1]) );
+	add_as((d[0] << 8) + d[1]);
 }
 
 /**
@@ -65,7 +65,7 @@ AsSegment::_encode(size_t &len) const
 
     list <AsNum>::const_iterator iter = _aslist.begin();
     for (;iter != _aslist.end(); ++iter)
-	len += (iter->is_extended()) ? 4 : 2;
+	len += 2;
     assert(_aslist.size() == _entries);		// XXX this is expensive
 
     debug_msg("data size = %u\n", (uint32_t)len);
@@ -76,21 +76,10 @@ AsSegment::_encode(size_t &len) const
     data[pos++] = _entries;
 
     for (iter = _aslist.begin(); iter != _aslist.end(); ++iter) {
-	if (iter->is_extended()) {
-	    debug_msg("Encoding 32-bit As %d\n", iter->as_extended());
-	    assert("4 byte as's not supported yet\n");
-	    abort();
-#if 0
-	    uint32_t temp = htonl(iter->as_extended());
-	    memcpy(&data[pos],&temp, 4);
-	    pos = pos + 4;
-#endif
-	} else {
-	    uint16_t temp = htons(iter->as());
-	    debug_msg("Encoding 16-bit As %d\n", iter->as());
-	    memcpy(&data[pos], &temp, 2);
-	    pos += 2;
-	}
+	uint16_t temp = htons(iter->as());
+	debug_msg("Encoding 16-bit As %d\n", iter->as());
+	memcpy(&data[pos], &temp, 2);
+	pos += 2;
     }
 
     return data;

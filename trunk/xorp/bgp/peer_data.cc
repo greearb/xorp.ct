@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.3 2002/12/14 21:25:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.4 2003/01/24 22:14:45 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -22,7 +22,7 @@
 
 BGPPeerData::BGPPeerData()
     // XXX assigning a default value here is bad
-    : _as_num(AsNum::invalid_As)
+    : _as_num(AsNum::AS_INVALID)
 {
     _unsupported_parameters = false;
     //    add_sent_parameter( new BGPMultiProtocolCapability( AFI_IPV4 , SAFI_NLRI_UNICAST ) );

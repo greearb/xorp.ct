@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.3 2002/12/15 04:09:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.4 2003/01/26 17:03:18 rizzo Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -76,7 +76,7 @@ main(int argc, char* argv[])
 	assert(aspathcopy->contains(*asn) == true);
 	delete asn;
     }
-    asn = new AsNum(AsNum::invalid_As);	// XXX should never do this
+    asn = new AsNum(AsNum::AS_INVALID);	// XXX should never do this
     assert(aspathcopy->contains(*asn) == false);
     delete asn;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.2 2002/12/13 22:38:54 rizzo Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -36,7 +36,7 @@ public:
      * initializer, as the AsNum field would be invalid.
      */
     // LocalData();	// not implemented
-    LocalData() : _as_num(AsNum::invalid_As) {}
+    LocalData() : _as_num(AsNum::AS_INVALID)		{}
 
     LocalData(const AsNum& as, const IPv4& id)
 	    : _as_num(as), _bgp_id(id)		{

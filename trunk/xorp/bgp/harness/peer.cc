@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.11 2003/01/24 20:08:25 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.12 2003/01/26 04:06:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -36,7 +36,7 @@
 #include "peer.hh"
 #include "bgppp.hh"
 
-Peer::Peer() : _as(AsNum::invalid_As) // XXX
+Peer::Peer() : _as(AsNum::AS_INVALID) // XXX
 {
 }
 
@@ -54,13 +54,13 @@ Peer::Peer(XrlRouter *xrlrouter, string peername, string target_hostname,
       _passive(false),
       _keepalive(false),
       _established(false),
-      _as(AsNum::invalid_As), // XXX
+      _as(AsNum::AS_INVALID), // XXX
       _holdtime(0)
 {
 }
 
 Peer::Peer(const Peer& rhs)
-      : _as(AsNum::invalid_As) // XXX
+      : _as(AsNum::AS_INVALID) // XXX
 {
     debug_msg("Copy constructor\n");
 

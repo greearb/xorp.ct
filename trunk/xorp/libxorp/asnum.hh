@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.2 2002/12/13 22:32:01 rizzo Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -31,58 +31,56 @@
  * unsigned numbers.  Later the "extended" AS numbers were introduced,
  * which are unsigned 32-bit numbers.
  *
+ * 16-bit numbers are expanded to 32-bit by extending them with 0's in front.
+ * 32-bit numbers are represented in a 16-bit path, by a special 16-bit value,
+ * AS_TRAN, which will be allocated by IANA.
+ * Together with any AsPath containing AS_TRAN, we will always see a NEW_AS_PATH
+ * attribute which contains the full 32-bit representation of the path.
+ * So there is no loss of information.
+ *
+ * The internal representation of an AsNum is 32-bit in host order.
+ *
  * An AsNum must always be initialized, so the default constructor
  * is never called.
- * Also, extended state only depends on the numeric value.
- * Temporarily we use the constant invalid_As to fill an AsNum
- * for which we have nothing to store in.
  */
 class AsNum {
 public:
-    /**
-     * in those cases where we really do not know better, initialize
-     * the As number to invalid_As (and is_extended is not set
-     * to true so the vailidity checks will fail).
-     */
-    static const uint32_t invalid_As = 0xffffffffU;
+    static const uint16_t AS_INVALID = 0;	// XXX IANA-reserved
+    static const uint16_t AS_TRAN = 23456;	// IANA
 
     AsNum(); // unimplemented
-    // AsNum() : _asnum(invalid_As), _is_extended(false)	{}
 
     /**
-     * Constructor for a non-extended AS number.
-     * 
+     * Constructor.
      * @param value the value to assign to this AS number.
      */
-    AsNum(uint16_t value) : _asnum(value), _is_extended(false) {}
-    
-    /**
-     * Constructor for an extended AS number.
-     * 
-     * @param value the value to assign to this AS number.
-     */
-    AsNum(uint32_t value) : _asnum(value), _is_extended(true) {}
+    AsNum(const uint32_t value) : _as(value)			{
+	// XXX remove when we support 32-bit AS
+	assert(value < 0xffff);
+    }
  
     /**
      * Get the non-extended AS number value.
      * 
      * @return the non-extended AS number value.
      */
-    uint16_t as() const { force_valid(); return  (uint16_t)_asnum; }
-    
+    uint16_t as() const					{
+	return extended() ? AS_TRAN : _as;
+    }
+
     /**
      * Get the extended AS number value.
      * 
      * @return the extended AS number value.
      */
-    uint32_t as_extended() const { force_valid(); return _asnum; }
+    uint32_t as32() const				{ return _as; }
     
     /**
      * Test if this is an extended AS number.
      * 
      * @return true if this is an extended AS number.
      */
-    bool is_extended() const			{ return _is_extended; };
+    bool extended() const				{ return _as>0xffff;};
     
     /**
      * Equality Operator
@@ -91,31 +89,14 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    bool operator==(const AsNum& other) const		{
-	return (_is_extended == other._is_extended &&
-		_asnum == other._asnum);
-    }
+    bool operator==(const AsNum& x) const		{ return _as == x._as; }
 
-    
     /**
      * Less-Than Operator
-     * 
-     * @param other the right-hand operand to compare against.
      * @return true if the left-hand operand is numerically smaller than the
      * right-hand operand.
      */
-    bool operator<(const AsNum& other) const		{
-	return _asnum < other._asnum;
-    }
-    
-    /**
-     * Test if this AS number is valid.
-     * 
-     * @return true if this AS number is valid.
-     */
-    inline bool is_valid() const {
-	return ((_is_extended == true) || (_asnum <= 0xffff));
-    }
+    bool operator<(const AsNum& x) const		{ return _as < x._as; }
     
     /**
      * Convert this AS number from binary form to presentation format.
@@ -124,14 +105,10 @@ public:
      * of the AS number.
      */
     string str() const					{
-	return c_format("AS/%d%s", _asnum, _is_extended ? " extended" : "");
+	return c_format("AS/%d", _as);
     }
     
 private:
-    inline void force_valid() const { if (is_valid() == false ) abort(); }
-    
-    uint32_t _asnum;		// The value of the AS number
-    bool _is_extended;		// True if the AS number is extended
+    uint32_t _as;		// The value of the AS number
 };
-
 #endif // __LIBXORP_ASNUM_HH__
