@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.20 2003/05/31 16:16:39 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.21 2003/06/01 02:11:17 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -757,6 +757,8 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     for (uint16_t i = 0; i < MfeaNode::maxvifs(); i++) {
 	MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(i);
+	if (mfea_vif == NULL)
+	    continue;
 	XrlMfeaClientV0p1Client::send_new_vif(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
@@ -851,6 +853,8 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     for (uint16_t i = 0; i < MfeaNode::maxvifs(); i++) {
 	MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(i);
+	if (mfea_vif == NULL)
+	    continue;
 	XrlMfeaClientV0p1Client::send_new_vif(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
