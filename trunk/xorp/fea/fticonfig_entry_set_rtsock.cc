@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.5 2003/05/21 03:08:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.6 2003/05/21 05:32:50 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -204,7 +204,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     case AF_INET:
 	rtm->rtm_msglen = sizeof(*rtm) + sizeof(struct sockaddr_in);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	if (fte.is_host_route()) {
+	if (! fte.is_host_route()) {
 	    rtm->rtm_msglen += sizeof(struct sockaddr_in);
 	    sin_netmask = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
 				      struct sockaddr_in *);
@@ -214,7 +214,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     case AF_INET6:
 	rtm->rtm_msglen = sizeof(*rtm) + sizeof(struct sockaddr_in6);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	if (fte.is_host_route()) {
+	if (! fte.is_host_route()) {
 	    rtm->rtm_msglen += sizeof(struct sockaddr_in6);
 	    sin_netmask = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
 				      struct sockaddr_in *);
