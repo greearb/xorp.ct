@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.6 2004/05/28 23:12:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.7 2004/06/04 04:47:05 pavlin Exp $ */
 
 protocols {
     static {
@@ -107,7 +107,7 @@ protocols {
 	}
 
 	mrib-route6 @: ipv6net {
-	    %help:	short "Configure a multicast-specific IPv4 static route";
+	    %help:	short "Configure a multicast-specific IPv6 static route";
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
