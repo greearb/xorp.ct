@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.16 2005/03/20 02:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.17 2005/03/22 08:15:18 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -142,6 +142,8 @@ protocols {
 	    %help:	short "Configure the set of static RPs";
 	    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/config_static_rp_done";
 	    %update:	xrl "$(pimsm4.targetname)/pim/0.1/config_static_rp_done";
+	    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_all_static_rps";
+	    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/config_static_rp_done";
 	    rp @ {
 		%help:	short "Configure a static RP";
 		group-prefix @ {
