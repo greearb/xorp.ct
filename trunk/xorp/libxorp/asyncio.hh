@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.6 2003/06/20 18:55:55 hodson Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.7 2004/06/10 22:41:14 hodson Exp $
 
 #ifndef __LINXORP_ASYNCIO_HH__
 #define __LINXORP_ASYNCIO_HH__
@@ -204,7 +204,9 @@ public:
      * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor marked as non-blocking to write to.
      */
-    AsyncFileWriter(EventLoop& e, int fd) : AsyncFileOperator(e, fd) {}
+    AsyncFileWriter(EventLoop& e, int fd) : AsyncFileOperator(e, fd),
+					    _immediate_ctr(0)
+    {}
 
     ~AsyncFileWriter() { stop(); }
 
@@ -273,9 +275,11 @@ protected:
     };
 
     void write(int, SelectorMask);
-    void complete_transfer(ssize_t done);
+    void immediate_write();
+    bool complete_transfer(ssize_t done);
 
     list<BufferInfo> _buffers;
+    int _immediate_ctr;
 };
 
 #endif // __LIBXORP_ASYNCIO_HH__
