@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.62 2005/02/19 02:55:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.63 2005/02/23 17:37:37 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -2074,7 +2074,7 @@ XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it,
-	// then send the next one.
+	// then print an error and send the next one.
 	//
 	do {
 	    const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
@@ -2458,7 +2458,14 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 		   vif_index);
 	return (XORP_ERROR);
     }
-    
+
+    if (! _is_mfea_alive) {
+	XLOG_ERROR("Cannot send a protocol message on vif %s: "
+		   "the MFEA is down",
+		   pim_vif->name().c_str());
+	return (XORP_ERROR);	// The MFEA is dead
+    }
+
     // Copy 'sndbuf' to a vector
     vector<uint8_t> snd_vector;
     snd_vector.resize(sndlen);
