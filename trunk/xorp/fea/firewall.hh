@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.1 2004/08/31 17:43:39 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.2 2004/09/01 23:30:44 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -148,17 +148,13 @@ class FwProvider;
  */
 class FirewallManager {
 public:
-	FirewallManager() {}
+	FirewallManager() : _fwp(0) {}
 	virtual ~FirewallManager() {}
 
-	// XXX: const-ness?
-	FwTable4& get_fwtable4() { return _fwtable4; }
-	FwTable6& get_fwtable6() { return _fwtable6; }
+	inline FwTable4& get_fwtable4() { return _fwtable4; }
+	inline FwTable6& get_fwtable6() { return _fwtable6; }
 
 private:
-	// XRL interface instance. XXX
-	//XrlFirewallTarget&	_xrl;
-
 	// Underlying firewall provider interface in use, or NULL
 	// if one hasn't been set up yet.
 	FwProvider*	_fwp;
