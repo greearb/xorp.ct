@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -33,7 +33,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
-#include "ifconfig_rtsock.hh"
+#include "ifconfig.hh"
 
 /* ------------------------------------------------------------------------- */
 /* Verbose output control */

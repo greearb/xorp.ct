@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.3 2003/03/10 23:20:17 hodson Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.5 2003/05/02 07:50:49 pavlin Exp $"
 
 /* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
@@ -24,7 +24,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "fti.hh"
+#include "fte.hh"
 
 typedef void (*func)(const XrlError&, XrlRouter&, const Xrl&,
 		     XrlArgs*, void*);

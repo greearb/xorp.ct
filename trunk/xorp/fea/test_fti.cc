@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fti.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/test_fti.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
 
 #include <list>
 
@@ -20,7 +20,7 @@
 #include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include "fti.hh"
+#include "fte.hh"
 
 bool debug = false;
 
