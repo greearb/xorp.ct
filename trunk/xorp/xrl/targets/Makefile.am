@@ -1,10 +1,10 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.4 2003/05/09 19:36:04 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.5 2003/05/09 20:58:22 hodson Exp $
 ##
 
-INTERFACES_DIR=$(top_builddir)/xrl/interfaces
+INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
 
 ###############################################################################
 # Xrl Target related

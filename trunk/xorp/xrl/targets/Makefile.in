@@ -82,7 +82,7 @@ RANLIB = @RANLIB@
 VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
 
-INTERFACES_DIR = $(top_builddir)/xrl/interfaces
+INTERFACES_DIR = $(top_srcdir)/xrl/interfaces
 noinst_LIBRARIES = libbgpbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestpeerbase.a libxorpshbase.a
 
 # BGP
