@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.10 2003/05/23 23:35:00 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.11 2003/08/14 15:23:25 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -189,6 +189,7 @@ private:
     IfConfigGetIoctl	_ifc_get_ioctl;
     IfConfigGetSysctl	_ifc_get_sysctl;
     IfConfigGetGetifaddrs _ifc_get_getifaddrs;
+    IfConfigGetProcLinux  _ifc_get_proc_linux;
     
     //
     // The mechanisms to set interface-related information
