@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.17 2004/03/23 11:24:25 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.18 2004/04/28 15:56:47 hodson Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -276,29 +276,9 @@ public:
     virtual int route_deregister(const IPNet<A>& subnet, const string& module);
 
     /**
-     * Enable Redistribution.
-     * Note that it is an error if redistribution is already enabled.
-     *
-     * @param from_table the name of the source redistribition table.
-     * @param to_table the name of the destination table to which
-     * routes should be redistributed (must be an OriginTable<A>
-     * name).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * Get route redistribution table for specified routing protocol.
      */
-    virtual int redist_enable(const string& from_table,
-			      const string& to_table);
-
-    /**
-     * Disable redistribution.
-     *
-     * @param from_table the name of the source redistribition table.
-     * @param to_table the name of the destination table to which
-     * routes were previously redistributed (must be an OriginTable<A>
-     * name).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int redist_disable(const string& from_table,
-			       const string& to_table);
+    RedistTable<A>* protocol_redist_table(const string& protocol);
 
     /**
      * Create the OriginTable for an IGP protocol and plumb it into

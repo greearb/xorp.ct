@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.26 2004/04/23 19:30:18 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.27 2004/04/28 15:56:47 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -33,6 +33,17 @@ struct table_has_name {
     inline table_has_name(const string& name) : _n(name) {}
     inline bool operator() (const RouteTable<A>* rt) const {
 	return rt->tablename() == _n;
+    }
+private:
+    const string& _n;
+};
+
+template <typename A, typename T>
+struct table_has_name_and_type {
+    inline table_has_name_and_type(const string& name) : _n(name) {}
+    inline bool operator() (const RouteTable<A>* rt) const {
+	const T* t = dynamic_cast<const T*>(rt);
+	return (t != 0) && (rt->tablename() == _n);
     }
 private:
     const string& _n;
@@ -764,92 +775,14 @@ RIB<A>::route_deregister(const IPNet<A>& subnet, const string& module)
 }
 
 template <typename A>
-int
-RIB<A>::redist_enable(const string& src_tablename,
-		      const string& dst_tablename)
+RedistTable<A>*
+RIB<A>::protocol_redist_table(const string& protocol)
 {
-    UNUSED(src_tablename);
-    UNUSED(dst_tablename);
-#if 0
-    //
-    // In theory we can redistribute from any RouteTable<A>, in practice,
-    // we practice it has to be an OriginTable for the time being.
-    //
-    RouteTable<A>* src_table = find_table(src_tablename);
-    if (src_table == 0) {
-	XLOG_ERROR("Attempt to redistribute from non-existent table \"%s\".",
-		   src_tablename.c_str());
-	return XORP_ERROR;
+    RouteTable<A>* rt = find_table(redist_tablename(protocol));
+    if (rt) {
+	return dynamic_cast<RedistTable<A>*>(rt);
     }
-
-    OriginTable<A>* src_otable = dynamic_cast<OriginTable<A>*>(src_table);
-    if (src_otable == 0) {
-	XLOG_ERROR("Redistribution failed \"%s\" is not an origin table.",
-		   src_tablename.c_str());
-	return XORP_ERROR;
-    }
-
-    //
-    // Find the table to redistribute to
-    //
-    // Note this table is not used by the RedistTable for anything execpt
-    // it's name.  We just want to know that a valid target to receive
-    // the redistributed routes exists.
-    //
-    RouteTable<A>* dst_table = find_table(dst_tablename);
-    if (dst_table == 0) {
-	XLOG_ERROR("Attempt to redistribute to non-existent table \"%s\".",
-		   dst_tablename.c_str());
-	return XORP_ERROR;
-    }
-
-    //
-    // We can only redistribute to an OriginTable (since it is associated
-    // with a routing protocol).
-    //
-    OriginTable<A>* dst_otable = dynamic_cast<OriginTable<A>*>(dst_table);
-    if (dst_otable == NULL) {
-	XLOG_ERROR("Redistribution failed \"%s\" is not an origin table.",
-		   dst_tablename.c_str());
-	return XORP_ERROR;
-    }
-
-    string tablename = redist_tablename(src_tablename, dst_tablename);
-    RedistTable<A>* redist_table = new RedistTable<A>(tablename,
-						      src_otable,
-						      dst_otable,
-						      _eventloop);
-    if (add_table(redist_table) != XORP_OK) {
-	XLOG_WARNING("Redistribution failed because redist table \"%s\" "
-		     "already exists", tablename.c_str());
-	delete redist_table;
-	return XORP_ERROR;
-    }
-#endif /* 0 */
-    return XORP_OK;
-}
-
-template <typename A>
-int
-RIB<A>::redist_disable(const string& from_table, const string& to_table)
-{
-    UNUSED(from_table);
-    UNUSED(to_table);
-#if 0
-    string tname = redist_tablename(from_table, to_table);
-
-    // TODO: XXX: This routine currently trawls tables map twice.
-    RedistTable<A>* rdt = dynamic_cast<RedistTable<A>* >(find_table(tname));
-    if (rdt == NULL) {
-	XLOG_WARNING("Attempt to disable redistribution \"%s\" when "
-		     "redistribution is not enabled.", tname.c_str());
-	return XORP_ERROR;
-    }
-    if (remove_table(tname) != XORP_OK) {
-	return XORP_ERROR;
-    }
-#endif /* 0 */
-    return XORP_OK;
+    return 0;
 }
 
 template <typename A>
