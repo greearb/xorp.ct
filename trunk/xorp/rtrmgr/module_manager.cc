@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.38 2004/12/11 13:36:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.39 2004/12/11 21:29:58 mjh Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -34,7 +34,8 @@
 #include "conf_tree_node.hh"
 #include "master_conf_tree.hh"
 #include "template_commands.hh"
-#include "xrl_rtrmgr_interface.hh"
+//#include "xrl_rtrmgr_interface.hh"
+#include "main_rtrmgr.hh"
 
 
 static map<pid_t, string> module_pids;
@@ -575,13 +576,15 @@ Module::str() const
     return s;
 }
 
-ModuleManager::ModuleManager(EventLoop& eventloop, bool do_restart,
+ModuleManager::ModuleManager(EventLoop& eventloop, 
+			     Rtrmgr *rtrmgr, bool do_restart,
 			     bool verbose, const string& xorp_root_dir)
     : GenericModuleManager(eventloop, verbose),
       _do_restart(do_restart),
       _verbose(verbose),
       _xorp_root_dir(xorp_root_dir),
-      _master_config_tree(NULL)
+      _master_config_tree(NULL),
+      _rtrmgr(rtrmgr)
 {
 }
 
@@ -648,7 +651,7 @@ ModuleManager::module_status_changed(const string& module_name,
 				     Module::ModuleStatus new_status)
 {
     UNUSED(old_status);
-    _xrl_interface->module_status_changed(module_name, new_status);
+    _rtrmgr->module_status_changed(module_name, new_status);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.54 2004/12/09 07:54:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.55 2004/12/11 21:29:56 mjh Exp $"
 
 #include <signal.h>
 
@@ -288,7 +288,7 @@ Rtrmgr::run()
     //
     // Start the module manager
     //
-    ModuleManager mmgr(eventloop, _do_restart, _verbose,
+    ModuleManager mmgr(eventloop, this, _do_restart, _verbose,
 		       xorp_binary_root_dir());
 
     try {
@@ -300,12 +300,15 @@ Rtrmgr::run()
 	UserDB userdb(_verbose);
 
 	userdb.load_password_file();
-	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen, *this);
+	_xrt = new XrlRtrmgrInterface(xrl_router, userdb, eventloop, 
+				      randgen, *this);
 
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
+#if 0
 	// Let the module manager know how to send XRLs to xorpsh
-	mmgr.set_xrl_interface(&xrt);
+	mmgr.set_xrl_interface(_xrt);
+#endif
 
 	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec,
 				    _verbose);
@@ -315,7 +318,7 @@ Rtrmgr::run()
 	// or ModuleManager::set_master_config_tree() below.
 	// For now we ignore that possibility...
 	//
-	xrt.set_master_config_tree(_mct);
+	_xrt->set_master_config_tree(_mct);
 	mmgr.set_master_config_tree(_mct);
 
 	// For testing purposes, rtrmgr can terminate itself after some time.
@@ -439,6 +442,13 @@ Rtrmgr::validate_save_hook() {
     }
     _save_hook = expanded_path;
     return XORP_OK;
+}
+
+void
+Rtrmgr::module_status_changed(const string& module_name,
+			      GenericModule::ModuleStatus status)
+{
+    _xrt->module_status_changed(module_name, status);
 }
 
 int

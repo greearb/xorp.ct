@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.28 2004/12/11 13:36:02 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.29 2004/12/11 21:29:58 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -33,7 +33,8 @@ class ModuleCommand;
 class ModuleManager;
 class XorpClient;
 class XrlAction;
-class XrlRtrmgrInterface;
+//class XrlRtrmgrInterface;
+class Rtrmgr;
 
 
 #define NO_SETUID_ON_EXEC 0
@@ -78,7 +79,8 @@ class ModuleManager : public GenericModuleManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
     
 public:
-    ModuleManager(EventLoop& eventloop, bool do_restart, bool verbose,
+    ModuleManager(EventLoop& eventloop, Rtrmgr* rtrmgr,
+		  bool do_restart, bool verbose,
 		  const string& xorp_root_dir);
     ~ModuleManager();
 
@@ -117,9 +119,11 @@ public:
 		      ModuleManager::CallBack cb, bool do_exec);
     MasterConfigTree* master_config_tree() const { return _master_config_tree; }
     void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
+#if 0
     void set_xrl_interface(XrlRtrmgrInterface* xrl_interface) {
 	_xrl_interface = xrl_interface;
     }
+#endif
 
     /**
      * Test if processes that have failed should be restarted.
@@ -133,7 +137,8 @@ private:
     bool	_verbose;	// Set to true if output is verbose
     string	_xorp_root_dir;	// The root of the XORP tree
     MasterConfigTree*	_master_config_tree;
-    XrlRtrmgrInterface* _xrl_interface;
+    //XrlRtrmgrInterface* _xrl_interface;
+    Rtrmgr *_rtrmgr;
 };
 
 #endif // __RTRMGR_MODULE_MANAGER_HH__

@@ -97,13 +97,11 @@ install_sh = @install_sh@
 bin_PROGRAMS = xorp_rtrmgr xorpsh xorp_profiler
 
 # -- Test Programs
-TESTS = test_templates
-#TESTS		+= test_sample_config
+TESTS = test_templates test_sample_config
 #TESTS		+= test_module_manager
 
 # -- No-install Programs
-check_PROGRAMS = test_templates
-#check_PROGRAMS	+= test_sample_config
+check_PROGRAMS = test_templates test_sample_config
 #check_PROGRAMS	+= test_module_manager
 
 # -- Libraries and library flags to link the binary programs
@@ -135,38 +133,6 @@ xorp_profiler_LDADD = $(top_builddir)/xrl/interfaces/libprofilexif.la $(top_buil
 #
 # test_templates
 # #
-#test_templates_SOURCES	+= y.boot_tab.h
-
-# test_templates_SOURCES	+= command_tree.hh
-# test_templates_SOURCES	+= conf_tree.hh
-# test_templates_SOURCES	+= generic_module_manager.hh
-# test_templates_SOURCES	+= master_conf_tree.hh
-# test_templates_SOURCES	+= module_commands.hh
-# test_templates_SOURCES	+= module_manager.hh
-# test_templates_SOURCES	+= path_segment.hh
-# test_templates_SOURCES	+= rtrmgr_error.hh
-# test_templates_SOURCES	+= task.hh
-# test_templates_SOURCES	+= template_commands.hh
-# test_templates_SOURCES	+= unexpanded_xrl.hh
-# test_templates_SOURCES	+= userdb.hh
-# test_templates_SOURCES	+= xorp_client.hh
-# test_templates_SOURCES	+= xrl_rtrmgr_interface.hh
-# test_templates_SOURCES	+= xrldb.hh
-
-# test_templates_SOURCES	+= command_tree.cc
-# test_templates_SOURCES	+= conf_tree.cc
-# test_templates_SOURCES	+= generic_module_manager.cc
-# test_templates_SOURCES	+= lex.boot.cc
-# test_templates_SOURCES	+= master_conf_tree.cc
-# test_templates_SOURCES	+= module_command.cc
-# test_templates_SOURCES	+= module_manager.cc
-# test_templates_SOURCES	+= task.cc
-# test_templates_SOURCES	+= template_commands.cc
-# test_templates_SOURCES	+= unexpanded_xrl.cc
-# test_templates_SOURCES	+= xorp_client.cc
-# test_templates_SOURCES	+= xrl_rtrmgr_interface.xx
-# test_templates_SOURCES	+= xrldb.cc
-# test_templates_SOURCES	+= y.boot_tab.cc
 test_templates_SOURCES = rtrmgr_module.h y.tplt_tab.h conf_tree_node.hh template_base_command.hh template_tree.hh template_tree_node.hh util.hh conf_tree_node.cc lex.tplt.cc template_base_command.cc template_tree.cc template_tree_node.cc test_templates.cc util.cc y.tplt_tab.cc
 
 test_templates_LDADD = $(LDADD)
@@ -174,50 +140,11 @@ test_templates_LDADD = $(LDADD)
 #
 # test_sample_config
 #
-# test_sample_config_SOURCES	 = rtrmgr_module.h
-# test_sample_config_SOURCES	+= y.boot_tab.h
-# test_sample_config_SOURCES	+= y.tplt_tab.h
+#test_sample_config_SOURCES	+= xrl_rtrmgr_interface.hh
+test_sample_config_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh master_conf_tree.hh master_conf_tree_node.hh generic_module_manager.hh module_commands.hh module_manager.hh path_segment.hh rtrmgr_error.hh task.hh template_base_command.hh template_commands.hh template_tree.hh template_tree_node.hh master_template_tree.hh master_template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc master_conf_tree.cc master_conf_tree_node.cc generic_module_manager.cc lex.boot.cc lex.tplt.cc module_command.cc module_manager.cc task.cc template_base_command.cc template_commands.cc template_tree.cc template_tree_node.cc master_template_tree.cc master_template_tree_node.cc test_sample_config.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
-# test_sample_config_SOURCES	+= command_tree.hh
-# test_sample_config_SOURCES	+= conf_tree.hh
-# test_sample_config_SOURCES	+= conf_tree_node.hh
-# test_sample_config_SOURCES	+= generic_module_manager.hh
-# test_sample_config_SOURCES	+= master_conf_tree.hh
-# test_sample_config_SOURCES	+= module_commands.hh
-# test_sample_config_SOURCES	+= module_manager.hh
-# test_sample_config_SOURCES	+= path_segment.hh
-# test_sample_config_SOURCES	+= rtrmgr_error.hh
-# test_sample_config_SOURCES	+= task.hh
-# test_sample_config_SOURCES	+= template_commands.hh
-# test_sample_config_SOURCES	+= template_tree.hh
-# test_sample_config_SOURCES	+= template_tree_node.hh
-# test_sample_config_SOURCES	+= unexpanded_xrl.hh
-# test_sample_config_SOURCES	+= util.hh
-# test_sample_config_SOURCES	+= xorp_client.hh
-# test_sample_config_SOURCES	+= xrldb.hh
-
-# test_sample_config_SOURCES	+= command_tree.cc
-# test_sample_config_SOURCES	+= conf_tree.cc
-# test_sample_config_SOURCES	+= conf_tree_node.cc
-# test_sample_config_SOURCES	+= generic_module_manager.cc
-# test_sample_config_SOURCES	+= lex.boot.cc
-# test_sample_config_SOURCES	+= lex.tplt.cc
-# test_sample_config_SOURCES	+= master_conf_tree.cc
-# test_sample_config_SOURCES	+= module_command.cc
-# test_sample_config_SOURCES	+= module_manager.cc
-# test_sample_config_SOURCES	+= task.cc
-# test_sample_config_SOURCES	+= template_commands.cc
-# test_sample_config_SOURCES	+= template_tree.cc
-# test_sample_config_SOURCES	+= template_tree_node.cc
-# test_sample_config_SOURCES	+= test_sample_config.cc
-# test_sample_config_SOURCES	+= unexpanded_xrl.cc
-# test_sample_config_SOURCES	+= util.cc
-# test_sample_config_SOURCES	+= xorp_client.cc
-# test_sample_config_SOURCES	+= xrldb.cc
-# test_sample_config_SOURCES	+= y.boot_tab.cc
-# test_sample_config_SOURCES	+= y.tplt_tab.cc
-
-# test_sample_config_LDADD 	 = $(LDADD)
+#test_sample_config_SOURCES	+= xrl_rtrmgr_interface.cc
+test_sample_config_LDADD = $(LDADD)
 
 # #
 # # test_module_manager
@@ -280,9 +207,28 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT) \
 	xorp_profiler$(EXEEXT)
-check_PROGRAMS = test_templates$(EXEEXT)
+check_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
+am_test_sample_config_OBJECTS = command_tree.$(OBJEXT) \
+	conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
+	master_conf_tree.$(OBJEXT) master_conf_tree_node.$(OBJEXT) \
+	generic_module_manager.$(OBJEXT) lex.boot.$(OBJEXT) \
+	lex.tplt.$(OBJEXT) module_command.$(OBJEXT) \
+	module_manager.$(OBJEXT) task.$(OBJEXT) \
+	template_base_command.$(OBJEXT) template_commands.$(OBJEXT) \
+	template_tree.$(OBJEXT) template_tree_node.$(OBJEXT) \
+	master_template_tree.$(OBJEXT) \
+	master_template_tree_node.$(OBJEXT) \
+	test_sample_config.$(OBJEXT) unexpanded_xrl.$(OBJEXT) \
+	util.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
+	y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
+test_sample_config_OBJECTS = $(am_test_sample_config_OBJECTS)
+test_sample_config_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+test_sample_config_LDFLAGS =
 am_test_templates_OBJECTS = conf_tree_node.$(OBJEXT) lex.tplt.$(OBJEXT) \
 	template_base_command.$(OBJEXT) template_tree.$(OBJEXT) \
 	template_tree_node.$(OBJEXT) test_templates.$(OBJEXT) \
@@ -371,6 +317,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/template_commands.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_tree.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_sample_config.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_templates.Po \
 @AMDEP_TRUE@	$(DEPDIR)/unexpanded_xrl.Po $(DEPDIR)/userdb.Po \
 @AMDEP_TRUE@	$(DEPDIR)/util.Po $(DEPDIR)/xorp_client.Po \
@@ -396,10 +343,11 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(test_templates_SOURCES) $(xorp_profiler_SOURCES) \
-	$(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
+DIST_SOURCES = $(test_sample_config_SOURCES) $(test_templates_SOURCES) \
+	$(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) \
+	$(xorpsh_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(test_templates_SOURCES) $(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
+SOURCES = $(test_sample_config_SOURCES) $(test_templates_SOURCES) $(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
 
 all: all-am
 
@@ -448,6 +396,9 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+test_sample_config$(EXEEXT): $(test_sample_config_OBJECTS) $(test_sample_config_DEPENDENCIES) 
+	@rm -f test_sample_config$(EXEEXT)
+	$(CXXLINK) $(test_sample_config_LDFLAGS) $(test_sample_config_OBJECTS) $(test_sample_config_LDADD) $(LIBS)
 test_templates$(EXEEXT): $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES) 
 	@rm -f test_templates$(EXEEXT)
 	$(CXXLINK) $(test_templates_LDFLAGS) $(test_templates_OBJECTS) $(test_templates_LDADD) $(LIBS)
@@ -493,6 +444,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_sample_config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_templates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/unexpanded_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/userdb.Po@am__quote@

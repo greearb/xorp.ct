@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.17 2004/08/19 02:00:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.18 2004/12/09 07:54:42 pavlin Exp $"
 
 
 #include <signal.h>
@@ -27,6 +27,7 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
+#include "test_sample_config.hh"
 #include "master_conf_tree.hh"
 #include "module_manager.hh"
 #include "rtrmgr_error.hh"
@@ -34,7 +35,8 @@
 #include "template_commands.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
-
+#include "master_template_tree.hh"
+#include "master_template_tree_node.hh"
 
 //
 // Defaults
@@ -47,35 +49,54 @@ static const string default_config_template_dir = srcdir + "/../etc/templates";
 static const string default_xrl_targets_dir = srcdir + "/../xrl/targets";
 static const string default_config_boot = srcdir + "/config.boot.sample";
 
+// the following two functions are an ugly hack to cause the C code in
+// the parser to call methods on the right version of the TemplateTree
+
+void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+{
+    ((MasterTemplateTree*)tt)->add_cmd(cmd);
+}
+
+
+void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt)
+{
+    ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
+}
+
+
 //
 // This test loads the template tree, then loads the sample config,
 // but doesn't call any XRLs or start any processes.
 //
 
-int
-main(int argc, char* const argv[])
+
+Rtrmgr::Rtrmgr()
 {
-    UNUSED(argc);
+}
 
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
 
+int 
+Rtrmgr::run()
+{
     const string& config_template_dir = default_config_template_dir;
     const string& xrl_targets_dir = default_xrl_targets_dir;
     const string& config_boot = default_config_boot;
 
-    // Read the router config template files
-    TemplateTree *tt = NULL;
+    XRLdb* xrldb = NULL;
     try {
-	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
-			      xrl_targets_dir, true /* verbose */);
+	xrldb = new XRLdb(xrl_targets_dir, /*verbose*/ true);
+    } catch (const InitError& e) {
+	fprintf(stderr, "Init error in XrlDB: %s", e.why().c_str());
+	fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	return (1);
+    }
+
+    // Read the router config template files
+    MasterTemplateTree *tt = NULL;
+    try {
+	tt = new MasterTemplateTree(default_xorp_root_dir, 
+				    *xrldb, true /* verbose */);
     } catch (const InitError& e) {
 	fprintf(stderr, "test_sample_config: template tree init error: %s\n",
 		e.why().c_str());
@@ -88,6 +109,13 @@ main(int argc, char* const argv[])
 	exit(1);
     }
 
+    string errmsg;
+    if (tt->load_template_tree(config_template_dir, errmsg) == false) {
+	fprintf(stderr, "%s", errmsg.c_str());
+	fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	exit(1);
+    }
+
     // Initialize the event loop
     EventLoop eventloop; 
 
@@ -96,7 +124,7 @@ main(int argc, char* const argv[])
 		    FinderConstants::FINDER_DEFAULT_PORT());
 
     // Start the module manager
-    ModuleManager mmgr(eventloop,
+    ModuleManager mmgr(eventloop, this,
 		       false,	/* do_restart */
 		       false,	/* verbose */
 		       default_xorp_root_dir);
@@ -132,6 +160,37 @@ main(int argc, char* const argv[])
     }
 
     delete tt;
+    delete xrldb;
+
+    return 0;
+}
+
+void 
+Rtrmgr::module_status_changed(const string& module_name,
+			      GenericModule::ModuleStatus status)
+{
+    UNUSED(module_name);
+    UNUSED(status);
+}
+
+
+int
+main(int argc, char* const argv[])
+{
+    UNUSED(argc);
+
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+    // XXX: verbosity of the error messages temporary increased
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    Rtrmgr rtrmgr;
+    rtrmgr.run();
 
     //
     // Gracefully stop and exit xlog

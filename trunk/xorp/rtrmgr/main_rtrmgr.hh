@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.8 2004/05/28 22:27:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.9 2004/08/19 02:00:20 pavlin Exp $
 
 #ifndef __RTRMGR_MAIN_RTRMGR_HH__
 #define __RTRMGR_MAIN_RTRMGR_HH__
@@ -21,9 +21,11 @@
 #include <list>
 
 #include "libxorp/ipv4.hh"
+#include "generic_module_manager.hh"
 
 
 class MasterConfigTree;
+class XrlRtrmgrInterface;
 
 class Rtrmgr {
 public:
@@ -40,6 +42,8 @@ public:
     int run();
     bool ready() const;
     const string& save_hook() const { return _save_hook; }
+    void module_status_changed(const string& module_name,
+			       GenericModule::ModuleStatus status);
     bool verbose() const { return _verbose; }
 
 private:
@@ -70,6 +74,7 @@ private:
 
     bool	_ready;
     MasterConfigTree* _mct;
+    XrlRtrmgrInterface* _xrt;
 };
 
 #endif // __RTRMGR_MAIN_RTRMGR_HH__
