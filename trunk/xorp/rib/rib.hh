@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.26 2004/09/17 14:00:03 abittau Exp $
+// $XORP: xorp/rib/rib.hh,v 1.27 2004/10/29 01:10:06 bms Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -308,7 +308,7 @@ public:
      *
      * @param lookupaddr the address to be looked up.
      * @return pointer to address of next hop for @ref lookupaddr if
-     * available, A::ZERO() otherwise.
+     * available, otherwise A::ZERO().
      */
     virtual const A& lookup_route(const A& lookupaddr);
 
