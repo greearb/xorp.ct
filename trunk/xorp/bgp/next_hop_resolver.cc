@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.24 2003/10/13 20:43:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.25 2003/10/23 10:54:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -214,9 +214,12 @@ NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
 
     bool resolvable;
     uint32_t metric;
-    if (!_next_hop_cache.lookup_by_addr(addr, prefix_len, resolvable, metric)) {
+    if (!_next_hop_cache.lookup_by_addr(addr, prefix_len, resolvable,
+					metric)) {
 	XLOG_WARNING("address not found in next hop cache: %s/%d",
 		   addr.str().c_str(), prefix_len);
+	if (_next_hop_rib_request.busy())
+	    XLOG_WARNING("Waiting for a response from the RIB");
 	return false;
     }
 
@@ -273,15 +276,6 @@ NextHopResolver<A>::next_hop_changed(A addr, bool old_resolves,
 	    (*i)->igp_nexthop_changed(addr);
     }
 }
-
-template <class A>
-bool 
-NextHopResolver<A>::status(string& reason) const
-{
-    return _next_hop_rib_request.status(reason);
-}
-
-
 
 /****************************************/
 
@@ -624,8 +618,7 @@ NextHopRibRequest<A>::NextHopRibRequest(XrlStdRouter *xrl_router,
 					NextHopCache<A>& next_hop_cache,
 					BGPMain& bgp)
     : _xrl_router(xrl_router), _next_hop_resolver(next_hop_resolver),
-      _next_hop_cache(next_hop_cache), _bgp(bgp), _busy(false), 
-      _interface_failed(false)
+      _next_hop_cache(next_hop_cache), _bgp(bgp), _busy(false)
 {
 }
 
@@ -646,9 +639,6 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
 
-    //don't do anything if we've already fatally failed
-    if (_interface_failed)
-	return;
     /*
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
@@ -688,10 +678,6 @@ void
 NextHopRibRequest<A>::deregister_from_rib(const A& base_addr, 
 					  uint32_t prefix_len)
 {
-    //don't do anything if we've already fatally failed
-    if (_interface_failed)
-	return;
-
     /*
     ** Construct a request.
     */
@@ -944,7 +930,8 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 
 template<class A>
 void
-NextHopRibRequest<A>::send_next_request() {
+NextHopRibRequest<A>::send_next_request()
+{
     if (_queue.empty()) {
 	_busy = false;
 	return;
@@ -1157,7 +1144,6 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	//A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
 	//unrecoverable.  A RESOLVE_FAILED error when it had
 	//previously been successful is also unrecoverable.
-	_interface_failed = true;
 	while (!_queue.empty()) {
 	    delete _queue.front();
 		_queue.pop_front();
@@ -1165,20 +1151,8 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	return;
 	break;
     case SEND_FAILED:
-	//SEND_FAILED can be a transient error.  RESOLVE_FAILED
-	//when we hadn't been previously successful might indicate
-	//an ordering problem at startup.  In both cases, we resend.
-	XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
-	    
-	//The request will still be on the request queue.
-	//All we need to do is resend it after a respectable delay
-	_rtx_delay_timer = 
-	    _next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
-			      ::callback(this,
-			      &NextHopRibRequest<A>::deregister_interest,
-			      addr, prefix_len));
-	    return;
-	    break;
+	XLOG_FATAL("%s %s", comment.c_str(), error.str().c_str());
+	break;
     case SEND_FAILED_TRANSIENT:
     case NO_SUCH_METHOD:
     case BAD_ARGS:
@@ -1199,18 +1173,6 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	send_next_request();
 
     return;
-}
-
-template <class A>
-bool 
-NextHopRibRequest<A>::status(string& reason) const
-{
-    if (_interface_failed) {
-	reason = "NextHopResolver suffered fatal error talking to RIB";
-	return false;
-    } else {
-	return true;
-    }
 }
 
 /****************************************/

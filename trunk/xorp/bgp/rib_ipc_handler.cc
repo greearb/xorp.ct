@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.41 2003/12/19 22:12:10 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.42 2003/12/20 02:09:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -439,7 +439,7 @@ XrlQueue<A>::start()
 	    // This return is here temporarily to allow the regression
 	    // tests to succeed.
 	    // XXX
-	    return;
+// 	    return;
  	    continue;
 	}
 

@@ -841,9 +841,9 @@ BGPPlumbingAF<A>::read_next_route(uint32_t token,
 
 template <class A>
 bool
-BGPPlumbingAF<A>::status(string& reason) const
+BGPPlumbingAF<A>::status(string&) const
 {
-    return _next_hop_resolver.status(reason);
+    return true;
 }
 
 template class BGPPlumbingAF<IPv4>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.20 2003/09/30 03:07:55 pavlin Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.21 2003/10/13 20:43:18 atanu Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -201,15 +201,6 @@ public:
      */
     EventLoop& eventloop() {return _eventloop;}
 
-    /**
-     * Get the status of the NextHopResolver
-     *
-     * @param reason the human-readable reason for any failure
-     *
-     * @return false if NextHopResolver has suffered a fatal error,
-     * true otherwise 
-     */
-    bool status(string& reason) const;
 protected:
     list<DecisionTable<A> *> _decision;
 private:
@@ -700,14 +691,11 @@ public:
 				      string comment);
 
     /**
-     * Get the status of the NextHopRibRequest
+     * Check the status of outstanding requests to the RIB.
      *
-     * @param reason the human-readable reason for any failure
-     *
-     * @return false if NextHopRibRequest has suffered a fatal error,
-     * true otherwise 
+     * @return true if we are waiting for a response from the RIB.
      */
-    bool status(string& reason) const;
+    bool busy() const {return _busy;}
 private:
     string _ribname;
     XrlStdRouter *_xrl_router;
@@ -719,16 +707,11 @@ private:
      * Are we currently waiting for a response from the RIB.
      */
     bool _busy;
+
     /**
      * The queue of outstanding requests.
      */
     list<RibRequestQueueEntry<A> *> _queue;
-    /**
-     * Retransmit delay timer for resending (de)registrations.
-     */
-    XorpTimer _rtx_delay_timer;
-
-    bool _interface_failed; /* true if we've received a fatal error */
 
     /**
      * Used by the destructor to delete all the "RibRequestQueueEntry" objects
