@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.10 2003/08/01 04:08:12 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.11 2003/08/04 23:36:38 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -31,6 +31,7 @@
 #include "port_manager.hh"
 #include "packet_assembly.hh"
 #include "packet_queue.hh"
+#include "system.hh"
 
 // ----------------------------------------------------------------------------
 // PortTimerConstants Implementation
