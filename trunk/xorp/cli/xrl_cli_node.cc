@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.7 2003/03/25 01:21:45 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.8 2003/05/07 23:15:13 mjh Exp $"
 
-#include "libxorp/status_codes.h"
 #include "cli_module.h"
 #include "cli_private.hh"
+#include "libxorp/status_codes.h"
 #include "xrl_cli_node.hh"
 #include "cli_node.hh"
 
