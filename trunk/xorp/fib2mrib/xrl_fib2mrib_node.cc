@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.11 2004/06/02 18:28:16 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.12 2004/06/10 22:41:01 hodson Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -1025,7 +1025,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv4(),
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy 
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1037,7 +1038,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    true,			/* multicast */
 		    fib2mrib_route.network().get_ipv4net(),
 		    fib2mrib_route.nexthop().get_ipv4(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1054,7 +1056,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv6(),
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1066,7 +1069,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    true,			/* multicast */
 		    fib2mrib_route.network().get_ipv6net(),
 		    fib2mrib_route.nexthop().get_ipv6(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1086,7 +1090,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv4(),
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1098,7 +1103,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    true,			/* multicast */
 		    fib2mrib_route.network().get_ipv4net(),
 		    fib2mrib_route.nexthop().get_ipv4(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1115,7 +1121,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.nexthop().get_ipv6(),
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1127,7 +1134,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    true,			/* multicast */
 		    fib2mrib_route.network().get_ipv6net(),
 		    fib2mrib_route.nexthop().get_ipv6(),
-		    fib2mrib_route.metric(),
+		    fib2mrib_route.metric(), 
+		    XrlAtomList(), // no policy
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;

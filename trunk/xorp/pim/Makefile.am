@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.23 2004/06/04 02:37:10 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.24 2004/07/26 02:57:24 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -80,6 +80,7 @@ test_pim_SOURCES += $(top_builddir)/rib/redist_xrl.hh
 test_pim_SOURCES += $(top_builddir)/rib/redist_xrl.cc
 
 test_pim_LDADD	 = $(LDADD)
+test_pim_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.a
 test_pim_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
@@ -97,10 +98,12 @@ test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredist6xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
-test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.a
+#test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h
