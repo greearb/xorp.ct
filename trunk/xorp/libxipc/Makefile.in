@@ -152,11 +152,9 @@ test_finder_events_LDADD = libfinder.a $(LDADD)
 test_finder_to_SOURCES = test_finder_to.cc
 test_finder_to_LDADD = libfinder.a $(LDADD)
 
-test_xrl_receiver_SOURCES = test_xrl_receiver.cc
-test_xrl_receiver_LDADD = $(top_builddir)/xrl/targets/libtestxrlsbase.a $(LDADD)
+test_xrl_receiver_SOURCES = test_xrl_receiver.cc test_xrls_base.hh test_xrls_base.cc
 
-test_xrl_sender_SOURCES = test_xrl_sender.cc
-test_xrl_sender_LDADD = $(top_builddir)/xrl/interfaces/libtestxrlsxif.a $(LDADD)
+test_xrl_sender_SOURCES = test_xrl_sender.cc test_xrls_xif.hh test_xrls_xif.cc
 
 # -- Library Sources (libxipc)
 
@@ -178,7 +176,7 @@ INCLUDES = -I$(top_srcdir)
 
 # -- Generated Sources used in libxipc and libfinder
 # (see explanation at end of file)
-BUILT_SOURCES = common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_xif.hh finder_xif.cc finder_event_notifier_xif.hh finder_event_notifier_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc test_finder_events_base.hh test_finder_events_base.cc
+BUILT_SOURCES = common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_xif.hh finder_xif.cc finder_event_notifier_xif.hh finder_event_notifier_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc test_finder_events_base.hh test_finder_events_base.cc test_xrls_xif.hh test_xrls_xif.cc test_xrls_base.hh test_xrls_base.cc
 
 CLEANFILES = $(BUILT_SOURCES)
 subdir = libxipc
@@ -345,11 +343,12 @@ test_xrl_parser_DEPENDENCIES = ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_parser_LDFLAGS =
-am_test_xrl_receiver_OBJECTS = test_xrl_receiver.$(OBJEXT)
+am_test_xrl_receiver_OBJECTS = test_xrl_receiver.$(OBJEXT) \
+	test_xrls_base.$(OBJEXT)
 test_xrl_receiver_OBJECTS = $(am_test_xrl_receiver_OBJECTS)
-test_xrl_receiver_DEPENDENCIES = \
-	$(top_builddir)/xrl/targets/libtestxrlsbase.a ./libfinder.a \
-	./libxipc.a $(top_builddir)/libxorp/libxorp.a \
+test_xrl_receiver_LDADD = $(LDADD)
+test_xrl_receiver_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_receiver_LDFLAGS =
 am_test_xrl_router_OBJECTS = test_xrl_router.$(OBJEXT)
@@ -358,11 +357,12 @@ test_xrl_router_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_router_LDFLAGS =
-am_test_xrl_sender_OBJECTS = test_xrl_sender.$(OBJEXT)
+am_test_xrl_sender_OBJECTS = test_xrl_sender.$(OBJEXT) \
+	test_xrls_xif.$(OBJEXT)
 test_xrl_sender_OBJECTS = $(am_test_xrl_sender_OBJECTS)
-test_xrl_sender_DEPENDENCIES = \
-	$(top_builddir)/xrl/interfaces/libtestxrlsxif.a ./libfinder.a \
-	./libxipc.a $(top_builddir)/libxorp/libxorp.a \
+test_xrl_sender_LDADD = $(LDADD)
+test_xrl_sender_DEPENDENCIES = ./libfinder.a ./libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_sender_LDFLAGS =
 am_xorp_finder_OBJECTS = finder_main.$(OBJEXT)
@@ -415,7 +415,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_parser.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_receiver.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_router.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_xrl_sender.Po $(DEPDIR)/xrl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_sender.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrls_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrls_xif.Po $(DEPDIR)/xrl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_args.Po $(DEPDIR)/xrl_atom.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_atom_encoding.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_atom_list.Po $(DEPDIR)/xrl_cmd_map.Po \
@@ -642,6 +644,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_router.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_sender.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrls_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrls_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_args.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_atom.Po@am__quote@
@@ -955,6 +959,16 @@ $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc:		\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
+test_xrls_xif.%:							\
+    $(top_srcdir)/xrl/interfaces/test_xrls_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/test_xrls_xif.hh				\
+$(top_srcdir)/xrl/interfaces/test_xrls_xif.cc:				\
+    $(top_srcdir)/xrl/interfaces/test_xrls.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
 ###############################################################################
 #
 # Build handler bases
@@ -1007,6 +1021,20 @@ $(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
     $(top_srcdir)/xrl/targets/test_finder_events.tgt			\
     $(top_srcdir)/xrl/interfaces/common.xif				\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+# Test XRLs base
+
+test_xrls_base.%:							\
+    $(top_srcdir)/xrl/targets/test_xrls_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/test_xrls_base.hh				\
+$(top_srcdir)/xrl/targets/test_xrls_base.cc:				\
+    $(top_srcdir)/xrl/targets/test_xrls.tgt				\
+    $(top_srcdir)/xrl/interfaces/common.xif				\
+    $(top_srcdir)/xrl/interfaces/test_xrls.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.30 2003/09/26 21:34:34 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.31 2004/09/22 02:49:59 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -83,12 +83,12 @@ test_finder_to_SOURCES		 = test_finder_to.cc
 test_finder_to_LDADD		 = libfinder.a $(LDADD)
 
 test_xrl_receiver_SOURCES	 = test_xrl_receiver.cc
-test_xrl_receiver_LDADD		 = $(top_builddir)/xrl/targets/libtestxrlsbase.a
-test_xrl_receiver_LDADD		+= $(LDADD)
+test_xrl_receiver_SOURCES	+= test_xrls_base.hh
+test_xrl_receiver_SOURCES	+= test_xrls_base.cc
 
 test_xrl_sender_SOURCES		 = test_xrl_sender.cc
-test_xrl_sender_LDADD		 = $(top_builddir)/xrl/interfaces/libtestxrlsxif.a
-test_xrl_sender_LDADD		+= $(LDADD)
+test_xrl_sender_SOURCES		+= test_xrls_xif.hh
+test_xrl_sender_SOURCES		+= test_xrls_xif.cc
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h
@@ -223,6 +223,10 @@ BUILT_SOURCES += finder_event_observer_xif.hh
 BUILT_SOURCES += finder_event_observer_xif.cc
 BUILT_SOURCES += test_finder_events_base.hh
 BUILT_SOURCES += test_finder_events_base.cc
+BUILT_SOURCES += test_xrls_xif.hh
+BUILT_SOURCES += test_xrls_xif.cc
+BUILT_SOURCES += test_xrls_base.hh
+BUILT_SOURCES += test_xrls_base.cc
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -295,6 +299,16 @@ $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc:		\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
+test_xrls_xif.%:							\
+    $(top_srcdir)/xrl/interfaces/test_xrls_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/test_xrls_xif.hh				\
+$(top_srcdir)/xrl/interfaces/test_xrls_xif.cc:				\
+    $(top_srcdir)/xrl/interfaces/test_xrls.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
 ###############################################################################
 #
 # Build handler bases
@@ -347,4 +361,18 @@ $(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
     $(top_srcdir)/xrl/targets/test_finder_events.tgt			\
     $(top_srcdir)/xrl/interfaces/common.xif				\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+# Test XRLs base
+
+test_xrls_base.%:							\
+    $(top_srcdir)/xrl/targets/test_xrls_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/test_xrls_base.hh				\
+$(top_srcdir)/xrl/targets/test_xrls_base.cc:				\
+    $(top_srcdir)/xrl/targets/test_xrls.tgt				\
+    $(top_srcdir)/xrl/interfaces/common.xif				\
+    $(top_srcdir)/xrl/interfaces/test_xrls.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
