@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.12 2003/04/16 15:56:16 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.13 2003/04/22 23:27:20 hodson Exp $"
 
 
 //
@@ -2508,7 +2508,7 @@ UnixComm::open_proto_socket(void)
     
     // Assign a function to read from this socket
     if (mfea_node().eventloop().add_selector(_proto_socket, SEL_RD,
-		      callback(this, &UnixComm::proto_socket_read))
+				callback(this, &UnixComm::proto_socket_read))
 	== false) {
 	return (XORP_ERROR);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.8 2003/04/02 22:49:12 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.9 2003/04/22 23:27:20 hodson Exp $"
 
 
 //
@@ -451,8 +451,8 @@ MfeaDfe::start_measurement()
 {
     _measurement_timer =
 	eventloop().new_oneoff_after(_measurement_interval,
-				      callback(this,
-					       &MfeaDfe::measurement_timer_timeout));
+				     callback(this,
+					      &MfeaDfe::measurement_timer_timeout));
     
     TimeVal now;
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.8 2003/04/01 00:56:14 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.9 2003/04/22 23:27:16 hodson Exp $"
 
 
 //
@@ -106,7 +106,7 @@ CliNode::start(void)
     //
     if (sock_serv_open() >= 0) {
 	eventloop().add_selector(_cli_socket, SEL_RD,
-				  callback(this, &CliNode::accept_connection));
+				 callback(this, &CliNode::accept_connection));
     }
     
     add_internal_cli_commands();

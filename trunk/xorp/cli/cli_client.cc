@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.5 2003/04/03 19:12:21 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.6 2003/04/22 23:27:16 hodson Exp $"
 
 
 //
@@ -860,7 +860,7 @@ CliClient::post_process_command(bool timer_timeout)
 	if (! timer_timeout) {
 	    _waiting_for_result_timer =
 		cli_node().eventloop().new_oneoff_after_ms(5000,
-							    callback(this, &CliClient::post_process_command, true));
+							   callback(this, &CliClient::post_process_command, true));
 	    return;
 	}
 	// Timeout waiting for data

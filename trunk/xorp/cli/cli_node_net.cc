@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.10 2003/04/02 22:48:37 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.11 2003/04/22 23:27:16 hodson Exp $"
 
 
 //
@@ -249,7 +249,7 @@ int
 CliClient::start_connection(void)
 {
     if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
-					     callback(this, &CliClient::client_read))
+					    callback(this, &CliClient::client_read))
 	== false)
 	return (XORP_ERROR);
     
@@ -373,7 +373,7 @@ CliClient::block_connection(bool block_bool)
 
     // Do-select()
     if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
-					     callback(this, &CliClient::client_read))
+					    callback(this, &CliClient::client_read))
 	== false)
 	return (XORP_ERROR);
 

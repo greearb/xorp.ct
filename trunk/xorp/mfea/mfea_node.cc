@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.7 2003/03/31 03:45:20 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.8 2003/04/22 23:27:20 hodson Exp $"
 
 
 //
@@ -141,7 +141,7 @@ MfeaNode::start(void)
     mrib_table().clear();
     _mrib_table_read_timer =
 	eventloop().new_oneoff_after(TimeVal(0,0),
-				      callback(this, &MfeaNode::mrib_table_read_timer_timeout));
+				     callback(this, &MfeaNode::mrib_table_read_timer_timeout));
     
     return (XORP_OK);
 }
@@ -1893,7 +1893,7 @@ MfeaNode::mrib_table_read_timer_timeout()
     //
     _mrib_table_read_timer =
 	eventloop().new_oneoff_after(TimeVal(MRIB_TABLE_READ_PERIOD_SEC,
-					      MRIB_TABLE_READ_PERIOD_USEC),
-				      callback(this,
-					       &MfeaNode::mrib_table_read_timer_timeout));
+					     MRIB_TABLE_READ_PERIOD_USEC),
+				     callback(this,
+					      &MfeaNode::mrib_table_read_timer_timeout));
 }
