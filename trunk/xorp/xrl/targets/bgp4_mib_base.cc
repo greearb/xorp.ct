@@ -153,3 +153,55 @@ XrlBgp4MibTargetBase::handle_common_0_1_shutdown(const XrlArgs& xa_inputs, XrlAr
     return XrlCmdError::OKAY();
 }
 
+const XrlCmdError
+XrlBgp4MibTargetBase::handle_bgp_mib_traps_0_1_send_bgp_established_trap(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 2) {
+	XLOG_ERROR("Wrong number of arguments (%u != 2) handling bgp_mib_traps/0.1/send_bgp_established_trap",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = bgp_mib_traps_0_1_send_bgp_established_trap(
+	    xa_inputs.get_string("bgp_last_error"),
+	    xa_inputs.get_uint32("bgp_state"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for bgp_mib_traps/0.1/send_bgp_established_trap failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+
+const XrlCmdError
+XrlBgp4MibTargetBase::handle_bgp_mib_traps_0_1_send_bgp_backward_transition_trap(const XrlArgs& xa_inputs, XrlArgs* /* pxa_outputs */)
+{
+    if (xa_inputs.size() != 2) {
+	XLOG_ERROR("Wrong number of arguments (%u != 2) handling bgp_mib_traps/0.1/send_bgp_backward_transition_trap",
+            (uint32_t)xa_inputs.size());
+	return XrlCmdError::BAD_ARGS();
+    }
+
+    /* Return value declarations */
+    try {
+	XrlCmdError e = bgp_mib_traps_0_1_send_bgp_backward_transition_trap(
+	    xa_inputs.get_string("bgp_last_error"),
+	    xa_inputs.get_uint32("bgp_state"));
+	if (e != XrlCmdError::OKAY()) {
+	    XLOG_WARNING("Handling method for bgp_mib_traps/0.1/send_bgp_backward_transition_trap failed: %s",
+            		 e.str().c_str());
+	    return e;
+        }
+    } catch (const XrlArgs::XrlAtomNotFound& e) {
+	XLOG_ERROR("Argument not found");
+	return XrlCmdError::BAD_ARGS();
+    }
+    return XrlCmdError::OKAY();
+}
+

@@ -1,14 +1,18 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.7 2003/05/20 01:16:53 jcardona Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.8 2003/05/21 00:13:03 atanu Exp $
 ##
 
 ###############################################################################
 # Client Interface related
 ###############################################################################
 
+# BGP MIB traps
+noinst_LIBRARIES = libbgpmibtrapsxif.a
+libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
+
 # BGP Client Interface 
-noinst_LIBRARIES = libbgpxif.a
+noinst_LIBRARIES += libbgpxif.a
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 
 # Command-Line Interface Manager Interface

@@ -17,7 +17,7 @@
 # Client Interface related
 ###############################################################################
 
-# BGP Client Interface 
+# BGP MIB traps
 
 SHELL = @SHELL@
 
@@ -96,6 +96,8 @@ snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
 
+# BGP Client Interface 
+
 # Command-Line Interface Manager Interface
 
 # Command-Line Interface Processor Interface
@@ -153,7 +155,8 @@ snmpd2 = @snmpd2@
 #
 # Sample Test Client Interface 
 #
-noinst_LIBRARIES = libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
 libcliprocessorxif_a_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
@@ -200,6 +203,10 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
+libbgpmibtrapsxif_a_AR = $(AR) cru
+libbgpmibtrapsxif_a_LIBADD =
+am_libbgpmibtrapsxif_a_OBJECTS = bgp_mib_traps_xif.$(OBJEXT)
+libbgpmibtrapsxif_a_OBJECTS = $(am_libbgpmibtrapsxif_a_OBJECTS)
 libbgpxif_a_AR = $(AR) cru
 libbgpxif_a_LIBADD =
 am_libbgpxif_a_OBJECTS = bgp_xif.$(OBJEXT)
@@ -327,8 +334,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgp_xif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/cli_manager_xif.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgp_mib_traps_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp_xif.Po $(DEPDIR)/cli_manager_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/cli_processor_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/common_xif.Po $(DEPDIR)/coord_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/datain_xif.Po \
@@ -358,12 +365,13 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) \
-	$(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) \
-	$(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) \
-	$(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) \
-	$(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) \
-	$(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) \
+DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
+	$(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) \
+	$(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) \
+	$(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) \
+	$(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) \
+	$(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) \
+	$(libfinderclientxif_a_SOURCES) \
 	$(libfindereventnotifierxif_a_SOURCES) \
 	$(libfindereventobserverxif_a_SOURCES) \
 	$(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) \
@@ -375,7 +383,7 @@ DIST_SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) \
 	$(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) \
 	$(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -393,6 +401,10 @@ AR = ar
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libbgpmibtrapsxif.a: $(libbgpmibtrapsxif_a_OBJECTS) $(libbgpmibtrapsxif_a_DEPENDENCIES) 
+	-rm -f libbgpmibtrapsxif.a
+	$(libbgpmibtrapsxif_a_AR) libbgpmibtrapsxif.a $(libbgpmibtrapsxif_a_OBJECTS) $(libbgpmibtrapsxif_a_LIBADD)
+	$(RANLIB) libbgpmibtrapsxif.a
 libbgpxif.a: $(libbgpxif_a_OBJECTS) $(libbgpxif_a_DEPENDENCIES) 
 	-rm -f libbgpxif.a
 	$(libbgpxif_a_AR) libbgpxif.a $(libbgpxif_a_OBJECTS) $(libbgpxif_a_LIBADD)
@@ -516,6 +528,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_mib_traps_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_manager_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_processor_xif.Po@am__quote@

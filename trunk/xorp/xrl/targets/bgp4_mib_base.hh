@@ -67,6 +67,26 @@ protected:
      */
     virtual XrlCmdError common_0_1_shutdown() = 0;
 
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *  
+     *  Send bgpEstablished trap
+     */
+    virtual XrlCmdError bgp_mib_traps_0_1_send_bgp_established_trap(
+	// Input values, 
+	const string&	bgp_last_error, 
+	const uint32_t&	bgp_state) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *  
+     *  Send bgpBackwardTransition trap
+     */
+    virtual XrlCmdError bgp_mib_traps_0_1_send_bgp_backward_transition_trap(
+	// Input values, 
+	const string&	bgp_last_error, 
+	const uint32_t&	bgp_state) = 0;
+
 private:
     const XrlCmdError handle_common_0_1_get_target_name(const XrlArgs& in, XrlArgs* out);
 
@@ -75,6 +95,10 @@ private:
     const XrlCmdError handle_common_0_1_get_status(const XrlArgs& in, XrlArgs* out);
 
     const XrlCmdError handle_common_0_1_shutdown(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_bgp_mib_traps_0_1_send_bgp_established_trap(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_bgp_mib_traps_0_1_send_bgp_backward_transition_trap(const XrlArgs& in, XrlArgs* out);
 
     void add_handlers()
     {
@@ -94,6 +118,14 @@ private:
 	    callback(this, &XrlBgp4MibTargetBase::handle_common_0_1_shutdown)) == false) {
 	    XLOG_ERROR("Failed to xrl handler finder://bgp4_mib/common/0.1/shutdown");
 	}
+	if (_cmds->add_handler("bgp_mib_traps/0.1/send_bgp_established_trap", 
+	    callback(this, &XrlBgp4MibTargetBase::handle_bgp_mib_traps_0_1_send_bgp_established_trap)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://bgp4_mib/bgp_mib_traps/0.1/send_bgp_established_trap");
+	}
+	if (_cmds->add_handler("bgp_mib_traps/0.1/send_bgp_backward_transition_trap", 
+	    callback(this, &XrlBgp4MibTargetBase::handle_bgp_mib_traps_0_1_send_bgp_backward_transition_trap)) == false) {
+	    XLOG_ERROR("Failed to xrl handler finder://bgp4_mib/bgp_mib_traps/0.1/send_bgp_backward_transition_trap");
+	}
 	_cmds->finalize();
     }
 
@@ -103,6 +135,8 @@ private:
 	_cmds->remove_handler("common/0.1/get_version");
 	_cmds->remove_handler("common/0.1/get_status");
 	_cmds->remove_handler("common/0.1/shutdown");
+	_cmds->remove_handler("bgp_mib_traps/0.1/send_bgp_established_trap");
+	_cmds->remove_handler("bgp_mib_traps/0.1/send_bgp_backward_transition_trap");
     }
 };
 
