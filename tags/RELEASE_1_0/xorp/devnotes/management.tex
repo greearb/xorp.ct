@@ -1,0 +1,154 @@
+\documentclass[11pt]{article}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{psfig}
+\usepackage{amsmath}
+\newcommand{\module} {{\em module}\@\xspace}
+\newcommand{\modules} {{\em modules}\@\xspace}
+\newcommand{\finder} {{\em Finder}\@\xspace}
+\newcommand{\cm} {{\em CM}\@\xspace}
+\textwidth 6.5in
+\topmargin 0.0in
+\textheight 8.5in
+\headheight 0in
+\headsep 0in
+\oddsidemargin 0in
+%\date{}
+\title{XORP Management and Configuration Interface}
+\author{Atanu Ghosh}
+%\twocolumn
+\begin{document}
+\parsep 0ex
+\parskip 1.0ex
+\parindent 0em
+\noindent
+\maketitle                            
+\section{Introduction}
+
+A XORP router must present a management interface to the world.  This
+document tries to capture some of our initial thoughts on this
+subject. As discussed at XORP meeting Tuesday 12th June 2001.
+
+In order to ease the adoption of XORP routers a Cisco style command
+line interface needs to exist. A XORP router must also support SNMP.
+We may also decide to provide a XORP specific command interface.
+
+A XORP router \cite{architecture} is made up of separate \modules
+bound together using XRL's \cite{xrl}.
+
+How then does a management interface interact with the separate
+components? The obvious solution, based on the current architecture is,
+all \modules register their management interface with the \finder
+\cite{xrl}. The \finder is analogous to a portmapper in the rpc world,
+or the rmiregistry in the Java world.
+
+Each \module that exports a management interface could have knowledge
+of SNMP and command line interfaces. This doesn't seem to be a
+sensible approach as each \module would have to be changed if a new
+management interface was required. Instead each \module will export a
+single management interface. Every management type (SNMP, Cisco CLI, HTTP,
+etc \ldots) will be handled by a management \module.  A management
+\module will be a single point in a XORP router that will be used to
+channel requests/responses to other XORP \modules. An example of such
+a configuration is given in Figure \ref{modules}.
+
+Each \module could have an XML configuration file associated with it
+as in Figure \ref{xml}. For a particular accessor method on a \module
+the mapping to the management interfaces can be provided. A \module
+therefore just exposes itself via XRL's.
+
+\begin{figure}
+\include{management_diag1}
+\centerline{\raise 1em\box\graph}
+\caption{Managment Interactions}
+\label{modules}
+\end{figure}
+
+\begin{figure}
+\begin{verbatim}
+<!doctype "-//xorp//dtd">
+<variable name="interface name">
+        <access>
+                XRL://fea/get_interface_name
+        </access>
+        <snmp>
+        .iso.org.dod.internet.mgmt.mib-2.interfaces.ifTable.ifEntry.ifDescr
+        </snmp>
+        <cli>
+                show interface name
+        </cli>
+</variable>
+<trap name="overflow">
+        <access>
+                XRL://callback/overflow?XRL://overflowed/
+        </access>
+        <snmp>
+                .overflows
+        </snmp>
+        <logger>
+                syslog "%s"
+        </logger>
+</trap>
+\end{verbatim}
+\caption{XML management interface description exported by \modules}
+\label{xml}
+\end{figure}
+
+Figure \ref{xml} is not in any way meant to be definitive. It is an
+example of one possible way if binding the XRL interface exported by
+\modules and the various management interfaces we will be required to
+implement. 
+
+A \module writer will clearly need to know what parts of the \module
+will need to be exposed for management. Specifically the BGP \module
+will need to expose the SNMP MIB variables. Rather than expose them
+in terms of SNMP it would seem to be more flexible to expose them as
+XRL's. Thus using the standard interprocess communication system.
+
+We do not yet have enough knowledge of SNMP to be sure that the
+mechanism described will be sufficient to build a SNMP \module. Given
+SNMP has a well defined set of accessor methods it should be
+relatively easy to define simple mappings. Get and Set should be
+simple. Traps may turn out to be more problematic.
+
+A much harder question to answer is will we be able to define a
+configuration definition that will capture all the vagaries of the
+Cisco command line. There are also issues regarding the partitioning
+of how much can be expressed in configuration files versus logic in
+the cli \module.
+
+Nothing has been said about the \modules registering with the \finder.
+The fundamental question in this regard is how does the SNMP \module
+bind with the BGP \module. We need to consider the simple case of how
+does the system bootstrap itself. We also need to consider new
+management and/or new other \modules being started. Additionally we
+need to consider failure of some or all the \modules. Restarting or
+adding \modules should be a simple process.
+
+Our current thinking is that there will be at least two
+critical/permanent \modules the \finder and a Configuration Manager
+(\cm). If either of these \modules fail then all bets are off. It may
+turn out to be the case that the \finder and the \cm should be a
+single process. The \cm will be responsible for starting the various
+routing \modules and perhaps even the \finder.
+
+For reasons of efficiency management \modules and other \modules will
+communicate directly using XRL's. The rendezvous process between
+management \modules and other \modules (BGP, URIB, etc \ldots) will be
+coordinated by the \cm.
+
+All \modules register with the \cm. The management \modules
+registration basically says ``I am a \module that wants to know about
+all current and future registrations by \modules exporting management
+interfaces''. The ``other'' \modules will just register that they are
+exporting management interfaces. Hopefully this captures all
+combinations of failures, new management \modules and new ``other''
+\modules.
+
+\section{Random Thoughts}
+The GNU ``readline'' library may be a good place to start, when
+considering building a command line interface.
+
+\bibliographystyle{plain}
+\bibliography{xorp}
+\end{document}

@@ -1,0 +1,45 @@
+# $XORP: other/testbed/config/config10.xt,v 1.1 2004/05/14 22:21:19 pavlin Exp $
+#
+# - Surround a XORP (xorp12) router with a bunch of testbed hosts. 
+# - Add a chain of routers between xorp6 and xorp7
+#
+#
+#			      xorp0
+#				t0
+#				|
+#				|
+#				|
+#			        t0
+#             xorp7.t3 ---- t3.xorp12.t1 ---- t1.xorp1
+#               t0              t2
+#	        |	        |
+#               |               |
+#	        t0	        |
+#	      xorp3  	        |
+#	        t2	        |
+#               |               |
+#               |               |
+#               t0              |
+#              xorp2            |
+#               t1              |
+#               |               |
+#               |               t2
+#               |---------- t1.xorp6
+#
+
+# Kernel to install
+kernel[/home/xorpc/u2/freebsd.kernels/kernel] = xorp0, xorp1, xorp2, xorp3, xorp6, xorp7
+
+# xorp12 is the router. This will create default routes that point at xorp12.
+router = xorp12
+
+# A star around the router xorp12
+vlan[net 172.16.0.1/24] = xorp12.t0[172.16.0.1], xorp0.t0[172.16.0.2]
+vlan[net 172.16.1.1/24] = xorp12.t1[172.16.1.1], xorp1.t1[172.16.1.2]
+vlan[net 172.16.2.1/24] = xorp12.t2[172.16.2.1], xorp6.t2[172.16.2.2]
+vlan[net 172.16.3.1/24] = xorp12.t3[172.16.3.1], xorp7.t3[172.16.3.2]
+
+# A chain of routers between xorp6 and xorp7
+vlan[net 10.4.0.0/24] = xorp3.t0[10.4.0.1], xorp7.t0[10.4.0.2]
+vlan[net 10.3.0.0/24] = xorp2.t0[10.3.0.1], xorp3.t2[10.3.0.2]
+vlan[net 10.2.0.0/24] = xorp6.t1[10.2.0.1], xorp2.t1[10.2.0.2]

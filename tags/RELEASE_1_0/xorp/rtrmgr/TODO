@@ -1,0 +1,121 @@
+#
+# $XORP: xorp/rtrmgr/TODO,v 1.24 2004/06/09 02:43:29 pavlin Exp $
+#
+
+Urgent
+======
+
+Configure Mode
+
+ - There are lots of hard-coded values in master_conf_tree.cc
+ - Implement node locking in MasterConfigTree
+ - Use node locking to prevent two users editing the same node.
+ - Templates need %delete commands adding.
+ - Can't delete leaf nodes.
+    - Can delete some leaf nodes, but the xorpsh thinks there are still
+      uncommitted changes.
+ - In xorpsh, variable expansion can fail (for example with FEA
+   transation IDs).  Currently the xorpsh-side checks are disabled in
+   slave_config_tree.cc, but this is the wrong solution to the
+   problem.
+ - Implement the "help" and "quit" commands in the top-level xorpsh
+   command tree.
+ - The parsing of the return arguments of %modinfo status_method xrl method
+   is still hardcoded in task.cc: "status:u32&reason:txt"
+   The status decoding should be completely based on the template
+   specification.
+
+Operational Mode
+ - Fix the CLI command completion for optional parameters:
+   if an optional parameter is typed, then the list of optional parameters
+   should not be shown again after it.
+ - Change MasterConfigTree::parse() to return error message string
+   by reference.
+ - Ensure commands only appear when modules are loaded.
+ - If signal SIGSTOP is delivered to a child process
+   (e.g., by kill -STOP <pid>), the child process will properly deliver
+   SIGCHLD to its parent process (i.e., the rtrmgr). Then the parent
+   process SIGCHLD handler (function child_handler() in module_manager.cc)
+   will properly set the child module status to stalled by
+   calling set_stalled() for the corresponding module.
+   However, if then we send signal SIGCONT to that child process,
+   then the child process will NOT deliver SIGCHLD to the rtrmgr.
+   As a result, the rtrmgr won't know that the child status is
+   not stalled anymore.
+   Find a solution of that problem. E.g., one possibility is that
+   every child process should have a handler for the SIGCONT signals,
+   and then it should explicitly deliver SIGCHLD signal to its parent
+   process (the rtrmgr).
+
+Other
+ - Whenever we deal with configuration trees, use
+   add_default_children() in a single place to add the defaults
+   from the template tree rather than doing so every time we
+   create a configuration tree from somewhere (e.g., file, xorpsh, etc).
+
+ - Fix test_router_manager, because even if the path to the xorp_finder
+   binary is incorrect, it doesn't report an error.
+
+ - Assuming the following paragraph refers to the xorpsh this may be fixed.
+
+   Restart code is broken, currently exits because of an Xrl failure
+   when xorp_rtrmgr goes away.  Want to stick around, announce absence
+   of xorp_rtrmgr and gracefully re-connect when it restarts.
+
+ - Add support for commenting-out large blocks of user config files even
+   if those files may contain /* ... */ comments inside.
+
+Non-Urgent
+==========
+
+General
+
+ - User database needs proper implementation of capabilities.
+ - When the rtrmgr is running in no-exec mode do not instantiate a
+   finder and XrlRouter.
+
+Configure Mode
+
+ - Rollback when a commit fails.
+ - Allow more flexible syntax in text_entry_mode.
+ - Add support for "%setting" command.
+ - Check whether UNIX shell environment $EDITOR exists and is a valid
+   command. If "yes", then fire the editor, create a temporary file,
+   then apply "diff" on the configuration changes (or something like this).
+ - Check whetner UNIX shell environment $PAGER exists and is a valid
+   command. If "yes", then pipe the output through it instead of
+   the built-in pager.
+ - Add facility to redirect the log messages to a file with filename that
+   is configurable within the XORP config file.
+
+Operational Mode
+ - Add template specification for "show" output: fields formatting, etc.
+
+Done
+====
+
+ - Remove 5 second timeout.
+ - Interruption of commands in progress.
+   RESOLVED: Use Ctrl-C to interrupt xorpsh waiting for command completion.
+ - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
+   fail all authentication checks.  Handle this more gracefully.
+ - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
+   and list all *.cc files there in alphabetical order
+ - Implement $(@.DEFAULT) varname.
+
+RESOLVED: restart is detected and user is advised to logout and login again.
+
+ - TemplateTree destructor doesn't clean up properly.
+
+RESOLVED: actually it was correct, the comment was wrong.
+
+ - Module unloading when relevant config is deleted. (Done)
+ - Get rid of the printf() in master_conf_tree.cc and elsewhere.
+   At least, the info should be printed only if in debug mode.
+ - Change the behavior of command-line option "-d" from "Display defaults"
+   to "Enable debug output" (for both the rtrmgr and xorpsh).
+RESOLVED: "-d" is removed, because it is redundant (the same info
+   is printed by "-h"). The new command-line option to print
+   verbose output is "-v".
+ - Modify the *.cmds templates syntax to allow specification of the CLI
+   help per command.

@@ -1,0 +1,313 @@
+#
+# $XORP: xorp/README,v 1.25 2004/06/15 20:56:52 hodson Exp $
+#
+
+		XORP: eXtensible Open Router Platform
+
+
+
+1. Overview
+===========
+
+XORP is an open router platform being developed at the ICSI Center for
+Open Networking (ICON) at the International Computer Science Institute
+in Berkeley, California, USA. XORP primary goal is to be both a research
+tool and a stable deployment platform that can be used to close the gap
+between network research and real world.
+
+XORP design philosophy is:
+  * modularity
+  * extensibility
+  * performance
+  * robustness
+This is achieved by carefully separating functionalities into
+independent modules, and by providing an API for each module.
+
+XORP divides into two subsystems. The higher-level ("user-level")
+subsystem consists of the routing protocols. The lower-level ("kernel")
+manages the forwarding path, and provides APIs for the higher-level to
+access.
+
+User-level XORP uses multi-process architecture with one process per
+routing protocol, and a novel inter-process communication mechanism
+called XRL (XORP Resource Locator). XRLs can be used across the network,
+therefore XORP can in principle run in distributed fashion. For
+example, we can have a distributed router with the forwarding engine
+running on one machine, and each of the routing protocols that update
+the forwarding engine is running on a separate machine.
+
+The lower-level subsystem can use traditional UNIX kernel forwarding, or
+Click modular router. The modularity and independency of the lower-level
+from the user-level subsystem allows for its easily replacement with
+other solutions including high-end hardware-based forwarding engines.
+
+For more information about XORP high-level design see the following
+paper available from http://www.xorp.org/ :
+"XORP: An Open Platform for Network Research", HotNets-I 2002 Workshop.
+
+
+2. Status
+=========
+
+This is XORP Release-1.0. It is reasonably stable and can be used
+for routing, but there are known issues.
+
+Supported platforms:
+
+  * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE with:
+    - gcc/g++ version 2.95.4 (default), 3.3.4 20040322 (prerelease),
+      3.4.0 20040310 (prerelease)
+    - gmake (GNU make) version 3.79.1
+    - autoconf version 2.53
+    - automake version 1.5
+    - flex version 2.5.4
+    - yacc version default one that comes with the above OS
+
+  * Linux RedHat-7.3 (kernel 2.4-20) with:
+    - gcc/g++ version 2.96 (default)
+
+See ${XORP}/BUILD_NOTES for the list of additional platforms this
+release of XORP may compile or work on.
+
+See ${XORP}/ERRATA for the list of known problems.
+
+Currently, XORP implements the following protocols:
+
+  * RIP and RIPng:
+    - RFC 2453 (RIP version 2)
+    - RFC 2082 (RIP-2 MD5 Authentication)
+    - RFC 2080 (RIPng for IPv6)
+
+  * BGP4:
+   - draft-ietf-idr-bgp4-23.txt (A Border Gateway Protocol 4 (BGP-4))
+   - RFC 3392 (Capabilities Advertisement with BGP-4)
+   - draft-ietf-idr-rfc2858bis-03.txt (Multiprotocol Extensions for BGP-4)
+   - RFC 2545 (Use of Multiprotocol Extensions for IPv6 Inter-Domain Routing)
+
+  * PIM-SM:
+    - draft-ietf-pim-sm-v2-new-09.{ps,txt} (without SSM).
+    - draft-ietf-pim-sm-bsr-03.{ps,txt}
+
+  * IGMP v1 and v2:
+    - RFC 2236
+
+  * MLD v1:
+    - RFC 2710
+
+For description of the changes in each release, see ${XORP}/RELEASE_NOTES.
+
+
+3. Compilation, configuration and startup
+=========================================
+
+To compile XORP, you must have GNU make (gmake) installed. Then just
+run the following commands in the top-level directory:
+
+./configure
+gmake
+
+See ${XORP}/BUILD_NOTES for additional information of building XORP.
+
+In general, configuration and startup of the various XORP processes are
+normally meant to happen via the router manager (rtrmgr), so please
+refer first to the XORP configuration guide
+(http://www.xorp.org/getting_started.html),
+the rtrmgr documentation (${XORP}/docs/rtrmgr/),
+and then the documentation of the individual modules.
+
+
+4. Code structure and documentation
+===================================
+
+The code is split into several directories, each containing libraries,
+components or implementation of the various XORP modules.  Typically,
+documentation for each of them is available in one or more of the
+following places:
+
+  * the README file in each directory
+
+  * a high level architecture overview, available in
+
+	${XORP}/docs/<modulename>/
+
+  * kdoc-generated documentation, created with the script
+
+	${XORP}/docs/kdoc/gen-kdoc.sh
+
+    whose output goes into
+
+	${XORP}/docs/kdoc/html/<modulename>/
+
+    with top-level index file in
+
+	${XORP}/docs/kdoc/html/index.html
+
+The content of each of the directories is the following:
+
+  * bgp : BGP implementation.
+
+  * cli : CLI (Command-Line Interface) library.
+    It is used by the Router Manager (rtrmgr), and by some of the
+    multicast code (the multicast-specific part of fea, mld6igmp, pim).
+
+  * docs : XORP user documentation.
+
+  * etc : Various XORP-related files (e.g., configuration, templates).
+
+  * fea : Forwarding Engine Abstraction.
+    The FEA implements the interface between XORP and the underlying
+    forwarding engine (e.g., the UNIX kernel). It is used both for
+    unicast and multicast. Note that the multicast-specific
+    documentation is in ${XORP}/docs/mfea.
+
+  * fib2mrib : Forwarding Information Base to the Multicast Routing
+    Information Base route propagator.
+    It uses the FEA to obtain the FIB information from the underlying system,
+    and propagates it to the MRIB, so it can be used by multicast routing
+    protocols such as PIM-SM. Typically, it is needed only if the unicast
+    routing protocols run within XORP do not inject routes in the MRIB.
+
+  * libcomm : Communication socket library.
+    Currently, it is used only by the cli.
+
+  * libproto : Abstract protocol library.
+    Used by the following modules/directories: cli, fea, mld6igmp, pim.
+
+  * libxipc : XRL (XORP Resource Locator) library and XRL-related
+    programs.
+
+  * libxorp : XORP library that contains various basic
+    functionalities such as IP addresses, IP subnets, etc.
+
+  * mibs : XORP MIB modules.
+    XORP uses the Net-SNMP package (http://www.net-snmp.org/) as an SNMP
+    agent, and implements only the necessary MIB modules.
+    The documentation is in ${XORP}/docs/snmp/.
+
+  * mld6igmp : Multicast Listen Discovery/Internet Group Management
+    Protocol (MLD/IGMP) implementation.
+
+  * mrt : Various multicast-related code.
+    Used by the following modules/directories: fea, mld6igmp, pim.
+
+  * pim : Protocol Independent Multicast - Sparse Mode (PIM-SM)
+    implementation.
+
+  * rib : Routing Information Base.
+    It is used to store the routing information from various protocols.
+
+  * rip: Routing Information Protocol implementation.
+
+  * rtrmgr : Router Manager.
+    It is used to manage and configure all XORP components.
+
+  * static_routes : Static routes management.
+    It is used to configure static routes.
+
+  * xrl : XRL (XORP Resource Locator) interface.
+
+The directories listed below contain various information that are of
+limited interest, or are not relevant to the current release:
+
+  * config : autoconf/automake related files.
+
+  * contrib : various contributed code.
+
+  * contrib/ospfd : John Moy's OSPFd implementation (http://www.ospf.org/).
+    Not supported with this release.
+
+  * devnotes : various notes for the XORP core members.
+
+  * libfeaclient : Library that may be useful to clients of the FEA.
+    Currently, it is not used yet.
+
+  * policy : Policy-related library.
+    Currently, it is work in progress, and is not used yet.
+
+  * utils : Various XORP-related utilities.
+
+
+5. Future plans
+===============
+
+In the short-term we plan to add:
+  * OSPF
+  * IS-IS
+  * Click forwarding path
+  * Security
+  * PIM-SSM
+  * IGMPv3
+  * Bi-directional PIM-SM
+
+In the long-term, we plan to add:
+  * BGMP
+
+
+6. Authors
+==========
+
+The core team currently consists of:
+
+  * Fred Bauer
+  * Javier Cardona
+  * Atanu Ghosh
+  * Adam Greenhalgh
+  * Mark Handley
+  * Orion Hodson
+  * Eddie Kohler
+  * Pavlin Radoslavov
+  * Luigi Rizzo
+
+
+7. Acknowledgments
+==================
+
+  * Sponsors (in chronological order, oldest first):
+    - AT&T funding (through ICIR)
+    - Intel Corporation
+    - NSF grant (ANI-0129541).
+      The following acknowledgment and disclaimer applies for the NSF
+      support:
+	This material is based upon work supported by the National
+	Science Foundation under Grant No. 0129541.
+	Any opinions, findings, and conclusions or recommendations
+	expressed in this material are those of the author(s) and do not
+	necessarily reflect the views of the National Science Foundation.
+
+  * Martin C. Shepherd for the libtecla library (used by the CLI).
+
+8. Additional information
+=========================
+
+  * WWW: http://www.xorp.org/
+
+  * Source code and CVS access: see XORP web site.
+
+  * XORP users mailing list: xorp-users@xorp.org
+    This list is for general XORP discussion.
+
+    To subscribe, send email to xorp-users-request@xorp.org with
+    the word "subscribe" (no quotes!) in the subject or the body
+    of the email. For more subscription options, send the command
+    "help" instead, or use the following URL:
+    http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-users
+
+  * XORP hackers mailing list: xorp-hackers@xorp.org
+    This list is for XORP development discussion.
+
+    To subscribe, send email to xorp-hackers-request@xorp.org with
+    the word "subscribe" (no quotes!) in the subject or the body
+    of the email. For more subscription options, send the command
+    "help" instead, or use the following URL:
+    http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-hackers
+
+  * XORP announcements mailing list:  xorp-announce@xorp.org
+    This list is for XORP release and milestone announcements.
+
+    To subscribe, send email to xorp-announce-request@xorp.org with
+    the word "subscribe" (no quotes!) in the subject or the body
+    of the email. For more subscription options, send the command
+    "help" instead, or use the following URL:
+    http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-announce
+
+  * Feedback: feedback@xorp.org

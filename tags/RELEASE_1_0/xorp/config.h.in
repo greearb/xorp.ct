@@ -1,0 +1,419 @@
+/* config.h.in.  Generated from configure.in by autoheader.  */
+/*  acconfig.h -- `autoheader' will generate config.h.in */
+/*
+ * This file is part of the XORP software.
+ * See file `LICENSE.xorp' for copyright and license information.
+ */
+
+#ifndef __XORP_CONFIG_H__
+#define __XORP_CONFIG_H__
+
+/*
+ * XXX: everything above is unconditionally copied to the generated file
+ */
+
+/*
+ * If you don't have these types in <inttypes.h>, #define these to be
+ * the types you do have.
+ */
+#undef int8_t
+#undef int16_t
+#undef int32_t
+#undef int64_t
+#undef uint8_t
+#undef uint16_t
+#undef uint32_t
+
+/*
+ * Debugging:
+ * DEBUG: general debugging
+ * DEBUG_MEM: debug memory allocation
+ */
+#undef DEBUG
+#undef DEBUG_MEM
+
+
+/* Define to 1 if the preprocessor supports GNU style variable argument macros
+   */
+#undef CPP_SUPPORTS_GNU_VA_ARGS
+
+/* Define to enable callback debugging */
+#undef DEBUG_CALLBACKS
+
+/* Define to 1 to enable globally debug messages output */
+#undef DEBUG_LOGGING_GLOBAL
+
+/* Define to 1 to enable printing function name in debug messages */
+#undef DEBUG_PRINT_FUNCTION_NAME
+
+/* Define to 1 to enable advanced multicast API */
+#undef ENABLE_ADVANCED_MCAST_API
+
+/* Define to 1 if netinet6/nd6.h is not C++ friendly */
+#undef HAVE_BROKEN_CXX_NETINET6_ND6_H
+
+/* Define to 1 if you have the `getifaddrs' function. */
+#undef HAVE_GETIFADDRS
+
+/* Define to 1 if you have the <ifaddrs.h> header file. */
+#undef HAVE_IFADDRS_H
+
+/* Define to 1 if your struct ifreq has field ifr_ifindex */
+#undef HAVE_IFR_IFINDEX
+
+/* Define to 1 if you have the `if_indextoname' function. */
+#undef HAVE_IF_INDEXTONAME
+
+/* Define to 1 if you have the `if_nametoindex' function. */
+#undef HAVE_IF_NAMETOINDEX
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have ioctl(SIOCGIFCONF) interface read method */
+#undef HAVE_IOCTL_SIOCGIFCONF
+
+/* Define to 1 if you have IPv6 */
+#undef HAVE_IPV6
+
+/* Define to 1 if you have IPv6 multicast */
+#undef HAVE_IPV6_MULTICAST
+
+/* Define to 1 if you have IPv6 multicast routing */
+#undef HAVE_IPV6_MULTICAST_ROUTING
+
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#undef HAVE_LIBCRYPTO
+
+/* Define to 1 if you have the <linux/rtnetlink.h> header file. */
+#undef HAVE_LINUX_RTNETLINK_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have struct mf6ctl2 */
+#undef HAVE_MF6CCTL2
+
+/* Define to 1 if your struct mf6ctl2 has field mf6cc_flags */
+#undef HAVE_MF6CC_FLAGS
+
+/* Define to 1 if your struct mf6ctl2 has field mf6cc_rp */
+#undef HAVE_MF6CC_RP
+
+/* Define to 1 if you have struct mfcctl2 */
+#undef HAVE_MFCCTL2
+
+/* Define to 1 if your struct mfcctl2 has field mfcc_flags */
+#undef HAVE_MFCC_FLAGS
+
+/* Define to 1 if your struct mfcctl2 has field mfcc_rp */
+#undef HAVE_MFCC_RP
+
+/* Define to 1 if you have struct mld_hdr in netinet/icmp6.h */
+#undef HAVE_MLD_HDR
+
+/* Define to 1 if you have the <netinet6/in6_var.h> header file. */
+#undef HAVE_NETINET6_IN6_VAR_H
+
+/* Define to 1 if you have the <netinet6/ip6_mroute.h> header file. */
+#undef HAVE_NETINET6_IP6_MROUTE_H
+
+/* Define to 1 if you have the <netinet6/nd6.h> header file. */
+#undef HAVE_NETINET6_ND6_H
+
+/* Define to 1 if you have the <netinet/icmp6.h> header file. */
+#undef HAVE_NETINET_ICMP6_H
+
+/* Define to 1 if you have the <netinet/if_ether.h> header file. */
+#undef HAVE_NETINET_IF_ETHER_H
+
+/* Define to 1 if you have the <netinet/in_var.h> header file. */
+#undef HAVE_NETINET_IN_VAR_H
+
+/* Define to 1 if you have the <netinet/ip6.h> header file. */
+#undef HAVE_NETINET_IP6_H
+
+/* Define to 1 if you have the <netinet/pim.h> header file. */
+#undef HAVE_NETINET_PIM_H
+
+/* Define to 1 if you have Linux-style netlink sockets (AF_NETLINK) */
+#undef HAVE_NETLINK_SOCKETS
+
+/* Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they
+   cannot be used to set the flags on an interface */
+#undef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
+
+/* Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they
+   cannot be used to set the MTU on an interface */
+#undef HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN
+
+/* Define to 1 if you have the <net/ethernet.h> header file. */
+#undef HAVE_NET_ETHERNET_H
+
+/* Define to 1 if you have the <net/if_dl.h> header file. */
+#undef HAVE_NET_IF_DL_H
+
+/* Define to 1 if you have the <net/if_ether.h> header file. */
+#undef HAVE_NET_IF_ETHER_H
+
+/* Define to 1 if you have the <net/if_types.h> header file. */
+#undef HAVE_NET_IF_TYPES_H
+
+/* Define to 1 if you have the <net/if_var.h> header file. */
+#undef HAVE_NET_IF_VAR_H
+
+/* Define to 1 if you have the <net-snmp/agent/net-snmp-agent-includes.h>
+   header file. */
+#undef HAVE_NET_SNMP_AGENT_NET_SNMP_AGENT_INCLUDES_H
+
+/* Define to 1 if you have the <net-snmp/library/container.h> header file. */
+#undef HAVE_NET_SNMP_LIBRARY_CONTAINER_H
+
+/* Define to 1 if Linux /proc filesystem exists */
+#undef HAVE_PROC_LINUX
+
+/* Define to 1 if you have newer IPv6 advanced API */
+#undef HAVE_RFC2292BIS
+
+/* Define to 1 if you have BSD-style routing sockets (AF_ROUTE) */
+#undef HAVE_ROUTING_SOCKETS
+
+/* Define to 1 if your struct sockaddr has field sa_len */
+#undef HAVE_SA_LEN
+
+/* Define to 1 if you have sig_t */
+#undef HAVE_SIG_T
+
+/* Define to 1 if your struct sockaddr_in6 has field sin6_len */
+#undef HAVE_SIN6_LEN
+
+/* Define to 1 if your struct sockaddr_in has field sin_len */
+#undef HAVE_SIN_LEN
+
+/* Define to 1 if you have socklen_t */
+#undef HAVE_SOCKLEN_T
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have struct ip_mreqn */
+#undef HAVE_ST_IP_MREQN
+
+/* Define to 1 if your struct sockaddr_un has field sun_len */
+#undef HAVE_SUN_LEN
+
+/* Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method */
+#undef HAVE_SYSCTL_NET_RT_DUMP
+
+/* Define to 1 if you have sysctl(NET_RT_IFLIST) interface read method */
+#undef HAVE_SYSCTL_NET_RT_IFLIST
+
+/* Define to 1 if you have the <sys/cdefs.h> header file. */
+#undef HAVE_SYS_CDEFS_H
+
+/* Define to 1 if you have the <sys/ethernet.h> header file. */
+#undef HAVE_SYS_ETHERNET_H
+
+/* Define to 1 if you have the <sys/filio.h> header file. */
+#undef HAVE_SYS_FILIO_H
+
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/sockio.h> header file. */
+#undef HAVE_SYS_SOCKIO_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/sysctl.h> header file. */
+#undef HAVE_SYS_SYSCTL_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if the OS is BSDI */
+#undef HOST_OS_BSDI
+
+/* Define to 1 if the OS is FreeBSD */
+#undef HOST_OS_FREEBSD
+
+/* Define to 1 if the OS is Linux */
+#undef HOST_OS_LINUX
+
+/* Define to 1 if the OS is MacOS X */
+#undef HOST_OS_MACOSX
+
+/* Define to 1 if the OS is NetBSD */
+#undef HOST_OS_NETBSD
+
+/* Define to 1 if the OS is OpenBSD */
+#undef HOST_OS_OPENBSD
+
+/* Define to 1 if the OS is Solaris */
+#undef HOST_OS_SOLARIS
+
+/* Define to 1 if your IPv4 values are not modified on receiving raw IPv4
+   packets */
+#undef IPV4_RAW_INPUT_IS_RAW
+
+/* Define to 1 if your IPv4 values are not modified on sending raw IPv4
+   packets */
+#undef IPV4_RAW_OUTPUT_IS_RAW
+
+/* Define to 1 if you have KAME IPv6 stack */
+#undef IPV6_STACK_KAME
+
+/* Define to 1 if the C library is missing ether_aton(3) */
+#undef NEED_ETHER_ATON
+
+/* Define to 1 if the C library is missing ether_ntoa(3) */
+#undef NEED_ETHER_NTOA
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define as the return type of signal handlers (`int' or `void'). */
+#undef RETSIGTYPE
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if your <sys/time.h> declares `struct tm'. */
+#undef TM_IN_SYS_TIME
+
+/* Version number of package */
+#undef VERSION
+
+/* Define if using the dmalloc debugging malloc package */
+#undef WITH_DMALLOC
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
+/* Define path to the top-level build directory */
+#undef XORP_BUILD_ROOT
+
+/* Define the path to the root of the XORP installation */
+#undef XORP_INSTALL_ROOT
+
+/* Define the path to the root of the XORP installation */
+#undef XORP_ROOT
+
+/* Define path to the top-level source directory */
+#undef XORP_SRC_ROOT
+
+/* Define to 1 if type `char' is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
+# undef __CHAR_UNSIGNED__
+#endif
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef pid_t
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to `unsigned short' if <sys/types.h> does not define. */
+#undef uint16_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef uint32_t
+
+/* Define to `unsigned char' if <sys/types.h> does not define. */
+#undef uint8_t
+/*
+ * XXX: everything below is unconditionally copied to the generated file
+ */
+
+#ifndef HAVE_SIG_T
+typedef RETSIGTYPE (*sig_t)(int);
+#endif
+
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif /* HAVE_SOCKLEN_T */
+
+/* KAME code likes to use INET6 to ifdef IPv6 code */
+#if defined(HAVE_IPV6) && defined (IPV6_STACK_KAME)
+#ifndef INET6
+#define INET6
+#endif
+#endif /* HAVE_IPV6 && IPV6_STACK_KAME */
+
+/* KAME backward-compatibility definitions */
+#if defined(HAVE_IPV6) && defined (IPV6_STACK_KAME)
+#ifndef HAVE_MLD_HDR
+#define mld_hdr mld6_hdr
+#endif
+#endif /* HAVE_IPV6 && IPV6_STACK_KAME */
+
+#ifndef WORDS_BIGENDIAN
+#define WORDS_SMALLENDIAN
+#endif
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+using namespace std;
+#endif
+
+/*
+ * Include sys/cdefs.h to define __BEGIN_DECLS and __END_DECLS.  Even if
+ * this file exists, not all platforms define these macros.
+ */
+#ifdef HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#endif
+
+/*
+ * Define C++ decls wrappers if not previously defined.
+ */
+#ifndef __BEGIN_DECLS
+#  if defined(__cplusplus)
+#    define __BEGIN_DECLS	extern "C" {
+#    define __END_DECLS		};    
+#  else /* __BEGIN_DECLS */
+#    define __BEGIN_DECLS
+#    define __END_DECLS
+#  endif /* __BEGIN_DECLS */
+#endif /* __BEGIN_DECLS */
+
+#endif /* __XORP_CONFIG_H__ */

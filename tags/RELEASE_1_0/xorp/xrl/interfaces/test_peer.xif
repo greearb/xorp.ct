@@ -1,0 +1,75 @@
+/* $XORP: xorp/xrl/interfaces/test_peer.xif,v 1.2 2003/06/26 19:41:48 atanu Exp $ */
+
+/*
+ * Test Peer Interface. Simple endpoint to interact with protocols under
+ * test such as bgp.
+ */
+
+interface test_peer/0.1 {
+	/**
+	 * Register for receiving packets and events.
+	 *
+	 * The registering process must implement the "datain" interface in
+	 * order to receive data.
+	 *
+	 * @param Coordinator. Coordinator's name.
+	 * @param genid Generation id.
+	 */ 
+	register ? coordinator:txt & genid:u32
+
+	/**
+         * Packetisation style.
+	 *
+	 * @param protocol. Protocol that is being handled.
+	 */
+	packetisation ? protocol:txt
+
+	/**
+	 * Make a tcp connection to the specified host and port.
+	 *
+	 * @param host name.
+	 * @param port number.
+	 */
+	connect ? host:txt & port:u32
+
+	/**
+         * Listen for connections on this address and port.
+	 *
+	 * @param address local address.
+	 * @param port local port number.
+	 */
+	listen ? address:txt & port:u32
+
+	/**
+         * Bind the port but don't perform the listen or accept.
+	 *
+	 * @param address local address.
+	 * @param port local port number.
+	 */
+	bind ? address:txt & port:u32
+
+	/**
+	 * Send data
+	 *
+	 * Send data to the peer.
+	 */
+	send ? data:binary
+
+	/**
+	 * Disconnect from the peer.
+	 *
+	 */
+	disconnect
+        
+	/**
+	 * Reset the peer.
+	 * Take it back to a known state.
+	 */
+	reset
+
+	/**
+	 * Terminate the test peer process.
+	 *
+	 */
+	terminate
+}

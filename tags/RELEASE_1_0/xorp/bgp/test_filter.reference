@@ -1,0 +1,151 @@
+[comment] TEST 1
+[comment] ADD AND DELETE UNFILTERED
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] TEST 1a
+[comment] ADD AND DELETE FILTERING
+[comment] ADD, FILTERED
+[separator]-------------------------------------
+[comment] DELETE, FILTERED
+[separator]-------------------------------------
+[comment] TEST 2
+[comment] REPLACE ROUTE
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+[separator]-------------------------------------
+[comment] TEST 2a
+[comment] REPLACE ROUTE, OLD ROUTE FILTERED
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] TEST 2b
+[comment] REPLACE ROUTE, NEW ROUTE FILTERED
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] TEST 2c
+[comment] REPLACE ROUTE, BOTH ROUTES FILTERED
+[separator]-------------------------------------
+[comment] TEST 3
+[comment] ROUTE DUMP
+[DUMP]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] TEST 3a
+[comment] ROUTE_DUMP, FILTERED
+[separator]-------------------------------------
+[comment] TEST 4
+[comment] ADD, LOOKUP AND DELETE UNFILTERED
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] LOOKUP ROUTE
+[comment] TEST SUCCESSFUL
+[separator]-------------------------------------
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] TEST 4a
+[comment] ADD, LOOKUP AND DELETE FILTERED
+[comment] ADD, SHOULD BE FILTERED
+[separator]-------------------------------------
+[comment] LOOKUP ROUTE
+[comment] TEST SUCCESSFUL
+[separator]-------------------------------------
+[comment] DELETE, SHOULD BE FILTERED
+[separator]-------------------------------------
+[comment] TEST 5
+[comment] ADD AND DELETE
+[ADD]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[DELETE]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] TEST 6
+[comment] ADD AND DELETE
+[ADD]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 128.16.64.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[DELETE]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 128.16.64.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] SHUTDOWN AND CLEAN UP

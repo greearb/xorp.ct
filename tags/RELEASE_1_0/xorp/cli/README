@@ -1,0 +1,36 @@
+#
+# $XORP: xorp/cli/README,v 1.9 2004/06/15 00:14:36 pavlin Exp $
+#
+
+Command-Line Interface Implementation
+============================================
+
+This directory contains the XORP implementation of the CLI library.
+
+Startup
+=======
+
+The CLI library is used as part of the "xorpsh" process
+(inside ${XORP}/rtrmgr/).
+
+Documentation
+=============
+
+Please refer to ${XORP}/rtrmgr/ about information how to use the CLI
+as part of the xorpsh.
+Currently, the only available development documentation is the source
+code itself. In the future documentation will be added to describe the
+CLI architecture and API.
+
+Testing
+=======
+
+Currently, the CLI testing is performed manually. See file ``TODO''
+for a list of known problems.
+
+Status
+======
+
+Currently (July 2004), the CLI implementation is reasonably
+stable, but more tests are needed and there are still several minor
+things that need fixing.

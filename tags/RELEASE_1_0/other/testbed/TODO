@@ -1,0 +1,71 @@
+$XORP: other/testbed/TODO,v 1.3 2002/12/06 03:17:50 pavlin Exp $
+
+1) In the function install in xtconf.py once the <testbed_config> file
+has been generated verify it against the <testbed_physical>. Using the
+verify function. [DONE]
+
+2) When creating a fancy config file it would be very useful to know
+what machines and interfaces exist. Add an option to xtxml.py that
+that generates output of this form:
+
+xorp0: t0 t1 t2 t3 f0 f1
+xorp1: t0 f0
+
+...
+
+3) The mappings from our abstract interface names to actual interface names
+should somehow be captured in the <testebd_physical> file. Currently
+this information is hardcoded in "xtifset.py". There are a number of
+offending functions:
+	vif2interface
+	portmap
+	trans
+	verify
+	test
+
+One possible solution is to put the PCI slot number in
+<testbed_physical>. The FreeBSD or Linux name can then be derived from
+this information.
+
+4) The class Xorp in "xtxml.py" should be removed once all code that
+uses it has been changed to use Xtphysical. For example xttable.py.
+
+5) A more pleasing way of printing out <testbed_physical> should be
+available. For example:
+# xorp0 00:02:b3:10:e2:ec e1 33 fxp 319 f0 yes
+# xorp0 00:02:b3:10:df:aa d1 25 fxp 320 f1 yes
+# xorp0 00:80:c8:b9:3f:60 c1 17 tulip 321 t0 yes
+# xorp0 00:80:c8:b9:3f:5f b1 9 tulip 330 t1 yes
+# xorp0 00:80:c8:b9:3f:5d e7 39 tulip 327 t2 yes
+# xorp0 00:80:c8:b9:3f:5e e8 40 tulip 332 t3 yes
+# xorp0 00:02:B3:10:DF:4F a1 1 fxp 237 main no
+# xorp1 00:02:b3:10:e2:e9 e2 34 fxp 312 unknown yes
+# xorp1 00:02:b3:10:e3:e7 d2 26 fxp 316 unknown yes
+# xorp1 00:80:c8:b9:05:5b b2 10 tulip 318 unknown yes
+# xorp1 00:80:c8:b9:05:5c c2 18 tulip 317 unknown yes
+# xorp2 00:02:b3:10:dc:df e3 35 fxp 323 unknown yes
+# xorp2 00:02:b3:09:6f:80 d3 27 fxp 324 unknown yes
+# xorp2 00:80:c8:b9:17:c3 b3 11 tulip 326 unknown yes
+# xorp2 00:80:c8:b9:17:c4 c3 19 tulip 325 unknown yes
+# xorp3 00:02:b3:10:e2:eb e4 36 fxp 308 unknown yes
+# xorp3 00:02:b3:10:e2:ed d4 28 fxp 309 unknown yes
+# xorp3 00:80:c8:cf:ac:54 c4 20 tulip 310 unknown yes
+# xorp3 00:80:c8:cf:ac:53 b4 12 tulip 315 unknown yes
+# xorp4 00:02:b3:10:dc:a5 e5 37 fxp 304 unknown yes
+# xorp4 00:02:b3:10:c3:9c d5 29 fxp 306 unknown yes
+# xorp4 00:80:c8:b9:43:50 c5 21 tulip 311 unknown yes
+# xorp4 00:80:c8:b9:43:4f b5 13 tulip 314 unknown yes
+
+Thus allowing us to write simple scripts.
+
+6) It is not currently possible to reboot the switch using xtreset.py
+unless the program is run on "xorpc.icir.org". A possible fix would
+be to setup an ssh tunnel.
+
+7) When snmp is used to reset machines on the APC masterswitch the
+positions on the switch are hardcoded in "xtreset.py". A more flexible
+setup would be to read the names of the ports back from the
+masterswitch.
+
+8) Stick a simple GUI onto xtreset.py.
+

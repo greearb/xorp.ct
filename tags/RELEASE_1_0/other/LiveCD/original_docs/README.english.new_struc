@@ -1,0 +1,145 @@
+ _____ _   _  ____ ____  ____  ____  ____      /(        )`
+|  ___| | | |/ ___/ ___||  _ \| __ )|  _ \     \ \___   / |
+| |_  | | | | |  _\___ \| |_) |  _ \| |_) |    /- _  `-/  '
+|  _| | |_| | |_| |___) |  __/| |_) |  _ <    (/\/ \ \   /\
+|_|    \___/ \____|____/|_|   |____/|_| \_\   / /   | `    \
+                                              O O   ) /    |
+-------------------------------------------   `-^--'`<     '
+                                             (_.)  _  )   /
+                                              `.___/`    /
+ Brazilian Group of FreeBSD Users               `-----' /
+      http://www.fugspbr.org       <----.     __ / __   \
+          FreeBSD LiveCD           <----|====O)))==) \) /====
+            24/june/2002             <----'    `--' `.__,' \
+
+
+Disclaimer
+==========
+
+This software is offered to you "as is", and it is your responsibility to
+deal with its results. The authors do not take any responsibility for 
+any loss, problems or any other kind of misfortunes that might come 
+from its use.
+
+This is a work in progress and some features described below may not be 
+present yet. Also, some functionality may be present and not yet documented.
+
+Always check the main website (http://livecd.sourceforge.net/) to 
+an up to date status of the developments.
+
+Using this tool in the wrong way may cause data loss ! Make sure you read 
+the instructions carefully !
+
+
+Objective
+=========
+
+The FreeBSD LiveCD Toolkit has the objective of allowing the generation of 
+custom bootable CDs based on a working FreeBSD system. The project itself 
+was born in October 2001, due to a necessity of the Brazilian FreeBSD User 
+Group, whose goal was to have a diagnostic and recovery tool for emergency 
+situations like a disk crash and others.
+
+
+What is it after all ?
+======================
+
+In short, the FreeBSD LiveCD itself is a set of scripts that will prepare 
+an ISO image of a working FreeBSD system, based on some questions asked to 
+the user. A custom made kernel will allow this ISO to be bootable and to 
+have iteration with other partitions that might exist on the original or 
+other hard disk(s).
+
+Some of the uses for the FreeBSD LiveCD include: live operating system for 
+system recovery, implement firewalls (packet filtering), NAT, bridges, 
+installing the system on another machine, among other applications. Most of 
+those NOT NEEDING a hard disk !!!!
+
+
+Distribution and Downloads
+==========================
+
+The FreeBSD LiveCD follows the BSD license agreement.
+
+You will find the FreeBSD LiveCD available in two flavors:
+
+LiveCD-[version_number].tgz
+
+and
+
+LiveCD-[version_number]_ISO[FreeBSD_version].ISO
+
+As the names indicate, que .tgz file is a package that contains the
+FreeBSD LiveCD scripts, that will create the ISO image and allow you to
+run your LiveCD system.
+
+The ISO file is a READY TO RUN LiveCD image featuring the indicated FreeBSD
+version, all set for you to record your CD and use it. Burn it and go ! :)
+
+
+Requirements
+============
+
+* To use the FreeBSD LiveCD system:
+
+
+- Run it as ROOT ! You must have write permission to several places.
+- A working FreeBSD machine running version 4.5-stable or higher (not 
+tested with 5.x yet. Please let us know if you do it)
+- your sources (/usr/src mandatory !) synchronized with the above version.
+- 2 GB of free disk space under /usr/local
+- mkisofs
+
+Of course you need a CD Recorder to burn the CD image, but it does not need 
+to be in the FreeBSD system.
+
+* To recover/install the system based on a FreeBSD LiveCD
+
+A computer with a equivalent configuration of the original machine (pay 
+special attention to disk controllers and network cards, not to mention 
+disk space, in case you are recovering/installing the system on a hard drive)
+
+
+Instructions
+============
+
+You will find detailed instructions on the HOWTO.english file, within
+the FreeBSD LiveCD documentation. There you will learn how it works and 
+will have many examples of how to perform several tasks.
+
+Also you will find a HOWTO.QUICKLY.english that will basically have 
+step-by-step instructions, without comments. It is basicaly the
+HOWTO.english with the comments stripped down. For the impatient and
+also those already familiar with the tool.
+
+
+Warning !!!
+===========
+
+The FreeBSD LiveCD will attempt to use you frist IDE drive as default. 
+Currently it will not accept any other IDE drive as your base installation.
+SCSI disks have a different treatment, and can be freely used.
+
+In any case, recovering/installing the system using the FreeBSD LiveCD system
+offers considerably less options than a regular installation, regarding 
+the ability of using disks.
+
+You will more likely loose all the pre existing data on the target hard disk
+when performing a LiveCD installation.
+
+Remember: the goal of this tool is to be a repair/replication instrument. For
+a complete and customized fresh installation you should refere to the 
+Official FreeBSD distribution CD.
+
+
+Comments
+========
+
+All comments and suggestions are VERY welcome.
+Please, feel free to email the FreeBSD LiveCD Development Team at
+
+livecd@fugspbr.org
+
+just making sure that the term "LiveCD" (caps does not matter) is within the
+subject line, or the message will be rejected.
+

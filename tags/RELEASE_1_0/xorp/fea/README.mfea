@@ -1,0 +1,152 @@
+#
+# $XORP: xorp/fea/README.mfea,v 1.14 2004/06/22 01:28:25 pavlin Exp $
+#
+
+Multicast Forwarding Engine Abstraction
+=======================================
+
+The main purpose of the MFEA is to abstract the underlying system and
+the multicast forwarding engine, and to provide a consistent interface
+to multicast-related modules such as PIM and MLD/IGMP.
+
+The MFEA is intended to fulfill several roles on behalf of multicast-related
+processes such as MLD/IGMP and PIM-SM.
+
+    1) It provides access to the multicast forwarding engine for processes
+       such as PIM-SM.
+
+    2) It installs dataflow monitors into the kernel (if the underlying
+       system supports it), or reads bandwidth forwarding statistics per
+       dataflow.
+
+    3) It receives from the FEA information about network interfaces,
+       and forwards this information to the protocols registered with
+       the MFEA.
+
+    4) It receives from the FEA information about the underlying unicast
+       forwarding table, and composes Reverse-Path Forwarding information
+       for processes such as PIM-SM.
+       Note that currently (July 2004) this is used only when the MFEA
+       is used as part of ths stand-alone ${XORP}/pim/test_pim binary.
+
+    5) It allows protocol-specific packets (e.g., PIM or IGMP) to be
+       sent/received to/from network interfaces.
+
+Note that typically the MFEA would be part of the unicast FEA process,
+though logically it is a separate entity.
+
+Configuration
+=============
+
+MFEA like most XORP modules does not take its configuration
+parameters from the command line. Its parameters are provided via
+XRLs. At the very least a MFEA module must be provided with
+the set of network interfaces to enable for multicast forwarding.
+For information how to configure the MFEA see
+http://www.xorp.org/getting_started.html
+
+Startup
+=======
+
+In normal operation, MFEA would be started by the XORP router manager
+process, not directly from the command line. In that case, make sure
+that IP forwarding is enabled in the XORP configuration file
+(see http://www.xorp.org/getting_started.html about information how to
+enable it). 
+
+Debugging with Stand-alone MFEA
+===============================
+
+For testing and debugging purposes, MFEA can be started manually.  The
+XORP MFEA module (as part of the FEA process) assumes that the XRL finder
+is running.  However, the binary program ``test_mfea'' already contains it,
+therefore it is sufficient to start only ``test_mfea'' (as a root).
+
+First, make sure that IP forwarding is enabled.
+ - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
+      sysctl net.inet.ip.forwarding=1
+      sysctl net.inet6.ip6.forwarding=1
+
+ - In case of Linux run as a root (for IPv4):
+      echo 1 > /proc/sys/net/ipv4/ip_forward
+   Note that currently Linux doesn't support IPv6 multicast routing.
+
+After ``test_mfea'' is started, the MFEA is disabled by default. To
+start it, and to configure its operation, run script ``./configure_mfea''.
+Note that it MUST be run from the ``$XORP/fea'' directory.
+To run MFEA in IPv6 mode, then use ``./configure_mfea -6'' instead.
+
+However, before running ``configure_mfea'', you must configure
+it for each router:
+
+ - Add an entry for each router under "case $HOSTNAME in" with the
+   set of network interfaces to enable.
+   Example:
+
+	xorp1)
+	ENABLE_VIFS="dc1 dc2 dc4"
+	;;
+
+ - All configuration variables described above can be predefined in your
+   shell environment instead.
+
+ - By default, ``test_mfea'' will log all protocol-related messages.
+   To disable them, comment-out the following variables:
+
+	MFEA_ENABLE_LOG_TRACE=yes
+
+ - After MFEA is started, if you want to send a single XRL command
+   to it and change some of its configuration, you can use the command
+   ./command_mfea <xrl_command> [xrl_command_arguments ... ]
+   
+   The list of all XRL commands and their arguments are in
+   ``xrl_mfea_shell_funcs.sh''
+
+ - After MFEA is started, if you want to access its internal
+   information, you can use the built-in CLI:
+     telnet localhost 12000
+
+ - If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable in ``configure_mfea'':
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+
+
+   Currently, the CLI supports primarily "show" commands. For example,
+   "show mfea interface" will show the list of all interfaces known to
+   the MFEA and their status. All MFEA commands start with "show mfea"
+   or "show mfea6" for IPv4 and IPv6 respectively. At each moment you
+   can press <TAB> for the list of existing commands at each level,
+   and a brief description of them. Pressing '?' after a command has
+   similar function.
+   Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   Ctrl-E to go to the beginning or end of the current line, Ctrl-A
+   to kill the remaining part of the current line, etc.
+   To exit, press Ctrl-D when you are on a new empty line.
+
+Documentation
+=============
+
+The MFEA design architecture and code structure are described in:
+	${XORP}/docs/mfea/
+
+The programming documentation is in:
+	${XORP}/docs/kdoc/html/fea/
+
+Testing
+=======
+
+Currently, the MFEA testing is performed manually, indirectly as part of
+the MLD/IGMP and PIM-SM testing.
+
+In the future, automated testing will be added, similar to
+the BGP testing framework.
+
+Status
+======
+
+Currently (July 2004), the MFEA supports abstraction for
+the following systems:
+
+ * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
+ * Lunux OS (tested only on Red Hat Linux 7.2 with kernel 2.4.18)

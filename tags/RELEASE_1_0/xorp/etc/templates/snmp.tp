@@ -1,0 +1,50 @@
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.11 2004/06/04 04:47:05 pavlin Exp $ */
+
+protocols {
+    snmp {
+	targetname:		txt = "xorp_if_mib";
+
+	mib-module @: txt {
+	    abs-path:		txt = "";
+	    mib-index:		u32 = 0;
+	}
+    }
+}
+
+protocols {
+    snmp {
+	%help:		short		"Configure SNMP";
+	%modinfo:	provides	xorp_if_mib; 
+	%modinfo:	path		"mibs/snmpdscripts/startsnmp";
+	%modinfo:	default_targetname "xorp_if_mib";
+	%modinfo:	status_method	xrl "$(snmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl "$(snmp.targetname)/common/0.1/shutdown";
+
+	%mandatory:	targetname;
+
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+
+	mib-module @ {
+	    %help:	short "Configure s MIB module";
+	    %create:	xrl "$(snmp.targetname)/xorp_if_mib/0.1/load_mib?mod_name:txt=$(@)&abs_path:txt=$(@.abs-path)->mib_index:u32=$(@.mib-index)";
+	    %delete:	xrl "$(snmp.targetname)/xorp_if_mib/0.1/unload_mib?mib_index:u32=$(@.mib-index)->unloaded:bool";
+
+	    abs-path {
+		%help:	short "Configure the absolute path to load the MIB";
+		%set: ;
+		%get: ;
+		%delete: ;
+	    }
+
+	    mib-index {
+		%help:	short "Configure the MIB index";
+		%set: ;
+		%get: ;
+		%delete: ;
+	    }
+	}
+    }
+}

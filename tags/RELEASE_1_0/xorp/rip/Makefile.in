@@ -1,0 +1,1268 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+FLOWER_MALLOC = @FLOWER_MALLOC@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+
+# Redefine the bin installation directory
+bindir = $(prefix)/$(subdir)
+
+SUBDIRS = . tools
+
+# -- Real Programs
+bin_PROGRAMS = xorp_rip xorp_ripng
+
+# -- Test Programs
+TESTS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
+
+# -- No-install Programs
+noinst_PROGRAMS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
+
+# -- No-install Libraries
+noinst_LIBRARIES = librip.a libripng.a libripxrl.a libripngxrl.a
+
+# -- Libraries and library flags to link the binary programs
+LDFLAGS = 
+#LDADD				 = ./librip.a
+LDADD = $(top_builddir)/libxorp/libxorp.a
+
+# -- Real Program Sources
+xorp_rip_CXXFLAGS = -DINSTANTIATE_IPV4
+xorp_rip_SOURCES = xorp_rip_main.cc xrl_target_common.hh xrl_target_rip.hh xrl_target_rip.cc
+xorp_rip_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/libripbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+xorp_ripng_CXXFLAGS = -DINSTANTIATE_IPV6
+xorp_ripng_SOURCES = xorp_rip_main.cc xrl_target_common.hh xrl_target_ripng.hh xrl_target_ripng.cc
+xorp_ripng_LDADD = ./libripngxrl.a ./libripng.a $(top_builddir)/xrl/targets/libripngbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket6locatorxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+# -- Test Program Sources
+test_auth_SOURCES = test_auth.cc test_utils.hh
+test_auth_LDADD = ./librip.a $(LDADD)
+
+test_packets_SOURCES = test_packets.cc test_utils.hh
+test_packets_LDADD = ./librip.a $(LDADD)
+
+test_request_SOURCES = test_request.cc test_utils.hh
+test_request_LDADD = ./librip.a $(LDADD)
+
+test_route_walk_SOURCES = test_route_walk.cc test_utils.hh
+test_route_walk_LDADD = ./librip.a ./libripng.a $(LDADD)
+
+test_timers_SOURCES = test_timers.cc test_utils.hh
+test_timers_LDADD = ./librip.a ./libripng.a $(LDADD)
+
+test_update_queue_SOURCES = test_update_queue.cc test_utils.hh
+test_update_queue_LDADD = ./librip.a ./libripng.a $(LDADD)
+
+test_outputs_SOURCES = test_outputs.cc test_utils.hh
+test_outputs_LDADD = ./librip.a libripng.a $(LDADD)
+
+# -- RIP Core Library Sources
+librip_a_CXXFLAGS = -DINSTANTIATE_IPV4
+
+librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
+
+# -- RIP NG Core Library Sources
+libripng_a_CXXFLAGS = -DINSTANTIATE_IPV6
+
+libripng_a_SOURCES = rip_module.h constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
+
+# -- RIP XRL library sources
+libripxrl_a_CXXFLAGS = -DINSTANTIATE_IPV4
+
+libripxrl_a_SOURCES = xrl_config.hh xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_redist_manager.hh xrl_rib_notifier.hh xrl_config.cc xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_redist_manager.cc xrl_rib_notifier.cc
+
+# -- RIP NG Xrl library sources
+libripngxrl_a_CXXFLAGS = -DINSTANTIATE_IPV6
+
+libripngxrl_a_SOURCES = xrl_config.hh xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_redist_manager.hh xrl_rib_notifier.hh xrl_config.cc xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_rib_notifier.cc xrl_redist_manager.cc
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+subdir = rip
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+librip_a_AR = $(AR) cru
+librip_a_LIBADD =
+am_librip_a_OBJECTS = librip_a-auth.$(OBJEXT) \
+	librip_a-output_table.$(OBJEXT) \
+	librip_a-output_updates.$(OBJEXT) \
+	librip_a-packet_queue.$(OBJEXT) librip_a-peer.$(OBJEXT) \
+	librip_a-port.$(OBJEXT) librip_a-redist.$(OBJEXT) \
+	librip_a-rib_notifier_base.$(OBJEXT) \
+	librip_a-route_db.$(OBJEXT) librip_a-route_entry.$(OBJEXT) \
+	librip_a-update_queue.$(OBJEXT)
+librip_a_OBJECTS = $(am_librip_a_OBJECTS)
+libripng_a_AR = $(AR) cru
+libripng_a_LIBADD =
+am_libripng_a_OBJECTS = libripng_a-output_table.$(OBJEXT) \
+	libripng_a-output_updates.$(OBJEXT) \
+	libripng_a-packet_queue.$(OBJEXT) libripng_a-peer.$(OBJEXT) \
+	libripng_a-port.$(OBJEXT) libripng_a-redist.$(OBJEXT) \
+	libripng_a-rib_notifier_base.$(OBJEXT) \
+	libripng_a-route_db.$(OBJEXT) libripng_a-route_entry.$(OBJEXT) \
+	libripng_a-update_queue.$(OBJEXT)
+libripng_a_OBJECTS = $(am_libripng_a_OBJECTS)
+libripngxrl_a_AR = $(AR) cru
+libripngxrl_a_LIBADD =
+am_libripngxrl_a_OBJECTS = libripngxrl_a-xrl_config.$(OBJEXT) \
+	libripngxrl_a-xrl_port_manager.$(OBJEXT) \
+	libripngxrl_a-xrl_port_io.$(OBJEXT) \
+	libripngxrl_a-xrl_process_spy.$(OBJEXT) \
+	libripngxrl_a-xrl_rib_notifier.$(OBJEXT) \
+	libripngxrl_a-xrl_redist_manager.$(OBJEXT)
+libripngxrl_a_OBJECTS = $(am_libripngxrl_a_OBJECTS)
+libripxrl_a_AR = $(AR) cru
+libripxrl_a_LIBADD =
+am_libripxrl_a_OBJECTS = libripxrl_a-xrl_config.$(OBJEXT) \
+	libripxrl_a-xrl_port_manager.$(OBJEXT) \
+	libripxrl_a-xrl_port_io.$(OBJEXT) \
+	libripxrl_a-xrl_process_spy.$(OBJEXT) \
+	libripxrl_a-xrl_redist_manager.$(OBJEXT) \
+	libripxrl_a-xrl_rib_notifier.$(OBJEXT)
+libripxrl_a_OBJECTS = $(am_libripxrl_a_OBJECTS)
+bin_PROGRAMS = xorp_rip$(EXEEXT) xorp_ripng$(EXEEXT)
+noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
+	test_request$(EXEEXT) test_route_walk$(EXEEXT) \
+	test_timers$(EXEEXT) test_update_queue$(EXEEXT) \
+	test_outputs$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+
+am_test_auth_OBJECTS = test_auth.$(OBJEXT)
+test_auth_OBJECTS = $(am_test_auth_OBJECTS)
+test_auth_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_auth_LDFLAGS =
+am_test_outputs_OBJECTS = test_outputs.$(OBJEXT)
+test_outputs_OBJECTS = $(am_test_outputs_OBJECTS)
+test_outputs_DEPENDENCIES = ./librip.a libripng.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_outputs_LDFLAGS =
+am_test_packets_OBJECTS = test_packets.$(OBJEXT)
+test_packets_OBJECTS = $(am_test_packets_OBJECTS)
+test_packets_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_packets_LDFLAGS =
+am_test_request_OBJECTS = test_request.$(OBJEXT)
+test_request_OBJECTS = $(am_test_request_OBJECTS)
+test_request_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_request_LDFLAGS =
+am_test_route_walk_OBJECTS = test_route_walk.$(OBJEXT)
+test_route_walk_OBJECTS = $(am_test_route_walk_OBJECTS)
+test_route_walk_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_route_walk_LDFLAGS =
+am_test_timers_OBJECTS = test_timers.$(OBJEXT)
+test_timers_OBJECTS = $(am_test_timers_OBJECTS)
+test_timers_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_timers_LDFLAGS =
+am_test_update_queue_OBJECTS = test_update_queue.$(OBJEXT)
+test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)
+test_update_queue_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_update_queue_LDFLAGS =
+am_xorp_rip_OBJECTS = xorp_rip-xorp_rip_main.$(OBJEXT) \
+	xorp_rip-xrl_target_rip.$(OBJEXT)
+xorp_rip_OBJECTS = $(am_xorp_rip_OBJECTS)
+xorp_rip_DEPENDENCIES = ./libripxrl.a ./librip.a \
+	$(top_builddir)/xrl/targets/libripbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/xrl/interfaces/libsocket4locatorxif.a \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_rip_LDFLAGS =
+am_xorp_ripng_OBJECTS = xorp_ripng-xorp_rip_main.$(OBJEXT) \
+	xorp_ripng-xrl_target_ripng.$(OBJEXT)
+xorp_ripng_OBJECTS = $(am_xorp_ripng_OBJECTS)
+xorp_ripng_DEPENDENCIES = ./libripngxrl.a ./libripng.a \
+	$(top_builddir)/xrl/targets/libripngbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/xrl/interfaces/libsocket6locatorxif.a \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_ripng_LDFLAGS =
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/librip_a-auth.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-output_table.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-output_updates.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-packet_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-peer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-port.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-redist.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-rib_notifier_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-route_db.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-route_entry.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-update_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-output_table.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-output_updates.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-packet_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-peer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-port.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-redist.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-rib_notifier_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-route_db.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-route_entry.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-update_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_config.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_port_io.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_process_spy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_config.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_port_io.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_port_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_process_spy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_outputs.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_packets.Po $(DEPDIR)/test_request.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_rip-xorp_rip_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_rip-xrl_target_rip.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_ripng-xorp_rip_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(librip_a_SOURCES) $(libripng_a_SOURCES) \
+	$(libripngxrl_a_SOURCES) $(libripxrl_a_SOURCES) \
+	$(test_auth_SOURCES) $(test_outputs_SOURCES) \
+	$(test_packets_SOURCES) $(test_request_SOURCES) \
+	$(test_route_walk_SOURCES) $(test_timers_SOURCES) \
+	$(test_update_queue_SOURCES) $(xorp_rip_SOURCES) \
+	$(xorp_ripng_SOURCES)
+
+RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
+	uninstall-info-recursive all-recursive install-data-recursive \
+	install-exec-recursive installdirs-recursive install-recursive \
+	uninstall-recursive check-recursive installcheck-recursive
+DIST_COMMON = Makefile.am Makefile.in TODO
+DIST_SUBDIRS = $(SUBDIRS)
+SOURCES = $(librip_a_SOURCES) $(libripng_a_SOURCES) $(libripngxrl_a_SOURCES) $(libripxrl_a_SOURCES) $(test_auth_SOURCES) $(test_outputs_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES) $(xorp_rip_SOURCES) $(xorp_ripng_SOURCES)
+
+all: all-recursive
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  rip/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+librip_a-auth.$(OBJEXT): auth.cc
+librip_a-output_table.$(OBJEXT): output_table.cc
+librip_a-output_updates.$(OBJEXT): output_updates.cc
+librip_a-packet_queue.$(OBJEXT): packet_queue.cc
+librip_a-peer.$(OBJEXT): peer.cc
+librip_a-port.$(OBJEXT): port.cc
+librip_a-redist.$(OBJEXT): redist.cc
+librip_a-rib_notifier_base.$(OBJEXT): rib_notifier_base.cc
+librip_a-route_db.$(OBJEXT): route_db.cc
+librip_a-route_entry.$(OBJEXT): route_entry.cc
+librip_a-update_queue.$(OBJEXT): update_queue.cc
+librip.a: $(librip_a_OBJECTS) $(librip_a_DEPENDENCIES) 
+	-rm -f librip.a
+	$(librip_a_AR) librip.a $(librip_a_OBJECTS) $(librip_a_LIBADD)
+	$(RANLIB) librip.a
+libripng_a-output_table.$(OBJEXT): output_table.cc
+libripng_a-output_updates.$(OBJEXT): output_updates.cc
+libripng_a-packet_queue.$(OBJEXT): packet_queue.cc
+libripng_a-peer.$(OBJEXT): peer.cc
+libripng_a-port.$(OBJEXT): port.cc
+libripng_a-redist.$(OBJEXT): redist.cc
+libripng_a-rib_notifier_base.$(OBJEXT): rib_notifier_base.cc
+libripng_a-route_db.$(OBJEXT): route_db.cc
+libripng_a-route_entry.$(OBJEXT): route_entry.cc
+libripng_a-update_queue.$(OBJEXT): update_queue.cc
+libripng.a: $(libripng_a_OBJECTS) $(libripng_a_DEPENDENCIES) 
+	-rm -f libripng.a
+	$(libripng_a_AR) libripng.a $(libripng_a_OBJECTS) $(libripng_a_LIBADD)
+	$(RANLIB) libripng.a
+libripngxrl_a-xrl_config.$(OBJEXT): xrl_config.cc
+libripngxrl_a-xrl_port_manager.$(OBJEXT): xrl_port_manager.cc
+libripngxrl_a-xrl_port_io.$(OBJEXT): xrl_port_io.cc
+libripngxrl_a-xrl_process_spy.$(OBJEXT): xrl_process_spy.cc
+libripngxrl_a-xrl_rib_notifier.$(OBJEXT): xrl_rib_notifier.cc
+libripngxrl_a-xrl_redist_manager.$(OBJEXT): xrl_redist_manager.cc
+libripngxrl.a: $(libripngxrl_a_OBJECTS) $(libripngxrl_a_DEPENDENCIES) 
+	-rm -f libripngxrl.a
+	$(libripngxrl_a_AR) libripngxrl.a $(libripngxrl_a_OBJECTS) $(libripngxrl_a_LIBADD)
+	$(RANLIB) libripngxrl.a
+libripxrl_a-xrl_config.$(OBJEXT): xrl_config.cc
+libripxrl_a-xrl_port_manager.$(OBJEXT): xrl_port_manager.cc
+libripxrl_a-xrl_port_io.$(OBJEXT): xrl_port_io.cc
+libripxrl_a-xrl_process_spy.$(OBJEXT): xrl_process_spy.cc
+libripxrl_a-xrl_redist_manager.$(OBJEXT): xrl_redist_manager.cc
+libripxrl_a-xrl_rib_notifier.$(OBJEXT): xrl_rib_notifier.cc
+libripxrl.a: $(libripxrl_a_OBJECTS) $(libripxrl_a_DEPENDENCIES) 
+	-rm -f libripxrl.a
+	$(libripxrl_a_AR) libripxrl.a $(libripxrl_a_OBJECTS) $(libripxrl_a_LIBADD)
+	$(RANLIB) libripxrl.a
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+test_auth$(EXEEXT): $(test_auth_OBJECTS) $(test_auth_DEPENDENCIES) 
+	@rm -f test_auth$(EXEEXT)
+	$(CXXLINK) $(test_auth_LDFLAGS) $(test_auth_OBJECTS) $(test_auth_LDADD) $(LIBS)
+test_outputs$(EXEEXT): $(test_outputs_OBJECTS) $(test_outputs_DEPENDENCIES) 
+	@rm -f test_outputs$(EXEEXT)
+	$(CXXLINK) $(test_outputs_LDFLAGS) $(test_outputs_OBJECTS) $(test_outputs_LDADD) $(LIBS)
+test_packets$(EXEEXT): $(test_packets_OBJECTS) $(test_packets_DEPENDENCIES) 
+	@rm -f test_packets$(EXEEXT)
+	$(CXXLINK) $(test_packets_LDFLAGS) $(test_packets_OBJECTS) $(test_packets_LDADD) $(LIBS)
+test_request$(EXEEXT): $(test_request_OBJECTS) $(test_request_DEPENDENCIES) 
+	@rm -f test_request$(EXEEXT)
+	$(CXXLINK) $(test_request_LDFLAGS) $(test_request_OBJECTS) $(test_request_LDADD) $(LIBS)
+test_route_walk$(EXEEXT): $(test_route_walk_OBJECTS) $(test_route_walk_DEPENDENCIES) 
+	@rm -f test_route_walk$(EXEEXT)
+	$(CXXLINK) $(test_route_walk_LDFLAGS) $(test_route_walk_OBJECTS) $(test_route_walk_LDADD) $(LIBS)
+test_timers$(EXEEXT): $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES) 
+	@rm -f test_timers$(EXEEXT)
+	$(CXXLINK) $(test_timers_LDFLAGS) $(test_timers_OBJECTS) $(test_timers_LDADD) $(LIBS)
+test_update_queue$(EXEEXT): $(test_update_queue_OBJECTS) $(test_update_queue_DEPENDENCIES) 
+	@rm -f test_update_queue$(EXEEXT)
+	$(CXXLINK) $(test_update_queue_LDFLAGS) $(test_update_queue_OBJECTS) $(test_update_queue_LDADD) $(LIBS)
+xorp_rip-xorp_rip_main.$(OBJEXT): xorp_rip_main.cc
+xorp_rip-xrl_target_rip.$(OBJEXT): xrl_target_rip.cc
+xorp_rip$(EXEEXT): $(xorp_rip_OBJECTS) $(xorp_rip_DEPENDENCIES) 
+	@rm -f xorp_rip$(EXEEXT)
+	$(CXXLINK) $(xorp_rip_LDFLAGS) $(xorp_rip_OBJECTS) $(xorp_rip_LDADD) $(LIBS)
+xorp_ripng-xorp_rip_main.$(OBJEXT): xorp_rip_main.cc
+xorp_ripng-xrl_target_ripng.$(OBJEXT): xrl_target_ripng.cc
+xorp_ripng$(EXEEXT): $(xorp_ripng_OBJECTS) $(xorp_ripng_DEPENDENCIES) 
+	@rm -f xorp_ripng$(EXEEXT)
+	$(CXXLINK) $(xorp_ripng_LDFLAGS) $(xorp_ripng_OBJECTS) $(xorp_ripng_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-auth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-output_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-output_updates.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-packet_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-peer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-port.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-redist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-rib_notifier_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-route_db.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-route_entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-update_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-output_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-output_updates.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-packet_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-peer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-port.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-redist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-rib_notifier_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-route_db.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-route_entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-update_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_port_io.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_process_spy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_port_io.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_port_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_process_spy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_auth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_outputs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packets.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_request.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_route_walk.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timers.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_update_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip-xorp_rip_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip-xrl_target_rip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ripng-xorp_rip_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+librip_a-auth.o: auth.cc
+@AMDEP_TRUE@	source='auth.cc' object='librip_a-auth.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-auth.Po' tmpdepfile='$(DEPDIR)/librip_a-auth.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-auth.o `test -f auth.cc || echo '$(srcdir)/'`auth.cc
+
+librip_a-auth.obj: auth.cc
+@AMDEP_TRUE@	source='auth.cc' object='librip_a-auth.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-auth.Po' tmpdepfile='$(DEPDIR)/librip_a-auth.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-auth.obj `cygpath -w auth.cc`
+
+librip_a-output_table.o: output_table.cc
+@AMDEP_TRUE@	source='output_table.cc' object='librip_a-output_table.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-output_table.Po' tmpdepfile='$(DEPDIR)/librip_a-output_table.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-output_table.o `test -f output_table.cc || echo '$(srcdir)/'`output_table.cc
+
+librip_a-output_table.obj: output_table.cc
+@AMDEP_TRUE@	source='output_table.cc' object='librip_a-output_table.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-output_table.Po' tmpdepfile='$(DEPDIR)/librip_a-output_table.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-output_table.obj `cygpath -w output_table.cc`
+
+librip_a-output_updates.o: output_updates.cc
+@AMDEP_TRUE@	source='output_updates.cc' object='librip_a-output_updates.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-output_updates.Po' tmpdepfile='$(DEPDIR)/librip_a-output_updates.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-output_updates.o `test -f output_updates.cc || echo '$(srcdir)/'`output_updates.cc
+
+librip_a-output_updates.obj: output_updates.cc
+@AMDEP_TRUE@	source='output_updates.cc' object='librip_a-output_updates.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-output_updates.Po' tmpdepfile='$(DEPDIR)/librip_a-output_updates.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-output_updates.obj `cygpath -w output_updates.cc`
+
+librip_a-packet_queue.o: packet_queue.cc
+@AMDEP_TRUE@	source='packet_queue.cc' object='librip_a-packet_queue.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-packet_queue.Po' tmpdepfile='$(DEPDIR)/librip_a-packet_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-packet_queue.o `test -f packet_queue.cc || echo '$(srcdir)/'`packet_queue.cc
+
+librip_a-packet_queue.obj: packet_queue.cc
+@AMDEP_TRUE@	source='packet_queue.cc' object='librip_a-packet_queue.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-packet_queue.Po' tmpdepfile='$(DEPDIR)/librip_a-packet_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-packet_queue.obj `cygpath -w packet_queue.cc`
+
+librip_a-peer.o: peer.cc
+@AMDEP_TRUE@	source='peer.cc' object='librip_a-peer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-peer.Po' tmpdepfile='$(DEPDIR)/librip_a-peer.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-peer.o `test -f peer.cc || echo '$(srcdir)/'`peer.cc
+
+librip_a-peer.obj: peer.cc
+@AMDEP_TRUE@	source='peer.cc' object='librip_a-peer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-peer.Po' tmpdepfile='$(DEPDIR)/librip_a-peer.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-peer.obj `cygpath -w peer.cc`
+
+librip_a-port.o: port.cc
+@AMDEP_TRUE@	source='port.cc' object='librip_a-port.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-port.Po' tmpdepfile='$(DEPDIR)/librip_a-port.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-port.o `test -f port.cc || echo '$(srcdir)/'`port.cc
+
+librip_a-port.obj: port.cc
+@AMDEP_TRUE@	source='port.cc' object='librip_a-port.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-port.Po' tmpdepfile='$(DEPDIR)/librip_a-port.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-port.obj `cygpath -w port.cc`
+
+librip_a-redist.o: redist.cc
+@AMDEP_TRUE@	source='redist.cc' object='librip_a-redist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-redist.Po' tmpdepfile='$(DEPDIR)/librip_a-redist.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-redist.o `test -f redist.cc || echo '$(srcdir)/'`redist.cc
+
+librip_a-redist.obj: redist.cc
+@AMDEP_TRUE@	source='redist.cc' object='librip_a-redist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-redist.Po' tmpdepfile='$(DEPDIR)/librip_a-redist.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-redist.obj `cygpath -w redist.cc`
+
+librip_a-rib_notifier_base.o: rib_notifier_base.cc
+@AMDEP_TRUE@	source='rib_notifier_base.cc' object='librip_a-rib_notifier_base.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-rib_notifier_base.Po' tmpdepfile='$(DEPDIR)/librip_a-rib_notifier_base.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-rib_notifier_base.o `test -f rib_notifier_base.cc || echo '$(srcdir)/'`rib_notifier_base.cc
+
+librip_a-rib_notifier_base.obj: rib_notifier_base.cc
+@AMDEP_TRUE@	source='rib_notifier_base.cc' object='librip_a-rib_notifier_base.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-rib_notifier_base.Po' tmpdepfile='$(DEPDIR)/librip_a-rib_notifier_base.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-rib_notifier_base.obj `cygpath -w rib_notifier_base.cc`
+
+librip_a-route_db.o: route_db.cc
+@AMDEP_TRUE@	source='route_db.cc' object='librip_a-route_db.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-route_db.Po' tmpdepfile='$(DEPDIR)/librip_a-route_db.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-route_db.o `test -f route_db.cc || echo '$(srcdir)/'`route_db.cc
+
+librip_a-route_db.obj: route_db.cc
+@AMDEP_TRUE@	source='route_db.cc' object='librip_a-route_db.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-route_db.Po' tmpdepfile='$(DEPDIR)/librip_a-route_db.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-route_db.obj `cygpath -w route_db.cc`
+
+librip_a-route_entry.o: route_entry.cc
+@AMDEP_TRUE@	source='route_entry.cc' object='librip_a-route_entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-route_entry.Po' tmpdepfile='$(DEPDIR)/librip_a-route_entry.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-route_entry.o `test -f route_entry.cc || echo '$(srcdir)/'`route_entry.cc
+
+librip_a-route_entry.obj: route_entry.cc
+@AMDEP_TRUE@	source='route_entry.cc' object='librip_a-route_entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-route_entry.Po' tmpdepfile='$(DEPDIR)/librip_a-route_entry.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-route_entry.obj `cygpath -w route_entry.cc`
+
+librip_a-update_queue.o: update_queue.cc
+@AMDEP_TRUE@	source='update_queue.cc' object='librip_a-update_queue.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-update_queue.Po' tmpdepfile='$(DEPDIR)/librip_a-update_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-update_queue.o `test -f update_queue.cc || echo '$(srcdir)/'`update_queue.cc
+
+librip_a-update_queue.obj: update_queue.cc
+@AMDEP_TRUE@	source='update_queue.cc' object='librip_a-update_queue.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-update_queue.Po' tmpdepfile='$(DEPDIR)/librip_a-update_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-update_queue.obj `cygpath -w update_queue.cc`
+
+libripng_a-output_table.o: output_table.cc
+@AMDEP_TRUE@	source='output_table.cc' object='libripng_a-output_table.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-output_table.Po' tmpdepfile='$(DEPDIR)/libripng_a-output_table.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-output_table.o `test -f output_table.cc || echo '$(srcdir)/'`output_table.cc
+
+libripng_a-output_table.obj: output_table.cc
+@AMDEP_TRUE@	source='output_table.cc' object='libripng_a-output_table.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-output_table.Po' tmpdepfile='$(DEPDIR)/libripng_a-output_table.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-output_table.obj `cygpath -w output_table.cc`
+
+libripng_a-output_updates.o: output_updates.cc
+@AMDEP_TRUE@	source='output_updates.cc' object='libripng_a-output_updates.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-output_updates.Po' tmpdepfile='$(DEPDIR)/libripng_a-output_updates.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-output_updates.o `test -f output_updates.cc || echo '$(srcdir)/'`output_updates.cc
+
+libripng_a-output_updates.obj: output_updates.cc
+@AMDEP_TRUE@	source='output_updates.cc' object='libripng_a-output_updates.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-output_updates.Po' tmpdepfile='$(DEPDIR)/libripng_a-output_updates.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-output_updates.obj `cygpath -w output_updates.cc`
+
+libripng_a-packet_queue.o: packet_queue.cc
+@AMDEP_TRUE@	source='packet_queue.cc' object='libripng_a-packet_queue.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-packet_queue.Po' tmpdepfile='$(DEPDIR)/libripng_a-packet_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-packet_queue.o `test -f packet_queue.cc || echo '$(srcdir)/'`packet_queue.cc
+
+libripng_a-packet_queue.obj: packet_queue.cc
+@AMDEP_TRUE@	source='packet_queue.cc' object='libripng_a-packet_queue.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-packet_queue.Po' tmpdepfile='$(DEPDIR)/libripng_a-packet_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-packet_queue.obj `cygpath -w packet_queue.cc`
+
+libripng_a-peer.o: peer.cc
+@AMDEP_TRUE@	source='peer.cc' object='libripng_a-peer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-peer.Po' tmpdepfile='$(DEPDIR)/libripng_a-peer.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-peer.o `test -f peer.cc || echo '$(srcdir)/'`peer.cc
+
+libripng_a-peer.obj: peer.cc
+@AMDEP_TRUE@	source='peer.cc' object='libripng_a-peer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-peer.Po' tmpdepfile='$(DEPDIR)/libripng_a-peer.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-peer.obj `cygpath -w peer.cc`
+
+libripng_a-port.o: port.cc
+@AMDEP_TRUE@	source='port.cc' object='libripng_a-port.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-port.Po' tmpdepfile='$(DEPDIR)/libripng_a-port.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-port.o `test -f port.cc || echo '$(srcdir)/'`port.cc
+
+libripng_a-port.obj: port.cc
+@AMDEP_TRUE@	source='port.cc' object='libripng_a-port.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-port.Po' tmpdepfile='$(DEPDIR)/libripng_a-port.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-port.obj `cygpath -w port.cc`
+
+libripng_a-redist.o: redist.cc
+@AMDEP_TRUE@	source='redist.cc' object='libripng_a-redist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-redist.Po' tmpdepfile='$(DEPDIR)/libripng_a-redist.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-redist.o `test -f redist.cc || echo '$(srcdir)/'`redist.cc
+
+libripng_a-redist.obj: redist.cc
+@AMDEP_TRUE@	source='redist.cc' object='libripng_a-redist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-redist.Po' tmpdepfile='$(DEPDIR)/libripng_a-redist.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-redist.obj `cygpath -w redist.cc`
+
+libripng_a-rib_notifier_base.o: rib_notifier_base.cc
+@AMDEP_TRUE@	source='rib_notifier_base.cc' object='libripng_a-rib_notifier_base.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-rib_notifier_base.Po' tmpdepfile='$(DEPDIR)/libripng_a-rib_notifier_base.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-rib_notifier_base.o `test -f rib_notifier_base.cc || echo '$(srcdir)/'`rib_notifier_base.cc
+
+libripng_a-rib_notifier_base.obj: rib_notifier_base.cc
+@AMDEP_TRUE@	source='rib_notifier_base.cc' object='libripng_a-rib_notifier_base.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-rib_notifier_base.Po' tmpdepfile='$(DEPDIR)/libripng_a-rib_notifier_base.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-rib_notifier_base.obj `cygpath -w rib_notifier_base.cc`
+
+libripng_a-route_db.o: route_db.cc
+@AMDEP_TRUE@	source='route_db.cc' object='libripng_a-route_db.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-route_db.Po' tmpdepfile='$(DEPDIR)/libripng_a-route_db.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-route_db.o `test -f route_db.cc || echo '$(srcdir)/'`route_db.cc
+
+libripng_a-route_db.obj: route_db.cc
+@AMDEP_TRUE@	source='route_db.cc' object='libripng_a-route_db.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-route_db.Po' tmpdepfile='$(DEPDIR)/libripng_a-route_db.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-route_db.obj `cygpath -w route_db.cc`
+
+libripng_a-route_entry.o: route_entry.cc
+@AMDEP_TRUE@	source='route_entry.cc' object='libripng_a-route_entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-route_entry.Po' tmpdepfile='$(DEPDIR)/libripng_a-route_entry.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-route_entry.o `test -f route_entry.cc || echo '$(srcdir)/'`route_entry.cc
+
+libripng_a-route_entry.obj: route_entry.cc
+@AMDEP_TRUE@	source='route_entry.cc' object='libripng_a-route_entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-route_entry.Po' tmpdepfile='$(DEPDIR)/libripng_a-route_entry.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-route_entry.obj `cygpath -w route_entry.cc`
+
+libripng_a-update_queue.o: update_queue.cc
+@AMDEP_TRUE@	source='update_queue.cc' object='libripng_a-update_queue.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-update_queue.Po' tmpdepfile='$(DEPDIR)/libripng_a-update_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-update_queue.o `test -f update_queue.cc || echo '$(srcdir)/'`update_queue.cc
+
+libripng_a-update_queue.obj: update_queue.cc
+@AMDEP_TRUE@	source='update_queue.cc' object='libripng_a-update_queue.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-update_queue.Po' tmpdepfile='$(DEPDIR)/libripng_a-update_queue.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-update_queue.obj `cygpath -w update_queue.cc`
+
+libripngxrl_a-xrl_config.o: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripngxrl_a-xrl_config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_config.o `test -f xrl_config.cc || echo '$(srcdir)/'`xrl_config.cc
+
+libripngxrl_a-xrl_config.obj: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripngxrl_a-xrl_config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_config.obj `cygpath -w xrl_config.cc`
+
+libripngxrl_a-xrl_port_manager.o: xrl_port_manager.cc
+@AMDEP_TRUE@	source='xrl_port_manager.cc' object='libripngxrl_a-xrl_port_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_port_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_port_manager.o `test -f xrl_port_manager.cc || echo '$(srcdir)/'`xrl_port_manager.cc
+
+libripngxrl_a-xrl_port_manager.obj: xrl_port_manager.cc
+@AMDEP_TRUE@	source='xrl_port_manager.cc' object='libripngxrl_a-xrl_port_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_port_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_port_manager.obj `cygpath -w xrl_port_manager.cc`
+
+libripngxrl_a-xrl_port_io.o: xrl_port_io.cc
+@AMDEP_TRUE@	source='xrl_port_io.cc' object='libripngxrl_a-xrl_port_io.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_port_io.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_port_io.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_port_io.o `test -f xrl_port_io.cc || echo '$(srcdir)/'`xrl_port_io.cc
+
+libripngxrl_a-xrl_port_io.obj: xrl_port_io.cc
+@AMDEP_TRUE@	source='xrl_port_io.cc' object='libripngxrl_a-xrl_port_io.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_port_io.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_port_io.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_port_io.obj `cygpath -w xrl_port_io.cc`
+
+libripngxrl_a-xrl_process_spy.o: xrl_process_spy.cc
+@AMDEP_TRUE@	source='xrl_process_spy.cc' object='libripngxrl_a-xrl_process_spy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_process_spy.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_process_spy.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_process_spy.o `test -f xrl_process_spy.cc || echo '$(srcdir)/'`xrl_process_spy.cc
+
+libripngxrl_a-xrl_process_spy.obj: xrl_process_spy.cc
+@AMDEP_TRUE@	source='xrl_process_spy.cc' object='libripngxrl_a-xrl_process_spy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_process_spy.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_process_spy.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_process_spy.obj `cygpath -w xrl_process_spy.cc`
+
+libripngxrl_a-xrl_rib_notifier.o: xrl_rib_notifier.cc
+@AMDEP_TRUE@	source='xrl_rib_notifier.cc' object='libripngxrl_a-xrl_rib_notifier.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_rib_notifier.o `test -f xrl_rib_notifier.cc || echo '$(srcdir)/'`xrl_rib_notifier.cc
+
+libripngxrl_a-xrl_rib_notifier.obj: xrl_rib_notifier.cc
+@AMDEP_TRUE@	source='xrl_rib_notifier.cc' object='libripngxrl_a-xrl_rib_notifier.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_rib_notifier.obj `cygpath -w xrl_rib_notifier.cc`
+
+libripngxrl_a-xrl_redist_manager.o: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripngxrl_a-xrl_redist_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_redist_manager.o `test -f xrl_redist_manager.cc || echo '$(srcdir)/'`xrl_redist_manager.cc
+
+libripngxrl_a-xrl_redist_manager.obj: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripngxrl_a-xrl_redist_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_redist_manager.obj `cygpath -w xrl_redist_manager.cc`
+
+libripxrl_a-xrl_config.o: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripxrl_a-xrl_config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_config.o `test -f xrl_config.cc || echo '$(srcdir)/'`xrl_config.cc
+
+libripxrl_a-xrl_config.obj: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripxrl_a-xrl_config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_config.obj `cygpath -w xrl_config.cc`
+
+libripxrl_a-xrl_port_manager.o: xrl_port_manager.cc
+@AMDEP_TRUE@	source='xrl_port_manager.cc' object='libripxrl_a-xrl_port_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_port_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_port_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_port_manager.o `test -f xrl_port_manager.cc || echo '$(srcdir)/'`xrl_port_manager.cc
+
+libripxrl_a-xrl_port_manager.obj: xrl_port_manager.cc
+@AMDEP_TRUE@	source='xrl_port_manager.cc' object='libripxrl_a-xrl_port_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_port_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_port_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_port_manager.obj `cygpath -w xrl_port_manager.cc`
+
+libripxrl_a-xrl_port_io.o: xrl_port_io.cc
+@AMDEP_TRUE@	source='xrl_port_io.cc' object='libripxrl_a-xrl_port_io.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_port_io.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_port_io.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_port_io.o `test -f xrl_port_io.cc || echo '$(srcdir)/'`xrl_port_io.cc
+
+libripxrl_a-xrl_port_io.obj: xrl_port_io.cc
+@AMDEP_TRUE@	source='xrl_port_io.cc' object='libripxrl_a-xrl_port_io.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_port_io.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_port_io.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_port_io.obj `cygpath -w xrl_port_io.cc`
+
+libripxrl_a-xrl_process_spy.o: xrl_process_spy.cc
+@AMDEP_TRUE@	source='xrl_process_spy.cc' object='libripxrl_a-xrl_process_spy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_process_spy.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_process_spy.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_process_spy.o `test -f xrl_process_spy.cc || echo '$(srcdir)/'`xrl_process_spy.cc
+
+libripxrl_a-xrl_process_spy.obj: xrl_process_spy.cc
+@AMDEP_TRUE@	source='xrl_process_spy.cc' object='libripxrl_a-xrl_process_spy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_process_spy.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_process_spy.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_process_spy.obj `cygpath -w xrl_process_spy.cc`
+
+libripxrl_a-xrl_redist_manager.o: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripxrl_a-xrl_redist_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_redist_manager.o `test -f xrl_redist_manager.cc || echo '$(srcdir)/'`xrl_redist_manager.cc
+
+libripxrl_a-xrl_redist_manager.obj: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripxrl_a-xrl_redist_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_redist_manager.obj `cygpath -w xrl_redist_manager.cc`
+
+libripxrl_a-xrl_rib_notifier.o: xrl_rib_notifier.cc
+@AMDEP_TRUE@	source='xrl_rib_notifier.cc' object='libripxrl_a-xrl_rib_notifier.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_rib_notifier.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_rib_notifier.o `test -f xrl_rib_notifier.cc || echo '$(srcdir)/'`xrl_rib_notifier.cc
+
+libripxrl_a-xrl_rib_notifier.obj: xrl_rib_notifier.cc
+@AMDEP_TRUE@	source='xrl_rib_notifier.cc' object='libripxrl_a-xrl_rib_notifier.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_rib_notifier.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_rib_notifier.obj `cygpath -w xrl_rib_notifier.cc`
+
+xorp_rip-xorp_rip_main.o: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_rip-xorp_rip_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xorp_rip_main.o `test -f xorp_rip_main.cc || echo '$(srcdir)/'`xorp_rip_main.cc
+
+xorp_rip-xorp_rip_main.obj: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_rip-xorp_rip_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xorp_rip_main.obj `cygpath -w xorp_rip_main.cc`
+
+xorp_rip-xrl_target_rip.o: xrl_target_rip.cc
+@AMDEP_TRUE@	source='xrl_target_rip.cc' object='xorp_rip-xrl_target_rip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xrl_target_rip.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xrl_target_rip.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xrl_target_rip.o `test -f xrl_target_rip.cc || echo '$(srcdir)/'`xrl_target_rip.cc
+
+xorp_rip-xrl_target_rip.obj: xrl_target_rip.cc
+@AMDEP_TRUE@	source='xrl_target_rip.cc' object='xorp_rip-xrl_target_rip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_rip-xrl_target_rip.Po' tmpdepfile='$(DEPDIR)/xorp_rip-xrl_target_rip.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_rip_CXXFLAGS) $(CXXFLAGS) -c -o xorp_rip-xrl_target_rip.obj `cygpath -w xrl_target_rip.cc`
+
+xorp_ripng-xorp_rip_main.o: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_ripng-xorp_rip_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xorp_rip_main.o `test -f xorp_rip_main.cc || echo '$(srcdir)/'`xorp_rip_main.cc
+
+xorp_ripng-xorp_rip_main.obj: xorp_rip_main.cc
+@AMDEP_TRUE@	source='xorp_rip_main.cc' object='xorp_ripng-xorp_rip_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xorp_rip_main.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xorp_rip_main.obj `cygpath -w xorp_rip_main.cc`
+
+xorp_ripng-xrl_target_ripng.o: xrl_target_ripng.cc
+@AMDEP_TRUE@	source='xrl_target_ripng.cc' object='xorp_ripng-xrl_target_ripng.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xrl_target_ripng.o `test -f xrl_target_ripng.cc || echo '$(srcdir)/'`xrl_target_ripng.cc
+
+xorp_ripng-xrl_target_ripng.obj: xrl_target_ripng.cc
+@AMDEP_TRUE@	source='xrl_target_ripng.cc' object='xorp_ripng-xrl_target_ripng.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.Po' tmpdepfile='$(DEPDIR)/xorp_ripng-xrl_target_ripng.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_ripng_CXXFLAGS) $(CXXFLAGS) -c -o xorp_ripng-xrl_target_ripng.obj `cygpath -w xrl_target_ripng.cc`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive:
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+	for subdir in $(SUBDIRS); do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d $(distdir)/$$subdir \
+	    || mkdir $(distdir)/$$subdir \
+	    || exit 1; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$(top_distdir)" \
+	        distdir=../$(distdir)/$$subdir \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-recursive
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+installdirs: installdirs-recursive
+installdirs-am:
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-recursive
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-recursive
+
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
+
+distclean: distclean-recursive
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-recursive
+
+dvi-am:
+
+info: info-recursive
+
+info-am:
+
+install-data-am:
+
+install-exec-am: install-binPROGRAMS
+
+install-info: install-info-recursive
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-recursive
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-recursive
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+uninstall-info: uninstall-info-recursive
+
+.PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
+	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-recursive distclean-tags distdir dvi dvi-am \
+	dvi-recursive info info-am info-recursive install install-am \
+	install-binPROGRAMS install-data install-data-am \
+	install-data-recursive install-exec install-exec-am \
+	install-exec-recursive install-info install-info-am \
+	install-info-recursive install-man install-recursive \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am installdirs-recursive maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-info-recursive uninstall-recursive
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

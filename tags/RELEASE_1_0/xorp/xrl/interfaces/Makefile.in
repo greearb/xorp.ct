@@ -1,0 +1,950 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+###############################################################################
+# Client Interface related
+###############################################################################
+
+# BGP MIB traps
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ../..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AMTAR = @AMTAR@
+AR = @AR@
+AWK = @AWK@
+CC = @CC@
+CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
+FLOWER_MALLOC = @FLOWER_MALLOC@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MIBS = @MIBS@
+OBJEXT = @OBJEXT@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
+
+
+# BGP Client Interface
+
+# Command-Line Interface Manager Interface
+
+# Command-Line Interface Processor Interface
+
+# Common Client Interface
+
+# Interface to the coordinating BGP test process
+
+# Datain client of the test peer interface.
+
+# FEA Client Interface
+
+# FEA FIB Interface
+
+# FEA FIB Client Interface
+
+# FEA Interface Manager Client Interface
+
+# FEA Interface Manager Mirror Interface
+
+# FEA Interface Manager Replicator Interface
+
+# Fib2mrib Interface
+
+# Forwarding Table Interface Client Interface
+
+# FEA Raw Packet Server Interface
+
+# FEA Raw Packet Client Interface
+
+# Finder Interface
+
+# Finder Event Notifier Interface
+
+# Finder Event Observer Interface
+
+# Finder Client Interface (client of Finder)
+
+# Multicast FEA Interface
+
+# Multicast FEA Client Interface
+
+# MLD6/IGMP Interface
+
+# MLD6/IGMP Client Interface
+
+# OSPF Interface
+
+# PIM Interface
+
+# Redistribution Interface to Routing Protocols
+
+# Transaction-based Redistribution Interface to Routing Protocols
+
+# RIB Interface to Routing Protocols
+
+# RIB Client Interface supported by BGP
+
+# RIP Interface
+
+# RIPng Interface
+
+# RTRMGR Interface
+
+# RTRMGR Client Interface
+
+# IPv4 Socket Interface
+
+# IPv4 Socket Locator Interface
+
+# IPv4 Socket User Interface
+
+# IPv6 Socket Interface
+
+# IPv6 Socket Locator Interface
+
+# IPv6 Socket User Interface
+
+# StaticRoutes Interface
+
+# Test Peer Interface
+
+# XORP MIBS Interface
+
+#
+# Sample Test Client Interface
+#
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeafibxif.a libfeafibclientxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libredist4xif.a libredist6xif.a libredisttransaction4xif.a libredisttransaction6xif.a libribxif.a libribclientxif.a libripxif.a libripngxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libsocket6xif.a libsocket6locatorxif.a libsocket6userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
+libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
+libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
+libcliprocessorxif_a_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
+libcommonxif_a_SOURCES = common_xif.hh common_xif.cc
+libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
+libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
+libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
+libfeafibxif_a_SOURCES = fea_fib_xif.hh fea_fib_xif.cc
+libfeafibclientxif_a_SOURCES = fea_fib_client_xif.hh fea_fib_client_xif.cc
+libfeaifmgrclientxif_a_SOURCES = fea_ifmgr_client_xif.hh fea_ifmgr_client_xif.cc
+libfeaifmgrmirrorxif_a_SOURCES = fea_ifmgr_mirror_xif.hh fea_ifmgr_mirror_xif.cc
+libfeaifmgrreplicatorxif_a_SOURCES = fea_ifmgr_replicator_xif.hh fea_ifmgr_replicator_xif.cc
+libfib2mribxif_a_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
+libftixif_a_SOURCES = fti_xif.hh fti_xif.cc
+libfearawpkt_a_SOURCES = fea_rawpkt_xif.hh fea_rawpkt_xif.cc
+libfearawpktclient_a_SOURCES = fea_rawpkt_client_xif.hh fea_rawpkt_client_xif.cc
+libfinderxif_a_SOURCES = finder_xif.hh finder_xif.cc
+libfindereventnotifierxif_a_SOURCES = finder_event_notifier_xif.hh finder_event_notifier_xif.cc
+libfindereventobserverxif_a_SOURCES = finder_event_observer_xif.hh finder_event_observer_xif.cc
+libfinderclientxif_a_SOURCES = finder_client_xif.hh finder_client_xif.cc
+libmfeaxif_a_SOURCES = mfea_xif.hh mfea_xif.cc
+libmfeaclientxif_a_SOURCES = mfea_client_xif.hh mfea_client_xif.cc
+libmld6igmpxif_a_SOURCES = mld6igmp_xif.hh mld6igmp_xif.cc
+libmld6igmpclientxif_a_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
+libospfxif_a_SOURCES = ospf_xif.hh ospf_xif.cc
+libpimxif_a_SOURCES = pim_xif.hh pim_xif.cc
+libredist4xif_a_SOURCES = redist4_xif.hh redist4_xif.cc
+libredist6xif_a_SOURCES = redist6_xif.hh redist6_xif.cc
+libredisttransaction4xif_a_SOURCES = redist_transaction4_xif.hh redist_transaction4_xif.cc
+libredisttransaction6xif_a_SOURCES = redist_transaction6_xif.hh redist_transaction6_xif.cc
+libribxif_a_SOURCES = rib_xif.hh rib_xif.cc
+libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
+libripxif_a_SOURCES = rip_xif.hh rip_xif.cc
+libripngxif_a_SOURCES = ripng_xif.hh ripng_xif.cc
+librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
+librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
+libsocket4xif_a_SOURCES = socket4_xif.hh socket4_xif.cc
+libsocket4locatorxif_a_SOURCES = socket4_locator_xif.hh socket4_locator_xif.cc
+libsocket4userxif_a_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
+libsocket6xif_a_SOURCES = socket6_xif.hh socket6_xif.cc
+libsocket6locatorxif_a_SOURCES = socket6_locator_xif.hh socket6_locator_xif.cc
+libsocket6userxif_a_SOURCES = socket6_user_xif.hh socket6_user_xif.cc
+libstaticroutesxif_a_SOURCES = static_routes_xif.hh static_routes_xif.cc
+libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
+libxorpifmibxif_a_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
+libtestxif_a_SOURCES = test_xif.hh test_xif.cc
+
+
+################################################################
+INCLUDES = -I$(top_srcdir)
+
+
+###############################################################################
+# Static Pattern Rules
+###############################################################################
+SCRIPT_DIR = $(top_srcdir)/xrl/scripts
+CLNTGEN_PY = $(SCRIPT_DIR)/clnt-gen
+subdir = xrl/interfaces
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libbgpmibtrapsxif_a_AR = $(AR) cru
+libbgpmibtrapsxif_a_LIBADD =
+am_libbgpmibtrapsxif_a_OBJECTS = bgp_mib_traps_xif.$(OBJEXT)
+libbgpmibtrapsxif_a_OBJECTS = $(am_libbgpmibtrapsxif_a_OBJECTS)
+libbgpxif_a_AR = $(AR) cru
+libbgpxif_a_LIBADD =
+am_libbgpxif_a_OBJECTS = bgp_xif.$(OBJEXT)
+libbgpxif_a_OBJECTS = $(am_libbgpxif_a_OBJECTS)
+libclimanagerxif_a_AR = $(AR) cru
+libclimanagerxif_a_LIBADD =
+am_libclimanagerxif_a_OBJECTS = cli_manager_xif.$(OBJEXT)
+libclimanagerxif_a_OBJECTS = $(am_libclimanagerxif_a_OBJECTS)
+libcliprocessorxif_a_AR = $(AR) cru
+libcliprocessorxif_a_LIBADD =
+am_libcliprocessorxif_a_OBJECTS = cli_processor_xif.$(OBJEXT)
+libcliprocessorxif_a_OBJECTS = $(am_libcliprocessorxif_a_OBJECTS)
+libcommonxif_a_AR = $(AR) cru
+libcommonxif_a_LIBADD =
+am_libcommonxif_a_OBJECTS = common_xif.$(OBJEXT)
+libcommonxif_a_OBJECTS = $(am_libcommonxif_a_OBJECTS)
+libcoordxif_a_AR = $(AR) cru
+libcoordxif_a_LIBADD =
+am_libcoordxif_a_OBJECTS = coord_xif.$(OBJEXT)
+libcoordxif_a_OBJECTS = $(am_libcoordxif_a_OBJECTS)
+libdatainxif_a_AR = $(AR) cru
+libdatainxif_a_LIBADD =
+am_libdatainxif_a_OBJECTS = datain_xif.$(OBJEXT)
+libdatainxif_a_OBJECTS = $(am_libdatainxif_a_OBJECTS)
+libfeafibclientxif_a_AR = $(AR) cru
+libfeafibclientxif_a_LIBADD =
+am_libfeafibclientxif_a_OBJECTS = fea_fib_client_xif.$(OBJEXT)
+libfeafibclientxif_a_OBJECTS = $(am_libfeafibclientxif_a_OBJECTS)
+libfeafibxif_a_AR = $(AR) cru
+libfeafibxif_a_LIBADD =
+am_libfeafibxif_a_OBJECTS = fea_fib_xif.$(OBJEXT)
+libfeafibxif_a_OBJECTS = $(am_libfeafibxif_a_OBJECTS)
+libfeaifmgrclientxif_a_AR = $(AR) cru
+libfeaifmgrclientxif_a_LIBADD =
+am_libfeaifmgrclientxif_a_OBJECTS = fea_ifmgr_client_xif.$(OBJEXT)
+libfeaifmgrclientxif_a_OBJECTS = $(am_libfeaifmgrclientxif_a_OBJECTS)
+libfeaifmgrmirrorxif_a_AR = $(AR) cru
+libfeaifmgrmirrorxif_a_LIBADD =
+am_libfeaifmgrmirrorxif_a_OBJECTS = fea_ifmgr_mirror_xif.$(OBJEXT)
+libfeaifmgrmirrorxif_a_OBJECTS = $(am_libfeaifmgrmirrorxif_a_OBJECTS)
+libfeaifmgrreplicatorxif_a_AR = $(AR) cru
+libfeaifmgrreplicatorxif_a_LIBADD =
+am_libfeaifmgrreplicatorxif_a_OBJECTS = \
+	fea_ifmgr_replicator_xif.$(OBJEXT)
+libfeaifmgrreplicatorxif_a_OBJECTS = \
+	$(am_libfeaifmgrreplicatorxif_a_OBJECTS)
+libfeaifmgrxif_a_AR = $(AR) cru
+libfeaifmgrxif_a_LIBADD =
+am_libfeaifmgrxif_a_OBJECTS = fea_ifmgr_xif.$(OBJEXT)
+libfeaifmgrxif_a_OBJECTS = $(am_libfeaifmgrxif_a_OBJECTS)
+libfearawpkt_a_AR = $(AR) cru
+libfearawpkt_a_LIBADD =
+am_libfearawpkt_a_OBJECTS = fea_rawpkt_xif.$(OBJEXT)
+libfearawpkt_a_OBJECTS = $(am_libfearawpkt_a_OBJECTS)
+libfearawpktclient_a_AR = $(AR) cru
+libfearawpktclient_a_LIBADD =
+am_libfearawpktclient_a_OBJECTS = fea_rawpkt_client_xif.$(OBJEXT)
+libfearawpktclient_a_OBJECTS = $(am_libfearawpktclient_a_OBJECTS)
+libfib2mribxif_a_AR = $(AR) cru
+libfib2mribxif_a_LIBADD =
+am_libfib2mribxif_a_OBJECTS = fib2mrib_xif.$(OBJEXT)
+libfib2mribxif_a_OBJECTS = $(am_libfib2mribxif_a_OBJECTS)
+libfinderclientxif_a_AR = $(AR) cru
+libfinderclientxif_a_LIBADD =
+am_libfinderclientxif_a_OBJECTS = finder_client_xif.$(OBJEXT)
+libfinderclientxif_a_OBJECTS = $(am_libfinderclientxif_a_OBJECTS)
+libfindereventnotifierxif_a_AR = $(AR) cru
+libfindereventnotifierxif_a_LIBADD =
+am_libfindereventnotifierxif_a_OBJECTS = \
+	finder_event_notifier_xif.$(OBJEXT)
+libfindereventnotifierxif_a_OBJECTS = \
+	$(am_libfindereventnotifierxif_a_OBJECTS)
+libfindereventobserverxif_a_AR = $(AR) cru
+libfindereventobserverxif_a_LIBADD =
+am_libfindereventobserverxif_a_OBJECTS = \
+	finder_event_observer_xif.$(OBJEXT)
+libfindereventobserverxif_a_OBJECTS = \
+	$(am_libfindereventobserverxif_a_OBJECTS)
+libfinderxif_a_AR = $(AR) cru
+libfinderxif_a_LIBADD =
+am_libfinderxif_a_OBJECTS = finder_xif.$(OBJEXT)
+libfinderxif_a_OBJECTS = $(am_libfinderxif_a_OBJECTS)
+libftixif_a_AR = $(AR) cru
+libftixif_a_LIBADD =
+am_libftixif_a_OBJECTS = fti_xif.$(OBJEXT)
+libftixif_a_OBJECTS = $(am_libftixif_a_OBJECTS)
+libmfeaclientxif_a_AR = $(AR) cru
+libmfeaclientxif_a_LIBADD =
+am_libmfeaclientxif_a_OBJECTS = mfea_client_xif.$(OBJEXT)
+libmfeaclientxif_a_OBJECTS = $(am_libmfeaclientxif_a_OBJECTS)
+libmfeaxif_a_AR = $(AR) cru
+libmfeaxif_a_LIBADD =
+am_libmfeaxif_a_OBJECTS = mfea_xif.$(OBJEXT)
+libmfeaxif_a_OBJECTS = $(am_libmfeaxif_a_OBJECTS)
+libmld6igmpclientxif_a_AR = $(AR) cru
+libmld6igmpclientxif_a_LIBADD =
+am_libmld6igmpclientxif_a_OBJECTS = mld6igmp_client_xif.$(OBJEXT)
+libmld6igmpclientxif_a_OBJECTS = $(am_libmld6igmpclientxif_a_OBJECTS)
+libmld6igmpxif_a_AR = $(AR) cru
+libmld6igmpxif_a_LIBADD =
+am_libmld6igmpxif_a_OBJECTS = mld6igmp_xif.$(OBJEXT)
+libmld6igmpxif_a_OBJECTS = $(am_libmld6igmpxif_a_OBJECTS)
+libospfxif_a_AR = $(AR) cru
+libospfxif_a_LIBADD =
+am_libospfxif_a_OBJECTS = ospf_xif.$(OBJEXT)
+libospfxif_a_OBJECTS = $(am_libospfxif_a_OBJECTS)
+libpimxif_a_AR = $(AR) cru
+libpimxif_a_LIBADD =
+am_libpimxif_a_OBJECTS = pim_xif.$(OBJEXT)
+libpimxif_a_OBJECTS = $(am_libpimxif_a_OBJECTS)
+libredist4xif_a_AR = $(AR) cru
+libredist4xif_a_LIBADD =
+am_libredist4xif_a_OBJECTS = redist4_xif.$(OBJEXT)
+libredist4xif_a_OBJECTS = $(am_libredist4xif_a_OBJECTS)
+libredist6xif_a_AR = $(AR) cru
+libredist6xif_a_LIBADD =
+am_libredist6xif_a_OBJECTS = redist6_xif.$(OBJEXT)
+libredist6xif_a_OBJECTS = $(am_libredist6xif_a_OBJECTS)
+libredisttransaction4xif_a_AR = $(AR) cru
+libredisttransaction4xif_a_LIBADD =
+am_libredisttransaction4xif_a_OBJECTS = \
+	redist_transaction4_xif.$(OBJEXT)
+libredisttransaction4xif_a_OBJECTS = \
+	$(am_libredisttransaction4xif_a_OBJECTS)
+libredisttransaction6xif_a_AR = $(AR) cru
+libredisttransaction6xif_a_LIBADD =
+am_libredisttransaction6xif_a_OBJECTS = \
+	redist_transaction6_xif.$(OBJEXT)
+libredisttransaction6xif_a_OBJECTS = \
+	$(am_libredisttransaction6xif_a_OBJECTS)
+libribclientxif_a_AR = $(AR) cru
+libribclientxif_a_LIBADD =
+am_libribclientxif_a_OBJECTS = rib_client_xif.$(OBJEXT)
+libribclientxif_a_OBJECTS = $(am_libribclientxif_a_OBJECTS)
+libribxif_a_AR = $(AR) cru
+libribxif_a_LIBADD =
+am_libribxif_a_OBJECTS = rib_xif.$(OBJEXT)
+libribxif_a_OBJECTS = $(am_libribxif_a_OBJECTS)
+libripngxif_a_AR = $(AR) cru
+libripngxif_a_LIBADD =
+am_libripngxif_a_OBJECTS = ripng_xif.$(OBJEXT)
+libripngxif_a_OBJECTS = $(am_libripngxif_a_OBJECTS)
+libripxif_a_AR = $(AR) cru
+libripxif_a_LIBADD =
+am_libripxif_a_OBJECTS = rip_xif.$(OBJEXT)
+libripxif_a_OBJECTS = $(am_libripxif_a_OBJECTS)
+librtrmgr_clientxif_a_AR = $(AR) cru
+librtrmgr_clientxif_a_LIBADD =
+am_librtrmgr_clientxif_a_OBJECTS = rtrmgr_client_xif.$(OBJEXT)
+librtrmgr_clientxif_a_OBJECTS = $(am_librtrmgr_clientxif_a_OBJECTS)
+librtrmgrxif_a_AR = $(AR) cru
+librtrmgrxif_a_LIBADD =
+am_librtrmgrxif_a_OBJECTS = rtrmgr_xif.$(OBJEXT)
+librtrmgrxif_a_OBJECTS = $(am_librtrmgrxif_a_OBJECTS)
+libsocket4locatorxif_a_AR = $(AR) cru
+libsocket4locatorxif_a_LIBADD =
+am_libsocket4locatorxif_a_OBJECTS = socket4_locator_xif.$(OBJEXT)
+libsocket4locatorxif_a_OBJECTS = $(am_libsocket4locatorxif_a_OBJECTS)
+libsocket4userxif_a_AR = $(AR) cru
+libsocket4userxif_a_LIBADD =
+am_libsocket4userxif_a_OBJECTS = socket4_user_xif.$(OBJEXT)
+libsocket4userxif_a_OBJECTS = $(am_libsocket4userxif_a_OBJECTS)
+libsocket4xif_a_AR = $(AR) cru
+libsocket4xif_a_LIBADD =
+am_libsocket4xif_a_OBJECTS = socket4_xif.$(OBJEXT)
+libsocket4xif_a_OBJECTS = $(am_libsocket4xif_a_OBJECTS)
+libsocket6locatorxif_a_AR = $(AR) cru
+libsocket6locatorxif_a_LIBADD =
+am_libsocket6locatorxif_a_OBJECTS = socket6_locator_xif.$(OBJEXT)
+libsocket6locatorxif_a_OBJECTS = $(am_libsocket6locatorxif_a_OBJECTS)
+libsocket6userxif_a_AR = $(AR) cru
+libsocket6userxif_a_LIBADD =
+am_libsocket6userxif_a_OBJECTS = socket6_user_xif.$(OBJEXT)
+libsocket6userxif_a_OBJECTS = $(am_libsocket6userxif_a_OBJECTS)
+libsocket6xif_a_AR = $(AR) cru
+libsocket6xif_a_LIBADD =
+am_libsocket6xif_a_OBJECTS = socket6_xif.$(OBJEXT)
+libsocket6xif_a_OBJECTS = $(am_libsocket6xif_a_OBJECTS)
+libstaticroutesxif_a_AR = $(AR) cru
+libstaticroutesxif_a_LIBADD =
+am_libstaticroutesxif_a_OBJECTS = static_routes_xif.$(OBJEXT)
+libstaticroutesxif_a_OBJECTS = $(am_libstaticroutesxif_a_OBJECTS)
+libtestpeerxif_a_AR = $(AR) cru
+libtestpeerxif_a_LIBADD =
+am_libtestpeerxif_a_OBJECTS = test_peer_xif.$(OBJEXT)
+libtestpeerxif_a_OBJECTS = $(am_libtestpeerxif_a_OBJECTS)
+libtestxif_a_AR = $(AR) cru
+libtestxif_a_LIBADD =
+am_libtestxif_a_OBJECTS = test_xif.$(OBJEXT)
+libtestxif_a_OBJECTS = $(am_libtestxif_a_OBJECTS)
+libxorpifmibxif_a_AR = $(AR) cru
+libxorpifmibxif_a_LIBADD =
+am_libxorpifmibxif_a_OBJECTS = xorp_if_mib_xif.$(OBJEXT)
+libxorpifmibxif_a_OBJECTS = $(am_libxorpifmibxif_a_OBJECTS)
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bgp_mib_traps_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp_xif.Po $(DEPDIR)/cli_manager_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/cli_processor_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/common_xif.Po $(DEPDIR)/coord_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/datain_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_fib_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_fib_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_mirror_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_replicator_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fib2mrib_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_event_notifier_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_event_observer_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/finder_xif.Po $(DEPDIR)/fti_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mfea_client_xif.Po $(DEPDIR)/mfea_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_xif.Po $(DEPDIR)/ospf_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/pim_xif.Po $(DEPDIR)/redist4_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/redist6_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/redist_transaction4_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/redist_transaction6_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_client_xif.Po $(DEPDIR)/rib_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rip_xif.Po $(DEPDIR)/ripng_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_client_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrmgr_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket4_locator_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket4_user_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket4_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket6_locator_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket6_user_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/socket6_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/static_routes_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_peer_xif.Po $(DEPDIR)/test_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_if_mib_xif.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
+	$(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) \
+	$(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) \
+	$(libdatainxif_a_SOURCES) $(libfeafibclientxif_a_SOURCES) \
+	$(libfeafibxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) \
+	$(libfeaifmgrmirrorxif_a_SOURCES) \
+	$(libfeaifmgrreplicatorxif_a_SOURCES) \
+	$(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) \
+	$(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) \
+	$(libfinderclientxif_a_SOURCES) \
+	$(libfindereventnotifierxif_a_SOURCES) \
+	$(libfindereventobserverxif_a_SOURCES) \
+	$(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) \
+	$(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) \
+	$(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) \
+	$(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) \
+	$(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) \
+	$(libredisttransaction4xif_a_SOURCES) \
+	$(libredisttransaction6xif_a_SOURCES) \
+	$(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) \
+	$(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) \
+	$(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) \
+	$(libsocket4locatorxif_a_SOURCES) \
+	$(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) \
+	$(libsocket6locatorxif_a_SOURCES) \
+	$(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) \
+	$(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) \
+	$(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+DIST_COMMON = Makefile.am Makefile.in
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeafibclientxif_a_SOURCES) $(libfeafibxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libredist4xif_a_SOURCES) $(libredist6xif_a_SOURCES) $(libredisttransaction4xif_a_SOURCES) $(libredisttransaction6xif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(libripngxif_a_SOURCES) $(libripxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libsocket6locatorxif_a_SOURCES) $(libsocket6userxif_a_SOURCES) $(libsocket6xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+
+all: all-am
+
+.SUFFIXES:
+.SUFFIXES: .cc .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  xrl/interfaces/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libbgpmibtrapsxif.a: $(libbgpmibtrapsxif_a_OBJECTS) $(libbgpmibtrapsxif_a_DEPENDENCIES) 
+	-rm -f libbgpmibtrapsxif.a
+	$(libbgpmibtrapsxif_a_AR) libbgpmibtrapsxif.a $(libbgpmibtrapsxif_a_OBJECTS) $(libbgpmibtrapsxif_a_LIBADD)
+	$(RANLIB) libbgpmibtrapsxif.a
+libbgpxif.a: $(libbgpxif_a_OBJECTS) $(libbgpxif_a_DEPENDENCIES) 
+	-rm -f libbgpxif.a
+	$(libbgpxif_a_AR) libbgpxif.a $(libbgpxif_a_OBJECTS) $(libbgpxif_a_LIBADD)
+	$(RANLIB) libbgpxif.a
+libclimanagerxif.a: $(libclimanagerxif_a_OBJECTS) $(libclimanagerxif_a_DEPENDENCIES) 
+	-rm -f libclimanagerxif.a
+	$(libclimanagerxif_a_AR) libclimanagerxif.a $(libclimanagerxif_a_OBJECTS) $(libclimanagerxif_a_LIBADD)
+	$(RANLIB) libclimanagerxif.a
+libcliprocessorxif.a: $(libcliprocessorxif_a_OBJECTS) $(libcliprocessorxif_a_DEPENDENCIES) 
+	-rm -f libcliprocessorxif.a
+	$(libcliprocessorxif_a_AR) libcliprocessorxif.a $(libcliprocessorxif_a_OBJECTS) $(libcliprocessorxif_a_LIBADD)
+	$(RANLIB) libcliprocessorxif.a
+libcommonxif.a: $(libcommonxif_a_OBJECTS) $(libcommonxif_a_DEPENDENCIES) 
+	-rm -f libcommonxif.a
+	$(libcommonxif_a_AR) libcommonxif.a $(libcommonxif_a_OBJECTS) $(libcommonxif_a_LIBADD)
+	$(RANLIB) libcommonxif.a
+libcoordxif.a: $(libcoordxif_a_OBJECTS) $(libcoordxif_a_DEPENDENCIES) 
+	-rm -f libcoordxif.a
+	$(libcoordxif_a_AR) libcoordxif.a $(libcoordxif_a_OBJECTS) $(libcoordxif_a_LIBADD)
+	$(RANLIB) libcoordxif.a
+libdatainxif.a: $(libdatainxif_a_OBJECTS) $(libdatainxif_a_DEPENDENCIES) 
+	-rm -f libdatainxif.a
+	$(libdatainxif_a_AR) libdatainxif.a $(libdatainxif_a_OBJECTS) $(libdatainxif_a_LIBADD)
+	$(RANLIB) libdatainxif.a
+libfeafibclientxif.a: $(libfeafibclientxif_a_OBJECTS) $(libfeafibclientxif_a_DEPENDENCIES) 
+	-rm -f libfeafibclientxif.a
+	$(libfeafibclientxif_a_AR) libfeafibclientxif.a $(libfeafibclientxif_a_OBJECTS) $(libfeafibclientxif_a_LIBADD)
+	$(RANLIB) libfeafibclientxif.a
+libfeafibxif.a: $(libfeafibxif_a_OBJECTS) $(libfeafibxif_a_DEPENDENCIES) 
+	-rm -f libfeafibxif.a
+	$(libfeafibxif_a_AR) libfeafibxif.a $(libfeafibxif_a_OBJECTS) $(libfeafibxif_a_LIBADD)
+	$(RANLIB) libfeafibxif.a
+libfeaifmgrclientxif.a: $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_DEPENDENCIES) 
+	-rm -f libfeaifmgrclientxif.a
+	$(libfeaifmgrclientxif_a_AR) libfeaifmgrclientxif.a $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_LIBADD)
+	$(RANLIB) libfeaifmgrclientxif.a
+libfeaifmgrmirrorxif.a: $(libfeaifmgrmirrorxif_a_OBJECTS) $(libfeaifmgrmirrorxif_a_DEPENDENCIES) 
+	-rm -f libfeaifmgrmirrorxif.a
+	$(libfeaifmgrmirrorxif_a_AR) libfeaifmgrmirrorxif.a $(libfeaifmgrmirrorxif_a_OBJECTS) $(libfeaifmgrmirrorxif_a_LIBADD)
+	$(RANLIB) libfeaifmgrmirrorxif.a
+libfeaifmgrreplicatorxif.a: $(libfeaifmgrreplicatorxif_a_OBJECTS) $(libfeaifmgrreplicatorxif_a_DEPENDENCIES) 
+	-rm -f libfeaifmgrreplicatorxif.a
+	$(libfeaifmgrreplicatorxif_a_AR) libfeaifmgrreplicatorxif.a $(libfeaifmgrreplicatorxif_a_OBJECTS) $(libfeaifmgrreplicatorxif_a_LIBADD)
+	$(RANLIB) libfeaifmgrreplicatorxif.a
+libfeaifmgrxif.a: $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrxif_a_DEPENDENCIES) 
+	-rm -f libfeaifmgrxif.a
+	$(libfeaifmgrxif_a_AR) libfeaifmgrxif.a $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrxif_a_LIBADD)
+	$(RANLIB) libfeaifmgrxif.a
+libfearawpkt.a: $(libfearawpkt_a_OBJECTS) $(libfearawpkt_a_DEPENDENCIES) 
+	-rm -f libfearawpkt.a
+	$(libfearawpkt_a_AR) libfearawpkt.a $(libfearawpkt_a_OBJECTS) $(libfearawpkt_a_LIBADD)
+	$(RANLIB) libfearawpkt.a
+libfearawpktclient.a: $(libfearawpktclient_a_OBJECTS) $(libfearawpktclient_a_DEPENDENCIES) 
+	-rm -f libfearawpktclient.a
+	$(libfearawpktclient_a_AR) libfearawpktclient.a $(libfearawpktclient_a_OBJECTS) $(libfearawpktclient_a_LIBADD)
+	$(RANLIB) libfearawpktclient.a
+libfib2mribxif.a: $(libfib2mribxif_a_OBJECTS) $(libfib2mribxif_a_DEPENDENCIES) 
+	-rm -f libfib2mribxif.a
+	$(libfib2mribxif_a_AR) libfib2mribxif.a $(libfib2mribxif_a_OBJECTS) $(libfib2mribxif_a_LIBADD)
+	$(RANLIB) libfib2mribxif.a
+libfinderclientxif.a: $(libfinderclientxif_a_OBJECTS) $(libfinderclientxif_a_DEPENDENCIES) 
+	-rm -f libfinderclientxif.a
+	$(libfinderclientxif_a_AR) libfinderclientxif.a $(libfinderclientxif_a_OBJECTS) $(libfinderclientxif_a_LIBADD)
+	$(RANLIB) libfinderclientxif.a
+libfindereventnotifierxif.a: $(libfindereventnotifierxif_a_OBJECTS) $(libfindereventnotifierxif_a_DEPENDENCIES) 
+	-rm -f libfindereventnotifierxif.a
+	$(libfindereventnotifierxif_a_AR) libfindereventnotifierxif.a $(libfindereventnotifierxif_a_OBJECTS) $(libfindereventnotifierxif_a_LIBADD)
+	$(RANLIB) libfindereventnotifierxif.a
+libfindereventobserverxif.a: $(libfindereventobserverxif_a_OBJECTS) $(libfindereventobserverxif_a_DEPENDENCIES) 
+	-rm -f libfindereventobserverxif.a
+	$(libfindereventobserverxif_a_AR) libfindereventobserverxif.a $(libfindereventobserverxif_a_OBJECTS) $(libfindereventobserverxif_a_LIBADD)
+	$(RANLIB) libfindereventobserverxif.a
+libfinderxif.a: $(libfinderxif_a_OBJECTS) $(libfinderxif_a_DEPENDENCIES) 
+	-rm -f libfinderxif.a
+	$(libfinderxif_a_AR) libfinderxif.a $(libfinderxif_a_OBJECTS) $(libfinderxif_a_LIBADD)
+	$(RANLIB) libfinderxif.a
+libftixif.a: $(libftixif_a_OBJECTS) $(libftixif_a_DEPENDENCIES) 
+	-rm -f libftixif.a
+	$(libftixif_a_AR) libftixif.a $(libftixif_a_OBJECTS) $(libftixif_a_LIBADD)
+	$(RANLIB) libftixif.a
+libmfeaclientxif.a: $(libmfeaclientxif_a_OBJECTS) $(libmfeaclientxif_a_DEPENDENCIES) 
+	-rm -f libmfeaclientxif.a
+	$(libmfeaclientxif_a_AR) libmfeaclientxif.a $(libmfeaclientxif_a_OBJECTS) $(libmfeaclientxif_a_LIBADD)
+	$(RANLIB) libmfeaclientxif.a
+libmfeaxif.a: $(libmfeaxif_a_OBJECTS) $(libmfeaxif_a_DEPENDENCIES) 
+	-rm -f libmfeaxif.a
+	$(libmfeaxif_a_AR) libmfeaxif.a $(libmfeaxif_a_OBJECTS) $(libmfeaxif_a_LIBADD)
+	$(RANLIB) libmfeaxif.a
+libmld6igmpclientxif.a: $(libmld6igmpclientxif_a_OBJECTS) $(libmld6igmpclientxif_a_DEPENDENCIES) 
+	-rm -f libmld6igmpclientxif.a
+	$(libmld6igmpclientxif_a_AR) libmld6igmpclientxif.a $(libmld6igmpclientxif_a_OBJECTS) $(libmld6igmpclientxif_a_LIBADD)
+	$(RANLIB) libmld6igmpclientxif.a
+libmld6igmpxif.a: $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpxif_a_DEPENDENCIES) 
+	-rm -f libmld6igmpxif.a
+	$(libmld6igmpxif_a_AR) libmld6igmpxif.a $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpxif_a_LIBADD)
+	$(RANLIB) libmld6igmpxif.a
+libospfxif.a: $(libospfxif_a_OBJECTS) $(libospfxif_a_DEPENDENCIES) 
+	-rm -f libospfxif.a
+	$(libospfxif_a_AR) libospfxif.a $(libospfxif_a_OBJECTS) $(libospfxif_a_LIBADD)
+	$(RANLIB) libospfxif.a
+libpimxif.a: $(libpimxif_a_OBJECTS) $(libpimxif_a_DEPENDENCIES) 
+	-rm -f libpimxif.a
+	$(libpimxif_a_AR) libpimxif.a $(libpimxif_a_OBJECTS) $(libpimxif_a_LIBADD)
+	$(RANLIB) libpimxif.a
+libredist4xif.a: $(libredist4xif_a_OBJECTS) $(libredist4xif_a_DEPENDENCIES) 
+	-rm -f libredist4xif.a
+	$(libredist4xif_a_AR) libredist4xif.a $(libredist4xif_a_OBJECTS) $(libredist4xif_a_LIBADD)
+	$(RANLIB) libredist4xif.a
+libredist6xif.a: $(libredist6xif_a_OBJECTS) $(libredist6xif_a_DEPENDENCIES) 
+	-rm -f libredist6xif.a
+	$(libredist6xif_a_AR) libredist6xif.a $(libredist6xif_a_OBJECTS) $(libredist6xif_a_LIBADD)
+	$(RANLIB) libredist6xif.a
+libredisttransaction4xif.a: $(libredisttransaction4xif_a_OBJECTS) $(libredisttransaction4xif_a_DEPENDENCIES) 
+	-rm -f libredisttransaction4xif.a
+	$(libredisttransaction4xif_a_AR) libredisttransaction4xif.a $(libredisttransaction4xif_a_OBJECTS) $(libredisttransaction4xif_a_LIBADD)
+	$(RANLIB) libredisttransaction4xif.a
+libredisttransaction6xif.a: $(libredisttransaction6xif_a_OBJECTS) $(libredisttransaction6xif_a_DEPENDENCIES) 
+	-rm -f libredisttransaction6xif.a
+	$(libredisttransaction6xif_a_AR) libredisttransaction6xif.a $(libredisttransaction6xif_a_OBJECTS) $(libredisttransaction6xif_a_LIBADD)
+	$(RANLIB) libredisttransaction6xif.a
+libribclientxif.a: $(libribclientxif_a_OBJECTS) $(libribclientxif_a_DEPENDENCIES) 
+	-rm -f libribclientxif.a
+	$(libribclientxif_a_AR) libribclientxif.a $(libribclientxif_a_OBJECTS) $(libribclientxif_a_LIBADD)
+	$(RANLIB) libribclientxif.a
+libribxif.a: $(libribxif_a_OBJECTS) $(libribxif_a_DEPENDENCIES) 
+	-rm -f libribxif.a
+	$(libribxif_a_AR) libribxif.a $(libribxif_a_OBJECTS) $(libribxif_a_LIBADD)
+	$(RANLIB) libribxif.a
+libripngxif.a: $(libripngxif_a_OBJECTS) $(libripngxif_a_DEPENDENCIES) 
+	-rm -f libripngxif.a
+	$(libripngxif_a_AR) libripngxif.a $(libripngxif_a_OBJECTS) $(libripngxif_a_LIBADD)
+	$(RANLIB) libripngxif.a
+libripxif.a: $(libripxif_a_OBJECTS) $(libripxif_a_DEPENDENCIES) 
+	-rm -f libripxif.a
+	$(libripxif_a_AR) libripxif.a $(libripxif_a_OBJECTS) $(libripxif_a_LIBADD)
+	$(RANLIB) libripxif.a
+librtrmgr_clientxif.a: $(librtrmgr_clientxif_a_OBJECTS) $(librtrmgr_clientxif_a_DEPENDENCIES) 
+	-rm -f librtrmgr_clientxif.a
+	$(librtrmgr_clientxif_a_AR) librtrmgr_clientxif.a $(librtrmgr_clientxif_a_OBJECTS) $(librtrmgr_clientxif_a_LIBADD)
+	$(RANLIB) librtrmgr_clientxif.a
+librtrmgrxif.a: $(librtrmgrxif_a_OBJECTS) $(librtrmgrxif_a_DEPENDENCIES) 
+	-rm -f librtrmgrxif.a
+	$(librtrmgrxif_a_AR) librtrmgrxif.a $(librtrmgrxif_a_OBJECTS) $(librtrmgrxif_a_LIBADD)
+	$(RANLIB) librtrmgrxif.a
+libsocket4locatorxif.a: $(libsocket4locatorxif_a_OBJECTS) $(libsocket4locatorxif_a_DEPENDENCIES) 
+	-rm -f libsocket4locatorxif.a
+	$(libsocket4locatorxif_a_AR) libsocket4locatorxif.a $(libsocket4locatorxif_a_OBJECTS) $(libsocket4locatorxif_a_LIBADD)
+	$(RANLIB) libsocket4locatorxif.a
+libsocket4userxif.a: $(libsocket4userxif_a_OBJECTS) $(libsocket4userxif_a_DEPENDENCIES) 
+	-rm -f libsocket4userxif.a
+	$(libsocket4userxif_a_AR) libsocket4userxif.a $(libsocket4userxif_a_OBJECTS) $(libsocket4userxif_a_LIBADD)
+	$(RANLIB) libsocket4userxif.a
+libsocket4xif.a: $(libsocket4xif_a_OBJECTS) $(libsocket4xif_a_DEPENDENCIES) 
+	-rm -f libsocket4xif.a
+	$(libsocket4xif_a_AR) libsocket4xif.a $(libsocket4xif_a_OBJECTS) $(libsocket4xif_a_LIBADD)
+	$(RANLIB) libsocket4xif.a
+libsocket6locatorxif.a: $(libsocket6locatorxif_a_OBJECTS) $(libsocket6locatorxif_a_DEPENDENCIES) 
+	-rm -f libsocket6locatorxif.a
+	$(libsocket6locatorxif_a_AR) libsocket6locatorxif.a $(libsocket6locatorxif_a_OBJECTS) $(libsocket6locatorxif_a_LIBADD)
+	$(RANLIB) libsocket6locatorxif.a
+libsocket6userxif.a: $(libsocket6userxif_a_OBJECTS) $(libsocket6userxif_a_DEPENDENCIES) 
+	-rm -f libsocket6userxif.a
+	$(libsocket6userxif_a_AR) libsocket6userxif.a $(libsocket6userxif_a_OBJECTS) $(libsocket6userxif_a_LIBADD)
+	$(RANLIB) libsocket6userxif.a
+libsocket6xif.a: $(libsocket6xif_a_OBJECTS) $(libsocket6xif_a_DEPENDENCIES) 
+	-rm -f libsocket6xif.a
+	$(libsocket6xif_a_AR) libsocket6xif.a $(libsocket6xif_a_OBJECTS) $(libsocket6xif_a_LIBADD)
+	$(RANLIB) libsocket6xif.a
+libstaticroutesxif.a: $(libstaticroutesxif_a_OBJECTS) $(libstaticroutesxif_a_DEPENDENCIES) 
+	-rm -f libstaticroutesxif.a
+	$(libstaticroutesxif_a_AR) libstaticroutesxif.a $(libstaticroutesxif_a_OBJECTS) $(libstaticroutesxif_a_LIBADD)
+	$(RANLIB) libstaticroutesxif.a
+libtestpeerxif.a: $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_DEPENDENCIES) 
+	-rm -f libtestpeerxif.a
+	$(libtestpeerxif_a_AR) libtestpeerxif.a $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_LIBADD)
+	$(RANLIB) libtestpeerxif.a
+libtestxif.a: $(libtestxif_a_OBJECTS) $(libtestxif_a_DEPENDENCIES) 
+	-rm -f libtestxif.a
+	$(libtestxif_a_AR) libtestxif.a $(libtestxif_a_OBJECTS) $(libtestxif_a_LIBADD)
+	$(RANLIB) libtestxif.a
+libxorpifmibxif.a: $(libxorpifmibxif_a_OBJECTS) $(libxorpifmibxif_a_DEPENDENCIES) 
+	-rm -f libxorpifmibxif.a
+	$(libxorpifmibxif_a_AR) libxorpifmibxif.a $(libxorpifmibxif_a_OBJECTS) $(libxorpifmibxif_a_LIBADD)
+	$(RANLIB) libxorpifmibxif.a
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_mib_traps_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_manager_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_processor_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/common_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/coord_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/datain_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_fib_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_fib_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_mirror_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_replicator_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fib2mrib_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_notifier_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_observer_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fti_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist4_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist6_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_transaction4_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_transaction6_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ripng_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_client_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_locator_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_user_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket4_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket6_locator_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket6_user_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket6_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/static_routes_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_if_mib_xif.Po@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ../..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+check: check-am
+all-am: Makefile $(LIBRARIES)
+
+installdirs:
+
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-am
+
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+
+distclean: distclean-am
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am:
+
+install-exec-am:
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-am
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am: uninstall-info-am
+
+.PHONY: GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-info-am
+
+
+@PY_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
+@PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

@@ -1,0 +1,282 @@
+diff -X exclude_files -Nabur ospfd2.15/src/nbrfsm.C ospfd2.16/src/nbrfsm.C
+--- ospfd2.15/src/nbrfsm.C	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/nbrfsm.C	Fri Apr  5 11:36:20 2002
+@@ -37,7 +37,6 @@
+     { NBS_INIT,	NBE_1WAY,	0,		0},
+     { NBS_DOWN,	NBE_HELLO,	NBA_ST_IATIM,	NBS_INIT},
+     { NBS_DOWN,	NBE_START,	NBA_START,	NBS_ATTEMPT},
+-    { NBS_ACTIVE, NBE_START,	NBA_START,	0},
+     { NBS_ATTEMPT, NBE_HELLO,	NBA_RST_IATIM,	NBS_INIT},
+     { NBS_INIT,	NBE_2WAY,	NBA_EVAL1,	0},
+     { NBS_INIT,	NBE_DDRCVD,	NBA_EVAL2,	0},
+@@ -157,7 +156,7 @@
+ 	n_acttim.start(n_ifp->if_dint*Timer::SECOND);
+ 	break;
+       case NBA_RST_IATIM:
+-	n_acttim.restart();
++	n_acttim.restart(n_ifp->if_dint*Timer::SECOND);
+ 	break;
+       case NBA_ST_IATIM:
+ 	n_acttim.start(n_ifp->if_dint*Timer::SECOND);
+@@ -188,9 +187,22 @@
+ 	nba_clr_lists();
+ 	break;
+       case NBA_HELLOCHK:
+-	(void) n_ifp->adjacency_wanted(this);
++	/* Here we are not yet ready to form adjacencies,
++	 * but reevaluation of whether an adjacency should
++	 * form lets us set the Hello Interval
++	 * appropriately on non-broadcast interfaces.
++	 */
++	if (n_ifp->type() != IFT_NBMA && n_ifp->type() != IFT_P2MP)
++	    break;
++	if (!n_ifp->adjacency_wanted(this) && n_state == NBS_ATTEMPT) {
++	    n_state = NBS_DOWN;
++	    nba_delete();
++	    break;
++	}
++	if (n_ifp->adjacency_wanted(this) && n_state == NBS_DOWN)
++	    n_state = NBS_ATTEMPT;
++	n_ifp->adjust_hello_interval(this);
+ 	break;
+-	
+       case -1:		// FSM error
+       default:
+ 	if (ospf->spflog(ERR_NBR_FSM, 5)) {
+@@ -279,6 +291,7 @@
+ 
+ {
+     n_state = NBS_2WAY;
++    n_ifp->adjust_hello_interval(this);
+     if (!n_ifp->adjacency_wanted(this))
+ 	DelPendAdj();
+     else if (!n_ifp->more_adjacencies_needed(id()))
+@@ -375,6 +388,7 @@
+ void SpfNbr::nba_reeval()
+ 
+ {
++    n_ifp->adjust_hello_interval(this);
+     if (!n_ifp->adjacency_wanted(this)) {
+ 	nba_clr_lists();
+ 	n_state = NBS_2WAY;
+@@ -416,10 +430,7 @@
+  * On point-to-point links, point-to-multipoint links and virtual
+  * links, adjacencies are always wanted.
+  * On broadcast and NBMA links, adjacencies must have DR or Backup
+- * DR as one (or both) endpoint(s). For NBMA and
+- * Point-to-MultiPoint networks, calls
+- * to adjacency_wanted() are used to stop and start
+- * hello timers for neighbors.
++ * DR as one (or both) endpoint(s).
+  */
+ 
+ int SpfIfc::adjacency_wanted(SpfNbr *)
+@@ -443,29 +454,49 @@
+ 	return(false);
+ }
+ 
+-int NBMAIfc::adjacency_wanted(SpfNbr *np)
++int P2mPIfc::adjacency_wanted(SpfNbr *np)
+ 
+ {
+-    int retcd;
+-
+-    retcd = DRIfc::adjacency_wanted(np);
+-    if (retcd)
+-	np->n_htim.start(if_hint*Timer::SECOND);
+-    else if (if_drpri && np->dr_eligible())
+-	np->n_htim.start(if_hint*Timer::SECOND);
+-    else
+-	np->n_htim.stop();
+-
+-    return(retcd);
++    return(true);
+ }
+ 
+-int P2mPIfc::adjacency_wanted(SpfNbr *np)
++/* Adjust Hello Interval on NBMA and
++ * Point-to-MultiPoint interfaces, depending
++ * upon neighbor state.
++ */
++
++void SpfIfc::adjust_hello_interval(SpfNbr *np)
+ 
+ {
+-    np->n_htim.start(if_hint*Timer::SECOND);
+-    return(true);
+-}
++    uns32 period;
++    uns32 dead = 0;
+ 
++    // Only on non-broadcast networks
++    if (if_type != IFT_NBMA && if_type != IFT_P2MP)
++        return;
++
++    // Determine Hello frequency
++    if (!adjacency_wanted(np))
++        period = 0;
++    else if (np->state() == NBS_DOWN)
++        period = if_pint*Timer::SECOND;
++    else {
++        period = if_hint*Timer::SECOND;
++	dead = if_dint*Timer::SECOND;
++    }
++
++    // Reset Hello and Dead timers if intervals have changed
++    if (period != np->n_htim.interval()) {
++        np->n_htim.stop();
++	if (period != 0)
++	    np->n_htim.start(period);
++    }
++    if (dead != np->n_acttim.interval()) {
++        np->n_acttim.stop();
++	if (dead != 0)
++	    np->n_acttim.start(dead);
++    }
++}
+ 
+ /* Prepare a neighbor for deletion.
+  */
+@@ -485,6 +516,8 @@
+ 
+     if (!configured())
+ 	ospf->delete_neighbors = true;
++    else if (n_ifp->state() != IFS_DOWN)
++        n_ifp->adjust_hello_interval(this);
+ }
+ 
+ /* Start trying to establish an adjacency. Increment the DD sequence
+diff -X exclude_files -Nabur ospfd2.15/src/nbrfsm.h ospfd2.16/src/nbrfsm.h
+--- ospfd2.15/src/nbrfsm.h	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/nbrfsm.h	Fri Apr  5 11:36:20 2002
+@@ -44,7 +44,7 @@
+     NBS_LOAD = 0x40,	// DDs done, now only LS reqs
+     NBS_FULL = 0x80,	// Full adjacency
+ 
+-    NBS_ACTIVE = 0xFE,	// Any state but down
++    NBS_ACTIVE = 0xFC,	// Any state but down and attempt
+     NBS_FLOOD = NBS_EXCH | NBS_LOAD | NBS_FULL,
+     NBS_ADJFORM = NBS_EXST | NBS_FLOOD,
+     NBS_BIDIR = NBS_2WAY | NBS_ADJFORM,
+diff -X exclude_files -Nabur ospfd2.15/src/ospf.h ospfd2.16/src/ospf.h
+--- ospfd2.15/src/ospf.h	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/ospf.h	Fri Apr  5 11:36:20 2002
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 15,	// Minor version number
++	vminor = 16,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.15/src/spfhello.C ospfd2.16/src/spfhello.C
+--- ospfd2.15/src/spfhello.C	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/spfhello.C	Fri Apr  5 11:36:21 2002
+@@ -216,7 +216,6 @@
+     bool nbr_change;
+     bool backup_seen;
+     bool first_hello;
+-    bool new_nbr = false;
+     SpfNbr *np;
+ 
+     if (if_state == IFS_DOWN || passive)
+@@ -248,10 +247,8 @@
+ 
+     // Find the neighbor structure
+     // If one is not found, it is created
+-    if (!(np = find_nbr(nbr_addr, nbr_id))) {
++    if (!(np = find_nbr(nbr_addr, nbr_id)))
+ 	np = new SpfNbr(this, nbr_id, nbr_addr);
+-	new_nbr = true;
+-    }
+ 
+     // Set ID or address, depending on interface type
+     old_id = np->n_id;
+@@ -274,10 +271,12 @@
+ 	// If not bidirectional, processing stops
+ 	if ((byte *) idp >= pdesc->end) {
+ 	    np->nbr_fsm(NBE_1WAY);
+-	    if (new_nbr)
++	    if (first_hello) {
+ 		np->nbr_fsm(NBE_EVAL);
+-	    if (first_hello && !np->ifc()->is_multi_access())
++		if (!np->ifc()->is_multi_access() ||
++		    np->ifc()->type() == IFT_P2MP)
+ 		np->send_hello();
++	    }
+ 	    else
+ 	        send_hello_response(np);
+ 	    return;
+diff -X exclude_files -Nabur ospfd2.15/src/spfifc.C ospfd2.16/src/spfifc.C
+--- ospfd2.15/src/spfifc.C	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/spfifc.C	Fri Apr  5 11:36:21 2002
+@@ -93,8 +93,9 @@
+     if (!(new_ap = FindArea(m->area_id)))
+ 	new_ap = new SpfArea(m->area_id);
+     // Change timers, if need be
+-    if (m->hello_int != ip->if_hint) {
++    if (m->hello_int != ip->if_hint || ip->if_pint != m->poll_int) {
+ 	ip->if_hint = m->hello_int;
++	ip->if_pint = m->poll_int;
+ 	ip->restart_hellos();
+     }
+     // Set new parameters
+@@ -102,7 +103,6 @@
+     ip->if_xdelay = m->xmt_dly;	// Transit delay (seconds)
+     ip->if_rxmt = m->rxmt_int;	// Retransmission interval (seconds)
+     ip->if_dint = m->dead_int;	// Router dead interval (seconds)
+-    ip->if_pint = m->poll_int;	// Poll interval
+     ip->if_autype = m->auth_type; // Authentication type
+     memcpy(ip->if_passwd, m->auth_key, 8);// Auth key
+ 
+@@ -1035,7 +1035,7 @@
+     SpfNbr *np;
+ 
+     while ((np = iter.get_next()))
+-	np->n_htim.restart(if_hint*Timer::SECOND);
++	np->nbr_fsm(NBE_EVAL);
+ }
+ 
+ /* Interface has gone down. Stop sending Hellos to all
+diff -X exclude_files -Nabur ospfd2.15/src/spfifc.h ospfd2.16/src/spfifc.h
+--- ospfd2.15/src/spfifc.h	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/spfifc.h	Fri Apr  5 11:36:21 2002
+@@ -205,6 +205,7 @@
+     void nl_orig(int forced); // Originate network-LSA
+     LShdr *nl_raw_orig();
+     void finish_pkt(Pkt *pdesc, InAddr addr);
++    void adjust_hello_interval(SpfNbr *np);
+     void nonbroadcast_send(Pkt *pdesc, InAddr addr);
+     void nonbroadcast_stop_hellos();
+     void nonbroadcast_restart_hellos();
+@@ -406,7 +407,6 @@
+     virtual void start_hellos();
+     virtual void restart_hellos();
+     virtual void stop_hellos();
+-    virtual int adjacency_wanted(class SpfNbr *np);
+     virtual void send_hello_response(SpfNbr *np);
+ };
+ 
+diff -X exclude_files -Nabur ospfd2.15/src/timer.h ospfd2.16/src/timer.h
+--- ospfd2.15/src/timer.h	Fri Mar  8 13:54:22 2002
++++ ospfd2.16/src/timer.h	Fri Apr  5 11:36:21 2002
+@@ -40,6 +40,7 @@
+     void stop();
+     void restart(int millseconds=0);// Stop and start again
+     inline int is_running();
++    inline uns32 interval();
+     int milliseconds_to_firing();
+     virtual void start(int milliseconds, bool randomize=true);
+     virtual void fire();
+@@ -51,6 +52,10 @@
+ inline int Timer::is_running()
+ {
+     return(active);
++}
++inline uns32 Timer::interval()
++{
++    return(active ? period : 0);
+ }
+ 
+ /* Implementation of a interval timer

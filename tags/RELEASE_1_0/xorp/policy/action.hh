@@ -1,0 +1,47 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001-2004 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+// $XORP: xorp/policy/action.hh,v 1.1 2003/01/30 19:21:10 mjh Exp $
+
+#ifndef __POLICY_ACTION_HH__
+#define __POLICY_ACTION_HH__
+
+#include <list>
+#include "libxorp/xorp.h"
+#include "policy_route.hh"
+
+template <class A>
+class PolicyAction {
+public:
+    PolicyAction();
+    virtual bool apply_actions(const PolicyRoute<A>& in_route, 
+			       PolicyRoute<A>*& out_route) const = 0;
+private:
+};
+
+template <class A>
+class AcceptAction : public PolicyAction<A> {
+    AcceptAction();
+    bool apply_actions(const PolicyRoute<A>& in_route, 
+		       PolicyRoute<A>*& out_route) const;
+};
+
+template <class A>
+class RejectAction : public PolicyAction<A> {
+    RejectAction();
+    bool apply_actions(const PolicyRoute<A>& in_route, 
+		       PolicyRoute<A>*& out_route) const;
+};
+
+#endif // __POLICY_ACTION_HH__

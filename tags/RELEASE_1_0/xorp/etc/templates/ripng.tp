@@ -1,0 +1,169 @@
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.14 2004/06/15 00:31:55 hodson Exp $ */
+
+/*
+ * RIPng attribute descriptions
+ */
+
+protocols {
+    ripng {
+	targetname: txt = "ripng";
+	interface @: txt {
+	    vif @: txt {
+		address @: ipv6 {
+		    metric:			u32	=   1;
+		    horizon:			txt	= "split-horizon-poison-reverse" ;
+		    enabled:			bool	= false ;
+		    passive:			bool	= false ;
+		    accept-non-rip-requests:	bool	= true ;
+		    accept-default-route:	bool	= false ;
+		    advertise-default-route:	bool	= false ;
+		    route-expiry-secs:		u32	= 180 ;
+		    route-deletion-secs:	u32	= 120 ;
+		    triggered-update-min-secs:	u32	=   1 ;
+		    triggered-update-max-secs:	u32	=   5 ;
+		    table-announce-min-secs:	u32	=  25 ;
+		    table-announce-max-secs:	u32	=  35 ;
+		    table-request-secs:		u32	=   1 ;
+		    interpacket-delay-msecs:	u32	=  50 ;
+		}
+	    }
+	}
+
+	export @: txt {
+	    metric:u32	= 1 ;
+	    tag:u32	= 0 ;
+	}
+    }
+}
+
+/*
+ * RIPNG attribute manipulation.
+ */
+protocols {
+    ripng {
+	%modinfo:	provides		ripng;
+	%modinfo:	depends			rib;
+	%modinfo:	path			"rip/xorp_ripng";
+	%modinfo:	default_targetname	"ripng";
+	%modinfo:	status_method xrl	"$(ripng.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl	"$(ripng.targetname)/common/0.1/shutdown";
+	%help:		short "Configure RIPng intra-domain routing." ;
+
+	%mandatory:	targetname;
+
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+
+	interface @ {
+	    vif @ {
+		address @ {
+		    %create: xrl "$(ripng.targetname)/ripng/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)" ;
+		    %delete: xrl "$(ripng.targetname)/ripng/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)" ;
+
+		    enabled {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&enabled:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->enabled:bool" ;
+			%help: short "Enable RIPng on address." ;
+		    }
+
+		    metric {
+			%allow-range: $(@) "0" "16" ;
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&cost:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->cost:u32" ;
+			%help: short "Set the cost metric added to routes received on address." ;
+		    }
+
+		    horizon {
+			%allow: $(@) "none" "split-horizon" "split-horizon-poison-reverse" ;
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&horizon:txt=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->horizon:txt" ;
+			%help: short "Set the horizon type applied to routes announced on address." ;
+		    }
+
+		    passive {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&passive:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->passive:bool" ;
+			%help: short "Set address as receive only." ;
+		    }
+
+		    accept-non-ripng-requests {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&accept:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->accept:bool" ;
+			%help: short "Answer RIPng requests made from non-RIPng processes." ;
+		    }
+
+		    accept-default-route {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&accept:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->accept:bool" ;
+			%help: short "Accept default route if received from RIP neighbor." ;
+		    }
+
+		    advertise-default-route {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&advertise:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->advertise:bool" ;
+			%help: short "Advertise default route to neighbors on address." ;		    }
+
+		    route-expiry-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set timeout when routes become unreachable in the absence of updates." ;
+		    }
+
+		    route-deletion-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_route_deletion_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/route_deletion_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set period routes are removed after being advertised as unreachable." ;
+		    }
+
+		    trigger-update-min-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_triggered_update_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/triggered_update_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set the lower bound of triggered update announcements." ;
+		    }
+
+		    trigger-update-max-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_triggered_update_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/triggered_update_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set the upper bound of triggered update announcements." ;
+		    }
+
+		    table-announce-min-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_unsolicited_response_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/unsolicited_response_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set the lower bound of route table announcements." ;
+		    }
+
+		    table-announce-max-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_unsolicited_response_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/unsolicited_response_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set the upper bound of route table announcements." ;
+		    }
+
+		    table-request-secs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_table_request_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/table_request_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
+			%help: short "Set the gap between sending RIP request packets when no neighbors are known." ;
+		    }
+
+		    interpacket-delay-msecs {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_interpacket_delay_milliseconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_msecs:u32=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/interpacket_delay_milliseconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_msecs:u32" ;
+			%help: short "Set the minimum delay between outbound RIP packets." ;
+		    }
+
+		    status {
+			%get: xrl "$(ripng.targetname)/ripng/0.1/rip_address_status?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->status:txt=$(@)" ;
+		    }
+		}
+	    }
+	}
+
+	export @: txt {
+		%activate: xrl "$(ripng.targetname)/ripng/0.1/redist_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)";
+		%delete: xrl "$(ripng.targetname)/ripng/0.1/no_redist_protocol_routes?protocol_name:txt=$(@)";
+		%help: short "Export routes from another routing protocol." ;
+	}
+    }
+}

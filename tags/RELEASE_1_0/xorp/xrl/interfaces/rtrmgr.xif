@@ -1,0 +1,40 @@
+/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
+ 
+/*
+ * Router Manager XRL interface.
+ */
+
+interface rtrmgr/0.1 {
+    get_pid ? -> pid:u32
+    /** Register a user and client process with the rtrmgr.  
+     * @param clientname name of xrl entity supporting
+     * rtrmgr_client.xif methods.  
+     */
+    register_client ? userid:u32 & clientname:txt -> filename:txt & pid:u32
+    
+    unregister_client ? token:txt
+
+    authenticate_client ? userid:u32 & clientname:txt & token:txt
+
+    enter_config_mode ? token:txt & exclusive:bool
+
+    leave_config_mode ? token:txt
+
+    get_config_users ? token:txt -> users:list
+
+    get_running_config ? token:txt -> ready:bool & config:txt
+
+    apply_config_change ? token:txt & target:txt & deltas:txt & deletions:txt
+
+    lock_config ? token:txt & timeout:u32 -> success:bool & holder:u32
+
+    unlock_config ? token:txt 
+
+    lock_node ? token:txt & node:txt & timeout:u32 -> success:bool & holder:u32
+
+    unlock_node ? token:txt & node:txt
+
+    save_config ? token:txt & filename:txt
+
+    load_config ? token:txt & target:txt & filename:txt
+}

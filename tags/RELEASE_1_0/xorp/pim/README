@@ -1,0 +1,186 @@
+#
+# $XORP: xorp/pim/README,v 1.24 2004/06/22 01:28:25 pavlin Exp $
+#
+
+Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
+==================================================================
+
+This directory contains the XORP implementation of the PIM-SM protocol.
+
+Configuration
+=============
+
+PIM-SM like most XORP processes does not take its configuration
+parameters from the command line. Its parameters are provided via
+XRLs. At the very least a PIM-SM process must be provided with
+the set of network interfaces to enable for multicast.
+
+Startup
+=======
+
+In normal operation, PIM-SM would be started by the XORP router manager
+process, not directly from the command line.
+For information how to configure PIM-SM see
+http://www.xorp.org/getting_started.html
+
+To use PIM-SM, you must have PIM-capable kernel. Currently, the
+following systems are known to have PIM-SM kernel support:
+
+ - IPv4: FreeBSD-4.9, FreeBSD-5.2 (and later), DragonFlyBSD, Linux:
+    For FreeBSD and DragonFlyBSD kernel, the following options are required:
+options		MROUTING		# Multicast routing
+options		PIM			# PIM multicast routing
+
+    For Linux kernel, the following options are required:
+enable CONFIG_IP_MULTICAST
+enable CONFIG_IP_PIMSM_V2
+enable CONFIG_IP_MROUTE
+
+ - IPv6: FreeBSD, NetBSD, OpenBSD, DragonFlyBSD
+   No kernel options are required.
+
+Debugging with Stand-alone PIM
+==============================
+
+For testing and debugging purposes, PIM-SM can be started manually.  The
+XORP PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
+are running. However, the binary program ``test_pim'' already contains
+them, therefore it is sufficient to start only ``test_pim'' (as a root).
+
+First, make sure that IP forwarding is enabled.
+ - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
+      sysctl net.inet.ip.forwarding=1
+      sysctl net.inet6.ip6.forwarding=1
+
+ - In case of Linux run as a root (for IPv4):
+      echo 1 > /proc/sys/net/ipv4/ip_forward
+   Note that currently Linux doesn't support IPv6 multicast routing.
+
+After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
+disabled by default. To start them, and to configure their operation,
+as well as the PIM-SM operation, run script ``./configure_pim''.
+Note that it MUST be run from the ``${XORP}/pim'' directory.
+To run PIM-SM in IPv6 mode, then use ``./configure_pim -6'' instead.
+
+However, before running ``./configure_pim'', you must configure
+it for each router:
+
+ - Add an entry for each router under "case $HOSTNAME in" with the
+   set of network interfaces to enable, and with the interface whose
+   address the router will use as the Candidate-BSR or Candidate-RP
+   addresses. Example:
+
+	xorp1)
+	ENABLE_VIFS="dc1 dc2 dc4"
+	CAND_BSR_VIF="dc1"
+	CAND_RP_VIF="dc1"
+	;;
+
+   Note that each enabled vif must have a domain-wide reachable
+   address. E.g., in case of IPv6 link-local addresses are not
+   sufficient.
+
+ - If you don't want to configure the PIM-SM router as a Candidate-BSR
+   or a Candidate-RP, then comment-out CAND_BSR_VIF or CAND_RP_VIF
+   respectively.
+
+ - If you want to configure static RPs, add all IP addresses to the
+   variable STATIC_RPS4 or STATIC_RPS6 (for IPv4 and IPv6 respectively):
+
+	STATIC_RPS4="10.2.0.1 10.4.0.2"
+	STATIC_RPS6=""
+
+ - If you want to add an "alternative (sub)net" to a network interface,
+   e.g., if you want to make incoming traffic with a non-local source address
+   to appear as it is coming from a local subnet, then create a list
+   of tuples "<virtual interface name> <subnet address>".
+   Typically, this is needed as a work-around solution when there are
+   uni-directional interfaces for sending and receiving traffic
+   (e.g., satellite links).
+   [ Note: add alternative subnets with extreme care, only if you know what
+   you are really doing! ]
+   Example:
+	ALTERNATIVE_SUBNET4="dc1 10.3.0.0/16 dc2 10.4.0.0/16"
+	ALTERNATIVE_SUBNET6=""
+
+ - All configuration variables described above can be predefined in your
+   shell environment instead.
+
+ - By default, ``./test_pim'' will log all protocol-related messages.
+   To disable them, comment-out the following variables:
+
+	MFEA_ENABLE_LOG_TRACE=yes
+	MLD6IGMP_ENABLE_LOG_TRACE=yes
+	PIM_ENABLE_LOG_TRACE=yes
+
+ - After PIM-SM is started, if you want to send a single XRL command
+   to it and change some of its configuration, you can use the command
+   ./command_pim <xrl_command> [xrl_command_arguments ... ]
+   
+   The list of all XRL commands and their arguments are in
+   ``xrl_pim_shell_funcs.sh''
+
+ - After PIM-SM is started, if you want to access its internal
+   information, you can use the built-in CLI:
+     telnet localhost 12000
+
+ - If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable in ``configure_pim'':
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+
+
+   Currently, the CLI supports primarily "show" commands. For example,
+   "show pim interface" will show the list of all interfaces known to
+   PIM and their status. All PIM-SM CLI commands start with "show pim"
+   or "show pim6" for IPv4 and IPv6 respectively. At each moment you
+   can press <TAB> for the list of existing commands at each level,
+   and a brief description of them. Pressing '?' after a command has
+   similar function.
+   Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   Ctrl-E to go to the beginning or end of the current line, Ctrl-A
+   to kill the remaining part of the current line, etc.
+   To exit, press Ctrl-D when you are on a new empty line.
+
+ - Note that on start-up, it takes on the order of 2-3 minutes for
+   a Candidate-BSR to become the Bootstrap router, therefore after a
+   (re)boot of the BSR, it may take up to 2-3 minutes before multicast
+   routing is working. You can use the CLI command "show pim bootstrap"
+   on the Candidate-BSR that is expected to become the BSR to observe the
+   remaining time before that Candidate-BSR becomes the BSR (the Timeout
+   value for the Active zone(s)).
+
+Documentation
+=============
+
+The PIM-SM design architecture and code structure are described in:
+	${XORP}/docs/pim/
+
+The programming documentation is in:
+	${XORP}/docs/kdoc/html/pim/
+
+Testing
+=======
+
+Currently, the PIM-SM testing is performed manually, by starting
+PIM-SM on a number of testbed machines. All tests performed so far are
+described in ${XORP}/docs/pim_testsuite/pim_testsuite.ps
+
+In the future, automated testing will be added, similar to
+the BGP testing framework.
+
+Status
+======
+
+Currently (July 2004), the PIM-SM implementation is based
+on the specification in the following documents:
+
+ * draft-ietf-pim-sm-v2-new-09.{ps,txt} (The core PIM-SM specification).
+ * draft-ietf-pim-sm-bsr-03.{ps,txt} (The Bootstrap mechanism).
+
+The only major features not implemented yet are SSM support and security.
+
+Many detailed tests have been performed so far
+(see the "XORP PIM-SM Test Suite" document in ${XORP}/docs/pim_testsute/ or
+http://www.xorp.org/design_docs.html), and the code appears
+to be spec-compliant and robust, but no guarantees it is bug-free of course.

@@ -1,0 +1,112 @@
+XORP Live CD Creation Toolkit
+=============================
+
+This LiveCD creation toolkit is based on the FreeBSD LiveCD toolkit by
+the Brazilian FreeBSD Users Group.  Their original README files can be
+found in the original_docs directory.  The original toolkit has been
+heavily modified to build a XORP router instead of a generic FreeBSD
+system.  Much of the flexibility of the original toolkit has been
+deliverately removed as the goals of a router are rather different
+from those of a generic host.
+
+
+Objective
+=========
+
+The XORP LiveCD Toolkit has the objective of allowing the generation of 
+bootable XORP CDs based on the FreeBSD operating system. 
+
+The goals of the LiveCD are to allow users to experiment with XORP
+without having to go through the process of installing FreeBSD or
+Linux and compiling and installing XORP.  A system running off a
+LiveCD also makes a great educational tool, and could even be used for
+production use.
+
+
+What is it?
+==========
+
+The XORP LiveCD Toolkit itself is a set of scripts that will prepare
+an ISO image of a working FreeBSD system and the XORP routing
+components, based on some questions asked to the user. A custom made
+kernel will allow this ISO to be bootable.  Access to the hard disks
+on the system the CD is running on has been disabled, so it's hard for
+the resulting Live CD to harm any pre-installed operating systems on
+the local disk.
+
+The XORP router components needs to have somewhere to save config
+files if the router configuration is to be preserved across reboots.
+If the system has a floppy drive, XORP can use this to retain the
+configuration files.  Otherwise XORP will come up with an empty
+configuration every time it is booted.
+
+
+Requirements
+============
+
+* To use the XORP LiveCD system:
+
+- Run it as ROOT ! You must have write permission on several places.
+- A working FreeBSD machine running version 4.9 or higher.  This
+  probably does not work with FreeBSD 5.x.
+- Your sources (/usr/src mandatory !) synchronized with the above version.
+  The LiveCD will run do buildworld in /usr/src.
+- Your XORP sources to build and install XORP.
+- 2 GB of free disk space under /usr/local
+- mkisofs
+
+Of course you need a CD Recorder to burn the CD image, but it does not need 
+to be in the FreeBSD system.
+
+* To run the system based on a XORP LiveCD:
+
+A computer with a fair amount of memory (at least 256MB), a CD-ROM
+drive, optionally a floppy drive for saving configuration, and the
+BIOS configured to boot from CD first (ahead of floppy and hard
+drives).  The Live CD uses a uniprocessor kernel, so if your system
+has additional processors, they will not be used.
+
+How to use it
+=============
+
+Using the XORP LiveCD is very simple. It consists basically of one
+scripts: LiveCD/livecd.sh
+
+The livecd.sh script is the main tool, used to generate the ISO image.
+
+Livecd.sh usage
+===============
+
+Before using the livecd.sh script you should edit the config file and set 
+some basic variables in there. Those variables will define paths, places 
+and files that will be used and/or generated during the operation. 
+When  running the livecd.sh script those parameters will be displayed to 
+you so that you can review them. To accept, press enter. To abort the 
+process press Ctrl-C and change the file as needed.
+
+There are 13 steps to create the LiveCD, and for each of those, there
+is one entry on the main menu.  
+
+ - The "install packages" step is optional, but can be used to add
+   additional software to the LiveCD.
+ - If you have already run buildworld, you can skip this step.
+ - If you have already built XORP, you can skip this step.  
+ - If you have already built a kernel from LiveCD, you can skip the
+   buildkernel step.
+ - The "burn CD" step is optional if you want to copy the ISO to
+   another system to burn it.
+
+The process can be interrupted at any time, and can be resumed by executing 
+the next step right after the last concluded step.
+
+Notes:
+======
+
+Due to the nature of a CDROM-based system, you system RAM is used
+heavily. This means that if, for some reason your system's hardware is
+not properly tuned or has bad quality memory, you may experience
+several problems like core dumps (with signals 10 and 11), computer
+freezing, etc. Most of the system will be running under MFS (memory
+file system) therefore, bad memory behavior also means corrupted
+files.
+

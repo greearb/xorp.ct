@@ -1,0 +1,77 @@
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.7 2004/06/04 04:47:04 pavlin Exp $ */
+
+protocols {
+    igmp {
+	targetname:		txt = "IGMP";
+	enabled:		bool = true;
+
+	interface @: txt {
+	    vif @: txt {
+		enabled:	bool = true;
+	    }
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    enabled:	bool = false;
+		}
+	    }
+	}
+    }
+}
+
+protocols {
+    igmp {
+	%help:		short		"Configure the IGMP protocol";
+	%modinfo:	provides	igmp;
+	%modinfo:	depends		mfea4;
+	%modinfo:	path		"mld6igmp/xorp_igmp";
+	%modinfo:	default_targetname "mld6igmp";
+	%modinfo:	status_method	xrl "$(igmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	startup_method	xrl "$(igmp.targetname)/mld6igmp/0.1/start_mld6igmp";
+	%modinfo:	shutdown_method	xrl "$(igmp.targetname)/common/0.1/shutdown";
+
+	%mandatory:	targetname;
+
+	targetname {
+	    %help:	short "Set the target name";
+	    %set:;
+	}
+
+	enabled {
+	    %help:	short "Enable the IGMP protocol";
+	    %create:;
+	    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(@)";
+	    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(DEFAULT)";
+	}
+
+	interface @ {
+	    %help:	short "Configure IGMP on a network interface";
+	    vif @ {
+		%help:	short "Configure IGMP on a virtual interface";
+		%activate: xrl "$(igmp.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+
+		enabled {
+		    %help:	short "Enable IGMP on an interface";
+		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+	    }
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short "Configure all tracing operations";
+		    enabled {
+			%help:	short "Enable all tracing operations";
+			%set:	xrl "$(igmp.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(@)";
+		    }
+		}
+	    }
+	}
+    }
+}

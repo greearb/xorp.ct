@@ -1,0 +1,3 @@
+#include "fea_ifmgr_replicator.xif"
+
+target test_fea_ifmgr_mirror implements	ifmgr_replicator/0.1
