@@ -92,7 +92,7 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-SUBDIRS = libtecla .
+SUBDIRS = libtecla . tools
 
 # -- Real Programs
 bin_PROGRAMS = 

@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/cli/Makefile.am,v 1.6 2003/09/30 20:41:20 pavlin Exp $
+## $XORP: xorp/cli/Makefile.am,v 1.7 2004/03/18 00:36:29 pavlin Exp $
 ##
 
 # -- Subdirectories (directory ordering is important)
-SUBDIRS = libtecla .
+SUBDIRS = libtecla . tools
 
 # -- Real Programs
 bin_PROGRAMS  = 
