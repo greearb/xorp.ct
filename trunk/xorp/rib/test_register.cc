@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.10 2004/02/11 08:48:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.11 2004/03/23 11:24:25 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -29,38 +29,44 @@
 RIB<IPv4>* rib_ptr;
 bool verbose = false;
 
-static void 
-verify_route(const string& ipv4, const string& vifname, 
-	     const string& nexthop, uint32_t metric) 
+static void
+verify_route(const string& ipv4, const string& vifname,
+	     const string& nexthop, uint32_t metric)
 {
     if (verbose) {
 	printf("-----------------------------------------------------------\n");
 	printf("VERIFY: addr %s -> if: %s, NH: %s\n",
 	       ipv4.c_str(), vifname.c_str(), nexthop.c_str());
     }
-    if (rib_ptr->verify_route(IPv4(ipv4.c_str()), vifname, 
+    if (rib_ptr->verify_route(IPv4(ipv4.c_str()), vifname,
 			      IPv4(nexthop.c_str()), metric) != XORP_OK) {
 	printf("route verify failed\n");
 	abort();
     }
 }
 
-static void 
+static void
 test_route_range(const string& ipv4,
 		 const string& vifname,
-		 const string& nexthop, 
+		 const string& nexthop,
 		 const string& lower,
 		 const string& upper)
 {
     RouteRange<IPv4>* rr;
-    
+
     rr = rib_ptr->route_range_lookup(IPv4(ipv4.c_str()));
     if (verbose)
 	printf("**RouteRange for %s\n", ipv4.c_str());
     if (rr->route() != NULL) {
-	if (string(rr->route()->vif()->name()) != vifname) {
+	if (rr->route()->vif() == NULL) {
+	    printf("BAD Vif NULL != \"%s\"\n", vifname.c_str());
+	    abort();
+	} else if (rr->route()->vif()->name() != vifname) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("BAD Vif\n");
+	    printf("BAD Vif \"%s\" != \"%s\"\n",
+		   rr->route()->vif()->name().c_str(),
+		   vifname.c_str()
+		   );
 	    abort();
 	}
 	IPNextHop<IPv4>* nh;
@@ -114,7 +120,7 @@ main (int /* argc */, char* argv[])
     EventLoop eventloop;
     XrlStdRouter xrl_router(eventloop, "rib");
     RibManager rib_manager;
-    
+
     RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     rib_ptr = &rib;
 
@@ -137,6 +143,9 @@ main (int /* argc */, char* argv[])
     rib.add_igp_table("ospf", "", "");
     rib.add_egp_table("ebgp", "", "");
     rib.add_egp_table("ibgp", "", "");
+
+    rib.print_rib();
+
     // rib.add_route("connected", IPv4Net("10.0.0.0", 24), IPv4("10.0.0.1"));
     // rib.add_route("connected", IPv4Net("10.0.1.0", 24), IPv4("10.0.1.1"));
     // rib.add_route("connected", IPv4Net("10.0.2.0", 24), IPv4("10.0.2.1"));
@@ -148,7 +157,7 @@ main (int /* argc */, char* argv[])
     rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"), "", "", 0);
     rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"), "", "", 1);
     rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"), "", "", 2);
-    
+
     verify_route("1.0.5.4", "vif0", "10.0.0.2", 0);
     verify_route("1.0.3.4", "vif1", "10.0.1.2", 1);
 
@@ -156,7 +165,7 @@ main (int /* argc */, char* argv[])
     test_route_range("1.0.4.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.8.255");
     test_route_range("1.0.3.1", "vif1", "10.0.1.2", "1.0.3.0", "1.0.3.255");
     test_route_range("1.0.7.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.8.255");
-    test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0", 
+    test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0",
 		     "9.255.255.255");
 
     // Add a route to another IGP table
@@ -285,6 +294,6 @@ main (int /* argc */, char* argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }
