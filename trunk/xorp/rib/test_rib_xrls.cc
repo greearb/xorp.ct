@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.35 2004/10/01 20:23:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.36 2004/10/06 21:21:07 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -53,7 +53,9 @@ public:
 
 	// XXX The following should probably use XRL's but punting for
 	// time being.
+	add_command(new DirectDiscardVifCommand(rib));
 	add_command(new DirectEtherVifCommand(rib));
+	add_command(new DirectLoopbackVifCommand(rib));
     }
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.11 2004/06/10 22:41:37 hodson Exp $
+// $XORP: xorp/rib/parser.hh,v 1.12 2004/10/29 01:10:05 bms Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -344,9 +344,39 @@ protected:
     int		_metric;
 };
 
+class DiscardVifCommand : public Command {
+public:
+    DiscardVifCommand() : Command("vif Discard ~String ~IPv4 ~Int", 3) {
+	bind_string(0, _ifname);
+	bind_ipv4(1, _addr);
+	bind_int(2, _prefix_len);
+    }
+    virtual int execute() = 0;
+
+protected:
+    string	_ifname;
+    IPv4	_addr;
+    int		_prefix_len;
+};
+
 class EtherVifCommand : public Command {
 public:
     EtherVifCommand() : Command("vif Ethernet ~String ~IPv4 ~Int", 3) {
+	bind_string(0, _ifname);
+	bind_ipv4(1, _addr);
+	bind_int(2, _prefix_len);
+    }
+    virtual int execute() = 0;
+
+protected:
+    string	_ifname;
+    IPv4	_addr;
+    int		_prefix_len;
+};
+
+class LoopbackVifCommand : public Command {
+public:
+    LoopbackVifCommand() : Command("vif Loopback ~String ~IPv4 ~Int", 3) {
 	bind_string(0, _ifname);
 	bind_ipv4(1, _addr);
 	bind_int(2, _prefix_len);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.13 2004/09/17 14:00:03 abittau Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.14 2004/10/29 01:10:05 bms Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -113,6 +113,27 @@ private:
     RIB<IPv4>& _rib;
 };
 
+class DirectDiscardVifCommand : public DiscardVifCommand {
+public:
+    DirectDiscardVifCommand(RIB<IPv4>& rib)
+	: DiscardVifCommand(), _rib(rib) {}
+    int execute() {
+	cout << "DiscardVifCommand::execute " << _ifname << " ";
+	cout << _addr.str() << "\n";
+
+	Vif vif(_ifname);
+	IPv4Net subnet(_addr, _prefix_len);
+	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
+	vif.add_address(vifaddr);
+	vif.set_discard(true);
+	cout << "**** Vif: " << vif.str() << endl;
+
+	return _rib.new_vif(_ifname, vif);
+    }
+private:
+    RIB<IPv4>& _rib;
+};
+
 class DirectEtherVifCommand : public EtherVifCommand {
 public:
     DirectEtherVifCommand(RIB<IPv4>& rib)
@@ -125,6 +146,27 @@ public:
 	IPv4Net subnet(_addr, _prefix_len);
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
 	vif.add_address(vifaddr);
+	cout << "**** Vif: " << vif.str() << endl;
+
+	return _rib.new_vif(_ifname, vif);
+    }
+private:
+    RIB<IPv4>& _rib;
+};
+
+class DirectLoopbackVifCommand : public LoopbackVifCommand {
+public:
+    DirectLoopbackVifCommand(RIB<IPv4>& rib)
+	: LoopbackVifCommand(), _rib(rib) {}
+    int execute() {
+	cout << "LoopbackVifCommand::execute " << _ifname << " ";
+	cout << _addr.str() << "\n";
+
+	Vif vif(_ifname);
+	IPv4Net subnet(_addr, _prefix_len);
+	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
+	vif.add_address(vifaddr);
+	vif.set_loopback(true);
 	cout << "**** Vif: " << vif.str() << endl;
 
 	return _rib.new_vif(_ifname, vif);
