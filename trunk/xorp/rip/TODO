@@ -16,6 +16,8 @@ o Check and double check nexthop handling paying attention to incoming
 
 o Reception of static routes from FEA / statics process.
 
+o Handle interfaces coming up and down and socket errors.
+
 o Inter-op testing.
 
 // ----------------------------------------------------------------------------
