@@ -89,9 +89,10 @@ options		DDB		# Debugging
 #
 options		GDB_REMOTE_CHAT
 
+# XORP: Enable SMP
 # To make an SMP kernel, the next two are needed
-#options 	SMP			# Symmetric MultiProcessor Kernel
-#options 	APIC_IO			# Symmetric (APIC) I/O
+options 	SMP			# Symmetric MultiProcessor Kernel
+options 	APIC_IO			# Symmetric (APIC) I/O
 
 device		isa
 device		eisa
