@@ -55,6 +55,8 @@ run_timer_callbacks(u_int alarm_id, void *)
     for (p = e._pending_alarms.begin(); p != e._pending_alarms.end(); ++p) {
 	if (alarm_id == (*p).second) {
 	    e._pending_alarms.erase(p);
+	    // exported alarms are all 'one-time', so no need to unregister them
+	    // with calls to snmp_alarm_unregister here.
 	    break;
 	}
     }
@@ -160,9 +162,17 @@ SnmpEventLoop::export_timers()
 	return;  // timer already exported
     DEBUGMSGTL((_log_name, "imported xorp timeout:%d s %d us \n",
 			    del_tv.sec(), del_tv.usec()));
+    if ((0 == del_tv.sec()) && (0 == del_tv.usec()))
+	{
+	DEBUGMSGTL((_log_name, "running callbacks of expired timer(s)\n"));
+	SnmpEventLoop& e = SnmpEventLoop::the_instance();
+	e.timer_list().run();
+	e.export_events();
+	return;
+	}
     del_tv.copy_out(snmp_tv);
     alarm_id = snmp_alarm_register_hr(snmp_tv, 0, run_timer_callbacks, NULL);
-    if (!alarm_id) snmp_log(LOG_WARNING, "unable to import xorp timout");
+    if (!alarm_id) snmp_log(LOG_WARNING, "unable to import xorp timeout");
     else {
 	SnmpEventLoop::AlarmMap::value_type al(abs_tv, alarm_id);
 	_pending_alarms.insert(al);
