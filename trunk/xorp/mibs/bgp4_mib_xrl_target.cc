@@ -31,7 +31,7 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_xrl_target.hh"
 
-static oid snmptrap_oid[] = { SNMP_OID_SNMPMODULES, 1, 1, 5, 1, 0 };
+static oid snmptrap_oid[] = { SNMP_OID_SNMPMODULES, 1, 1, 4, 1, 0 };
 static oid bgp_established_trap_oid[] = { SNMP_OID_MIB2, 15, 7, 1 };
 static oid bgp_backward_transition_trap_oid[] = { SNMP_OID_MIB2, 15, 7, 2 };
 
@@ -75,7 +75,7 @@ XrlBgpMibTarget::bgp_mib_traps_0_1_send_bgp_established_trap(
     snmp_set_var_objid(&snmptrap_var, snmptrap_oid,
                        OID_LENGTH(snmptrap_oid));
     snmp_set_var_value(&snmptrap_var, (u_char *) bgp_established_trap_oid, 
-	OID_LENGTH(bgp_established_trap_oid));
+	sizeof(bgp_established_trap_oid));
     snmptrap_var.type = ASN_OBJECT_ID;
     snmptrap_var.next_variable = &bgp_last_err_var;
 
@@ -125,7 +125,7 @@ XrlBgpMibTarget::bgp_mib_traps_0_1_send_bgp_backward_transition_trap(
                        OID_LENGTH(snmptrap_oid));
     snmp_set_var_value(&snmptrap_var, 
 	(u_char *) bgp_backward_transition_trap_oid, 
-	OID_LENGTH(bgp_backward_transition_trap_oid));
+	sizeof(bgp_backward_transition_trap_oid));
     snmptrap_var.type = ASN_OBJECT_ID;
     snmptrap_var.next_variable = &bgp_last_err_var;
 
