@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.3 2003/09/20 00:35:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.4 2003/10/13 23:32:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -50,7 +50,9 @@ RoutingSocket::RoutingSocket(EventLoop& e)
 
 RoutingSocket::~RoutingSocket()
 {
+#ifdef HAVE_ROUTING_SOCKETS
     stop();
+#endif
     XLOG_ASSERT(_ol.empty());
 }
 
