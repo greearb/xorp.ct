@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.19 2005/02/12 08:09:04 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.20 2005/02/18 00:39:58 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -30,6 +30,7 @@ XrlCliNode::XrlCliNode(EventLoop&	eventloop,
     : XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
     XrlCliTargetBase(&xrl_router()),
+      _eventloop(eventloop),
       _cli_node(cli_node),
       _xrl_cli_processor_client(&xrl_router()),
       _is_finder_alive(false)

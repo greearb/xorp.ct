@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.23 2005/02/17 00:54:19 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.24 2005/02/18 00:40:00 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -39,6 +39,7 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
       XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlStaticRoutesTargetBase(&xrl_router()),
+      _eventloop(eventloop),
       _class_name(xrl_router().class_name()),
       _instance_name(xrl_router().instance_name()),
       _xrl_rib_client(&xrl_router()),
@@ -148,42 +149,72 @@ XrlStaticRoutesNode::fea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_startup_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::fea_register_startup));
+	_fea_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::fea_register_startup));
 	return;
     }
 }
 
 void
-XrlStaticRoutesNode::finder_register_interest_fea_cb(
-    const XrlError& xrl_error)
+XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 {
-    // If success, then the FEA birth event will startup the ifmgr
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the FEA birth event will startup the ifmgr
+	//
 	_is_fea_registering = false;
 	_is_fea_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _fea_register_startup_timer.scheduled()) {
-	_fea_register_startup_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::fea_register_startup));
+	}
+	break;
     }
 }
 
@@ -224,10 +255,9 @@ XrlStaticRoutesNode::fea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_shutdown_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::fea_register_shutdown));
+	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::fea_register_shutdown));
 	return;
     }
 
@@ -242,23 +272,64 @@ void
 XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
     const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_deregistering = false;
 	_is_fea_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_fea_deregistering = false;
+	_is_fea_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::fea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_fea_deregistering = false;
-    _is_fea_registered = false;
-
-    StaticRoutesNode::set_status(SERVICE_FAILED);
-    StaticRoutesNode::update_status();
 }
 
 //
@@ -298,42 +369,73 @@ XrlStaticRoutesNode::rib_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_startup_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::rib_register_startup));
+	_rib_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::rib_register_startup));
 	return;
     }
 }
 
 void
-XrlStaticRoutesNode::finder_register_interest_rib_cb(
-    const XrlError& xrl_error)
+XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 {
-    // If success, then add the RIB tables
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the RIB birth event will startup the RIB
+	// registration.
+	//
 	_is_rib_registering = false;
 	_is_rib_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _rib_register_startup_timer.scheduled()) {
-	_rib_register_startup_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::rib_register_startup));
+	}
+	break;
     }
 }
 
@@ -377,10 +479,9 @@ XrlStaticRoutesNode::rib_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_shutdown_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
+	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
 	return;
     }
 
@@ -391,23 +492,64 @@ void
 XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
     const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_deregistering = false;
 	_is_rib_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_deregistering = false;
+	_is_rib_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_rib_deregistering = false;
-    _is_rib_registered = false;
-
-    StaticRoutesNode::set_status(SERVICE_FAILED);
-    StaticRoutesNode::update_status();
 }
 
 //
@@ -460,73 +602,138 @@ XrlStaticRoutesNode::send_rib_add_tables()
 	// If an error, then start a timer to try again.
 	//
     start_timer_label:
-	_rib_igp_table_registration_timer =
-	    StaticRoutesNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
+	_rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
     }
 }
 
 void
-XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table4_registered = true;
 	send_rib_add_tables();
 	StaticRoutesNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add IPv4 IGP table to the RIB: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_rib_igp_table_registration_timer.scheduled())
-	return;
-    _rib_igp_table_registration_timer =
-	StaticRoutesNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_igp_table_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
+	}
+	break;
+    }
 }
 
 void
-XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table6_registered = true;
 	send_rib_add_tables();
 	StaticRoutesNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add IPv6 IGP table to the RIB: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_rib_igp_table_registration_timer.scheduled())
-	return;
-    _rib_igp_table_registration_timer =
-	StaticRoutesNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_igp_table_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
+	}
+	break;
+    }
 }
 
 //
@@ -581,41 +788,131 @@ XrlStaticRoutesNode::send_rib_delete_tables()
 }
 
 void
-XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table4_registered = false;
 	StaticRoutesNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister IPv4 IGP table with the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_igp_table4_registered = false;
+	StaticRoutesNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    StaticRoutesNode::set_status(SERVICE_FAILED);
-    StaticRoutesNode::update_status();
 }
 
 void
-XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table6_registered = false;
 	StaticRoutesNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister IPv6 IGP table with the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_igp_table6_registered = false;
+	StaticRoutesNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    StaticRoutesNode::set_status(SERVICE_FAILED);
-    StaticRoutesNode::update_status();
 }
 
 
@@ -1275,7 +1572,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		   : "delete",
 		   static_route.network().str().c_str());
     start_timer_label:
-	_inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
+	_inform_rib_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::send_rib_route_change));
     }
@@ -1284,32 +1581,75 @@ XrlStaticRoutesNode::send_rib_route_change()
 void
 XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 {
-    // If success, then send the next route change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next route change
+	//
 	_inform_rib_queue.pop_front();
 	send_rib_route_change();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it,
-    // then send the next route change.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it,
+	// then send the next one.
+	//
+	XLOG_ERROR("Cannot %s a routing entry with the RIB: %s",
+		   (_inform_rib_queue.front().is_add_route())? "add"
+		   : (_inform_rib_queue.front().is_replace_route())? "replace"
+		   : "delete",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot %s a routing entry with the RIB: %s",
+		   (_inform_rib_queue.front().is_add_route())? "add"
+		   : (_inform_rib_queue.front().is_replace_route())? "replace"
+		   : "delete",
+		   xrl_error.str().c_str());
 	_inform_rib_queue.pop_front();
 	send_rib_route_change();
-        return;
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_inform_rib_queue_timer.scheduled())
-	return;
-    _inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlStaticRoutesNode::send_rib_route_change));
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _inform_rib_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s a routing entry with the RIB: %s. "
+		       "Will try again.",
+		       (_inform_rib_queue.front().is_add_route())? "add"
+		       : (_inform_rib_queue.front().is_replace_route())? "replace"
+		       : "delete",
+		       xrl_error.str().c_str());
+	    _inform_rib_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::send_rib_route_change));
+	}
+	break;
+    }
 }
 
 XrlCmdError

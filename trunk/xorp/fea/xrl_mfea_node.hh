@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.19 2005/02/15 02:08:37 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.20 2005/02/18 00:39:59 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -114,7 +114,7 @@ protected:
 	string&	reason);
 
     /**
-     *  shutdown cleanly
+     *  Shutdown cleanly
      */
     XrlCmdError common_0_1_shutdown();
 
@@ -845,6 +845,7 @@ private:
     
     int family() const { return (MfeaNode::family()); }
 
+    EventLoop&			_eventloop;
     const string		_class_name;
     const string		_instance_name;
     const string		_finder_target;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.35 2005/02/17 00:55:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.36 2005/02/18 00:39:59 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -46,6 +46,7 @@ XrlMfeaNode::XrlMfeaNode(int		family,
 		   finder_port),
       XrlMfeaTargetBase(&xrl_router()),
       MfeaNodeCli(*static_cast<MfeaNode *>(this)),
+      _eventloop(eventloop),
       _class_name(xrl_router().class_name()),
       _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
@@ -226,42 +227,72 @@ XrlMfeaNode::fea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_startup_timer =
-	    MfeaNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMfeaNode::fea_register_startup));
+	_fea_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlMfeaNode::fea_register_startup));
 	return;
     }
 }
 
 void
-XrlMfeaNode::finder_register_interest_fea_cb(
-    const XrlError& xrl_error)
+XrlMfeaNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 {
-    // If success, then the FEA birth event will startup the ifmgr
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the FEA birth event will startup the ifmgr
+	//
 	_is_fea_registering = false;
 	_is_fea_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _fea_register_startup_timer.scheduled()) {
-	_fea_register_startup_timer =
-	    MfeaNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_register_startup_timer.scheduled()) {
+	    XLOG_FATAL("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlMfeaNode::fea_register_startup));
+	}
+	break;
     }
 }
 
@@ -302,10 +333,9 @@ XrlMfeaNode::fea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_shutdown_timer =
-	    MfeaNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMfeaNode::fea_register_shutdown));
+	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlMfeaNode::fea_register_shutdown));
 	return;
     }
 
@@ -317,26 +347,66 @@ XrlMfeaNode::fea_register_shutdown()
 }
 
 void
-XrlMfeaNode::finder_deregister_interest_fea_cb(
-    const XrlError& xrl_error)
+XrlMfeaNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_deregistering = false;
 	_is_fea_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_fea_deregistering = false;
+	_is_fea_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMfeaNode::fea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_fea_deregistering = false;
-    _is_fea_registered = false;
-
-    MfeaNode::set_status(SERVICE_FAILED);
-    MfeaNode::update_status();
 }
 
 //
@@ -441,18 +511,59 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 }
 
 void
-XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
 	//
-	// XXX: all protocol messages that use the MFEA are soft-state
+	// If success, then we are done
+	//
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send a data message to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// XXX: if a transient error, then don't try again.
+	// All protocol messages that use the MFEA are soft-state
 	// (i.e., they are retransmitted periodically by the protocol),
 	// hence we don't retransmit them here if there was an error.
 	//
-
 	XLOG_ERROR("Failed to send a data message to a protocol: %s",
 		   xrl_error.str().c_str());
-	return;
+	break;
     }
 }
 
@@ -556,18 +667,59 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 // function.
 //
 void
-XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
 	//
-	// XXX: all kernel signal messages are soft-state
+	// If success, then we are done
+	//
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send a kernel signal message to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// XXX: if a transient error, then don't try again.
+	// All kernel signal messages are soft-state
 	// (i.e., they are retransmitted as appropriate by the kernel),
 	// hence we don't retransmit them here if there was an error.
 	//
-
 	XLOG_ERROR("Failed to send a kernel signal message to a protocol: %s",
 		   xrl_error.str().c_str());
-	return;
+	break;
     }
 }
 
@@ -802,79 +954,346 @@ XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_nam
 void
 XrlMfeaNode::mfea_client_client_send_new_vif_cb(const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send new vif info to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send new vif info to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to send new vif info to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 void
 XrlMfeaNode::mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send delete_vif to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send delete_vif to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to send delete_vif to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 void
 XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send new vif address to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send new vif address to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to send new vif address to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 void
-XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send delete vif address to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send delete_vif_address to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to send delete_vif_address to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 void
-XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send new vif flags to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send new vif flags to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to send new vif flags to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 void
-XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send set_all_vifs_done to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send set_all_vifs_done to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to send set_all_vifs_done to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 int
@@ -951,16 +1370,60 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 }
 
 void
-XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to send recv_dataflow_signal to a protocol: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send recv_dataflow_signal to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// XXX: if a transient error, then don't try again.
+	// All dataflow signals are soft-state (i.e., they are
+	// retransmitted periodically by the originator),
+	// hence we don't retransmit them here if there was an error.
+	//
+	XLOG_ERROR("Failed to send recv_dataflow_signal to a protocol: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 //
@@ -991,16 +1454,62 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 }
 
 void
-XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
+XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to add a command to CLI manager: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 int
@@ -1019,16 +1528,62 @@ XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 }
 
 void
-XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
+XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error != XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to delete a command from CLI manager: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 
@@ -1120,7 +1675,6 @@ XrlMfeaNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_class,
     const string&	target_instance)
 {
-
     bool do_shutdown = false;
 
     if (target_class == _fea_target) {

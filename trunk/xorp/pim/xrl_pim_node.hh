@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.46 2005/01/28 03:34:20 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.47 2005/02/19 02:55:15 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2387,6 +2387,7 @@ private:
 	AddDeleteDataflowMonitor*	_dataflow_monitor;
     };
 
+    EventLoop&			_eventloop;
     const string		_class_name;
     const string		_instance_name;
     const string		_finder_target;

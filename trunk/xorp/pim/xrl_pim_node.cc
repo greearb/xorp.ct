@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.61 2005/02/12 08:09:08 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.62 2005/02/19 02:55:15 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -50,6 +50,7 @@ XrlPimNode::XrlPimNode(int		family,
 		   finder_port),
       XrlPimTargetBase(&xrl_router()),
       PimNodeCli(*static_cast<PimNode *>(this)),
+      _eventloop(eventloop),
       _class_name(xrl_router().class_name()),
       _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
@@ -279,10 +280,9 @@ XrlPimNode::mfea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_mfea_register_startup_timer =
-	    PimNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::mfea_register_startup));
+	_mfea_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::mfea_register_startup));
 	return;
     }
 }
@@ -290,30 +290,63 @@ XrlPimNode::mfea_register_startup()
 void
 XrlPimNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 {
-    // If success, then the MFEA birth event will startup the MFEA registration
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the MFEA birth event will startup the MFEA
+	// registration.
+	//
 	_is_mfea_registering = false;
 	_is_mfea_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _mfea_register_startup_timer.scheduled()) {
-	_mfea_register_startup_timer =
-	    PimNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::mfea_register_startup));
+	}
+	break;
     }
 }
 
@@ -354,10 +387,9 @@ XrlPimNode::mfea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_mfea_register_shutdown_timer =
-	    PimNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::mfea_register_shutdown));
+	_mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::mfea_register_shutdown));
 	return;
     }
 
@@ -367,23 +399,64 @@ XrlPimNode::mfea_register_shutdown()
 void
 XrlPimNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_deregistering = false;
 	_is_mfea_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_mfea_deregistering = false;
+	_is_mfea_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::mfea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_mfea_deregistering = false;
-    _is_mfea_registered = false;
-
-    PimNode::set_status(SERVICE_FAILED);
-    PimNode::update_status();
 }
 
 //
@@ -430,7 +503,7 @@ XrlPimNode::send_mfea_add_protocol()
 	//
 	XLOG_ERROR("Failed to add protocol with the MFEA. "
 		   "Will try again.");
-	_mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
+	_mfea_add_protocol_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_mfea_add_protocol));
 	return;
@@ -459,7 +532,7 @@ XrlPimNode::send_mfea_add_protocol()
 	XLOG_ERROR("Failed to enable the receiving of kernel signal messages "
 		   "with the MFEA. "
 		   "Will try again.");
-	_mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
+	_mfea_add_protocol_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_mfea_add_protocol));
 	return;
@@ -469,62 +542,128 @@ XrlPimNode::send_mfea_add_protocol()
 void
 XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_add_protocol_registered = true;
 	send_mfea_add_protocol();
 	PimNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add protocol with the MFEA: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
-    //
-    if (_mfea_add_protocol_timer.scheduled())
-	return;
-    _mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlPimNode::send_mfea_add_protocol));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_add_protocol_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add protocol with the MFEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_add_protocol_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_mfea_add_protocol));
+	}
+	break;
+    }
 }
 
 void
 XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_allow_signal_messages_registered = true;
 	send_mfea_add_protocol();
 	PimNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot allow signal messages with the MFEA: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
-    //
-    if (_mfea_add_protocol_timer.scheduled())
-	return;
-    _mfea_add_protocol_timer = PimNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlPimNode::send_mfea_add_protocol));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_add_protocol_timer.scheduled()) {
+	    XLOG_ERROR("Failed to allow signal messages with the MFEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_add_protocol_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_mfea_add_protocol));
+	}
+	break;
+    }
 }
 
 //
@@ -575,21 +714,66 @@ XrlPimNode::send_mfea_delete_protocol()
 void
 XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_add_protocol_registered = false;
 	_is_mfea_allow_signal_messages_registered = false;
 	PimNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot delete protocol with the MFEA: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_mfea_add_protocol_registered = false;
+	_is_mfea_allow_signal_messages_registered = false;
+	PimNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::mfea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    PimNode::set_status(SERVICE_FAILED);
-    PimNode::update_status();
 }
 
 //
@@ -627,10 +811,9 @@ XrlPimNode::rib_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_startup_timer =
-	    PimNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::rib_register_startup));
+	_rib_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::rib_register_startup));
 	return;
     }
 }
@@ -638,30 +821,63 @@ XrlPimNode::rib_register_startup()
 void
 XrlPimNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 {
-    // If success, then add the RIB tables
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the RIB birth event will startup the RIB
+	// registration.
+	//
 	_is_rib_registering = false;
 	_is_rib_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _rib_register_startup_timer.scheduled()) {
-	_rib_register_startup_timer =
-	    PimNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::rib_register_startup));
+	}
+	break;
     }
 }
 
@@ -703,10 +919,9 @@ XrlPimNode::rib_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_shutdown_timer =
-	    PimNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::rib_register_shutdown));
+	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlPimNode::rib_register_shutdown));
 	return;
     }
 
@@ -716,23 +931,64 @@ XrlPimNode::rib_register_shutdown()
 void
 XrlPimNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_deregistering = false;
 	_is_rib_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_deregistering = false;
+	_is_rib_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_rib_deregistering = false;
-    _is_rib_registered = false;
-
-    PimNode::set_status(SERVICE_FAILED);
-    PimNode::update_status();
 }
 
 //
@@ -780,8 +1036,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 	//
 	XLOG_ERROR("Failed to enable receiving MRIB information from the RIB. "
 		   "Will try again.");
-	_rib_redist_transaction_enable_timer =
-	    PimNode::eventloop().new_oneoff_after(
+	_rib_redist_transaction_enable_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
 	return;
@@ -792,32 +1047,64 @@ void
 XrlPimNode::rib_client_send_redist_transaction_enable_cb(
     const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_redist_transaction_enabled = true;
 	send_rib_redist_transaction_enable();
 	PimNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot enable receiving MRIB information from the RIB: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
-    //
-    if (_rib_redist_transaction_enable_timer.scheduled())
-	return;
-    _rib_redist_transaction_enable_timer =
-	PimNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_redist_transaction_enable_timer.scheduled()) {
+	    XLOG_ERROR("Failed to enable receiving MRIB information from the RIB: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_redist_transaction_enable_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
+	}
+	break;
+    }
 }
 
 //
@@ -873,19 +1160,64 @@ void
 XrlPimNode::rib_client_send_redist_transaction_disable_cb(
     const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_redist_transaction_enabled = false;
 	PimNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot disable receiving MRIB information from the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_redist_transaction_enabled = false;
+	PimNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to disable receiving MRIB information from the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    XLOG_ERROR("Failed to disable receiving MRIB information from the RIB: %s."
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    PimNode::set_status(SERVICE_FAILED);
-    PimNode::update_status();
 }
 
 int
@@ -1036,43 +1368,87 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		   (is_start)? "start" : "stop",
 		   pim_vif->name().c_str());
     start_timer_label:
-	_start_stop_protocol_kernel_vif_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
     }
 }
 
 void
-XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error)
+XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
+    const XrlError& xrl_error)
 {
     bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
 
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_start_stop_protocol_kernel_vif_queue.pop_front();
 	send_start_stop_protocol_kernel_vif();
 	if (is_start)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot %s protocol vif with the MFEA: %s",
 		   (is_start)? "start" : "stop",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    //
-    _start_stop_protocol_kernel_vif_queue_timer = PimNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	if (is_start) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _start_stop_protocol_kernel_vif_queue.pop_front();
+	    send_start_stop_protocol_kernel_vif();
+	    PimNode::decr_shutdown_requests_n();
+	}
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _start_stop_protocol_kernel_vif_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
+		       "Will try again.",
+		       (is_start)? "start" : "stop",
+		       xrl_error.str().c_str());
+	    _start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_start_stop_protocol_kernel_vif));
+	}
+	break;
+    }
 }
 
 int
@@ -1233,43 +1609,87 @@ XrlPimNode::send_join_leave_multicast_group()
 		   cstring(group.multicast_group()),
 		   pim_vif->name().c_str());
     start_timer_label:
-	_join_leave_multicast_group_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_join_leave_multicast_group));
     }
 }
 
 void
-XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error)
+XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
+    const XrlError& xrl_error)
 {
     bool is_join = _join_leave_multicast_group_queue.front().is_join();
 
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_join_leave_multicast_group_queue.pop_front();
 	send_join_leave_multicast_group();
 	if (is_join)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot %s a multicast group with the MFEA: %s",
 		   (is_join)? "join" : "leave",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    //
-    _join_leave_multicast_group_queue_timer = PimNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlPimNode::send_join_leave_multicast_group));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	if (is_join) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _join_leave_multicast_group_queue.pop_front();
+	    send_join_leave_multicast_group();
+	    PimNode::decr_shutdown_requests_n();
+	}
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _join_leave_multicast_group_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s a multicast group with the MFEA: %s. "
+		       "Will try again.",
+		       (is_join)? "join" : "leave",
+		       xrl_error.str().c_str());
+	    _join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_join_leave_multicast_group));
+	}
+	break;
+    }
 }
 
 int
@@ -1392,7 +1812,7 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 		   cstring(mfc.source_addr()),
 		   cstring(mfc.group_addr()));
     start_timer_label:
-	_add_delete_mfc_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_add_delete_mfc_dataflow_monitor_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
     }
@@ -1618,7 +2038,7 @@ XrlPimNode::send_add_delete_dataflow_monitor(
 		   cstring(monitor.group_addr()));
 
     start_timer_label:
-	_add_delete_mfc_dataflow_monitor_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_add_delete_mfc_dataflow_monitor_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
     }
@@ -1639,56 +2059,89 @@ XrlPimNode::send_add_delete_mfc_dataflow_monitor()
 }
 
 void
-XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(const XrlError& xrl_error)
+XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_add_delete_mfc_dataflow_monitor_queue.pop_front();
 	send_add_delete_mfc_dataflow_monitor();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it,
-    // then send the next one.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
-	const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
-	    _add_delete_mfc_dataflow_monitor_queue.front();
-	if (mfc_dataflow_monitor.mfc() != NULL) {
-	    const AddDeleteMfc& mfc = *mfc_dataflow_monitor.mfc();
-	    bool is_add = mfc.is_add();
-
-	    XLOG_ERROR("Cannot %s a multicast group with the MFEA: %s",
-		       (is_add)? "add" : "delete",
-		       xrl_error.str().c_str());
-	}
-
-	if (mfc_dataflow_monitor.dataflow_monitor() != NULL) {
-	    const AddDeleteDataflowMonitor& monitor =
-		*mfc_dataflow_monitor.dataflow_monitor();
-	    bool is_add = monitor.is_add();
-	    bool is_delete_all = monitor.is_delete_all();
-
-	    XLOG_ERROR("Cannot %s with the MFEA: %s",
-		       (is_add)? "add a dataflow monitor"
-		       : (is_delete_all)? "delete multiple dataflow monitors"
-		       : "delete a dataflow monitor",
-		       xrl_error.str().c_str());
-	}
-
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it,
+	// then send the next one.
+	//
+	do {
+	    const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
+		_add_delete_mfc_dataflow_monitor_queue.front();
+	    if (mfc_dataflow_monitor.mfc() != NULL) {
+		const AddDeleteMfc& mfc = *mfc_dataflow_monitor.mfc();
+		bool is_add = mfc.is_add();
+		XLOG_ERROR("Cannot %s a multicast forwarding entry with the MFEA: %s",
+			   (is_add)? "add" : "delete",
+			   xrl_error.str().c_str());
+	    }
+	    if (mfc_dataflow_monitor.dataflow_monitor() != NULL) {
+		const AddDeleteDataflowMonitor& monitor =
+		    *mfc_dataflow_monitor.dataflow_monitor();
+		bool is_add = monitor.is_add();
+		bool is_delete_all = monitor.is_delete_all();
+		XLOG_ERROR("Cannot %s with the MFEA: %s",
+			   (is_add)? "add a dataflow monitor"
+			   : (is_delete_all)? "delete multiple dataflow monitors"
+			   : "delete a dataflow monitor",
+			   xrl_error.str().c_str());
+	    }
+	} while (false);
 	_add_delete_mfc_dataflow_monitor_queue.pop_front();
 	send_add_delete_mfc_dataflow_monitor();
-	return;
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    //
-    _add_delete_mfc_dataflow_monitor_queue_timer =
-	PimNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _add_delete_mfc_dataflow_monitor_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add/delete a multicast forwarding entry "
+		       "or a dataflow monitor with the MFEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _add_delete_mfc_dataflow_monitor_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
+	}
+	break;
+    }
 }
 
 int
@@ -1837,43 +2290,87 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		   (is_add)? "add" : "delete",
 		   pim_vif->name().c_str());
     start_timer_label:
-	_add_delete_protocol_mld6igmp_queue_timer = PimNode::eventloop().new_oneoff_after(
+	_add_delete_protocol_mld6igmp_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
     }
 }
 
 void
-XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(const XrlError& xrl_error)
+XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
+    const XrlError& xrl_error)
 {
     bool is_add = _add_delete_protocol_mld6igmp_queue.front().second;
 
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_add_delete_protocol_mld6igmp_queue.pop_front();
 	send_add_delete_protocol_mld6igmp();
 	if (is_add)
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
-	XLOG_FATAL("Cannot %s with the MFEA: %s",
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot %s with the MLD6IGMP: %s",
 		   (is_add)? "register" : "deregister",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    //
-    _add_delete_protocol_mld6igmp_queue_timer = PimNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	if (is_add) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _add_delete_protocol_mld6igmp_queue.pop_front();
+	    send_add_delete_protocol_mld6igmp();
+	    PimNode::decr_shutdown_requests_n();
+	}
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _add_delete_protocol_mld6igmp_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s with the MLD6IGMP: %s. "
+		       "Will try again.",
+		       (is_add)? "register" : "deregister",
+		       xrl_error.str().c_str());
+	    _add_delete_protocol_mld6igmp_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
+	}
+	break;
+    }
 }
 
 //
@@ -2018,16 +2515,58 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 void
 XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // XXX: all protocol messages are soft-state
-    // (i.e., they are retransmitted periodically by the protocol),
-    // hence we don't retransmit them here if there was an error.
-    //
-    XLOG_ERROR("Failed to send a protocol message: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send a protocol message: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot send a protocol message: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// XXX: if a transient error, then don't try again.
+	// All protocol messages are soft-state (i.e., they are
+	// retransmitted periodically by the protocol),
+	// hence we don't retransmit them here if there was an error.
+	//
+	XLOG_ERROR("Failed to send a protocol message: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 //
@@ -2058,16 +2597,62 @@ XrlPimNode::add_cli_command_to_cli_manager(const char *command_name,
 }
 
 void
-XrlPimNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
+XrlPimNode::cli_manager_client_send_add_cli_command_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to add a command to CLI manager: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 int
@@ -2086,16 +2671,62 @@ XrlPimNode::delete_cli_command_from_cli_manager(const char *command_name)
 }
 
 void
-XrlPimNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
+XrlPimNode::cli_manager_client_send_delete_cli_command_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to delete a command from CLI manager: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 
@@ -2198,7 +2829,6 @@ XrlPimNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_class,
     const string&	target_instance)
 {
-
     bool do_shutdown = false;
 
     if (target_class == _mfea_target) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.22 2005/02/17 00:54:20 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.23 2005/02/18 00:40:00 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -38,6 +38,7 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
       XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlFib2mribTargetBase(&xrl_router()),
+      _eventloop(eventloop),
       _class_name(xrl_router().class_name()),
       _instance_name(xrl_router().instance_name()),
       _xrl_fea_fti_client(&xrl_router()),
@@ -160,42 +161,72 @@ XrlFib2mribNode::fea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_startup_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::fea_register_startup));
+	_fea_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::fea_register_startup));
 	return;
     }
 }
 
 void
-XrlFib2mribNode::finder_register_interest_fea_cb(
-    const XrlError& xrl_error)
+XrlFib2mribNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 {
-    // If success, then the FEA birth event will startup the ifmgr
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the FEA birth event will startup the ifmgr
+	//
 	_is_fea_registering = false;
 	_is_fea_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _fea_register_startup_timer.scheduled()) {
-	_fea_register_startup_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::fea_register_startup));
+	}
+	break;
     }
 }
 
@@ -241,10 +272,9 @@ XrlFib2mribNode::fea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_shutdown_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::fea_register_shutdown));
+	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::fea_register_shutdown));
 	return;
     }
 
@@ -258,26 +288,66 @@ XrlFib2mribNode::fea_register_shutdown()
 }
 
 void
-XrlFib2mribNode::finder_deregister_interest_fea_cb(
-    const XrlError& xrl_error)
+XrlFib2mribNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_deregistering = false;
 	_is_fea_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_fea_deregistering = false;
+	_is_fea_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::fea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_fea_deregistering = false;
-    _is_fea_registered = false;
-
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
 }
 
 //
@@ -317,42 +387,73 @@ XrlFib2mribNode::rib_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_startup_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::rib_register_startup));
+	_rib_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::rib_register_startup));
 	return;
     }
 }
 
 void
-XrlFib2mribNode::finder_register_interest_rib_cb(
-    const XrlError& xrl_error)
+XrlFib2mribNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 {
-    // If success, then add the RIB tables
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the RIB birth event will startup the RIB
+	// registration.
+	//
 	_is_rib_registering = false;
 	_is_rib_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _rib_register_startup_timer.scheduled()) {
-	_rib_register_startup_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_startup));
+	}
+	break;
     }
 }
 
@@ -396,10 +497,9 @@ XrlFib2mribNode::rib_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_shutdown_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	return;
     }
 
@@ -407,26 +507,66 @@ XrlFib2mribNode::rib_register_shutdown()
 }
 
 void
-XrlFib2mribNode::finder_deregister_interest_rib_cb(
-    const XrlError& xrl_error)
+XrlFib2mribNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_deregistering = false;
 	_is_rib_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_deregistering = false;
+	_is_rib_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_rib_deregistering = false;
-    _is_rib_registered = false;
-
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
 }
 
 //
@@ -503,10 +643,9 @@ XrlFib2mribNode::send_fea_add_fib_client()
 	// If an error, then start a timer to try again.
 	//
     start_timer_label:
-	_fea_fib_client_registration_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	_fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
     }
 }
 
@@ -514,134 +653,266 @@ void
 XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
 						  const bool* result)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_have_ipv4_tested = true;
 	_fea_have_ipv4 = *result;
 	send_fea_add_fib_client();
 	// XXX: if the underying system doesn't support IPv4, then we are done
 	if (! _fea_have_ipv4)
 	    Fib2mribNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot test using the FEA whether the system "
 		   "supports IPv4: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_fea_fib_client_registration_timer.scheduled())
-	return;
-    _fea_fib_client_registration_timer =
-	Fib2mribNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_fib_client_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to test using the FEA whether the system "
+		       "supports IPv4: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	}
+	break;
+    }
 }
 
 void
 XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
 						  const bool* result)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_have_ipv6_tested = true;
 	_fea_have_ipv6 = *result;
 	send_fea_add_fib_client();
 	// XXX: if the underying system doesn't support IPv6, then we are done
 	if (! _fea_have_ipv6)
 	    Fib2mribNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot test using the FEA whether the system "
 		   "supports IPv6: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_fea_fib_client_registration_timer.scheduled())
-	return;
-    _fea_fib_client_registration_timer =
-	Fib2mribNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_fib_client_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to test using the FEA whether the system "
+		       "supports IPv6: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	}
+	break;
+    }
 }
 
 void
-XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_fib_client4_registered = true;
 	send_fea_add_fib_client();
 	Fib2mribNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add IPv4 FIB client to the FEA: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_fea_fib_client_registration_timer.scheduled())
-	return;
-    _fea_fib_client_registration_timer =
-	Fib2mribNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_fib_client_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv4 FIB client to the FEA: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	}
+	break;
+    }
 }
 
 void
-XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_fib_client6_registered = true;
 	send_fea_add_fib_client();
 	Fib2mribNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add IPv6 FIB client to the FEA: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_fea_fib_client_registration_timer.scheduled())
-	return;
-    _fea_fib_client_registration_timer =
-	Fib2mribNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_fib_client_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv6 FIB client to the FEA: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	}
+	break;
+    }
 }
 
 //
@@ -688,45 +959,139 @@ XrlFib2mribNode::send_fea_delete_fib_client()
 }
 
 void
-XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_have_ipv4_tested = false;
 	_fea_have_ipv4 = false;
 	_is_fea_fib_client4_registered = false;
 	Fib2mribNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Failed to deregister IPv4 FIB client with the FEA: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_fea_have_ipv4_tested = false;
+	_fea_have_ipv4 = false;
+	_is_fea_fib_client4_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Cannot deregister IPv4 FIB client with the FEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister IPv4 FIB client with the FEA: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
 }
 
 void
-XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_fea_have_ipv6_tested = false;
 	_fea_have_ipv6 = false;
 	_is_fea_fib_client6_registered = false;
 	Fib2mribNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Failed to deregister IPv6 FIB client with the FEA: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_fea_have_ipv6_tested = false;
+	_fea_have_ipv6 = false;
+	_is_fea_fib_client6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Cannot deregister IPv6 FIB client with the FEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister IPv6 FIB client with the FEA: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
 }
 
 //
@@ -777,73 +1142,136 @@ XrlFib2mribNode::send_rib_add_tables()
 	// If an error, then start a timer to try again.
 	//
     start_timer_label:
-	_rib_igp_table_registration_timer =
-	    Fib2mribNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::send_rib_add_tables));
+	_rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_rib_add_tables));
     }
 }
 
 void
 XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table4_registered = true;
 	send_rib_add_tables();
 	Fib2mribNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add IPv4 IGP table to the RIB: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_rib_igp_table_registration_timer.scheduled())
-	return;
-    _rib_igp_table_registration_timer =
-	Fib2mribNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlFib2mribNode::send_rib_add_tables));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_igp_table_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_rib_add_tables));
+	}
+	break;
+    }
 }
 
 void
 XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table6_registered = true;
 	send_rib_add_tables();
 	Fib2mribNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
-	XLOG_FATAL("Cannot add IPv4 IGP table to the RIB: %s",
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot add IPv6 IGP table to the RIB: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_rib_igp_table_registration_timer.scheduled())
-	return;
-    _rib_igp_table_registration_timer =
-	Fib2mribNode::eventloop().new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlFib2mribNode::send_rib_add_tables));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_igp_table_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s"
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_rib_add_tables));
+	}
+	break;
+    }
 }
 
 //
@@ -898,41 +1326,131 @@ XrlFib2mribNode::send_rib_delete_tables()
 }
 
 void
-XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table4_registered = false;
 	Fib2mribNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister IPv4 IGP table with the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_igp_table4_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
 }
 
 void
-XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_rib_igp_table6_registered = false;
 	Fib2mribNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister IPv6 IGP table with the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_igp_table6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
 }
 
 
@@ -1040,7 +1558,6 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_class,
     const string&	target_instance)
 {
-
     bool do_shutdown = false;
 
     if (target_class == _fea_target) {
@@ -1565,7 +2082,7 @@ XrlFib2mribNode::send_rib_route_change()
 		   : "delete",
 		   fib2mrib_route.network().str().c_str());
     start_timer_label:
-	_inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	_inform_rib_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::send_rib_route_change));
     }
@@ -1574,32 +2091,75 @@ XrlFib2mribNode::send_rib_route_change()
 void
 XrlFib2mribNode::send_rib_route_change_cb(const XrlError& xrl_error)
 {
-    // If success, then send the next route change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next route change
+	//
 	_inform_rib_queue.pop_front();
 	send_rib_route_change();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it,
-    // then send the next route change.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it,
+	// then send the next one.
+	//
+	XLOG_ERROR("Cannot %s a routing entry with the RIB: %s",
+		   (_inform_rib_queue.front().is_add_route())? "add"
+		   : (_inform_rib_queue.front().is_replace_route())? "replace"
+		   : "delete",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot %s a routing entry with the RIB: %s",
+		   (_inform_rib_queue.front().is_add_route())? "add"
+		   : (_inform_rib_queue.front().is_replace_route())? "replace"
+		   : "delete",
+		   xrl_error.str().c_str());
 	_inform_rib_queue.pop_front();
 	send_rib_route_change();
-	return;
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (_inform_rib_queue_timer.scheduled())
-	return;
-    _inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlFib2mribNode::send_rib_route_change));
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _inform_rib_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s a routing entry with the RIB: %s. "
+		       "Will try again.",
+		       (_inform_rib_queue.front().is_add_route())? "add"
+		       : (_inform_rib_queue.front().is_replace_route())? "replace"
+		       : "delete",
+		       xrl_error.str().c_str());
+	    _inform_rib_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_rib_route_change));
+	}
+	break;
+    }
 }
 
 XrlCmdError

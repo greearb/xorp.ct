@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.25 2005/02/17 01:03:36 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.26 2005/02/18 00:40:00 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -717,6 +717,7 @@ private:
 	bool		_is_add;
     };
 
+    EventLoop&			_eventloop;
     const string		_class_name;
     const string		_instance_name;
     const string		_finder_target;

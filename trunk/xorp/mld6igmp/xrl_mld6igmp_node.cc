@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.32 2005/02/17 01:03:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.33 2005/02/18 00:40:00 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -46,6 +46,7 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
 		   finder_port),
       XrlMld6igmpTargetBase(&xrl_router()),
       Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this)),
+      _eventloop(eventloop),
       _class_name(xrl_router().class_name()),
       _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
@@ -224,42 +225,73 @@ XrlMld6igmpNode::mfea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_mfea_register_startup_timer =
-	    Mld6igmpNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMld6igmpNode::mfea_register_startup));
+	_mfea_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlMld6igmpNode::mfea_register_startup));
 	return;
     }
 }
 
 void
-XrlMld6igmpNode::finder_register_interest_mfea_cb(
-    const XrlError& xrl_error)
+XrlMld6igmpNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 {
-    // If success, then the MFEA birth event will startup the MFEA registration
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then the MFEA birth event will startup the MFEA
+	// registration.
+	//
 	_is_mfea_registering = false;
 	_is_mfea_registered = true;
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot register interest in finder events: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    // (unless the timer is already running).
-    //
-    if (! _mfea_register_startup_timer.scheduled()) {
-	_mfea_register_startup_timer =
-	    Mld6igmpNode::eventloop().new_oneoff_after(
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_startup_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlMld6igmpNode::mfea_register_startup));
+	}
+	break;
     }
 }
 
@@ -300,10 +332,9 @@ XrlMld6igmpNode::mfea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_mfea_register_shutdown_timer =
-	    Mld6igmpNode::eventloop().new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
+	_mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
 	return;
     }
 
@@ -311,26 +342,66 @@ XrlMld6igmpNode::mfea_register_shutdown()
 }
 
 void
-XrlMld6igmpNode::finder_deregister_interest_mfea_cb(
-    const XrlError& xrl_error)
+XrlMld6igmpNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_deregistering = false;
 	_is_mfea_registered = false;
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_mfea_deregistering = false;
+	_is_mfea_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    _is_mfea_deregistering = false;
-    _is_mfea_registered = false;
-
-    Mld6igmpNode::set_status(SERVICE_FAILED);
-    Mld6igmpNode::update_status();
 }
 
 //
@@ -377,7 +448,7 @@ XrlMld6igmpNode::send_mfea_add_protocol()
 	//
 	XLOG_ERROR("Failed to add protocol with the MFEA. "
 		   "Will try again.");
-	_mfea_add_protocol_timer = Mld6igmpNode::eventloop().new_oneoff_after(
+	_mfea_add_protocol_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
 	return;
@@ -387,31 +458,64 @@ XrlMld6igmpNode::send_mfea_add_protocol()
 void
 XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_add_protocol_registered = true;
 	send_mfea_add_protocol();
 	Mld6igmpNode::decr_startup_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot add protocol with the MFEA: %s",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
-    //
-    if (_mfea_add_protocol_timer.scheduled())
-	return;
-    _mfea_add_protocol_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_add_protocol_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add protocol with the MFEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_add_protocol_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
+	}
+	break;
+    }
 }
 
 //
@@ -462,20 +566,64 @@ XrlMld6igmpNode::send_mfea_delete_protocol()
 void
 XrlMld6igmpNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 {
-    // If success, then we are done
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
 	_is_mfea_add_protocol_registered = false;
 	Mld6igmpNode::decr_shutdown_requests_n();
-	return;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot delete protocol with the MFEA: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_mfea_add_protocol_registered = false;
+	Mld6igmpNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+	    callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
+	}
+	break;
     }
-
-    // TODO: retry de-registration if this was a transport error
-    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
-	       "Will give up.",
-	       xrl_error.str().c_str());
-
-    Mld6igmpNode::set_status(SERVICE_FAILED);
-    Mld6igmpNode::update_status();
 }
 
 int
@@ -626,43 +774,87 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		   (is_start)? "start" : "stop",
 		   mld6igmp_vif->name().c_str());
     start_timer_label:
-	_start_stop_protocol_kernel_vif_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
+	_start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
     }
 }
 
 void
-XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error)
+XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
+    const XrlError& xrl_error)
 {
     bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
 
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_start_stop_protocol_kernel_vif_queue.pop_front();
 	send_start_stop_protocol_kernel_vif();
 	if (is_start)
 	    Mld6igmpNode::decr_startup_requests_n();
 	else
 	    Mld6igmpNode::decr_shutdown_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot %s protocol vif with the MFEA: %s",
 		   (is_start)? "start" : "stop",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    //
-    _start_stop_protocol_kernel_vif_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	if (is_start) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _start_stop_protocol_kernel_vif_queue.pop_front();
+	    send_start_stop_protocol_kernel_vif();
+	    Mld6igmpNode::decr_shutdown_requests_n();
+	}
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _start_stop_protocol_kernel_vif_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
+		       "Will try again.",
+		       (is_start)? "start" : "stop",
+		       xrl_error.str().c_str());
+	    _start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
+	}
+	break;
+    }
 }
 
 int
@@ -823,43 +1015,87 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		   cstring(group.multicast_group()),
 		   mld6igmp_vif->name().c_str());
     start_timer_label:
-	_join_leave_multicast_group_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
+	_join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
     }
 }
 
 void
-XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error)
+XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
+    const XrlError& xrl_error)
 {
     bool is_join = _join_leave_multicast_group_queue.front().is_join();
 
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_join_leave_multicast_group_queue.pop_front();
 	send_join_leave_multicast_group();
 	if (is_join)
 	    Mld6igmpNode::decr_startup_requests_n();
 	else
 	    Mld6igmpNode::decr_shutdown_requests_n();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it, this is fatal.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
 	XLOG_FATAL("Cannot %s a multicast group with the MFEA: %s",
 		   (is_join)? "join" : "leave",
 		   xrl_error.str().c_str());
-    }
+	break;
 
-    //
-    // If an error, then start a timer to try again
-    //
-    _join_leave_multicast_group_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	if (is_join) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _join_leave_multicast_group_queue.pop_front();
+	    send_join_leave_multicast_group();
+	    Mld6igmpNode::decr_shutdown_requests_n();
+	}
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _join_leave_multicast_group_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s a multicast group with the MFEA: %s. "
+		       "Will try again.",
+		       (is_join)? "join" : "leave",
+		       xrl_error.str().c_str());
+	    _join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
+	}
+	break;
+    }
 }
 
 int
@@ -1028,45 +1264,77 @@ XrlMld6igmpNode::send_add_delete_membership()
 		   mld6igmp_vif->name().c_str(),
 		   membership.dst_module_instance_name().c_str());
     start_timer_label:
-	_send_add_delete_membership_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
+	_send_add_delete_membership_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_add_delete_membership));
     }
 }
 
 void
-XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(const XrlError& xrl_error)
+XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
+    const XrlError& xrl_error)
 {
-    // If success, then send the next change
-    if (xrl_error == XrlError::OKAY()) {
+    bool is_add = _send_add_delete_membership_queue.front().is_add();
+
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
 	_send_add_delete_membership_queue.pop_front();
 	send_add_delete_membership();
-	return;
-    }
+	break;
 
-    //
-    // If a command failed because the other side rejected it,
-    // then send the next one.
-    //
-    if (xrl_error == XrlError::COMMAND_FAILED()) {
-	const SendAddDeleteMembership& membership = _send_add_delete_membership_queue.front();
-	bool is_add = membership.is_add();
-
-	XLOG_ERROR("Cannot %s a multicast group with a client: %s",
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot %s a multicast group with a client: %s",
 		   (is_add)? "add" : "delete",
 		   xrl_error.str().c_str());
+	break;
 
-	_send_add_delete_membership_queue.pop_front();
-	send_add_delete_membership();
-	return;
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _send_add_delete_membership_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s a multicast group with a client: %s. "
+		       "Will try again.",
+		       (is_add)? "add" : "delete",
+		       xrl_error.str().c_str());
+	    _send_add_delete_membership_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::send_add_delete_membership));
+	}
+	break;
     }
-
-    //
-    // If an error, then start a timer to try again
-    //
-    _send_add_delete_membership_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	RETRY_TIMEVAL,
-	callback(this, &XrlMld6igmpNode::send_add_delete_membership));
 }
 
 //
@@ -1169,18 +1437,62 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 }
 
 void
-XrlMld6igmpNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
-{
-    if (xrl_error == XrlError::OKAY())
-	return;
+XrlMld6igmpNode::mfea_client_send_protocol_message_cb(
+    const XrlError& xrl_error)
 
-    //
-    // XXX: all protocol messages are soft-state
-    // (i.e., they are retransmitted periodically by the protocol),
-    // hence we don't retransmit them here if there was an error.
-    //
-    XLOG_ERROR("Failed to send a protocol message: %s",
-	       xrl_error.str().c_str());
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot send a protocol message: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot send a protocol message: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// XXX: if a transient error, then don't try again.
+	// All protocol messages are soft-state (i.e., they are
+	// retransmitted periodically by the protocol),
+	// hence we don't retransmit them here if there was an error.
+	//
+	XLOG_ERROR("Failed to send a protocol message: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 //
@@ -1211,16 +1523,62 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 }
 
 void
-XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
+XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to add a command to CLI manager: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 int
@@ -1239,16 +1597,62 @@ XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 }
 
 void
-XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
+XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb(
+    const XrlError& xrl_error)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	break;
 
-    //
-    // TODO: if the command failed, then we should retransmit it
-    //
-    XLOG_ERROR("Failed to delete a command from CLI manager: %s",
-	       xrl_error.str().c_str());
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case SEND_FAILED:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	//
+	// TODO: if the command failed, then we should retransmit it
+	//
+	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
+	break;
+    }
 }
 
 
@@ -1341,11 +1745,10 @@ XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_class,
     const string&	target_instance)
 {
-
     bool do_shutdown = false;
 
     if (target_class == _mfea_target) {
-	XLOG_ERROR("FEAM (instance %s) has died, shutting down.",
+	XLOG_ERROR("MFEA (instance %s) has died, shutting down.",
 		   target_instance.c_str());
 	_is_mfea_alive = false;
 	do_shutdown = true;
