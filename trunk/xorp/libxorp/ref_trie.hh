@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.3 2003/01/21 19:27:29 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.4 2003/01/24 00:51:36 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -515,7 +515,7 @@ public:
 	assert(!_cur->deleted());
 	return _cur->p(); 
     };
-    const Key & key() { 
+    const Key & key() const { 
 	/* see payload() for usage note*/
 	assert(!_cur->deleted());
 	return _cur->k(); 
