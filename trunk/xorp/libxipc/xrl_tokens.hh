@@ -12,40 +12,40 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_tokens.hh,v 1.1 2002/12/14 23:43:03 hodson Exp $
+// $XORP: xorp/libxipc/xrl_tokens.hh,v 1.2 2002/12/19 01:29:14 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_CHARS_HH__
 #define __LIBXIPC_XRL_CHARS_HH__
 
 struct XrlToken {
     // Protocol - Target separator
-    static const char PROTO_TGT_SEP[] = "://";
-
+    static const char* PROTO_TGT_SEP;
+    
     // Target - Command separator
-    static const char TGT_CMD_SEP[] = "/";
-
+    static const char* TGT_CMD_SEP;
+    
     // Command - Arguments separator
-    static const char CMD_ARGS_SEP[] = "?";
+    static const char* CMD_ARGS_SEP;
 
     // Argument-Argument separator
-    static const char ARG_ARG_SEP[] = "&";
+    static const char* ARG_ARG_SEP;
 
     // Argument Name-Type separator
-    static const char ARG_NT_SEP[] = ":";
+    static const char* ARG_NT_SEP;
 
     // Argument Type-Value separator
-    static const char ARG_TV_SEP[] = "=";
+    static const char* ARG_TV_SEP;
 
     // Input Argument list - Output argument list separator
-    static const char ARG_RARG_SEP[] = "->";
+    static const char* ARG_RARG_SEP;
 
     // Line Continuation
-    static const char LINE_CONT[] = "\\";
+    static const char* LINE_CONT;
 
     // XrlAtomList item separator
-    static const char LIST_SEP[] = ",";
+    static const char* LIST_SEP;
 };
 
-#define TOKEN_BYTES(x) (sizeof(x) / sizeof(x[0]))
+#define TOKEN_BYTES(x) (strlen(x) + 1)
 
 #endif // __LIBXIPC_XRL_CHARS_HH__

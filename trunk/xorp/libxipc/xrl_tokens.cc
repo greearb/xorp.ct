@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_tokens.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_tokens.cc,v 1.1 2002/12/14 23:43:03 hodson Exp $"
 
 #include "xrl_tokens.hh"
 
-const char XrlToken::PROTO_TGT_SEP[];
-const char XrlToken::TGT_CMD_SEP[];
-const char XrlToken::CMD_ARGS_SEP[];
-const char XrlToken::ARG_ARG_SEP[];
-const char XrlToken::ARG_NT_SEP[];
-const char XrlToken::ARG_TV_SEP[];
-const char XrlToken::ARG_RARG_SEP[];
-const char XrlToken::LINE_CONT[];
-const char XrlToken::LIST_SEP[];
+const char* XrlToken::PROTO_TGT_SEP = "://";
+const char* XrlToken::TGT_CMD_SEP = "/";
+const char* XrlToken::CMD_ARGS_SEP = "?";
+const char* XrlToken::ARG_ARG_SEP = "&";
+const char* XrlToken::ARG_NT_SEP = ":";
+const char* XrlToken::ARG_TV_SEP = "=";
+const char* XrlToken::ARG_RARG_SEP = "->";
+const char* XrlToken::LINE_CONT = "\\";
+const char* XrlToken::LIST_SEP = ",";
