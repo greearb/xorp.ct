@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.13 2003/06/16 15:52:18 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.15 2004/02/24 17:02:40 hodson Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -312,7 +312,7 @@ TimerList::run()
 		    "=======================================\n");
 	    fprintf(stderr,
 		    "Timer Expiry *much* later than scheduled: "
-		    "behind by %u seconds\n", tardiness.str().c_str());
+		    "behind by %s seconds\n", tardiness.str().c_str());
 	    fprintf(stderr,
 		    "========================================"
 		    "=======================================\n");
