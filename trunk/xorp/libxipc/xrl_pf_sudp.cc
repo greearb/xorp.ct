@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.8 2003/02/26 00:12:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.9 2003/03/04 23:41:25 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -178,7 +178,9 @@ parse_response(const char* buf,
 
 int XrlPFSUDPSender::sender_fd;
 int XrlPFSUDPSender::instance_count;
-map<const XUID, XrlPFSender::Request> XrlPFSUDPSender::requests_pending;
+
+typedef map<const XUID, XrlPFSender::Request> XuidRequestMap;
+XuidRequestMap XrlPFSUDPSender::requests_pending;
 
 XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
     throw (XrlPFConstructorError)
@@ -219,10 +221,21 @@ XrlPFSUDPSender::~XrlPFSUDPSender()
 {
     instance_count--;
     debug_msg("~XrlPFSUDPSender - instance count %d\n", instance_count);
+
     if (instance_count == 0) {
 	_event_loop.remove_selector(sender_fd, SEL_RD);
 	close(sender_fd);
 	sender_fd = 0;
+    }
+
+    // Delete requests associated with us, they cannot possibly be valid
+    XuidRequestMap::iterator i = requests_pending.begin();
+    while (i != requests_pending.end()) {
+	if (i->second.parent == this) {
+	    requests_pending.erase(i++);
+	} else {
+	    i++;
+	}
     }
 }
 
