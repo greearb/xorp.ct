@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.28 2004/03/28 20:59:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.29 2004/04/05 05:38:46 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -624,6 +624,12 @@ VifManager::vifaddr6_update(const string& ifname,
 	XLOG_WARNING("vifaddr6_update invalid event: %u", event);
 	break;
     }
+}
+
+void
+VifManager::updates_completed()
+{
+    update_state();
 }
 
 void
