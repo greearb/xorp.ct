@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipf.cc,v 1.4 2004/09/14 16:47:40 bms Exp $
+// $XORP: xorp/fea/firewall_ipf.cc,v 1.5 2004/09/14 17:04:11 bms Exp $
 
 #include "fea/fea_module.h"
 
@@ -61,9 +61,11 @@ static int xorp_rule4_to_ipf(IpfFwRule4* prule, frentry_t& ipfrule);
 
 IpfFwProvider::IpfFwProvider(FirewallManager& m)
     throw(InvalidFwProvider)
-    : FwProvider(m), _ipfname(IPL_NAME)
+    : FwProvider(m)
 {
 #ifdef HAVE_FIREWALL_IPF
+	_ipfname = IPL_NAME;
+
 	//
 	// Probe for IPF by attempting to open the platform's
 	// default IPF device.
@@ -128,6 +130,7 @@ IpfFwProvider::set_enabled(bool enabled)
 
 	return (XORP_OK);
 #else
+	UNUSED(enabled);
 	return (XORP_ERROR);
 #endif // HAVE_FIREWALL_IPF
 }
@@ -164,6 +167,7 @@ IpfFwProvider::add_rule4(FwRule4& rule)
 
 	return (XORP_OK);
 #else
+	UNUSED(rule);
 	return (XORP_ERROR);
 #endif // HAVE_FIREWALL_IPF
 }

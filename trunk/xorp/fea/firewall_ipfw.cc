@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.3 2004/09/14 15:05:15 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.4 2004/09/14 17:04:11 bms Exp $
 
 #include "fea/fea_module.h"
 
@@ -25,7 +25,9 @@
 #include "libxorp/ipvxnet.hh"
 
 #include <sys/socket.h>
+#ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
+#endif
 #include <sys/sysctl.h>
 
 #include <net/if.h>
@@ -48,12 +50,11 @@
 // We define a 'safe' IPFW rule range for XORP to manage;
 // whilst IPFW2 can support separate rule tables, IPFW1 cannot.
 //
-
+#ifdef HAVE_FIREWALL_IPFW
 IpfwFwProvider::IpfwFwProvider(FirewallManager& m)
     throw(InvalidFwProvider)
     : FwProvider(m)
 {
-#ifdef HAVE_FIREWALL_IPFW
 	// Attempt to probe for IPFW with an operation which doesn't
 	// change any of the state.
 	int system_rule_count = IpfwFwProvider::get_ipfw_static_rule_count();
@@ -68,8 +69,8 @@ IpfwFwProvider::IpfwFwProvider(FirewallManager& m)
 	// Setup rule tag counters.
 	_ipfw_next_free_idx = _ipfw_xorp_start_idx = IPFW_FIRST_XORP_IDX;
 	_ipfw_xorp_end_idx = IPFW_LAST_XORP_IDX;
-#endif /* HAVE_FIREWALL_IPFW */
 }
+#endif /* HAVE_FIREWALL_IPFW */
 
 IpfwFwProvider::~IpfwFwProvider()
 {
@@ -122,6 +123,7 @@ IpfwFwProvider::set_enabled(bool enabled)
 
 	return (ret == -1 ? XORP_ERROR : XORP_OK);
 #else
+	UNUSED(enabled);
 	return (XORP_ERROR);
 #endif /* HAVE_FIREWALL_IPFW */
 }
@@ -168,6 +170,7 @@ IpfwFwProvider::add_rule4(FwRule4& rule)
 
 	return (r == -1 ? XORP_ERROR : XORP_OK);
 #else
+	UNUSED(rule);
 	return (XORP_ERROR);
 #endif
 }
@@ -206,6 +209,7 @@ IpfwFwProvider::delete_rule4(FwRule4& rule)
 
 	return (ret != 0 ? XORP_ERROR : XORP_OK);
 #else
+	UNUSED(rule);
 	return (XORP_ERROR);
 #endif
 }
