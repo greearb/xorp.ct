@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.4 2004/09/14 17:04:11 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.5 2004/09/16 07:16:32 bms Exp $
 
 #include "fea/fea_module.h"
 
@@ -131,6 +131,25 @@ IpfwFwProvider::set_enabled(bool enabled)
 int
 IpfwFwProvider::take_table_ownership()
 {
+	FwTable4::iterator	fi4;
+	FwTable4&		ft4 = _m._fwtable4;
+
+	// Take ownership of the IPv4 table by converting all of the
+	// FwRules to IpfwFwRules.
+
+	for (fi4 = ft4.begin(); fi4 != ft4.end(); ++fi4) {
+		FwRule4* rp4 = *fi4;
+		IpfwFwRule4* nrp4 = new IpfwFwRule4(*rp4);
+		delete rp4;
+		*fi4 = nrp4;
+	}
+
+	// TODO: Synchronize in-kernel table with XORP table:
+	//  TODO: Remove all pre-existing IPFW rules in the managed range.
+	//  TODO: Add all XORP rules to the kernel.
+
+	// Disregard the IPv6 table for the time being.
+
 	return (XORP_OK);
 }
 
@@ -267,6 +286,8 @@ IpfwFwProvider::get_ipfw_static_rule_count()
 // This requires that all members except rule_number are zeroed first
 // or else the result may be undefined.
 //
+// XXX: move this to IpfwFwRule?
+//
 int
 IpfwFwProvider::xorp_rule4_to_ipfw1(FwRule4& rule,
     struct ip_fw& ipfwrule) const
@@ -388,4 +409,33 @@ IpfwFwProvider::ifname_to_ifu(const string& ifname, union ip_fw_if& ifu)
 
 	return (XORP_OK);
 }
+
+//
+// Deferred templatized function definitions, static, for a function
+// which deals with translating FwRule's intermediate representation
+// to an IPFW specific representation.
+//
+// Templatization is necessary because templatized class constructors
+// cannot have deferred definitions. Therefore we use an additional
+// static function. Generic instantiation makes no sense.
+// Therefore we specialize the template for IPv4-IPv4 and IPv6-IPv6
+// conversions only.
+//
+
+template <>
+static void
+convert_to_ipfw(IpfwFwRule<IPv4>& nr, const FwRule<IPv4>& or)
+{
+	UNUSED(nr);
+	UNUSED(or);
+}
+
+template <>
+static void
+convert_to_ipfw(IpfwFwRule<IPv6>& nr, const FwRule<IPv6>& or)
+{
+	UNUSED(nr);
+	UNUSED(or);
+}
+
 #endif /* HAVE_FIREWALL_IPFW */
