@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.23 2004/02/29 22:57:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.24 2004/03/24 19:14:06 atanu Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -150,6 +150,7 @@ XrlMfeaVifManager::set_vif_state()
     //
     // Remove vifs that don't exist anymore
     //
+    list<string> delete_vifs_list;
     for (mfea_vif_iter = _mfea_node.configured_vifs().begin();
 	 mfea_vif_iter != _mfea_node.configured_vifs().end();
 	 ++mfea_vif_iter) {
@@ -157,14 +158,20 @@ XrlMfeaVifManager::set_vif_state()
 	if (node_vif->is_pim_register())
 	    continue;		// XXX: don't delete the PIM Register vif
 	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
-	    // Delete the interface
-	    string vif_name = node_vif->name();
-	    if (_mfea_node.delete_config_vif(vif_name, error_msg) < 0) {
-		XLOG_ERROR("Cannot delete vif %s from the set of configured "
-			   "vifs: %s",
-			   vif_name.c_str(), error_msg.c_str());
-	    }
-	    continue;
+	    // Add the vif to the list of old interfaces
+	    delete_vifs_list.push_back(node_vif->name());
+	}
+    }
+    // Delete the old vifs
+    list<string>::iterator vif_name_iter;
+    for (vif_name_iter = delete_vifs_list.begin();
+	 vif_name_iter != delete_vifs_list.end();
+	 ++vif_name_iter) {
+	string vif_name = *vif_name_iter;
+	if (_mfea_node.delete_config_vif(vif_name, error_msg) < 0) {
+	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
+		       "vifs: %s",
+		       vif_name.c_str(), error_msg.c_str());
 	}
     }
     
@@ -172,7 +179,8 @@ XrlMfeaVifManager::set_vif_state()
     // Add new vifs, and update existing ones
     //
     for (vif_iter = _vifs_by_name.begin();
-	 vif_iter != _vifs_by_name.end(); ++vif_iter) {
+	 vif_iter != _vifs_by_name.end();
+	 ++vif_iter) {
 	Vif* vif = vif_iter->second;
 	Vif* node_vif = NULL;
 	
