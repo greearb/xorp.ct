@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.27 2004/03/04 17:49:57 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.28 2004/03/07 20:11:19 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -272,7 +272,7 @@ See also: \"load\".";
 
     _help_long_c["top"] = "\
 The \"top\" command will cause the current position in the configuration \n\
-to return to the top level of the configuration.  For example, if the 
+to return to the top level of the configuration.  For example, if the \n\
 configuration was:\n\
 \n\
    protocols {\n\
