@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.2 2003/08/01 17:10:44 hodson Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.3 2003/08/04 23:41:10 hodson Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -50,7 +50,7 @@ void
 OutputUpdates<A>::output_packet()
 {
     ResponsePacketAssembler<A> rpa(_port);
-    RipPacket<A>* pkt = new RipPacket<A>(ip_addr(), ip_port(), 0);
+    RipPacket<A>* pkt = new RipPacket<A>(ip_addr(), ip_port());
     rpa.packet_start(pkt);
 
     uint32_t done = 0;
