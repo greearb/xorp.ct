@@ -22,7 +22,7 @@
 
 #include "libxorp/callback.hh"
 #include "xrl.hh"
-#include "xrlerror.hh"
+#include "xrl_error.hh"
 
 // Deprecated callback type, still exists for compatibilty.
 typedef const XrlCmdError (*XrlCmdCallback) (const Xrl&	request,

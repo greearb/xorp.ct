@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.14 2002/12/09 18:28:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -22,7 +22,7 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/callback.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/test_peer_xif.hh"
 #include "coord.hh"
 #include "command.hh"

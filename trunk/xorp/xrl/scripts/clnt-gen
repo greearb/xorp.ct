@@ -140,7 +140,7 @@ def prepare_client_if_hh(modulename, hh_file):
 #undef XORP_LIBRARY_NAME
 #define XORP_LIBRARY_NAME "%s"
 #include "libxorp/xlog.h"
-#include "libxipc/xrlrouter.hh"
+#include "libxipc/xrl_router.hh"
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 

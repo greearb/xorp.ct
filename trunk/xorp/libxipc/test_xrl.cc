@@ -21,7 +21,7 @@
 #include "xrl_module.h"
 #include "libxorp/xlog.h"
 #include "xrl.hh"
-#include "xrlargs.hh"
+#include "xrl_args.hh"
 
 static int
 xrl_test(const char* testname, const Xrl& x, const Xrl& y) {

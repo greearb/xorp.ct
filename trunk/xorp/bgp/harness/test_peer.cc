@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.24 2002/12/09 18:28:52 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -24,7 +24,7 @@
 #include "libxorp/xlog.h"
 
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "bgp/socket.hh"
 
 #include "xrl/interfaces/datain_xif.hh"

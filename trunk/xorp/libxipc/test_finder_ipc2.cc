@@ -8,7 +8,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 
-#include "finder-ipc.hh"
+#include "finder_ipc.hh"
 
 // ----------------------------------------------------------------------------
 // Global variables and hooks

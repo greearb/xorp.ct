@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.47 2002/12/09 18:29:37 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
 
 #include <signal.h>
 
@@ -22,8 +22,8 @@
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 
-#include "libxipc/finder-server.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/finder_server.hh"
+#include "libxipc/xrl_std_router.hh"
 
 #include "template_tree_node.hh"
 #include "template_commands.hh"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.16 2002/12/09 18:29:40 hodson Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -26,8 +26,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/timer.hh"
-#include "libxipc/xrlrouter.hh"
-#include "libxipc/xrlpf-sudp.hh"
+#include "libxipc/xrl_router.hh"
+#include "libxipc/xrl_pf_sudp.hh"
 #include "unexpanded_xrl.hh"
 
 

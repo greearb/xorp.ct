@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.16 2002/12/09 18:28:46 hodson Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -21,7 +21,7 @@
 
 #include "peer_handler.hh"
 #include "plumbing.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/rib_xif.hh"
 
 class RibIpcHandler;

@@ -205,7 +205,7 @@ def prepare_target_hh(modulename, hh_file):
 #define XORP_LIBRARY_NAME "%s"
 
 #include "libxorp/xlog.h"
-#include "libxipc/xrlrouter.hh"
+#include "libxipc/xrl_router.hh"
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 

@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.26 2002/12/09 18:29:39 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "template_commands.hh"
 #include "xrldb.hh"
 #include "template_tree.hh"
-#include "libxipc/xrlrouter.hh"
-#include "libxipc/xrlrouter.hh"
+#include "libxipc/xrl_router.hh"
+#include "libxipc/xrl_router.hh"
 
 Action::Action(const list<string> &action) 
     throw (ParseError) 

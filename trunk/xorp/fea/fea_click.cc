@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_click.cc,v 1.9 2002/12/09 18:28:55 hodson Exp $"
+#ident "$XORP: xorp/fea/fea_click.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -24,7 +24,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/mac.hh"
 #include "libxorp/ipvx.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "fti.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"

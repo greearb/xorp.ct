@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.12 2002/12/09 18:29:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -22,7 +22,7 @@
 #include "xrl_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-#include "xrlpf-inproc.hh"
+#include "xrl_pf_inproc.hh"
 
 static const bool g_show_trace = false;
 #define trace(args...) if (g_show_trace) printf(args)

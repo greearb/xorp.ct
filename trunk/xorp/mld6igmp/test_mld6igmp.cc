@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.46 2002/12/09 18:29:21 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -27,8 +27,8 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-#include "libxipc/finder-server.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/finder_server.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "mrt/timer.hh"
 #include "cli/xrl_cli_node.hh"
 #include "mfea/xrl_mfea_node.hh"

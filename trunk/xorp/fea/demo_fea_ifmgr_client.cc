@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.2 2002/12/09 18:28:55 hodson Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -27,7 +27,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 
 #include "xrl/targets/demo_fea_ifmgr_client_base.hh"
 #include "xrl/interfaces/fea_ifmgr_xif.hh"

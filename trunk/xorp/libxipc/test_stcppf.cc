@@ -3,8 +3,8 @@
 
 #include "xrl_module.h"
 #include "config.h"
-#include "xrlerror.hh"
-#include "xrlpf-stcp-ph.hh"
+#include "xrl_error.hh"
+#include "xrl_pf_stcp_ph.hh"
 
 static void
 test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes) {

@@ -12,17 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.27 2002/12/09 18:29:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
-#include "finder-server.hh"
-#include "xrlstdrouter.hh"
-#include "xrlargs.hh"
-#include "xrl-parser-input.hh"
+#include "finder_server.hh"
+#include "xrl_std_router.hh"
+#include "xrl_args.hh"
+#include "xrl_parser_input.hh"
 
 static const char* ROUTER_NAME = "call_xrl";
 

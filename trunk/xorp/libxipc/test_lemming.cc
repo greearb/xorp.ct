@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.3 2002/12/09 18:29:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -21,8 +21,8 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/xlog.h"
 
-#include "libxipc/finder-server.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/finder_server.hh"
+#include "libxipc/xrl_std_router.hh"
 
 class verbose_ostream {
 public:

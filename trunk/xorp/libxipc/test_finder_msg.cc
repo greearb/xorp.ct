@@ -2,7 +2,7 @@
 
 #include "finder_module.h"
 #include "libxorp/xlog.h"
-#include "finder-msg.hh"
+#include "finder_msg.hh"
 
 class Receiver {
 public:

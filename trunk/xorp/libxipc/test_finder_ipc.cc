@@ -4,7 +4,7 @@
 #include "finder_module.h"
 #include "config.h"
 #include "libxorp/xlog.h"
-#include "finder-ipc.hh"
+#include "finder_ipc.hh"
 
 typedef bool (*test_iter_f)(FinderIPCService*);
 

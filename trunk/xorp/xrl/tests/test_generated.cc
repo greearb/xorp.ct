@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.4 2002/12/09 18:29:41 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $"
 
 #include <iostream>
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
-#include "libxipc/finder-server.hh"
-#include "libxipc/xrlstdrouter.hh"
-#include "libxipc/xrlpf-sudp.hh"
+#include "libxipc/finder_server.hh"
+#include "libxipc/xrl_std_router.hh"
+#include "libxipc/xrl_pf_sudp.hh"
 
 #include "test_xifs.hh"
 #include "test_tgt.hh"

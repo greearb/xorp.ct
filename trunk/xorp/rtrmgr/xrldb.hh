@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrldb.hh,v 1.6 2002/12/09 18:29:40 hodson Exp $
+// $XORP: xorp/rtrmgr/xrldb.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 
 #ifndef __RTRMGR_XRLDB_HH__
 #define __RTRMGR_XRLDB_HH__
@@ -20,7 +20,7 @@
 #include <list>
 #include "config.h"
 #include "libxorp/xorp.h"
-#include "libxipc/xrlrouter.hh"
+#include "libxipc/xrl_router.hh"
 
 enum XRLMatchType {
     MATCH_FAIL  = 0x0,

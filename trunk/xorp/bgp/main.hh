@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.41 2002/12/09 18:28:42 hodson Exp $
+// $XORP: xorp/bgp/main.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -24,7 +24,7 @@
 #include "peer_list.hh"
 #include "plumbing.hh"
 #include "iptuple.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "libxorp/eventloop.hh"
 
 #include "peer_handler.hh"

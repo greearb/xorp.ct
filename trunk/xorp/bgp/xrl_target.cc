@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.24 2002/12/09 18:28:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -21,7 +21,7 @@
 #include "libxorp/xlog.h"
 
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "xrl_target.hh"
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)

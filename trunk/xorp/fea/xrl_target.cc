@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.35 2002/12/09 18:29:00 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -24,7 +24,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "xrl_target.hh"
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,

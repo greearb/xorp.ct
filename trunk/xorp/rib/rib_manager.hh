@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.10 2002/12/10 05:12:13 mjh Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -23,7 +23,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 
 #include "rib.hh"
 #include "fea_client.hh"

@@ -34,7 +34,7 @@
 #include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 
 #include "ospfinc.h"
 #include "monitor.h"

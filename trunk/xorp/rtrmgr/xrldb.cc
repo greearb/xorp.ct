@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.10 2002/12/09 18:29:40 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include <glob.h>
 #include "config.h"
 #include "rtrmgr_module.h"
 #include "libxorp/exceptions.hh"
-#include "libxipc/xrl-parser.hh"
+#include "libxipc/xrl_parser.hh"
 #include "xrldb.hh"
 
 XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec) 

@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.11 2002/12/09 18:29:24 hodson Exp $
+// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
 
 #ifndef __XORP_OSPF_XORP_XRL_TARGET_HH__
 #define __XORP_OSPF_XORP_XRL_TARGET_HH__
 
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrlrouter.hh"
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/ospf_base.hh"
 
 class XrlOspfTarget : public XrlOspfTargetBase {

@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/unexpanded_xrl.hh,v 1.5 2002/12/09 18:29:40 hodson Exp $
+// $XORP: xorp/rtrmgr/unexpanded_xrl.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
 
 #ifndef __RTRMGR_UNEXPANDED_XRL_HH__
 #define __RTRMGR_UNEXPANDED_XRL_HH__
 
 #include <string>
-#include "libxipc/xrlrouter.hh"
-#include "libxipc/xrlpf-sudp.hh"
+#include "libxipc/xrl_router.hh"
+#include "libxipc/xrl_pf_sudp.hh"
 
 class ConfigTreeNode;
 class XrlAction;

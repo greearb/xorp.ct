@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.57 2002/12/09 18:28:54 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $"
 
 
 //
@@ -25,8 +25,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-#include "libxipc/finder-server.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/finder_server.hh"
+#include "libxipc/xrl_std_router.hh"
 #include "cli/cli_client.hh"
 #include "cli/xrl_cli_node.hh"
 

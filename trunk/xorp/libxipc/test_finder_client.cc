@@ -4,8 +4,8 @@
 #include "finder_module.h"
 #include "config.h"
 #include "libxorp/xlog.h"
-#include "finder-client.hh"
-#include "finder-server.hh"
+#include "finder_client.hh"
+#include "finder_server.hh"
 
 const char* okay_str(bool okay) {
     return okay ? "okay" : "fail";

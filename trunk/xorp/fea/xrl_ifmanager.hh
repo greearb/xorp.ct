@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.4 2002/12/09 18:29:00 hodson Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/transaction.hh"
-#include "libxipc/xrlrouter.hh"
+#include "libxipc/xrl_router.hh"
 #include "ifmanager.hh"
 #include "ifmanager_transaction.hh"
 

@@ -84,9 +84,9 @@ noinst_LIBRARIES = libxipc.a
 
 # -- Programs
 bin_PROGRAMS = call_xrl finder
-noinst_PROGRAMS = test_finder_client test_finder_ipc test_finder_ipc2 test_finder_msg test_finder_transport test_header test_inproc test_lemming test_sudp test_stcp test_xrlerror test_xrl test_xrlatom test_xrlargs  test_xrlrouter test_xrlparser
+noinst_PROGRAMS = test_finder_client test_finder_ipc test_finder_ipc2 test_finder_msg test_finder_transport test_header test_inproc test_lemming test_sudp test_stcp test_xrl_error test_xrl test_xrl_atom test_xrl_args  test_xrl_router test_xrl_parser
 
-TESTS = $(noinst_PROGRAMS) test_xrlparser.sh
+TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
@@ -107,12 +107,12 @@ test_lemming_SOURCES = test_lemming.cc
 test_stcp_SOURCES = test_stcp.cc
 test_sudp_SOURCES = test_sudp.cc
 test_xrl_SOURCES = test_xrl.cc
-test_xrlatom_SOURCES = test_xrlatom.cc
-test_xrlargs_SOURCES = test_xrlargs.cc
-test_xrlparser_SOURCES = test_xrlparser.cc
-test_xrlrouter_SOURCES = test_xrlrouter.cc
-test_xrlerror_SOURCES = test_xrlerror.cc
-libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h md5.h finder-client.hh finder-ipc.hh finder-msg.hh finder-server.hh finder-transport.hh header.hh hmac.hh sockutil.hh xrl.hh xrl-parser.hh xrl-parser-input.hh xrl-tokens.hh xrlatom.hh xrlatom-encoding.hh xrlatom-list.hh xrlargs.hh xrlcmdmap.hh xrlpf-factory.hh xrlpf-inproc.hh xrlpf-stcp.hh xrlpf-stcp-ph.hh xrlpf-sudp.hh xrlpf.hh xrlrouter.hh xrlstdrouter.hh xuid.hh xrlerror.hh hmac_md5.c md5.c finder-client.cc finder-ipc.cc finder-msg.cc finder-server.cc finder-transport.cc header.cc hmac.cc sockutil.cc xrl.cc xrl-parser.cc xrl-parser-input.cc xrl-tokens.cc xrlatom.cc xrlatom-encoding.cc xrlatom-list.cc xrlargs.cc xrlcmdmap.cc xrlpf-factory.cc xrlpf-inproc.cc xrlpf-stcp.cc xrlpf-stcp-ph.cc xrlpf-sudp.cc xrlrouter.cc xrlstdrouter.cc xrlerror.cc xuid.cc
+test_xrl_atom_SOURCES = test_xrl_atom.cc
+test_xrl_args_SOURCES = test_xrl_args.cc
+test_xrl_parser_SOURCES = test_xrl_parser.cc
+test_xrl_router_SOURCES = test_xrl_router.cc
+test_xrl_error_SOURCES = test_xrl_error.cc
+libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h md5.h finder_client.hh finder_ipc.hh finder_msg.hh finder_server.hh finder_transport.hh header.hh hmac.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrlcmdmap.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf.hh xrl_router.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c md5.c finder_client.cc finder_ipc.cc finder_msg.cc finder_server.cc finder_transport.cc header.cc hmac.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrlcmdmap.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -123,12 +123,12 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 libxipc_a_LIBADD = 
-libxipc_a_OBJECTS =  hmac_md5.o md5.o finder-client.o finder-ipc.o \
-finder-msg.o finder-server.o finder-transport.o header.o hmac.o \
-sockutil.o xrl.o xrl-parser.o xrl-parser-input.o xrl-tokens.o xrlatom.o \
-xrlatom-encoding.o xrlatom-list.o xrlargs.o xrlcmdmap.o xrlpf-factory.o \
-xrlpf-inproc.o xrlpf-stcp.o xrlpf-stcp-ph.o xrlpf-sudp.o xrlrouter.o \
-xrlstdrouter.o xrlerror.o xuid.o
+libxipc_a_OBJECTS =  hmac_md5.o md5.o finder_client.o finder_ipc.o \
+finder_msg.o finder_server.o finder_transport.o header.o hmac.o \
+sockutil.o xrl.o xrl_parser.o xrl_parser_input.o xrl_tokens.o \
+xrl_atom.o xrl_atom_encoding.o xrl_atom_list.o xrl_args.o xrlcmdmap.o \
+xrl_pf_factory.o xrl_pf_inproc.o xrl_pf_stcp.o xrl_pf_stcp_ph.o \
+xrl_pf_sudp.o xrl_router.o xrl_std_router.o xrl_error.o xuid.o
 PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 call_xrl_OBJECTS =  call_xrl.o
@@ -184,33 +184,35 @@ test_stcp_OBJECTS =  test_stcp.o
 test_stcp_LDADD = $(LDADD)
 test_stcp_DEPENDENCIES =  libxipc.a $(top_builddir)/libxorp/libxorp.a
 test_stcp_LDFLAGS = 
-test_xrlerror_OBJECTS =  test_xrlerror.o
-test_xrlerror_LDADD = $(LDADD)
-test_xrlerror_DEPENDENCIES =  libxipc.a \
+test_xrl_error_OBJECTS =  test_xrl_error.o
+test_xrl_error_LDADD = $(LDADD)
+test_xrl_error_DEPENDENCIES =  libxipc.a \
 $(top_builddir)/libxorp/libxorp.a
-test_xrlerror_LDFLAGS = 
+test_xrl_error_LDFLAGS = 
 test_xrl_OBJECTS =  test_xrl.o
 test_xrl_LDADD = $(LDADD)
 test_xrl_DEPENDENCIES =  libxipc.a $(top_builddir)/libxorp/libxorp.a
 test_xrl_LDFLAGS = 
-test_xrlatom_OBJECTS =  test_xrlatom.o
-test_xrlatom_LDADD = $(LDADD)
-test_xrlatom_DEPENDENCIES =  libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_xrlatom_LDFLAGS = 
-test_xrlargs_OBJECTS =  test_xrlargs.o
-test_xrlargs_LDADD = $(LDADD)
-test_xrlargs_DEPENDENCIES =  libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_xrlargs_LDFLAGS = 
-test_xrlrouter_OBJECTS =  test_xrlrouter.o
-test_xrlrouter_LDADD = $(LDADD)
-test_xrlrouter_DEPENDENCIES =  libxipc.a \
+test_xrl_atom_OBJECTS =  test_xrl_atom.o
+test_xrl_atom_LDADD = $(LDADD)
+test_xrl_atom_DEPENDENCIES =  libxipc.a \
 $(top_builddir)/libxorp/libxorp.a
-test_xrlrouter_LDFLAGS = 
-test_xrlparser_OBJECTS =  test_xrlparser.o
-test_xrlparser_LDADD = $(LDADD)
-test_xrlparser_DEPENDENCIES =  libxipc.a \
+test_xrl_atom_LDFLAGS = 
+test_xrl_args_OBJECTS =  test_xrl_args.o
+test_xrl_args_LDADD = $(LDADD)
+test_xrl_args_DEPENDENCIES =  libxipc.a \
 $(top_builddir)/libxorp/libxorp.a
-test_xrlparser_LDFLAGS = 
+test_xrl_args_LDFLAGS = 
+test_xrl_router_OBJECTS =  test_xrl_router.o
+test_xrl_router_LDADD = $(LDADD)
+test_xrl_router_DEPENDENCIES =  libxipc.a \
+$(top_builddir)/libxorp/libxorp.a
+test_xrl_router_LDFLAGS = 
+test_xrl_parser_OBJECTS =  test_xrl_parser.o
+test_xrl_parser_LDADD = $(LDADD)
+test_xrl_parser_DEPENDENCIES =  libxipc.a \
+$(top_builddir)/libxorp/libxorp.a
+test_xrl_parser_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -229,23 +231,24 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/call_xrl.P .deps/finder-client.P .deps/finder-ipc.P \
-.deps/finder-msg.P .deps/finder-server.P .deps/finder-transport.P \
-.deps/finder.P .deps/header.P .deps/hmac.P .deps/hmac_md5.P .deps/md5.P \
-.deps/sockutil.P .deps/test_finder_client.P .deps/test_finder_ipc.P \
-.deps/test_finder_ipc2.P .deps/test_finder_msg.P \
-.deps/test_finder_transport.P .deps/test_header.P .deps/test_inproc.P \
-.deps/test_lemming.P .deps/test_stcp.P .deps/test_sudp.P \
-.deps/test_xrl.P .deps/test_xrlargs.P .deps/test_xrlatom.P \
-.deps/test_xrlerror.P .deps/test_xrlparser.P .deps/test_xrlrouter.P \
-.deps/xrl-parser-input.P .deps/xrl-parser.P .deps/xrl-tokens.P \
-.deps/xrl.P .deps/xrlargs.P .deps/xrlatom-encoding.P \
-.deps/xrlatom-list.P .deps/xrlatom.P .deps/xrlcmdmap.P .deps/xrlerror.P \
-.deps/xrlpf-factory.P .deps/xrlpf-inproc.P .deps/xrlpf-stcp-ph.P \
-.deps/xrlpf-stcp.P .deps/xrlpf-sudp.P .deps/xrlrouter.P \
-.deps/xrlstdrouter.P .deps/xuid.P
-SOURCES = $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_client_SOURCES) $(test_finder_ipc_SOURCES) $(test_finder_ipc2_SOURCES) $(test_finder_msg_SOURCES) $(test_finder_transport_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrlerror_SOURCES) $(test_xrl_SOURCES) $(test_xrlatom_SOURCES) $(test_xrlargs_SOURCES) $(test_xrlrouter_SOURCES) $(test_xrlparser_SOURCES)
-OBJECTS = $(libxipc_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_client_OBJECTS) $(test_finder_ipc_OBJECTS) $(test_finder_ipc2_OBJECTS) $(test_finder_msg_OBJECTS) $(test_finder_transport_OBJECTS) $(test_header_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrlerror_OBJECTS) $(test_xrl_OBJECTS) $(test_xrlatom_OBJECTS) $(test_xrlargs_OBJECTS) $(test_xrlrouter_OBJECTS) $(test_xrlparser_OBJECTS)
+DEP_FILES =  .deps/call_xrl.P .deps/finder.P .deps/finder_client.P \
+.deps/finder_ipc.P .deps/finder_msg.P .deps/finder_server.P \
+.deps/finder_transport.P .deps/header.P .deps/hmac.P .deps/hmac_md5.P \
+.deps/md5.P .deps/sockutil.P .deps/test_finder_client.P \
+.deps/test_finder_ipc.P .deps/test_finder_ipc2.P \
+.deps/test_finder_msg.P .deps/test_finder_transport.P \
+.deps/test_header.P .deps/test_inproc.P .deps/test_lemming.P \
+.deps/test_stcp.P .deps/test_sudp.P .deps/test_xrl.P \
+.deps/test_xrl_args.P .deps/test_xrl_atom.P .deps/test_xrl_error.P \
+.deps/test_xrl_parser.P .deps/test_xrl_router.P .deps/xrl.P \
+.deps/xrl_args.P .deps/xrl_atom.P .deps/xrl_atom_encoding.P \
+.deps/xrl_atom_list.P .deps/xrl_error.P .deps/xrl_parser.P \
+.deps/xrl_parser_input.P .deps/xrl_pf_factory.P .deps/xrl_pf_inproc.P \
+.deps/xrl_pf_stcp.P .deps/xrl_pf_stcp_ph.P .deps/xrl_pf_sudp.P \
+.deps/xrl_router.P .deps/xrl_std_router.P .deps/xrl_tokens.P \
+.deps/xrlcmdmap.P .deps/xuid.P
+SOURCES = $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_client_SOURCES) $(test_finder_ipc_SOURCES) $(test_finder_ipc2_SOURCES) $(test_finder_msg_SOURCES) $(test_finder_transport_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
+OBJECTS = $(libxipc_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_client_OBJECTS) $(test_finder_ipc_OBJECTS) $(test_finder_ipc2_OBJECTS) $(test_finder_msg_OBJECTS) $(test_finder_transport_OBJECTS) $(test_header_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -370,29 +373,29 @@ test_stcp: $(test_stcp_OBJECTS) $(test_stcp_DEPENDENCIES)
 	@rm -f test_stcp
 	$(CXXLINK) $(test_stcp_LDFLAGS) $(test_stcp_OBJECTS) $(test_stcp_LDADD) $(LIBS)
 
-test_xrlerror: $(test_xrlerror_OBJECTS) $(test_xrlerror_DEPENDENCIES)
-	@rm -f test_xrlerror
-	$(CXXLINK) $(test_xrlerror_LDFLAGS) $(test_xrlerror_OBJECTS) $(test_xrlerror_LDADD) $(LIBS)
+test_xrl_error: $(test_xrl_error_OBJECTS) $(test_xrl_error_DEPENDENCIES)
+	@rm -f test_xrl_error
+	$(CXXLINK) $(test_xrl_error_LDFLAGS) $(test_xrl_error_OBJECTS) $(test_xrl_error_LDADD) $(LIBS)
 
 test_xrl: $(test_xrl_OBJECTS) $(test_xrl_DEPENDENCIES)
 	@rm -f test_xrl
 	$(CXXLINK) $(test_xrl_LDFLAGS) $(test_xrl_OBJECTS) $(test_xrl_LDADD) $(LIBS)
 
-test_xrlatom: $(test_xrlatom_OBJECTS) $(test_xrlatom_DEPENDENCIES)
-	@rm -f test_xrlatom
-	$(CXXLINK) $(test_xrlatom_LDFLAGS) $(test_xrlatom_OBJECTS) $(test_xrlatom_LDADD) $(LIBS)
+test_xrl_atom: $(test_xrl_atom_OBJECTS) $(test_xrl_atom_DEPENDENCIES)
+	@rm -f test_xrl_atom
+	$(CXXLINK) $(test_xrl_atom_LDFLAGS) $(test_xrl_atom_OBJECTS) $(test_xrl_atom_LDADD) $(LIBS)
 
-test_xrlargs: $(test_xrlargs_OBJECTS) $(test_xrlargs_DEPENDENCIES)
-	@rm -f test_xrlargs
-	$(CXXLINK) $(test_xrlargs_LDFLAGS) $(test_xrlargs_OBJECTS) $(test_xrlargs_LDADD) $(LIBS)
+test_xrl_args: $(test_xrl_args_OBJECTS) $(test_xrl_args_DEPENDENCIES)
+	@rm -f test_xrl_args
+	$(CXXLINK) $(test_xrl_args_LDFLAGS) $(test_xrl_args_OBJECTS) $(test_xrl_args_LDADD) $(LIBS)
 
-test_xrlrouter: $(test_xrlrouter_OBJECTS) $(test_xrlrouter_DEPENDENCIES)
-	@rm -f test_xrlrouter
-	$(CXXLINK) $(test_xrlrouter_LDFLAGS) $(test_xrlrouter_OBJECTS) $(test_xrlrouter_LDADD) $(LIBS)
+test_xrl_router: $(test_xrl_router_OBJECTS) $(test_xrl_router_DEPENDENCIES)
+	@rm -f test_xrl_router
+	$(CXXLINK) $(test_xrl_router_LDFLAGS) $(test_xrl_router_OBJECTS) $(test_xrl_router_LDADD) $(LIBS)
 
-test_xrlparser: $(test_xrlparser_OBJECTS) $(test_xrlparser_DEPENDENCIES)
-	@rm -f test_xrlparser
-	$(CXXLINK) $(test_xrlparser_LDFLAGS) $(test_xrlparser_OBJECTS) $(test_xrlparser_LDADD) $(LIBS)
+test_xrl_parser: $(test_xrl_parser_OBJECTS) $(test_xrl_parser_DEPENDENCIES)
+	@rm -f test_xrl_parser
+	$(CXXLINK) $(test_xrl_parser_LDFLAGS) $(test_xrl_parser_OBJECTS) $(test_xrl_parser_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 

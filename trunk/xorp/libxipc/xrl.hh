@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.11 2002/12/09 18:29:07 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
 
 #ifndef __XRL_H__
 #define __XRL_H__
@@ -20,8 +20,8 @@
 #include <string>
 
 #include "libxorp/exceptions.hh"
-#include "xrlatom.hh"
-#include "xrlargs.hh"
+#include "xrl_atom.hh"
+#include "xrl_args.hh"
 
 /**
  * XORP IPC request.

@@ -11,7 +11,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
-#include "finder-transport.hh"
+#include "finder_transport.hh"
 
 XorpTimer g_timeout;
 

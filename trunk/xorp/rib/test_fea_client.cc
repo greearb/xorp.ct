@@ -12,14 +12,14 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.4 2002/12/09 18:29:35 hodson Exp $"
+#ident "$XORP: xorp/rib/test_fea_client.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-#include "libxipc/xrlstdrouter.hh"
+#include "libxipc/xrl_std_router.hh"
 
 #include "fea_client.hh"
 

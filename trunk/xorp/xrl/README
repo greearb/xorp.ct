@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/README,v 1.5 2002/12/09 02:54:11 pavlin Exp $
+# $XORP: xorp/xrl/README,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $
 #
 
 This directory contains code for automatically generating Xrl
@@ -74,7 +74,7 @@ derived from the Xrl parameter names.
 
 List of valid names of Xrl atoms
 (TODO: temp. here until the Xrl document is added to the CVS)
-(See XrlAtomTypeMap(){} inside libxipc/xrlatom.cc for latest list)
+(See XrlAtomTypeMap(){} inside libxipc/xrl_atom.cc for latest list)
 ---------------------------
 boolean		= "bool"
 int32		= "i32"
