@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.12 2003/09/22 05:45:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.13 2003/10/08 17:45:58 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -252,34 +252,58 @@ IfConfig::push_error() const
 }
 
 void
-IfConfig::map_ifindex(uint32_t index, const string& name)
+IfConfig::map_ifindex(uint32_t ifindex, const string& ifname)
 {
-    _ifnames[index] = name;
+    _ifnames[ifindex] = ifname;
 }
 
 void
-IfConfig::unmap_ifindex(uint32_t index)
+IfConfig::unmap_ifindex(uint32_t ifindex)
 {
-    IfIndex2NameMap::iterator i = _ifnames.find(index);
+    IfIndex2NameMap::iterator i = _ifnames.find(ifindex);
     if (_ifnames.end() != i)
 	_ifnames.erase(i);
 }
 
 const char *
-IfConfig::get_ifname(uint32_t index)
+IfConfig::get_ifname(uint32_t ifindex)
 {
-    IfIndex2NameMap::const_iterator i = _ifnames.find(index);
+    IfIndex2NameMap::const_iterator i = _ifnames.find(ifindex);
 
     if (_ifnames.end() == i) {
+#ifdef HAVE_IF_INDEXTONAME
 	char name_buf[IF_NAMESIZE];
-	const char* ifname = if_indextoname(index, name_buf);
+	const char* ifname = if_indextoname(ifindex, name_buf);
 
-	if (ifname)
-	    map_ifindex(index, ifname);
+	if (ifname != NULL)
+	    map_ifindex(ifindex, ifname);
 
 	return ifname;
+#else
+	return NULL;
+#endif // ! HAVE_IF_INDEXTONAME
     }
     return i->second.c_str();
+}
+
+uint32_t
+IfConfig::get_ifindex(const string& ifname)
+{
+    IfIndex2NameMap::const_iterator i;
+
+    for (i = _ifnames.begin(); i != _ifnames.end(); ++i) {
+	if (i->second == ifname)
+	    return i->first;
+    }
+
+#ifdef HAVE_IF_NAMETOINDEX
+    uint32_t ifindex = if_nametoindex(ifname.c_str());
+    if (ifindex > 0)
+	map_ifindex(ifindex, ifname);
+    return ifindex;
+#else
+    return 0;
+#endif // ! HAVE_IF_NAMETOINDEX
 }
 
 IfTreeInterface *
