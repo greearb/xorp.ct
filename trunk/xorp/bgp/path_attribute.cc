@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.22 2003/08/05 21:06:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.23 2003/08/06 17:52:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,8 +119,6 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 	break;
          
     default:
-	//this will throw an error if the attribute isn't
-	// optional transitive
 	pa = new UnknownAttribute(d);
 	break;
     }
