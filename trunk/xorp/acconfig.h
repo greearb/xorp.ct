@@ -21,6 +21,7 @@
 #undef HOST_OS_FREEBSD
 #undef HOST_OS_BSDI
 #undef HOST_OS_SOLARIS
+#undef HOST_OS_MACOSX
 
 /*
  * Preprocessor macro test
