@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.7 2004/11/12 07:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.8 2004/11/29 11:28:22 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -38,7 +38,8 @@ IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
     : IfConfigSet(ifc),
       ClickSocket(ifc.eventloop()),
       _cs_reader(*(ClickSocket *)this),
-      _click_config_generator_run_command(NULL)
+      _click_config_generator_run_command(NULL),
+      _click_config_generator_tmp_socket(-1)
 {
 }
 
@@ -613,7 +614,7 @@ int
 IfConfigSetClick::execute_click_config_generator(string& errmsg)
 {
     string command = ClickSocket::click_config_generator_file();
-    string arguments = "";		// TODO: XXX: PAVPAVPAV: create them!
+    string arguments;
 
     if (command.empty()) {
 	errmsg = c_format(
@@ -622,11 +623,37 @@ IfConfigSetClick::execute_click_config_generator(string& errmsg)
 	return (XORP_ERROR);
     }
 
+    string xorp_config = regenerate_xorp_iftree_config();
+
+    // Create a temporary file
+    char tmp_filename[1024] = "/tmp/xorp_fea_click.XXXXXXXX";
+    int s = mkstemp(tmp_filename);
+    if (s < 0) {
+	errmsg = c_format("Cannot create a temporary file: %s",
+			  strerror(errno));
+	return (XORP_ERROR);
+    }
+    if (::write(s, xorp_config.c_str(), xorp_config.size())
+	!= static_cast<ssize_t>(xorp_config.size())) {
+	errmsg = c_format("Error writing to temporary file: %s",
+			  strerror(errno));
+	close(s);
+	return (XORP_ERROR);
+    }
+    arguments = tmp_filename;	// XXX: the filename is the argument
+
     // XXX: kill any previously running instance
     if (_click_config_generator_run_command != NULL) {
 	delete _click_config_generator_run_command;
 	_click_config_generator_run_command = NULL;
     }
+    if (_click_config_generator_tmp_socket >= 0) {
+	close(_click_config_generator_tmp_socket);
+	_click_config_generator_tmp_socket = -1;
+	unlink(_click_config_generator_tmp_filename.c_str());
+    }
+    _click_config_generator_tmp_socket = s;
+    _click_config_generator_tmp_filename = tmp_filename;
 
     // Clear any previous stdout
     _click_config_generator_stdout.erase();
@@ -642,6 +669,9 @@ IfConfigSetClick::execute_click_config_generator(string& errmsg)
     if (_click_config_generator_run_command->execute() != XORP_OK) {
 	delete _click_config_generator_run_command;
 	_click_config_generator_run_command = NULL;
+	close(_click_config_generator_tmp_socket);
+	_click_config_generator_tmp_socket = -1;
+	unlink(_click_config_generator_tmp_filename.c_str());
 	errmsg = c_format("Could not execute the Click configuration generator");
 	return (XORP_ERROR);
     }
@@ -655,6 +685,11 @@ IfConfigSetClick::terminate_click_config_generator()
     if (_click_config_generator_run_command != NULL) {
 	delete _click_config_generator_run_command;
 	_click_config_generator_run_command = NULL;
+    }
+    if (_click_config_generator_tmp_socket >= 0) {
+	close(_click_config_generator_tmp_socket);
+	_click_config_generator_tmp_socket = -1;
+	unlink(_click_config_generator_tmp_filename.c_str());
     }
 }
 
@@ -687,6 +722,11 @@ IfConfigSetClick::click_config_generator_done_cb(RunCommand* run_command,
     }
     delete _click_config_generator_run_command;
     _click_config_generator_run_command = NULL;
+    if (_click_config_generator_tmp_socket >= 0) {
+	close(_click_config_generator_tmp_socket);
+	_click_config_generator_tmp_socket = -1;
+	unlink(_click_config_generator_tmp_filename.c_str());
+    }
     if (! success)
 	return;
 
@@ -707,11 +747,160 @@ IfConfigSetClick::write_generated_config(const string& config, string& errmsg)
 	return (XORP_ERROR);
 
     //
+    // Generate the new port mapping
+    //
+    generate_nexthop_to_port_mapping();
+
+    //
     // Notify the NextHopPortMapper observers about any port mapping changes
     //
     ifc().nexthop_port_mapper().notify_observers();
 
     return (XORP_OK);
+}
+
+string
+IfConfigSetClick::regenerate_xorp_iftree_config() const
+{
+    string config, preamble;
+    IfTree::IfMap::const_iterator ii;
+    IfTreeInterface::VifMap::const_iterator vi;
+    IfTreeVif::V4Map::const_iterator ai4;
+    IfTreeVif::V6Map::const_iterator ai6;
+
+    preamble = "";
+    config += preamble + c_format("interfaces {\n");
+    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	const IfTreeInterface& fi = ii->second;
+	preamble = "    ";
+	config += preamble + c_format("interface %s {\n",
+				      fi.ifname().c_str());
+	preamble = "\t";
+	config += preamble + c_format("enabled: %s\n",
+				      fi.enabled() ? "true" : "false");
+	config += preamble + c_format("discard: %s\n",
+				      fi.discard() ? "true" : "false");
+	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
+	config += preamble + c_format("mtu: %u\n", fi.mtu());
+	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
+	    const IfTreeVif& fv = vi->second;
+	    preamble = "\t";
+	    config += preamble + c_format("vif %s {\n", fv.vifname().c_str());
+	    preamble = "\t    ";
+	    config += preamble + c_format("enabled: %s\n",
+					  fv.enabled() ? "true" : "false");
+	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
+		const IfTreeAddr4& fa4 = ai4->second;
+		preamble = "\t    ";
+		config += preamble + c_format("address %s {\n",
+					      fa4.addr().str().c_str());
+		preamble = "\t\t";
+		config += preamble + c_format("prefix-length: %u\n",
+					      fa4.prefix_len());
+		if (fa4.broadcast()) {
+		    config += preamble + c_format("broadcast: %s\n",
+						  fa4.bcast().str().c_str());
+		}
+		if (fa4.point_to_point()) {
+		    config += preamble + c_format("destination: %s\n",
+						  fa4.endpoint().str().c_str());
+		}
+		config += preamble + c_format("multicast-capable: %s\n",
+					      fa4.multicast() ? "true" : "false");
+		config += preamble + c_format("point-to-point: %s\n",
+					      fa4.point_to_point() ? "true" : "false");
+		config += preamble + c_format("loopback: %s\n",
+					      fa4.loopback() ? "true" : "false");
+		config += preamble + c_format("enabled: %s\n",
+					      fa4.enabled() ? "true" : "false");
+		preamble = "\t    ";
+		config += preamble + c_format("}\n");
+	    }
+	    for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
+		const IfTreeAddr6& fa6 = ai6->second
+;		preamble = "\t    ";
+		config += preamble + c_format("address %s {\n",
+					      fa6.addr().str().c_str());
+		preamble = "\t\t";
+		config += preamble + c_format("prefix-length: %u\n",
+					      fa6.prefix_len());
+		if (fa6.point_to_point()) {
+		    config += preamble + c_format("destination: %s\n",
+						  fa6.endpoint().str().c_str());
+		}
+		config += preamble + c_format("multicast-capable: %s\n",
+					      fa6.multicast() ? "true" : "false");
+		config += preamble + c_format("point-to-point: %s\n",
+					      fa6.point_to_point() ? "true" : "false");
+		config += preamble + c_format("loopback: %s\n",
+					      fa6.loopback() ? "true" : "false");
+		config += preamble + c_format("enabled: %s\n",
+					      fa6.enabled() ? "true" : "false");
+		preamble = "\t    ";
+		config += preamble + c_format("}\n");
+	    }
+	    preamble = "\t";
+	    config += preamble + c_format("}\n");
+	}
+	preamble = "    ";
+	config += preamble + c_format("}\n");
+    }
+    preamble = "";
+    config += preamble + c_format("}\n");
+
+    return (config);
+}
+
+/**
+ * Generate the next-hop to port mapping.
+ *
+ * @return the number of generated ports.
+ */
+int
+IfConfigSetClick::generate_nexthop_to_port_mapping()
+{
+    IfTree::IfMap::const_iterator ii;
+    IfTreeInterface::VifMap::const_iterator vi;
+    IfTreeVif::V4Map::const_iterator ai4;
+    IfTreeVif::V6Map::const_iterator ai6;
+    int xorp_rt_port;
+
+    //
+    // Generate the next-hop to port mapping
+    //
+    // XXX: last port in xorp_rt is reserved for local delivery
+    ifc().nexthop_port_mapper().clear();
+    xorp_rt_port = 0;
+    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	const IfTreeInterface& fi = ii->second;
+	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
+	    const IfTreeVif& fv = vi->second;
+	    ifc().nexthop_port_mapper().add_interface(fi.ifname(),
+						      fv.vifname(),
+						      xorp_rt_port);
+	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
+		const IfTreeAddr4& fa4 = ai4->second;
+		ifc().nexthop_port_mapper().add_ipv4(fa4.addr(), xorp_rt_port);
+		IPv4Net ipv4net(fa4.addr(), fa4.prefix_len());
+		ifc().nexthop_port_mapper().add_ipv4net(ipv4net, xorp_rt_port);
+		if (fa4.point_to_point())
+		    ifc().nexthop_port_mapper().add_ipv4(fa4.endpoint(),
+							 xorp_rt_port);
+	    }
+	    for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
+		const IfTreeAddr6& fa6 = ai6->second;
+		ifc().nexthop_port_mapper().add_ipv6(fa6.addr(), xorp_rt_port);
+		IPv6Net ipv6net(fa6.addr(), fa6.prefix_len());
+		ifc().nexthop_port_mapper().add_ipv6net(ipv6net, xorp_rt_port);
+		if (fa6.point_to_point())
+		    ifc().nexthop_port_mapper().add_ipv6(fa6.endpoint(),
+							 xorp_rt_port);
+	    }
+	    xorp_rt_port++;
+	}
+    }
+
+    return (xorp_rt_port);
 }
 
 string
@@ -721,7 +910,7 @@ IfConfigSetClick::generate_config()
     IfTreeInterface::VifMap::const_iterator vi;
     IfTreeVif::V4Map::const_iterator ai4;
     IfTreeVif::V6Map::const_iterator ai6;
-    uint32_t port, max_vifs;
+    int xorp_rt_port, max_xorp_rt_port, max_vifs;
 
     string config;
 
@@ -741,40 +930,7 @@ IfConfigSetClick::generate_config()
 	}
     }
 
-    //
-    // Generate the next-hop to port mapping
-    //
-    ifc().nexthop_port_mapper().clear();
-    //
-    // XXX: port number 0 is reserved for local delivery, hence we start from 1
-    //
-    port = 1;
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
-	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
-	    ifc().nexthop_port_mapper().add_interface(fi.ifname(),
-						      fv.vifname(),
-						      port);
-	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
-		const IfTreeAddr4& fa4 = ai4->second;
-		ifc().nexthop_port_mapper().add_ipv4(fa4.addr(), port);
-		IPv4Net ipv4net(fa4.addr(), fa4.prefix_len());
-		ifc().nexthop_port_mapper().add_ipv4net(ipv4net, port);
-		if (fa4.point_to_point())
-		    ifc().nexthop_port_mapper().add_ipv4(fa4.endpoint(), port);
-	    }
-	    for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
-		const IfTreeAddr6& fa6 = ai6->second;
-		ifc().nexthop_port_mapper().add_ipv6(fa6.addr(), port);
-		IPv6Net ipv6net(fa6.addr(), fa6.prefix_len());
-		ifc().nexthop_port_mapper().add_ipv6net(ipv6net, port);
-		if (fa6.point_to_point())
-		    ifc().nexthop_port_mapper().add_ipv6(fa6.endpoint(), port);
-	    }
-	    port++;
-	}
-    }
+    max_xorp_rt_port = generate_nexthop_to_port_mapping();
 
     config += "//\n";
     config += "// Generated by XORP FEA\n";
@@ -815,7 +971,7 @@ IfConfigSetClick::generate_config()
     string xorp_arpt = "_xorp_arpt";
     config += c_format("%s :: Tee(%u);\n", xorp_arpt.c_str(), max_vifs + 1);
 
-    port = 0;
+    int port = 0;
     for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi, ++port) {
@@ -827,7 +983,7 @@ IfConfigSetClick::generate_config()
 	    string xorp_arpq = c_format("_xorp_arpq%u", port);
 
 	    string from_device, to_device, arp_responder, arp_querier;
-	    string paint, print;
+	    string paint, print_non_ip;
 
 	    if (! fv.enabled()) {
 		from_device = "NullDevice";
@@ -865,8 +1021,8 @@ IfConfigSetClick::generate_config()
 				   fi.mac().str().c_str());
 
 	    paint = c_format("Paint(%u)", port + 1);
-	    print = c_format("Print(\"%s non-IP\")",
-			     fv.vifname().c_str());
+	    print_non_ip = c_format("Print(\"%s non-IP\")",
+				    fv.vifname().c_str());
 
 	    config += "\n";
 	    config += c_format("// Input and output paths for %s\n",
@@ -902,7 +1058,7 @@ IfConfigSetClick::generate_config()
 			       xorp_ip.c_str());
 	    config += c_format("%s[3] -> %s -> Discard;\n",
 			       xorp_c.c_str(),
-			       print.c_str());
+			       print_non_ip.c_str());
 	}
     }
 
@@ -924,9 +1080,10 @@ IfConfigSetClick::generate_config()
 		       xorp_arpt.c_str(),
 		       max_vifs,
 		       xorp_toh.c_str());
-    // XXX: port 0 in xorp_rt is reserved for local delivery
-    config += c_format("%s[0] -> %s -> %s;\n",
+    // XXX: last port in xorp_rt is reserved for local delivery
+    config += c_format("%s[%u] -> %s -> %s;\n",
 		       xorp_rt.c_str(),
+		       max_xorp_rt_port,
 		       ether_encap.c_str(),
 		       xorp_toh.c_str());
 
@@ -943,7 +1100,7 @@ IfConfigSetClick::generate_config()
 	    string xorp_gio = c_format("_xorp_gio%u", port);
 	    string xorp_dt = c_format("_xorp_dt%u", port);
 	    string xorp_fr = c_format("_xorp_fr%u", port);
-	    string xorp_arpq = c_format("_xorp_arpq%u", port);	    
+	    string xorp_arpq = c_format("_xorp_arpq%u", port);
 
 	    string ipgw_options = c_format("IPGWOptions(");
 	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
@@ -971,7 +1128,7 @@ IfConfigSetClick::generate_config()
 	    config += "\n";
 	    config += c_format("// Forwarding path for %s\n",
 			       fv.vifname().c_str());
-	    int xorp_rt_port = ifc().nexthop_port_mapper().lookup_nexthop_interface(fi.ifname(), fv.vifname());
+	    xorp_rt_port = ifc().nexthop_port_mapper().lookup_nexthop_interface(fi.ifname(), fv.vifname());
 	    XLOG_ASSERT(xorp_rt_port >= 0);
 	    config += c_format("%s[%u] -> DropBroadcasts\n",
 			       xorp_rt.c_str(),

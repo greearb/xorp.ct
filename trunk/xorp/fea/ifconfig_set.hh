@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.21 2004/11/12 00:47:36 bms Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.22 2004/11/29 11:28:22 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -611,12 +611,23 @@ private:
 					bool success,
 					const string& error_msg);
     int write_generated_config(const string& config, string& errmsg);
+    string regenerate_xorp_iftree_config() const;
+
+    /**
+     * Generate the next-hop to port mapping.
+     *
+     * @return the number of generated ports.
+     */
+    int generate_nexthop_to_port_mapping();
+
     virtual string generate_config();
 
     ClickSocketReader	_cs_reader;
     IfTree		_iftree;
     RunCommand*		_click_config_generator_run_command;
     string		_click_config_generator_stdout;
+    int			_click_config_generator_tmp_socket;
+    string		_click_config_generator_tmp_filename;
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__
