@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.10 2003/04/25 03:39:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.11 2003/04/25 04:02:18 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -57,6 +57,7 @@ Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
     : _mmgr(mmgr), _name(name), 
     _pid(0),
     _status(MODULE_NOT_STARTED),
+    _do_exec(false),
     _verbose(verbose) 
 {}
 
@@ -64,8 +65,13 @@ Module::~Module()
 {
     if (_verbose)
 	printf("Shutting down %s\n", _name.c_str());
+
     if (!_do_exec)
 	return;
+
+    if (_status == MODULE_NOT_STARTED)
+	return;
+
     if (_status != MODULE_FAILED) {
 	new_status(MODULE_SHUTTING_DOWN);
 	kill(_pid, SIGTERM);
