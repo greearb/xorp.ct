@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.5 2003/03/16 08:20:30 pavlin Exp $"
 
 #include <string.h>
 #include <stdio.h>
@@ -476,8 +476,8 @@ XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
 	try {
 	    XrlAtom xa(tok.c_str());
 	    add(xa);
-	} catch (const InvalidString& is) {
-	    throw is;
+	} catch (const XrlAtomFound& xaf) {
+	    xorp_throw(InvalidString, "Duplicate Atom found:" + tok);
 	}
 	start = end;
     }
