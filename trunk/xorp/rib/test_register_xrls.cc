@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.29 2004/07/24 01:01:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.30 2004/09/17 14:00:05 abittau Exp $"
 
 #include "rib_module.h"
 
@@ -326,17 +326,17 @@ main(int /* argc */, char* argv[])
     FinderServer fs(eventloop);
 
     // Rib Server component
-    XrlStdRouter xrl_router(eventloop, "rib");
+    XrlStdRouter xrl_std_router_rib(eventloop, "rib");
 
     // Rib Client component
     XrlStdRouter client_xrl_router(eventloop, "ribclient");
     RibClientTarget ribclienttarget(&client_xrl_router);
 
-    RibManager rib_manager(eventloop, xrl_router, "fea");
+    RibManager rib_manager(eventloop, xrl_std_router_rib, "fea");
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
-    RegisterServer register_server(&xrl_router);
+    RegisterServer register_server(&xrl_std_router_rib);
     urib4.initialize(register_server);
     if (urib4.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
@@ -351,15 +351,15 @@ main(int /* argc */, char* argv[])
     RIB<IPv6> mrib6(MULTICAST, rib_manager, eventloop);
     mrib6.add_igp_table("connected", "", "");
 
-    VifManager vif_manager(xrl_router, eventloop, NULL, "fea");
+    VifManager vif_manager(xrl_std_router_rib, eventloop, NULL, "fea");
     vif_manager.enable();
     vif_manager.start();
-    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,
-		     NULL);
+    XrlRibTarget xrt(&xrl_std_router_rib, urib4, mrib4, urib6, mrib6,
+		     vif_manager, NULL);
 
-    XrlRibV0p1Client xc(&xrl_router);
+    XrlRibV0p1Client xc(&xrl_std_router_rib);
 
-    wait_until_xrl_router_is_ready(eventloop, xrl_router);
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
 
     add_igp_table(xc, eventloop, "ospf");
     add_egp_table(xc, eventloop, "ebgp");

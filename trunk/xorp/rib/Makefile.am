@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.34 2004/10/01 20:37:12 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.35 2004/10/01 22:09:00 pavlin Exp $
 ##
 
 SUBDIRS = . tools
@@ -47,6 +47,7 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 LDADD		+= $(top_builddir)/libxipc/libfinder.a
 LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
@@ -74,10 +75,7 @@ xorp_rib_SOURCES		+= rt_tab_register.hh
 xorp_rib_SOURCES		+= vifmanager.hh
 xorp_rib_SOURCES		+= xrl_target.hh
 xorp_rib_SOURCES		+= main_rib.cc
-xorp_rib_SOURCES		+= rib_manager.cc
-xorp_rib_SOURCES		+= xrl_target.cc
 xorp_rib_LDADD			 = $(LDADD)
-xorp_rib_LDADD			+= $(top_builddir)/xrl/targets/libribbase.a
 
 add_route_SOURCES		 = add_route.cc
 add_route_LDADD			 = $(LDADD)
@@ -109,10 +107,10 @@ test_redist_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 test_register_SOURCES		 = rib_module.h
 test_register_SOURCES		+= dummy_register_server.hh
-test_register_SOURCES		+= dummy_rib_manager.hh
 test_register_SOURCES		+= protocol.hh
 test_register_SOURCES		+= register_server.hh
 test_register_SOURCES		+= rib.hh
+test_register_SOURCES		+= rib_manager.hh
 test_register_SOURCES		+= route.hh
 test_register_SOURCES		+= rt_tab_base.hh
 test_register_SOURCES		+= rt_tab_extint.hh
@@ -123,7 +121,6 @@ test_register_SOURCES		+= rt_tab_register.hh
 test_register_SOURCES		+= vifmanager.hh
 test_register_SOURCES		+= xrl_target.hh
 test_register_SOURCES		+= dummy_register_server.cc
-test_register_SOURCES		+= dummy_rib_manager.cc
 test_register_SOURCES		+= test_register.cc
 test_register_LDADD		 = $(LDADD)
 
@@ -144,22 +141,19 @@ test_register_xrls_SOURCES	+= rt_tab_redist.hh
 test_register_xrls_SOURCES	+= rt_tab_register.hh
 test_register_xrls_SOURCES	+= vifmanager.hh
 test_register_xrls_SOURCES	+= xrl_target.hh
-test_register_xrls_SOURCES	+= rib_manager.cc
 test_register_xrls_SOURCES	+= test_register_xrls.cc
-test_register_xrls_SOURCES	+= xrl_target.cc
 test_register_xrls_LDADD	 = $(LDADD)
 test_register_xrls_LDADD	+= $(top_builddir)/xrl/interfaces/libribxif.a
-test_register_xrls_LDADD	+= $(top_builddir)/xrl/targets/libribbase.a
 test_register_xrls_LDADD	+= $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_rib_direct_SOURCES		 = rib_module.h
 test_rib_direct_SOURCES		+= dummy_register_server.hh
-test_rib_direct_SOURCES		+= dummy_rib_manager.hh
 test_rib_direct_SOURCES		+= parser.hh
 test_rib_direct_SOURCES		+= parser_direct_cmds.hh
 test_rib_direct_SOURCES		+= protocol.hh
 test_rib_direct_SOURCES		+= register_server.hh
 test_rib_direct_SOURCES		+= rib.hh
+test_rib_direct_SOURCES		+= rib_manager.hh
 test_rib_direct_SOURCES		+= route.hh
 test_rib_direct_SOURCES		+= rt_tab_base.hh
 test_rib_direct_SOURCES		+= rt_tab_extint.hh
@@ -170,14 +164,12 @@ test_rib_direct_SOURCES		+= rt_tab_register.hh
 test_rib_direct_SOURCES		+= vifmanager.hh
 test_rib_direct_SOURCES		+= xrl_target.hh
 test_rib_direct_SOURCES		+= dummy_register_server.cc
-test_rib_direct_SOURCES		+= dummy_rib_manager.cc
 test_rib_direct_SOURCES		+= parser.cc
 test_rib_direct_SOURCES		+= test_rib_direct.cc
 test_rib_direct_LDADD		 = $(LDADD)
 
 test_rib_xrls_SOURCES		 = rib_module.h
 test_rib_xrls_SOURCES		+= dummy_register_server.hh
-test_rib_xrls_SOURCES		+= dummy_rib_manager.hh
 test_rib_xrls_SOURCES		+= parser.hh
 test_rib_xrls_SOURCES		+= parser_direct_cmds.hh
 test_rib_xrls_SOURCES		+= parser_xrl_cmds.hh
@@ -195,13 +187,10 @@ test_rib_xrls_SOURCES		+= rt_tab_register.hh
 test_rib_xrls_SOURCES		+= vifmanager.hh
 test_rib_xrls_SOURCES		+= xrl_target.hh
 test_rib_xrls_SOURCES		+= dummy_register_server.cc
-test_rib_xrls_SOURCES		+= dummy_rib_manager.cc
 test_rib_xrls_SOURCES		+= parser.cc
 test_rib_xrls_SOURCES		+= test_rib_xrls.cc
-test_rib_xrls_SOURCES		+= xrl_target.cc
 test_rib_xrls_LDADD		 = $(LDADD)
 test_rib_xrls_LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
-test_rib_xrls_LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 
 # -- Library Sources
 librib_a_SOURCES		 = rib_module.h
@@ -228,6 +217,7 @@ librib_a_SOURCES		+= profile_vars.cc
 librib_a_SOURCES		+= protocol.cc
 librib_a_SOURCES		+= register_server.cc
 librib_a_SOURCES		+= rib.cc
+librib_a_SOURCES		+= rib_manager.cc
 librib_a_SOURCES		+= rib_varrw.cc
 librib_a_SOURCES		+= rt_tab_base.cc
 librib_a_SOURCES		+= rt_tab_deletion.cc
@@ -240,6 +230,7 @@ librib_a_SOURCES		+= rt_tab_pol_redist.cc
 librib_a_SOURCES		+= rt_tab_redist.cc
 librib_a_SOURCES		+= rt_tab_register.cc
 librib_a_SOURCES		+= vifmanager.cc
+librib_a_SOURCES		+= xrl_target.cc
 
 libribxrl_a_SOURCES		 = redist_xrl.hh
 libribxrl_a_SOURCES		+= redist_xrl.cc

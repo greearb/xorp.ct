@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.15 2004/07/24 01:01:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.16 2004/09/17 14:00:04 abittau Exp $"
 
 #include "rib_module.h"
 
@@ -22,7 +22,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 
-#include "dummy_rib_manager.hh"
+#include "rib_manager.hh"
 #include "rib.hh"
 #include "dummy_register_server.hh"
 
@@ -118,10 +118,15 @@ main (int /* argc */, char* argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
     EventLoop eventloop;
-    XrlStdRouter xrl_router(eventloop, "rib");
-    RibManager rib_manager;
-    rib_manager.set_xrl_router(xrl_router);
+    XrlStdRouter xrl_std_router_rib(eventloop, "rib");
+
+    //
+    // The RIB manager
+    //
+    RibManager rib_manager(eventloop, xrl_std_router_rib, "fea");
+    rib_manager.enable();
 
     RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     rib_ptr = &rib;

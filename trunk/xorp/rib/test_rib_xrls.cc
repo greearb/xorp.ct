@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.34 2004/07/24 01:01:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.35 2004/10/01 20:23:00 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -24,7 +24,7 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
-#include "dummy_rib_manager.hh"
+#include "rib_manager.hh"
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
@@ -66,33 +66,23 @@ parser_main()
     FinderServer fs(eventloop);
 
     // Rib Server component
-    XrlStdRouter xrl_router(eventloop, "rib", fs.addr(), fs.port());
+    XrlStdRouter xrl_std_router_rib(eventloop, "rib", fs.addr(), fs.port());
 
-    RibManager rib_manager;
+    //
+    // The RIB manager
+    //
+    RibManager rib_manager(eventloop, xrl_std_router_rib, "fea");
+    rib_manager.enable();
 
-    // RIB Instantiations for XrlRibTarget
-    RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
-    DummyRegisterServer register_server;
-    urib4.initialize_register(register_server);
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
 
-    // Instantiated but not used
-    RIB<IPv4> mrib4(MULTICAST, rib_manager, eventloop);
-    RIB<IPv6> urib6(UNICAST, rib_manager, eventloop);
-    RIB<IPv6> mrib6(MULTICAST, rib_manager, eventloop);
+    rib_manager.start();
 
-    VifManager vif_manager(xrl_router, eventloop, NULL, "fea");
-    vif_manager.enable();
-    vif_manager.start();
-    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,
-		     &rib_manager);
-
-    wait_until_xrl_router_is_ready(eventloop, xrl_router);
-
-    XrlRibV0p1Client xrl_client(&xrl_router);
+    XrlRibV0p1Client xrl_client(&xrl_std_router_rib);
 
     // Variable used to signal completion of Xrl parse completion
     XrlCompletion cv;
-    XrlRibParser parser(eventloop, xrl_client, urib4, cv);
+    XrlRibParser parser(eventloop, xrl_client, rib_manager.urib4(), cv);
 
     string cmd;
     int line = 0;
