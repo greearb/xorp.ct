@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.18 2003/12/10 21:57:50 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.19 2004/01/28 00:34:14 pavlin Exp $"
 
 
 //
@@ -384,7 +384,9 @@ CliClient::start_connection(void)
     gl_configure_getline(_gl, "bind ^W backward-delete-word", NULL, NULL);
 
     // Print the welcome message
-    cli_print(c_format("%s\n", XORP_CLI_WELCOME));
+    char hostname[255];
+    gethostname(hostname, 254);
+    cli_print(c_format("%s%s\n", XORP_CLI_WELCOME, hostname));
 
     // Show the prompt
     cli_print(current_cli_prompt());
