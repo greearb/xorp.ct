@@ -1,6 +1,12 @@
 #
-# $XORP: xorp/pim/TODO,v 1.69 2004/02/25 01:29:32 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.70 2004/03/02 00:47:43 pavlin Exp $
 #
+
+* IMPL:
+  Check again that various addresses are not link-local (e.g., the
+  Cand-BSR address, Cand-RP address, etc).
+  The related methods to consider again are Vif::is_my_addr()
+  vif_find_by_addr() and vif_find_same_subnet_or_p2p()
 
 * IMPL:
  Take care of Section 4.5.10: Background: (*,*,RP) and (S,G,rpt) interaction.
