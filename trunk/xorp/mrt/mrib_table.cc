@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.7 2004/05/17 20:54:09 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.8 2004/06/10 22:41:28 hodson Exp $"
 
 
 //
@@ -80,11 +80,26 @@ MribTable::~MribTable()
 }
 
 //
-// Remove all MRIB entries from the table.
+// Clear all entries and pending transactions.
 // XXX: the entries themselves are deleted too.
 //
 void
 MribTable::clear()
+{
+    remove_all_entries();
+
+    //
+    // Delete all pending transactions
+    //
+    _mrib_pending_transactions.clear();
+}
+
+//
+// Remove all MRIB entries from the table.
+// XXX: the entries themselves are deleted too.
+//
+void
+MribTable::remove_all_entries()
 {
     //
     // Delete all MribLookup entries
@@ -93,11 +108,6 @@ MribTable::clear()
     _mrib_lookup_root = NULL;
     _mrib_lookup_size = 0;
     _mrib_size = 0;
-    
-    //
-    // Delete all pending transactions
-    //
-    _mrib_pending_transactions.clear();
 }
 
 //
@@ -450,6 +460,12 @@ MribTable::add_pending_remove(uint32_t tid, const Mrib& mrib)
 }
 
 void
+MribTable::add_pending_remove_all_entries(uint32_t tid)
+{
+    _mrib_pending_transactions.push_back(PendingTransaction(*this, tid));
+}
+
+void
 MribTable::commit_pending_transactions(uint32_t tid)
 {
     //
@@ -465,10 +481,14 @@ MribTable::commit_pending_transactions(uint32_t tid)
 	++iter;
 	if (pending_transaction.tid() != tid)
 	    continue;
-	if (pending_transaction.is_insert())
-	    insert(pending_transaction.mrib());
-	else
-	    remove(pending_transaction.mrib());
+	if (pending_transaction.is_remove_all()) {
+	    remove_all_entries();
+	} else {
+	    if (pending_transaction.is_insert())
+		insert(pending_transaction.mrib());
+	    else
+		remove(pending_transaction.mrib());
+	}
 	_mrib_pending_transactions.erase(old_iter);
     }
 }

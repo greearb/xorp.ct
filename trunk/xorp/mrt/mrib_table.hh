@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.6 2004/05/17 20:54:09 pavlin Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.7 2004/06/10 22:41:28 hodson Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -250,11 +250,24 @@ public:
     ~MribTable();
     
     typedef MribTableIterator	iterator;
-    
+
     /**
-     * Remove all entries (make the container empty).
+     * Get the address family.
+     *
+     * @return the address family ((e.g., AF_INET or AF_INET6 for IPv4 and
+     * IPv6 respectively).
+     */
+    int		family() const { return (_family); }
+
+    /**
+     * Remove all entries and pending transactions (make the container empty).
      */
     void	clear();
+
+    /**
+     * Remove all entries.
+     */
+    void	remove_all_entries();
     
     /**
      * Insert a copy of a @ref Mrib entry.
@@ -351,14 +364,27 @@ public:
      * the entry to remove.
      */
     void	add_pending_remove(uint32_t tid, const Mrib& mrib);
-    
+
+    /**
+     * Add a pending transaction to remove all @ref Mrib entries
+     * from the table.
+     * 
+     * the operation is added to the list of pending transaction, but the
+     * entries themselves is not removed from the table
+     * (until @ref MribTable::commit_pending_transactions() is called).
+     * 
+     * @param tid the transaction ID.
+     */
+    void	add_pending_remove_all_entries(uint32_t tid);
+
     /**
      * Commit pending transactions for adding or removing @ref Mrib
      * entries for a given transaction ID.
      * 
      * All pending transactions to add/remove @ref Mrib entries for a given
      * transaction ID are processes (see @ref MribTable::add_pending_insert()
-     * and @ref MribTable::add_pending_remove()).
+     * and @ref MribTable::add_pending_remove()
+     * and @ref MribTable::add_pending_remove_all_entries()).
      * 
      * @param tid the transaction ID of the entries to commit.
      */
@@ -412,14 +438,34 @@ private:
     //
     class PendingTransaction {
     public:
+	/**
+	 * Constructor to insert or remove a MRIB entry.
+	 *
+	 * @param tid the transaction ID.
+	 * @param mrib the MRIB entry to insert or remove.
+	 * @param is_insert if true, then insert the entry, otherwise
+	 * remove it.
+	 */
 	PendingTransaction(uint32_t tid, const Mrib& mrib, bool is_insert)
 	    : _tid(tid),
 	      _mrib(mrib),
-	      _is_insert(is_insert)
+	      _is_insert(is_insert),
+	      _is_remove_all(false)
+	    {}
+
+	/**
+	 * Constructor to remove all entries.
+	 */
+	PendingTransaction(const MribTable& mrib_table, uint32_t tid)
+	    : _tid(tid),
+	      _mrib(Mrib(IPvXNet(IPvX::ZERO(mrib_table.family()), 0))),
+	      _is_insert(false),
+	      _is_remove_all(true)
 	    {}
 	uint32_t	tid() const { return (_tid); }
 	const Mrib&	mrib() const { return (_mrib); }
 	bool		is_insert() const { return (_is_insert); }
+	bool		is_remove_all() const { return (_is_remove_all); }
 	void		update_entry_vif_index(uint16_t vif_index) {
 	    _mrib.set_next_hop_vif_index(vif_index);
 	}
@@ -428,6 +474,7 @@ private:
 	uint32_t	_tid;		// The transaction ID
 	Mrib		_mrib;		// The MRIB to add or remove
 	bool		_is_insert;	// If true, insert, otherwise remove
+	bool		_is_remove_all;	// If true, remove all entries
     };
     
     //
