@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipf.hh,v 1.3 2004/09/14 15:03:38 bms Exp $
+// $XORP: xorp/fea/firewall_ipf.hh,v 1.4 2004/09/14 17:04:11 bms Exp $
 
 #ifndef __FEA_FIREWALL_IPF_HH__
 #define __FEA_FIREWALL_IPF_HH__
@@ -36,9 +36,9 @@ protected:
 #endif
 };
 
-typedef IpfFwRule<IPv4Net> IpfFwRule4;
-typedef IpfFwRule<IPv6Net> IpfFwRule6;
-typedef IpfFwRule<IPvXNet> IpfFwRuleX;
+typedef IpfFwRule<IPv4> IpfFwRule4;
+typedef IpfFwRule<IPv6> IpfFwRule6;
+typedef IpfFwRule<IPvX> IpfFwRuleX;
 
 /****************************************************************************/
 
