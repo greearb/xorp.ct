@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.4 2003/05/09 19:36:15 hodson Exp $
+// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.5 2003/05/09 21:00:51 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
@@ -29,6 +29,7 @@ public:
     XrlCmdError common_0_1_get_target_name(string& name);
     XrlCmdError common_0_1_get_version(string& version);
     XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
+    XrlCmdError common_0_1_shutdown();
 
     XrlCmdError finder_client_0_2_hello();
 

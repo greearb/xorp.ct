@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.5 2003/05/02 22:33:54 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.6 2003/05/07 23:15:17 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -47,6 +47,11 @@ public:
     XrlCmdError common_0_1_get_status(// Output values,
 				      uint32_t& status,
 				      string& reason);
+
+    /**
+     * Request clean shutdown.
+     */
+    XrlCmdError common_0_1_shutdown();
 
     XrlCmdError rtrmgr_0_1_get_pid(
         // Output values, 

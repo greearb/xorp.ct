@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_tgt.cc,v 1.2 2003/03/10 23:21:04 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_tgt.cc,v 1.3 2003/05/07 23:15:24 mjh Exp $"
 
 #include <iostream>
 
@@ -47,6 +47,12 @@ XrlTestTarget::common_0_1_get_status(uint32_t& status,
     status = PROC_READY;
     reason = "Test Reason";
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlTestTarget::common_0_1_shutdown()
+{
+    exit(0);
 }
 
 XrlCmdError

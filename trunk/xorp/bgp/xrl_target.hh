@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.10 2003/03/29 19:03:09 pavlin Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.11 2003/05/07 23:15:13 mjh Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -42,6 +42,11 @@ public:
 				      // Output values,
 				      uint32_t& status,
 				      string&	reason);
+
+    /**
+     * Request target shut down cleanly
+     */
+    XrlCmdError common_0_1_shutdown();
 
     XrlCmdError bgp_0_2_get_bgp_version(
 					// Output values, 

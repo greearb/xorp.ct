@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.8 2003/05/07 23:15:17 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.9 2003/05/23 00:02:09 mjh Exp $"
 
 #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -70,6 +70,14 @@ XrlRtrmgrInterface::common_0_1_get_status(// Output values,
     reason = "Ready";
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+XrlRtrmgrInterface::common_0_1_shutdown()
+{
+    //rtrmgr does not accept XRL requests to shutdown via this interface.
+    return XrlCmdError::COMMAND_FAILED();
+}
+
 
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_get_pid(// Output values, 

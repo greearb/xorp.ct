@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.4 2003/05/09 19:36:15 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client_xrl_target.cc,v 1.5 2003/05/09 21:00:51 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "finder_client_xrl_target.hh"
@@ -45,6 +45,15 @@ FinderClientXrlTarget::common_0_1_get_status(uint32_t& status, string& r)
     status = PROC_READY;
     r = "Ready";
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderClientXrlTarget::common_0_1_shutdown()
+{
+    //This isn't the right way to shutdown a process. The common
+    //interface specific to the target process should be used instead,
+    //as it can do the necessary cleanup.
+    return XrlCmdError::COMMAND_FAILED();
 }
 
 XrlCmdError

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.13 2003/05/09 21:00:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.14 2003/05/22 22:25:22 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -105,6 +105,13 @@ FinderXrlTarget::common_0_1_get_status(uint32_t& status, string& reason)
     status = PROC_READY;
     reason = "Ready";
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::common_0_1_shutdown()
+{
+    //XXX it's not clear to me if we want to support shutdown on the finder...
+    exit(0);
 }
 
 XrlCmdError

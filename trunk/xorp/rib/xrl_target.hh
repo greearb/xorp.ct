@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.9 2003/05/19 23:36:19 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.10 2003/05/24 23:35:27 mjh Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -80,6 +80,11 @@ protected:
 	// Output values,
         uint32_t& status,
 	string&	reason);
+
+    /**
+     *  shutdown cleanly
+     */
+    XrlCmdError common_0_1_shutdown();
 
     /**
      *  Enable/disable/start/stop RIB.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/common.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/common.xif,v 1.2 2003/05/07 23:15:18 mjh Exp $ */
 
 /*
  * XRL interface common to all XRL target entities.
@@ -14,4 +14,7 @@ interface common/0.1 {
 
 	/** Get status of Xrl Target */
 	get_status	-> status:u32 & reason:txt
+
+	/** Request clean shutdown of Xrl Target */
+	shutdown
 }

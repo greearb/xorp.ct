@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.13 2003/04/22 23:27:22 hodson Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.14 2003/05/07 23:15:15 mjh Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -153,7 +153,12 @@ protected:
     XrlCmdError common_0_1_get_status(// Output values,
 				      uint32_t& status,
 				      string&	reason);
-    
+
+    /**
+     * Shutdown cleanly
+     */
+    XrlCmdError common_0_1_shutdown();
+
     /**
      *  Process a CLI command.
      *  

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.11 2003/05/19 00:19:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.12 2003/05/21 05:32:52 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -721,6 +721,13 @@ XrlMld6igmpNode::common_0_1_get_status(// Output values,
     status = PROC_READY;
     reason = "Ready";
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::common_0_1_shutdown()
+{
+    //XXX placeholder only
+    exit(0);
 }
 
 XrlCmdError

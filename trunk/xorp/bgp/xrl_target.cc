@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.12 2003/05/07 23:15:13 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.13 2003/05/08 21:27:01 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -42,6 +42,13 @@ XrlBgpTarget::common_0_1_get_status(
     string&	reason)
 {
     status = _bgp.status(reason);
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::common_0_1_shutdown()
+{
+    _bgp.terminate();
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.8 2003/05/07 23:15:13 mjh Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.9 2003/05/08 00:01:35 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -104,6 +104,13 @@ XrlCliNode::common_0_1_get_status(
     status = PROC_READY;
     reason = "Ready";
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlCliNode::common_0_1_shutdown()
+{
+    //XXX this is a placeholder - I don't think this should be used.
+    return XrlCmdError::COMMAND_FAILED();
 }
 
 XrlCmdError

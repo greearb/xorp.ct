@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.12 2003/04/22 19:20:16 mjh Exp $
+// $XORP: xorp/bgp/main.hh,v 1.13 2003/05/08 21:27:00 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -159,7 +159,12 @@ public:
     bool register_ribname(const string& name);
 
     void main_loop();
+
+    /**
+     * shutdown BGP cleanly
+     */
     void terminate() { _exit_loop = true; }
+
     int create_listener(const Iptuple& iptuple);
     LocalData *get_local_data();
     void start_server(const Iptuple& iptuple);

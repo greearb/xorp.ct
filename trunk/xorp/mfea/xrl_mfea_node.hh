@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.12 2003/05/07 23:15:15 mjh Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.13 2003/05/18 03:19:57 pavlin Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -182,6 +182,11 @@ protected:
 	// Output values,
         uint32_t& status,
 	string&	reason);
+
+    /** 
+     * shutdown cleanly
+     */
+    XrlCmdError common_0_1_shutdown();
 
     /**
      *  Process a CLI command.
