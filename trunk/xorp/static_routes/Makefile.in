@@ -119,7 +119,7 @@ xorp_static_routes_SOURCES = xorp_static_routes.cc
 libstaticroutes_a_SOURCES = static_routes_module.h static_routes_node.hh xrl_static_routes_node.hh static_routes_node.cc xrl_static_routes_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = 
+EXTRA_DIST = command_static_routes
 
 
 ################################################################

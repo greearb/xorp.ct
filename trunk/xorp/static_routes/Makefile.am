@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.2 2004/02/17 23:01:17 pavlin Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.3 2004/02/18 00:11:57 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -45,7 +45,7 @@ libstaticroutes_a_SOURCES	+= static_routes_node.cc
 libstaticroutes_a_SOURCES	+= xrl_static_routes_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	  = 
+EXTRA_DIST	  = command_static_routes
 
 
 ################################################################
