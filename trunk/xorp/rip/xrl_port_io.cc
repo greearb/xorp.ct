@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.11 2004/05/23 01:10:23 atanu Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.12 2004/06/10 22:41:47 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -90,7 +90,7 @@ XrlPortIO<IPv4>::request_open_bind_socket()
     XrlSocket4V0p1Client cl(&_xr);
     return cl.send_udp_open_and_bind(
 		_ss.c_str(), _xr.instance_name(), IPv4::ANY(),
-		RIP_AF_CONSTANTS<IPv4>::IP_PORT,
+		RIP_AF_CONSTANTS<IPv4>::IP_PORT, false,
 		callback(this, &XrlPortIO<IPv4>::open_bind_socket_cb)
 		);
 }
@@ -203,7 +203,7 @@ XrlPortIO<IPv6>::request_open_bind_socket()
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_udp_open_and_bind(
 		_ss.c_str(), _xr.instance_name(), IPv6::ANY(),
-		RIP_AF_CONSTANTS<IPv6>::IP_PORT,
+		RIP_AF_CONSTANTS<IPv6>::IP_PORT, false,
 		callback(this, &XrlPortIO<IPv6>::open_bind_socket_cb)
 		);
 }
