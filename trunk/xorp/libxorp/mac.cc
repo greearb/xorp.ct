@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.7 2004/12/15 21:33:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.8 2004/12/15 22:55:59 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -48,6 +48,9 @@ Mac::Mac(const string& s) throw (InvalidString)
 string
 Mac::normalized_str() const
 {
+    if (_srep.empty())
+	return _srep;	// XXX: the empty string is valid, so just return it
+
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //
