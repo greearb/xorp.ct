@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.9 2003/03/04 23:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.10 2003/03/07 18:23:44 hodson Exp $"
 
 #include <functional>
 
@@ -133,7 +133,6 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	if (EAGAIN == errno) {
 	    _reader.resume();
 	} else {
-	    read_event(errno, buffer, 0);
 	    error_event();
 	}
 	return;
