@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/packet_assembly.hh,v 1.1 2003/08/01 04:08:12 hodson Exp $
 
 #ifndef __RIP_PACKET_ASSEMBLY_HH__
 #define __RIP_PACKET_ASSEMBLY_HH__
@@ -287,6 +287,7 @@ ResponsePacketAssembler<IPv4>::packet_finish()
 
     PacketRouteEntry<IPv4>* fe = (ah.head_entries()) ? _p->route_entry(0) : 0;
 
+    _p->set_max_entries(_pos);
     if (ah.authenticate(_p->data_ptr(), _p->data_bytes(), fe, trailer) == 0) {
 	XLOG_ERROR("Outbound authentication error: %s\n", ah.error().c_str());
 	return false;
