@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.6 2004/06/10 22:40:52 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.7 2004/08/12 22:18:38 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -46,7 +46,7 @@ IfConfigObserverNetlink::IfConfigObserverNetlink(IfConfig& ifc)
       NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ifc();
+    register_ifc_primary();
 #endif
 }
 
@@ -125,7 +125,8 @@ IfConfigObserverNetlink::stop()
 void
 IfConfigObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
 {
-    if (ifc().ifc_get().parse_buffer_nlm(ifc().live_config(), data, nbytes)
+    if (ifc().ifc_get_primary().parse_buffer_nlm(ifc().live_config(),
+						 data, nbytes)
 	!= true)
 	return;
     ifc().report_updates(ifc().live_config(), true);

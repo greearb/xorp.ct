@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.7 2004/03/18 13:09:46 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.8 2004/06/10 22:40:57 hodson Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -47,11 +47,11 @@ public:
 			     XrlRouter* xrl_router,
 			     uint32_t	max_ops = 200)
 	: _ftm(e, ftic), _max_ops(max_ops), _xrl_fea_fib_client(xrl_router) {
-	ftic.ftic_table_observer().add_fib_table_observer(this);
+	ftic.add_fib_table_observer(this);
     }
 
     ~XrlFtiTransactionManager() {
-	ftic().ftic_table_observer().delete_fib_table_observer(this);
+	ftic().delete_fib_table_observer(this);
     }
 
     /**

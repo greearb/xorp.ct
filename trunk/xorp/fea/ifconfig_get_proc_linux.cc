@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.14 2004/06/10 22:40:52 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.15 2004/08/12 22:18:38 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -48,7 +48,7 @@ IfConfigGetProcLinux::IfConfigGetProcLinux(IfConfig& ifc)
     : IfConfigGet(ifc)
 {
 #ifdef HAVE_PROC_LINUX
-    register_ifc();
+    register_ifc_primary();
 #endif
 }
 

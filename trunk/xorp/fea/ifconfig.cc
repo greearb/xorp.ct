@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.25 2004/06/10 22:40:51 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.26 2004/08/12 22:18:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -55,7 +55,6 @@ IfConfig::IfConfig(EventLoop& eventloop,
 		   IfConfigUpdateReporterBase& ur,
 		   IfConfigErrorReporterBase& er)
     : _eventloop(eventloop), _ur(ur), _er(er),
-      _ifc_get(NULL), _ifc_set(NULL), _ifc_observer(NULL),
       _ifc_get_dummy(*this),
       _ifc_get_ioctl(*this),
       _ifc_get_sysctl(*this),
@@ -74,6 +73,23 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _is_running(false)
 {
     //
+    // Check that all necessary mechanisms to interact with the
+    // underlying system are in place.
+    //
+    if (_ifc_gets.empty()) {
+	XLOG_FATAL("No mechanism to get the network interface information "
+		   "from the underlying system");
+    }
+    if (_ifc_sets.empty()) {
+	XLOG_FATAL("No mechanism to set the network interface information "
+		   "into the underlying system");
+    }
+    if (_ifc_observers.empty()) {
+	XLOG_FATAL("No mechanism to observe the network interface information "
+		   "from the underlying system");
+    }
+
+    //
     // Test if the system supports IPv4 and IPv6 respectively
     //
     _have_ipv4 = test_have_ipv4();
@@ -81,25 +97,58 @@ IfConfig::IfConfig(EventLoop& eventloop,
 }
 
 int
-IfConfig::register_ifc_get(IfConfigGet *ifc_get)
+IfConfig::register_ifc_get_primary(IfConfigGet *ifc_get)
 {
-    _ifc_get = ifc_get;
+    _ifc_gets.clear();
+    if (ifc_get != NULL)
+	_ifc_gets.push_back(ifc_get);
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_set(IfConfigSet *ifc_set)
+IfConfig::register_ifc_set_primary(IfConfigSet *ifc_set)
 {
-    _ifc_set = ifc_set;
+    _ifc_sets.clear();
+    if (ifc_set != NULL)
+	_ifc_sets.push_back(ifc_set);
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_observer(IfConfigObserver *ifc_observer)
+IfConfig::register_ifc_observer_primary(IfConfigObserver *ifc_observer)
 {
-    _ifc_observer = ifc_observer;
+    _ifc_observers.clear();
+    if (ifc_observer != NULL)
+	_ifc_observers.push_back(ifc_observer);
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::register_ifc_get_secondary(IfConfigGet *ifc_get)
+{
+    if (ifc_get != NULL)
+	_ifc_gets.push_back(ifc_get);
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::register_ifc_set_secondary(IfConfigSet *ifc_set)
+{
+    if (ifc_set != NULL)
+	_ifc_sets.push_back(ifc_set);
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::register_ifc_observer_secondary(IfConfigObserver *ifc_observer)
+{
+    if (ifc_observer != NULL)
+	_ifc_observers.push_back(ifc_observer);
 
     return (XORP_OK);
 }
@@ -107,9 +156,9 @@ IfConfig::register_ifc_observer(IfConfigObserver *ifc_observer)
 int
 IfConfig::set_dummy()
 {
-    register_ifc_get(&_ifc_get_dummy);
-    register_ifc_set(&_ifc_set_dummy);
-    register_ifc_observer(&_ifc_observer_dummy);
+    register_ifc_get_primary(&_ifc_get_dummy);
+    register_ifc_set_primary(&_ifc_set_dummy);
+    register_ifc_observer_primary(&_ifc_observer_dummy);
 
     _is_dummy = true;
 
@@ -119,16 +168,31 @@ IfConfig::set_dummy()
 int
 IfConfig::start()
 {
-    if (_ifc_get != NULL) {
-	if (_ifc_get->start() < 0)
+    list<IfConfigGet*>::iterator ifc_get_iter;
+    list<IfConfigSet*>::iterator ifc_set_iter;
+    list<IfConfigObserver*>::iterator ifc_observer_iter;
+
+    for (ifc_get_iter = _ifc_gets.begin();
+	 ifc_get_iter != _ifc_gets.end();
+	 ++ifc_get_iter) {
+	IfConfigGet* ifc_get = *ifc_get_iter;
+	if (ifc_get->start() < 0)
 	    return (XORP_ERROR);
     }
-    if (_ifc_set != NULL) {
-	if (_ifc_set->start() < 0)
+
+    for (ifc_set_iter = _ifc_sets.begin();
+	 ifc_set_iter != _ifc_sets.end();
+	 ++ifc_set_iter) {
+	IfConfigSet* ifc_set = *ifc_set_iter;
+	if (ifc_set->start() < 0)
 	    return (XORP_ERROR);
     }
-    if (_ifc_observer != NULL) {
-	if (_ifc_observer->start() < 0)
+
+    for (ifc_observer_iter = _ifc_observers.begin();
+	 ifc_observer_iter != _ifc_observers.end();
+	 ++ifc_observer_iter) {
+	IfConfigObserver* ifc_observer = *ifc_observer_iter;
+	if (ifc_observer->start() < 0)
 	    return (XORP_ERROR);
     }
 
@@ -146,21 +210,35 @@ IfConfig::start()
 int
 IfConfig::stop()
 {
+    list<IfConfigGet*>::iterator ifc_get_iter;
+    list<IfConfigSet*>::iterator ifc_set_iter;
+    list<IfConfigObserver*>::iterator ifc_observer_iter;
     int ret_value = XORP_OK;
 
     if (! _is_running)
 	return (XORP_OK);
 
-    if (_ifc_observer != NULL) {
-	if (_ifc_observer->stop() < 0)
+    for (ifc_observer_iter = _ifc_observers.begin();
+	 ifc_observer_iter != _ifc_observers.end();
+	 ++ifc_observer_iter) {
+	IfConfigObserver* ifc_observer = *ifc_observer_iter;
+	if (ifc_observer->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
-    if (_ifc_set != NULL) {
-	if (_ifc_set->stop() < 0)
+
+    for (ifc_set_iter = _ifc_sets.begin();
+	 ifc_set_iter != _ifc_sets.end();
+	 ++ifc_set_iter) {
+	IfConfigSet* ifc_set = *ifc_set_iter;
+	if (ifc_set->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
-    if (_ifc_get != NULL) {
-	if (_ifc_get->stop() < 0)
+
+    for (ifc_get_iter = _ifc_gets.begin();
+	 ifc_get_iter != _ifc_gets.end();
+	 ++ifc_get_iter) {
+	IfConfigGet* ifc_get = *ifc_get_iter;
+	if (ifc_get->stop() < 0)
 	    ret_value = XORP_ERROR;
     }
 
@@ -216,7 +294,9 @@ IfConfig::test_have_ipv6() const
 bool
 IfConfig::push_config(const IfTree& config)
 {
-    if (_ifc_set == NULL)
+    list<IfConfigSet*>::iterator ifc_set_iter;
+
+    if (_ifc_sets.empty())
 	return false;
 
     //
@@ -224,17 +304,33 @@ IfConfig::push_config(const IfTree& config)
     // the new config with the current config.
     //
     pull_config();
-    return (_ifc_set->push_config(config));
+
+    for (ifc_set_iter = _ifc_sets.begin();
+	 ifc_set_iter != _ifc_sets.end();
+	 ++ifc_set_iter) {
+	IfConfigSet* ifc_set = *ifc_set_iter;
+	if (ifc_set->push_config(config) != true)
+	    return false;
+    }
+
+    return true;
 }
 
 const IfTree&
 IfConfig::pull_config()
 {
+    list<IfConfigGet*>::iterator ifc_get_iter;
+
     // Clear the old state
     _pulled_config.clear();
 
-    if (_ifc_get != NULL)
-	_ifc_get->pull_config(_pulled_config);
+    for (ifc_get_iter = _ifc_gets.begin();
+	 ifc_get_iter != _ifc_gets.end();
+	 ++ifc_get_iter) {
+	IfConfigGet* ifc_get = *ifc_get_iter;
+	ifc_get->pull_config(_pulled_config);
+    }
+
     return _pulled_config;
 }
 

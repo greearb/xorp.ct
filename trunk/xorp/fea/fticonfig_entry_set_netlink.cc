@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.8 2004/08/03 03:51:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.9 2004/08/12 22:18:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -49,7 +49,7 @@ FtiConfigEntrySetNetlink::FtiConfigEntrySetNetlink(FtiConfig& ftic)
       _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ftic();
+    register_ftic_primary();
 #endif
 }
 

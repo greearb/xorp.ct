@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.7 2004/06/02 22:52:40 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.8 2004/06/10 22:40:52 hodson Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -32,7 +32,7 @@ public:
     
     IfConfig&	ifc() { return _ifc; }
     
-    virtual void register_ifc();
+    virtual void register_ifc_primary();
 
     /**
      * Start operation.

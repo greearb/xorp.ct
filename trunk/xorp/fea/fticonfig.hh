@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.15 2004/08/03 05:02:54 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.16 2004/08/12 22:18:37 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -65,19 +65,25 @@ public:
 
     EventLoop& eventloop() { return _eventloop; }
 
-    int register_ftic_entry_get(FtiConfigEntryGet *ftic_entry_get);
-    int register_ftic_entry_set(FtiConfigEntrySet *ftic_entry_set);
-    int register_ftic_entry_observer(FtiConfigEntryObserver *ftic_entry_observer);
-    int register_ftic_table_get(FtiConfigTableGet *ftic_table_get);
-    int register_ftic_table_set(FtiConfigTableSet *ftic_table_set);
-    int register_ftic_table_observer(FtiConfigTableObserver *ftic_table_observer);
+    int register_ftic_entry_get_primary(FtiConfigEntryGet *ftic_entry_get);
+    int register_ftic_entry_set_primary(FtiConfigEntrySet *ftic_entry_set);
+    int register_ftic_entry_observer_primary(FtiConfigEntryObserver *ftic_entry_observer);
+    int register_ftic_table_get_primary(FtiConfigTableGet *ftic_table_get);
+    int register_ftic_table_set_primary(FtiConfigTableSet *ftic_table_set);
+    int register_ftic_table_observer_primary(FtiConfigTableObserver *ftic_table_observer);
+    int register_ftic_entry_get_secondary(FtiConfigEntryGet *ftic_entry_get);
+    int register_ftic_entry_set_secondary(FtiConfigEntrySet *ftic_entry_set);
+    int register_ftic_entry_observer_secondary(FtiConfigEntryObserver *ftic_entry_observer);
+    int register_ftic_table_get_secondary(FtiConfigTableGet *ftic_table_get);
+    int register_ftic_table_set_secondary(FtiConfigTableSet *ftic_table_set);
+    int register_ftic_table_observer_secondary(FtiConfigTableObserver *ftic_table_observer);
     
-    FtiConfigEntryGet&		ftic_entry_get() { return *_ftic_entry_get; }
-    FtiConfigEntrySet&		ftic_entry_set() { return *_ftic_entry_set; }
-    FtiConfigEntryObserver&	ftic_entry_observer() { return *_ftic_entry_observer; }
-    FtiConfigTableGet&		ftic_table_get() { return *_ftic_table_get; }
-    FtiConfigTableSet&		ftic_table_set() { return *_ftic_table_set; }
-    FtiConfigTableObserver&	ftic_table_observer() { return *_ftic_table_observer; }
+    FtiConfigEntryGet&		ftic_entry_get_primary() { return *_ftic_entry_gets.front(); }
+    FtiConfigEntrySet&		ftic_entry_set_primary() { return *_ftic_entry_sets.front(); }
+    FtiConfigEntryObserver&	ftic_entry_observer_primary() { return *_ftic_entry_observers.front(); }
+    FtiConfigTableGet&		ftic_table_get_primary() { return *_ftic_table_gets.front(); }
+    FtiConfigTableSet&		ftic_table_set_primary() { return *_ftic_table_sets.front(); }
+    FtiConfigTableObserver&	ftic_table_observer_primary() { return *_ftic_table_observers.front(); }
 
     /**
      * Setup the unit to behave as dummy (for testing purpose).
@@ -255,6 +261,22 @@ public:
     virtual bool get_table6(list<Fte6>& fte_list);
 
     /**
+     * Add a FIB table observer.
+     * 
+     * @param fib_table_observer the FIB table observer to add.
+     * @return true on success, otherwise false.
+     */
+    bool add_fib_table_observer(FibTableObserverBase* fib_table_observer);
+    
+    /**
+     * Delete a FIB table observer.
+     * 
+     * @param fib_table_observer the FIB table observer to delete.
+     * @return true on success, otherwise false.
+     */
+    bool delete_fib_table_observer(FibTableObserverBase* fib_table_observer);
+
+    /**
      * Return true if the underlying system supports IPv4.
      * 
      * @return true if the underlying system supports IPv4, otherwise false.
@@ -370,12 +392,12 @@ protected:
 private:
     EventLoop&	_eventloop;
 
-    FtiConfigEntryGet		*_ftic_entry_get;
-    FtiConfigEntrySet		*_ftic_entry_set;
-    FtiConfigEntryObserver	*_ftic_entry_observer;
-    FtiConfigTableGet		*_ftic_table_get;
-    FtiConfigTableSet		*_ftic_table_set;
-    FtiConfigTableObserver	*_ftic_table_observer;
+    list<FtiConfigEntryGet*>		_ftic_entry_gets;
+    list<FtiConfigEntrySet*>		_ftic_entry_sets;
+    list<FtiConfigEntryObserver*>	_ftic_entry_observers;
+    list<FtiConfigTableGet*>		_ftic_table_gets;
+    list<FtiConfigTableSet*>		_ftic_table_sets;
+    list<FtiConfigTableObserver*>	_ftic_table_observers;
     
     //
     // The mechanisms to get single-entry information from the unicast

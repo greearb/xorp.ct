@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer_dummy.cc,v 1.3 2004/06/02 22:52:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_dummy.cc,v 1.4 2004/06/10 22:40:47 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -39,7 +39,7 @@ FtiConfigEntryObserverDummy::FtiConfigEntryObserverDummy(FtiConfig& ftic)
     : FtiConfigEntryObserver(ftic)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ftic();
+    register_ftic_primary();
 #endif
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.25 2004/06/10 22:40:51 hodson Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.26 2004/08/12 22:18:37 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -66,13 +66,16 @@ public:
 
     const IfTree& pulled_config() { return (_pulled_config); }
 
-    int register_ifc_get(IfConfigGet *ifc_get);
-    int register_ifc_set(IfConfigSet *ifc_set);
-    int register_ifc_observer(IfConfigObserver *ifc_observer);
+    int register_ifc_get_primary(IfConfigGet *ifc_get);
+    int register_ifc_set_primary(IfConfigSet *ifc_set);
+    int register_ifc_observer_primary(IfConfigObserver *ifc_observer);
+    int register_ifc_get_secondary(IfConfigGet *ifc_get);
+    int register_ifc_set_secondary(IfConfigSet *ifc_set);
+    int register_ifc_observer_secondary(IfConfigObserver *ifc_observer);
 
-    IfConfigGet&	ifc_get() { return *_ifc_get; }
-    IfConfigSet&	ifc_set() { return *_ifc_set; }
-    IfConfigObserver&	ifc_observer() { return *_ifc_observer; }
+    IfConfigGet&	ifc_get_primary() { return *_ifc_gets.front(); }
+    IfConfigSet&	ifc_set_primary() { return *_ifc_sets.front(); }
+    IfConfigObserver&	ifc_observer_primary() { return *_ifc_observers.front(); }
 
     IfConfigGet&	ifc_get_ioctl() { return _ifc_get_ioctl; }
 
@@ -221,48 +224,50 @@ private:
     IfConfigUpdateReporterBase&	_ur;
     IfConfigErrorReporterBase&	_er;
 
+    //
     // A cache of associative array of interface names to interface index.
     // Needed because the RTM_IFANNOUNCE upcall is called after the interface
     // name is deleted from the kernel.
+    //
     typedef map<uint32_t, string> IfIndex2NameMap;
     IfIndex2NameMap	_ifnames;
 
     IfTree		_live_config;	// The IfTree with live config
     IfTree		_pulled_config;	// The IfTree when we pull the config
 
-    IfConfigGet		*_ifc_get;
-    IfConfigSet		*_ifc_set;
-    IfConfigObserver	*_ifc_observer;
+    list<IfConfigGet*>		_ifc_gets;
+    list<IfConfigSet*>		_ifc_sets;
+    list<IfConfigObserver*>	_ifc_observers;
 
     //
     // The mechanisms to get interface-related information
     // from the underlying system.
     // Ordering is important: the last that is supported is the one to use.
     //
-    IfConfigGetDummy	_ifc_get_dummy;
-    IfConfigGetIoctl	_ifc_get_ioctl;
-    IfConfigGetSysctl	_ifc_get_sysctl;
-    IfConfigGetGetifaddrs _ifc_get_getifaddrs;
-    IfConfigGetProcLinux  _ifc_get_proc_linux;
-    IfConfigGetNetlink	_ifc_get_netlink;
+    IfConfigGetDummy		_ifc_get_dummy;
+    IfConfigGetIoctl		_ifc_get_ioctl;
+    IfConfigGetSysctl		_ifc_get_sysctl;
+    IfConfigGetGetifaddrs	_ifc_get_getifaddrs;
+    IfConfigGetProcLinux	_ifc_get_proc_linux;
+    IfConfigGetNetlink		_ifc_get_netlink;
 
     //
     // The mechanisms to set interface-related information
     // within the underlying system.
     // Ordering is important: the last that is supported is the one to use.
     //
-    IfConfigSetDummy	_ifc_set_dummy;
-    IfConfigSetIoctl	_ifc_set_ioctl;
-    IfConfigSetNetlink	_ifc_set_netlink;
+    IfConfigSetDummy		_ifc_set_dummy;
+    IfConfigSetIoctl		_ifc_set_ioctl;
+    IfConfigSetNetlink		_ifc_set_netlink;
 
     //
     // The mechanisms to observe whether the interface-related information
     // within the underlying system has changed.
     // Ordering is important: the last that is supported is the one to use.
     //
-    IfConfigObserverDummy _ifc_observer_dummy;
-    IfConfigObserverRtsock _ifc_observer_rtsock;
-    IfConfigObserverNetlink _ifc_observer_netlink;
+    IfConfigObserverDummy	_ifc_observer_dummy;
+    IfConfigObserverRtsock	_ifc_observer_rtsock;
+    IfConfigObserverNetlink	_ifc_observer_netlink;
 
     //
     // Misc other state

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_netlink.cc,v 1.5 2004/06/10 22:40:50 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_netlink.cc,v 1.6 2004/08/12 22:18:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -50,7 +50,7 @@ FtiConfigTableObserverNetlink::FtiConfigTableObserverNetlink(FtiConfig& ftic)
       NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ftic();
+    register_ftic_primary();
 #endif
 }
 
@@ -133,8 +133,8 @@ FtiConfigTableObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
     // Get the IPv4 routes
     //
     if (ftic().have_ipv4()) {
-	ftic().ftic_table_get().parse_buffer_nlm(AF_INET, fte_list, data,
-						 nbytes, false);
+	ftic().ftic_table_get_primary().parse_buffer_nlm(AF_INET, fte_list,
+							 data, nbytes, false);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -146,8 +146,8 @@ FtiConfigTableObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
     // Get the IPv6 routes
     //
     if (ftic().have_ipv6()) {
-	ftic().ftic_table_get().parse_buffer_nlm(AF_INET6, fte_list, data,
-						 nbytes, false);
+	ftic().ftic_table_get_primary().parse_buffer_nlm(AF_INET6, fte_list,
+							 data, nbytes, false);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.15 2004/08/03 03:51:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.16 2004/08/12 22:18:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -36,7 +36,7 @@ FtiConfigEntrySetRtsock::FtiConfigEntrySetRtsock(FtiConfig& ftic)
       RoutingSocket(ftic.eventloop())
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic();
+    register_ftic_primary();
 #endif
 }
 

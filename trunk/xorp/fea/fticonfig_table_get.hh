@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.10 2004/06/02 22:52:37 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.11 2004/06/10 22:40:50 hodson Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -36,7 +36,7 @@ public:
     
     FtiConfig&	ftic() { return _ftic; }
     
-    virtual void register_ftic();
+    virtual void register_ftic_primary();
 
     /**
      * Start operation.

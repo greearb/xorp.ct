@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.5 2004/06/02 22:52:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.6 2004/06/10 22:40:52 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -43,7 +43,7 @@ IfConfigGetSysctl::IfConfigGetSysctl(IfConfig& ifc)
     : IfConfigGet(ifc)
 {
 #ifdef HAVE_SYSCTL_NET_RT_IFLIST
-    register_ifc();
+    register_ifc_primary();
 #endif
 }
 

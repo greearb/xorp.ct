@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.22 2004/06/17 03:59:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.23 2004/08/12 22:18:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -80,7 +80,7 @@ IfConfigSetIoctl::IfConfigSetIoctl(IfConfig& ifc)
     : IfConfigSet(ifc), _s4(-1), _s6(-1)
 {
 #ifdef HAVE_IOCTL_SIOCGIFCONF
-    register_ifc();
+    register_ifc_primary();
 #endif
 }
 

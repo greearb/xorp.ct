@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.5 2004/06/02 22:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.6 2004/06/10 22:40:53 hodson Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -37,7 +37,7 @@ IfConfigObserverRtsock::IfConfigObserverRtsock(IfConfig& ifc)
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ifc();
+    register_ifc_primary();
 #endif
 }
 
@@ -74,7 +74,8 @@ IfConfigObserverRtsock::stop()
 void
 IfConfigObserverRtsock::receive_data(const uint8_t* data, size_t nbytes)
 {
-    if (ifc().ifc_get().parse_buffer_rtm(ifc().live_config(), data, nbytes)
+    if (ifc().ifc_get_primary().parse_buffer_rtm(ifc().live_config(),
+						 data, nbytes)
 	!= true)
 	return;
     ifc().report_updates(ifc().live_config(), true);
