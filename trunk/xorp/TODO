@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.6 2004/09/02 03:18:05 pavlin Exp $
+# $XORP: xorp/TODO,v 1.7 2004/10/15 09:16:11 bms Exp $
 #
 
 * Standardize the version string format return by the
@@ -17,3 +17,7 @@
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.
+
+* Consolidate the way we render bools as strings, i.e. make the use
+  of bool2str() vs truefalse() vs explicit tertiary operator consistent
+  and settle on one only if possible.
