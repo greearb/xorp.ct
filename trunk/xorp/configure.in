@@ -1,5 +1,5 @@
-dnl
-dnl $XORP: xorp/configure.in,v 1.23 2003/04/16 05:58:24 pavlin Exp $
+dnl -*- sh -*-
+dnl $XORP: xorp/configure.in,v 1.24 2003/04/16 08:05:08 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -275,10 +275,33 @@ fail_openssl()
 }
 
 if test "X${xr_openssl_prefix}" = "X" ; then
-   AC_CACHE_VAL(xr_cv_openssl_prefix, xr_cv_openssl_prefix="/usr")
-else
-   AC_CACHE_VAL(xr_cv_openssl_prefix, 
-	        xr_cv_openssl_prefix="${xr_openssl_prefix}")
+# User has not specified an OpenSSL prefix, may be in cache, otherwise take
+# a guess
+    AC_CACHE_CHECK(
+	"OpenSSL installation prefix", 
+	xr_cv_openssl_prefix,
+	[
+	    # Prefer base install over local install, assume base if not found
+	    for xr_cv_openssl_prefix in /usr /usr/local /usr ; do
+		if test -d ${xr_cv_openssl_prefix}/include/openssl; then
+		    break
+		fi
+	    done
+	])
+elif test "X${xr_openssl_prefix}" != "X${xr_cv_openssl_prefix}"; then
+
+    # User has specified a new OpenSSL prefix, flush cache state of
+    # header files and libraries that we care about to force a
+    # re-check.
+    unset ac_cv_header_openssl_md5_h
+    unset ac_cv_lib_crypto_MD5_Init
+    unset xr_cv_openssl_prefix
+
+    # This cache check is doomed to fail because we unset variable,
+    # but use it for consistent looking output.
+    AC_CACHE_CHECK("OpenSSL installation prefix", 
+		   xr_cv_openssl_prefix,
+		   xr_cv_openssl_prefix="${xr_openssl_prefix}")
 fi
 
 if test -d ${xr_cv_openssl_prefix}/include/openssl; then
