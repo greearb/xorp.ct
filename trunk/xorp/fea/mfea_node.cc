@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.23 2004/03/01 10:01:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.24 2004/04/01 12:22:06 pavlin Exp $"
 
 
 //
@@ -1533,7 +1533,7 @@ MfeaNode::join_multicast_group(const string& module_instance_name,
     ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
     
-    if ((proto_comm == NULL) || mfea_vif == NULL)
+    if ((proto_comm == NULL) || (mfea_vif == NULL))
 	return (XORP_ERROR);
     
     bool has_group = mfea_vif->has_multicast_group(group);
@@ -1579,7 +1579,7 @@ MfeaNode::leave_multicast_group(const string& module_instance_name,
     ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
     
-    if ((proto_comm == NULL) || mfea_vif == NULL)
+    if ((proto_comm == NULL) || (mfea_vif == NULL))
 	return (XORP_ERROR);
     
     // Delete the state for the group
