@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.7 2003/05/15 21:46:31 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.8 2004/04/13 22:14:43 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -9,7 +9,8 @@ filter_and_post_log()
 {
     local subject toaddr errfile filtfile msgfile
 
-    subject="$1"
+    d=`date "+%y%m%d-%H%M"`
+    subject="[$d] - $1"
     toaddr="$2"
     errfile="$3"
 
@@ -49,12 +50,12 @@ init_log_header()
     sinfo=`ssh ${SSH_FLAGS} -n ${host} 'uname -s -r'`
     cat >${outfile} <<EOF
 -------------------------------------------------------------------------------
-Configuration:		${cfg}
-Host:			${host}
-Environment:		${env}
-Build directory:	${dir}
-Start time:		${now}
-System Info:		${sinfo}
+Configuration:    ${cfg}
+Host:             ${host}
+Environment:      ${env}
+Build directory:  ${dir}
+Start time:       ${now}
+System Info:      ${sinfo}
 -------------------------------------------------------------------------------
 
 EOF
