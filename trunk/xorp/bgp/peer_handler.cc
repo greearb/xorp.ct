@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.29 2003/10/30 04:44:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.30 2003/11/05 06:39:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -219,7 +219,7 @@ PeerHandler::add<IPv6>(const UpdatePacket *p,
 	++ni;
     }
 
-    return false;
+    return true;
 }
 
 template <>
