@@ -219,11 +219,21 @@ class Lsa {
      * Add the LSA type bindings.
      */
 //     void install_type(LsaType type, Lsa *lsa); 
-
+    
+    /**
+     * Get a reference to the raw LSA
+     *
+     * @param len The length of the LSA.
+     *
+     * @return pointer to start of the LSA.
+     */
+    uint8_t *lsa(size_t &len) {
+	len = _pkt.size();
+	return &_pkt[0];
+    }
  protected:
-    Lsa_header _header;	// Common LSA header.
-    uint8_t *ptr;	// Encoded or decoded packets are stored here.
-    size_t _len;	// Length of the packet.
+    Lsa_header _header;		// Common LSA header.
+    vector<uint8_t> _pkt;	// Raw LSA.
 
  private:
     const OspfTypes::Version 	_version;
@@ -239,18 +249,161 @@ class Lsa {
  */
 class RouterLink {
  public:
+    enum type {
+	p2p = 1,	// Point-to-point connection to another router
+	transit = 2,	// Connection to a transit network
+	stub = 3,	// Connection to a stub network OSPF V2 only
+	vlink = 4	// Virtual link
+    };
+
     RouterLink(OspfTypes::Version version) : _version(version)
     {}
+
+    RouterLink(const RouterLink& rhs) : _version(rhs._version) {
+	copy(rhs);
+    }
+
+    RouterLink operator=(const RouterLink& rhs) {
+	if(&rhs == this)
+	    return *this;
+	copy(rhs);
+	return *this;
+    }
+
+#define	routerlink_copy(var)	var = rhs.var;
+
+    void copy(const RouterLink& rhs) {
+	routerlink_copy(_type);
+	routerlink_copy(_metric);
+	switch (get_version()) {
+	case OspfTypes::V2:
+	    routerlink_copy(_link_id);
+	    routerlink_copy(_link_data);
+	    break;
+	case OspfTypes::V3:
+	    routerlink_copy(_interface_id);
+	    routerlink_copy(_neighbour_interface_id);
+	    routerlink_copy(_neighbour_router_id);
+	    break;
+	}
+    }
+#undef	routerlink_copy
+    
+    /**
+     * @return the number of bytes the encoded data will occupy.
+     */
+    size_t length() const;
+
+     /**
+     * Decode a RouterLink.
+     *
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A RouterLink.
+     */
+    RouterLink
+    decode(uint8_t *ptr, size_t& len) throw(BadPacket);
+    
+    /**
+     * Copy a wire format representation to the pointer provided.
+     *
+     * length() should be called by the caller to verify enough space
+     * is available.
+     * @return the number of bytes written.
+     */
+    size_t copy_out(uint8_t *to_uint8) const;
+
+    OspfTypes::Version get_version() const {
+	return _version;
+    }
+
+    // Type
+    void set_type(type t) {
+	if (stub == t)
+	    XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_type = t;
+    }
+
+    type get_type() const {
+	return _type;
+    }
+
+    // Metric
+    void set_metric(uint16_t metric) {
+	_metric = metric;
+    }
+
+    uint16_t get_metric() const {
+	return _metric;
+    }
+
+    // Link ID
+    void set_link_id(uint32_t link_id) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_link_id = link_id;
+    }
+
+    uint32_t get_link_id() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _link_id;
+    }
+
+    // Link Data
+    void set_link_data(uint32_t link_data) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_link_data = link_data;
+    }
+
+    uint32_t get_link_data() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _link_data;
+    }
+
+    // Interface ID
+    void set_interface_id(uint32_t interface_id) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_interface_id = interface_id;
+    }
+
+    uint32_t get_interface_id() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _interface_id;
+    }
+
+    // Neighbour Interface ID
+    void set_neighbour_interface_id(uint32_t neighbour_interface_id) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_neighbour_interface_id = neighbour_interface_id;
+    }
+
+    uint32_t get_neighbour_interface_id() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _neighbour_interface_id;
+    }
+
+    // Neighbour Router ID
+    void set_neighbour_router_id(uint32_t neighbour_router_id) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_neighbour_router_id = neighbour_router_id;
+    }
+
+    uint32_t get_neighbour_router_id() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _neighbour_router_id;
+    }
+
+    /**
+     * Generate a printable representation of the header.
+     */
+    string str() const;
+
  private:
     const OspfTypes::Version 	_version;
 
-    enum type_description {
-	p2p = 1,	// Point-to-point connection to another router
-	transit = 2,	//
-    };
-
-    uint16_t	_type;
-    uint16_t	_metric;
+    type	_type;
+    uint16_t	_metric;		// Only store TOS 0 metric
 
     uint32_t	_link_id;		// OSPF V2 Only
     uint32_t	_link_data;		// OSPF V2 Only
