@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.20 2005/03/05 01:58:51 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.21 2005/03/25 02:53:21 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -697,7 +697,8 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
 	// we just replace the previously received route with the
 	// new one.
 	//
-	return (replace_route(fib2mrib_route, error_msg));
+	updated_route.set_replace_route();
+	return (replace_route(updated_route, error_msg));
     }
 
     //
