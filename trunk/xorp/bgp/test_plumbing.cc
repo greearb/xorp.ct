@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.1 2003/09/27 02:20:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.2 2003/09/27 02:37:32 atanu Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -362,7 +362,7 @@ int main(int /* argc */, char *argv[])
 	pid_t pid;
 	switch(pid = fork()) {
 	case 0:
-	    execlp("../libxipc/xorp_finder", "xorp_finder", 0);
+	    execlp("../libxipc/xorp_finder", "xorp_finder", NULL);
 	    exit(0);
 	case -1:
 	    XLOG_FATAL("unable to exec xorp_finder");
