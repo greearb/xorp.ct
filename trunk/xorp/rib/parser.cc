@@ -82,7 +82,7 @@ void
 Command::check_syntax()
 {
     size_t nargs = count(_syntax.begin(), _syntax.end(), '~');
-    assert((int)nargs == _nargs);
+    XLOG_ASSERT((int)nargs == _nargs);
 }
 
 DatumVariableBinding*

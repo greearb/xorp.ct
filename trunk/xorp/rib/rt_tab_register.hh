@@ -176,7 +176,7 @@ public:
      *
      * @param module the ModuleData instance refering to the
      * additional routing protocol that just registered interest.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_registrant(const ModuleData *module) {
 	    debug_msg("add_registrant: Module: %s\n", module->str().c_str());
@@ -193,7 +193,7 @@ public:
      *
      * @param module the ModuleData instance of the routing protocol
      * that de-registered.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_registrant(const ModuleData *module);
 
@@ -228,12 +228,12 @@ public:
      * @return the module names interested in this RouteRegister as a
      * list of strings 
      */
-    list <string> module_names() const {
-	    list <string> names;
-	    set <const ModuleData *, ModuleCmp>::const_iterator i;
-	    for (i = _modules.begin(); i != _modules.end(); ++i)
-		names.push_back((*i)->name());
-	    return names;
+    list<string> module_names() const {
+	list<string> names;
+	set<const ModuleData *, ModuleCmp>::const_iterator i;
+	for (i = _modules.begin(); i != _modules.end(); ++i)
+	    names.push_back((*i)->name());
+	return names;
     }
 
     /**
@@ -302,7 +302,7 @@ public:
      *
      * @param route the new route.
      * @param caller this must be this table's parent table.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
@@ -314,7 +314,7 @@ public:
      *
      * @param route the route being deleted.
      * @param caller this must be this table's parent table.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 
@@ -395,7 +395,7 @@ public:
      * RouteRegister returned by a prior call to register_route_range.
      * @param module the XRL target name of the module that is no
      * longer interested in being notified.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int deregister_route_range(const IPNet<A>& subnet, const string& module);
 

@@ -137,7 +137,7 @@ parser_main()
 				// exist synchronous code.
 	while (cv == XRL_PENDING)
 	    eventloop.run();
-	assert (cv == SUCCESS);
+	XLOG_ASSERT(cv == SUCCESS);
     }
 }
 

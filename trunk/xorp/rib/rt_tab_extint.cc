@@ -527,7 +527,7 @@ const IPRouteEntry<A> *
 ExtIntTable<A>::lookup_route(const A& addr) const 
 {
     const IPRouteEntry<A> *ext_found = NULL, *int_found;
-    list <const IPRouteEntry<A>*> found;
+    list<const IPRouteEntry<A>*> found;
     cp(48);
     debug_msg("ExtIntTable::lookup_route\n");
 
@@ -557,7 +557,7 @@ ExtIntTable<A>::lookup_route(const A& addr) const
 
     // retain only the routes with the longest prefix length
     uint32_t longest_prefix_len = 0;
-    typename list <const IPRouteEntry<A>*>::iterator i, i2;
+    typename list<const IPRouteEntry<A>*>::iterator i, i2;
     for (i = found.begin(); i != found.end(); i++) {
 	if ((*i)->net().prefix_len() > longest_prefix_len) {
 	    longest_prefix_len = (*i)->net().prefix_len();

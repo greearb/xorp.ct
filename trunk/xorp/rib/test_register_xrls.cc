@@ -96,14 +96,14 @@ public:
     bool verify_no_info();
 
 private:
-    set <string> _invalidated;
-    set <string> _changed;
+    set<string> _invalidated;
+    set<string> _changed;
 };
 
 bool 
 RibClientTarget::verify_invalidated(const string& invalid)
 {
-    set <string>::iterator i;
+    set<string>::iterator i;
     
     i = _invalidated.find(invalid);
     if (i == _invalidated.end()) {
@@ -119,7 +119,7 @@ RibClientTarget::verify_invalidated(const string& invalid)
 bool 
 RibClientTarget::verify_changed(const string& changed)
 {
-    set <string>::iterator i;
+    set<string>::iterator i;
     
     i = _changed.find(changed);
     if (i == _changed.end()) {
@@ -258,19 +258,19 @@ register_done(const XrlError& e,
 	      IPv4 expected_nexthop,
 	      uint32_t expected_metric)
 {
-    assert(e == XrlCmdError::OKAY());
+    XLOG_ASSERT(e == XrlCmdError::OKAY());
     if (expected_resolves) {
-	assert(*resolves);
+	XLOG_ASSERT(*resolves == true);
 	IPv4Net net(*base_addr, *prefix_len);
-	assert(net == expected_net);
+	XLOG_ASSERT(net == expected_net);
 	if (*metric != expected_metric) {
 	    fprintf(stderr, "Expected metric %d, got %d\n", 
 		    expected_metric, *metric);
 	    abort();
 	}
-	assert(*nexthop == expected_nexthop);
+	XLOG_ASSERT(*nexthop == expected_nexthop);
     } else {
-	assert(!(*resolves));
+	XLOG_ASSERT(*resolves == false);
     }
     xrl_done_flag = true;
 }

@@ -524,17 +524,17 @@ RibManager::make_errors_fatal()
 }
 
 void 
-RibManager::register_interest_in_target(const string& tgt_class)
+RibManager::register_interest_in_target(const string& target_class)
 {
-    if (_targets_of_interest.find(tgt_class) 
+    if (_targets_of_interest.find(target_class) 
 	== _targets_of_interest.end()) {
-	_targets_of_interest.insert(tgt_class);
+	_targets_of_interest.insert(target_class);
 	XrlFinderEventNotifierV0p1Client finder(&_xrl_router);
 	XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
 	    callback(this, &RibManager::register_interest_in_target_done);
 	finder.send_register_class_event_interest("finder",
 						  _xrl_router.instance_name(),
-						  tgt_class, cb);
+						  target_class, cb);
     } else {
 	return;
     }
@@ -548,28 +548,28 @@ RibManager::register_interest_in_target_done(const XrlError& e)
     }
 }
 
-
 void
-RibManager::target_death(const string& tgt_class, const string& tgt_instance)
+RibManager::target_death(const string& target_class,
+			 const string& target_instance)
 {
-    if (tgt_class == "fea") {
-	//No cleanup - we just exit.
+    if (target_class == "fea") {
+	// No cleanup - we just exit.
 	XLOG_ERROR("FEA died, so RIB is exiting too\n");
 	exit(0);
     }
 
-    //inform the RIBs in case this was a routing protocol that died.
-    _urib4.target_death(tgt_class, tgt_instance);
-    _urib6.target_death(tgt_class, tgt_instance);
-    _mrib4.target_death(tgt_class, tgt_instance);
-    _mrib6.target_death(tgt_class, tgt_instance);
+    // Inform the RIBs in case this was a routing protocol that died.
+    _urib4.target_death(target_class, target_instance);
+    _urib6.target_death(target_class, target_instance);
+    _mrib4.target_death(target_class, target_instance);
+    _mrib6.target_death(target_class, target_instance);
 
-    //remove any RibClients that died.
+    // Remove any RibClients that died.
     list<RibClient *>::iterator i;
 
     for (i=_urib4_clients_list.begin(); i!= _urib4_clients_list.end(); i++) {
-	if (((*i)->target_name() == tgt_instance)
-	    || ((*i)->target_name() == tgt_class)) {
+	if (((*i)->target_name() == target_instance)
+	    || ((*i)->target_name() == target_class)) {
 	    delete (*i);
 	    _urib4_clients_list.erase(i);
 	    break;
@@ -577,8 +577,8 @@ RibManager::target_death(const string& tgt_class, const string& tgt_instance)
     }
 
     for (i=_mrib4_clients_list.begin(); i!= _mrib4_clients_list.end(); i++) {
-	if (((*i)->target_name() == tgt_instance)
-	    || ((*i)->target_name() == tgt_class)) {
+	if (((*i)->target_name() == target_instance)
+	    || ((*i)->target_name() == target_class)) {
 	    delete (*i);
 	    _mrib4_clients_list.erase(i);
 	    break;
@@ -586,8 +586,8 @@ RibManager::target_death(const string& tgt_class, const string& tgt_instance)
     }
 
     for (i=_urib6_clients_list.begin(); i!= _urib6_clients_list.end(); i++) {
-	if (((*i)->target_name() == tgt_instance)
-	    || ((*i)->target_name() == tgt_class)) {
+	if (((*i)->target_name() == target_instance)
+	    || ((*i)->target_name() == target_class)) {
 	    delete (*i);
 	    _urib6_clients_list.erase(i);
 	    break;
@@ -595,8 +595,8 @@ RibManager::target_death(const string& tgt_class, const string& tgt_instance)
     }
 
     for (i=_mrib6_clients_list.begin(); i!= _mrib6_clients_list.end(); i++) {
-	if (((*i)->target_name() == tgt_instance)
-	    || ((*i)->target_name() == tgt_class)) {
+	if (((*i)->target_name() == target_instance)
+	    || ((*i)->target_name() == target_class)) {
 	    delete (*i);
 	    _mrib6_clients_list.erase(i);
 	    break;

@@ -431,8 +431,8 @@ RegisterTable<A>::notify_route_changed(
     typename Trie<A, RouteRegister<A>*>::iterator iter,
     const IPRouteEntry<A>& changed_route)
 {
-    list <string> module_names = iter.payload()->module_names();
-    list <string>::const_iterator i;
+    list<string> module_names = iter.payload()->module_names();
+    list<string>::const_iterator i;
     NextHop *nh = changed_route.nexthop();
     A nexthop;
     bool resolves;
@@ -470,8 +470,8 @@ template<class A>
 void
 RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>*>::iterator iter)
 {
-    list <string> module_names = iter.payload()->module_names();
-    list <string>::const_iterator i;
+    list<string> module_names = iter.payload()->module_names();
+    list<string>::const_iterator i;
     IPNet<A> valid_subnet = iter.payload()->valid_subnet();
     debug_msg("notify_invalidated: %s\n", valid_subnet.str().c_str());
     for (i = module_names.begin(); i != module_names.end(); ++i) {

@@ -18,10 +18,10 @@
 #define __RIB_DUMMY_RIB_MANAGER_HH__
 
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/eventloop.hh"
-#include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
 
 #include "libproto/proto_state.hh"
@@ -34,22 +34,14 @@
 #include "vifmanager.hh"
 #include "xrl_target.hh"
 
+
 /**
- * @short Main top-level class containing RIBs and main eventloop.
- *
- * The single RibManager class instance is the top-level class in the
- * RIB process from which everything else is built and run.  It
- * contains the four RIBs for IPv4 unicast routes, IPv4 multicast
- * routes, IPv6 unicast routes and IPv6 multicast routes.  It also
- * contains the RIB's main eventloop.  
+ * @short A dummy RIB manager.
  */
 class RibManager : public ProtoState {
 public:
     /**
      * RibManager constructor
-     * 
-     * @param eventloop the event loop to user.
-     * @param xrl_std_router the XRL router to use.
      */
     RibManager();
 
@@ -84,7 +76,7 @@ public:
     /**
      * Check status of RIB process.
      *
-     * @return process status code
+     * @return process status code.
      */
     ProcessStatus status(string& reason) const; 
 
@@ -98,7 +90,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.  
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_vif(const string& vifname, const Vif& vif, string& err);
 
@@ -110,7 +102,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_vif(const string& vifname, string& err);
 
@@ -125,7 +117,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_vif_address(const string& vifname, 
 			const IPv4& addr,
@@ -142,7 +134,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_vif_address(const string& vifname, 
 			   const IPv4& addr,
@@ -159,7 +151,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_vif_address(const string& vifname,
 			const IPv6& addr,
@@ -176,7 +168,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_vif_address(const string& vifname, 
 			   const IPv6& addr,
@@ -283,9 +275,9 @@ public:
      * Register Interest in an XRL target so we can monitor process
      * births and deaths and clean up appropriately when things die.
      *
-     * @param tgt_class the XRL Target Class we're interested in.  
+     * @param target_class the XRL Target Class we're interested in.  
      */
-    void register_interest_in_target(const string& tgt_class);
+    void register_interest_in_target(const string& target_class);
 
     /**
      * Called in response to registering interest in an XRL target
@@ -294,7 +286,15 @@ public:
      */
     void register_interest_in_target_done(const XrlError& e);
 
-    void target_death(const string& tgt_class, const string& tgt_instance);
+    /**
+     * Target Death is called when an XRL target that we've registered
+     * an interest in dies.
+     *
+     * @param target_class the XRL Class of the target that died.
+     * @param target_instance the XRL Class Instance of the target that died.  
+     */
+    void target_death(const string& target_class,
+		      const string& target_instance);
 private:
 };
 

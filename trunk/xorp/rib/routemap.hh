@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/routemap.hh,v 1.2 2003/03/10 23:20:56 hodson Exp $
+// $XORP: xorp/rib/routemap.hh,v 1.3 2003/03/16 07:18:58 pavlin Exp $
 
 #ifndef __RIB_ROUTEMAP_HH__
 #define __RIB_ROUTEMAP_HH__
@@ -40,7 +40,7 @@ public:
     
 private:
     string _mapname;
-    list <RMRule*> _ruleset;
+    list<RMRule*> _ruleset;
 };
 
 /**

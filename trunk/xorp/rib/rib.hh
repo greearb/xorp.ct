@@ -88,7 +88,7 @@ public:
      *
      * @see ExportTable
      * @param rib_clients_list a pointer to the list of RIB clients.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int initialize_export(list<RibClient *> *rib_clients_list);
 
@@ -98,7 +98,7 @@ public:
      * information that affects specfic addresses.
      * Note that it is an error to initialize the table twice.
      *
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int initialize_register(RegisterServer *regserv);
 
@@ -108,20 +108,20 @@ public:
      * @see OriginTable
      * @param tablename human-readable name for this table to help in
      * debugging
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that will supply routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that will supply routes to this OriginTable.
      * @param admin_distance default administrative distance to be
      * applied to routes that enter the RIB through this OriginTable.
      * @param igp true if the routing protocol that will inject routes
      * is a Interior Gateway Protocol such as OSPF.  False if it's an
      * EGP such as BGP (or IBGP).
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_origin_table(const string&	tablename,
-			 const string&	tgt_class,
-			 const string&	tgt_instance,
+			 const string&	target_class,
+			 const string&	target_instance,
 			 int		admin_distance,
 			 int		igp);
 
@@ -135,7 +135,7 @@ public:
      * this MergedTable
      * @param table_b parent routing table that will feed routes in to
      * this MergedTable
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_merged_table(const string& tablename,
 			 const string& table_a,
@@ -151,7 +151,7 @@ public:
      * this ExtIntTable
      * @param t_int parent routing table that will feed IGP routes in to
      * this ExtIntTable
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_extint_table(const string& tablename,
 			 const string& t_ext,
@@ -164,7 +164,7 @@ public:
      * @see Vif
      * @param vifname the name of the VIF, as understood by the FEA.
      * @param vif Vif class instance giving the information about this vif.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int new_vif(const string& vifname, const Vif& vif);
 
@@ -172,7 +172,7 @@ public:
      * Inform the RIB that a VIF no longer exists.
      *
      * @param vifname the name of the VIF, as previously indicated by new_vif.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_vif(const string& vifname);
 
@@ -185,7 +185,7 @@ public:
      * addresses of this router.
      * @param net the subnet that is connected to this VIF
      * corresponding to the address addr.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_vif_address(const string&	vifname,
 				const A& 	addr,
@@ -195,8 +195,8 @@ public:
      * Remove an address and the associated subnet from an existing VIF.
      * @param vifname the name of the VIF the address will be removed from.
      * @param addr the address to be removed.  This must be an address
-     * previously added by add_vif_address
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * previously added by add_vif_address.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_vif_address(const string& vifname,
 				   const A& addr);
@@ -210,7 +210,7 @@ public:
      * @param addr the nexthop that packets destined for net should be
      * forwarded to.
      * @param the routing protocol metric associated with this route.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_route(const string& tablename,
 			  const IPNet<A>& net,
@@ -226,7 +226,7 @@ public:
      * @param addr the new nexthop that packets destined for @ref net should be
      * forwarded to.
      * @param the new routing protocol metric associated with this route.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int replace_route(const string& tablename,
 			      const IPNet<A>& net,
@@ -237,7 +237,7 @@ public:
      * Verify that expected routing information is correct.  This is
      * intended for testing purposes only.
      *
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int verify_route(const A&	   lookupaddr,
 			     const string& ifname,
@@ -251,7 +251,7 @@ public:
      * route should be deleted.
      * @param subnet the subnet (address and prefix length) of the
      * route to be deleted.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_route(const string&   tablename,
 			     const IPNet<A>& subnet);
@@ -293,7 +293,7 @@ public:
      * @param lookupaddr the address to de-register interest in.
      * @param module the XRL module name to which notifications of
      * changes should no longer be sent.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int route_deregister(const IPNet<A>& subnet, const string& module);
 
@@ -305,7 +305,7 @@ public:
      * @param totable the name of the destination table to which
      * routes should be redistributed (must be an OriginTable<A>
      * name).
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int redist_enable(const string& fromtable, const string& totable);
 
@@ -316,7 +316,7 @@ public:
      * @param totable the name of the destination table to which
      * routes were previously redistributed (must be an OriginTable<A>
      * name).
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int redist_disable(const string& fromtable, const string& totable);
 
@@ -328,15 +328,15 @@ public:
      * @param tablename the routing protocol name.  This should be one
      * of the list of names the RIB knows about, or the incorrect
      * default administrative distance will be applied.
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that will supply routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that will supply routes to this OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_igp_table(const string& tablename,
-			      const string& tgt_class,
-			      const string& tgt_instance);
+			      const string& target_class,
+			      const string& target_instance);
 
     /**
      * Delete the OriginTable for an IGP protocol and unplumb it from
@@ -345,15 +345,15 @@ public:
      *
      * @param tablename the routing protocol name, previously
      * registered using @ref add_igp_table .
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that supplied routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that supplied routes to this OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_igp_table(const string& tablename,
-				 const string& tgt_class,
-				 const string& tgt_instance);
+				 const string& target_class,
+				 const string& target_instance);
 
     /**
      * Create the OriginTable for an EGP protocol and plumb it into
@@ -364,15 +364,15 @@ public:
      * @param tablename the routing protocol name.  This should be one
      * of the list of names the RIB knows about, or the incorrect
      * default administrative distance will be applied.
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that will supply routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that will supply routes to this OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_egp_table(const string& tablename,
-			      const string& tgt_class,
-			      const string& tgt_instance);
+			      const string& target_class,
+			      const string& target_instance);
 
     /**
      * Delete the OriginTable for an EGP protocol and unplumb it from
@@ -381,25 +381,25 @@ public:
      *
      * @param tablename the routing protocol name, previously
      * registered using @ref add_igp_table .
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that supplied routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that supplied routes to this OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_egp_table(const string& tablename,
-				 const string& tgt_class,
-				 const string& tgt_instance);
+				 const string& target_class,
+				 const string& target_instance);
 
     /**
      * An XRL Target died.  We need to check if it's a routing
      * protocol, and if it was, clean up after it.
      *
-     * @param tgt_class the XRL Class of the target that died.
-     * @param tgt_instance the XRL Class Instance of the target that died.
+     * @param target_class the XRL Class of the target that died.
+     * @param target_instance the XRL Class Instance of the target that died.
      */
-    void target_death(const string& tgt_class,
-		      const string& tgt_instance);
+    void target_death(const string& target_class,
+		      const string& target_instance);
 
     /**
      * Print the RIB structure for debugging
@@ -411,31 +411,31 @@ private:
      * Used to implement @ref add_igp_table and @ref add_egp_table.
      *
      * @param tablename the routing protocol name.
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that will supply routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that will supply routes to this OriginTable.
      * @param type IGP == 1, EGP == 2
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_origin_table(const string& tablename, 
-			 const string& tgt_class,
-			 const string& tgt_instance,
+			 const string& target_class,
+			 const string& target_instance,
 			 int type);
 
     /**
      * Used to implement @ref delete_igp_table and @ref delete_egp_table.
      *
      * @param tablename the routing protocol name.
-     * @param tgt_class the XRL target class of the routing
+     * @param target_class the XRL target class of the routing
      * protocol that will supply routes to this OriginTable.
-     * @param tgt_instance the XRL target instance of the routing
+     * @param target_instance the XRL target instance of the routing
      * protocol that supplied routes to this OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_origin_table(const string& tablename,
-			    const string& tgt_class,
-			    const string& tgt_instance);
+			    const string& target_class,
+			    const string& target_instance);
 
     /**
      * track_back trough the RouteTables' parent pointers to find the
@@ -477,13 +477,13 @@ private:
      * instance name.
      *
      * @param tablename the name of the protocol to search for.
-     * @param tgt_class the name of the target class to search for.
-     * @param tgt_instance the name of the target instance to search for.
+     * @param target_class the name of the target class to search for.
+     * @param target_instance the name of the target instance to search for.
      * @return pointer to table if exists, NULL otherwise.  
      */
     inline OriginTable<A> *find_table_by_instance(const string& tablename,
-						  const string&	tgt_class,
-						  const string& tgt_instance);
+						  const string&	target_class,
+						  const string& target_instance);
 
     /**
      * Find a routing protcol, given its protocol name
@@ -501,7 +501,7 @@ private:
      *
      * @param tablename the name of the table to be added.
      * @param table the table to be added.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     inline int add_table(const string& tablename, RouteTable<A> *table);
 
@@ -510,7 +510,7 @@ private:
      * The table is not deleted by this.
      *
      * @param tablename the name of the table to be removed.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     inline int remove_table(const string& tablename);
 

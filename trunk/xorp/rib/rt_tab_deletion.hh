@@ -54,14 +54,14 @@ public:
      * Add a route.  If the route was stored in the DeletionTable,
      * we'll remove it and propagate the delete and add downstream.
      *
-     * @param route the route entry to be added.  
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @param route the route entry to be added.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>&, RouteTable<A> *);
 
     /**
      * Delete a route.  This route MUST NOT be in the DeletionTable trie.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route(const IPRouteEntry<A> *, RouteTable<A> *caller);
 

@@ -245,160 +245,192 @@ XrlRibTarget::rib_0_1_make_errors_fatal()
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_igp_table4(const string&	protocol,
-				     const string&	tgt_class,
-				     const string&	tgt_instance,
+				     const string&	target_class,
+				     const string&	target_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
     if (unicast &&
-	_urib4.add_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib4.add_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add unicast IPv4 igp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib4.add_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib4.add_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add multicast IPv4 igp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
-				     const string&	tgt_class,
-				     const string&	tgt_instance,
+				     const string&	target_class,
+				     const string&	target_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
     if (unicast &&
-	_urib6.add_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib6.add_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add unicast IPv6 igp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib6.add_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib6.add_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add multicast IPv6 igp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
-				     const string&	tgt_class,
-					const string&	tgt_instance,
+				     const string&	target_class,
+					const string&	target_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
     if (unicast &&
-	_urib4.delete_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib4.delete_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete unicast IPv4 igp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib4.delete_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib4.delete_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete multicast IPv4 igp table "
 			     "\"%s\"", protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
-					const string&	tgt_class,
-					const string&	tgt_instance,
+					const string&	target_class,
+					const string&	target_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
     if (unicast &&
-	_urib6.delete_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib6.delete_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete unicast IPv6 igp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib6.delete_igp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib6.delete_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete multicast IPv6 igp table "
 			     "\"%s\"", protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
-				     const string&	tgt_class,
-				     const string&	tgt_instance,
+				     const string&	target_class,
+				     const string&	target_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
     if (unicast &&
-	_urib4.add_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib4.add_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add unicast IPv4 egp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib4.add_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib4.add_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add multicast IPv4 egp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
-				     const string&	tgt_class,
-				     const string&	tgt_instance,
+				     const string&	target_class,
+				     const string&	target_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
     if (unicast &&
-	_urib6.add_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib6.add_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add unicast IPv6 egp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib6.add_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib6.add_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not add multicast IPv6 egp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_egp_table4(const string&	protocol,
-					const string&	tgt_class,
-					const string&	tgt_instance,
+					const string&	target_class,
+					const string&	target_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
     if (unicast &&
-	_urib4.delete_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib4.delete_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete unicast IPv4 egp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib4.delete_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib4.delete_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete multicast IPv4 egp table "
 			     "\"%s\"", protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_egp_table6(const string&	protocol,
-					const string&	tgt_class,
-					const string&	tgt_instance,
+					const string&	target_class,
+					const string&	target_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
     if (unicast &&
-	_urib6.delete_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_urib6.delete_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete unicast IPv6 egp table \"%s\"",
 			     protocol.c_str()));
+    }
 
     if (multicast &&
-	_mrib6.delete_egp_table(protocol, tgt_class, tgt_instance) != XORP_OK)
+	_mrib6.delete_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
 	RETURN_FAIL(c_format("Could not delete multicast IPv6 egp table "
 			     "\"%s\"", protocol.c_str()));
+    }
 
     return XrlCmdError::OKAY();
 }

@@ -18,7 +18,9 @@
 #define __RIB_DUMMY_REGISTER_SERVER_HH__
 
 #include <set>
+
 #include "register_server.hh"
+
 
 class DummyRegisterServer : public RegisterServer {
 public:
@@ -33,7 +35,6 @@ public:
     void send_invalidate(const string& modname,
 			 const IPv4Net& net,
 			 bool multicast);
-
     void send_route_changed(const string& modname,
 			    const IPv6Net& net, 
 			    const IPv6& nexthop,
@@ -49,9 +50,9 @@ public:
     bool verify_changed(const string& changed);
     bool verify_no_info();
 
-protected:
-    set <string> _invalidated;
-    set <string> _changed;
+private:
+    set<string> _invalidated;
+    set<string> _changed;
 };
 
 #endif // __RIB_DUMMY_REGISTER_SERVER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.12 2003/09/27 22:32:47 mjh Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.13 2003/09/30 03:08:01 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -163,64 +163,64 @@ protected:
     XrlCmdError rib_0_1_add_igp_table4(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_igp_table6(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_igp_table4(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_igp_table6(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_egp_table4(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_egp_table6(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_egp_table4(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_egp_table6(
 	// Input values, 
 	const string&	protocol, 
-	const string&	tgt_class, 
-	const string&	tgt_instance, 
+	const string&	target_class, 
+	const string&	target_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 

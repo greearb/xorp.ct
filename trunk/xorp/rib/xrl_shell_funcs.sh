@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.4 2003/09/18 23:56:02 atanu Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.5 2003/10/21 04:28:08 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -22,14 +22,14 @@ add_igp_table4()
 {
     echo -n "add_igp_table4" $*
     
-    $CALLXRL "finder://rib/rib/0.1/add_igp_table4?protocol:txt=$1&tgt_class:txt=$2&tgt_instance:txt=$3&unicast:bool=$4&multicast:bool=$5"
+    $CALLXRL "finder://rib/rib/0.1/add_igp_table4?protocol:txt=$1&target_class:txt=$2&target_instance:txt=$3&unicast:bool=$4&multicast:bool=$5"
 }
 
 delete_igp_table4()
 {
     echo -n "delete_igp_table4" $*
     
-    $CALLXRL "finder://rib/rib/0.1/delete_igp_table4?protocol:txt=$1&tgt_class:txt=$2&tgt_instance:txt=$3&unicast:bool=$4&multicast:bool=$5"
+    $CALLXRL "finder://rib/rib/0.1/delete_igp_table4?protocol:txt=$1&target_class:txt=$2&target_instance:txt=$3&unicast:bool=$4&multicast:bool=$5"
 }
 
 new_vif()

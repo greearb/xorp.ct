@@ -25,7 +25,7 @@ RouteMap::RouteMap(const string& mapname)
 int
 RouteMap::add_rule(RMRule *rule)
 {
-#ifdef NOTDEF
+#if 0
     if (_ruleset[rule->seq()] != NULL) {
 	cerr << "Attempt to add duplicate rule number " << rule->seq() 
 	     << " to RouteMap " << _mapname << "\n";

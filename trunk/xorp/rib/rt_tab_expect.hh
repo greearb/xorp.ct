@@ -54,7 +54,7 @@ public:
 
 private:
     RouteTable<A>* _parent;
-    list <ExpectedRouteChange<A> > _expected;
+    list<ExpectedRouteChange<A> > _expected;
 };
 
 #endif // __RIB_RT_TAB_EXPECT_HH__

@@ -102,7 +102,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_vif(const string& vifname, const Vif& vif, string& err);
 
@@ -114,7 +114,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_vif(const string& vifname, string& err);
 
@@ -129,7 +129,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_vif_address(const string& vifname, 
 			const IPv4& addr,
@@ -146,7 +146,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_vif_address(const string& vifname, 
 			   const IPv4& addr,
@@ -163,7 +163,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_vif_address(const string& vifname,
 			const IPv6& addr,
@@ -180,7 +180,7 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_vif_address(const string& vifname, 
 			   const IPv6& addr,
@@ -287,9 +287,9 @@ public:
      * Register Interest in an XRL target so we can monitor process
      * births and deaths and clean up appropriately when things die.
      *
-     * @param tgt_class the XRL Target Class we're interested in.  
+     * @param target_class the XRL Target Class we're interested in.  
      */
-    void register_interest_in_target(const string& tgt_class);
+    void register_interest_in_target(const string& target_class);
 
     /**
      * Called in response to registering interest in an XRL target
@@ -298,15 +298,15 @@ public:
      */
     void register_interest_in_target_done(const XrlError& e);
 
-
     /**
      * Target Death is called when an XRL target that we've registered
      * an interest in dies.
      *
-     * @param tgt_class the XRL Class of the target that died.
-     * @param tgt_instance the XRL Class Instance of the target that died.  
+     * @param target_class the XRL Class of the target that died.
+     * @param target_instance the XRL Class Instance of the target that died.  
      */
-    void target_death(const string& tgt_class, const string& tgt_instance);
+    void target_death(const string& target_class,
+		      const string& target_instance);
 
 private:
     /**
@@ -344,7 +344,7 @@ private:
     VifManager		_vif_manager;	// The VIF manager
     XrlRibTarget	_xrl_rib_target;
 
-    set <string>        _targets_of_interest; // XRL targets we're monitoring.
+    set<string>		_targets_of_interest; // XRL targets we're monitoring.
 
     XorpTimer _status_update_timer;  //used for periodic checks of RIB status.
 };

@@ -133,7 +133,7 @@ RegisterServer::add_entry_to_queue(const string& modname,
 {
     debug_msg("REGSERV: add_entry_to_queue\n");
     NotifyQueue *queue;
-    map <string, NotifyQueue*>::iterator qmi;
+    map<string, NotifyQueue*>::iterator qmi;
     bool new_queue;
     
     qmi = _queuemap.find(modname);
@@ -205,7 +205,7 @@ void
 RegisterServer::flush() 
 {
     debug_msg("REGSERV: flush\n");
-    map <string, NotifyQueue*>::iterator i;
+    map<string, NotifyQueue*>::iterator i;
     for (i = _queuemap.begin(); i != _queuemap.end(); i++) {
 	i->second->flush(&_response_sender);
     }

@@ -55,8 +55,8 @@ public:
      * 
      * @param route the @ref RouteEntry for the new route.
      * @param caller the @ref RouteTable calling this method. This
-     * must be the same as _parent
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * must be the same as _parent.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
@@ -66,8 +66,8 @@ public:
      * 
      * @param route the @ref RouteEntry for the route being deleted.
      * @param caller the @ref RouteTable calling this method. This
-     * must be the same as _parent
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * must be the same as _parent.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 

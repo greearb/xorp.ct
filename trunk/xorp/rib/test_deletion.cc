@@ -76,16 +76,16 @@ main (int /* argc */, char *argv[])
     dt.expect_delete(route1);
     dt.expect_delete(route2);
 
-    assert(dt.parent()->type() == ORIGIN_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
     ot.routing_protocol_shutdown();
 
     //validate that a deletion table got added
-    assert(dt.parent()->type() == DELETION_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
     eventloop.run();
     eventloop.run();
     eventloop.run();
 
-    assert(dt.parent()->type() == ORIGIN_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
 
     printf("-------------------------------------------------------\n");
 
@@ -98,10 +98,10 @@ main (int /* argc */, char *argv[])
     ot.add_route(route1);
     ot.add_route(route2);
 
-    assert(dt.parent()->type() == ORIGIN_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
     ot.routing_protocol_shutdown();
 
-    assert(dt.parent()->type() == DELETION_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
     IPRouteEntry<IPv4> route3(net1, &vif2, &nh2, proto, 101);
     dt.expect_delete(route1);
     dt.expect_add(route3);
@@ -109,12 +109,12 @@ main (int /* argc */, char *argv[])
     ot.add_route(route3);
 
     dt.expect_delete(route2);
-    assert(dt.parent()->type() == DELETION_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
     eventloop.run();
-    assert(dt.parent()->type() == DELETION_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
     eventloop.run();
 
-    assert(dt.parent()->type() == ORIGIN_TABLE);
+    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
 
     dt.expect_delete(route3);
     ot.delete_route(net1);

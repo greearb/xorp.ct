@@ -82,7 +82,7 @@ public:
 
 private:
     string		_modname;
-    list <NotifyQueueEntry *> _queue;
+    list<NotifyQueueEntry *> _queue;
     bool		_active;
     ResponseSender	*_response_sender;
 };
@@ -351,7 +351,7 @@ public:
 
 protected:
     void add_entry_to_queue(const string& modname, NotifyQueueEntry *e);
-    map <string, NotifyQueue *> _queuemap;
+    map<string, NotifyQueue *> _queuemap;
     ResponseSender _response_sender;
 };
 

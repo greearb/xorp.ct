@@ -42,15 +42,17 @@ RibManager::stop()
 }
 
 ProcessStatus 
-RibManager::status(string&) const
+RibManager::status(string& reason) const
 {
+    UNUSED(reason);
+
     return PROC_READY;
 }
 
 void 
-RibManager::register_interest_in_target(const string& tgt_class)
+RibManager::register_interest_in_target(const string& target_class)
 {
-    UNUSED(tgt_class);
+    UNUSED(target_class);
 }
 
 int 
@@ -59,6 +61,7 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
     UNUSED(vifname);
     UNUSED(vif);
     UNUSED(err);
+
     return XORP_OK;
 }
 
@@ -67,6 +70,7 @@ RibManager::delete_vif(const string& vifname, string& err)
 {
     UNUSED(vifname);
     UNUSED(err);
+
     return XORP_OK;
 }
 
@@ -80,6 +84,7 @@ RibManager::add_vif_address(const string& vifname,
     UNUSED(addr);
     UNUSED(net);
     UNUSED(err);
+
     return XORP_OK;
 }
 
@@ -93,6 +98,7 @@ RibManager::add_vif_address(const string& vifname,
     UNUSED(addr);
     UNUSED(net);
     UNUSED(err);
+
     return XORP_OK;
 }
 
@@ -104,6 +110,7 @@ RibManager::delete_vif_address(const string& vifname,
     UNUSED(vifname);
     UNUSED(addr);
     UNUSED(err);
+
     return XORP_OK;
 }
 
@@ -115,6 +122,7 @@ RibManager::delete_vif_address(const string& vifname,
     UNUSED(vifname);
     UNUSED(addr);
     UNUSED(err);
+
     return XORP_OK;
 }
 
@@ -130,34 +138,57 @@ RibManager::no_fea()
 }
 
 int 
-RibManager::add_rib_client(const string&, int,
-			   bool, bool)
+RibManager::add_rib_client(const string& target_name, int family,
+			   bool unicast, bool multicast)
 {
+    UNUSED(target_name);
+    UNUSED(family);
+    UNUSED(unicast);
+    UNUSED(multicast);
+
     return XORP_OK;
 }
 
 int 
-RibManager::delete_rib_client(const string&, int,
-			      bool, bool)
+RibManager::delete_rib_client(const string& target_name, int family,
+			      bool unicast, bool multicast)
 {
+    UNUSED(target_name);
+    UNUSED(family);
+    UNUSED(unicast);
+    UNUSED(multicast);
+
     return XORP_OK;
 }
 
 int 
-RibManager::enable_rib_client(const string&, int,
-			      bool, bool)
+RibManager::enable_rib_client(const string& target_name, int family,
+			      bool unicast, bool multicast)
 {
+    UNUSED(target_name);
+    UNUSED(family);
+    UNUSED(unicast);
+    UNUSED(multicast);
+
     return XORP_OK;
 }
 
 int 
-RibManager::disable_rib_client(const string&, int,
-			       bool, bool)
+RibManager::disable_rib_client(const string& target_name, int family,
+			       bool unicast, bool multicast)
 {
+    UNUSED(target_name);
+    UNUSED(family);
+    UNUSED(unicast);
+    UNUSED(multicast);
+
     return XORP_OK;
 }
 
 void 
-RibManager::target_death(const string&, const string&)
+RibManager::target_death(const string& target_class,
+			 const string& target_instance)
 {
+    UNUSED(target_class);
+    UNUSED(target_instance);
 }

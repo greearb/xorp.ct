@@ -125,8 +125,8 @@ private:
 
     int split_into_words(const string& str, vector <string>& words) const;
     char _separator;
-    map <string, Command *> _templates;
-    map <string, ArgumentParser *> _argtypes;
+    map<string, Command *> _templates;
+    map<string, ArgumentParser *> _argtypes;
 };
 
 class Parse_error {

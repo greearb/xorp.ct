@@ -136,7 +136,7 @@ DummyRegisterServer::send_invalidate(const string& modname,
 bool 
 DummyRegisterServer::verify_invalidated(const string& invalid)
 {
-    set <string>::iterator i;
+    set<string>::iterator i;
     
     i = _invalidated.find(invalid);
     if (i == _invalidated.end()) {
@@ -154,7 +154,7 @@ DummyRegisterServer::verify_invalidated(const string& invalid)
 bool 
 DummyRegisterServer::verify_changed(const string& changed)
 {
-    set <string>::iterator i;
+    set<string>::iterator i;
     
     i = _changed.find(changed);
     if (i == _changed.end()) {

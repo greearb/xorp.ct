@@ -70,9 +70,9 @@ public:
      * other table, or no route exists in the other table then it is
      * passed downstream if nexthop resolution is successful.
      *
-     * @param route the new route
-     * @param caller the parent table sending the new route
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @param route the new route.
+     * @param caller the parent table sending the new route.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
@@ -86,7 +86,7 @@ public:
      *
      * @param route the route to be deleted.
      * @param caller the parent table sending the delete_route.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 

@@ -65,28 +65,28 @@ public:
      * Add a route to the OriginTable.  The route must not already be
      * in the OriginTable.
      *
-     * @param route the route entry to be added.  
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @param route the route entry to be added.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>& route);
 
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { XLOG_UNREACHABLE(); return XORP_ERROR;}
 
     /**
      * Delete a route from the OriginTable.
      *
-     * @param net the subnet of the route entry to be deleted.  
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @param net the subnet of the route entry to be deleted.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route(const IPNet<A>& net);
 
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
-     * @return XORP_OK on success, XORP_ERROR otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { XLOG_UNREACHABLE(); return XORP_ERROR; }
 
@@ -99,7 +99,8 @@ public:
 
     /**
      * Delete all the routes that are in this OriginTable, and
-     * propagate the deletions downstream.  */
+     * propagate the deletions downstream.
+     */
     void routing_protocol_shutdown();
 
     /**
