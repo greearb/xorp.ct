@@ -1,6 +1,9 @@
 #
-# $XORP: xorp/TODO,v 1.10 2004/12/13 14:28:50 bms Exp $
+# $XORP: xorp/TODO,v 1.11 2004/12/13 14:40:37 bms Exp $
 #
+
+* Dummy TODO item to test propagation across cvsup mirrors and Perforce
+  import jobs.
 
 * Standardize the version string format return by the
   common_0_1_get_version XRL across all targets.
