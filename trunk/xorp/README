@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.21 2004/03/04 00:07:16 pavlin Exp $
+# $XORP: xorp/README,v 1.22 2004/06/15 00:06:55 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -108,7 +108,9 @@ See ${XORP}/BUILD_NOTES for additional information of building XORP.
 
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
-refer to the rtrmgr documentation in the first place (${XORP}/docs/rtrmgr/),
+refer first to the XORP configuration guide
+(http://www.xorp.org/getting_started.html),
+the rtrmgr documentation (${XORP}/docs/rtrmgr/),
 and then the documentation of the individual modules.
 
 

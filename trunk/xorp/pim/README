@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.21 2004/06/12 06:25:38 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.22 2004/06/15 00:52:33 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -19,8 +19,9 @@ Startup
 =======
 
 In normal operation, PIM-SM would be started by the XORP router manager
-process, not directly from the command line
-(see ${XORP}/docs/rtrmgr/ for information how to configure PIM-SM).
+process, not directly from the command line.
+For information how to configure PIM-SM see
+http://www.xorp.org/getting_started.html
 
 To use PIM-SM, you must have PIM-capable kernel. Currently, the
 following systems are known to have PIM-SM kernel support:

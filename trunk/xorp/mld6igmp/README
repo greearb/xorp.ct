@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.11 2004/03/04 00:10:34 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.12 2004/06/15 00:41:45 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -21,6 +21,8 @@ Startup
 
 In normal operation, MLD/IGMP would be started by the XORP router manager
 process, not directly from the command line.  
+For information how to configure MLD/IGMP see
+http://www.xorp.org/getting_started.html
 
 For testing and debugging purposes, MLD/IGMP can be manually started.  The
 XORP MLD6/IGMP process assumes that the XRL finder and the MFEA

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.11 2004/06/15 00:32:41 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.12 2004/06/15 00:38:49 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -42,6 +42,8 @@ MFEA like most XORP modules does not take its configuration
 parameters from the command line. Its parameters are provided via
 XRLs. At the very least a MFEA module must be provided with
 the set of network interfaces to enable for multicast forwarding.
+For information how to configure the MFEA see
+http://www.xorp.org/getting_started.html
 
 Startup
 =======
@@ -49,7 +51,8 @@ Startup
 In normal operation, MFEA would be started by the XORP router manager
 process, not directly from the command line. In that case, make sure
 that IP forwarding is enabled in the XORP configuration file
-(see ${XORP}/docs/rtrmgr/ about information how to enable it).
+(see http://www.xorp.org/getting_started.html about information how to
+enable it). 
 
 For testing and debugging purposes, MFEA can be manually started.  The
 XORP MFEA module (as part of the FEA process) assumes that the XRL finder
