@@ -1,12 +1,36 @@
+%
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.8 2003/11/06 19:37:06 pavlin Exp $
+%
+
 \documentclass[11pt]{article}
-\usepackage{graphicx}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
 \usepackage{times}
-\textwidth 6.5in
-\topmargin 0.0in
-\textheight 8.5in
-\headheight 0in
-\headsep 0in
-\oddsidemargin 0in
+\usepackage{latexsym}
+\usepackage{psfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
+
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
 
 \title{XORP Router Manager Process (rtrmgr) \\
 \vspace{1ex}
@@ -170,39 +194,63 @@ protocols ospf {
   %modinfo: provides ospf;
   %modinfo: depends rib;
   %modinfo: path "ospfd/xorp/ospfd";
+  %modinfo: default_targetname "ospf";
+  targetname {
+    %set:;
+  }
   router-id {
-    %set: xrl "ospf/ospf/0.1/set_router_id?id:u32=$(@)";
-    %get: xrl "ospf/ospf/0.1/get_router_id->id:u32";
+    %set: xrl "$(ospf.targetname)/ospf/0.1/set_router_id?id:u32=$(@)";
+    %get: xrl "$(ospf.targetname)/ospf/0.1/get_router_id->id:u32";
   }
   area @ {
-    %create: xrl "ospf/ospf/0.1/add_or_configure_area?
+    %create: xrl "$(ospf.targetname)/ospf/0.1/add_or_configure_area?
                   area_id:u32=$(area.@)&is_stub:bool=$(@.stub)";
-    %delete: xrl "ospf/ospf/0.1/delete_area?area_id:u32=$(area.@)";
+    %delete: xrl "$(ospf.targetname)/ospf/0.1/delete_area?
+                  area_id:u32=$(area.@)";
   }
 }
 \end{verbatim}
-The first three annotations apply to the ``protocols ospf'' node, and
+The first four annotations apply to the ``protocols ospf'' node, and
 specify the ``\%modinfo'' command, which provides information about
 the module providing this functionality.  In this case they specify
-that this functionality is provided by the module called {\tt ospf},
-that this module depends on the module called {\tt rib}, and that the
-software in {\tt ospfd/xorp/ospfd} is the software to run to
-provide this module.
+the following:
+\begin{itemize}
+
+  \item This functionality is provided by the module called {\tt ospf}.
+
+  \item This module depends on the module called {\tt rib}.
+
+  \item The program in {\tt ospfd/xorp/ospfd} should be run run to
+        provide this module.
+
+  \item XRL target name {\tt ospf} should be used by default when validating
+    an XRL specification that uses a variable inside the {\tt ospf} module
+    (\eg {\tt \$(ospf.targetname)}) to specify the XRL target.
+
+\end{itemize}
+
+The ``{\tt protocols ospf targetname}'' node carries an annotation to
+specify the existence of variable name ``{\tt targetname}'' that
+can be used to specify the XRL target name of an OSPF instance.
+The specific value of ``{\tt targetname}'' can be configured elsewhere.
 
 The ``{\tt protocols ospf router-id}'' node carries annotations to set
 the value of the router ID in the ospf process, and to get the value
 back.  The set command is:
 \begin{verbatim}
-    %set: xrl "ospf/ospf/0.1/set_router_id?id:u32=$(@)";
+    %set: xrl "$(ospf.targetname)/ospf/0.1/set_router_id?id:u32=$(@)";
 \end{verbatim}
 This specifies that to set this value, the rtrmgr must call the
-specified XRL.  In this case it specifies a variable expansion of the
-variable {\tt \$(@)}.  All variables take the form {\tt \$(}...{\tt
-)}.   
+specified XRL.  In this case it specifies a variable expansion of
+variables {\tt \$(ospf.targetname)} and  {\tt \$(@)}.  All variables take the
+form {\tt \$(}...{\tt )}.   
 
-The variable {\tt \$(@)} means the value of the
-current node, so if the router ID node in the configuration tree had
-the value 1.2.3.4, then the XRL to call would be:
+The variable {\tt \$(ospf.targetname)} means the value of node
+``{\tt protocols ospf targetname}''.
+The variable {\tt \$(@)} means the value of the current node.
+Hence, if the targetname is set in the configuration tree to (or had a default
+value in the template tree of) {\tt "ospf"}, and router ID node in the
+configuration tree had the value 1.2.3.4, then the XRL to call would be:
 \begin{verbatim}
     ospf/ospf/0.1/set_router_id?id:u32=1.2.3.4
 \end{verbatim}
@@ -223,8 +271,8 @@ Thus the template tree specifies the following information:
 possible on the router.
 \item Some of the nodes are annotated with information to indicate
 which software to run to provide the functionality rooted at that
-node, and to indicate which other modules this software depends on
-being running.
+node, to indicate which other modules this software depends on
+being running, and to provide additional information about this module.
 \item Most of the nodes are annotated with commands to be run when the
 value of the node changes in the configuration tree, when a new
 instance of the node is created or an instance of the node is deleted
@@ -268,9 +316,11 @@ The sub-commands to the {\tt \%modinfo} command are:
 \item {{\tt \%modinfo: provides }{\it ModuleName}}  \\The {\tt provides} subcommand takes one additional
 parameter, which gives the name of the module providing the
 functionality rooted at this node.  
+
 \item {{\tt \%modinfo: depends }{\it list of modules}}  \\The {\tt depends} subcommand takes at least one additional
 parameter, giving a list of the other modules that must
 be running and configured before this module may be started.
+
 \item {{\tt \%modinfo: path }{\it ProgramPath}}  \\The {\tt path} subcommand takes one additional parameter giving the pathname of the software to be run
 to provide this functionality.  The pathname may be absolute or
 relative to the root of the XORP tree. The ordering in computing the root of
@@ -279,19 +329,29 @@ directory the rtrmgr is run from (only if it contains the
 etc/templates and the xrl/targets directories); (c) the XORP\_ROOT value as
 defined in config.h (currently this is the installation directory, and
 defaults to ``/usr/local/xorp'').
+
+\item {{\tt \%modinfo: default\_targetname }{\it TargetName}}  \\The {\tt
+default\_targetname} subcommand takes one additional parameter giving the
+value of the XRL target name that should be used by default when
+validating an XRL specification (\eg if the specification uses a variable
+inside that module to specify the XRL target name).
+
 \item {{\tt \%modinfo: startcommit }{\it XRL}}  \\The {\tt startcommit} subcommand takes one additional
 parameter, and gives the XRL to call before performing
 any change to the configuration of the module.
+
 \item {{\tt \%modinfo: endcommit }{\it XRL}}  \\The {\tt endcommit} subcommand takes one additional
 parameter, and gives the XRL to call to complete any
 change to the configuration of the module.  startcommit and
 endcommit are optional.  They provide a way to make batch changes to a
 module configuration as an atomic operation.
+
 \item {{\tt \%modinfo: statusmethod }{\it method}}  \\The {\tt
 statusmethod} subcommand indicates the mechanism to be used to
 discover the status of the module.  The only method current supported
 is {\tt xrl} which indicates usage of the common interface {\tt
 get\_status} XRL.
+
 \item {{\tt \%modinfo: shutdownmethod }{\it method}}  \\The {\tt
 shutdownmethod} subcommand indicates the mechanism to be used to
 gracefully shutdown the module.  The only method current supported
