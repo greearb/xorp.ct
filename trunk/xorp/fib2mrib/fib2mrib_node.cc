@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.1 2004/02/18 00:10:56 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.2 2004/02/20 05:17:52 pavlin Exp $"
 
 
 //
@@ -201,7 +201,7 @@ Fib2mribNode::node_status(string& reason_msg)
     case PROC_STARTUP:
 	// Get the message about the startup progress
 	reason_msg = c_format("Waiting for %u startup events",
-			      reinterpret_cast<uint32_t>(_startup_requests_n));
+			      static_cast<uint32_t>(_startup_requests_n));
 	break;
     case PROC_NOT_READY:
 	// XXX: this state is unused
@@ -213,7 +213,7 @@ Fib2mribNode::node_status(string& reason_msg)
     case PROC_SHUTDOWN:
 	// Get the message about the shutdown progress
 	reason_msg = c_format("Waiting for %u shutdown events",
-			      reinterpret_cast<uint32_t>(_shutdown_requests_n));
+			      static_cast<uint32_t>(_shutdown_requests_n));
 	break;
     case PROC_FAILED:
 	// XXX: this state is unused
