@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.16 2003/05/22 20:37:53 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.17 2003/05/27 04:33:07 mjh Exp $"
 
 #include <signal.h>
 
@@ -264,7 +264,7 @@ main(int argc, char* const argv[])
 	}
     } catch (InitError& e) {
 	XLOG_ERROR("rtrmgr shutting down due to error\n");
-	xorp_print_standard_exceptions();
+	fprintf(stderr, "rtrmgr shutting down due to error\n");
 	errcode = 1;
     }
 

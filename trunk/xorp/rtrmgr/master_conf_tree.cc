@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.10 2003/05/03 21:26:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.11 2003/05/04 06:25:20 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -158,12 +158,15 @@ void MasterConfigTree::config_done(bool success, string errmsg) {
 	printf("fail: %s\n", errmsg.c_str());
 
     if (!success) {
-	//XXXX find out what happened....
-	XLOG_FATAL(("Startup failed (" + errmsg + ")\n").c_str());
+	XLOG_ERROR(("Startup failed (" + errmsg + ")\n").c_str());
+	fprintf(stderr, ("Startup failed (" + errmsg + ")\n").c_str());
+	xorp_throw0(InitError);
     }
     string errmsg2;
     if (check_commit_status(errmsg2) == false) {
-	XLOG_FATAL(errmsg2.c_str());
+	XLOG_ERROR(errmsg2.c_str());
+	fprintf(stderr, errmsg2.c_str());
+	xorp_throw0(InitError);
     }
     printf("MasterConfigTree::config_done returning\n");
 }
