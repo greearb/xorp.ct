@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospf.tp,v 1.13 2004/06/04 04:47:05 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospf.tp,v 1.14 2004/06/07 18:16:25 pavlin Exp $ */
 
 protocols {
     ospf {
@@ -44,7 +44,7 @@ protocols {
 	%help:		short		"Configure the OSPF protocol";
 	%modinfo:	provides	ospf;
 	%modinfo:	depends		rib;
-	%modinfo:	path		"ospfd/xorp/xorp_ospf";
+	%modinfo:	path		"contrib/ospfd/xorp/xorp_ospf";
 	%modinfo:	default_targetname "ospf";
 	%modinfo:	status_method	xrl "$(ospf.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl "$(ospf.targetname)/common/0.1/shutdown";
