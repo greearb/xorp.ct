@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.27 2004/04/28 15:48:47 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.28 2004/05/06 23:06:03 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -43,6 +43,10 @@ initialize_rib(RIB<A>& 			rib,
 		   rib.name().c_str());
     }
     if (rib.add_igp_table("connected", "", "") != XORP_OK) {
+	XLOG_FATAL("Could not add igp table \"connected\" for %s",
+		   rib.name().c_str());
+    }
+    if (rib.add_igp_table("static", "", "") != XORP_OK) {
 	XLOG_FATAL("Could not add igp table \"connected\" for %s",
 		   rib.name().c_str());
     }
