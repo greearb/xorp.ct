@@ -8,7 +8,7 @@ protocols {
 	interface @: text {
 	    vif @: text {
 		address @: ipv4 {
-		    cost:			uint	=   1;
+		    metric:			uint	=   1;
 		    horizon:			text    = "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
@@ -32,7 +32,7 @@ protocols {
 	}
 
 	import @: text {
-	    cost:uint = 1 ;
+	    metric:uint = 1 ;
 	    tag:uint  = 0 ;
 	}
     }
@@ -61,7 +61,7 @@ protocols {
 			%get: xrl "$(rip.targetname)/rip/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->enabled:bool" ;
 		    }
 
-		    cost {
+		    metric {
 			%set: xrl "$(rip.targetname)/rip/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&cost:u32=$(@)" ;
 			%get: xrl "$(rip.targetname)/rip/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->cost:u32" ;
 		    }
@@ -145,7 +145,7 @@ protocols {
 	}
 
 	import @: text {
-	    %activate: xrl "$(rip.targetname)/rip/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.cost)&tag:u32=$(@.tag)";
+	    %activate: xrl "$(rip.targetname)/rip/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)";
 	    %delete: xrl "$(rip.targetname)/rip/0.1/no_import_protocol_routes?protocol_name:txt=$(@)";
 	}
     }

@@ -8,7 +8,7 @@ protocols {
 	interface @: text {
 	    vif @: text {
 		address @: ipv6 {
-		    cost:			uint	=   1;
+		    metric:			uint	=   1;
 		    horizon:			text    = "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
@@ -28,8 +28,8 @@ protocols {
 	}
 
 	import @: text {
-	    cost:uint = 1 ;
-	    tag:uint  = 0 ;
+	    metric:uint = 1 ;
+	    tag:uint	= 0 ;
 	}
     }
 }
@@ -57,7 +57,7 @@ protocols {
 			%get: xrl "$(ripng.targetname)/ripng/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->enabled:bool" ;
 		    }
 
-		    cost {
+		    metric {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&cost:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->cost:u32" ;
 		    }
@@ -136,7 +136,7 @@ protocols {
 	}
 
 	import @: text {
-		%activate: xrl "$(ripng.targetname)/ripng/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.cost)&tag:u32=$(@.tag)";
+		%activate: xrl "$(ripng.targetname)/ripng/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)";
 		%delete: xrl "$(ripng.targetname)/ripng/0.1/no_import_protocol_routes?protocol_name:txt=$(@)";
 	}
     }
