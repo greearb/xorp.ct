@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.41 2004/10/29 01:10:05 bms Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.42 2004/11/02 22:51:03 bms Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -125,7 +125,7 @@ template <typename A>
 inline int
 RIB<A>::admin_distance(const string& tablename)
 {
-    map<const string, int>::iterator mi;
+    map<string, int>::iterator mi;
 
     mi = _admin_distances.find(tablename);
     if (mi == _admin_distances.end()) {
@@ -140,7 +140,7 @@ template <typename A>
 inline Vif*
 RIB<A>::find_vif(const A& addr)
 {
-    map<const string, Vif>::iterator mi;
+    map<string, Vif>::iterator mi;
 
     for (mi = _vifs.begin(); mi != _vifs.end(); ++mi) {
 	Vif& v = mi->second;
@@ -154,7 +154,7 @@ template <typename A>
 inline IPExternalNextHop<A>*
 RIB<A>::find_external_nexthop(const A& addr)
 {
-    typename map<const A, IPExternalNextHop<A> >::iterator mi;
+    typename map<A, IPExternalNextHop<A> >::iterator mi;
 
     mi = _external_nexthops.find(addr);
     if (mi == _external_nexthops.end())
@@ -166,7 +166,7 @@ template <typename A>
 inline IPPeerNextHop<A>*
 RIB<A>::find_peer_nexthop(const A& addr)
 {
-    typename map<const A, IPPeerNextHop<A> >::iterator mi;
+    typename map<A, IPPeerNextHop<A> >::iterator mi;
 
     mi = _peer_nexthops.find(addr);
     if (mi == _peer_nexthops.end())
@@ -182,7 +182,7 @@ RIB<A>::find_or_create_external_nexthop(const A& addr)
     if (nexthop != NULL)
 	return nexthop;
 
-    typedef map<const A,IPExternalNextHop<A> > C;	// for convenience
+    typedef map<A, IPExternalNextHop<A> > C;	// for convenience
     typename C::value_type vt(addr, IPExternalNextHop<A>(addr));
     typename C::iterator iter;
     iter = _external_nexthops.insert(_external_nexthops.end(), vt);
@@ -197,7 +197,7 @@ RIB<A>::find_or_create_peer_nexthop(const A& addr)
     if (nexthop != NULL)
 	return nexthop;
 
-    typedef map<const A,IPPeerNextHop<A> > C;		// for convenience
+    typedef map<A, IPPeerNextHop<A> > C;		// for convenience
     typename C::value_type vt(addr, addr);
     typename C::iterator iter;
     iter = _peer_nexthops.insert(_peer_nexthops.end(), vt);
@@ -416,11 +416,11 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) == _vifs.end()) {
 	// Can't use _vifs[vifname] = vif because no Vif() constructor
-	map<const string, Vif>::value_type v(vifname, vif);
+	map<string, Vif>::value_type v(vifname, vif);
 	_vifs.insert(_vifs.end(), v);
 
 	// We need to add the routes from the VIF to the connected table
-	map<const string, Vif>::iterator iter = _vifs.find(vifname);
+	map<string, Vif>::iterator iter = _vifs.find(vifname);
 	XLOG_ASSERT(iter != _vifs.end());
 	Vif* new_vif = &(iter->second);
 	XLOG_ASSERT(new_vif != NULL);
@@ -452,11 +452,11 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) == _vifs.end()) {
 	// Can't use _vifs[vifname] = vif because no Vif() constructor
-	map<const string, Vif>::value_type v(vifname, vif);
+	map<string, Vif>::value_type v(vifname, vif);
 	_vifs.insert(_vifs.end(), v);
 
 	// We need to add the routes from the VIF to the connected table
-	map<const string, Vif>::iterator iter = _vifs.find(vifname);
+	map<string, Vif>::iterator iter = _vifs.find(vifname);
 	XLOG_ASSERT(iter != _vifs.end());
 	Vif* new_vif = &(iter->second);
 	XLOG_ASSERT(new_vif != NULL);
@@ -486,7 +486,7 @@ int
 RIB<A>::delete_vif(const string& vifname)
 {
     debug_msg("RIB::delete_vif: %s\n", vifname.c_str());
-    map<const string, Vif>::iterator iter;
+    map<string, Vif>::iterator iter;
     iter = _vifs.find(vifname);
     if (iter == _vifs.end()) {
 	return XORP_ERROR;
@@ -521,7 +521,7 @@ RIB<A>::set_vif_flags(const string& vifname,
 		      bool is_broadcast,
 		      bool is_up)
 {
-    map<const string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to set flags to non-existant Vif \"%s\"",
 		   vifname.c_str());
@@ -546,7 +546,7 @@ RIB<A>::add_vif_address(const string&	vifname,
 			const A&	broadcast_addr,
 			const A&	peer_addr)
 {
-    map<const string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to add address to non-existant Vif \"%s\"",
 		   vifname.c_str());
@@ -569,7 +569,7 @@ int
 RIB<A>::delete_vif_address(const string& vifname,
 			   const A& addr)
 {
-    map<const string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to delete address from non-existant Vif \"%s\"",
 		   vifname.c_str());
@@ -648,7 +648,7 @@ RIB<A>::add_route(const string&		tablename,
 	//
 	// Add a route with explicitly specified network interface
 	//
-	map<const string, Vif>::iterator iter = _vifs.find(vifname);
+	map<string, Vif>::iterator iter = _vifs.find(vifname);
 	if (iter == _vifs.end()) {
 	    XLOG_ERROR("Attempting to add route to table \"%s\" "
 		       "(prefix %s next-hop %s ifname %s vifname %s): "
@@ -1323,7 +1323,7 @@ RIB<A>::target_death(const string& target_class,
 		     const string& target_instance)
 {
     string s = " " + target_class + " " + target_instance;
-    typename map<const string, OriginTable<A>* >::iterator iter;
+    typename map<string, OriginTable<A>* >::iterator iter;
     for (iter = _routing_protocol_instances.begin();
 	 iter != _routing_protocol_instances.end();
 	 ++iter) {

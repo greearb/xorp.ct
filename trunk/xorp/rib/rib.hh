@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.27 2004/10/29 01:10:06 bms Exp $
+// $XORP: xorp/rib/rib.hh,v 1.28 2004/11/02 22:47:54 bms Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -653,12 +653,12 @@ protected:
     PolicyRedistTable<A>*		_policy_redist_table;
 
     list<RouteTable<A>* >		_tables;
-    map<const string, Protocol* >	_protocols;
-    map<const string, OriginTable<A>* > _routing_protocol_instances;
-    map<const string, Vif>		_vifs;
-    map<const string, int>		_admin_distances;
-    map<const A, IPExternalNextHop<A> >	_external_nexthops;
-    map<const A, IPPeerNextHop<A> > 	_peer_nexthops;
+    map<string, Protocol* >		_protocols;
+    map<string, OriginTable<A>* >	_routing_protocol_instances;
+    map<string, Vif>			_vifs;
+    map<string, int>			_admin_distances;
+    map<A, IPExternalNextHop<A> >	_external_nexthops;
+    map<A, IPPeerNextHop<A> >		_peer_nexthops;
 };
 
 typedef RIB<IPv4> IPv4RIB;
