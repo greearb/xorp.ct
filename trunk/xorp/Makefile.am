@@ -1,20 +1,20 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.9 2003/06/03 10:40:55 pavlin Exp $
+## $XORP: xorp/Makefile.am,v 1.10 2003/07/31 00:35:18 pavlin Exp $
 ##
 
 # --- Options
 AUTOMAKE_OPTIONS	= foreign
 ETAGS_ARGS		= --c++
 
-# --- Libraries (directory ordering is important)
-SUBDIRS	 = libxorp libcomm libxipc libproto mrt xrl cli policy
+# --- Libraries and utilities (directory ordering is important)
+SUBDIRS	 = libxorp libcomm libxipc libproto mrt xrl cli policy utils
 
 # --- Dual Libraries/Applications (directory ordering should not matter)
 SUBDIRS	+= fea rib
 
 # --- Applications (directory ordering should not matter)
-SUBDIRS += bgp mld6igmp pim rip rtrmgr utils
+SUBDIRS += bgp mld6igmp pim rip rtrmgr
 
 # --- Other (directory ordering should not matter)
 SUBDIRS += etc
