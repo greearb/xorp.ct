@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.36 2004/05/06 20:05:10 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.37 2004/05/21 08:08:02 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -60,6 +60,8 @@ xorp_fea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+### Firewall front-end XRL libraries
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfirewallbase.a
 ### socket server libraries and related
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
@@ -193,6 +195,7 @@ libfea_a_SOURCES	+= netlink_socket_utils.hh
 libfea_a_SOURCES	+= rawsock4.hh
 libfea_a_SOURCES	+= routing_socket.hh
 libfea_a_SOURCES	+= routing_socket_utils.hh
+libfea_a_SOURCES	+= xrl_firewall.hh
 libfea_a_SOURCES	+= xrl_fti.hh
 libfea_a_SOURCES	+= xrl_ifmanager.hh
 libfea_a_SOURCES	+= xrl_ifupdate.hh
@@ -269,6 +272,7 @@ libfea_a_SOURCES	+= netlink_socket_utils.cc
 libfea_a_SOURCES	+= rawsock4.cc
 libfea_a_SOURCES	+= routing_socket.cc
 libfea_a_SOURCES	+= routing_socket_utils.cc
+libfea_a_SOURCES	+= xrl_firewall.cc
 libfea_a_SOURCES	+= xrl_fti.cc
 libfea_a_SOURCES	+= xrl_ifmanager.cc
 libfea_a_SOURCES	+= xrl_ifupdate.cc
