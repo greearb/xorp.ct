@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.51 2004/06/14 23:57:10 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.52 2004/06/15 06:03:02 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.0RC (2004/06/15)
+Release 1.0 (2004/07/08)
 =========================
   ALL:
     - All the routing processes can now be started and configured via the
