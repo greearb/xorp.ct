@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/TODO,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/cli/TODO,v 1.2 2003/06/03 10:04:11 pavlin Exp $
 #
 
 * If SPACE is pressed on empty line at the bottom of the terminal xterm
@@ -11,9 +11,6 @@
 
 * Implement CliCommand::create_default_cli_commands() and use
   it as appropriate.
-
-* Assign an unuqie session ID per each CLI client, and use that
-  session ID to match XRL responses with a waiting client.
 
 * Don't return any error if a command with exactly same help, etc
   was installed already. (??)
@@ -30,7 +27,7 @@
 * When asking for help '?' or <Tab> on a command that supports optional
   arguments, print those optional arguments as well.
 
-* Add CLIserver::delete_command()
+* Add CliNode::delete_command()
 
 * cli_command->name() for the root command is empty string.
   When printing error with cli_command->name(), use '' around the command
@@ -66,7 +63,7 @@
 * When ^D is pressed in the beginning of a line, the connection is closed.
   Is this a desired behavior?
 
-* Name completion for filenames and for usernames (when appropriate).
+* Implement name completion for filenames and for usernames (when appropriate).
 
 * In Juniper, we have:
   "Delete all characters on the command line" : Ctrl-u or Ctrl-x

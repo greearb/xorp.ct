@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.7 2003/05/21 04:00:07 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.8 2003/06/03 22:00:09 pavlin Exp $
 #
 
 * Do we need to include <asm/types.h> for Linux, when we include
@@ -58,9 +58,6 @@
 * Rename protocol_name and protocol_id in the send protocol messages
   to src_module_instance_name and src_module_id (or sth. like that).
 
-* Whenever the MFEA starts to measure a dataflow, the kernel query
-  frequency should be 1/4th of the specified 'measurement_interval'.
-
 * The min. required TTL to forward on a MFC entry should be configurable
   per vif.
 
@@ -109,13 +106,8 @@
 
 * A single UnixComm should be able to handle more than one protocol modules.
 
-* Get rid of _maxvifs ??
-
 * 'int proto' (e.g. IPPROTO_IGMP, etc) should be renamed to 'proto_number'
    or sth. like that
-
-* There should be a periodic task to re-read the status of all
-  kernel interfaces.
 
 * In UnixComm::proto_socket_write() we should copy "databuf" to
   _sndbuf instead of assigning it to _sndiov[].
@@ -142,8 +134,6 @@
 
 * In k_get_vif_flags(int family, char *vif_name, uint32_t *return_value)
   rename 'return_value' to 'flags' or sth. else
-
-* Replace TRUE/FALSE with true/false
 
 * In function headers, make sure that constants have % in front.
   E.g.: %XORP_OK %XORP_ERROR 
