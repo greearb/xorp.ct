@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.3 2003/05/14 01:13:43 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.4 2003/10/09 00:11:02 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -48,10 +48,48 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop() = 0;
-    
-    virtual bool push_config(const IfTree& config) = 0;
-    
+
+    virtual bool push_config(const IfTree& config);
+
+protected:
+    virtual int set_interface_mac_address(const string& ifname,
+					  uint16_t if_index,
+					  const struct ether_addr& ether_addr,
+					  string& reason) = 0;
+
+    virtual int set_interface_mtu(const string& ifname,
+				  uint16_t if_index,
+				  uint32_t mtu,
+				  string& reason) = 0;
+
+    virtual int set_interface_flags(const string& ifname,
+				    uint16_t if_index,
+				    uint32_t flags,
+				    string& reason) = 0;
+
+    virtual int set_vif_address(const string& ifname,
+				uint16_t if_index,
+				bool is_broadcast,
+				bool is_p2p,
+				const IPvX& addr,
+				const IPvX& dst_or_bcast,
+				uint32_t prefix_len,
+				string& reason) = 0;
+
+    virtual int delete_vif_address(const string& ifname,
+				   uint16_t if_index,
+				   const IPvX& addr,
+				   uint32_t prefix_len,
+				   string& reason) = 0;
+
 private:
+    void push_interface(const IfTreeInterface& i);
+    void push_vif(const IfTreeInterface& i, const IfTreeVif& v);
+    void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
+			  const IfTreeAddr4& a);
+    void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
+			  const IfTreeAddr6& a);
+
     IfConfig&	_ifc;
 };
 
@@ -73,10 +111,39 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
+
     virtual bool push_config(const IfTree& config);
-    
+
 private:
+    virtual int set_interface_mac_address(const string& ifname,
+					  uint16_t if_index,
+					  const struct ether_addr& ether_addr,
+					  string& reason);
+
+    virtual int set_interface_mtu(const string& ifname,
+				  uint16_t if_index,
+				  uint32_t mtu,
+				  string& reason);
+
+    virtual int set_interface_flags(const string& ifname,
+				    uint16_t if_index,
+				    uint32_t flags,
+				    string& reason);
+
+    virtual int set_vif_address(const string& ifname,
+				uint16_t if_index,
+				bool is_broadcast,
+				bool is_p2p,
+				const IPvX& addr,
+				const IPvX& dst_or_bcast,
+				uint32_t prefix_len,
+				string& reason);
+
+    virtual int delete_vif_address(const string& ifname,
+				   uint16_t if_index,
+				   const IPvX& addr,
+				   uint32_t prefix_len,
+				   string& reason);
 };
 
 class IfConfigSetIoctl : public IfConfigSet {
@@ -98,16 +165,54 @@ public:
      */
     virtual int stop();
     
-    virtual bool push_config(const IfTree& config);
-    
 private:
-    void push_if(const IfTreeInterface& i);
-    void push_vif(const IfTreeInterface& i, const IfTreeVif& v);
-    void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
-		   const IfTreeAddr4& a);
-    void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
-		   const IfTreeAddr6& a);
-    
+    virtual int set_interface_mac_address(const string& ifname,
+					  uint16_t if_index,
+					  const struct ether_addr& ether_addr,
+					  string& reason);
+
+    virtual int set_interface_mtu(const string& ifname,
+				  uint16_t if_index,
+				  uint32_t mtu,
+				  string& reason);
+
+    virtual int set_interface_flags(const string& ifname,
+				    uint16_t if_index,
+				    uint32_t flags,
+				    string& reason);
+
+    virtual int set_vif_address(const string& ifname,
+				uint16_t if_index,
+				bool is_broadcast,
+				bool is_p2p,
+				const IPvX& addr,
+				const IPvX& dst_or_bcast,
+				uint32_t prefix_len,
+				string& reason);
+
+    virtual int delete_vif_address(const string& ifname,
+				   uint16_t if_index,
+				   const IPvX& addr,
+				   uint32_t prefix_len,
+				   string& reason);
+
+    virtual int set_vif_address4(const string& ifname,
+				 uint16_t if_index,
+				 bool is_broadcast,
+				 bool is_p2p,
+				 const IPvX& addr,
+				 const IPvX& dst_or_bcast,
+				 uint32_t prefix_len,
+				 string& reason);
+
+    virtual int set_vif_address6(const string& ifname,
+				 uint16_t if_index,
+				 bool is_p2p,
+				 const IPvX& addr,
+				 const IPvX& dst,
+				 uint32_t prefix_len,
+				 string& reason);
+
     int _s4;
     int _s6;
 };
@@ -125,23 +230,44 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int start();
-    
+
     /**
      * Stop operation.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
-    virtual bool push_config(const IfTree& config);
-    
+
 private:
-    void push_if(const IfTreeInterface& i);
-    void push_vif(const IfTreeInterface& i, const IfTreeVif& v);
-    void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
-		   const IfTreeAddr4& a);
-    void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
-		   const IfTreeAddr6& a);
+    virtual int set_interface_mac_address(const string& ifname,
+					  uint16_t if_index,
+					  const struct ether_addr& ether_addr,
+					  string& reason);
+
+    virtual int set_interface_mtu(const string& ifname,
+				  uint16_t if_index,
+				  uint32_t mtu,
+				  string& reason);
+
+    virtual int set_interface_flags(const string& ifname,
+				    uint16_t if_index,
+				    uint32_t flags,
+				    string& reason);
+
+    virtual int set_vif_address(const string& ifname,
+				uint16_t if_index,
+				bool is_broadcast,
+				bool is_p2p,
+				const IPvX& addr,
+				const IPvX& dst_or_bcast,
+				uint32_t prefix_len,
+				string& reason);
+
+    virtual int delete_vif_address(const string& ifname,
+				   uint16_t if_index,
+				   const IPvX& addr,
+				   uint32_t prefix_len,
+				   string& reason);
 
     int _s4;
     int _s6;

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.3 2003/05/14 20:33:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.4 2003/05/23 23:35:00 pavlin Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/ether_compat.h"
 
 #include "ifconfig.hh"
 #include "ifconfig_set.hh"
@@ -61,6 +62,109 @@ IfConfigSetDummy::push_config(const IfTree& it)
 {
     ifc().report_updates(it, true);
     ifc().set_live_config(it);
-    
+
     return true;
+}
+
+int
+IfConfigSetDummy::set_interface_mac_address(const string& ifname,
+					    uint16_t if_index,
+					    const struct ether_addr& ether_addr,
+					    string& reason)
+{
+    debug_msg("set_interface_mac "
+	      "(ifname = %s if_index = %u mac = %s)\n",
+	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
+
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(ether_addr);
+    UNUSED(reason);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetDummy::set_interface_mtu(const string& ifname,
+				    uint16_t if_index,
+				    uint32_t mtu,
+				    string& reason)
+{
+    debug_msg("set_interface_mtu "
+	      "(ifname = %s if_index = %u mtu = %u)\n",
+	      ifname.c_str(), if_index, mtu);
+
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(mtu);
+    UNUSED(reason);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetDummy::set_interface_flags(const string& ifname,
+				      uint16_t if_index,
+				      uint32_t flags,
+				      string& reason)
+{
+    debug_msg("set_interface_flags "
+	      "(ifname = %s if_index = %u flags = 0x%x)\n",
+	      ifname.c_str(), if_index, flags);
+
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(flags);
+    UNUSED(reason);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetDummy::set_vif_address(const string& ifname,
+				  uint16_t if_index,
+				  bool is_broadcast,
+				  bool is_p2p,
+				  const IPvX& addr,
+				  const IPvX& dst_or_bcast,
+				  uint32_t prefix_len,
+				  string& reason)
+{
+    debug_msg("set_vif_address "
+	      "(ifname = %s if_index = %u is_broadcast = %s is_p2p = %s "
+	      "addr = %s dst/bcast = %s prefix_len = %u)\n",
+	      ifname.c_str(), if_index, (is_broadcast)? "true" : "false",
+	      (is_p2p)? "true" : "false", addr.str().c_str(),
+	      dst_or_bcast.str().c_str(), prefix_len);
+
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(is_broadcast);
+    UNUSED(is_p2p);
+    UNUSED(addr);
+    UNUSED(dst_or_bcast);
+    UNUSED(prefix_len);
+    UNUSED(reason);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetDummy::delete_vif_address(const string& ifname,
+				     uint16_t if_index,
+				     const IPvX& addr,
+				     uint32_t prefix_len,
+				     string& reason)
+{
+    debug_msg("delete_vif_address "
+	      "(ifname = %s if_index = %u addr = %s prefix_len = %u)\n",
+	      ifname.c_str(), if_index, addr.str().c_str(), prefix_len);
+
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(addr);
+    UNUSED(prefix_len);
+    UNUSED(reason);
+
+    return (XORP_OK);
 }
