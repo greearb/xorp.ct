@@ -1,13 +1,14 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/etc/templates/Makefile.am,v 1.6 2004/05/05 07:11:32 pavlin Exp $
+## $XORP: xorp/etc/templates/Makefile.am,v 1.7 2004/05/12 23:58:49 pavlin Exp $
 ##
 
 # Redefine the data installation directory
 datadir = $(prefix)/$(subdir)
 
 # -- Data
-data_DATA	  = bgp.cmds bgp.tp
+data_DATA	  = host.cmds
+data_DATA	 += bgp.cmds bgp.tp
 data_DATA	 += fea.cmds fea.tp
 data_DATA	 += fib2mrib.tp
 data_DATA	 += igmp.cmds igmp.tp
@@ -19,7 +20,7 @@ data_DATA	 += ospf.tp
 data_DATA	 += pim.cmds pimsm4.tp
 data_DATA	 += pim6.cmds pimsm6.tp
 data_DATA	 += rib.tp
-data_DATA	 += rip.tp
+data_DATA	 += rip.cmds rip.tp
 data_DATA	 += ripng.tp
 data_DATA	 += snmp.tp
 data_DATA	 += static_routes.tp

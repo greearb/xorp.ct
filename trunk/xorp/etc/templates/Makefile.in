@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 datadir = $(prefix)/$(subdir)
 
 # -- Data
-data_DATA = bgp.cmds bgp.tp fea.cmds fea.tp fib2mrib.tp igmp.cmds igmp.tp interfaces.tp mfea.cmds mfea4.tp mfea6.cmds mfea6.tp mld.cmds mld.tp ospf.tp pim.cmds pimsm4.tp pim6.cmds pimsm6.tp rib.tp rip.tp ripng.tp snmp.tp static_routes.tp
+data_DATA = host.cmds bgp.cmds bgp.tp fea.cmds fea.tp fib2mrib.tp igmp.cmds igmp.tp interfaces.tp mfea.cmds mfea4.tp mfea6.cmds mfea6.tp mld.cmds mld.tp ospf.tp pim.cmds pimsm4.tp pim6.cmds pimsm6.tp rib.tp rip.cmds rip.tp ripng.tp snmp.tp static_routes.tp
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(data_DATA)
