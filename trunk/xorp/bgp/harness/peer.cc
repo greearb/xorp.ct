@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.6 2003/01/21 16:56:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.7 2003/01/21 18:54:27 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -866,14 +866,12 @@ Peer::check_expect(BGPPacket *rec)
 	case MESSAGETYPEOPEN:
 	    {
 	    OpenPacket *pac = new OpenPacket(rec_buf, rec_len);
-	    pac->decode();
 	    _expect._bad = pac;
 	    }
 	    break;
 	case MESSAGETYPEUPDATE:
 	    {
 	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len);
-	    pac->decode();
 	    _expect._bad = pac;
 	    }
 	    break;
@@ -881,7 +879,6 @@ Peer::check_expect(BGPPacket *rec)
 	    {
 	    NotificationPacket *pac =
 		new NotificationPacket(rec_buf, rec_len);
-	    pac->decode();
 	    _expect._bad = pac;
 	    }
 	    break;
@@ -951,7 +948,6 @@ Peer::datain(const bool& status, const timeval& tv,
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 	    
 	    if(_session && !_established && _passive)
@@ -962,7 +958,6 @@ Peer::datain(const bool& status, const timeval& tv,
 	case MESSAGETYPEKEEPALIVE: {
 	    debug_msg("KEEPALIVE Packet RECEIVED %d\n", length);
 	    KeepAlivePacket pac(buf, length);
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 
 	    /* XXX
@@ -989,7 +984,6 @@ Peer::datain(const bool& status, const timeval& tv,
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    UpdatePacket pac(buf, length);
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 	    /*
 	    ** Save the update message in the receive trie.
@@ -1001,7 +995,6 @@ Peer::datain(const bool& status, const timeval& tv,
 	case MESSAGETYPENOTIFICATION: {
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    NotificationPacket pac(buf, length);
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 	    check_expect(&pac);
 	}

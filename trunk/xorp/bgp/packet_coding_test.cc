@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.6 2003/01/21 16:56:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.7 2003/01/21 18:54:27 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -43,7 +43,6 @@ int test_simple_open_packet()
     skip++;
 
     OpenPacket receivedpacket(buf, plen);
-    receivedpacket.decode();
     assert(receivedpacket.type()==MESSAGETYPEOPEN);
 
     //check the information we put in came out again OK.
@@ -95,7 +94,6 @@ int test_keepalive_packet()
     skip++;
 
     KeepAlivePacket receivedpacket(buf, plen);
-    receivedpacket.decode();
     assert(receivedpacket.type()==MESSAGETYPEKEEPALIVE);
 
     //try encoding the received packet, and check we get the same
@@ -146,7 +144,6 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
     skip++;
 
     NotificationPacket receivedpacket(buf, plen);
-    receivedpacket.decode();
     assert(receivedpacket.type()==MESSAGETYPENOTIFICATION);
     assert(receivedpacket.error_code() == ec);
     assert(receivedpacket.error_subcode() == esc);
@@ -201,7 +198,6 @@ int test_withdraw_packet(bool verbose)
     skip++;
 
     UpdatePacket receivedpacket(buf, plen);
-    receivedpacket.decode();
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
     list <BGPWithdrawnRoute>::const_iterator iter;
     iter = receivedpacket.withdrawn_list().begin();
@@ -333,7 +329,6 @@ int test_announce_packet(bool verbose)
     skip++;
 
     UpdatePacket receivedpacket(buf, plen);
-    receivedpacket.decode();
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes

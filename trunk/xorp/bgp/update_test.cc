@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_test.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_test.cc,v 1.2 2002/12/13 22:38:55 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -68,7 +68,6 @@ main(int, char **argv)
 
     try {
  	UpdatePacket pac(&buffer[0], sizeof(buffer));
- 	pac.decode();
 	
 	for(int i = 0; i < 2048; i++)
 	    test1(i);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.6 2003/01/21 18:54:27 rizzo Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.7 2003/01/22 00:43:35 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -47,7 +47,6 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
 	_error_data = error_data;
     } else
 	_error_data = 0;
-    _Data = NULL;
 
     debug_msg(str().c_str());
 }
@@ -56,81 +55,39 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
     throw(InvalidPacket)
 {
     debug_msg("Data %#x len %d\n", (int)d, l);
+    if (l < MINNOTIFICATIONPACKET)
+	xorp_throw(InvalidPacket, "Truncated Notification Message");
 
     _Length = l;
     _Type = MESSAGETYPENOTIFICATION;
-    int data_len = _Length;
-    if (data_len < MINNOTIFICATIONPACKET) {
-	xorp_throw(InvalidPacket, "Truncated Notification Message");
-    }
-    uint8_t *data = new uint8_t[data_len];
-    memcpy(data, d, data_len);
-    _Data = data;
-    _error_data = NULL;
-}
-
-NotificationPacket::~NotificationPacket()
-{
-    if (_Data != NULL)
-	delete[] _Data;
-    if (_error_data != NULL)
-	delete[] _error_data;
-}
-
-void
-NotificationPacket::decode() throw(InvalidPacket)
-{
-    const uint8_t *data = _Data + BGP_COMMON_HEADER_LEN;
-
-    _error_code = data[0];
-    _error_subcode = data[1];
+    d += BGP_COMMON_HEADER_LEN;	// skip header
+    _error_code = d[0];
+    _error_subcode = d[1];
     int error_data_len = _Length - MINNOTIFICATIONPACKET;
     if (error_data_len > 0) {
 	uint8_t *ed = new uint8_t[error_data_len];
-	memcpy(ed, data + 2, error_data_len);
+	memcpy(ed, d + 2, error_data_len);
 	_error_data = ed;
 	debug_msg("%s", str().c_str());
-    } else if (error_data_len < 0) {
+    } else
 	_error_data = NULL;
-	xorp_throw(InvalidPacket, "Truncated notification packet received");
-    } else {
-	_error_data = NULL;
-    }
     return;
 }
 
 const uint8_t *
 NotificationPacket::encode(int& len) const
 {
-    struct iovec io[6];
-
-    uint16_t k = 0;
-
     debug_msg("Encode in NotificationPacket called (%d)\n", _Length);
+    len = length();
 
-    io[0].iov_base = const_cast<char *>((const char *)&_Marker[0]);
-    io[0].iov_len = MARKER_SIZE;
-    k = htons(_Length);
-
-    io[1].iov_base = (char *)&k;
-    io[1].iov_len = 2;
-
-    io[2].iov_base = const_cast<char*>((const char *)&_Type);
-    io[2].iov_len = 1;
-
-    io[3].iov_base = const_cast<char*>((const char *)&_error_code);
-    io[3].iov_len = 1;
-
-    io[4].iov_base = const_cast<char*>((const char *)&_error_subcode);
-    io[4].iov_len = 1;
-
-    if (_error_data == NULL) {
-	return flatten(&io[0], 5, len);
-    } else {
-	io[5].iov_base = const_cast<char*>((const char *)_error_data);
-	io[5].iov_len = _Length - MINNOTIFICATIONPACKET;
-	return flatten(&io[0], 6, len);
-    }
+    // allocate buffer, set length, fill up header
+    uint8_t *buf = basic_encode(len);
+    buf[BGP_COMMON_HEADER_LEN] = _error_code;
+    buf[BGP_COMMON_HEADER_LEN+1] = _error_subcode;
+    if (_error_data != 0)
+	memcpy(buf + MINNOTIFICATIONPACKET, _error_data,
+		length() - MINNOTIFICATIONPACKET);
+    return buf;
 }
 
 bool

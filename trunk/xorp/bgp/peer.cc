@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.6 2003/01/21 16:56:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.7 2003/01/21 18:54:27 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,7 +103,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
 	    // All decode errors should throw a CorruptMessage.
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
 	    _peerdata->dump_peer_data();
@@ -114,7 +113,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("KEEPALIVE Packet RECEIVED %d\n", length);
 	    // Decoding a KeepAlivePacket cannot fail
 	    KeepAlivePacket pac(buf, length);
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 	    action(EVENTRECKEEPALIVEMESS, &pac);
 	    break;
@@ -125,7 +123,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    gettimeofday(&_in_update_time, NULL);
 	    UpdatePacket pac(buf, length);
 	    // All decode errors should throw a CorruptMessage.
-	    pac.decode();
 	    debug_msg(pac.str().c_str());
 	    _mainprocess->add_update(_peerdata, &pac);
 	    action(EVENTRECUPDATEMESS, &pac);
@@ -136,7 +133,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    try {
 		NotificationPacket pac(buf, length);
 		// All decode errors should throw an InvalidPacket
-		pac.decode();
 		_last_error[0] = pac.error_code();
 		_last_error[1] = pac.error_subcode();
 		debug_msg(pac.str().c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.5 2003/01/17 05:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.6 2003/01/21 18:54:27 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,7 +41,6 @@ UpdatePacket::UpdatePacket()
 {
     _Type = MESSAGETYPEUPDATE;
     //    _pathattributes = NULL;
-    _Data = NULL;
 }
 
 UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
@@ -53,14 +52,11 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     
     _Length = l; 
     _Type = MESSAGETYPEUPDATE;
-    uint8_t *data = new uint8_t[l];
-    memcpy(data,d,l);
-    _Data = data;
+    decode(d, l);
 }
 
-UpdatePacket::~UpdatePacket() {
-    if (_Data != NULL)
-	delete[] _Data;
+UpdatePacket::~UpdatePacket()
+{
     list <PathAttribute*>::iterator pai = _att_list.begin();
     while(pai != _att_list.end()) {
 	delete (*pai);
@@ -174,7 +170,7 @@ const uint8_t *UpdatePacket::encode(int &len) const
 
     struct iovec io[size];
 	
-    io[0].iov_base = const_cast<char*>((const char *)&_Marker[0]);
+    io[0].iov_base = const_cast<char*>((const char *)Marker);
     io[0].iov_len = MARKER_SIZE;
 	
     // 1 is set below, since total size is currently unknown.
@@ -275,15 +271,13 @@ const uint8_t *UpdatePacket::encode(int &len) const
 }
 
 void
-UpdatePacket::decode()
+UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
     throw(CorruptMessage)
 {
     int urlength = 0;
     int plength = 0; // Path attributes length
     int nlength = 0;
 
-    const uint8_t *data = _Data;
-	
     /* shift the data by the header length */
     data = data + BGP_COMMON_HEADER_LEN;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.2 2003/01/21 18:54:27 rizzo Exp $"
 
 /*
 ** BGP Pretty Print
@@ -39,25 +39,21 @@ bgppp(const uint8_t *buf, const size_t len)
 	switch(header->type) {
 	case MESSAGETYPEOPEN: {
 	    OpenPacket pac(buf, len);
-	    pac.decode();
 	    result = pac.str().c_str();
 	}
 	    break;
 	case MESSAGETYPEKEEPALIVE: {
 	    KeepAlivePacket pac(buf, len);
-	    pac.decode();
 	    result = pac.str().c_str();
 	}
 	    break;
 	case MESSAGETYPEUPDATE: {
 	    UpdatePacket pac(buf, len);
-	    pac.decode();
 	    result = pac.str().c_str();
 	}
 	    break;
 	case MESSAGETYPENOTIFICATION: {
 	    NotificationPacket pac(buf, len);
-	    pac.decode();
 	    result = pac.str().c_str();
 	}
 	    break;

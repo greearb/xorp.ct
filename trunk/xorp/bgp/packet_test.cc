@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.3 2002/12/15 04:09:28 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -103,7 +103,6 @@ bool BGPTestPacket::test_keepalive()
 
     debug_msg("Decoding KeepAlivePacket\n\n");
     KeepAlivePacket* keepalivepacket = new KeepAlivePacket(buf,len);
-    keepalivepacket->decode();
     
     debug_msg("Ending test of KeepAlivePacket\n\n");
     
@@ -135,7 +134,6 @@ bool BGPTestPacket::test_open()
     OpenPacket *openpacket;
     try {
 	openpacket = new OpenPacket(buf,len);
-	openpacket->decode();
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket from buffer failed\n");
 	delete op;
@@ -172,7 +170,6 @@ bool BGPTestPacket::test_update()
     UpdatePacket *updatepacket;
     try {
 	updatepacket = new UpdatePacket(buf,len);
-	updatepacket->decode();
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket from buffer failed\n");
 	delete up;
@@ -208,7 +205,6 @@ bool BGPTestPacket::test_notification()
     NotificationPacket *notificationpacket;
     try {
 	notificationpacket = new NotificationPacket(buf,len);
-	notificationpacket->decode();
     } catch (InvalidPacket& err) {
 	debug_msg("Construction of NotificationPacket from buffer failed\n");
 	delete np;
@@ -230,8 +226,8 @@ bool BGPTestPacket::test_notification()
 KeepAlivePacket* BGPTestPacket::create_keepalive()
 {
     KeepAlivePacket* p = new KeepAlivePacket();
-    uint8_t m[16] = {255,1,255,2,255,3,255,4,255,5,255,6,255,7,255,8};
-    p->set_marker(m);
+    //uint8_t m[16] = {255,1,255,2,255,3,255,4,255,5,255,6,255,7,255,8};
+    // p->set_marker(m); // XXX no support for random markers right now.
     return p;
 }
 

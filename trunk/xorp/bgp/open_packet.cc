@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -30,13 +30,10 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     debug_msg("OpenPacket(char, uint16_t) constructor called\n");
     _Length = l;
     _Type = MESSAGETYPEOPEN;
-    uint8_t *data = new uint8_t[l];
 
-    debug_msg("OpenPacket: allocated buffer %x\n", (uint)data);
-    memcpy(data, d, l);
-    _Data = data;
     _OptParmLen = 0;
     _num_parameters = 0;
+    decode(d, l);
 }
 
 OpenPacket::OpenPacket(const AsNum& as,
@@ -53,15 +50,6 @@ OpenPacket::OpenPacket(const AsNum& as,
     _Type = MESSAGETYPEOPEN;
     _OptParmLen = 0;
     _num_parameters = 0;
-    _Data = NULL;
-}
-
-OpenPacket::~OpenPacket()
-{
-    debug_msg("OpenPacket destructor called\n");
-    if (_Data != NULL) {
-	delete[] _Data;
-    }
 }
 
 const uint8_t *
@@ -76,7 +64,7 @@ OpenPacket::encode(int& len) const
 
     debug_msg("Send in OpenPacket called\n");
 
-    io[0].iov_base = const_cast<char*>((const char *)_Marker);
+    io[0].iov_base = const_cast<char*>((const char *)Marker);
     io[0].iov_len = MARKER_SIZE;
 
     io[2].iov_base = const_cast<char*>((const char *)&_Type);
@@ -128,7 +116,7 @@ OpenPacket::encode(int& len) const
 }
 
 void
-OpenPacket::decode() throw(CorruptMessage)
+OpenPacket::decode(const uint8_t *data, uint16_t /* l */) throw(CorruptMessage)
 {
     debug_msg("decode called\n");
 
@@ -145,8 +133,6 @@ OpenPacket::decode() throw(CorruptMessage)
 	xorp_throw(CorruptMessage, "Open message too short",
 		   MSGHEADERERR, BADMESSLEN);
     }
-
-    const uint8_t* data = _Data;
 
     /* shift data by common header length */
     data = data + BGP_COMMON_HEADER_LEN;

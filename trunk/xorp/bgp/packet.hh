@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.4 2003/01/21 16:56:59 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.5 2003/01/21 18:54:27 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -145,7 +145,13 @@ private:
 };
 
 
-/* **************** BGPPacket *********************** */
+/**
+ * The main container for BGP messages (packets) which are sent
+ * back and forth.
+ *
+ * This base class only contains the standard fields (length, type)
+ * leaving other information to be stored in the derived objects.
+ */
 
 class BGPPacket {
 public:
@@ -158,24 +164,35 @@ public:
 	CONNECTION_CLOSED,
     };
 
-    BGPPacket();
-    virtual ~BGPPacket();
-    virtual const uint8_t *encode(int& len) const = 0;
-    const uint8_t *flatten(struct iovec *iov, int cnt, int& len) const;
+    // The default marker.
+    static const uint8_t Marker[MARKER_SIZE];
+
+    BGPPacket()					{}
+    virtual ~BGPPacket()			{}
     uint8_t type() const			{ return _Type; }
-    void set_marker(uint8_t* m);
-    const uint8_t* marker() const		{ return _Marker; }
     uint16_t length() const			{ return _Length; }
     virtual string str() const = 0;
+
+    virtual const uint8_t *encode(int &len) const = 0;
 protected:
+    /*
+     * Return the external representation of the packet into a buffer.
+     * If the caller supplies the buffer it is its responsibility to make
+     * sure that it has the correct size, otherwise the routine will
+     * allocate it with new[length()].
+     * In all cases it is responsibility of the caller to dispose
+     * of the buffer.
+     * Note that this routine will only copy the fixed_header part.
+     * The derived-class methods are in charge of filling up any
+     * additional data past it.
+     */
+    uint8_t *basic_encode(int &len, uint8_t *buf=0) const;
+
+    const uint8_t *flatten(struct iovec *iov, int cnt, int& len) const;
     // don't allow the use of the default copy constructor
     BGPPacket(const BGPPacket& BGPPacket);
-
-    const uint8_t* _Data; /*data is only the payload data, so it's
-                            length is (_Length - 19) */
     uint16_t _Length;  /*length is the total packet length, including
                          the BGP common header*/
-    uint8_t _Marker[MARKER_SIZE];
     uint8_t _Type;
 private:
 };
@@ -186,9 +203,8 @@ class OpenPacket : public BGPPacket {
 public:
     OpenPacket(const uint8_t *d, uint16_t l);
     OpenPacket(const AsNum& as, const IPv4& bgpid, const uint16_t holdtime);
-    ~OpenPacket();
+    ~OpenPacket()				{}
     const uint8_t *encode(int& len) const;
-    void decode() throw(CorruptMessage);
     string str() const;
 
     const uint8_t Version() const { return _Version; }
@@ -208,6 +224,7 @@ public:
 protected:
 
 private:
+    void decode(const uint8_t *d, uint16_t l) throw(CorruptMessage);
     OpenPacket();
     // don't allow the use of the default copy constructor
     OpenPacket(const OpenPacket& OpenPacket);
@@ -243,7 +260,6 @@ public:
 	return _nlri_list;
     }
     const uint8_t *encode(int& len) const;
-    void decode() throw(CorruptMessage);
 
     bool big_enough() const;
 
@@ -252,6 +268,7 @@ public:
 protected:
 
 private:
+    void decode(const uint8_t *d, uint16_t l) throw(CorruptMessage);
     // don't allow the use of the default copy constructor
     UpdatePacket(const UpdatePacket& UpdatePacket);
     list <BGPWithdrawnRoute> _withdrawn_list;
@@ -267,7 +284,7 @@ public:
     NotificationPacket(uint8_t ec, uint8_t esc = 0,
 		const uint8_t *d = 0, size_t l=0);
     NotificationPacket();
-    ~NotificationPacket();
+    ~NotificationPacket()			{ delete[] _error_data; }
     uint8_t error_code() const { return _error_code; }
     uint8_t error_subcode() const { return _error_subcode; }
     /*
@@ -276,12 +293,12 @@ public:
     static bool validate_error_code(const int error, const int subcode);
     const uint8_t* error_data() const { return _error_data; }
     const uint8_t *encode(int &len) const;
-    void decode() throw(InvalidPacket);
     string str() const;
     bool operator==(const NotificationPacket& him) const;
 protected:
 
 private:
+    // void decode() throw(InvalidPacket);
     // don't allow the use of the default copy constructor
     NotificationPacket(const NotificationPacket& Notificationpacket);
     uint8_t _error_code;
@@ -289,17 +306,30 @@ private:
     const uint8_t* _error_data;
 };
 
-/* **************** KeepAlivePacket *********************** */
-
+/**
+ * KeepAlivePacket are extremely simple, being made only of a header.
+ * with the appropriate type and length.
+ */
 class KeepAlivePacket : public BGPPacket {
 public:
-    KeepAlivePacket(const uint8_t *d, uint16_t l);
-    KeepAlivePacket();
-    ~KeepAlivePacket();
-    const uint8_t *encode(int& len) const;
-    void decode();
-    string str() const;
-    bool operator==(const KeepAlivePacket& him) const;
+    /**
+     * need nothing to parse incoming data
+     */
+    KeepAlivePacket(const uint8_t *, uint16_t l)	{
+	_Type = MESSAGETYPEKEEPALIVE;
+	_Length = l;
+    }
+
+    KeepAlivePacket()					{
+	_Type = MESSAGETYPEKEEPALIVE;
+	_Length = MINKEEPALIVEPACKET;
+    }
+    ~KeepAlivePacket()					{}
+    const uint8_t *encode(int &len) const		{
+	return basic_encode(len);
+    }
+    virtual string str() const		{ return "Keepalive Packet\n"; }
+    bool operator==(const KeepAlivePacket&) const	{ return true; }
 protected:
 
 private:
