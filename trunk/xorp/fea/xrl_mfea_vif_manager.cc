@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.11 2003/05/23 23:35:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.12 2003/05/27 17:47:33 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -136,7 +136,7 @@ XrlMfeaVifManager::update_state()
 void
 XrlMfeaVifManager::set_vif_state()
 {
-    map<string, Vif *>::const_iterator iter;
+    map<string, Vif *>::const_iterator vif_iter;
     string err;
     
     //
@@ -159,8 +159,9 @@ XrlMfeaVifManager::set_vif_state()
     //
     // Add new vifs, and update existing ones
     //
-    for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
-	Vif* vif = iter->second;
+    for (vif_iter = _vifs_by_name.begin();
+	 vif_iter != _vifs_by_name.end(); ++vif_iter) {
+	Vif* vif = vif_iter->second;
 	Vif* node_vif = _mfea_node.vif_find_by_name(vif->name());
 	
 	//
