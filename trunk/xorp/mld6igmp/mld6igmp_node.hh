@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.8 2003/05/21 05:32:52 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.9 2003/07/12 01:05:19 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -187,6 +187,42 @@ public:
     int		delete_vif_addr(const string& vif_name,
 				const IPvX& addr,
 				string& err);
+    
+    /**
+     * Enable an existing MLD6IGMP vif.
+     * 
+     * @param vif_name the name of the vif to enable.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		enable_vif(const string& vif_name, string& err);
+
+    /**
+     * Disable an existing MLD6IGMP vif.
+     * 
+     * @param vif_name the name of the vif to disable.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		disable_vif(const string& vif_name, string& err);
+
+    /**
+     * Start an existing MLD6IGMP vif.
+     * 
+     * @param vif_name the name of the vif to start.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		start_vif(const string& vif_name, string& err);
+    
+    /**
+     * Stop an existing MLD6IGMP vif.
+     * 
+     * @param vif_name the name of the vif to start.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		stop_vif(const string& vif_name, string& err);
     
     /**
      * Start MLD/IGMP on all enabled interfaces.

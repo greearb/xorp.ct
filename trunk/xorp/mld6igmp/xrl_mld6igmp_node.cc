@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.17 2003/07/12 01:05:19 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.18 2003/07/16 02:56:56 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -1089,15 +1089,10 @@ XrlMld6igmpNode::mld6igmp_0_1_enable_vif(
     // Input values, 
     const string&	vif_name)
 {
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mld6igmp_vif == NULL) {
-	string msg = c_format("Cannot enable vif %s: no such vif",
-			      vif_name.c_str());
+    if (Mld6igmpNode::enable_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    mld6igmp_vif->enable();
     
     return XrlCmdError::OKAY();
 }
@@ -1107,15 +1102,10 @@ XrlMld6igmpNode::mld6igmp_0_1_disable_vif(
     // Input values, 
     const string&	vif_name)
 {
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mld6igmp_vif == NULL) {
-	string msg = c_format("Cannot disable vif %s: no such vif",
-			      vif_name.c_str());
+    if (Mld6igmpNode::disable_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    mld6igmp_vif->disable();
     
     return XrlCmdError::OKAY();
 }
@@ -1125,19 +1115,10 @@ XrlMld6igmpNode::mld6igmp_0_1_start_vif(
     // Input values, 
     const string&	vif_name)
 {
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mld6igmp_vif == NULL) {
-	string msg = c_format("Cannot start vif %s: no such vif",
-			      vif_name.c_str());
+    if (Mld6igmpNode::start_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    if (mld6igmp_vif->start() != XORP_OK) {
-	string msg = c_format("Failed to start vif %s",
-			      vif_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
     
     return XrlCmdError::OKAY();
 }
@@ -1147,19 +1128,10 @@ XrlMld6igmpNode::mld6igmp_0_1_stop_vif(
     // Input values, 
     const string&	vif_name)
 {
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (mld6igmp_vif == NULL) {
-	string msg = c_format("Cannot stop vif %s: no such vif",
-			      vif_name.c_str());
+    if (Mld6igmpNode::stop_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    if (mld6igmp_vif->stop() != XORP_OK) {
-	string msg = c_format("Failed to stop vif %s",
-			      vif_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
     
     return XrlCmdError::OKAY();
 }
