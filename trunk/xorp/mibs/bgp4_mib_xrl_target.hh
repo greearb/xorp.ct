@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.11 2003/05/07 23:15:13 mjh Exp $
+// $XORP: xorp/mibs/bgp4_mib_xrl_target.hh,v 1.1 2003/05/14 18:34:33 jcardona Exp $
 
-#ifndef __BGP4_MIB_XRL_TARGET_HH__
-#define __BGP4_MIB_XRL_TARGET_HH__
+#ifndef __MIBS_BGP4_MIB_XRL_TARGET_HH__
+#define __MIBS_BGP4_MIB_XRL_TARGET_HH__
 
 #include "xrl/targets/bgp4_mib_base.hh"
 
@@ -31,7 +31,7 @@ public:
     }
 
     XrlCmdError common_0_1_get_version(string& version) {
-	version = "0.3";
+	version = "0.1";
 	return XrlCmdError::OKAY();
     }
 
@@ -51,4 +51,4 @@ private:
 
 };
 
-#endif // __BGP4_MIB_XRL_TARGET_HH__
+#endif // __MIBS_BGP4_MIB_XRL_TARGET_HH__

@@ -211,6 +211,8 @@ SnmpEventLoop::clear_monitored_fds ()
     for (p = _exported_exceptfds.begin(); p != _exported_exceptfds.end(); p++)
 	unregister_exceptfd(*p);
     _exported_readfds.erase(_exported_readfds.begin(), _exported_readfds.end());
-    _exported_writefds.erase(_exported_writefds.begin(), _exported_writefds.end());
-    _exported_exceptfds.erase(_exported_exceptfds.begin(), _exported_exceptfds.end());
+    _exported_writefds.erase(
+	_exported_writefds.begin(), _exported_writefds.end());
+    _exported_exceptfds.erase(
+	_exported_exceptfds.begin(), _exported_exceptfds.end());
 }

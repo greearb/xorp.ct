@@ -17,7 +17,7 @@ init_bgp4_mib_1657_bgpversion (void)
 {
     static oid bgpVersion_oid[] = { 1,3,6,1,2,1,15,1, 0 };
 
-    DEBUGMSGTL(("bgp4_mib1657", "Initializing\n"));
+    DEBUGMSGTL((BgpMib::the_instance().name(), "Initializing\n"));
 
     netsnmp_register_read_only_instance(netsnmp_create_handler_registration
                                         ("bgpVersion",
@@ -31,7 +31,7 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
 			       netsnmp_delegated_cache* cache)
 {
 
-    DEBUGMSGTL(("bgp4_mib1657", "get_bgp_version_done called\n"));
+    DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgp_version_done called\n"));
 
     netsnmp_request_info *requests;
     netsnmp_agent_request_info *reqinfo;
@@ -48,15 +48,15 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
     requests = cache->requests;
 
     if (e != XrlError::OKAY()) {
-	DEBUGMSGTL(("bgp4_mib1657", "XrlError: "));
-	DEBUGMSGTL(("bgp4_mib1657", e.error_msg()));
-	DEBUGMSGTL(("bgp4_mib1657", "\n"));
+	DEBUGMSGTL((BgpMib::the_instance().name(), "XrlError: "));
+	DEBUGMSGTL((BgpMib::the_instance().name(), e.error_msg()));
+	DEBUGMSGTL((BgpMib::the_instance().name(), "\n"));
 	netsnmp_set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
 	requests->delegated = 0;
 	return;
     }
 
-    DEBUGMSGTL(("bgp4_mib1657","continuing delayed req, mode = %d\n", 
+    DEBUGMSGTL((BgpMib::the_instance().name(),"continuing delayed req, mode = %d\n", 
 	reqinfo->mode));
 
     // no longer delegated since we'll answer down below
@@ -79,7 +79,7 @@ get_bgpVersion(netsnmp_mib_handler * handler,
                           netsnmp_agent_request_info *  reqinfo,
                           netsnmp_request_info *requests)
 {
-    DEBUGMSGTL(("bgp4_mib1657", "get_bgpVersion called\n"));
+    DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgpVersion called\n"));
     BgpMib& bgp_mib = BgpMib::the_instance();
     BgpMib::CB0 cb_version;
     netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache(handler,

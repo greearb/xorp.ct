@@ -14,7 +14,7 @@
 
 #ident "$Header$"
 
-#define XORP_MODULE_NAME "XORP_SNMP_INTERFACE"
+#include "xorp_if_module.h"
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -22,20 +22,16 @@
 
 #include "xorpevents.hh"
 #include "libxorp/xlog.h"
+#include "xorp_if_mib_module.hh"
 
-static const char * mib_mod_name = "xorp_if_mib_module";
 
-extern "C" {
-void   init_xorp_if_mib_module(void);
-void deinit_xorp_if_mib_module(void);
-}
 
 void
 init_xorp_if_mib_module(void)
 {
-    DEBUGMSGTL((mib_mod_name, "Initialized...\n"));
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.set_log_name(mib_mod_name);  
+    XorpIfMib & xorp_if_mib = XorpIfMib::the_instance();
+    DEBUGMSGTL((xorp_if_mib.name(), "Initialized...\n"));
+
     xlog_init("snmpd", NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW); 
     xlog_add_default_output();
@@ -46,9 +42,47 @@ init_xorp_if_mib_module(void)
 void
 deinit_xorp_if_mib_module(void)
 {
-    DEBUGMSGTL((mib_mod_name, "Unloaded...\n"));
+    XorpIfMib & xorp_if_mib = XorpIfMib::the_instance();
+    DEBUGMSGTL((xorp_if_mib.name(), "Unloaded...\n"));
+    xorp_if_mib.explicit_destructor();
+
+    // since this is the last XORP mib module that will be unloaded, it must do
+    // the clean up 
     xlog_stop();
     xlog_exit();
 }
 
 
+XorpIfMib *  XorpIfMib::_xorp_if_mib = NULL;
+
+
+XorpIfMib&
+XorpIfMib::the_instance()
+{
+    if (!_xorp_if_mib) {
+        _xorp_if_mib = new XorpIfMib;
+        DEBUGMSGTL((XORP_MODULE_NAME, "XorpIfMib created\n"));
+    }
+    return *_xorp_if_mib;
+}
+
+XorpIfMib::XorpIfMib()
+    : _xrl_router(SnmpEventLoop::the_instance(),"xorp_if_mib"),
+      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME)
+
+{
+    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
+    eventloop.export_events();
+}
+
+void
+XorpIfMib::explicit_destructor()
+{
+    DEBUGMSGTL((XORP_MODULE_NAME, "XorpIfMib destroyed\n"));
+    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
+    bool cleanup_done = false;
+    XorpTimer t = eventloop.set_flag_after_ms(1000, &cleanup_done);
+    while (!cleanup_done)
+	eventloop.run();
+    if (_xorp_if_mib) delete _xorp_if_mib;
+}

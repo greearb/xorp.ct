@@ -10,36 +10,16 @@
 #include "bgp4_mib_1657_bgppeertable.hh"
 
 
-// Local variables
-static const char * mib_mod_name = XORP_MODULE_NAME;
-static PeriodicTimerCallback ptcb;
-static XorpTimer * pXtbgp;
-
-// Local functions
-static bool bgp4_mib_callback() {
-    static int i;
-    DEBUGMSGTL((mib_mod_name, "Counting...%d\n", i));
-    if (-1 == ++i) return false;
-    return true;
-}
 
 void
 init_bgp4_mib_1657 (void)
 {
-    DEBUGMSGTL((mib_mod_name, "Initializing...\n"));
 
-    // this is to ensure the constructor of BgpMib gets called as soon as
-    // we load this MIB
-    BgpMib::the_instance();
+    BgpMib & bgp_mib = BgpMib::the_instance();
+    DEBUGMSGTL((bgp_mib.name(), "Initializing...\n"));
 
     init_bgp4_mib_1657_bgpversion();
     init_bgp4_mib_1657_bgppeertable();
-    DEBUGMSGTL((mib_mod_name, "Creating periodic event...\n"));
-    ptcb = callback(bgp4_mib_callback);
-    pXtbgp = new XorpTimer;
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
-    DEBUGMSGTL((mib_mod_name, "Exporting events...\n"));
-    eventloop.export_events();
 
     // NOTE:  these xlog calls are required by each mib module, since the
     // runtime linker seems to reset the values of xlog.c static variables
@@ -55,35 +35,44 @@ init_bgp4_mib_1657 (void)
 void  
 deinit_bgp4_mib_1657 (void)
 {
-    DEBUGMSGTL((mib_mod_name, "Unloading...\n"));
-    delete pXtbgp;
-    pXtbgp = NULL;
+    BgpMib & bgp_mib = BgpMib::the_instance();
+    DEBUGMSGTL((bgp_mib.name(), "Unloading...\n"));
+    bgp_mib.explicit_destructor();
 }
 
-BgpMib *  BgpMib::_bgpMib = NULL;
+BgpMib *  BgpMib::_bgp_mib = NULL;
 
 
 BgpMib& 
 BgpMib::the_instance() 
 {
-    if (!_bgpMib) {
-	_bgpMib = new BgpMib;
-	DEBUGMSGTL((mib_mod_name, "BgpMib created\n"));
+    if (!_bgp_mib) {
+	_bgp_mib = new BgpMib;
+	DEBUGMSGTL((XORP_MODULE_NAME, "BgpMib created\n"));
     }
-    return *_bgpMib;
+    return *_bgp_mib;
 }
 
 BgpMib::BgpMib() 
     : XrlBgpV0p2Client(&_xrl_router), 
       _xrl_router(SnmpEventLoop::the_instance(),"bgp4_mib"),
-      _xrl_target(&_xrl_router, *this)
+      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) 
 
 {
+    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
+    eventloop.export_events();
 }
 
-BgpMib::~BgpMib()
+void
+BgpMib::explicit_destructor()
 {
-    if (_bgpMib) delete _bgpMib;
-    DEBUGMSGTL((mib_mod_name, "BgpMib destroyed\n"));
+    DEBUGMSGTL((XORP_MODULE_NAME, "BgpMib destroyed\n"));
+    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
+    bool cleanup_done = false;
+    XorpTimer t = eventloop.set_flag_after_ms(1000, &cleanup_done);
+    while (!cleanup_done)
+	eventloop.run();
+    if (_bgp_mib) delete _bgp_mib;
 }
+
 

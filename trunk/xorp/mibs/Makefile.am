@@ -45,20 +45,23 @@ LDADD += $(top_builddir)/libcomm/libcomm.a
  
 libnetsnmpxorp_so_LDFLAGS = -shared -fPIC -fpic 
 
-test_xorpevents_LDADD  = $(LDADD) -lnetsnmpxorp -L.
+test_xorpevents_LDADD  = $(LDADD) -lnetsnmpxorp -L${top_builddir}/mibs
 
-bgp4_mib_1657_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
+bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs
 bgp4_mib_1657_so_LDADD += -lbgp4mibbase -L$(top_builddir)/xrl/targets
 bgp4_mib_1657_so_LDADD += $(top_builddir)/xrl/interfaces/libbgpxif.a
+bgp4_mib_1657_so_LDADD += $(LDADD)
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
 bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
  
 
-ospf_mib_1850_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
+ospf_mib_1850_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs $(LDADD) 
 ospf_mib_1850_so_LDFLAGS = -shared -fPIC -fpic 
 ospf_mib_1850_so_DEPENDENCIES = libnetsnmpxorp.so
 
-xorp_if_mib_module_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
+xorp_if_mib_module_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs
+xorp_if_mib_module_so_LDADD += -lxorpifmibbase -L$(top_builddir)/xrl/targets 
+xorp_if_mib_module_so_LDADD += $(LDADD) 
 xorp_if_mib_module_so_LDFLAGS = -shared -fPIC -fpic 
 xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
 
@@ -89,6 +92,8 @@ ospf_mib_1850_so_SOURCES += ospf_mib_1850.cc
 # -- Library Sources (xorp_if_mib_module)
 xorp_if_mib_module_so_SOURCES  = xorp_if_mib_module.hh
 xorp_if_mib_module_so_SOURCES += xorp_if_mib_module.cc
+xorp_if_mib_module_so_SOURCES += xorp_if_mib_xrl_target.cc
+xorp_if_mib_module_so_SOURCES += xorp_if_mib_xrl_target.hh
 
 ################################################################
 ##

@@ -33,13 +33,17 @@ class BgpMib : public XrlBgpV0p2Client {
 
 public:
     static BgpMib& the_instance();
+    static void explicit_destructor();
+    const char * name()    { return _name.c_str(); };
 
 private:
     BgpMib();
-    ~BgpMib();
-    static BgpMib* _bgpMib;
     XrlStdRouter _xrl_router;
     XrlBgpMibTarget _xrl_target;
+
+    const string  _name;
+
+    static BgpMib* _bgp_mib;
 };
 
 #endif    /* __MIBS_BGP4_MIB_1657_HH__ */                      

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/bgp/bgp_module.h,v 1.2 2003/03/10 23:19:57 hodson Exp $
+ * $XORP: xorp/mibs/xorp_if_module.h,v 1.1 2003/05/14 18:34:33 jcardona Exp $
  */
 
 /*
@@ -23,5 +23,5 @@
  */
 /* XXX: this file must be included first by each *.c or *.cc file in a module */
 
-#define XORP_MODULE_NAME	"NETSNMP"
-#define XORP_MODULE_VERSION	"0.3"
+#define XORP_MODULE_NAME	"xorp_if_mib_module"
+#define XORP_MODULE_VERSION	"0.1"
