@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ref_ptr.cc,v 1.2 2003/02/08 01:06:29 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ref_ptr.cc,v 1.3 2003/03/10 23:20:34 hodson Exp $"
 
 #include <assert.h>
 #include <iostream>
@@ -46,7 +46,7 @@ void
 ref_counter_pool::grow()
 {
     size_t old_size = _counters.size();
-    _counters.resize(2 * old_size);
+    _counters.resize(old_size + old_size / 8 + 1);
 
     for (size_t i = old_size; i < _counters.size(); i++) {
 	_counters[i] = _free_index;
