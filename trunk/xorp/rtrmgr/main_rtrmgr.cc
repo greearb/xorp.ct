@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.29 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.30 2003/09/24 16:26:32 hodson Exp $"
 
 #include <signal.h>
 
@@ -46,50 +46,43 @@
 //
 // Defaults
 //
-#define DEFAULT_XORP_ROOT_DIR		XORP_ROOT
-#define DEFAULT_CONFIG_BOOT		"config.boot"
-#define DEFAULT_CONFIG_TEMPLATE_DIR	"etc/templates"
-#define DEFAULT_XRL_DIR			"xrl/targets"
-#define DEFAULT_DO_EXEC			true
-string	default_xorp_root_dir		= DEFAULT_XORP_ROOT_DIR;
-string	default_config_boot		= DEFAULT_CONFIG_BOOT;
-string	default_config_template_dir	= DEFAULT_CONFIG_TEMPLATE_DIR;
-string	default_xrl_dir			= DEFAULT_XRL_DIR;
-bool	default_do_exec			= DEFAULT_DO_EXEC;
-
-static bool running;
+static bool default_do_exec = true;
+static bool running = false;
 
 static void signalhandler(int)
 {
     running = false;
 }
 
-void
-usage()
+static void
+usage(const char* argv0)
 {
-    fprintf(stderr,
-	"usage: rtrmgr [-n] [-b config.boot] [-t cfg_dir] [-x xrl_dir]\n");
-    fprintf(stderr, "options:\n");
-
-    fprintf(stderr,
-	    "\t-n		do not execute XRLs		[ %s ]\n",
-	    default_do_exec ? "false" : "true");
-
-    fprintf(stderr,
-	    "\t-b config.boot	specify boot file 		[ %s ]\n",
-	    default_config_boot.c_str());
-
-    fprintf(stderr,
-	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
-	    default_config_template_dir.c_str());
-
-    fprintf(stderr,
-	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir.c_str());
-
-    exit(-1);
+    fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -h        Display this information\n");
+    fprintf(stderr, "  -d        Display defaults\n");
+    fprintf(stderr, "  -b <file> Specify boot file\n");
+    fprintf(stderr, "  -n        Do not execute XRLs\n");
+    fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
+    fprintf(stderr, "  -p <port> Set port to run Finder on\n");
+    fprintf(stderr, "  -q <secs> Set forced quit period\n");
+    fprintf(stderr, "  -t <dir>  Specify templates directory\n");
+    fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
 }
 
+static void
+display_defaults()
+{
+    fprintf(stderr, "Defaults:\n");
+    fprintf(stderr, "  Execute Xrls          := %s\n",
+	    default_do_exec ? "true" : "false");
+    fprintf(stderr, "  Boot file             := %s\n",
+	    xorp_boot_file().c_str());
+    fprintf(stderr, "  Templates directory   := %s\n",
+	    xorp_template_dir().c_str());
+    fprintf(stderr, "  Xrl targets directory := %s\n",
+	    xorp_xrl_targets_dir().c_str());
+}
 
 static bool
 valid_interface(const IPv4& addr)
@@ -138,53 +131,12 @@ main(int argc, char* const argv[])
     RandomGen randgen;
 
     //
-    // Get the root of the tree
-    // The ordering is:
-    // 1. The shell environment XORP_ROOT
-    // 2. The parent directory (only if it contains the template and the
-    //    xrl directories)
-    // 3. The XORP_ROOT value as defined in config.h
-    //
-    do {
-	// Try the shell environment XORP_ROOT
-	char *p = getenv("XORP_ROOT");
-	if (p != NULL) {
-	    default_xorp_root_dir = p;
-	    break;
-	}
-
-	// Try the parent directory
-	string s = find_exec_path_name(argv[0]);
-	if (s.empty() == false) {
-	    s += "/..";		// XXX: add the parent directory
-	    string t_dir = s + "/" + DEFAULT_CONFIG_TEMPLATE_DIR;
-	    string x_dir = s + "/" + DEFAULT_XRL_DIR;
-	    struct stat t_stat, x_stat;
-	    if ((stat(t_dir.c_str(), &t_stat) == 0)
-		&& (stat(x_dir.c_str(), &x_stat) == 0)
-		&& (S_ISDIR(t_stat.st_mode))
-		&& (S_ISDIR(x_stat.st_mode))) {
-		default_xorp_root_dir = s;
-		break;
-	    }
-	}
-
-	// The XORP_ROOT value
-	default_xorp_root_dir = DEFAULT_XORP_ROOT_DIR;
-	break;
-    } while (false);
-
-    //
     // Expand the default variables to include the XORP root path
     //
-    default_config_boot = default_xorp_root_dir + "/" + default_config_boot;
-    default_config_template_dir = default_xorp_root_dir + "/"
-	+ default_config_template_dir;
-    default_xrl_dir = default_xorp_root_dir + "/" + default_xrl_dir;
-
-    string	config_template_dir = default_config_template_dir;
-    string	xrl_dir 	    = default_xrl_dir;
-    string	config_boot         = default_config_boot;
+    xorp_path_init(argv[0]);
+    string template_dir	= xorp_template_dir();
+    string xrl_dir	= xorp_xrl_targets_dir();
+    string boot_file	= xorp_boot_file();
 
     bool do_exec = default_do_exec;
 
@@ -194,13 +146,13 @@ main(int argc, char* const argv[])
 
     int c;
 
-    while ((c = getopt (argc, argv, "t:b:x:i:p:q:n")) != EOF) {
+    while ((c = getopt (argc, argv, "t:b:x:i:p:q:ndh")) != EOF) {
 	switch(c) {
 	case 't':
-	    config_template_dir = optarg;
+	    template_dir = optarg;
 	    break;
 	case 'b':
-	    config_boot = optarg;
+	    boot_file = optarg;
 	    break;
 	case 'x':
 	    xrl_dir = optarg;
@@ -210,6 +162,9 @@ main(int argc, char* const argv[])
 	    break;
 	case 'n':
 	    do_exec = false;
+	    break;
+	case 'd':
+	    display_defaults();
 	    break;
 	case 'p':
 	    bind_port = static_cast<uint16_t>(atoi(optarg));
@@ -234,21 +189,27 @@ main(int argc, char* const argv[])
 	    } catch (const InvalidString&) {
 		fprintf(stderr, "%s is not a valid interface address.\n",
 			optarg);
-		usage();
+		usage(argv[0]);
+		xlog_stop();
+		xlog_exit();
 		exit(-1);
 	    }
 	    break;
+	case 'h':
 	case '?':
 	default:
-	    usage();
+	    usage(argv[0]);
+	    xlog_stop();
+	    xlog_exit();
+	    exit(-1);
 	}
     }
 
     // read the router config template files
     TemplateTree *tt;
     try {
-	tt = new TemplateTree(default_xorp_root_dir,
-			      config_template_dir,
+	tt = new TemplateTree(xorp_config_root_dir(),
+			      template_dir,
 			      xrl_dir);
     } catch (const XorpException&) {
 	printf("caught exception\n");
@@ -294,7 +255,7 @@ main(int argc, char* const argv[])
     }
 
     // start the module manager
-    ModuleManager mmgr(eventloop, /*verbose = */true, default_xorp_root_dir);
+    ModuleManager mmgr(eventloop, /*verbose = */true, xorp_binary_root_dir());
 
     UserDB userdb;
     userdb.load_password_file();
@@ -323,7 +284,7 @@ main(int argc, char* const argv[])
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	    }
 	}
-	MasterConfigTree* ct = new MasterConfigTree(config_boot, tt, taskmgr);
+	MasterConfigTree* ct = new MasterConfigTree(boot_file, tt, taskmgr);
 	//
 	// XXX: note that theoretically we may receive an XRL before
 	// we call XrlRtrmgrInterface::set_conf_tree().

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/split.hh,v 1.2 2003/03/10 23:21:01 hodson Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.1 2003/09/24 16:16:08 hodson Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -40,5 +40,72 @@ list<string> split(const string& s, char sep);
  * @return path of executable on success, empty string on failure.
  */
 string find_exec_path_name(const char* progname);
+
+/**
+ * Initialize paths.
+ *
+ * This method attempts to determine where XORP is being run from and
+ * initialize paths accordingly.  If the environment variable
+ * XORP_ROOT is set, this overrides the path determination algorithm.
+ *
+ * This method should be called before any
+ * of the following methods:
+ *
+ *   @li @ref xorp_binary_root_dir()
+ *   @li @ref xorp_config_root_dir()
+ *   @li @ref xorp_template_dir()
+ *   @li @ref xorp_xrl_targets_dir()
+ *   @li @ref xorp_boot_file()
+ *
+ */
+void xorp_path_init(const char* argv0);
+
+/**
+ * Return top-level directory of xorp binaries.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+const string& xorp_binary_root_dir();
+
+/**
+ * Return top-level directory of xorp configuration files.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+const string& xorp_config_root_dir();
+
+/**
+ * Return the path of the xorp templates directory given the xorp_root
+ * path.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+string xorp_template_dir();
+
+/**
+ * Return the path of the xrl targets directory given the xorp_root
+ * path.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+string xorp_xrl_targets_dir();
+
+/**
+ * Return path of boot config file to be used given the xorp_root path.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+string xorp_boot_file();
+
+/**
+ * Return basename of binary.
+ */
+const char*
+xorp_basename(const char* argv);
 
 #endif // __RTRMGR_UTIL_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.14 2003/09/24 16:16:08 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.15 2003/09/24 16:26:32 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -35,14 +35,7 @@
 //
 // Defaults
 //
-#define DEFAULT_XORP_ROOT_DIR		XORP_ROOT
-#define DEFAULT_CONFIG_TEMPLATE_DIR	"etc/templates"
-#define DEFAULT_XRL_DIR			"xrl/targets"
-string	default_xorp_root_dir		= DEFAULT_XORP_ROOT_DIR;
-string	default_config_template_dir	= DEFAULT_CONFIG_TEMPLATE_DIR;
-string	default_xrl_dir			= DEFAULT_XRL_DIR;
-
-static bool running;
+static bool running = false;
 
 static void signal_handler(int signal_value);
 static void exit_handler(CliClient*);
@@ -428,23 +421,25 @@ exit_handler(CliClient*)
     running = false;
 }
 
-void
-usage(char *name)
+static void
+usage(const char *argv0)
 {
-    fprintf(stderr,
-	"usage: %s [-t cfg_dir] [-x xrl_dir]\n",
-	    name);
-    fprintf(stderr, "options:\n");
+    fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -h        Display this information\n");
+    fprintf(stderr, "  -d        Display defaults\n");
+    fprintf(stderr, "  -t <dir>  Specify templates directory\n");
+    fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
+}
 
-    fprintf(stderr,
-	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
-	    default_config_template_dir.c_str());
-
-    fprintf(stderr,
-	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir.c_str());
-
-    exit(-1);
+static void
+display_defaults()
+{
+    fprintf(stderr, "Defaults:\n");
+    fprintf(stderr, "  Templates directory   := %s\n",
+	    xorp_template_dir().c_str());
+    fprintf(stderr, "  Xrl targets directory := %s\n",
+	    xorp_xrl_targets_dir().c_str());
 }
 
 int
@@ -463,65 +458,31 @@ main(int argc, char *argv[])
     xlog_start();
 
     //
-    // Get the root of the tree
-    // The ordering is:
-    // 1. The shell environment XORP_ROOT
-    // 2. The parent directory (only if it contains the template and the
-    //    xrl directories)
-    // 3. The XORP_ROOT value as defined in config.h
-    //
-    do {
-	// Try the shell environment XORP_ROOT
-	char *p = getenv("XORP_ROOT");
-	if (p != NULL) {
-	    default_xorp_root_dir = p;
-	    break;
-	}
-
-	// Try the parent directory
-	string s = find_exec_path_name(argv[0]);
-	if (s.empty() == false) {
-	    s += "/..";		// XXX: add the parent directory
-	    string t_dir = s + "/" + DEFAULT_CONFIG_TEMPLATE_DIR;
-	    string x_dir = s + "/" + DEFAULT_XRL_DIR;
-	    struct stat t_stat, x_stat;
-	    if ((stat(t_dir.c_str(), &t_stat) == 0)
-		&& (stat(x_dir.c_str(), &x_stat) == 0)
-		&& (S_ISDIR(t_stat.st_mode))
-		&& (S_ISDIR(x_stat.st_mode))) {
-		default_xorp_root_dir = s;
-		break;
-	    }
-	}
-
-	// The XORP_ROOT value
-	default_xorp_root_dir = DEFAULT_XORP_ROOT_DIR;
-	break;
-    } while (false);
-
-    //
     // Expand the default variables to include the XORP root path
     //
-    default_config_template_dir = default_xorp_root_dir + "/"
-	+ default_config_template_dir;
-    default_xrl_dir = default_xorp_root_dir + "/" + default_xrl_dir;
+    xorp_path_init(argv[0]);
 
-    string config_template_dir = default_config_template_dir;
-    string xrl_dir = default_xrl_dir;
-
-    string configuration;
+    string template_dir = xorp_template_dir();
+    string xrl_dir	= xorp_xrl_targets_dir();
 
     int c;
-    while ((c = getopt (argc, argv, "t:x:")) != EOF) {
+    while ((c = getopt (argc, argv, "t:x:dh")) != EOF) {
 	switch(c) {
 	case 't':
-	    config_template_dir = optarg;
+	    template_dir = optarg;
 	    break;
 	case 'x':
 	    xrl_dir = optarg;
 	    break;
+	case 'd':
+	    display_defaults();
+	    break;
 	case '?':
+	case 'h':
 	    usage(argv[0]);
+	    xlog_stop();
+	    xlog_exit();
+	    exit(-1);
 	}
     }
 
@@ -536,9 +497,7 @@ main(int argc, char *argv[])
 
     string IPCname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
 
-
-    XorpShell xorpsh(IPCname, default_xorp_root_dir, config_template_dir,
-		     xrl_dir);
+    XorpShell xorpsh(IPCname, xorp_config_root_dir(), template_dir, xrl_dir);
 
     // this doesn't return until we're done
     xorpsh.run();

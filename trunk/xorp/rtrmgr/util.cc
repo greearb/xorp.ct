@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/split.cc,v 1.3 2003/03/10 23:21:01 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.1 2003/09/24 16:16:08 hodson Exp $"
 
 #include <list>
 #include <string>
@@ -21,6 +21,10 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "util.hh"
+
+static string s_cfg_root;
+static string s_bin_root;
+static string s_boot_file;
 
 list<string>
 split(const string& s, char ch)
@@ -74,4 +78,84 @@ find_exec_path_name(const char *progname)
 	}
     }
     return string("");
+}
+
+static string
+xorp_real_path(const string& path)
+{
+    char rp[MAXPATHLEN + 1];
+    const char* prp = realpath(path.c_str(), rp);
+    if (prp) {
+	return string(prp);
+    }
+    XLOG_WARNING("realpath(%s) failed.", path.c_str());
+    return path;
+}
+
+void
+xorp_path_init(const char* argv0)
+{
+    const char* xr = getenv("XORP_ROOT");
+    if (xr != NULL) {
+	s_bin_root = xr;
+	s_cfg_root = xr;
+	s_boot_file = s_cfg_root + "/rtrmgr/config.boot";
+	return;
+    }
+
+    string current_root = find_exec_path_name(argv0) + "/..";
+    current_root = xorp_real_path(current_root);
+
+    string build_root = xorp_real_path(XORP_BUILD_ROOT);
+    if (current_root == build_root) {
+	s_bin_root = build_root;
+	s_cfg_root = xorp_real_path(XORP_SRC_ROOT);
+	s_boot_file = s_cfg_root + "/rtrmgr/config.boot";
+	return;
+    }
+
+    string install_root = xorp_real_path(XORP_INSTALL_ROOT);
+    s_bin_root = install_root;
+    s_cfg_root = install_root;
+    s_boot_file = s_cfg_root + "/config.boot";
+}
+
+const string&
+xorp_binary_root_dir()
+{
+    return s_bin_root;
+}
+
+const string&
+xorp_config_root_dir()
+{
+    return s_cfg_root;
+}
+
+string
+xorp_template_dir()
+{
+    return s_cfg_root + string("/etc/templates");
+}
+
+string
+xorp_xrl_targets_dir()
+{
+    return s_cfg_root + string("/xrl/targets");
+}
+
+string
+xorp_boot_file()
+{
+    return s_boot_file;
+}
+
+const char*
+xorp_basename(const char* argv0)
+{
+    const char* p = strrchr(argv0, '/');
+    if (p) {
+	return p + 1;
+    }
+    return argv0;
 }
