@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.19 2003/06/24 23:30:43 atanu Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.20 2003/07/30 22:12:05 atanu Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -94,11 +94,17 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 		e.run();
 	    }
 	    tries++;
+	    if (true == to)
+		XLOG_WARNING("request: %s no response waited %d ms", request,
+			     wait_time);
 	}
 
 	if (router.connected() == false) {
 	    XLOG_FATAL("Lost connection to finder\n");
 	}
+ 	if (false == done)
+	    XLOG_WARNING("request: %s no response waited %d ms", request,
+			 wait_time);
 	return done == true ? OK : NOCALLBACK;
     } catch(const InvalidString& s) {
 	cerr << s.str() << endl;
