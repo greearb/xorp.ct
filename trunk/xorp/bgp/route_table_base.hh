@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.7 2004/05/15 15:12:15 mjh Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.8 2004/06/10 22:40:33 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -44,6 +44,22 @@ enum RouteTableType {
 #define ADD_UNUSED 2
 #define ADD_FAILURE 3 
 #define ADD_FILTERED 4 
+
+/**
+ * @short Base class for a stage in BGP's internal plumbing
+ *
+ * The XORP BGP is internally implemented as a set of pipelines.  Each
+ * pipeline receives routes from a BGP peer, stores them, and applies
+ * filters to them to modify the routes.  Then the pipelines converge
+ * on a single decision process, which decides which route wins
+ * amongst possible alternative routes.  After decision, the winning
+ * routes fanout again along a set of pipelines, again being filtered,
+ * before being transmitted to peers.  
+ *
+ * Each stage in these pipelines is a BGPRouteTable.  BGPRouteTable is
+ * a virtual base class, so all the stages consist of specialized
+ * RouteTable class instances.
+ */
 
 template<class A>
 class BGPRouteTable {

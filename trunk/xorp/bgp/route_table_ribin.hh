@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.17 2004/05/15 15:12:17 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.18 2004/06/10 22:40:36 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -24,6 +24,24 @@
 #include "bgp_trie.hh"
 
 class EventLoop;
+
+/**
+ * @short Specialized BGPRouteTable that stores routes from a BGP peer.
+ *
+ * The XORP BGP is internally implemented as a set of pipelines
+ * consisting of a series of BGPRouteTables.  Each pipeline receives
+ * routes from a BGP peer, stores them, and applies filters to them to
+ * modify the routes.  Then the pipelines converge on a single
+ * decision process, which decides which route wins amongst possible
+ * alternative routes.  After decision, the winning routes fanout
+ * again along a set of pipelines, again being filtered, before being
+ * transmitted to peers.
+ *
+ * RibInTable is the first stage in such a pipeline.  It receives
+ * routes from a single BGP peer, and stores them.  Changes are passed
+ * down the pipeline as they occur, and route lookups from downstream
+ * are answered by the RibInTable.
+ */ 
 
 template<class A>
 class RibInTable : public BGPRouteTable<A>  {

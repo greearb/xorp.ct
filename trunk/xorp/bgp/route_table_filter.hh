@@ -12,13 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.9 2004/05/15 15:12:17 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.10 2004/06/10 22:40:35 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
 
 #include "route_table_base.hh"
 #include "next_hop_resolver.hh"
+
+/**
+ * @short Base class for a single filter within FilterTable's filter bank.
+ *
+ * FilterTable implements a bank of filters for modifying or dropping
+ * routes. Each filter within such a filter bank is a BGPRouteFilter.
+ * BGPRouteFilter is a generic filter, and so needs specializing in a
+ * subclass to actually implement a filter.
+ */
 
 template<class A>
 class BGPRouteFilter {
@@ -41,6 +50,17 @@ protected:
 private:
 };
 
+
+/**
+ * @short BGPRouteFilter that drops routes that have a particular AS
+ * in their AS path.
+ *
+ * SimpleASFilter is a BGPRouteFilter that drops routes that have a
+ * particular AS in their AS path.  This is typically used in loop
+ * prevention, where an inbound filter from an EBGP peer drops routes
+ * that contain our own AS number
+ */
+
 template<class A>
 class SimpleASFilter : public BGPRouteFilter<A> {
 public:
@@ -51,6 +71,15 @@ public:
 private:
     AsNum _as_num;
 };
+
+
+/**
+ * @short BGPRouteFilter that prepends an AS to the AS path.
+ *
+ * ASPrependFilter is a BGPRouteFilter that prepends an AS to the AS
+ * path.  This is typically used when sending a route to an EBGP peer
+ * to add our own AS number to the path.
+ */
 
 template<class A>
 class ASPrependFilter : public BGPRouteFilter<A> {
@@ -63,6 +92,17 @@ private:
     AsNum _as_num;
 };
 
+
+/**
+ * @short BGPRouteFilter that changes the nexthop attribute in a route.
+ *
+ * NexthopRewriteFilter is a BGPRouteFilter that changes the nexthop
+ * attribute in a route passing though the filter.  A typicaly use is
+ * when passing a route to an EBGP peer, we change the nexthop
+ * attribute to be our own IP address on the appropriate interface to
+ * that peer.
+ */
+
 template<class A>
 class NexthopRewriteFilter : public BGPRouteFilter<A> {
 public:
@@ -74,6 +114,16 @@ private:
     A _local_nexthop;
 };
 
+
+/**
+ * @short BGPRouteFilter that drops routes that came to us from an IBGP peer.
+ *
+ * NexthopRewriteFilter is a BGPRouteFilter that drops routes that
+ * came to us from an IBGP peer.  Typically it is used in a outgoing
+ * filter on a branch to another IBGP peer, and prevents routes coming
+ * from one IBGP peer from being forwarded to another IBGP peer.
+ */
+
 template<class A>
 class IBGPLoopFilter : public BGPRouteFilter<A> {
 public:
@@ -83,6 +133,15 @@ public:
 	      bool &modified) const ;
 private:
 };
+
+
+/**
+ * @short BGPRouteFilter that inserts a LocalPref attribute.
+ *
+ * LocalPrefInsertionFilter is a BGPRouteFilter that inserts a LocalPref
+ * attribute into routes passing though the filter.  This is typically
+ * used in an incoming filter bank from an EBGP peer to add LocalPref.
+ */
 
 template<class A>
 class LocalPrefInsertionFilter : public BGPRouteFilter<A> {
@@ -94,6 +153,16 @@ private:
     uint32_t _default_local_pref;
 };
 
+
+/**
+ * @short BGPRouteFilter that deletes a LocalPref attribute.
+ *
+ * LocalPrefRemovalFilter is a BGPRouteFilter that deletes the
+ * LocalPref attribute (if present) from routes passing though the
+ * filter.  This is typically used in an outgoing filter bank to an
+ * EBGP peer.
+ */
+
 template<class A>
 class LocalPrefRemovalFilter : public BGPRouteFilter<A> {
 public:
@@ -102,6 +171,15 @@ public:
 				     bool &modified) const ;
 private:
 };
+
+
+/**
+ * @short BGPRouteFilter that inserts a MED attribute.
+ *
+ * MEDInsertionFilter is a BGPRouteFilter that inserts a MED attribute
+ * into routes passing though the filter.  This is typically used in
+ * an outgoing filter bank to an EBGP peer.
+ */
 
 template<class A>
 class MEDInsertionFilter : public BGPRouteFilter<A> {
@@ -113,6 +191,14 @@ private:
     NextHopResolver<A>& _next_hop_resolver;
 };
 
+/**
+ * @short BGPRouteFilter that removes a MED attribute.
+ *
+ * MEDInsertionFilter is a BGPRouteFilter that removes a MED attribute
+ * from routes passing though the filter.  This is typically used in
+ * an outgoing filter bank to an EBGP peer, before we add our own MED.
+ */
+
 template<class A>
 class MEDRemovalFilter : public BGPRouteFilter<A> {
 public:
@@ -121,6 +207,16 @@ public:
 				     bool &modified) const ;
 private:
 };
+
+/**
+ * @short BGPRouteFilter that processes unknown attributes.
+ *
+ * UnknownFilter is a BGPRouteFilter that processes unknown attributes
+ * according to their flags.  It is typically used in an outgoing
+ * filter bank to avoid incorrectly passing unknown non-transitive
+ * attributes on to a peer, and to set the partial but on unknown
+ * transitive attributes.
+ */
 
 template<class A>
 class UnknownFilter : public BGPRouteFilter<A> {
@@ -131,6 +227,7 @@ public:
 private:
 };
 
+
 /**
  * Perform any filter operations that are required for routes that we
  * originate.
@@ -140,6 +237,7 @@ private:
  * prepended.
  *
  */
+
 template<class A>
 class OriginateRouteFilter : public BGPRouteFilter<A> {
 public:
@@ -151,13 +249,32 @@ private:
     bool _ibgp;
 };
 
-/*
- * FilterTable is a route table that can hold banks of route
+
+/**
+ * @short specialized BGPRouteTable implementing a filter bank to
+ * modify or drop routes.
+ *
+ * The XORP BGP is internally implemented as a set of pipelines
+ * consisting of a series of BGPRouteTables.  Each pipeline receives
+ * routes from a BGP peer, stores them, and applies filters to them to
+ * modify the routes.  Then the pipelines converge on a single
+ * decision process, which decides which route wins amongst possible
+ * alternative routes.  After decision, the winning routes fanout
+ * again along a set of pipelines, again being filtered, before being
+ * transmitted to peers.
+ *
+ * FilterTable is a BGPRouteTable that can hold banks of route
  * filters.  Normally FilterTable propagates add_route,
  * delete_route and the response to lookup_route directly through from
- * the parent to the child.  A route filter can cause these to fail to
+ * the parent to the child.  A route filter can cause these to not be
  * be propagated, or can modify the attributes of the route in the
  * message.
+ *
+ * Typically there are two FilterTables for each peer, one in the
+ * input branch from that peer, and one in the output branch to that
+ * peer.  A FilterTable does not store the routes it modifies.  Thus
+ * is is normally followed by a CacheTable which stores those routes
+ * for later use.
  */
 
 template<class A>

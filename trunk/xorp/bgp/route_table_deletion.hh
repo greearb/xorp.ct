@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.12 2004/05/15 15:12:16 mjh Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.13 2004/06/10 22:40:34 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -23,7 +23,7 @@
 
 class EventLoop;
 /**
- * @short DeletionTable is a temporary route table used to delete
+ * @short DeletionTable is a temporary BGPRouteTable used to delete
  * routes when a peer goes down
  * 
  * When a peer goes down, all the routes stored in a RibIn need to be
