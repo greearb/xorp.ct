@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.26 2004/03/04 17:49:56 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.27 2004/04/01 19:54:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -360,6 +360,7 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	    break;
 	}
     }
+    XLOG_ASSERT(i != _next_tables.end());
     XLOG_ASSERT(i.second().busy());
 
     int result;
