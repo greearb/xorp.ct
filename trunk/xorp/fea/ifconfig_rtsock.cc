@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.2 2003/01/09 01:18:37 atanu Exp $"
+#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.3 2003/02/23 23:57:04 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -911,19 +911,41 @@ protected:
 
 void
 IfConfigRoutingSocket::push_addr(const IfTreeInterface&	i,
-				 const IfTreeVif&		v,
+				 const IfTreeVif&	v,
 				 const IfTreeAddr4&	a)
 {
+    bool enabled = (i.enabled() & v.enabled() & a.enabled());
+
+    debug_msg("Pushing %s\n", a.str().c_str());
+
+    if (a.is_marked(IfTreeItem::CREATED) && enabled == false) {
+	//
+	// A created but disabled address will not appear in the live
+	// config rippled up from the kernel via the routing socket
+	// 
+	// This is a lot of work!
+	//
+	IfTree::IfMap::iterator ii = _live_config.get_if(i.ifname());
+	assert(ii != _live_config.ifs().end());
+	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
+	assert(vi != ii->second.vifs().end());
+	vi->second.add_addr(a.addr());
+	IfTreeVif::V4Map::iterator ai = vi->second.get_addr(a.addr());
+	ai->second = a;
+	return;
+    }
+
     bool deleted = (i.is_marked(IfTreeItem::DELETED) |
 		    v.is_marked(IfTreeItem::DELETED) |
 		    a.is_marked(IfTreeItem::DELETED));
 
-    bool enabled = (i.enabled() & v.enabled() & a.enabled());
-
     if (deleted || !enabled) {
 	if (IfDelAddr4(_s4, i.ifname(), a.addr()).execute()) {
-	    er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-			       "Failed to delete address");
+	    string reason = 
+		c_format("Failed to delete address (%s): %s",
+			 (deleted) ? "deleted" : "not enabled",
+			 (errno) ? strerror(errno) : "not sys err");
+	    er().vifaddr_error(i.ifname(), v.vifname(), a.addr(), reason);
 	    XLOG_ERROR(er().last_error().c_str());
 	}
 	return;
@@ -970,19 +992,39 @@ IfConfigRoutingSocket::push_addr(const IfTreeInterface&	i,
 
 void
 IfConfigRoutingSocket::push_addr(const IfTreeInterface&	i,
-				 const IfTreeVif&		v,
+				 const IfTreeVif&	v,
 				 const IfTreeAddr6&	a)
 {
+    bool enabled = (i.enabled() & v.enabled() & a.enabled());
+
+    if (a.is_marked(IfTreeItem::CREATED) && enabled == false) {
+	//
+	// A created but disabled address will not appear in the live
+	// config rippled up from the kernel via the routing socket
+	// 
+	// This is a lot of work!
+	//
+	IfTree::IfMap::iterator ii = _live_config.get_if(i.ifname());
+	assert(ii != _live_config.ifs().end());
+	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
+	assert(vi != ii->second.vifs().end());
+	vi->second.add_addr(a.addr());
+	IfTreeVif::V6Map::iterator ai = vi->second.get_addr(a.addr());
+	ai->second = a;
+	return;
+    }
+
     bool deleted = (i.is_marked(IfTreeItem::DELETED) |
 		    v.is_marked(IfTreeItem::DELETED) |
 		    a.is_marked(IfTreeItem::DELETED));
 
-    bool enabled = (i.enabled() & v.enabled() & a.enabled());
-
     if (deleted || !enabled) {
 	if (IfDelAddr6(_s6, i.ifname(), a.addr()).execute()) {
-	    er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-			       "Failed to delete address");
+	    string reason = 
+		c_format("Failed to delete address (%s): %s",
+			 (deleted) ? "deleted" : "not enabled",
+			 (errno) ? strerror(errno) : "not sys err");
+	    er().vifaddr_error(i.ifname(), v.vifname(), a.addr(), reason);
 	    XLOG_ERROR(er().last_error().c_str());
 	}
 	return;
@@ -1146,19 +1188,20 @@ IfConfigRoutingSocket::push_config(const IfTree& it)
 	    IfTreeVif::V4Map::const_iterator a4i;
 	    for (a4i = v.v4addrs().begin(); a4i != v.v4addrs().end(); ++a4i) {
 		const IfTreeAddr4& a = a4i->second;
-		push_addr(i, v, a);
+		if (a.state() != IfTreeItem::NO_CHANGE)
+		    push_addr(i, v, a);
 	    }
 
 	    IfTreeVif::V6Map::const_iterator a6i;
 	    for (a6i = v.v6addrs().begin(); a6i != v.v6addrs().end(); ++a6i) {
 		const IfTreeAddr6& a = a6i->second;
-		push_addr(i, v, a);
+		if (a.state() != IfTreeItem::NO_CHANGE)
+		    push_addr(i, v, a);
 	    }
 	    push_vif(i, v);
 	}
 	push_if(i);
     }
-
     return er().error_count() == 0;
 }
 
