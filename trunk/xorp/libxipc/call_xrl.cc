@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.9 2003/03/06 21:43:40 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.10 2003/03/07 02:14:55 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -223,22 +223,24 @@ main(int argc, char* const argv[])
     argc -= optind;
     argv += optind;
 
-    EventLoop	 e;
-    XrlStdRouter router(e, ROUTER_NAME);
-
-    bool	 timeout = false;
-    XorpTimer	 to = e.set_flag_after_ms(1000, &timeout);
-
-    while (false == timeout && false == router.connected()) {
-	e.run();
-    }
-
-    if (false == router.connected()) {
-	XLOG_ERROR("Could not connect to finder\n");
-	exit(-1);
-    }
-    
     try {
+	EventLoop	 e;
+	XrlStdRouter router(e, ROUTER_NAME);
+
+	router.finalize();
+    
+	bool	 timeout = false;
+	XorpTimer	 to = e.set_flag_after_ms(1000, &timeout);
+
+	while (false == timeout && false == router.connected()) {
+	    e.run();
+	}
+
+	if (false == router.connected()) {
+	    XLOG_ERROR("Could not connect to finder\n");
+	    exit(-1);
+	}
+
 	if (fileinput) {
 	    if (input_files(e, router, argc, argv, pponly)) {
 		return -1;
