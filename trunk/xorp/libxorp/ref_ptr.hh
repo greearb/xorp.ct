@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.6 2003/04/02 04:44:16 hodson Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.7 2003/04/07 15:46:33 hodson Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -85,6 +85,11 @@ public:
     void check();
 
     /**
+     * Check index is on free list.
+     */
+    bool on_free_list(int32_t index);
+
+    /**
      * @return singleton ref_counter_pool.
      */
     static ref_counter_pool& instance();
@@ -97,7 +102,7 @@ public:
  *
  * The ref_ptr class is a strong reference class.  It maintains a count of
  * how many references to an object exist and releases the memory associated
- * with the object when the reference count reaches zero.  The reference 
+ * with the object when the reference count reaches zero.  The reference
  * pointer can be dereferenced like an ordinary pointer to call methods
  * on the reference counted object.
  *
@@ -106,7 +111,7 @@ public:
  * should support the STL allocator classes or an equivalent to
  * provide greater flexibility.
  */
-template <class _Tp> 
+template <class _Tp>
 class ref_ptr {
 public:
     typedef ref_ptr<const _Tp> const_ref_ptr;
@@ -114,18 +119,18 @@ public:
     /**
      * Construct a reference pointer for object.
      *
-     * @param p pointer to object to be reference counted.  p must be 
+     * @param p pointer to object to be reference counted.  p must be
      * allocated using operator new as it will be destructed using delete
      * when the reference count reaches zero.
      */
-    ref_ptr(_Tp* __p = 0) 
-        : _M_ptr(__p), 
+    ref_ptr(_Tp* __p = 0)
+        : _M_ptr(__p),
 	_M_counter(ref_counter_pool::instance().new_counter())
     {}
 
     /**
      * Copy Constructor
-     * 
+     *
      * Constructs a reference pointer for object.  Raises reference count
      * associated with object by 1.
      */
@@ -188,7 +193,7 @@ public:
     inline bool operator==(const ref_ptr& rp) const {
 	return _M_ptr == rp._M_ptr;
     }
-    
+
     /**
      * Check if reference pointer refers to an object or whether it has
      * been assigned a null object.
@@ -216,7 +221,7 @@ public:
     /**
      * Release reference on object.  The reference pointers underlying
      * object is set to null, and the former object is destructed if
-     * necessary.  
+     * necessary.
      */
     inline void release() const {
 	unref();
@@ -232,26 +237,28 @@ public:
     {
 	ref_counter_pool::instance().incr_counter(_M_counter);
     }
-    
+
 protected:
     inline int32_t counter() const {
 	return _M_counter;
     }
-    
+
     /**
      * Add reference.
      */
     void ref(const ref_ptr* __r) const {
 	_M_ptr = __r->_M_ptr;
 	_M_counter = __r->_M_counter;
-	ref_counter_pool::instance().incr_counter(_M_counter);
+	if (_M_ptr) {
+	    ref_counter_pool::instance().incr_counter(_M_counter);
+	}
     }
 
     /**
      * Remove reference.
      */
     void unref() const {
-	if (_M_ptr && 
+	if (_M_ptr &&
 	    ref_counter_pool::instance().decr_counter(_M_counter) == 0) {
 	    delete _M_ptr;
 	}
@@ -324,7 +331,7 @@ public:
     int32_t count(int32_t index);
 
     void* data(int32_t index);
-    
+
     /**
      * Recycle counter.  Places counter on free-list.
      * @param index of the counter to recycle.
@@ -368,23 +375,23 @@ public:
  * should support the STL allocator classes or an equivalent to
  * provide greater flexibility.
  */
-template <class _Tp> 
+template <class _Tp>
 class cref_ptr {
 public:
     /**
      * Construct a compact reference pointer for object.
      *
-     * @param p pointer to object to be reference counted.  p must be 
+     * @param p pointer to object to be reference counted.  p must be
      * allocated using operator new as it will be destructed using delete
      * when the reference count reaches zero.
      */
-    cref_ptr(_Tp* __p = 0) 
+    cref_ptr(_Tp* __p = 0)
         : _M_counter(cref_counter_pool::instance().new_counter(__p))
 	{}
 
     /**
      * Copy Constructor
-     * 
+     *
      * Constructs a reference pointer for object.  Raises reference count
      * associated with object by 1.
      */
@@ -424,7 +431,7 @@ public:
 	return reinterpret_cast<_Tp*>
 	    (cref_counter_pool::instance().data(_M_counter));
     }
-    
+
     /**
      * Dereference reference counted object.
      * @return reference to object.
@@ -444,7 +451,7 @@ public:
     inline bool operator==(const cref_ptr& rp) const {
 	return get() == rp.get();
     }
-    
+
     /**
      * Check if reference pointer refers to an object or whether it has
      * been assigned a null object.
@@ -472,7 +479,7 @@ public:
     /**
      * Release reference on object.  The reference pointers underlying
      * object is set to null, and the former object is destructed if
-     * necessary.  
+     * necessary.
      */
     inline void release() const {
 	unref();
@@ -491,7 +498,7 @@ private:
      * Remove reference.
      */
     void unref() const {
-	if (_M_counter >= 0 && 
+	if (_M_counter >= 0 &&
 	    cref_counter_pool::instance().decr_counter(_M_counter) == 0) {
 	    delete get();
 	    _M_counter = -1;
