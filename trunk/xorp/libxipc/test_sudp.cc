@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.9 2003/05/09 21:00:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.10 2003/06/09 22:14:18 hodson Exp $"
 
 #include <map>
 
@@ -32,11 +32,10 @@ static bool g_trace = false;
 static bool hello_done = false;
 
 static const XrlCmdError
-hello_recv_handler(const Xrl&	request,
-		   XrlArgs*	response)
+hello_recv_handler(const XrlArgs& inputs, XrlArgs* outputs)
 {
-    trace("hello_recv_handler: request %s response %p\n",
-	  request.str().c_str(), response);
+    trace("hello_recv_handler: inputs %s outputs %p\n",
+	  inputs.str().c_str(), outputs);
     return XrlCmdError::OKAY();
 }
 
@@ -73,13 +72,12 @@ test_hello(EventLoop& e, XrlPFSUDPListener &l)
 static bool int32_done = false;
 
 static const XrlCmdError
-int32_recv_handler(const Xrl&	request,
-		   XrlArgs*	response)
+int32_recv_handler(const XrlArgs& inputs, XrlArgs* outputs)
 {
-    trace("int32_recv_handler: request %s response %p\n",
-	   request.str().c_str(), response);
-    if (response) {
-	response->add_int32("an_int32", 123456);
+    trace("int32_recv_handler: inputs %s outputs %p\n",
+	   inputs.str().c_str(), outputs);
+    if (outputs) {
+	outputs->add_int32("an_int32", 123456);
     }
     return XrlCmdError::OKAY();
 }
@@ -115,9 +113,9 @@ test_int32(EventLoop& e, XrlPFSUDPListener& l)
 static const char* NOISE = "Random arbitrary noise";
 
 static const XrlCmdError
-no_execute_recv_handler(const Xrl&  /* request*/,
-			XrlArgs*    /* args */,
-			const char* noise)
+no_execute_recv_handler(const XrlArgs&  /* inputs */,
+			XrlArgs*	/* outputs */,
+			const char*	noise)
 {
     return XrlCmdError::COMMAND_FAILED(noise);
 }

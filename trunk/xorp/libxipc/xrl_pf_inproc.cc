@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.11 2003/06/09 22:14:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.12 2003/06/10 17:46:27 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -136,9 +136,10 @@ XrlPFInProcSender::send(const Xrl& x, const SendCallback& cb)
 {
     XrlPFInProcListener *l = get_inproc_listener(_listener_no);
 
+    const XrlDispatcher *d = l->dispatcher();
     if (l) {
 	XrlArgs reply;
-	const XrlError e = l->dispatch(x, reply);
+	const XrlError e = d->dispatch_xrl(x.command(), x.args(), reply);
 	cb->dispatch(e, (e == XrlError::OKAY()) ? &reply : 0);
     } else {
 	debug_msg("XrlPFInProcSender::send() no listener (id %d)\n",
@@ -202,12 +203,4 @@ XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr)
 XrlPFInProcListener::~XrlPFInProcListener()
 {
     remove_inproc_listener(_instance_no);
-}
-
-const XrlError
-XrlPFInProcListener::dispatch(const Xrl& request, XrlArgs& reply)
-{
-    const XrlDispatcher* xr = dispatcher();
-    assert(xr != 0);
-    return xr->dispatch_xrl(request, reply);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.17 2003/06/09 22:14:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.18 2003/06/10 19:12:48 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -230,12 +230,12 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
     XrlError e;
     XrlArgs response;
 
-    const XrlDispatcher* xr = _parent.dispatcher();
-    assert(xr != 0);
+    const XrlDispatcher* d = _parent.dispatcher();
+    assert(d != 0);
     
     try {
 	Xrl xrl(xrl_c_str);
-	e = xr->dispatch_xrl(xrl, response);
+	e = d->dispatch_xrl(xrl.command(), xrl.args(), response);
     } catch (const InvalidString&) {
 	e = XrlError(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
     }

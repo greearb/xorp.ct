@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.22 2003/06/06 17:34:06 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.23 2003/06/09 22:14:19 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -30,6 +30,12 @@
 #include "finder_tcp_messenger.hh"
 
 #include "sockutil.hh"
+
+//
+// Enable this macro to enable Xrl callback checker that checks each Xrl
+// callback is dispatched just once.
+//
+// #define USE_XRL_CALLBACK_CHECKER
 
 
 // ----------------------------------------------------------------------------
@@ -53,39 +59,27 @@ do {									      \
 } while (0)
 
 
-struct XrlRouterDispatchState {
+/**
+ * Slow-path dispatch state.  Contains information that needs to be held
+ * whilst waiting for a finder resolution.
+ */
+struct XrlRouterDispatchState
+{
 public:
     typedef XrlRouter::XrlCallback XrlCallback;
 
 public:
-    XrlRouterDispatchState(const XrlRouter*	r,
-			   const Xrl&		x,
+    XrlRouterDispatchState(const Xrl&		x,
 			   const XrlCallback&	xcb)
-	: _rtr(r), _xrl(x), _xcb(xcb), _xrs(0)
-    {
-    }
+	: _xrl(x), _xcb(xcb)
+    {}
 
-    ~XrlRouterDispatchState()
-    {
-	delete _xrs;
-    }
-
-    inline const XrlRouter* router() const { return _rtr; }
-
-    inline const Xrl& xrl() const { return _xrl; }
-
-    inline void dispatch(const XrlError& e, XrlArgs* a = 0)
-    {
-	_xcb->dispatch(e, a);
-    }
-
-    inline void set_sender(XrlPFSender* s) { _xrs = s; }
+    inline const Xrl& xrl() const		{ return _xrl; }
+    inline XrlCallback& callback()		{ return _xcb; }
 
 protected:
-    const XrlRouter*		_rtr;
     Xrl				_xrl;
     XrlRouter::XrlCallback	_xcb;
-    XrlPFSender*		_xrs;
 };
 
 
@@ -134,6 +128,14 @@ mk_instance_name(EventLoop& e, const char* classname)
     return c_format("%s-%s@", classname, asc_digest) + IPv4(sa).str();
 }
 
+// ----------------------------------------------------------------------------
+// Debug code (check callbacks only invoked once)
+
+
+
+// ----------------------------------------------------------------------------
+// XrlRouter code
+
 void
 XrlRouter::initialize(const char* class_name,
 		      IPv4	  finder_addr,
@@ -158,7 +160,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* finder_addr,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
+    : XrlDispatcher(class_name), _e(e)
 {
 
     IPv4 finder_ip = finder_addr ? finder_host(finder_addr)
@@ -174,7 +176,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     IPv4 	 finder_ip,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
+    : XrlDispatcher(class_name), _e(e)
 {
     if (0 == finder_port)
 	finder_port = FINDER_DEFAULT_PORT;
@@ -186,6 +188,11 @@ XrlRouter::~XrlRouter()
 {
     _fac->set_enabled(false);
 
+    while (_senders.empty() == false) {
+	delete _senders.front();
+	_senders.pop_front();
+    }
+    
     while (_dsl.empty() == false) {
 	delete _dsl.front();
 	_dsl.pop_front();
@@ -194,16 +201,6 @@ XrlRouter::~XrlRouter()
     delete _fac;
     delete _fxt;
     delete _fc;
-}
-
-void
-XrlRouter::dispose(XrlRouterDispatchState* ds)
-{
-    list<XrlRouterDispatchState*>::iterator i;
-    i = find(_dsl.begin(), _dsl.end(), ds);
-    XLOG_ASSERT(_dsl.end() != i);
-    delete *i;
-    _dsl.erase(i);
 }
 
 bool
@@ -221,7 +218,7 @@ XrlRouter::ready() const
 bool
 XrlRouter::pending() const
 {
-    return _rpend != 0 || _spend != 0;
+    return _senders.empty() == false && _dsl.empty() == false;
 }
 
 bool
@@ -275,13 +272,42 @@ XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
 }
 
 void
-XrlRouter::send_callback(const XrlError&	 e,
-			 XrlArgs*	 	 args,
-			 XrlRouterDispatchState* ds)
+XrlRouter::send_callback(const XrlError& e,
+			 XrlArgs*	 reply,
+			 XrlPFSender*	 sender,
+			 XrlCallback	 user_callback)
 {
-    _spend--;
-    ds->dispatch(e, args);
-    dispose(ds);
+    list<XrlPFSender*>::iterator i;
+    i = find(_senders.begin(), _senders.end(), sender);
+    XLOG_ASSERT(i != _senders.end());
+    _senders.erase(i);
+    delete sender;
+    user_callback->dispatch(e, reply);
+}
+
+bool
+XrlRouter::send_resolved(const Xrl&		xrl,
+			 const FinderDBEntry*	dbe,
+			 const XrlCallback&	cb)
+{
+    try {
+	Xrl x(dbe->values().front().c_str());
+	XrlPFSender* s = XrlPFSenderFactory::create(_e,
+						    x.protocol().c_str(),
+						    x.target().c_str());
+	Xrl tmp(xrl);
+	x.args().swap(tmp.args());
+	if (s) {
+	    trace_xrl("Sending ", x);
+	    _senders.push_back(s);
+	    s->send(x, callback(this, &XrlRouter::send_callback, s, cb));
+	    return true;
+	}
+	cb->dispatch(XrlError(SEND_FAILED, "sender not instantiated"), 0);
+    } catch (const InvalidString&) {
+	cb->dispatch(XrlError(INTERNAL_ERROR, "bad factory arguments"), 0);
+    }
+    return false;
 }
 
 void
@@ -289,57 +315,135 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
 			    const FinderDBEntry*	dbe,
 			    XrlRouterDispatchState*	ds)
 {
-    _rpend--;
-    if (e != XrlError::OKAY()) {
-	ds->dispatch(e, 0);
-	dispose(ds);
-	return;
+    list<XrlRouterDispatchState*>::iterator i;
+    i = find(_dsl.begin(), _dsl.end(), ds);
+    _dsl.erase(i);
+    
+    if (e == XrlError::OKAY()) {
+	send_resolved(ds->xrl(), dbe, ds->callback());
+    } else {
+	ds->callback()->dispatch(e, 0);
     }
-
-    if (dbe->values().size() > 1) {
-	XLOG_WARNING("Xrl resolves multiple times, using first.");
-    }
-
-    try {
-	Xrl x(dbe->values().front().c_str());
-	XrlPFSender* s = XrlPFSenderFactory::create(_e,
-						    x.protocol().c_str(),
-						    x.target().c_str());
-	ds->set_sender(s);
-	if (s) {
-	    trace_xrl("Sending ", x);
-	    _spend++;
-	    s->send(ds->xrl(),
-		    callback(this, &XrlRouter::send_callback, ds));
-	    return;
-	}
-	ds->dispatch(XrlError::SEND_FAILED(), 0);
-    } catch (const InvalidString&) {
-	ds->dispatch(XrlError(XrlError::INTERNAL_ERROR().error_code(),
-			      "bad factory arguments"), 0);
-    }
-    dispose(ds);
+    delete ds;
 
     return;
 }
 
+#ifdef USE_XRL_CALLBACK_CHECKER
+
+/**
+ * @short Class to maonitor Xrl callbacks.
+ *
+ * At present this class just checks that each XrlCallback is executed
+ * just once.
+ */
+static class
+XrlCallbackChecker
+{
+public:
+    typedef XrlRouter::XrlCallback XrlCallback;
+
+public:
+    XrlCallbackChecker()
+	: _seqno(0)
+    {}
+    
+    void process_callback(const XrlError& e, XrlArgs* a, uint32_t seqno)
+    {
+	map<uint32_t, XrlCallback>::iterator i = _cbs.find(seqno);
+	XLOG_ASSERT(i != _cbs.end());
+	XrlCallback ucb = i->second;
+	_cbs.erase(i);
+	if (e != XrlError::OKAY()) {
+	    fprintf(stderr, "Seqno %u Failed %s\n",
+		    seqno, e.str().c_str());
+	}
+	ucb->dispatch(e, a);
+    }
+    
+    XrlCallback add_callback(const XrlCallback& ucb)
+    {
+	_cbs[_seqno] = ucb;
+	return callback(this, &XrlCallbackChecker::process_callback, _seqno++);
+    }
+    
+protected:
+    map<uint32_t, XrlCallback> _cbs;
+    uint32_t _seqno;
+} cb_checker;
+
+#endif
+
 bool
-XrlRouter::send(const Xrl& xrl, const XrlCallback& xcb)
+XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 {
     trace_xrl("Resolving xrl:", xrl);
-    _rpend++;
 
-    DispatchState *ds = new XrlRouterDispatchState(this, xrl, xcb);
-    _dsl.push_back(ds);
+#ifdef USE_XRL_CALLBACK_CHECKER
+    // Callback checker wrappers user callback with callback that
+    // performs completion checking operation and then dispatches the
+    // users callback.
+    XrlCallback xcb = cb_checker.add_callback(user_cb);
+#else
+    const XrlCallback& xcb = user_cb;
+#endif
 
+    //
+    // Finder directed Xrl - takes custom path through FinderClient.
+    //
     if (xrl.protocol() == "finder" && xrl.target().substr(0,6) == "finder") {
-	_fc->forward_finder_xrl(ds->xrl(),
-				callback(this, &XrlRouter::send_callback, ds));
-    } else {
-	_fc->query(xrl.string_no_args(),
-		   callback(this, &XrlRouter::resolve_callback, ds));
+	_fc->forward_finder_xrl(xrl, xcb);
+	// XXX check for error.
+	return true;
     }
+    
+    //
+    // Fast path - Xrl resolution in cache and no Xrls ahead blocked on
+    // on response from Finder.  Fast path cannot be taken if earlier Xrls
+    // are blocked on Finder as re-ordering may occur.  We don't necessarily
+    // care about re-ordering between protocol families (at this time), but
+    // we do within protocol families.
+    //
+    string xrl_no_args = xrl.string_no_args();
+    const FinderDBEntry* fdbe = _fc->query_cache(xrl_no_args);
+    if (_dsl.empty() && fdbe) {
+	send_resolved(xrl, fdbe, xcb);
+	// XXX check for error
+	return true;
+    }
+
+    //
+    // Slow path - involves more state copying
+    //
+    DispatchState *ds = new XrlRouterDispatchState(xrl, xcb);
+    _dsl.push_back(ds);
+    _fc->query(xrl_no_args,
+	       callback(this, &XrlRouter::resolve_callback, ds));
+
     return true;
 }
 
+XrlError
+XrlRouter::dispatch_xrl(const string&	method_name,
+			const XrlArgs&	inputs,
+			XrlArgs&	outputs) const
+{
+    string resolved_method;
+    if (_fc->query_self(method_name, resolved_method) == true) {
+	return XrlDispatcher::dispatch_xrl(resolved_method, inputs, outputs);
+    }
+    debug_msg("Could not find mapping for %s\n", method_name.c_str());
+    return XrlError::NO_SUCH_METHOD();
+}
 
+IPv4
+XrlRouter::finder_address() const
+{
+    return _fac->finder_address();
+}
+
+uint16_t
+XrlRouter::finder_port() const
+{
+    return _fac->finder_port();
+}

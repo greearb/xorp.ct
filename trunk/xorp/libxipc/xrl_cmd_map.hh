@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/xrl_cmd_map.hh,v 1.11 2003/03/16 08:20:32 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_CMD_MAP_HH__
 #define __LIBXIPC_XRL_CMD_MAP_HH__
@@ -25,7 +25,7 @@
 #include "xrl_error.hh"
 
 typedef
-XorpCallback2<const XrlCmdError, const Xrl&, XrlArgs*>::RefPtr XrlRecvCallback;
+XorpCallback2<const XrlCmdError, const XrlArgs&, XrlArgs*>::RefPtr XrlRecvCallback;
 
 struct XrlCmdEntry {
     XrlCmdEntry(const string& s, XrlRecvCallback cb) :
@@ -41,7 +41,7 @@ public:
 public:
     XrlCmdMap(const string& name = "anonymous") : _name(name) {}
     virtual ~XrlCmdMap() {}
-    
+
     const string& name() const { return _name; }
 
     virtual bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
@@ -49,24 +49,24 @@ public:
     virtual bool remove_handler (const string& name);
 
     const XrlCmdEntry* get_handler(const string& name) const;
-    
+
     uint32_t count_handlers() const;
 
     const XrlCmdEntry* get_handler(uint32_t index) const;
 
     void get_command_names(list<string>& names) const;
-    
+
     /**
      * Mark command map as finished.
      */
     virtual void finalize();
-    
+
 protected:
     bool add_handler (const XrlCmdEntry& c);
 
     XrlCmdMap(const XrlCmdMap&);		// not implemented
     XrlCmdMap& operator=(const XrlCmdMap&);	// not implemented
-    
+
 protected:
     const string _name;
 

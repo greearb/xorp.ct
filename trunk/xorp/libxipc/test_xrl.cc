@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl.cc,v 1.7 2003/03/16 08:20:30 pavlin Exp $"
 
 // test_xrl: String Serialization Tests
 
@@ -32,7 +32,7 @@ xrl_test(const char* testname, const Xrl& x, const Xrl& y)
 	cout << "\t\t" << x.protocol() << "\t" << y.protocol() << endl;
 	cout << "\t\t" << x.target() << "\t" << y.target() << endl;
 	cout << "\t\t" << x.command() << "\t" << y.command() << endl;
-	cout << "\t\t" << x.const_args().str() << "\t" << y.const_args().str()
+	cout << "\t\t" << x.args().str() << "\t" << y.args().str()
 	     << endl;
         return 1;
     }

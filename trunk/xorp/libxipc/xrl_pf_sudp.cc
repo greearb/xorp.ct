@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.19 2003/06/09 22:14:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.20 2003/06/10 19:12:48 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -281,6 +281,7 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 		      (sockaddr*)&_destination, sizeof(_destination))
 	       != msg_bytes) {
 	debug_msg("Write failed: %s\n", strerror(errno));
+	requests_pending.erase(p.first);
 	cb->dispatch(XrlError::SEND_FAILED(), 0);
 	return;
     }
@@ -358,15 +359,21 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	      i->second.xuid.str().c_str());
     requests_pending.erase(i);
 
+    XrlArgs* response = 0;
     try {
-	XrlArgs response(buf + header_bytes);
-	callback->dispatch(err, &response);
+	response = new XrlArgs(buf + header_bytes);
     } catch (const InvalidString&) {
-	debug_msg("Corrupt response: header_bytes %u content_bytes %u\n\t\"%s\"\n", (uint32_t)header_bytes, (uint32_t)content_bytes, buf + header_bytes);
-	XrlError xe(XrlError::INTERNAL_ERROR().error_code(),
-		    "corrupt xrl response");
+	debug_msg("Corrupt response: "
+		  "header_bytes %u content_bytes %u\n\t\"%s\"\n",
+		  (uint32_t)header_bytes,
+		  (uint32_t)content_bytes,
+		  buf + header_bytes);
+	XrlError xe(INTERNAL_ERROR, "corrupt xrl response");
 	callback->dispatch(xe, 0);
+	return;
     }
+    callback->dispatch(err, response);
+    delete response;
 }
 
 // ----------------------------------------------------------------------------
@@ -455,13 +462,12 @@ XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
     assert(d != 0);
 
     try {
-	Xrl x(rbuf);
-	return d->dispatch_xrl(x, reply);
+	Xrl xrl(rbuf);
+	return d->dispatch_xrl(xrl.command(), xrl.args(), reply);
     } catch (InvalidString& e) {
 	debug_msg("Invalid string - failed to dispatch %s\n", rbuf);
     }
-    return XrlError(XrlError::INTERNAL_ERROR().error_code(),
-		    "corrupt xrl");
+    return XrlError(INTERNAL_ERROR, "corrupt xrl");
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.7 2003/05/09 19:36:16 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.8 2003/05/09 21:00:52 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_INPROC_HH__
 #define __LIBXIPC_XRL_PF_INPROC_HH__
@@ -30,8 +30,6 @@ public:
 
     const char* address() const { return _address.c_str(); }
     const char* protocol() const { return _protocol; }
-
-    const XrlError dispatch(const Xrl& request, XrlArgs& reply);
 
 private:
     string _address;

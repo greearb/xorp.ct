@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.8 2003/04/03 16:08:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.9 2003/04/23 20:50:49 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -78,13 +78,13 @@ public:
     }
 
     const XrlCmdError
-    ping(const Xrl&, XrlArgs*)
+    ping(const XrlArgs&, XrlArgs*)
     {
 	return XrlCmdError::OKAY();
     }
 
     const XrlCmdError
-    jump(const Xrl&, XrlArgs*)
+    jump(const XrlArgs&, XrlArgs*)
     {
 	_live = false;	// trigger death
 	return XrlCmdError::OKAY();
@@ -136,9 +136,9 @@ public:
     }
 
     const XrlCmdError
-    set_who(const Xrl& x, XrlArgs*)
+    set_who(const XrlArgs& inputs, XrlArgs*)
     {
-	x.const_args().get("who", _who);
+	inputs.get("who", _who);
 	vout << "Pinger set target to " << _who << endl;
 	return XrlCmdError::OKAY();
     }

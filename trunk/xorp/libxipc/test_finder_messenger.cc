@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.7 2003/03/10 23:20:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.8 2003/04/23 20:50:49 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -64,9 +64,10 @@ do {									\
 //
 
 const XrlCmdError
-hello_cmd(const Xrl& xrl, XrlArgs*)
+hello_cmd(const XrlArgs& inputs, XrlArgs*)
 {
-    verbose_log("received xrl %s\n", xrl.str().c_str());
+    verbose_log("received hello_cmd( args = \"%s\" )\n",
+		inputs.str().c_str());
     return XrlCmdError::OKAY();
 }
 

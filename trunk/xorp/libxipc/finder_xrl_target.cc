@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.15 2003/05/29 21:17:15 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.16 2003/06/01 21:37:28 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -321,7 +321,7 @@ FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
 							      u.str());
     if (0 == resolutions) {
 	finder_trace_result("fail (does not resolve).");
-	return XrlCmdError::COMMAND_FAILED("Xrl does not resolve");
+	return XrlCmdError::COMMAND_FAILED("Xrl does not resolve: " + xrl);
     }
 
     Finder::Resolveables::const_iterator ci = resolutions->begin();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.15 2003/05/30 23:15:56 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.16 2003/06/09 22:14:18 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -28,7 +28,8 @@
 #include "libxorp/selector.hh"
 #include "libxorp/exceptions.hh"
 
-class XrlPFConstructorError : public XorpReasonedException {
+class XrlPFConstructorError : public XorpReasonedException
+{
 public:
     XrlPFConstructorError(const char* file, size_t line, const string& reason)
 	: XorpReasonedException("XrlPFConstructorError", file, line, reason)
@@ -37,15 +38,18 @@ public:
 
 class XrlDispatcher;
 
-class XrlPFListener {
+class XrlPFListener
+{
 public:
     XrlPFListener(EventLoop& e, XrlDispatcher* d = 0)
 	: _eventloop(e), _dispatcher(d) {}
     virtual ~XrlPFListener() {}
+
     virtual const char*	address() const = 0;
     virtual const char*	protocol() const = 0;
 
-    inline bool set_dispatcher(XrlDispatcher* d);
+    inline bool set_dispatcher(const XrlDispatcher* d);
+
     inline const XrlDispatcher* dispatcher() const { return _dispatcher; }
 
     EventLoop& eventloop() const { return _eventloop; }
@@ -58,7 +62,8 @@ protected:
 // ----------------------------------------------------------------------------
 // XrlPFSender
 
-class XrlPFSender {
+class XrlPFSender
+{
 public:
     XrlPFSender(EventLoop& e, const char* address = "")
 	: _eventloop(e), _address(address) {}
@@ -84,7 +89,7 @@ protected:
 // Inline XrlPFListener Methods
 
 inline bool
-XrlPFListener::set_dispatcher(XrlDispatcher* d)
+XrlPFListener::set_dispatcher(const XrlDispatcher* d)
 {
     if (_dispatcher == 0) {
 	_dispatcher = d;

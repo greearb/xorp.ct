@@ -101,7 +101,7 @@ def target_virtual_fns(methods):
 def target_declare_handlers(methods):
     s = ""
     for x in methods:
-        s += "    const XrlCmdError handle_%s(const Xrl& x, XrlArgs* a);\n\n" \
+        s += "    const XrlCmdError handle_%s(const XrlArgs& in, XrlArgs* out);\n\n" \
              % cpp_name(x.name())
     return s;
 
@@ -128,22 +128,23 @@ def target_handler_methods(cls, name, methods):
     for m in methods:
         s += "const XrlCmdError\n"
         if len(m.rargs()):
-            argarg = "args"
+            argarg = "pxa_outputs"
         else:
-            argarg = "/* args */"
-        s += "%s::handle_%s(const Xrl& xrl, XrlArgs* %s)\n" % \
+            argarg = "/* pxa_outputs */"
+        s += "%s::handle_%s(const XrlArgs& xa_inputs, XrlArgs* %s)\n" % \
              (cls, cpp_name(m.name()), argarg)
         s += "{"
         s += """
-    if (xrl.const_args().size() != %d) {
-	XLOG_ERROR(\"Wrong number of arguments (%%u != %d) handling %s\", (uint32_t)xrl.const_args().size());
+    if (xa_inputs.size() != %d) {
+	XLOG_ERROR(\"Wrong number of arguments (%%u != %d) handling %s\",
+            (uint32_t)xa_inputs.size());
 	return XrlCmdError::BAD_ARGS();
     }
 """ % (len(m.args()), len(m.args()), m.name())
 
         if len(m.rargs()):
             s += """
-    if (args == 0) {
+    if (pxa_outputs == 0) {
 	XLOG_FATAL(\"Return list empty\");
 	return XrlCmdError::BAD_ARGS();
     }
@@ -157,7 +158,7 @@ def target_handler_methods(cls, name, methods):
         get_reqs = []
         for a in m.args():
             get_reqs.append("\n" + xorp_indent(3) + \
-                            "xrl.const_args().%s(\"%s\")" \
+                            "xa_inputs.%s(\"%s\")" \
                             % (a.accessor(), a.name()))
         ret_vals = []
         for r in m.rargs():
@@ -182,8 +183,8 @@ def target_handler_methods(cls, name, methods):
         if m.rargs():
             s += "\n    /* Marshall return values */\n    try {\n"
             for r in m.rargs():
-                s += xorp_indent(2) + "args->add(\"%s\", %s);\n" % \
-                     (r.name(), cpp_name(r.name()))
+                s += xorp_indent(2) + "%s->add(\"%s\", %s);\n" % \
+                     (argarg, r.name(), cpp_name(r.name()))
             s += \
 """    } catch (const XrlArgs::XrlAtomFound& ) {
 	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */

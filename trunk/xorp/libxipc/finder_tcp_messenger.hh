@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.7 2003/04/23 20:50:48 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.8 2003/06/01 21:37:27 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -104,11 +104,11 @@ protected:
 
 class FinderTcpConnector {
 public:
-    FinderTcpConnector(EventLoop&		 e,
-			 FinderMessengerManager& mm,
-			 XrlCmdMap&		 cmds,
-			 IPv4			 host,
-			 uint16_t		 port);
+    FinderTcpConnector(EventLoop&		e,
+		       FinderMessengerManager&	mm,
+		       XrlCmdMap&		cmds,
+		       IPv4			host,
+		       uint16_t			port);
 
     /**
      * Connect to host specified in constructor.
@@ -119,6 +119,9 @@ public:
      */
     int connect(FinderTcpMessenger*& created_messenger);
 
+    IPv4 finder_address() const;
+    uint16_t finder_port() const;
+    
 protected:
     EventLoop&		    _e;
     FinderMessengerManager& _mm;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.4 2003/03/04 23:41:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.5 2003/03/10 23:20:26 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -90,5 +90,5 @@ bool
 Xrl::operator==(const Xrl& x) const
 {
     return ((x._protocol == _protocol) && (x._target == _target) &&
-	    (x._command == _command) && (x.const_args() == const_args()));
+	    (x._command == _command) && (x.args() == args()));
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.5 2003/03/10 23:20:26 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.6 2003/03/16 08:20:30 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -101,7 +101,7 @@ public:
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    const XrlArgs& const_args() const { return _args; }
+    const XrlArgs& args() const { return _args; }
 
     /**
      * Test the equivalence of two XRL's.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.6 2003/03/10 23:20:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.7 2003/04/22 23:27:17 hodson Exp $"
 
 #include "finder_module.h"
 #include "finder_messenger.hh"
@@ -91,7 +91,7 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
 	manager()->messenger_active_event(this);
     
     XrlArgs reply_args;
-    XrlError e = ce->callback->dispatch(xrl, &reply_args);
+    XrlError e = ce->callback->dispatch(xrl.args(), &reply_args);
     if (XrlCmdError::OKAY() == e) {
 	reply(seqno, e, &reply_args);
     } else {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.9 2003/05/29 14:44:37 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.10 2003/06/01 21:37:27 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -172,6 +172,15 @@ public:
     void query(const string&	    xrl,
 	       const QueryCallback& qcb);
 
+    /**
+     * Attempt to resolve Xrl from cache.
+     *
+     * @param xrl Xrl to be resolved.
+     *
+     * @return pointer to cached entry on success, 0 otherwise.
+     */
+    const FinderDBEntry* query_cache(const string& xrl) const;
+    
     /**
      * Resolve Xrl that an Xrl Target associated with the FinderClient
      * registered.

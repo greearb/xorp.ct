@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.18 2003/06/03 19:10:31 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.19 2003/06/09 22:14:18 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -348,7 +348,7 @@ public:
 
     void execute(FinderMessengerBase* m)
     {
-	FinderTcpMessenger *ftm = dynamic_cast<FinderTcpMessenger*>(m);
+	FinderTcpMessenger* ftm = dynamic_cast<FinderTcpMessenger*>(m);
 	XLOG_ASSERT(ftm != 0);
 	XrlFinderV0p2Client cl(m);
 	if (!cl.send_register_finder_client(finder, _iname, _cname,
@@ -459,7 +459,7 @@ public:
     void execute(FinderMessengerBase* m)
     {
 	finder_trace_init("execute EnableXrls \"%s\"", _iname.c_str());
-	FinderTcpMessenger *ftm = dynamic_cast<FinderTcpMessenger*>(m);
+	FinderTcpMessenger* ftm = dynamic_cast<FinderTcpMessenger*>(m);
 	XLOG_ASSERT(ftm != 0);
 	XrlFinderV0p2Client cl(m);
 	if (!cl.send_set_finder_client_enabled(finder, _iname, _en,
@@ -635,22 +635,40 @@ void
 FinderClient::query(const string&	 key,
 		    const QueryCallback& qcb)
 {
+#if 0
     ResolvedTable::const_iterator i = _rt.find(key);
     if (_rt.end() != i) {
 	// Entry exists.
 	qcb->dispatch(XrlError::OKAY(), &i->second);
 	return;
     }
-
+#endif
     Operation op(new FinderClientQuery(*this, key, _rt, qcb));
     _todo_list.push_back(op);
     crank();
+}
+
+const FinderDBEntry*
+FinderClient::query_cache(const string& key) const
+{
+    ResolvedTable::const_iterator i = _rt.find(key);
+    return (_rt.end() == i) ? 0 : &i->second;
 }
 
 bool
 FinderClient::query_self(const string& incoming_xrl_cmd,
 			 string&       local_xrl) const
 {
+#if 0
+    {
+	LocalResolvedTable::const_iterator i = _lrt.begin();
+	fprintf(stderr, "==> Incoming: %s\n", incoming_xrl_cmd.c_str());
+	while (i != _lrt.end()) {
+	    fprintf(stderr, " * \"%s\"\n", i->second.c_str());
+	    ++i;
+	}
+    }
+#endif /* 0 */
     LocalResolvedTable::const_iterator i = _lrt.find(incoming_xrl_cmd);
     if (_lrt.end() == i)
 	return false;
@@ -864,16 +882,9 @@ FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
 	    return XrlCmdError::COMMAND_FAILED("target not found");
 	}
 
-	string local_xrl_command;
-	if (query_self(xrl.command(), local_xrl_command) == false) {
-	    finder_trace_result("local resolution not found");
-	    return XrlCmdError::COMMAND_FAILED("xrl not found");
-	}
-
-	Xrl dispatch_me(xrl.target(), local_xrl_command, xrl.args());
 	XrlArgs ret_vals;
-	i->dispatcher()->dispatch_xrl(dispatch_me, ret_vals);
-
+	i->dispatcher()->dispatch_xrl(xrl.command(),
+				      xrl.args(), ret_vals);
 	finder_trace_result("success");
 	return XrlCmdError::OKAY();
     } catch (InvalidString&) {

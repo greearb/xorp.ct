@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.19 2003/06/01 21:37:29 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.20 2003/06/09 22:14:19 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -72,17 +72,42 @@ public:
     inline const string& instance_name() const	{ return _instance_name; }
     inline const string& class_name() const	{ return XrlCmdMap::name(); }
 
+    IPv4     finder_address() const;
+    uint16_t finder_port() const;
+    
 protected:
-    void resolve_callback(const XrlError&		e,
-			  const FinderDBEntry*		dbe,
-			  XrlRouterDispatchState*	ds);
 
-    void send_callback(const XrlError&		e,
-		       XrlArgs*			reply,
-		       XrlRouterDispatchState*	ds);
+    XrlError dispatch_xrl(const string&	 method_name,
+			  const XrlArgs& inputs,
+			  XrlArgs&	 outputs) const;
 
-    void dispose(XrlRouterDispatchState*);
+protected:
+    /**
+     * Resolve callback (slow path).
+     *
+     * Called with results from asynchronous FinderClient Xrl queries.
+     */
+    void resolve_callback(const XrlError&	  e,
+			  const FinderDBEntry*	  dbe,
+			  XrlRouterDispatchState* ds);
 
+    /**
+     * Send callback (fast path).
+     */
+    void send_callback(const XrlError&	e,
+		       XrlArgs*		reply,
+		       XrlPFSender*	sender,
+		       XrlCallback	user_callback);
+
+    /**
+     * Choose appropriate XrlPFSender and execute Xrl dispatch.
+     *
+     * @return true on success, false otherwise.
+     */
+    bool send_resolved(const Xrl&		xrl,
+		       const FinderDBEntry*	dbe,
+		       const XrlCallback&	dispatch_cb);
+    
     void initialize(const char* class_name,
 		    IPv4	finder_addr,
 		    uint16_t	finder_port);
@@ -94,10 +119,9 @@ protected:
     FinderTcpAutoConnector*	_fac;
     string			_instance_name;
 
-    uint32_t			_rpend, _spend;
-
     list<XrlPFListener*>	_listeners;
     list<XrlRouterDispatchState*> _dsl;
+    list<XrlPFSender*>		_senders;
 };
 
 #endif // __LIBXIPC_XRL_ROUTER_HH__
