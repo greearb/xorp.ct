@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.2 2003/01/24 22:14:44 rizzo Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.3 2003/01/29 23:38:12 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -515,7 +515,7 @@ BGPParameter *
 BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	throw(CorruptMessage)
 {
-    assert (d == 0);	// this is a programming error
+    XLOG_ASSERT(d != 0);	// this is a programming error
     if (max_len < 2)
 	xorp_throw(CorruptMessage, "Short block to BGPParameter::create\n",
                        OPENMSGERROR, 0);
