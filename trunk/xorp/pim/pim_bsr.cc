@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.29 2004/08/02 21:20:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.30 2005/01/13 23:30:24 pavlin Exp $"
 
 
 //
@@ -1452,7 +1452,7 @@ BsrZone::can_merge_rp_set(const BsrZone& bsr_zone, string& error_msg) const
 				 "for zone %s is too large: %u while "
 				 "the expected count is %u",
 				 cstring(zone_id()),
-				 rp_count_sum,
+				 XORP_UINT_CAST(rp_count_sum),
 				 active_bsr_group_prefix->expected_rp_count());
 	    return (false);
 	}

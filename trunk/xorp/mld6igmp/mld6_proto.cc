@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.28 2004/03/04 03:02:09 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.29 2004/06/10 22:41:26 hodson Exp $"
 
 
 //
@@ -89,7 +89,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
 		     module_name(),
 		     cstring(src), cstring(dst),
 		     name().c_str(),
-		     (uint32_t)BUFFER_DATA_SIZE(buffer));
+		     XORP_UINT_CAST(BUFFER_DATA_SIZE(buffer)));
 	return (XORP_ERROR);
     }
     
