@@ -12,10 +12,46 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.9 2004/05/18 01:26:31 atanu Exp $"
-
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.10 2004/05/20 15:53:53 hodson Exp $"
 
 #include "print_routes.hh"
+
+// ----------------------------------------------------------------------------
+// Specialized PrintRoutes implementation
+
+template <>
+void
+PrintRoutes<IPv4>::get_route_list_start(bool unicast, bool multicast)
+{
+    _active_requests = 0;
+    send_get_v4_route_list_start("bgp", unicast, multicast,
+		 callback(this, &PrintRoutes::get_route_list_start_done));
+}
+
+template <>
+void
+PrintRoutes<IPv6>::get_route_list_start(bool unicast, bool multicast)
+{
+    _active_requests = 0;
+    send_get_v6_route_list_start("bgp", unicast, multicast,
+		 callback(this, &PrintRoutes::get_route_list_start_done));
+}
+
+template <>
+void
+PrintRoutes<IPv4>::get_route_list_next()
+{
+    send_get_v4_route_list_next("bgp",	_token,
+		callback(this, &PrintRoutes::get_route_list_next_done));
+}
+
+template <>
+void
+PrintRoutes<IPv6>::get_route_list_next()
+{
+    send_get_v6_route_list_next("bgp", _token,
+		callback(this, &PrintRoutes::get_route_list_next_done));
+}
 
 // ----------------------------------------------------------------------------
 // Common PrintRoutes implementation
@@ -93,6 +129,7 @@ PrintRoutes<A>::get_route_list_start_done(const XrlError& e,
 	get_route_list_next();
     }
 }
+
 template <typename A>
 void
 PrintRoutes<A>::get_route_list_next_done(const XrlError& e,
@@ -171,43 +208,6 @@ void
 PrintRoutes<A>::timer_expired()
 {
     _done = true;
-}
-
-// ----------------------------------------------------------------------------
-// Specialized PrintRoutes implementation
-
-template <>
-void
-PrintRoutes<IPv4>::get_route_list_start(bool unicast, bool multicast)
-{
-    _active_requests = 0;
-    send_get_v4_route_list_start("bgp", unicast, multicast,
-		 callback(this, &PrintRoutes::get_route_list_start_done));
-}
-
-template <>
-void
-PrintRoutes<IPv6>::get_route_list_start(bool unicast, bool multicast)
-{
-    _active_requests = 0;
-    send_get_v6_route_list_start("bgp", unicast, multicast,
-		 callback(this, &PrintRoutes::get_route_list_start_done));
-}
-
-template <>
-void
-PrintRoutes<IPv4>::get_route_list_next()
-{
-    send_get_v4_route_list_next("bgp",	_token,
-		callback(this, &PrintRoutes::get_route_list_next_done));
-}
-
-template <>
-void
-PrintRoutes<IPv6>::get_route_list_next()
-{
-    send_get_v6_route_list_next("bgp", _token,
-		callback(this, &PrintRoutes::get_route_list_next_done));
 }
 
 
