@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.4 2003/03/10 23:20:45 hodson Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.5 2003/03/22 03:26:41 pavlin Exp $"
 
 
 //
@@ -163,7 +163,7 @@ MribTable::insert(const Mrib& mrib)
 	    }
 #undef MRIB_LOOKUP_BITTEST
 	    
-	    if (! --prefix_len) {
+	    if (--prefix_len == 0) {
 		// Found the place to install the entry
 		if (mrib_lookup->_mrib != NULL) {
 		    delete mrib_lookup->_mrib;	// XXX: delete the old entry
@@ -387,7 +387,7 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
 	    }
 #undef MRIB_LOOKUP_BITTEST
 	    
-	    if (! --prefix_len) {
+	    if (--prefix_len == 0) {
 		// Found the entry
 		return (mrib_lookup);
 	    }
