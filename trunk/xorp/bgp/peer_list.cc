@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.8 2003/03/10 23:20:02 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.9 2003/04/28 18:13:03 jcardona Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -68,13 +68,13 @@ BGPPeerList::add_peer(BGPPeer *p)
 {
     list<BGPPeer *>::iterator i;
      
-    if (_peers.empty() || p->remote_ip_greater_than(*(_peers.back()))) {
+    if (_peers.empty() || p->remote_ip_ge_than(*(_peers.back()))) {
 	_peers.push_back(p);
 	return;
     }
     
     for(i = _peers.begin(); i != _peers.end(); i++) {
-	if((*i)->remote_ip_greater_than(*p)) {
+	if((*i)->remote_ip_ge_than(*p)) {
 	    _peers.insert(i,p);
 	    return;
 	}

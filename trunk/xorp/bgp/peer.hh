@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.7 2003/04/02 02:53:49 pavlin Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.8 2003/04/28 18:13:03 jcardona Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -199,7 +199,7 @@ private:
      */
     void set_state(FSMState s, bool error = false);
     static const char *pretty_print_state(FSMState s);
-    bool remote_ip_greater_than(const BGPPeer& peer);
+    bool remote_ip_ge_than(const BGPPeer& peer);
 };
 
 #endif // __BGP_PEER_HH__
