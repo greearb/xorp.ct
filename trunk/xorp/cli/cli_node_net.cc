@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.13 2003/06/02 08:06:22 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.14 2003/06/03 09:58:52 pavlin Exp $"
 
 
 //
@@ -273,7 +273,9 @@ CliClient::start_connection(void)
     }
     
     //
-    // Put the terminal in non-canonical and non-echo mode
+    // Put the terminal in non-canonical and non-echo mode.
+    // In addition, disable signals INTR, QUIT, [D]SUSP
+    // (i.e., force their value to be received when read from the terminal).
     //
     if (is_stdio()) {
 	struct termios termios;
