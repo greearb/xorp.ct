@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.12 2004/09/17 14:14:24 abittau Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.13 2004/10/29 01:23:31 pavlin Exp $ */
 
 protocols {
     static {
@@ -6,21 +6,25 @@ protocols {
 	enabled:		bool = true;
 
 	route4 @: ipv4net {
+	    next-hop:		ipv4;
 	    nexthop:		ipv4;
 	    metric:		u32 = 1;
 	}
 
 	route6 @: ipv6net {
+	    next-hop:		ipv6;
 	    nexthop:		ipv6;
 	    metric:		u32 = 1;
 	}
 
 	mrib-route4 @: ipv4net {
+	    next-hop:		ipv4;
 	    nexthop:		ipv4;
 	    metric:		u32 = 1;
 	}
 
 	mrib-route6 @: ipv6net {
+	    next-hop:		ipv6;
 	    nexthop:		ipv6;
 	    metric:		u32 = 1;
 	}
@@ -62,13 +66,19 @@ protocols {
 
 	route4 @: ipv4net {
 	    %help:	short "Configure an IPv4 static route";
-	    %mandatory:	nexthop;
+	    %mandatory:	next-hop;
 
-	    %activate:	xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
-	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %activate:	xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop)&metric:u32=$(@.metric)";
+	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop)&metric:u32=$(@.metric)";
 	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)";
 
+	    next-hop {
+		%help:	short "Configure the next-hop router";
+		%set:;
+	    }
+
 	    nexthop {
+		%deprecated: "Statement 'nexthop' is replaced with 'next-hop'";
 		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
@@ -82,13 +92,19 @@ protocols {
 
 	route6 @: ipv6net {
 	    %help:	short "Configure an IPv6 static route";
-	    %mandatory:	nexthop;
+	    %mandatory:	next-hop;
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
-	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)";
 
+	    next-hop {
+		%help:	short "Configure the next-hop router";
+		%set:;
+	    }
+
 	    nexthop {
+		%deprecated: "Statement 'nexthop' is replaced with 'next-hop'";
 		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
@@ -102,13 +118,19 @@ protocols {
 
 	mrib-route4 @: ipv4net {
 	    %help:	short "Configure a multicast-specific IPv4 static route";
-	    %mandatory:	nexthop;
+	    %mandatory:	next-hop;
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
-	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)";
 
+	    next-hop {
+		%help:	short "Configure the next-hop router";
+		%set:;
+	    }
+
 	    nexthop {
+		%deprecated: "Statement 'nexthop' is replaced with 'next-hop'";
 		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
@@ -122,13 +144,19 @@ protocols {
 
 	mrib-route6 @: ipv6net {
 	    %help:	short "Configure a multicast-specific IPv6 static route";
-	    %mandatory: nexthop;
+	    %mandatory: next-hop;
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
-	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)";
 
+	    next-hop {
+		%help:	short "Configure the next-hop router";
+		%set:;
+	    }
+
 	    nexthop {
+		%deprecated: "Statement 'nexthop' is replaced with 'next-hop'";
 		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
