@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.45 2004/02/24 23:06:28 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.46 2004/03/02 00:47:00 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -24,7 +24,7 @@ Release ?.?? (200?/??/??)
     - 
 
   RTRMGR:
-    - Add support for explicit configuration of the XRL target name of
+    - Added support for explicit configuration of the XRL target name of
       a module.
 
   XORPSH:
@@ -51,7 +51,8 @@ Release ?.?? (200?/??/??)
       interfaces for sending and receiving traffic (e.g., satellite links).
 
   CLI:
-    - 
+    - A bug fix related to the CLI paging output: now it can handle properly
+      lines that are longer than the width of the CLI output terminal.
 
   SNMP:
     - 
