@@ -1,0 +1,11 @@
+#
+# $XORP$
+#
+
+------------------------------ TODO -----------------------------
+
+1) The script test_peering1.sh does not actually check that the bgp
+process has terminated. When the test was written calling the
+terminate/shutdown XRL used to cause the bgp process to core dump.
+
+------------------------------ DONE -----------------------------
