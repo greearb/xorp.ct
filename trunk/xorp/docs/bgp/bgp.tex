@@ -576,7 +576,7 @@ the DumpIterator to be the set of peers that are currently up.  Then
 it iterates through this list dumping all the routes from each RibIn
 in turn.
 
-The DumpTable calls {\tt dump\_next\_route} on it's parent table, passing the
+The DumpTable calls {\tt dump\_next\_route} on its parent table, passing the
 DumpIterator as a parameter.  The {\tt dump\_next\_route} request is relayed
 upstream to the DecisionTable.  DecisionTable relays the request to
 the input branch of the first peer listed in the list of remaining

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.4 2003/03/07 06:11:38 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.5 2003/03/07 23:59:46 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -172,7 +172,7 @@ which are unsigned 32-bit numbers.
 
 This file contains 
 asynchronous file transfer classes.  These utilize XORP EventLoop
-and it's SelectorList to read or write files asynchronously.  The
+and its SelectorList to read or write files asynchronously.  The
 user creates an AsyncFile\{Reader,Writer\} and adds a buffer for
 reading or writing with add\_buffer().  A callback provided with
 each buffer is called every time I/O happens on the buffer.
