@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.56 2004/12/14 21:58:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.57 2004/12/18 02:08:11 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1354,3 +1354,12 @@ ConfigTreeNode::named_value(const string& varname) const
     return iter->second;
 }
 
+int
+ConfigTreeNode::child_number() const
+{
+    if (_template_tree_node) {
+	return _template_tree_node->child_number();
+    } else {
+	return 0;
+    }
+}

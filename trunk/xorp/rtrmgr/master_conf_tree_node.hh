@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree_node.hh,v 1.6 2004/12/18 02:08:12 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree_node.hh,v 1.7 2004/12/22 23:34:05 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_NODE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_NODE_HH__
@@ -27,6 +27,13 @@
 
 #include "conf_tree_node.hh"
 #include "task.hh"
+
+class CTN_Compare {
+public:
+    bool operator() (ConfigTreeNode* a, ConfigTreeNode *b) {
+	return (a->child_number() < b->child_number());
+    }
+};
 
 
 class MasterConfigTreeNode : public ConfigTreeNode {
@@ -66,6 +73,7 @@ protected:
     const Command* _cmd_that_failed;
 
 private:
+    void sort_by_template(list <ConfigTreeNode*>& children) const;
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_NODE_HH__

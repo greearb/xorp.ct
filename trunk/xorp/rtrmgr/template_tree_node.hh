@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.18 2004/06/10 22:41:55 hodson Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.19 2004/12/11 21:29:59 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -109,6 +109,8 @@ public:
 	return _help_long;
     }
 
+    int child_number() const { return _child_number;}
+
 protected:
     void add_child(TemplateTreeNode* child);
 
@@ -148,6 +150,8 @@ private:
     string _help_long;
 
     list<string>	_mandatory_children;
+
+    int _child_number;
 
     bool		_verbose;	 // Set to true if output is verbose
 };

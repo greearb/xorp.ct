@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.29 2004/12/11 21:29:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.30 2004/12/12 18:53:16 mjh Exp $"
 
 
 #include <glob.h>
@@ -50,6 +50,9 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
 	_parent->add_child(this);
 	_module_name = _parent->module_name();
 	_default_target_name = _parent->default_target_name();
+	_child_number = _parent->children().size();
+    } else {
+	_child_number = 0;
     }
 }
 

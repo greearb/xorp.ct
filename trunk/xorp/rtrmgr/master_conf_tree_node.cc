@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.6 2004/12/18 02:08:12 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.7 2004/12/22 23:34:05 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -440,11 +440,14 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	}
     }
 
+    list<ConfigTreeNode *> sorted_children = _children;
+    sort_by_template(sorted_children);
+
     list<ConfigTreeNode *>::iterator iter, prev_iter;
-    iter = _children.begin();
+    iter = sorted_children.begin();
     if (changes_made)
 	last_depth = depth;
-    while (iter != _children.end()) {
+    while (iter != sorted_children.end()) {
 	prev_iter = iter;
 	++iter;
 	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
@@ -536,6 +539,12 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 
     return success;
 }
+
+void
+MasterConfigTreeNode::sort_by_template(list <ConfigTreeNode*>& children) const
+{
+    children.sort(CTN_Compare());
+} 
 
 bool 
 MasterConfigTreeNode::check_commit_status(string& response) const
