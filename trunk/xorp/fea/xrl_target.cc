@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.3 2003/01/08 21:59:58 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.4 2003/03/10 23:20:18 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -341,6 +341,9 @@ XrlFeaTarget::ifmgr_0_1_get_vif_flags4(
 	return e;
 
     uint32_t flags = fa->flags();
+
+    XLOG_ASSERT(!(flags & IFF_POINTOPOINT) || !(flags & IFF_BROADCAST));
+
     up = flags & IFF_UP;
     broadcast = flags & IFF_BROADCAST;
     loopback = flags & IFF_LOOPBACK;
