@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.22 2003/12/16 23:39:39 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.23 2003/12/20 01:43:34 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -164,7 +164,7 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
     
     do {
 	if (dst.is_ipv4()) {
-	    XrlMfeaV0p1Client::send_send_protocol_message4(
+	    _xrl_mfea_client.send_send_protocol_message4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -182,7 +182,7 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 	}
 	
 	if (dst.is_ipv6()) {
-	    XrlMfeaV0p1Client::send_send_protocol_message6(
+	    _xrl_mfea_client.send_send_protocol_message6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -224,7 +224,7 @@ XrlMld6igmpNode::start_protocol_kernel()
     //
     do {
 	if (Mld6igmpNode::is_ipv4()) {
-	    XrlMfeaV0p1Client::send_add_protocol4(
+	    _xrl_mfea_client.send_add_protocol4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -234,7 +234,7 @@ XrlMld6igmpNode::start_protocol_kernel()
 	}
 	
 	if (Mld6igmpNode::is_ipv6()) {
-	    XrlMfeaV0p1Client::send_add_protocol6(
+	    _xrl_mfea_client.send_add_protocol6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -280,7 +280,7 @@ XrlMld6igmpNode::stop_protocol_kernel()
 {   
     do {
 	if (Mld6igmpNode::is_ipv4()) {
-	    XrlMfeaV0p1Client::send_delete_protocol4(
+	    _xrl_mfea_client.send_delete_protocol4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -290,7 +290,7 @@ XrlMld6igmpNode::stop_protocol_kernel()
 	}
 	
 	if (Mld6igmpNode::is_ipv6()) {
-	    XrlMfeaV0p1Client::send_delete_protocol6(
+	    _xrl_mfea_client.send_delete_protocol6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -329,7 +329,7 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
     
     do {
 	if (Mld6igmpNode::is_ipv4()) {
-	    XrlMfeaV0p1Client::send_start_protocol_vif4(
+	    _xrl_mfea_client.send_start_protocol_vif4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -341,7 +341,7 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
 	}
 	
 	if (Mld6igmpNode::is_ipv6()) {
-	    XrlMfeaV0p1Client::send_start_protocol_vif6(
+	    _xrl_mfea_client.send_start_protocol_vif6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -384,7 +384,7 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
     
     do {
 	if (Mld6igmpNode::is_ipv4()) {
-	    XrlMfeaV0p1Client::send_stop_protocol_vif4(
+	    _xrl_mfea_client.send_stop_protocol_vif4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -396,7 +396,7 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
 	}
 	
 	if (Mld6igmpNode::is_ipv6()) {
-	    XrlMfeaV0p1Client::send_stop_protocol_vif6(
+	    _xrl_mfea_client.send_stop_protocol_vif6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -437,7 +437,7 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
     
     do {
 	if (multicast_group.is_ipv4()) {
-	    XrlMfeaV0p1Client::send_join_multicast_group4(
+	    _xrl_mfea_client.send_join_multicast_group4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -450,7 +450,7 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
 	}
 	
 	if (multicast_group.is_ipv6()) {
-	    XrlMfeaV0p1Client::send_join_multicast_group6(
+	    _xrl_mfea_client.send_join_multicast_group6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -492,7 +492,7 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
     
     do {
 	if (multicast_group.is_ipv4()) {
-	    XrlMfeaV0p1Client::send_leave_multicast_group4(
+	    _xrl_mfea_client.send_leave_multicast_group4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -505,7 +505,7 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
 	}
 	
 	if (multicast_group.is_ipv6()) {
-	    XrlMfeaV0p1Client::send_leave_multicast_group6(
+	    _xrl_mfea_client.send_leave_multicast_group6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
@@ -555,7 +555,7 @@ XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
     
     do {
 	if (group.is_ipv4()) {
-	    XrlMld6igmpClientV0p1Client::send_add_membership4(
+	    _xrl_mld6igmp_client_client.send_add_membership4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mld6igmp_vif->name(),
@@ -567,7 +567,7 @@ XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
 	}
 	
 	if (group.is_ipv6()) {
-	    XrlMld6igmpClientV0p1Client::send_add_membership6(
+	    _xrl_mld6igmp_client_client.send_add_membership6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mld6igmp_vif->name(),
@@ -616,7 +616,7 @@ XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
     
     do {
 	if (group.is_ipv4()) {
-	    XrlMld6igmpClientV0p1Client::send_delete_membership4(
+	    _xrl_mld6igmp_client_client.send_delete_membership4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mld6igmp_vif->name(),
@@ -628,7 +628,7 @@ XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
 	}
 	
 	if (group.is_ipv6()) {
-	    XrlMld6igmpClientV0p1Client::send_delete_membership6(
+	    _xrl_mld6igmp_client_client.send_delete_membership6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mld6igmp_vif->name(),
@@ -668,7 +668,7 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 						bool is_command_processor
     )
 {
-    XrlCliManagerV0p1Client::send_add_cli_command(
+    _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
@@ -694,7 +694,7 @@ XrlMld6igmpNode::xrl_result_add_cli_command(const XrlError& xrl_error)
 int
 XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
-    XrlCliManagerV0p1Client::send_delete_cli_command(
+    _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
@@ -1358,7 +1358,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 	 iter != mld6igmp_vif->members().end();
 	 ++iter) {
 	const MemberQuery *member_query = *iter;
-	XrlMld6igmpClientV0p1Client::send_add_membership4(
+	_xrl_mld6igmp_client_client.send_add_membership4(
 	    xrl_sender_name.c_str(),
 	    my_xrl_target_name(),
 	    mld6igmp_vif->name(),
@@ -1432,7 +1432,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 	 iter != mld6igmp_vif->members().end();
 	 ++iter) {
 	const MemberQuery *member_query = *iter;
-	XrlMld6igmpClientV0p1Client::send_add_membership6(
+	_xrl_mld6igmp_client_client.send_add_membership6(
 	    xrl_sender_name.c_str(),
 	    my_xrl_target_name(),
 	    mld6igmp_vif->name(),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.19 2003/12/16 23:39:39 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.20 2003/12/20 01:43:35 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -27,7 +27,6 @@
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_router.hh"
 #include "xrl/targets/mld6igmp_base.hh"
-#include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "xrl/interfaces/mld6igmp_client_xif.hh"
@@ -40,22 +39,17 @@
 //
 class XrlMld6igmpNode : public Mld6igmpNode,
 			public XrlMld6igmpTargetBase,
-			public XrlCommonV0p1Client,
-			public XrlMfeaV0p1Client,
-			public XrlCliManagerV0p1Client,
-			public XrlMld6igmpClientV0p1Client,
 			public Mld6igmpNodeCli {
 public:
     XrlMld6igmpNode(int family, xorp_module_id module_id, 
 		    EventLoop& eventloop, XrlRouter* xrl_router)
 	: Mld6igmpNode(family, module_id, eventloop),
 	  XrlMld6igmpTargetBase(xrl_router),
-	  XrlCommonV0p1Client(xrl_router),
-	  XrlMfeaV0p1Client(xrl_router),
-	  XrlCliManagerV0p1Client(xrl_router),
-	  XrlMld6igmpClientV0p1Client(xrl_router),
-	  Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this))
-	{ }
+	  Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this)),
+	  _xrl_cli_manager_client(xrl_router),
+	  _xrl_mfea_client(xrl_router),
+	  _xrl_mld6igmp_client_client(xrl_router)
+    { }
     virtual ~XrlMld6igmpNode() { Mld6igmpNode::stop(); Mld6igmpNodeCli::stop(); }
     
     //
@@ -669,6 +663,10 @@ private:
     }
     
     int family() const { return (Mld6igmpNode::family()); }
+
+    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    XrlMfeaV0p1Client		_xrl_mfea_client;
+    XrlMld6igmpClientV0p1Client	_xrl_mld6igmp_client_client;
 };
 
 #endif // __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
