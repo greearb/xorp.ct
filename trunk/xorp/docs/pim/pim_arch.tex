@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.5 2003/06/05 07:07:51 pavlin Exp $
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.6 2003/06/09 20:02:21 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP PIM-SM Routing Daemon \\
 \vspace{1ex}
-Version 0.3}
+Version 0.4}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 9, 2003}
+\date{August 28, 2003}
 
 \maketitle
 
@@ -77,7 +77,7 @@ implementation is well tested, we would
 try to optimize those parts of the implementation that should prove
 to be a bottleneck.
 
-Currently (June 2003), the PIM-SM implementation is based
+Currently (August 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 
 \begin{itemize}
@@ -228,7 +228,7 @@ capable, and the loopback interface are ignored for multicast
 routing.
 
 Typically, from developer's point of view, all interaction with PimVif
-would be through PimNode~\footnote{For simplicity, currently (June 2003)
+would be through PimNode~\footnote{For simplicity, currently (August 2003)
 there are few occasions when XrlPimNode uses direct access to PimNode.}.
 
 The public interface for PimVif contains the methods to manipulate a
@@ -262,7 +262,7 @@ PimScopeZoneTable is a table that contains information about scoped
 zones. There is one such table per PimNode. This table is used to check
 whether various control messages are allowed to be sent or accepted a
 specific network interface~\footnote{Note that in the current implementation
-(June 2003) the PimScopeZoneTable is used only for PIM
+(August 2003) the PimScopeZoneTable is used only for PIM
 Bootstrap messages. In the future, the scope zone information would be
 used for other control messages as well.}.
 
@@ -322,12 +322,12 @@ contains PimMre entries (described in file \verb=pim/pim_mre.hh=):
 
 \end{itemize}
 
-For simplicity of implementation, currently (June 2003) PimMrt
+For simplicity of implementation, currently (August 2003) PimMrt
 contains one more table: PimMrtMfc PIM-specific table with Multicast
 Forwarding Cache (PimMfc) entries (in the future, this table may be
 moved out of PimMrt to PimNode). This table contains all
 entries that have been installed in the multicast forwarding table in
-the multicast forwarding engine. Currently (June 2003), those
+the multicast forwarding engine. Currently (August 2003), those
 entries are source-group-specific, and are installed ``on-demand'' (\ie
 only if there is an active source for some multicast group). In the future,
 group-specific entries may be supported as well (assuming that that
@@ -401,8 +401,8 @@ table for a given input event returns a list of the ordered output
 operations that need to be performed for that event.
 
 If there are just few input events and output operations, it might be
-possible to create such table manually. However, currently (June
-2003) there are 52 input events and 75 output operations,
+possible to create such table manually. However, currently (August
+2003) there are 52 input events and 77 output operations,
 therefore it is not feasible to crate manually such table.
 The solution is on startup to automatically compute this table based on
 a set of rules about the various state dependencies as defined in the
@@ -464,7 +464,7 @@ for those entries changes). In that case, we use ``time-slices'' to
 compute how long has taken the processing so far.
 In the above example, we check the processing time after we process each
 (*,G) entry: if the elapsed time is above a threshold (default to 100ms
-as of June 2003), we save the appropriate state to continue the
+as of August 2003), we save the appropriate state to continue the
 processing later (\eg in the above example we save the address of the
 next multicast group to process).
 
@@ -576,7 +576,7 @@ class Mrib {
 
 
 The MRIB information is obtained from the RIB
-module~\footnote{Currently (June 2003), the information is
+module~\footnote{Currently (August 2003), the information is
 received from the MFEA instead.}; if the RIB changes, the
 PimMribTable is updated as well. Examples when the MRIB information
 may change are: the unicast routing changes the next-hop router address
@@ -658,7 +658,7 @@ would contain all affected entries: \eg a list of \emph{MRIB\_ADD} and
 entries would specify also the order the PIM-SM module should apply
 them.
 
-Note that as we mentioned earlier, currently (June 2003), the MRIB
+Note that as we mentioned earlier, currently (August 2003), the MRIB
 information is received from the MFEA, which reads directly the unicast
 forwarding table from the (UNIX) kernel, and PIM-SM keeps a local copy
 of the whole table. The MFEA periodically reads (\eg every 10 seconds)
@@ -680,7 +680,7 @@ future the current behavior may be changed.}.
 \subsection{PimConfig Description}
 
 PimConfig handles the PIM-specific configuration~\footnote{Currently
-(June 2003), PimConfig is not implemented; rather, all state is
+(August 2003), PimConfig is not implemented; rather, all state is
 kept inside PimNode instead.}. This configuration is used to configure the
 following units:
 
@@ -713,6 +713,8 @@ following units:
   cleanup.
 
   \item June 9, 2003: Bump-up the version to 0.3, and the date.
+
+  \item August 28, 2003: Bump-up the version to 0.4, and the date.
 
 \end{itemize}
 
