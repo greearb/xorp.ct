@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libproto/spt.hh,v 1.1 2004/11/02 23:15:22 atanu Exp $
 
-#ifndef __IGP_SPT_HH__
-#define __IGP_SPT_HH__
+#ifndef __LIBPROTO_SPT_HH__
+#define __LIBPROTO_SPT_HH__
 
 #include "libxorp/ref_ptr.hh"
 #include "libxorp/c_format.hh"
@@ -448,4 +448,4 @@ class RouteCmd {
     A _nexthop;
 };
 
-#endif // __IGP_SPT_HH__
+#endif // __LIBPROTO_SPT_HH__
