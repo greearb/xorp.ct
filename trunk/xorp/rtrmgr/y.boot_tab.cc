@@ -223,6 +223,7 @@ string
 booterrormsg(const char *s)
 {
     string errmsg;
+
     if (boot_filename.empty()) {
 	errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s\n", 
 			  boot_filename.c_str(),
@@ -244,6 +245,7 @@ extend_path(char *segment)
 {
     strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
     lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     cf->extend_path(string(segment));
     free(segment);
 }
@@ -265,16 +267,18 @@ terminal(char *segment, char *value, int type)
 {
     extend_path(segment);
     push_path();
+
     strncpy(lastsymbol, value, sizeof(lastsymbol) - 1);
     lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     cf->terminal_value(value, type);
     free(value);
     pop_path();
 }
 
 int
-init_bootfile_parser(const char *configuration, 
-		     const char *filename, 
+init_bootfile_parser(const char *configuration,
+		     const char *filename,
 		     ConfigTree *c)
 {
     cf = c;
@@ -290,7 +294,7 @@ parse_bootfile()
     bootparse();
     return 0;
 }
-#line 294 "y.boot_tab.c"
+#line 298 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -488,8 +492,8 @@ yyreduce:
 case 4:
 #line 37 "boot.yy"
 {
-                   /* printf("DEFINITION\n"); */
-                }
+			/* printf("DEFINITION\n"); */
+		}
 break;
 case 5:
 #line 41 "boot.yy"
@@ -538,52 +542,52 @@ break;
 case 21:
 #line 61 "boot.yy"
 {
-		    terminal(yyvsp[-1], strdup(""), NODE_VOID);
+			terminal(yyvsp[-1], strdup(""), NODE_VOID);
 		}
 break;
 case 22:
 #line 64 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_TEXT);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_TEXT);
+		}
 break;
 case 23:
 #line 67 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_UINT);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_UINT);
+		}
 break;
 case 24:
 #line 70 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_BOOL);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_BOOL);
+		}
 break;
 case 25:
 #line 73 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4);
+		}
 break;
 case 26:
 #line 76 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4PREFIX);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4PREFIX);
+		}
 break;
 case 27:
 #line 79 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6);
+		}
 break;
 case 28:
 #line 82 "boot.yy"
 {
-		    terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6PREFIX);
-                }
+			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6PREFIX);
+		}
 break;
-#line 587 "y.boot_tab.c"
+#line 591 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -2,10 +2,10 @@
 #include <string.h>
 #include "y.opcmd_tab.h"
 #define YY_NO_UNPUT
-//#define DEBUG_OPCMD_PARSER
+/* #define DEBUG_OPCMD_PARSER */
 %}
-	int op_level=0;
-	int op_linenum=1;
+	int op_level = 0;
+	int op_linenum = 1;
 	extern void* opcmdlval;
 %option noyywrap
 %x comment
@@ -41,15 +41,15 @@
 	return COLON;
 	}
 
-"\n"	{ 
-	/*newline is not significant in op_commands*/
+"\n"	{
+	/* newline is not significant in op_commands */
 	op_linenum++;
 #ifdef DEBUG_OPCMD_PARSER
 	printf(" lex(newline)\n");
 #endif
 	}
 
-[ \t]+	/*whitespace*/
+[ \t]+	/* whitespace */
 
 \%[a-z][a-z0-9\-_]*	{
 #ifdef DEBUG_OPCMD_PARSER
@@ -76,12 +76,9 @@
 	}
 
 "/*"			BEGIN(comment);
-<comment>[^*\n]* 	/*eat up anything that's not a '*' */
-<comment>"*"+[^*/\n]* 	/*eat up '*'s not followed by "/"s */
+<comment>[^*\n]* 	/* eat up anything that's not a '*' */
+<comment>"*"+[^*/\n]* 	/* eat up '*'s not followed by "/"s */
 <comment>\n		op_linenum++;
 <comment>"*"+"/"	BEGIN(INITIAL);
 
-
 %%
-
-

@@ -30,18 +30,18 @@
 %token IPV6NET
 
 %%
-input:	/* empty */
-	| definition input
-	| emptystatement input
+input:		/* empty */
+		| definition input
+		| emptystatement input
 
 definition:	nodename nodegroup {
-                   /* printf("DEFINITION\n"); */
-                }
+			/* printf("DEFINITION\n"); */
+		}
 
 nodename:	literals { push_path(); }
 
 literals:	LITERAL { extend_path($1); }
-                | literals LITERAL { extend_path($2); }
+		| literals LITERAL { extend_path($2); }
 		| literals IPV4 { extend_path($2); }
 		| literals IPV4NET { extend_path($2); }
 		| literals IPV6 { extend_path($2); }
@@ -59,29 +59,29 @@ statement:	terminal | definition | emptystatement
 emptystatement:	END { /* printf("EMPTY STATEMENT\n"); */ }
 
 terminal:	LITERAL END {
-		    terminal($1, strdup(""), NODE_VOID);
+			terminal($1, strdup(""), NODE_VOID);
 		}
 		| LITERAL ASSIGN_VALUE STRING END {
-		    terminal($1, $3, NODE_TEXT);
-                }
+			terminal($1, $3, NODE_TEXT);
+		}
 		| LITERAL ASSIGN_VALUE INTEGER END {
-		    terminal($1, $3, NODE_UINT);
-                }
+			terminal($1, $3, NODE_UINT);
+		}
 		| LITERAL ASSIGN_VALUE BOOL END {
-		    terminal($1, $3, NODE_BOOL);
-                }
+			terminal($1, $3, NODE_BOOL);
+		}
 		| LITERAL ASSIGN_VALUE IPV4 END {
-		    terminal($1, $3, NODE_IPV4);
-                }
+			terminal($1, $3, NODE_IPV4);
+		}
 		| LITERAL ASSIGN_VALUE IPV4NET END {
-		    terminal($1, $3, NODE_IPV4PREFIX);
-                }
+			terminal($1, $3, NODE_IPV4PREFIX);
+		}
 		| LITERAL ASSIGN_VALUE IPV6 END {
-		    terminal($1, $3, NODE_IPV6);
-                }
+			terminal($1, $3, NODE_IPV6);
+		}
 		| LITERAL ASSIGN_VALUE IPV6NET END {
-		    terminal($1, $3, NODE_IPV6PREFIX);
-                }
+			terminal($1, $3, NODE_IPV6PREFIX);
+		}
 
 %%
 
@@ -102,6 +102,7 @@ string
 booterrormsg(const char *s)
 {
     string errmsg;
+
     if (boot_filename.empty()) {
 	errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s\n", 
 			  boot_filename.c_str(),
@@ -123,6 +124,7 @@ extend_path(char *segment)
 {
     strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
     lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     cf->extend_path(string(segment));
     free(segment);
 }
@@ -144,16 +146,18 @@ terminal(char *segment, char *value, int type)
 {
     extend_path(segment);
     push_path();
+
     strncpy(lastsymbol, value, sizeof(lastsymbol) - 1);
     lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     cf->terminal_value(value, type);
     free(value);
     pop_path();
 }
 
 int
-init_bootfile_parser(const char *configuration, 
-		     const char *filename, 
+init_bootfile_parser(const char *configuration,
+		     const char *filename,
 		     ConfigTree *c)
 {
     cf = c;

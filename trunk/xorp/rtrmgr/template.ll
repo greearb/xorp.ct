@@ -3,8 +3,8 @@
 #include "y.tplt_tab.h"
 #define YY_NO_UNPUT
 %}
-	int level=0;
-	int linenum=1;
+	int level = 0;
+	int linenum = 1;
 	extern void* tpltlval;
 %option noyywrap
 %x comment
@@ -138,7 +138,7 @@
 #endif
 	}
 
-[ \t]+	/*whitespace*/
+[ \t]+	/* whitespace */
 
 \%[a-z][a-z0-9\-_]*	{
 #ifdef DEBUG_TEMPLATE_PARSER
@@ -168,14 +168,14 @@
 \"[a-zA-Z0-9\-_\[\]:/&.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
 	tpltlval = strdup(tplttext);
 #ifdef DEBUG_TEMPLATE_PARSER
-	printf("STRING >%s<", (char*)tpltlval);
+	printf("STRING >%s<", (char *)tpltlval);
 #endif
 	return STRING;
 	}
 
 "/*"			BEGIN(comment);
-<comment>[^*\n]* 	/*eat up anything that's not a '*' */
-<comment>"*"+[^*/\n]* 	/*eat up '*'s not followed by "/"s */
+<comment>[^*\n]* 	/* eat up anything that's not a '*' */
+<comment>"*"+[^*/\n]* 	/* eat up '*'s not followed by "/"s */
 <comment>\n		linenum++;
 <comment>"*"+"/"	BEGIN(INITIAL);
 
@@ -184,7 +184,4 @@
 	return INTEGER;
 	}
 
-
 %%
-
-

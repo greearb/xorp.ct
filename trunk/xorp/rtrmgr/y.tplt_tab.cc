@@ -50,8 +50,8 @@ static int yygrowstack();
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
 #include "template_tree.hh"
-/*#define DEBUG_TEMPLATE_PARSER*/
-  /*sigh - -p flag to yacc should do this for us*/
+/* #define DEBUG_TEMPLATE_PARSER */
+/* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
 #line 58 "y.tplt_tab.c"
@@ -261,7 +261,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 155 "template.yy"
+#line 164 "template.yy"
 
 extern char *lstr;
 extern char *vstr;
@@ -277,112 +277,148 @@ static char lastsymbol[256];
 
 #define MAXSTACK 20
 #define MAXPATH 256
-//static string cmd_str;
+/* static string cmd_str; */
 static string current_cmd;
-//static string path_hold;
-static list <string> cmd_list;
+/* static string path_hold; */
+static list<string> cmd_list;
 static TemplateTree* tt;
 extern "C" int tpltparse();
 extern int tpltlex();
 
-void tplterror (const char *s) {
-    printf("\n ERROR [Template File: %s line %d]: %s\n", tplt_filename, 
-	linenum, s);
+void
+tplterror(const char *s)
+{
+    printf("\n ERROR [Template File: %s line %d]: %s\n",
+	tplt_filename, linenum, s);
     printf("\n Last symbol parsed was %s\n", lastsymbol);
     exit(1);
 }
 
+static void
+extend_path(char *segment, bool is_tag)
+{
+    strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
+    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
 
-static void extend_path(char *segment, bool is_tag) {
-    strncpy(lastsymbol, segment, 255);
     string segname;
     segname = segment;
     tt->extend_path(segname, is_tag);
-    //free(segment);
-    //  printf("\n>>> extend path: %s\n", path);
+    /* free(segment); */
+    /* printf("\n>>> extend path: %s\n", path); */
 }
 
-static void push_path() {
-  //printf("\n>>>PUSH: %s\n", path);
+static void
+push_path()
+{
+    /* printf("\n>>>PUSH: %s\n", path); */
     tt->push_path(tplt_type, tplt_initializer);
     tplt_type = NODE_VOID;
     tplt_initializer = NULL;
 }
 
-static void pop_path() {
+static void
+pop_path()
+{
     tt->pop_path();
     tplt_type = NODE_VOID;
     tplt_initializer = NULL;
-    //printf("\n>>>POP: %s\n", path);
+    /* printf("\n>>>POP: %s\n", path); */
 }
 
-static void terminal(char *segment) {
+static void
+terminal(char *segment)
+{
     extend_path(segment, false);
     push_path();
     pop_path();
 }
 
-static void add_cmd(char *cmd) {
-    strncpy(lastsymbol, cmd, 255);
+static void
+add_cmd(char *cmd)
+{
+    strncpy(lastsymbol, cmd, sizeof(lastsymbol) - 1);
+    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     tt->add_cmd(cmd);
     current_cmd = cmd;
     free(cmd);
     cmd_list.clear();
 }
 
-static void append_cmd(char *s) {
-    strncpy(lastsymbol, s, 255);
+static void
+append_cmd(char *s)
+{
+    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
+    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     cmd_list.push_back(string(s));
+
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("cmd_str now >");
-    list <string>::const_iterator i;
-    for (i = cmd_list.begin(); i!=cmd_list.end(); ++i) {	
-	printf("%s ", i->c_str());
+    list<string>::const_iterator iter;
+    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
+	printf("%s ", iter->c_str());
     }
-    printf("\n");	
-#endif
+    printf("\n");
+#endif /* DEBUG_TEMPLATE_PARSER */
+
     free(s);
 }
 
-static void prepend_cmd(char *s) {
-    strncpy(lastsymbol, s, 255);
+static void
+prepend_cmd(char *s)
+{
+    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
+    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+
     cmd_list.push_front(string(s));
+
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("cmd_str now >");
-    list <string>::const_iterator i;
-    for (i = cmd_list.begin(); i!=cmd_list.end(); ++i) {	
-	printf("%s ", i->c_str());
+    list<string>::const_iterator iter;
+    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
+	printf("%s ", iter->c_str());
     }
-    printf("\n");	
-#endif
+    printf("\n");
+#endif /* DEBUG_TEMPLATE_PARSER */
+
     free(s);
 }
 
-static void end_cmd() {
+static void
+end_cmd()
+{
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("end_cmd\n");
-#endif	
-    tt->add_cmd_action(current_cmd, cmd_list); 
+#endif
+
+    tt->add_cmd_action(current_cmd, cmd_list);
     cmd_list.clear();
 }
 
-int init_template_parser (const char *filename, TemplateTree *c) {
+int
+init_template_parser (const char *filename, TemplateTree *c)
+{
     tt = c;
     linenum = 1;
+
     tpltin = fopen(filename, "r");
     if (tpltin == NULL)
 	return -1;
+
     tplt_type = NODE_VOID;
     tplt_initializer = NULL;
     tplt_filename = filename;
     return 0;
 }
 
-int parse_template() {
+int
+parse_template()
+{
     tpltparse();
     return 0;
 }
-#line 386 "y.tplt_tab.c"
+#line 422 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -583,180 +619,190 @@ case 4:
 break;
 case 5:
 #line 47 "template.yy"
-{push_path();}
+{ push_path(); }
 break;
 case 6:
 #line 49 "template.yy"
 {
-                     extend_path(yyvsp[-1], true); extend_path(yyvsp[0], false);
-                  }
+			extend_path(yyvsp[-1], true);
+			extend_path(yyvsp[0], false);
+		}
 break;
 case 7:
-#line 52 "template.yy"
+#line 53 "template.yy"
 {
-			extend_path(yyvsp[-3], true); extend_path(yyvsp[-2], false);
-                  }
+			extend_path(yyvsp[-3], true);
+			extend_path(yyvsp[-2], false);
+		}
 break;
 case 8:
-#line 56 "template.yy"
+#line 58 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
 case 9:
-#line 57 "template.yy"
+#line 59 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
 case 11:
-#line 60 "template.yy"
-{ tplt_type = NODE_TEXT;}
+#line 62 "template.yy"
+{ tplt_type = NODE_TEXT; }
 break;
 case 12:
-#line 61 "template.yy"
-{ tplt_type = NODE_UINT;}
+#line 63 "template.yy"
+{ tplt_type = NODE_UINT; }
 break;
 case 13:
-#line 62 "template.yy"
-{ tplt_type = NODE_INT;}
+#line 64 "template.yy"
+{ tplt_type = NODE_INT; }
 break;
 case 14:
-#line 63 "template.yy"
-{ tplt_type = NODE_BOOL;}
+#line 65 "template.yy"
+{ tplt_type = NODE_BOOL; }
 break;
 case 15:
-#line 64 "template.yy"
-{ tplt_type = NODE_TOGGLE;}
+#line 66 "template.yy"
+{ tplt_type = NODE_TOGGLE; }
 break;
 case 16:
-#line 65 "template.yy"
-{ tplt_type = NODE_IPV4;}
+#line 67 "template.yy"
+{ tplt_type = NODE_IPV4; }
 break;
 case 17:
-#line 66 "template.yy"
-{ tplt_type = NODE_IPV4PREFIX;}
+#line 68 "template.yy"
+{ tplt_type = NODE_IPV4PREFIX; }
 break;
 case 18:
-#line 67 "template.yy"
-{ tplt_type = NODE_IPV6;}
+#line 69 "template.yy"
+{ tplt_type = NODE_IPV6; }
 break;
 case 19:
-#line 68 "template.yy"
-{ tplt_type = NODE_IPV6PREFIX;}
+#line 70 "template.yy"
+{ tplt_type = NODE_IPV6PREFIX; }
 break;
 case 20:
-#line 69 "template.yy"
-{ tplt_type = NODE_MACADDR;}
+#line 71 "template.yy"
+{ tplt_type = NODE_MACADDR; }
 break;
 case 21:
-#line 71 "template.yy"
-{ tplt_type = NODE_TEXT;
-                                             tplt_initializer = yyvsp[0];}
+#line 73 "template.yy"
+{
+			tplt_type = NODE_TEXT;
+			tplt_initializer = yyvsp[0];
+		}
 break;
 case 22:
-#line 73 "template.yy"
-{ tplt_type = NODE_UINT;
-                                                tplt_initializer = yyvsp[0];}
+#line 77 "template.yy"
+{
+			tplt_type = NODE_UINT;
+			tplt_initializer = yyvsp[0];
+		}
 break;
 case 23:
-#line 75 "template.yy"
-{ tplt_type = NODE_BOOL; 
-                                                    tplt_initializer = yyvsp[0];}
+#line 81 "template.yy"
+{
+			tplt_type = NODE_BOOL;
+			tplt_initializer = yyvsp[0];
+		}
 break;
 case 24:
-#line 77 "template.yy"
-{ tplt_type = NODE_TOGGLE;
-                                                      tplt_initializer = yyvsp[0];}
+#line 85 "template.yy"
+{
+			tplt_type = NODE_TOGGLE;
+			tplt_initializer = yyvsp[0];
+		}
 break;
 case 25:
-#line 80 "template.yy"
+#line 90 "template.yy"
 { pop_path(); }
 break;
 case 33:
-#line 89 "template.yy"
-{terminal(yyvsp[-3]); }
+#line 99 "template.yy"
+{ terminal(yyvsp[-3]); }
 break;
 case 34:
-#line 91 "template.yy"
-{terminal(yyvsp[-3]); }
+#line 101 "template.yy"
+{ terminal(yyvsp[-3]); }
 break;
 case 39:
-#line 100 "template.yy"
-{ add_cmd(yyvsp[0]);}
+#line 110 "template.yy"
+{ add_cmd(yyvsp[0]); }
 break;
 case 42:
-#line 105 "template.yy"
-{  
-                     prepend_cmd(yyvsp[-1]); 
-		     end_cmd();
-                  }
+#line 115 "template.yy"
+{
+			prepend_cmd(yyvsp[-1]);
+			end_cmd();
+		}
 break;
 case 43:
-#line 109 "template.yy"
-{  
-                     append_cmd(yyvsp[-3]); 
-		     append_cmd(yyvsp[-2]);
-		     append_cmd(strdup("return"));
-		     append_cmd(yyvsp[0]);
-                     end_cmd();  
-                  }
+#line 119 "template.yy"
+{
+			append_cmd(yyvsp[-3]);
+			append_cmd(yyvsp[-2]);
+			append_cmd(strdup("return"));
+			append_cmd(yyvsp[0]);
+			end_cmd();
+		}
 break;
 case 44:
-#line 116 "template.yy"
-{  /* eg: set FOOBAR ipv4 */
-                     append_cmd(yyvsp[-2]); 
-		     append_cmd(yyvsp[-1]);
-		     append_cmd(yyvsp[0]);
-                     end_cmd();  
-                  }
+#line 126 "template.yy"
+{ /* eg: set FOOBAR ipv4 */
+			append_cmd(yyvsp[-2]);
+			append_cmd(yyvsp[-1]);
+			append_cmd(yyvsp[0]);
+			end_cmd();
+		}
 break;
 case 45:
-#line 122 "template.yy"
-{ 
-                     append_cmd(yyvsp[-1]);
-                     append_cmd(yyvsp[0]);
-                     end_cmd();  
-                  }
+#line 132 "template.yy"
+{
+			append_cmd(yyvsp[-1]);
+			append_cmd(yyvsp[0]);
+			end_cmd();
+		}
 break;
 case 46:
-#line 127 "template.yy"
-{ 
-                     append_cmd(yyvsp[-2]);
-                     append_cmd(yyvsp[-1]);
-                     append_cmd(yyvsp[0]);
-                     end_cmd();  
-                  }
+#line 137 "template.yy"
+{
+			append_cmd(yyvsp[-2]);
+			append_cmd(yyvsp[-1]);
+			append_cmd(yyvsp[0]);
+			end_cmd();
+		}
 break;
 case 47:
-#line 133 "template.yy"
-{ 
-                     append_cmd(yyvsp[0]);
-                     end_cmd();  
-                  }
+#line 143 "template.yy"
+{
+			append_cmd(yyvsp[0]);
+			end_cmd();
+		}
 break;
 case 48:
-#line 137 "template.yy"
-{ 
-                     prepend_cmd(yyvsp[-1]);
-		     end_cmd();
-                  }
+#line 147 "template.yy"
+{
+			prepend_cmd(yyvsp[-1]);
+			end_cmd();
+		}
 break;
 case 49:
-#line 141 "template.yy"
+#line 151 "template.yy"
 {
-                     append_cmd(yyvsp[0]);
+			append_cmd(yyvsp[0]);
 		}
 break;
 case 50:
-#line 146 "template.yy"
+#line 156 "template.yy"
 {
-		     prepend_cmd(yyvsp[0]);  
-		  }
+			prepend_cmd(yyvsp[0]);
+		}
 break;
 case 51:
-#line 149 "template.yy"
+#line 159 "template.yy"
 {
-		     prepend_cmd(yyvsp[-1]);  
-		  }
+			prepend_cmd(yyvsp[-1]);
+		}
 break;
-#line 760 "y.tplt_tab.c"
+#line 806 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
