@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.13 2004/06/15 19:17:19 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.14 2004/06/22 01:28:25 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -31,6 +31,9 @@ For testing and debugging purposes, MLD/IGMP can be started manually.  The
 XORP MLD6/IGMP process assumes that the XRL finder and the MFEA
 are running. However, the binary program ``test_mld6igmp'' already contains
 them, therefore it is sufficient to start only ``test_mld6igmp'' (as a root).
+[Note that running ``gmake'' at the top-level would not compile the
+``test_mld6igmp'' binary. You have to run ``gmake check'' within the
+``mld6igmp'' directory to compile it.]
 
 First, make sure that IP forwarding is enabled.
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):

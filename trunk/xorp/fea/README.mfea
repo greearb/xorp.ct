@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.14 2004/06/22 01:28:25 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.15 2004/07/09 05:22:26 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -61,6 +61,9 @@ For testing and debugging purposes, MFEA can be started manually.  The
 XORP MFEA module (as part of the FEA process) assumes that the XRL finder
 is running.  However, the binary program ``test_mfea'' already contains it,
 therefore it is sufficient to start only ``test_mfea'' (as a root).
+[Note that running ``gmake'' at the top-level would not compile the
+``test_mfea'' binary. You have to run ``gmake check'' within the
+``fea'' directory to compile it.]
 
 First, make sure that IP forwarding is enabled.
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
