@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall.hh,v 1.1 2004/08/31 17:43:39 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -101,7 +101,7 @@ public:
 	}
 
 	/* XXX: Firewall action as enum? */
-	static inline const string& action_to_str(Action a) const {
+	static inline const string& action_to_str(const Action a) {
 		switch (a) {
 		case ACTION_PASS:
 			return ("pass");
@@ -136,8 +136,10 @@ typedef FwRule<IPvXNet> FwRuleX;
 
 /**************************************************************************/
 
-typedef vector<FwRule4> FwTable4;
-typedef vector<FwRule4> FwTable6;
+typedef vector<FwRule4 *> FwTable4;
+typedef vector<FwRule6 *> FwTable6;
+
+class FwProvider;
 
 /**
  * @short Firewall manager.
@@ -149,8 +151,9 @@ public:
 	FirewallManager() {}
 	virtual ~FirewallManager() {}
 
-	FwTable4& get_fwtable4() const { return _fwtable4; }
-	FwTable6& get_fwtable6() const { return _fwtable6; }
+	// XXX: const-ness?
+	FwTable4& get_fwtable4() { return _fwtable4; }
+	FwTable6& get_fwtable6() { return _fwtable6; }
 
 private:
 	// XRL interface instance. XXX
@@ -158,7 +161,7 @@ private:
 
 	// Underlying firewall provider interface in use, or NULL
 	// if one hasn't been set up yet.
-	FirewallProvider*	_fwp;
+	FwProvider*	_fwp;
 
 	//
 	// XORP's idea of the firewall rule tables. There are two
@@ -183,7 +186,8 @@ class InvalidFwProviderCmd {};
 class FwProvider {
 public:
 	FwProvider(FirewallManager& m)
-	    throw(InvalidFwProvider) = 0;
+	    throw(InvalidFwProvider)
+	    : _m(m) { throw InvalidFwProvider(); }
 	virtual ~FwProvider() = 0;
 
 	/* General provider interface */
@@ -193,14 +197,14 @@ public:
 	virtual const string& get_provider_version() const = 0;
 
 	/* IPv4 firewall provider interface */
-	virtual int add_rule4(FwRule& rule) = 0;
-	virtual int delete_rule4(FwRule& rule) = 0;
+	virtual int add_rule4(FwRule4& rule) = 0;
+	virtual int delete_rule4(FwRule4& rule) = 0;
 	virtual uint32_t get_num_xorp_rules4() const = 0;
 	virtual uint32_t get_num_system_rules4() const = 0;
 
 	/* IPv6 firewall provider interface */
-	virtual int add_rule6(FwRule& rule) = 0;
-	virtual int delete_rule6(FwRule& rule) = 0;
+	virtual int add_rule6(FwRule6& rule) = 0;
+	virtual int delete_rule6(FwRule6& rule) = 0;
 	virtual uint32_t get_num_xorp_rules6() const = 0;
 	virtual uint32_t get_num_system_rules6() const = 0;
 
