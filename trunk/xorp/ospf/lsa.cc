@@ -292,7 +292,7 @@ RouterLink::decode(uint8_t *ptr, size_t& len) throw(BadPacket)
 	// XXX - This LSA may be carrying more metric info for other
 	// TOS. We are going to ignore them.
 	tos_number = ptr[9];
-	if (0 == tos_number)
+	if (0 != tos_number)
 	    XLOG_INFO("Non zero number of TOS %u", tos_number);
 	break;
     case OspfTypes::V3:
