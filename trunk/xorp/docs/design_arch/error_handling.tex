@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.17 2003/04/16 00:25:22 jcardona Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.18 2003/04/16 19:31:36 kohler Exp $
 %
 
 \documentclass[11pt]{article}
@@ -57,20 +57,20 @@ the FEA and hence to the forwarding engine's Forwarding Information
 Base (FIB). If the RIB process fails then BGP would lose the ability
 to manipulate the FIB, and forwarding would not match the BGP routing
 table.  Thus BGP should withdraw all routes that it told its peers, or
-more catastrophically it might drop all peerings until the RIB has
+alternatively it might drop all peerings until the RIB has
 successfully restarted.
 
-A critical component if the system is the router manager process
+A critical component of the system is the router manager process
 (\rtrmgr) which is responsible for starting and stopping routing
-processes. When a process is started by the \rtrmgr or dies, that
+processes. When a xorp process starts or terminates, that
 process's XRL client library ensures that the \finder is notified. If
 a process has an interest in the status of another process it can
 register interest with the \finder.
 
-In any complex system such as a \xorp router errors can occur. These
+In a \xorp router, as with any complex system, errors can occur. These
 errors can range from a \xorp process simply failing, to an attempt to
 install a route into the forwarding engine that already exists. Errors
-will occur and need to be dealt with in a consistent manner. The types
+need to be dealt with in a consistent manner. The types
 of error that may occur are categorised below.
 
 The first type of error is {\em Process failure}.
@@ -81,12 +81,13 @@ was the recipient of the \xrl may have failed or be slow to respond.
 The message that was being sent may have been lost in transit.
 
 The third type of error, {\em Execution Error}, is when an XRL call
-returns an error due to some underlying interaction failure. The most
-fundamental example of this type of error is a route add failing. The
-attempt to add a route may fail for many reasons. The route may
-already be present or a different route may be installed. The error
-may occur due to a bug in the router code or because routing state has
-been manipulated by non \xorp processes.
+returns an error due to some underlying interaction failure. A simple
+example of this type of error is a route add failing. The attempt to
+add a route may fail for many reasons. The identical route may already
+be present or a different route may be installed. The error may occur
+due to a bug in the router code, because routing state has been
+manipulated by non \xorp processes, or due to resource starvation in
+the forwarding engine.
 
 The fourth type of error, {\em Type Error}, is when an XRL call fails
 because the arguments passed to an XRL are invalid. This error will
@@ -107,10 +108,14 @@ process. One of the functions of this component is to start/re-start
 processes. If process A is dependent on the status (alive, dead,
 restarted) of process B, then process A registers this interest with
 the \finder. This dependency on the \rtrmgr/\finder for managing and
-monitoring process state means that a \xorp router cannot survive the
-failure of this process. A \xorp process that detects the loss of the
-\finder must exit. There is one exception to this rule, the \xorpsh
-process, that will be discussed later in section \ref{xorpsh}.
+monitoring process liveness state means that a \xorp router cannot
+survive the failure of this process. If we attempted to survive a
+\finder restart, it is conceivable that, in the same time window,
+another monitored process could restart, in which case the restarting
+of the monitored process could be missed by the \finder. To guard
+against this possible race, a \xorp process that detects the loss of
+the \finder must exit. There is one exception to this rule, the
+\xorpsh process, that will be discussed later in section \ref{xorpsh}.
 
 Each process in a \xorp router is described with how it should behave
 when another process in the system fails. Processes can explicitly
@@ -118,25 +123,19 @@ register interest in the status of other processes through the
 \finder. If process A is dependent on the state of process B then
 process A must register interest in process B.
 
-The only mechanism that a process should use to determine another
-process's failure is notification from the \finder.
-
-It is conceivable that the \finder could restart and, in the same time
-window, another monitored process could restart, in which case the
-restarting of the monitored process could be missed. To guard against
-this possible race, if the \finder fails or restarts, all processes
-should exit. The assumption is that the \finder failing is a very low
-probability event.
-
 \subsection{Implementing process failure detection}
 
 The \finder process will send keepalive messages to all processes at
 thirty second intervals. If a process does not respond to a keepalive
 it is considered dead. The keepalive messages are sent over a reliable
 transport such as TCP. A process dying should therefore be easy to
-detect. The \rtrmgr, if it detects that a process has died, will send a
-hint to the \finder, which will immediately try and send a keepalive.
-Again if the process has died it should be easy to detect.
+detect. 
+
+The \rtrmgr might also be able to detect that a process has died (but
+not if it is simply not responding), as it will normally receive a
+SIGCHILD signal.  On discovering a process has died, the \rtrmgr will
+send a hint to the \finder, which will immediately try and send a
+keepalive.  Again if the process has died it should be easy to detect.
 
 If a process is not responding to keepalives but it is still alive, it
 will be marked as dead and all interested processes will be notified.
@@ -206,10 +205,10 @@ attempt to restart the process.
 
 The FEA primarily accepts routes from the RIB and places them in the
 kernel. The FEA should tag all routes that it has installed in the
-kernel. The FEA on restart should remove all routes that a previous
+kernel.  On restart, the FEA should remove all routes that a previous
 incarnation of the FEA has placed in the kernel. When an FEA is
-exiting it should attempt to remove all routes that it has installed in
-the kernel.
+exiting it should attempt to remove all routes that it has installed
+in the kernel.
 
 The FEA process should register interest in the RIB. If the RIB fails
 the FEA should withdraw all routes that the RIB has sent to it.
@@ -221,19 +220,20 @@ that the MFEA and FEA are currently being merged.
 
 Similar to the FEA, on restart or exit the MFEA should remove all
 multicast forwarding entries that were installed in the kernel. Note
-that the MFEA does not contain copy of the multicast forwarding entries
-that were installed in the kernel, therefore it should utilize a
-mechanism that removes all multicast forwarding entries at once. E.g, in
+that the MFEA does not contain a copy of the multicast forwarding entries
+that were installed in the kernel, so it should utilize a
+mechanism that removes all multicast forwarding entries at once.  In
 case of UNIX-based systems, closing the multicast routing socket will
 automatically remove all entries.
 
-If the multicast routing process that has installed the
-multicast forwarding entries exits, then the MFEA should remove all
-multicast forwarding entries from the kernel. Currently, PIM is the only
-multicast routing process. In the future, XORP multicast routing
+If the multicast routing process that has installed the multicast
+forwarding entries exits, then the MFEA should remove all multicast
+forwarding entries from the kernel. Currently, PIM is the only
+multicast routing process. In the future, the XORP multicast routing
 architecture may contain a special coordinator among all multicast
-routing protocol instances. If that coordinator exits, the MFEA should
-remove all multicast forwarding entries from the kernel.
+routing protocol instances, analogous to the function of the unicast
+RIB process. If that coordinator exits, the MFEA should remove all
+multicast forwarding entries from the kernel.
 
 \subsubsection{RIB - Routing Information Base}
 
@@ -457,7 +457,7 @@ A XORP router is partitioned into many processes; most of the operating
 system specific interactions are performed by the FEA. In a router the
 most frequent operation will be the adding and deleting of routes.
 Consider BGP adding a route. First the BGP process will send the route
-to the RIB, then the route may be sent to FEA. If the addition of the
+to the RIB, then the route may be sent to the FEA. If the addition of the
 route from the RIB to the FEA fails, then there is no way of
 propagating this failure back to the BGP process due to the
 asynchronous nature of XRLs. If adding/deleting a route fails a very
