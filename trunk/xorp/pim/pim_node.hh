@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.10 2003/03/27 00:19:03 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.11 2003/04/22 23:27:24 hodson Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -308,9 +308,9 @@ public:
      * Currently, the type of messages received from the kernel are:
      * 
 <pre>
-#define MFEA_UNIX_KERNEL_MESSAGE_NOCACHE        1
-#define MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF       2
-#define MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT       3
+#define MFEA_KERNEL_MESSAGE_NOCACHE        1
+#define MFEA_KERNEL_MESSAGE_WRONGVIF       2
+#define MFEA_KERNEL_MESSAGE_WHOLEPKT       3
 </pre>
      * 
      * 

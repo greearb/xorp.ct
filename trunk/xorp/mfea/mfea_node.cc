@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.9 2003/04/23 00:52:50 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.10 2003/04/23 09:39:18 pavlin Exp $"
 
 
 //
@@ -1026,7 +1026,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
     //
     // If it is a bandwidth upcall message, parse it now
     //
-    if (message_type == MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL) {
+    if (message_type == MFEA_KERNEL_MESSAGE_BW_UPCALL) {
 	//
 	// XXX: do we need to check if the kernel supports the
 	// bandwidth-upcall mechanism?

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.6 2003/03/27 00:19:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.7 2003/04/22 23:27:24 hodson Exp $"
 
 
 //
@@ -772,9 +772,9 @@ PimNode::pim_send(uint16_t vif_index,
  * @src_module_id: The #xorp_module_id of the module-origin of the message.
  * @message_type: The message type of the kernel signal.
  * At this moment, one of the following:
- * %MFEA_UNIX_KERNEL_MESSAGE_NOCACHE (if a cache-miss in the kernel)
- * %MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF (multicast packet received on wrong vif)
- * %MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT (typically, a packet that should be
+ * %MFEA_KERNEL_MESSAGE_NOCACHE (if a cache-miss in the kernel)
+ * %MFEA_KERNEL_MESSAGE_WRONGVIF (multicast packet received on wrong vif)
+ * %MFEA_KERNEL_MESSAGE_WHOLEPKT (typically, a packet that should be
  * encapsulated as a PIM-Register).
  * @vif_index: The vif index of the related interface (message-specific
  * relation).
@@ -800,7 +800,7 @@ PimNode::signal_message_recv(const string& src_module_instance_name,
     int ret_value = XORP_ERROR;
     
     do {
-	if (message_type == MFEA_UNIX_KERNEL_MESSAGE_NOCACHE) {
+	if (message_type == MFEA_KERNEL_MESSAGE_NOCACHE) {
 	    ret_value = pim_mrt().signal_message_nocache_recv(
 		src_module_instance_name,
 		src_module_id,
@@ -809,7 +809,7 @@ PimNode::signal_message_recv(const string& src_module_instance_name,
 		dst);
 	    break;
 	}
-	if (message_type == MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF) {
+	if (message_type == MFEA_KERNEL_MESSAGE_WRONGVIF) {
 	    ret_value = pim_mrt().signal_message_wrongvif_recv(
 		src_module_instance_name,
 		src_module_id,
@@ -818,7 +818,7 @@ PimNode::signal_message_recv(const string& src_module_instance_name,
 		dst);
 	    break;
 	}
-	if (message_type == MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT) {
+	if (message_type == MFEA_KERNEL_MESSAGE_WHOLEPKT) {
 	    ret_value = pim_mrt().signal_message_wholepkt_recv(
 		src_module_instance_name,
 		src_module_id,

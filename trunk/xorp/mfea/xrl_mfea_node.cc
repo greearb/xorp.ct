@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.13 2003/05/07 23:15:15 mjh Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.14 2003/05/08 00:01:34 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -226,11 +226,11 @@ XrlMfeaNode::xrl_result_recv_protocol_message(const XrlError& xrl_error)
  * message.
  * @message_type: The message type of the kernel signal.
  * At this moment, one of the following:
- * %MFEA_UNIX_KERNEL_MESSAGE_NOCACHE (if a cache-miss in the kernel)
- * %MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF (multicast packet received on wrong vif)
- * %MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT (typically, a packet that should be
+ * %MFEA_KERNEL_MESSAGE_NOCACHE (if a cache-miss in the kernel)
+ * %MFEA_KERNEL_MESSAGE_WRONGVIF (multicast packet received on wrong vif)
+ * %MFEA_KERNEL_MESSAGE_WHOLEPKT (typically, a packet that should be
  * encapsulated as a PIM-Register).
- * %MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL (the bandwidth of a predefined
+ * %MFEA_KERNEL_MESSAGE_BW_UPCALL (the bandwidth of a predefined
  * source-group flow is above or below a given threshold).
  * (XXX: The above types correspond to %IGMPMSG_* or %MRT6MSG_*).
  * @vif_index: The vif index of the related interface (message-specific

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_kernel_messages.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+// $XORP: xorp/mfea/mfea_unix_kernel_messages.hh,v 1.2 2003/03/10 23:20:40 hodson Exp $
 
 #ifndef __MFEA_MFEA_UNIX_KERNEL_MESSAGES_HH__
 #define __MFEA_MFEA_UNIX_KERNEL_MESSAGES_HH__
@@ -33,16 +33,16 @@
 //
 // The types of the kernel multicast signal messages
 // 
-// Note that MFEA_UNIX_KERNEL_MESSAGE_BW_UPCAL is not sent by the
+// Note that MFEA_KERNEL_MESSAGE_BW_UPCAL is not sent by the
 // Mfea to the protocol instances, because it is not always supported
 // by the kernel. For this reason the Mfea implements an user-level
 // work-around mechanism, and it uses specific methods to propagate
 // this information to the protocol instances.
 // 
-#define MFEA_UNIX_KERNEL_MESSAGE_NOCACHE	1
-#define MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF	2
-#define MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT	3
-#define MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL	4
+#define MFEA_KERNEL_MESSAGE_NOCACHE	1
+#define MFEA_KERNEL_MESSAGE_WRONGVIF	2
+#define MFEA_KERNEL_MESSAGE_WHOLEPKT	3
+#define MFEA_KERNEL_MESSAGE_BW_UPCALL	4
 
 
 //

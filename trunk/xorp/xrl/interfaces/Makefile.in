@@ -125,7 +125,7 @@ libtestxif_a_SOURCES = test_xif.hh test_xif.cc
 INCLUDES = -I$(top_srcdir)
 
 ###############################################################################
-# Implicit Rules
+# Static Pattern Rules
 ###############################################################################
 
 SCRIPT_DIR = $(top_srcdir)/xrl/scripts

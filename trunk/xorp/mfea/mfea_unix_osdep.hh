@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.4 2003/04/10 03:12:03 pavlin Exp $
+// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.5 2003/04/16 15:54:42 pavlin Exp $
 
 #ifndef __MFEA_MFEA_UNIX_OSDEP_HH__
 #define __MFEA_MFEA_UNIX_OSDEP_HH__
@@ -246,7 +246,7 @@ do {									\
 //          (IGMPMSG_WRONGVIF == MRT6MSG_WRONGMIF)
 //          (IGMPMSG_WHOLEPKT == MRT6MSG_WHOLEPKT)
 //          (IGMPMSG_BW_UPCALL == MRT6MSG_BW_UPCALL)
-// Also, check if MFEA_UNIX_KERNEL_MESSAGE_NOCACHE/WRONGVIF/WHOLEPKT/BW_UPCALL
+// Also, check if MFEA_KERNEL_MESSAGE_NOCACHE/WRONGVIF/WHOLEPKT/BW_UPCALL
 // were defined accurately.
 // TODO: Yes, I know this is a very, very bad style, but I wanted to have
 // abstract kernel signal types, and I didn't want the upper layer
@@ -276,27 +276,27 @@ do {									\
 
 #endif // HAVE_IPV6
 
-#if IGMPMSG_NOCACHE != MFEA_UNIX_KERNEL_MESSAGE_NOCACHE
-#  error "MFEA message handling needs fix, because IGMPMSG_NOCACHE != MFEA_UNIX_KERNEL_MESSAGE_NOCACHE"
+#if IGMPMSG_NOCACHE != MFEA_KERNEL_MESSAGE_NOCACHE
+#  error "MFEA message handling needs fix, because IGMPMSG_NOCACHE != MFEA_KERNEL_MESSAGE_NOCACHE"
 #endif
 
-#if IGMPMSG_WRONGVIF != MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF
-#  error "MFEA message handling needs fix, because IGMPMSG_WRONGVIF != MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF"
+#if IGMPMSG_WRONGVIF != MFEA_KERNEL_MESSAGE_WRONGVIF
+#  error "MFEA message handling needs fix, because IGMPMSG_WRONGVIF != MFEA_KERNEL_MESSAGE_WRONGVIF"
 #endif
 
-#if IGMPMSG_WHOLEPKT != MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT
-#  error "MFEA message handling needs fix, because IGMPMSG_WHOLEPKT != MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT"
+#if IGMPMSG_WHOLEPKT != MFEA_KERNEL_MESSAGE_WHOLEPKT
+#  error "MFEA message handling needs fix, because IGMPMSG_WHOLEPKT != MFEA_KERNEL_MESSAGE_WHOLEPKT"
 #endif
 
 #if defined(IGMPMSG_BW_UPCALL)
-#if IGMPMSG_BW_UPCALL != MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL
-#  error "MFEA message handling needs fix, because IGMPMSG_BW_UPCALL != MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL"
+#if IGMPMSG_BW_UPCALL != MFEA_KERNEL_MESSAGE_BW_UPCALL
+#  error "MFEA message handling needs fix, because IGMPMSG_BW_UPCALL != MFEA_KERNEL_MESSAGE_BW_UPCALL"
 #endif
 #endif
 
 #if defined(MRT6MSG_BW_UPCALL)
-#if MRT6MSG_BW_UPCALL != MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL
-#  error "MFEA message handling needs fix, because MRT6MSG_BW_UPCALL != MFEA_UNIX_KERNEL_MESSAGE_BW_UPCALL"
+#if MRT6MSG_BW_UPCALL != MFEA_KERNEL_MESSAGE_BW_UPCALL
+#  error "MFEA message handling needs fix, because MRT6MSG_BW_UPCALL != MFEA_KERNEL_MESSAGE_BW_UPCALL"
 #endif
 #endif
 

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.30 2003/04/08 19:35:11 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.31 2003/05/13 21:39:44 pavlin Exp $
 #
 
 * BSR SPEC+IMPL+TESTSUITE:
@@ -669,7 +669,7 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   Also, make sure that such entry is removed appopriately if the
   Assert state expires.
 
-* IMPL: find a solution for the MFEA_UNIX_KERNEL_MESSAGE_* values
+* IMPL: find a solution for the MFEA_KERNEL_MESSAGE_* values
   so inside pim_node.cc we don't need to include
   "mfea/mfea_unix_kernel_messages.hh"
 

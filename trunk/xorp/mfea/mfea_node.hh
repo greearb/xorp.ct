@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.6 2003/03/31 03:45:20 pavlin Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.7 2003/04/22 23:27:20 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -223,9 +223,9 @@ public:
      * and forwarded to the protocol instances are:
      * 
 <pre>
-#define MFEA_UNIX_KERNEL_MESSAGE_NOCACHE        1
-#define MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF       2
-#define MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT       3
+#define MFEA_KERNEL_MESSAGE_NOCACHE        1
+#define MFEA_KERNEL_MESSAGE_WRONGVIF       2
+#define MFEA_KERNEL_MESSAGE_WHOLEPKT       3
 </pre>
      * 
      * @param module_instance_name the module instance name of the protocol
@@ -247,9 +247,9 @@ public:
      * and forwarded to the protocol instances are:
      * 
 <pre>
-#define MFEA_UNIX_KERNEL_MESSAGE_NOCACHE        1
-#define MFEA_UNIX_KERNEL_MESSAGE_WRONGVIF       2
-#define MFEA_UNIX_KERNEL_MESSAGE_WHOLEPKT       3
+#define MFEA_KERNEL_MESSAGE_NOCACHE        1
+#define MFEA_KERNEL_MESSAGE_WRONGVIF       2
+#define MFEA_KERNEL_MESSAGE_WHOLEPKT       3
 </pre>
      * 
      * @param module_instance_name the module instance name of the protocol
