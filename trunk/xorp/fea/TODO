@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.23 2004/11/05 03:23:09 bms Exp $
+# $XORP: xorp/fea/TODO,v 1.24 2004/11/11 07:45:25 bms Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -60,8 +60,6 @@
   click.hh click_glue.hh fti_click.hh ifconfig_click.hh
   click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
   Refactor them?
-
-* Fix spleling mistakes in xrl_target.[ch][ch].
 
 * Parse and pass up Linux RTN_UNREACHABLE messages using the new resolve
   upcall mechanism.
