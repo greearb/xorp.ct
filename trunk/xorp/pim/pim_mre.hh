@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.31 2003/07/12 01:14:37 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.32 2004/02/22 03:32:58 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -83,8 +83,9 @@ enum {
     PIM_MRE_I_AM_RP		 = 1 << 19,  // I am the RP for the group
     PIM_MRE_KEEPALIVE_TIMER_IS_SET = 1 << 20,// The (S,G) KeepaliveTimer is
 					     // running
-    PIM_MRE_TASK_DELETE_PENDING	= 1 << 21,    // Entry is pending deletion
-    PIM_MRE_TASK_DELETE_DONE	= 1 << 22    // Entry is ready to be deleted
+    PIM_MRE_TASK_DELETE_PENDING	= 1 << 21,   // Entry is pending deletion
+    PIM_MRE_TASK_DELETE_DONE	= 1 << 22,   // Entry is ready to be deleted
+    PIM_MRE_SWITCH_TO_SPT_DESIRED = 1 << 23  // SwitchToSptDesired(S,G) is true
 };
 
 
@@ -768,6 +769,8 @@ public:
 				       PimMre*& pim_mre_sg,
 				       uint32_t measured_interval_sec,
 				       uint32_t measured_bytes);
+    // Note: applies only for (S,G)
+    void	set_switch_to_spt_desired_sg(bool v);
     
     
     //

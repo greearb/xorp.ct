@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.9 2003/07/12 01:14:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.10 2004/02/22 03:27:24 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -79,21 +79,23 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
     }
 }
 
+//
 // Return true if monitoring switch to SPT is desired, otherwise false.
 // Note: this implements part of the CheckSwitchToSpt(S,G) macro
 // (i.e., check_switch_to_spt_sg()).
 // Note: applies for all entries
 // Note: by spec definition it should apply only for (*,G), (S,G), (S,G,rpt),
 // but the RP-based SPT switch extends it for (*,*,RP) entries as well.
+//
 bool
 PimMre::is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const
 {
     Mifset mifs;
     
     //
-    // XXX: the RP-based SPT switch is not in the spec
+    // The RP-based SPT switch
     //
-    if (i_am_rp() && inherited_olist_sg().any())
+    if (i_am_rp())
 	return (true);
     
     //
@@ -123,6 +125,10 @@ PimMre::is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
     //
     // SPT-switch enabled
     //
+    
+    // Test if the switch was desired already
+    if (_flags & PIM_MRE_SWITCH_TO_SPT_DESIRED)
+	return (true);
     
     //
     // Test whether the number of forwarded bytes is equal or above
@@ -165,8 +171,22 @@ PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
 							   PIM_MRE_SG);
 	}
 	pim_mre_sg->start_keepalive_timer();
+	pim_mre_sg->set_switch_to_spt_desired_sg(true);
 	return (true);
     }
     
     return (false);
+}
+
+// Note: applies only for (S,G)
+void
+PimMre::set_switch_to_spt_desired_sg(bool v)
+{
+    if (! is_sg())
+	return;
+
+    if (v)
+	_flags |= PIM_MRE_SWITCH_TO_SPT_DESIRED;
+    else
+	_flags &= ~PIM_MRE_SWITCH_TO_SPT_DESIRED;
 }
