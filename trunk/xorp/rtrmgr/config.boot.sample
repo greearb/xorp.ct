@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.20 2004/12/17 06:03:18 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.21 2005/01/20 00:45:37 pavlin Exp $ */
 
 
 interfaces {
@@ -100,20 +100,20 @@ fea {
 protocols {
     static {
 	route4 10.20.0.0/16 {
-	    nexthop: 10.10.10.20
+	    next-hop: 10.10.10.20
 	    metric: 1
 	}
 	mrib-route4 10.20.0.0/16 {
-	    nexthop: 10.10.10.30
+	    next-hop: 10.10.10.30
 	    metric: 1
 	}
 /*
 	route6 20:20:20:20::/64 {
-	    nexthop: 10:10:10:10:10:10:10:20
+	    next-hop: 10:10:10:10:10:10:10:20
 	    metric: 1
 	}
 	mrib-route6 20:20:20:20::/64 {
-	    nexthop: 10:10:10:10:10:10:10:30
+	    next-hop: 10:10:10:10:10:10:10:30
 	    metric: 1
 	}
 */
