@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.12 2003/05/21 05:32:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.13 2003/05/29 21:17:15 mjh Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -726,8 +726,8 @@ XrlMld6igmpNode::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlMld6igmpNode::common_0_1_shutdown()
 {
-    //XXX placeholder only
-    exit(0);
+    // TODO: XXX: PAVPAVPAV: implement it!!
+    return XrlCmdError::COMMAND_FAILED("Not implemented yet");
 }
 
 XrlCmdError
@@ -911,25 +911,6 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
 	!= XORP_OK) {
 	string msg = c_format("Failed to set flags for vif %s: %s",
 			      vif_name.c_str(), err.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_set_vif_done(
-    // Input values, 
-    const string&	vif_name, 
-    const uint32_t&	vif_index)
-{
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
-    
-    if (mld6igmp_vif == NULL) {
-	string msg = c_format("Failed to complete setup for vif %s "
-			      "with vif_index = %d: "
-			      "no such vif",
-			      vif_name.c_str(), vif_index);
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     

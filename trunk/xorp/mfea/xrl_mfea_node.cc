@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.17 2003/05/21 05:32:52 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.18 2003/05/29 21:17:15 mjh Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -491,15 +491,6 @@ XrlMfeaNode::xrl_result_set_vif_flags(const XrlError& xrl_error)
 	return;
     }
 }
-void
-XrlMfeaNode::xrl_result_set_vif_done(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send set_vif_done to a protocol: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
 
 void
 XrlMfeaNode::xrl_result_set_all_vifs_done(const XrlError& xrl_error)
@@ -687,8 +678,8 @@ XrlMfeaNode::common_0_1_get_status(
 XrlCmdError
 XrlMfeaNode::common_0_1_shutdown()
 {
-    //XXX This is just a placeholder
-    exit(0);
+    // TODO: XXX: PAVPAVPAV: implement it!!
+    return XrlCmdError::COMMAND_FAILED("Not implemented yet");
 }
 
 XrlCmdError
@@ -797,11 +788,6 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    mfea_vif->is_broadcast_capable(),
 	    mfea_vif->is_up(),
 	    callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
-	XrlMfeaClientV0p1Client::send_set_vif_done(
-	    xrl_sender_name.c_str(),
-	    mfea_vif->name(),
-	    mfea_vif->vif_index(),
-	    callback(this, &XrlMfeaNode::xrl_result_set_vif_done));
     }
     
     // We are done with the vifs
@@ -898,11 +884,6 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    mfea_vif->is_broadcast_capable(),
 	    mfea_vif->is_up(),
 	    callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
-	XrlMfeaClientV0p1Client::send_set_vif_done(
-	    xrl_sender_name.c_str(),
-	    mfea_vif->name(),
-	    mfea_vif->vif_index(),
-	    callback(this, &XrlMfeaNode::xrl_result_set_vif_done));
     }
     
     // We are done with the vifs

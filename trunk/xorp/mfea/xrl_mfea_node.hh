@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.13 2003/05/18 03:19:57 pavlin Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.14 2003/05/29 21:17:15 mjh Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -124,7 +124,6 @@ protected:
     void xrl_result_add_vif_addr(const XrlError& xrl_error);
     void xrl_result_delete_vif_addr(const XrlError& xrl_error);
     void xrl_result_set_vif_flags(const XrlError& xrl_error);
-    void xrl_result_set_vif_done(const XrlError& xrl_error);
     void xrl_result_set_all_vifs_done(const XrlError& xrl_error);
     
     int dataflow_signal_send(const string& dst_module_instance_name,

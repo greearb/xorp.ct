@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.14 2003/05/07 23:15:15 mjh Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.15 2003/05/29 21:17:16 mjh Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -300,18 +300,6 @@ protected:
 	const bool&	is_multicast, 
 	const bool&	is_broadcast, 
 	const bool&	is_up);
-
-    /**
-     *  Complete a transaction with vif information.
-     *  
-     *  @param vif_name the name of the vif.
-     *  
-     *  @param vif_index the index of the vif.
-     */
-    XrlCmdError mfea_client_0_1_set_vif_done(
-	// Input values, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
 
     /**
      *  Complete all transactions with vif information.
