@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.8 2004/06/17 05:33:37 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.9 2004/06/18 22:35:21 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -125,6 +125,21 @@
       error message:
         [ 2004/06/12 10:26:41  ERROR xorp_fea:444 MFEA +529 mfea_mrouter.cc
         start_mrt ] setsockopt(MRT_INIT, 1) failed: Operation not supported
+
+    - On Linux, if the unicast Reverse Path Forwarding information is
+      different from the multicast Reverse Path Forwarding information,
+      the Reverse Path Filtering should be disabled. E.g., as root:
+
+        echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+      OR
+        echo 0 > /proc/sys/net/ipv4/conf/eth0/rp_filter
+        echo 0 > /proc/sys/net/ipv4/conf/eth1/rp_filter
+        ...
+
+      Otherwise, the router will ignore packets if they don't arrive on
+      the reverse-path interface.
+      For more information about Reverse Path Filtering see
+      http://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.rpf.html
 
     - If a vif has been enabled with the startup configuration file,
       and then is disabled and enabled again via xorpsh, then
