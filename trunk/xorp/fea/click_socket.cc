@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.12 2004/12/08 01:41:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.13 2004/12/09 07:39:26 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -854,7 +854,7 @@ ClickSocket::write_config(const string& element, const string& handler,
 	    return (XORP_ERROR);
 	}
 	// XXX: we must close the socket before checking the result
-	close(fd);
+	int close_ret_value = close(fd);
 
 	//
 	// Check the command status
@@ -870,6 +870,21 @@ ClickSocket::write_config(const string& element, const string& handler,
 	}
 	if (error_bytes > 0) {
 	    error_msg = c_format("Kernel Click command error: %s", error_buf);
+	    return (XORP_ERROR);
+	}
+	if (close_ret_value < 0) {
+	    //
+	    // XXX: If the close() system call returned an error, this is
+	    // an indication that the write to the Click handler failed.
+	    //
+	    // Note that typically we should have caught any errors by
+	    // reading the "<click>/errors" handler, so the check for
+	    // the return value of close() is the last line of defense.
+	    //
+	    // The errno should be EINVAL, but we are liberal about this
+	    // additional check.
+	    //
+	    error_msg = c_format("Kernel Click command error: unknown");
 	    return (XORP_ERROR);
 	}
     }
