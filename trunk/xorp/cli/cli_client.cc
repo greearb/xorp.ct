@@ -95,15 +95,15 @@ CliClient::CliClient(CliNode& init_cli_node, int fd)
     _is_page_mode = false;
     
     _is_output_buffer_mode = false;
-    _output_buffer_last_line = 0;
+    _output_buffer_last_line_n = 0;
     
     _is_help_buffer_mode = false;
-    _help_buffer_last_line = 0;
+    _help_buffer_last_line_n = 0;
     _is_help_mode = false;
     
     _is_page_buffer_mode = &_is_output_buffer_mode;
     _page_buffer = &_output_buffer;
-    _page_buffer_last_line = &_output_buffer_last_line;
+    _page_buffer_last_line_n = &_output_buffer_last_line_n;
     
     
     //
@@ -472,6 +472,13 @@ CliClient::set_page_mode(bool v)
     }
 }
 
+const string&
+CliClient::page_buffer_line(size_t line_number) const
+{
+    XLOG_ASSERT(line_number < _page_buffer->size());
+    return ((*_page_buffer)[line_number]);
+}
+
 //
 // Print a message. If a terminal connection, add '\r' before each '\n'
 // (unless the previous character to print is indeed '\r').
@@ -542,7 +549,7 @@ CliClient::cli_print(const string& msg)
 		&& (! is_nomore_mode())) {
 		set_page_mode(true);
 	    } else {
-		incr_page_buffer_last_line();
+		incr_page_buffer_last_line_n();
 		output_string += pipe_line;
 	    }
 	    pipe_line = "";
@@ -615,7 +622,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	    set_help_mode(true);
 	    _is_page_buffer_mode = &_is_help_buffer_mode;
 	    _page_buffer = &_help_buffer;
-	    _page_buffer_last_line = &_help_buffer_last_line;
+	    _page_buffer_last_line_n = &_help_buffer_last_line_n;
 	    set_page_buffer_mode(true);
 #define CLI_HELP_STRING							\
 "                   SUMMARY OF MORE COMMANDS\n"				\
@@ -645,7 +652,7 @@ CliClient::process_char_page_mode(uint8_t val)
 "  q   Q   ^C  ^K    *  Interrupt the display of output.\n"		\
 "\n"
 
-	    cli_print(c_format("%s", CLI_HELP_STRING));
+	    cli_print(CLI_HELP_STRING);
 	    set_page_buffer_mode(false);
 	}
 	goto redisplay_screen_label;
@@ -670,9 +677,9 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == CHAR_TO_CTRL('m'))
 	|| (val == CHAR_TO_CTRL('n'))
 	|| (gl_get_user_event(gl()) == 2)) {
-	if (page_buffer_last_line() < page_buffer_lines_n()) {
-	    cli_print(c_format("%s", page_buffer()[page_buffer_last_line()].c_str()));
-	    incr_page_buffer_last_line();
+	if (page_buffer_last_line_n() < page_buffer_lines_n()) {
+	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
     }
@@ -685,11 +692,11 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == CHAR_TO_CTRL('d'))
 	|| (val == CHAR_TO_CTRL('x'))) {
 	for (size_t i = 0; i < window_height()/2; i++) {
-	    if (page_buffer_last_line() >= page_buffer_lines_n()) {
+	    if (page_buffer_last_line_n() >= page_buffer_lines_n()) {
 		break;
 	    }
-	    cli_print(c_format("%s", page_buffer()[page_buffer_last_line()].c_str()));
-	    incr_page_buffer_last_line();
+	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
     }
@@ -700,12 +707,11 @@ CliClient::process_char_page_mode(uint8_t val)
     if ((val == ' ')
 	|| (val == CHAR_TO_CTRL('f'))) {
 	for (size_t i = 0; i < window_height() - 1; i++) {
-	    if (page_buffer_last_line() >= page_buffer_lines_n()) {
+	    if (page_buffer_last_line_n() >= page_buffer_lines_n()) {
 		break;
 	    }
-	    const vector<string>& pb = page_buffer();
-	    cli_print(c_format("%s", pb[page_buffer_last_line()].c_str()));
-	    incr_page_buffer_last_line();
+	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
     }
@@ -715,12 +721,12 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'G')
 	|| (val == CHAR_TO_CTRL('e'))) {
-	if (page_buffer_last_line() + window_height() - 1
+	if (page_buffer_last_line_n() + window_height() - 1
 	    < page_buffer_lines_n())
-	    set_page_buffer_last_line(page_buffer_lines_n() - window_height() + 1);
-	while (page_buffer_last_line() < page_buffer_lines_n()) {
-	    cli_print(c_format("%s", page_buffer()[page_buffer_last_line()].c_str()));
-	    incr_page_buffer_last_line();
+	    set_page_buffer_last_line_n(page_buffer_lines_n() - window_height() + 1);
+	while (page_buffer_last_line_n() < page_buffer_lines_n()) {
+	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
     }
@@ -730,9 +736,9 @@ CliClient::process_char_page_mode(uint8_t val)
     // (Same as specifying the "| no-more" command.)
     //
     if ((val == 'N')) {
-	while (page_buffer_last_line() < page_buffer_lines_n()) {
-	    cli_print(c_format("%s", page_buffer()[page_buffer_last_line()].c_str()));
-	    incr_page_buffer_last_line();
+	while (page_buffer_last_line_n() < page_buffer_lines_n()) {
+	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    incr_page_buffer_last_line_n();
 	}
 	// TODO: do we want to exit the page mode at the end?
 	// If "yes", then the line below should be changed to
@@ -748,8 +754,8 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == CHAR_TO_CTRL('p'))
 	|| (gl_get_user_event(gl()) == 1)) {
 	// TODO: add the "up arrow" as well
-	if (page_buffer_last_line() > 0)
-	    decr_page_buffer_last_line();
+	if (page_buffer_last_line_n() > 0)
+	    decr_page_buffer_last_line_n();
 	goto redisplay_screen_label;
     }
     
@@ -758,11 +764,11 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'u')
 	|| (val == CHAR_TO_CTRL('u'))) {
-	if (page_buffer_last_line() > window_height() - 1 + window_height()/2)
-	    set_page_buffer_last_line(page_buffer_last_line() - window_height()/2);
+	if (page_buffer_last_line_n() > window_height() - 1 + window_height()/2)
+	    set_page_buffer_last_line_n(page_buffer_last_line_n() - window_height()/2);
 	else
-	    set_page_buffer_last_line(min(window_height() - 1,
-					  page_buffer_lines_n()));
+	    set_page_buffer_last_line_n(min(window_height() - 1,
+					    page_buffer_lines_n()));
 	goto redisplay_screen_label;
     }
     
@@ -771,11 +777,11 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'b')
 	|| (val == CHAR_TO_CTRL('b'))) {
-	if (page_buffer_last_line() > window_height() - 1 + window_height() - 1)
-	    set_page_buffer_last_line(page_buffer_last_line() - window_height() + 1);
+	if (page_buffer_last_line_n() > window_height() - 1 + window_height() - 1)
+	    set_page_buffer_last_line_n(page_buffer_last_line_n() - window_height() + 1);
 	else
-	    set_page_buffer_last_line(min(window_height() - 1,
-					  page_buffer_lines_n()));
+	    set_page_buffer_last_line_n(min(window_height() - 1,
+					    page_buffer_lines_n()));
 	goto redisplay_screen_label;
     }
     
@@ -785,8 +791,8 @@ CliClient::process_char_page_mode(uint8_t val)
     if ((val == 'g')
 	|| (val == CHAR_TO_CTRL('a'))) {
 	size_t start_window_line = 0;
-	set_page_buffer_last_line(min(start_window_line + window_height() - 1,
-				      page_buffer_lines_n()));
+	set_page_buffer_last_line_n(min(start_window_line + window_height() - 1,
+					page_buffer_lines_n()));
 	goto redisplay_screen_label;
     }
     
@@ -796,14 +802,14 @@ CliClient::process_char_page_mode(uint8_t val)
     if ((val == CHAR_TO_CTRL('l'))) {
     redisplay_screen_label:
 	size_t i, start_window_line = 0;
-	if (page_buffer_last_line() >= window_height() - 1)
-	    start_window_line = page_buffer_last_line() - window_height() + 1;
+	if (page_buffer_last_line_n() >= window_height() - 1)
+	    start_window_line = page_buffer_last_line_n() - window_height() + 1;
 	else
 	    start_window_line = 0;
-	set_page_buffer_last_line(min(start_window_line + window_height() - 1,
-				      page_buffer_lines_n()));
-	for (i = start_window_line; i < page_buffer_last_line(); i++)
-	    cli_print(c_format("%s", page_buffer()[i].c_str()));
+	set_page_buffer_last_line_n(min(start_window_line + window_height() - 1,
+					page_buffer_lines_n()));
+	for (i = start_window_line; i < page_buffer_last_line_n(); i++)
+	    cli_print(page_buffer_line(i));
 	// XXX: fill-up the rest of the window
 	for ( ; i < window_height() - 1; i++)
 	    cli_print("\n");
@@ -826,7 +832,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	set_help_mode(false);
 	_is_page_buffer_mode = &_is_output_buffer_mode;
 	_page_buffer = &_output_buffer;
-	_page_buffer_last_line = &_output_buffer_last_line;
+	_page_buffer_last_line_n = &_output_buffer_last_line_n;
 	goto redisplay_screen_label;
     }
     // FALLTHROUGH
@@ -834,7 +840,7 @@ CliClient::process_char_page_mode(uint8_t val)
  redisplay_line_label:
     cli_flush();
     if (is_page_mode()) {
-	if (page_buffer_last_line() < page_buffer_lines_n())
+	if (page_buffer_last_line_n() < page_buffer_lines_n())
 	    restore_cli_prompt = " --More-- ";
 	else
 	    restore_cli_prompt = " --More-- (END) ";
@@ -888,7 +894,7 @@ CliClient::post_process_command()
     //
     set_page_buffer_mode(false);
     if (is_page_mode()) {
-	if (page_buffer_last_line() < page_buffer_lines_n())
+	if (page_buffer_last_line_n() < page_buffer_lines_n())
 	    set_current_cli_prompt(" --More-- ");
 	else
 	    set_current_cli_prompt(" --More-- (END) ");
@@ -935,7 +941,7 @@ CliClient::process_char(const char *line, uint8_t val)
 	command_line_help(line, gl_buff_curpos);
 	//set_page_buffer_mode(false);
 	//if (is_page_mode()) {
-	//if (page_buffer_last_line() < page_buffer_lines_n())
+	//if (page_buffer_last_line_n() < page_buffer_lines_n())
 	//set_current_cli_prompt(" --More-- ");
 	//else
 	//set_current_cli_prompt(" --More-- (END) ");

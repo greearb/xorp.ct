@@ -365,13 +365,14 @@ private:
     bool	is_page_buffer_mode() { return (*_is_page_buffer_mode); }
     void	set_page_buffer_mode(bool v) { *_is_page_buffer_mode = v; }
     vector<string>& page_buffer() { return (*_page_buffer); }
-    void	reset_page_buffer() { page_buffer().clear(); set_page_buffer_last_line(0); }
+    const string& page_buffer_line(size_t line_number) const;
+    void	reset_page_buffer() { page_buffer().clear(); set_page_buffer_last_line_n(0); }
     size_t	page_buffer_lines_n() { return (page_buffer().size()); }
     void	add_page_buffer_line(const string& buffer_line);
-    size_t	page_buffer_last_line() { return (*_page_buffer_last_line); }
-    void	set_page_buffer_last_line(size_t v) { *_page_buffer_last_line = v; }
-    void	incr_page_buffer_last_line() { (*_page_buffer_last_line)++; }
-    void	decr_page_buffer_last_line() { (*_page_buffer_last_line)--; }
+    size_t	page_buffer_last_line_n() { return (*_page_buffer_last_line_n); }
+    void	set_page_buffer_last_line_n(size_t v) { *_page_buffer_last_line_n = v; }
+    void	incr_page_buffer_last_line_n() { (*_page_buffer_last_line_n)++; }
+    void	decr_page_buffer_last_line_n() { (*_page_buffer_last_line_n)--; }
     bool	is_help_mode() { return (_is_help_mode); }
     void	set_help_mode(bool v) { _is_help_mode = v; }
     bool	is_nomore_mode() { return (_is_nomore_mode); }
@@ -427,15 +428,15 @@ private:
     
     bool	*_is_page_buffer_mode;	// True if enabled page_buffer_mode
     vector<string> *_page_buffer;
-    size_t	*_page_buffer_last_line;
+    size_t	*_page_buffer_last_line_n;
     
     bool	_is_output_buffer_mode;	// True if enabled output_buffer_mode
     vector<string> _output_buffer;	// The output buffer: line per element
-    size_t	_output_buffer_last_line; // The current last (visable) line
+    size_t	_output_buffer_last_line_n; // The current last (visable) line
     
     bool	_is_help_buffer_mode;	// True if enabled help_buffer_mode
     vector<string> _help_buffer;	// The help buffer: line per element
-    size_t	_help_buffer_last_line;	// The current last (visable) line
+    size_t	_help_buffer_last_line_n; // The current last (visable) line
     bool	_is_help_mode;		// True if enabled help mode
     
     
