@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.4 2004/02/12 19:10:41 hodson Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.5 2004/02/14 00:28:22 hodson Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -25,6 +25,17 @@
 
 class XrlRouter;
 
+/**
+ * @short Class for managing RIP Ports and their transport systems.
+ *
+ * The XrlPortManager class instantiates RIP Port instances and their
+ * transport system.  The methods add_rip_address and
+ * remove_rip_address cause @ref Port objects and @ref XrlPortIO
+ * objects to be instantiated and destructed.
+ *
+ * The deliver_packet method forwards an arriving packet to the
+ * appropriate @ref XrlPortIO object.
+ */
 template <typename A>
 class XrlPortManager
     : public PortManagerBase<A>,
@@ -50,7 +61,7 @@ public:
     void startup();
 
     /**
-     * Request shutdown of instance..
+     * Request shutdown of instance.
      */
     void shutdown();
 
@@ -134,6 +145,16 @@ protected:
     void status_change(ServiceBase*	service,
 		       ServiceStatus	old_status,
 		       ServiceStatus 	new_status);
+
+    //
+    // Attempt to start next io handler.  Walk list of ports, check
+    // none are in state STARTING and call start on first found to be
+    // in state READY.
+    //
+    // We start 1 at a time to avoid races trying to create
+    // sockets with the fea.
+    //
+    void try_start_next_io_handler();
 
 private:
     XrlPortManager(const XrlPortManager&);		// not implemented

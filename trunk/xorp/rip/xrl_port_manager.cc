@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.7 2004/02/20 06:36:15 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.8 2004/02/24 22:46:08 hodson Exp $"
 
-#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
@@ -22,6 +22,8 @@
 #include "libxorp/debug.h"
 
 #include "libxipc/xrl_router.hh"
+
+#include "libfeaclient/ifmgr_atoms.hh"
 
 #include "port.hh"
 #include "xrl_port_manager.hh"
@@ -81,23 +83,110 @@ private:
 };
 
 /**
- * Unary function object to test whether a particular socket id is
- * associated with a RIP port.
+ * Unary function object to test whether a particular port's io
+ * system is in a given state.
+ */
+template <typename A>
+struct port_has_io_in_state {
+    inline port_has_io_in_state(ServiceStatus st) : _st(st) {}
+
+    bool operator() (const Port<A>* p) const
+    {
+	const PortIOBase<A>* 	io  = p->io_handler();
+	const XrlPortIO<A>* 	xio = dynamic_cast<const XrlPortIO<A>*>(io);
+	if (xio == 0)
+	    return false;
+	return xio->status() == _st;
+    }
+protected:
+    ServiceStatus _st;
+};
+
+/**
+ * Unary function object to test whether a particular RIP port is appropriate
+ * for packet arriving on socket.
  *
  * NB At a future date we might want to track socket id to XrlPortIO
  * mappings.  This would be more efficient.
  */
 template <typename A>
-struct port_has_sockid {
-    inline port_has_sockid(const string& sockid) : _id(sockid) {}
-    inline bool operator() (Port<A>*& p) {
-	PortIOBase<A>* io = p->io_handler();
-	XrlPortIO<A>* xio = dynamic_cast<XrlPortIO<A>*>(io);
-	return xio && xio->socket_id() == _id;
-    }
+struct is_port_for {
+    inline is_port_for(const string* sockid, const A* addr, IfMgrXrlMirror* im)
+	: _psid(sockid), _pa(addr), _pim(im)
+    {}
+
+    inline bool operator() (Port<A>*& p);
+
+protected:
+    inline bool link_addr_valid() const;
+
 private:
-    string _id;
+    const string* 	_psid;
+    const A* 		_pa;
+    IfMgrXrlMirror* 	_pim;
 };
+
+template <>
+inline bool
+is_port_for<IPv4>::link_addr_valid() const
+{
+    return true;
+}
+
+template <>
+inline bool
+is_port_for<IPv6>::link_addr_valid() const
+{
+    return _pa->is_linklocal_unicast();
+}
+
+template <typename A>
+bool
+is_port_for<A>::operator() (Port<A>*& p)
+{
+    //
+    // Perform address family specific check for source address being
+    // link-local.  For IPv4 the concept does not exist, for IPv6
+    // check if origin is link local.
+    //
+    if (link_addr_valid() == false) {
+	return false;
+    }
+
+    PortIOBase<A>* 	io  = p->io_handler();
+    XrlPortIO<A>* 	xio = dynamic_cast<XrlPortIO<A>*>(io);
+    if (xio == 0)
+	return false;
+
+    // If another socket, ignore
+    if (xio->socket_id() != *_psid)
+	return false;
+
+    // If our packet, ignore
+    if (xio->address() == *_pa)
+	return false;
+
+    //
+    // Packet has arrived on multicast socket and is not one of ours.
+    //
+    // Check source address to find originating neighbour on local nets
+    // or p2p link.
+    //
+    const typename IfMgrIP<A>::Atom* ifa;
+    ifa = _pim->iftree().find_addr(xio->ifname(),
+				   xio->vifname(),
+				   xio->address());
+
+    if (ifa == 0) {
+	return false;
+    }
+    if (ifa->has_endpoint()) {
+	return ifa->endpoint_addr() == *_pa;
+    }
+
+    IPNet<A> n(ifa->addr(), ifa->prefix_len());
+    return n.contains(*_pa);
+}
 
 
 // ----------------------------------------------------------------------------
@@ -198,8 +287,8 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
     // Add self to observers of io objects status
     io->set_observer(this);
 
-    // Start io object
-    io->startup();
+    // Start port's I/O handler if no others are starting up already
+    try_start_next_io_handler();
 
     return true;
 }
@@ -234,12 +323,25 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
 {
     typename PortManagerBase<A>::PortList& pl = ports();
     typename PortManagerBase<A>::PortList::iterator i;
-    i = find_if(pl.begin(), pl.end(), port_has_sockid<A>(sockid));
+
+    debug_msg("Packet on %s from %s/%u %u bytes\n",
+	      sockid.c_str(), src_addr.str().c_str(), src_port, pdata.size());
+
+    i = find_if(pl.begin(), pl.end(),
+		is_port_for<A>(&sockid, &src_addr, &_ifm));
+
     if (i == ports().end()) {
+	debug_msg("Discarding packet %s/%u %u bytes\n",
+		  src_addr.str().c_str(), src_port, pdata.size());
 	return false;
     }
     Port<A>* p = *i;
     p->port_io_receive(src_addr, src_port, &pdata[0], pdata.size());
+
+    XLOG_ASSERT(find_if(++i, pl.end(),
+			is_port_for<A>(&sockid, &src_addr, &_ifm))
+		== pl.end());
+
     return true;
 }
 
@@ -292,6 +394,8 @@ XrlPortManager<A>::status_change(ServiceBase* 	service,
     debug_msg("XXX %p status -> %s\n",
 	      service, service_status_name(new_status));
 
+    try_start_next_io_handler();
+
     if (new_status != SHUTDOWN)
 	return;
 
@@ -314,6 +418,32 @@ XrlPortManager<A>::~XrlPortManager()
 	delete p;
 	_dead_ports.erase(_dead_ports.begin());
     }
+}
+
+template <typename A>
+void
+XrlPortManager<A>::try_start_next_io_handler()
+{
+    typename PortManagerBase<A>::PortList::const_iterator cpi;
+    cpi = find_if(ports().begin(), ports().end(),
+		  port_has_io_in_state<A>(STARTING));
+    if (cpi != ports().end()) {
+	return;
+    }
+
+    typename PortManagerBase<A>::PortList::iterator pi = ports().begin();
+    XrlPortIO<A>* xio = 0;
+    while (xio == 0) {
+	pi = find_if(pi, ports().end(),
+		     port_has_io_in_state<A>(READY));
+	if (pi == ports().end()) {
+	    return;
+	}
+	Port<A>* p = (*pi);
+	xio = dynamic_cast<XrlPortIO<A>*>(p->io_handler());
+	pi++;
+    }
+    xio->startup();
 }
 
 #ifdef INSTANTIATE_IPV4

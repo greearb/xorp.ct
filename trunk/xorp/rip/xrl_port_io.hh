@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.1 2004/01/09 00:28:13 hodson Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.2 2004/01/13 20:37:09 hodson Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -40,10 +40,7 @@ public:
 	      PortIOUser&	port,
 	      const string& 	ifname,
 	      const string&	vifname,
-	      const Addr&	addr)
-	: PortIOBase<A>(port, ifname, vifname, addr, false),
-	  ServiceBase("RIP I/O port"), _xr(xr), _pending(false)
-    {}
+	      const Addr&	addr);
 
     /**
      * Startup.  Sends request to FEA for socket server for address
@@ -83,27 +80,35 @@ public:
     /**
      * Get name of socket server used to instantiate socket.
      */
-    inline const string& socket_server() const { return _ss; }
+    inline const string& socket_server() const		{ return _ss; }
 
-    /**
-     * Get socket id.
-     */
-    inline const string& socket_id() const { return _sid; }
+    inline const string& socket_id() const		{ return _sid; }
 
 private:
     bool request_socket_server();
-    bool request_socket_open();
-    bool request_socket_close();
-
     void socket_server_cb(const XrlError& xe, const string* pss);
-    void socket_open_cb(const XrlError& xe, const string* psid);
+
+    bool request_open_bind_socket();
+    void open_bind_socket_cb(const XrlError& xe, const string* psid);
+
+    bool request_ttl_one();
+    void ttl_one_cb(const XrlError& xe);
+
+    bool request_no_loop();
+    void no_loop_cb(const XrlError& xe);
+
+    bool request_socket_join();
+    void socket_join_cb(const XrlError& xe);
+
+    bool request_socket_leave();
+    void socket_leave_cb(const XrlError& xe);
+
     void send_cb(const XrlError& xe);
-    void socket_close_cb(const XrlError& xe);
 
 protected:
     XrlRouter&	_xr;
     string	_ss;			// Socket Server Target Name
-    string	_sid;			// Socket id
+    string	_sid;			// Unicast Socket id
     bool	_pending;
 };
 
