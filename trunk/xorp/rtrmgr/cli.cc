@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.11 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.12 2003/09/30 20:53:22 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -866,7 +866,7 @@ RouterCLI::text_entry_func(const char* ,
 {
     string path(command_global_name);
     list <string> pathsegs;
-    while (path.size()>0) {
+    while (path.size() > 0) {
 	uint ix = path.find(' ');
 	if ((ix == string::npos) && (path.size() > 0)) {
 	    pathsegs.push_back(path);
@@ -961,7 +961,7 @@ RouterCLI::text_entry_func(const char* ,
 	    assert(tag_ttn->type() == NODE_VOID);
 	    if (argv.size() == 1 && argv[0] != "{") {
 		string result = "ERROR: \"{\" expected instead of  \""
-		    + argv[1];
+		    + argv[0];
 		_cli_client.cli_print(c_format("%s\n", result.c_str()));
 		return (XORP_ERROR);
 	    } else if (argv.size() > 1) {
@@ -1097,7 +1097,7 @@ RouterCLI::delete_func(const char* ,
 {
     if (argv.size() == 0) {
 	string cmd_name(command_global_name);
-	assert(cmd_name.substr(0,7) == "delete ");
+	assert(cmd_name.substr(0, 7) == "delete ");
 	string path = cmd_name.substr(7, cmd_name.size() - 7);
 	list<string> pathsegs;
 	while (path.size() > 0) {
