@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.33 2005/02/18 00:40:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.34 2005/02/23 17:37:37 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1287,12 +1287,14 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 
     case COMMAND_FAILED:
 	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
+	// If a command failed because the other side rejected it,
+	// then print an error and send the next one.
 	//
-	XLOG_FATAL("Cannot %s a multicast group with a client: %s",
+	XLOG_ERROR("Cannot %s a multicast group with a client: %s",
 		   (is_add)? "add" : "delete",
 		   xrl_error.str().c_str());
+	_send_add_delete_membership_queue.pop_front();
+	send_add_delete_membership();
 	break;
 
     case NO_FINDER:
@@ -1385,7 +1387,14 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 		   vif_index);
 	return (XORP_ERROR);
     }
-    
+
+    if (! _is_mfea_alive) {
+	XLOG_ERROR("Cannot send a protocol message on vif %s: "
+		   "the MFEA is down",
+		   mld6igmp_vif->name().c_str());
+	return (XORP_ERROR);	// The MFEA is dead
+    }
+
     // Copy 'sndbuf' to a vector
     vector<uint8_t> snd_vector;
     snd_vector.resize(sndlen);
