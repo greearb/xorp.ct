@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_peer.hh,v 1.4 2003/01/18 05:32:04 mjh Exp $
+// $XORP: xorp/bgp/tools/print_peer.hh,v 1.5 2003/01/18 21:41:04 mjh Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -68,7 +68,8 @@ public:
 				    const uint32_t* keep_alive, 
 				    const uint32_t* hold_time_conf, 
 				    const uint32_t* keep_alive_conf, 
-				    const uint32_t* min_as_origination_interval);
+				    const uint32_t* min_as_origination_interval,
+				    const uint32_t* min_route_adv_interval);
     void do_verbose_peer_print();
     string time_units(uint32_t s) const;
     
@@ -104,6 +105,7 @@ private:
     uint32_t _hold_time_conf;
     uint32_t _keep_alive_conf;
     uint32_t _min_as_origination_interval;
+    uint32_t _min_route_adv_interval;
 };
 
 #endif // __BGP_TOOLS_PRINT_PEER_HH__

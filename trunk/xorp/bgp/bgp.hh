@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.3 2002/12/20 06:42:47 mjh Exp $
+// $XORP: xorp/bgp/main.hh,v 1.4 2003/01/17 04:07:23 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -132,7 +132,8 @@ public:
 			       uint32_t& keep_alive, 
 			       uint32_t& hold_time_configured, 
 			       uint32_t& keep_alive_configured, 
-			       uint32_t& min_as_origination_interval);
+			       uint32_t& min_as_origination_interval,
+			       uint32_t& min_route_adv_interval);
 
     bool register_ribname(const string& name);
 

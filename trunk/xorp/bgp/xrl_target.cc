@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.3 2002/12/20 06:42:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.4 2003/01/17 04:07:24 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -396,12 +396,14 @@ XrlBgpTarget::bgp_0_2_get_peer_timer_config(
 					    uint32_t& keep_alive, 
 					    uint32_t& hold_time_conf, 
 					    uint32_t& keep_alive_conf, 
-					    uint32_t& min_as_origin_interval)
+					    uint32_t& min_as_origin_interval,
+					    uint32_t& min_route_adv_interval)
 {
     Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
     if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
 				    keep_alive, hold_time_conf,
-				    keep_alive_conf, min_as_origin_interval)) {
+				    keep_alive_conf, min_as_origin_interval,
+				    min_route_adv_interval)) {
 	return XrlCmdError::COMMAND_FAILED();
     }
     return XrlCmdError::OKAY();

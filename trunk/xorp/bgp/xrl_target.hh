@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.2 2002/12/20 06:42:48 mjh Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.3 2003/01/17 04:07:24 mjh Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -188,7 +188,8 @@ public:
 	uint32_t& keep_alive, 
 	uint32_t& hold_time_conf, 
 	uint32_t& keep_alive_conf, 
-	uint32_t& min_as_origin_interval);
+	uint32_t& min_as_origin_interval,
+	uint32_t& min_route_adv_interval);
 
     XrlCmdError bgp_0_2_register_rib(
 	// Input values, 

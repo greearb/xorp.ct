@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.4 2003/01/18 21:41:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.5 2003/01/19 00:42:06 mjh Exp $"
 
 #include "print_peer.hh"
 
@@ -159,9 +159,9 @@ PrintPeers::print_peer_verbose(const IPv4& local_ip,
     send_get_peer_established_stats("bgp", local_ip, local_port, 
 				    peer_ip, peer_port, cb6);
 
-    XorpCallback7<void, const XrlError&, const uint32_t*, const uint32_t*, 
+    XorpCallback8<void, const XrlError&, const uint32_t*, const uint32_t*, 
 	const uint32_t*, const uint32_t*, const uint32_t*, 
-	const uint32_t*>::RefPtr cb7;
+	const uint32_t*, const uint32_t*>::RefPtr cb7;
     cb7 = callback(this, &PrintPeers::get_peer_timer_config_done);
     send_get_peer_timer_config("bgp", local_ip, local_port, 
 			       peer_ip, peer_port, cb7);
@@ -284,7 +284,8 @@ PrintPeers::get_peer_timer_config_done(const XrlError& e,
 				       const uint32_t* keep_alive, 
 				       const uint32_t* hold_time_conf, 
 				       const uint32_t* keep_alive_conf, 
-				       const uint32_t* min_as_origination_interval)
+				       const uint32_t* min_as_origination_interval,
+				       const uint32_t* min_route_adv_interval)
 {
     if (e != XrlError::OKAY()) {
 	printf("Failed to retrieve verbose data\n");
@@ -298,6 +299,7 @@ PrintPeers::get_peer_timer_config_done(const XrlError& e,
     _hold_time_conf = *hold_time_conf;
     _keep_alive_conf = *keep_alive_conf;
     _min_as_origination_interval = *min_as_origination_interval;
+    _min_route_adv_interval = *min_route_adv_interval;
     _received++;
     if (_received == 7)
 	do_verbose_peer_print();
@@ -399,6 +401,8 @@ PrintPeers::do_verbose_peer_print()
 	   time_units(_keep_alive_conf).c_str());
     printf("  Minimum AS Origination Interval: %s\n", 
 	   time_units(_min_as_origination_interval).c_str());
+    printf("  Minimum Route Advertisement Interval: %s\n", 
+	   time_units(_min_route_adv_interval).c_str());
     if (_more) {
 	printf("\n");
 	get_peer_list_next();
