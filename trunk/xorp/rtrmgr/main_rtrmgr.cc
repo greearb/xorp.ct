@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.30 2003/09/24 16:26:32 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.31 2003/09/25 00:54:10 hodson Exp $"
 
 #include <signal.h>
 
@@ -123,6 +123,8 @@ main(int argc, char* const argv[])
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
+    xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
