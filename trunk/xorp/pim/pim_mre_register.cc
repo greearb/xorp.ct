@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.11 2003/05/21 05:32:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.12 2003/07/03 07:15:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -210,6 +210,8 @@ PimMre::recompute_is_could_register_sg()
 	|| is_register_prune_state()) {
 	// Register Join state -> Register NoInfo state
 	set_register_noinfo_state();
+    }
+    if (is_register_join_state()) {
 	// Remove reg tunnel
 	remove_register_tunnel();
     }
@@ -257,7 +259,7 @@ PimMre::register_stop_timer_timeout()
     // Register Prune state
     // Register Prune state -> Register JoinPending state
     set_register_join_pending_state();
-    // Stop timer(**) (** The RegisterStopTimer is set to Register_Probe_Time
+    // Stop timer(**) (** The Register-Stop Timer is set to Register_Probe_Time
     register_stop_timer() =
 	pim_node().eventloop().new_oneoff_after(
 	    TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0),
