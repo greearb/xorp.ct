@@ -1,0 +1,42 @@
+/*
+ * Interface implemented by routing process interested in configuration
+ * changes in the Forwarding Engine Abstraction process.
+ */
+
+interface fea_ifmgr_mirror/0.1 {
+	interface_add ? ifname:txt
+	interface_remove ? ifname:txt
+	interface_set_enabled ? ifname:txt & enabled:bool
+	interface_set_mtu ? ifname:txt & mtu_bytes:u32
+	interface_set_mac ? ifname:txt & mac:mac
+
+	vif_add ? ifname:txt & vifname:txt
+	vif_remove ? ifname:txt & vifname:txt
+	vif_set_enabled ? ifname:txt & vifname:txt & enabled:bool
+	vif_set_multicast_capable ? ifname:txt & vifname:txt & capable:bool
+	vif_set_broadcast_capable ? ifname:txt & vifname:txt & capable:bool
+	vif_set_p2p_capable ? ifname:txt & vifname:txt & capable:bool
+	vif_set_loopback ? ifname:txt & vifname:txt & loopback:bool
+	vif_set_pif_index ? ifname:txt & vifname:txt & index:u32
+
+	ipv4_add ? ifname:txt & vifname:txt & addr:ipv4
+	ipv4_remove ? ifname:txt & vifname:txt & addr:ipv4
+	ipv4_set_prefix ? ifname:txt & vifname:txt & addr:ipv4 & prefix:u32
+	ipv4_set_enabled ? ifname:txt & vifname:txt & addr:ipv4 & enabled:bool
+	ipv4_set_multicast_capable ? ifname:txt & vifname:txt & addr:ipv4     \
+				   & capable:bool
+	ipv4_set_loopback ? ifname:txt & vifname:txt & addr:ipv4	      \
+			  & loopback:bool
+	ipv4_set_broadcast ? ifname:txt & vifname:txt & addr:ipv4 & oaddr:ipv4
+	ipv4_set_endpoint ? ifname:txt & vifname:txt & addr:ipv4 & oaddr:ipv4
+
+	ipv6_add ? ifname:txt & vifname:txt & addr:ipv6
+	ipv6_remove ? ifname:txt & vifname:txt & addr:ipv6
+	ipv6_set_prefix ? ifname:txt & vifname:txt & addr:ipv6 & prefix:u32
+	ipv6_set_enabled ? ifname:txt & vifname:txt & addr:ipv6 & enabled:bool
+	ipv6_set_loopback ? ifname:txt & vifname:txt & addr:ipv6	      \
+			  & loopback:bool
+	ipv6_set_multicast_capable ? ifname:txt & vifname:txt & addr:ipv6     \
+				   & capable:bool
+	ipv6_set_endpoint ? ifname:txt & vifname:txt & addr:ipv6 & oaddr:ipv6
+}

@@ -1,0 +1,113 @@
+/* $XORP: xorp/rtrmgr/config.template,v 1.21 2002/04/17 18:22:06 mjh Exp $ */
+
+interfaces {
+  interface . IFNAME: text {
+    disable: toggle = false;
+    description: text = "";
+    mac: macaddr;
+    mtu: uint;
+    vif . VIFNAME: text {
+      disable: toggle = false;
+      multipoint: toggle = false;
+      point-to-point: toggle = false;
+      family . FAMILYNAME: text {
+        mtu: uint;
+        address . ADDR: ipvx {
+          netmask: uint;
+          broadcast: ipvx;
+          destination: ipvx;
+        }
+      }
+    }
+  }
+}
+
+protocols {
+  ospf {
+    router-id: ipvx;
+    disable: toggle = false;
+    area . ADDR: ipvx {
+      stub: toggle = false;
+      stub_metric: uint;
+      stub_summaries: bool;
+      interface . IFNAME: text {
+        disable: toggle = false;
+        hello-interval: uint = 30;
+        dead-interval: uint;
+        poll-interval: uint;
+        retransmit-interval: uint;
+        transit-delay: uint;
+        priority: uint;
+        passive: toggle = false;
+      }
+    }
+    done: toggle = false;
+  }
+}
+
+interfaces {
+  interface . IFNAME {
+    %create: xrl "fea/create_interface?ifname:txt=IFNAME";
+    %activate: xrl "fea/enable_interface?ifname:txt=IFNAME";
+    mac {
+	%set: xrl  "fea/set_mac?ifname:txt=IFNAME&mac:txt=VALUE";
+    }
+    vif . VIFNAME {
+	%create: xrl "fea/create_vif?ifname:txt=IFNAME&vif:txt=IFNAME";
+        %activate: xrl "fea/enable_vif?vif:txt=VIFNAME";
+        family . FAMILYNAME {
+            address . ADDR {
+	      %create: xrl "fea/add_address?vif:txt=VIFNAME&address:ipv4=ADDR";
+	      netmask {
+                %set: xrl "fea/set_prefix?vif:txt=VIFNAME&address:ipv4=ADDR&prefix:i32=VALUE"; 
+              }
+	      broadcast {
+              %set: xrl "fea/set_broadcast?vif:txt=VIFNAME&address:ipv4=ADDR&broadcast:ipv4=VALUE";
+	  }
+	}
+      }	
+    }
+  }
+}
+
+protocols.ospf {
+  %modinfo: provides ospfd; 
+  %modinfo: depends rib;
+  %modinfo: depends finder;
+  %modinfo: path "../ospfd/bin/ospfd";
+  router-id {
+    %set: xrl "ospfd/set_param?router_id:ipv4=VALUE";
+  }
+  done {
+    %set: xrl "ospfd/set_param?done:i32=0";
+  }
+  area.ADDR {
+    %create: xrl "ospfd/create_area?area_id:ipv4=ADDR";
+    interface.IFNAME {
+      %create: xrl "ospfd/create_interface?area_id:ipv4=ADDR&interface:txt=IFNAME&cost:i32=0"; 
+      hello-interval { 
+        %set: xrl "ospfd/set_interface_param?area_id:ipv4=ADDR&interface:txt=IFNAME&ospf_if_hello_interval:i32=VALUE";
+      }
+    }
+  }
+}
+
+plumbing.rib {
+  %modinfo: provides rib;
+  %modinfo: depends finder;
+  %modinfo: depends fea;
+  %modinfo: path "../urib/rib";
+}
+
+plumbing.finder {
+  %modinfo: provides finder;
+  %modinfo: path "../ipc/finder";
+}
+
+interfaces {
+  %modinfo: provides fea;
+  %modinfo: depends finder;
+  %modinfo: path "../fea/fea";
+}
+
+  

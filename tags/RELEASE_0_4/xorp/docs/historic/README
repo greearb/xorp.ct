@@ -1,0 +1,4 @@
+This directory contains documents that are no longer be relevant to
+XORP, but may have wider interest.  The files include:
+
+dfd.ps: Data flow diagram for a best-effort IP router.

@@ -1,0 +1,93 @@
+/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.2 2003/03/13 00:32:06 pavlin Exp $ */
+
+/*
+ * Multicast Listener Discovery/Internet Group Management Protocol
+ * XRL interface.
+ */
+
+
+interface mld6igmp/0.1 {
+
+	/**
+	 * Enable/disable/start/stop a MLD6IGMP vif interface.
+	 *
+	 * @param vif_name the name of the vif to enable/disable/start/stop.
+	 */
+	enable_vif	? vif_name:txt
+	disable_vif	? vif_name:txt
+	start_vif	? vif_name:txt
+	stop_vif	? vif_name:txt
+
+	/**
+	 * Enable/disable/start/stop all MLD6IGMP vif interfaces.
+	 */
+	enable_all_vifs
+	disable_all_vifs
+	start_all_vifs
+	stop_all_vifs
+	
+	/**
+	 * Enable/disable/start/stop MLD6IGMP protocol and the
+	 * MLD6IGMP CLI access.
+	 */
+	enable_mld6igmp
+	disable_mld6igmp
+	enable_cli
+	disable_cli
+	start_mld6igmp
+	stop_mld6igmp
+	start_cli
+	stop_cli
+
+	/**
+	 * Configure MLD6IGMP interface-related metrics.
+	 * 
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param vif_name the name of the vif to configure.
+	 * @param proto_version the protocol version.
+	 */
+	get_vif_proto_version		? vif_name:txt			\
+					-> proto_version:u32
+	set_vif_proto_version		? vif_name:txt			\
+					& proto_version:u32
+	reset_vif_proto_version		? vif_name:txt
+
+	/**
+	 * Enable/disable the MLD6IGMP trace log.
+	 */
+	enable_log_trace
+	disable_log_trace
+
+
+	/**
+	 * Add/delete a client protocol in the MLD/IGMP protocol.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to add/delete.
+	 * @param protocol_id the ID of the protocol to add/delete
+	 * (both sides must agree on the particular values).
+	 * @param vif_name the name of the vif the protocol add/delete to
+	 * apply to.
+	 * @param vif_index the index of the vif the protocol add/delete to
+	 * apply to.
+	 *
+	 * The added protocol will receive Join/Leave membership information
+	 * about same-LAN members for the particular vif.
+	 */
+	/* TODO: the protocol names have to be globally defined */
+	add_protocol4	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+	add_protocol6	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+	
+	delete_protocol4 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+	delete_protocol6 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32
+}

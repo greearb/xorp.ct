@@ -1,0 +1,67 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/command_pim,v 1.5 2003/06/06 23:47:18 pavlin Exp $
+#
+
+#
+# Send commands to a running PIM process.
+#
+
+MODULE_NAME="PIM-SM"
+HOSTNAME=`hostname`
+
+echo "Sending command to $MODULE_NAME on $HOSTNAME..."
+
+
+#
+# The optional first argument should be either -4 or -6 to specify
+# IPv4 or IPv6 command
+# 
+# The next argument should be the command to call.
+# The rest of the arguments should be the arguments to the command to call.
+#
+
+usage()
+{
+	echo "Usage: $0 [-4 | -6 ] <xrl_command> [xrl_command_arguments ... ]"
+}
+
+if [ $# -lt 1 ] ; then
+	usage;
+	exit 1
+fi
+
+case "${1}" in
+	-4)
+		if [ $# -lt 2 ] ; then
+			usage;
+			exit 1
+		fi
+		IP_VERSION=IPV4
+		shift
+		;;
+	-6)
+		if [ $# -lt 2 ] ; then
+			usage;
+			exit 1
+		fi
+		IP_VERSION=IPV6
+		shift
+		;;
+	*)
+		# XXX: IP version defaults to IPv4
+		IP_VERSION=IPV4
+		;;
+esac
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+. ../pim/xrl_rib_shell_funcs.sh
+. ../pim/xrl_pim_shell_funcs.sh
+
+
+$*
+
+exit $?

@@ -1,0 +1,78 @@
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+
+/*
+ * Interface for sending packets on a raw socket. Typically implemented by the
+ * fea.
+ */
+
+interface raw_packet/0.1 {
+	/**
+	 * Send a packet on a raw socket.
+	 *
+	 * @param src_address. Source address.
+	 * @param dst_address. Destination address.
+         * @param vif_name. Vif to send the packet on, essential for multicast.
+	 *                  In the unicast case this field should be empty.
+	 * @param proto. Protocol number (8 LSBs).
+	 * @param ttl. Time to live (8 LSBs).
+	 * @param tos. Type of service bits (Diffserv/ECN) (8 LSBs).
+	 * @param options: IP options data, may include multiple IP options.
+	 * @param payload. The payload, everything after the IP header and
+	 *                 options.
+	 */
+	send4 ?  							      \
+	        src_address:ipv4 & 				      	      \
+	        dst_address:ipv4 & 					      \
+	        vif_name:txt & 						      \
+	        proto:u32 & 						      \
+	        ttl:u32 & 						      \
+		tos:u32 &						      \
+		options:binary &					      \
+	        payload:binary
+
+	/**
+	 * Send raw packet.  Checksum is computed and applied before 
+	 * transmission.  All the fields within the IPv4 header must
+	 * be in network order.
+	 *
+	 * @param vif_name.Vif to send the packet on, essential for multicast.
+	 *                  In the unicast case this field should be empty.
+	 *                 
+	 * @param packet.  Raw IPv4 packet including header and payload.
+	 */
+	send_raw4 ? 							      \
+		    vif_name:txt &					      \
+		    packet:binary
+
+	/**
+	 * Register to receive packets.  The receiver is expected to
+	 * support raw_socket_client/0.1 interface.
+	 *
+	 * @param router_name. Receivers Xrl router name
+         * @param if_name.  Interface associated with VIF.
+         * @param vif_name. Vif through which packets should be accepted.
+	 * @param proto. Protocol number that the receiver is interested in.
+	 *               A protocol number of 0 signifies interest in all
+	 *               protocols.
+	 */
+	register_vif_receiver ?		 				      \
+	 	router_name:txt & 				              \
+	        if_name:txt & 						      \
+	        vif_name:txt & 						      \
+		proto:u32
+
+	/**
+	 * Unregister stop receiving packets.
+	 *
+	 * @param router_name. Receivers Xrl router name
+         * @param if_name.  Interface associated with VIF.
+         * @param vif_name. Vif through which packets should be accepted.
+	 * @param proto Protocol number that the receiver is interested in.
+	 */
+	unregister_vif_receiver ? 					      \
+		router_name:txt &					      \
+	        if_name:txt & 						      \
+	        vif_name:txt & 						      \
+		proto:u32
+		
+}

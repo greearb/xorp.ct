@@ -1,0 +1,33 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001-2003 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+
+#include "rtrmgr_module.h"
+#include "template_tree_node.hh"
+#include "template_commands.hh"
+#include "master_conf_tree_node.hh"
+
+MasterConfigTreeNode::
+MasterConfigTreeNode(const string &node_name, 
+		     const string &path, 
+		     const TemplateTreeNode *ttn, 
+		     MasterConfigTreeNode *parent, 
+		     uid_t user_id) 
+    : ConfigTreeNode(node_name, path, ttn, parent, user_id)
+{
+}
+
+
+

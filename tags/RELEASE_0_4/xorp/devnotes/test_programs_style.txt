@@ -1,0 +1,134 @@
+#
+# $XORP: xorp/devnotes/test_programs_style.txt,v 1.2 2002/12/09 03:41:03 pavlin Exp $
+#
+
+			XORP test programs style
+
+The style described below describes a set of rules that should be
+applied to test programs we write.  Those rules should be considered as
+"work-in-progress".  Hopefully, as we write more test programs, we will
+have some clues about what those programs should be about.
+
+- DOCTRINE
+
+  Write test programs to test your code!  If you don't write them,
+  then your code does not work, or will not work when it is modified
+  in the future. Period.
+
+- TEST PROGRAM GRANULARITY
+
+  "Shall I write one big program to test everything, or shall I write
+  many small programs, one for each particular test?"
+
+  In general, prefer smaller test programs.  However, if several tests
+  are tightly related, they can be combined into one test program.
+  Also, if there is a relatively large number of tests, and each test is
+  just few lines, then it is fine to combine them in one test program.
+
+- TEST PROGRAM INTERNAL IDENTIFIERS
+
+  * PROGRAM_NAME: the program filename (excluding the path to it).
+    TODO: shall we include the path as well, so we don't have to worry
+    whether each program has an unique name?
+
+  * PROGRAM_VERSION_ID: should be in the `number-dot' format, with no
+    blank spaces.  Typically, two or three digits would be sufficient.
+    Examples: 0.2 or 1.20.1
+
+    Optionally, one of the letters 'a' or 'b' may be added to the end to
+    indicate 'alpha' or 'beta' status of the program.
+    Examples: 0.2a or 1.20.1b
+
+- RETURN STATUS
+
+  Return status is 0 if all tests succeed, 1 if any test fails, and 2 if
+  a test fails due to an internal error.
+
+- TEST PROGRAM OUTPUT
+
+  By default, the test-related output is printed to the standard output,
+  and is generated only if the test program is run with the -v or
+  --verbose command-line option (see below).  This option does not apply
+  to the internal error messages, which by default are printed to the
+  standard error stream.
+
+- COMMAND-LINE OPTIONS
+
+  Each test program should support the following command-line options:
+
+	-h
+	--help
+		Print help information on the standard output, and then
+		exit with return status of 0.
+
+	-v
+	--verbose
+		Print information about successful tests as well as
+		unsuccessful tests.
+
+	-V
+	--version
+		Print the program version ID on the standard output, and
+		then exit with return status of 0.
+
+  At minimum, a test program should support at least -h and -v
+  options (i.e., their LONG_OPTIONS format may be omitted).
+
+  A test program may support some of the following command-line options:
+
+	--info
+		Print detailed information about the program on the
+		standard output, and then exit with return status of 0.
+		The information to print should be readable by human,
+		and does not have specific format.  Preferably, it
+		should contain the following information about the
+		program: name, description of its purpose, list of
+		supported version (lastest first), last modification
+		date, list of authors, copyright status, etc.
+		Example:
+	Name:		test_ipvx
+	Description:	Test IPv4 and IPv6 address manipulation
+	Versions:	0.5.1 0.3 0.2.2
+	Date:		Oct 10, 2002
+	Copyright:	See file LICENSE.XORP
+	Return:		0 on success, 1 if test error, 2 if internal error
+
+	--verbose-level=<level>
+		Print information about successful tests as well
+		as unsuccessful tests.  The level of verbosity is
+		defined by <level>.  The particular assignment of the
+		verbosity levels is program-specific, but higher level
+		should correspond to more verbosity.  However, if
+		the level is 0, then the program should not print any
+		test-related information (i.e., if there are no internal
+		errors, it should return the appropriate status only).
+		The verbose level does not apply to the messages related
+		to internal errors.
+
+	--with-version=<version>
+		Run the program with version <version>, if supported.
+		If the specified version is not supported, the program
+		should print the list of supported versions to the
+		standard error stream, and then exit with return status
+		of 2.
+
+
+  A test program may support additional test-specific command-line
+  options.  Each command-line option should be specified in the
+  LONG_OPTIONS format (e.g., --help), but it may have a short version
+  as well (e.g., -h).
+
+  If a program is called with the wrong arguments, this should be
+  treated as an internal error: the program should print the help
+  information (the same one produced with -h) to the standard error
+  stream, and then exit with return status of 2.
+
+- TEST SCRIPTS
+
+  TODO: adapt Eddie's email about file format of test scripts, etc.
+
+       Command-line arguments for test scripts:
+	
+	--preserve-temporaries
+		Preserve the temporary directory created for the test.
+

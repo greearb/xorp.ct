@@ -1,0 +1,358 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/configure_pim,v 1.18 2003/07/28 19:08:01 pavlin Exp $
+#
+
+#
+# Send configuration commands to a running PIM process.
+#
+
+MODULE_NAME="PIM-SM"
+HOSTNAME=`hostname`
+
+echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
+
+
+###############################################################
+# USER CONFIGURATION BEGIN
+###############################################################
+
+#
+# The IP version. It must be either IPV4 or IPV6
+#
+IP_VERSION=IPV4
+#IP_VERSION=IPV6
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+. ../pim/xrl_rib_shell_funcs.sh
+. ../pim/xrl_pim_shell_funcs.sh
+
+#
+# Select the vifs to enable, and the Candidate-BSR and Candidate-RP vifs.
+#
+case ${HOSTNAME} in
+	xorp1)
+	ENABLE_VIFS="dc1 dc2 dc4"
+	CAND_BSR_VIF="dc1"
+	CAND_RP_VIF="dc1"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp2)
+	#ENABLE_VIFS="dc1 dc2 dc4"
+	ENABLE_VIFS="dc1 dc2"
+	CAND_BSR_VIF="dc1"
+	CAND_RP_VIF="dc1"
+	#CAND_BSR_VIF=""
+	#CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp3)
+	#ENABLE_VIFS="dc0 dc1 dc2 dc3"
+	ENABLE_VIFS="dc0 dc1 dc2"
+	CAND_BSR_VIF="dc0"
+	CAND_RP_VIF="dc0"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp4)
+	#ENABLE_VIFS="eth0 eth1 eth2 eth4 eth5 eth6 eth7"
+	ENABLE_VIFS="eth2 eth6 eth7"
+	ENABLE_VIFS="eth6 eth7"
+	CAND_BSR_VIF="eth7"
+	CAND_RP_VIF="eth7"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp6)
+	ENABLE_VIFS="dc1"
+	CAND_BSR_VIF="dc1"
+	CAND_RP_VIF="dc1"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	possum.icir.org)
+	ENABLE_VIFS="rl0"
+	CAND_BSR_VIF="rl0"
+	CAND_RP_VIF="rl0"
+	STATIC_RPS=""
+	;;
+
+	koala.icir.org)
+	ENABLE_VIFS="eth0"
+	CAND_BSR_VIF="eth0"
+	CAND_RP_VIF="eth0"
+	STATIC_RPS=""
+	;;
+
+	oreo.icir.org)
+	ENABLE_VIFS="wi0"
+	CAND_BSR_VIF="wi0"
+	CAND_RP_VIF="wi0"
+	#ENABLE_VIFS="ed1"
+	#CAND_BSR_VIF="ed1"
+	#CAND_RP_VIF="ed1"
+	STATIC_RPS=""
+	;;
+	
+	pie)
+	ENABLE_VIFS="en1"
+	CAND_BSR_VIF="en1"
+	CAND_RP_VIF="en1"
+	STATIC_RPS=""
+	;;
+
+	*)
+	echo "Unknown host : ${HOSTNAME}"
+	exit 1
+	;;
+esac
+
+#
+# Comment-out to disable log trace
+#
+MFEA_ENABLE_LOG_TRACE=yes
+MLD6IGMP_ENABLE_LOG_TRACE=yes
+PIM_ENABLE_LOG_TRACE=yes
+
+#
+# The subnets to enable/disable CLI access
+#
+CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
+
+#
+# MRIB default metric preference and metric
+#
+#MRIB_TABLE_DEFAULT_METRIC_PREFERENCE=100
+#MRIB_TABLE_DEFAULT_METRIC=100
+
+#
+# The PIM shortest-path tree switch bandwidth threshold
+#
+# The "interval" (in seconds) and the "bytes" values specify the minimum
+# amount of bytes that must be forwarded within that interval before the
+# SPT switch is triggered. E.g., if the interval value is 100 (seconds),
+# and the bytes value is 102400, then the SPT switch will occur if the
+# average forwarding bandwidth is at least 1024bps within an interval
+# of 100 seconds.
+# If the SPT switch should happen right after the first packet, then
+# the "bytes" value should be zero.
+#
+PIM_ENABLE_SWITCH_TO_SPT_THRESHOLD=yes		# Set to "no" to disable
+PIM_SWITCH_TO_SPT_THRESHOLD_INTERVAL_SEC=100
+PIM_SWITCH_TO_SPT_THRESHOLD_BYTES=102400
+
+###############################################################
+# USER CONFIGURATION END
+###############################################################
+
+
+# Add the PIM 'register_vif' to the list of interfaces to enable
+MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
+MLD6IGMP_ENABLE_VIFS="${ENABLE_VIFS}"
+PIM_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
+
+#
+# Disable log trace
+#
+if [ "${MFEA_ENABLE_LOG_TRACE}" != "yes" ] ; then
+	mfea_disable_log_trace
+fi
+if [ "${MLD6IGMP_ENABLE_LOG_TRACE}" != "yes" ] ; then
+	mld6igmp_disable_log_trace
+fi
+if [ "${PIM_ENABLE_LOG_TRACE}" != "yes" ] ; then
+	pim_disable_log_trace
+fi
+
+#
+# Configure CLI
+#
+for subnet in ${CLI_ENABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
+	cli_add_enable_cli_access_from_subnet4 ${subnet}
+done
+for subnet in ${CLI_DISABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
+	cli_add_disable_cli_access_from_subnet4 ${subnet}
+done
+
+#
+# Enable and start CLI
+#
+cli_enable_cli
+cli_start_cli
+
+#
+# Enable and start MFEA CLI
+#
+mfea_enable_cli
+mfea_start_cli
+
+#
+# Enable and start MFEA
+#
+if [ "${MRIB_TABLE_DEFAULT_METRIC_PREFERENCE}" != "" ] ; then
+	mfea_set_mrib_table_default_metric_preference ${MRIB_TABLE_DEFAULT_METRIC_PREFERENCE}
+fi
+if [ "${MRIB_TABLE_DEFAULT_METRIC}" != "" ] ; then
+	mfea_set_mrib_table_default_metric ${MRIB_TABLE_DEFAULT_METRIC}
+fi
+mfea_enable_mfea
+mfea_start_mfea
+
+#
+# Enable and start MFEA vifs
+#
+for vif in ${MFEA_ENABLE_VIFS}; do
+	mfea_enable_vif ${vif}
+	mfea_start_vif ${vif}
+done
+
+
+#
+# Enable and start MLD6IGMP CLI
+#
+mld6igmp_enable_cli
+mld6igmp_start_cli
+
+#
+# Enable and start MLD6IGMP
+#
+mld6igmp_enable_mld6igmp
+mld6igmp_start_mld6igmp
+
+#
+# Wait to get the list of vifs
+#
+mld6igmp_is_vif_setup_completed
+
+#
+# Enable and start MLD6IGMP vifs
+#
+for vif in ${MLD6IGMP_ENABLE_VIFS}; do
+	mld6igmp_enable_vif ${vif}
+	mld6igmp_start_vif ${vif}
+done
+
+
+#
+# Enable and start PIM CLI
+#
+pim_enable_cli
+pim_start_cli
+
+#
+# Enable and start PIM
+#
+pim_enable_pim
+pim_start_pim
+
+#
+# Wait to get the list of vifs
+#
+pim_is_vif_setup_completed
+
+#
+# Enable and start PIM vifs
+#
+for vif in ${PIM_ENABLE_VIFS}; do
+	pim_enable_vif ${vif}
+	
+	# XXX: temp. for testing purpose
+	#if [ "${vif}" = "register_vif" ] ; then
+	#    sleep 5;
+	#fi
+	
+	pim_start_vif ${vif}
+done
+
+#
+# Add PIM SPT switch bandwidth threshold
+#
+if [ "${PIM_ENABLE_SWITCH_TO_SPT_THRESHOLD}" = "yes" ] ; then
+	pim_set_switch_to_spt_threshold true ${PIM_SWITCH_TO_SPT_THRESHOLD_INTERVAL_SEC} ${PIM_SWITCH_TO_SPT_THRESHOLD_BYTES}
+else
+	pim_set_switch_to_spt_threshold false 0 0
+fi
+
+#
+# Add static RP configuration
+#
+if [ "${STATIC_RPS}" != "" ] ; then
+	for rp in ${STATIC_RPS}; do
+		case "${IP_VERSION}" in
+			IPV4)
+				pim_add_config_static_rp4 224.0.0.0/4 ${rp} 192 0
+				;;
+			IPV6)
+				pim_add_config_static_rp6 FF00::/8 ${rp} 192 0
+				;;
+			*)
+				echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+				exit 1
+		esac
+	done
+	pim_config_static_rp_done
+fi
+
+#
+# Enable and start PIM BSR
+#
+pim_enable_bsr
+
+if [ "${CAND_BSR_VIF}" != "" ] ; then
+	case "${IP_VERSION}" in
+		IPV4)
+			pim_add_config_cand_bsr_by_vif_name4 224.0.0.0/4 false ${CAND_BSR_VIF} 1 30
+			;;
+		IPV6)
+			pim_add_config_cand_bsr_by_vif_name6 FF00::/8 false ${CAND_BSR_VIF} 1 30
+			;;
+		*)
+			echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+			exit 1
+	esac
+fi
+
+if [ "${CAND_RP_VIF}" != "" ] ; then
+	case "${IP_VERSION}" in
+		IPV4)
+			pim_add_config_cand_rp_by_vif_name4 224.0.0.0/4 false ${CAND_RP_VIF} 192 150
+			;;
+		IPV6)
+			pim_add_config_cand_rp_by_vif_name6 FF00::/8 false ${CAND_RP_VIF} 192 150
+			;;
+		*)
+			echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+			exit 1
+	esac
+fi
+
+pim_start_bsr
+
+
+#
+# Done
+#
+echo "Configuration done."
+
+exit 0

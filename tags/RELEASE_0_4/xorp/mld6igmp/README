@@ -1,0 +1,106 @@
+#
+# $XORP: xorp/mld6igmp/README,v 1.5 2003/06/26 18:36:40 pavlin Exp $
+#
+
+Multicast Listener Discovery/Internet Group Management Protocol
+(MLD/IGMP) Implementation
+===============================================================
+
+This directory contains the XORP implementation of the MLD and IGMP protocols.
+
+Configuration
+=============
+
+MLD/IGMP like most Xorp processes does not take its configuration
+parameters from the command line. Its parameters are provided via
+XRLs. At the very least a MLD/IGMP process must be provided with
+the set of network interfaces to enable for multicast.
+
+Startup
+=======
+
+In normal operation, MLD/IGMP would be started by the XORP router manager
+process, not directly from the command line.  
+
+For testing and debugging purposes, MLD/IGMP can be manually started.  The
+Xorp MLD6/IGMP process assumes that the XRL finder and the MFEA
+are already running. However, the binary program ``test_mld6igmp'' already
+contains them as well, therefore it is sufficient to start only this
+program (as a root).
+
+After ``test_mld6igmp'' is started, the MFEA and MLD/IGMP are
+disabled by default. To start them, and to configure their operation,
+as well as the MLD/IGMP operation, run script ``configure_mld6igmp''.
+Note that it MUST be run from the ``mld6igmp'' directory.
+
+However, before running ``configure_mld6igmp'', you must configure
+it for each router:
+
+ - Add an entry for each router under "case $HOSTNAME in" with the
+   set of network interfaces to enable.
+   Example:
+
+	xorp1)
+	ENABLE_VIFS="dc1 dc2 dc4"
+	;;
+
+ - By default, ``test_mld6igmp'' will log all protocol-related messages.
+   To disable them, comment-out the following variables:
+
+	MFEA_ENABLE_LOG_TRACE=yes
+	MLD6IGMP_ENABLE_LOG_TRACE=yes
+
+ - After MLD6IGMP is started, if you want to send a single XRL command
+   to it and change some of its configuration, you can use the command
+   ./command_mld6igmp <xrl_command> [xrl_command_arguments ... ]
+   
+   The list of all XRL commands and their arguments are in
+   ``xrl_mld6igmp_shell_funcs.sh''
+
+ - After MLD/IGMP is started, if you want to access its internal
+   information, you can use the built-in CLI:
+     telnet localhost 12000
+
+ - If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable in ``configure_mld6igmp'':
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+
+
+   Currently, the CLI supports primarily "show" commands. For example,
+   "show igmp interface" will show the list of all interfaces known to
+   IGMP and their status. At each moment you can press <TAB> for the
+   list of existing commands at each level, and a brief description
+   of them. Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   Ctrl-E to go to the beginning or end of the current line, Ctrl-A
+   to kill the remaining part of the current line, etc.
+   To exit, press Ctrl-D when you are on a new empty line.
+
+Documentation
+=============
+
+The MLD/IGMP design architecture and code structure are described in:
+	$(XORP)/docs/mld6igmp/
+
+The programming documentation is in:
+	$(XORP)/docs/kdoc/html/mld6igmp/
+
+Testing
+=======
+
+Currently, the MLD/IGMP testing is performed manually, by starting
+MLD/IGMP on a number of testbed machines.
+
+In the future, automated testing will be added, similar to
+the BGP testing framework.
+
+Status
+======
+
+Currently (August 2003), the MLD/IGMP implementation is based
+on the specification in the following documents:
+
+ * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
+ * RFC 2236: Internet Group Management Protocol, Version 2
+
+However, only IGMP has been tested.

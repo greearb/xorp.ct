@@ -1,0 +1,669 @@
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.11 2003/08/12 15:49:23 pavlin Exp $ */
+
+/*
+ * Protocol Independent Multicast XRL interface.
+ */
+
+
+interface pim/0.1 {
+
+	/**
+	 * Enable/disable/start/stop a PIM vif interface.
+	 *
+	 * @param vif_name the name of the vif to enable/disable/start/stop.
+	 */
+	enable_vif	? vif_name:txt
+	disable_vif	? vif_name:txt
+	start_vif	? vif_name:txt
+	stop_vif	? vif_name:txt
+
+	/**
+	 * Enable/disable/start/stop all PIM vif interfaces.
+	 */
+	enable_all_vifs
+	disable_all_vifs
+	start_all_vifs
+	stop_all_vifs
+	
+	/**
+	 * Enable/disable/start/stop PIM protocol and PIM CLI access.
+	 */
+	enable_pim
+	disable_pim
+	enable_cli
+	disable_cli
+	start_pim
+	stop_pim
+	start_cli
+	stop_cli
+
+	/**
+	 * Enable/disable/start/stop BSR.
+	 */
+	enable_bsr
+	disable_bsr
+	start_bsr
+	stop_bsr
+
+	/**
+	 * Add/delete scope zone.
+	 *
+	 * @param scope_zone_id the ID of the configured zone.
+	 * @param vif_name the name of the vif to use as a bondary of the
+	 * scope zone.
+	 * @param vif_addr the address of the vif to use as a bondary of the
+	 * scope zone.
+	 */
+	add_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
+						& vif_name:txt
+	add_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
+						& vif_name:txt
+	add_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
+						& vif_addr:ipv4
+	add_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
+						& vif_addr:ipv6
+	delete_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
+						& vif_name:txt
+	delete_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
+						& vif_name:txt
+	delete_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
+						& vif_addr:ipv4
+	delete_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
+						& vif_addr:ipv6
+
+	/**
+	 * Add/delete candidate-BSR configuration.
+	 *
+	 * @param scope_zone_id the ID of the configured zone.
+	 * @param is_scope_zone true if configuring administratively scoped
+	 * zone.
+	 * @param vif_name the name of the vif to use its address as a
+	 * candidate-BSR.
+	 * @param cand_bsr_addr the address to use as a candidate-BSR.
+	 * @param bsr_priority the BSR priority (larger is better).
+	 * @param hash_masklen the hash mask length.
+	 */
+	add_config_cand_bsr_by_vif_name4? scope_zone_id:ipv4net		\
+					& is_scope_zone:bool		\
+					& vif_name:txt			\
+					& bsr_priority:u32		\
+					& hash_masklen:u32
+	add_config_cand_bsr_by_vif_name6? scope_zone_id:ipv6net		\
+					& is_scope_zone:bool		\
+					& vif_name:txt			\
+					& bsr_priority:u32		\
+					& hash_masklen:u32
+	add_config_cand_bsr_by_addr4	? scope_zone_id:ipv4net		\
+					& is_scope_zone:bool		\
+					& cand_bsr_addr:ipv4		\
+					& bsr_priority:u32		\
+					& hash_masklen:u32
+	add_config_cand_bsr_by_addr6	? scope_zone_id:ipv6net		\
+					& is_scope_zone:bool		\
+					& cand_bsr_addr:ipv6		\
+					& bsr_priority:u32		\
+					& hash_masklen:u32
+	delete_config_cand_bsr4		? scope_zone_id:ipv4net		\
+					& is_scope_zone:bool
+	delete_config_cand_bsr6		? scope_zone_id:ipv6net		\
+					& is_scope_zone:bool
+
+	/**
+	 * Add/delete Candidate-RP configuration.
+	 *
+	 * @param is_scope_zone true if configuring administratively scoped
+	 * zone.
+	 * @param group_prefix the group prefix of the configured zone.
+	 * @param vif_name the name of the vif to use its address as a
+	 * candidate-RP.
+	 * @param cand_rp_addr the address to use as a candidate-RP.
+	 * @param rp_priority the Cand-RP priority (smaller is better).
+	 * @param rp_holdtime the Cand-RP holdtime (in seconds).
+	 */
+	add_config_cand_rp_by_vif_name4	? group_prefix:ipv4net		\
+					& is_scope_zone:bool		\
+					& vif_name:txt			\
+					& rp_priority:u32		\
+					& rp_holdtime:u32
+	add_config_cand_rp_by_vif_name6	? group_prefix:ipv6net		\
+					& is_scope_zone:bool		\
+					& vif_name:txt			\
+					& rp_priority:u32		\
+					& rp_holdtime:u32
+	add_config_cand_rp_by_addr4	? group_prefix:ipv4net		\
+					& is_scope_zone:bool		\
+					& cand_rp_addr:ipv4		\
+					& rp_priority:u32		\
+					& rp_holdtime:u32
+	add_config_cand_rp_by_addr6	? group_prefix:ipv6net		\
+					& is_scope_zone:bool		\
+					& cand_rp_addr:ipv6		\
+					& rp_priority:u32		\
+					& rp_holdtime:u32
+	delete_config_cand_rp_by_vif_name4? group_prefix:ipv4net	\
+					& is_scope_zone:bool		\
+					& vif_name:txt
+	delete_config_cand_rp_by_vif_name6? group_prefix:ipv6net	\
+					& is_scope_zone:bool		\
+					& vif_name:txt
+	delete_config_cand_rp_by_addr4	? group_prefix:ipv4net		\
+					& is_scope_zone:bool		\
+					& cand_rp_addr:ipv4
+	delete_config_cand_rp_by_addr6	? group_prefix:ipv6net		\
+					& is_scope_zone:bool		\
+					& cand_rp_addr:ipv6
+
+	/**
+	 * Add/delete/complete static RP configuration.
+	 *
+	 * @param group_prefix the group prefix for the RP.
+	 * @param rp_addr the RP address.
+	 * @param rp_priority the RP priority (smaller is better).
+	 * @param hash_masklen the hash masklen used in computing an RP for
+	 * a group. It should be same across all RPs. If set to zero,
+	 * the default one will be used.
+	 */
+	add_config_static_rp4		? group_prefix:ipv4net		\
+					& rp_addr:ipv4			\
+					& rp_priority:u32		\
+					& hash_masklen:u32
+	add_config_static_rp6		? group_prefix:ipv6net		\
+					& rp_addr:ipv6			\
+					& rp_priority:u32		\
+					& hash_masklen:u32
+	delete_config_static_rp4	? group_prefix:ipv4net		\
+					& rp_addr:ipv4
+	delete_config_static_rp6	? group_prefix:ipv6net		\
+					& rp_addr:ipv6
+	config_static_rp_done
+
+	/**
+	 * Configure PIM Hello-related metrics.
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param vif_name the name of the vif to configure.
+	 * @param proto_version the protocol version.
+	 * @param hello_triggered_delay the Triggered_Hello_Delay (in seconds).
+	 * @param hello_period the Hello_Period periodic interval for Hello
+	 * messages (in seconds).
+	 * @param hello_holdtime the Holdtime in the Holdtime option
+	 * (in seconds).
+	 * @param dr_priority the DR Priority in the DR Priority
+	 * option (larger is better).
+	 * @param lan_delay the LAN Delay in the LAN Prune Delay option
+	 * (in milliseconds).
+	 * @param override_interval the Override_Interval in the
+	 * LAN Prune Delay option (in milliseconds).
+	 * @param is_tracking_support_disabled if true, the T-bit in the
+	 * LAN Prune Delay option is set.
+	 * @param accept_nohello_neighbors if true, accept neighbors that
+	 * didn't send a Hello message first.
+	 */
+	get_vif_proto_version		? vif_name:txt -> proto_version:u32
+	set_vif_proto_version		? vif_name:txt  & proto_version:u32
+	reset_vif_proto_version		? vif_name:txt
+	get_vif_hello_triggered_delay	? vif_name:txt -> hello_triggered_delay:u32
+	set_vif_hello_triggered_delay	? vif_name:txt  & hello_triggered_delay:u32
+	reset_vif_hello_triggered_delay	? vif_name:txt
+	get_vif_hello_period		? vif_name:txt -> hello_period:u32
+	set_vif_hello_period		? vif_name:txt  & hello_period:u32
+	reset_vif_hello_period		? vif_name:txt
+	get_vif_hello_holdtime		? vif_name:txt -> hello_holdtime:u32
+	set_vif_hello_holdtime		? vif_name:txt  & hello_holdtime:u32
+	reset_vif_hello_holdtime	? vif_name:txt
+	get_vif_dr_priority		? vif_name:txt -> dr_priority:u32
+	set_vif_dr_priority		? vif_name:txt  & dr_priority:u32
+	reset_vif_dr_priority		? vif_name:txt
+	get_vif_lan_delay		? vif_name:txt -> lan_delay:u32
+	set_vif_lan_delay		? vif_name:txt  & lan_delay:u32
+	reset_vif_lan_delay		? vif_name:txt
+	get_vif_override_interval	? vif_name:txt -> override_interval:u32
+	set_vif_override_interval	? vif_name:txt  & override_interval:u32
+	reset_vif_override_interval	? vif_name:txt
+	get_vif_is_tracking_support_disabled	? vif_name:txt		\
+					-> is_tracking_support_disabled:bool
+	set_vif_is_tracking_support_disabled	? vif_name:txt		\
+						& is_tracking_support_disabled:bool
+	reset_vif_is_tracking_support_disabled	? vif_name:txt
+	get_vif_accept_nohello_neighbors	? vif_name:txt		\
+					-> accept_nohello_neighbors:bool
+	set_vif_accept_nohello_neighbors	? vif_name:txt		\
+						& accept_nohello_neighbors:bool
+	reset_vif_accept_nohello_neighbors	? vif_name:txt
+
+	/**
+	 * Configure PIM Join/Prune-related metrics.
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param vif_name the name of the vif to configure.
+	 * @param join_prune_period the period between Join/Prune messages.
+	 */
+	get_vif_join_prune_period	? vif_name:txt -> join_prune_period:u32
+	set_vif_join_prune_period	? vif_name:txt  & join_prune_period:u32
+	reset_vif_join_prune_period	? vif_name:txt
+
+	/**
+	 * Configure SPT-switch threshold.
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param is_enabled if true, enable SPT-switch, otherwise disable it.
+	 * @param interval_sec if the SPT-switch is enabled, the interval
+	 * (in number of seconds) to measure the bandwidth to consider whether
+	 * to switch to the SPT.
+	 * @param if the SPT-switch is enabled, the threshold in number of
+	 * bytes within the interval_sec to switch to the SPT. If it is zero,
+	 * then the SPT will happen on the first packet.
+	 */
+	get_switch_to_spt_threshold	-> is_enabled:bool		\
+					& interval_sec:u32		\
+					& bytes:u32
+	set_switch_to_spt_threshold	? is_enabled:bool		\
+					& interval_sec:u32		\
+					& bytes:u32
+	reset_switch_to_spt_threshold
+
+	/**
+	 * Enable/disable the PIM trace log.
+	 */
+	enable_log_trace
+	disable_log_trace
+
+	/**
+	 * Test-related methods: add Join/Prune entries, and send them
+	 * to a neighbor.
+	 */
+	add_test_jp_entry4	? source_addr:ipv4 & group_addr:ipv4	\
+				& group_masklen:u32			\
+				& mrt_entry_type:txt			\
+				& action_jp:txt				\
+				& holdtime:u32				\
+				& new_group_bool:bool
+	add_test_jp_entry6	? source_addr:ipv6 & group_addr:ipv6	\
+				& group_masklen:u32			\
+				& mrt_entry_type:txt			\
+				& action_jp:txt				\
+				& holdtime:u32				\
+				& new_group_bool:bool
+	send_test_jp_entry4	? nbr_addr:ipv4
+	send_test_jp_entry6	? nbr_addr:ipv6
+
+	/**
+	 * Test-related methods: send an Assert message on an interface.
+	 *
+	 * @param vif_name the name of the vif to send the Assert on.
+	 * @param source_addr the source address inside the Assert message.
+	 * @param group_addr the group address inside the Assert message.
+	 * @param rpt_bit the RPT-bit inside the Assert message.
+	 * @param metric_preference the metric preference inside the Assert
+	   message.
+	 * @param metric the metric inside the Assert message.
+	 */
+	send_test_assert4	? vif_name:txt				\
+				& source_addr:ipv4 & group_addr:ipv4	\
+				& rpt_bit:bool				\
+				& metric_preference:u32			\
+				& metric:u32
+	send_test_assert6	? vif_name:txt				\
+				& source_addr:ipv6 & group_addr:ipv6	\
+				& rpt_bit:bool				\
+				& metric_preference:u32			\
+				& metric:u32
+
+	/**
+	 * Test-related methods: send Bootstrap and Cand-RP-Adv messages.
+	 *
+	 * @param zone_id_scope_zone_prefix the zone prefix of the zone ID.
+	 * @param zone_id_is_scope_zone true if the zone is scoped.
+	 * @param bsr_addr the address of the Bootstrap router.
+	 * @param bsr_priority the priority of the Bootstrap router.
+	 * @param hash_masklen the hash masklen inside the Bootstrap messages.
+	 * @param fragment_tag the fragment tag inside the Bootstrap messages.
+	 * @param group_prefix the group prefix.
+	 * @param is_scope_zone true if the group prefix has the scope zone
+	 * flag set.
+	 * @param expected_rp_count the number of the expected RPs for
+	 * the group prefix.
+	 * @param rp_addr the RP address.
+	 * @param rp_priority the RP priority.
+	 * @param rp_holdtime the RP holdtime.
+	 * @param vif_name the name of the vif to send the messages on.
+	 * @param dest_addr the destination address to send the message to.
+	 */
+	add_test_bsr_zone4	? zone_id_scope_zone_prefix:ipv4net	\
+				& zone_id_is_scope_zone:bool		\
+				& bsr_addr:ipv4				\
+				& bsr_priority:u32			\
+				& hash_masklen:u32			\
+				& fragment_tag:u32
+	add_test_bsr_zone6	? zone_id_scope_zone_prefix:ipv6net	\
+				& zone_id_is_scope_zone:bool		\
+				& bsr_addr:ipv6				\
+				& bsr_priority:u32			\
+				& hash_masklen:u32			\
+				& fragment_tag:u32
+	add_test_bsr_group_prefix4 ? zone_id_scope_zone_prefix:ipv4net	\
+				& zone_id_is_scope_zone:bool		\
+				& group_prefix:ipv4net			\
+				& is_scope_zone:bool			\
+				& expected_rp_count:u32
+	add_test_bsr_group_prefix6 ? zone_id_scope_zone_prefix:ipv6net	\
+				& zone_id_is_scope_zone:bool		\
+				& group_prefix:ipv6net			\
+				& is_scope_zone:bool			\
+				& expected_rp_count:u32
+	add_test_bsr_rp4	? zone_id_scope_zone_prefix:ipv4net	\
+				& zone_id_is_scope_zone:bool		\
+				& group_prefix:ipv4net			\
+				& rp_addr:ipv4				\
+				& rp_priority:u32			\
+				& rp_holdtime:u32
+	add_test_bsr_rp6	? zone_id_scope_zone_prefix:ipv6net	\
+				& zone_id_is_scope_zone:bool		\
+				& group_prefix:ipv6net			\
+				& rp_addr:ipv6				\
+				& rp_priority:u32			\
+				& rp_holdtime:u32
+	send_test_bootstrap	? vif_name:txt
+	send_test_bootstrap_by_dest4 ? vif_name:txt			\
+				& dest_addr:ipv4
+	send_test_bootstrap_by_dest6 ? vif_name:txt			\
+				& dest_addr:ipv6
+	send_test_cand_rp_adv
+
+	/**
+	 * Retrieve information about all PIM neighbors.
+	 * 
+	 * @param nbrs_number the number of PIM neighbors
+	 * @param vifs the list of vif names for all neighbors
+	 * (one vif name per neighbor).
+	 * @param addreesses the list of addresses of all neighbors
+	 * (one IPv4 or IPv6 address per neighbor).
+	 * @param pim_versions the list of PIM protocol versions for all
+	 * neighbors (one number per neighbor).
+	 * @param dr_priorities the list of DR priorities of all neighbors
+	 * (one number per neighbor).
+	 * @param holdtimes the list of configured holdtimes (in seconds)
+	 * of all neighbors (one number per neighbor).
+	 * @param timeouts the list of timeout values (in seconds)
+	 * of all neighbors (one number per neighbor).
+	 * @param uptimes the list of uptime values (in seconds)
+	 * of all neighbors (one number per neighbor).
+	 */
+	pimstat_neighbors4		-> nbrs_number:u32		\
+					& vifs:list			\
+					& addresses:list		\
+					& pim_versions:list		\
+					& dr_priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& uptimes:list
+	pimstat_neighbors6		-> nbrs_number:u32		\
+					& vifs:list			\
+					& addresses:list		\
+					& pim_versions:list		\
+					& dr_priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& uptimes:list
+
+	/**
+	 * Retrieve information about PIM interfaces.
+	 * 
+	 * @param vif_name the name of the vif to retrieve information about.
+	 * @param pim_version the PIM protocol version on that vif.
+	 * @param is_dr true if this router is the DR for the subnet
+	 * the vif is connected to.
+	 * @param dr_priority the DR priority configured on that vif.
+	 * @param dr_address the address of the DR for the subnet
+	 * the vif is connected to.
+	 * @param pim_nbrs_number the number of PIM neighbors on the subnet
+	 * the vif is connected to.
+	 */
+	pimstat_interface4		? vif_name:txt			\
+					-> pim_version:u32		\
+					& is_dr:bool			\
+					& dr_priority:u32		\
+					& dr_address:ipv4		\
+					& pim_nbrs_number:u32
+	pimstat_interface6		? vif_name:txt			\
+					-> pim_version:u32		\
+					& is_dr:bool			\
+					& dr_priority:u32		\
+					& dr_address:ipv6		\
+					& pim_nbrs_number:u32
+
+	/**
+	 * Retrieve information about the RP-Set.
+	 * 
+	 * @param rps_number the number of RPs in the RP-Set.
+	 * @param addresses the list of addresses of all RPs
+	 * (one IPv4 or IPv6 address per RP).
+	 * @param types the list of textual description about the origin
+	 * of each RP (one keyword per RP: "bootstrap", "static" or "unknown").
+	 * @param priorities the list of RP priorities of all RPs
+	 * (one number per RP).
+	 * @param holdtimes the list of configured holdtimes (in seconds)
+	 * of all RPs (one number per RP).
+	 * @param timeouts the list of timeout values (in seconds)
+	 * of all RPs (one number per RP).
+	 * @param group_prefixes the list of all group prefixes
+	 * (one network IPv4Net or IPv6Net address per RP).
+	 * Note that if an RP is configured for more than one group prefixes,
+	 * there will be a number of entries for that RP: one per group prefix.
+	 */
+	pimstat_rps4			-> rps_number:u32		\
+					& addresses:list		\
+					& types:list			\
+					& priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& group_prefixes:list
+
+	pimstat_rps6			-> rps_number:u32		\
+					& addresses:list		\
+					& types:list			\
+					& priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& group_prefixes:list
+
+	/**
+	 * Clear all statistics
+	 */
+	clear_pim_statistics
+	
+	/**
+	 * Clear all statistics on a specific interface.
+	 * 
+	 * @param vif_name the interface to clear the statistics of.
+	 */
+	clear_pim_statistics_per_vif	? vif_name:txt
+
+	/**
+	 * Statistics-related counters and values
+	 */
+	pimstat_hello_messages_received			-> value:u32
+	pimstat_hello_messages_sent			-> value:u32
+	pimstat_hello_messages_rx_errors		-> value:u32
+	pimstat_register_messages_received		-> value:u32
+	pimstat_register_messages_sent			-> value:u32
+	pimstat_register_messages_rx_errors		-> value:u32
+	pimstat_register_stop_messages_received		-> value:u32
+	pimstat_register_stop_messages_sent		-> value:u32
+	pimstat_register_stop_messages_rx_errors	-> value:u32
+	pimstat_join_prune_messages_received		-> value:u32
+	pimstat_join_prune_messages_sent		-> value:u32
+	pimstat_join_prune_messages_rx_errors		-> value:u32
+	pimstat_bootstrap_messages_received		-> value:u32
+	pimstat_bootstrap_messages_sent			-> value:u32
+	pimstat_bootstrap_messages_rx_errors		-> value:u32
+	pimstat_assert_messages_received		-> value:u32
+	pimstat_assert_messages_sent			-> value:u32
+	pimstat_assert_messages_rx_errors		-> value:u32
+	pimstat_graft_messages_received			-> value:u32
+	pimstat_graft_messages_sent			-> value:u32
+	pimstat_graft_messages_rx_errors		-> value:u32
+	pimstat_graft_ack_messages_received		-> value:u32
+	pimstat_graft_ack_messages_sent			-> value:u32
+	pimstat_graft_ack_messages_rx_errors		-> value:u32
+	pimstat_candidate_rp_messages_received		-> value:u32
+	pimstat_candidate_rp_messages_sent		-> value:u32
+	pimstat_candidate_rp_messages_rx_errors		-> value:u32
+	pimstat_unknown_type_messages			-> value:u32
+	pimstat_unknown_version_messages		-> value:u32
+	pimstat_neighbor_unknown_messages		-> value:u32
+	pimstat_bad_length_messages			-> value:u32
+	pimstat_bad_checksum_messages			-> value:u32
+	pimstat_bad_receive_interface_messages		-> value:u32
+	pimstat_rx_interface_disabled_messages		-> value:u32
+	pimstat_rx_register_not_rp			-> value:u32
+	pimstat_rp_filtered_source			-> value:u32
+	pimstat_unknown_register_stop			-> value:u32
+	pimstat_rx_join_prune_no_state			-> value:u32
+	pimstat_rx_graft_graft_ack_no_state		-> value:u32
+	pimstat_rx_graft_on_upstream_interface		-> value:u32
+	pimstat_rx_candidate_rp_not_bsr			-> value:u32
+	pimstat_rx_bsr_when_bsr				-> value:u32
+	pimstat_rx_bsr_not_rpf_interface		-> value:u32
+	pimstat_rx_unknown_hello_option			-> value:u32
+	pimstat_rx_data_no_state			-> value:u32
+	pimstat_rx_rp_no_state				-> value:u32
+	pimstat_rx_aggregate				-> value:u32
+	pimstat_rx_malformed_packet			-> value:u32
+	pimstat_no_rp					-> value:u32
+	pimstat_no_route_upstream			-> value:u32
+	pimstat_rp_mismatch				-> value:u32
+	pimstat_rpf_neighbor_unknown			-> value:u32
+	pimstat_rx_join_rp				-> value:u32
+	pimstat_rx_prune_rp				-> value:u32
+	pimstat_rx_join_wc				-> value:u32
+	pimstat_rx_prune_wc				-> value:u32
+	pimstat_rx_join_sg				-> value:u32
+	pimstat_rx_prune_sg				-> value:u32
+	pimstat_rx_join_sg_rpt				-> value:u32
+	pimstat_rx_prune_sg_rpt				-> value:u32
+
+	pimstat_hello_messages_received_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_hello_messages_sent_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_hello_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_register_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_register_messages_sent_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_register_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_register_stop_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_register_stop_messages_sent_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_register_stop_messages_rx_errors_per_vif ? vif_name:txt	\
+							-> value:u32
+	pimstat_join_prune_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_join_prune_messages_sent_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_join_prune_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_bootstrap_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_bootstrap_messages_sent_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_bootstrap_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_assert_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_assert_messages_sent_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_assert_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_graft_messages_received_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_graft_messages_sent_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_graft_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_graft_ack_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_graft_ack_messages_sent_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_graft_ack_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_candidate_rp_messages_received_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_candidate_rp_messages_sent_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_candidate_rp_messages_rx_errors_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_unknown_type_messages_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_unknown_version_messages_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_neighbor_unknown_messages_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_bad_length_messages_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_bad_checksum_messages_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_bad_receive_interface_messages_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_interface_disabled_messages_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_register_not_rp_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rp_filtered_source_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_unknown_register_stop_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_join_prune_no_state_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_graft_graft_ack_no_state_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_graft_on_upstream_interface_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_candidate_rp_not_bsr_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_bsr_when_bsr_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_bsr_not_rpf_interface_per_vif	? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_unknown_hello_option_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_data_no_state_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_rp_no_state_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_aggregate_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_malformed_packet_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_no_rp_per_vif				? vif_name:txt	\
+							-> value:u32
+	pimstat_no_route_upstream_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rp_mismatch_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rpf_neighbor_unknown_per_vif		? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_join_rp_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_prune_rp_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_join_wc_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_prune_wc_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_join_sg_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_prune_sg_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_join_sg_rpt_per_vif			? vif_name:txt	\
+							-> value:u32
+	pimstat_rx_prune_sg_rpt_per_vif			? vif_name:txt	\
+							-> value:u32
+}

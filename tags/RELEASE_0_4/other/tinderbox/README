@@ -1,0 +1,24 @@
+XORP Tinderbox
+==============
+
+The tinderbox is used to build and test xorp on different platforms a
+number of times a day and report errors.  A tinderbox control machine
+runs the scripts/tinderbox.sh shell program.
+
+Directory structure
+===================
+
+scripts/ contains shell scripts for tinderbox.
+xorp/ 	 when it exists contains the xorp code and is used for build and 
+	 testing
+
+Configuration
+=============
+
+Configuration variables appear in scripts/config.  These should be
+self explanatory.
+
+The scripts assume host based authentication (.shosts) between the
+controlling machine and the build/test clients.  Depending on your ssh
+version you may need need ssh-keysign(8) to be setuid on the
+controlling machine.

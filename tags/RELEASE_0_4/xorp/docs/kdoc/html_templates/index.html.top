@@ -1,0 +1,38 @@
+<HTML>
+<HEAD>
+<TITLE>XORP Source File Documentation</TITLE>
+<!-- This style is copied from generated kdoc html-->
+<META NAME="Generator" CONTENT="KDOC ">
+</HEAD>
+<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#000099" alink= "#ffffff">
+<TABLE WIDTH="100%" BORDER="0">
+<TR>
+<TD>
+	<TABLE BORDER="0">
+		<TR><TD valign="top" align="left" cellspacing="10">
+		<h1>XORP Source Code Documentation</h1>
+		<p> The XORP project uses the KDE documentation tool 
+		    <a href="http://www.ph.unimelb.edu.au/~ssk/kde/kdoc/">kdoc</a>
+		    tool to produce source code documentation.  The following
+		    source code documentation is available.
+		</TD>
+		<TD valign="top" align="right" colspan="1"></TD></TR>
+	</TABLE>
+	<HR>
+	<TABLE BORDER="0">
+
+	</TABLE>
+	</TD>
+<TD align="right"><TABLE BORDER="0"><TD rowspan="6">
+  <IMG SRC=@HTML_LOGO@>
+</TD>
+
+<!-- <TR><TD><small><A HREF="index-long.html">Annotated List</A></small></TD></TR>
+<TR><TD><small><A HREF="header-list.html">Files</A></small></TD></TR>
+<TR><TD><small><A HREF="all-globals.html">Globals</A></small></TD></TR>
+<TR><TD><small><A HREF="hier.html">Hierarchy</A></small></TD></TR>
+<TR><TD><small><A HREF="index.html">Index</A></small></TD></TR>
+-->
+</TABLE></TD></TR></TABLE>
+<TABLE BORDER="0">
+<TR bgcolor="b0b0b0"><TH>Title</TH><TH>Description</TH></TR>

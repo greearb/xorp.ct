@@ -1,0 +1,17 @@
+#!/bin/sh
+if [ $# -lt 1 ] ; then
+   echo "Usage: $0 <program [program parameters]>"
+   exit 1
+fi
+
+# this looks in the same directory, this
+# FlowerCheck script resides; modify to your
+# needs:
+SHLIB=`dirname $0`/flower_malloc.so
+if [ ! -x $SHLIB ] ; then
+    echo "$SHLIB not found"
+    exit 1
+fi
+
+export LD_PRELOAD=$SHLIB
+exec $@

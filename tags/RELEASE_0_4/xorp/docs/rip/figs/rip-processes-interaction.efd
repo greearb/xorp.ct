@@ -1,0 +1,438 @@
+Storage 
+{
+	{ Format 1.33 }
+	{ GeneratedFrom TEFD-version-2.20 }
+	{ WrittenBy orion }
+	{ WrittenOn "" }
+}
+
+Document 
+{
+	{ Type "Data and Event Flow Diagram" }
+	{ Name rip-processes-interaction.efd }
+	{ Author hodson }
+	{ CreatedOn "" }
+	{ Annotation "" }
+	{ Hierarchy False }
+}
+
+Page 
+{
+	{ PageOrientation Portrait }
+	{ PageSize A4 }
+	{ ShowHeaders False }
+	{ ShowFooters False }
+	{ ShowNumbers False }
+}
+
+Scale 
+{
+	{ ScaleValue 1 }
+}
+
+# GRAPH NODES
+
+ExternalEntity 1
+{
+	{ Name "RtrMgr" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+}
+
+ExternalEntity 2
+{
+	{ Name "RIP" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+}
+
+ExternalEntity 3
+{
+	{ Name "RIB" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+}
+
+ExternalEntity 4
+{
+	{ Name "FEA\rInterface\rManager" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+}
+
+ExternalEntity 5
+{
+	{ Name "FEA\rUDP\rService" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+}
+
+ExternalEntity 24
+{
+	{ Name "SNMP" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+}
+
+# GRAPH EDGES
+
+BidirectionalDataFlow 6
+{
+	{ Name "Configuration\rData\r" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 2 }
+	{ Subject2 1 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+BidirectionalDataFlow 14
+{
+	{ Name "RIP protocol\rpackets" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 2 }
+	{ Subject2 5 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+DataFlow 15
+{
+	{ Name "Interface\revents" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 4 }
+	{ Subject2 2 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+DataFlow 16
+{
+	{ Name "RIP routes" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 2 }
+	{ Subject2 3 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+DataFlow 17
+{
+	{ Name "Static routes" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 3 }
+	{ Subject2 2 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+DataFlow 18
+{
+	{ Name "Redistribution routes" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 3 }
+	{ Subject2 2 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+DataFlow 25
+{
+	{ Name "Counter Values\r" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 2 }
+	{ Subject2 24 }
+	{ Components 0 }
+	{ ContentType Unspecified }
+}
+
+# VIEWS AND GRAPHICAL SHAPES
+
+View 7
+{
+	{ Index "0" }
+	{ Parent 0 }
+}
+
+Square 8
+{
+	{ View 7 }
+	{ Subject 1 }
+	{ Position 360 180 }
+	{ Size 60 60 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Square 9
+{
+	{ View 7 }
+	{ Subject 2 }
+	{ Position 360 330 }
+	{ Size 60 60 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Square 10
+{
+	{ View 7 }
+	{ Subject 3 }
+	{ Position 150 330 }
+	{ Size 60 60 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 11
+{
+	{ View 7 }
+	{ Subject 6 }
+	{ FromShape 9 }
+	{ ToShape 8 }
+	{ Curved False }
+	{ End1 FilledArrow }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 360 300 }
+	{ Point 360 210 }
+	{ NamePosition 359 263 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Square 12
+{
+	{ View 7 }
+	{ Subject 4 }
+	{ Position 540 390 }
+	{ Size 60 60 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Square 13
+{
+	{ View 7 }
+	{ Subject 5 }
+	{ Position 540 270 }
+	{ Size 60 60 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 19
+{
+	{ View 7 }
+	{ Subject 14 }
+	{ FromShape 9 }
+	{ ToShape 13 }
+	{ Curved False }
+	{ End1 FilledArrow }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 390 320 }
+	{ Point 510 280 }
+	{ NamePosition 446 291 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 20
+{
+	{ View 7 }
+	{ Subject 15 }
+	{ FromShape 12 }
+	{ ToShape 9 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 510 380 }
+	{ Point 390 340 }
+	{ NamePosition 454 351 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 21
+{
+	{ View 7 }
+	{ Subject 16 }
+	{ FromShape 9 }
+	{ ToShape 10 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 330 310 }
+	{ Point 180 310 }
+	{ NamePosition 255 300 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 22
+{
+	{ View 7 }
+	{ Subject 17 }
+	{ FromShape 10 }
+	{ ToShape 9 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 180 330 }
+	{ Point 330 330 }
+	{ NamePosition 255 320 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 23
+{
+	{ View 7 }
+	{ Subject 18 }
+	{ FromShape 10 }
+	{ ToShape 9 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 180 350 }
+	{ Point 330 350 }
+	{ NamePosition 255 340 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Square 26
+{
+	{ View 7 }
+	{ Subject 24 }
+	{ Position 360 480 }
+	{ Size 60 60 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 27
+{
+	{ View 7 }
+	{ Subject 25 }
+	{ FromShape 9 }
+	{ ToShape 26 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 FilledArrow }
+	{ Points 2 }
+	{ Point 360 360 }
+	{ Point 360 450 }
+	{ NamePosition 359 408 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+

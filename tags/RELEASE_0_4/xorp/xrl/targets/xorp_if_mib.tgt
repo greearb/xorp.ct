@@ -1,0 +1,7 @@
+
+/* $XORP: xorp/xrl/targets/bgp4_mib.tgt,v 1.1 2003/05/14 18:32:17 jcardona Exp $ */
+
+#include "common.xif"
+#include "xorp_if_mib.xif"
+
+target xorp_if_mib implements common/0.1, xorp_if_mib/0.1

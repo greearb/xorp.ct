@@ -1,0 +1,25 @@
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt_client.xif,v 1.1 2002/11/15 00:09:04 hodson Exp $ */
+
+/*
+ * Interface for receiving packets on a raw socket. 
+ */
+
+interface raw_packet_client/0.1 {
+	/**
+	 * Receive a packet from a raw socket.
+	 * 
+	 * @param if_name.  Interface packet arrived on.
+	 * @param vif_name. VIF packet arrived on.
+	 * @param packet. Raw packet data.  Checksum of packet guaranteed to be
+	 *		  good before method called.  Value of the IP checksum 
+	 *		  bits in binary packet is undefined.  All fields
+	 *		  in the IPv4 header should be in network order.
+	 */
+	recv_raw4 ?							      \
+		if_name:txt &						      \
+		vif_name:txt &						      \
+	        packet:binary
+}
+
+
+
