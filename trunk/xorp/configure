@@ -3125,7 +3125,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
     ;;
-    windows* )
+    *cygwin )
 
 cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_WINDOWS 1

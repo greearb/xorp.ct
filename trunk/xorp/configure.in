@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.128 2004/12/11 02:23:50 atanu Exp $
+dnl $XORP: xorp/configure.in,v 1.129 2004/12/15 17:51:49 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ case "${host_os}" in
     solaris* )
 	AC_DEFINE(HOST_OS_SOLARIS, 1, [Define to 1 if the OS is Solaris])
     ;;
-    windows* )
+    *cygwin )
 	AC_DEFINE(HOST_OS_WINDOWS, 1, [Define to 1 if the OS is Windows])
     ;;
 esac
