@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.41 2004/12/08 04:59:34 bms Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.42 2004/12/09 07:54:35 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,16 +31,11 @@
 #include "ifconfig_addr_table.hh"
 #include "libfeaclient_bridge.hh"
 #include "nexthop_port_mapper.hh"
-#ifdef notyet
-#include "firewall.hh"
-#endif
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
-#ifdef notyet
-#include "xrl_firewall.hh"
-#endif
+#include "xrl_packet_acl.hh"
 #include "profile_vars.hh"
 
 static const char* xrl_entity = "fea";
@@ -185,15 +180,15 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
    //
-   // Packet ACL (Firewall) transaction manager and XRL target.
+   // Packet ACL transaction manager and XRL target.
    //
-#ifdef notyet
-   FwTransactionManager ftm;
+   PaTableManager ptm;
+   PaTransactionManager patm(eventloop, ptm);
    XrlStdRouter xrl_std_router_packet_acl(eventloop, "packet_acl",
 					  finder_hostname, finder_port);
-   XrlPacketAclTarget xrl_packet_acl_target(&xrl_std_router_packet_acl, ftm);
+   XrlPacketAclTarget xrl_packet_acl_target(&xrl_std_router_packet_acl,
+					    eventloop, patm);
    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_packet_acl);
-#endif
 
 #ifndef FEA_DUMMY
     //
