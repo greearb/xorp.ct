@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.3 2003/06/01 21:37:28 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.4 2003/06/02 17:12:33 hodson Exp $"
 
 #include <list>
 #include <vector>
@@ -66,7 +66,8 @@ do {									\
 	struct timeval t;						\
 	gettimeofday(&t, 0);						\
  	printf("From %s:%d at %ld.%06ld: ", wh, line,			\
-	       t.tv_sec, t.tv_usec);					\
+	       static_cast<long>(t.tv_sec),				\
+	       static_cast<long>(t.tv_usec));				\
 	printf(x);							\
     }									\
 } while(0)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.3 2003/04/18 19:42:39 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.4 2003/04/23 17:06:48 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -363,9 +363,9 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     record_packet(p);
 		  
     if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
-	record_bad_packet(c_format("Packet size less than minimum (%d < %d)",
+	record_bad_packet(c_format("Packet size less than minimum (%u < %u)",
 				   uint32_t(rip_packet_bytes),
-				   RIPv2_MIN_PACKET_BYTES),
+			  static_cast<uint32_t>(RIPv2_MIN_PACKET_BYTES)),
 			  src_address, src_port, p);
 	return;
     }
@@ -410,7 +410,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     }
 
     const PacketRouteEntry<IPv4>* entries = 0;
-    size_t n_entries = 0;
+    uint32_t n_entries = 0;
 
     if (auth_handler()->authenticate(rip_packet,
 				     rip_packet_bytes,

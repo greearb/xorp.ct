@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.1 2003/04/18 19:42:38 hodson Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.2 2003/04/23 17:06:48 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -83,17 +83,19 @@ NullAuthHandler::authenticate(const uint8_t*		     packet,
     n_entries = 0;
 
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES) {
-	set_error(c_format("packet too large (%d bytes)", packet_bytes));
+	set_error(c_format("packet too large (%u bytes)",
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     } else if (packet_bytes < RIPv2_MIN_PACKET_BYTES) {
-	set_error(c_format("packet too small (%d bytes)", packet_bytes));
+	set_error(c_format("packet too small (%u bytes)",
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     }
 
     size_t entry_bytes = packet_bytes - sizeof(RipPacketHeader);
     if (entry_bytes % sizeof(PacketRouteEntry<IPv4>)) {
-	set_error(c_format("non-integral route entries (%d bytes)",
-			    entry_bytes));
+	set_error(c_format("non-integral route entries (%u bytes)",
+			    static_cast<uint32_t>(entry_bytes)));
 	return false;
     }
 
@@ -174,19 +176,21 @@ PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
     n_entries = 0;
     
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES) {
-	set_error(c_format("packet too large (%d bytes)", packet_bytes));
+	set_error(c_format("packet too large (%u bytes)",
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     }
 
     if (packet_bytes < RIPv2_MIN_AUTH_PACKET_BYTES) {
-	set_error(c_format("packet too small (%d bytes)", packet_bytes));
+	set_error(c_format("packet too small (%u bytes)",
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     }
 
     size_t entry_bytes = packet_bytes - sizeof(RipPacketHeader);
     if (entry_bytes % sizeof(PacketRouteEntry<IPv4>)) {
-	set_error(c_format("non-integral route entries (%d bytes)",
-			   entry_bytes));
+	set_error(c_format("non-integral route entries (%u bytes)",
+			   static_cast<uint32_t>(entry_bytes)));
 	return false;
     }
 
@@ -394,7 +398,7 @@ MD5AuthHandler::currently_active_key() const
 
 bool
 MD5AuthHandler::authenticate(const uint8_t*		    packet,
-			     uint32_t			    packet_bytes,
+			     size_t			    packet_bytes,
 			     const PacketRouteEntry<IPv4>*& entries,
 			     uint32_t&			    n_entries)
 {
@@ -404,12 +408,14 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     n_entries = 0;
     
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES + sizeof(MD5PacketTrailer)) {
-	set_error(c_format("packet too large (%d bytes)", packet_bytes));
+	set_error(c_format("packet too large (%u bytes)",
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     }
 
     if (packet_bytes < RIPv2_MIN_AUTH_PACKET_BYTES) {
-	set_error(c_format("packet too small (%d bytes)", packet_bytes));
+	set_error(c_format("packet too small (%u bytes)",
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     }
 
@@ -428,16 +434,18 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     }
 
     if (mpr->auth_bytes() != sizeof(MD5PacketTrailer)) {
-	set_error(c_format("wrong number of auth bytes (%d != %d)",
-			   mpr->auth_bytes(), sizeof(MD5PacketTrailer)));
+	set_error(c_format("wrong number of auth bytes (%d != %u)",
+			   mpr->auth_bytes(),
+			   static_cast<uint32_t>(sizeof(MD5PacketTrailer))));
 	return false;
     }
 
     if (uint32_t(mpr->auth_offset() + mpr->auth_bytes()) != packet_bytes) {
 	set_error(c_format("Size of packet does not correspond with "
 			   "authentication data offset and size "
-			   "(%d + %d != %d).", mpr->auth_offset(),
-			   mpr->auth_bytes(), packet_bytes));
+			   "(%d + %d != %u).", mpr->auth_offset(),
+			   mpr->auth_bytes(),
+			   static_cast<uint32_t>(packet_bytes)));
 	return false;
     }
 

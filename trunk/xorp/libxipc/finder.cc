@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.11 2003/05/10 18:56:55 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.12 2003/05/22 22:25:21 hodson Exp $"
 
 #include <set>
 
@@ -307,8 +307,8 @@ validate_finder_classes_and_instances(const Finder::ClassTable&  classes,
 		     ti != targets.end(); ti++) {
 		    debug_msg("Known target \"%s\"\n", ti->first.c_str());
 		}
-		XLOG_FATAL("Missing instance (%s) / %d\n", ii->c_str(),
-			   targets.size());
+		XLOG_FATAL("Missing instance (%s) / %u\n", ii->c_str(),
+			   static_cast<uint32_t>(targets.size()));
 	    }
 	}
     }

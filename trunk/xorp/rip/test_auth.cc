@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.1 2003/04/18 19:42:39 hodson Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.2 2003/04/23 17:06:49 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -49,7 +49,7 @@ void set_verbose(bool v)        { s_verbose = v; }
 #define _verbose_log(file, line, x...)					\
 do {									\
     if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
+	printf("From %s:%d: ", file, line);			       	\
 	printf(x);							\
     }									\
 } while(0)
@@ -172,7 +172,7 @@ void dump_binary_data(const vector<uint8_t>& data)
 
     vector<uint8_t>::size_type i = 0; 
     while (i != data.size()) {
-	fprintf(stdout, "%08x ", i);
+	fprintf(stdout, "%08x ", static_cast<uint32_t>(i));
 	string hex;
 	string asc;
 	int r = (data.size() - i) > BPL ? BPL : data.size() - i;
@@ -319,7 +319,9 @@ test_main()
 	    bad_pkt[c] = bad_pkt[c] ^ 0x01;
 	    if (check_auth_packet(bad_pkt, mah, n, true)) {
 		verbose_log("MD5 authentication passed corruption in byte "
-			    "%d with in packet %d entries\n", c, n);
+			    "%u with in packet %u entries\n",
+			    static_cast<uint32_t>(c),
+			    static_cast<uint32_t>(n));
 		dump_binary_data(bad_pkt);
 		return 1;
 	    }
@@ -352,8 +354,8 @@ test_main()
     }
 
     if (mah.key_chain().size() != 1) {
-	verbose_log("Bogus key count: expected 1 key left, have %d\n",
-		    mah.key_chain().size());
+	verbose_log("Bogus key count: expected 1 key left, have %u\n",
+		    static_cast<uint32_t>(mah.key_chain().size()));
 	return 1;
     }
     
