@@ -26,13 +26,10 @@
 #include "xrl_io.hh"
 
 bool
-XrlIO::send(const char* interface, const char *vif,
-	    const char *src,
-	    const char *dst,
+XrlIO::send(const string& interface, const string& vif,
 	    uint8_t* data, uint32_t len)
 {
-    debug_msg("send(%s,%s,%s,%s,%p,%d\n",
-	      interface, vif, src, dst, data, len);
+    debug_msg("send(%s,%s,%p,%d\n", interface.c_str(), vif.c_str(), data, len);
 
     return true;
 }

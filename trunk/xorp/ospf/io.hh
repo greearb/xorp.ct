@@ -30,9 +30,7 @@ class IO {
     /**
      * Send Raw frames.
      */
-    virtual bool send(const char* interface, const char *vif,
-		      const char *src,
-		      const char *dst,
+    virtual bool send(const string& interface, const string& vif,
 		      uint8_t* data, uint32_t len) = 0;
 
     typedef XorpCallback4<void, const string&, const string&,

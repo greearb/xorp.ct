@@ -137,6 +137,12 @@ class Ospf {
 		 uint8_t* data, uint32_t len);
 
     /**
+     * Used to send traffic on the IO interface.
+     */
+    bool send(const string& interface, const string& vif,
+	      uint8_t* data, uint32_t len);
+
+    /**
      * XXX
      * Be sure to capture the multipath capability of OSPF.
      */

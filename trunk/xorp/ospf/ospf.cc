@@ -105,6 +105,17 @@ Ospf<A>::receive(const string& interface, const string& vif,
 
 template <typename A>
 bool
+Ospf<A>::send(const string& interface, const string& vif,
+		 uint8_t* data, uint32_t len)
+{
+    debug_msg("Interface %s Vif %s data %p len %u",
+	      interface.c_str(), vif.c_str(), data, len);
+
+    return _io->send(interface, vif, data, len);
+}
+
+template <typename A>
+bool
 Ospf<A>::add_route()
 {
     return true;

@@ -35,10 +35,9 @@ class XrlIO : public IO {
     /**
      * Send Raw frames.
      */
-    bool send(const char* interface, const char *vif, 
-	      const char *src,
-	      const char *dst,
+    bool send(const string& interface, const string& vif, 
 	      uint8_t* data, uint32_t len);
+
     /**
      * Register for receiving raw frames.
      */
