@@ -255,6 +255,8 @@ class Lsa {
 	return &_pkt[0];
     }
 
+    Lsa_header& get_header() {return _header; }
+
     /**
      * Add the LSA type bindings.
      */

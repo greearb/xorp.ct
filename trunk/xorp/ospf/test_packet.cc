@@ -166,6 +166,27 @@ populate_link_state_request(LinkStateRequestPacket *lsrp,
 	push_back(Ls_request(version, 0xff, 0x0a0b0c0d, 0x12345678));
 }
 
+inline
+void
+populate_router_lsa(RouterLsa *rlsa, OspfTypes::Version version)
+{
+    populate_lsa_header(rlsa->get_header(), version);
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	rlsa->set_w_bit(true);
+	rlsa->set_options(0x010203);
+	break;
+    }
+    
+    RouterLink rl(version);
+    rlsa->get_router_links().push_back(rl);
+
+    // This will set the checksum and the length.
+    rlsa->encode();
+}
+
 bool
 hello_packet_print(TestInfo& info)
 {
@@ -425,6 +446,26 @@ decoder2(TestInfo& info, OspfTypes::Version version)
     return true;
 }
 
+bool
+router_lsa_print(TestInfo& info)
+{
+    RouterLsa *rlsa = new RouterLsa(OspfTypes::V2);
+    populate_router_lsa(rlsa, OspfTypes::V2);
+
+    DOUT(info) << rlsa->str() << endl;
+
+    delete rlsa;
+
+    rlsa = new RouterLsa(OspfTypes::V3);
+    populate_router_lsa(rlsa, OspfTypes::V3);
+
+    DOUT(info) << rlsa->str() << endl;
+
+    delete rlsa;
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -444,6 +485,8 @@ main(int argc, char **argv)
 	{"data_description_print", callback(data_description_packet_print)},
 	{"link_state_request_print",
 	 callback(link_state_request_packet_print)},
+	{"router_lsa_print",
+	 callback(router_lsa_print)},
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
 	{"ddp_compareV2", callback(data_description_packet_compare,
