@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.7 2003/05/21 01:11:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.9 2003/05/23 00:38:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -63,11 +63,11 @@ usage(const char *argv0, int exit_value)
 	output = stdout;
     else
 	output = stderr;
-    
-    fprintf(output, "Usage: %s [-f <finder_hostname>]\n",
+
+    fprintf(output, "Usage: %s [-f <finder_hostname>[/<finder_port>]]\n",
 	    progname);
-    fprintf(output, "           -f <finder_hostname>  : finder hostname\n");
-    fprintf(output, "           -h                    : usage (this message)\n");
+    fprintf(output, "           -f <finder_hostname>[/<finder_port>]  : finder hostname and port\n");
+    fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
     fprintf(output, "Module name:    %s\n", XORP_MODULE_NAME);
@@ -79,11 +79,12 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-fea_main(const char* finder_hostname)
+fea_main(const char* finder_hostname, uint16_t finder_port)
 {
     EventLoop eventloop;
 
-    XrlStdRouter xrl_std_router_fea(eventloop, xrl_entity, finder_hostname);
+    XrlStdRouter xrl_std_router_fea(eventloop, xrl_entity, finder_hostname,
+				    finder_port);
 
     //
     // Initialize Components
@@ -173,7 +174,10 @@ main(int argc, char *argv[])
 {
     int c;
     const char *argv0 = argv[0];
-    const char *finder_hostname = "localhost";		// XXX: default
+    char finder_hostname[MAXHOSTNAMELEN + 1];
+    uint16_t finder_port = 0;			// XXX: default (in host order)
+    
+    strcpy(finder_hostname, "localhost");	// XXX: default
     
     //
     // Initialize and start xlog
@@ -191,8 +195,18 @@ main(int argc, char *argv[])
     while ((c = getopt(argc, argv, "f:h")) != -1) {
 	switch (c) {
 	case 'f':
-	    // Finder hostname
-	    finder_hostname = optarg;
+	    // Finder hostname and port
+	    char *p;
+	    strncpy(finder_hostname, optarg, sizeof(finder_hostname) - 1);
+	    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
+	    p = strrchr(finder_hostname, '/');
+	    if (p != NULL)
+		*p = '\0';
+	    p = strrchr(optarg, '/');
+	    if (p != NULL) {
+		p++;
+		finder_port = static_cast<uint16_t>(atoi(p));
+	    }
 	    break;
 	case 'h':
 	case '?':
@@ -218,7 +232,7 @@ main(int argc, char *argv[])
     //
 
     try {
-	fea_main(finder_hostname);
+	fea_main(finder_hostname, finder_port);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
