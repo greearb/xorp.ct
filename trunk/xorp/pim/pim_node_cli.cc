@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.16 2003/08/07 01:09:10 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.17 2004/02/18 02:48:26 pavlin Exp $"
 
 
 //
@@ -791,7 +791,7 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
     }
     if (pim_mre->is_sg_rpt()) {
 	if (pim_mre->is_rpt_not_joined_state())
-	    upstream_state += "RptNotJoined ";
+	    upstream_state += "RPTNotJoined ";
 	if (pim_mre->is_pruned_state())
 	    upstream_state += "Pruned ";
 	if (pim_mre->is_not_pruned_state())
@@ -842,30 +842,30 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 		       iif_pim_vif_rp->name().c_str() : "UNKNOWN"));
     cli_print(c_format("    Upstream MRIB next hop (RP): %s\n",
 		       (pim_mre->mrib_next_hop_rp() != NULL)?
-		       cstring(pim_mre->mrib_next_hop_rp()->addr())
+		       cstring(pim_mre->mrib_next_hop_rp()->primary_addr())
 		       : "UNKNOWN"));
     if (pim_mre->is_sg()) {
 	cli_print(c_format("    Upstream MRIB next hop (S):  %s\n",
 			   (pim_mre->mrib_next_hop_s() != NULL)?
-			   cstring(pim_mre->mrib_next_hop_s()->addr())
+			   cstring(pim_mre->mrib_next_hop_s()->primary_addr())
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_wc()) {
 	cli_print(c_format("    Upstream RPF'(*,G):        %s\n",
 			   (pim_mre->rpfp_nbr_wc() != NULL)?
-			   cstring(pim_mre->rpfp_nbr_wc()->addr())
+			   cstring(pim_mre->rpfp_nbr_wc()->primary_addr())
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_sg()) {
 	cli_print(c_format("    Upstream RPF'(S,G):        %s\n",
 			   (pim_mre->rpfp_nbr_sg() != NULL)?
-			   cstring(pim_mre->rpfp_nbr_sg()->addr())
+			   cstring(pim_mre->rpfp_nbr_sg()->primary_addr())
 			   : "UNKNOWN"));
     }
     if (pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    Upstream RPF'(S,G,rpt):    %s\n",
 			   (pim_mre->rpfp_nbr_sg_rpt() != NULL)?
-			   cstring(pim_mre->rpfp_nbr_sg_rpt()->addr())
+			   cstring(pim_mre->rpfp_nbr_sg_rpt()->primary_addr())
 			   : "UNKNOWN"));
     }
     cli_print(c_format("    Upstream state:            %s\n",
@@ -1090,7 +1090,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	    cli_print(c_format("%-16s%11s %-16s%2d %-7s%9d%8s\n",
 			       pim_vif->name().c_str(),
 			       dr_priority_string.c_str(),
-			       cstring(pim_nbr->addr()),
+			       cstring(pim_nbr->primary_addr()),
 			       pim_nbr->proto_version(),
 			       pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
 			       pim_nbr->hello_holdtime(),
