@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.2 2002/12/12 20:24:14 mjh Exp $
+# $XORP: xorp/bgp/TODO,v 1.3 2002/12/13 01:35:45 pavlin Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -38,6 +38,11 @@ all peers.  However, the RIB peerhandle is also NULL, so routes that
 come from the rib would then be sent back to the RIB, which is bad.
 Rewrite this code so it doesn't overload the NULL value.
 
+29) Under certain circumstances a new session may be sent withdraws
+that were meant for the previous session. This problem can be
+reproduced by running "test_peering2.sh" with the "-b" flag.
+
+-- added 2003-08-28 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
