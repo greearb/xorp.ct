@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.3 2003/05/31 23:23:25 mjh Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.4 2003/07/16 16:37:27 pavlin Exp $
 #
 
 Urgent
@@ -26,6 +26,9 @@ Operational Mode
 
  - Ensure commands only appear when modules are loaded.
 
+Other
+ - Fix test_router_manager, because even if the path to the xorp_finder
+   binary is incorrect, it doesn't report an error.
 
 Non-Urgent
 ==========
