@@ -74,13 +74,13 @@ delete_interface()
 enable_interface()
 {
     echo -n "enable_interface" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32&ifname:txt=$1&enabled:bool=true"
+    $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32=$1&ifname:txt=$2&enabled:bool=true"
 }
 
 disable_interface()
 {
     echo -n "disable_interface" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32&ifname:txt=$1&enabled:bool=false"
+    $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32=$1&ifname:txt=$2&enabled:bool=false"
 }
 
 set_mac()
