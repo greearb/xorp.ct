@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.28 2003/09/30 18:27:05 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.29 2003/10/14 22:39:46 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -798,7 +798,11 @@ public:
     PimNbr	*pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib);
     
     /**
-     * Find a PIM neighbor.
+     * Find a PIM neighbor by its address.
+     * 
+     * Note: this method should be used in very limited cases, because
+     * in case of IPv6 a neighbor's IP address may be non-unique within
+     * the PIM neighbor database due to scope issues.
      * 
      * @param nbr_addr the address of the PIM neighbor.
      * @return the PIM neighbor (@ref PimNbr) if found, otherwise NULL.

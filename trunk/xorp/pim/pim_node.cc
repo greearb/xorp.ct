@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.29 2003/12/08 20:21:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.30 2003/12/10 22:24:25 pavlin Exp $"
 
 
 //
@@ -1375,7 +1375,7 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr)
 PimNbr *
 PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
 {
-    PimNbr *pim_nbr;
+    PimNbr *pim_nbr = NULL;
     
     //
     // Check the MRIB information
@@ -1412,6 +1412,10 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
  * 
  * Find a PIM neighbor by its address.
  * 
+ * Note: this method should be used in very limited cases, because
+ * in case of IPv6 a neighbor's IP address may be non-unique within
+ * the PIM neighbor database due to scope issues.
+ * 
  * Return value: The #PimNbr entry for the neighbor if found, otherwise %NULL.
  **/
 PimNbr *
@@ -1430,7 +1434,7 @@ PimNode::pim_nbr_find(const IPvX& nbr_addr)
 }
 
 //
-// Add the PimMre to the dummy PimNbr with addr of IPvX::ZERO()
+// Add the PimMre to the dummy PimNbr with primary address of IPvX::ZERO()
 //
 void
 PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
@@ -1438,13 +1442,13 @@ PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
     IPvX ipvx_zero(IPvX::ZERO(family()));
     PimNbr *pim_nbr = NULL;
     
-    // Find the dummy PimNbr with addr of IPvX::ZERO()
+    // Find the dummy PimNbr with primary address of IPvX::ZERO()
     list<PimNbr *>::iterator iter;
     for (iter = processing_pim_nbr_list().begin();
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	pim_nbr = *iter;
-	if (pim_nbr->addr() == ipvx_zero)
+	if (pim_nbr->primary_addr() == ipvx_zero)
 	    break;
 	else
 	    pim_nbr = NULL;
@@ -1468,7 +1472,7 @@ PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
 }
 
 //
-// Delete the PimMre from the dummy PimNbr with addr of IPvX::ZERO()
+// Delete the PimMre from the dummy PimNbr with primary address of IPvX::ZERO()
 //
 void
 PimNode::delete_pim_mre_no_pim_nbr(PimMre *pim_mre)
@@ -1476,13 +1480,13 @@ PimNode::delete_pim_mre_no_pim_nbr(PimMre *pim_mre)
     IPvX ipvx_zero(IPvX::ZERO(family()));
     PimNbr *pim_nbr = NULL;
     
-    // Find the dummy PimNbr with addr of IPvX::ZERO()
+    // Find the dummy PimNbr with primary address of IPvX::ZERO()
     list<PimNbr *>::iterator iter;
     for (iter = processing_pim_nbr_list().begin();
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	pim_nbr = *iter;
-	if (pim_nbr->addr() == ipvx_zero)
+	if (pim_nbr->primary_addr() == ipvx_zero)
 	    break;
 	else
 	    pim_nbr = NULL;
@@ -1518,7 +1522,7 @@ PimNode::init_processing_pim_mre_rp(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() == pim_nbr_addr)
+	if (pim_nbr->primary_addr() == pim_nbr_addr)
 	    pim_nbr->init_processing_pim_mre_rp();
     }
 }
@@ -1549,7 +1553,7 @@ PimNode::init_processing_pim_mre_wc(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() == pim_nbr_addr)
+	if (pim_nbr->primary_addr() == pim_nbr_addr)
 	    pim_nbr->init_processing_pim_mre_wc();
     }
 }
@@ -1580,7 +1584,7 @@ PimNode::init_processing_pim_mre_sg(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() == pim_nbr_addr)
+	if (pim_nbr->primary_addr() == pim_nbr_addr)
 	    pim_nbr->init_processing_pim_mre_sg();
     }
 }
@@ -1611,7 +1615,7 @@ PimNode::init_processing_pim_mre_sg_rpt(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() == pim_nbr_addr)
+	if (pim_nbr->primary_addr() == pim_nbr_addr)
 	    pim_nbr->init_processing_pim_mre_sg_rpt();
     }
 }
@@ -1637,7 +1641,7 @@ PimNode::find_processing_pim_mre_rp(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() != pim_nbr_addr)
+	if (pim_nbr->primary_addr() != pim_nbr_addr)
 	    continue;
 	if (pim_nbr->processing_pim_mre_rp_list().empty())
 	    continue;
@@ -1668,7 +1672,7 @@ PimNode::find_processing_pim_mre_wc(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() != pim_nbr_addr)
+	if (pim_nbr->primary_addr() != pim_nbr_addr)
 	    continue;
 	if (pim_nbr->processing_pim_mre_wc_list().empty())
 	    continue;
@@ -1699,7 +1703,7 @@ PimNode::find_processing_pim_mre_sg(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() != pim_nbr_addr)
+	if (pim_nbr->primary_addr() != pim_nbr_addr)
 	    continue;
 	if (pim_nbr->processing_pim_mre_sg_list().empty())
 	    continue;
@@ -1730,7 +1734,7 @@ PimNode::find_processing_pim_mre_sg_rpt(uint16_t vif_index,
 	 iter != processing_pim_nbr_list().end();
 	 ++iter) {
 	PimNbr *pim_nbr = *iter;
-	if (pim_nbr->addr() != pim_nbr_addr)
+	if (pim_nbr->primary_addr() != pim_nbr_addr)
 	    continue;
 	if (pim_nbr->processing_pim_mre_sg_rpt_list().empty())
 	    continue;
