@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.58 2005/01/05 21:40:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.59 2005/01/31 20:58:49 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -801,7 +801,8 @@ void
 BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out, string ribname)
 {
     debug_msg("BGPPlumbingAF<IPv%u:%s>::dump_entire_table\n",
-	      A::ip_version(), pretty_string_safi(_master.safi()));
+	      XORP_UINT_CAST(A::ip_version()),
+	      pretty_string_safi(_master.safi()));
 
     _fanout_table->dump_entire_table(filter_out, _master.safi(), ribname);
 
