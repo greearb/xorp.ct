@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.3 2003/04/02 00:44:22 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -691,8 +691,8 @@ test_ipv6_invalid_manipulate_address()
     try {
 	// Invalid prefix length
 	IPv6 ip(IPv6::make_prefix(IPv6::addr_bitlen() + 1));
-	verbose_log("Cannot catch invalid IPv6 mask prefix with length %d : FAIL\n",
-		    IPv6::addr_bitlen() + 1);
+	verbose_log("Cannot catch invalid IPv6 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPv6::addr_bitlen() + 1);
 	incr_failures();
 	UNUSED(ip);
     } catch (const InvalidNetmaskLength& e) {
@@ -707,8 +707,8 @@ test_ipv6_invalid_manipulate_address()
 	// Invalid mask prefix
 	IPv6 ip(addr_string6);
 	ip.mask_by_prefix(IPv6::addr_bitlen() + 1);
-	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %d : FAIL\n",
-		    IPv6::addr_bitlen() + 1);
+	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPv6::addr_bitlen() + 1);
 	incr_failures();
     } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught

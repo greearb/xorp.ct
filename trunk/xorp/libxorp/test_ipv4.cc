@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.3 2003/04/02 00:44:22 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -643,8 +643,8 @@ test_ipv4_invalid_manipulate_address()
     try {
 	// Invalid prefix length
 	IPv4 ip(IPv4::make_prefix(IPv4::addr_bitlen() + 1));
-	verbose_log("Cannot catch invalid IPv4 mask prefix with length %d : FAIL\n",
-		    IPv4::addr_bitlen() + 1);
+	verbose_log("Cannot catch invalid IPv4 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPv4::addr_bitlen() + 1);
 	incr_failures();
 	UNUSED(ip);
     } catch (const InvalidNetmaskLength& e) {
@@ -659,8 +659,8 @@ test_ipv4_invalid_manipulate_address()
 	// Invalid mask prefix
 	IPv4 ip(addr_string4);
 	ip.mask_by_prefix(IPv4::addr_bitlen() + 1);
-	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %d : FAIL\n",
-		    IPv4::addr_bitlen() + 1);
+	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPv4::addr_bitlen() + 1);
 	incr_failures();
     } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught

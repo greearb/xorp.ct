@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.3 2003/04/18 04:52:09 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -1256,8 +1256,8 @@ test_ipvx_invalid_manipulate_address()
     try {
 	// Invalid prefix length: IPv4
 	IPvX ip(IPvX::make_prefix(AF_INET, IPvX::addr_bitlen(AF_INET) + 1));
-	verbose_log("Cannot catch invalid IPv4 mask prefix with length %d : FAIL\n",
-		    IPvX::addr_bitlen(AF_INET) + 1);
+	verbose_log("Cannot catch invalid IPv4 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPvX::addr_bitlen(AF_INET) + 1);
 	incr_failures();
 	UNUSED(ip);
     } catch (const InvalidNetmaskLength& e) {
@@ -1267,8 +1267,8 @@ test_ipvx_invalid_manipulate_address()
     try {
 	// Invalid prefix length: IPv6
 	IPvX ip(IPvX::make_prefix(AF_INET6, IPvX::addr_bitlen(AF_INET6) + 1));
-	verbose_log("Cannot catch invalid IPv6 mask prefix with length %d : FAIL\n",
-		    IPvX::addr_bitlen(AF_INET6) + 1);
+	verbose_log("Cannot catch invalid IPv6 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPvX::addr_bitlen(AF_INET6) + 1);
 	incr_failures();
 	UNUSED(ip);
     } catch (const InvalidNetmaskLength& e) {
@@ -1283,8 +1283,8 @@ test_ipvx_invalid_manipulate_address()
 	// Invalid mask prefix: IPv4
 	IPvX ip(addr_string4);
 	ip.mask_by_prefix(IPvX::addr_bitlen(AF_INET) + 1);
-	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %d : FAIL\n",
-		    IPvX::addr_bitlen(AF_INET) + 1);
+	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPvX::addr_bitlen(AF_INET) + 1);
 	incr_failures();
     } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught
@@ -1294,8 +1294,8 @@ test_ipvx_invalid_manipulate_address()
 	// Invalid mask prefix: IPv6
 	IPvX ip(addr_string6);
 	ip.mask_by_prefix(IPvX::addr_bitlen(AF_INET6) + 1);
-	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %d : FAIL\n",
-		    IPvX::addr_bitlen(AF_INET6) + 1);
+	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %u : FAIL\n",
+		    (uint32_t)IPvX::addr_bitlen(AF_INET6) + 1);
 	incr_failures();
     } catch (const InvalidNetmaskLength& e) {
 	// The problem was caught
