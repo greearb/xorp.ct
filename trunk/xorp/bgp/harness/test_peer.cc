@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.27 2004/12/05 16:14:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.28 2004/12/09 07:54:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -97,7 +97,8 @@ XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator,
     debug_msg("\n");
 
     if(_trace)
-	printf("register(%s,%u)\n", coordinator.c_str(), genid);
+	printf("register(%s,%u)\n", coordinator.c_str(),
+	       XORP_UINT_CAST(genid));
 
     _test_peer.register_coordinator(coordinator);
     _test_peer.register_genid(genid);
@@ -127,7 +128,7 @@ XrlTestPeerTarget::test_peer_0_1_connect(const string&	host,
     debug_msg("\n");
 
     if(_trace)
-	printf("connect(%s,%u)\n", host.c_str(), port);
+	printf("connect(%s,%u)\n", host.c_str(), XORP_UINT_CAST(port));
 
     string error_string;
     if(!_test_peer.connect(host, port, error_string)) {
@@ -144,7 +145,7 @@ XrlTestPeerTarget::test_peer_0_1_listen(const string& address,
     debug_msg("\n");
 
     if(_trace)
-	printf("listen(%s,%u)\n", address.c_str(), port);
+	printf("listen(%s,%u)\n", address.c_str(), XORP_UINT_CAST(port));
 
     string error_string;
     if(!_test_peer.listen(address, port, error_string)) {
@@ -161,7 +162,7 @@ XrlTestPeerTarget::test_peer_0_1_bind(const string& address,
     debug_msg("\n");
 
     if(_trace)
-	printf("bind(%s,%u)\n", address.c_str(), port);
+	printf("bind(%s,%u)\n", address.c_str(), XORP_UINT_CAST(port));
 
     string error_string;
     if(!_test_peer.bind(address, port, error_string)) {
@@ -271,7 +272,7 @@ TestPeer::register_coordinator(const string& name)
 void
 TestPeer::register_genid(const uint32_t& genid)
 {
-    debug_msg("Test Peer: genid = %u\n", genid);
+    debug_msg("Test Peer: genid = %u\n", XORP_UINT_CAST(genid));
 
     _genid = genid;
 }
@@ -485,7 +486,7 @@ TestPeer::bind(const string& host, const uint32_t& port,
 bool
 TestPeer::send(const vector<uint8_t>& data, string& error_string)
 {
-    debug_msg("len: %u\n", (uint32_t)data.size());
+    debug_msg("len: %u\n", XORP_UINT_CAST(data.size()));
     if(UNCONNECTED == _s) {
 	XLOG_WARNING("Not connected");
 	error_string = "Not connected";
@@ -747,7 +748,7 @@ TestPeer::receive(int fd, SelectorMask m)
 void
 TestPeer::datain(status st, uint8_t *ptr, size_t len, string error)
 {
-    debug_msg("status = %d len = %u error = %s\n", st, (uint32_t)len,
+    debug_msg("status = %d len = %u error = %s\n", st, XORP_UINT_CAST(len),
 	      error.c_str());
 
     if(_verbose) {
@@ -810,7 +811,7 @@ TestPeer::sendit()
 
     XrlDatainV0p1Client datain(&_xrlrouter);
 
-    debug_msg("%u\n", (uint32_t)q.v.size());
+    debug_msg("%u\n", XORP_UINT_CAST(q.v.size()));
     XLOG_ASSERT(q.len == q.v.size());
 
     _flying++;

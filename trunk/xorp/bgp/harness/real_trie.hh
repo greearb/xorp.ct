@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/real_trie.hh,v 1.5 2003/09/30 03:07:55 pavlin Exp $
+// $XORP: xorp/bgp/harness/real_trie.hh,v 1.6 2004/06/10 22:40:40 hodson Exp $
 
 #ifndef __BGP_HARNESS_REAL_TRIE_HH_
 #define __BGP_HARNESS_REAL_TRIE_HH_
@@ -87,8 +87,8 @@ void
 RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
 			     A address, size_t prefix_len, A orbit) const
 {
-    debug_msg("Enter: %s/%d\n", address.str().c_str(),
-	      static_cast<uint32_t>(prefix_len));
+    debug_msg("Enter: %s/%u\n", address.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     if(0 == ptr) {
 	return;
@@ -97,8 +97,8 @@ RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
     TimeVal tv;
     const UpdatePacket *update = ptr->p.get(tv);
     if(0 != update) {
- 	debug_msg("Found %s/%d\n", address.str().c_str(),
-		  static_cast<uint32_t>(prefix_len));
+ 	debug_msg("Found %s/%u\n", address.str().c_str(),
+		  XORP_UINT_CAST(prefix_len));
 	tw->dispatch(update, IPNet<A>(address, prefix_len), tv);
     }
 
@@ -123,8 +123,8 @@ template <class A>
 bool
 RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 {
-    debug_msg("%s/%d\n", address.str().c_str(),
-	      static_cast<uint32_t>(mask_length));
+    debug_msg("%s/%u\n", address.str().c_str(),
+	      XORP_UINT_CAST(mask_length));
 #ifdef	PARANOIA
     if(0 == p.get()) {
 	debug_msg("insert: Attempt to store an invalid entry\n");
@@ -140,9 +140,9 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 	    index = 0;
 	address = address << 1;
 
-	debug_msg("address %s prefix_len %d depth %d index %d\n",
-		  address.str().c_str(), static_cast<uint32_t>(mask_length), 
-		  static_cast<uint32_t>(i), index);
+	debug_msg("address %s prefix_len %u depth %u index %d\n",
+		  address.str().c_str(), XORP_UINT_CAST(mask_length), 
+		  XORP_UINT_CAST(i), index);
 
 	
 	if(0 == ptr->ptrs[index]) {
@@ -265,8 +265,8 @@ RealTrie<A>::find(A address, size_t mask_length) const
     const Tree *ptr = &_head;
     Tree *next;
 
-    debug_msg("find: %s/%d\n", address.str().c_str(), 
-	      static_cast<uint32_t>(mask_length));
+    debug_msg("find: %s/%u\n", address.str().c_str(), 
+	      XORP_UINT_CAST(mask_length));
 
     // The loop should not require bounding. Defensive
     for(size_t i = 0; i <= A::addr_bitlen(); i++) {
