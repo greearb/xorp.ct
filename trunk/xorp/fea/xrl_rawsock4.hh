@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.2 2002/12/14 23:42:51 hodson Exp $
+// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.4 2004/06/10 22:40:59 hodson Exp $
 
 #ifndef __FEA_XRL_RAWSOCK4_HH__
 #define __FEA_XRL_RAWSOCK4_HH__
@@ -45,11 +45,11 @@ public:
     /**
      * Contructor for XrlRawSocket4Manager instances.
      *
-     * May throw RawSocketException since a raw socket is contructed and
+     * May throw RawSocket4Exception since a raw socket is contructed and
      * this requires root privelage.
      */
     XrlRawSocket4Manager(EventLoop& e, InterfaceManager& ifmgr, XrlRouter& xr)
-	throw (RawSocketException);
+	throw (RawSocket4Exception);
 
     ~XrlRawSocket4Manager();
 

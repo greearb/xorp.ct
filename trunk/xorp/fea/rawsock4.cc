@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.4 2003/03/10 23:20:16 hodson Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.6 2004/06/10 22:40:56 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -33,18 +33,18 @@
 /* ------------------------------------------------------------------------- */
 /* RawSocket4 methods */
 
-RawSocket4::RawSocket4(uint32_t protocol) throw (RawSocketException)
+RawSocket4::RawSocket4(uint32_t protocol) throw (RawSocket4Exception)
 {
     _fd = socket(AF_INET, SOCK_RAW, protocol);
     if (_fd < 0)
-	xorp_throw(RawSocketException, "socket", errno);
+	xorp_throw(RawSocket4Exception, "socket", errno);
 
     const int on = 1;
     if (setsockopt(_fd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
-	xorp_throw(RawSocketException, "setsockopt (IP_HDRINCL)", errno);
+	xorp_throw(RawSocket4Exception, "setsockopt (IP_HDRINCL)", errno);
     /*
       if (setsockopt(_fd, SOL_SOCKET, SO_DONTROUTE, &on, sizeof(on)) < 0)
-      xorp_throw(RawSocketException, "setsockopt (SO_DONTROUTE)", errno);
+      xorp_throw(RawSocket4Exception, "setsockopt (SO_DONTROUTE)", errno);
     */
 }
 
@@ -125,20 +125,20 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
 IoRawSocket4::IoRawSocket4(EventLoop&	e,
 			   uint32_t	protocol,
 			   bool		autohook)
-    throw (RawSocketException)
+    throw (RawSocket4Exception)
     : RawSocket4(protocol), _e(e), _autohook(autohook)
 {
     int fl = fcntl(_fd, F_GETFL);
     if (fcntl(_fd, F_SETFL, fl | O_NONBLOCK) < 0)
-	xorp_throw(RawSocketException, "fcntl (O_NON_BLOCK)", errno);
+	xorp_throw(RawSocket4Exception, "fcntl (O_NON_BLOCK)", errno);
 
     _recvbuf.reserve(RECVBUF_BYTES);
     if (_recvbuf.capacity() != RECVBUF_BYTES)
-	xorp_throw(RawSocketException, "receive buffer reserve() failed", 0);
+	xorp_throw(RawSocket4Exception, "receive buffer reserve() failed", 0);
 
     ssize_t sz = RECVBUF_BYTES;
     if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz)) < 0)
-	xorp_throw(RawSocketException, "setsockopt (SO_RCVBUF)", errno);
+	xorp_throw(RawSocket4Exception, "setsockopt (SO_RCVBUF)", errno);
 
     if (_autohook)
 	eventloop_hook();
@@ -190,7 +190,7 @@ IoRawSocket4::eventloop_unhook()
 /* FilterRawSocket4 methods */
 
 FilterRawSocket4::FilterRawSocket4(EventLoop& e, int protocol)
-    throw (RawSocketException)
+    throw (RawSocket4Exception)
     : IoRawSocket4(e, protocol, false)
 {
 }

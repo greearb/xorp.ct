@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.4 2003/03/10 23:20:18 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.6 2004/06/10 22:40:59 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -144,7 +144,7 @@ protected:
 XrlRawSocket4Manager::XrlRawSocket4Manager(EventLoop&	     e,
 					   InterfaceManager& ifmgr,
 					   XrlRouter&	     xr)
-    throw (RawSocketException)
+    throw (RawSocket4Exception)
     : _e(e), _ifmgr(ifmgr), _xrlrouter(xr), _rs(_e, 0)
 {
 }

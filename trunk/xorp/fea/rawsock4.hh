@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.3 2004/06/10 22:40:56 hodson Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
@@ -26,10 +26,10 @@
 #include "libxorp/eventloop.hh"
 
 /** Exception class for RawSocket Constructors */
-struct RawSocketException : public XorpReasonedException {
-    RawSocketException(const char* file, size_t line,
+struct RawSocket4Exception : public XorpReasonedException {
+    RawSocket4Exception(const char* file, size_t line,
 		       const char* cmd, int error_no) :
-	XorpReasonedException("RawSocketException", file, line,
+	XorpReasonedException("RawSocket4Exception", file, line,
 			      c_format("%s: %s", cmd, strerror(error_no))) {}
 };
 
@@ -39,7 +39,7 @@ struct RawSocketException : public XorpReasonedException {
 
 class RawSocket4 {
 public:
-    RawSocket4(uint32_t protocol) throw (RawSocketException);
+    RawSocket4(uint32_t protocol) throw (RawSocket4Exception);
 
     virtual ~RawSocket4();
 
@@ -83,7 +83,7 @@ class IoRawSocket4 : public RawSocket4
 {
 public:
     IoRawSocket4(EventLoop& e, uint32_t protocol, bool autohook = true)
-	throw (RawSocketException);
+	throw (RawSocket4Exception);
 
     ~IoRawSocket4();
 
@@ -139,7 +139,7 @@ public:
     };
 
 public:
-    FilterRawSocket4(EventLoop& e, int protocol) throw (RawSocketException);
+    FilterRawSocket4(EventLoop& e, int protocol) throw (RawSocket4Exception);
     ~FilterRawSocket4();
 
     /** Add a filter to list of input filters.  The FilterRawSocket4 class
