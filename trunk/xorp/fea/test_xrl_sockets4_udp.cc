@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.4 2004/02/19 00:29:55 hodson Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.5 2004/06/10 22:40:57 hodson Exp $"
 
 #include <sysexits.h>
 
@@ -170,8 +170,8 @@ public:
 	verbose_log("Sending bind request (\"%s\", %s/%u)\n",
 		    _ssname.c_str(), addr.str().c_str(), port);
 	bool s = c.send_udp_open_and_bind(
-			_ssname.c_str(), _r->instance_name(), addr, port,
-			callback(this, &TestSocket4UDP::bind_cb));
+	    _ssname.c_str(), _r->instance_name(), addr, port, false,
+	    callback(this, &TestSocket4UDP::bind_cb));
 	return s;
     }
 
