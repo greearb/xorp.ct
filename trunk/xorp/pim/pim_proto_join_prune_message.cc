@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.41 2002/12/09 18:29:30 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -524,10 +524,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    }
 	    
 	    lookup_flags	= PIM_MRE_SG_RPT;
-	    if (i_am_target_router_bool)
-		create_flags = lookup_flags;
-	    else
-		create_flags = 0;
+	    // XXX: if no entry, the (S,G,rpt) Join should not create one
+	    create_flags = 0;
 	    pim_mre = pim_mrt().pim_mre_find(source_addr, group_addr,
 					     lookup_flags, create_flags);
 	    if (pim_mre == NULL) {
@@ -584,7 +582,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     	    
 	    lookup_flags	= PIM_MRE_SG;
 	    // XXX: if no entry, the (S,G) Prune should not create one
-	    create_flags = 0;
 	    create_flags = 0;
 	    pim_mre = pim_mrt().pim_mre_find(source_addr, group_addr,
 					     lookup_flags, create_flags);
