@@ -1,11 +1,11 @@
-% $XORP: xorp/docs/slides/xorp.tex,v 1.2 2004/02/19 19:13:06 atanu Exp $
+% $XORP: xorp/docs/slides/xorp.tex,v 1.3 2004/02/19 19:32:56 atanu Exp $
 
 \documentclass[landscape]{slides}
 %\usepackage{ncntrsbk}
 \usepackage{epsfig,colordvi}
 \frenchspacing
 
-\renewcommand{\baselinestretch}{0.8}
+%\renewcommand{\baselinestretch}{0.8}
 \newcommand{\T}[1]{\center{\PineGreen {#1}}}
 
 \begin{document}
@@ -39,25 +39,28 @@
 % #    #  ######  #    #  ######
 
 
-\newpage
 %------------------------------------------------------------
-\T{The Project}
+\begin{slide}
 
-\begin{itemize}
+  \T{The Project}
+
+  \begin{itemize}
   \item Started January 2001
   \item Sponsors
     \begin{itemize}
-      \item Intel
-      \item National Science Foundation (Award ANI-0129541)
-      \item DARPA (Control Plane)
+    \item Intel
+    \item National Science Foundation (Award ANI-0129541)
+    \item DARPA (Control Plane)
     \end{itemize}
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Objective}
+\begin{slide}
 
-\begin{itemize}
+  \T{Objective}
+
+  \begin{itemize}
 
   \item To replace edge routers with commodity PCs running XORP thus
     enabling innovation and research.
@@ -76,145 +79,166 @@
 
     \end{itemize}
 
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Deployments}
+\begin{slide}
 
-\begin{itemize}
+  \T{Deployments}
+
+  \begin{itemize}
   \item PlanetLab testbed for DARPA control plane project (June -
     September 2004)
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Architecture}
+\begin{slide}
 
-\begin{center}
-\epsfig{file=../papers/hotnets_2002_talk/processes3.ps,width=.65\hsize}
-\end{center}
+  \T{Architecture}
 
-\newpage
+  \begin{center}
+    \epsfig{file=../papers/hotnets_2002_talk/processes3.ps,width=.65\hsize}
+  \end{center}
+
+\end{slide}
 %------------------------------------------------------------
-\T{Design 1}
+\begin{slide}
 
-\begin{itemize}
+  \T{Design 1}
+
+  \begin{itemize}
   \item Object oriented design in C++.
   \item Each routing protocol is a separate process.
   \item XORP's own interprocess communication (XRLs).
     \begin{itemize}
-      \item Processes can be run on any host.
-      \item Routing protocols under development can be isolated on
-        separate host.
-      \item XRLs can be invoked from scripting languages allowing
-        easy testing.
+    \item Processes can be run on any host.
+    \item Routing protocols under development can be isolated on
+      separate host.
+    \item XRLs can be invoked from scripting languages allowing
+      easy testing.
     \end{itemize}
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Design 2}
+\begin{slide}
 
-\begin{itemize}
+  \T{Design 2}
+
+  \begin{itemize}
   \item All routing/forwarding interactions with the operating system
     are performed through the Forwarding Engine Abstraction(FEA).
     \begin{itemize}
-      \item Simplifies porting to new operating systems.
+    \item Simplifies porting to new operating systems.
     \end{itemize}
 
-    \item The router manager is a fully configurable entity that
-      is responsible for process management.
-\end{itemize}
+  \item The router manager is a fully configurable entity that
+    is responsible for process management.
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Suported Platforms}
+\begin{slide}
 
-\begin{itemize}
+  \T{Suported Platforms}
+
+  \begin{itemize}
   \item FreeBSD
   \item Linux
   \item Mac OS X 10.3 (no FEA)
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Completed Components}
+\begin{slide}
+  \T{Completed Components}
 
-\begin{itemize}
-\item BGP4+, Full AFI/SAFI support (IPv6 - Multicast), missing route filters
+  \begin{itemize}
+  \item BGP4+, Full AFI/SAFI support (IPv6 - Multicast), missing route filters
 %  \begin{itemize}
 %        \item IPv4 tested against Cisco with a full feed
 %        \item IPv6 testing against Cisco with full feed in progress.
 %        \item IPv6/Multicast against Cisco with full feed in progress.
 %  \end{itemize}        
 
-\item PIM-SM, IGMP (v1 and v2) / MLD (IPv6)  v1
+  \item PIM-SM, IGMP (v1 and v2) / MLD (IPv6)  v1
 %  \begin{itemize}
 %        \item PIM-SM (IPv4) and IGMP - Tested internally in details, and some
 %          testing against Cisco.
 %        \item MLD - Internal tests only.
 %        \item PIM-SM (IPv6) - Internal tests. About to start tests against Cisco.
 %  \end{itemize}
-\item RIPv2 and RIPng
+  \item RIPv2 and RIPng
 %  \begin{itemize}
 %        \item RIPv2. Tested with some third party tools (rtquery,
 %          ethereal). Not yet tested against another implementation
 %        \item RIPng (IPv6). Will be completed tomorrow.
 %  \end{itemize}
 
-\item SNMP using net-snmp
-  \begin{itemize}
-        \item 
-          BGP-4 mib (RFC 1657).
+  \item SNMP using net-snmp
+    \begin{itemize}
+    \item 
+      BGP-4 mib (RFC 1657).
+    \end{itemize}
   \end{itemize}
-\end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Expected end of 2004}
+\begin{slide}
 
-\begin{itemize}
+  \T{Expected end of 2004}
+
+  \begin{itemize}
   \item Integration with Click and Planetlab for DARPA control plane project.
   \item Route filters.
   \item Porting of John Moy's OSPF code completed.
   \item IS-IS implementation with basic functionality.
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Possible Future Work}
+\begin{slide}
 
-\begin{itemize}
+  \T{Possible Future Work}
+
+  \begin{itemize}
   \item Firewall integration (forwarding filters)
   \item Security (integration with intrusion detection systems)
   \item Distributed router.
   \item Intel network processor (IXP2400) port.
   \item XORP Simulation environment.
   \item Next generation routing protocols.
-\end{itemize}
+  \end{itemize}
 
-\newpage
+\end{slide}
 %------------------------------------------------------------
-\T{Why choose XORP?}
+\begin{slide}
 
-\begin{itemize}
-\item Stable release 1st quarter 2004
-\item Full IPv6 and Multicast support
-\item Designed for extensibility
-\item Ideal research platform
-\item Multiprocess architecture allows construction of distributed routers
-\item Architecture supports high performance network processors
-\end{itemize}
+  \T{Why choose XORP?}
 
-\newpage
+  \begin{itemize}
+  \item Stable release 1st quarter 2004
+  \item Full IPv6 and Multicast support
+  \item Designed for extensibility
+  \item Ideal research platform
+  \item Multiprocess architecture allows construction of distributed routers
+  \item Architecture supports high performance network processors
+  \end{itemize}
+
+\end{slide}
 %------------------------------------------------------------
-\T{Summary}
+\begin{slide}
 
-A XORP based PC router will out perform low end routers. The
-proprietary router market will be opened up enabling innovation and
-research.
+  \T{Summary}
 
-{\huge www.xorp.org}
+  A XORP based PC router will out perform low end routers. The
+  proprietary router market will be opened up enabling innovation and
+  research.
+
+  {\huge www.xorp.org}
+
+\end{slide}
 
 \end{document}
