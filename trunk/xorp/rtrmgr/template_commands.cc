@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.4 2003/01/26 04:06:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.5 2003/02/22 00:41:37 mjh Exp $"
 
 #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -854,8 +854,8 @@ ModuleCommand::action_complete(const XrlError& err,
 	    }
 	}
 	return;
-    } else if (err == XrlError::BAD_COMMAND()) {	
-	fprintf(stderr, "BAD COMMAND: %s\n", cmd);
+    } else if (err == XrlError::COMMAND_FAILED()) {	
+	fprintf(stderr, "COMMAND_FAILED: %s\n", cmd.c_str());
 	//XXX 
     }
     abort();
