@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.5 2003/01/24 22:14:45 rizzo Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.6 2003/01/26 17:55:48 rizzo Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -114,11 +114,11 @@ public:
     virtual void add_hash(MD5_CTX *context);
 
     const uint8_t * encode_and_get_data();
-    const uint8_t * get_data() const {
+    const uint8_t * data() const {
 	assert(_data != NULL);
 	return _data;
     }
-    uint16_t get_size() const			{ return _length; }
+    uint16_t size() const			{ return _length; }
 
     void pretty_print();
 

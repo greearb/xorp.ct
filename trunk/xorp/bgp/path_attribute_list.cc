@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.4 2003/01/26 01:22:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.5 2003/01/26 17:22:00 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -174,6 +174,16 @@ operator< (const PathAttributeList<A> &him) const
     // XXX we should be using hashes, not direct comparisons!
     assert_rehash();
     him.assert_rehash();
+    if ((*_nexthop_att) < (*(him._nexthop_att)))
+        return true;
+    if ((*(him._nexthop_att)) < (*_nexthop_att))
+        return false;
+    if (_att_list.size() < him._att_list.size())
+        return true;
+    if (him._att_list.size() < _att_list.size())
+        return false;
+    return (memcmp(_hash, him.hash(), 16) < 0);
+
     const_iterator my_i = _att_list.begin();
     const_iterator his_i = him.att_list().begin();
     while (1) {

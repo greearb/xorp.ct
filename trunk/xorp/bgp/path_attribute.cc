@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.7 2003/01/24 22:14:44 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.8 2003/01/26 04:06:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -270,14 +270,14 @@ OriginAttribute::decode()
 {
     PathAttribute::decode();
 
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     if (extended()) {
-	data += 4;
+	d += 4;
     } else {
-	data += 3;
+	d += 3;
     }
 
-    _origin = (OriginType)(*data);
+    _origin = (OriginType)(*d);
     debug_msg("Origin Attribute: ");
     switch (_origin) {
     case IGP:
@@ -291,7 +291,7 @@ OriginAttribute::decode()
 	break;
     default:
 	debug_msg("UNKNOWN (%d)\n", _origin);
-	dump_bytes(data, _length);
+	dump_bytes(d, _length);
 	xorp_throw(CorruptMessage,
 		   c_format("Unknown Origin Type %d", _origin),
 		   UPDATEMSGERR, INVALORGATTR);
@@ -300,7 +300,7 @@ OriginAttribute::decode()
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Origin attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     debug_msg("Origin Attribute decode() finished \n");
 }
@@ -429,34 +429,34 @@ ASPathAttribute::decode()
     int temp_len;
     int as_len;
 
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     int length = _attribute_length;
 
     if (extended()) {
 	debug_msg("Extended AS Path!\n");
-	data += 4;
+	d += 4;
     } else {
-	data += 3;
+	d += 3;
     }
 
     while (length > 0) {
-	dump_bytes(data, length);
+	dump_bytes(d, length);
 	// XXX this assumes a 16 bit AS number
-	as_len = data[1];	// number 
+	as_len = d[1];	// number 
 	temp_len = as_len*2+2;
 	assert(temp_len <= length);
 
 	debug_msg("temp_len %d, length %d, as_len %d\n",
 		temp_len, length, as_len);
-	int t = static_cast<ASPathSegType>(*data);
+	int t = static_cast<ASPathSegType>(*d);
 	switch (t) {
 	case AS_SET:
 	    debug_msg("Decoding AS Set\n");
-	    _as_path.add_segment(AsSegment(data));
+	    _as_path.add_segment(AsSegment(d));
 	    break;
 	case AS_SEQUENCE:
 	    debug_msg("Decoding AS Sequence\n");
-	    _as_path.add_segment(AsSegment(data));
+	    _as_path.add_segment(AsSegment(d));
 	    break;
 	default:
 	    debug_msg("Wrong sequence type %d\n", t);
@@ -465,13 +465,13 @@ ASPathAttribute::decode()
 		       UPDATEMSGERR, MALASPATH);
 	}
 	length = length - temp_len;
-	data = data + temp_len; // 2 bytes of header
+	d += temp_len; // 2 bytes of header
     }
     if (!well_known() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in AS Path attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     debug_msg("after: >%s<\n", _as_path.str().c_str());
 }
@@ -548,28 +548,27 @@ NextHopAttribute<A>::decode()
 {
     PathAttribute::decode();
 
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     if (extended()) {
-	data += 4;
+	d += 4;
     } else {
-	data += 3;
+	d += 3;
     }
     if (!well_known() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in NextHop attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
-    _next_hop = A((const uint8_t*)data);
+    _next_hop = A(d);
 
     // check that the nexthop address is syntactically correct
     if (!_next_hop.is_unicast()) {
 	xorp_throw(CorruptMessage,
 		   c_format("NextHop %s is not a unicast address",
 			    _next_hop.str().c_str()),
-		   UPDATEMSGERR,
-		   INVALNHATTR,
-		   get_data(), get_size())
+		   UPDATEMSGERR, INVALNHATTR,
+		   data(), size())
     }
     debug_msg("Next Hop Attribute \n");
 }
@@ -649,21 +648,21 @@ MEDAttribute::decode()
 {
     PathAttribute::decode();
 
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     if (extended()) {
-	data += 4;
+	d += 4;
     } else {
-	data += 3;
+	d += 3;
     }
     if (!optional() || transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in MED attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     debug_msg("Multi_exit discriminator Attribute\n");
     uint32_t med;
-    memcpy(&med, data, 4);
+    memcpy(&med, d, 4);
     _multiexitdisc = htonl(med);
     debug_msg("Multi_exit desc %d\n", _multiexitdisc);
 }
@@ -729,25 +728,23 @@ LocalPrefAttribute::decode()
 {
     PathAttribute::decode();
 
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     if (extended()) {
-	data += 4;
+	d += 4;
     } else {
-	data += 3;
+	d += 3;
     }
     if (!well_known() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in LocalPref attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     debug_msg("Local Preference Attribute\n");
     uint32_t localpref;
-    memcpy(&localpref, data, 4);
+    memcpy(&localpref, d, 4);
     _localpref = ntohl(localpref);
-
     debug_msg("Local Preference Attribute %d\n", _localpref);
-
 }
 
 string
@@ -806,20 +803,13 @@ void
 AtomicAggAttribute::decode()
 {
     PathAttribute::decode();
-    const uint8_t *data = _data;
-    if (extended()) {
-	data += 4;
-    } else {
-	data += 3;
-    }
     if (!well_known() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in AtomicAggregate attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     debug_msg("Atomic Aggregate Attribute\n");
-
 }
 
 string
@@ -891,25 +881,25 @@ AggregatorAttribute::decode()
 
     debug_msg("Aggregator Attribute\n");
 
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     if (extended()) {
-	data += 4;
+	d += 4;
     } else {
-	data += 3;
+	d += 3;
     }
     // The internet draft sets this AS Number to be 2 octets (section 4.3)
     uint16_t agg_as;
-    memcpy(&agg_as, data, 2);
+    memcpy(&agg_as, d, 2);
     _aggregatoras = AsNum(ntohs(agg_as));
-    data += 2;
+    d += 2;
     uint32_t agg_addr;
-    memcpy(&agg_addr, data, 4);
+    memcpy(&agg_addr, d, 4);
     _routeaggregator = IPv4(agg_addr);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Aggregator attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
 }
 
 string AggregatorAttribute::str() const
@@ -989,28 +979,28 @@ void
 CommunityAttribute::decode()
 {
     PathAttribute::decode();
-    const uint8_t *data = _data;
+    const uint8_t *d = _data;
     if (extended()) {
 	uint16_t len;
-	memcpy(&len, data+2, 2);
+	memcpy(&len, d+2, 2);
 	_length = htons(len);
-	data += 4;
+	d += 4;
     } else {
-	_length = data[2];
-	data += 3;
+	_length = d[2];
+	d += 3;
     }
     if (!optional() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Community attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     int remaining = _length;
     while (remaining > 0) {
 	uint32_t value;
-	memcpy(&value, data, 4);
+	memcpy(&value, d, 4);
 	_communities.insert(htonl(value));
-	data += 4;
+	d += 4;
 	remaining -= 4;
     }
 
@@ -1101,8 +1091,8 @@ void
 UnknownAttribute::decode()
 {
     PathAttribute::decode();
-    const uint8_t *data = _data;
-    _type = data[1];
+    const uint8_t *d = _data;
+    _type = d[1];
 
     switch (_type) {
     case ORIGIN:
@@ -1121,18 +1111,18 @@ UnknownAttribute::decode()
 
     if (extended()) {
 	uint16_t len;
-	memcpy(&len, data+2, 2);
+	memcpy(&len, d+2, 2);
 	_length = htons(len);
-	data += 4;
+	d += 4;
     } else {
-	_length = data[2];
-	data += 3;
+	_length = d[2];
+	d += 3;
     }
     if (!optional() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Unknown attribute",
 		   UPDATEMSGERR, ATTRFLAGS,
-		   get_data(), get_size());
+		   data(), size());
     }
     debug_msg("Unknown Attribute\n");
 }
@@ -1150,13 +1140,13 @@ UnknownAttribute::str() const
 bool
 UnknownAttribute::operator<(const UnknownAttribute& him) const
 {
-    if (_length < him.get_size())
+    if (size() < him.size())
 	return true;
-    if (_length > him.get_size())
+    if (size() > him.size())
 	return false;
 
     //lengths are equal
-    if (memcmp(_data, him.get_data(), _length)<0)
+    if (memcmp(data(), him.data(), size())<0)
 	return true;
     return false;
 }
@@ -1164,9 +1154,7 @@ UnknownAttribute::operator<(const UnknownAttribute& him) const
 bool
 UnknownAttribute::operator==(const UnknownAttribute& him) const
 {
-    if (_length != him.get_size())
-	return false;
-
-    return (memcmp(_data, him.get_data(), _length) == 0);
+    return (size() == him.size() &&
+	    (memcmp(data(), him.data(), size()) == 0) );
 }
 

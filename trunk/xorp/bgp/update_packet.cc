@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.9 2003/01/24 19:50:11 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.10 2003/01/26 04:06:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -188,7 +188,7 @@ UpdatePacket::encode(size_t &len) const
     list <BGPWithdrawnRoute>::const_iterator wi = _withdrawn_list.begin();
     while (wi != _withdrawn_list.end()) {
 	assert(position < size);
-	io[position].iov_base = 
+	io[position].iov_base =
 	    (char *)(const_cast<uint8_t*>(wi->get_size()));
 	io[position].iov_len = 1;
 	position++;
@@ -213,8 +213,8 @@ UpdatePacket::encode(size_t &len) const
 	debug_msg("Looping through path attributes\n");
 	io[position].iov_base = 
 	    (char *)const_cast<uint8_t *>(pa->encode_and_get_data());
-	io[position].iov_len = pa->get_size();
-	path_size = path_size + pa->get_size();
+	io[position].iov_len = pa->size();
+	path_size = path_size + pa->size();
 	position++;
 	++pai;
     }	
@@ -224,7 +224,7 @@ UpdatePacket::encode(size_t &len) const
     list <NetLayerReachability>::const_iterator ni = _nlri_list.begin();
     while (ni != _nlri_list.end()) {
 	assert(position < size);
-	io[position].iov_base = 
+	io[position].iov_base = // XXX what ?>>
 	    (char *)const_cast<uint8_t *>(ni->get_size());		
 	io[position].iov_len = 1;
 	position++;
