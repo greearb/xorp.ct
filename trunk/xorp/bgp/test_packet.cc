@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.3 2003/09/04 03:12:21 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.4 2003/09/26 23:58:49 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -62,7 +62,7 @@ BGPTestPacket::run_tests()
     // Run tests
     
     struct test {
-	const char *test_name;
+	string test_name;
 	bool (BGPTestPacket::*func)();
     } tests[] = {
 	{"Keep alive",	&BGPTestPacket::test_keepalive},
@@ -75,7 +75,7 @@ BGPTestPacket::run_tests()
 
     bool failed = false;
     for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); i++) {
-	printf("%-15s", tests[i].test_name);
+	printf("%-15s", tests[i].test_name.c_str());
 	if(!((*this).*tests[i].func)()) {
 	    printf("FAILED\n");
 	    failed = true;
