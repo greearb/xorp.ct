@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.9 2003/03/11 00:17:08 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.10 2003/03/12 19:11:30 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1018,6 +1018,7 @@ AC_OUTPUT(
 	docs/pim_testsuite/Makefile
 	docs/rib/Makefile
 	docs/rtrmgr/Makefile
+	docs/snmp/Makefile
 	docs/test_harness/Makefile
 	cli/Makefile
 	fea/Makefile

@@ -4687,6 +4687,7 @@ trap 'rm -fr `echo "Makefile
 	docs/pim_testsuite/Makefile
 	docs/rib/Makefile
 	docs/rtrmgr/Makefile
+	docs/snmp/Makefile
 	docs/test_harness/Makefile
 	cli/Makefile
 	fea/Makefile
@@ -4848,6 +4849,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	docs/pim_testsuite/Makefile
 	docs/rib/Makefile
 	docs/rtrmgr/Makefile
+	docs/snmp/Makefile
 	docs/test_harness/Makefile
 	cli/Makefile
 	fea/Makefile
