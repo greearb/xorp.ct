@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.20 2003/05/21 23:04:42 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.21 2003/06/01 21:37:28 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -202,6 +202,7 @@ XrlRouter::dispose(XrlRouterDispatchState* ds)
     list<XrlRouterDispatchState*>::iterator i;
     i = find(_dsl.begin(), _dsl.end(), ds);
     XLOG_ASSERT(_dsl.end() != i);
+    delete *i;
     _dsl.erase(i);
 }
 
