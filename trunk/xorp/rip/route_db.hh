@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.4 2003/07/09 00:11:02 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.5 2003/07/11 22:10:59 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -104,7 +104,7 @@ public:
      * @return count of routes in database.
      */
     uint32_t route_count() const;
-    
+
     /**
      * Resolve a route and take a reference to it.  While the reference
      * exists the route will not be deleted from memory, though may be
