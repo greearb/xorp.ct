@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.11 2003/05/04 06:25:21 mjh Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.12 2003/12/02 09:39:00 pavlin Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -35,8 +35,8 @@ public:
     ~XorpClient() {};
 
 #if 0
-    int send_xrl(const UnexpandedXrl &xrl, XrlRouter::XrlCallback cb,
-		 bool do_exec);
+    int send_xrl(const UnexpandedXrl &xrl, string& errmsg,
+		 XrlRouter::XrlCallback cb, bool do_exec);
 #endif
     void send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
 		 const string& expected_response, bool do_exec);

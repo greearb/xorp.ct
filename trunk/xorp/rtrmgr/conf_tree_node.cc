@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.31 2004/01/06 02:56:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.32 2004/01/13 00:37:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -1192,7 +1192,7 @@ ConfigTreeNode::expand_expression(const string& expr, string& value) const
     if ((expr[0] != '`') || (expr[expr.size() - 1] != '`'))
 	return false;
 
-    // Trim quotes
+    // Trim the back-quotes
     string expression = expr.substr(1, expr.size() - 2);
 
     // XXX: quick and very dirty hack

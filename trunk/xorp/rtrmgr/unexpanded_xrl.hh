@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/unexpanded_xrl.hh,v 1.4 2003/05/04 06:25:21 mjh Exp $
+// $XORP: xorp/rtrmgr/unexpanded_xrl.hh,v 1.5 2003/12/02 09:38:59 pavlin Exp $
 
 #ifndef __RTRMGR_UNEXPANDED_XRL_HH__
 #define __RTRMGR_UNEXPANDED_XRL_HH__
@@ -40,9 +40,11 @@ public:
      * Expand the variables in the unexpanded XRL, and create an
      * XRL that we can actually send.
      * 
-     * @return the created XRL that we can send.
+     * @param errmsg the error message (if error).
+     * 
+     * @return the created XRL that we can send, or NULL if error.
      */
-    Xrl* expand() const;
+    Xrl* expand(string& errmsg) const;
 
     /**
      * Return the XRL return specification as a string.

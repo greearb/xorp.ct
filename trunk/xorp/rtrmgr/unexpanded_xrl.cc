@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.6 2003/12/02 09:38:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.7 2004/01/13 00:19:50 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -42,9 +42,9 @@ UnexpandedXrl::~UnexpandedXrl()
  * XRL that we can actually send.  
  */
 Xrl*
-UnexpandedXrl::expand() const
+UnexpandedXrl::expand(string& errmsg) const
 {
-    string request, errmsg;
+    string request;
 
     // Remove the old expanded XRL, because it may be obsolete
     if (_xrl != NULL) {

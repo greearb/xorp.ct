@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.34 2004/01/05 23:43:04 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.35 2004/01/13 01:06:44 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -521,7 +521,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 		// Error
 		errmsg = c_format("failed to expand expression \"%s\" "
 				  "associated with node \"%s\"",
-				  segment.c_str(), tn.segname().c_str());
+				  segment.c_str(), tn.path().c_str());
 		return (XORP_ERROR);
 	    }
 	} else if (segment[0] == '$') {

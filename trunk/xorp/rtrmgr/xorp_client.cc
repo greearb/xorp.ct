@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.15 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.16 2003/12/02 09:39:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -144,10 +144,10 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 
 #if 0
 int
-XorpClient::send_xrl(const UnexpandedXrl& unexpanded_xrl,
+XorpClient::send_xrl(const UnexpandedXrl& unexpanded_xrl, string& errmsg,
 		     XrlRouter::XrlCallback cb, bool do_exec)
 {
-    Xrl* xrl = unexpanded_xrl.expand();
+    Xrl* xrl = unexpanded_xrl.expand(errmsg);
 
     if (xrl == NULL)
 	return XORP_ERROR;
@@ -155,4 +155,4 @@ XorpClient::send_xrl(const UnexpandedXrl& unexpanded_xrl,
     send_now(*xrl, cb, return_spec, do_exec);
     return XORP_OK;
 }
-#endif
+#endif // 0

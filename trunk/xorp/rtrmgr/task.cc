@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.30 2003/12/19 09:33:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.31 2004/01/13 00:57:53 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -513,10 +513,10 @@ TaskXrlItem::execute(string& errmsg)
     printf("TaskXrlItem::execute\n");
     printf("  %s\n", _unexpanded_xrl.str().c_str());
 
-    Xrl* xrl = _unexpanded_xrl.expand();
+    Xrl* xrl = _unexpanded_xrl.expand(errmsg);
     if (xrl == NULL) {
-	errmsg = c_format("Failed to expand XRL %s",
-			  _unexpanded_xrl.str().c_str());
+	errmsg = c_format("Failed to expand XRL %s: %s",
+			  _unexpanded_xrl.str().c_str(), errmsg.c_str());
 	return false;
     }
     printf("  XRL: >%s<\n", xrl->str().c_str());
@@ -549,7 +549,9 @@ TaskXrlItem::unschedule()
 void
 TaskXrlItem::resend()
 {
-    Xrl* xrl = _unexpanded_xrl.expand();
+    string errmsg;
+
+    Xrl* xrl = _unexpanded_xrl.expand(errmsg);
     if (xrl == NULL) {
 	// This can't happen in a resend, because we already succeeded
 	// in the orginal send.
