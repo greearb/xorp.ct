@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.45 2005/02/14 20:35:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.46 2005/02/15 02:08:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -231,7 +231,7 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
 			       finder_hostname,
 			       finder_port,
 			       "finder",
-			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA));
+			       xorp_module_name(AF_INET6, XORP_MODULE_FEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_mfea_node6.xrl_router());
 #endif // HAVE_IPV6_MULTICAST
 
