@@ -341,7 +341,7 @@ add_cmd_command(char *s)
 	if ((arguments[i] == ' ') || (arguments[i] == '\t')) {
 	    if (! current_argument.empty()) {
 		command_action_arguments.push_back(current_argument);
-		current_argument.clear();
+		current_argument.erase();
 	    }
 	    continue;
 	}
@@ -350,7 +350,7 @@ add_cmd_command(char *s)
     // Add the last argument
     if (! current_argument.empty()) {
 	command_action_arguments.push_back(current_argument);
-	current_argument.clear();
+	current_argument.erase();
     }
     // Verify the positional arguments
     list<string>::const_iterator iter;
