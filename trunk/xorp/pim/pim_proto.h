@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.3 2003/03/10 23:20:50 hodson Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.4 2003/06/13 19:06:20 pavlin Exp $
  */
 
 
@@ -25,7 +25,8 @@
 
 /*
  * Protocol Independent Multicast protocol-specific definitions
- * (both for PIM-SMv2 and PIM-DMv2).
+ * (both for PIM-SMv2 and PIM-DMv2, as per
+ * draft-ietf-pim-sm-v2-new-07.txt and draft-ietf-pim-dm-new-v2-03.txt)
  */
 
 
@@ -141,6 +142,12 @@
 				PIM_BOOTSTRAP_HASH_MASKLEN_IPV4_DEFAULT	\
 				: PIM_BOOTSTRAP_HASH_MASKLEN_IPV6_DEFAULT)
 
+/* PIM_GRAFT-related definitions */
+#define PIM_GRAFT_RETRY_PERIOD_DEFAULT		3
+
+/* PIM-DM-related definitions */
+#define PIM_DM_SOURCE_LIFETIME_DEFAULT		210
+#define PIM_DM_REFRESH_INTERVAL_DEFAULT		60
 
 /* Other timeout default values */
 #define PIM_KEEPALIVE_PERIOD_DEFAULT		210
