@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.2 2004/05/21 22:14:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.3 2004/05/24 01:22:31 hodson Exp $"
 
 #include "fea/fea_module.h"
 
@@ -571,21 +571,12 @@ main(int argc, char* const argv[])
     argv += optind;
 
     // Get the command itself
-    if (argc == 0) {
-	usage(argv0, 1);
-	// NOTREACHED
-    }
     while (argc != 0) {
 	if (! command.empty())
 	    command += " ";
 	command += string(argv[0]);
 	argc--;
 	argv++;
-    }
-
-    if (command.empty()) {
-	usage(argv0, 1);
-	// NOTREACHED
     }
 
     //
