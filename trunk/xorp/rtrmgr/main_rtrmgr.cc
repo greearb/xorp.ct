@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.2 2002/12/14 23:43:10 hodson Exp $"
 
 #include <signal.h>
 
@@ -129,7 +129,9 @@ main(int argc, char* const argv[])
 	printf("caught exception\n");
 	xorp_unexpected_handler();
     }
+#if 0
     tt->display_tree();
+#endif
 
 
     //signal handlers so we can clean up when we're killed

@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.6 2003/02/22 00:46:10 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.7 2003/02/22 07:14:33 mjh Exp $"
 
-#define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "template_commands.hh"
 #include "xrldb.hh"
@@ -113,7 +113,7 @@ Action::str() const {
 XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb) 
      throw (ParseError) : Action(action)
 {
-    printf("XrlAction constructor\n");
+    debug_msg("XrlAction constructor\n");
     assert(action.front()=="xrl");
     check_xrl_is_valid(action, xrldb);
     
@@ -121,9 +121,9 @@ XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb)
     list <string>::const_iterator si;
     int j=0;
     for (si = xrlparts.begin(); si!= xrlparts.end(); si++) {
-	printf("Seg %d: >%s< \n", j++, si->c_str());
+	debug_msg("Seg %d: >%s< \n", j++, si->c_str());
     }
-    printf("\n");
+    debug_msg("\n");
     //trim off the "xrl" command part.
     xrlparts.pop_front();
     if (xrlparts.empty())
@@ -133,7 +133,7 @@ XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb)
     int segcount = 0;
     while (xrlparts.empty()==false) {
 	string segment = xrlparts.front();
-	printf("segment: %s\n", segment.c_str());
+	debug_msg("segment: %s\n", segment.c_str());
 	string origsegment = segment;
 	if (origsegment[0]=='\n') {
 	    //strip the magic "\n" off
@@ -143,9 +143,9 @@ XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb)
 		segment = " " + segment.substr(1,segment.size()-1);
 	}
 	string::size_type start = segment.find("->");
-	printf("start=%u\n", (uint32_t)start);
+	debug_msg("start=%u\n", (uint32_t)start);
 	if (start != string::npos) {
-	    printf("found return spec\n");
+	    debug_msg("found return spec\n");
 	    string::size_type origstart = origsegment.find("->");
 	    if (request_done)
 		throw ParseError("Two responses in one XRL\n");
@@ -169,18 +169,18 @@ XrlAction::XrlAction(const list<string> &action, const XRLdb& xrldb)
 	xrlparts.pop_front();
 	segcount++;
     }
-    printf("XrlAction:\n");
-    printf("Request: >%s<\n", _request.c_str());
+    debug_msg("XrlAction:\n");
+    debug_msg("Request: >%s<\n", _request.c_str());
     list <string>::const_iterator i;
     for (i = _split_request.begin(); i != _split_request.end(); i++) {
-	printf(">%s< ", (*i).c_str());
+	debug_msg(">%s< ", (*i).c_str());
     }
-    printf("\n");
-    printf("Response: >%s<\n", _response.c_str());
+    debug_msg("\n");
+    debug_msg("Response: >%s<\n", _response.c_str());
     for (i = _split_response.begin(); i != _split_response.end(); i++) {
-	printf(">%s< ", (*i).c_str());
+	debug_msg(">%s< ", (*i).c_str());
     }
-    printf("\n");
+    debug_msg("\n");
 }
 
 void 
@@ -191,7 +191,7 @@ XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb)
 	abort();
     action.pop_front();
     string xrlstr =  action.front();
-    printf("checking XRL: %s\n", xrlstr.c_str());
+    debug_msg("checking XRL: %s\n", xrlstr.c_str());
 
     /*
      * we need to go through the XRL template, and remove the
@@ -326,7 +326,7 @@ Action::execute(const ConfigTreeNode& ctn,
 		else
 		    word += expanded_var;
 	    } else {
-		fprintf(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
+		fdebug_msg(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
 		exit(1);
 	    }
 	} else if (segment[0]=='$') {
@@ -339,7 +339,7 @@ Action::execute(const ConfigTreeNode& ctn,
 		else
 		    word += expanded_var;
 	    } else {
-		fprintf(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
+		fdebug_msg(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
 		//exit(1);
 		abort();
 	    }
@@ -371,21 +371,21 @@ Action::execute(const ConfigTreeNode& ctn,
     int result;
     if (args[0] == "xrl") {
 	if (args[1].empty()) {
-	    fprintf(stderr, "Bad XRL command: %s\n", cmd_str.c_str());
+	    fdebug_msg(stderr, "Bad XRL command: %s\n", cmd_str.c_str());
 	    return (XORP_ERROR);
 	}
 	if ((args[1])[0]=='"' && args[1][args[1].size()-1]=='"')
 	    args[1] = args[1].substr(1,args[1].size()-2);
-	printf("CALL XRL: %s\n", args[1].c_str());
+	debug_msg("CALL XRL: %s\n", args[1].c_str());
 	result = xclient->run_command(tid, ctn, args[1], cb, no_execute);
 	if ((i>=4) && !(args[3].empty()))
-	    printf("Need to do something here to get the response back\n");
+	    debug_msg("Need to do something here to get the response back\n");
     } else {
-	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
+	fdebug_msg(stderr, "Bad command: %s\n", args[0].c_str());
 	return (XORP_ERROR);
     }
 	       
-    printf("action execute returning %d\n", result);
+    debug_msg("action execute returning %d\n", result);
     return result;
 }
 
@@ -443,11 +443,11 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	string xrlstr = args[1];
 	if (xrlstr[0]=='"' && xrlstr[xrlstr.size()-1]=='"')
 	    xrlstr = xrlstr.substr(1,xrlstr.size()-2);
-	printf("CALL XRL: %s\n", xrlstr.c_str());
+	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
 
 	UnexpandedXrl x(&ctn, this);
 	result = xclient->send_xrl(tid, x, cb, no_execute);
-	printf("result = %d\n", result);
+	debug_msg("result = %d\n", result);
     } else {
 	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
 	return (XORP_ERROR);
@@ -570,13 +570,13 @@ Command::execute(ConfigTreeNode& ctn,
 	    XLOG_FATAL("execute on unimplemented action type\n");
 	}
 	if (result < 0) {
-	    printf("command execute returning %d\n", result);
+	    debug_msg("command execute returning %d\n", result);
 	    //XXXX how do we communicate this error back up
 	    //return result;
 	}
 	actions++;
     } 
-    printf("command execute returning XORP_OK\n");
+    debug_msg("command execute returning XORP_OK\n");
     return actions;
 }
 
@@ -683,11 +683,11 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
 	else
 	    _modpath = value;
     } else if (cmd == "startcommit") {
-	printf("startcommit:\n");
+	debug_msg("startcommit:\n");
 	list <string>::const_iterator i;
 	for (i=action.begin(); i!=action.end(); i++)
-	    printf(">%s< ", (*i).c_str());
-	printf("\n");
+	    debug_msg(">%s< ", (*i).c_str());
+	debug_msg("\n");
 	list <string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front()=="xrl")
@@ -712,9 +712,9 @@ ModuleCommand::execute(XorpClient *xclient, uint tid,
 		       ModuleManager *module_manager, 
 		       bool no_execute, 
 		       bool no_commit) const {
-    printf("ModuleCommand::execute %s\n", _modname.c_str());
+    debug_msg("ModuleCommand::execute %s\n", _modname.c_str());
     if (no_commit == false) {
-	printf("no_commit == false\n");
+	debug_msg("no_commit == false\n");
 	//OK, we're actually going to do the commit
 
 	//find or create the module in the module manager
@@ -745,7 +745,7 @@ ModuleCommand::start_transaction(ConfigTreeNode &ctn,
 				 bool no_commit) const {
     if (_startcommit == NULL || no_commit)
 	return XORP_OK;
-    printf("\n\n****! start_transaction on %s \n", ctn.segname().c_str());
+    debug_msg("\n\n****! start_transaction on %s \n", ctn.segname().c_str());
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 				    &ModuleCommand::action_complete,
 				    &ctn, _startcommit,
@@ -780,6 +780,7 @@ ModuleCommand::str() const {
     string tmp;
     tmp= "ModuleCommand: provides: " + _modname + "\n";
     tmp+="               path: " + _modpath + "\n";
+    abort();
     typedef list<string>::const_iterator CI;
     CI ptr = _depends.begin();
     while (ptr != _depends.end()) {
@@ -792,7 +793,7 @@ ModuleCommand::str() const {
 void 
 ModuleCommand::exec_complete(const XrlError& /*err*/, 
 			     XrlArgs*) {
-    printf("ModuleCommand::exec_complete\n");
+    debug_msg("ModuleCommand::exec_complete\n");
 #ifdef NOTDEF
     if (err == XrlError::OKAY()) {
 	//XXX does this make sense?
@@ -809,11 +810,11 @@ ModuleCommand::action_complete(const XrlError& err,
 			       ConfigTreeNode *ctn,
 			       Action* action,
 			       string cmd) {
-    printf("ModuleCommand::action_complete\n");
+    debug_msg("ModuleCommand::action_complete\n");
     if (err == XrlError::OKAY()) {
 	//XXX does this make sense?
 	if (!args->empty()) {
-	    printf("ARGS: %s\n", args->str().c_str());
+	    debug_msg("ARGS: %s\n", args->str().c_str());
 	    list <string> specargs;
 	    XrlAction* xa = dynamic_cast<XrlAction*>(action);
 	    assert(xa != NULL);
@@ -825,7 +826,7 @@ ModuleCommand::action_complete(const XrlError& err,
 		    break;
 		}
 		specargs.push_back(s.substr(0, start));
-		printf("specargs: %s\n", s.substr(0, start).c_str());
+		debug_msg("specargs: %s\n", s.substr(0, start).c_str());
 		s = s.substr(start+1, s.size()-(start+1));
 	    }
 	    list <string>::const_iterator i;
@@ -835,9 +836,9 @@ ModuleCommand::action_complete(const XrlError& err,
 		    continue;
 		} else {
 		    XrlAtom atom(i->substr(0, eq).c_str());
-		    printf("atom name=%s\n", atom.name().c_str());
+		    debug_msg("atom name=%s\n", atom.name().c_str());
 		    string varname = i->substr(eq+1, i->size()-(eq+1));
-		    printf("varname=%s\n", varname.c_str());
+		    debug_msg("varname=%s\n", varname.c_str());
 		    XrlAtom returned_atom;
 		    try {
 			returned_atom = args->item(atom.name());
@@ -846,8 +847,8 @@ ModuleCommand::action_complete(const XrlError& err,
 			abort();
 		    }
 		    string value = returned_atom.value();
-		    printf("found atom = %s\n", returned_atom.str().c_str());
-		    printf("found value = %s\n", value.c_str());
+		    debug_msg("found atom = %s\n", returned_atom.str().c_str());
+		    debug_msg("found value = %s\n", value.c_str());
 		    ctn->set_variable(varname, value);
 		}
 	    }
@@ -870,9 +871,7 @@ void
 AllowCommand::add_action(const list <string> &action) 
     throw (ParseError)
 {
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("AllowCommand::add_action\n");
-#endif
+    debug_msg("AllowCommand::add_action\n");
     if (action.size() < 2) {
 	throw ParseError("Allow command with less than two parameters");
     }

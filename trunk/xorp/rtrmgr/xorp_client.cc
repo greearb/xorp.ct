@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.2 2003/01/10 00:30:25 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.3 2003/01/26 04:06:24 pavlin Exp $"
 
-#define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "xorp_client.hh"
@@ -143,7 +143,7 @@ XorpBatchXrlItem::execute(XorpClient *xclient,
     }
 
     string xrl_return_spec = _unexpanded_xrl.xrl_return_spec();
-    debug_msg("XorpBatchXrlItem::execute %s\n", xrl->str().c_str());
+    printf("XorpBatchXrlItem::execute %s\n", xrl->str().c_str());
     return xclient->
 	send_now(*xrl, callback(this,
 				&XorpBatchXrlItem::response_callback),
@@ -252,7 +252,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
     if (xrl_return_spec.empty()) {
 	return XrlArgs();
     }
-    printf("fake_return_args %s\n", xrl_return_spec.c_str());
+    debug_msg("fake_return_args %s\n", xrl_return_spec.c_str());
     list <string> args;
     string s = xrl_return_spec;
     while (1) {
@@ -267,14 +267,14 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
     XrlArgs xargs;
     list <string>::const_iterator i;
     for(i = args.begin(); i!= args.end(); i++) {
-	printf("ARG: %s\n", i->c_str());
+	debug_msg("ARG: %s\n", i->c_str());
 	string::size_type eq = i->find("=");
 	XrlAtom atom;
 	if (eq == string::npos) {
-	    printf("ARG2: %s\n", i->c_str());
+	    debug_msg("ARG2: %s\n", i->c_str());
 	    atom = XrlAtom(i->c_str());
 	} else {
-	    printf("ARG2: >%s<\n", i->substr(0, eq).c_str());
+	    debug_msg("ARG2: >%s<\n", i->substr(0, eq).c_str());
 	    atom = XrlAtom(i->substr(0, eq).c_str());
 	}
 	switch (atom.type()) {
@@ -304,7 +304,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
 	    break;
 	}
     }
-    printf("ARGS: %s\n", xargs.str().c_str());
+    debug_msg("ARGS: %s\n", xargs.str().c_str());
     return xargs;
 }
 

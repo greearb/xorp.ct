@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.4 2002/12/09 18:29:40 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/debug.h"
@@ -35,11 +35,11 @@ Xrl* UnexpandedXrl::xrl() {
     
     if (_xrl==NULL) {
 	string request = _action->expand_xrl_variables(*_node);
-	printf("XRL expanded to %s\n", request.c_str());
+	debug_msg("XRL expanded to %s\n", request.c_str());
 	try {
 	    _xrl = new Xrl(request.c_str());
 	} catch (const InvalidString& e) {
-	    printf("Failed to initialize XRL: %s\n", e.why().c_str());
+	    debug_msg("Failed to initialize XRL: %s\n", e.why().c_str());
 	    return NULL;
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.24 2002/12/09 18:29:40 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -85,7 +85,9 @@ XorpShell::XorpShell(const string& IPCname,
 #endif
 	xorp_unexpected_handler();
     }
+#if DEBUG_STARTUP
     _tt->display_tree();
+#endif
 
 
     //read the router operational template files

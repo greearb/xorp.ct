@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.2 2002/12/14 23:43:11 hodson Exp $"
 
 #include <glob.h>
 #include "config.h"
@@ -23,7 +23,9 @@
 
 XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec) 
     : _xrl(xrl), _rspec(rspec) {
+#ifdef DEBUG_XRLDB
     cout << "XrlSpec " + xrl.str() + " -> " + rspec.str() + "\n";
+#endif
 }
 
 
@@ -58,7 +60,9 @@ XrlSpec::str() const {
 XRLtarget::XRLtarget(const string& xrlfilename) 
     : _targetname(xrlfilename)
 {
+#ifdef DEBUG_XRLDB
     cout << "Loading xrl file " << xrlfilename << endl;
+#endif
     XrlParserFileInput xpi(xrlfilename.c_str());
     XrlParser parser(xpi);
 
@@ -69,18 +73,26 @@ XRLtarget::XRLtarget(const string& xrlfilename)
 
 	try {
 	    if (parser.get(s)) {
+#ifdef DEBUG_XRLDB
 		cout << "Xrl " + s + "\n";
+#endif
 		if (parser.get_return_specs(rspec)) {
+#ifdef DEBUG_XRLDB
 		    cout << "Return Spec:" << endl;
+#endif
 		    list<XrlAtomSpell>::const_iterator si;
 		    for (si = rspec.begin(); si != rspec.end(); si++) {
 			rargs.add(si->atom());
+#ifdef DEBUG_XRLDB
 			cout << "\t -> " 
 			     << si->atom().str() << " - " << si->spell() 
 			     << endl;
+#endif
 		    }
 		} else {
+#ifdef DEBUG_XRLDB
 		    cout << "No return spec for XRL " + s + "\n";
+#endif
 		}
 		Xrl xrl(s.c_str());
 		_xrlspecs.push_back(XrlSpec(xrl, rargs));
@@ -167,7 +179,7 @@ XRLdb::XRLdb(const string& xrldir) {
     for (size_t i=0; i< (size_t)pglob.gl_pathc; i++) {
 	_targets.push_back(XRLtarget(pglob.gl_pathv[i]));
     }
-#if 0
+#ifdef DEBUG_XRLDB
     printf("XRLdb initialized\n");
     printf("%s\n", str().c_str());
 #endif
@@ -176,7 +188,9 @@ XRLdb::XRLdb(const string& xrldir) {
 
 bool
 XRLdb::check_xrl_syntax(const string &xrlstr) const {
+#ifdef DEBUG_XRLDB
     printf("XRLdb: checking xrl syntax: %s\n", xrlstr.c_str());
+#endif
     try {
 	string::size_type start = xrlstr.find("->");
 	string rspec;
@@ -198,8 +212,9 @@ XRLdb::check_xrl_syntax(const string &xrlstr) const {
 
 XRLMatchType
 XRLdb::check_xrl_exists(const string &xrlstr) const {
+#if DEBUG_XRLDB
     printf("XRLdb: checking xrl exists: %s\n", xrlstr.c_str());
-
+#endif
     string::size_type start = xrlstr.find("->");
     string xrlspec;
     string rspec;

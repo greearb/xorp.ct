@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.4 2003/02/22 07:14:32 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.5 2003/02/22 20:21:30 mjh Exp $"
 
-#define DEBUG_LOGGING
-#define DEBUG_VARIABLES
+//#define DEBUG_LOGGING
+//#define DEBUG_VARIABLES
 //#define DEBUG_COMMIT
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
@@ -374,7 +374,6 @@ ConfigTreeNode::find_changed_modules(set <string>& changed_modules) const {
 	    }
 	} else if (!_value_committed) {
 	    cmd = _template->const_command("%set");
-	    printf("cmd=%p\n", cmd);
 	    if (cmd != NULL) {
 		modules = cmd->affected_xrl_modules();
 		for (i = modules.begin(); i!=modules.end(); i++)
@@ -917,7 +916,7 @@ void
 ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id) {
     /* we delete all the children of this node, then delete the node
        itself */
-    printf("Mark subtree for deletion: %s\n", _segname.c_str());
+    debug_msg("Mark subtree for deletion: %s\n", _segname.c_str());
 
     if (_existence_committed == false) {
 	//this node was never committed
@@ -927,7 +926,7 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id) {
     
     /* delete_subtree calls remove_child, so we just iterate until no
        children are left */
-    printf("Node has %u children\n", (uint32_t)_children.size());
+    debug_msg("Node has %u children\n", (uint32_t)_children.size());
     list <ConfigTreeNode*>::iterator i, previ;
     i = _children.begin();
     while(i!= _children.end()) {
@@ -1083,153 +1082,6 @@ ConfigTreeNode::expand_expression(const string& expr,
     }
     return true;
 }
-
-#ifdef NOTDEF
-bool 
-ConfigTreeNode::expand_variable(const string& varname, 
-				string& value) const {
-#ifdef DEBUG_VARIABLES
-    printf("ConfigTreeNode::expand_variable at %s: >%s<\n", _segname.c_str(), varname.c_str());
-#endif
-    if (varname == "$(@)") {
-	assert(!_template->is_tag());
-	value = this->value();
-#ifdef DEBUG_VARIABLES
-	printf("returning value >%s<\n", value.c_str());
-	printf("         _value >%s<\n", _value.c_str());
-#endif
-	return true;
-    }
-    list <string> var_parts;
-    split_up_varname(varname, var_parts);
-    if (var_parts.size()==1) {
-	/*check our children*/
-#ifdef DEBUG_VARIABLES
-	printf("trying to expand child\n");
-#endif
-	list <ConfigTreeNode *>::const_iterator child_iter;
-	for(child_iter = _children.begin();
-	    child_iter != _children.end();
-	    child_iter++) {
-	    if ((*child_iter)->segname() == var_parts.front()) {
-		const ConfigTreeNode *search_node = *child_iter;
-		var_parts.pop_front();
-		while(!var_parts.empty()) {
-		    /* not yet implemented */
-		    abort();
-		}
-		assert(search_node->is_tag()==false);
-		value = search_node->value();
-#ifdef DEBUG_VARIABLES
-		printf("returning >%s<\n", value.c_str());
-#endif
-		return true;
-	    }
-	}
-	if (var_parts.size() == 1) {
-	    list <TemplateTreeNode*>::const_iterator tchild_iter;
-	    for(tchild_iter = _template->children().begin();
-		tchild_iter != _template->children().end();
-		tchild_iter++) {
-		if ((*tchild_iter)->segname() == var_parts.front()) {
-		    if ((*tchild_iter)->has_default()) {
-			value = (*tchild_iter)->default_str();
-#ifdef DEBUG_VARIABLES
-			printf("returning >%s<\n", value.c_str());
-#endif
-			return true;
-		    } else {
-#ifdef DEBUG_VARIABLES
-			printf("attempt to get default value from node %s that doesn't have one\n",
-			       (*tchild_iter)->segname().c_str());
-#endif
-			return false;
-		    }
-		}
-	    }
-	}
-    } else {
-	/*check our parents*/
-#ifdef DEBUG_VARIABLES
-	printf("searching parents\n");
-#endif
-	list <const ConfigTreeNode*> our_path;
-	bool is_on_our_path = true;
-	assert(var_parts.front()!="@");
-	const ConfigTreeNode *search_node = this;
-	while (search_node != NULL && search_node->template_node()!=NULL) {
-	    if (search_node->is_tag() 
-		&& search_node->segname() == var_parts.front()) {
-		//we've found the right place to start
-#ifdef DEBUG_VARIABLES
-		printf("starting expansion at segname %s\n", 
-		       search_node->segname().c_str());
-#endif
-		var_parts.pop_front();
-		search_node = our_path.front();
-		our_path.pop_front();
-
-		//we expect the expansion to alternate between tags
-		//and non-tags as we work down the variable name
-		bool expecting_tag = false;
-		while(!var_parts.empty()) {
-		    if (expecting_tag == false) {
-#ifdef DEBUG_VARIABLES
-			printf("expecting_tag==false, segname=%s\n",
-			       search_node->segname().c_str());
-#endif
-			assert(search_node->is_tag() == false);
-			if (var_parts.front()=="@") {
-			    if (var_parts.size()==1) {
-				value = search_node->value();
-#ifdef DEBUG_VARIABLES
-				printf("returning >%s<\n", value.c_str());
-#endif
-				return true;
-			    }
-			    expecting_tag = true;
-			    search_node = our_path.front();
-			    our_path.pop_front();
-			} else {
-			    //not yet implemented
-			    abort();
-			}
-		    } else {
-#ifdef DEBUG_VARIABLES
-			printf("expecting_tag==true, segname=%s\n",
-			       search_node->segname().c_str());
-#endif
-			assert(search_node->is_tag() == true);
-			if (is_on_our_path) {
-			    if (var_parts.front() != search_node->segname()) {
-#ifdef DEBUG_VARIABLES
-				printf("expand failed\n");
-#endif
-				return false;
-			    }
-			    expecting_tag = false;
-			    search_node = our_path.front();
-			    our_path.pop_front();
-			} else {
-			    //not yet implemented
-			    abort();
-			}
-		    }
-		}
-	    }
-#ifdef DEBUG_VARIABLES
-	    printf("pushing >%s<\n", search_node->segname().c_str());
-#endif
-	    our_path.push_front(search_node);
-	    search_node = const_cast<ConfigTreeNode *>(search_node)->parent();
-	}
-    }
-#ifdef DEBUG_VARIABLES
-    printf("expand failed\n");
-#endif
-    return false;
-}
-#endif
 
 const string&
 ConfigTreeNode::named_value(const string& varname) const {
@@ -1553,7 +1405,7 @@ bool ConfigTreeNode::set_variable(const string& varname, string& value) {
     split_up_varname(varname, var_parts);
     list <string>::iterator i;
     for (i=var_parts.begin(); i!=var_parts.end(); i++) {
-	printf("VP: %s\n", i->c_str());
+	debug_msg("VP: %s\n", i->c_str());
     }
     if (var_parts.size()<2) {
 	string err = "Attempt to set unknown variable \"" + varname + "\"\n";
@@ -1591,7 +1443,7 @@ bool ConfigTreeNode::set_variable(const string& varname, string& value) {
 
 void 
 ConfigTreeNode::set_named_value(const string& varname, const string& value) {
-    printf("set_named_value %s=%s\n", varname.c_str(), value.c_str());
+    debug_msg("set_named_value %s=%s\n", varname.c_str(), value.c_str());
     _variables[varname] = value;
 }
 
