@@ -1,23 +1,23 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.1 2004/05/04 00:31:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.2 2004/05/16 07:15:17 pavlin Exp $ */
 
 protocols {
     pimsm4 {
-	targetname: text = "PIMSM_4";
+	targetname: txt = "PIMSM_4";
 	disable: bool = false;
 
-	interface @: text {
-	    vif @: text {
+	interface @: txt {
+	    vif @: txt {
 		enable: bool = true;
-		alternative-subnet @: ipv4_prefix {
+		alternative-subnet @: ipv4net {
 		}
 	    }
 	}
 
 	static-rps {
 	    rp @: ipv4 {
-		group-prefix @: ipv4_prefix {
-		    rp-priority: uint = 192;
-		    hash-mask-len: uint = 30;
+		group-prefix @: ipv4net {
+		    rp-priority: u32 = 192;
+		    hash-mask-len: u32 = 30;
 		}
 	    }
 	}
@@ -26,28 +26,28 @@ protocols {
 	    disable: bool = false;
 
 	    cand-bsr {
-		scope-zone @: ipv4_prefix {
+		scope-zone @: ipv4net {
 		    is-scope-zone: bool = false;
-		    cand-bsr-by-vif-name: text;
-		    bsr-priority: uint = 1;
-		    hash-mask-len: uint = 30;
+		    cand-bsr-by-vif-name: txt;
+		    bsr-priority: u32 = 1;
+		    hash-mask-len: u32 = 30;
 		}
 	    }
 
 	    cand-rp {
-		group-prefix @: ipv4_prefix {
+		group-prefix @: ipv4net {
 		    is-scope-zone: bool = false;
-		    cand-rp-by-vif-name: text;
-		    rp-priority: uint = 192;
-		    rp-holdtime: uint = 150;
+		    cand-rp-by-vif-name: txt;
+		    rp-priority: u32 = 192;
+		    rp-holdtime: u32 = 150;
 		}
 	    }
 	}
 
 	switch-to-spt-threshold {
 	    enable: bool = false;
-	    interval-sec: uint = 0;
-	    bytes: uint = 0;
+	    interval-sec: u32 = 0;
+	    bytes: u32 = 0;
 	}
 
 	traceoptions {

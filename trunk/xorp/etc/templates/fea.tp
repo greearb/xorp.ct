@@ -1,7 +1,7 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.20 2004/05/12 23:58:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.21 2004/05/16 07:15:16 pavlin Exp $ */
 
 fea {
-    targetname: text = "fea";
+    targetname: txt = "fea";
     enable-unicast-forwarding4: bool;
     enable-unicast-forwarding6: bool;
 }

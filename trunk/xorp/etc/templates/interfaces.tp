@@ -1,19 +1,19 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.1 2004/05/12 23:58:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.2 2004/05/16 07:15:17 pavlin Exp $ */
 
 interfaces {
-    targetname: text = "fea";
+    targetname: txt = "fea";
 
-    interface @: text {
+    interface @: txt {
 	disable: toggle = false;
-	description: text = "";
+	description: txt = "";
 	mac: macaddr;
-	mtu: uint;
+	mtu: u32;
 
-	vif @: text {
+	vif @: txt {
 	    disable: toggle = false;
 
 	    address @: ipv4 {
-		prefix-length: uint;
+		prefix-length: u32;
 		broadcast: ipv4;
 		destination: ipv4;
 		multicast-capable: bool;
@@ -23,7 +23,7 @@ interfaces {
 	    }
 
 	    address @: ipv6 {
-		prefix-length: uint;
+		prefix-length: u32;
 		destination: ipv6;
 		multicast-capable: bool;
 		point-to-point: bool;
@@ -51,7 +51,7 @@ interfaces {
 	%create:;
     }
 
-    interface @: text {
+    interface @: txt {
 	%create: xrl "$(interfaces.targetname)/ifmgr/0.1/create_interface?tid:u32=$(interfaces.TID)&ifname:txt=$(@)";
 	%delete: xrl "$(interfaces.targetname)/ifmgr/0.1/delete_interface?tid:u32=$(interfaces.TID)&ifname:txt=$(@)";
 	%list: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_interface_names->ifnames:list";
@@ -75,7 +75,7 @@ interfaces {
 	    %get: xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mac?ifname:txt=$(interface.@)->mac:mac=$(@)";
 	}
 
-	vif @: text {
+	vif @: txt {
 	    %create: xrl "$(interfaces.targetname)/ifmgr/0.1/create_vif?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(@)";
 	    %delete: xrl "$(interfaces.targetname)/ifmgr/0.1/delete_vif?ifname:txt=$(interface.@)&tid:u32=$(interfaces.TID)&vif:txt=$(@)";
 	    %list: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_names?ifname:txt=$(interface.@)->vifs:list";

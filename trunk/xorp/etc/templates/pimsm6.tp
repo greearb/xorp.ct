@@ -1,23 +1,23 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.1 2004/05/04 00:31:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.2 2004/05/16 07:15:17 pavlin Exp $ */
 
 protocols {
     pimsm6 {
-	targetname: text = "PIMSM_6";
+	targetname: txt = "PIMSM_6";
 	disable: bool = false;
 
-	interface @: text {
-	    vif @: text {
+	interface @: txt {
+	    vif @: txt {
 		enable: bool = true;
-		alternative-subnet @: ipv6_prefix {
+		alternative-subnet @: ipv6net {
 		}
 	    }
 	}
 
 	static-rps {
 	    rp @: ipv6 {
-		group-prefix @: ipv6_prefix {
-		    rp-priority: uint = 192;
-		    hash-mask-len: uint = 126;
+		group-prefix @: ipv6net {
+		    rp-priority: u32 = 192;
+		    hash-mask-len: u32 = 126;
 		}
 	    }
 	}
@@ -26,28 +26,28 @@ protocols {
 	    disable: bool = false;
 
 	    cand-bsr {
-		scope-zone @: ipv6_prefix {
+		scope-zone @: ipv6net {
 		    is-scope-zone: bool = false;
-		    cand-bsr-by-vif-name: text;
-		    bsr-priority: uint = 1;
-		    hash-mask-len: uint = 126;
+		    cand-bsr-by-vif-name: txt;
+		    bsr-priority: u32 = 1;
+		    hash-mask-len: u32 = 126;
 		}
 	    }
 
 	    cand-rp {
-		group-prefix @: ipv6_prefix {
+		group-prefix @: ipv6net {
 		    is-scope-zone: bool = false;
-		    cand-rp-by-vif-name: text;
-		    rp-priority: uint = 192;
-		    rp-holdtime: uint = 150;
+		    cand-rp-by-vif-name: txt;
+		    rp-priority: u32 = 192;
+		    rp-holdtime: u32 = 150;
 		}
 	    }
 	}
 
 	switch-to-spt-threshold {
 	    enable: bool = false;
-	    interval-sec: uint = 0;
-	    bytes: uint = 0;
+	    interval-sec: u32 = 0;
+	    bytes: u32 = 0;
 	}
 
 	traceoptions {

@@ -1,8 +1,8 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.1 2004/02/14 00:14:59 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.1 2004/05/04 00:31:26 pavlin Exp $ */
 
 protocols {
     fib2mrib {
-	targetname: text = "fib2mrib";
+	targetname: txt = "fib2mrib";
 	disable: bool = true;
     }
 }

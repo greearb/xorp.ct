@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.12 2004/02/27 12:12:49 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.13 2004/03/11 22:31:45 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -38,9 +38,9 @@ enum TTNodeType {
     NODE_BOOL		= 4,
     NODE_TOGGLE		= 4,
     NODE_IPV4		= 5,
-    NODE_IPV4PREFIX	= 6,
+    NODE_IPV4NET	= 6,
     NODE_IPV6		= 7,
-    NODE_IPV6PREFIX	= 8,
+    NODE_IPV6NET	= 8,
     NODE_MACADDR	= 9
 };
 
@@ -236,7 +236,7 @@ public:
     ~IPv4NetTemplate();
 
     string typestr() const { return string("IPv4Net"); }
-    TTNodeType type() const { return NODE_IPV4PREFIX; }
+    TTNodeType type() const { return NODE_IPV4NET; }
     IPv4Net default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
     bool type_match(const string& s) const;
@@ -270,7 +270,7 @@ public:
     ~IPv6NetTemplate();
 
     string typestr() const { return string("IPv6Net"); }
-    TTNodeType type() const { return NODE_IPV6PREFIX; }
+    TTNodeType type() const { return NODE_IPV6NET; }
     IPv6Net default_value() const { return *_default; }
     string default_str() const { return _default->str(); }
     bool type_match(const string& s) const;

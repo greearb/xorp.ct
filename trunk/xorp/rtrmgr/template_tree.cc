@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.16 2004/01/14 03:00:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.17 2004/03/11 22:31:45 mjh Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -178,13 +178,13 @@ TemplateTree::new_node(TemplateTreeNode* parent,
     case NODE_IPV4:
 	ttn = new IPv4Template(*this, parent, path, varname, initializer);
 	break;
-    case NODE_IPV4PREFIX:
+    case NODE_IPV4NET:
 	ttn = new IPv4NetTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV6:
 	ttn = new IPv6Template(*this, parent, path, varname, initializer);
 	break;
-    case NODE_IPV6PREFIX:
+    case NODE_IPV6NET:
 	ttn = new IPv6NetTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_MACADDR:

@@ -11,7 +11,7 @@
 RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?
 RE_IPV4 {RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}\.{RE_IPV4_BYTE}
 RE_IPV4_PREFIXLEN 3[0-2]|[0-2]?[0-9]
-RE_IPV4_PREFIX {RE_IPV4}\/{RE_IPV4_PREFIXLEN}
+RE_IPV4NET {RE_IPV4}\/{RE_IPV4_PREFIXLEN}
 
 /*
  * IPv6 address representation in Augmented Backus-Naur Form (ABNF).
@@ -53,7 +53,7 @@ RE_IPV6_P8	({RE_H4_COLON}{0,5}{RE_H4})?::{RE_H4}
 RE_IPV6_P9	({RE_H4_COLON}{0,6}{RE_H4})?::
 RE_IPV6		{RE_IPV6_P1}|{RE_IPV6_P2}|{RE_IPV6_P3}|{RE_IPV6_P4}|{RE_IPV6_P5}|{RE_IPV6_P6}|{RE_IPV6_P7}|{RE_IPV6_P8}|{RE_IPV6_P9}
 RE_IPV6_PREFIXLEN 12[0-8]|1[01][0-9]|[0-9][0-9]?
-RE_IPV6_PREFIX	{RE_IPV6}\/{RE_IPV6_PREFIXLEN}
+RE_IPV6NET	{RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 
@@ -96,17 +96,17 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return RETURN;
 	}
 
-"text"	{
+"txt"	{
 	tpltlval = strdup(tplttext);
 	return TEXT_TYPE;
 	}
 
-"int"	{
+"i32"	{
 	tpltlval = strdup(tplttext);
 	return INT_TYPE;
 	}
 
-"uint"	{
+"u32"	{
 	tpltlval = strdup(tplttext);
 	return UINT_TYPE;
 	}
@@ -126,9 +126,9 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return IPV4_TYPE;
 	}
 
-"ipv4_prefix"	{
+"ipv4net"	{
 	tpltlval = strdup(tplttext);
-	return IPV4PREFIX_TYPE;
+	return IPV4NET_TYPE;
 	}
 
 "ipv6"	{
@@ -136,9 +136,9 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return IPV6_TYPE;
 	}
 
-"ipv6_prefix"	{
+"ipv6net"	{
 	tpltlval = strdup(tplttext);
-	return IPV6PREFIX_TYPE;
+	return IPV6NET_TYPE;
 	}
 
 "macaddr"	{
@@ -166,9 +166,9 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return IPV4_VALUE;
 	}
 
-{RE_IPV4_PREFIX} {
+{RE_IPV4NET} {
 	tpltlval = strdup(tplttext);
-	return IPV4PREFIX_VALUE;
+	return IPV4NET_VALUE;
 	}
 
 {RE_IPV6}	{
@@ -176,9 +176,9 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return IPV6_VALUE;
 	}
 
-{RE_IPV6_PREFIX} {
+{RE_IPV6NET} {
 	tpltlval = strdup(tplttext);
-	return IPV6PREFIX_VALUE;
+	return IPV6NET_VALUE;
 	}
 
 {RE_MACADDR}	{

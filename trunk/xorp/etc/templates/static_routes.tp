@@ -1,28 +1,28 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.2 2004/05/03 23:42:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.3 2004/05/16 07:15:18 pavlin Exp $ */
 
 protocols {
     static {
-	targetname: text = "static_routes";
+	targetname: txt = "static_routes";
 	disable: bool = false;
 
-	route4 @: ipv4_prefix {
+	route4 @: ipv4net {
 	    nexthop:ipv4;
-	    metric:uint = 1;		/* Default metric of 1 */
+	    metric:u32 = 1;		/* Default metric of 1 */
 	}
 
-	route6 @: ipv6_prefix {
+	route6 @: ipv6net {
 	    nexthop:ipv6;
-	    metric:uint = 1;		/* Default metric of 1 */
+	    metric:u32 = 1;		/* Default metric of 1 */
 	}
 
-	mrib-route4 @: ipv4_prefix {
+	mrib-route4 @: ipv4net {
 	    nexthop:ipv4;
-	    metric:uint = 1;		/* Default metric of 1 */
+	    metric:u32 = 1;		/* Default metric of 1 */
 	}
 
-	mrib-route6 @: ipv6_prefix {
+	mrib-route6 @: ipv6net {
 	    nexthop:ipv6;
-	    metric:uint = 1;		/* Default metric of 1 */
+	    metric:u32 = 1;		/* Default metric of 1 */
 	}
     }
 }
@@ -50,7 +50,7 @@ protocols {
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=`~$(DEFAULT)`";
 	}
 
-	route4 @: ipv4_prefix {
+	route4 @: ipv4net {
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
@@ -65,7 +65,7 @@ protocols {
 	    }
 	}
 
-	route6 @: ipv6_prefix {
+	route6 @: ipv6net {
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
@@ -80,7 +80,7 @@ protocols {
 	    }
 	}
 
-	mrib-route4 @: ipv4_prefix {
+	mrib-route4 @: ipv4net {
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
@@ -95,7 +95,7 @@ protocols {
 	    }
 	}
 
-	mrib-route6 @: ipv6_prefix {
+	mrib-route6 @: ipv6net {
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";

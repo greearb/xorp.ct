@@ -1,12 +1,12 @@
-/* $XORP: xorp/etc/templates/snmp.tp,v 1.6 2004/01/07 10:26:18 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.7 2004/05/16 07:15:18 pavlin Exp $ */
 
 protocols {
     snmp {
-	targetname: text = "xorp_if_mib";
+	targetname: txt = "xorp_if_mib";
 
-	mib-module @: text {
-	    abs-path: text = "";
-	    mib-index: uint = 0;
+	mib-module @: txt {
+	    abs-path: txt = "";
+	    mib-index: u32 = 0;
 	}
     }
 }

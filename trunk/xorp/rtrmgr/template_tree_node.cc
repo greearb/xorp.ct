@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.18 2004/02/27 12:12:49 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.19 2004/05/16 02:52:13 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -676,7 +676,7 @@ TextTemplate::type_match(const string& ) const
 {
     //
     // If the lexical analyser passed it to us, we can assume its a
-    // value text value.
+    // text value.
     //
     return true;
 }

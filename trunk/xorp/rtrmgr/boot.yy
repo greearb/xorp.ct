@@ -94,13 +94,13 @@ terminal:	LITERAL END {
 			terminal($1, $3, NODE_IPV4);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV4NET_VALUE END {
-			terminal($1, $3, NODE_IPV4PREFIX);
+			terminal($1, $3, NODE_IPV4NET);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV6_VALUE END {
 			terminal($1, $3, NODE_IPV6);
 		}
 		| LITERAL ASSIGN_OPERATOR IPV6NET_VALUE END {
-			terminal($1, $3, NODE_IPV6PREFIX);
+			terminal($1, $3, NODE_IPV6NET);
 		}
 		| LITERAL ASSIGN_OPERATOR MACADDR_VALUE END {
 			terminal($1, $3, NODE_MACADDR);

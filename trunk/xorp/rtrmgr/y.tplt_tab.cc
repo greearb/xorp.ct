@@ -68,16 +68,16 @@ static int yygrowstack();
 #define BOOL_TYPE 267
 #define TOGGLE_TYPE 268
 #define IPV4_TYPE 269
-#define IPV4PREFIX_TYPE 270
+#define IPV4NET_TYPE 270
 #define IPV6_TYPE 271
-#define IPV6PREFIX_TYPE 272
+#define IPV6NET_TYPE 272
 #define MACADDR_TYPE 273
 #define BOOL_VALUE 274
 #define INTEGER_VALUE 275
 #define IPV4_VALUE 276
-#define IPV4PREFIX_VALUE 277
+#define IPV4NET_VALUE 277
 #define IPV6_VALUE 278
-#define IPV6PREFIX_VALUE 279
+#define IPV6NET_VALUE 279
 #define MACADDR_VALUE 280
 #define VARDEF 281
 #define COMMAND 282
@@ -187,10 +187,10 @@ const char * const tpltname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"UPLEVEL","DOWNLEVEL","END",
 "COLON","ASSIGN_DEFAULT","LISTNEXT","RETURN","TEXT_TYPE","INT_TYPE","UINT_TYPE",
-"BOOL_TYPE","TOGGLE_TYPE","IPV4_TYPE","IPV4PREFIX_TYPE","IPV6_TYPE",
-"IPV6PREFIX_TYPE","MACADDR_TYPE","BOOL_VALUE","INTEGER_VALUE","IPV4_VALUE",
-"IPV4PREFIX_VALUE","IPV6_VALUE","IPV6PREFIX_VALUE","MACADDR_VALUE","VARDEF",
-"COMMAND","VARIABLE","LITERAL","STRING","SYNTAX_ERROR",
+"BOOL_TYPE","TOGGLE_TYPE","IPV4_TYPE","IPV4NET_TYPE","IPV6_TYPE","IPV6NET_TYPE",
+"MACADDR_TYPE","BOOL_VALUE","INTEGER_VALUE","IPV4_VALUE","IPV4NET_VALUE",
+"IPV6_VALUE","IPV6NET_VALUE","MACADDR_VALUE","VARDEF","COMMAND","VARIABLE",
+"LITERAL","STRING","SYNTAX_ERROR",
 };
 const char * const tpltrule[] = {
 "$accept : input",
@@ -211,9 +211,9 @@ const char * const tpltrule[] = {
 "type : BOOL_TYPE",
 "type : TOGGLE_TYPE",
 "type : IPV4_TYPE",
-"type : IPV4PREFIX_TYPE",
+"type : IPV4NET_TYPE",
 "type : IPV6_TYPE",
-"type : IPV6PREFIX_TYPE",
+"type : IPV6NET_TYPE",
 "type : MACADDR_TYPE",
 "init_type : TEXT_TYPE ASSIGN_DEFAULT STRING",
 "init_type : INT_TYPE ASSIGN_DEFAULT INTEGER_VALUE",
@@ -221,9 +221,9 @@ const char * const tpltrule[] = {
 "init_type : BOOL_TYPE ASSIGN_DEFAULT BOOL_VALUE",
 "init_type : TOGGLE_TYPE ASSIGN_DEFAULT BOOL_VALUE",
 "init_type : IPV4_TYPE ASSIGN_DEFAULT IPV4_VALUE",
-"init_type : IPV4PREFIX_TYPE ASSIGN_DEFAULT IPV4PREFIX_VALUE",
+"init_type : IPV4NET_TYPE ASSIGN_DEFAULT IPV4NET_VALUE",
 "init_type : IPV6_TYPE ASSIGN_DEFAULT IPV6_VALUE",
-"init_type : IPV6PREFIX_TYPE ASSIGN_DEFAULT IPV6PREFIX_VALUE",
+"init_type : IPV6NET_TYPE ASSIGN_DEFAULT IPV6NET_VALUE",
 "init_type : MACADDR_TYPE ASSIGN_DEFAULT MACADDR_VALUE",
 "nodegroup : UPLEVEL statements DOWNLEVEL",
 "statements :",
@@ -668,7 +668,7 @@ case 17:
 break;
 case 18:
 #line 80 "template.yy"
-{ tplt_type = NODE_IPV4PREFIX; }
+{ tplt_type = NODE_IPV4NET; }
 break;
 case 19:
 #line 81 "template.yy"
@@ -676,7 +676,7 @@ case 19:
 break;
 case 20:
 #line 82 "template.yy"
-{ tplt_type = NODE_IPV6PREFIX; }
+{ tplt_type = NODE_IPV6NET; }
 break;
 case 21:
 #line 83 "template.yy"
@@ -727,7 +727,7 @@ break;
 case 28:
 #line 110 "template.yy"
 {
-			tplt_type = NODE_IPV4PREFIX;
+			tplt_type = NODE_IPV4NET;
 			tplt_initializer = yyvsp[0];
 		}
 break;
@@ -741,7 +741,7 @@ break;
 case 30:
 #line 118 "template.yy"
 {
-			tplt_type = NODE_IPV6PREFIX;
+			tplt_type = NODE_IPV6NET;
 			tplt_initializer = yyvsp[0];
 		}
 break;

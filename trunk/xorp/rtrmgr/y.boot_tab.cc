@@ -580,7 +580,7 @@ break;
 case 33:
 #line 96 "boot.yy"
 {
-			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4PREFIX);
+			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4NET);
 		}
 break;
 case 34:
@@ -592,7 +592,7 @@ break;
 case 35:
 #line 102 "boot.yy"
 {
-			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6PREFIX);
+			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6NET);
 		}
 break;
 case 36:

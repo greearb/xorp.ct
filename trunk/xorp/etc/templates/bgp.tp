@@ -1,25 +1,25 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.23 2004/05/11 00:44:35 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.24 2004/05/16 07:15:16 pavlin Exp $ */
 
 protocols {
     bgp {
-	targetname: text = "bgp";
+	targetname: txt = "bgp";
 	bgp-id: ipv4;
-	local-as: uint;
+	local-as: u32;
 
-	peer @: text {
-	    peer-port: uint = 179;
-	    local-port: uint = 179;
-	    local-ip: text = "";
-	    as: uint;
+	peer @: txt {
+	    peer-port: u32 = 179;
+	    local-port: u32 = 179;
+	    local-ip: txt = "";
+	    as: u32;
 	    next-hop: ipv4;
-	    holdtime: uint=120;
+	    holdtime: u32 = 120;
 	    disable: bool = false;
 	}
 
 	/*
 	 * Originate IPv4 routes
 	 */
-	network4 @: ipv4_prefix {
+	network4 @: ipv4net {
 	    next-hop:ipv4;
 	    unicast:bool = true;		/* Default unicast */
 	    multicast:bool = false;
@@ -28,7 +28,7 @@ protocols {
 	/*
 	 * Originate IPv6 routes
 	 */
-	network6 @: ipv6_prefix {
+	network6 @: ipv6net {
 	    next-hop:ipv6;
 	    unicast:bool = true;		/* Default unicast */
 	    multicast:bool = false;
@@ -117,7 +117,7 @@ protocols {
 	    }
 	}
 
-	network4 @: ipv4_prefix {
+	network4 @: ipv4net {
 	    %mandatory: next-hop;
 
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route4?nlri:ipv4net=$(@)&next_hop:ipv4=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
@@ -136,7 +136,7 @@ protocols {
 	    }
 	}
 
-	network6 @: ipv6_prefix {
+	network6 @: ipv6net {
 	    %mandatory: next-hop;
 
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route6?nlri:ipv6net=$(@)&next_hop:ipv6=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";

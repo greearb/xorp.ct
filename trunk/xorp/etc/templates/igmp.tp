@@ -1,8 +1,8 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.1 2004/05/04 00:31:26 pavlin Exp $ */
 
 protocols {
     igmp {
-	targetname: text = "IGMP";
+	targetname: txt = "IGMP";
 	disable: bool = false;
 
 	traceoptions {
@@ -13,8 +13,8 @@ protocols {
 	    }
 	}
 
-	interface @: text {
-	    vif @: text {
+	interface @: txt {
+	    vif @: txt {
 		enable: bool = true;
 	    }
 	}

@@ -1,39 +1,39 @@
-/* $XORP: xorp/etc/templates/ospf.tp,v 1.8 2003/11/18 23:03:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospf.tp,v 1.9 2004/05/16 07:15:17 pavlin Exp $ */
 
 protocols {
     ospf {
-	targetname: text = "ospf";
+	targetname: txt = "ospf";
 	router-id: ipv4;
-	lsdb-limit: int;
+	lsdb-limit: i32;
 	mospf: toggle = false;
 	interarea-mc: toggle = false;
-	overflow-interval: int;
-	flood-rate: int;
-	max-rxmt-window: uint;
-	max-dds: uint;
-	lsa-refresh-rate: uint;
-	p2p-adj-limit: uint = 0;
+	overflow-interval: i32;
+	flood-rate: i32;
+	max-rxmt-window: u32;
+	max-dds: u32;
+	lsa-refresh-rate: u32;
+	p2p-adj-limit: u32 = 0;
 	random-refresh: toggle = false;
 
 	area @: ipv4 {
 	    stub: toggle = false;
-	    stub-metric: uint = 0;
+	    stub-metric: u32 = 0;
 	    stub-summaries: bool = false;
 
-	    interface @: text {
+	    interface @: txt {
 		disable: toggle = false;
-		hello-interval: uint = 30;
-		dead-interval: uint = 95;
-		poll-interval: uint;
-		retransmit-interval: uint;
-		transit-delay: uint;
-		priority: uint;
+		hello-interval: u32 = 30;
+		dead-interval: u32 = 95;
+		poll-interval: u32;
+		retransmit-interval: u32;
+		transit-delay: u32;
+		priority: u32;
 		passive: toggle = false;
-		cost: uint = 0;
-		mtu: uint = 1500;
+		cost: u32 = 0;
+		mtu: u32 = 1500;
 		on-demand: toggle = false;
-		type: text = "broadcast";
-		if-index: uint = 0;
+		type: txt = "broadcast";
+		if-index: u32 = 0;
 	    }
 	}
     }

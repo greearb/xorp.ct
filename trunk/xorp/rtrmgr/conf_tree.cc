@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.15 2004/03/11 22:31:44 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.16 2004/05/16 02:50:50 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -267,7 +267,7 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 		goto parse_error;
 	    }
 	    break;
-	case NODE_IPV4PREFIX:
+	case NODE_IPV4NET:
 	    try {
 		IPv4Net(svalue.c_str());
 	    } catch (InvalidString) {
@@ -281,7 +281,7 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 		goto parse_error;
 	    }
 	    break;
-	case NODE_IPV6PREFIX:
+	case NODE_IPV6NET:
 	    try {
 		IPv6Net(svalue.c_str());
 	    } catch (InvalidString) {

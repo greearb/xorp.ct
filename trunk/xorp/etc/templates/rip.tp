@@ -4,36 +4,36 @@
 
 protocols {
     rip {
-	targetname: text = "rip";
-	interface @: text {
-	    vif @: text {
+	targetname: txt = "rip";
+	interface @: txt {
+	    vif @: txt {
 		address @: ipv4 {
-		    metric:			uint	=   1;
-		    horizon:			text    = "split-horizon-poison-reverse" ;
+		    metric:			u32	=   1;
+		    horizon:			txt    = "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
 		    accept-non-rip-requests:	bool	= true ;
 		    accept-default-route:	bool	= false ;
 		    advertise-default-route:	bool	= false ;
-		    route-expiry-secs:		uint	= 180 ;
-		    route-deletion-secs:	uint	= 120 ;
-		    triggered-update-min-secs:	uint	=   1 ;
-		    triggered-update-max-secs:	uint	=   5 ;
-		    table-announce-min-secs:	uint	=  25 ;
-		    table-announce-max-secs:	uint	=  35 ;
-		    table-request-secs:		uint    =   1 ;
-		    interpacket-delay-msecs:	uint	=  50 ;
+		    route-expiry-secs:		u32	= 180 ;
+		    route-deletion-secs:	u32	= 120 ;
+		    triggered-update-min-secs:	u32	=   1 ;
+		    triggered-update-max-secs:	u32	=   5 ;
+		    table-announce-min-secs:	u32	=  25 ;
+		    table-announce-max-secs:	u32	=  35 ;
+		    table-request-secs:		u32	=   1 ;
+		    interpacket-delay-msecs:	u32	=  50 ;
 		    authentication {
-			type:			text	= "none" ;
-			password:		text	= "" ;
+			type:			txt	= "none" ;
+			password:		txt	= "" ;
 		    }
 		}
 	    }
 	}
 
-	import @: text {
-	    metric:uint = 1 ;
-	    tag:uint  = 0 ;
+	import @: txt {
+	    metric:u32	= 1 ;
+	    tag:u32	= 0 ;
 	}
     }
 }
@@ -144,7 +144,7 @@ protocols {
 	    }
 	}
 
-	import @: text {
+	import @: txt {
 	    %activate: xrl "$(rip.targetname)/rip/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)";
 	    %delete: xrl "$(rip.targetname)/rip/0.1/no_import_protocol_routes?protocol_name:txt=$(@)";
 	}
