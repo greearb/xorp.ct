@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.9 2003/09/11 14:01:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.10 2003/09/20 00:28:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -69,12 +69,12 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 {
     u_short if_index = 0;
     string if_name, alias_if_name;
-    const uint8_t *ptr;
+    const uint8_t* ptr;
     
     for (ptr = buf; ptr < buf + buf_bytes; ) {
 	int len = 0;
-	const struct ifreq	*ifreq = (const struct ifreq *)ptr;
-	struct ifreq		ifrcopy;
+	const struct ifreq* ifreq = reinterptet_cast<const struct ifreq*>(ptr);
+	struct ifreq ifrcopy;
 	
 	// Get the length of the ifreq entry
 #ifdef HAVE_SA_LEN
@@ -101,7 +101,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	char tmp_if_name[IFNAMSIZ+1];
 	strncpy(tmp_if_name, ifreq->ifr_name, sizeof(tmp_if_name));
-	char *cptr;
+	char* cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
 	    // Replace colon with null. Needed because in Solaris and Linux
 	    // the interface name changes for aliases.
@@ -163,9 +163,9 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	do {
 #ifdef AF_LINK
-	    const sockaddr *sa = &ifreq->ifr_addr;
+	    const struct sockaddr* sa = &ifreq->ifr_addr;
 	    if (sa->sa_family == AF_LINK) {
-		const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(sa);
+		const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
 		if (sdl->sdl_type == IFT_ETHER) {
 		    if (sdl->sdl_alen == sizeof(struct ether_addr)) {
 			struct ether_addr ea;

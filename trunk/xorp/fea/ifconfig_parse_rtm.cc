@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.8 2003/09/11 12:57:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.9 2003/09/20 00:30:03 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -79,7 +79,7 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
     bool recognized = false;
     u_short if_index_hint = 0;
     
-    const struct if_msghdr* ifm = reinterpret_cast<const struct if_msghdr *>(buf);
+    const struct if_msghdr* ifm = reinterpret_cast<const struct if_msghdr*>(buf);
     const uint8_t* last = buf + buf_bytes;
     
     for (const uint8_t* ptr = buf; ptr < last; ptr += ifm->ifm_msglen) {
@@ -145,7 +145,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     debug_msg("%p index %d RTM_IFINFO\n", ifm, if_index);
     
     // Get the pointers to the corresponding data structures    
-    sa = reinterpret_cast<const sockaddr *>(ifm + 1);
+    sa = reinterpret_cast<const sockaddr*>(ifm + 1);
     RtmUtils::get_rta_sockaddr(ifm->ifm_addrs, sa, rti_info);
     
     if_index_hint = if_index;
@@ -378,7 +378,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_NEWADDR || ifm->ifm_type == RTM_DELADDR);
     
-    const ifa_msghdr *ifa = reinterpret_cast<const ifa_msghdr*>(ifm);
+    const ifa_msghdr* ifa = reinterpret_cast<const ifa_msghdr*>(ifm);
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = ifa->ifam_index;
     string if_name;
@@ -423,7 +423,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     // Locate the vif to pin data on
     //
     // XXX: vifname == ifname on this platform
-    IfTreeVif *fv = ifc.get_vif(it, if_name, if_name);
+    IfTreeVif* fv = ifc.get_vif(it, if_name, if_name);
     if (fv == NULL) {
 	XLOG_FATAL("Could not find vif named %s in IfTree.", if_name.c_str());
     }
@@ -550,7 +550,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	} while (false);
 #endif // 0/1
 	
-	/* Mark as deleted if necessary */
+	// Mark as deleted if necessary
 	if (ifa->ifam_type == RTM_DELADDR)
 	    fa.mark(IfTreeItem::DELETED);
 	
@@ -565,8 +565,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFANNOUNCE);
     
-    const if_announcemsghdr* ifan =
-	reinterpret_cast<const if_announcemsghdr*>(ifm);
+    const if_announcemsghdr* ifan = reinterpret_cast<const if_announcemsghdr*>(ifm);
     u_short if_index = ifan->ifan_index;
     string if_name = string(ifan->ifan_name);
     
