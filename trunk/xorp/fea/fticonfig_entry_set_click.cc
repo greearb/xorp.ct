@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.9 2004/12/03 03:52:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.10 2004/12/03 21:30:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -258,10 +258,10 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 			     port);
     string element = "_xorp_rt";
     string handler = "add";
-    string errmsg;
-    if (ClickSocket::write_config(element, handler, config, errmsg)
+    string error_msg;
+    if (ClickSocket::write_config(element, handler, config, error_msg)
 	!= XORP_OK) {
-	XLOG_ERROR("%s", errmsg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (false);
     }
 
@@ -328,10 +328,10 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 			     port);
     string element = "_xorp_rt";
     string handler = "remove";
-    string errmsg;
-    if (ClickSocket::write_config(element, handler, config, errmsg)
+    string error_msg;
+    if (ClickSocket::write_config(element, handler, config, error_msg)
 	!= XORP_OK) {
-	XLOG_ERROR("%s", errmsg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (false);
     }
 

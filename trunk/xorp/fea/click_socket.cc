@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.10 2004/12/03 04:59:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.11 2004/12/03 21:30:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -306,9 +306,6 @@ ClickSocket::stop(string& error_msg)
     }
 
     return (XORP_OK);
-
-    // TODO: check for errors
-    UNUSED(error_msg);
 }
 
 int
@@ -823,7 +820,7 @@ ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
 
 int
 ClickSocket::write_config(const string& element, const string& handler,
-			  const string& data, string& errmsg)
+			  const string& data, string& error_msg)
 {
     if (is_kernel_click()) {
 	//
@@ -841,9 +838,9 @@ ClickSocket::write_config(const string& element, const string& handler,
 	//
 	int fd = ::open(output_handler.c_str(), O_WRONLY | O_TRUNC | O_FSYNC);
 	if (fd < 0) {
-	    errmsg = c_format("Cannot open kernel Click handler '%s' "
-			      "for writing: %s",
-			      output_handler.c_str(), strerror(errno));
+	    error_msg = c_format("Cannot open kernel Click handler '%s' "
+				 "for writing: %s",
+				 output_handler.c_str(), strerror(errno));
 	    return (XORP_ERROR);
 	}
 
@@ -852,8 +849,9 @@ ClickSocket::write_config(const string& element, const string& handler,
 	//
 	if (::write(fd, data.c_str(), data.size())
 	    != static_cast<ssize_t>(data.size())) {
-	    errmsg = c_format("Error writing to kernel Click handler '%s': %s",
-			      output_handler.c_str(), strerror(errno));
+	    error_msg = c_format("Error writing to kernel Click "
+				 "handler '%s': %s",
+				 output_handler.c_str(), strerror(errno));
 	    return (XORP_ERROR);
 	}
 	// XXX: we must close the socket before checking the result
@@ -866,13 +864,13 @@ ClickSocket::write_config(const string& element, const string& handler,
 	int error_bytes;
 	error_bytes = ::read(_fd, error_buf, sizeof(error_buf));
 	if (error_bytes < 0) {
-	    errmsg = c_format("Error verifying the command status after "
-			      "writing to kernel Click handler: %s",
-			      strerror(errno));
+	    error_msg = c_format("Error verifying the command status after "
+				 "writing to kernel Click handler: %s",
+				 strerror(errno));
 	    return (XORP_ERROR);
 	}
 	if (error_bytes > 0) {
-	    errmsg = c_format("Kernel Click command error: %s", error_buf);
+	    error_msg = c_format("Kernel Click command error: %s", error_buf);
 	    return (XORP_ERROR);
 	}
     }
@@ -900,8 +898,9 @@ ClickSocket::write_config(const string& element, const string& handler,
 	//
 	if (ClickSocket::write(config.c_str(), config.size())
 	    != static_cast<ssize_t>(config.size())) {
-	    errmsg = c_format("Error writing to user-level Click socket: %s",
-			      strerror(errno));
+	    error_msg = c_format("Error writing to user-level "
+				 "Click socket: %s",
+				 strerror(errno));
 	    return (XORP_ERROR);
 	}
 
@@ -912,11 +911,11 @@ ClickSocket::write_config(const string& element, const string& handler,
 	string command_warning, command_error;
 	if (check_user_command_status(is_warning, command_warning,
 				      is_error, command_error,
-				      errmsg)
+				      error_msg)
 	    != XORP_OK) {
-	    errmsg = c_format("Error verifying the command status after "
-			      "writing to user-level Click socket: %s",
-			      errmsg.c_str());
+	    error_msg = c_format("Error verifying the command status after "
+				 "writing to user-level Click socket: %s",
+				 error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 
@@ -925,8 +924,8 @@ ClickSocket::write_config(const string& element, const string& handler,
 			 command_warning.c_str());
 	}
 	if (is_error) {
-	    errmsg = c_format("User-level Click command error: %s",
-			      command_error.c_str());
+	    error_msg = c_format("User-level Click command error: %s",
+				 command_error.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -946,14 +945,14 @@ ClickSocket::check_user_command_status(bool& is_warning,
 				       string& command_warning,
 				       bool& is_error,
 				       string& command_error,
-				       string& errmsg)
+				       string& error_msg)
 {
     vector<uint8_t> buffer;
 
     is_warning = false;
     is_error = false;
 
-    if (force_read_message(buffer, errmsg) != XORP_OK)
+    if (force_read_message(buffer, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -984,11 +983,12 @@ ClickSocket::check_user_command_status(bool& is_warning,
 	if (is_last_command_response)
 	    break;
 	if (line.size() < CLICK_COMMAND_RESPONSE_MIN_SIZE) {
-	    errmsg = c_format("User-level Click command line response is too "
-			      "short (expected min size %u received %u): %s",
-			      static_cast<uint32_t>(CLICK_COMMAND_RESPONSE_MIN_SIZE),
-			      static_cast<uint32_t>(line.size()),
-			      line.c_str());
+	    error_msg = c_format(
+		"User-level Click command line response is too short "
+		"(expected min size %u received %u): %s",
+		static_cast<uint32_t>(CLICK_COMMAND_RESPONSE_MIN_SIZE),
+		static_cast<uint32_t>(line.size()),
+		line.c_str());
 	    return (XORP_ERROR);
 	}
 
@@ -997,9 +997,9 @@ ClickSocket::check_user_command_status(bool& is_warning,
 	//
 	char separator = line[CLICK_COMMAND_RESPONSE_CODE_SEPARATOR_INDEX];
 	if ((separator != ' ') && (separator != '-')) {
-	    errmsg = c_format("Invalid user-level Click command line response "
-			      "(missing code separator): %s",
-			      line.c_str());
+	    error_msg = c_format("Invalid user-level Click command line "
+				 "response (missing code separator): %s",
+				 line.c_str());
 	    return (XORP_ERROR);
 	}
 	int error_code = atoi(line.substr(0, CLICK_COMMAND_RESPONSE_CODE_SEPARATOR_INDEX).c_str());
@@ -1028,8 +1028,8 @@ ClickSocket::check_user_command_status(bool& is_warning,
 	}
 
 	// Unknown error code
-	errmsg = c_format("Unknown user-level Click error code: %s",
-			  line.c_str());
+	error_msg = c_format("Unknown user-level Click error code: %s",
+			     line.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1037,11 +1037,11 @@ ClickSocket::check_user_command_status(bool& is_warning,
 }
 
 int
-ClickSocket::force_read(string& errmsg)
+ClickSocket::force_read(string& error_msg)
 {
     vector<uint8_t> message;
 
-    if (force_read_message(message, errmsg) != XORP_OK)
+    if (force_read_message(message, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -1055,7 +1055,7 @@ ClickSocket::force_read(string& errmsg)
 }
 
 int
-ClickSocket::force_read_message(vector<uint8_t>& message, string& errmsg)
+ClickSocket::force_read_message(vector<uint8_t>& message, string& error_msg)
 {
     vector<uint8_t> buffer(CLSOCK_BYTES);
 
@@ -1076,7 +1076,8 @@ ClickSocket::force_read_message(vector<uint8_t>& message, string& errmsg)
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
-	    errmsg = c_format("Click socket read error: %s", strerror(errno));
+	    error_msg = c_format("Click socket read error: %s",
+				 strerror(errno));
 	    return (XORP_ERROR);
 	}
 	message.resize(got);
@@ -1090,12 +1091,13 @@ ClickSocket::force_read_message(vector<uint8_t>& message, string& errmsg)
 void
 ClickSocket::select_hook(int fd, SelectorMask m)
 {
-    string errmsg;
+    string error_msg;
 
     XLOG_ASSERT(fd == _fd);
     XLOG_ASSERT(m == SEL_RD);
-    if (force_read(errmsg) != XORP_OK) {
-	XLOG_ERROR("Error force_read() from Click socket: %s", errmsg.c_str());
+    if (force_read(error_msg) != XORP_OK) {
+	XLOG_ERROR("Error force_read() from Click socket: %s",
+		   error_msg.c_str());
     }
 }
 
@@ -1164,17 +1166,17 @@ ClickSocketReader::~ClickSocketReader()
  *
  * @param cs the Click socket to receive the data from.
  * @param seqno the sequence number of the data to receive.
- * @param errmsg the error message (if an error).
+ * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 ClickSocketReader::receive_data(ClickSocket& cs, uint32_t seqno,
-				string& errmsg)
+				string& error_msg)
 {
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	if (cs.force_read(errmsg) != XORP_OK)
+	if (cs.force_read(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 

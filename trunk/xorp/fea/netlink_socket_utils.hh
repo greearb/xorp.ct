@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.10 2004/09/09 18:54:31 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.11 2004/11/05 01:43:26 bms Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -80,13 +80,13 @@ public:
      * @param ns_reader the NetlinkSocketReader to use for reading data.
      * @param ns the NetlinkSocket to use for reading data.
      * @param seqno the sequence nomer of the netlink request to check for.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     static int check_netlink_request(NetlinkSocketReader& ns_reader,
 				     NetlinkSocket& ns,
 				     uint32_t seqno,
-				     string& errmsg);
+				     string& error_msg);
 };
 
 #endif // __FEA_NETLINK_SOCKET_UTILS_HH__

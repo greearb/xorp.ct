@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.9 2004/11/23 00:53:20 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.10 2004/12/01 03:28:12 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -105,10 +105,10 @@ public:
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      *
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_read(string& errmsg);
+    int force_read(string& error_msg);
 
 private:
     typedef list<RoutingSocketObserver*> ObserverList;
@@ -177,10 +177,10 @@ public:
      *
      * @param rs the routing socket to receive the data from.
      * @param seqno the sequence number of the data to receive.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int receive_data(RoutingSocket& rs, uint32_t seqno, string& errmsg);
+    int receive_data(RoutingSocket& rs, uint32_t seqno, string& error_msg);
 
     /**
      * Get the buffer with the data that was received.

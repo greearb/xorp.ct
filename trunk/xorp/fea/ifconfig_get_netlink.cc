@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.11 2004/09/09 19:03:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.12 2004/12/01 03:28:10 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -196,11 +196,11 @@ IfConfigGetNetlink::read_config(IfTree& it)
     // Linux kernel bug: when we read the whole table the kernel
     // may not set the NLM_F_MULTI flag for the multipart messages.
     //
-    string errmsg;
+    string error_msg;
     ns4.set_multipart_message_read(true);
-    if (_ns_reader.receive_data4(nlh->nlmsg_seq, errmsg) != XORP_OK) {
+    if (_ns_reader.receive_data4(nlh->nlmsg_seq, error_msg) != XORP_OK) {
 	ns4.set_multipart_message_read(false);
-	XLOG_ERROR("Error reading from netlink socket: %s", errmsg.c_str());
+	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
 	return (false);
     }
     // XXX: reset the multipart message read hackish flag
@@ -274,12 +274,13 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // Linux kernel bug: when we read the whole table the kernel
 	    // may not set the NLM_F_MULTI flag for the multipart messages.
 	    //
-	    string errmsg;
+	    string error_msg;
 	    ns4.set_multipart_message_read(true);
-	    if (_ns_reader.receive_data4(nlh->nlmsg_seq, errmsg) != XORP_OK) {
+	    if (_ns_reader.receive_data4(nlh->nlmsg_seq, error_msg)
+		!= XORP_OK) {
 		ns4.set_multipart_message_read(false);
 		XLOG_ERROR("Error reading from netlink socket: %s",
-			   errmsg.c_str());
+			   error_msg.c_str());
 		return (false);
 	    }
 	    // XXX: reset the multipart message read hackish flag
@@ -328,12 +329,13 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // Linux kernel bug: when we read the whole table the kernel
 	    // may not set the NLM_F_MULTI flag for the multipart messages.
 	    //
-	    string errmsg;
+	    string error_msg;
 	    ns6.set_multipart_message_read(true);
-	    if (_ns_reader.receive_data6(nlh->nlmsg_seq, errmsg) != XORP_OK) {
+	    if (_ns_reader.receive_data6(nlh->nlmsg_seq, error_msg)
+		!= XORP_OK) {
 		ns6.set_multipart_message_read(false);
 		XLOG_ERROR("Error reading from netlink socket: %s",
-			   errmsg.c_str());
+			   error_msg.c_str());
 		return (false);
 	    }
 	    // XXX: reset the multipart message read hackish flag

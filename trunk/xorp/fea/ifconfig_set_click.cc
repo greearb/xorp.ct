@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.12 2004/12/03 21:30:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.13 2004/12/07 23:09:12 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -99,17 +99,17 @@ IfConfigSetClick::stop(string& error_msg)
 }
 
 int
-IfConfigSetClick::config_begin(string& errmsg)
+IfConfigSetClick::config_begin(string& error_msg)
 {
     debug_msg("config_begin\n");
 
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetClick::config_end(string& errmsg)
+IfConfigSetClick::config_end(string& error_msg)
 {
     debug_msg("config_end\n");
 
@@ -118,7 +118,7 @@ IfConfigSetClick::config_end(string& errmsg)
     // Generate the configuration and write it.
     //
     string config = generate_config();
-    if (write_generated_config(config, errmsg) != XORP_OK)
+    if (write_generated_config(config, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -127,7 +127,7 @@ IfConfigSetClick::config_end(string& errmsg)
     //
     // Trigger the generation of the configuration
     //
-    if (execute_click_config_generator(errmsg) != XORP_OK)
+    if (execute_click_config_generator(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -143,7 +143,7 @@ IfConfigSetClick::is_discard_emulated(const IfTreeInterface& i) const
 int
 IfConfigSetClick::add_interface(const string& ifname,
 				uint16_t if_index,
-				string& errmsg)
+				string& error_msg)
 {
     IfTree::IfMap::iterator ii;
 
@@ -157,7 +157,7 @@ IfConfigSetClick::add_interface(const string& ifname,
 	// Add the new interface
 	//
 	if (_iftree.add_if(ifname) != true) {
-	    errmsg = c_format("Cannot add interface '%s'", ifname.c_str());
+	    error_msg = c_format("Cannot add interface '%s'", ifname.c_str());
 	    return (XORP_ERROR);
 	}
 	ii = _iftree.get_if(ifname);
@@ -175,7 +175,7 @@ int
 IfConfigSetClick::add_vif(const string& ifname,
 			  const string& vifname,
 			  uint16_t if_index,
-			  string& errmsg)
+			  string& error_msg)
 {
     IfTree::IfMap::iterator ii;
     IfTreeInterface::VifMap::iterator vi;
@@ -186,9 +186,9 @@ IfConfigSetClick::add_vif(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot add interface '%s' vif '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot add interface '%s' vif '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
@@ -199,8 +199,8 @@ IfConfigSetClick::add_vif(const string& ifname,
 	// Add the new vif
 	//
 	if (fi.add_vif(vifname) != true) {
-	    errmsg = c_format("Cannot add interface '%s' vif '%s'",
-			      ifname.c_str(), vifname.c_str());
+	    error_msg = c_format("Cannot add interface '%s' vif '%s'",
+				 ifname.c_str(), vifname.c_str());
 	    return (XORP_ERROR);
 	}
 	vi = fi.get_vif(vifname);
@@ -218,7 +218,7 @@ IfConfigSetClick::config_interface(const string& ifname,
 				   uint32_t flags,
 				   bool is_up,
 				   bool is_deleted,
-				   string& errmsg)
+				   string& error_msg)
 {
     IfTree::IfMap::iterator ii;
 
@@ -230,9 +230,9 @@ IfConfigSetClick::config_interface(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot configure interface '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str());
+	error_msg = c_format("Cannot configure interface '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
@@ -266,7 +266,7 @@ IfConfigSetClick::config_vif(const string& ifname,
 			     bool loopback,
 			     bool point_to_point,
 			     bool multicast,
-			     string& errmsg)
+			     string& error_msg)
 {
     IfTree::IfMap::iterator ii;
     IfTreeInterface::VifMap::iterator vi;
@@ -285,18 +285,18 @@ IfConfigSetClick::config_vif(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot configure interface '%s' vif '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot configure interface '%s' vif '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
 
     vi = fi.get_vif(vifname);
     if (vi == fi.vifs().end()) {
-	errmsg = c_format("Cannot configure interface '%s' vif '%s': "
-			  "no such vif in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot configure interface '%s' vif '%s': "
+			     "no such vif in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeVif& fv = vi->second;
@@ -334,7 +334,7 @@ int
 IfConfigSetClick::set_interface_mac_address(const string& ifname,
 					    uint16_t if_index,
 					    const struct ether_addr& ether_addr,
-					    string& errmsg)
+					    string& error_msg)
 {
     IfTree::IfMap::iterator ii;
 
@@ -344,9 +344,9 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot set MAC address on interface '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str());
+	error_msg = c_format("Cannot set MAC address on interface '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
@@ -361,10 +361,11 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
 	if (fi.mac() != new_mac)
 	    fi.set_mac(new_mac);
     } catch (BadMac) {
-	errmsg = c_format("Cannot set MAC address on interface '%s' to '%s': "
-			  "invalid MAC address",
-			  ifname.c_str(),
-			  ether_ntoa(const_cast<struct ether_addr *>(&ether_addr)));
+	error_msg = c_format("Cannot set MAC address on interface '%s' "
+			     "to '%s': "
+			     "invalid MAC address",
+			     ifname.c_str(),
+			     ether_ntoa(const_cast<struct ether_addr *>(&ether_addr)));
 	return (XORP_ERROR);
     }
 
@@ -377,7 +378,7 @@ int
 IfConfigSetClick::set_interface_mtu(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t mtu,
-				    string& errmsg)
+				    string& error_msg)
 {
     IfTree::IfMap::iterator ii;
 
@@ -387,9 +388,9 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot set MTU on interface '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str());
+	error_msg = c_format("Cannot set MTU on interface '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
@@ -414,7 +415,7 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 				  const IPvX& addr,
 				  const IPvX& dst_or_bcast,
 				  uint32_t prefix_len,
-				  string& errmsg)
+				  string& error_msg)
 {
     IfTree::IfMap::iterator ii;
     IfTreeInterface::VifMap::iterator vi;
@@ -429,9 +430,9 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot add address to interface '%s' vif '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot add address to interface '%s' vif '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
@@ -439,9 +440,9 @@ IfConfigSetClick::add_vif_address(const string& ifname,
     vi = fi.get_vif(vifname);
 
     if (vi == fi.vifs().end()) {
-	errmsg = c_format("Cannot add address to interface '%s' vif '%s': "
-			  "no such vif in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot add address to interface '%s' vif '%s': "
+			     "no such vif in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeVif& fv = vi->second;
@@ -457,11 +458,11 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	ai = fv.get_addr(addr4);
 	if (ai == fv.v4addrs().end()) {
 	    if (fv.add_addr(addr4) != true) {
-		errmsg = c_format("Cannot add address '%s' "
-				  "to interface '%s' vif '%s'",
-				  addr4.str().c_str(),
-				  ifname.c_str(),
-				  vifname.c_str());
+		error_msg = c_format("Cannot add address '%s' "
+				     "to interface '%s' vif '%s'",
+				     addr4.str().c_str(),
+				     ifname.c_str(),
+				     vifname.c_str());
 		return (XORP_ERROR);
 	    }
 	    ai = fv.get_addr(addr4);
@@ -503,11 +504,11 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	ai = fv.get_addr(addr6);
 	if (ai == fv.v6addrs().end()) {
 	    if (fv.add_addr(addr6) != true) {
-		errmsg = c_format("Cannot add address '%s' "
-				  "to interface '%s' vif '%s'",
-				  addr6.str().c_str(),
-				  ifname.c_str(),
-				  vifname.c_str());
+		error_msg = c_format("Cannot add address '%s' "
+				     "to interface '%s' vif '%s'",
+				     addr6.str().c_str(),
+				     ifname.c_str(),
+				     vifname.c_str());
 		return (XORP_ERROR);
 	    }
 	    ai = fv.get_addr(addr6);
@@ -544,7 +545,7 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 				     uint16_t if_index,
 				     const IPvX& addr,
 				     uint32_t prefix_len,
-				     string& errmsg)
+				     string& error_msg)
 {
     IfTree::IfMap::iterator ii;
     IfTreeInterface::VifMap::iterator vi;
@@ -557,9 +558,10 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
-	errmsg = c_format("Cannot delete address on interface '%s' vif '%s': "
-			  "no such interface in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot delete address "
+			     "on interface '%s' vif '%s': "
+			     "no such interface in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeInterface& fi = ii->second;
@@ -567,9 +569,10 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
     vi = fi.get_vif(vifname);
 
     if (vi == fi.vifs().end()) {
-	errmsg = c_format("Cannot delete address on interface '%s' vif '%s': "
-			  "no such vif in the interface tree",
-			  ifname.c_str(), vifname.c_str());
+	error_msg = c_format("Cannot delete address "
+			     "on interface '%s' vif '%s': "
+			     "no such vif in the interface tree",
+			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
     IfTreeVif& fv = vi->second;
@@ -583,12 +586,12 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 
 	ai = fv.get_addr(addr4);
 	if (ai == fv.v4addrs().end()) {
-	    errmsg = c_format("Cannot delete address '%s' "
-			      "on interface '%s' vif '%s': "
-			      "no such address",
-			      addr4.str().c_str(),
-			      ifname.c_str(),
-			      vifname.c_str());
+	    error_msg = c_format("Cannot delete address '%s' "
+				 "on interface '%s' vif '%s': "
+				 "no such address",
+				 addr4.str().c_str(),
+				 ifname.c_str(),
+				 vifname.c_str());
 	    return (XORP_ERROR);
 	}
 	fv.remove_addr(addr4);
@@ -601,12 +604,12 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 
 	ai = fv.get_addr(addr6);
 	if (ai == fv.v6addrs().end()) {
-	    errmsg = c_format("Cannot delete address '%s' "
-			      "on interface '%s' vif '%s': "
-			      "no such address",
-			      addr6.str().c_str(),
-			      ifname.c_str(),
-			      vifname.c_str());
+	    error_msg = c_format("Cannot delete address '%s' "
+				 "on interface '%s' vif '%s': "
+				 "no such address",
+				 addr6.str().c_str(),
+				 ifname.c_str(),
+				 vifname.c_str());
 	    return (XORP_ERROR);
 	}
 	fv.remove_addr(addr6);
@@ -620,13 +623,13 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 }
 
 int
-IfConfigSetClick::execute_click_config_generator(string& errmsg)
+IfConfigSetClick::execute_click_config_generator(string& error_msg)
 {
     string command = ClickSocket::click_config_generator_file();
     string arguments;
 
     if (command.empty()) {
-	errmsg = c_format(
+	error_msg = c_format(
 	    "Cannot execute the Click configuration generator: "
 	    "empty generator file name");
 	return (XORP_ERROR);
@@ -647,14 +650,14 @@ IfConfigSetClick::execute_click_config_generator(string& errmsg)
     char tmp_filename[1024] = "/tmp/xorp_fea_click.XXXXXXXX";
     int s = mkstemp(tmp_filename);
     if (s < 0) {
-	errmsg = c_format("Cannot create a temporary file: %s",
-			  strerror(errno));
+	error_msg = c_format("Cannot create a temporary file: %s",
+			     strerror(errno));
 	return (XORP_ERROR);
     }
     if (::write(s, xorp_config.c_str(), xorp_config.size())
 	!= static_cast<ssize_t>(xorp_config.size())) {
-	errmsg = c_format("Error writing to temporary file: %s",
-			  strerror(errno));
+	error_msg = c_format("Error writing to temporary file: %s",
+			     strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
@@ -690,7 +693,8 @@ IfConfigSetClick::execute_click_config_generator(string& errmsg)
 	close(_click_config_generator_tmp_socket);
 	_click_config_generator_tmp_socket = -1;
 	unlink(_click_config_generator_tmp_filename.c_str());
-	errmsg = c_format("Could not execute the Click configuration generator");
+	error_msg = c_format("Could not execute the Click configuration "
+			     "generator");
 	return (XORP_ERROR);
     }
 
@@ -748,22 +752,25 @@ IfConfigSetClick::click_config_generator_done_cb(RunCommand* run_command,
     if (! success)
 	return;
 
-    string write_errmsg;
-    if (write_generated_config(_click_config_generator_stdout, write_errmsg)
+    string write_error_msg;
+    if (write_generated_config(_click_config_generator_stdout, write_error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("Failed to write the Click configuration: %s",
-		   write_errmsg.c_str());
+		   write_error_msg.c_str());
     }
 }
 
 int
-IfConfigSetClick::write_generated_config(const string& config, string& errmsg)
+IfConfigSetClick::write_generated_config(const string& config,
+					 string& error_msg)
 {
     string element = "";
     string handler = "hotconfig";
 
-    if (ClickSocket::write_config(element, handler, config, errmsg) != XORP_OK)
+    if (ClickSocket::write_config(element, handler, config, error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
+    }
 
     //
     // Generate the new port mapping

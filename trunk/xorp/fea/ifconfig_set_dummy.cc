@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.15 2004/11/12 00:47:36 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.16 2004/12/01 03:28:12 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -88,21 +88,21 @@ IfConfigSetDummy::push_config(const IfTree& it)
 }
 
 int
-IfConfigSetDummy::config_begin(string& errmsg)
+IfConfigSetDummy::config_begin(string& error_msg)
 {
     debug_msg("config_begin\n");
 
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetDummy::config_end(string& errmsg)
+IfConfigSetDummy::config_end(string& error_msg)
 {
     debug_msg("config_end\n");
 
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -117,7 +117,7 @@ IfConfigSetDummy::is_discard_emulated(const IfTreeInterface& i) const
 int
 IfConfigSetDummy::add_interface(const string& ifname,
 				uint16_t if_index,
-				string& errmsg)
+				string& error_msg)
 {
     debug_msg("add_interface "
 	      "(ifname = %s if_index = %u)\n",
@@ -125,7 +125,7 @@ IfConfigSetDummy::add_interface(const string& ifname,
 
     UNUSED(ifname);
     UNUSED(if_index);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -134,7 +134,7 @@ int
 IfConfigSetDummy::add_vif(const string& ifname,
 			  const string& vifname,
 			  uint16_t if_index,
-			  string& errmsg)
+			  string& error_msg)
 {
     debug_msg("add_vif "
 	      "(ifname = %s vifname = %s if_index = %u)\n",
@@ -143,7 +143,7 @@ IfConfigSetDummy::add_vif(const string& ifname,
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -154,7 +154,7 @@ IfConfigSetDummy::config_interface(const string& ifname,
 				   uint32_t flags,
 				   bool is_up,
 				   bool is_deleted,
-				   string& errmsg)
+				   string& error_msg)
 {
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
@@ -167,7 +167,7 @@ IfConfigSetDummy::config_interface(const string& ifname,
     UNUSED(flags);
     UNUSED(is_up);
     UNUSED(is_deleted);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -183,7 +183,7 @@ IfConfigSetDummy::config_vif(const string& ifname,
 			     bool loopback,
 			     bool point_to_point,
 			     bool multicast,
-			     string& errmsg)
+			     string& error_msg)
 {
     debug_msg("config_vif "
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
@@ -207,7 +207,7 @@ IfConfigSetDummy::config_vif(const string& ifname,
     UNUSED(loopback);
     UNUSED(point_to_point);
     UNUSED(multicast);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -216,7 +216,7 @@ int
 IfConfigSetDummy::set_interface_mac_address(const string& ifname,
 					    uint16_t if_index,
 					    const struct ether_addr& ether_addr,
-					    string& errmsg)
+					    string& error_msg)
 {
     debug_msg("set_interface_mac "
 	      "(ifname = %s if_index = %u mac = %s)\n",
@@ -225,7 +225,7 @@ IfConfigSetDummy::set_interface_mac_address(const string& ifname,
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(ether_addr);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -234,7 +234,7 @@ int
 IfConfigSetDummy::set_interface_mtu(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t mtu,
-				    string& errmsg)
+				    string& error_msg)
 {
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
@@ -243,7 +243,7 @@ IfConfigSetDummy::set_interface_mtu(const string& ifname,
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(mtu);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -257,7 +257,7 @@ IfConfigSetDummy::add_vif_address(const string& ifname,
 				  const IPvX& addr,
 				  const IPvX& dst_or_bcast,
 				  uint32_t prefix_len,
-				  string& errmsg)
+				  string& error_msg)
 {
     debug_msg("add_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
@@ -274,7 +274,7 @@ IfConfigSetDummy::add_vif_address(const string& ifname,
     UNUSED(addr);
     UNUSED(dst_or_bcast);
     UNUSED(prefix_len);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }
@@ -285,7 +285,7 @@ IfConfigSetDummy::delete_vif_address(const string& ifname,
 				     uint16_t if_index,
 				     const IPvX& addr,
 				     uint32_t prefix_len,
-				     string& errmsg)
+				     string& error_msg)
 {
     debug_msg("delete_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
@@ -298,7 +298,7 @@ IfConfigSetDummy::delete_vif_address(const string& ifname,
     UNUSED(if_index);
     UNUSED(addr);
     UNUSED(prefix_len);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
 
     return (XORP_OK);
 }

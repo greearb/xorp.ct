@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.13 2004/11/18 14:39:57 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.14 2004/11/18 21:21:02 bms Exp $"
 
 #include "xrl_fti.hh"
 
@@ -37,10 +37,10 @@ XrlCmdError
 XrlFtiTransactionManager::commit_transaction(uint32_t tid)
 {
     if (_ftm.commit(tid)) {
-	const string& errmsg = _ftm.error();
-	if (errmsg.empty())
+	const string& error_msg = _ftm.error();
+	if (error_msg.empty())
 	    return XrlCmdError::OKAY();
-	return XrlCmdError::COMMAND_FAILED(errmsg);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::COMMAND_FAILED(FTI_BAD_ID);
 }

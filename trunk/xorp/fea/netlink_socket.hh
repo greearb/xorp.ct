@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.12 2004/11/23 00:53:19 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.13 2004/12/01 03:28:12 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -108,10 +108,10 @@ public:
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      *
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_read(string& errmsg);
+    int force_read(string& error_msg);
 
     /**
      * Force socket to recvfrom data.
@@ -120,11 +120,11 @@ public:
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      *
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int force_recvfrom(int flags, struct sockaddr* from, socklen_t* fromlen,
-		       string& errmsg);
+		       string& error_msg);
 
     /**
      * Force socket to recvmsg data.
@@ -133,10 +133,10 @@ public:
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      *
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_recvmsg(int flags, string& errmsg);
+    int force_recvmsg(int flags, string& error_msg);
 
     /**
      * Set the netlink multicast groups to listen for on the netlink socket.
@@ -279,29 +279,29 @@ public:
      * Force the reader to receive data from the IPv4 netlink socket.
      *
      * @param seqno the sequence number of the data to receive.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int receive_data4(uint32_t seqno, string& errmsg);
+    int receive_data4(uint32_t seqno, string& error_msg);
 
     /**
      * Force the reader to receive data from the IPv6 netlink socket.
      *
      * @param seqno the sequence number of the data to receive.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int receive_data6(uint32_t seqno, string& errmsg);
+    int receive_data6(uint32_t seqno, string& error_msg);
 
     /**
      * Force the reader to receive data from the specified netlink socket.
      *
      * @param ns the netlink socket to receive the data from.
      * @param seqno the sequence number of the data to receive.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int receive_data(NetlinkSocket& ns, uint32_t seqno, string& errmsg);
+    int receive_data(NetlinkSocket& ns, uint32_t seqno, string& error_msg);
 
     /**
      * Get the buffer with the data that was received.

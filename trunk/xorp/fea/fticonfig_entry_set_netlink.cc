@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.16 2004/11/05 18:16:17 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.17 2004/12/01 03:28:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -349,7 +349,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     // we don't add it.
     //
     
-    string errmsg;
+    string error_msg;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
@@ -357,8 +357,8 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	return false;
     }
     if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
-					errmsg) < 0) {
-	XLOG_ERROR("Error checking netlink request: %s", errmsg.c_str());
+					error_msg) < 0) {
+	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
 	return false;
     }
 
@@ -469,7 +469,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     if (ii->second.discard())
 	rtmsg->rtm_type = RTN_BLACKHOLE;
 
-    string errmsg;
+    string error_msg;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
@@ -477,8 +477,8 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	return false;
     }
     if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
-					errmsg) < 0) {
-	XLOG_ERROR("Error checking netlink request: %s", errmsg.c_str());
+					error_msg) < 0) {
+	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
 	return false;
     }
 

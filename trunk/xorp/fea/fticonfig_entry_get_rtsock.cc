@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.22 2004/11/11 07:48:22 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.23 2004/12/01 03:28:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -304,9 +304,9 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     //
     // Force to receive data from the kernel, and then parse it
     //
-    string errmsg;
-    if (_rs_reader.receive_data(rs, rtm->rtm_seq, errmsg) != XORP_OK) {
-	XLOG_ERROR("Error reading from routing socket: %s", errmsg.c_str());
+    string error_msg;
+    if (_rs_reader.receive_data(rs, rtm->rtm_seq, error_msg) != XORP_OK) {
+	XLOG_ERROR("Error reading from routing socket: %s", error_msg.c_str());
 	return (false);
     }
     if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
@@ -447,9 +447,9 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     //
     // Force to receive data from the kernel, and then parse it
     //
-    string errmsg;
-    if (_rs_reader.receive_data(rs, rtm->rtm_seq, errmsg) != XORP_OK) {
-	XLOG_ERROR("Error reading from routing socket: %s", errmsg.c_str());
+    string error_msg;
+    if (_rs_reader.receive_data(rs, rtm->rtm_seq, error_msg) != XORP_OK) {
+	XLOG_ERROR("Error reading from routing socket: %s", error_msg.c_str());
 	return (false);
     }
 

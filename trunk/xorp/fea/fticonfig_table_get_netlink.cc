@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.21 2004/09/09 19:01:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.22 2004/12/01 03:28:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -266,10 +266,11 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     // doesn't set the NLM_F_MULTI flag for the multipart messages.
     //
     ns_ptr->set_multipart_message_read(true);
-    string errmsg;
-    if (_ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq, errmsg) != XORP_OK) {
+    string error_msg;
+    if (_ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq, error_msg)
+	!= XORP_OK) {
 	ns_ptr->set_multipart_message_read(false);
-	XLOG_ERROR("Error reading from netlink socket: %s", errmsg.c_str());
+	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
 	return false;
     }
     // XXX: reset the multipart message read hackish flag

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.10 2004/12/03 04:59:28 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.11 2004/12/03 21:30:07 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -230,11 +230,11 @@ public:
      * configuration.
      * @param handler the Click handler to write the configuration to.
      * @param data the configuration data to write.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int write_config(const string& element, const string& handler,
-		     const string& data, string& errmsg);
+		     const string& data, string& error_msg);
 
     /**
      * Write data to Click socket.
@@ -255,13 +255,13 @@ public:
      * @param is_error if true, the previous command generated an error.
      * @param command_error if @ref is_error is true, then it contains
      * the generated error message.
-     * @param errmsg if the command status cannot be checked, then it contains
-     * the error message with the reason.
+     * @param error_msg if the command status cannot be checked, then it
+     * contains the error message with the reason.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int check_user_command_status(bool& is_warning, string& command_warning,
 				  bool& is_error, string& command_error,
-				  string& errmsg);
+				  string& error_msg);
 
     /**
      * Get the sequence number for next message written into Click.
@@ -288,10 +288,10 @@ public:
      * Click will answer (e.g., after writing a configuration change).
      * Use sparingly, with caution, and at your own risk.
      *
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_read(string& errmsg);
+    int force_read(string& error_msg);
 
 private:
     typedef list<ClickSocketObserver*> ObserverList;
@@ -310,10 +310,10 @@ private:
      * propagate the data to the socket observers.
      *
      * @param message the message with the result.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int  force_read_message(vector<uint8_t>& message, string& errmsg);
+    int  force_read_message(vector<uint8_t>& message, string& error_msg);
 
     /**
      * Load the kernel Click modules.
@@ -512,10 +512,10 @@ public:
      *
      * @param cs the Click socket to receive the data from.
      * @param seqno the sequence number of the data to receive.
-     * @param errmsg the error message (if an error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int receive_data(ClickSocket& cs, uint32_t seqno, string& errmsg);
+    int receive_data(ClickSocket& cs, uint32_t seqno, string& error_msg);
 
     /**
      * Return the buffer as a string with the data that was received.
