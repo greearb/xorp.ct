@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.50 2004/10/02 03:42:10 atanu Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.51 2004/10/02 04:22:20 atanu Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -1370,10 +1370,9 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
-	// TODO: set the values of metric, admin_distance and protocol_origin
-	// to something meaningful
-	metric = ~0;
-	admin_distance = ~0;
+	metric = fte.metric();
+	admin_distance = fte.admin_distance();
+	// TODO: set the value of protocol_origin to something meaningful
 	protocol_origin = "NOT_SUPPORTED";
 	return XrlCmdError::OKAY();
     }
@@ -1402,10 +1401,9 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
-	// TODO: set the values of metric, admin_distance and protocol_origin
-	// to something meaningful
-	metric = ~0;
-	admin_distance = ~0;
+	metric = fte.metric();
+	admin_distance = fte.admin_distance();
+	// TODO: set the value of protocol_origin to something meaningful
 	protocol_origin = "NOT_SUPPORTED";
 	return XrlCmdError::OKAY();
     }
@@ -1432,10 +1430,9 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network4(
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
-	// TODO: set the values of metric, admin_distance and protocol_origin
-	// to something meaningful
-	metric = ~0;
-	admin_distance = ~0;
+	metric = fte.metric();
+	admin_distance = fte.admin_distance();
+	// TODO: set the value of protocol_origin to something meaningful
 	protocol_origin = "NOT_SUPPORTED";
 	return XrlCmdError::OKAY();
     }
@@ -1462,10 +1459,9 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network6(
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
-	// TODO: set the values of metric, admin_distance and protocol_origin
-	// to something meaningful
-	metric = ~0;
-	admin_distance = ~0;
+	metric = fte.metric();
+	admin_distance = fte.admin_distance();
+	// TODO: set the value of protocol_origin to something meaningful
 	protocol_origin = "NOT_SUPPORTED";
 	return XrlCmdError::OKAY();
     }
