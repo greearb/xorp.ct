@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.2 2004/05/18 01:06:48 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.3 2004/05/18 07:11:07 pavlin Exp $ */
 
 protocols {
     mld {
@@ -28,6 +28,7 @@ protocols {
 	%modinfo: path			"mld6igmp/xorp_mld";
 	%modinfo: default_targetname	"mld6igmp";
 	%modinfo: status_method		xrl "$(mld.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: startup_method	xrl "$(mld.targetname)/mld6igmp/0.1/start_mld6igmp";
 	%modinfo: shutdown_method	xrl "$(mld.targetname)/common/0.1/shutdown";
 
 	%mandatory: targetname;
