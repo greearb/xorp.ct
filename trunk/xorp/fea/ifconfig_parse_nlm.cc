@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.8 2003/10/28 21:25:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.9 2004/03/17 07:16:14 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -369,6 +369,19 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     //
     const char* name = ifc.get_ifname(if_index);
     if (name == NULL) {
+	if (is_deleted) {
+	    //
+	    // XXX: in case of Linux kernel we may receive first
+	    // a message to delete the interface and then a message to
+	    // delete an address on that interface.
+	    // However, the first message would remove all state about
+	    // that interface (including its addresses).
+	    // Hence, we silently ignore messages for deleting addresses
+	    // if the interface is not found.
+	    //
+	    return;
+	}
+
 #ifdef HAVE_IF_INDEXTONAME
 	char name_buf[IF_NAMESIZE];
 	name = if_indextoname(if_index, name_buf);
