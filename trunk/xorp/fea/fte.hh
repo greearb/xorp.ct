@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.11 2004/10/26 01:59:11 bms Exp $
+// $XORP: xorp/fea/fte.hh,v 1.12 2004/11/05 00:47:27 bms Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -45,7 +45,7 @@ public:
 	bool		xorp_route)
 	: _net(net), _nexthop(nexthop), _ifname(ifname), _vifname(vifname),
 	  _metric(metric), _admin_distance(admin_distance),
-	  _xorp_route(xorp_route), _is_deleted(false) {}
+	  _xorp_route(xorp_route), _is_deleted(false), _is_unresolved(false) {}
     Fte(const N& net)
 	: _net(net), _nexthop(A::ZERO(net.af())),
 	  _metric(0), _admin_distance(0), _xorp_route(false) {}
@@ -59,6 +59,8 @@ public:
     bool	xorp_route() const 	{ return _xorp_route; }
     bool	is_deleted() const	{ return _is_deleted; }
     void	mark_deleted()		{ _is_deleted = true; }
+    bool	is_unresolved() const	{ return _is_unresolved; }
+    void	mark_unresolved()	{ _is_unresolved = true; }
 
     /**
      * Reset all members
@@ -72,6 +74,7 @@ public:
 	_admin_distance = 0;
 	_xorp_route = false;
 	_is_deleted = false;
+	_is_unresolved = false;
     }
 
     /**
@@ -90,12 +93,13 @@ public:
     string str() const {
 	return c_format("net = %s nexthop = %s ifname = %s vifname = %s "
 			"metric = %u admin_distance = %u xorp_route = %s "
-			"is_deleted = %s",
+			"is_deleted = %s is_unresolved = %s",
 			_net.str().c_str(), _nexthop.str().c_str(),
 			_ifname.c_str(), _vifname.c_str(),
 			_metric, _admin_distance,
 			_xorp_route ? "true" : "false",
-			_is_deleted ? "true" : "false");
+			_is_deleted ? "true" : "false",
+			_is_unresolved ? "true" : "false");
     }
 
 private:
@@ -107,6 +111,9 @@ private:
     uint32_t	_admin_distance;	// Route admin distance
     bool	_xorp_route;		// This route was installed by XORP
     bool	_is_deleted;		// True if the entry was deleted
+    bool	_is_unresolved;		// True if the entry is actually
+					// a notification of an unresolved
+					// route to the destination.
 };
 
 typedef Fte<IPv4, IPv4Net> Fte4;
