@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.13 2004/06/10 22:40:56 hodson Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.14 2004/08/03 03:51:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -293,14 +293,14 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
  * @param ns_reader the NetlinkSocketReader to use for reading data.
  * @param ns the NetlinkSocket to use for reading data.
  * @param seqno the sequence nomer of the netlink request to check for.
- * @param reason the human-readable reason for any failure.
+ * @param errmsg the error message (if an error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 				NetlinkSocket& ns,
 				uint32_t seqno,
-				string& reason)
+				string& errmsg)
 {
     size_t buf_bytes;
     const struct nlmsghdr* nlh;
@@ -308,7 +308,8 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
     //
     // Force to receive data from the kernel, and then parse it
     //
-    ns_reader.receive_data(ns, seqno);
+    if (ns_reader.receive_data(ns, seqno, errmsg) != XORP_OK)
+	return (XORP_ERROR);
 
     buf_bytes = ns_reader.buffer_size();
     for (nlh = reinterpret_cast<const struct nlmsghdr*>(ns_reader.buffer());
@@ -323,13 +324,13 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 
 	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
 	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
-		reason = "AF_NETLINK nlmsgerr length error";
+		errmsg = "AF_NETLINK nlmsgerr length error";
 		return (XORP_ERROR);
 	    }
 	    if (err->error == 0)
 		return (XORP_OK);	// No error
 	    errno = -err->error;
-	    reason = c_format("AF_NETLINK NLMSG_ERROR message: %s",
+	    errmsg = c_format("AF_NETLINK NLMSG_ERROR message: %s",
 			      strerror(errno));
 	    return (XORP_ERROR);
 	}
@@ -338,7 +339,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	case NLMSG_DONE:
 	{
 	    // End-of-message, and no ACK was received: error.
-	    reason = "No ACK was received";
+	    errmsg = "No ACK was received";
 	    return (XORP_ERROR);
 	}
 	break;
@@ -354,7 +355,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	}
     }
 
-    reason = "No ACK was received";
+    errmsg = "No ACK was received";
     return (XORP_ERROR);		// No ACK was received: error.
 }
 

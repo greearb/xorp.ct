@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.10 2004/08/17 02:20:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.11 2004/09/01 18:17:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -120,7 +120,7 @@ int
 IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 					      uint16_t if_index,
 					      const struct ether_addr& ether_addr,
-					      string& reason)
+					      string& errmsg)
 {
     debug_msg("set_interface_mac "
 	      "(ifname = %s if_index = %u mac = %s)\n",
@@ -130,7 +130,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     UNUSED(if_index);
     UNUSED(ether_addr);
 
-    reason = "method not supported";
+    errmsg = "method not supported";
 
     return (XORP_ERROR);
 }
@@ -139,7 +139,7 @@ int
 IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 				      uint16_t if_index,
 				      uint32_t mtu,
-				      string& reason)
+				      string& errmsg)
 {
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
@@ -149,7 +149,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     UNUSED(if_index);
     UNUSED(mtu);
 
-    reason = "method not supported";
+    errmsg = "method not supported";
 
     return (XORP_ERROR);
 }
@@ -158,7 +158,7 @@ int
 IfConfigSetNetlink::set_interface_flags(const string& ifname,
 					uint16_t if_index,
 					uint32_t flags,
-					string& reason)
+					string& errmsg)
 {
     debug_msg("set_interface_flags "
 	      "(ifname = %s if_index = %u flags = 0x%x)\n",
@@ -168,7 +168,7 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
     UNUSED(if_index);
     UNUSED(flags);
 
-    reason = "method not supported";
+    errmsg = "method not supported";
 
     return (XORP_ERROR);
 }
@@ -181,7 +181,7 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
 				    const IPvX& addr,
 				    const IPvX& dst_or_bcast,
 				    uint32_t prefix_len,
-				    string& reason)
+				    string& errmsg)
 {
     debug_msg("set_vif_address "
 	      "(ifname = %s if_index = %u is_broadcast = %s is_p2p = %s "
@@ -198,7 +198,7 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
     UNUSED(dst_or_bcast);
     UNUSED(prefix_len);
 
-    reason = "method not supported";
+    errmsg = "method not supported";
 
     return (XORP_ERROR);
 }
@@ -208,7 +208,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 				       uint16_t if_index,
 				       const IPvX& addr,
 				       uint32_t prefix_len,
-				       string& reason)
+				       string& errmsg)
 {
     debug_msg("delete_vif_address "
 	      "(ifname = %s if_index = %u addr = %s prefix_len = %u)\n",
@@ -219,7 +219,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     UNUSED(addr);
     UNUSED(prefix_len);
 
-    reason = "method not supported";
+    errmsg = "method not supported";
 
     return (XORP_ERROR);
 }
@@ -230,7 +230,7 @@ int
 IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 					      uint16_t if_index,
 					      const struct ether_addr& ether_addr,
-					      string& reason)
+					      string& errmsg)
 {
     debug_msg("set_interface_mac "
 	      "(ifname = %s if_index = %u mac = %s)\n",
@@ -288,12 +288,12 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
 		   reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
+	errmsg = c_format("error writing to netlink socket: %s",
 			  strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
-					reason) < 0) {
+					errmsg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -321,7 +321,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     ifreq.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
     if (ioctl(s, SIOCSIFHWADDR, &ifreq) < 0) {
-	reason = c_format("%s", strerror(errno));
+	errmsg = c_format("%s", strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
@@ -338,7 +338,7 @@ int
 IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 				      uint16_t if_index,
 				      uint32_t mtu,
-				      string& reason)
+				      string& errmsg)
 {
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
@@ -397,12 +397,12 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
 		   reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
+	errmsg = c_format("error writing to netlink socket: %s",
 			  strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
-					reason) < 0) {
+					errmsg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -426,7 +426,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
     ifreq.ifr_mtu = mtu;
     if (ioctl(s, SIOCSIFMTU, &ifreq) < 0) {
-	reason = c_format("%s", strerror(errno));
+	errmsg = c_format("%s", strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
@@ -440,7 +440,7 @@ int
 IfConfigSetNetlink::set_interface_flags(const string& ifname,
 					uint16_t if_index,
 					uint32_t flags,
-					string& reason)
+					string& errmsg)
 {
     debug_msg("set_interface_flags "
 	      "(ifname = %s if_index = %u flags = 0x%x)\n",
@@ -490,12 +490,12 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
     if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
 		   reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
+	errmsg = c_format("error writing to netlink socket: %s",
 			  strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
-					reason) < 0) {
+					errmsg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -517,7 +517,7 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
     ifreq.ifr_flags = flags;
     if (ioctl(s, SIOCSIFFLAGS, &ifreq) < 0) {
-	reason = c_format("%s", strerror(errno));
+	errmsg = c_format("%s", strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
@@ -535,7 +535,7 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
 				    const IPvX& addr,
 				    const IPvX& dst_or_bcast,
 				    uint32_t prefix_len,
-				    string& reason)
+				    string& errmsg)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
@@ -561,7 +561,7 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
     switch (addr.af()) {
     case AF_INET:
 	if (! ifc().have_ipv4()) {
-	    reason = "IPv4 is not supported";
+	    errmsg = "IPv4 is not supported";
 	    return (XORP_ERROR);
 	}
 	break;
@@ -569,7 +569,7 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	if (! ifc().have_ipv6()) {
-	    reason = "IPv6 is not supported";
+	    errmsg = "IPv6 is not supported";
 	    return (XORP_ERROR);
 	}
 	break;
@@ -661,12 +661,12 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
+	errmsg = c_format("error writing to netlink socket: %s",
 			  strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
-					reason) < 0) {
+					errmsg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -677,7 +677,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 				       uint16_t if_index,
 				       const IPvX& addr,
 				       uint32_t prefix_len,
-				       string& reason)
+				       string& errmsg)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
@@ -700,7 +700,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     switch (addr.af()) {
     case AF_INET:
 	if (! ifc().have_ipv4()) {
-	    reason = "IPv4 is not supported";
+	    errmsg = "IPv4 is not supported";
 	    return (XORP_ERROR);
 	}
 	break;
@@ -708,7 +708,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	if (! ifc().have_ipv6()) {
-	    reason = "IPv6 is not supported";
+	    errmsg = "IPv6 is not supported";
 	    return (XORP_ERROR);
 	}
 	break;
@@ -780,12 +780,12 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	reason = c_format("error writing to netlink socket: %s",
+	errmsg = c_format("error writing to netlink socket: %s",
 			  strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
-					reason) < 0) {
+					errmsg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.8 2004/08/17 02:20:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.9 2004/09/01 18:17:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -80,7 +80,7 @@ int
 IfConfigSetDummy::set_interface_mac_address(const string& ifname,
 					    uint16_t if_index,
 					    const struct ether_addr& ether_addr,
-					    string& reason)
+					    string& errmsg)
 {
     debug_msg("set_interface_mac "
 	      "(ifname = %s if_index = %u mac = %s)\n",
@@ -89,7 +89,7 @@ IfConfigSetDummy::set_interface_mac_address(const string& ifname,
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(ether_addr);
-    UNUSED(reason);
+    UNUSED(errmsg);
 
     return (XORP_OK);
 }
@@ -98,7 +98,7 @@ int
 IfConfigSetDummy::set_interface_mtu(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t mtu,
-				    string& reason)
+				    string& errmsg)
 {
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
@@ -107,7 +107,7 @@ IfConfigSetDummy::set_interface_mtu(const string& ifname,
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(mtu);
-    UNUSED(reason);
+    UNUSED(errmsg);
 
     return (XORP_OK);
 }
@@ -116,7 +116,7 @@ int
 IfConfigSetDummy::set_interface_flags(const string& ifname,
 				      uint16_t if_index,
 				      uint32_t flags,
-				      string& reason)
+				      string& errmsg)
 {
     debug_msg("set_interface_flags "
 	      "(ifname = %s if_index = %u flags = 0x%x)\n",
@@ -125,7 +125,7 @@ IfConfigSetDummy::set_interface_flags(const string& ifname,
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(flags);
-    UNUSED(reason);
+    UNUSED(errmsg);
 
     return (XORP_OK);
 }
@@ -138,7 +138,7 @@ IfConfigSetDummy::set_vif_address(const string& ifname,
 				  const IPvX& addr,
 				  const IPvX& dst_or_bcast,
 				  uint32_t prefix_len,
-				  string& reason)
+				  string& errmsg)
 {
     debug_msg("set_vif_address "
 	      "(ifname = %s if_index = %u is_broadcast = %s is_p2p = %s "
@@ -154,7 +154,7 @@ IfConfigSetDummy::set_vif_address(const string& ifname,
     UNUSED(addr);
     UNUSED(dst_or_bcast);
     UNUSED(prefix_len);
-    UNUSED(reason);
+    UNUSED(errmsg);
 
     return (XORP_OK);
 }
@@ -164,7 +164,7 @@ IfConfigSetDummy::delete_vif_address(const string& ifname,
 				     uint16_t if_index,
 				     const IPvX& addr,
 				     uint32_t prefix_len,
-				     string& reason)
+				     string& errmsg)
 {
     debug_msg("delete_vif_address "
 	      "(ifname = %s if_index = %u addr = %s prefix_len = %u)\n",
@@ -174,7 +174,7 @@ IfConfigSetDummy::delete_vif_address(const string& ifname,
     UNUSED(if_index);
     UNUSED(addr);
     UNUSED(prefix_len);
-    UNUSED(reason);
+    UNUSED(errmsg);
 
     return (XORP_OK);
 }
