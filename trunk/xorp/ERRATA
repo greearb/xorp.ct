@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.13 2004/07/09 07:22:31 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.14 2004/08/03 18:16:01 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -179,14 +179,6 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       This will be fixed for XORP Release-1.1.
       Currently, there is no work-around except that restarting the
       rtrmgr with all enabled interfaces again.
-
-    - Very late in the release process a problem was found with scheduling
-      the internal PIM-SM tasks for state dependency tracking. The result of
-      it is that if the router is heavy loaded and if it has lots of multicast
-      routing state, then any change that affects many multicast routing
-      entries (e.g., MRIB changes, etc) in some cases may result in incorrect
-      recomputation of the result multicast routing state. This problem
-      will be fixed in the CVS repository right after the XORP Release-1.0.
 
   FIB2MRIB:
     - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
