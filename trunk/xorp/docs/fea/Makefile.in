@@ -119,7 +119,7 @@ SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 DOCS = fea
 
 # -- Document Sources
-fea_LATEX = fea.tex
+fea_LATEX = ../tex/xorp.bib fea.tex
 fea_FIGURES = figs/ifi.eps					\
 			  figs/ifmgmt.eps				\
 			  figs/iftreeitem.eps				\

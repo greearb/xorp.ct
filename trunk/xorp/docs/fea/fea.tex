@@ -1,25 +1,59 @@
-\documentclass[11pt]{article}
-\usepackage{times}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{rotating}
+%
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.4 2003/06/03 23:51:27 pavlin Exp $
+%
 
-\newcommand{\eg}{\emph{e.g.\/}} % e.g.
+\documentclass[11pt]{article}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{psfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
+
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+% \pagestyle{empty}
+
+\begin{document}
 
 \title{XORP Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 0.2}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 10, 2003}
+\date{June 5, 2003}
 
-\begin{document}
 \maketitle
 
+\thispagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+\label{sec:introduction}
 
 The role of the Forwarding Engine Abstraction (FEA) in XORP is to
 provide a uniform interface to the underlying forwarding engine.  It
@@ -32,49 +66,65 @@ cards.
 
 The FEA performs three distinct roles: \emph{interface management},
 \emph{forwarding table management}, and \emph{interface specific
-packet I/O}.  Each of these is briefly described here together with a
-description of the normal interaction with other processes.  The
-presentation of the design and implementation follows in the next
-section and is followed by a status summary in the concluding section.
+packet I/O}.  Those are described briefly in
+Section~\ref{sec:introduction:interface_management},
+Section~\ref{sec:introduction:forwarding_table_management},
+and Section~\ref{sec:introduction:interface_specific_packet_io}
+respectively.
+Section~\ref{sec:design_and_implementation} presents
+the design and implementation of the FEA components.
+FEA status summary is in Section~\ref{sec:status}.
 
+Note that the multicast-specific tasks are handled by the Multicast
+Forwarding Engine Abstraction (MFEA) which is logically separate from
+the FEA, but typically would be part of the FEA process.
+For information about the MFEA architecture, see \cite{xorp:mfea}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interface Management}
+\label{sec:introduction:interface_management}
 
 In the normal course of interaction, the RouterManager process is the
 principal source of interface configuration requests to the FEA.  The
 RouterManager constructs the interface configuration from the router
 configuration files and the input it receives at the command line.
-The type of requests the RouterManager makes to the FEA are to enable
+The type of requests the RouterManager sends to the FEA are to enable
 interfaces, create virtual interfaces, set interface MTU's, and so
 forth.  The FEA interprets and executes these requests in a manner
 appropriate for the underlying forwarding plane.
 
 Processes can register with the FEA to be notified of changes in
 interface configuration.  The registered processes are notified of
-changes and may query the FEA on the receipt of an update notification
+changes, and may query the FEA on the receipt of an update notification
 to determine the change that occurred.  These notifications are
 primarily of interest to routing protocols since these need to know
 what the state of each interface is at a given time.
 
-Both of the above interactions are depicted in figure \ref{fig:ifmgmt}.
-
-\begin{figure}
-\centerline{\includegraphics[width=0.80\textwidth]{figs/ifmgmt}}
-\caption{\label{fig:ifmgmt} \
-FEA Interface Management interaction with other XORP processes. \
-}
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=0.80\textwidth]{figs/ifmgmt}
+    \caption{FEA Interface Management interaction with other XORP processes}
+    \label{fig:ifmgmt}
+  \end{center}
 \end{figure}
 
+Both of the above interactions are depicted in Figure~\ref{fig:ifmgmt}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Forwarding Table Management}
+\label{sec:introduction:forwarding_table_management}
 
 The FEA primarily receives forwarding table configuration information from the
 RIB process.  The RIB arbitrates between the routes proposed by the
-different routing processes and propagates the results into the FEA's
+different routing processes, and propagates the results into the FEA's
 forwarding table interface.  The FEA accepts requests to insert and
 remove routing entries and propagates the necessary changes into the
 forwarding plane.  The FEA also supports queries on the current
 contents of the forwarding table.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interface Specific Packet I/O}
+\label{sec:introduction:interface_specific_packet_io}
 
 Routing protocols, such as OSPF, need to be able to send and receive
 packets on specific interfaces in the forwarding plane in order to
@@ -82,16 +132,19 @@ exchange routing information and to determine the liveness of
 connected paths.  Since the forwarding plane may be distributed across
 multiple machines, these routing protocols delegate the I/O operations
 on these packets to the FEA.  The FEA supports sending and receiving
-raw and UDP\footnote{At the time of writing UDP support is not
-present.}  packets on specific interfaces.  The transmission of
+raw and UDP~\footnote{At the time of writing UDP support
+is not present.}  packets on specific interfaces.  The transmission of
 packets through the FEA is straightforward, the routing process simply
 hands the FEA a packet and indicates which interface it should be sent
 on.  The reception of packets is handled through a register-notify
 interface where the routing process registers which types of packets
 on which interfaces it is interested.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Design and Implementation}
+\label{sec:design_and_implementation}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Overview}
 
 The FEA fulfills three discrete roles: Interface Management, Forwarding
@@ -117,37 +170,40 @@ a distinct XRL interface.  The Interface Management and Interface
 Specific Packet I/O roles support the notion of clients that notified
 when event occur and client processes are expected to implement known
 interfaces.  The FEA XRL and FEA XRL client interfaces are shown in
-table \ref{tbl:xifs}.
+Table~\ref{tbl:xifs}.
 
 \begin{table}[h]
 \begin{center}
 \begin{tabular}{|l|l|l|}\hline
 Role & XRL Interface file & Client XRL Interface\\ \hline\hline
 Interface Management 		& fea\_ifmgr.xif	& fea\_ifmgr\_client.xif\\
-Forwarding Table Management	& fea\_fti.xif 		& \\
+Forwarding Table Management	& fti.xif 		& \\
 Interface Specific Packet I/O	& fea\_rawpkt.xif 	& fea\_rawpkt\_client.xif\\ \hline
 \end{tabular}
-\caption{\label{tbl:xifs} \
-	 FEA XRL Interfaces (defined in {\tt \$XORP/xrl/target/fea.tgt.}) }
+\caption{FEA XRL Interfaces (defined in {\tt \$XORP/xrl/target/fea.tgt})}
+\label{tbl:xifs}
 \end{center}
 \end{table}
 
 The XRL handling code is found in {\tt
 \$XORP/fea/xrl\_target.\{hh,cc\}}.  Each XRL interface is handled by
-an XRL aware helper class.  The helper class understands the semantics
-of the implementation and maps errors and responses to the appropriate
+an XRL-aware helper class.  The helper class understands the semantics
+of the implementation, and maps errors and responses to the appropriate
 XRL forms.  The helper classes and their relations to the interfaces
-are depicted in figure \ref{fig:xrl_ifs}.
+are depicted in Figure~\ref{fig:xrl_ifs}.
 
 \clearpage
-\begin{sidewaysfigure}
-%\centering
-\includegraphics[width=\textheight]{figs/xrl_ifs}
-\caption{\label{fig:xrl_ifs} \
-XRL Interfaces in relation to FEA classes.
-}
-\end{sidewaysfigure}
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[angle=90,height=0.90\textheight]{figs/xrl_ifs}
+    \caption{XRL Interfaces in relation to FEA classes}
+    \label{fig:xrl_ifs}
+  \end{center}
+\end{figure}
 \clearpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interface Management}
 
 To succinctly explain the interface management classes and how they
@@ -194,12 +250,13 @@ three interacting classes: {\tt IfConfig}, {\tt InterfaceManager},
 is managed by the {\tt XrlInterfaceManager}, which takes external XRL
 requests and maps them onto the appropriate operations.  The
 interactions between these classes and related classes are shown in
-figure \ref{fig:ifi}. The {\tt XrlInterfaceManager} is sufficiently
+Figure~\ref{fig:ifi}. The {\tt XrlInterfaceManager} is sufficiently
 aware of the semantics of the operations to pass back human parseable
 error messages when operations fail.
 
-The {\tt IfConfig} class is an interface configurator, and a derived
-version is required for each supported forwarding plane architecture.
+The {\tt IfConfig} class is an interface configurator, and contains
+plug-ins for each supported forwarding plane architecture to
+access, set, or monitor the interface-related information.
 The functionality of the {\tt IfConfig} is conceptually simple: it can
 push-down an {\tt IfTree} to the forwarding plane or pull-up the live
 configuration state from the forwarding plane as an {\tt IfTree}.
@@ -215,33 +272,37 @@ down into the {\tt IfConfig}.
 
 The process of configuration is asynchronous, and two phase.  Errors
 can occur whilst a transaction is being committed and operating on an
-{\tt Iftree}, \eg because of a bad operation within a transaction, and
+{\tt Iftree} (\eg because of a bad operation within a transaction), and
 errors can occur when the configuration is pushed down to the
-forwarding plane, \eg the configuration has an inconsistent number of
-interfaces.  Errors in the first phase are reported by the {\tt
+forwarding plane (\eg the configuration has an inconsistent number of
+interfaces).  Errors in the first phase are reported by the {\tt
 InterfaceTransactionManager}.  Errors in the second phase are reported
 by the {\tt IfConfig} through a helper class derived from {\tt
 IfConfigErrorReporterBase}.
 
 The interface management role of the FEA is expected to report
-configuration changes to other XORP processes.  The {\tt IfConfig}
-classes are therefore expected to use the {\tt XrlIfConfigUpdateReporter}
+configuration changes to other XORP processes.  Hence,
+the {\tt IfConfig} class uses the {\tt XrlIfConfigUpdateReporter}
 class to report configuration changes.
 
 \clearpage
-\begin{sidewaysfigure}
-%\centering
-\includegraphics[angle=0,width=\textheight]{figs/ifi}
-\caption{\label{fig:ifi}FEA Interface Management classes and their interactions}
-\end{sidewaysfigure}
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[angle=90,height=0.90\textheight]{figs/ifi}
+    \caption{FEA Interface Management classes and their interactions}
+    \label{fig:ifi}
+  \end{center}
+\end{figure}
 \clearpage
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Forwarding Table Management}
 
 The Forwarding Table Management role propagates routes into the
 forwarding plane.  The Forwarding Table Management role does not
 shadow the forwarding information outside of the forwarding plane
-itself, it relies on the RIB to do this.  As a result it is
+itself; rather, it relies on the RIB to do this.  As a result, it is
 considerably simpler than the Interface Management role.
 
 The classes interacting to provide the Forward Table Management role
@@ -249,18 +310,22 @@ are: the {\tt XrlFtiTransactionManager} class, a class that adapts
 requests and responses from the subset of {\tt XrlFeaTarget} methods
 that represent the forwarding table management externally; the {\tt
 FtiTransactionManager} that builds and executes transactions to
-configure the forwarding table; and a class derived from the {\tt Fti}
-that understands how to program the forwarding plane.
+configure the forwarding table; and class {\tt Fti} that understands
+how to program the forwarding plane.
 
-The particular {\tt Fti} classes implement the interface described by
-the abstract {\tt Fti} class.  These include methods for adding and
+The {\tt Fti} class provides the interface for accessing the
+forwarding plane.  It includes methods for adding and
 removing routes, as well as resolving routes in the forwarding table.
 Modifications to the {\tt Fti} state are only permitted during a
 configuration interval.  The configuration interval is started and
 stopped using {\tt Fti::start\_configuration} and {\tt
-Fti:end\_configuration}.  Child classes override these methods to
-perform any additional operations they need to conduct in order to
-change the forwarding table state.
+Fti:end\_configuration}.  The particular access to the forwarding
+plane is performed by plug-ins that are specific to that
+plane. For example, to read the forwarding table currently there are
+plug-ins that utilize the sysctl(3) mechanism (\eg in case of FreeBSD)
+or the netlink mechanism (\eg in case of Linux). There are
+plug-ins to read, set or monitor the forwarding table information
+at the granularity of one entry, or the whole table.
 
 The {\tt FtiTransactionManager} presents a transactional interface for
 configuring the {\tt Fti} instance.  Command classes exist for each
@@ -268,6 +333,7 @@ possible modifier operation on the {\tt Fti} instance.  The {\tt Fti}
 methods {\tt start\_configuration} and {\tt end\_configuration} are
 called at the start and end of the transaction.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interface Specific Packet I/O}
 
 The Interface Specific Packet I/O role of the FEA provides a means for
@@ -296,14 +362,43 @@ allows processes to receive raw packets on the basis of the receiving
 VIF.  In principle, filters could be written to match on any field
 within a packet and perform an action.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Status}
+\label{sec:status}
 
 At the time of writing two versions of the FEA are supported: {\tt
-fea\_rtsock} and {\tt fea\_dummy}.  The {\tt fea\_rtsock} is a version
-of the FEA that relies on the host operating system supporting BSD
-style routing sockets.  This has been developed on FreeBSD 4.x, but
-should port with minor modifications to other BSD's with relatively
-minor changes.  The {\tt fea\_dummy} is a substitute FEA and may be
+fea} and {\tt fea\_dummy}.  The {\tt fea} is a version
+of the FEA that contains plug-ins to access the forwarding plane by
+using the following mechanisms:
+
+\begin{itemize}
+
+  \item {\it getifaddrs(3)}, {\it sysctl(3)} and {\it ioctl(3)} to
+  obtain interface-specific information.
+
+  \item {\it ioctl(3)} to set interface-specific information.
+
+  \item {\it routing sockets} for observing changes in the
+  interface-specific information.
+
+  \item {\it routing sockets} and {\it netlink sockets} to lookup
+  a single forwarding entry in the forwarding plane.
+
+  \item {\it sysctl(3)} and {\it netlink sockets} to obtain the whole
+  forwarding table from the forwarding plane.
+
+  \item {\it routing sockets} to set a single forwarding entry or the
+  whole table in the forwarding plane.
+
+  \item {\it routing sockets} to observe changes in the forwarding
+  table.
+
+\end{itemize}
+
+In other words, currently the {\tt fea} supports FreeBSD for reading
+and writing to the forwarding plane, and Linux for reading only (so far
+it has been tested on FreeBSD-4.x and Linux-2.4.20).
+The {\tt fea\_dummy} is a substitute FEA and may be
 used for development testing purposes.  The {\tt fea\_dummy}
 represents an idealized form of FEA, other FEA's may differ in their
 responses due to architectural differences.  Therefore processes that
@@ -311,11 +406,17 @@ interact with the FEA should regard {\tt fea\_dummy} interactions as
 indicative, but not definitive.
 
 The FEA's are still a work in progress and no doubt have some bugs.
-Any contributions or bug fixes are welcome.  FEA's for Click and Linux
-netlink need to be written, and FEA's for any other architecture would
+Any contributions or bug fixes are welcome.  Completing the FEA support
+for Linix is work-in-progress. FEA support for Click is yet to
+be written, and FEA's for any other architecture would
 be welcomed.  There is a now defunct Click FEA in the {\tt \$XORP/fea}
 directory that should be possible to resurrect.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{../tex/xorp}
+\bibliographystyle{plain}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
-
-

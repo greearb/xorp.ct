@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/fea/Makefile.am,v 1.4 2002/12/09 23:09:43 hodson Exp $
+## $XORP: xorp/docs/fea/Makefile.am,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -9,7 +9,7 @@ include $(top_srcdir)/docs/mk/Makefile.doc.am
 DOCS			= fea
 
 # -- Document Sources
-fea_LATEX		= fea.tex
+fea_LATEX		= ../tex/xorp.bib fea.tex
 fea_FIGURES		= figs/ifi.eps					\
 			  figs/ifmgmt.eps				\
 			  figs/iftreeitem.eps				\
