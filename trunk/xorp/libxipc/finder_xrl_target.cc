@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.1 2003/01/28 00:42:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.2 2003/02/24 19:39:19 hodson Exp $"
 
 #include "finder_ng_xrl_target.hh"
 #include "finder_ng.hh"
+#include "permits.hh"
 #include "xuid.hh"
 
 /**
@@ -196,4 +197,44 @@ FinderNGXrlTarget::finder_0_1_get_xrls_registered_by(const string&,
 						     XrlAtomList&)
 {
     return XrlCmdError::COMMAND_FAILED("Unimplemented");
+}
+
+XrlCmdError
+FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4hosts)
+{
+    const IPv4Hosts& hl = permitted_ipv4_hosts();
+    for (IPv4Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
+	ipv4hosts.append(XrlAtom(*ci));
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderNGXrlTarget::finder_0_1_get_ipv4_permitted_nets(XrlAtomList& ipv4nets)
+{
+    const IPv4Nets& nl = permitted_ipv4_nets();
+    for (IPv4Nets::const_iterator ci = nl.begin(); ci != nl.end(); ++ci)
+	ipv4nets.append(XrlAtom(*ci));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderNGXrlTarget::finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6hosts)
+{
+    const IPv6Hosts& hl = permitted_ipv6_hosts();
+    for (IPv6Hosts::const_iterator ci = hl.begin(); ci != hl.end(); ++ci)
+	ipv6hosts.append(XrlAtom(*ci));
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderNGXrlTarget::finder_0_1_get_ipv6_permitted_nets(XrlAtomList& ipv6nets)
+{
+    const IPv6Nets& nl = permitted_ipv6_nets();
+    for (IPv6Nets::const_iterator ci = nl.begin(); ci != nl.end(); ++ci)
+	ipv6nets.append(XrlAtom(*ci));
+
+    return XrlCmdError::OKAY();
 }

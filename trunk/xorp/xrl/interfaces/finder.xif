@@ -21,7 +21,9 @@ interface finder/0.1 {
 		  & protocol_args:txt					      \
 		  -> resolved_xrl_method_name:txt
 
-	  /** Remove xrl */
+	  /**
+	   * Remove xrl
+	   */
 	  remove_xrl ? xrl:txt
 
 	  /**
@@ -29,9 +31,33 @@ interface finder/0.1 {
 	   */
 	   resolve_xrl ? xrl:txt -> resolutions:list
 
-	  /** Get list of registered Xrl targets */
+	  /**
+	   * Get list of registered Xrl targets 
+	   */
 	  get_xrl_targets -> target_names:list
 
-	  /** Get list of Xrls registered by target */
+	  /**
+	   * Get list of Xrls registered by target
+	   */
 	  get_xrls_registered_by ? target_name:txt -> xrls:list
+
+	  /**
+	   * Get list of IPv4 hosts that clients should accept IPC requests from.
+	   */
+	   get_ipv4_permitted_hosts -> ipv4s:list
+
+	  /**
+	   * Get list of IPv4 nets that clients should accept IPC requests from.
+	   */
+	   get_ipv4_permitted_nets -> ipv4nets:list
+
+	  /**
+	   * Get list of IPv6 hosts that clients should accept IPC requests from.
+	   */
+	   get_ipv6_permitted_hosts -> ipv6s:list
+
+	  /**
+	   * Get list of IPv6 nets that clients should accept IPC requests from.
+	   */
+	   get_ipv6_permitted_nets -> ipv6nets:list
 }
