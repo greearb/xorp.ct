@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.4 2003/03/10 23:20:12 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.5 2003/03/18 02:44:33 pavlin Exp $"
 
 
 //
@@ -379,7 +379,7 @@ CliNode::xlog_output(void *obj, const char *msg)
 //
 // CLI add_cli_command
 //
-void
+int
 CliNode::add_cli_command(
     // Input values,
     const string&	processor_name,
@@ -389,20 +389,17 @@ CliNode::add_cli_command(
     const string&	command_cd_prompt,
     const bool&		is_command_processor,
     // Output values,
-    bool&		fail,
     string&		reason)
 {
     // Reset the return value
-    fail = false;
     reason = "";
     
     //
     // Check the request
     //
     if (command_name.empty()) {
-	fail = true;
 	reason = "ERROR: command name is empty";
-	return;
+	return (XORP_ERROR);
     }
     
     CliCommand *c0 = cli_command_root();
@@ -429,15 +426,14 @@ CliNode::add_cli_command(
     //
     
     if (c1 == NULL) {
-	fail = true;
 	reason = c_format("Cannot install command '%s'", command_name.c_str());
-	return;
+	return (XORP_ERROR);
     }
     
     c1->set_global_name(command_name.c_str());
     c1->set_server_name(processor_name.c_str());
     
-    fail = false;
+    return (XORP_OK);
 }
 
 //

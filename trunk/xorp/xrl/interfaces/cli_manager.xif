@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.2 2003/01/23 11:14:25 pavlin Exp $ */
 
 /*
  * CLI manager XRL interface.
@@ -8,14 +8,11 @@
 interface cli_manager/0.1 {
 	/**
 	 * Enable/disable/start/stop the CLI.
-	 * 
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	enable_cli			-> fail:bool & reason:txt
-	disable_cli			-> fail:bool & reason:txt
-	start_cli			-> fail:bool & reason:txt
-	stop_cli			-> fail:bool & reason:txt
+	enable_cli
+	disable_cli
+	start_cli
+	stop_cli
 
 	/**
 	 * Add a subnet address to the list of subnet addresses enabled
@@ -24,26 +21,18 @@ interface cli_manager/0.1 {
 	 * subnet addresses.
 	 *
 	 * @param subnet_addr the subnet address to add.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	add_enable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
-						-> fail:bool & reason:txt
-	add_enable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
-						-> fail:bool & reason:txt
+	add_enable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	add_enable_cli_access_from_subnet6	? subnet_addr:ipv6net
 
 	/**
 	 * Delete a subnet address from the list of subnet addresses enabled
 	 * for CLI access.
 	 *
 	 * @param subnet_addr the subnet address to delete.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	delete_enable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
-						-> fail:bool & reason:txt
-	delete_enable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
-						-> fail:bool & reason:txt
+	delete_enable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	delete_enable_cli_access_from_subnet6	? subnet_addr:ipv6net
 
 	/**
 	 * Add a subnet address to the list of subnet addresses disabled
@@ -52,26 +41,18 @@ interface cli_manager/0.1 {
 	 * subnet addresses.
 	 *
 	 * @param subnet_addr the subnet address to add.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	add_disable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
-						-> fail:bool & reason:txt
-	add_disable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
-						-> fail:bool & reason:txt
+	add_disable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	add_disable_cli_access_from_subnet6	? subnet_addr:ipv6net
 
 	/**
 	 * Delete a subnet address from the list of subnet addresses disabled
 	 * for CLI access.
 	 *
 	 * @param subnet_addr the subnet address to delete.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */
-	delete_disable_cli_access_from_subnet4	? subnet_addr:ipv4net	\
-						-> fail:bool & reason:txt
-	delete_disable_cli_access_from_subnet6	? subnet_addr:ipv6net	\
-						-> fail:bool & reason:txt
+	delete_disable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	delete_disable_cli_access_from_subnet6	? subnet_addr:ipv6net
 
 	/**
 	 * Add a CLI command to the CLI manager
@@ -87,30 +68,25 @@ interface cli_manager/0.1 {
 	 * "cd" to that level of the CLI command-tree.
 	 * @param is_command_processor if true, this is a processing command
 	 * that would be performed by processor_name.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */	
 	add_cli_command		? processor_name:txt			\
 				& command_name:txt			\
 				& command_help:txt			\
 				& is_command_cd:bool			\
 				& command_cd_prompt:txt			\
-				& is_command_processor:bool		\
-				-> fail:bool & reason:txt
+				& is_command_processor:bool
+
 	/**
 	 * Delete a CLI command from the CLI manager
 	 *
 	 * @param processor_name the name of the module that sends the request.
 	 * @param command_name the name of the command to delete.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
 	 */	
-	delete_cli_command	? processor_name:txt & command_name:txt	\
-				-> fail:bool & reason:txt
+	delete_cli_command	? processor_name:txt & command_name:txt
 	
 	/*
 	 * TODO: do we want 'add_cli_commands_done' to indicate
 	 * end-of-adding?
 	 */
-	/* add_cli_commands_done ? processor_name:txt -> fail:bool & reason:txt */
+	/* add_cli_commands_done ? processor_name:txt */
 }

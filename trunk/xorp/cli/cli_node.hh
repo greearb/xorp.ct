@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.5 2003/03/10 23:20:12 hodson Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.6 2003/03/18 02:44:33 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -195,10 +195,11 @@ public:
      * "cd" to that level of the CLI command-tree.
      * @param is_command_processor if true, this is a processing command
      * that would be performed by @processor_name.
-     * @param fail true if failure has occured.
      * @param reason contains failure reason if it occured.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    void add_cli_command(
+    int add_cli_command(
 	// Input values,
 	const string&	processor_name,
 	const string&	command_name,
@@ -207,7 +208,6 @@ public:
 	const string&	command_cd_prompt,
 	const bool&	is_command_processor,
 	// Output values,
-	bool&		fail,
 	string&		reason);
 
     /**

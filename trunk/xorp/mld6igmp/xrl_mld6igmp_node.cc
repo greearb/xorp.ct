@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.5 2003/03/13 00:32:05 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.6 2003/03/18 02:44:36 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -715,18 +715,12 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 }
 
 void
-XrlMld6igmpNode::xrl_result_add_cli_command(const XrlError& xrl_error,
-					    const bool *fail,
-					    const string *reason)
+XrlMld6igmpNode::xrl_result_add_cli_command(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("XRL error: %s", xrl_error.str().c_str());
+	XLOG_ERROR("Failed to add a command to CLI manager: %s",
+		   xrl_error.str().c_str());
 	return;
-    }
-    
-    if (fail && *fail) {
-	XLOG_ERROR("Failure add a command to CLI manager: %s",
-		   reason? reason->c_str(): "unknown reason");
     }
 }
 
@@ -743,18 +737,12 @@ XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 }
 
 void
-XrlMld6igmpNode::xrl_result_delete_cli_command(const XrlError& xrl_error,
-					       const bool *fail,
-					       const string *reason)
+XrlMld6igmpNode::xrl_result_delete_cli_command(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("XRL error: %s", xrl_error.str().c_str());
+	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
+		   xrl_error.str().c_str());
 	return;
-    }
-    
-    if (fail && *fail) {
-	XLOG_ERROR("Failure delete a command from CLI manager: %s",
-		   reason? reason->c_str(): "unknown reason");
     }
 }
 
