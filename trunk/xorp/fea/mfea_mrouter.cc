@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.12 2003/09/23 03:35:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.13 2003/09/26 16:01:56 pavlin Exp $"
 
 
 //
@@ -1995,7 +1995,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	case MRT6MSG_WRONGMIF:
 	    if ((! src.is_unicast())
 		|| (! dst.is_multicast())
-		|| IN6_IS_ADDR_LINKLOCAL(&mrt6msg->im6_dst)) {
+		|| dst.is_linklocal_multicast()) {
 		// XXX: LAN-scoped addresses are not routed
 		return (XORP_ERROR);
 	    }
