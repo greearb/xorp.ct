@@ -188,7 +188,7 @@ template <typename A>
 bool
 Port<A>::peer_gc_timeout()
 {
-    PeerList::iterator i = _peers.begin();
+    typename PeerList::iterator i = _peers.begin();
     while (i != _peers.end()) {
 	Peer<A>* pp = *i;
 	if (pp->route_count() == 0) {
