@@ -1,10 +1,11 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.15 2003/11/17 22:10:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.16 2003/11/18 23:03:57 pavlin Exp $ */
 
 protocols {
   bgp {
     targetname: text = "bgp";
     bgp-id: ipv4;
     local-as: uint;
+
     peer @: text {
       peer-port: uint = 179;
       local-port: uint = 179;
@@ -16,7 +17,6 @@ protocols {
     }
   }
 }
-
 
 protocols {
   bgp {
@@ -64,6 +64,15 @@ protocols {
       }
       set-parameter {
 	%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
+      }
+      enable-ipv4-multicast {
+        %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast";
+      }
+      enable-ipv6-unicast {
+        %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast";
+      }
+      enable-ipv6-multicast {
+        %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast";
       }
     }
   }
