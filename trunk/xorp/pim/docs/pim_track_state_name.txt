@@ -18,7 +18,6 @@ Input = INPUT_STATE_RP_CHANGED
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
-        OUTPUT_STATE_RP_REGISTER_SG_CHANGED                           (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)

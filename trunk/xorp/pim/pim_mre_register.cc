@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.34 2002/12/09 18:29:26 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -334,10 +334,14 @@ PimMre::receive_register_stop()
     return;		// Ignore
 }
 
-// TODO: call it when approppriate
+//
+// Perform the "RP changed" action at the (S,G) register state-machine
+// Note that the RP has already changed and assigned by the method that
+// calls this one, hence we unconditionally take the "RP changed" actions.
+//
 // Note: applies for (S,G)
 void
-PimMre::recompute_rp_register_sg_changed()
+PimMre::rp_register_sg_changed()
 {
     if (! is_sg())
 	return;

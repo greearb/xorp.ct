@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.11 2003/01/29 05:43:59 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.12 2003/01/30 00:39:32 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -496,8 +496,11 @@ public:
     //
     // Note: applies for (S,G)
     void	receive_register_stop();
+    // Perform the "RP changed" action at the (S,G) register state-machine
+    // Note that the RP has already changed and assigned by the method that
+    // calls this one, hence we unconditionally take the "RP changed" actions.
     // Note: applies for (S,G)
-    void	recompute_rp_register_sg_changed();
+    void	rp_register_sg_changed();
     // Note: applies for (S,G)
     void	set_register_noinfo_state();
     // Note: applies for (S,G)

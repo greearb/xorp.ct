@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.4 2003/01/23 06:54:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.5 2003/01/26 04:06:23 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -78,7 +78,6 @@ PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
     output_state_is_rpt_join_desired_g(action_list);
     output_state_inherited_olist_sg_rpt(action_list);
     output_state_iif_olist_mfc(action_list);
-    output_state_rp_register_sg_changed(action_list);
     output_state_is_could_register_sg(action_list);
     output_state_assert_tracking_desired_sg(action_list);
     output_state_assert_tracking_desired_wc(action_list);
@@ -499,62 +498,61 @@ do {									\
     OUTPUT_NAME(OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G);		// 15
     OUTPUT_NAME(OUTPUT_STATE_INHERITED_OLIST_SG_RPT);		// 16
     OUTPUT_NAME(OUTPUT_STATE_IIF_OLIST_MFC);			// 17
-    OUTPUT_NAME(OUTPUT_STATE_RP_REGISTER_SG_CHANGED);		// 18
-    OUTPUT_NAME(OUTPUT_STATE_IS_COULD_REGISTER_SG);		// 19
-    OUTPUT_NAME(OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG);	// 20
-    OUTPUT_NAME(OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC);	// 21
-    OUTPUT_NAME(OUTPUT_STATE_COULD_ASSERT_SG);			// 22
-    OUTPUT_NAME(OUTPUT_STATE_COULD_ASSERT_WC);			// 23
-    OUTPUT_NAME(OUTPUT_STATE_MY_ASSERT_METRIC_SG);		// 24
-    OUTPUT_NAME(OUTPUT_STATE_MY_ASSERT_METRIC_WC);		// 25
-    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG);		// 26
-    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC);		// 27
-    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG);		// 28
-    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC);		// 29
-    OUTPUT_NAME(OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT);	// 30
-    OUTPUT_NAME(OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT);	// 31
-    OUTPUT_NAME(OUTPUT_STATE_SG_SEE_PRUNE_WC);			// 32
-    OUTPUT_NAME(OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG);		// 33
-    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_WC);			// 34
-    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_WC_GEN_ID);		// 35
-    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG);			// 36
-    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_GEN_ID);		// 37
-    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_RPT);			// 38
-    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_RPT_SG);		// 39
-    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP);			// 40
-    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID);		// 41
-    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP_G);		// 42
-    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_S);			// 43
-    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_RP);			// 44
-    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_WC);			// 45
-    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_SG);			// 46
-    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_SG_RPT);		// 47
-    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_RP);			// 48
-    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_WC);			// 49
-    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_SG);			// 50
-    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_SG_RPT);		// 51
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP);	// 52
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC);	// 53
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG);	// 54
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT);	// 55
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC);	// 56
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG);	// 57
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT);	// 58
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG);	// 59
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT);	// 60
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG);	// 61
-    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT);// 62
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP);	// 63
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC);	// 64
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG);	// 65
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT);// 66
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC);	// 67
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG);	// 68
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT);// 69
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG);	// 70
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT);// 71
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG);// 72
-    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT);// 73
+    OUTPUT_NAME(OUTPUT_STATE_IS_COULD_REGISTER_SG);		// 18
+    OUTPUT_NAME(OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG);	// 19
+    OUTPUT_NAME(OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC);	// 20
+    OUTPUT_NAME(OUTPUT_STATE_COULD_ASSERT_SG);			// 21
+    OUTPUT_NAME(OUTPUT_STATE_COULD_ASSERT_WC);			// 22
+    OUTPUT_NAME(OUTPUT_STATE_MY_ASSERT_METRIC_SG);		// 23
+    OUTPUT_NAME(OUTPUT_STATE_MY_ASSERT_METRIC_WC);		// 24
+    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG);		// 25
+    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC);		// 26
+    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG);		// 27
+    OUTPUT_NAME(OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC);		// 28
+    OUTPUT_NAME(OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT);	// 29
+    OUTPUT_NAME(OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT);	// 30
+    OUTPUT_NAME(OUTPUT_STATE_SG_SEE_PRUNE_WC);			// 31
+    OUTPUT_NAME(OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG);		// 32
+    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_WC);			// 33
+    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_WC_GEN_ID);		// 34
+    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG);			// 35
+    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_GEN_ID);		// 36
+    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_RPT);			// 37
+    OUTPUT_NAME(OUTPUT_STATE_RPFP_NBR_SG_RPT_SG);		// 38
+    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP);			// 39
+    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID);		// 40
+    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_RP_G);		// 41
+    OUTPUT_NAME(OUTPUT_STATE_MRIB_NEXT_HOP_S);			// 42
+    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_RP);			// 43
+    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_WC);			// 44
+    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_SG);			// 45
+    OUTPUT_NAME(OUTPUT_STATE_OUT_START_VIF_SG_RPT);		// 46
+    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_RP);			// 47
+    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_WC);			// 48
+    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_SG);			// 49
+    OUTPUT_NAME(OUTPUT_STATE_OUT_STOP_VIF_SG_RPT);		// 50
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP);	// 51
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC);	// 52
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG);	// 53
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT);	// 54
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC);	// 55
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG);	// 56
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT);	// 57
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG);	// 58
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT);	// 59
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG);	// 60
+    OUTPUT_NAME(OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT);// 61
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP);	// 62
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC);	// 63
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG);	// 64
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT);// 65
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC);	// 66
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG);	// 67
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT);// 68
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG);	// 69
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT);// 70
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG);// 71
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT);// 72
     
 #undef INPUT_NAME
 #undef OUTPUT_NAME
@@ -1238,21 +1236,6 @@ PimMreTrackState::output_state_iif_olist_mfc(list<PimMreAction> action_list)
     
     if (init_flag)
 	track_state_iif_olist_mfc(action_list);
-    
-    return (action_list);
-}
-
-list<PimMreAction>
-PimMreTrackState::output_state_rp_register_sg_changed(list<PimMreAction> action_list)
-{
-    bool init_flag = action_list.empty();
-    PimMreAction action(OUTPUT_STATE_RP_REGISTER_SG_CHANGED, PIM_MRE_SG);
-    
-    if (can_add_action_to_list(action_list, action))
-	action_list.push_back(action);
-    
-    if (init_flag)
-	track_state_rp_register_sg_changed(action_list);
     
     return (action_list);
 }
@@ -2900,14 +2883,6 @@ PimMreTrackState::track_state_assert_winner_metric_is_better_than_spt_assert_met
 }
 
 void
-PimMreTrackState::track_state_rp_register_sg_changed(list<PimMreAction> action_list)
-{
-    action_list = output_state_rp_register_sg_changed(action_list);
-    
-    track_state_rp(action_list);
-}
-
-void
 PimMreTrackState::track_state_is_directly_connected_s(list<PimMreAction> action_list)
 {
     track_state_my_ip_address(action_list);
@@ -3297,15 +3272,11 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	// pim_mfc.recompute_iif_olist_mfc();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_RP_REGISTER_SG_CHANGED:		// 18
-	pim_mre.recompute_rp_register_sg_changed();
-	break;
-	
-    case PimMreTrackState::OUTPUT_STATE_IS_COULD_REGISTER_SG:		// 19
+    case PimMreTrackState::OUTPUT_STATE_IS_COULD_REGISTER_SG:		// 18
 	pim_mre.recompute_is_could_register_sg();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG:	// 20
+    case PimMreTrackState::OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG:	// 19
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_assert_tracking_desired_sg(vif_index);
 	} else {
@@ -3315,7 +3286,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC:	// 21
+    case PimMreTrackState::OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC:	// 20
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_assert_tracking_desired_wc(vif_index);
 	} else {
@@ -3325,7 +3296,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_COULD_ASSERT_SG:		// 22
+    case PimMreTrackState::OUTPUT_STATE_COULD_ASSERT_SG:		// 21
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_could_assert_sg(vif_index);
 	} else {
@@ -3335,7 +3306,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_COULD_ASSERT_WC:		// 23
+    case PimMreTrackState::OUTPUT_STATE_COULD_ASSERT_WC:		// 22
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_could_assert_wc(vif_index);
 	} else {
@@ -3345,7 +3316,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MY_ASSERT_METRIC_SG:		// 24
+    case PimMreTrackState::OUTPUT_STATE_MY_ASSERT_METRIC_SG:		// 23
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_my_assert_metric_sg(vif_index);
 	} else {
@@ -3355,7 +3326,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MY_ASSERT_METRIC_WC:		// 25
+    case PimMreTrackState::OUTPUT_STATE_MY_ASSERT_METRIC_WC:		// 24
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_my_assert_metric_wc(vif_index);
 	} else {
@@ -3365,7 +3336,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG:	// 26
+    case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG:	// 25
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_assert_rpf_interface_sg(vif_index);
 	} else {
@@ -3375,7 +3346,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC:	// 27
+    case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC:	// 26
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_assert_rpf_interface_wc(vif_index);
 	} else {
@@ -3385,7 +3356,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG:		// 28
+    case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG:		// 27
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_assert_receive_join_sg(vif_index);
 	} else {
@@ -3395,7 +3366,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC:		// 29
+    case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_WC:		// 28
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_assert_receive_join_wc(vif_index);
 	} else {
@@ -3405,7 +3376,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT:	// 30
+    case PimMreTrackState::OUTPUT_STATE_RECEIVE_JOIN_WC_BY_SG_RPT:	// 29
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.receive_join_wc_by_sg_rpt(vif_index);
 	} else {
@@ -3415,175 +3386,175 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	}
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT:	// 31
+    case PimMreTrackState::OUTPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT:	// 30
 	pim_mre.receive_end_of_message_sg_rpt(vif_index);
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_SG_SEE_PRUNE_WC:		// 32
+    case PimMreTrackState::OUTPUT_STATE_SG_SEE_PRUNE_WC:		// 31
 	pim_mre.sg_see_prune_wc(vif_index, addr_arg);
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG:		// 33
+    case PimMreTrackState::OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG:		// 32
 	pim_mre.recompute_check_switch_to_spt_sg();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_WC:			// 34
+    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_WC:			// 33
 	pim_mre.recompute_rpfp_nbr_wc_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_WC_GEN_ID:		// 35
+    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_WC_GEN_ID:		// 34
 	pim_mre.recompute_rpfp_nbr_wc_gen_id_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG:			// 36
+    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG:			// 35
 	pim_mre.recompute_rpfp_nbr_sg_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG_GEN_ID:		// 37
+    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG_GEN_ID:		// 36
 	pim_mre.recompute_rpfp_nbr_sg_gen_id_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG_RPT:		// 38
+    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG_RPT:		// 37
 	pim_mre.recompute_rpfp_nbr_sg_rpt_changed();
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG_RPT_SG:		// 39
+    case PimMreTrackState::OUTPUT_STATE_RPFP_NBR_SG_RPT_SG:		// 38
 	pim_mre.recompute_rpfp_nbr_sg_rpt_sg_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP:		// 40
+    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP:		// 39
 	pim_mre.recompute_mrib_next_hop_rp_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID:	// 41
+    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID:	// 40
 	pim_mre.recompute_mrib_next_hop_rp_gen_id_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP_G:		// 42
+    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_RP_G:		// 41
 	pim_mre.recompute_mrib_next_hop_rp_g_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_S:		// 43
+    case PimMreTrackState::OUTPUT_STATE_MRIB_NEXT_HOP_S:		// 42
 	pim_mre.recompute_mrib_next_hop_s_changed();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_RP:		// 44
+    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_RP:		// 43
 	pim_mre.recompute_start_vif_rp(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_WC:		// 45
+    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_WC:		// 44
 	pim_mre.recompute_start_vif_wc(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_SG:		// 46
+    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_SG:		// 45
 	pim_mre.recompute_start_vif_sg(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_SG_RPT:		// 47
+    case PimMreTrackState::OUTPUT_STATE_OUT_START_VIF_SG_RPT:		// 46
 	pim_mre.recompute_start_vif_sg_rpt(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_RP:		// 48
+    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_RP:		// 47
 	pim_mre.recompute_stop_vif_rp(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_WC:		// 49
+    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_WC:		// 48
 	pim_mre.recompute_stop_vif_wc(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_SG:		// 50
+    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_SG:		// 49
 	pim_mre.recompute_stop_vif_sg(vif_index);
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_SG_RPT:		// 51
+    case PimMreTrackState::OUTPUT_STATE_OUT_STOP_VIF_SG_RPT:		// 50
 	pim_mre.recompute_stop_vif_sg_rpt(vif_index);
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP:	// 52
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_RP:	// 51
 	pim_mre.add_pim_mre_rp_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC:	// 53
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_WC:	// 52
 	pim_mre.add_pim_mre_rp_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG:	// 54
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG:	// 53
 	pim_mre.add_pim_mre_rp_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT: // 55
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_RP_ENTRY_SG_RPT: // 54
 	pim_mre.add_pim_mre_rp_entry();
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC:	// 56
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_WC:	// 55
 	pim_mre.add_pim_mre_wc_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG:	// 57
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG:	// 56
 	pim_mre.add_pim_mre_wc_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT: // 58
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_WC_ENTRY_SG_RPT: // 57
 	pim_mre.add_pim_mre_wc_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG:	// 59
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG:	// 58
 	pim_mre.add_pim_mre_sg_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT: // 60
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_ENTRY_SG_RPT: // 59
 	pim_mre.add_pim_mre_sg_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG: // 61
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG: // 60
 	pim_mre.add_pim_mre_sg_rpt_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT: // 62
+    case PimMreTrackState::OUTPUT_STATE_OUT_ADD_PIM_MRE_SG_RPT_ENTRY_SG_RPT: // 61
 	pim_mre.add_pim_mre_sg_rpt_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP:	// 63
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_RP:	// 62
 	pim_mre.remove_pim_mre_rp_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC:	// 64
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_WC:	// 63
 	pim_mre.remove_pim_mre_rp_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG:	// 65
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG:	// 64
 	pim_mre.remove_pim_mre_rp_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT: // 66
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_RP_ENTRY_SG_RPT: // 65
 	pim_mre.remove_pim_mre_rp_entry();
 	break;
 
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC:	// 67
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_WC:	// 66
 	pim_mre.remove_pim_mre_wc_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG:	// 68
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG:	// 67
 	pim_mre.remove_pim_mre_wc_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT: // 69
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_WC_ENTRY_SG_RPT: // 68
 	pim_mre.remove_pim_mre_wc_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG:	// 70
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG:	// 69
 	pim_mre.remove_pim_mre_sg_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT: // 71
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT: // 70
 	pim_mre.remove_pim_mre_sg_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG: // 72
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG: // 71
 	pim_mre.remove_pim_mre_sg_rpt_entry();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT: // 73
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT: // 72
 	pim_mre.remove_pim_mre_sg_rpt_entry();
 	break;
 	
@@ -3602,7 +3573,7 @@ PimMreAction::perform_action(PimMfc& pim_mfc)
 	pim_mfc.recompute_rp_mfc();
 	break;
 	
-    case PimMreTrackState::OUTPUT_STATE_IIF_OLIST_MFC:			// 16
+    case PimMreTrackState::OUTPUT_STATE_IIF_OLIST_MFC:			// 17
 	pim_mfc.recompute_iif_olist_mfc();
 	break;
 	

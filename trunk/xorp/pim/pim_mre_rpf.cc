@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.6 2003/01/23 06:54:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.7 2003/01/27 08:05:14 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -399,6 +399,13 @@ PimMre::uncond_set_pim_rp(PimRp *v)
     }
     
     pim_node().rp_table().add_pim_mre(this);
+    
+    //
+    // Perform the appropriate actions when "RP changed" at the (S,G)
+    // register state machine.
+    //
+    if (is_sg())
+	rp_register_sg_changed();
 }
 
 // Return the PimRp entry for the multicast group.
@@ -1287,7 +1294,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
     pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_changed();
     
     //
-    // Try to remove the (S,G,rpt) entry that was just created (in cas
+    // Try to remove the (S,G,rpt) entry that was just created (in case
     // it is not needed).
     //
     pim_mre_sg_rpt->entry_try_remove();
