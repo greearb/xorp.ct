@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.4 2003/04/23 17:06:48 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.5 2003/07/09 00:11:02 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -418,8 +418,8 @@ protected:
     XorpTimer		_us_timer;		// Unsolicited update timer
     XorpTimer		_tu_timer;		// Triggered update timer
 
-    UpdateQueue<A>&		 _update_queue; // RIP instance update queue
-    UpdateQueue<A>::ReadIterator _uq_iter;
+    UpdateQueue<A>&		 	  _update_queue;
+    typename UpdateQueue<A>::ReadIterator _uq_iter;
 
     bool		_en;			// Enabled state
     uint32_t		_cost;			// Cost metric of peer
