@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.4 2003/02/27 03:23:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.5 2003/02/27 19:42:24 pavlin Exp $"
 
 
 //
@@ -101,8 +101,9 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	// Prefix count of 0 implies all multicast groups.
 	is_scope_zone = false;
 	group_prefix = IPvXNet::ip_multicast_base_prefix(family());
+	// Try to find a non-scoped zone for this prefix
 	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(group_prefix,
-								 is_scope_zone);
+								 false);
 	if (active_bsr_zone == NULL)
 	    return (XORP_ERROR);	// XXX: don't know anything about this zone yet
 	if (active_bsr_zone->bsr_zone_state() != BsrZone::STATE_ELECTED_BSR) {
@@ -178,8 +179,15 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 			 cstring(group_prefix));
 	    continue;
 	}
+	//
+	// Try to find a scoped zone for this group prefix.
+	// Only if no scoped zone, then try non-scoped zone.
 	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(group_prefix,
-								 is_scope_zone);
+								 true);
+	if (active_bsr_zone == NULL) {
+	    active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(group_prefix,
+								     false);
+	}
 	if (active_bsr_zone == NULL)
 	    continue;		// XXX: don't know anything about this zone yet
 	if (active_bsr_zone->bsr_zone_state() != BsrZone::STATE_ELECTED_BSR) {
@@ -298,13 +306,21 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	 ++iter_prefix) {
 	BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
 	const IPvXNet& group_prefix = bsr_group_prefix->group_prefix();
-	bool all_multicast_groups_bool;
+	bool all_multicast_groups_bool, is_zbr;
     	
 	if (group_prefix == IPvXNet::ip_multicast_base_prefix(family())) {
 	    all_multicast_groups_bool = true;
 	} else {
 	    all_multicast_groups_bool = false;
 	}
+	
+	//
+	// Test if I am Zone Border Router (ZBR) for this prefix 
+	//
+	if (pim_node().pim_scope_zone_table().is_zone_border_router(group_prefix))
+	    is_zbr = true;
+	else
+	    is_zbr = false;
 	
 	list<BsrRp *>::const_iterator iter_rp;
 	for (iter_rp = bsr_group_prefix->rp_list().begin();
@@ -330,7 +346,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	    PUT_ENCODED_UNICAST_ADDR(family(), bsr_rp->rp_addr(), buffer);
 	    if (! all_multicast_groups_bool) {
 		uint8_t group_addr_reserved_flags = 0;
-		if (bsr_group_prefix->is_scope_zone())
+		if (is_zbr)
 		    group_addr_reserved_flags |= EGADDR_Z_BIT;
 		PUT_ENCODED_GROUP_ADDR(family(),
 				       group_prefix.masked_addr(),
