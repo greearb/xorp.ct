@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.7 2003/10/20 22:37:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.8 2004/06/10 22:41:09 hodson Exp $"
 
 #include <string.h>
 #include <stdio.h>
@@ -570,15 +570,14 @@ XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	}
 
 	used_bytes += atom_bytes;
+	--cnt;
 	if (used_bytes >= buffer_bytes) {
 	    // Greater than would be bad...
 	    assert(used_bytes == buffer_bytes);
 	    break;
 	}
-	--cnt;
     }
-
-    if (cnt) {
+    if (cnt != 0) {
 	// Unexpected truncation
 	return 0;
     }
