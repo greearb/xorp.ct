@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.25 2003/06/13 01:56:23 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.26 2003/06/24 18:40:06 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -8724,7 +8724,12 @@ The results should be same as in Part I.
 \end{itemize}
 
 \para{Possible Problems:}
-None.
+In Part C, TR1 may transmit two identical Assert messages on LAN1 instead of
+one message. Strictly speaking, according to the PIM-SM spec
+(draft-ietf-pim-sm-v2-new-05), a router would send two Assert messages
+when the first data packet is received on the wrong interface.
+However, an implementation may choose to apply an optimization, and
+transmit only one Assert message instead.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -9983,7 +9988,13 @@ The results should be same as in Part I.
 \end{itemize}
 
 \para{Possible Problems:}
-None.
+In Part C, TR1 may transmit two identical Assert messages on LAN1 instead of
+one message. Strictly speaking, according to the PIM-SM spec
+(draft-ietf-pim-sm-v2-new-05), a router would send two Assert messages
+when the first data packet is received on the wrong interface.
+However, an implementation may choose to apply an optimization, and
+transmit only one Assert message instead.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Bootstrap Mechanism}
