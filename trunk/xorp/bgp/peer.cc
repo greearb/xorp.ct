@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.28 2003/02/08 09:16:41 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.29 2003/03/07 01:02:41 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -1289,7 +1289,7 @@ BGPPeer::release_resources()
 {
     debug_msg("BGPPeer::release_resources()\n");
 
-    if (_handler != NULL && _handler->peering_is_up()) {
+    if (_handler != NULL && _handler->peering_is_up())
 	_handler->peering_went_down();
 
     /*
