@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.3 2003/03/10 23:20:33 hodson Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.4 2003/04/18 04:52:09 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -33,6 +33,7 @@
 typedef IPNet<IPvX> BaseIPvXNet; 
 
 template<>
+inline
 IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t preflen)
     throw (InvalidNetmaskLength)
     : _prefix_len(preflen)
@@ -42,7 +43,8 @@ IPNet<IPvX>::IPNet(const IPvX& ipvx, size_t preflen)
     _masked_addr = ipvx.mask_by_prefix(preflen);
 }
 
-template <> void
+template <> 
+inline void
 IPNet<IPvX>::initialize_from_string(const char *cp)
     throw (InvalidString, InvalidNetmaskLength)
 {
