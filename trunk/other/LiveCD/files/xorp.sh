@@ -24,7 +24,7 @@ unmount_fd() {
 	echo -n "Mounting floppy disk... "
 	#umount it first, just in case it got left mounted....
 	umount /mnt/floppy 1>/dev/null 2>/dev/null
-	mount -t msdos $DEV $MNT_PNT 1>$LOG_FILE 2>$LOG_FILE
+	mount_msdos -g xorp -m 775 $DEV $MNT_PNT 1>$LOG_FILE 2>$LOG_FILE
 	if [ $? -eq 0 ]; then 
 	    	echo "OK"
 	    	copy_files_back
@@ -45,7 +45,7 @@ mount_fd() {
 	echo -n "Mounting floppy disk... "
 	#umount it first, just in case it got left mounted....
 	umount /mnt/floppy 1>/dev/null 2>/dev/null
-	mount -t msdos $DEV $MNT_PNT 1>$LOG_FILE 2>$LOG_FILE
+	mount_msdos -g xorp -m 775 $DEV $MNT_PNT 1>$LOG_FILE 2>$LOG_FILE
 	if [ $? -eq 0 ]; then 
 	    	echo "OK"
 	    	copy_files_in

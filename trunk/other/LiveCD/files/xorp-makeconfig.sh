@@ -52,6 +52,7 @@ TITLE="XORP LiveCD"
 #this runs during the boot process, so we need to be pretty robust to
 #path errors and so forth
 MOUNT="/sbin/mount"
+MOUNTMSDOS="/sbin/mount_msdos"
 UMOUNT="/sbin/umount"
 MKTEMP="/usr/bin/mktemp"
 TOUCH="/usr/bin/touch"
@@ -87,7 +88,7 @@ test_floppy() {
 
     #mount the floppy
     ${TOUCH} ${tempfile} 
-    ${MOUNT} -t msdos ${FLOPPYDEV} ${MNTDIR} 1>> ${tempfile} 2>> ${tempfile}
+    ${MOUNTMSDOS} -g xorp -m 775 ${FLOPPYDEV} ${MNTDIR} 1>> ${tempfile} 2>> ${tempfile}
     if [ $? -ne 0 ]; then
 	err=`${CAT} ${tempfile}`
 	${DMESG} | grep ${FLOPPYNUM} 1>> /dev/null
