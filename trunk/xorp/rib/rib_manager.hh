@@ -12,16 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.16 2003/09/27 22:32:46 mjh Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.19 2004/02/06 22:44:11 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
 
 #include "libxorp/xorp.h"
-#include "libxorp/debug.h"
-#include "libxorp/exceptions.hh"
-#include "libxorp/eventloop.hh"
-#include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
 
 #include "libproto/proto_state.hh"
@@ -33,6 +29,9 @@
 #include "register_server.hh"
 #include "vifmanager.hh"
 #include "xrl_target.hh"
+
+
+class EventLoop;
 
 /**
  * @short Main top-level class containing RIBs and main eventloop.
@@ -64,7 +63,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	start();
-    
+
     /**
      * Stop operation.
      * 
@@ -84,14 +83,15 @@ public:
     /**
      * Check status of RIB process.
      *
-     * @return process status code
+     * @return the process status code.
+     * @see ProcessStatus.
      */
     ProcessStatus status(string& reason) const 
     {
 	reason = _status_reason;
 	return _status_code;
     }
-    
+
     /**
      * new_vif is called to inform all the RIBs that a new virtual
      * interface has been created.
@@ -185,8 +185,7 @@ public:
     int delete_vif_address(const string& vifname, 
 			   const IPv6& addr,
 			   string& err);
-    
-    
+
     /**
      * Find a RIB client.
      * 
@@ -200,9 +199,9 @@ public:
      * @param multicast true if a client for the multicast RIB.
      * @return a pointer to a valid @ref RibClient if found, otherwise NULL.
      */
-    RibClient *find_rib_client(const string& target_name, int family,
+    RibClient* find_rib_client(const string& target_name, int family,
 			       bool unicast, bool multicast);
-    
+
     /**
      * Add a RIB client.
      * 
@@ -266,7 +265,7 @@ public:
      */
     int disable_rib_client(const string& target_name, int family,
 			   bool unicast, bool multicast);
-    
+
     /**
      * Don't try to communicate with the FEA.
      * 
@@ -323,30 +322,28 @@ private:
      * for the multicast RIB.
      * @return a pointer to the appropriate list if found, otherwise NULL.
      */
-    list<RibClient *>	*select_rib_clients_list(int family, bool unicast,
-						 bool multicast);
+    list<RibClient* >* select_rib_clients_list(int family, bool unicast,
+					       bool multicast);
     
     ProcessStatus       _status_code;
     string              _status_reason;
-    EventLoop&		_eventloop;	// The event loop to use
-    XrlStdRouter&	_xrl_router;	// The XRL router to use
-    list<RibClient *>	_urib4_clients_list; // The list of IPv4 URIB clients
-    list<RibClient *>	_mrib4_clients_list; // The list of IPv4 MRIB clients
-    list<RibClient *>	_urib6_clients_list; // The list of IPv6 URIB clients
-    list<RibClient *>	_mrib6_clients_list; // The list of IPv6 MRIB clients
+    EventLoop&		_eventloop;		// The event loop to use
+    XrlStdRouter&	_xrl_router;		// The XRL router to use
+    list<RibClient* >	_urib4_clients_list; // The list of IPv4 URIB clients
+    list<RibClient* >	_mrib4_clients_list; // The list of IPv4 MRIB clients
+    list<RibClient* >	_urib6_clients_list; // The list of IPv6 URIB clients
+    list<RibClient* >	_mrib6_clients_list; // The list of IPv6 MRIB clients
     RegisterServer	_register_server;    // To notify clients about route change
-    
-    RIB<IPv4>		_urib4;		// The IPv4 unicast RIB
-    RIB<IPv4>		_mrib4;		// The IPv4 multicast RIB
-    RIB<IPv6>		_urib6;		// The IPv6 unicast RIB
-    RIB<IPv6>		_mrib6;		// The IPv6 multicast RIB
-    
-    VifManager		_vif_manager;	// The VIF manager
+
+    RIB<IPv4>		_urib4;			// The IPv4 unicast RIB
+    RIB<IPv4>		_mrib4;			// The IPv4 multicast RIB
+    RIB<IPv6>		_urib6;			// The IPv6 unicast RIB
+    RIB<IPv6>		_mrib6;			// The IPv6 multicast RIB
+
+    VifManager		_vif_manager;		// The VIF manager
     XrlRibTarget	_xrl_rib_target;
-
-    set<string>		_targets_of_interest; // XRL targets we're monitoring.
-
-    XorpTimer _status_update_timer;  //used for periodic checks of RIB status.
+    set<string>		_targets_of_interest;	// Monitored XRL targets
+    XorpTimer		_status_update_timer;	// Timer for periodic checks of RIB status
 };
 
 #endif // __RIB_RIB_MANAGER_HH__

@@ -19,23 +19,18 @@
 #include "rib_client.hh"
 #include "rt_tab_export.hh"
 
-#define DEBUG_ROUTE_TABLE
-
-#define codepath(x) printf("ExTabCodePath: %d\n", x);
 
 template<class A>
-ExportTable<A>::ExportTable<A>(const string&	 tablename,
-			       RouteTable<A>	 *parent,
-			       list<RibClient *> *rib_clients)
-    : RouteTable<A>(tablename)
+ExportTable<A>::ExportTable<A>(const string&		tablename,
+			       RouteTable<A>*		parent,
+			       list<RibClient* >*	rib_clients)
+    : RouteTable<A>(tablename),
+      _parent(parent),
+      _rib_clients(rib_clients)
 {
-    _parent = parent;
-    _rib_clients = rib_clients;
-
-    // plumb ourselves into the table graph
+    // Plumb ourselves into the table graph
     if (_parent != NULL) {
 	XLOG_ASSERT(_parent->next_table() == NULL);
-
 	_parent->set_next_table(this);
     }
 }
@@ -48,47 +43,48 @@ ExportTable<A>::~ExportTable<A>()
 template<class A>
 int
 ExportTable<A>::add_route(const IPRouteEntry<A>& route,
-			  RouteTable<A> *caller) 
+			  RouteTable<A>* caller) 
 {
     XLOG_ASSERT(caller == _parent);
 
+    // TODO: XXX: hard-coded protocol name!
     if (route.protocol().name() == "connected") {
-	printf("Add route called for connected route\n");
+	debug_msg("Add route called for connected route\n");
 	return XORP_OK;
     }
     
     //
     // Add the route to all RIB clients
     //
-    list<RibClient *>::iterator i;
-    for (i = _rib_clients->begin(); i != _rib_clients->end(); i++) {
-	RibClient *rib_client = *i;
+    list<RibClient* >::iterator iter;
+    for (iter = _rib_clients->begin(); iter != _rib_clients->end(); ++iter) {
+	RibClient* rib_client = *iter;
 	rib_client->add_route(route);
     }
     
-    debug_msg(("Add route called on export table " + _tablename +
-	       "\n").c_str());
+    debug_msg("Add route called on export table %s\n", + _tablename.c_str());
     return XORP_OK;
 }
 
 template<class A>
 int
-ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
-			     RouteTable<A> *caller) 
+ExportTable<A>::delete_route(const IPRouteEntry<A>* route,
+			     RouteTable<A>* caller) 
 {
     XLOG_ASSERT(caller == _parent);
 
+    // TODO: XXX: hard-coded protocol name!
     if (route->protocol().name() == "connected") {
-	printf("Delete route called for connected route\n");
+	debug_msg("Delete route called for connected route\n");
 	return XORP_OK;
     }
 
     //
     // Delete the route from all RIB clients
     //
-    list<RibClient *>::iterator i;
-    for (i = _rib_clients->begin(); i != _rib_clients->end(); i++) {
-	RibClient *rib_client = *i;
+    list<RibClient* >::iterator iter;
+    for (iter = _rib_clients->begin(); iter != _rib_clients->end(); ++iter) {
+	RibClient* rib_client = *iter;
 	rib_client->delete_route(*route);
     }
 
@@ -100,19 +96,19 @@ template<class A>
 void
 ExportTable<A>::flush() 
 {
-    // XXXX TBD
+    // TODO: XXX: NOT IMPLEMENTED!!!
     debug_msg("Flush called on ExportTable\n");
 }
 
 template<class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 ExportTable<A>::lookup_route(const IPNet<A>& net) const 
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 ExportTable<A>::lookup_route(const A& addr) const 
 {
     return _parent->lookup_route(addr);
@@ -120,14 +116,14 @@ ExportTable<A>::lookup_route(const A& addr) const
 
 template<class A>
 void
-ExportTable<A>::replumb(RouteTable<A> *old_parent,
-			RouteTable<A> *new_parent) 
+ExportTable<A>::replumb(RouteTable<A>* old_parent,
+			RouteTable<A>* new_parent) 
 {
     debug_msg("ExportTable::replumb\n");
     if (_parent == old_parent) {
 	_parent = new_parent;
     } else {
-	// shouldn't be possible
+	// Shouldn't be possible
 	XLOG_UNREACHABLE();
     }
 }

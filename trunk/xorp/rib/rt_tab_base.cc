@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_base.cc,v 1.2 2003/03/10 23:20:56 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_base.cc,v 1.3 2003/03/15 02:28:38 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "rt_tab_base.hh"
-#define DEBUG_ROUTE_TABLE
+
 
 template class RouteTable<IPv4>;
 typedef RouteTable<IPv4> IPv4RouteTable;

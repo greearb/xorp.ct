@@ -19,6 +19,7 @@
 
 #include "parser.hh"
 
+
 // ----------------------------------------------------------------------------
 // Direct RIB Commands (operate on an instance of a RIB<IPv4>).
 
@@ -30,7 +31,7 @@ public:
 	cout << "TableOriginCommand::execute " << _tablename << "\n";
 	// On the context of this test code, we don't care whether it's an
 	// IGP or an EGP, because we do the plumbing explicitly.  So it's
-	// safe to just say it's an IGP, even if its not
+	// safe to just say it's an IGP, even if its not.
 	return _rib.new_origin_table(_tablename, "", "", _admin_distance, IGP);
     }
 private:
@@ -134,9 +135,9 @@ public:
     DirectRedistEnableCommand(RIB<IPv4>& rib)
 	: RedistEnableCommand(), _rib(rib) {}
     int execute() {
-	cout << "RedistEnableCommand::execute " << _fromtable << " ";
-	cout << _totable << "\n";
-	int dummy = _rib.redist_enable(_fromtable, _totable);
+	cout << "RedistEnableCommand::execute " << _from_table << " ";
+	cout << _to_table << "\n";
+	int dummy = _rib.redist_enable(_from_table, _to_table);
 	return dummy;
     }
 private:
@@ -148,9 +149,9 @@ public:
     DirectRedistDisableCommand(RIB<IPv4>& rib) :
 	RedistDisableCommand(), _rib(rib) {}
     int execute() {
-	cout << "RedistDisableCommand::execute " << _fromtable << " ";
-	cout << _totable << "\n";
-	int dummy = _rib.redist_disable(_fromtable, _totable);
+	cout << "RedistDisableCommand::execute " << _from_table << " ";
+	cout << _to_table << "\n";
+	int dummy = _rib.redist_disable(_from_table, _to_table);
 	return dummy;
     }
 private:

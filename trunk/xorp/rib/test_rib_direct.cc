@@ -15,15 +15,18 @@
 #ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.7 2003/09/27 22:32:47 mjh Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
+
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "dummy_rib_manager.hh"
 #include "rib.hh"
 #include "dummy_register_server.hh"
+
 
 bool verbose = false;
 
@@ -35,7 +38,8 @@ private:
     RIB<IPv4>& _rib;
 };
 
-RibParser::RibParser(RIB<IPv4>& rib) : _rib(rib) 
+RibParser::RibParser(RIB<IPv4>& rib)
+    : _rib(rib) 
 {
     add_command(new DirectEtherVifCommand(_rib));
     add_command(new DirectRouteAddCommand(_rib));
@@ -64,6 +68,7 @@ parser_main()
     RibManager rib_manager;
     RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     DummyRegisterServer regserv;
+
     rib.initialize_register(&regserv);
 
     RibParser parser(rib);
@@ -75,13 +80,13 @@ parser_main()
 	if (feof(stdin) != 0)
 	    break;
 	line++;
-	cout << line << ": " << cmd << endl;
+	printf("%d: %s\n", line, cmd.c_str());
 	parser.parse(cmd);
     }
 }
 
 int
-main (int /* argc */, char *argv[]) 
+main (int /* argc */, char* argv[]) 
 {
     //
     // Initialize and start xlog

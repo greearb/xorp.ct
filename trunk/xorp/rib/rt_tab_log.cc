@@ -15,14 +15,16 @@
 #ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.6 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xlog.h"
 
 #include "rt_tab_log.hh"
 
+
 template<typename A>
 LogTable<A>::LogTable(const string&   tablename,
 		      RouteTable<A>*  parent)
-    : RouteTable<A>(tablename), _u_no(0)
+    : RouteTable<A>(tablename), _update_number(0)
 {
     _parent = parent;
     _parent->set_next_table(this);
@@ -38,7 +40,7 @@ int
 LogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 		       RouteTable<A>* 		caller)
 {
-    _u_no++;
+    _update_number++;
     RouteTable<A>* n = next_table();
     if (n != NULL) {
 	return n->add_route(route, caller);
@@ -55,7 +57,7 @@ LogTable<A>::delete_route(const IPRouteEntry<A>* route,
     if (n != NULL) {
 	return n->delete_route(route, caller);
     }
-    _u_no++;
+    _update_number++;
     return XORP_OK;
 }
 
@@ -106,8 +108,8 @@ LogTable<A>::str() const
 template <typename A>
 OstreamLogTable<A>::OstreamLogTable(const string&	tablename,
 				    RouteTable<A>*	parent,
-				    std::ostream&	o)
-    : LogTable<A>(tablename, parent), _o(o)
+				    std::ostream&	out)
+    : LogTable<A>(tablename, parent), _o(out)
 {
 }
 

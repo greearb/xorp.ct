@@ -12,15 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/protocol.cc,v 1.3 2003/03/15 02:28:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/protocol.cc,v 1.4 2003/03/15 02:54:39 pavlin Exp $"
 
 #include "rib_module.h"
 #include "protocol.hh"
 
-Protocol::Protocol(const string& name, int proto_type, int genid)
-{
-	_name = name;
-	_proto_type = proto_type;
-	_genid = genid;
-}
 
+Protocol::Protocol(const string& name, ProtocolType protocol_type,
+		   uint32_t genid)
+    : _name(name),
+      _protocol_type(protocol_type),
+      _genid(genid)
+{
+
+}

@@ -17,7 +17,10 @@
 #ifndef __RIB_RT_TAB_LOG_HH__
 #define __RIB_RT_TAB_LOG_HH__
 
+#include <iostream>
+
 #include "rt_tab_base.hh"
+
 
 /**
  * @short A Base for Route Tables that log updates.
@@ -42,19 +45,19 @@ public:
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
-    int type() const { return LOG_TABLE; }
+    TableType type() const { return LOG_TABLE; }
     RouteTable<A>* parent() { return _parent; }
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
 
-    inline uint32_t update_number() const { return _u_no; }
+    inline uint32_t update_number() const { return _update_number; }
+
 private:
     RouteTable<A>* _parent;
-    uint32_t	   _u_no;	// update number
+    uint32_t	   _update_number;
 };
 
 
-#include <iostream>
 
 /**
  * @short Route Table that passes through updates whilst logging them

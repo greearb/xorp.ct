@@ -15,16 +15,19 @@
 #ident "$XORP: xorp/rib/test_rib_client.cc,v 1.3 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
+
 #include "libxipc/xrl_std_router.hh"
 
 #include "rib_client.hh"
 
+
 static bool
-send_rib_client_commands(RibClient *rc, int *pcount)
+send_rib_client_commands(RibClient* rc, int* pcount)
 {
     int& count = *pcount;
     
@@ -32,7 +35,7 @@ send_rib_client_commands(RibClient *rc, int *pcount)
     rc->delete_route(IPv4Net("128.16.8.8/16"));
     rc->add_route(IPv4Net("128.16.8.8/16"), IPv4("128.16.8.1"), "if0", "vif0",
 		  10, 20, "static");
-    cout << "Sending RibClient commands" << endl;
+    printf("Sending RibClient commands\n");
     return true;
 }
 
@@ -55,7 +58,8 @@ rib_client_test()
     }
 }
 
-int main(int, char *argv[])
+int
+main(int, char* argv[])
 {
     //
     // Initialize and start xlog

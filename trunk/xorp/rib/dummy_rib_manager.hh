@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.1 2003/09/27 22:32:45 mjh Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.4 2004/02/06 22:44:10 pavlin Exp $
 
 #ifndef __RIB_DUMMY_RIB_MANAGER_HH__
 #define __RIB_DUMMY_RIB_MANAGER_HH__
@@ -173,8 +173,7 @@ public:
     int delete_vif_address(const string& vifname, 
 			   const IPv6& addr,
 			   string& err);
-    
-    
+
     /**
      * Find a RIB client.
      * 
@@ -188,9 +187,9 @@ public:
      * @param multicast true if a client for the multicast RIB.
      * @return a pointer to a valid @ref RibClient if found, otherwise NULL.
      */
-    RibClient *find_rib_client(const string& target_name, int family,
+    RibClient* find_rib_client(const string& target_name, int family,
 			       bool unicast, bool multicast);
-    
+
     /**
      * Add a RIB client.
      * 
@@ -254,7 +253,7 @@ public:
      */
     int disable_rib_client(const string& target_name, int family,
 			   bool unicast, bool multicast);
-    
+
     /**
      * Don't try to communicate with the FEA.
      * 
@@ -295,6 +294,7 @@ public:
      */
     void target_death(const string& target_class,
 		      const string& target_instance);
+
 private:
 };
 

@@ -15,43 +15,41 @@
 #ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.2 2003/09/27 22:32:46 mjh Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
+
 #include "rt_tab_deletion.hh"
 
-#ifdef DEBUG_CODEPATH
-#define cp(x) printf("DeletionTabCodePath: %2d\n", x)
-#else
-#define cp(x) {}
-#endif
 
-// A = Address Type, eg IPv4
-
+//
+// A = Address Type. E.g., IPv4 or IPv6
+//
 template<class A>
-DeletionTable<A>::DeletionTable<A>(
-    const string& tablename,
-    RouteTable<A>* parent,
-    Trie<A,  const IPRouteEntry<A> *> * ip_route_trie,
-    EventLoop& eventloop)
+DeletionTable<A>::DeletionTable<A>(const string& tablename,
+				   RouteTable<A>* parent,
+				   Trie<A, const IPRouteEntry<A>* >* ip_route_trie,
+				   EventLoop& eventloop)
     : RouteTable<A>(tablename),
-    _eventloop(eventloop)
+      _parent(parent),
+      _eventloop(eventloop),
+      _ip_route_table(ip_route_trie)
 {
-    _parent = parent;
+    XLOG_ASSERT(_parent != NULL);
     _next_table = _parent->next_table();
     _next_table->replumb(parent, this);
     parent->set_next_table(this);
-    _ip_route_table = ip_route_trie;
 
-    _background_deletion_timer = _eventloop.
-	new_oneoff_after_ms(0 /*call back immediately, but after
-				network events or expired timers */,
-			    callback(this,
-				     &DeletionTable<A>::background_deletion_pass));
+    // Callback immediately, but after network events or expired timers
+    _background_deletion_timer = _eventloop.new_oneoff_after_ms(
+	0,
+	callback(this, &DeletionTable<A>::background_deletion_pass));
 }
 
 template<class A>
 DeletionTable<A>::~DeletionTable<A>() 
 {
-    // delete all the routes in the trie.
+    // Delete all the routes in the trie.
     delete_all_routes();
     delete _ip_route_table;
 }
@@ -59,18 +57,20 @@ DeletionTable<A>::~DeletionTable<A>()
 template<class A>
 int 
 DeletionTable<A>::add_route(const IPRouteEntry<A>& route, 
-			    RouteTable<A> *caller)
+			    RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table->lookup_node(route.net());
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
+    iter = _ip_route_table->lookup_node(route.net());
     if (iter !=  _ip_route_table->end()) {
+	//
 	// We got an add route for a route that was waiting to be
 	// deleted.  Process this now - pass the deletion downstream,
 	// remove the route from our trie, then pass the new route
 	// downstream.
-	const IPRouteEntry<A> *our_route = iter.payload();
+	//
+	const IPRouteEntry<A>* our_route = iter.payload();
 	_ip_route_table->erase(route.net());
 	_next_table->delete_route(our_route, this);
 	delete our_route;
@@ -81,51 +81,55 @@ DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 
 template<class A>
 int 
-DeletionTable<A>::delete_route(const IPRouteEntry<A> *route, 
-			       RouteTable<A> *caller)
+DeletionTable<A>::delete_route(const IPRouteEntry<A>* route, 
+			       RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
     // The route MUST NOT be in our trie.
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(route->net());
     XLOG_ASSERT(iter == _ip_route_table->end());
 
     return _next_table->delete_route(route, this);
 }
 
-
 template<class A>
 void
 DeletionTable<A>::delete_all_routes() 
 {
-    typename Trie<A, const IPRouteEntry<A>*>::iterator i;
-    for (i = _ip_route_table->begin(); i != _ip_route_table->end(); i++) {
-	delete i.payload();
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
+    for (iter = _ip_route_table->begin();
+	 iter != _ip_route_table->end();
+	 ++iter) {
+	delete iter.payload();
     }
     _ip_route_table->delete_all_nodes();
 }
 
-
 template<class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 DeletionTable<A>::lookup_route(const IPNet<A>& net) const
 {
-    const IPRouteEntry<A> *parent_route = _parent->lookup_route(net);
+    const IPRouteEntry<A>* parent_route = _parent->lookup_route(net);
 
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(net);
 
     if (parent_route != NULL) {
+	//
 	// If we succeeded in looking up the route in the parent table,
 	// then the route MUST NOT be in our deletion table.
+	//
 	XLOG_ASSERT(iter == _ip_route_table->end());
 	return parent_route;
     } else {
+	//
 	// While we hold routes to be deleted, we haven't told anyone
 	// downstream they've gone yet.  We have to pretend they're
 	// still there (for consistency reasons) until we've got round
 	// to telling downstream that they've actually gone.
+	//
 	return (iter == _ip_route_table->end()) ? NULL : iter.payload();
     }
 }
@@ -134,19 +138,21 @@ template<class A>
 const IPRouteEntry<A>*
 DeletionTable<A>::lookup_route(const A& addr) const
 {
-    const IPRouteEntry<A> *parent_route = _parent->lookup_route(addr);
+    const IPRouteEntry<A>* parent_route = _parent->lookup_route(addr);
 
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->find(addr);
 
     if (parent_route != NULL) {
 	if (iter == _ip_route_table->end()) {
 	    return parent_route;
 	} else {
-	    //Both our parent and ourselves have a route.  We need to
-	    //return the more specific route.  If the two are the same
-	    //this is a fatal error.
-	    const IPRouteEntry<A> *our_route = iter.payload();
+	    //
+	    // Both our parent and ourselves have a route.  We need to
+	    // return the more specific route.  If the two are the same
+	    // this is a fatal error.
+	    //
+	    const IPRouteEntry<A>* our_route = iter.payload();
 	    XLOG_ASSERT(our_route->prefix_len() != parent_route->prefix_len());
 
 	    if (our_route->prefix_len() > parent_route->prefix_len()) {
@@ -156,13 +162,15 @@ DeletionTable<A>::lookup_route(const A& addr) const
 	    }
 	}
 	XLOG_UNREACHABLE();
-    } else {
-	// While we hold routes to be deleted, we haven't told anyone
-	// downstream they've gone yet.  We have to pretend they're
-	// still there (for consistency reasons) until we've got round
-	// to telling downstream that they've actually gone.
-	return (iter == _ip_route_table->end()) ? NULL : iter.payload();
     }
+
+    //
+    // While we hold routes to be deleted, we haven't told anyone
+    // downstream they've gone yet.  We have to pretend they're
+    // still there (for consistency reasons) until we've got round
+    // to telling downstream that they've actually gone.
+    //
+    return (iter == _ip_route_table->end()) ? NULL : iter.payload();
 }
 
 template<class A>
@@ -170,12 +178,12 @@ RouteRange<A>*
 DeletionTable<A>::lookup_route_range(const A& addr) const
 {
     const IPRouteEntry<A>* route;
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->find(addr);
 
     if (iter == _ip_route_table->end())
 	route = NULL;
-    else 
+    else
 	route = iter.payload();
 
     A bottom_addr, top_addr;
@@ -203,18 +211,17 @@ DeletionTable<A>::background_deletion_pass()
 	return;
     }
 
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table->begin();
-    const IPRouteEntry<A> *our_route = iter.payload();
+    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
+    iter = _ip_route_table->begin();
+    const IPRouteEntry<A>* our_route = iter.payload();
     _ip_route_table->erase(our_route->net());
     _next_table->delete_route(our_route, this);
     delete our_route;
 
-    _background_deletion_timer = _eventloop.
-	new_oneoff_after_ms(0 /*call back immediately, but after
-				network events or expired timers */,
-			    callback(this,
-				     &DeletionTable<A>::background_deletion_pass));
+    // Callback immediately, but after network events or expired timers
+    _background_deletion_timer = _eventloop.new_oneoff_after_ms(
+	0,
+	callback(this, &DeletionTable<A>::background_deletion_pass));
 }
 
 template<class A> 
@@ -226,7 +233,16 @@ DeletionTable<A>::unplumb_self()
     delete this;
 }
 
-template<class A> string
+template<class A>
+void
+DeletionTable<A>::replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent)
+{
+    XLOG_ASSERT(_parent == old_parent);
+    _parent = new_parent;
+}
+
+template<class A>
+string
 DeletionTable<A>::str() const
 {
     string s;
@@ -244,4 +260,3 @@ typedef DeletionTable<IPv4> IPv4DeletionTable;
 
 template class DeletionTable<IPv6>;
 typedef DeletionTable<IPv6> IPv6DeletionTable;
-

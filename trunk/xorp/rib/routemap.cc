@@ -12,18 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/routemap.cc,v 1.4 2003/03/16 07:18:58 pavlin Exp $"
+#ident "$XORP: xorp/rib/routemap.cc,v 1.6 2004/02/06 22:44:11 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "routemap.hh"
 
+
 RouteMap::RouteMap(const string& mapname)
+    : _mapname(mapname)
 {
-    _mapname = mapname;
 }
 
 int
-RouteMap::add_rule(RMRule *rule)
+RouteMap::add_rule(RMRule* rule)
 {
 #if 0
     if (_ruleset[rule->seq()] != NULL) {
@@ -33,20 +35,18 @@ RouteMap::add_rule(RMRule *rule)
     }
 #endif
     
-    typedef list<RMRule*>::iterator CI;
-    CI ptr = _ruleset.begin();
-    while (ptr != _ruleset.end()) {
+    list<RMRule* >::iterator iter;
+    for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) {
 	cout << "comparing new rule " << rule->seq() << " with " 
-	     << (*ptr)->seq() << "\n";
-	if (rule->seq() < (*ptr)->seq()) {
+	     << (*iter)->seq() << "\n";
+	if (rule->seq() < (*iter)->seq()) {
 	    cout << "here1\n";
-	    _ruleset.insert(ptr, rule);
+	    _ruleset.insert(iter, rule);
 	    return XORP_OK;
 	}
-	ptr++;
     }
     cout << "here2\n";
-    _ruleset.insert(ptr, rule);
+    _ruleset.push_back(rule);
     return XORP_OK;
 }
 
@@ -55,16 +55,14 @@ RouteMap::str() const
 {
     string result;
     
-    typedef list<RMRule*>::const_iterator CI;
-    CI ptr = _ruleset.begin();
-    while (ptr != _ruleset.end()) {
-	result += "route-map " + _mapname + (*ptr)->str() + "!\n";
-	ptr++;
+    list<RMRule* >::const_iterator iter;
+    for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) {
+	result += "route-map " + _mapname + (*iter)->str() + "!\n";
     }
     return result;
 }
 
-RMRule::RMRule(int seq, RMMatch *match, RMAction *action)
+RMRule::RMRule(int seq, RMMatch* match, RMAction* action)
 {
   _seq = seq;
   _match = match;

@@ -15,19 +15,23 @@
 #ident "$XORP: xorp/rib/rib_client.cc,v 1.8 2003/05/14 10:32:25 pavlin Exp $"
 
 // #define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
 #include "rib_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "libxorp/ref_ptr.hh"
+
 #include "libxipc/xrl_router.hh"
+
 #include "xrl/interfaces/fti_xif.hh"
 
 #include "rib_client.hh"
 
+
+//
 // For the time being this code is synchronous.  Instead of making the
 // FTI of the RIB clients support synchronous and asynchronous interfaces, we
 // use asynchronous operations here, but make them look asynchronous.  This
@@ -37,6 +41,7 @@
 // A net result of this mismatch is we end up queuing XRL's here and
 // queuing transaction operations in the FTI.  Not a biggie, but it
 // makes this end harder to comprehend.
+//
 
 // -------------------------------------------------------------------------
 // Synchronous Xrl code
@@ -51,17 +56,18 @@
 class SyncFtiCommand {
 public:
     // Callback type of callback to be invoked when synchronous command
-    // completes
+    // completes.
     typedef ref_ptr<XorpCallback1<void, bool> > CompletionCallback;
     // Callback to get the next add or delete if available.
-    typedef ref_ptr<XorpCallback0<SyncFtiCommand *> > GetNextCallback;
+    typedef ref_ptr<XorpCallback0<SyncFtiCommand* > > GetNextCallback;
 
     typedef ref_ptr<XorpCallback1<void, const XrlError&> > CommandCompleteCallback;
 
     SyncFtiCommand(XrlRouter& rtr, const string& target_name)
 	: _eventloop(rtr.eventloop()),
-	  _fticlient(&rtr), _target_name(target_name), 
-	_previously_successful(false) {}
+	  _fticlient(&rtr),
+	  _target_name(target_name), 
+	  _previously_successful(false) {}
     virtual ~SyncFtiCommand() {}
 
     void start(const CompletionCallback& cb, const GetNextCallback& gncb);
@@ -72,7 +78,7 @@ public:
 
 protected:
     void redo_start();
-    void start_complete(const XrlError& e, const uint32_t *tid);
+    void start_complete(const XrlError& e, const uint32_t* tid);
 
     void command_complete(const XrlError& e);
 
@@ -80,29 +86,25 @@ protected:
 
     void commit_complete(const XrlError& e);
 
-    SyncFtiCommand *get_next() {
-	return _get_next_cb->dispatch();
-    }
+    SyncFtiCommand* get_next() { return _get_next_cb->dispatch(); }
 
-    void done(bool fatal_error) {
-	_completion_cb->dispatch(fatal_error);
-    }
+    void done(bool fatal_error) { _completion_cb->dispatch(fatal_error); }
 
     uint32_t tid() const { return _tid; }
 
-    EventLoop& _eventloop;
+    EventLoop&		_eventloop;
     XrlFtiV0p2Client	_fticlient;
     const string&	_target_name;
 
 private:
-    uint32_t		_tid;		// transaction id
-    CompletionCallback	_completion_cb;	// callback called when done
-    GetNextCallback	_get_next_cb;	// get the next operation
+    uint32_t		_tid;		// Transaction id
+    CompletionCallback	_completion_cb;	// Callback called when done
+    GetNextCallback	_get_next_cb;	// Callback to get the next operation
 
-    XorpTimer _rtx_timer; //Used to re-send after a delay when we
-                          //suffered a full transmit buffer.
-    bool _previously_successful; //true when the interface has previously 
-                                 //succeeded
+    XorpTimer _rtx_timer; // A timer used to re-send after a delay when we
+                          // suffered a full transmit buffer.
+    bool _previously_successful; // Set to true when the interface has
+                                 // previously succeeded.
 };
 
 void
@@ -114,10 +116,10 @@ SyncFtiCommand::start(const CompletionCallback& ccb,
     if (!_fticlient.send_start_transaction(_target_name.c_str(),
 			       callback(this,
 					&SyncFtiCommand::start_complete))) {
-	// The send failed - not enough buffer space?.
-	// We resend after a delay
+	// The send failed - not enough buffer space?
+	// We resend after a delay.
 	_rtx_timer = _eventloop.new_oneoff_after_ms(
-	    1000, 
+	    1000,
 	    callback(this, &SyncFtiCommand::redo_start));
     }
 }
@@ -129,7 +131,7 @@ SyncFtiCommand::redo_start()
 }
 
 void
-SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
+SyncFtiCommand::start_complete(const XrlError& e, const uint32_t* tid)
 {
     debug_msg("start completed\n");
     if (e == XrlError::OKAY()) {
@@ -148,8 +150,10 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
 	    fatal_error = true;
 	} else if ((e == XrlError::RESOLVE_FAILED())
 		   && (!_previously_successful)) {
+	    //
 	    // We've not yet succeeded in talking to the target, so
 	    // give them a chance to get started - not strictly necessary.
+	    //
 	    _rtx_timer = _eventloop.new_oneoff_after_ms(
 		1000,
 		callback(this, &SyncFtiCommand::redo_start));
@@ -171,12 +175,12 @@ SyncFtiCommand::command_complete(const XrlError& e)
 	    || e == XrlError::NO_SUCH_METHOD()) {
 	    XLOG_ERROR("Fatal error while performing RibClient command: %s.",
 		       e.str().c_str());
-	    //This error is a fatal transport error.
+	    // This error is a fatal transport error.
 	    done(true);
 	    return;
 	}
 
-	//XXX something bad happened - not sure how to recover from this.
+	// XXX: something bad happened - not sure how to recover from this.
 	XLOG_WARNING("Command failed: %s", e.str().c_str());
 	commit();
 	return;
@@ -185,7 +189,7 @@ SyncFtiCommand::command_complete(const XrlError& e)
     //
     // More commands may have arrived lets check.
     //
-    SyncFtiCommand *task = get_next();
+    SyncFtiCommand* task = get_next();
     if (task != NULL) {
 	task->send_command(_tid,
 			   callback(this, &SyncFtiCommand::command_complete));
@@ -221,7 +225,7 @@ SyncFtiCommand::commit_complete(const XrlError& e)
 		       e.str().c_str());
 	    fatal_error = true;
 	} else {
-	    //XXX should handle other errors here too.
+	    // XXX: should handle other errors here too.
 	    XLOG_ERROR("Could not commit Synchronous RibClient command: %s.",
 		       e.str().c_str());
 	}
@@ -351,8 +355,8 @@ template<typename A>
 inline const A&
 gw(const IPRouteEntry<A>& re)
 {
-    IPNextHop<A> *nh = reinterpret_cast<IPNextHop<A> *>(re.nexthop());
-    return nh->addr();
+    IPNextHop<A>* nexthop = reinterpret_cast<IPNextHop<A>* >(re.nexthop());
+    return nexthop->addr();
 }
 
 template<typename A>
@@ -396,7 +400,7 @@ RibClient::add_route(const IPv4Net& dest,
 		     uint32_t	    admin_distance,
 		     const string&  protocol_origin)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     _tasks.push_back(RibClientTask(new AddRoute4(_xrl_router, dest, gw, 
 						 ifname, vifname,
@@ -409,7 +413,7 @@ RibClient::add_route(const IPv4Net& dest,
 void
 RibClient::delete_route(const IPv4Net& dest)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     _tasks.push_back(RibClientTask(new DeleteRoute4(_xrl_router, dest,
 						    _target_name)));
@@ -425,7 +429,7 @@ RibClient::add_route(const IPv6Net& dest,
 		     uint32_t	    admin_distance,
 		     const string&  protocol_origin)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     _tasks.push_back(RibClientTask(new AddRoute6(_xrl_router, dest, gw, 
 						 ifname, vifname,
@@ -438,7 +442,7 @@ RibClient::add_route(const IPv6Net& dest,
 void
 RibClient::delete_route(const IPv6Net& dest)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     _tasks.push_back(RibClientTask(new DeleteRoute6(_xrl_router, dest,
 						    _target_name)));
@@ -448,7 +452,7 @@ RibClient::delete_route(const IPv6Net& dest)
 void
 RibClient::add_route(const IPv4RouteEntry& re)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     add_route(dest(re), gw(re), ifname(re), vifname(re), re.metric(),
 	      re.admin_distance(), re.protocol().name());
@@ -457,7 +461,7 @@ RibClient::add_route(const IPv4RouteEntry& re)
 void
 RibClient::delete_route(const IPv4RouteEntry& re)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     delete_route(dest(re));
 }
@@ -465,7 +469,7 @@ RibClient::delete_route(const IPv4RouteEntry& re)
 void
 RibClient::add_route(const IPv6RouteEntry& re)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     add_route(dest(re), gw(re), ifname(re), vifname(re), re.metric(),
 	      re.admin_distance(), re.protocol().name());
@@ -474,7 +478,7 @@ RibClient::add_route(const IPv6RouteEntry& re)
 void
 RibClient::delete_route(const IPv6RouteEntry& re)
 {
-    if (_failed) 
+    if (_failed)
 	return;
     delete_route(dest(re));
 }
@@ -492,7 +496,7 @@ RibClient::tasks_pending() const
     return !_tasks.empty();
 }
 
-SyncFtiCommand *
+SyncFtiCommand*
 RibClient::get_next()
 {
     debug_msg("Get next task count %u op count %u\n", (uint32_t)tasks_count(),

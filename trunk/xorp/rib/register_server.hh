@@ -12,18 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.6 2003/03/29 19:03:10 pavlin Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.8 2004/02/06 22:44:10 pavlin Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
 
 #include <map>
 #include <list>
+
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
+
 #include "xrl/interfaces/rib_client_xif.hh"
+
 
 class XrlRouter;
 class NotifyQueueEntry;
@@ -44,17 +47,17 @@ public:
     /**
      * NotifyQueue constructor
      *
-     * @param modname the XRL module target name for the process that
+     * @param module_name the XRL module target name for the process that
      * this queue holds notifications for.  
      */
-    NotifyQueue(const string& modname);
+    NotifyQueue(const string& module_name);
 
     /**
      * Add an notification entry to the queue.
      *
      * @param e the notification entry to be queued.
      */
-    void add_entry(NotifyQueueEntry *e);
+    void add_entry(NotifyQueueEntry* e);
 
     /**
      * Send the next entry in the queue to this queue's XRL target.
@@ -69,8 +72,7 @@ public:
      * batch of changes (and to consolidate those changes to avoid
      * thrashing, but we don't currently do this).
      */
-    void flush(ResponseSender *response_sender);
-    typedef XorpCallback1<void, const XrlError&>::RefPtr XrlCompleteCB;
+    void flush(ResponseSender* response_sender);
 
     /**
      * XRL transmit complete callback.  We use this to cause the next
@@ -80,13 +82,14 @@ public:
      */
     void xrl_done(const XrlError& e);
 
-private:
-    string		_modname;
-    list<NotifyQueueEntry *> _queue;
-    bool		_active;
-    ResponseSender	*_response_sender;
-};
+    typedef XorpCallback1<void, const XrlError&>::RefPtr XrlCompleteCB;
 
+private:
+    string		_module_name;
+    list<NotifyQueueEntry* > _queue;
+    bool		_active;
+    ResponseSender*	_response_sender;
+};
 
 /**
  * Base class for a queue entry to be held in a @ref NotifyQueue.
@@ -115,8 +118,8 @@ public:
     /** 
      * Send the queue entry (pure virtual)
      */
-    virtual void send(ResponseSender *response_sender,
-		      const string& modname,
+    virtual void send(ResponseSender* response_sender,
+		      const string& module_name,
 		      NotifyQueue::XrlCompleteCB& cb) = 0;
 
     /**
@@ -131,10 +134,10 @@ private:
 /**
  * Notification Queue entry indicating that a change occured to the
  * metric, admin_distance or nexthop of a route in which interest was
- * registered.  
+ * registered.
  *
  * The template class A is the address family: either the IPv4 class
- * or the IPv6 class.  
+ * or the IPv6 class.
  */
 template <class A>
 class NotifyQueueChangedEntry : public NotifyQueueEntry {
@@ -155,15 +158,10 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
      */
     NotifyQueueChangedEntry(const IPNet<A>& net, const A& nexthop,
 			    uint32_t metric, uint32_t admin_distance,
-			    const string& protocol_origin, bool multicast) 
-    {
-	_net = net;
-	_nexthop = nexthop;
-	_metric = metric;
-	_admin_distance = admin_distance;
-	_protocol_origin = protocol_origin;
-	_multicast = multicast;
-    }
+			    const string& protocol_origin, bool multicast)
+    : _net(net), _nexthop(nexthop), _metric(metric),
+      _admin_distance(admin_distance), _protocol_origin(protocol_origin),
+      _multicast(multicast) {}
 
     /**
      * @return CHANGED
@@ -177,24 +175,25 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
      *
      * @param response_sender the auto-generated stub class instance
      * that will do the parameter marchalling.
-     * @param modname the XRL module target name to send this information to.
+     * @param module_name the XRL module target name to send this
+     * information to.
      * @param cb the method to call back when this XRL completes.
      */
-    void send(ResponseSender *response_sender,
-	      const string& modname,
+    void send(ResponseSender* response_sender,
+	      const string& module_name,
 	      NotifyQueue::XrlCompleteCB& cb);
 
  private:
-    IPNet<A>	_net;	// the route's full subnet (not the valid_subnet)
-    A		_nexthop;	// the new nexthop of the route
-    uint32_t	_metric;	// the metric of the route
-    uint32_t	_admin_distance; // the administratively defined distance of
+    IPNet<A>	_net;	// The route's full subnet (not the valid_subnet)
+    A		_nexthop;	// The new nexthop of the route
+    uint32_t	_metric;	// The metric of the route
+    uint32_t	_admin_distance; // The administratively defined distance of
 				// the routing protocol this routing entry
 				// was computed by
-    string	_protocol_origin; // the name of the protocol that originated
+    string	_protocol_origin; // The name of the protocol that originated
 				  // this route
-    bool	_multicast;	// true if change occured in multicast RIB,
-				// otherwise change occured in the unicast RIB
+    bool	_multicast;	// If true, a change occured in multicast RIB,
+				// otherwise it occured in the unicast RIB
 };
 
 /**
@@ -203,7 +202,7 @@ class NotifyQueueChangedEntry : public NotifyQueueEntry {
  * re-register to find out what actually happened.
  *
  * The template class A is the address family: either the IPv4 class
- * or the IPv6 class.  
+ * or the IPv6 class.
  */
 template <class A>
 class NotifyQueueInvalidateEntry : public NotifyQueueEntry {
@@ -217,11 +216,8 @@ public:
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.  
      */
-    NotifyQueueInvalidateEntry(const IPNet<A>& net,
-			       bool multicast) {
-	_net = net;
-	_multicast = multicast;
-    }
+    NotifyQueueInvalidateEntry(const IPNet<A>& net, bool multicast)
+	: _net(net), _multicast(multicast) {}
 
     /**
      * @return INVALIDATE
@@ -235,20 +231,21 @@ public:
      *
      * @param response_sender the auto-generated stub class instance
      * that will do the parameter marchalling.
-     * @param modname the XRL module target name to send this information to.
+     * @param module_name the XRL module target name to send this
+     * information to.
      * @param cb the method to call back when this XRL completes.
      */
-    void send(ResponseSender *response_sender,
-	      const string& modname,
+    void send(ResponseSender* response_sender,
+	      const string& module_name,
 	      NotifyQueue::XrlCompleteCB& cb);
-private:
-    IPNet<A>	_net;	// the valid_subnet from the RouteRegister
-			// instance.  The other end already knows the
-			// route's full subnet
-    bool	_multicast;	// true if change occured in multicast RIB,
-				// otherwise change occured in the unicast RIB
-};
 
+private:
+    IPNet<A>	_net;	// The valid_subnet from the RouteRegister
+			// instance.  The other end already knows the
+			// route's full subnet.
+    bool	_multicast;	// If true, a change occured in multicast RIB,
+				// otherwise it occured in the unicast RIB
+};
 
 /**
  * @short RegisterServer handles communication of notifications to the
@@ -269,7 +266,7 @@ public:
      * @param xrl_router the XRL router instance used to send and
      * receive XRLs in this process.
      */
-    RegisterServer(XrlRouter *xrl_router);
+    RegisterServer(XrlRouter* xrl_router);
 
     /**
      * RegisterServer destructor
@@ -281,7 +278,7 @@ public:
      * module that routing information in which it had registered an
      * interest has changed its nexthop, metric, or admin distance.
      *
-     * @param modname the XRL target name of the module to notify.
+     * @param module_name the XRL target name of the module to notify.
      * @param net the destination subnet of the route that changed.
      * @param nexthop the new nexthop of the route that changed.
      * @param metric the new routing protocol metric of the route that changed.
@@ -292,14 +289,14 @@ public:
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.
      */
-    virtual void send_route_changed(const string& modname,
+    virtual void send_route_changed(const string& module_name,
 				    const IPv4Net& net,
 				    const IPv4& nexthop,
 				    uint32_t metric,
 				    uint32_t admin_distance,
 				    const string& protocol_origin,
 				    bool multicast);
-    virtual void send_invalidate(const string& modname,
+    virtual void send_invalidate(const string& module_name,
 				 const IPv4Net& net,
 				 bool multicast);
 
@@ -308,7 +305,7 @@ public:
      * module that routing information in which it had registered an
      * interest has changed its nexthop, metric, or admin distance.
      *
-     * @param modname the XRL target name of the module to notify.
+     * @param module_name the XRL target name of the module to notify.
      * @param net the destination subnet of the route that changed.
      * @param nexthop the new nexthop of the route that changed.
      * @param metric the new routing protocol metric of the route that changed.
@@ -319,13 +316,14 @@ public:
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.
      */
-    virtual void send_route_changed(const string& modname,
+    virtual void send_route_changed(const string& module_name,
 				    const IPv6Net& net,
 				    const IPv6& nexthop,
 				    uint32_t metric,
 				    uint32_t admin_distance,
 				    const string& protocol_origin,
 				    bool multicast);
+
     /**
      * send_invalidate is called to communicate to another XRL module
      * that routing information in which it had registered an interest
@@ -333,14 +331,14 @@ public:
      * registration to become invalid.  The client must re-register to
      * find out what really happened.
      *
-     * @param modname the XRL target name of the module to notify.
+     * @param module_name the XRL target name of the module to notify.
      * @param net the valid_subnet of the route registration that is
      * now invalid.
      * @param multicast true indicates that the change occured in the
      * multicast RIB, false indicates that it occured in the unicast
      * RIB.  
      */
-    virtual void send_invalidate(const string& modname,
+    virtual void send_invalidate(const string& module_name,
 				 const IPv6Net& net,
 				 bool multicast);
 
@@ -350,8 +348,8 @@ public:
     virtual void flush();
 
 protected:
-    void add_entry_to_queue(const string& modname, NotifyQueueEntry *e);
-    map<string, NotifyQueue *> _queuemap;
+    void add_entry_to_queue(const string& module_name, NotifyQueueEntry* e);
+    map<string, NotifyQueue* > _queuemap;
     ResponseSender _response_sender;
 };
 

@@ -12,15 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.3 2003/03/16 07:19:00 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_expect.hh,v 1.2 2004/02/06 22:44:11 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPECT_HH__
 #define __RIB_RT_TAB_EXPECT_HH__
 
 #include "rt_tab_base.hh"
 
-template<class A>
-class ExpectedRouteChange;
+template<class A> class ExpectedRouteChange;
 
 /**
  * @short A Route Table for comparing route updates received against
@@ -40,14 +39,15 @@ class ExpectTable : public RouteTable<A> {
 public:
     ExpectTable(const string& tablename, RouteTable<A>* parent);
     ~ExpectTable();
+
     void expect_add(const IPRouteEntry<A>& route);
     void expect_delete(const IPRouteEntry<A>& route);
     int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* caller);
+    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
-    int type() const { return EXPECT_TABLE; }
+    TableType type() const { return EXPECT_TABLE; }
     RouteTable<A>* parent() { return _parent; }
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;

@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.24 2003/09/27 22:32:47 mjh Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.26 2004/02/06 22:44:12 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -27,9 +28,10 @@
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
-#include "xrl_target.hh"
 #include "rib_client.hh"
 #include "dummy_register_server.hh"
+#include "xrl_target.hh"
+
 
 bool verbose = false;
 
@@ -87,7 +89,8 @@ parser_main()
     VifManager vif_manager(xrl_router, eventloop, NULL);
     vif_manager.enable();
     vif_manager.start();
-    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
+    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,
+		     NULL);
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
@@ -96,7 +99,7 @@ parser_main()
 	while (xrl_router.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	
+
 	if (xrl_router.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
@@ -128,7 +131,7 @@ parser_main()
 	if (feof(stdin) != 0)
 	    break;
 	line++;
-	cout << line << ": " << cmd << endl;
+	printf("%d: %s\n", line, cmd.c_str());
 
 	cv = SUCCESS;
 	parser.parse(cmd);	// Xrl based commands set cv to XRL_PENDING
@@ -142,7 +145,7 @@ parser_main()
 }
 
 int
-main(int /* argc */, char *argv[])
+main(int /* argc */, char* argv[])
 {
     //
     // Initialize and start xlog

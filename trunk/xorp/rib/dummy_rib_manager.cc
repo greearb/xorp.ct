@@ -12,14 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.2 2003/09/27 22:49:32 mjh Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.5 2004/02/06 22:44:10 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
+
 #include "dummy_rib_manager.hh"
+
 
 RibManager::RibManager()
 {

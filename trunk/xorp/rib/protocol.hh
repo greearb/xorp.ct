@@ -12,12 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/protocol.hh,v 1.3 2003/03/10 23:20:55 hodson Exp $
+// $XORP: xorp/rib/protocol.hh,v 1.4 2003/03/15 02:54:39 pavlin Exp $
 
 #ifndef __RIB_PROTOCOL_HH__
 #define __RIB_PROTOCOL_HH__
 
 #include "libxorp/xorp.h"
+
+
+enum ProtocolType {
+    IGP = 1,		// Interior Gateway Protocol
+    EGP = 2		// Exterior Gateway Protocol
+};
 
 /**
  * @short Routing protocol information.
@@ -31,20 +37,21 @@ public:
      * Protocol constuctor
      *
      * @param name the canonical name for the routing protocol.
-     * @param proto_type either IGP or EGP
-     * @param genid the generation id for the protocol (if the
+     * @param protocol_type the routing protocol type (@ref ProtocolType).
+     * @param genid the generation ID for the protocol (if the
      * protocol goes down and comes up, the genid should be
      * incremented).
      */
-    Protocol(const string& name, int proto_type, int genid);
+    Protocol(const string& name, ProtocolType protocol_type, uint32_t genid);
 
     /**
-     * @return the protocol type: either IGP or EGP
+     * @return the protocol type.
+     * @see ProtocolType
      */
-    int proto_type() const { return _proto_type; }
+    ProtocolType protocol_type() const { return _protocol_type; }
 
     /**
-     * @return the canonical name of the routing protocol
+     * @return the canonical name of the routing protocol.
      */
     const string& name() const { return _name; }
 
@@ -60,16 +67,16 @@ public:
     bool operator==(const Protocol& other) const {
 	return (name() == other.name());
     }
-    
+
+    /**
+     * Increment the protocol generation ID.
+     */
     void increment_genid() { _genid++; }
-    
+
 private:
-    string _name;
-
-    // IGP or EGP
-    int _proto_type;
-
-    int _genid;
+    string		_name;
+    ProtocolType	_protocol_type;	// The protocol type (IGP or EGP)
+    uint32_t		_genid;		// The protocol generation ID.
 };
 
 #endif // __RIB_PROTOCOL_HH__

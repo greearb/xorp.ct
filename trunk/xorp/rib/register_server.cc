@@ -12,32 +12,39 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.9 2003/05/14 10:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.11 2004/02/06 22:44:10 pavlin Exp $"
 
 //#define DEBUG_LOGGING
+
 #include "rib_module.h"
-#include "config.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
+
 #include "libxipc/xrl_router.hh"
+
 #include "register_server.hh"
 
-NotifyQueue::NotifyQueue(const string& modname)
-    : _modname(modname), _active(false), _response_sender(NULL)
+
+NotifyQueue::NotifyQueue(const string& module_name)
+    : _module_name(module_name),
+      _active(false),
+      _response_sender(NULL)
 {
 }
 
 void
-NotifyQueue::add_entry(NotifyQueueEntry *e) 
+NotifyQueue::add_entry(NotifyQueueEntry* e) 
 {
     _queue.push_back(e);
 }
-
 
 void
 NotifyQueue::send_next() 
 {
     XrlCompleteCB cb = callback(this, &NotifyQueue::xrl_done);
-    _queue.front()->send(_response_sender, _modname, cb);
+
+    _queue.front()->send(_response_sender, _module_name, cb);
     _queue.pop_front();
     if (_queue.empty()) {
 	_active = false;
@@ -54,9 +61,11 @@ NotifyQueue::flush(ResponseSender* response_sender)
 	return;
     }
     _response_sender = response_sender;
-    // this isn't really the best way to do this, because when the
+    //
+    // This isn't really the best way to do this, because when the
     // queue is active it won't force transaction batching, but it's
-    // better than nothing
+    // better than nothing.
+    //
     if (_active) {
 	debug_msg("queue is already active\n");
 	return;
@@ -65,7 +74,8 @@ NotifyQueue::flush(ResponseSender* response_sender)
     send_next();
 }
 
-void NotifyQueue::xrl_done(const XrlError& e) 
+void
+NotifyQueue::xrl_done(const XrlError& e) 
 {
     debug_msg("NQ: xrl_done\n");
     if (e == XrlError::OKAY()) {
@@ -78,10 +88,10 @@ void NotifyQueue::xrl_done(const XrlError& e)
 
 void
 NotifyQueueChangedEntry<IPv4>::send(ResponseSender* response_sender,
-				    const string& modname,
+				    const string& module_name,
 				    NotifyQueue::XrlCompleteCB& cb) 
 {
-    response_sender->send_route_info_changed4(modname.c_str(),
+    response_sender->send_route_info_changed4(module_name.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), _nexthop,
 					      _metric, _admin_distance,
@@ -90,10 +100,10 @@ NotifyQueueChangedEntry<IPv4>::send(ResponseSender* response_sender,
 
 void
 NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
-				    const string& modname,
+				    const string& module_name,
 				    NotifyQueue::XrlCompleteCB& cb) 
 {
-    response_sender->send_route_info_changed6(modname.c_str(),
+    response_sender->send_route_info_changed6(module_name.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), _nexthop,
 					      _metric, _admin_distance,
@@ -102,21 +112,21 @@ NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
 
 void
 NotifyQueueInvalidateEntry<IPv4>::send(ResponseSender* response_sender,
-				       const string& modname,
+				       const string& module_name,
 				       NotifyQueue::XrlCompleteCB& cb) 
 {
     printf("Sending route_info_invalid4\n");
-    response_sender->send_route_info_invalid4(modname.c_str(),
+    response_sender->send_route_info_invalid4(module_name.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), cb);
 }
 
 void
 NotifyQueueInvalidateEntry<IPv6>::send(ResponseSender* response_sender,
-				       const string& modname,
+				       const string& module_name,
 				       NotifyQueue::XrlCompleteCB& cb) 
 {
-    response_sender->send_route_info_invalid6(modname.c_str(),
+    response_sender->send_route_info_invalid6(module_name.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), cb);
 }
@@ -128,18 +138,18 @@ RegisterServer::RegisterServer(XrlRouter* xrl_router)
 }
 
 void
-RegisterServer::add_entry_to_queue(const string& modname,
-				   NotifyQueueEntry *e) 
+RegisterServer::add_entry_to_queue(const string& module_name,
+				   NotifyQueueEntry* e) 
 {
     debug_msg("REGSERV: add_entry_to_queue\n");
-    NotifyQueue *queue;
-    map<string, NotifyQueue*>::iterator qmi;
+    NotifyQueue* queue;
+    map<string, NotifyQueue* >::iterator qmi;
     bool new_queue;
     
-    qmi = _queuemap.find(modname);
+    qmi = _queuemap.find(module_name);
     if (qmi == _queuemap.end()) {
-	_queuemap[modname] = new NotifyQueue(modname);
-	queue = _queuemap[modname];
+	_queuemap[module_name] = new NotifyQueue(module_name);
+	queue = _queuemap[module_name];
 	new_queue = true;
     } else {
 	new_queue = false;
@@ -149,7 +159,7 @@ RegisterServer::add_entry_to_queue(const string& modname,
 }
 
 void
-RegisterServer::send_route_changed(const string& modname,
+RegisterServer::send_route_changed(const string& module_name,
 				   const IPv4Net& net,
 				   const IPv4& nexthop,
 				   uint32_t metric,
@@ -161,22 +171,23 @@ RegisterServer::send_route_changed(const string& modname,
     q_entry = new NotifyQueueChangedEntry<IPv4>(net, nexthop,
 						metric, admin_distance,
 						protocol_origin, multicast);
-    add_entry_to_queue(modname, (NotifyQueueEntry*)q_entry);
+    add_entry_to_queue(module_name,
+		       reinterpret_cast<NotifyQueueEntry *>(q_entry));
 }
 
 void
-RegisterServer::send_invalidate(const string& modname,
+RegisterServer::send_invalidate(const string& module_name,
 				const IPv4Net& net,
 				bool multicast) 
 {
     NotifyQueueInvalidateEntry<IPv4>* q_entry;
     q_entry = new NotifyQueueInvalidateEntry<IPv4>(net, multicast);
-    add_entry_to_queue(modname, (NotifyQueueEntry*)q_entry);
+    add_entry_to_queue(module_name,
+		       reinterpret_cast<NotifyQueueEntry *>(q_entry));
 }
 
-
 void
-RegisterServer::send_route_changed(const string& modname,
+RegisterServer::send_route_changed(const string& module_name,
 				   const IPv6Net& net,
 				   const IPv6& nexthop,
 				   uint32_t metric,
@@ -188,25 +199,27 @@ RegisterServer::send_route_changed(const string& modname,
     q_entry = new NotifyQueueChangedEntry<IPv6>(net, nexthop,
 						metric, admin_distance,
 						protocol_origin, multicast);
-    add_entry_to_queue(modname, (NotifyQueueEntry*)q_entry);
+    add_entry_to_queue(module_name,
+		       reinterpret_cast<NotifyQueueEntry* >(q_entry));
 }
 
 void
-RegisterServer::send_invalidate(const string& modname,
+RegisterServer::send_invalidate(const string& module_name,
 				const IPv6Net& net,
 				bool multicast) 
 {
     NotifyQueueInvalidateEntry<IPv6>* q_entry;
     q_entry = new NotifyQueueInvalidateEntry<IPv6>(net, multicast);
-    add_entry_to_queue(modname, (NotifyQueueEntry*)q_entry);
+    add_entry_to_queue(module_name,
+		       reinterpret_cast<NotifyQueueEntry *>(q_entry));
 }
 
 void
 RegisterServer::flush() 
 {
     debug_msg("REGSERV: flush\n");
-    map<string, NotifyQueue*>::iterator i;
-    for (i = _queuemap.begin(); i != _queuemap.end(); i++) {
-	i->second->flush(&_response_sender);
+    map<string, NotifyQueue* >::iterator iter;
+    for (iter = _queuemap.begin(); iter != _queuemap.end(); ++iter) {
+	iter->second->flush(&_response_sender);
     }
 }

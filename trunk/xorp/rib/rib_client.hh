@@ -18,11 +18,13 @@
 #define __RIB_RIB_CLIENT_HH__
 
 #include <list>
+
 #include "libxorp/ref_ptr.hh"
+
 #include "route.hh"
 
-class XrlRouter;
 
+class XrlRouter;
 class SyncFtiCommand;
 typedef ref_ptr<SyncFtiCommand> RibClientTask;
 
@@ -100,7 +102,7 @@ public:
      *
      * @param dest the destination subnet of the route.
      */
-    void delete_route(const IPv4Net&);
+    void delete_route(const IPv4Net& dest);
 
     /**
      * Communicate the addition of a new IPv6 route to the RIB client.
@@ -125,13 +127,13 @@ public:
 		   uint32_t metric,
 		   uint32_t admin_distance,
 		   const string& protocol_origin);
-    
+
     /**
      * Communicate the deletion of an IPv6 route to the RIB client.
      *
      * @param dest the destination subnet of the route.
      */
-    void delete_route(const IPv6Net& re);
+    void delete_route(const IPv6Net& dest);
 
     //
     // The methods below are compatibility methods used by the
@@ -191,7 +193,7 @@ protected:
     /**
      * @return The next task or NULL if there isn't one.
      */
-    SyncFtiCommand *get_next();
+    SyncFtiCommand* get_next();
 
     /**
      * Called when a transaction has completed.

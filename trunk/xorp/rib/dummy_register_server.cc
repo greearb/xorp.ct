@@ -12,21 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.5 2003/03/29 19:03:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.7 2004/02/06 22:44:10 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "dummy_register_server.hh"
+
 
 extern bool verbose;
 
 
-DummyRegisterServer::DummyRegisterServer() 
-    : RegisterServer(NULL) {
+DummyRegisterServer::DummyRegisterServer()
+    : RegisterServer(NULL)
+{
 }
 
 
 void 
-DummyRegisterServer::send_route_changed(const string& modname,
+DummyRegisterServer::send_route_changed(const string& module_name,
 					const IPv4Net& net, 
 					const IPv4& nexthop,
 					uint32_t metric,
@@ -38,11 +41,11 @@ DummyRegisterServer::send_route_changed(const string& modname,
     
     if (verbose) {
 	printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d admin_distance=%d protocol_origin=%s",
-	       modname.c_str(), net.str().c_str(), nexthop.str().c_str(), 
+	       module_name.c_str(), net.str().c_str(), nexthop.str().c_str(), 
 	       metric, admin_distance, protocol_origin.c_str());
     }
     
-    s = modname + " " + net.str() + " " + nexthop.str();
+    s = module_name + " " + net.str() + " " + nexthop.str();
     s += " " + c_format("%d", metric);
     if (multicast) {
 	if (verbose)
@@ -56,8 +59,8 @@ DummyRegisterServer::send_route_changed(const string& modname,
     _changed.insert(s);
 }
 
-void 
-DummyRegisterServer::send_invalidate(const string& modname,
+void
+DummyRegisterServer::send_invalidate(const string& module_name,
 				     const IPv4Net& net,
 				     bool multicast)
 {
@@ -65,10 +68,10 @@ DummyRegisterServer::send_invalidate(const string& modname,
     
     if (verbose) {
 	printf("DummyRegisterServer::send_invalidate module=%s net=%s ",
-	       modname.c_str(), net.str().c_str());
+	       module_name.c_str(), net.str().c_str());
     }
     
-    s = modname + " " + net.str();
+    s = module_name + " " + net.str();
     if (multicast) {
 	if (verbose)
 	    printf("mcast=true\n");
@@ -81,8 +84,8 @@ DummyRegisterServer::send_invalidate(const string& modname,
     _invalidated.insert(s);
 }
 
-void 
-DummyRegisterServer::send_route_changed(const string& modname,
+void
+DummyRegisterServer::send_route_changed(const string& module_name,
 					const IPv6Net& net, 
 					const IPv6& nexthop,
 					uint32_t metric,
@@ -93,10 +96,10 @@ DummyRegisterServer::send_route_changed(const string& modname,
     string s;
     
     printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%d admin_distance=%d protocol_origin=%s",
-	   modname.c_str(), net.str().c_str(), nexthop.str().c_str(), metric,
-	   admin_distance, protocol_origin.c_str());
+	   module_name.c_str(), net.str().c_str(), nexthop.str().c_str(),
+	   metric, admin_distance, protocol_origin.c_str());
     
-    s = modname + " " + net.str() + " " + nexthop.str();
+    s = module_name + " " + net.str() + " " + nexthop.str();
     s += " " + c_format("%d", metric);
     if (multicast) {
 	printf("mcast=true\n");
@@ -108,8 +111,8 @@ DummyRegisterServer::send_route_changed(const string& modname,
     _changed.insert(s);
 }
 
-void 
-DummyRegisterServer::send_invalidate(const string& modname,
+void
+DummyRegisterServer::send_invalidate(const string& module_name,
 				     const IPv6Net& net,
 				     bool multicast)
 {
@@ -117,10 +120,10 @@ DummyRegisterServer::send_invalidate(const string& modname,
     
     if (verbose) {
 	printf("DummyRegisterServer::send_invalidate module=%s net=%s ",
-	       modname.c_str(), net.str().c_str());
+	       module_name.c_str(), net.str().c_str());
     }
     
-    s = modname + " " + net.str();
+    s = module_name + " " + net.str();
     if (multicast) {
 	if (verbose)
 	    printf("mcast=true\n");
@@ -133,39 +136,39 @@ DummyRegisterServer::send_invalidate(const string& modname,
     _invalidated.insert(s);
 }
 
-bool 
+bool
 DummyRegisterServer::verify_invalidated(const string& invalid)
 {
-    set<string>::iterator i;
+    set<string>::iterator iter;
     
-    i = _invalidated.find(invalid);
-    if (i == _invalidated.end()) {
+    iter = _invalidated.find(invalid);
+    if (iter == _invalidated.end()) {
 	if (verbose)
 	    printf("EXPECTED: >%s<\n", invalid.c_str());
-	for (i = _invalidated.begin(); i !=  _invalidated.end(); ++i)
+	for (iter = _invalidated.begin(); iter !=  _invalidated.end(); ++iter)
 	    if (verbose)
-		printf("INVALIDATED: >%s<\n", i->c_str());
+		printf("INVALIDATED: >%s<\n", iter->c_str());
 	return false;
     }
-    _invalidated.erase(i);
+    _invalidated.erase(iter);
     return true;
 }
 
-bool 
+bool
 DummyRegisterServer::verify_changed(const string& changed)
 {
-    set<string>::iterator i;
+    set<string>::iterator iter;
     
-    i = _changed.find(changed);
-    if (i == _changed.end()) {
+    iter = _changed.find(changed);
+    if (iter == _changed.end()) {
 	if (verbose)
 	    printf("EXPECTED: >%s<\n", changed.c_str());
-	for (i = _invalidated.begin(); i !=  _invalidated.end(); ++i)
+	for (iter = _invalidated.begin(); iter !=  _invalidated.end(); ++iter)
 	    if (verbose)
-		printf("CHANGED: >%s<\n", i->c_str());
+		printf("CHANGED: >%s<\n", iter->c_str());
 	return false;
     }
-    _changed.erase(i);
+    _changed.erase(iter);
     return true;
 }
 

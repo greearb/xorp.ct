@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.11 2003/05/20 17:31:28 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.12 2003/06/05 02:39:36 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -20,9 +20,11 @@
 #include <map>
 
 #include "libxorp/timer.hh"
+
 #include "libproto/proto_state.hh"
 
 #include "xrl/interfaces/fea_ifmgr_xif.hh"
+
 
 #define IF_EVENT_CREATED 1
 #define IF_EVENT_DELETED 2
@@ -34,7 +36,7 @@ class Vif;
 class XrlRouter;
 
 /**
- * @short VifManager keeps track of the VIFs currently enabled in the FEA
+ * @short VifManager keeps track of the VIFs currently enabled in the FEA.
  *
  * The RIB process has a single VifManager instance, which registers
  * with the FEA process to discover the VIFs on this router and their
@@ -58,7 +60,7 @@ public:
      * and IPv4, unicast and multicast.
      */
     VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
-	       RibManager *rib_manager);
+	       RibManager* rib_manager);
 
     /**
      * VifManager destructor
@@ -170,7 +172,7 @@ public:
 			 const string& vifname,
 			 const IPv6& addr,
 			 const uint32_t& event);
-    
+
 private:
     void update_state();
     void set_vif_state();
@@ -180,9 +182,9 @@ private:
     void register_if_spy();
     void xrl_result_register_client(const XrlError& e);
     void xrl_result_get_configured_interface_names(const XrlError& e,
-						   const XrlAtomList *alist);
+						   const XrlAtomList* alist);
     void xrl_result_get_configured_vif_names(const XrlError& e,
-					     const XrlAtomList *alist,
+					     const XrlAtomList* alist,
 					     string ifname);
     void xrl_result_get_configured_vif_flags(const XrlError& e,
 					     const bool* enabled,
@@ -193,11 +195,11 @@ private:
 					     string ifname,
 					     string vifname);
     void xrl_result_get_configured_vif_addresses4(const XrlError& e,
-						  const XrlAtomList *alist,
+						  const XrlAtomList* alist,
 						  string ifname,
 						  string vifname);
     void xrl_result_get_configured_vif_addresses6(const XrlError& e,
-						  const XrlAtomList *alist,
+						  const XrlAtomList* alist,
 						  string ifname,
 						  string vifname);
     void interface_deleted(const string& ifname);
@@ -251,7 +253,7 @@ private:
 
     XrlRouter&		_xrl_router;
     EventLoop&		_eventloop;
-    RibManager		*_rib_manager;
+    RibManager*		_rib_manager;
     XrlIfmgrV0p1Client	_ifmgr_client;
     
     bool		_no_fea;
@@ -265,10 +267,10 @@ private:
     size_t		_addrs_remaining;
     
     // The maps with the interfaces and vifs
-    map<string, Vif *>	_vifs_by_name;
-    multimap<string, Vif *> _vifs_by_interface;
+    map<string, Vif* >	_vifs_by_name;
+    multimap<string, Vif* > _vifs_by_interface;
     
-    map<string, Vif *>	_saved_vifs_by_name;	// The local copy
+    map<string, Vif* >	_saved_vifs_by_name;	// The local copy
     
     string _fea_target_name;	// The FEA target name
 };

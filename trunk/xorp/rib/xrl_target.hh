@@ -12,18 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.13 2003/09/30 03:08:01 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.14 2004/02/06 22:44:13 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
 
 #include "libxipc/xrl_router.hh"
+
 #include "xrl/targets/rib_base.hh"
+
 #include "rib.hh"
 #include "vifmanager.hh"
 
+
 /**
- * @short Implement RIB Xrl target methods
+ * @short Implement RIB Xrl target methods.
  *
  * XrlRibTarget implements the auto-generated sub methods to handle
  * XRL requests from the routing protocols to the RIB.  
@@ -34,7 +37,7 @@ public:
      * XrlRibTarget constructor
      *
      * @param xrl_router the XrlRouter instance handling sending and receiving
-     * XRLs for this process
+     * XRLs for this process.
      * @param urib4 the IPv4 unicast RIB.
      * @param mrib4 the IPv4 multicast RIB.
      * @param urib6 the IPv6 unicast RIB.
@@ -43,10 +46,10 @@ public:
      * communication with the FEA regarding VIF changes.
      * @param rib_manager the RibManager for this process.
      */ 
-    XrlRibTarget(XrlRouter *xrl_router,
+    XrlRibTarget(XrlRouter* xrl_router,
 		 RIB<IPv4>& urib4, RIB<IPv4>& mrib4,
 		 RIB<IPv6>& urib6, RIB<IPv6>& mrib6,
-		 VifManager& vif_manager, RibManager *rib_manager)
+		 VifManager& vif_manager, RibManager* rib_manager)
 	: XrlRibTargetBase(xrl_router),
 	  _urib4(urib4), _mrib4(mrib4), _urib6(urib6), _mrib6(mrib6),
 	  _vif_manager(vif_manager), _rib_manager(rib_manager) {}
@@ -61,7 +64,7 @@ protected:
     RIB<IPv6>&	_urib6;
     RIB<IPv6>&	_mrib6;
     VifManager& _vif_manager;
-    RibManager	*_rib_manager;
+    RibManager*	_rib_manager;
 
 protected:
 
@@ -410,8 +413,6 @@ protected:
 	// Input values, 
 	const string&	target_class, 
 	const string&	target_instance);
-
-    
 };
 
 #endif // __RIB_XRL_TARGET_HH__

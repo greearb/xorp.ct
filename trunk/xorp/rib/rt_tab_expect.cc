@@ -12,18 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.6 2003/05/29 17:59:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.4 2004/02/06 22:44:11 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xlog.h"
 
 #include "rt_tab_expect.hh"
 
-/*--------------------------------------------------------------------*/
 
 template <typename A>
-class ExpectedRouteChange
-{
+class ExpectedRouteChange {
 public:
     ExpectedRouteChange(bool add, const IPRouteEntry<A>& route);
     bool matches_add(const IPRouteEntry<A>& route) const;
@@ -31,14 +30,15 @@ public:
     string str() const;
 
 private:
-    bool _add; 			// true = add, false = delete.
-    IPRouteEntry<A> _route;
+    bool		_add; 			// true = add, false = delete
+    IPRouteEntry<A>	_route;
 };
 
 template<class A>
 ExpectedRouteChange<A>::ExpectedRouteChange<A>(bool add,
 					       const IPRouteEntry<A>& route)
-    : _add(add), _route(route)
+    : _add(add),
+      _route(route)
 {
 }
 
@@ -50,10 +50,10 @@ ExpectedRouteChange<A>::matches_add(const IPRouteEntry<A>& route) const
 	return false;
     if (route.net() != _route.net())
 	return false;
-    IPNextHop<A> *expected_nh = dynamic_cast<IPNextHop<A>*>(_route.nexthop());
+    IPNextHop<A>* expected_nh = dynamic_cast<IPNextHop<A>* >(_route.nexthop());
     XLOG_ASSERT(expected_nh != NULL);
 
-    IPNextHop<A> *actual_nh = dynamic_cast<IPNextHop<A>*>(route.nexthop());
+    IPNextHop<A>* actual_nh = dynamic_cast<IPNextHop<A>* >(route.nexthop());
     XLOG_ASSERT(actual_nh != NULL);
 
     if ((expected_nh->addr()) != (actual_nh->addr()))
@@ -69,10 +69,10 @@ ExpectedRouteChange<A>::matches_delete(const IPRouteEntry<A>* route) const
 	return false;
     if (route->net() != _route.net())
 	return false;
-    IPNextHop<A> *expected_nh = dynamic_cast<IPNextHop<A>*>(_route.nexthop());
+    IPNextHop<A>* expected_nh = dynamic_cast<IPNextHop<A>* >(_route.nexthop());
     XLOG_ASSERT(expected_nh != NULL);
 
-    IPNextHop<A> *actual_nh = dynamic_cast<IPNextHop<A>*>(route->nexthop());
+    IPNextHop<A>* actual_nh = dynamic_cast<IPNextHop<A>* >(route->nexthop());
     XLOG_ASSERT(actual_nh != NULL);
 
     if ((expected_nh->addr()) != (actual_nh->addr()))
@@ -103,10 +103,10 @@ ExpectTable<A>::ExpectTable<A>(const string&   tablename,
 {
     _parent = parent;
 
-    // plumb ourselves into the table graph
+    // Plumb ourselves into the table graph
     _parent->set_next_table(this);
 
-    //there's no downstream table
+    // There's no downstream table
     _next_table = NULL;
 }
 
@@ -136,8 +136,8 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			  RouteTable<A>* 		caller)
 {
     XLOG_ASSERT(caller == _parent);
-    printf("DT[%s]: Adding route %s\n", _tablename.c_str(),
-	   route.str().c_str());
+    debug_msg("DT[%s]: Adding route %s\n", _tablename.c_str(),
+	      route.str().c_str());
     if (_expected.empty()) {
 	XLOG_FATAL("ExpectTable: unexpected add_route received");
     }
@@ -158,8 +158,8 @@ ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 			  RouteTable<A>* 		caller)
 {
     XLOG_ASSERT(caller == _parent);
-    printf("DT[%s]: Deleting route %s\n", _tablename.c_str(),
-	   route->str().c_str());
+    debug_msg("DT[%s]: Deleting route %s\n", _tablename.c_str(),
+	      route->str().c_str());
     if (_expected.empty()) {
 	XLOG_FATAL("ExpectTable: unexpected delete_route received");
     }
@@ -175,14 +175,14 @@ ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 }
 
 template<class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 ExpectTable<A>::lookup_route(const IPNet<A>& net) const
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 ExpectTable<A>::lookup_route(const A& addr) const
 {
     return _parent->lookup_route(addr);
@@ -190,8 +190,8 @@ ExpectTable<A>::lookup_route(const A& addr) const
 
 template<class A>
 void
-ExpectTable<A>::replumb(RouteTable<A> *old_parent,
-		       RouteTable<A> *new_parent)
+ExpectTable<A>::replumb(RouteTable<A>* old_parent,
+		       RouteTable<A>* new_parent)
 {
     XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;

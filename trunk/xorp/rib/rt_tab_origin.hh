@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.7 2003/09/27 22:32:46 mjh Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.10 2004/02/06 22:44:12 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -20,6 +20,7 @@
 #include "libxorp/eventloop.hh"
 
 #include "rt_tab_base.hh"
+
 
 /**
  * @short RouteTable that receives and stores raw routes sent by
@@ -31,7 +32,7 @@
  * requests from downstream using the routes it has stored.
  *
  * Its template class, A, must be either the IPv4 class of the IPv6
- * class 
+ * class.
  */
 template<class A>
 class OriginTable : public RouteTable<A> {
@@ -45,16 +46,12 @@ public:
      * for the OriginTable that holds locally configured static
      * routes.  
      * @param admin_distance the default administrative distance for
-     * routes in this table
-     * @param igp true if the routing protocol is an IGP (defined for
-     * this purpose as one that always produces routes with an
-     * immediate neighbor as a nexthop).  false if the routing
-     * protocol is an EGP (nexthop is not always an immediate
-     * neighbor) 
+     * routes in this table.
+     * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @param eventloop the main event loop.
      */
-    OriginTable(const string& tablename, int admin_distance, int igp,
-		EventLoop& eventloop);
+    OriginTable(const string& tablename, int admin_distance,
+		ProtocolType protocol_type, EventLoop& eventloop);
 
     /**
      * OriginTable destructor.
@@ -74,7 +71,10 @@ public:
      * Generic @ref RouteTable method that is not used on OriginTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { XLOG_UNREACHABLE(); return XORP_ERROR;}
+    int add_route(const IPRouteEntry<A>&, RouteTable<A>* ) {
+	XLOG_UNREACHABLE();
+	return XORP_ERROR;
+    }
 
     /**
      * Delete a route from the OriginTable.
@@ -88,12 +88,15 @@ public:
      * Generic @ref RouteTable method that is not used on OriginTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { XLOG_UNREACHABLE(); return XORP_ERROR; }
+    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* ) {
+	XLOG_UNREACHABLE();
+	return XORP_ERROR;
+    }
 
     /**
      * Delete all the routes that are in this OriginTable.  The
      * deletion is not propagated downstream, so this is only useful
-     * when shutting down the RIB 
+     * when shutting down the RIB.
      */
     void delete_all_routes();
 
@@ -109,7 +112,7 @@ public:
      * @param net the subnet to look up.
      * @return a pointer to the route entry if it exists, NULL otherwise.
      */
-    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const;
+    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -117,9 +120,9 @@ public:
      *
      * @param addr the IP address to look up.
      * @return a pointer to the most specific route entry if any entry
-     * matches, NULL otherwise.  
+     * matches, NULL otherwise.
      */
-    const IPRouteEntry<A> *lookup_route(const A& addr) const;
+    const IPRouteEntry<A>* lookup_route(const A& addr) const;
 
     /**
      * Lookup an IP addressto get the most specific (longest prefix
@@ -133,37 +136,38 @@ public:
      * relevant answer.  It is up to the recipient of this pointer to
      * free the associated memory.
      */
-    RouteRange<A> *lookup_route_range(const A& addr) const;
+    RouteRange<A>* lookup_route_range(const A& addr) const;
 
     /**
      * @return the default administrative distance for this OriginTable
      */
-    int admin_distance() const			{ return _admin_distance; }
+    int admin_distance() const		{ return _admin_distance; }
 
     /**
-     * @return the routing protocol type (IGP or EGP)
+     * @return the routing protocol type (@ref ProtocolType).
      */
-    int proto_type() const			{ return _igp;		}
+    int protocol_type() const		{ return _protocol_type; }
 
     /**
-     * @return ORIGIN_TABLE
+     * @return the table type (@ref TableType).
      */
-    int type() const				{ return ORIGIN_TABLE;	}
+    TableType type() const		{ return ORIGIN_TABLE; }
 
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
      */
-    void replumb(RouteTable<A> *, RouteTable<A> *) {}
+    void replumb(RouteTable<A>* , RouteTable<A>* ) {}
 
     /**
      * Render the OriginTable as a string for debugging purposes
      */
     string str() const;
+
 private:
-    Trie<A, const IPRouteEntry<A> *> *_ip_route_table;
-    int		_admin_distance;		// 0 .. 255
-    int		_igp;				// IGP or EGP
-    EventLoop& _eventloop;
+    int		 _admin_distance;		// 0 .. 255
+    ProtocolType _protocol_type;		// IGP or EGP
+    EventLoop&   _eventloop;
+    Trie<A, const IPRouteEntry<A>* >* _ip_route_table;
 };
 
 #endif // __RIB_RT_TAB_ORIGIN_HH__

@@ -15,197 +15,169 @@
 #ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.8 2003/09/30 03:08:00 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xlog.h"
+
 #include "rt_tab_merged.hh"
 
-//A = Address Type
 
-#ifdef DEBUG_CODEPATH
-#define cp(x) if (x < 10) printf("MTabCodePath:  %d\n", x); else printf("MTabCodePath: %d\n", x);
-#else
-#define cp(x) {}
-#endif
-
+//
+// A = Address Type. E.g., IPv4 or IPv6
+//
 template <class A>
 MergedTable<A>::MergedTable<A>(const string&  tablename,
 			       RouteTable<A>* table_a,
 			       RouteTable<A>* table_b)
-    : RouteTable<A>(tablename)
+    : RouteTable<A>(tablename),
+      _table_a(table_a),
+      _table_b(table_b)
 {
-    cp(1);
-    _table_a = table_a;
-    _table_b = table_b;
     _table_a->set_next_table(this);
     _table_b->set_next_table(this);
 }
 
-
 template <class A>
 int
-MergedTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller)
+MergedTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 {
     debug_msg("MT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
 
-    cp(2);
     if (_next_table == NULL)
 	return XORP_ERROR;
-    cp(3);
-    cp(4);
-    RouteTable<A> *other_table;
+    RouteTable<A>* other_table;
     if (caller == _table_b) {
-	cp(5);
 	other_table = _table_a;
     } else if (caller == _table_a) {
-	cp(6);
 	other_table = _table_b;
     } else {
 	XLOG_UNREACHABLE();
     }
-    const IPRouteEntry<A> *found;
+    const IPRouteEntry<A>* found;
     found = other_table->lookup_route(route.net());
     if (found != NULL) {
 	if (found->admin_distance() > route.admin_distance()) {
-	    // the admin distance of the existing route is worse
-	    cp(7);
+	    // The admin distance of the existing route is worse
 	    _next_table->delete_route(found, this);
 	} else {
-	    cp(8);
 	    return XORP_ERROR;
 	}
     }
-    cp(9);
     _next_table->add_route(route, this);
 
     return XORP_OK;
 }
 
-
 template <class A>
 int
-MergedTable<A>::delete_route(const IPRouteEntry<A> *route,
-			       RouteTable<A> *caller) 
+MergedTable<A>::delete_route(const IPRouteEntry<A>* route,
+			     RouteTable<A>* caller) 
 {
     if (_next_table == NULL)
 	return XORP_ERROR;
-    RouteTable<A> *other_table;
-    cp(10);
+    RouteTable<A>* other_table;
     if (caller == _table_b) {
-	cp(11);
 	other_table = _table_a;
     } else if (caller == _table_a) {
-	cp(12);
 	other_table = _table_b;
     } else {
 	XLOG_UNREACHABLE();
     }
-    const IPRouteEntry<A> *found;
+    const IPRouteEntry<A>* found;
     found = other_table->lookup_route(route->net());
     if (found != NULL) {
 	if (found->admin_distance() > route->admin_distance()) {
-	    // the admin distance of the existing route is worse
-	    cp(13);
+	    // The admin distance of the existing route is worse
 	    _next_table->delete_route(route, this);
 	    _next_table->add_route(*found, this);
 	    return XORP_OK;
 	} else {
-	    // the admin distance of the existing route is better, so
+	    // The admin distance of the existing route is better, so
 	    // this route would not previously have been propagated
-	    // downstream
-	    cp(14);
+	    // downstream.
 	    return XORP_ERROR;
 	}
     }
-    cp(15);
     _next_table->delete_route(route, this);
     return XORP_OK;
 }
 
-
 template <class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 MergedTable<A>::lookup_route(const IPNet<A>& net) const 
 {
-    const IPRouteEntry<A> *found_a, *found_b;
+    const IPRouteEntry<A>* found_a;
+    const IPRouteEntry<A>* found_b;
+
     found_a = _table_a->lookup_route(net);
     found_b = _table_b->lookup_route(net);
 
     if (found_b == NULL) {
-	cp(16);
 	return found_a;
     }
     if (found_a == NULL) {
-	cp(17);
 	return found_b;
     }
 
     if (found_a->admin_distance() <= found_b->admin_distance()) {
-	cp(18);
 	return found_a;
     } else {
-	cp(19);
 	return found_b;
     }
 }
 
 
 template <class A>
-const IPRouteEntry<A> *
+const IPRouteEntry<A>*
 MergedTable<A>::lookup_route(const A& addr) const 
 {
-    const IPRouteEntry<A> *found_b, *found_a;
+    const IPRouteEntry<A>* found_a;
+    const IPRouteEntry<A>* found_b;
 
-    debug_msg("MergedTable::lookup_route.  Table_b: %p\n", _table_b);
     found_b = _table_b->lookup_route(addr);
-    debug_msg("MergedTable::lookup_route.  Table_a: %p\n", _table_a);
     found_a = _table_a->lookup_route(addr);
+    debug_msg("MergedTable::lookup_route.  Table_a: %p\n", _table_a);
+    debug_msg("MergedTable::lookup_route.  Table_b: %p\n", _table_b);
+
     if (found_b == NULL) {
-	cp(20);
 	return found_a;
     }
     if (found_a == NULL) {
-	cp(21);
 	return found_b;
     }
 
     //
     // The route was in both tables.  We need to do longest match
     // unless the prefixes are the same, when we take the route with the
-    // lowest admin distance
+    // lowest admin distance.
     //
-    int hi_prefix_len, lo_prefix_len;
+    size_t hi_prefix_len, lo_prefix_len;
     hi_prefix_len = found_b->net().prefix_len();
     lo_prefix_len = found_a->net().prefix_len();
 
     if (hi_prefix_len > lo_prefix_len) {
-	cp(22);
 	return found_b;
     } else if (hi_prefix_len < lo_prefix_len) {
-	cp(23);
 	return found_a;
     } else if (found_b->admin_distance() <= found_a->admin_distance()) {
-	cp(24);
 	return found_b;
     } else {
-	cp(25);
 	return found_a;
     }
-
 }
-
 
 template <class A>
 void
-MergedTable<A>::replumb(RouteTable<A> *old_parent,
-			RouteTable<A> *new_parent)
+MergedTable<A>::replumb(RouteTable<A>* old_parent,
+			RouteTable<A>* new_parent)
 {
-    debug_msg(("MergedTable::replumb replacing " + old_parent->tablename()
-	       + " with " + new_parent->tablename() + "\n").c_str());
+    debug_msg("MergedTable::replumb replacing %s with %s\n",
+	      old_parent->tablename().c_str(),
+	      new_parent->tablename().c_str());
+
     if (_table_a == old_parent) {
-	cp(26);
 	_table_a = new_parent;
     } else if (_table_b == old_parent) {
-	cp(27);
 	_table_b = new_parent;
     } else {
 	XLOG_UNREACHABLE();
@@ -218,8 +190,10 @@ MergedTable<A>::lookup_route_range(const A& addr) const
 {
     RouteRange<A>* lo_rr = _table_a->lookup_route_range(addr);
     RouteRange<A>* hi_rr = _table_b->lookup_route_range(addr);
+
     hi_rr->merge(lo_rr);
     delete lo_rr;
+
     return hi_rr;
 }
 
@@ -227,6 +201,7 @@ template <class A> string
 MergedTable<A>::str() const 
 {
     string s;
+
     s = "-------\nMergedTable: " + _tablename + "\n";
     s += "_table_a = " + _table_a -> tablename() + "\n";
     s += "_table_b = " + _table_b -> tablename() + "\n";

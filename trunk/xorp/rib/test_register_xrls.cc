@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.20 2003/09/30 03:08:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.23 2004/02/06 22:44:12 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -23,20 +24,22 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
+#include "xrl/targets/ribclient_base.hh"
+
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
-#include "xrl_target.hh"
 #include "rib_client.hh"
 #include "register_server.hh"
 #include "rib_manager.hh"
-#include "xrl/targets/ribclient_base.hh"
+#include "xrl_target.hh"
+
 
 bool callback_flag;
 
 class RibClientTarget : public XrlRibclientTargetBase {
 public:
-    RibClientTarget(XrlRouter *r) : XrlRibclientTargetBase(r) {}
+    RibClientTarget(XrlRouter* r) : XrlRibclientTargetBase(r) {}
 
     XrlCmdError rib_client_0_1_route_info_changed4(
 	// Input values, 
@@ -45,9 +48,11 @@ public:
 	const IPv4&	nexthop, 
 	const uint32_t&	metric,
 	const uint32_t&	admin_distance,
-	const string&	protocol_origin) {
+	const string&	protocol_origin)
+    {
 	IPv4Net net(addr, prefix_len);
-	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %d new admin_distance: %d new protocol_origin: %s\n",
+	printf("route_info_changed4: net:%s, new nexthop: %s, new metric: %d "
+	       "new admin_distance: %d new protocol_origin: %s\n",
 	       net.str().c_str(), nexthop.str().c_str(), metric,
 	       admin_distance, protocol_origin.c_str());
 	string s;
@@ -67,7 +72,8 @@ public:
 	const IPv6&	/* nexthop */, 
 	const uint32_t&	/* metric */,
 	const uint32_t&	/* admin_distance */,
-	const string&	/* protocol_origin */) {
+	const string&	/* protocol_origin */)
+    {
 	return XrlCmdError::OKAY();
     }
 
@@ -88,9 +94,11 @@ public:
     XrlCmdError rib_client_0_1_route_info_invalid6(
 	// Input values,
         const IPv6&	/* addr */, 
-	const uint32_t&	/* prefix_len */) {
+	const uint32_t&	/* prefix_len */)
+    {
 	return XrlCmdError::OKAY();
     }
+
     bool verify_invalidated(const string& invalid);
     bool verify_changed(const string& changed);
     bool verify_no_info();
@@ -103,32 +111,32 @@ private:
 bool 
 RibClientTarget::verify_invalidated(const string& invalid)
 {
-    set<string>::iterator i;
-    
-    i = _invalidated.find(invalid);
-    if (i == _invalidated.end()) {
+    set<string>::iterator iter;
+
+    iter = _invalidated.find(invalid);
+    if (iter == _invalidated.end()) {
 	printf("EXPECTED: >%s<\n", invalid.c_str());
-	for (i = _invalidated.begin(); i !=  _invalidated.end(); ++i)
-	    printf("INVALIDATED: >%s<\n", i->c_str());
+	for (iter = _invalidated.begin(); iter !=  _invalidated.end(); ++iter)
+	    printf("INVALIDATED: >%s<\n", iter->c_str());
 	return false;
     }
-    _invalidated.erase(i);
+    _invalidated.erase(iter);
     return true;
 }
 
 bool 
 RibClientTarget::verify_changed(const string& changed)
 {
-    set<string>::iterator i;
+    set<string>::iterator iter;
     
-    i = _changed.find(changed);
-    if (i == _changed.end()) {
+    iter = _changed.find(changed);
+    if (iter == _changed.end()) {
 	printf("EXPECTED: >%s<\n", changed.c_str());
-	for (i = _invalidated.begin(); i !=  _invalidated.end(); ++i)
-	    printf("CHANGED: >%s<\n", i->c_str());
+	for (iter = _invalidated.begin(); iter !=  _invalidated.end(); ++iter)
+	    printf("CHANGED: >%s<\n", iter->c_str());
 	return false;
     }
-    _changed.erase(i);
+    _changed.erase(iter);
     return true;
 }
 
@@ -217,7 +225,7 @@ add_route(XrlRibV0p1Client& client,
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
-    client.send_add_route4("rib", protocol, true, false, 
+    client.send_add_route4("rib", protocol, true, false,
 			   net, nexthop, metric, cb);
 
     xrl_done_flag = false;
@@ -259,6 +267,7 @@ register_done(const XrlError& e,
 	      uint32_t expected_metric)
 {
     XLOG_ASSERT(e == XrlCmdError::OKAY());
+
     if (expected_resolves) {
 	XLOG_ASSERT(*resolves == true);
 	IPv4Net net(*base_addr, *prefix_len);
@@ -287,6 +296,7 @@ register_interest(XrlRibV0p1Client& client,
     XorpCallback7<void, const XrlError&, const bool*, const IPv4*, 
 	const uint32_t*, const uint32_t*, const IPv4*, 
 	const uint32_t*>::RefPtr cb;
+
     cb = callback(register_done, expected_resolves, 
 		  expected_net, expected_nexthop, expected_metric);
     client.send_register_interest4("rib", "ribclient", addr, cb);
@@ -300,7 +310,7 @@ register_interest(XrlRibV0p1Client& client,
 
 
 int
-main(int /* argc */, char *argv[])
+main(int /* argc */, char* argv[])
 {
     //
     // Initialize and start xlog
@@ -347,7 +357,8 @@ main(int /* argc */, char *argv[])
     VifManager vif_manager(xrl_router, eventloop, NULL);
     vif_manager.enable();
     vif_manager.start();
-    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
+    XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,
+		     NULL);
 
     XrlRibV0p1Client xc(&xrl_router);
 
@@ -389,7 +400,7 @@ main(int /* argc */, char *argv[])
     callback_flag = false;
     delete_route(xc, eventloop, "ospf", IPv4Net("9.0.0.0/24"));
 
-    //wait for a callback
+    // Wait for a callback
     while (callback_flag == false) {
 	eventloop.run();
     }
@@ -400,9 +411,9 @@ main(int /* argc */, char *argv[])
     printf("====================================================\n");
 
     callback_flag = false;
-    add_route(xc, eventloop, "ospf", 
-	      IPv4Net("9.0.1.128/25"),  IPv4("1.0.0.2"), 7);
-    //wait for a callback
+    add_route(xc, eventloop, "ospf", IPv4Net("9.0.1.128/25"),
+	      IPv4("1.0.0.2"), 7);
+    // Wait for a callback
     while (callback_flag == false) {
 	eventloop.run();
     }

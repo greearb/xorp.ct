@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.2 2003/03/10 23:20:57 hodson Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.3 2003/03/16 07:19:00 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
 
 #include "rt_tab_base.hh"
 #include "rt_tab_origin.hh"
+
 
 /**
  * @short RouteTable used to redistribute routes (not yet working)
@@ -35,19 +36,20 @@ public:
     RedistTable(const string& tablename, RouteTable<A>* from_table, 
 		OriginTable<A>* to_table);
     ~RedistTable();
+
     int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
     int delete_route(const IPRouteEntry<A>* , RouteTable<A>* caller);
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
-    int type() const { return REDIST_TABLE; }
+    TableType type() const { return REDIST_TABLE; }
     RouteTable<A>* parent() { return _from_table; }
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
     
 private:
-    RouteTable<A>* _from_table;
-    OriginTable<A>* _to_table;
+    RouteTable<A>*	_from_table;
+    OriginTable<A>*	_to_table;
 };
 
 #endif // __RIB_RT_TAB_REDIST_HH__

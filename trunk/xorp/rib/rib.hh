@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.12 2003/09/27 22:32:46 mjh Exp $
+// $XORP: xorp/rib/rib.hh,v 1.15 2004/02/06 22:44:11 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -35,13 +35,14 @@
 #include "rt_tab_register.hh"
 #include "rt_tab_export.hh"
 
+
 class RegisterServer;
 class RibClient;
 class RibManager;
 
 enum RibTransportType {
-    UNICAST = 1,
-    MULTICAST = 2
+    UNICAST	= 1,
+    MULTICAST	= 2
 };
 
 /**
@@ -68,7 +69,7 @@ public:
      * that's common to all the individual RIBs.
      * @param eventloop the main event loop.
      */
-    RIB(RibTransportType rib_type, RibManager& rib_manager, 
+    RIB(RibTransportType rib_type, RibManager& rib_manager,
 	EventLoop& eventloop);
 
     /**
@@ -77,7 +78,7 @@ public:
     virtual ~RIB();
 
     /**
-     * set test-mode: abort on some errors that we'd normally mask
+     * Set test-mode: abort on some errors that we'd normally mask.
      */
     void set_errors_are_fatal() { _errors_are_fatal = true; }
 
@@ -90,7 +91,7 @@ public:
      * @param rib_clients_list a pointer to the list of RIB clients.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int initialize_export(list<RibClient *> *rib_clients_list);
+    int initialize_export(list<RibClient* >* rib_clients_list);
 
     /**
      * Initialize the RIB's RegisterTable.  The RegisterTable allows
@@ -100,41 +101,39 @@ public:
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int initialize_register(RegisterServer *regserv);
+    int initialize_register(RegisterServer* regserv);
 
     /**
      * Add a new OriginTable.  Use is deprecated, except in test suites.
      *
      * @see OriginTable
      * @param tablename human-readable name for this table to help in
-     * debugging
+     * debugging.
      * @param target_class the XRL target class of the routing
      * protocol that will supply routes to this OriginTable.
      * @param target_instance the XRL target instance of the routing
      * protocol that will supply routes to this OriginTable.
      * @param admin_distance default administrative distance to be
      * applied to routes that enter the RIB through this OriginTable.
-     * @param igp true if the routing protocol that will inject routes
-     * is a Interior Gateway Protocol such as OSPF.  False if it's an
-     * EGP such as BGP (or IBGP).
+     * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
 			 int		admin_distance,
-			 int		igp);
+			 ProtocolType	protocol_type);
 
     /**
      * Add a new MergedTable.  Use is deprecated, except in test suites.
      *
      * @see MergedTable
      * @param tablename human-readable name for this table to help in
-     * debugging
+     * debugging.
      * @param table_a parent routing table that will feed routes in to
-     * this MergedTable
+     * this MergedTable.
      * @param table_b parent routing table that will feed routes in to
-     * this MergedTable
+     * this MergedTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_merged_table(const string& tablename,
@@ -146,11 +145,11 @@ public:
      *
      * @see ExtIntTable
      * @param tablename human-readable name for this table to help in
-     * debugging
+     * debugging.
      * @param t_ext parent routing table that will feed EGP routes in to
-     * this ExtIntTable
+     * this ExtIntTable.
      * @param t_int parent routing table that will feed IGP routes in to
-     * this ExtIntTable
+     * this ExtIntTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int new_extint_table(const string& tablename,
@@ -198,8 +197,7 @@ public:
      * previously added by add_vif_address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int delete_vif_address(const string& vifname,
-				   const A& addr);
+    virtual int delete_vif_address(const string& vifname, const A& addr);
 
     /**
      * Add a route via the OriginTable called tablename.
@@ -207,15 +205,15 @@ public:
      * @param tablename the name of the OriginTable into which the
      * route should be inserted.
      * @param net the subnet (address and prefix length) of the route.
-     * @param addr the nexthop that packets destined for net should be
+     * @param nexthop_addr the nexthop that packets destined for net should be
      * forwarded to.
      * @param the routing protocol metric associated with this route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int add_route(const string& tablename,
-			  const IPNet<A>& net,
-			  const A& addr,
-			  uint32_t metric);
+    virtual int add_route(const string&		tablename,
+			  const IPNet<A>&	net,
+			  const A&		nexthop_addr,
+			  uint32_t		metric);
 
     /**
      * Replace  an existing route via the OriginTable called tablename.
@@ -223,15 +221,15 @@ public:
      * @param tablename the name of the OriginTable in which the
      * route should be replaced.
      * @param net the subnet (address and prefix length) of the route.
-     * @param addr the new nexthop that packets destined for @ref net should be
-     * forwarded to.
+     * @param nexthop_addr the new nexthop that packets destined for @ref net
+     * should be forwarded to.
      * @param the new routing protocol metric associated with this route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int replace_route(const string& tablename,
-			      const IPNet<A>& net,
-			      const A& addr,
-			      uint32_t metric);
+    virtual int replace_route(const string&	tablename,
+			      const IPNet<A>&	net,
+			      const A&		nexthop_addr,
+			      uint32_t		metric);
 
     /**
      * Verify that expected routing information is correct.  This is
@@ -239,10 +237,10 @@ public:
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int verify_route(const A&	   lookupaddr,
-			     const string& ifname,
-			     const A&	   nexthop,
-			     uint32_t metric);
+    virtual int verify_route(const A&		lookupaddr,
+			     const string&	ifname,
+			     const A&		nexthop_addr,
+			     uint32_t		metric);
 
     /**
      * Delete an existing route via the OriginTable called tablename.
@@ -269,19 +267,18 @@ public:
     /**
      * Used for debugging only
      */
-    virtual RouteRange<A> *route_range_lookup(const A& lookupaddr);
+    virtual RouteRange<A>* route_range_lookup(const A& lookupaddr);
 
     /**
      * Register interest in being notified about all changes to
      * routing information that would affect traffic destined for a
-     * particular address
+     * particular address.
      *
      * @param lookupaddr the address to register interest in.
-
      * @param module the XRL module name to which notifications of
      * changes should be sent.
      */
-    virtual RouteRegister<A> *route_register(const A&	   lookupaddr,
+    virtual RouteRegister<A>* route_register(const A&	   lookupaddr,
 					     const string& module);
 
     /**
@@ -301,24 +298,26 @@ public:
      * Enable Redistribution.
      * Note that it is an error if redistribution is already enabled.
      *
-     * @param fromtable the name of the source redistribition table.
-     * @param totable the name of the destination table to which
+     * @param from_table the name of the source redistribition table.
+     * @param to_table the name of the destination table to which
      * routes should be redistributed (must be an OriginTable<A>
      * name).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int redist_enable(const string& fromtable, const string& totable);
+    virtual int redist_enable(const string& from_table,
+			      const string& to_table);
 
     /**
      * Disable redistribution.
      *
-     * @param fromtable the name of the source redistribition table.
-     * @param totable the name of the destination table to which
+     * @param from_table the name of the source redistribition table.
+     * @param to_table the name of the destination table to which
      * routes were previously redistributed (must be an OriginTable<A>
      * name).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int redist_disable(const string& fromtable, const string& totable);
+    virtual int redist_disable(const string& from_table,
+			       const string& to_table);
 
     /**
      * Create the OriginTable for an IGP protocol and plumb it into
@@ -344,7 +343,7 @@ public:
      * an IGP routing protocol such as OSPF exits.
      *
      * @param tablename the routing protocol name, previously
-     * registered using @ref add_igp_table .
+     * registered using @ref add_igp_table.
      * @param target_class the XRL target class of the routing
      * protocol that supplied routes to this OriginTable.
      * @param target_instance the XRL target instance of the routing
@@ -380,7 +379,7 @@ public:
      * an EGP routing protocol such as BGP exits.
      *
      * @param tablename the routing protocol name, previously
-     * registered using @ref add_igp_table .
+     * registered using @ref add_igp_table.
      * @param target_class the XRL target class of the routing
      * protocol that supplied routes to this OriginTable.
      * @param target_instance the XRL target instance of the routing
@@ -415,13 +414,13 @@ private:
      * protocol that will supply routes to this OriginTable.
      * @param target_instance the XRL target instance of the routing
      * protocol that will supply routes to this OriginTable.
-     * @param type IGP == 1, EGP == 2
+     * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_origin_table(const string& tablename, 
 			 const string& target_class,
 			 const string& target_instance,
-			 int type);
+			 ProtocolType protocol_type);
 
     /**
      * Used to implement @ref delete_igp_table and @ref delete_egp_table.
@@ -449,7 +448,7 @@ private:
      * we may track back through.
      * @return the last matching table, or @ref rt if rt itself doesn't match.
      */
-    RouteTable<A> *track_back(RouteTable<A> *rt, int typemask) const;
+    RouteTable<A>* track_back(RouteTable<A>* rt, int typemask) const;
 
     /**
      * track_forward trough the RouteTables' child pointers to find
@@ -460,9 +459,9 @@ private:
      * @param rt the routing table to start with.
      * @param typemask the bitwise-or of the routing table types that
      * we may track forward through.
-     * @return the last matching table
+     * @return the last matching table.
      */
-    RouteTable<A> *track_forward(RouteTable<A> *rt, int typemask) const;
+    RouteTable<A>* track_forward(RouteTable<A>* rt, int typemask) const;
 
     /**
      * Find a routing table, given its table name
@@ -470,7 +469,7 @@ private:
      * @param tablename the name of the table to search for.
      * @return pointer to table if exists, NULL otherwise.
      */
-    inline RouteTable<A> *find_table(const string& tablename);
+    inline RouteTable<A>* find_table(const string& tablename);
 
     /**
      * Find a routing table, given its protocol name and XRL target
@@ -481,7 +480,7 @@ private:
      * @param target_instance the name of the target instance to search for.
      * @return pointer to table if exists, NULL otherwise.  
      */
-    inline OriginTable<A> *find_table_by_instance(const string& tablename,
+    inline OriginTable<A>* find_table_by_instance(const string& tablename,
 						  const string&	target_class,
 						  const string& target_instance);
 
@@ -491,7 +490,7 @@ private:
      * @param protocol the name of the table to search for.
      * @return pointer to table if exists, NULL otherwise.
      */
-    inline Protocol *find_protocol(const string& protocol);
+    inline Protocol* find_protocol(const string& protocol);
 
     /**
      * Add table to RIB, but don't do any plumbing.  The caller should
@@ -503,7 +502,7 @@ private:
      * @param table the table to be added.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline int add_table(const string& tablename, RouteTable<A> *table);
+    inline int add_table(const string& tablename, RouteTable<A>* table);
 
     /**
      * Remove table from RIB, but don't do any unplumbing.
@@ -526,58 +525,56 @@ private:
 
     /**
      * Find the virtual interface associated with one of this router's
-     * addresses
+     * addresses.
      *
-     * @param addr the IP address to lookup
+     * @param addr the IP address to lookup.
      * @return pointer to Vif on success, NULL otherwise.
      */
-    inline Vif *find_vif(const A& addr);
+    inline Vif* find_vif(const A& addr);
 
     /**
      * Find the IP External Nexthop class instance associated with an IP
      * address.
      *
-     * @param addr the IP address of the nexthop router
+     * @param addr the IP address of the nexthop router.
      * @return pointer to external next hop if it exists, NULL otherwise.
      */
-    inline IPExternalNextHop<A> *find_external_nexthop(const A& addr);
+    inline IPExternalNextHop<A>* find_external_nexthop(const A& addr);
 
     /**
      * Find the IP Peer Nexthop class instance associated with an IP
      * address.
      *
-     * @param addr the IP address of the nexthop router
+     * @param addr the IP address of the nexthop router.
      * @return pointer to peer next hop if it exists, NULL otherwise.
      */
-    inline IPPeerNextHop<A> *find_peer_nexthop(const A& addr);
+    inline IPPeerNextHop<A>* find_peer_nexthop(const A& addr);
 
     /**
      * Find or create the IP External Nexthop class instance
      * associated with an IP address.
      *
-     * @param addr the IP address of the nexthop router
+     * @param addr the IP address of the nexthop router.
      * @return the IPExternalNextHop class instance for @ref addr
      */
-    inline IPExternalNextHop<A> *
-    find_or_create_external_nexthop(const A& addr);
+    inline IPExternalNextHop<A>* find_or_create_external_nexthop(const A& addr);
 
     /**
      * Find or create the IP Peer Nexthop class instance
      * associated with an IP address.
      *
-     * @param addr the IP address of the nexthop router
-     * @return the IPPeerNextHop class instance for @ref addr
+     * @param addr the IP address of the nexthop router.
+     * @return the IPPeerNextHop class instance for @ref addr.
      */
-    inline IPPeerNextHop<A> *
-    find_or_create_peer_nexthop(const A& addr);
+    inline IPPeerNextHop<A>* find_or_create_peer_nexthop(const A& addr);
 
     /**
-     * not implemented - force use of default copy constuctor to fail
+     * not implemented - force use of default copy constuctor to fail.
      */
     RIB(const RIB& );
 
     /**
-     * not implemented - force use of default assignment operator to fail
+     * not implemented - force use of default assignment operator to fail.
      */
     RIB& operator=(const RIB& );
 
@@ -587,16 +584,16 @@ private:
     void flush();
 
 protected:
-    RibManager& _rib_manager;
-    EventLoop& _eventloop;
-    RouteTable<A>	*_final_table;
-    RegisterTable<A>	*_register_table;
-    bool _mcast;
-    bool _errors_are_fatal;
+    RibManager&		_rib_manager;
+    EventLoop&		_eventloop;
+    RouteTable<A>*	_final_table;
+    RegisterTable<A>*	_register_table;
+    bool		_multicast;
+    bool		_errors_are_fatal;
 
-    map<const string, RouteTable<A> *>	_tables;
-    map<const string, Protocol *>	_protocols;
-    map<const string, OriginTable<A> *> _routing_protocol_instances;
+    map<const string, RouteTable<A>* >	_tables;
+    map<const string, Protocol* >	_protocols;
+    map<const string, OriginTable<A>* > _routing_protocol_instances;
     map<const string, Vif>		_vifs;
     map<const string, int>		_admin_distances;
     map<const A, IPExternalNextHop<A> >	_external_nexthops;

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.8 2003/05/08 05:51:27 mjh Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.10 2004/02/06 22:44:11 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
 
 #include "rt_tab_base.hh"
+
 
 class RibClient;
 
@@ -41,8 +42,8 @@ public:
      * instances.  The list of RibClient instances is used to communicate
      * with the RIB clients using XRLs.
      */
-    ExportTable(const string& tablename, RouteTable<A> *parent, 
-		list<RibClient *> *rib_clients_list);
+    ExportTable(const string& tablename, RouteTable<A>* parent, 
+		list<RibClient* >* rib_clients_list);
 
     /**
      * ExportTable Destructor
@@ -58,7 +59,7 @@ public:
      * must be the same as _parent.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
+    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
 
     /**
      * delete_route is called when a route is removed from the
@@ -69,30 +70,30 @@ public:
      * must be the same as _parent.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
+    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
 
     /**
      * lookup a route in this RIB. This request is simply passed on
      * unchanged to the parent.  
      */
-    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const ;
+    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
 
     /**
      * lookup a route in this RIB. This request is simply passed on
      * unchanged to the parent.  
      */
-    const IPRouteEntry<A> *lookup_route(const A& addr) const;
+    const IPRouteEntry<A>* lookup_route(const A& addr) const;
 
     /**
      * lookup a route range in this RIB. This request is simply passed
      * on unchanged to the parent.  
      */
-    RouteRange<A> *lookup_route_range(const A& addr) const;
+    RouteRange<A>* lookup_route_range(const A& addr) const;
 
     /**
-     * @return EXPORT_TABLE
+     * @return the table type (@ref TableType).
      */
-    int type() const { return EXPORT_TABLE; }
+    TableType type() const	{ return EXPORT_TABLE; }
 
     /**
      * replumb to replace the old parent of this table with a new parent
@@ -101,12 +102,12 @@ public:
      * the same as the existing parent)
      * @param new_parent the new parent RouteTable
      */
-    void replumb(RouteTable<A> *old_parent, RouteTable<A> *new_parent);
+    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
 
     /**
      * @return this ExportTable's parent RouteTable
      */
-    RouteTable<A> *parent() { return _parent; }
+    RouteTable<A>* parent() { return _parent; }
 
     /**
      * @return this ExportTable as a string for debugging purposes
@@ -125,8 +126,8 @@ public:
     void flush();
 
 private:
-    RouteTable<A>	*_parent;
-    list<RibClient *>	*_rib_clients;
+    RouteTable<A>*	_parent;
+    list<RibClient* >*	_rib_clients;
 };
 
 #endif // __RIB_RT_TAB_EXPORT_HH__

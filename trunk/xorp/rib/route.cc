@@ -12,24 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/route.cc,v 1.4 2003/03/15 02:28:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/route.cc,v 1.5 2003/03/16 07:18:58 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "route.hh"
 
-RouteEntry::RouteEntry(Vif *vif, NextHop *nh, const Protocol& proto, 
+
+RouteEntry::RouteEntry(Vif *vif, NextHop *nexthop, const Protocol& protocol, 
 		       uint16_t metric)
-    : _proto(proto)
+    : _vif(vif),
+      _nexthop(nexthop),
+      _protocol(protocol),
+      _admin_distance(255),
+      _metric(metric)
 {
-    _vif = vif;
-    _nh = nh;
-    _admin_distance = 255;
-    _metric = metric;
 }
 
 RouteEntry::~RouteEntry()
 {
 }
-
-
-

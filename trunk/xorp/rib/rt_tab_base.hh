@@ -18,30 +18,29 @@
 #define __RIB_RT_TAB_BASE_HH__
 
 #include <map>
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv4.hh"
+
 #include "route.hh"
 #include "protocol.hh"
 #include "libxorp/trie.hh"
 
-#define IGP 		1
-#define EGP 		2
 
-#define ROUTE_USED 	4
-#define ROUTE_UNUSED 	8
-
-#define ORIGIN_TABLE 	1
-#define MERGED_TABLE 	2
-#define EXTINT_TABLE 	4
-#define REDIST_TABLE 	8
-#define EXPORT_TABLE 	16
-#define REGISTER_TABLE 	32
-#define DELETION_TABLE 	64
-#define EXPECT_TABLE 	128
-#define LOG_TABLE 	256
-#define MAX_TABLE_TYPE 	256
+enum TableType {
+    ORIGIN_TABLE	= 1 << 0,
+    MERGED_TABLE	= 1 << 1,
+    EXTINT_TABLE	= 1 << 2,
+    REDIST_TABLE	= 1 << 3,
+    EXPORT_TABLE	= 1 << 4,
+    REGISTER_TABLE	= 1 << 5,
+    DELETION_TABLE	= 1 << 6,
+    EXPECT_TABLE	= 1 << 7,
+    LOG_TABLE		= 1 << 8,
+    MAX_TABLE_TYPE	= 1 << 8
+};
 
 /**
  * @short Stores a Route and bounds on the validity of the route.
@@ -63,19 +62,19 @@
  *   top: 1.0.0.255
  *   bottom: 1.0.0.0
  *
- * Ie, the route for 1.0.0.10 is 1.0.0.0/16, and this answer is also
+ * I.e., the route for 1.0.0.10 is 1.0.0.0/16, and this answer is also
  * valid for addresses in the range 1.0.0.0 to 1.0.0.255 inclusive.
  */
 template<class A>
 class RouteRange {
 public:
-    RouteRange(const A& req_addr, const IPRouteEntry<A> *route,
+    RouteRange(const A& req_addr, const IPRouteEntry<A>* route,
 	       const A& top, const A& bottom)
 	: _req_addr(req_addr), _route(route), _top(top), _bottom(bottom) {}
 
     const A& top() const			{ return _top;		}
     const A& bottom() const			{ return _bottom;	}
-    const IPRouteEntry<A> *route() const	{ return _route;	}
+    const IPRouteEntry<A>* route() const	{ return _route;	}
     const IPNet<A>& net() const			{ return _route->net();	}
 
     /**
@@ -86,8 +85,8 @@ public:
      * 
      * @param his_rr the entry to merge with.
      */
-    void merge(const RouteRange *his_rr)	{
-	    const IPRouteEntry<A> *rrr = his_rr->route();
+    void merge(const RouteRange* his_rr)	{
+	    const IPRouteEntry<A>* rrr = his_rr->route();
 
 	    if (_route == NULL)
 		_route = rrr;
@@ -123,12 +122,10 @@ public:
 
 private:
     A	_req_addr;
-    const IPRouteEntry<A> *_route;
+    const IPRouteEntry<A>* _route;
     A	_top;
     A	_bottom;
 };
-
-//A = Address Type, eg IPv4
 
 /**
  * @short Base class for a routing table.
@@ -150,11 +147,13 @@ private:
  * RouteTables take route lookup requests from their _next_table, and
  * pass on those requests to their parents.  If more than one parent
  * has a response, only the best is returned as the answer.
+ *
+ * Note: A = Address Type, e.g., IPv4 or IPv6.
  */
 template<class A>
 class RouteTable {
 public:
-    RouteTable(const string& name) : _tablename(name), _next_table(0) {}
+    RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
     virtual ~RouteTable() {}
 
     virtual int add_route(const IPRouteEntry<A>& route,
@@ -163,29 +162,27 @@ public:
     virtual int delete_route(const IPRouteEntry<A>* route,
 			     RouteTable*	    caller) = 0;
 
-    virtual const
-    IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const = 0;
+    virtual const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const = 0;
 
-    virtual const
-    IPRouteEntry<A> *lookup_route(const A& addr) const = 0;
+    virtual const IPRouteEntry<A>* lookup_route(const A& addr) const = 0;
 
-    virtual RouteRange<A> *lookup_route_range(const A& addr) const = 0;
+    virtual RouteRange<A>* lookup_route_range(const A& addr) const = 0;
 
-    void set_next_table(RouteTable *next_table) { _next_table = next_table; }
-    RouteTable *next_table() { return _next_table; }
+    void set_next_table(RouteTable* next_table) { _next_table = next_table; }
+    RouteTable* next_table() { return _next_table; }
 
     // parent is only supposed to be called on single-parent tables
-    virtual RouteTable *parent() { XLOG_UNREACHABLE(); return NULL; }
+    virtual RouteTable* parent() { XLOG_UNREACHABLE(); return NULL; }
 
-    virtual int type() const = 0;
+    virtual TableType type() const = 0;
     const string& tablename() const { return _tablename; }
-    virtual void replumb(RouteTable *old_parent, RouteTable *new_parent) = 0;
+    virtual void replumb(RouteTable* old_parent, RouteTable* new_parent) = 0;
     virtual string str() const = 0;
     virtual void flush() {}
 
 protected:
     string	_tablename;
-    RouteTable	*_next_table;
+    RouteTable*	_next_table;
 };
 
 #endif // __RIB_RT_TAB_BASE_HH__

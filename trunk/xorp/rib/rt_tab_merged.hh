@@ -12,19 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_merged.hh,v 1.4 2003/03/19 09:05:20 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_merged.hh,v 1.6 2004/02/06 22:44:12 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_MERGED_HH__
 #define __RIB_RT_TAB_MERGED_HH__
 
 #include "rt_tab_base.hh"
 
+
 /**
  * @short Make two route @ref RouteTables behave like one
  *
  * MergedTable takes two routing tables and combines them together to
  * form a single table, where routes for the same subnet with a lower
- * admin distance override those with a higher admin distance
+ * admin distance override those with a higher admin distance.
  *
  * The two parent tables are not actually merged.  
  * 
@@ -47,13 +48,13 @@ public:
     /**
      * MergedTable Constructor.
      * 
-     * @param tablename human-readable tablename to aid debugging
-     * @param table_a one of two parent RouteTables
-     * @param table_b one of two parent RouteTables
+     * @param tablename human-readable tablename to aid debugging.
+     * @param table_a one of two parent RouteTables.
+     * @param table_b one of two parent RouteTables.
      */
-    MergedTable(const string&  tablename, 
-		RouteTable<A> *table_a, 
-		RouteTable<A> *table_b);
+    MergedTable(const string&  tablename,
+		RouteTable<A>* table_a,
+		RouteTable<A>* table_b);
 
     /**
      * An add_route request from a parent table causes a lookup on the
@@ -66,7 +67,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route(const IPRouteEntry<A>& route, 
-		  RouteTable<A> *caller);
+		  RouteTable<A>* caller);
 
     /**
      * An delete_route request from a parent table also causes a
@@ -79,8 +80,8 @@ public:
      * @param caller the parent table sending the delete_route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A> *route,
-		     RouteTable<A> *caller);
+    int delete_route(const IPRouteEntry<A>* route,
+		     RouteTable<A>* caller);
 
     /**
      * Lookup a specific subnet.  The lookup will be sent to both
@@ -90,7 +91,7 @@ public:
      * @param net the subnet to look up.
      * @return a pointer to the route entry if it exists, NULL otherwise.  
      */
-    const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const;
+    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -103,9 +104,9 @@ public:
      * @param addr the IP address to look up.
      *
      * @return a pointer to the best most specific route entry if any
-     * entry matches, NULL otherwise.  
+     * entry matches, NULL otherwise.
      */
-    const IPRouteEntry<A> *lookup_route(const A& addr) const;
+    const IPRouteEntry<A>* lookup_route(const A& addr) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -121,29 +122,29 @@ public:
      * relevant answer.  It is up to the recipient of this pointer to
      * free the associated memory.  
      */
-    RouteRange<A> *lookup_route_range(const A& addr) const;
+    RouteRange<A>* lookup_route_range(const A& addr) const;
 
     /**
-     * @return MERGED_TABLE
+     * @return the table type (@ref TableType).
      */
-    int type() const {return MERGED_TABLE;}
+    TableType type() const	{ return MERGED_TABLE; }
 
     /**
-     * replumb the parent tables, so that new_parent replaces old_parent
+     * replumb the parent tables, so that new_parent replaces old_parent.
      *
-     * @param old_parent
-     * @param new_parent
+     * @param old_parent the old parent table.
+     * @param new_parent the new parent table.
      */
-    void replumb(RouteTable<A> *old_parent, 
-		 RouteTable<A> *new_parent);
+    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
 
     /**
-     * Render this MergedTable as a string for debugging purposes
+     * Render this MergedTable as a string for debugging purposes.
      */
     string str() const;
+
 private:
-    RouteTable<A> *_table_a;
-    RouteTable<A> *_table_b;
+    RouteTable<A>* _table_a;
+    RouteTable<A>* _table_b;
 };
 
 #endif // __RIB_RT_TAB_MERGED_HH__

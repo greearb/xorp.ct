@@ -12,20 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_routemap.cc,v 1.2 2003/03/10 23:20:54 hodson Exp $"
+#ident "$XORP: xorp/rib/main_routemap.cc,v 1.3 2003/03/15 02:28:37 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xlog.h"
+
 #include "routemap.hh"
 #include "route.hh"
 
-int main(int /* argc */, char *argv[]) {
-    RouteMap *rm;
+
+int main(int /* argc */, char* argv[]) {
+    RouteMap* rm;
     rm = new RouteMap("testmap");
     
-    RMRule *rr;
-    RMMatchIPAddr *rmatchip;
-    RMAction *ra;
+    RMRule* rr;
+    RMMatchIPAddr* rmatchip;
+    RMAction* ra;
 
     //
     // Initialize and start xlog
@@ -49,9 +52,9 @@ int main(int /* argc */, char *argv[]) {
 
 
 
-    RMRule *rr2;
-    RMMatchIPAddr *rmatchip2;
-    RMAction *ra2;
+    RMRule* rr2;
+    RMMatchIPAddr* rmatchip2;
+    RMAction* ra2;
 
     IPv4 ip2("192.150.186.0");
     IPv4Net ipnet2(ip2, 24);
@@ -64,9 +67,9 @@ int main(int /* argc */, char *argv[]) {
 
 
 
-    RMRule *rr3;
-    RMMatchIPAddr *rmatchip3;
-    RMAction *ra3;
+    RMRule* rr3;
+    RMMatchIPAddr* rmatchip3;
+    RMAction* ra3;
 
     IPv4 ip3("193.150.186.0");
     IPv4Net ipnet3(ip3, 24);

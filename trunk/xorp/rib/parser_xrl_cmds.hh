@@ -17,8 +17,10 @@
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
 
-#include "parser.hh"
 #include "xrl/interfaces/rib_xif.hh"
+
+#include "parser.hh"
+
 
 enum XrlCompletion {
     XRL_PENDING = 0,	// hack - corresponds with success for Parser::execute
@@ -108,14 +110,14 @@ public:
 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
-	cout << "RedistEnableCommand::execute " << _fromtable << " ";
-	cout << _totable << endl;
+	cout << "RedistEnableCommand::execute " << _from_table << " ";
+	cout << _to_table << endl;
 
 	_completion = XRL_PENDING;
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_redist_enable4(
-	    "rib", _fromtable, _totable, unicast, multicast, 
+	    "rib", _from_table, _to_table, unicast, multicast, 
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;
@@ -136,14 +138,14 @@ public:
 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
 
     int execute() {
-	cout << "RedistDisableCommand::execute " << _fromtable << " ";
-	cout << _totable << endl;
+	cout << "RedistDisableCommand::execute " << _from_table << " ";
+	cout << _to_table << endl;
 
 	_completion = XRL_PENDING;
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_redist_disable4(
-	    "rib", _fromtable, _totable, unicast, multicast,
+	    "rib", _from_table, _to_table, unicast, multicast,
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;

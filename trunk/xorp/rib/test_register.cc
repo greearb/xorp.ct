@@ -12,20 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.7 2003/09/27 22:32:47 mjh Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.9 2004/02/06 22:44:12 pavlin Exp $"
 
 #include "rib_module.h"
-#include "config.h"
-#include "libxorp/debug.h"
+
 #include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+
 #include "dummy_rib_manager.hh"
 #include "rib.hh"
 #include "dummy_register_server.hh"
 
-RIB<IPv4> *rib_ptr;
-bool verbose=false;
+
+RIB<IPv4>* rib_ptr;
+bool verbose = false;
 
 static void 
 verify_route(const string& ipv4, const string& vifname, 
@@ -50,7 +52,7 @@ test_route_range(const string& ipv4,
 		 const string& lower,
 		 const string& upper)
 {
-    RouteRange<IPv4> *rr;
+    RouteRange<IPv4>* rr;
     
     rr = rib_ptr->route_range_lookup(IPv4(ipv4.c_str()));
     if (verbose)
@@ -61,7 +63,8 @@ test_route_range(const string& ipv4,
 	    printf("BAD Vif\n");
 	    abort();
 	}
-	IPNextHop<IPv4> *nh= (IPNextHop<IPv4>*)(rr->route()->nexthop());
+	IPNextHop<IPv4>* nh;
+	nh = reinterpret_cast<IPNextHop<IPv4>* >(rr->route()->nexthop());
 	if (nh->addr().str() != nexthop) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
 	    printf("Found Nexthop: %s\n", nh->addr().str().c_str());
@@ -96,7 +99,7 @@ test_route_range(const string& ipv4,
 
 
 int
-main (int /* argc */, char *argv[])
+main (int /* argc */, char* argv[])
 {
 
     //
@@ -149,24 +152,23 @@ main (int /* argc */, char *argv[])
     verify_route("1.0.5.4", "vif0", "10.0.0.2", 0);
     verify_route("1.0.3.4", "vif1", "10.0.1.2", 1);
 
-    // test with routes just in "static" and "connected" tables
+    // Test with routes just in "static" and "connected" tables
     test_route_range("1.0.4.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.8.255");
     test_route_range("1.0.3.1", "vif1", "10.0.1.2", "1.0.3.0", "1.0.3.255");
     test_route_range("1.0.7.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.8.255");
     test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0", 
 		     "9.255.255.255");
 
-    // add a route to another IGP table
+    // Add a route to another IGP table
     rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 3);
     test_route_range("1.0.4.1", "vif0", "10.0.0.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.8.1", "vif0", "10.0.0.2", "1.0.7.0", "1.0.8.255");
     test_route_range("1.0.6.1", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
-    // add an EGP route
+    // Add an EGP route
     rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"), 4);
     test_route_range("5.0.5.1", "vif1", "10.0.1.2", "5.0.5.0", "5.0.5.255");
-    test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0", 
-		     "5.0.4.255");
+    test_route_range("2.0.0.1", "discard", "0.0.0.0", "1.1.0.0", "5.0.4.255");
 
     rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"), 5);
     test_route_range("1.0.5.1", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.255");
@@ -176,7 +178,7 @@ main (int /* argc */, char *argv[])
     test_route_range("1.0.5.1", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.63");
 
 
-    // add a couple of registrations
+    // Add a couple of registrations
     RouteRegister<IPv4>* rreg;
     rreg = rib.route_register(IPv4("1.0.5.1"), string("foo"));
     if (verbose)
@@ -186,7 +188,7 @@ main (int /* argc */, char *argv[])
 	printf("%s\n", rreg->str().c_str());
 
 
-    // check we can delete and add back
+    // Check we can delete and add back
     if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo"))
 	!= XORP_OK) {
 	abort();
@@ -196,14 +198,14 @@ main (int /* argc */, char *argv[])
 	printf("%s\n", rreg->str().c_str());
 
 
-    // add a route that should have no effect
+    // Add a route that should have no effect
     rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 1);
     if (verbose)
 	printf("##########################\n");
     if (!regserv.verify_no_info())
 	abort();
 
-    // add a route that should cause both registrations to be invalidated
+    // Add a route that should cause both registrations to be invalidated
     rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 1);
     if (!regserv.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
@@ -212,7 +214,7 @@ main (int /* argc */, char *argv[])
     if (!regserv.verify_no_info())
 	abort();
 
-    // verify that the deregister now fails because the registrations
+    // Verify that the deregister now fails because the registrations
     // became invalid
     if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo"))
 	== XORP_OK) {
@@ -223,7 +225,7 @@ main (int /* argc */, char *argv[])
 	abort();
     }
 
-    // re-register interest
+    // Re-register interest
     rreg = rib.route_register(IPv4("1.0.5.1"), string("foo"));
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
@@ -231,13 +233,15 @@ main (int /* argc */, char *argv[])
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
 
-    // delete the routes we just added
-    // this one should have no effect
+    //
+    // Delete the routes we just added.
+    // This one should have no effect.
+    //
     rib.delete_route("ospf", IPv4Net("1.0.11.0", 24));
     if (!regserv.verify_no_info())
 	abort();
 
-    // this one should cause the registrations to be invalidated
+    // This one should cause the registrations to be invalidated
     rib.delete_route("ospf", IPv4Net("1.0.5.0", 24));
     if (!regserv.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
@@ -246,7 +250,7 @@ main (int /* argc */, char *argv[])
     if (!regserv.verify_no_info())
 	abort();
 
-    // test registration where the address doesn't resolve
+    // Test registration where the address doesn't resolve
     rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 1);
     rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 1);
     rib.delete_route("ebgp", IPv4Net("1.0.0.0", 20));
@@ -255,7 +259,7 @@ main (int /* argc */, char *argv[])
     if (!regserv.verify_no_info())
 	abort();
 
-    // register interest in all three non-existent ranges
+    // Register interest in all three non-existent ranges
     rreg = rib.route_register(IPv4("1.0.0.1"), string("foo"));
     if (verbose)
 	printf("%s\n", rreg->str().c_str());

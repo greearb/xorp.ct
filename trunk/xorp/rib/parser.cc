@@ -12,15 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.6 2003/11/06 03:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.8 2004/02/06 22:44:10 pavlin Exp $"
 
 #include <stdexcept>
 
 #include "rib_module.h"
-#include "parser.hh"
+
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/xlog.h"
+
+#include "parser.hh"
+
 
 // ----------------------------------------------------------------------------
 // Argument Parsing methods
@@ -88,7 +91,7 @@ Command::check_syntax()
 DatumVariableBinding*
 Command::find_binding(int n) 
 {
-    map<int, DatumVariableBinding*>::iterator mi = _bindings.find(n);
+    map<int, DatumVariableBinding* >::iterator mi = _bindings.find(n);
     if (mi == _bindings.end())
 	return NULL;
     return mi->second;
@@ -97,11 +100,12 @@ Command::find_binding(int n)
 void
 Command::bind(int n, DatumVariableBinding* d)
 {
-    if (find_binding(n) != NULL)
-	abort();  // binding already exists for argument
-    if ((size_t)n != _bindings.size()) 
-	abort(); // non-contiguous positional binding
-    map<int, DatumVariableBinding*>::value_type b(n, d);
+    // Test if binding already exists for argument
+    XLOG_ASSERT(find_binding(n) == NULL);
+    // Test if non-contiguous positional binding
+    XLOG_ASSERT((size_t)n == _bindings.size());
+
+    map<int, DatumVariableBinding* >::value_type b(n, d);
     _bindings.insert(_bindings.end(), b);
 }
 
@@ -130,9 +134,9 @@ Command::bind_ipv4net(int n, IPv4Net& ipv4net)
 }
 
 void
-Command::set_arg(int n, Datum *d) throw (Parse_error)
+Command::set_arg(int n, Datum* d) throw (Parse_error)
 {
-    DatumVariableBinding *b = find_binding(n);
+    DatumVariableBinding* b = find_binding(n);
     if (b == NULL) 
 	throw Parse_error(c_format("Argument %d has no variable associated "
 				   "with it", n));
@@ -145,7 +149,6 @@ Command::set_arg(int n, Datum *d) throw (Parse_error)
 Parser::Parser()
     : _separator(' ')
 {
-    set_separator(' ');
     add_argtype(new IntArgumentParser());
     add_argtype(new StringArgumentParser());
     add_argtype(new IPv4ArgumentParser());
@@ -164,17 +167,19 @@ Parser::~Parser()
     }
 }
 
-bool Parser::add_command(Command* command) 
+bool
+Parser::add_command(Command* command) 
 {
     const string& s = command->syntax();
     debug_msg("Parser::add_command %s\n", s.c_str());
-    return (_templates.insert(pair<string, Command *>(s, command)).second);
+
+    return (_templates.insert(pair<string, Command* >(s, command)).second);
 }
 
 ArgumentParser*
 Parser::get_argument_parser(const string& name) const
 {
-    map<string, ArgumentParser*>::const_iterator mi = _argtypes.find(name);
+    map<string, ArgumentParser* >::const_iterator mi = _argtypes.find(name);
     if (mi == _argtypes.end())
 	return NULL;
     return mi->second;
@@ -210,7 +215,8 @@ single_space(const string& s)
 	return s;
 
     string r;
-    string::const_iterator i, lt = s.begin();
+    string::const_iterator i;
+    string::const_iterator lt = s.begin();
     bool inspace = (*lt == ' ');
     for (i = s.begin(); i != s.end(); i++) {
 	if (*i == ' ' && inspace == false) {
@@ -241,7 +247,8 @@ blat_control(const string& s)
     return tmp;
 }
 
-static string prepare_line(const string& s)
+static string
+prepare_line(const string& s)
 {
     return ltrim(rtrim(single_space(blat_control(s))));
 }
@@ -258,7 +265,7 @@ Parser::parse(const string& s) const
     if (str[0] == '#')
 	return XORP_OK;
 
-    typedef map<string, Command*>::const_iterator CI;
+    typedef map<string, Command* >::const_iterator CI;
     CI rpair = _templates.lower_bound(str);
     debug_msg("Best match: %s\n", rpair->first.c_str());
     Command* cmd = rpair->second;
@@ -325,7 +332,7 @@ Parser::split_into_words(const string& str, vector<string>& words) const
     
     try {
 	while (true) {
-	    //remove leading whitespace
+	    // Remove leading whitespace
 	    while (tmpstr.at(0) == ' ' && tmpstr.length() > 0) {
 		tmpstr.erase(0, 1);
 	    }
@@ -343,13 +350,13 @@ Parser::split_into_words(const string& str, vector<string>& words) const
     return word;
 }
 
-bool Parser::add_argtype(ArgumentParser *arg)
+bool
+Parser::add_argtype(ArgumentParser* arg)
 {
     debug_msg("Parser::add_argtype %s\n", arg->name().c_str());
     if (arg->name()[0] != '~') {
 	XLOG_FATAL("ArgumentParser Type names must begin with ~");
     }
-    return (_argtypes.insert(pair<string, ArgumentParser*>
-			     (arg->name(), arg)).second);
-}
 
+    return (_argtypes.insert(pair<string, ArgumentParser* >(arg->name(), arg)).second);
+}

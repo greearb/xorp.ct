@@ -15,6 +15,7 @@
 #ident "$XORP: xorp/rib/vifmanager.cc,v 1.24 2003/09/20 06:21:45 pavlin Exp $"
 
 #include "rib_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -25,6 +26,7 @@
 
 #include "rib_manager.hh"
 #include "vifmanager.hh"
+
 
 VifManager::VifManager(XrlRouter& xrl_router,
 		       EventLoop& eventloop,
@@ -40,8 +42,9 @@ VifManager::VifManager(XrlRouter& xrl_router,
     _vifs_remaining = 0;
     _addrs_remaining = 0;
 
-    _fea_target_name = "fea";		// XXX
-    
+    // TODO: XXX: the FEA target name is hardcoded!!
+    _fea_target_name = "fea";
+
     enable();	// XXX: by default the VifManager is always enabled
 }
 
@@ -50,7 +53,7 @@ VifManager::~VifManager()
     stop();
     
     // Remove all Vif entries
-    map<string, Vif*>::iterator iter;
+    map<string, Vif* >::iterator iter;
     for (iter = _vifs_by_name.begin(); iter != _vifs_by_name.end(); ++iter) {
 	delete iter->second;
     }
@@ -132,7 +135,7 @@ VifManager::update_state()
 void
 VifManager::set_vif_state()
 {
-    map<string, Vif*>::const_iterator vif_iter;
+    map<string, Vif* >::const_iterator vif_iter;
     string error_msg;
     
     //
@@ -164,7 +167,7 @@ VifManager::set_vif_state()
 	Vif* vif = vif_iter->second;
 	Vif* node_vif = NULL;
 	
-	map<string, Vif*>::const_iterator tmp_vif_iter;
+	map<string, Vif* >::const_iterator tmp_vif_iter;
 	tmp_vif_iter = _saved_vifs_by_name.find(vif->name());
 	if (tmp_vif_iter != _saved_vifs_by_name.end())
 	    node_vif = tmp_vif_iter->second;
@@ -175,8 +178,8 @@ VifManager::set_vif_state()
 	if (node_vif == NULL) {
 	    _rib_manager->new_vif(vif->name(), *vif, error_msg);
 	    node_vif = new Vif(*vif);
-	    _saved_vifs_by_name.insert(pair<string, Vif*>(vif->name(),
-							  node_vif));
+	    _saved_vifs_by_name.insert(pair<string, Vif* >(vif->name(),
+							   node_vif));
 	    continue;
 	}
 	
@@ -235,16 +238,18 @@ VifManager::set_vif_state()
 		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
 		if (node_vif_addr == NULL) {
 		    if (vif_addr.addr().is_ipv4()) {
-			_rib_manager->add_vif_address(node_vif->name(),
-						      vif_addr.addr().get_ipv4(),
-						      vif_addr.subnet_addr().get_ipv4net(),
-						      error_msg);
+			_rib_manager->add_vif_address(
+			    node_vif->name(),
+			    vif_addr.addr().get_ipv4(),
+			    vif_addr.subnet_addr().get_ipv4net(),
+			    error_msg);
 		    }
 		    if (vif_addr.addr().is_ipv6()) {
-			_rib_manager->add_vif_address(node_vif->name(),
-						      vif_addr.addr().get_ipv6(),
-						      vif_addr.subnet_addr().get_ipv6net(),
-						      error_msg);
+			_rib_manager->add_vif_address(
+			    node_vif->name(),
+			    vif_addr.addr().get_ipv6(),
+			    vif_addr.subnet_addr().get_ipv6net(),
+			    error_msg);
 		    }
 		    node_vif->add_address(vif_addr);
 		    continue;
@@ -314,7 +319,7 @@ VifManager::xrl_result_register_client(const XrlError& e)
 	// entries that are already there. First, find out the set of
 	// all interfaces.
 	//
-	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+	XorpCallback2<void, const XrlError&, const XrlAtomList* >::RefPtr cb;
 	cb = callback(this, &VifManager::xrl_result_get_configured_interface_names);
 	_ifmgr_client.send_get_configured_interface_names(_fea_target_name.c_str(),
 							  cb);
@@ -353,7 +358,7 @@ VifManager::xrl_result_get_configured_interface_names(
 	    string ifname = atom.text();
 	    debug_msg("got interface name: %s\n", ifname.c_str());
 	    
-	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+	    XorpCallback2<void, const XrlError&, const XrlAtomList* >::RefPtr cb;
 	    cb = callback(this, &VifManager::xrl_result_get_configured_vif_names, ifname);
 	    _ifmgr_client.send_get_configured_vif_names(_fea_target_name.c_str(),
 							ifname, cb);
@@ -627,7 +632,7 @@ VifManager::interface_deleted(const string& ifname)
     debug_msg("interface_deleted %s\n", ifname.c_str());
     
     // Reomve all vifs for the same interface name
-    multimap<string, Vif*>::iterator iter;
+    multimap<string, Vif* >::iterator iter;
     iter = _vifs_by_interface.find(ifname);
     for (; iter != _vifs_by_interface.end(); ++iter) {
 	if (iter->first != ifname)
@@ -641,7 +646,7 @@ VifManager::vif_deleted(const string& ifname, const string& vifname)
 {
     debug_msg("vif_deleted %s %s\n", ifname.c_str(), vifname.c_str());
     
-    map<string, Vif*>::iterator vi = _vifs_by_name.find(vifname);
+    map<string, Vif* >::iterator vi = _vifs_by_name.find(vifname);
     if (vi == _vifs_by_name.end()) {
 	XLOG_ERROR("vif_deleted: vif %s not found", vifname.c_str());
 	return;
@@ -652,7 +657,7 @@ VifManager::vif_deleted(const string& ifname, const string& vifname)
     //
     Vif* vif = vi->second;
     _vifs_by_name.erase(vi);
-    multimap<string, Vif*>::iterator ii = _vifs_by_interface.find(ifname);
+    multimap<string, Vif* >::iterator ii = _vifs_by_interface.find(ifname);
     XLOG_ASSERT(ii != _vifs_by_interface.end());
     while (ii != _vifs_by_interface.end() && ii->first == ifname) {
 	if (ii->second == vif) {
@@ -682,7 +687,7 @@ VifManager::vif_created(const string& ifname, const string& vifname)
     //
     Vif* vif = new Vif(vifname, ifname);
     _vifs_by_name[vifname] = vif;
-    _vifs_by_interface.insert(pair<string, Vif*>(ifname, vif));
+    _vifs_by_interface.insert(pair<string, Vif* >(ifname, vif));
     
     //
     // Fire off requests in parallel to get the flags and all the
@@ -699,7 +704,7 @@ VifManager::vif_created(const string& ifname, const string& vifname)
 	_vifs_remaining++;
     }
     
-    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
+    XorpCallback2<void, const XrlError&, const XrlAtomList* >::RefPtr cb;
     {
 	// Get IPv4 addresses
 	cb = callback(this, &VifManager::xrl_result_get_configured_vif_addresses4,
@@ -750,11 +755,14 @@ VifManager::vifaddr4_created(const string& ifname,
     
     {
 	// Get the prefix length
-	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
+	XorpCallback2<void, const XrlError&, const uint32_t* >::RefPtr cb;
 	cb = callback(this, &VifManager::xrl_result_get_configured_prefix4,
 		      ifname, vifname, addr);
-	_ifmgr_client.send_get_configured_prefix4(_fea_target_name.c_str(), ifname,
-						  vifname, addr, cb);
+	_ifmgr_client.send_get_configured_prefix4(_fea_target_name.c_str(),
+						  ifname,
+						  vifname,
+						  addr,
+						  cb);
 	_addrs_remaining++;
     }
 }
@@ -779,13 +787,16 @@ VifManager::vifaddr6_created(const string& ifname,
 	cb = callback(this, &VifManager::xrl_result_get_configured_address_flags6,
 		      ifname, vifname, addr);
 	_ifmgr_client.send_get_configured_address_flags6(_fea_target_name.c_str(),
-							 ifname, vifname, addr, cb);
+							 ifname,
+							 vifname,
+							 addr,
+							 cb);
 	_addrs_remaining++;
     }
     
     {
 	// Get the prefix length
-	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
+	XorpCallback2<void, const XrlError&, const uint32_t* >::RefPtr cb;
 	cb = callback(this, &VifManager::xrl_result_get_configured_prefix6,
 		      ifname, vifname, addr);
 	_ifmgr_client.send_get_configured_prefix6(_fea_target_name.c_str(), ifname,
@@ -825,21 +836,27 @@ VifManager::xrl_result_get_configured_address_flags4(const XrlError& e,
 	
 	if (*broadcast) {
 	    // Get the broadcast address
-	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
+	    XorpCallback2<void, const XrlError&, const IPv4* >::RefPtr cb;
 	    cb = callback(this, &VifManager::xrl_result_get_configured_broadcast4,
 			  ifname, vifname, addr);
 	    _ifmgr_client.send_get_configured_broadcast4(_fea_target_name.c_str(),
-							 ifname, vifname, addr, cb);
+							 ifname,
+							 vifname,
+							 addr,
+							 cb);
 	    _addrs_remaining++;
 	}
 	
 	if (*point_to_point) {
 	    // Get the endpoint address
-	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
+	    XorpCallback2<void, const XrlError&, const IPv4* >::RefPtr cb;
 	    cb = callback(this, &VifManager::xrl_result_get_configured_endpoint4,
 			  ifname, vifname, addr);
 	    _ifmgr_client.send_get_configured_endpoint4(_fea_target_name.c_str(),
-							ifname, vifname, addr, cb);
+							ifname,
+							vifname,
+							addr,
+							cb);
 	    _addrs_remaining++;
 	}
 	
@@ -898,11 +915,14 @@ VifManager::xrl_result_get_configured_address_flags6(const XrlError& e,
 	
 	if (*point_to_point) {
 	    // Get the endpoint address
-	    XorpCallback2<void, const XrlError&, const IPv6*>::RefPtr cb;
+	    XorpCallback2<void, const XrlError&, const IPv6* >::RefPtr cb;
 	    cb = callback(this, &VifManager::xrl_result_get_configured_endpoint6,
 			  ifname, vifname, addr);
 	    _ifmgr_client.send_get_configured_endpoint6(_fea_target_name.c_str(),
-							ifname, vifname, addr, cb);
+							ifname,
+							vifname,
+							addr,
+							cb);
 	    _addrs_remaining++;
 	}
 	
