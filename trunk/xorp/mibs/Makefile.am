@@ -10,6 +10,10 @@
 # default settings.
 #
 
+# --- Options
+AUTOMAKE_OPTIONS	= foreign
+ETAGS_ARGS		= --c++
+
 SUBDIRS				 = snmpdscripts tests
 
 #
@@ -108,6 +112,6 @@ xorp_if_mib_module_la_SOURCES	+= xorp_if_mib_xrl_target.hh
 ## to anybody else
 ##
 
-INCLUDES	 = -I$(top_srcdir)/..
+INCLUDES	 = -I$(top_srcdir)/.. -I$(top_builddir)/..
 
 .NOTPARALLEL:
