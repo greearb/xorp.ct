@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng.hh,v 1.3 2003/02/24 19:39:18 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng.hh,v 1.4 2003/03/05 02:01:50 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
@@ -58,7 +58,12 @@ public:
     bool active_messenger_represents_target(const string& target_name) const;
     
     bool remove_target(const string& target_name);
+
     bool remove_target_with_cookie(const string& cookie);
+
+    bool set_target_enabled(const string& target_name, bool en);
+
+    bool target_enabled(const string& target_name, bool& is_enabled) const;
     
     bool add_resolution(const string& target,
 			const string& key,

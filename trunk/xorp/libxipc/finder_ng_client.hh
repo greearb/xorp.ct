@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_client.hh,v 1.2 2003/03/04 23:41:23 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng_client.hh,v 1.3 2003/03/05 18:19:44 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_HH__
@@ -82,6 +82,8 @@ public:
 		      const string& pf_name,
 		      const string& pf_args);
 
+    bool enable_xrls(uint32_t target_id);
+    
     void query(const string&	    key,
 	       const QueryCallback& qcb);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_xrl_target.hh,v 1.2 2003/02/24 19:39:19 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng_xrl_target.hh,v 1.3 2003/02/26 18:33:38 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TGT_HH__
 #define __LIBXIPC_FINDER_XRL_TGT_HH__
@@ -46,6 +46,12 @@ public:
 
     XrlCmdError finder_0_1_unregister_finder_client(const string& target_name);
 
+    XrlCmdError finder_0_1_set_finder_client_enabled(const string& target_name,
+						     const bool&   en);
+
+    XrlCmdError finder_0_1_finder_client_enabled(const string& target_name,
+						 bool&         en);
+
     /**
      *  Add resolved Xrl into system, fails if xrl is already registered.
      */
@@ -77,8 +83,11 @@ public:
 						  XrlAtomList&	xrls);
 
     XrlCmdError finder_0_1_get_ipv4_permitted_hosts(XrlAtomList& ipv4s);
+
     XrlCmdError finder_0_1_get_ipv4_permitted_nets(XrlAtomList&  ipv4nets);
+
     XrlCmdError finder_0_1_get_ipv6_permitted_hosts(XrlAtomList& ipv6s);
+
     XrlCmdError finder_0_1_get_ipv6_permitted_nets(XrlAtomList&  ipv6nets);
     
 protected:

@@ -110,6 +110,11 @@ public:
      */
     bool add_listener (XrlPFListener* pf);
 
+    /**
+     * Signal end of listener and additions to Xrl Command map.
+     */
+    void finalize();
+    
     typedef XrlSender::Callback XrlCallback;
 
     /**
@@ -203,6 +208,8 @@ public:
     
     bool add_listener(XrlPFListener* listener);
 
+    void finalize();
+    
     bool connected() const;
 
     bool pending() const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.4 2003/03/04 23:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.5 2003/03/05 18:19:44 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -305,7 +305,6 @@ public:
 		      _xrl.c_str(), e.str().c_str());
 	   client().notify_failed(this);
 	}
-
     }
     
 protected:
@@ -313,6 +312,42 @@ protected:
     string _xrl;
     string _pf;
     string _pf_args;
+};
+
+class FinderNGClientEnableXrls : public FinderNGClientRepeatOp {
+public:
+    FinderNGClientEnableXrls(FinderNGClient& fc,
+			     uint32_t        target_id,
+			     const string&   instance_name,
+			     bool	     en)
+	: FinderNGClientRepeatOp(fc, target_id), _iname(instance_name), _en(en)
+    {}
+
+    void execute(FinderMessengerBase* m)
+    {
+	FinderTcpMessenger *ftm = dynamic_cast<FinderTcpMessenger*>(m);
+	XLOG_ASSERT(ftm != 0);
+	XrlFinderV0p1Client cl(m);
+	if (!cl.send_set_finder_client_enabled(finder, _iname, _en,
+		callback(this, &FinderNGClientEnableXrls::en_callback))) {
+	    XLOG_ERROR("Failed on send_set_finder_client_enabled");
+	    client().notify_failed(this);
+	}
+    }
+    void en_callback(const XrlError& e)
+    {
+	if (e == XrlError::OKAY()) {
+	    client().notify_done(this);
+	    return;
+	}
+	XLOG_ERROR("Failed to enable client \"%s\": %s\n",
+		   _iname.c_str(), e.str().c_str());
+	client().notify_failed(this);
+    }
+
+protected:
+    string	_iname;
+    bool	_en;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -362,7 +397,7 @@ FinderNGClient::register_xrl_target(const string& instance_name,
 }
 
 bool
-FinderNGClient::register_xrl(const uint32_t target_id,
+FinderNGClient::register_xrl(uint32_t target_id,
 			     const string& xrl,
 			     const string& pf_name,
 			     const string& pf_args)
@@ -372,6 +407,19 @@ FinderNGClient::register_xrl(const uint32_t target_id,
 
     Operation op(new FinderNGClientRegisterXrl(*this, _lrt, target_id, xrl,
 					       pf_name, pf_args));
+    _todo_list.push_back(op);
+    crank();
+    return true;
+}
+
+bool
+FinderNGClient::enable_xrls(uint32_t target_id)
+{
+    if (target_id >= _tids.size() || _tids[target_id].empty())
+	return false;
+
+    Operation op(new FinderNGClientEnableXrls(*this, target_id,
+					      _tids[target_id], true));
     _todo_list.push_back(op);
     crank();
     return true;

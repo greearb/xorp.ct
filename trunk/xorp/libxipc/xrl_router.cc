@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.8 2003/03/04 23:41:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.9 2003/03/05 18:19:44 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -244,6 +244,11 @@ XrlRouter::add_listener(XrlPFListener* pfl)
     }
 }
 
+void
+XrlRouter::finalize()
+{
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 #else // ndef ORIGINAL_FINDER
 ///////////////////////////////////////////////////////////////////////////////
@@ -392,6 +397,14 @@ XrlRouter::add_listener(XrlPFListener* l)
     }
     
     return true;
+}
+
+void
+XrlRouter::finalize()
+{
+    // XXX should set a variable here to signal finalize set and no
+    // further registrations of commands or xrls will be accepted.
+    _fc->enable_xrls(_id);
 }
 
 bool

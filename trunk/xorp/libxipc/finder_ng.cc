@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.3 2003/02/24 19:39:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.4 2003/03/05 02:01:50 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -41,7 +41,8 @@ public:
 		   const string& classname,
 		   const string& cookie,
 		   FinderMessengerBase* fm)
-	: _name(name), _classname(classname), _cookie(cookie), _messenger(fm)
+	: _name(name), _classname(classname), _cookie(cookie),
+	  _enabled(false), _messenger(fm)
     {}
 
     inline const string& name() const { return _name; }
@@ -49,6 +50,9 @@ public:
     inline const string& classname() const { return _classname; }
 
     inline const string& cookie() const { return _cookie; }
+
+    inline bool enabled() const { return _enabled; }
+    inline void set_enabled(bool en) { _enabled = en; }
     
     inline const FinderMessengerBase* messenger() const { return _messenger; }
 
@@ -80,11 +84,11 @@ public:
 	return &i->second;
     }
 
-
 protected:
     string			_name;		// name of target
     string			_classname;	// name of target class
     string			_cookie;
+    bool			_enabled;
     ResolveMap			_resolutions;	// items registered by target
     FinderMessengerBase*	_messenger;	// source of registrations
 };
@@ -275,6 +279,28 @@ FinderNG::remove_target(const string& tgt)
     _targets.erase(i);
     announce_departure(tgt);
 
+    return true;
+}
+
+bool
+FinderNG::set_target_enabled(const string& tgt, bool en)
+{
+    TargetTable::iterator i = _targets.find(tgt);
+    if (_targets.end() == i) {
+	return false;
+    }
+    i->second.set_enabled(en);
+    return true;
+}
+
+bool
+FinderNG::target_enabled(const string& tgt, bool& en) const
+{
+    TargetTable::const_iterator i = _targets.find(tgt);
+    if (_targets.end() == i) {
+	return false;
+    }
+    en = i->second.enabled();
     return true;
 }
 

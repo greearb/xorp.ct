@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.5 2003/03/05 02:01:50 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.6 2003/03/05 20:02:46 hodson Exp $"
 
 #include "libxorp/debug.h"
 
@@ -127,7 +127,7 @@ FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
 XrlCmdError
 FinderNGXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
 {
-    finder_trace_init("unregister_finder_client(\"%s\"", tgt_name.c_str());
+    finder_trace_init("unregister_finder_client(\"%s\")", tgt_name.c_str());
 
     if (_finder.active_messenger_represents_target(tgt_name)) {
 	_finder.remove_target(tgt_name);
@@ -138,6 +138,37 @@ FinderNGXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
     finder_trace_result("failed");
 
     return XrlCmdError::COMMAND_FAILED(bad_target_message(tgt_name));
+}
+
+XrlCmdError
+FinderNGXrlTarget::finder_0_1_set_finder_client_enabled(const string& tgt_name,
+							const bool&   en)
+{
+    finder_trace_init("set_finder_client_enabled(\"%s\", %s)",
+		      tgt_name.c_str(), (en) ? "true" : "false");
+    
+    if (_finder.active_messenger_represents_target(tgt_name)) {
+	_finder.set_target_enabled(tgt_name, en);
+	finder_trace_result("okay");
+	return XrlCmdError::OKAY();
+    }
+    finder_trace_result("failed (not originator)");
+    return XrlCmdError::COMMAND_FAILED(bad_target_message(tgt_name));
+}
+
+XrlCmdError
+FinderNGXrlTarget::finder_0_1_finder_client_enabled(const string& tgt_name,
+						    bool&         en)
+{
+    finder_trace_init("finder_client_enabled(\"%s\")",
+		      tgt_name.c_str());
+
+    if (_finder.target_enabled(tgt_name, en) == false) {
+	finder_trace_result("failed (invalid target name)");
+	return XrlCmdError::COMMAND_FAILED(
+		c_format("Invalid target name \"%s\"", tgt_name.c_str()));
+    }
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -214,9 +245,9 @@ XrlCmdError
 FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 					  XrlAtomList&	resolved_xrls)
 {
-    Xrl u;
-
     finder_trace_init("resolve_xrl(\"%s\")", xrl.c_str());
+
+    Xrl u;
     
     // Construct Xrl
     try {
@@ -226,6 +257,16 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
     }
 
+    // Check target exists and is enabled
+    bool en;
+    if (_finder.target_enabled(u.target(), en) == false) {
+	finder_trace_result("fail (target does not exist).");
+	return XrlCmdError::COMMAND_FAILED("Xrl target does not exist.");
+    } else if (en == false) {
+	finder_trace_result("fail (xrl exists but is not enabled).");
+	return XrlCmdError::COMMAND_FAILED("Xrl target is not enabled.");
+    }
+    
     const FinderNG::Resolveables* resolutions = _finder.resolve(u.target(),
 								u.str());
     if (0 == resolutions) {
