@@ -4259,16 +4259,37 @@ if test "${net_snmp_found}" = "true";  then
                 if test "${net_snmp_rev}" = ""; then
 	net_snmp_rev=0
     fi
-    net_snmp_unified_ver=$(($net_snmp_maj*100+$net_snmp_min*10+$net_snmp_rev))
     echo "$as_me:$LINENO: checking if net-snmp version equal or newer than 5.0.6" >&5
 echo $ECHO_N "checking if net-snmp version equal or newer than 5.0.6... $ECHO_C" >&6
 if test "${ac_cv_net_snmp_usable+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   net_snmp_too_old=true
-	if test "${net_snmp_unified_ver}" -ge "506" ; then
+	while test "${net_snmp_too_old}" = "true"; do
+	    if test "${net_snmp_maj}" -lt "5" ; then
+		break;
+	    fi
+	    if test "${net_snmp_maj}" -gt "5" ; then
+		net_snmp_too_old=false
+		break;
+	    fi
+	    if test "${net_snmp_min}" -lt "0" ; then
+		break;
+	    fi
+	    if test "${net_snmp_min}" -gt "0" ; then
+		net_snmp_too_old=false
+		break;
+	    fi
+	    if test "${net_snmp_rev}" -lt "6" ; then
+		break;
+	    fi
+	    if test "${net_snmp_rev}" -gt "6" ; then
+		net_snmp_too_old=false
+		break;
+	    fi
 	    net_snmp_too_old=false
-	fi
+	    break;
+	done
 	if test "${net_snmp_too_old}" != "true"; then
 	    ac_cv_net_snmp_usable=yes
 	else
