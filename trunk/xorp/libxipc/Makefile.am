@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.19 2003/05/09 21:00:50 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.20 2003/05/12 23:57:20 hodson Exp $
 ##
 
 # - The library
@@ -198,31 +198,44 @@ libfinder_a_SOURCES += finder_client_xif.cc
 # automake (rightly) dislikes cross directory builds.
 #
 
-IDIR=$(top_srcdir)/xrl/interfaces
-TDIR=$(top_srcdir)/xrl/targets
-SDIR=$(srcdir)
+#
+# Build interfaces
+#
+common_xif.%: $(top_srcdir)/xrl/interfaces/common_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-common_xif.%: $(IDIR)/common_xif.%
-	cd $(IDIR) && $(MAKE) $(notdir $@)
-	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(IDIR)/$@ $(SDIR)
+$(top_srcdir)/xrl/interfaces/common_xif.hh $(top_srcdir)/xrl/interfaces/common_xif.cc: $(top_srcdir)/xrl/interfaces/common.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
-finder_base.%: $(TDIR)/finder_base.%
-	cd $(TDIR) && $(MAKE) $(notdir $@)
-	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(TDIR)/$@ $(SDIR)
+finder_xif.%: $(top_srcdir)/xrl/interfaces/finder_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-finder_xif.%: $(IDIR)/finder_xif.%
-	cd $(IDIR) && $(MAKE) $(notdir $@)
-	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(IDIR)/$@ $(SDIR)
+$(top_srcdir)/xrl/interfaces/finder_xif.hh $(top_srcdir)/xrl/interfaces/finder_xif.cc: $(top_srcdir)/xrl/interfaces/finder.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
-finder_client_base.%: $(TDIR)/finder_client_base.%
-	cd $(TDIR) && $(MAKE) $(notdir $@)
-	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(TDIR)/$@ $(SDIR)
+finder_client_xif.%: $(top_srcdir)/xrl/interfaces/finder_client_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-finder_client_xif.%: $(IDIR)/finder_client_xif.%
-	cd $(IDIR) && $(MAKE) $(notdir $@)
-	cd $(SDIR) && $(RM) $@
-	cd $(SDIR) && $(LN_S) $(IDIR)/$@ $(SDIR)
+$(top_srcdir)/xrl/interfaces/finder_client_xif.hh $(top_srcdir)/xrl/interfaces/finder_client_xif.cc: $(top_srcdir)/xrl/interfaces/finder_client.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+#
+# Build handler bases
+#
+finder_base.%: $(top_srcdir)/xrl/targets/finder_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/finder_base.hh $(top_srcdir)/xrl/targets/finder_base.cc: $(top_srcdir)/xrl/targets/finder.tgt
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+finder_client_base.%: $(top_srcdir)/xrl/targets/finder_client_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/finder_client_base.hh $(top_srcdir)/xrl/targets/finder_client_base.cc: $(top_srcdir)/xrl/targets/finder_client.tgt
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
