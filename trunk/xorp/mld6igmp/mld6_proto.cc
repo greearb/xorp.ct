@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.25 2004/02/26 13:07:57 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.26 2004/02/26 13:14:20 pavlin Exp $"
 
 
 //
@@ -212,9 +212,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
     case MLD_LISTENER_QUERY:
     case MLD_LISTENER_REPORT:
     case MLD_LISTENER_DONE:
-#if 0
-	// TODO: temporary enable receiving MLD messages from IPv6 addresses
-	// that are not link-local.
+	// XXX: the source address must be a link-local address
 	if (! src.is_linklocal_unicast()) {
 	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "source is not a link-local address",
@@ -223,7 +221,6 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
 			 name().c_str());
 	    return (XORP_ERROR);
 	}
-#endif // 0/1
 	break;
     case MLD_MTRACE:
 	// TODO: perform the appropriate checks
