@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.9 2003/03/07 18:23:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.10 2003/03/08 20:56:52 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -524,6 +524,7 @@ void
 FinderNGClient::query(const string& key,
 		      const QueryCallback& qcb)
 {
+#if 0
     if (!_xrls_registered) {
 	// there is a finder, but we've not finished registering our xrls.
 	// there's a risk that if we allow program to send xrls before
@@ -535,7 +536,7 @@ FinderNGClient::query(const string& key,
 	qcb->dispatch(XrlError::NO_FINDER(), 0);
 	return;
     }
-    
+#endif
     ResolvedTable::const_iterator i = _rt.find(key);
     if (_rt.end() != i) {
 	// Entry exists.
