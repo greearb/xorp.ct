@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.22 2003/06/12 03:01:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.23 2003/06/23 18:50:18 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1756,7 +1756,7 @@ PimMre::recompute_is_join_desired_rp()
     // NotJoined state -> Joined state
     if (! is_join_desired_rp())
 	return (false);		// Nothing changed
-    // Send Join(*,*,RP)
+    // Send Join(*,*,RP) to MRIB.next_hop(RP)
     pim_nbr = mrib_next_hop_rp();
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
@@ -1787,7 +1787,7 @@ PimMre::recompute_is_join_desired_rp()
     // Joined state -> NotJoined state
     if (is_join_desired_rp())
 	return (false);		// Nothing changed
-    // Send Prune(*,*,RP);
+    // Send Prune(*,*,RP) to MRIB.next_hop(RP)
     pim_nbr = mrib_next_hop_rp();
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
@@ -1877,7 +1877,7 @@ PimMre::recompute_is_join_desired_wc()
     // NotJoined state -> Joined state
     if (! is_join_desired_wc())
 	return (false);		// Nothing changed
-    // Send Join(*,G)
+    // Send Join(*,G) to RPF'(*,G)
     my_rp_addr_ptr = rp_addr_ptr();
     if (my_rp_addr_ptr == NULL) {
 	XLOG_WARNING("JoinDesired(*,G) = true: "
@@ -1916,7 +1916,7 @@ PimMre::recompute_is_join_desired_wc()
     // Joined state -> NotJoined state
     if (is_join_desired_wc())
 	return (false);		// Nothing changed
-    // Send Prune(*,G);
+    // Send Prune(*,G) to RPF'(*,G)
     my_rp_addr_ptr = rp_addr_ptr();
     if (my_rp_addr_ptr == NULL) {
 	XLOG_WARNING("JoinDesired(*,G) = false: "
@@ -2008,7 +2008,7 @@ PimMre::recompute_is_join_desired_sg()
     // NotJoined state -> Joined state
     if (! is_join_desired_sg())
 	return (false);		// Nothing changed
-    // Send Join(S,G)
+    // Send Join(S,G) to RPF'(S,G)
     pim_nbr = rpfp_nbr_sg();
     if (pim_nbr == NULL) {
 	if (! is_directly_connected_s()) {
@@ -2039,7 +2039,7 @@ PimMre::recompute_is_join_desired_sg()
     // Joined state -> NotJoined state
     if (is_join_desired_sg())
 	return (false);		// Nothing changed
-    // Send Prune(S,G);
+    // Send Prune(S,G) to RPF'(S,G)
     pim_nbr = rpfp_nbr_sg();
     if (pim_nbr == NULL) {
 	if (! is_directly_connected_s()) {
@@ -2181,7 +2181,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
     if (! is_prune_desired_sg_rpt())
 	return (false);		// Nothing changed
     // PruneDesired(S,G,rpt) -> true
-    // Send Prune(S,G,rpt);
+    // Send Prune(S,G,rpt) to RPF'(S,G,rpt)
     my_rp_addr_ptr = rp_addr_ptr();
     if (my_rp_addr_ptr == NULL) {
         XLOG_WARNING("PruneDesired(S,G,rpt) = true: "
@@ -2364,7 +2364,7 @@ PimMre::join_timer_timeout()
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
-    // Send Join(*,*,RP)
+    // Send Join(*,*,RP) to MRIB.next_hop(RP)
     pim_nbr = mrib_next_hop_rp();  
     if (pim_nbr == NULL) {
 	if (! i_am_rp()) {
@@ -2395,7 +2395,7 @@ PimMre::join_timer_timeout()
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
-    // Send Join(*,G)
+    // Send Join(*,G) to RPF'(*,G)
     my_rp_addr_ptr = rp_addr_ptr();
     if (my_rp_addr_ptr == NULL) {
 	XLOG_WARNING("JoinDesired(*,G) = true: "
@@ -2435,7 +2435,7 @@ PimMre::join_timer_timeout()
 	return;		// Wrong state	TODO: trigger state deletion?
     
     // Joined state
-    // Send Join(S,G)
+    // Send Join(S,G) to RPF'(S,G)
     pim_nbr = rpfp_nbr_sg();
     if (pim_nbr == NULL) {
 	if (! is_directly_connected_s()) {
