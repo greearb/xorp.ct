@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.1 2004/10/22 23:08:28 pavlin Exp $
+// $XORP: xorp/fea/nexthop_port_mapper.hh,v 1.2 2004/10/26 01:02:55 pavlin Exp $
 
 #ifndef __FEA_NEXTHOP_PORT_MAPPER_HH__
 #define __FEA_NEXTHOP_PORT_MAPPER_HH__
@@ -36,6 +36,12 @@ class NexthopPortMapperObserver;
  * The next-hop information can be one of the following: network interface,
  * IP host address (local or peer address on point-to-point links), or
  * IP subnet address (of the directly connected subnet for an interface).
+ *
+ * Note that observers (@see NexthopPortMapperObserver) can be attached
+ * to monitor changes to the port mapping. The observers notification
+ * is triggered by an explicit call to @see NexthopPortMapper#notify_observers.
+ * The only exception is @see NexthopPortMapper#clear which calls
+ * internally @see NexthopPortMapper#notify_observers.
  */
 class NexthopPortMapper {
 public:
@@ -62,6 +68,11 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_observer(NexthopPortMapperObserver* observer);
+
+    /**
+     * Notify observers about any port mapping changes.
+     */
+    void notify_observers();
 
     /**
      * Lookup a next-hop interface/vif name to obtain the corresponding
@@ -188,13 +199,22 @@ public:
     int delete_ipv6net(const IPv6Net& ipv6net);
 
 private:
-    void notify_observers();
+    bool is_mapping_changed() const;
 
+    // The maps with the lookup info
     map<pair<string, string>, int>	_interface_map;
     map<IPv4, int>			_ipv4_map;
     map<IPv6, int>			_ipv6_map;
     map<IPv4Net, int>			_ipv4net_map;
     map<IPv6Net, int>			_ipv6net_map;
+
+    // The maps with the old info
+    map<pair<string, string>, int>	_old_interface_map;
+    map<IPv4, int>			_old_ipv4_map;
+    map<IPv6, int>			_old_ipv6_map;
+    map<IPv4Net, int>			_old_ipv4net_map;
+    map<IPv6Net, int>			_old_ipv6net_map;
+
     list<NexthopPortMapperObserver *>	_observers;
 };
 
