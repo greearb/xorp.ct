@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.23 2004/05/28 18:26:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.24 2004/05/28 22:27:59 pavlin Exp $"
 
 
 #include <glob.h>
@@ -614,7 +614,7 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
 				      size_t part) const
 {
     debug_msg("check_variable_name: us>%s< match>%s<, %d\n",
-	      _segname.c_str(), parts[part].c_str(), part);
+	      _segname.c_str(), parts[part].c_str(), static_cast<int>(part));
     bool ok = false;
     if (_parent == NULL) {
 	// Root node
@@ -651,7 +651,7 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
 		return true;
 	    }
 	}
-	debug_msg("--no successful children, %d\n", part);
+	debug_msg("--no successful children, %d\n", static_cast<int>(part));
     }
     return false;
 }
