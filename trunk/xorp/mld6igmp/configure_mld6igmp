@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.7 2003/03/31 04:26:16 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.8 2003/05/09 19:11:01 pavlin Exp $
 #
 
 #
@@ -19,7 +19,7 @@ MLD6IGMP_TARGET="IGMP"
 . ../mfea/xrl_mfea_shell_funcs.sh
 . ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
 
-echo "Configuring $MODULE_NAME on $HOSTNAME..."
+echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
 
 ###############################################################
 # USER CONFIGURATION BEGIN
@@ -28,7 +28,7 @@ echo "Configuring $MODULE_NAME on $HOSTNAME..."
 #
 # Select the vifs to enable
 #
-case $HOSTNAME in
+case ${HOSTNAME} in
 	xorp1)
 	ENABLE_VIFS="dc1 dc4"
 	;;
@@ -63,7 +63,7 @@ case $HOSTNAME in
 	;;
 
 	*)
-	echo "Unknown host : $HOSTNAME"
+	echo "Unknown host : ${HOSTNAME}"
 	exit 1
 	;;
 esac
@@ -87,27 +87,27 @@ CLI_DISABLE_SUBNETS="0.0.0.0/0"		# Disable everything else
 
 
 # Add the PIM 'register_vif' to the list of interfaces to enable
-MFEA_ENABLE_VIFS="$ENABLE_VIFS register_vif"
-MLD6IGMP_ENABLE_VIFS="$ENABLE_VIFS"
+MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
+MLD6IGMP_ENABLE_VIFS="${ENABLE_VIFS}"
 
 #
 # Disable log trace
 #
-if [ "$MFEA_ENABLE_LOG_TRACE" != "yes" ] ; then
+if [ "${MFEA_ENABLE_LOG_TRACE}" != "yes" ] ; then
 	mfea_disable_log_trace
 fi
-if [ "$MLD6IGMP_ENABLE_LOG_TRACE" != "yes" ] ; then
+if [ "${MLD6IGMP_ENABLE_LOG_TRACE}" != "yes" ] ; then
 	mld6igmp_disable_log_trace
 fi
 
 #
 # Configure CLI
 #
-for subnet in $CLI_ENABLE_SUBNETS; do
-	cli_add_enable_cli_access_from_subnet4 $subnet
+for subnet in ${CLI_ENABLE_SUBNETS}; do
+	cli_add_enable_cli_access_from_subnet4 ${subnet}
 done
-for subnet in $CLI_DISABLE_SUBNETS; do
-	cli_add_disable_cli_access_from_subnet4 $subnet
+for subnet in ${CLI_DISABLE_SUBNETS}; do
+	cli_add_disable_cli_access_from_subnet4 ${subnet}
 done
 
 #
@@ -131,9 +131,9 @@ mfea_start_mfea
 #
 # Enable and start MFEA vifs
 #
-for vif in $MFEA_ENABLE_VIFS; do
-	mfea_enable_vif $vif
-	mfea_start_vif $vif
+for vif in ${MFEA_ENABLE_VIFS}; do
+	mfea_enable_vif ${vif}
+	mfea_start_vif ${vif}
 done
 
 
@@ -157,9 +157,9 @@ mld6igmp_is_vif_setup_completed
 #
 # Enable and start MLD6IGMP vifs
 #
-for vif in $MLD6IGMP_ENABLE_VIFS; do
-	mld6igmp_enable_vif $vif
-	mld6igmp_start_vif $vif
+for vif in ${MLD6IGMP_ENABLE_VIFS}; do
+	mld6igmp_enable_vif ${vif}
+	mld6igmp_start_vif ${vif}
 done
 
 
