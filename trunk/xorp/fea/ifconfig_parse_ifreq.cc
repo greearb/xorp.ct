@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.6 2003/08/06 02:10:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.7 2003/09/11 12:56:26 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -183,7 +183,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    
 #ifdef SIOCGIFHWADDR
 	    memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
-	    if (ioctl(soc, SIOCGIFHWADDR, &ifrcopy) < 0) {
+	    if (ioctl(sock(family), SIOCGIFHWADDR, &ifrcopy) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
 			   if_name.c_str(), strerror(errno));
 	    } else {
