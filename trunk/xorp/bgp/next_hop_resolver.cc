@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.34 2005/01/31 19:23:03 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.35 2005/03/08 03:02:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1020,7 +1020,12 @@ NextHopRibRequest<A>::premature_invalid(const A& addr,
 	if (dreg) {
 	    if (dreg->base_addr() == addr && 
 		dreg->prefix_len() == prefix_len) {
-		_queue.erase(i);
+		/*
+		** Don't erase the first entry in the queue this is an
+		** ongoing transaction.
+		*/
+		if (i != _queue.begin())
+		    _queue.erase(i);
 		XLOG_INFO("invalid addr %s prefix len %u matched delete",
 			  cstring(addr), XORP_UINT_CAST(prefix_len));
 		return true;
