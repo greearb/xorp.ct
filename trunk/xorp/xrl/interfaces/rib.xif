@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.12 2004/04/01 19:31:21 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.13 2004/05/06 23:03:14 hodson Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -217,7 +217,7 @@ interface rib/0.1 {
 	 *
 	 * @param cookie a text value passed back to creator in each call
 	 *        from the RIB.  This allows creators to identity the source
-	 *	  of updates it receives through it redist_client/0.1
+	 *	  of updates it receives through the redist4/0.1
 	 *	  interface.
 	 */
 	redist_enable4 ? to_xrl_target:txt				\
@@ -242,7 +242,7 @@ interface rib/0.1 {
 	 *
 	 * @param cookie a text value passed back to creator in each call
 	 *        from the RIB.  This allows creators to identity the source
-	 *	  of updates it receives through it redist_client/0.1
+	 *	  of updates it receives through the redist6/0.1
 	 *	  interface.
 	 */
 	redist_enable6 ? to_xrl_target:txt				\
@@ -295,6 +295,101 @@ interface rib/0.1 {
 			& unicast:bool					\
 			& multicast:bool				\
 			& cookie:txt
+
+	/**
+	 * Enable transaction-based route redistribution from
+	 * one routing protocol to another.
+	 *
+	 * @param to_xrl_target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist_transaction4/0.1.
+	 *
+	 * @param from_protocol the name of the routing process routes are
+	 * to be redistributed from.
+	 *
+	 * @param unicast enable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast enable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through the redist_transaction4/0.1
+	 *	  interface.
+	 */
+	redist_transaction_enable4	? to_xrl_target:txt		\
+					& from_protocol:txt		\
+					& unicast:bool			\
+					& multicast:bool		\
+					& cookie:txt
+
+	/**
+	 * Enable transaction-based route redistribution from
+	 * one routing protocol to another.
+	 *
+	 * @param to_xrl_target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist_transaction6/0.1.
+	 *
+	 * @param from_protocol the name of the routing process routes are
+	 * to be redistributed from.
+	 *
+	 * @param unicast enable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast enable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through the redist_transaction6/0.1
+	 *	  interface.
+	 */
+	redist_transaction_enable6	? to_xrl_target:txt		\
+					& from_protocol:txt		\
+					& unicast:bool			\
+					& multicast:bool		\
+					& cookie:txt
+
+	/**
+	 * Disable transaction-based route redistribution from
+	 * one routing protocol to another.
+	 *
+	 * @param to_xrl_target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist_transaction4/0.1
+	 *	  and previously called redist_transaction_enable4.
+	 *
+	 * @param from the name of the routing process routes are to be
+	 *	  redistributed from.
+	 *
+	 * @param to the name of the routing process routes are to be
+	 *	  redistributed to.
+	 *
+	 * @param unicast disable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast disable for multicast RIBs matching from and to.
+	 */
+	redist_transaction_disable4	? to_xrl_target:txt		\
+					& from_protocol:txt		\
+					& unicast:bool			\
+					& multicast:bool		\
+					& cookie:txt
+
+	/**
+	 * Disable transaction-based route redistribution from
+	 * one routing protocol to another.
+	 *
+	 * @param to_xrl_target the XRL Target instance name of the caller.
+	 *	  The caller must implement redist_transaction6/0.1
+	 *	  and previously called redist_transaction_enable6.
+	 *
+	 * @param from the name of the routing process routes are to be
+	 *	  redistributed from.
+	 *
+	 * @param unicast disable for unicast RIBs matching from and to.
+	 *
+	 * @param multicast disable for multicast RIBs matching from and to.
+	 */
+	redist_transaction_disable6	? to_xrl_target:txt		\
+					& from_protocol:txt		\
+					& unicast:bool			\
+					& multicast:bool		\
+					& cookie:txt
 
 	/**
  	 * Register an interest in a route
