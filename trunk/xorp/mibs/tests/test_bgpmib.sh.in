@@ -224,11 +224,11 @@ test1()
     fi
 
     echo 'reading the entire BGP peer table at once... '
-    snmptable ${SNMPCONF} -CB -CH -Cf "," ${SNMPHOST}  BGP4-MIB::bgpPeerTable \
+    snmptable ${SNMPCONF} -CH -Cf "," ${SNMPHOST}  BGP4-MIB::bgpPeerTable \
         > bgpPeerTable2.tmp
     cat bgpPeerTable2.tmp
 
-    echo -n 'read again to check the variables that change with time... '
+    echo 'read again to check the variables that change with time... '
     snmpwalk ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpPeerTable > bgpPeerTable3.tmp
 
     # verify that bgpPeerFsmEstablishedTime is changing for all 4 peers
@@ -407,8 +407,12 @@ just_start()
     ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
 
     # wait for user to exit
-    echo 'Press Ctrl-C when done playing with the SNMP agent...'
-    sleep 360000
+    touch rock
+    echo 'Remove the file "./rock" to continue'
+    while [ -e "rock" ]
+    do
+	sleep 1
+    done
 
     # Unload MIB
     ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
