@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.8 2004/02/06 22:44:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.9 2004/02/11 08:48:45 pavlin Exp $"
 
 #include <stdexcept>
 
@@ -272,6 +272,8 @@ Parser::parse(const string& s) const
 
     vector<string> words(10);
     int wcount = split_into_words(str, words);
+    if (wcount == 0)
+	return XORP_OK;
 
     vector<string> template_words(10);
     int twcount = split_into_words(rpair->first, template_words);
