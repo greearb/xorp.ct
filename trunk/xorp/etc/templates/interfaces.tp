@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.7 2004/05/28 23:12:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.8 2004/06/04 04:47:04 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -47,7 +47,8 @@ interfaces {
     %mandatory:	targetname;
 
     targetname {
-	%create:;
+	%help:	short "Set the target name";
+	%set:;
     }
 
     TID {
