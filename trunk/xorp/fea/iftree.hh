@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.2 2003/03/10 23:20:16 hodson Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.3 2003/05/02 07:50:48 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -94,6 +94,7 @@ protected:
     State _st;
 };
 
+
 /* Classes derived from IfTreeItem */
 class IfTree;
 class IfTreeInterface;
@@ -135,8 +136,7 @@ public:
      *
      * @return iterator, will be equal to ifs().end() if invalid.
      */
-    inline IfMap::iterator get_if(const string& ifn)
-	{ return _ifs.find(ifn); }
+    inline IfMap::iterator get_if(const string& ifn);
 
     /**
      * Get iterator of corresponding to named interface.
@@ -145,8 +145,7 @@ public:
      *
      * @return iterator, will be equal to ifs().end() if invalid.
      */
-    inline IfMap::const_iterator get_if(const string& ifn) const
-	{ return _ifs.find(ifn); }
+    inline IfMap::const_iterator get_if(const string& ifn) const;
 
     inline const IfMap& ifs() const { return _ifs; }
 
@@ -184,6 +183,7 @@ protected:
     IfMap	_ifs;
 };
 
+
 /**
  * Fea class for holding physical interface state.
  */
@@ -220,11 +220,9 @@ public:
 
     bool remove_vif(const string& vifname);
 
-    inline VifMap::iterator get_vif(const string& vifname)
-	{ return _vifs.find(vifname); }
+    inline VifMap::iterator get_vif(const string& vifname);
 
-    inline VifMap::const_iterator get_vif(const string& vifname) const
-	{ return _vifs.find(vifname); }
+    inline VifMap::const_iterator get_vif(const string& vifname) const;
 
     /**
      * Copy state of internal variables from another IfTreeInterface.
@@ -250,6 +248,7 @@ protected:
     VifMap	 _vifs;
 };
 
+
 /**
  * Fea class for virtual (logical) interface state.
  */
@@ -286,15 +285,13 @@ public:
     inline const V6Map& v6addrs() const	{ return _v6addrs; }
     inline V6Map& v6addrs()		{ return _v6addrs; }
 
-    inline V4Map::iterator get_addr(const IPv4& a) { return _v4addrs.find(a); }
+    inline V4Map::iterator get_addr(const IPv4& a);
 
-    inline V6Map::iterator get_addr(const IPv6& a){ return _v6addrs.find(a); }
+    inline V6Map::iterator get_addr(const IPv6& a);
 
-    inline V4Map::const_iterator get_addr(const IPv4& a) const
-	{ return _v4addrs.find(a); }
+    inline V4Map::const_iterator get_addr(const IPv4& a) const;
 
-    inline V6Map::const_iterator get_addr(const IPv6& a) const
-	{ return _v6addrs.find(a); }
+    inline V6Map::const_iterator get_addr(const IPv6& a) const;
 
     /**
      * Add address.
@@ -364,6 +361,7 @@ protected:
     V6Map	 _v6addrs;
 };
 
+
 /**
  * Class for holding an IPv4 interface address and address related items.
  */
@@ -448,6 +446,7 @@ protected:
     uint32_t	_prefix;
 };
 
+
 /**
  * Class for holding an IPv6 interface address and address related items.
  */
@@ -507,5 +506,67 @@ protected:
     IPv6	_oaddr;	  /* Other address - p2p endpoint */
     uint32_t	_prefix;
 };
+
+
+//
+// Inline IfTree methods
+//
+
+inline IfTree::IfMap::iterator
+IfTree::get_if(const string& ifn)
+{
+    return _ifs.find(ifn); 
+}
+
+inline IfTree::IfMap::const_iterator
+IfTree::get_if(const string& ifn) const
+{
+    return _ifs.find(ifn);
+}
+
+//
+// Inline IfTreeInterface methods
+//
+
+inline IfTreeInterface::VifMap::iterator 
+IfTreeInterface::get_vif(const string& vifname)
+{
+    return _vifs.find(vifname);
+}
+
+inline 
+IfTreeInterface::VifMap::const_iterator 
+IfTreeInterface::get_vif(const string& vifname) const
+{
+    return _vifs.find(vifname);
+}
+
+//
+// Inline IfTreeVif methods
+//
+
+inline IfTreeVif::V4Map::iterator 
+IfTreeVif::get_addr(const IPv4& a) 
+{ 
+    return _v4addrs.find(a);
+}
+
+inline IfTreeVif::V6Map::iterator 
+IfTreeVif::get_addr(const IPv6& a) 
+{ 
+    return _v6addrs.find(a);
+}
+
+inline IfTreeVif::V4Map::const_iterator 
+IfTreeVif::get_addr(const IPv4& a) const
+{ 
+    return _v4addrs.find(a);
+}
+
+inline IfTreeVif::V6Map::const_iterator 
+IfTreeVif::get_addr(const IPv6& a) const
+{ 
+    return _v6addrs.find(a);
+}
 
 #endif // __FEA_IFTREE_HH__
