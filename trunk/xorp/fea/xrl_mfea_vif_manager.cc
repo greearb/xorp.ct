@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.14 2003/06/01 02:49:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.15 2003/06/02 02:17:19 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -188,6 +188,13 @@ XrlMfeaVifManager::set_vif_state()
 	    }
 	    continue;
 	}
+
+	//
+	// Update the pif_index
+	//
+	_mfea_node.set_config_pif_index(vif->name(),
+					vif->pif_index(),
+					err);
 	
 	//
 	// Update the vif flags
@@ -435,6 +442,50 @@ XrlMfeaVifManager::xrl_result_get_all_vif_names(
     // Permanent error
     _state = FAILED;
     XLOG_ERROR("Get VIF Names: Permanent Error");
+}
+
+void
+XrlMfeaVifManager::xrl_result_get_all_vif_pif_index(const XrlError& e,
+						    const uint32_t* pif_index,
+						    string ifname,
+						    string vifname)
+{
+    if (_vifs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_all_vif_pif_index for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _vifs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("setting pif_index for interface %s vif %s\n",
+		  ifname.c_str(), vifname.c_str());
+	vif->set_pif_index(*pif_index);
+	
+	update_state();
+	return;
+    }
+    
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get pif_index for vif %s: Permanent Error",
+	       vifname.c_str());
 }
 
 void
@@ -728,9 +779,19 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
     _vifs_by_interface.insert(pair<string, Vif*>(ifname, vif));
     
     //
-    // Fire off requests in parallel to get the flags and all the
+    // Fire off requests in parallel to get the pif_index, flags and all the
     // addresses on each Vif.
     //
+    {
+	// Get the pif_index
+	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
+	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_vif_pif_index,
+		      ifname, vifname);
+	_ifmgr_client.send_get_all_vif_pif_index(_fea_target_name.c_str(),
+						 ifname, vifname, cb);
+	_vifs_remaining++;
+    }
+    
     {
 	// Get the vif flags
 	XorpCallback6<void, const XrlError&, const bool*, const bool*,

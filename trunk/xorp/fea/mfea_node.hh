@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.5 2003/06/01 02:17:00 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.6 2003/06/02 02:17:19 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -177,6 +177,19 @@ public:
     int		delete_config_vif_addr(const string& vif_name,
 				       const IPvX& addr,
 				       string& reason);
+    
+    /**
+     * Set the pif_index to a configured vif.
+     * 
+     * @param vif_name the name of the vif.
+     * @param pif_index the physical interface index.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_config_pif_index(const string& vif_name,
+				     uint16_t pif_index,
+				     string& reason);
     
     /**
      * Set the vif flags to a configured vif.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.3 2003/06/01 02:49:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.4 2003/06/02 02:17:18 pavlin Exp $"
 
 
 //
@@ -59,6 +59,11 @@ MfeaNode::add_config_vif(const Vif& vif, string& reason)
 				reason) < 0) {
 	    return (XORP_ERROR);
 	}
+    }
+    if (set_config_pif_index(vif.name(),
+			     vif.pif_index(),
+			     reason) < 0) {
+	return (XORP_ERROR);
     }
     if (set_config_vif_flags(vif.name(),
 			     vif.is_pim_register(),
@@ -207,6 +212,31 @@ MfeaNode::delete_config_vif_addr(const string& vif_name,
         send_delete_config_vif_addr(dst_module_instance_name, dst_module_id,
 				    vif_name, addr);
     }
+    
+    return (XORP_OK);
+}
+
+/**
+ * Set the pif_index to a configured vif.
+ * 
+ * @param vif_name the name of the vif.
+ * @param pif_index the physical interface index.
+ * @param reason return-by-reference string that contains human-readable
+ * string with information about the reason for failure (if any).
+ * @return  XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+MfeaNode::set_config_pif_index(const string& vif_name,
+			       uint16_t pif_index,
+			       string& reason)
+{
+    if (ProtoNode<MfeaVif>::set_config_pif_index(vif_name, pif_index,
+						 reason) < 0)
+	return (XORP_ERROR);
+    
+    //
+    // XXX: no need to propagate the message to upper-layer protocols.
+    //
     
     return (XORP_OK);
 }
