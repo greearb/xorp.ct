@@ -3,6 +3,7 @@
  *        : mib2c.iterate.conf,v 5.5 2002/12/16 22:50:18 hardaker Exp $
  */
 
+#include "bgp4_mib_module.h"
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -93,7 +94,7 @@ initialize_table_bgpPeerTable(void)
     /***************************************************
      * registering the table with the master agent
      */
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable",
+    DEBUGMSGTL(("bgp4_mib1657",
                 "Registering table bgpPeerTable as a table iterator\n"));		 
     netsnmp_register_table_iterator(my_handler, iinfo);
 }
@@ -105,7 +106,7 @@ init_bgp4_mib_1657_bgppeertable(void)
 
   /* here we initialize all the tables we're planning on supporting */
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "Initializing\n"));
+    DEBUGMSGTL(("bgp4_mib1657", "Initializing\n"));
     initialize_table_bgpPeerTable();
 }
 
@@ -132,28 +133,28 @@ bgpPeerTable_get_first_data_point(void **my_loop_context,void **my_data_context,
 				  netsnmp_iterator_info *mydata)
 {
     PeerLoopContext* loop_context;
-    BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
+    BgpMib& bgp_mib = BgpMib::the_instance();
     SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_first_data_point\n"));
+    DEBUGMSGTL(("bgp4_mib1657", "get_first_data_point\n"));
 
     /* allocate loop context for this table */
     loop_context = SNMP_MALLOC_TYPEDEF(PeerLoopContext);
     if (NULL == loop_context) return NULL;
 
-    BgpMibXrlClient::CB12 cb12;    // see bgp_xif.hh for this prototype
+    BgpMib::CB12 cb12;    // see bgp_xif.hh for this prototype
     loop_context->valid = false;
     cb12 = callback(get_peer_list_start_done, loop_context);
     bgp_mib.send_get_peer_list_start("bgp", cb12);
     bool timeout = false;
     eventloop.set_flag_after_ms(1000, &timeout);
     while (!timeout && !loop_context->valid) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable","waiting for peer list...\n"));
+	DEBUGMSGTL(("bgp4_mib1657","waiting for peer list...\n"));
 	eventloop.run(); //see note in function header if this shocks you...
     }
 
     if (timeout) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "timeout while reading "
+	DEBUGMSGTL(("bgp4_mib1657", "timeout while reading "
 		     "table...\n"));
 	return NULL; // timeout
     }
@@ -179,7 +180,7 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
 				 netsnmp_variable_list *put_index_data,
 				 netsnmp_iterator_info *)
 {
-    BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
+    BgpMib& bgp_mib = BgpMib::the_instance();
     SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
     PeerLoopContext* loop_context = (PeerLoopContext*) (*my_loop_context);
     PeerDataContext* data_context;  
@@ -189,11 +190,11 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
     data_context = SNMP_MALLOC_TYPEDEF(PeerDataContext);
     if (NULL == data_context) return NULL;
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_next_data_point\n"));
+    DEBUGMSGTL(("bgp4_mib1657", "get_next_data_point\n"));
 
     if (!loop_context->more) return NULL;
 
-    BgpMibXrlClient::CB13 cb13;    // see bgp_xif.hh for this prototype
+    BgpMib::CB13 cb13;    // see bgp_xif.hh for this prototype
 
     cb13 = callback(get_peer_list_next_done, data_context);
     data_context->valid = false; 
@@ -202,12 +203,12 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
     bool timeout = false;
     eventloop.set_flag_after_ms(1000, &timeout);
     while (!timeout && !data_context->valid) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "waiting for next row...\n"));
+	DEBUGMSGTL(("bgp4_mib1657", "waiting for next row...\n"));
 	eventloop.run();  
     }
      
     if (timeout) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "timeout while reading "
+	DEBUGMSGTL(("bgp4_mib1657", "timeout while reading "
 		     "table...\n"));
 	return NULL; // timeout
     }
@@ -233,10 +234,10 @@ bgpPeerTable_handler(
     netsnmp_agent_request_info        * reqinfo,
     netsnmp_request_info              * requests) {
 
-    BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
+    BgpMib& bgp_mib = BgpMib::the_instance();
     SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "bgpPeerTable_handler\n"));
+    DEBUGMSGTL(("bgp4_mib1657", "bgpPeerTable_handler\n"));
 
     netsnmp_request_info *request;
     netsnmp_table_request_info *table_info;
@@ -290,7 +291,7 @@ bgpPeerTable_handler(
                 switch(table_info->colnum) {
                     case COLUMN_BGPPEERIDENTIFIER:
 			{
-			BgpMibXrlClient::CB14 cb_peerid;
+			BgpMib::CB14 cb_peerid;
 			cb_peerid = callback(get_peer_id_done, req_cache);
 			bgp_mib.send_get_peer_id("bgp", cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
@@ -302,7 +303,7 @@ bgpPeerTable_handler(
                     case COLUMN_BGPPEERSTATE:  // since they use the same XRL we
                     case COLUMN_BGPPEERADMINSTATUS: // can use the same callback
 			{
-			BgpMibXrlClient::CB15 cb_peerstatus;
+			BgpMib::CB15 cb_peerstatus;
 			cb_peerstatus = callback(get_peer_status_done, 
 			    req_cache);
 			bgp_mib.send_get_peer_status("bgp",
@@ -315,7 +316,7 @@ bgpPeerTable_handler(
 			}
                     case COLUMN_BGPPEERNEGOTIATEDVERSION:
  			{
-			BgpMibXrlClient::CB16 cb_peernegver;
+			BgpMib::CB16 cb_peernegver;
 			cb_peernegver = 
 			  callback(get_peer_negotiated_version_done, req_cache);
 			bgp_mib.send_get_peer_negotiated_version("bgp", 
@@ -360,7 +361,7 @@ bgpPeerTable_handler(
 			}
                     case COLUMN_BGPPEERREMOTEAS:
  			{
-			BgpMibXrlClient::CB17 cb_peeras;
+			BgpMib::CB17 cb_peeras;
 			cb_peeras = callback(get_peer_as_done, req_cache);
 			bgp_mib.send_get_peer_as("bgp", cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
@@ -376,7 +377,7 @@ bgpPeerTable_handler(
                     case COLUMN_BGPPEERLASTERROR:
                     case COLUMN_BGPPEERINUPDATEELAPSEDTIME:
  			{
-			BgpMibXrlClient::CB18 cb_peermsgstats;
+			BgpMib::CB18 cb_peermsgstats;
 			cb_peermsgstats = callback(get_peer_msg_stats_done,
 			    req_cache);
 			bgp_mib.send_get_peer_msg_stats("bgp", 
@@ -390,7 +391,7 @@ bgpPeerTable_handler(
                     case COLUMN_BGPPEERFSMESTABLISHEDTRANSITIONS:
                     case COLUMN_BGPPEERFSMESTABLISHEDTIME:
  			{
-			BgpMibXrlClient::CB19 cb_peereststats;
+			BgpMib::CB19 cb_peereststats;
 			cb_peereststats = callback(get_peer_established_stats, 
 						   req_cache);
 			bgp_mib.send_get_peer_established_stats("bgp", 
@@ -409,7 +410,7 @@ bgpPeerTable_handler(
                     case COLUMN_BGPPEERMINASORIGINATIONINTERVAL:
                     case COLUMN_BGPPEERMINROUTEADVERTISEMENTINTERVAL:
  			{
-			BgpMibXrlClient::CB20 cb_peertimercfg;
+			BgpMib::CB20 cb_peertimercfg;
 			cb_peertimercfg = callback(get_peer_timer_config_done, 
 						   req_cache);
 			bgp_mib.send_get_peer_timer_config ("bgp", 
@@ -440,7 +441,7 @@ bgpPeerTable_handler(
 
 void free_context(void * context, struct netsnmp_iterator_info_s * /* iinfo */)
 {
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable","freeing context %x\n", context));
+    DEBUGMSGTL(("bgp4_mib1657","freeing context %x\n", context));
     if (NULL != context) free(context);
 }
 
@@ -456,7 +457,7 @@ get_peer_list_start_done(
 	loop_context->peer_list_token = (*token);
 	loop_context->more = (*more);
 	loop_context->valid = true;
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable",
+	DEBUGMSGTL(("bgp4_mib1657",
                 "token: %ud more: %d\n", *token, *more));		 
     } else {
     // XXX: deal with retries
@@ -480,7 +481,7 @@ void get_peer_list_next_done(
 	data_context->peer_remote_port = (*remote_port); 
 	data_context->more = (*more);
 	data_context->valid = true;
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable",
+	DEBUGMSGTL(("bgp4_mib1657",
                 "local_ip: %s more: %d\n", local_ip->str().c_str(), *more));		 
     } else {
     // XXX: deal with retries
@@ -494,7 +495,7 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
 	// XXX: deal with retries
     } 
     
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", 
+    DEBUGMSGTL(("bgp4_mib1657", 
                 "peer_id %s\n", peer_id->str().c_str()));		 
 
     netsnmp_request_info *request;
@@ -527,7 +528,7 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
 	    }
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_peer_id_done"
+	    DEBUGMSGTL(("bgp4_mib1657", "get_peer_id_done"
 		" called for the wrong column (%d)", table_info->colnum));
 	    assert(0);
             return;
@@ -545,7 +546,7 @@ get_peer_status_done(const XrlError& e, const uint32_t* state,
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable",
+    DEBUGMSGTL(("bgp4_mib1657",
                 "state %d admin status %d\n", * state, * admstus));
 
     netsnmp_request_info *request;
@@ -579,7 +580,7 @@ get_peer_status_done(const XrlError& e, const uint32_t* state,
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_peer_state_done"
+	    DEBUGMSGTL(("bgp4_mib1657", "get_peer_state_done"
 		" called for the wrong column (%d)", table_info->colnum));
 	    assert(0);
             return;
@@ -597,7 +598,7 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "negotd version %d\n", * negver));
+    DEBUGMSGTL(("bgp4_mib1657", "negotd version %d\n", * negver));
 
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
@@ -626,7 +627,7 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", 
+	    DEBUGMSGTL(("bgp4_mib1657", 
 		"get_peer_state_done called for the wrong column (%d)", 
 		table_info->colnum));
 	    assert(0);
@@ -644,7 +645,7 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "as number %d\n", * asnum));
+    DEBUGMSGTL(("bgp4_mib1657", "as number %d\n", * asnum));
 
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
@@ -673,7 +674,7 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_peer_as_done called"
+	    DEBUGMSGTL(("bgp4_mib1657", "get_peer_as_done called"
 			 "for the wrong column (%d)", table_info->colnum));
 	    assert(0);
             return;
@@ -692,7 +693,7 @@ void get_peer_msg_stats_done(const XrlError& e, const uint32_t * inupd,
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "in upds %d out upds %d"
+    DEBUGMSGTL(("bgp4_mib1657", "in upds %d out upds %d"
 	"in msgs %d out msgs %d last err %d in updt elapsed %d\n", *inupd, 
 
 	*outupd, *inmsgs, *outmsgs, *lasterr, *inupdelps));
@@ -744,7 +745,7 @@ void get_peer_msg_stats_done(const XrlError& e, const uint32_t * inupd,
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_peer_msg_stats_done"
+	    DEBUGMSGTL(("bgp4_mib1657", "get_peer_msg_stats_done"
 			"called for the wrong column(%d)", table_info->colnum));
 	    assert(0);
             return;
@@ -761,7 +762,7 @@ get_peer_established_stats(const XrlError& e, const uint32_t * trans,
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "transitions %d neg time %d\n", 
+    DEBUGMSGTL(("bgp4_mib1657", "transitions %d neg time %d\n", 
 	* trans, * negtime));
 
     netsnmp_request_info *request;
@@ -795,7 +796,7 @@ get_peer_established_stats(const XrlError& e, const uint32_t * trans,
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable",
+	    DEBUGMSGTL(("bgp4_mib1657",
 		"get_peer_established_stats for the wrong column (%d)", 
 		table_info->colnum));
 	    assert(0);
@@ -817,7 +818,7 @@ get_peer_timer_config_done(const XrlError& e, const uint32_t * retryint,
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "connect retry intvl  %d"
+    DEBUGMSGTL(("bgp4_mib1657", "connect retry intvl  %d"
 	"hold time %d keep alive %d hold time conf %d\n keep alive conf %d"
 	"min as origin %d min rout adv intvl %d\n", *retryint, *holdtime,
 	*keepalive, *holdtimeconf, *keepaliveconf, *minasorig, *minroutead)); 
@@ -880,7 +881,7 @@ get_peer_timer_config_done(const XrlError& e, const uint32_t * retryint,
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
-	    DEBUGMSGTL(("bgp4_mib_1657_bgppeertable",
+	    DEBUGMSGTL(("bgp4_mib1657",
 		"get_peer_timer_config_done called for the wrong column (%d)", 
 		table_info->colnum));
 	    assert(0);

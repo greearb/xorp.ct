@@ -112,7 +112,7 @@ LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(
 libnetsnmpxorp_so_LDFLAGS = -shared -fPIC -fpic 
 
 test_xorpevents_LDADD = $(LDADD) -lnetsnmpxorp -L.
-bgp4_mib_1657_so_LDADD = $(LDADD) -lnetsnmpxorp -L. $(top_builddir)/xrl/interfaces/libbgpxif.a
+bgp4_mib_1657_so_LDADD = $(LDADD) -lnetsnmpxorp -L. -lbgp4mibbase -L$(top_builddir)/xrl/targets $(top_builddir)/xrl/interfaces/libbgpxif.a
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
 bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
 
@@ -128,7 +128,7 @@ xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
 
 test_xorpevents_SOURCES = test_xorpevents.cc
 libnetsnmpxorp_so_SOURCES = xorpevents.cc xorpevents.hh
-bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc bgp4_mib_1657_bgppeertable.hh bgp4_mib_1657_bgppeertable.cc
+bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc bgp4_mib_1657_bgppeertable.hh bgp4_mib_1657_bgppeertable.cc bgp4_mib_xrl_target.cc
 ospf_mib_1850_so_SOURCES = ospf_mib_1850.hh ospf_mib_1850.cc
 xorp_if_mib_module_so_SOURCES = xorp_if_mib_module.hh xorp_if_mib_module.cc
 
@@ -146,7 +146,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 bgp4_mib_1657_so_OBJECTS =  bgp4_mib_1657.o bgp4_mib_1657_bgpversion.o \
-bgp4_mib_1657_bgppeertable.o
+bgp4_mib_1657_bgppeertable.o bgp4_mib_xrl_target.o
 ospf_mib_1850_so_OBJECTS =  ospf_mib_1850.o
 xorp_if_mib_module_so_OBJECTS =  xorp_if_mib_module.o
 test_xorpevents_OBJECTS =  test_xorpevents.o
@@ -175,8 +175,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/bgp4_mib_1657.P .deps/bgp4_mib_1657_bgppeertable.P \
-.deps/bgp4_mib_1657_bgpversion.P .deps/ospf_mib_1850.P \
-.deps/test_xorpevents.P .deps/xorp_if_mib_module.P .deps/xorpevents.P
+.deps/bgp4_mib_1657_bgpversion.P .deps/bgp4_mib_xrl_target.P \
+.deps/ospf_mib_1850.P .deps/test_xorpevents.P \
+.deps/xorp_if_mib_module.P .deps/xorpevents.P
 SOURCES = $(bgp4_mib_1657_so_SOURCES) $(ospf_mib_1850_so_SOURCES) $(xorp_if_mib_module_so_SOURCES) $(test_xorpevents_SOURCES) $(libnetsnmpxorp_so_SOURCES)
 OBJECTS = $(bgp4_mib_1657_so_OBJECTS) $(ospf_mib_1850_so_OBJECTS) $(xorp_if_mib_module_so_OBJECTS) $(test_xorpevents_OBJECTS) $(libnetsnmpxorp_so_OBJECTS)
 

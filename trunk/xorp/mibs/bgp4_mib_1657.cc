@@ -3,6 +3,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "bgp4_mib_module.h"
 #include "xorpevents.hh"
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgpversion.hh"
@@ -26,13 +27,17 @@ void
 init_bgp4_mib_1657 (void)
 {
     DEBUGMSGTL((mib_mod_name, "Initializing...\n"));
+
+    // this is to ensure the constructor of BgpMib gets called as soon as
+    // we load this MIB
+    BgpMib::the_instance();
+
     init_bgp4_mib_1657_bgpversion();
     init_bgp4_mib_1657_bgppeertable();
     DEBUGMSGTL((mib_mod_name, "Creating periodic event...\n"));
     ptcb = callback(bgp4_mib_callback);
     pXtbgp = new XorpTimer;
     SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
-    // *pXtbgp = eventloop.new_periodic (750, ptcb);
     DEBUGMSGTL((mib_mod_name, "Exporting events...\n"));
     eventloop.export_events();
 
@@ -55,28 +60,30 @@ deinit_bgp4_mib_1657 (void)
     pXtbgp = NULL;
 }
 
-BgpMibXrlClient * BgpMibXrlClient::_bgpMib = NULL;
+BgpMib *  BgpMib::_bgpMib = NULL;
 
 
-BgpMibXrlClient& 
-BgpMibXrlClient::the_instance() 
+BgpMib& 
+BgpMib::the_instance() 
 {
     if (!_bgpMib) {
-	_bgpMib = new BgpMibXrlClient;
-	DEBUGMSGTL((mib_mod_name, "BgpMibXrlClient created\n"));
+	_bgpMib = new BgpMib;
+	DEBUGMSGTL((mib_mod_name, "BgpMib created\n"));
     }
     return *_bgpMib;
 }
 
-BgpMibXrlClient::BgpMibXrlClient() 
-    : XrlBgpV0p2Client(&_xrl_rtr), 
-      _xrl_rtr(SnmpEventLoop::the_instance(),"bgp4mib")
+BgpMib::BgpMib() 
+    : XrlBgpV0p2Client(&_xrl_router), 
+      _xrl_router(SnmpEventLoop::the_instance(),"bgp4_mib"),
+      _xrl_target(&_xrl_router, *this)
+
 {
 }
 
-BgpMibXrlClient::~BgpMibXrlClient()
+BgpMib::~BgpMib()
 {
     if (_bgpMib) delete _bgpMib;
-    DEBUGMSGTL((mib_mod_name, "BgpMibXrlClient destroyed\n"));
+    DEBUGMSGTL((mib_mod_name, "BgpMib destroyed\n"));
 }
 

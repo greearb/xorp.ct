@@ -3,6 +3,7 @@
  *        : mib2c.scalar.conf,v 1.5 2002/07/18 14:18:52 dts12 Exp $
  */
 
+#include "bgp4_mib_module.h"
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -16,7 +17,7 @@ init_bgp4_mib_1657_bgpversion (void)
 {
     static oid bgpVersion_oid[] = { 1,3,6,1,2,1,15,1, 0 };
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "Initializing\n"));
+    DEBUGMSGTL(("bgp4_mib1657", "Initializing\n"));
 
     netsnmp_register_read_only_instance(netsnmp_create_handler_registration
                                         ("bgpVersion",
@@ -29,12 +30,8 @@ init_bgp4_mib_1657_bgpversion (void)
 void get_bgp_version_done(const XrlError& e, const uint32_t* ver, 
 			       netsnmp_delegated_cache* cache)
 {
-    static const int bgpVerStrMax = 4;
-    char bgpVersion[bgpVerStrMax];
-    int  bgpVersionLen = snprintf(bgpVersion, bgpVerStrMax, "%d", *ver);
 
-    DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "get_bgp_version_done called\n"));
-    DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "ver = %ld\n", *ver));
+    DEBUGMSGTL(("bgp4_mib1657", "get_bgp_version_done called\n"));
 
     netsnmp_request_info *requests;
     netsnmp_agent_request_info *reqinfo;
@@ -51,17 +48,23 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
     requests = cache->requests;
 
     if (e != XrlError::OKAY()) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "XrlError: "));
-	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", e.error_msg()));
-	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "\n"));
+	DEBUGMSGTL(("bgp4_mib1657", "XrlError: "));
+	DEBUGMSGTL(("bgp4_mib1657", e.error_msg()));
+	DEBUGMSGTL(("bgp4_mib1657", "\n"));
 	netsnmp_set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
+	requests->delegated = 0;
 	return;
     }
 
-    DEBUGMSGTL((XORP_MODULE_NAME,"continuing delayed req, mode = %d\n", reqinfo->mode));
+    DEBUGMSGTL(("bgp4_mib1657","continuing delayed req, mode = %d\n", 
+	reqinfo->mode));
 
     // no longer delegated since we'll answer down below
+
     requests->delegated = 0;
+    static const int bgpVerStrMax = 4;
+    char bgpVersion[bgpVerStrMax];
+    int  bgpVersionLen = snprintf(bgpVersion, bgpVerStrMax, "%d", *ver);
 
     snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
 	(unsigned char *) bgpVersion, bgpVersionLen);
@@ -76,11 +79,11 @@ get_bgpVersion(netsnmp_mib_handler * handler,
                           netsnmp_agent_request_info *  reqinfo,
                           netsnmp_request_info *requests)
 {
-    DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "get_bgpVersion called\n"));
-    BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
-    BgpMibXrlClient::CB0 cb_version;
-    netsnmp_delegated_cache * req_cache = netsnmp_create_delegated_cache(handler,
-					    reginfo, reqinfo, requests, NULL);
+    DEBUGMSGTL(("bgp4_mib1657", "get_bgpVersion called\n"));
+    BgpMib& bgp_mib = BgpMib::the_instance();
+    BgpMib::CB0 cb_version;
+    netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache(handler,
+	reginfo, reqinfo, requests, NULL);
     cb_version = callback(get_bgp_version_done, req_cache);
     bgp_mib.send_get_bgp_version("bgp", cb_version); 
 

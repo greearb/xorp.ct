@@ -14,41 +14,30 @@
 
 #ident "$Header$"
 
-#define XORP_MODULE_NAME "XORP_SNMP_INTERFACE"
+#include "config.h"
 
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "bgp4_mib_module.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 
 #include "xorpevents.hh"
-#include "libxorp/xlog.h"
+#include "libxipc/xrl_std_router.hh"
+#include "bgp4_mib_xrl_target.hh"
 
-static const char * mib_mod_name = "xorp_if_mib_module";
-
-extern "C" {
-void   init_xorp_if_mib_module(void);
-void deinit_xorp_if_mib_module(void);
-}
-
-void
-init_xorp_if_mib_module(void)
+XrlBgpMibTarget::XrlBgpMibTarget(XrlRouter *r, BgpMib& bgp_mib)
+	: XrlBgp4MibTargetBase(r), _bgp_mib(bgp_mib)
 {
-    DEBUGMSGTL((mib_mod_name, "Initialized...\n"));
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.set_log_name(mib_mod_name);  
-    xlog_init("snmpd", NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW); 
-    xlog_add_default_output();
-    xlog_start();
 }
 
-
-void
-deinit_xorp_if_mib_module(void)
+XrlCmdError
+XrlBgpMibTarget::common_0_1_get_status(
+    // Output values, 
+    uint32_t& status,
+    string&	/* reason */)
 {
-    DEBUGMSGTL((mib_mod_name, "Unloaded...\n"));
-    xlog_stop();
-    xlog_exit();
+    status = PROC_READY;
+    return XrlCmdError::OKAY();
 }
 
-
+    

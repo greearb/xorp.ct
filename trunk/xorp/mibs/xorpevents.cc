@@ -14,11 +14,14 @@
 
 #ident "$Header$"
 
+#define XORP_MODULE_NAME "netsnmpxorp"
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "xorpevents.hh"
+
 
 // definition and initialization of static members
 const char * SnmpEventLoop::_log_name = "SnmpEventLoop";
@@ -72,6 +75,15 @@ SnmpEventLoop::the_instance()
     }
     return *_sel;
 }
+
+SnmpEventLoop::~SnmpEventLoop()
+{
+    DEBUGMSGTL((_log_name, "shared event loop freed...!\n"));
+    clear_pending_alarms();
+    clear_monitored_fds();
+    delete _sel;
+}
+
 
 void
 SnmpEventLoop::export_events()

@@ -47,6 +47,7 @@ libnetsnmpxorp_so_LDFLAGS = -shared -fPIC -fpic
 test_xorpevents_LDADD  = $(LDADD) -lnetsnmpxorp -L.
 
 bgp4_mib_1657_so_LDADD = $(LDADD) -lnetsnmpxorp -L.
+bgp4_mib_1657_so_LDADD += -lbgp4mibbase -L$(top_builddir)/xrl/targets
 bgp4_mib_1657_so_LDADD += $(top_builddir)/xrl/interfaces/libbgpxif.a
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
 bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
@@ -76,6 +77,8 @@ bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgpversion.hh
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgpversion.cc
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgppeertable.hh
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgppeertable.cc
+bgp4_mib_1657_so_SOURCES += bgp4_mib_xrl_target.cc
+
 
 # -- Library Sources (ospf_mib_1850)
 ospf_mib_1850_so_SOURCES  = ospf_mib_1850.hh

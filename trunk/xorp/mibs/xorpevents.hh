@@ -12,12 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.2 2003/04/09 22:41:00 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.3 2003/04/23 02:41:23 jcardona Exp $
 
 #ifndef __MIBS_XORPEVENTLOOP_HH__
 #define __MIBS_XORPEVENTLOOP_HH__
 
-#define XORP_MODULE_NAME "netsnmpxorp"
 #include <set>
 #include <map>
 #include "libxorp/timeval.hh"
@@ -36,19 +35,12 @@ class SnmpEventLoop;
 
 
 class SnmpEventLoop : public EventLoop {
+
 public:
     typedef std::set<int> FdSet;
     typedef std::map<TimeVal, unsigned int> AlarmMap;
+
 public:
-    ~SnmpEventLoop()
-    {
-	DEBUGMSGTL((_log_name, "shared event loop freed...!\n"));
-	clear_pending_alarms();
-	clear_monitored_fds();
-	delete _sel;
-    }
-
-
     /**
      * @return reference to the @ref SnmpEventLoop used by all XORP MIB
      * modules.
@@ -101,6 +93,7 @@ protected:
 private:
     SnmpEventLoop(SnmpEventLoop& o);		    // Not implemented
     SnmpEventLoop& operator= (SnmpEventLoop& o);    // Not implemented
+    ~SnmpEventLoop();
 
     SnmpEventLoop() : EventLoop() {}	// Private to prevent instantiation
     void export_timers();

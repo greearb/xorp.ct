@@ -5,9 +5,6 @@
 #ifndef __MIBS_BGP4_MIB_1657_HH__
 #define __MIBS_BGP4_MIB_1657_HH__ 
 
-#undef  XORP_MODULE_NAME 
-#define XORP_MODULE_NAME "bgp4_mib_1657"
-
 #include "config.h"
 #include <queue>
 #include "libxorp/xorp.h"
@@ -15,7 +12,8 @@
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_args.hh"
 #include "xrl/interfaces/bgp_xif.hh"
-#include "xrl/interfaces/bgp_xif.hh"
+#include "bgp4_mib_xrl_target.hh"
+
 
 /* dlopen functions */
 extern "C" {
@@ -24,22 +22,24 @@ void          deinit_bgp4_mib_1657 (void);
 }
 
 
+
+
 /**
- * @short Class that implements the Xrl interfaces relevant to the bgp mib
+ * @short Class that implements the BGP MIB tree 
  *
  */
 
-class BgpMibXrlClient : public XrlBgpV0p2Client {
+class BgpMib : public XrlBgpV0p2Client {
+
 public:
-    static BgpMibXrlClient& the_instance();
-    ~BgpMibXrlClient();
+    static BgpMib& the_instance();
 
 private:
-    BgpMibXrlClient();
-
-    static BgpMibXrlClient* _bgpMib;
-
-    XrlStdRouter _xrl_rtr;
+    BgpMib();
+    ~BgpMib();
+    static BgpMib* _bgpMib;
+    XrlStdRouter _xrl_router;
+    XrlBgpMibTarget _xrl_target;
 };
 
 #endif    /* __MIBS_BGP4_MIB_1657_HH__ */                      

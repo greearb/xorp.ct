@@ -8,6 +8,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "xorp_if_module.h"
 #include "xorpevents.hh"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
