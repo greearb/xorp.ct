@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.3 2003/04/10 00:29:02 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.4 2003/05/30 18:13:19 jcardona Exp $
 #
 
 #
@@ -362,17 +362,6 @@ xref="libxorp libxorp-callback libcomm libxipc libproto"
 kdocify
 
 #
-# mfea
-#
-lib="mfea"
-desc="Multicast Forwarding Engine Abstraction daemon"
-html_start_page="index.html"
-files="mfea/*.h mfea/*.hh"
-excludes=""
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
-kdocify
-
-#
 # mld6igmp
 #
 lib="mld6igmp"
@@ -402,7 +391,7 @@ desc="Forwarding Engine Abstraction daemon"
 html_start_page="index.html"
 files="fea/*.hh"
 excludes="fea/*click*hh"
-xref="libxorp libxorp-callback libcomm libxipc"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
 kdocify
 
 #
