@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.5 2003/04/26 06:01:52 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -363,7 +363,7 @@ test_ipv6net_address_const()
     //
     // Test the address family.
     //
-    verbose_assert(ipnet_a.af() == AF_INET6, "af()");
+    verbose_assert(IPv6Net::af() == AF_INET6, "af()");
     
     //
     // Get the base address.
