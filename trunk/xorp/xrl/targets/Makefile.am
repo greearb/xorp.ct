@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.31 2004/05/06 20:18:31 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.32 2004/05/12 21:58:39 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -126,6 +126,8 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/redist_transaction4.xif		\
+		$(INTERFACES_DIR)/redist_transaction6.xif		\
 		$(INTERFACES_DIR)/fea_rawpkt.xif			\
 		$(INTERFACES_DIR)/socket4_locator.xif			\
 		$(INTERFACES_DIR)/socket6_locator.xif
