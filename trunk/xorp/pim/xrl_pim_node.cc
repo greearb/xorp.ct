@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.28 2003/07/30 23:43:30 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.29 2003/08/03 08:31:26 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -308,7 +308,7 @@ XrlPimNode::start_protocol_kernel()
     //
     // Enable receiving of MRIB information
     //
-#if 1
+#if 0
     XrlMfeaV0p1Client::send_allow_mrib_messages(
 	xorp_module_name(family(), XORP_MODULE_MFEA),
 	my_xrl_target_name(),
@@ -2639,15 +2639,10 @@ XrlPimNode::pim_0_1_enable_vif(
     // Input values, 
     const string&	vif_name)
 {
-    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (pim_vif == NULL) {
-	string msg = c_format("Cannot enable vif %s: no such vif",
-			      vif_name.c_str());
+    if (PimNode::enable_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    pim_vif->enable();
     
     return XrlCmdError::OKAY();
 }
@@ -2657,15 +2652,10 @@ XrlPimNode::pim_0_1_disable_vif(
     // Input values, 
     const string&	vif_name)
 {
-    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (pim_vif == NULL) {
-	string msg = c_format("Cannot disable vif %s: no such vif",
-			      vif_name.c_str());
+    if (PimNode::disable_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    pim_vif->disable();
     
     return XrlCmdError::OKAY();
 }
@@ -2675,19 +2665,10 @@ XrlPimNode::pim_0_1_start_vif(
     // Input values, 
     const string&	vif_name)
 {
-    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (pim_vif == NULL) {
-	string msg = c_format("Cannot start vif %s: no such vif",
-			      vif_name.c_str());
+    if (PimNode::start_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    if (pim_vif->start() != XORP_OK) {
-	string msg = c_format("Failed to start vif %s",
-			      vif_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
     
     return XrlCmdError::OKAY();
 }
@@ -2697,19 +2678,10 @@ XrlPimNode::pim_0_1_stop_vif(
     // Input values, 
     const string&	vif_name)
 {
-    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    string msg;
     
-    if (pim_vif == NULL) {
-	string msg = c_format("Cannot stop vif %s: no such vif",
-			      vif_name.c_str());
+    if (PimNode::stop_vif(vif_name, msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    if (pim_vif->stop() != XORP_OK) {
-	string msg = c_format("Failed to stop vif %s",
-			      vif_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
     
     return XrlCmdError::OKAY();
 }

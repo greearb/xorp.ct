@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.22 2003/07/08 01:32:24 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.23 2003/07/12 01:06:56 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -224,6 +224,42 @@ public:
     int		delete_vif_addr(const string& vif_name,
 				const IPvX& addr,
 				string& err);
+    
+    /**
+     * Enable an existing PIM vif.
+     * 
+     * @param vif_name the name of the vif to enable.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		enable_vif(const string& vif_name, string& err);
+
+    /**
+     * Disable an existing PIM vif.
+     * 
+     * @param vif_name the name of the vif to disable.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		disable_vif(const string& vif_name, string& err);
+
+    /**
+     * Start an existing PIM vif.
+     * 
+     * @param vif_name the name of the vif to start.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		start_vif(const string& vif_name, string& err);
+    
+    /**
+     * Stop an existing PIM vif.
+     * 
+     * @param vif_name the name of the vif to start.
+     * @param err the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		stop_vif(const string& vif_name, string& err);
     
     /**
      * Start PIM on all enabled interfaces.
