@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.16 2004/10/21 00:27:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.17 2004/11/05 00:48:03 bms Exp $"
 
 
 #include "fea_module.h"
@@ -96,7 +96,7 @@ IfConfigSet::push_config(const IfTree& it)
 
 	// Soft interfaces and their child nodes should never be pushed.
 	if (i.is_soft())
-		continue;
+	    continue;
 
 	push_interface_begin(i);
 
