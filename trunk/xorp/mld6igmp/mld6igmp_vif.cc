@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.28 2004/06/10 22:41:27 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.29 2004/06/18 21:51:52 pavlin Exp $"
 
 
 //
@@ -558,7 +558,6 @@ Mld6igmpVif::update_primary_address(string& error_msg)
 
     //
     // Check that the interface has a primary address.
-    // addresses.
     //
     if (primary_a == IPvX::ZERO(family())) {
 	error_msg = "invalid primary address";
