@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.2 2003/02/25 06:53:51 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.3 2003/03/10 23:21:04 hodson Exp $"
 
 #include "rtrmgr/rtrmgr_module.h"
 #include "config.h"
@@ -226,11 +226,11 @@ InterfaceMonitor::get_flags4_done(const XrlError& e,
 	}
 	Vif* vif = _vifs_by_name[vifname];
 	//XXX this should be per-addr, not per VIF!
-	vif->set_multicast_capable(multicast);
-	vif->set_p2p(point_to_point);
-	vif->set_broadcast_capable(broadcast);
-	vif->set_underlying_vif_up(enabled);
-	vif->set_loopback(loopback);
+	vif->set_multicast_capable(*multicast);
+	vif->set_p2p(*point_to_point);
+	vif->set_broadcast_capable(*broadcast);
+	vif->set_underlying_vif_up(*enabled);
+	vif->set_loopback(*loopback);
 	_flags_remaining--;
     } else if (e == XrlError::COMMAND_FAILED()) {
 	// perhaps the vif went away?
