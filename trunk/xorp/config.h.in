@@ -49,6 +49,9 @@
 /* Define to 1 to enable advanced multicast API */
 #undef ENABLE_ADVANCED_MCAST_API
 
+/* Define to 1 if netinet6/nd6.h is not C++ friendly */
+#undef HAVE_BROKEN_CXX_NETINET6_ND6_H
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
@@ -76,7 +79,7 @@
 /* Define to 1 if you have IPv6 multicast */
 #undef HAVE_IPV6_MULTICAST
 
-/* Define to 1 if you have IPv6 multicastst routing */
+/* Define to 1 if you have IPv6 multicast routing */
 #undef HAVE_IPV6_MULTICAST_ROUTING
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.13 2004/03/20 22:33:56 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.14 2004/03/24 19:02:14 pavlin Exp $
 dnl
 
 dnl
@@ -10,6 +10,7 @@ dnl ------------------------------------
 dnl Check whether the system IPv6 stack implementation is reasonable
 dnl XXX: The check is very primitive. Add more checks as needed.
 dnl ------------------------------------
+
 AC_MSG_CHECKING(whether the system IPv6 stack implementation is reasonable)
 ipv6=no
 if test "${enable_ipv6}" = "no"; then
@@ -48,6 +49,7 @@ fi
 dnl ----------------------------
 dnl Check whether the system IPv6 stack supports IPv6 multicast.
 dnl ----------------------------
+
 ipv6_multicast=no
 if test "${ipv6}" = "yes"; then
   AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast)
@@ -76,6 +78,7 @@ dnl Check whether the system IPv6 stack supports IPv6 multicast routing.
 dnl ----------------------------
 dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on some OS,
 dnl hence we need to include them conditionally.
+
 ipv6_multicast_routing=no
 if test "${ipv6_multicast}" = "yes"; then
   AC_CHECK_HEADER(net/if_var.h,
@@ -123,7 +126,7 @@ dummy += MRT6MSG_WHOLEPKT;
 ],
   [AC_MSG_RESULT(yes)
    AC_DEFINE(HAVE_IPV6_MULTICAST_ROUTING, 1,
-             [Define to 1 if you have IPv6 multicastst routing])
+             [Define to 1 if you have IPv6 multicast routing])
    ipv6_multicast_routing=yes],
    AC_MSG_RESULT(no))
 fi
@@ -131,6 +134,7 @@ fi
 dnl ------------------------------------
 dnl Check if the newer (post-RFC2292) IPv6 advanced API is supported
 dnl ------------------------------------
+
 AC_MSG_CHECKING(for post-RFC2292 IPv6 advanced API)
 AC_LANG_SAVE
 AC_LANG_C
@@ -157,6 +161,7 @@ AC_LANG_RESTORE
 dnl ------------------------------------
 dnl Check the IPv6 stack type
 dnl ------------------------------------
+
 pv6type=unknown
 AC_MSG_CHECKING(IPv6 stack type)
 for i in KAME; do
@@ -181,8 +186,46 @@ AC_MSG_RESULT($ipv6type)
 dnl ------------------------------------
 dnl Check for IPv6 related headers
 dnl ------------------------------------
+
 AC_CHECK_HEADERS(netinet6/in6_var.h netinet6/nd6.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h)
 
+dnl ------------------------------------
+dnl Check whether netinet6/nd6.h is C++ friendly
+dnl ------------------------------------
+if test "${ac_cv_header_netinet6_nd6_h}" = "yes"; then
+  AC_CHECK_HEADER(net/if_var.h,
+    [test_net_if_var_h="#include <net/if_var.h>"],
+    [test_net_if_var_h=""])
+
+  test_have_broken_cxx_netinet6_nd6_h_header_files=["
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+${test_net_if_var_h}
+#include <netinet/in.h>
+#include <netinet/in_var.h>
+// XXX: a hack needed if <netinet6/nd6.h> is not C++ friendly
+// #define prf_ra in6_prflags::prf_ra
+#include <netinet6/nd6.h>
+"]
+
+  AC_MSG_CHECKING(whether netinet6/nd6.h is C++ friendly)
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+
+  AC_TRY_COMPILE([
+${test_have_broken_cxx_netinet6_nd6_h_header_files}
+],
+[
+size_t size = sizeof(struct in6_prflags);
+],
+  [AC_MSG_RESULT(yes)
+   AC_DEFINE(HAVE_BROKEN_CXX_NETINET6_ND6_H, 1,
+		[Define to 1 if netinet6/nd6.h is not C++ friendly])],
+
+   AC_MSG_RESULT(no))
+  AC_LANG_RESTORE
+fi
 
 dnl ----------------------------
 dnl Check for sin6_len in sockaddr_in6
