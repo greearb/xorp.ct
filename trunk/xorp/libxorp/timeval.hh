@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.13 2003/04/02 18:57:02 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.14 2003/04/02 20:02:46 hodson Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -21,6 +21,7 @@
 
 #include <math.h>
 #include <sys/time.h>
+#include "c_format.hh"
 
 /**
  * @short TimeVal class
@@ -76,6 +77,22 @@ public:
      */
     int32_t usec() const	{ return _usec; }
     
+    /**
+     * @return seconds and microseconds as a string.
+     */
+    string str() const {return c_format("%d.%d", _sec, _usec); }
+
+
+    /**
+     * Pretty print the time
+     *
+     * @return the time as formated by ctime(3) without the newline.
+     */
+    string pretty_print() const {
+	time_t t = static_cast<time_t>(_sec);
+	return c_format("%.24s", asctime(localtime(&t))); 
+    }
+
     /**
      * Get zero value.
      */
