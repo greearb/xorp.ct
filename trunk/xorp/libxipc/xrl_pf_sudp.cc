@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.22 2003/06/20 18:55:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.23 2003/08/14 05:20:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -369,9 +369,9 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	      i->second.xuid.str().c_str());
     requests_pending.erase(i);
 
-    XrlArgs* response = 0;
     try {
-	response = new XrlArgs(buf + header_bytes);
+	XrlArgs response(buf + header_bytes);
+	cb->dispatch(err, &response);
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: "
 		  "header_bytes %u content_bytes %u\n\t\"%s\"\n",
@@ -382,8 +382,6 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	cb->dispatch(xe, 0);
 	return;
     }
-    cb->dispatch(err, response);
-    delete response;
 }
 
 // ----------------------------------------------------------------------------
