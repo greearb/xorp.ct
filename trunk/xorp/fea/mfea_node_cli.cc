@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.1 2003/05/15 23:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.2 2004/02/18 02:46:21 pavlin Exp $"
 
 
 //
@@ -94,29 +94,54 @@ MfeaNodeCli::add_all_cli_commands()
 {
     // XXX: command "show" must have been installed by the CLI itself.
 
-    add_cli_dir_command("show mfea",	"Display information about MFEA");
+    if (mfea_node().is_ipv4()) {
+	add_cli_dir_command("show mfea",
+			    "Display information about IPv4 MFEA");
 
-    add_cli_command("show mfea dataflow",
-		    "Display information about MFEA dataflow filters",
-		    callback(this, &MfeaNodeCli::cli_show_mfea_dataflow));
-    
-    add_cli_command("show mfea interface",
-		    "Display information about MFEA interfaces",
-		    callback(this, &MfeaNodeCli::cli_show_mfea_interface));
-    
-    add_cli_command("show mfea interface address",
-		    "Display information about addresses of MFEA interfaces",
-		    callback(this, &MfeaNodeCli::cli_show_mfea_interface_address));
-    
-    add_cli_command("show mfea mrib",
-		    "Display MRIB information inside MFEA",
-		    callback(this, &MfeaNodeCli::cli_show_mfea_mrib));
-    
+	add_cli_command("show mfea dataflow",
+			"Display information about MFEA IPv4 dataflow filters",
+			callback(this, &MfeaNodeCli::cli_show_mfea_dataflow));
+
+	add_cli_command("show mfea interface",
+			"Display information about MFEA IPv4 interfaces",
+			callback(this, &MfeaNodeCli::cli_show_mfea_interface));
+
+	add_cli_command("show mfea interface address",
+			"Display information about addresses of MFEA IPv4 interfaces",
+			callback(this, &MfeaNodeCli::cli_show_mfea_interface_address));
+
+	add_cli_command("show mfea mrib",
+			"Display MRIB IPv4 information inside MFEA",
+			callback(this, &MfeaNodeCli::cli_show_mfea_mrib));
+    }
+
+    if (mfea_node().is_ipv6()) {
+	add_cli_dir_command("show mfea6",
+			    "Display information about IPv6 MFEA");
+
+	add_cli_command("show mfea6 dataflow",
+			"Display information about MFEA IPv6 dataflow filters",
+			callback(this, &MfeaNodeCli::cli_show_mfea_dataflow));
+
+	add_cli_command("show mfea6 interface",
+			"Display information about MFEA IPv6 interfaces",
+			callback(this, &MfeaNodeCli::cli_show_mfea_interface));
+
+	add_cli_command("show mfea6 interface address",
+			"Display information about addresses of MFEA IPv6 interfaces",
+			callback(this, &MfeaNodeCli::cli_show_mfea_interface_address));
+
+	add_cli_command("show mfea6 mrib",
+			"Display MRIB IPv6 information inside MFEA",
+			callback(this, &MfeaNodeCli::cli_show_mfea_mrib));
+    }
+
     return (XORP_OK);
 }
 
 //
 // CLI COMMAND: "show mfea dataflow [group | group-range]"
+// CLI COMMAND: "show mfea6 dataflow [group | group-range]"
 //
 // Display information about the dataflow filters the MFEA knows about.
 //
@@ -243,6 +268,7 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show mfea interface [interface-name]"
+// CLI COMMAND: "show mfea6 interface [interface-name]"
 //
 // Display information about the interfaces the MFEA knows about.
 //
@@ -331,6 +357,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show mfea interface address [interface-name]"
+// CLI COMMAND: "show mfea6 interface address [interface-name]"
 //
 // Display information about the addresses of interfaces the MFEA knows about.
 //
@@ -401,6 +428,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
 
 //
 // CLI COMMAND: "show mfea mrib [dest-address]"
+// CLI COMMAND: "show mfea6 mrib [dest-address]"
 //
 // Display MRIB information inside MFEA.
 //
