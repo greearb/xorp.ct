@@ -1,6 +1,6 @@
---- rc	Sun Jun  9 16:56:36 2002
-+++ rc.diff	Sun Jun  9 16:59:21 2002
-@@ -134,96 +134,11 @@
+--- rc	Mon May 31 03:26:47 2004
++++ rc.diff	Mon May 31 03:30:15 2004
+@@ -134,97 +134,12 @@
  	. /etc/rc.early
  fi
  
@@ -89,7 +89,7 @@
 +        sh /etc/rc.live
 +        echo '.'
  fi
--
+ 
 -case $? in
 -0)
 -	;;
@@ -98,6 +98,23 @@
 -	exit 1
 -	;;
 -esac
- 
+-
  adjkerntz -i
+ 
+ purgedir() {
+@@ -528,15 +443,6 @@
+ case ${lpd_enable} in
+ [Yy][Ee][Ss])
+ 	echo -n ' printer';	${lpd_program:-/usr/sbin/lpd} ${lpd_flags}
+-	;;
+-esac
+-
+-case ${sshd_enable} in
+-[Yy][Ee][Ss])
+-	if [ -x ${sshd_program:-/usr/sbin/sshd} ]; then
+-		echo -n ' sshd';
+-		${sshd_program:-/usr/sbin/sshd} ${sshd_flags}
+-	fi
+ 	;;
+ esac
  

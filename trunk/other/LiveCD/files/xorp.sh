@@ -88,10 +88,32 @@ mount_fd() {
       	fi
 }
 
+start_services() {
+    if [ -r /etc/defaults/rc.conf ]; then
+        . /etc/defaults/rc.conf
+        source_rc_confs
+    elif [ -r /etc/rc.conf ]; then
+        . /etc/rc.conf
+    fi
+
+    case ${sshd_enable} in
+    [Yy][Ee][Ss])
+        if [ -x ${sshd_program:-/usr/sbin/sshd} ]; then
+            echo -n ' sshd';
+            ${sshd_program:-/usr/sbin/sshd} ${sshd_flags}
+        fi
+        ;;
+    esac
+}
+
+
 start() {
         /bin/sh /usr/local/xorp/bin/xorp-makeconfig.sh
 	echo "Loading XORP config"
        	mount_fd
+
+	echo "Starting services"
+	start_services
 
 	echo "Starting XORP router manager process"
 	/usr/local/xorp/bin/xorp_rtrmgr -b $CFG_FILE 1>/dev/null 2>/dev/null &
