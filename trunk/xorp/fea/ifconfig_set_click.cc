@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.1 2004/10/21 00:44:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.2 2004/10/26 22:22:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -102,19 +102,7 @@ IfConfigSetClick::config_end(string& errmsg)
 
     debug_msg("config_end\n");
 
-    UNUSED(errmsg);
-
     config = generate_config();
-
-    FILE *f = fopen("foo.click", "r");
-    char buf[100000];
-    fread(&buf[0], sizeof(buf), 1, f);
-
-    printf("FOO_BEGIN\n");
-    // printf("%s", config.c_str());
-    config = string(buf);
-    printf("%s", config.c_str());
-    printf("FOO_END\n");
 
     string write_config = c_format("WRITEDATA hotconfig %u\n",
 				   static_cast<uint32_t>(config.size()));
@@ -725,10 +713,10 @@ IfConfigSetClick::generate_config()
 	}
     }
     check_ip_header += ")";
-	    
+
     config += c_format("%s :: Strip(14)\n", xorp_ip.c_str());
     config += c_format("    -> %s\n", check_ip_header.c_str());
-    config += c_format("    -> %s :: TrieIPLookup();\n", xorp_rt.c_str());
+    config += c_format("    -> %s :: LinearIPLookup();\n", xorp_rt.c_str());
 
     config += "\n";
     config += "// ARP responses are copied to each ARPQuerier and the host.\n";
