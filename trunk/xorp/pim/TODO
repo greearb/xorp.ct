@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.38 2003/06/13 19:23:40 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.39 2003/06/17 02:09:25 pavlin Exp $
 #
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
@@ -1117,73 +1117,36 @@ for the kernel patches as well.
   the "bool v" argument. If set_foo(false) is needed,
   add functions reset_foo().
 
-* If no creation allowed in pim_mre_find(), the entry that it returns
-  may be the next one in the map.
+* SPEC: Asserts rate-limit of (approx) 1 Assert/s
+  on same oif has to be per routing entry, i.e., (S,G) or (*,G).
 
-* When adding J/P commands in the outgoing J/P messages, make sure
-  that eventually we override whatever was commited before (if needed).
+* IMPL: Rate limit the asserts (was it DONE before?):
+  - add 'mif_set oifs_assert_rate_limit'
+    and 'mtimer_t *oifs_assert_rate_limit_timer'
+    to 'pimdm_mrt_t' that can be used to rate-limit the asserts:
+    if the rate-limit timer is running, and the rate-limit bit for oif
+    is set, then don't send Assert. If the rate-limit timer is
+    running, but the rate-limit bit is not set, send an Assert, and
+    set the rate-limit bit. If the rate-limit timer is not running,
+    send an Assert, set the rate-limit bit, and start the rate-limit
+    timer with default (minimum?) of 1 second.
+    After the rate-limit timer expires, clear all rate-limit bits.
+    XXX: the rate-limit is not exactly accurate (e.g. the min.
+    time interval between two asserts on the same oif may be less than
+    1 second, but this reduces significantly the number of timers we
+    need to run (and the consumed memory). But on average, the
+    number of asserts sent on an interface would be 1 assert/s.
 
-* Make sure that when we use rpf_nbr_wc() and rpf_nbr_sg(), etc
-  for computing the upstream nbr for sending J/P messages, we take
-  into account the upstream Asserts.
-
-* If (*,*,RP) state changes, retrack dependent (*,G) and the rest.
-  Same applies for (*,G)
-
-* PimMre state removal: after something goes to NoInfo state, call a
-  generic function and check whether it is time to delete that state.
-
-* All constants defined in pim_proto.h should be used as configurable
+* IMPL: All constants defined in pim_proto.h should be used as configurable
   variables inside the code.
 
-* SPEC: spellfix "goodbuy":
- (see section 4.6.1). These are effectively goodbuy messages and
-
-* Use constency in naming re. classes inheritance: e.g. for PIM classes
-  that inherit other classes, always stick PIM or PIM_ in front of the
-  name, or something like this.
-
-* When it comes to Prune overriding on shared LANs, no need for
-  explicit checking whether the LAN is shared. If we noticed
-  somebody else's Prune, this implies the LAN is shared and we
-  need to override it. XXX: we need to override even if this was
-  a Prune from a router that has not sent Hello yet.
-
-* Replace FAMILY2PREFIXLEN(family) with something else for C++
-
-* Make sure that we don't overlook the PruneTmp(P') state by 
-  not keeping explicit track of it.
-  Especially check PimMre::prunes_sg_rpt()
-
-* Add the processing when we receive (S,G,rpt)Prune and we are in PP state.
+* SPEC+IMPL: do we need to override a Prune even if this was
+  a Prune from a router that has not sent Hello yet?
 
 * IMPL: limit:
   - the number of groups created by a given source S
   - rate-limit incoming joins and leaves
   - rate-limit RP register messages at the RP
-
-* If the number of J/P sources in a J/P message is very large, use
-  IP fragmentation to create a larger message.
-
-* SPEC: Asserts rate-limit of (approx) 1 Assert/s
-  on same oif has to be per routing entry, i.e., (S,G) or (*,G).
-
- * IMPL: Rate limit the asserts (was it DONE before?):
-   - add 'mif_set oifs_assert_rate_limit'
-     and 'mtimer_t *oifs_assert_rate_limit_timer'
-     to 'pimdm_mrt_t' that can be used to rate-limit the asserts:
-      if the rate-limit timer is running, and the rate-limit bit for oif
-      is set, then don't send Assert. If the rate-limit timer is
-      running, but the rate-limit bit is not set, send an Assert, and
-      set the rate-limit bit. If the rate-limit timer is not running,
-      send an Assert, set the rate-limit bit, and start the rate-limit
-      timer with default (minimum?) of 1 second.
-      After the rate-limit timer expires, clear all rate-limit bits.
-      XXX: the rate-limit is not exactly accurate (e.g. the min.
-      time interval between two asserts on the same oif may be less than
-      1 second, but this reduces significantly the number of timers we
-      need to run (and the consumed memory). But on average, the
-      number of asserts sent on an interface would be 1 assert/s.
 
 ====================OLD pimdmd TODO BEGIN================
 
