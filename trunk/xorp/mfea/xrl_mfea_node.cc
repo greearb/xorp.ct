@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.21 2003/06/01 02:11:17 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.22 2003/06/01 02:18:23 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -346,6 +346,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 	break;
 #ifdef HAVE_IPV6
+    case AF_INET6:
 	XrlMfeaClientV0p1Client::send_add_mrib6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
@@ -392,6 +393,7 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 	    callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
 	break;
 #ifdef HAVE_IPV6
+    case AF_INET6:
 	XrlMfeaClientV0p1Client::send_delete_mrib6(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
@@ -1327,6 +1329,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		    callback(this, &XrlMfeaNode::xrl_result_add_mrib));
 		break;
 #ifdef HAVE_IPV6
+	    case AF_INET6:
 		XrlMfeaClientV0p1Client::send_add_mrib6(
 		    xrl_sender_name.c_str(),
 		    my_xrl_target_name(),
