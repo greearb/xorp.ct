@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.11 2003/04/02 20:34:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.12 2003/04/22 23:27:15 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -188,6 +188,18 @@ BGPPlumbing::read_next_route(uint32_t token,
 			     IPv4& peer_id)
 {
     return _v6_plumbing.read_next_route(token, route, peer_id);
+}
+
+bool
+BGPPlumbing::status(string& reason) const
+{
+    if (_v4_plumbing.status(reason) == false) {
+	return false;
+    }
+    if (_v6_plumbing.status(reason) == false) {
+	return false;
+    }
+    return true;
 }
 
 /***********************************************************************/
@@ -797,4 +809,11 @@ BGPPlumbingAF<A>::read_next_route(uint32_t token,
 	delete _reader;
     }
     return result;
+}
+
+template <class A>
+bool
+BGPPlumbingAF<A>::status(string& reason) const
+{
+    return _next_hop_resolver.status(reason);
 }

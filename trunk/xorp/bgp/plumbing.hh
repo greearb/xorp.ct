@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.7 2003/04/02 20:34:38 mjh Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.8 2003/04/22 23:27:15 hodson Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -65,6 +65,17 @@ public:
     bool read_next_route(uint32_t token, 
 			 const SubnetRoute<A>*& route, 
 			 IPv4& peer_id);
+
+
+    /**
+     * Get the status of the Plumbing
+     *
+     * @param reason the human-readable reason for any failure
+     *
+     * @return false if Plumbing has suffered a fatal error,
+     * true otherwise 
+     */
+    bool status(string& reason) const;
 private:
     const A& get_local_nexthop(const PeerHandler *peer_handler) const;
     list <RibInTable<A>*> ribin_list() const;
@@ -140,6 +151,16 @@ public:
     bool read_next_route(uint32_t token, 
 			 const SubnetRoute<IPv6>*& route, 
 			 IPv4& peer_id);
+
+    /**
+     * Get the status of the Plumbing
+     *
+     * @param reason the human-readable reason for any failure
+     *
+     * @return false if Plumbing has suffered a fatal error,
+     * true otherwise 
+     */
+    bool status(string& reason) const;
 private:
     RibIpcHandler *_rib_handler;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.13 2003/04/19 20:39:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.14 2003/04/22 23:27:14 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -264,6 +264,15 @@ NextHopResolver<A>::next_hop_changed(A addr, bool old_resolves,
     if (changed)
 	_decision->igp_nexthop_changed(addr);
 }
+
+template <class A>
+bool 
+NextHopResolver<A>::status(string& reason) const
+{
+    return _next_hop_rib_request.status(reason);
+}
+
+
 
 /****************************************/
 
@@ -742,7 +751,8 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     */
     if (XrlError::OKAY() != error) {
 	if (error == XrlError::NO_FINDER()
-	    /* || (error == FATAL_TRANSPORT_ERROR()) */
+	    || error == XrlError::NO_SUCH_METHOD() 
+	    || error == XrlError::SEND_FAILED() 
 	    || (error == XrlError::RESOLVE_FAILED() 
 		&& _previously_successful) ) {
 	    //A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
@@ -755,11 +765,10 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    }
 	    return;
 	}
-	if (error == XrlError::RESOLVE_FAILED()
-	    || error == XrlError::SEND_FAILED()) {
-	    //SEND_FAILED can be a transient error.  RESOLVE_FAILED
-	    //when we hadn't been previously successful might indicate
-	    //an ordering problem at startup.  In both cases, we resend.
+	if (error == XrlError::RESOLVE_FAILED()) {
+	    //RESOLVE_FAILED when we hadn't been previously successful
+	    //might indicate an ordering problem at startup.  In both
+	    //cases, we resend.
 	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
 	    
 	    //The request will still be on the request queue.
@@ -1181,6 +1190,18 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	send_next_request();
 
     return;
+}
+
+template <class A>
+bool 
+NextHopRibRequest<A>::status(string& reason) const
+{
+    if (_interface_failed) {
+	reason = "NextHopResolver suffered fatal error talking to RIB";
+	return false;
+    } else {
+	return true;
+    }
 }
 
 /****************************************/

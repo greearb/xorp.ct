@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.6 2003/04/22 19:20:18 mjh Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.7 2003/05/08 21:27:01 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -118,6 +118,15 @@ public:
     ** RIB has suffered a fatal error 
     */
     void fatal_error(const string& reason);
+
+    /**
+     * Get the status of the RibIpcHandler
+     *
+     * @param reason the human-readable reason for any failure
+     *
+     * @return false if RibIpcHandler has suffered a fatal error,
+     * true otherwise 
+     */
     bool status(string& reason) const;
 private:
     bool unregister_rib();

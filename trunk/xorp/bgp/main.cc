@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.22 2003/04/22 19:20:16 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.23 2003/05/08 21:27:00 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -120,6 +120,8 @@ BGPMain::status(string& reason)
     reason = "Ready";
 
     if (_rib_ipc_handler->status(reason) == false) {
+	s = PROC_FAILED;
+    } else if (_plumbing->status(reason) == false) {
 	s = PROC_FAILED;
     }
 

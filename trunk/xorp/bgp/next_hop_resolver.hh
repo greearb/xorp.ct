@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.13 2003/04/19 20:39:46 mjh Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.14 2003/04/22 23:27:15 hodson Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -196,6 +196,16 @@ public:
      * Get a reference to the main timer list
      */
     EventLoop& eventloop() {return _eventloop;}
+
+    /**
+     * Get the status of the NextHopResolver
+     *
+     * @param reason the human-readable reason for any failure
+     *
+     * @return false if NextHopResolver has suffered a fatal error,
+     * true otherwise 
+     */
+    bool status(string& reason) const;
 protected:
     DecisionTable<A> *_decision;
 private:
@@ -681,6 +691,16 @@ public:
 				      A addr,
 				      uint32_t prefix_len,
 				      string comment);
+
+    /**
+     * Get the status of the NextHopRibRequest
+     *
+     * @param reason the human-readable reason for any failure
+     *
+     * @return false if NextHopRibRequest has suffered a fatal error,
+     * true otherwise 
+     */
+    bool status(string& reason) const;
 private:
     string _ribname;
     XrlStdRouter *_xrl_router;
