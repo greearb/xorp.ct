@@ -90,13 +90,11 @@ The MFEA for Click doesn't exist.
 functionality described in draft-ietf-idr-bgp4-26.txt.  There are
 probably still some bugs but the core is reasonably stable.
 <P>
-Monitoring is limited to listing all the routes and listing all the
-peers - basically all the information demanded by the base BGP MIB.
-More fine-grain monitoring is definitely needed.  You can't install
-any optional filters, which means in practice it isn't too useful.
-Redistribution of routes into BGP currently
-doesn't work.  IPv4 and IPv6 routing works. Multicast SAFI has been
-implemented and has been tested.
+Since the last release profiling and some trace functionality has been
+added to BGP.  You can't install any optional filters, or redistribute
+routes into BGP. We are testing policy code that should allow this
+functionality in the next release. IPv4 and IPv6 routing
+works. Multicast SAFI has been implemented and has been tested.
 
 <P>
 <DT><B>OSPF</B>
@@ -168,7 +166,7 @@ can be configured to start the SNMP agent and to load MIB modules.
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.10 2005/02/24 00:04:48 atanu Exp $.
-<br>Generated on 24/Mar/2005 at 20:11:50.</em>
+<br>Generated on 24/Mar/2005 at 20:42:35.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
