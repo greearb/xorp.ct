@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.25 2003/06/26 02:17:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.26 2003/06/26 19:41:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,35 +40,22 @@
 Peer::~Peer()
 {
     debug_msg("XXX Deleting peer %p\n", this);
-//     printf("XXX Deleting peer %p\n", this);
-
-//     /*
-//     ** The corresponding test peer may have a tcp connection with a
-//     ** bgp process. Unconditionally attempt a disconnect.
-//     */
-//     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
-//     test_peer.send_disconnect(_peername.c_str(),
-// 	callback(this, &Peer::xrl_callback, "disconnect"));
-
-//     for(int i = 0; i < 10; i++)
-// 	_eventloop.run();
 }
 
-Peer::Peer(EventLoop&    eventloop,
-	   IPv4		 finder_address,
-	   uint16_t	 finder_port,
-	   const string& coordinator_name,
+Peer::Peer(EventLoop    *eventloop,
+	   XrlStdRouter *xrlrouter,
 	   const string& peername,
 	   const uint32_t genid,
 	   const string& target_hostname,
 	   const string& target_port)
     : _eventloop(eventloop),
-      _xrlrouter(eventloop, "bgp_harness_peer", finder_address, finder_port),
-      _coordinator(coordinator_name),
+      _xrlrouter(xrlrouter),
       _peername(peername),
       _genid(genid),
       _target_hostname(target_hostname),
       _target_port(target_port),
+      _up(true),
+      _busy(0),
       _session(false),
       _passive(false),
       _keepalive(false),
@@ -76,18 +63,118 @@ Peer::Peer(EventLoop&    eventloop,
       _as(AsNum::AS_INVALID), // XXX
       _holdtime(0)
 {
-    // The Xrl router exports no methods so finalize() early.
-    _xrlrouter.finalize();
-
     debug_msg("XXX Creating peer %p\n", this);
-    bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after_ms(5000, &timeout);
+}
 
-    /* XXX Nastiness */
-    while (_xrlrouter.ready() == false && timeout == false) {
-	eventloop.run();
+Peer::Peer(const Peer& rhs)
+    : _as(AsNum::AS_INVALID) // XXX
+{
+    debug_msg("Copy constructor\n");
+
+    copy(rhs);
+}
+
+Peer::Peer
+Peer::operator=(const Peer& rhs)
+{
+    debug_msg("= operator\n");
+    if(&rhs == this)
+	return *this;
+
+    copy(rhs);
+    
+    return *this;
+}
+
+void
+Peer::copy(const Peer& rhs)
+{
+    debug_msg("peername: %s\n", rhs._peername.c_str());
+
+    _eventloop = rhs._eventloop;
+    _xrlrouter = rhs._xrlrouter;
+
+    _peername = rhs._peername;
+    _genid = rhs._genid;
+    _target_hostname = rhs._target_hostname;
+    _target_port = rhs._target_port;
+
+    _up = rhs._up;
+
+    _busy = rhs._busy;
+    _session = rhs._session;
+    _passive = rhs._passive;
+    _keepalive = rhs._keepalive;
+    _established = rhs._established;
+
+    _as = rhs._as;
+    _holdtime = rhs._holdtime;
+    _id = rhs._id;
+}
+
+Peer::PeerState
+Peer::is_this_you(const string& peer_name) const
+{
+    debug_msg("is this you: %s %s\n", _peername.c_str(), peer_name.c_str());
+    
+    if(_up && peer_name == _peername) {
+	debug_msg("Its me\n");
+	return Peer::YES_ITS_ME;
     }
-    debug_msg("Peer router ready (%d)\n", _xrlrouter.ready());
+
+
+    /*
+    ** If this peer has been down for ten minutes its a candidate to
+    ** be deleted. There should be no more activity on this peer.
+    */
+    if(!_up) {
+	TimeVal now;
+	_eventloop->current_time(now);
+	if(now - _shutdown_time > TimeVal(60 * 10, 0))
+	    return Peer::PLEASE_DELETE_ME;
+    }
+
+    return Peer::NO_ITS_NOT_ME;
+}
+
+Peer::PeerState
+Peer::is_this_you(const string& peer_name, const uint32_t genid) const
+{
+    debug_msg("is this you: %s %s %u\n", _peername.c_str(), peer_name.c_str(),
+	      genid);
+    
+    if(_up && peer_name == _peername && genid == _genid)
+	return Peer::YES_ITS_ME;
+
+    if(!_up)
+	return is_this_you("");
+
+    return Peer::NO_ITS_NOT_ME;
+}
+
+void
+Peer::shutdown()
+{
+    XLOG_ASSERT(_up);	// We should only ever be shutdown once.
+
+    _up = false;
+    _eventloop->current_time(_shutdown_time);
+    
+    /*
+    ** The corresponding test peer may have a tcp connection with a
+    ** bgp process. Attempt a disconnect.
+    */
+    _busy++;
+    XrlTestPeerV0p1Client test_peer(_xrlrouter);
+    if(!test_peer.send_reset(_peername.c_str(),
+			     callback(this, &Peer::xrl_callback, "reset")))
+	XLOG_FATAL("reset failed");
+}
+
+bool
+Peer::up() const
+{
+    return _up;
 }
 
 void
@@ -106,9 +193,14 @@ Peer::pending()
     debug_msg("pending? : %s\n", (_session && !_established && !_passive)
 		  ? "true" : "false");
 
-    if(_xrlrouter.pending())
+    if(_xrlrouter->pending())
 	return true;
 
+    if(_busy > 0)
+	return true;
+
+//     printf("%s: session: %d established: %d passive %d\n", 
+// 	   _peername.c_str(), _session, _established, _passive);
     if(_session && !_established && !_passive)
 	return true;
 
@@ -121,15 +213,19 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
 {
     /* Connect the test peer to the target BGP */
     debug_msg("About to listen on: %s\n", _peername.c_str());
-    XrlTestPeerV0p1Client test_peer(&_xrlrouter);
-    test_peer.send_register(_peername.c_str(), _coordinator, _genid,
-			    callback(this, &Peer::xrl_callback, "register"));
-    test_peer.send_packetisation(_peername.c_str(), "bgp",
+    _busy += 3;
+    XrlTestPeerV0p1Client test_peer(_xrlrouter);
+    if(!test_peer.send_register(_peername.c_str(), _xrlrouter->name(), _genid,
+			callback(this, &Peer::xrl_callback, "register")))
+	XLOG_FATAL("send_register failed");
+    if(!test_peer.send_packetisation(_peername.c_str(), "bgp",
 			   callback(this, &Peer::xrl_callback,
-				    "packetisation"));
-    test_peer.send_listen(_peername.c_str(),
+				    "packetisation")))
+	XLOG_FATAL("send_packetisation");
+    if(!test_peer.send_listen(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
-			   callback(this, &Peer::xrl_callback, "listen"));
+			      callback(this, &Peer::xrl_callback, "listen")))
+	XLOG_FATAL("send_listen failed");
 }
 
 void 
@@ -138,14 +234,18 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
 {
     /* Connect the test peer to the target BGP */
     debug_msg("About to connect to: %s\n", _peername.c_str());
-    XrlTestPeerV0p1Client test_peer(&_xrlrouter);
-    test_peer.send_register(_peername.c_str(), _coordinator, _genid,
-			    callback(this, &Peer::xrl_callback, "register"));
-    test_peer.send_packetisation(_peername.c_str(), "bgp",
-	callback(this, &Peer::xrl_callback, "packetisation"));
-    test_peer.send_connect(_peername.c_str(),
+    _busy += 3;
+    XrlTestPeerV0p1Client test_peer(_xrlrouter);
+    if(!test_peer.send_register(_peername.c_str(), _xrlrouter->name(), _genid,
+			callback(this, &Peer::xrl_callback, "register")))
+	XLOG_FATAL("send_register failed");
+    if(!test_peer.send_packetisation(_peername.c_str(), "bgp",
+		     callback(this, &Peer::xrl_callback, "packetisation")))
+	XLOG_FATAL("send_packetisation failed");
+    if(!test_peer.send_connect(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
-			   callback(this, &Peer::xrl_callback, "connect"));
+			       callback(this, &Peer::xrl_callback, "connect")))
+	XLOG_FATAL("send_connect failed");
 }
 
 void 
@@ -154,11 +254,13 @@ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
 {
     /* Connect the test peer to the target BGP */
     debug_msg("About to disconnect from: %s\n", _peername.c_str());
-    XrlTestPeerV0p1Client test_peer(&_xrlrouter);
+    _busy++;
+    XrlTestPeerV0p1Client test_peer(_xrlrouter);
     _session = false;
     _established = false;
-    test_peer.send_disconnect(_peername.c_str(),
-	callback(this, &Peer::xrl_callback, "disconnect"));
+    if(!test_peer.send_disconnect(_peername.c_str(),
+			  callback(this, &Peer::xrl_callback, "disconnect")))
+	XLOG_FATAL("send_disconnect failed");
 }
 
 /*
@@ -170,6 +272,8 @@ void
 Peer::establish(const string& line, const vector<string>& words)
     throw(InvalidString)
 {
+    debug_msg("About to establish a connection %s\n", _peername.c_str());
+
     bool active = true;
 
     _session = true;
@@ -307,12 +411,11 @@ Peer::send_packet(const string& line, const vector<string>& words)
     ** Save the update message in the sent trie.
     */
     TimeVal tv;
-    _eventloop.current_time(tv);
+    _eventloop->current_time(tv);
     _trie_sent.process_update_packet(tv, buf, len);
 
+    _busy++;
     send_message(buf, len, callback(this, &Peer::xrl_callback, "update"));
-    fprintf(stderr, "done with send_pkt %p size %u\n",
-	buf, (uint32_t)len);
 }
 
 struct mrt_header {
@@ -425,7 +528,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
 	    ** Save the update message in the sent trie.
 	    */
 	    TimeVal tv;
-	    _eventloop.current_time(tv);
+	    _eventloop->current_time(tv);
 	    _trie_sent.process_update_packet(tv, buf, len);
 
 	    _smcb = callback(this, &Peer::send_dump_callback,
@@ -914,10 +1017,12 @@ void
 Peer::xrl_callback(const XrlError& error, const char *comment)
 {
     debug_msg("callback %s %s\n", comment, error.str().c_str());
+    XLOG_ASSERT(0 != _busy);
+    _busy--;
     if(XrlError::OKAY() != error) {
 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-	_session = false;
-	_established = false;
+ 	_session = false;
+ 	_established = false;
     }
 }
 
@@ -989,11 +1094,13 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    ** 
 	    */
 	    if(_keepalive || (_session && !_established)) {
-		XrlTestPeerV0p1Client test_peer(&_xrlrouter);
+		XrlTestPeerV0p1Client test_peer(_xrlrouter);
 		debug_msg("KEEPALIVE Packet SENT\n");
-		test_peer.send_send(_peername.c_str(), data,
+		_busy++;
+		if(!test_peer.send_send(_peername.c_str(), data,
 				    callback(this, &Peer::xrl_callback,
-					     "keepalive"));
+					     "keepalive")))
+		    XLOG_FATAL("send_send failed");
 	    }
 	    _established = true;
 	    check_expect(&pac);
@@ -1057,7 +1164,7 @@ Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
 
     if(!_traffic_sent.is_empty()) {
 	TimeVal tv;
-	_eventloop.current_time(tv);
+	_eventloop->current_time(tv);
 	_traffic_sent->dispatch(buf, len, tv);
     }
 
@@ -1067,8 +1174,9 @@ Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
 	v[i] = buf[i];
     delete [] buf;
     
-    XrlTestPeerV0p1Client test_peer(&_xrlrouter);
-    test_peer.send_send(_peername.c_str(), v, cb);
+    XrlTestPeerV0p1Client test_peer(_xrlrouter);
+    if(!test_peer.send_send(_peername.c_str(), v, cb))
+	XLOG_FATAL("send_send failed");
 }
 
 void
@@ -1081,6 +1189,7 @@ Peer::send_open()
     size_t len;
     const uint8_t *buf = bgpopen.encode(len);
     debug_msg("OPEN Packet SENT\n%s", bgpopen.str().c_str());
+    _busy++;
     send_message(buf, len, callback(this, &Peer::xrl_callback, "open"));
 }
 

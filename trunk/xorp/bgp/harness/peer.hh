@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.7 2003/06/26 02:17:42 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.8 2003/06/26 19:41:48 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -26,17 +26,29 @@ class TimeVal;
 class Peer {
 public:
 
-    Peer(EventLoop&    eventloop,
-	 IPv4	       finder_address,
-	 uint16_t      finder_port,
-	 const string& coordinator_name,
+    Peer(EventLoop    *eventloop,
+	 XrlStdRouter *xrlrouter,
 	 const string& peer_name,
 	 const uint32_t genid,
 	 const string& target_hostname,
 	 const string& target_port);
 
+    Peer::Peer(const Peer& rhs);
+    Peer operator=(const Peer& rhs);
+    void copy(const Peer& rhs);
+
     ~Peer();
     
+    enum PeerState {YES_ITS_ME, NO_ITS_NOT_ME, PLEASE_DELETE_ME};
+
+    PeerState is_this_you(const string& peer_name) const;
+
+    PeerState is_this_you(const string& peer_name, const uint32_t genid) const;
+
+    void shutdown();
+
+    bool up() const;
+
     void status(string& status);
 
     bool pending();
@@ -93,21 +105,20 @@ protected:
     void send_dump_callback(const XrlError& error, FILE *fp,
 			    const char *comment);
     void send_open();
-
-private:
-    // Not implemented
-    Peer(const Peer&);
-    Peer& operator=(const Peer&);
     
 private:
-    EventLoop&   _eventloop;
-    XrlStdRouter _xrlrouter;
+    EventLoop   *_eventloop;
+    XrlStdRouter *_xrlrouter;
 
-    string _coordinator;
     string _peername;
     uint32_t _genid;
     string _target_hostname;
     string _target_port;
+
+    bool _up;		// True if this peer has not been shutdown
+    TimeVal _shutdown_time;	// Time this peer was shutdown
+
+    uint32_t _busy;	// Count of outstanding transactions.
 
     bool _session;	// We are attempting to form a BGP session.
     bool _passive;	// We are passively trying to create a session.

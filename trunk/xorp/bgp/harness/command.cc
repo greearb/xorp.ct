@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.11 2003/06/26 02:17:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.12 2003/06/26 19:41:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -46,7 +46,7 @@ tokenize(const string& str,
     }
 }
 
-Command::Command(EventLoop& eventloop, XrlRouter& xrlrouter)
+Command::Command(EventLoop& eventloop, XrlStdRouter& xrlrouter)
     : _eventloop(eventloop),
       _xrlrouter(xrlrouter),
       _genid(0),
@@ -98,13 +98,22 @@ Command::status(const string& peer, string& status)
     /*
     ** Are we in the peer table.
     */
-    NamePeerMap::iterator cur  = _peers.find(peer);
-    if(cur == _peers.end()) {
-	status = "";
-	return;
+    PeerList::iterator cur = _peers.begin();
+    while(cur != _peers.end()) {
+	switch(cur->is_this_you(peer)) {
+	case Peer::YES_ITS_ME:
+	    cur->status(status);
+	    return;
+	    break;
+	case Peer::NO_ITS_NOT_ME:
+	    break;
+	case Peer::PLEASE_DELETE_ME:
+	    _peers.erase(cur++);
+	    continue;
+	    break;
+	}
+	++cur;
     }
-    ref_ptr<Peer> p = cur->second;
-    p->status(status);
 }
 
 bool
@@ -125,12 +134,9 @@ Command::pending()
 	return true;
     }
 
-    NamePeerMap::iterator i;
-    for(i = _peers.begin(); i != _peers.end(); i++) {
-	ref_ptr<Peer> p = i->second;
-	if (p->pending()) {
+    for(PeerList::iterator cur = _peers.begin(); cur != _peers.end(); ++cur){
+	if(cur->up() && cur->pending())
 	    return true;
-	}
     }
 
     return false;
@@ -154,14 +160,25 @@ Command::datain(const string&  peer,  const uint32_t& genid,
     /*
     ** Are we in the peer table.
     */
-    NamePeerMap::iterator cur  = _peers.find(peer);
-    if(cur == _peers.end()) {
-	XLOG_WARNING("Data for a peer <%s> that is not in our table",
-		     peer.c_str());
-	return;
+    PeerList::iterator cur = _peers.begin();
+    while(cur != _peers.end()) {
+	switch(cur->is_this_you(peer, genid)) {
+	case Peer::YES_ITS_ME:
+	    cur->datain(status, tv, data);
+	    return;
+	    break;
+	case Peer::NO_ITS_NOT_ME:
+	    break;
+	case Peer::PLEASE_DELETE_ME:
+	    _peers.erase(cur++);
+	    continue;
+	    break;
+	}
+	++cur;
     }
-    ref_ptr<Peer> p = cur->second;
-    p->datain(status, tv, data);
+
+    XLOG_WARNING("Data for a peer <%s,%u> that is not in our table",
+		 peer.c_str(), genid);
 }
 
 void 
@@ -173,14 +190,25 @@ Command::datain_error(const string&  peer, const uint32_t& genid,
     /*
     ** Are we in the peer table.
     */
-    NamePeerMap::iterator cur  = _peers.find(peer);
-    if(cur == _peers.end()) {
-	XLOG_WARNING("Data for a peer <%s> that is not in our table",
-		     peer.c_str());
-	return;
+    PeerList::iterator cur = _peers.begin();
+    while(cur != _peers.end()) {
+	switch(cur->is_this_you(peer, genid)) {
+	case Peer::YES_ITS_ME:
+	    cur->datain_error(reason);
+	    return;
+	    break;
+	case Peer::NO_ITS_NOT_ME:
+	    break;
+	case Peer::PLEASE_DELETE_ME:
+	    _peers.erase(cur++);
+	    continue;
+	    break;
+	}
+	++cur;
     }
-    ref_ptr<Peer> p = cur->second;
-    p->datain_error(reason);
+
+    XLOG_WARNING("Data for a peer <%s,%u> that is not in our table",
+		 peer.c_str(), genid);
 }
 
 void
@@ -190,14 +218,25 @@ Command::datain_closed(const string&  peer, const uint32_t& genid)
     /*
     ** Are we in the peer table.
     */
-    NamePeerMap::iterator cur  = _peers.find(peer);
-    if(cur == _peers.end()) {
-	XLOG_WARNING("Data for a peer <%s> that is not in our table",
-		     peer.c_str());
-	return;
+    PeerList::iterator cur = _peers.begin();
+    while(cur != _peers.end()) {
+	switch(cur->is_this_you(peer, genid)) {
+	case Peer::YES_ITS_ME:
+	    cur->datain_closed();
+	    return;
+	    break;
+	case Peer::NO_ITS_NOT_ME:
+	    break;
+	case Peer::PLEASE_DELETE_ME:
+	    _peers.erase(cur++);
+	    continue;
+	    break;
+	}
+	++cur;
     }
-    ref_ptr<Peer> p = cur->second;
-    p->datain_closed();
+
+    XLOG_WARNING("Data for a peer <%s,%u> that is not in our table",
+		 peer.c_str(), genid);
 }
 
 /*
@@ -217,7 +256,13 @@ Command::peer(const string& line, const vector<string>& words)
     ** This pointer must be valid. If we are in the command table
     ** there must be an entry in the peer table.
     */
-    ref_ptr<Peer> p = _peers.find(words[0])->second;
+    PeerList::iterator p = _peers.begin();
+    for(p = _peers.begin(); p != _peers.end(); ++p){
+	if(Peer::YES_ITS_ME == p->is_this_you(words[0]))
+	    break;
+    }
+    
+    XLOG_ASSERT(_peers.end() != p);
 
     const string command = words[1];
     if("connect" == command) {
@@ -260,16 +305,12 @@ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
     _target_port = "";
 
     /*
-    ** We want to clear out the _peers map. The problem is that the 
-    ** destructor for a peer calls the eventloop. We can therefore end
-    ** up in a race where a "reset" followed by an "initialise" can
-    ** cause entries to be added while we are in the clear code. Take
-    ** a copy of the map, so any "initialise" calls do not conflict
-    ** with the destruction of the previous peers.
+    ** Shutdown all the peers that are currently running.
     */
-    NamePeerMap _tmp_peers;
-    swap(_peers, _tmp_peers);
-    _tmp_peers.clear();
+    for(PeerList::iterator cur = _peers.begin(); cur != _peers.end(); ++cur){
+	if(cur->up())
+	    cur->shutdown();
+    }
 
     _init_count = 0;
 }
@@ -318,9 +359,15 @@ Command::initialise(const string& line, const vector<string>& v)
     /*
     ** Make sure that this peer doesn't already exist.
     */
-    NamePeerMap::iterator cur  = _peers.find(peername);
+
+
+    PeerList::iterator cur = _peers.begin();
+    for(; cur != _peers.end(); ++cur)
+	if(Peer::YES_ITS_ME == cur->is_this_you(peername))
+	    break;
+
     if(cur != _peers.end())
-	debug_msg("Peer name %s\n", cur->first.c_str());
+	 debug_msg("Peer name %s\n", peername);
 
     if(_peers.end() != cur)
 	xorp_throw(InvalidString, c_format("This peer already exists: %s",
@@ -371,15 +418,8 @@ Command::initialise_callback(const XrlError& error, string peername)
     }
 
     /* Add to the peer structure */
-    Peer* p = new Peer(_eventloop,
-		       _xrlrouter.finder_address(),
-		       _xrlrouter.finder_port(),
-		       _xrlrouter.name(),
-		       peername,
-		       _genid++,
-		       _target_hostname,
-		       _target_port);
-    _peers.insert(NamePeerMap::value_type(peername, p));
+    _peers.push_back(Peer(&_eventloop, &_xrlrouter, peername, _genid++,
+		       _target_hostname, _target_port));
 
     /* Add to the command structure */
     _commands.insert(StringCommandMap::value_type(peername, &Command::peer));

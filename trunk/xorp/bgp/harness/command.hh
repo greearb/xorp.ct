@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.7 2003/06/26 02:17:42 atanu Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.8 2003/06/26 19:41:47 atanu Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
@@ -29,7 +29,7 @@ class TimeVal;
 
 class Command {
 public:
-    Command(EventLoop& eventloop, XrlRouter& xrlrouter);
+    Command(EventLoop& eventloop, XrlStdRouter& xrlrouter);
 
     /*
     ** Load command map.
@@ -75,7 +75,7 @@ public:
     void initialise_callback(const XrlError& error, string peername);
 private:
     EventLoop& _eventloop;
-    XrlRouter& _xrlrouter;
+    XrlStdRouter& _xrlrouter;
     uint32_t _genid;
 
     uint32_t _init_count;	// Number of initialisations with
@@ -101,8 +101,8 @@ private:
     typedef map<const string, PCmd> StringCommandMap;
     StringCommandMap _commands;
 
-    typedef map<const string, ref_ptr<Peer> > NamePeerMap;
-    NamePeerMap _peers;
+    typedef list<Peer> PeerList;
+    PeerList _peers;
 
     string _target_hostname;
     string _target_port;
