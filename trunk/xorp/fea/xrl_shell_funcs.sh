@@ -1,7 +1,10 @@
 #!/bin/sh
 
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
-XRLDIR=${XRLDIR:-../xrl}
+XRLDIR=${XRLDIR:-${srcdir}/../xrl}
 
 get_all_interface_names()
 {
@@ -431,45 +434,52 @@ validate_xrls()
 #
 # STOPLOOKING
 #
-    script_name="xrl_shell_funcs.sh"
-    script_xrls=`cat $script_name | sed -n '1,/STOPLOOKING/p' | sed -n '/finder:\/\// p' | sed 's/[^"]*"\([^"]*\).*/\1/g' | sed 's/=[^-&]*//g' | sed 's/->.*//g'`
-    source_xrl_file="$XRLDIR/targets/fea.xrls"
-    source_xrls=`cat $source_xrl_file | grep '://' | sed 's/->.*//g'`
+    script_name="${srcdir}/xrl_shell_funcs.sh"
+    script_xrls=`cat ${script_name} | sed -n '1,/STOPLOOKING/p' | sed -n '/finder:\/\// p' | sed 's/[^"]*"\([^"]*\).*/\1/g' | sed 's/=[^-&]*//g' | sed 's/->.*//g'`
+    source_xrl_files="${XRLDIR}/targets/*.xrls"
 
     match_count=0
     bad_count=0
-    for i in $script_xrls ; do
+    for i in ${script_xrls} ; do
 	found="no"
-	for j in $source_xrls ; do
-	    if [ $i = $j ] ; then
-		found="yes"
-		match_count=`expr $match_count + 1`
-		break
-	    fi
-	    stripped_i=`echo $i | sed 's/\?.*//'`
-	    stripped_j=`echo $j | sed 's/\?.*//'`
-	    if [ $stripped_i = $stripped_j ] ; then
-		found="yes"
-		echo "Warning mismatch:"
-		echo "	script has \"$i\""
-		echo "	file has \"$j\""
-		bad_count=`expr $bad_count + 1`
+	for file in ${source_xrl_files} ; do
+	    source_xrls=`cat ${file} | grep '://' | sed 's/->.*//g'`
+	    for j in ${source_xrls} ; do
+		if [ ${i} = ${j} ] ; then
+		    found="yes"
+		    match_count=`expr ${match_count} + 1`
+		    break
+		fi
+		stripped_i=`echo ${i} | sed 's/\?.*//'`
+		stripped_j=`echo ${j} | sed 's/\?.*//'`
+		if [ ${stripped_i} = ${stripped_j} ] ; then
+		    found="yes"
+		    echo "Warning mismatch in file ${file}:"
+		    echo "	script has \"${i}\""
+		    echo "	file   has \"${j}\""
+		    bad_count=`expr ${bad_count} + 1`
+		    break
+		fi
+	    done
+	    if [ "${found}" = "yes" ] ; then
 		break
 	    fi
 	done
-	if [ "$found" = "no" ] ; then
-	    echo "No match for $i in source_xrl_file"
-	    bad_count=`expr $bad_count + 1`
+	if [ "${found}" = "no" ] ; then
+	    echo "No match for ${i} in ${source_xrl_files}"
+	    bad_count=`expr ${bad_count} + 1`
 	fi
     done
-    status="Summary: $match_count xrls okay, $bad_count xrls bad."
-    rule=`echo $status | sed 's/[A-z0-9,:. ]/-/g'`
-    echo $rule
-    echo $status
-    echo $rule
+    status="Summary: ${match_count} xrls okay, ${bad_count} xrls bad."
+    rule=`echo ${status} | sed 's/[A-z0-9,:. ]/-/g'`
+    echo ${rule}
+    echo ${status}
+    echo ${rule}
     echo $*
     unset script_xrls
     unset source_xrls
+
+    return ${bad_count}
 }
 
 # We have arguments.
