@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.3 2003/02/08 01:32:58 mjh Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.4 2003/03/10 23:20:03 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -25,7 +25,7 @@
  * the SubnetRoute's unref method, which permits delayed deletion.
  */
 template<>
-void
+inline void
 TrieNode<IPv4, const SubnetRoute<IPv4> >
 ::delete_payload(const SubnetRoute<IPv4>* p) 
 {
@@ -33,7 +33,7 @@ TrieNode<IPv4, const SubnetRoute<IPv4> >
 }
 
 template<>
-void
+inline void
 TrieNode<IPv6, const SubnetRoute<IPv6> >
 ::delete_payload(const SubnetRoute<IPv6>* p) 
 {

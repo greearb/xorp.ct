@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.10 2003/02/08 01:32:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.11 2003/03/10 23:20:04 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -27,10 +27,20 @@ template <class A>
 struct TypeName {
     static const char* get() { return "Unknown"; }
 };
-template<> const char* TypeName<IPv4>::get() { return "IPv4"; }
-template<> const char* TypeName<IPv6>::get() { return "IPv6"; }
 
+template<> 
+inline const char* 
+TypeName<IPv4>::get() 
+{ 
+    return "IPv4";
+}
 
+template<> 
+inline const char*
+TypeName<IPv6>::get() 
+{
+    return "IPv6";
+}
 template<class A>
 FanoutTable<A>::FanoutTable(string table_name,
 			    BGPRouteTable<A> *init_parent)
