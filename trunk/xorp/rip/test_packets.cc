@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.6 2004/02/21 00:34:06 hodson Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.7 2004/06/10 22:41:47 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -123,7 +123,7 @@ test_main()
 	for (size_t i = 0; i < 20; i++) {
 	    if (e[i] != r[i]) {
 		verbose_log("Expected packet data wrong at position %u\n",
-			    static_cast<uint32_t>(i));
+			    XORP_UINT_CAST(i));
 		return 1;
 	    }
 	}
@@ -165,7 +165,7 @@ test_main()
 	for (size_t i = 0; i < 20; i++) {
 	    if (e[i] != r[i]) {
 		verbose_log("Expected packet data wrong at position %u\n",
-			    static_cast<uint32_t>(i));
+			    XORP_UINT_CAST(i));
 		return 1;
 	    }
 	}
@@ -184,7 +184,7 @@ test_main()
 	for (size_t i = 0; i < 20; i++) {
 	    if (f[i] != r[i]) {
 		verbose_log("Expected packet data wrong at position %u\n",
-			    static_cast<uint32_t>(i));
+			    XORP_UINT_CAST(i));
 		return 1;
 	    }
 	}
@@ -210,7 +210,7 @@ test_main()
 	for (size_t i = 0; i < 20; i++) {
 	    if (e[i] != r[i]) {
 		verbose_log("Expected packet data wrong at position %u\n",
-			    static_cast<uint32_t>(i));
+			    XORP_UINT_CAST(i));
 		return 1;
 	    }
 	}

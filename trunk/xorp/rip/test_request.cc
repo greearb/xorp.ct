@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.12 2004/09/17 13:57:16 abittau Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.13 2004/09/18 00:00:32 pavlin Exp $"
 
 #include <set>
 
@@ -295,24 +295,27 @@ public:
 
 	if (n_entries > _testnets.size()) {
 	    verbose_log("Got more routes than requested (%u > %u).\n",
-			n_entries, (uint32_t)_testnets.size());
+			XORP_UINT_CAST(n_entries),
+			XORP_UINT_CAST(_testnets.size()));
 	    return false;
 	}
 
 	set<IPv4Net>::const_iterator ni = _testnets.begin();
 
 	for (uint32_t i = 0; i < n_entries; i++, pre++) {
-	    verbose_log("%s %s %d %d\n",
+	    verbose_log("%s %s %u %u\n",
 			pre->net().str().c_str(),
 			pre->nexthop().str().c_str(),
-			pre->metric(),
+			XORP_UINT_CAST(pre->metric()),
 			pre->tag());
 	    if (pre->addr_family() != PacketRouteEntry<IPv4>::ADDR_FAMILY) {
-		verbose_log("Invalid address family in route entry %d\n", i);
+		verbose_log("Invalid address family in route entry %u\n",
+			    XORP_UINT_CAST(i));
 		return false;
 	    }
 	    if (*ni != pre->net()) {
-		verbose_log("Mismatched net in route entry %d\n", i);
+		verbose_log("Mismatched net in route entry %u\n",
+			    XORP_UINT_CAST(i));
 		return false;
 	    }
 	    if (i < INJECTED_ROUTES) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.9 2005/01/06 05:51:03 atanu Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.10 2005/01/07 03:07:36 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -114,8 +114,9 @@ check_auth_packet(const vector<uint8_t>& pkt,
 
     if (ah.authenticate(&pkt[0], pkt.size(), entries, n_entries) == false) {
 	if (expect_fail == false) {
-	    verbose_log("Unexpected failure (actual entries %d, "
-			"expected %d) - %s\n", n_entries, n,
+	    verbose_log("Unexpected failure (actual entries %u, "
+			"expected %u) - %s\n",
+			XORP_UINT_CAST(n_entries), XORP_UINT_CAST(n),
 			ah.error().c_str());
 	    return 1;
 	}
@@ -229,7 +230,8 @@ check_saved_md5()
 
     uint32_t n = 11;
     if (check_auth_packet(pkt, mah, n, false)) {
-	verbose_log("Failed MD5 authentication with %d entries\n", n);
+	verbose_log("Failed MD5 authentication with %u entries\n",
+		    XORP_UINT_CAST(n));
 	dump_binary_data(pkt);
 	return 1;
     }
@@ -267,12 +269,13 @@ test_main()
     for (uint32_t n = 0; n < nah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, nah, n)) {
 	    verbose_log("Failed to build null authentication scheme packet "
-			"with %d entries.\n", n);
+			"with %u entries.\n", XORP_UINT_CAST(n));
 	    return 1;
 	}
 
 	if (check_auth_packet(pkt, nah, n, false)) {
-	    verbose_log("Failed null authentication with %d entries\n", n);
+	    verbose_log("Failed null authentication with % entries\n",
+			XORP_UINT_CAST(n));
 	    return 1;
 	}
 
@@ -280,7 +283,7 @@ test_main()
 	pkt.push_back(uint8_t(0));
 	if (check_auth_packet(pkt, nah, n, true)) {
 	    verbose_log("Null authentication passed broken packet "
-			"with %d entries\n", n);
+			"with %u entries\n", XORP_UINT_CAST(n));
 	    return 1;
 	}
     }
@@ -297,13 +300,13 @@ test_main()
 	for (uint32_t n = 0; n < pah.max_routing_entries(); n++) {
 	    if (build_auth_packet(pkt, pah, n)) {
 		verbose_log("Failed to build plaintext authentication scheme "
-			    "packet with %d entries.\n", n);
+			    "packet with %u entries.\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 
 	    if (check_auth_packet(pkt, pah, n, false)) {
 		verbose_log("Failed plaintext authentication with "
-			    "%d entries\n", n);
+			    "%u entries\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 
@@ -311,7 +314,7 @@ test_main()
 	    pkt.push_back(uint8_t(0));
 	    if (check_auth_packet(pkt, pah, n, true)) {
 		verbose_log("Plaintext authentication passed broken packet "
-			    "with %d entries\n", n);
+			    "with %u entries\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 	    if (n == 3 && verbose()) {
@@ -336,12 +339,13 @@ test_main()
     for (uint32_t n = 0; n < mah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, mah, n)) {
 	    verbose_log("Failed to build MD5 authentication scheme packet "
-			"with %d entries.\n", n);
+			"with %u entries.\n", XORP_UINT_CAST(n));
 	    return 1;
 	}
 
 	if (check_auth_packet(pkt, mah, n, false)) {
-	    verbose_log("Failed MD5 authentication with %d entries\n", n);
+	    verbose_log("Failed MD5 authentication with %u entries\n",
+			XORP_UINT_CAST(n));
 	    dump_binary_data(pkt);
 	    return 1;
 	}
@@ -350,7 +354,7 @@ test_main()
 	pkt.push_back(uint8_t(0));
 	if (check_auth_packet(pkt, mah, n, true)) {
 	    verbose_log("MD5 authentication passed broken packet "
-			"with %d entries\n", n);
+			"with %u entries\n", XORP_UINT_CAST(n));
 	    dump_binary_data(pkt);
 	    return 1;
 	}
@@ -361,7 +365,7 @@ test_main()
 	for (vector<uint8_t>::size_type c = 0; c != pkt.size(); c++) {
 	    if (build_auth_packet(pkt, mah, n)) {
 		verbose_log("Failed to build MD5 authentication scheme packet "
-			    "with %d entries.\n", n);
+			    "with %u entries.\n", XORP_UINT_CAST(n));
 		dump_binary_data(pkt);
 		return 1;
 	    }
@@ -370,8 +374,8 @@ test_main()
 	    if (check_auth_packet(bad_pkt, mah, n, true)) {
 		verbose_log("MD5 authentication passed corruption in byte "
 			    "%u with in packet %u entries\n",
-			    static_cast<uint32_t>(c),
-			    static_cast<uint32_t>(n));
+			    XORP_UINT_CAST(c),
+			    XORP_UINT_CAST(n));
 		dump_binary_data(bad_pkt);
 		return 1;
 	    }
@@ -405,7 +409,7 @@ test_main()
 
     if (mah.key_chain().size() != 1) {
 	verbose_log("Bogus key count: expected 1 key left, have %u\n",
-		    static_cast<uint32_t>(mah.key_chain().size()));
+		    XORP_UINT_CAST(mah.key_chain().size()));
 	return 1;
     }
 
