@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.2 2003/03/06 01:47:04 jcardona Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.3 2003/03/06 05:58:34 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -113,7 +113,7 @@ components (in alphabetical order):
   \item \emph{ref\_ptr.hh: template class ref\_ptr}: Reference counted
   pointer class.
 
-  \item \emph{ref\_trie.hh: Implementation of a trie to support route
+  \item \emph{ref\_trie.hh}: Implementation of a trie to support route
   lookups.  Based on trie.hh, but with reference-counted storage
   supporting delayed deletion.
 
@@ -348,7 +348,7 @@ should support the STL allocator classes or an equivalent to
 provide greater flexibility.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{ref_trie.hh}
+\subsection{ref\_trie.hh}
 
 This file implements a trie to support route lookups.  The
 implementation is template-based, and is based on the code in
