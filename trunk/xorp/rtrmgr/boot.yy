@@ -11,134 +11,130 @@
 #define yysslim bootsslim
 %}
 
-%token STRING
 %token UPLEVEL
 %token DOWNLEVEL
-%left ASSIGN_VALUE
-%left ASSIGN_DEFAULT
 %token END
-%token LITERAL
-%token SLASH
+%left ASSIGN_OPERATOR
 %token LISTNEXT
-%token TEXT
-%token UINT
-%token INTEGER
-%token BOOL
-%token IPV4
-%token IPV4NET
-%token IPV6
-%token IPV6NET
+%token BOOL_VALUE
+%token UINT_VALUE
+%token IPV4_VALUE
+%token IPV4NET_VALUE
+%token IPV6_VALUE
+%token IPV6NET_VALUE
+%token MACADDR_VALUE
+%token LITERAL
+%token STRING
+%token SYNTAX_ERROR
+
 
 %%
+
 input:		/* empty */
 		| definition input
 		| emptystatement input
+		| syntax_error
+		;
 
-definition:	nodename nodegroup {
-			/* printf("DEFINITION\n"); */
-		}
+definition:	nodename nodegroup
+		;
 
 nodename:	literals { push_path(); }
+		;
 
 literals:	LITERAL { extend_path($1); }
 		| literals LITERAL { extend_path($2); }
-		| literals IPV4 { extend_path($2); }
-		| literals IPV4NET { extend_path($2); }
-		| literals IPV6 { extend_path($2); }
-		| literals IPV6NET { extend_path($2); }
-		| literals INTEGER { extend_path($2); }
+		| literals BOOL_VALUE { extend_path($2); }
+		| literals UINT_VALUE { extend_path($2); }
+		| literals IPV4_VALUE { extend_path($2); }
+		| literals IPV4NET_VALUE { extend_path($2); }
+		| literals IPV6_VALUE { extend_path($2); }
+		| literals IPV6NET_VALUE { extend_path($2); }
+		| literals MACADDR_VALUE { extend_path($2); }
+		;
 
 nodegroup:	UPLEVEL statements DOWNLEVEL { pop_path(); }
 		| END { pop_path(); }
+		;
 
 statements:	/* empty string */
 		| statement statements
+		;
 
-statement:	terminal | definition | emptystatement
+statement:	terminal
+		| definition
+		| emptystatement
+		;
 
-emptystatement:	END { /* printf("EMPTY STATEMENT\n"); */ }
+emptystatement:	END
+		;
 
 terminal:	LITERAL END {
 			terminal($1, strdup(""), NODE_VOID);
 		}
-		| LITERAL ASSIGN_VALUE STRING END {
+		| LITERAL ASSIGN_OPERATOR STRING END {
 			terminal($1, $3, NODE_TEXT);
 		}
-		| LITERAL ASSIGN_VALUE INTEGER END {
-			terminal($1, $3, NODE_UINT);
-		}
-		| LITERAL ASSIGN_VALUE BOOL END {
+		| LITERAL ASSIGN_OPERATOR BOOL_VALUE END {
 			terminal($1, $3, NODE_BOOL);
 		}
-		| LITERAL ASSIGN_VALUE IPV4 END {
+		| LITERAL ASSIGN_OPERATOR UINT_VALUE END {
+			terminal($1, $3, NODE_UINT);
+		}
+		| LITERAL ASSIGN_OPERATOR IPV4_VALUE END {
 			terminal($1, $3, NODE_IPV4);
 		}
-		| LITERAL ASSIGN_VALUE IPV4NET END {
+		| LITERAL ASSIGN_OPERATOR IPV4NET_VALUE END {
 			terminal($1, $3, NODE_IPV4PREFIX);
 		}
-		| LITERAL ASSIGN_VALUE IPV6 END {
+		| LITERAL ASSIGN_OPERATOR IPV6_VALUE END {
 			terminal($1, $3, NODE_IPV6);
 		}
-		| LITERAL ASSIGN_VALUE IPV6NET END {
+		| LITERAL ASSIGN_OPERATOR IPV6NET_VALUE END {
 			terminal($1, $3, NODE_IPV6PREFIX);
 		}
+		| LITERAL ASSIGN_OPERATOR MACADDR_VALUE END {
+			terminal($1, $3, NODE_MACADDR);
+		}
+		;
+
+syntax_error:	SYNTAX_ERROR {
+			booterror("syntax error");
+		}
+		;
+
 
 %%
 
-/* extern FILE *bootin; */
-extern void boot_scan_string(const char *);
-extern int bootlinenum;
-
-#define MAXSTACK 20
-#define MAXPATH 256
-static ConfigTree *cf;
-static string boot_filename;
-static char lastsymbol[256];
+extern void boot_scan_string(const char *configuration);
+extern int boot_linenum;
 extern "C" int bootparse();
 extern int bootlex();
 
+static ConfigTree *config_tree = NULL;
+static string boot_filename;
+static string lastsymbol;
 
-string
-booterrormsg(const char *s)
-{
-    string errmsg;
-
-    if (boot_filename.empty()) {
-	errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s\n", 
-			  boot_filename.c_str(),
-			  bootlinenum, s);
-    } else {
-	errmsg = c_format("PARSE ERROR [line %d]: %s\n", bootlinenum, s);
-    }
-    return errmsg;
-}
-
-void
-booterror(const char *s) throw (ParseError)
-{
-    xorp_throw(ParseError, booterrormsg(s));
-}
 
 static void
 extend_path(char *segment)
 {
-    strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = segment;
 
-    cf->extend_path(string(segment));
+    config_tree->extend_path(string(segment));
     free(segment);
 }
 
 static void
 push_path()
 {
-    cf->push_path();
+    config_tree->push_path();
 }
 
 static void
 pop_path()
 {
-    cf->pop_path();
+    config_tree->pop_path();
 }
 
 static void
@@ -147,29 +143,45 @@ terminal(char *segment, char *value, int type)
     extend_path(segment);
     push_path();
 
-    strncpy(lastsymbol, value, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = value;
 
-    cf->terminal_value(value, type);
+    config_tree->terminal_value(value, type);
     free(value);
     pop_path();
+}
+
+void
+booterror(const char *s) throw (ParseError)
+{
+    string errmsg;
+
+    if (! boot_filename.empty()) {
+	errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s",
+			  boot_filename.c_str(),
+			  boot_linenum, s);
+    } else {
+	errmsg = c_format("PARSE ERROR [line %d]: %s", boot_linenum, s);
+    }
+    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+
+    xorp_throw(ParseError, errmsg);
 }
 
 int
 init_bootfile_parser(const char *configuration,
 		     const char *filename,
-		     ConfigTree *c)
+		     ConfigTree *ct)
 {
-    cf = c;
+    config_tree = ct;
     boot_filename = filename;
-    bootlinenum = 1;
+    boot_linenum = 1;
     boot_scan_string(configuration);
     return 0;
 }
 
-int
-parse_bootfile()
+void
+parse_bootfile() throw (ParseError)
 {
-    bootparse();
-    return 0;
+    if (bootparse() != 0)
+	booterror("unknown error");
 }
