@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.8 2003/04/01 00:56:20 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.10 2004/06/10 22:41:30 hodson Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -54,6 +54,10 @@ public:
     PimBsr(PimNode& pim_node);
     virtual ~PimBsr();
     
+    /**
+     * Clear the entry.
+     */
+    void	clear();
     int		start();
     int		stop();
     PimNode&	pim_node()		{ return (_pim_node); }

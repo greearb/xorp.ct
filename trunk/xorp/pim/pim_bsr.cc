@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.31 2005/02/01 02:02:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.32 2005/02/27 20:49:47 pavlin Exp $"
 
 
 //
@@ -81,6 +81,15 @@ PimBsr::PimBsr(PimNode& pim_node)
  * 
  **/
 PimBsr::~PimBsr()
+{
+    clear();
+}
+
+/**
+ * Clear the entry.
+ */
+void
+PimBsr::clear()
 {
     stop();
     
