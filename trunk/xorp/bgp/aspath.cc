@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.16 2003/02/02 00:10:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.17 2003/02/06 04:19:22 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,15 +119,15 @@ string
 AsSegment::short_str() const
 {
     string s;
-    string sep = (_type == AS_SET) ? "{": "[";	// separator
+    string sep = (_type == AS_SET) ? "{": "";	// separator
     const_iterator iter = _aslist.begin();
 
     for (u_int i = 0; i<_entries; i++, ++iter) {
 	s += sep ;
 	s += iter->short_str();
-	sep = ", ";
+	sep = " ";
     }
-    s += (_type == AS_SET) ? "}": "]";
+    s += (_type == AS_SET) ? "}": "";
     return s;
 }
 

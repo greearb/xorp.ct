@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.9 2003/02/08 01:32:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.10 2003/02/08 20:30:03 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,7 +119,6 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     IPNet<A> net = old_rtmsg.net();
     assert(net == new_rtmsg.net());
 
-    const SubnetRoute<A> *old_route = NULL;
     SubnetRouteConstRef<A> *old_route_reference = NULL;
     const InternalMessage<A> *old_rtmsg_ptr = &old_rtmsg;
     int result = ADD_USED;
@@ -137,7 +136,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    // the route being immediately deleted when it's erased
 	    // from the Trie.  Deletion will occur later when the
 	    // reference is deleted.
-	    old_route = &(iter.payload());
+	    const SubnetRoute<A> *old_route = &(iter.payload());
 	    old_route_reference = new SubnetRouteConstRef<A>(old_route);
 
 	    old_rtmsg_ptr = new InternalMessage<A>(old_route,
@@ -197,7 +196,6 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     if (old_rtmsg_ptr != &old_rtmsg) {
 	delete old_rtmsg_ptr;
-	assert(old_route != NULL);
 	assert(old_route_reference != NULL);
 	delete old_route_reference;
     }

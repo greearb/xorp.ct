@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.6 2003/01/26 01:22:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.7 2003/01/26 06:15:53 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -541,18 +541,17 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_next(
 	vector<uint8_t>& attr_unknown)
 {
     uint32_t origin;
-    bool best;
+    bool best = false;
     if (_bgp.get_route_list_next4(token, peer_id, net, origin, aspath,
 				  nexthop, med, localpref, atomic_agg,
 				  aggregator, calc_localpref, attr_unknown,
 				  best)) {
 	//trivial encoding to keep XRL arg count small enough
 	if (best) {
-	    best_and_origin = (2 << 16) & origin;
+	    best_and_origin = (2 << 16) | origin;
 	} else {
-	    best_and_origin = (1 << 16) & origin;
+	    best_and_origin = (1 << 16) | origin;
 	}
-
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED("No more routes");
