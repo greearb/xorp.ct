@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.25 2005/02/12 08:09:07 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.26 2005/02/14 23:15:16 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -547,12 +547,28 @@ public:
      * @return the node status (see @ref ProcessStatus).
      */
     ProcessStatus	node_status(string& reason_msg);
+
+    /**
+     * Increment the number of startup requests.
+     */
+    void incr_startup_requests_n();
+
+    /**
+     * Decrement the number of startup requests.
+     */
+    void decr_startup_requests_n();
+
+    /**
+     * Increment the number of shutdown requests.
+     */
+    void incr_shutdown_requests_n();
+
+    /**
+     * Decrement the number of shutdown requests.
+     */
+    void decr_shutdown_requests_n();
     
 protected:
-    void incr_startup_requests_n();
-    void decr_startup_requests_n();
-    void incr_shutdown_requests_n();
-    void decr_shutdown_requests_n();
     void update_status();
     
 private:
