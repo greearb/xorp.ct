@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.30 2003/08/28 15:41:46 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.31 2003/08/28 15:54:53 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -37,10 +37,12 @@ Release 0.4 (2003/08/28)
     - Added pre-order iterators for Trie and RefTrie.
 
   LIBXIPC:
-    - 
+    - Addition of virtual methods in XrlRouter to provide processes with
+      an opportunity to detect finder connection, registristration, and
+      disconnection events.
 
   XRL:
-    - 
+    - Minor changes to clnt-gen to that changes the names of some typedefs.
 
   RTRMGR:
     - Now all relative paths to templates, xrl files, configuration
@@ -168,7 +170,9 @@ Release 0.4 (2003/08/28)
     - Full implementation of BGP4-MIB module (RFC 1657) including traps.
 
   RIP:
-    - 
+    - Implementation functionally operational save communication with the RIB
+      for injecting routes, the FEA to send and receive packets, FEA 
+      interface monitoring code, and an XRL interface for configuration.
 
 Release 0.3 (2003/06/09)
 ========================
