@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.26 2003/08/12 15:11:38 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.27 2003/08/12 15:50:13 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1513,14 +1513,150 @@ protected:
     XrlCmdError pim_0_1_send_test_cand_rp_adv();
 
     /**
-     *  Statistics-related counters and values
+     *  Retrieve information about all PIM neighbors.
+     *  
+     *  @param nbrs_number the number of PIM neighbors
+     *  
+     *  @param vifs the list of vif names for all neighbors (one vif name per
+     *  neighbor).
+     *  
+     *  @param pim_versions the list of PIM protocol versions for all neighbors
+     *  (one number per neighbor).
+     *  
+     *  @param dr_priorities the list of DR priorities of all neighbors (one
+     *  number per neighbor).
+     *  
+     *  @param holdtimes the list of configured holdtimes (in seconds) of all
+     *  neighbors (one number per neighbor).
+     *  
+     *  @param timeouts the list of timeout values (in seconds) of all
+     *  neighbors (one number per neighbor).
+     *  
+     *  @param uptimes the list of uptime values (in seconds) of all neighbors
+     *  (one number per neighbor).
+     */
+    XrlCmdError pim_0_1_pimstat_neighbors4(
+	// Output values, 
+	uint32_t&	nbrs_number, 
+	XrlAtomList&	vifs, 
+	XrlAtomList&	addresses, 
+	XrlAtomList&	pim_versions, 
+	XrlAtomList&	dr_priorities, 
+	XrlAtomList&	holdtimes, 
+	XrlAtomList&	timeouts, 
+	XrlAtomList&	uptimes);
+
+    XrlCmdError pim_0_1_pimstat_neighbors6(
+	// Output values, 
+	uint32_t&	nbrs_number, 
+	XrlAtomList&	vifs, 
+	XrlAtomList&	addresses, 
+	XrlAtomList&	pim_versions, 
+	XrlAtomList&	dr_priorities, 
+	XrlAtomList&	holdtimes, 
+	XrlAtomList&	timeouts, 
+	XrlAtomList&	uptimes);
+
+    /**
+     *  Retrieve information about PIM interfaces.
+     *  
+     *  @param vif_name the name of the vif to retrieve information about.
+     *  
+     *  @param pim_version the PIM protocol version on that vif.
+     *  
+     *  @param is_dr true if this router is the DR for the subnet the vif is
+     *  connected to.
+     *  
+     *  @param dr_priority the DR priority configured on that vif.
+     *  
+     *  @param dr_address the address of the DR for the subnet the vif is
+     *  connected to.
+     *  
+     *  @param pim_nbrs_number the number of PIM neighbors on the subnet
+     *  the vif is connected to.
+     */
+    XrlCmdError pim_0_1_pimstat_interface4(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	pim_version, 
+	bool&		is_dr, 
+	uint32_t&	dr_priority, 
+	IPv4&		dr_address, 
+	uint32_t&	pim_nbrs_number);
+
+    XrlCmdError pim_0_1_pimstat_interface6(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	pim_version, 
+	bool&		is_dr, 
+	uint32_t&	dr_priority, 
+	IPv6&		dr_address, 
+	uint32_t&	pim_nbrs_number);
+
+    /**
+     *  Retrieve information about the RP-Set.
+     *  
+     *  @param rps_number the number of RPs in the RP-Set.
+     *  
+     *  @param addresses the list of addresses of all RPs (one IPv4 or IPv6
+     *  address per RP).
+     *  
+     *  @param types the list of textual description about the origin of each
+     *  RP (one keyword per RP: "bootstrap", "static" or "unknown").
+     *  
+     *  @param priorities the list of RP priorities of all RPs (one number per
+     *  RP).
+     *  
+     *  @param holdtimes the list of configured holdtimes (in seconds) of all
+     *  RPs (one number per RP).
+     *  
+     *  @param timeouts the list of timeout values (in seconds) of all RPs (one
+     *  number per RP).
+     *  
+     *  @param group_prefixes the list of all group prefixes (one network
+     *  IPv4Net or IPv6Net address per RP). Note that if an RP is configured
+     *  for more than one group prefixes, there will be a number of entries for
+     *  that RP: one per group prefix.
+     */
+    XrlCmdError pim_0_1_pimstat_rps4(
+	// Output values, 
+	uint32_t&	rps_number, 
+	XrlAtomList&	addresses, 
+	XrlAtomList&	types, 
+	XrlAtomList&	priorities, 
+	XrlAtomList&	holdtimes, 
+	XrlAtomList&	timeouts, 
+	XrlAtomList&	group_prefixes);
+
+    XrlCmdError pim_0_1_pimstat_rps6(
+	// Output values, 
+	uint32_t&	rps_number, 
+	XrlAtomList&	addresses, 
+	XrlAtomList&	types, 
+	XrlAtomList&	priorities, 
+	XrlAtomList&	holdtimes, 
+	XrlAtomList&	timeouts, 
+	XrlAtomList&	group_prefixes);
+
+    /**
+     *  Clear all statistics
      */
     XrlCmdError pim_0_1_clear_pim_statistics();
 
+    /**
+     *  Clear all statistics on a specific interface.
+     *  
+     *  @param vif_name the interface to clear the statistics of.
+     */
     XrlCmdError pim_0_1_clear_pim_statistics_per_vif(
 	// Input values, 
 	const string&	vif_name);
 
+    /**
+     *  Statistics-related counters and values
+     */
     XrlCmdError pim_0_1_pimstat_hello_messages_received(
 	// Output values, 
 	uint32_t&	value);

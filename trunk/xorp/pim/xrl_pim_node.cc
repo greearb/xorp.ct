@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.34 2003/08/12 15:50:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.35 2003/08/12 18:24:10 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -4661,9 +4661,414 @@ XrlPimNode::pim_0_1_send_test_cand_rp_adv()
     return XrlCmdError::OKAY();
 }
 
-//
-// Statistics-related counters and values
-//
+XrlCmdError
+XrlPimNode::pim_0_1_pimstat_neighbors4(
+    // Output values, 
+    uint32_t&		nbrs_number, 
+    XrlAtomList&	vifs, 
+    XrlAtomList&	addresses, 
+    XrlAtomList&	pim_versions, 
+    XrlAtomList&	dr_priorities, 
+    XrlAtomList&	holdtimes, 
+    XrlAtomList&	timeouts, 
+    XrlAtomList&	uptimes)
+{
+    //
+    // Verify the address family
+    //
+    do {
+	bool is_invalid_family = false;
+	
+	if (family() != AF_INET)
+	    is_invalid_family = true;
+	
+	if (is_invalid_family) {
+	    // Invalid address family
+	    string error_msg = c_format("Received protocol message with "
+					"invalid address family: IPv4");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+    } while (false);
+    
+    nbrs_number = 0;
+    
+    for (uint16_t i = 0; i < PimNode::maxvifs(); i++) {
+	PimVif *pim_vif = PimNode::vif_find_by_vif_index(i);
+	if (pim_vif == NULL)
+	    continue;
+	
+	if (pim_vif->addr_ptr() == NULL)
+	    continue;		// XXX: ignore vifs with no address
+	
+	list<PimNbr *>::iterator iter;
+	for (iter = pim_vif->pim_nbrs().begin();
+	     iter != pim_vif->pim_nbrs().end();
+	     ++iter) {
+	    PimNbr *pim_nbr = *iter;
+	    
+	    nbrs_number++;
+	    vifs.append(XrlAtom(pim_vif->name()));
+	    addresses.append(XrlAtom(pim_vif->addr_ptr()->get_ipv4()));
+	    pim_versions.append(XrlAtom(pim_nbr->proto_version()));
+	    if (pim_nbr->is_dr_priority_present())
+		dr_priorities.append(XrlAtom(pim_nbr->dr_priority()));
+	    else
+		dr_priorities.append(XrlAtom(-1));
+	    holdtimes.append(XrlAtom(pim_nbr->hello_holdtime()));
+	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
+		TimeVal tv_left;
+		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
+		timeouts.append(XrlAtom(tv_left.sec()));
+	    } else {
+		timeouts.append(XrlAtom(-1));
+	    }
+	    uptimes.append(XrlAtom(-1));
+	}
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_pimstat_neighbors6(
+    // Output values, 
+    uint32_t&		nbrs_number, 
+    XrlAtomList&	vifs, 
+    XrlAtomList&	addresses, 
+    XrlAtomList&	pim_versions, 
+    XrlAtomList&	dr_priorities, 
+    XrlAtomList&	holdtimes, 
+    XrlAtomList&	timeouts, 
+    XrlAtomList&	uptimes)
+{
+    //
+    // Verify the address family
+    //
+    do {
+	bool is_invalid_family = false;
+	
+#ifdef HAVE_IPV6
+	if (family() != AF_INET6)
+	    is_invalid_family = true;
+#else
+	is_invalid_family = true;
+#endif
+	
+	if (is_invalid_family) {
+	    // Invalid address family
+	    string error_msg = c_format("Received protocol message with "
+					"invalid address family: IPv6");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+    } while (false);
+
+    nbrs_number = 0;
+    
+    for (uint16_t i = 0; i < PimNode::maxvifs(); i++) {
+	PimVif *pim_vif = PimNode::vif_find_by_vif_index(i);
+	if (pim_vif == NULL)
+	    continue;
+	
+	if (pim_vif->addr_ptr() == NULL)
+	    continue;		// XXX: ignore vifs with no address
+	
+	list<PimNbr *>::iterator iter;
+	for (iter = pim_vif->pim_nbrs().begin();
+	     iter != pim_vif->pim_nbrs().end();
+	     ++iter) {
+	    PimNbr *pim_nbr = *iter;
+	    
+	    nbrs_number++;
+	    vifs.append(XrlAtom(pim_vif->name()));
+	    addresses.append(XrlAtom(pim_vif->addr_ptr()->get_ipv6()));
+	    pim_versions.append(XrlAtom(pim_nbr->proto_version()));
+	    if (pim_nbr->is_dr_priority_present())
+		dr_priorities.append(XrlAtom(pim_nbr->dr_priority()));
+	    else
+		dr_priorities.append(XrlAtom(-1));
+	    holdtimes.append(XrlAtom(pim_nbr->hello_holdtime()));
+	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
+		TimeVal tv_left;
+		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
+		timeouts.append(XrlAtom(tv_left.sec()));
+	    } else {
+		timeouts.append(XrlAtom(-1));
+	    }
+	    uptimes.append(XrlAtom(-1));
+	}
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_pimstat_interface4(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    uint32_t&		pim_version, 
+    bool&		is_dr, 
+    uint32_t&		dr_priority, 
+    IPv4&		dr_address, 
+    uint32_t&		pim_nbrs_number)
+{
+    //
+    // Verify the address family
+    //
+    do {
+	bool is_invalid_family = false;
+	
+	if (family() != AF_INET)
+	    is_invalid_family = true;
+	
+	if (is_invalid_family) {
+	    // Invalid address family
+	    string error_msg = c_format("Received protocol message with "
+					"invalid address family: IPv4");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+    } while (false);
+    
+    string error_msg;
+    
+    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get information about vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    pim_version = pim_vif->proto_version();
+    is_dr = pim_vif->i_am_dr();
+    dr_priority = pim_vif->dr_priority().get();
+    dr_address = pim_vif->dr_addr().get_ipv4();
+    pim_nbrs_number = pim_vif->pim_nbrs_number();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_pimstat_interface6(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    uint32_t&		pim_version, 
+    bool&		is_dr, 
+    uint32_t&		dr_priority, 
+    IPv6&		dr_address, 
+    uint32_t&		pim_nbrs_number)
+{
+    //
+    // Verify the address family
+    //
+    do {
+	bool is_invalid_family = false;
+	
+#ifdef HAVE_IPV6
+	if (family() != AF_INET6)
+	    is_invalid_family = true;
+#else
+	is_invalid_family = true;
+#endif
+	
+	if (is_invalid_family) {
+	    // Invalid address family
+	    string error_msg = c_format("Received protocol message with "
+					"invalid address family: IPv6");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+    } while (false);
+
+    string error_msg;
+    
+    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot get information about vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    pim_version = pim_vif->proto_version();
+    is_dr = pim_vif->i_am_dr();
+    dr_priority = pim_vif->dr_priority().get();
+    dr_address = pim_vif->dr_addr().get_ipv6();
+    pim_nbrs_number = pim_vif->pim_nbrs_number();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_pimstat_rps4(
+    // Output values, 
+    uint32_t&		rps_number, 
+    XrlAtomList&	addresses, 
+    XrlAtomList&	types, 
+    XrlAtomList&	priorities, 
+    XrlAtomList&	holdtimes, 
+    XrlAtomList&	timeouts, 
+    XrlAtomList&	group_prefixes)
+{
+    //
+    // Verify the address family
+    //
+    do {
+	bool is_invalid_family = false;
+	
+	if (family() != AF_INET)
+	    is_invalid_family = true;
+	
+	if (is_invalid_family) {
+	    // Invalid address family
+	    string error_msg = c_format("Received protocol message with "
+					"invalid address family: IPv4");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+    } while (false);
+    
+    rps_number = 0;
+    
+    list<PimRp *>::const_iterator iter;
+    for (iter = PimNode::rp_table().rp_list().begin();
+	 iter != PimNode::rp_table().rp_list().end();
+	 ++iter) {
+	PimRp *pim_rp = *iter;
+	
+	string rp_type;
+	int holdtime = -1;
+	int left_sec = -1;
+	switch (pim_rp->rp_learned_method()) {
+        case PimRp::RP_LEARNED_METHOD_BOOTSTRAP:
+	    rp_type = "bootstrap";
+	    do {
+		// Try first a scoped zone, then a non-scoped zone
+		BsrRp *bsr_rp;
+		bsr_rp = PimNode::pim_bsr().find_rp(pim_rp->group_prefix(),
+						    true,
+						    pim_rp->rp_addr());
+		if (bsr_rp == NULL) {
+		    bsr_rp = PimNode::pim_bsr().find_rp(pim_rp->group_prefix(),
+							false,
+							pim_rp->rp_addr());
+		}
+		if (bsr_rp == NULL)
+		    break;
+		holdtime = bsr_rp->rp_holdtime();
+		if (bsr_rp->const_candidate_rp_expiry_timer().scheduled()) {
+		    TimeVal tv_left;
+		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
+		    left_sec = tv_left.sec();
+		}
+	    } while (false);
+	    
+	    break;
+        case PimRp::RP_LEARNED_METHOD_STATIC:
+	    rp_type = "static";
+	    break;
+        default:
+	    rp_type = "unknown";
+	    break;
+        }
+	
+	addresses.append(XrlAtom(pim_rp->rp_addr().get_ipv4()));
+	types.append(XrlAtom(rp_type));
+	priorities.append(XrlAtom(pim_rp->rp_priority()));
+	holdtimes.append(XrlAtom(holdtime));
+	timeouts.append(XrlAtom(left_sec));
+	group_prefixes.append(XrlAtom(pim_rp->group_prefix().get_ipv4net()));
+    }
+	 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_pimstat_rps6(
+    // Output values, 
+    uint32_t&		rps_number, 
+    XrlAtomList&	addresses, 
+    XrlAtomList&	types, 
+    XrlAtomList&	priorities, 
+    XrlAtomList&	holdtimes, 
+    XrlAtomList&	timeouts, 
+    XrlAtomList&	group_prefixes)
+{
+    //
+    // Verify the address family
+    //
+    do {
+	bool is_invalid_family = false;
+	
+#ifdef HAVE_IPV6
+	if (family() != AF_INET6)
+	    is_invalid_family = true;
+#else
+	is_invalid_family = true;
+#endif
+	
+	if (is_invalid_family) {
+	    // Invalid address family
+	    string error_msg = c_format("Received protocol message with "
+					"invalid address family: IPv6");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+    } while (false);
+
+    rps_number = 0;
+    
+    list<PimRp *>::const_iterator iter;
+    for (iter = PimNode::rp_table().rp_list().begin();
+	 iter != PimNode::rp_table().rp_list().end();
+	 ++iter) {
+	PimRp *pim_rp = *iter;
+	
+	string rp_type;
+	int holdtime = -1;
+	int left_sec = -1;
+	switch (pim_rp->rp_learned_method()) {
+        case PimRp::RP_LEARNED_METHOD_BOOTSTRAP:
+	    rp_type = "bootstrap";
+	    do {
+		// Try first a scoped zone, then a non-scoped zone
+		BsrRp *bsr_rp;
+		bsr_rp = PimNode::pim_bsr().find_rp(pim_rp->group_prefix(),
+						    true,
+						    pim_rp->rp_addr());
+		if (bsr_rp == NULL) {
+		    bsr_rp = PimNode::pim_bsr().find_rp(pim_rp->group_prefix(),
+							false,
+							pim_rp->rp_addr());
+		}
+		if (bsr_rp == NULL)
+		    break;
+		holdtime = bsr_rp->rp_holdtime();
+		if (bsr_rp->const_candidate_rp_expiry_timer().scheduled()) {
+		    TimeVal tv_left;
+		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
+		    left_sec = tv_left.sec();
+		}
+	    } while (false);
+	    
+	    break;
+        case PimRp::RP_LEARNED_METHOD_STATIC:
+	    rp_type = "static";
+	    break;
+        default:
+	    rp_type = "unknown";
+	    break;
+        }
+	
+	addresses.append(XrlAtom(pim_rp->rp_addr().get_ipv6()));
+	types.append(XrlAtom(rp_type));
+	priorities.append(XrlAtom(pim_rp->rp_priority()));
+	holdtimes.append(XrlAtom(holdtime));
+	timeouts.append(XrlAtom(left_sec));
+	group_prefixes.append(XrlAtom(pim_rp->group_prefix().get_ipv6net()));
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlPimNode::pim_0_1_clear_pim_statistics()
 {
@@ -4686,6 +5091,11 @@ XrlPimNode::pim_0_1_clear_pim_statistics_per_vif(
     
     return XrlCmdError::OKAY();
 }
+
+
+//
+// Statistics-related counters and values
+//
 
 #define XRL_GET_PIMSTAT_PER_NODE(stat_name)			\
 XrlCmdError							\
