@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.30 2004/05/06 23:40:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.31 2004/06/10 22:40:30 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1192,14 +1192,27 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	return;
 	break;
     case SEND_FAILED:
-	XLOG_FATAL("%s %s", comment.c_str(), error.str().c_str());
+	XLOG_FATAL("callback: %s %s", comment.c_str(), error.str().c_str());
 	break;
     case SEND_FAILED_TRANSIENT:
     case NO_SUCH_METHOD:
     case BAD_ARGS:
-    case COMMAND_FAILED:
     case INTERNAL_ERROR:
 	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+    case COMMAND_FAILED:
+	/*
+	** If it possible that we were de-registering interest in this
+	** nexthop when it became invalid. In this case the command
+	** may fail as the RIB has already told us it is invalid.
+	*/
+	if (_invalid) {
+	    XLOG_ASSERT(addr == _invalid_net.masked_addr() &&
+			prefix_len == _invalid_net.prefix_len());
+	    _invalid = false;
+	} else
+	    XLOG_FATAL("callback: %s %s",  comment.c_str(),
+		       error.str().c_str());
 	break;
     }
 
