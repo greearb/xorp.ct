@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.6 2004/11/29 11:06:20 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.7 2004/12/01 03:28:06 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -62,6 +62,37 @@ public:
      * @param v if true, enable kernel-level Click, otherwise disable it.
      */
     void enable_kernel_click(bool v) { _is_kernel_click = v; }
+
+    /**
+     * Enable/disable installing kernel-level Click on startup.
+     *
+     * @param v if true, then install kernel-level Click on startup.
+     */
+    void enable_kernel_click_install_on_startup(bool v) {
+	_kernel_click_install_on_startup = v;
+    }
+
+    /**
+     * Specify the list of kernel Click modules to load on startup if
+     * installing kernel-level Click on startup is enabled.
+     *
+     * The file names of the kernel modules are separated by colon.
+     *
+     * @param v the list of kernel Click modules (separated by colon) to
+     * load.
+     */
+    void set_kernel_click_modules(const string& v) {
+	_kernel_click_modules = v;
+    }
+
+    /**
+     * Specify the kernel-level Click mount directory.
+     *
+     * @param v the kernel-level Click mount directory.
+     */
+    void set_kernel_click_mount_directory(const string& v) {
+	_kernel_click_mount_directory = v;
+    }
 
     /**
      * Enable/disable user-level Click.
@@ -354,6 +385,9 @@ private:
     bool	_is_user_click;		// True if user Click is enabled
 
     string	_click_config_generator_file;
+    bool	_kernel_click_install_on_startup;
+    string	_kernel_click_modules;
+    string	_kernel_click_mount_directory;
     string	_user_click_command_file;
     string	_user_click_command_extra_arguments;
     bool	_user_click_command_execute_on_startup;

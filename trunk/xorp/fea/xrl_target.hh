@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.46 2004/11/29 09:18:19 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.47 2004/11/29 09:25:09 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -105,6 +105,36 @@ public:
     XrlCmdError fea_click_0_1_enable_kernel_click(
 	// Input values,
 	const bool&	enable);
+
+    /**
+     *  Enable/disable installing kernel-level Click on startup.
+     *
+     *  @param enable if true, then install kernel-level Click on startup.
+     */
+    XrlCmdError fea_click_0_1_enable_kernel_click_install_on_startup(
+	// Input values,
+	const bool&	enable);
+
+    /**
+     *  Specify the list of kernel Click modules to load on startup if
+     *  installing kernel-level Click on startup is enabled. The file names of
+     *  the kernel modules are separated by colon.
+     *
+     *  @param modules the list of kernel Click modules (separated by colon) to
+     *  load.
+     */
+    XrlCmdError fea_click_0_1_set_kernel_click_modules(
+	// Input values,
+	const string&	modules);
+
+    /**
+     *  Specify the kernel-level Click mount directory.
+     *
+     *  @param directory the kernel-level Click mount directory.
+     */
+    XrlCmdError fea_click_0_1_set_kernel_click_mount_directory(
+	// Input values,
+	const string&	directory);
 
     /**
      *  Enable/disable user-level Click FEA support.

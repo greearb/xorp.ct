@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.61 2004/11/29 09:25:09 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.62 2004/11/29 09:36:27 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -229,6 +229,66 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click(
 
     ifc.enable_kernel_click(enable);
     ftic.enable_kernel_click(enable);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Enable/disable installing kernel-level Click on startup.
+ *
+ *  @param enable if true, then install kernel-level Click on startup.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_enable_kernel_click_install_on_startup(
+    // Input values,
+    const bool&	enable)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.enable_kernel_click_install_on_startup(enable);
+    ftic.enable_kernel_click_install_on_startup(enable);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the list of kernel Click modules to load on startup if
+ *  installing kernel-level Click on startup is enabled. The file names of
+ *  the kernel modules are separated by colon.
+ *
+ *  @param modules the list of kernel Click modules (separated by colon) to
+ *  load.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
+    // Input values,
+    const string&	modules)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_kernel_click_modules(modules);
+    ftic.set_kernel_click_modules(modules);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Specify the kernel-level Click mount directory.
+ *
+ *  @param directory the kernel-level Click mount directory.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_set_kernel_click_mount_directory(
+    // Input values,
+    const string&	directory)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    FtiConfig& ftic = _xftm.ftic();
+
+    ifc.set_kernel_click_mount_directory(directory);
+    ftic.set_kernel_click_mount_directory(directory);
 
     return XrlCmdError::OKAY();
 }

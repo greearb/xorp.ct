@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.36 2004/11/30 20:06:26 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.37 2004/12/01 03:28:09 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -192,6 +192,31 @@ public:
      * otherwise disable it.
      */
     void enable_kernel_click(bool enable);
+
+    /**
+     * Enable/disable installing kernel-level Click on startup.
+     *
+     * @param enable if true, then install kernel-level Click on startup.
+     */
+    void enable_kernel_click_install_on_startup(bool enable);
+
+    /**
+     * Specify the list of kernel Click modules to load on startup if
+     * installing kernel-level Click on startup is enabled.
+     *
+     * The file names of the kernel modules are separated by colon.
+     *
+     * @param modules the list of kernel Click modules (separated by colon) to
+     * load.
+     */
+    void set_kernel_click_modules(const string& modules);
+
+    /**
+     * Specify the kernel-level Click mount directory.
+     *
+     * @param directory the kernel-level Click mount directory.
+     */
+    void set_kernel_click_mount_directory(const string& directory);
 
     /**
      * Enable/disable user-level Click support.

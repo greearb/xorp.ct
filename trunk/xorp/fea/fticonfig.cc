@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.34 2004/11/29 04:02:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.35 2004/12/01 03:28:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -682,6 +682,53 @@ FtiConfig::enable_kernel_click(bool enable)
     _ftic_entry_set_click.enable_kernel_click(enable);
     _ftic_table_get_click.enable_kernel_click(enable);
     _ftic_table_set_click.enable_kernel_click(enable);
+}
+
+/**
+ * Enable/disable installing kernel-level Click on startup.
+ *
+ * @param enable if true, then install kernel-level Click on startup.
+ */
+void
+FtiConfig::enable_kernel_click_install_on_startup(bool enable)
+{
+    // XXX: only IfConfigGet should install the kernel-level Click
+    _ftic_entry_get_click.enable_kernel_click_install_on_startup(enable);
+    _ftic_entry_set_click.enable_kernel_click_install_on_startup(false);
+    _ftic_table_get_click.enable_kernel_click_install_on_startup(false);
+    _ftic_table_set_click.enable_kernel_click_install_on_startup(false);
+}
+
+/**
+ * Specify the list of kernel Click modules to load on startup if
+ * installing kernel-level Click on startup is enabled.
+ *
+ * The file names of the kernel modules are separated by colon.
+ *
+ * @param modules the list of kernel Click modules (separated by colon) to
+ * load.
+ */
+void
+FtiConfig::set_kernel_click_modules(const string& modules)
+{
+    _ftic_entry_get_click.set_kernel_click_modules(modules);
+    _ftic_entry_set_click.set_kernel_click_modules(modules);
+    _ftic_table_get_click.set_kernel_click_modules(modules);
+    _ftic_table_set_click.set_kernel_click_modules(modules);
+}
+
+/**
+ * Specify the kernel-level Click mount directory.
+ *
+ * @param directory the kernel-level Click mount directory.
+ */
+void
+FtiConfig::set_kernel_click_mount_directory(const string& directory)
+{
+    _ftic_entry_get_click.set_kernel_click_mount_directory(directory);
+    _ftic_entry_set_click.set_kernel_click_mount_directory(directory);
+    _ftic_table_get_click.set_kernel_click_mount_directory(directory);
+    _ftic_table_set_click.set_kernel_click_mount_directory(directory);
 }
 
 /**

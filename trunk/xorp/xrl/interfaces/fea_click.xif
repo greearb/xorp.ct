@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/fea_click.xif,v 1.1 2004/11/10 00:37:54 pavlin Exp $ */
 
 /*
  * Click FEA XRL interface.
@@ -39,7 +39,31 @@ interface fea_click/0.1 {
 	 * @param enable if true, then enable the kernel-level Click FEA
 	 * support, otherwise disable it.
 	 */
-	enable_kernel_click	? enable:bool
+	enable_kernel_click			? enable:bool
+
+	/**
+	 * Enable/disable installing kernel-level Click on startup.
+	 *
+	 * @param enable if true, then install kernel-level Click on startup.
+	 */
+	enable_kernel_click_install_on_startup	? enable:bool
+
+	/**
+	 * Specify the list of kernel Click modules to load on startup
+	 * if installing kernel-level Click on startup is enabled.
+	 * The file names of the kernel modules are separated by colon.
+	 *
+	 * @param modules the list of kernel Click modules (separated by
+	 * colon) to load.
+	 */
+	set_kernel_click_modules		? modules:txt
+
+	/**
+	 * Specify the kernel-level Click mount directory.
+	 *
+	 * @param directory the kernel-level Click mount directory.
+	 */
+	set_kernel_click_mount_directory	? directory:txt
 
 	/**
 	 * Enable/disable user-level Click FEA support.
@@ -47,7 +71,7 @@ interface fea_click/0.1 {
 	 * @param enable if true, then enable the user-level Click FEA
 	 * support, otherwise disable it.
 	 */
-	enable_user_click	? enable:bool
+	enable_user_click			? enable:bool
 
 	/**
 	 * Specify the user-level Click command file.
@@ -82,7 +106,7 @@ interface fea_click/0.1 {
 	 * @param user_click_control_address the address to use for
 	 * control access to the user-level Click.
 	 */
-	set_user_click_control_address		?		\
+	set_user_click_control_address			?		\
 				 user_click_control_address:ipv4
 
 	/**

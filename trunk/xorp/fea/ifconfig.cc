@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.38 2004/11/29 04:02:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.39 2004/12/01 03:28:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -465,6 +465,47 @@ IfConfig::enable_kernel_click(bool enable)
 {
     _ifc_get_click.enable_kernel_click(enable);
     _ifc_set_click.enable_kernel_click(enable);
+}
+
+/**
+ * Enable/disable installing kernel-level Click on startup.
+ *
+ * @param enable if true, then install kernel-level Click on startup.
+ */
+void
+IfConfig::enable_kernel_click_install_on_startup(bool enable)
+{
+    // XXX: only IfConfigGet should install the kernel-level Click
+    _ifc_get_click.enable_kernel_click_install_on_startup(enable);
+    _ifc_set_click.enable_kernel_click_install_on_startup(false);
+}
+
+/**
+ * Specify the list of kernel Click modules to load on startup if
+ * installing kernel-level Click on startup is enabled.
+ *
+ * The file names of the kernel modules are separated by colon.
+ *
+ * @param modules the list of kernel Click modules (separated by colon) to
+ * load.
+ */
+void
+IfConfig::set_kernel_click_modules(const string& modules)
+{
+    _ifc_get_click.set_kernel_click_modules(modules);
+    _ifc_set_click.set_kernel_click_modules(modules);
+}
+
+/**
+ * Specify the kernel-level Click mount directory.
+ *
+ * @param directory the kernel-level Click mount directory.
+ */
+void
+IfConfig::set_kernel_click_mount_directory(const string& directory)
+{
+    _ifc_get_click.set_kernel_click_mount_directory(directory);
+    _ifc_set_click.set_kernel_click_mount_directory(directory);
 }
 
 /**

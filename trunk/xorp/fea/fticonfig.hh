@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.26 2004/11/27 04:14:04 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.27 2004/12/01 03:28:06 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -181,7 +181,32 @@ public:
      * otherwise disable it.
      */
     void enable_kernel_click(bool enable);
-    
+
+    /**
+     * Enable/disable installing kernel-level Click on startup.
+     *
+     * @param enable if true, then install kernel-level Click on startup.
+     */
+    void enable_kernel_click_install_on_startup(bool enable);
+
+    /**
+     * Specify the list of kernel Click modules to load on startup if
+     * installing kernel-level Click on startup is enabled.
+     *
+     * The file names of the kernel modules are separated by colon.
+     *
+     * @param modules the list of kernel Click modules (separated by colon) to
+     * load.
+     */
+    void set_kernel_click_modules(const string& modules);
+
+    /**
+     * Specify the kernel-level Click mount directory.
+     *
+     * @param directory the kernel-level Click mount directory.
+     */
+    void set_kernel_click_mount_directory(const string& directory);
+
     /**
      * Enable/disable user-level Click support.
      *
