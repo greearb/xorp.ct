@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.30 2004/06/04 04:44:07 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.31 2004/06/07 18:16:25 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -60,6 +60,7 @@ protocols {
 	}
 
 	local-as {
+	    %allow-range: $(@) "0" "65535";
 	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
 	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
 	}
@@ -87,6 +88,7 @@ protocols {
 	    }
 
 	    as {
+	        %allow-range: $(@) "0" "65535";
 		%set:;
 	    }
 
