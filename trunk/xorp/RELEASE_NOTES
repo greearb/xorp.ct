@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.2 2002/12/12 00:46:36 hodson Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.1 2003/02/25 02:18:01 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -7,27 +7,72 @@
 This file contains XORP release notes (most recent releases first).
 
 
-* Release 0.2 (2003/??/??)
+Release 0.2 (2003/03/??)
+========================
+
   ALL:
     - Source code compiles under GCC 3.2.1 and on Mac OS X 10.2.x (GCC 3.1)
       in addition to GCC 2.95.x and 2.96.
 
   LIBXIPC:
-    - 
+    - Complete re-implementation of the XRL finder, so that
+      registration/deregistration to the finder uses XRLs.
 
   RTRMGR:
-    -
+    - Add operational-mode commands for monitoring BGP routes and
+      peers, and VIF/interface state.
+ 
+    - Re-implement how rtrmgr decides when to start processes.  This
+      fixes a fex bugs in the dependency tracking - prior to this the
+      RIB would not be started because it requires no direct configuration.
+
+  RIB: 
+    - Ensure that the originating protocol is propagated throughout
+      the RIB.
+
+    - Fix bug where routes for directly connected interfaces were
+      incorrectly being fed back to the FEA (which didn't expect to
+      see add_route for these subnets).
 
   BGP:
-    - 
+
+    - XRL interfaces for monitoring BGP peers and the complete BGP
+      routing table added.  Helper programs bgp/tools/show_routes and
+      bgp/tools/show_peers added, along with versions of these for
+      running from xorpsh.
+
+    - Support for adding/removing MEDs added.
+
+    - BGP message handling and Path Attribute handling re-written to
+      be much cleaner and more efficient.
+
+    - Re-structured the BGP peer state machine to make the code easier
+      to understand.
+
+    - Change BGP to use reference-counted tries.  This greatly
+      simplies the implementation of background tasks.
+
+    - Correctly handle unrecognized optional transitive attributes.
+
+    - Merge isolation tests into a single binary.
+
+    - Added BGP/RIB/FEA integration tests.
+
+    - Too many bug fixes to list.
 
   PIM-SM:
     - Detailed testing of the basic protocol completed and documented
       in the XORP PIM-SM Test Suite document.
+
     - PIM-SM Bootstrap mechanism reimplemented (not tested in details yet).
       Note that the Bootstrap-related configuration commands in
       pim/configure_pim have changed slightly.
 
-* Release 0.1 (2002/12/11)
+
+
+Release 0.1 (2002/12/11)
+========================
+
   - XORP Release 0.1 source code released.
+
   - CVS repository opened to the world.
