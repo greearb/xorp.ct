@@ -1,11 +1,11 @@
 #
-# $XORP: xorp/fea/TODO,v 1.5 2003/05/19 03:15:42 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.6 2003/05/20 20:58:01 pavlin Exp $
 #
 
 * Do we need to include <asm/types.h> for Linux, when we include
   <linux/rtnetlink.h> ?
 
-* Do we need file test_ifconfig_rtsock.cc ??
+* Fix test files like test_ifconfig_rtsock.cc
 
 * Sync by renaming all "IfTree& iftree" to "IfTree& it" (or vice-versa).
 
@@ -17,9 +17,6 @@
 
 * Set the pif_index for MfeaVif
 
-* Rename rtsock.hh and rtsock.cc to routing_socket.hh and routing_socket.cc
-  respectively.
-
 * When obtaining the forwarding table from the kernel,
   do we need to take special care of the
   (rtm->rtm_flags & RTF_LLINFO) entries? (see the mfea code for that).
@@ -29,20 +26,12 @@
     size_t enable = 1;
     sysctlbyname("net.inet.ip.forwarding", 0, 0, &enable, sizeof(enable))
 
-* Remove FEA_BUILD_RTSOCK from top-level configure.in
-
 * Make sure that the interfaces in the interface tree are deleted properly
   whenever the underlying interfaces in the kernel change. E.g.,
   especially be careful in case an interface disappears, and immediately
   after that a new interface with different name but same interface index
   appears. In that case, we need to update properly the local cache
   that maps interface names to indexes.
-
-* Use bool to return error: true if no error, otherwise false. (??)
-
-* Write a test program.
-
-* Add dummy mechanisms to get/set/observe interface information.
 
 * Add UDP interfaces for sending and receiving.
 
@@ -53,4 +42,4 @@
 * The following files inside "fea" are not used?
   click.hh click_glue.hh fti_click.hh ifconfig_click.hh
   click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
-  Keep them or remove?
+  Refactor them?
