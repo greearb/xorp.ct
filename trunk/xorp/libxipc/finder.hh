@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng.hh,v 1.2 2003/01/28 00:42:24 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng.hh,v 1.3 2003/02/24 19:39:18 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
@@ -70,6 +70,10 @@ public:
     const Resolveables* resolve(const string& target, const string& key);
 
     size_t messengers() const;
+
+    bool fill_target_list(list<string>& target_list) const;
+    bool fill_targets_xrl_list(const string& target,
+			       list<string>& xrl_list) const;
     
 protected:
     void announce_departure(const string& target);

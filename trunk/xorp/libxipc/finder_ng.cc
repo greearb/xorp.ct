@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.2 2003/01/28 00:42:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.3 2003/02/24 19:39:18 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -79,7 +79,8 @@ public:
 	    return false;
 	return &i->second;
     }
-    
+
+
 protected:
     string			_name;		// name of target
     string			_classname;	// name of target class
@@ -358,3 +359,35 @@ FinderNG::announce_departure(const string& tgt, const string& key)
     }
 }
 
+bool
+FinderNG::fill_target_list(list<string>& tgt_list) const
+{
+    TargetTable::const_iterator ci;
+    for (ci = _targets.begin(); ci != _targets.end(); ++ci) {
+	tgt_list.push_back(ci->first);
+    }
+    return true;
+}
+
+bool
+FinderNG::fill_targets_xrl_list(const string& target,
+				list<string>& xrl_list) const
+{
+    TargetTable::const_iterator ci = _targets.find(target);
+    if (_targets.end() == ci) {
+	return false;
+    }
+
+    FinderNGTarget::ResolveMap::const_iterator
+	cmi = ci->second.resolve_map().begin();
+
+    const FinderNGTarget::ResolveMap::const_iterator
+	end = ci->second.resolve_map().end();
+    
+    while (end != cmi) {
+	xrl_list.push_back(cmi->first);
+	++cmi;
+    }
+    
+    return true;
+}

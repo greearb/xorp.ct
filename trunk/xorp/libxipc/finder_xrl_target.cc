@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.3 2003/02/26 18:33:38 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.4 2003/03/04 23:41:23 hodson Exp $"
 
 #include "libxorp/debug.h"
 
@@ -251,16 +251,32 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList&)
+FinderNGXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
 {
-    return XrlCmdError::COMMAND_FAILED("Unimplemented");
+    list<string> tgts;
+
+    _finder.fill_target_list(tgts);
+    for (list<string>::const_iterator i = tgts.begin(); i != tgts.end(); i++) {
+	xal.append(XrlAtom(*i));
+    }
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-FinderNGXrlTarget::finder_0_1_get_xrls_registered_by(const string&,
-						     XrlAtomList&)
+FinderNGXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
+						     XrlAtomList&  xal)
 {
-    return XrlCmdError::COMMAND_FAILED("Unimplemented");
+    list<string> xrls;
+
+    if (_finder.fill_targets_xrl_list(tgt, xrls) == false) {
+	return
+	    XrlCmdError::COMMAND_FAILED
+	    (c_format("No such target \"%s\"", tgt.c_str()));
+    }
+    for (list<string>::const_iterator i = xrls.begin(); i != xrls.end(); i++) {
+	xal.append(XrlAtom(*i));
+    }
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
