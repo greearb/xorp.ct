@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.15 2004/05/20 23:45:46 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.16 2004/05/21 00:02:55 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -12,40 +12,6 @@ interface rib/0.1 {
 	disable_rib
 	start_rib
 	stop_rib
-
-	/**
-	 * Add/delete/enable/disable a RIB client.
-	 *
-	 * Add/delete/enable/disable a RIB client for a given target name,
-	 * address family, and unicast/multicast flags.
-	 *
-	 * @param target_name the target name of the RIB client.
-	 * @param unicast true if a client for the unicast RIB.
-	 * @param multicast true if a client for the multicast RIB.
-	 */
-	add_rib_client4		? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	add_rib_client6		? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	delete_rib_client4	? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	delete_rib_client6	? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	enable_rib_client4	? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	enable_rib_client6	? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	disable_rib_client4	? target_name:txt			\
-				& unicast:bool & multicast:bool
-
-	disable_rib_client6	? target_name:txt			\
-				& unicast:bool & multicast:bool
 
 	/**
 	 * Make errors fatal; used to detect errors we'd normally mask
