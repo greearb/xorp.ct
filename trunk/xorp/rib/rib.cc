@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.47 2005/02/10 03:51:58 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.48 2005/02/25 03:43:31 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -145,6 +145,8 @@ RIB<A>::find_vif(const A& addr)
     for (mi = _vifs.begin(); mi != _vifs.end(); ++mi) {
 	Vif& v = mi->second;
 	if (v.is_my_addr(addr))
+	    return &v;
+	if (v.is_p2p() && v.is_same_p2p(addr))
 	    return &v;
     }
     return NULL;
