@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node_cli.hh,v 1.2 2003/03/10 23:20:43 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node_cli.hh,v 1.3 2003/03/13 09:37:16 pavlin Exp $
 
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_CLI_HH__
@@ -90,6 +90,7 @@ private:
     // MLD6IGMP CLI commands
     //
     int		cli_show_mld6igmp_interface(const vector<string>& argv);
+    int		cli_show_mld6igmp_interface_address(const vector<string>& argv);
     int		cli_show_mld6igmp_group(const vector<string>& argv);
 };
 
