@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.16 2004/08/19 02:08:30 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.17 2004/09/15 18:42:27 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -43,6 +43,10 @@
       switch will be removed and will be enabled by default.
 
   XORPSH:
+    - There are several known issues, but none of them is considered critical.
+      The list of known issues is available from
+      http://www.xorp.org/bugzilla/query.cgi
+
     - A problem was noticed very late in the release process; rather
       than delay the release we have choosen to document the
       problem. The xorpsh provides the command line to the XORP
@@ -54,26 +58,6 @@
       fail in the majority of cases.
 
   FEA/MFEA:
-    - On Linux, the following error message may appear during graceful
-      shutdown (if PIM-SM is also running):
-
-        [ 2004/06/09 14:50:40  ERROR xorp_fea:14359 MFEA +1676
-        mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (10.10.10.10
-        224.0.1.20)) failed: Bad file descriptor
-
-      The error is harmless and can be ignored.
-
-    - If a vif has been enabled with the startup configuration file,
-      and then is disabled and enabled again via xorpsh, then
-      the enabling will not start the operations on that vif.
-      E.g., the "show mfea interface" xorpsh command will show the
-      vif status as DOWN, and its status cannot be changed to UP.
-      The problem is caused by a mismatch between how the enable/disable
-      state is handled by the rtrmgr and by the MFEA module itself.
-      This will be fixed for XORP Release-1.1.
-      Currently, there is no work-around except that restarting the
-      rtrmgr with all enabled interfaces again.
-
     - On Linux with kernel 2.6 (e.g., RedHat FC2 with kernel 2.6.5-1.358),
       some of the tests may fail (with or without an error message),
       but no coredump image. Some of those failures can be contributed
@@ -137,8 +121,7 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       after the XORP Release-1.0.
 
   STATIC_ROUTES:
-    - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
-      printing lots of error messages.
+    - No known issues.
       
   MLD/IGMP:
     - If MLD/IGMP is started with a relatively large number of interfaces
@@ -152,17 +135,6 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       E.g., to increase the value from 20 (the default) to 200, run as a root:
 
         echo 200 > /proc/sys/net/ipv4/igmp_max_memberships
-
-    - If a vif has been enabled with the startup configuration file,
-      and then is disabled and enabled again via xorpsh, then
-      the enabling will not start the operations on that vif.
-      E.g., the "show igmp interface" xorpsh command will show the
-      vif status as DOWN, and its status cannot be changed to UP.
-      The problem is caused by a mismatch between how the enable/disable
-      state is handled by the rtrmgr and by the MLD/IGMP module itself.
-      This will be fixed for XORP Release-1.1.
-      Currently, there is no work-around except that restarting the
-      rtrmgr with all enabled interfaces again.
 
   PIM-SM:
     - If the kernel does not support PIM-SM, or if PIM-SM is not enabled
@@ -186,20 +158,8 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       For more information about Reverse Path Filtering see
       http://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.rpf.html
 
-    - If a vif has been enabled with the startup configuration file,
-      and then is disabled and enabled again via xorpsh, then
-      the enabling will not start the operations on that vif.
-      E.g., the "show pim interface" xorpsh command will show the
-      vif status as DOWN, and its status cannot be changed to UP.
-      The problem is caused by a mismatch between how the enable/disable
-      state is handled by the rtrmgr and by the PIM-SM module itself.
-      This will be fixed for XORP Release-1.1.
-      Currently, there is no work-around except that restarting the
-      rtrmgr with all enabled interfaces again.
-
   FIB2MRIB:
-    - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
-      printing lots of error messages.
+    - No known issues.
 
   CLI:
     - No known issues.
