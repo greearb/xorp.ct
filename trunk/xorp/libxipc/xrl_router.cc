@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.4 2002/12/19 01:29:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.5 2003/01/10 00:30:24 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -75,26 +75,40 @@ XrlRouter::resolve_callback(FinderClient::Error	err,
 
     ds->_router->_finder_lookups_pending--;
 
-    if (err == FinderClient::FC_OKAY) {
-	debug_msg("Resolved: %s\n", value);
-	XrlPFSender* s = XrlPFSenderFactory::create(ds->_router->_event_loop,
-						    value);
-	if (s) {
-	    ds->_sender = s;
-	    ds->_router->_sends_pending++;
-	    s->send(ds->_xrl,
-		    callback(&XrlRouter::send_callback, ds));
-	    trace_xrl("Sending ", ds->_xrl);
-	} else {
-	    trace_xrl("Resolve failed on ", ds->_xrl);
-	    ds->_cb->dispatch(XrlError::RESOLVE_FAILED(), 0);
-	    delete ds;
+    switch (err) {
+    case FinderClient::FC_OKAY:
+	{
+	    debug_msg("Resolved: %s\n", value);
+	    XrlPFSender* s = XrlPFSenderFactory::create(ds->_router->_event_loop,
+							value);
+	    if (s) {
+		ds->_sender = s;
+		ds->_router->_sends_pending++;
+		s->send(ds->_xrl,
+			callback(&XrlRouter::send_callback, ds));
+		trace_xrl("Sending ", ds->_xrl);
+		return;
+	    } else {
+		trace_xrl("Sender construction failed on ", ds->_xrl);
+		ds->_cb->dispatch(XrlError::SEND_FAILED(), 0);
+	    }
 	}
-    } else {
+	break;
+    case FinderClient::FC_LOOKUP_FAILED:
 	trace_xrl("Resolve failed on ", ds->_xrl);
 	ds->_cb->dispatch(XrlError::RESOLVE_FAILED(), 0);
-	delete ds;
+	break;
+    case FinderClient::FC_NO_SERVER:
+	trace_xrl("Finder or Finder connection died when execution reached ",
+		  ds->_xrl);
+	ds->_cb->dispatch(XrlError::NO_FINDER(), 0);
+	break;
+    default:
+	trace_xrl(c_format("FinderClient error = %d when sending ", err), 
+		  ds->_xrl);
+	ds->_cb->dispatch(XrlError::FAILED_UNKNOWN(), 0);
     }
+    delete ds;
 }
 
 bool
