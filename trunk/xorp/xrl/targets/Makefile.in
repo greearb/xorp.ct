@@ -100,7 +100,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rib.tgt ribclient.tgt rtrmgr.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rip4.tgt rib.tgt ribclient.tgt rtrmgr.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -109,7 +109,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
+noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfeaifmgrmirrorbase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librip4base.a librip6base.a librtrmgrbase.a libtestbase.a libtestfeaifmgrmirrorbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -169,6 +169,12 @@ libribbase_a_SOURCES = rib_base.hh rib_base.cc
 
 # RIB client
 libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
+
+# RIP IPv4
+librip4base_a_SOURCES = rip4_base.hh rip4_base.cc
+
+# RIP IPv6
+librip6base_a_SOURCES = rip6_base.hh rip6_base.cc
 
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
@@ -278,6 +284,14 @@ libribclientbase_a_AR = $(AR) cru
 libribclientbase_a_LIBADD =
 am_libribclientbase_a_OBJECTS = ribclient_base.$(OBJEXT)
 libribclientbase_a_OBJECTS = $(am_libribclientbase_a_OBJECTS)
+librip4base_a_AR = $(AR) cru
+librip4base_a_LIBADD =
+am_librip4base_a_OBJECTS = rip4_base.$(OBJEXT)
+librip4base_a_OBJECTS = $(am_librip4base_a_OBJECTS)
+librip6base_a_AR = $(AR) cru
+librip6base_a_LIBADD =
+am_librip6base_a_OBJECTS = rip6_base.$(OBJEXT)
+librip6base_a_OBJECTS = $(am_librip6base_a_OBJECTS)
 librtrmgrbase_a_AR = $(AR) cru
 librtrmgrbase_a_LIBADD =
 am_librtrmgrbase_a_OBJECTS = rtrmgr_base.$(OBJEXT)
@@ -326,6 +340,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/mfea_base.Po $(DEPDIR)/mld6igmp_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ospf_base.Po $(DEPDIR)/pim_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_base.Po $(DEPDIR)/ribclient_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rip4_base.Po $(DEPDIR)/rip6_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rtrmgr_base.Po $(DEPDIR)/test_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_fea_ifmgr_mirror_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_finder_events_base.Po \
@@ -350,7 +365,8 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 	$(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) \
 	$(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) \
 	$(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) \
-	$(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) \
+	$(libribclientbase_a_SOURCES) $(librip4base_a_SOURCES) \
+	$(librip6base_a_SOURCES) $(librtrmgrbase_a_SOURCES) \
 	$(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) \
 	$(libtestfindereventsbase_a_SOURCES) \
 	$(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) \
@@ -358,7 +374,7 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 DATA = $(data_DATA)
 
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
+SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfeaifmgrmirrorbase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librip4base_a_SOURCES) $(librip6base_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfeaifmgrmirrorbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
 
 all: all-am
 
@@ -436,6 +452,14 @@ libribclientbase.a: $(libribclientbase_a_OBJECTS) $(libribclientbase_a_DEPENDENC
 	-rm -f libribclientbase.a
 	$(libribclientbase_a_AR) libribclientbase.a $(libribclientbase_a_OBJECTS) $(libribclientbase_a_LIBADD)
 	$(RANLIB) libribclientbase.a
+librip4base.a: $(librip4base_a_OBJECTS) $(librip4base_a_DEPENDENCIES) 
+	-rm -f librip4base.a
+	$(librip4base_a_AR) librip4base.a $(librip4base_a_OBJECTS) $(librip4base_a_LIBADD)
+	$(RANLIB) librip4base.a
+librip6base.a: $(librip6base_a_OBJECTS) $(librip6base_a_DEPENDENCIES) 
+	-rm -f librip6base.a
+	$(librip6base_a_AR) librip6base.a $(librip6base_a_OBJECTS) $(librip6base_a_LIBADD)
+	$(RANLIB) librip6base.a
 librtrmgrbase.a: $(librtrmgrbase_a_OBJECTS) $(librtrmgrbase_a_DEPENDENCIES) 
 	-rm -f librtrmgrbase.a
 	$(librtrmgrbase_a_AR) librtrmgrbase.a $(librtrmgrbase_a_OBJECTS) $(librtrmgrbase_a_LIBADD)
@@ -486,6 +510,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ribclient_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip4_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rip6_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrmgr_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_fea_ifmgr_mirror_base.Po@am__quote@
@@ -718,6 +744,12 @@ $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/rib.xif
 $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 		$(INTERFACES_DIR)/rib_client.xif
+$(srcdir)/rip4_base.hh $(srcdir)/rip4_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rip.xif
+$(srcdir)/rip6_base.hh $(srcdir)/rip6_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/rip.xif
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif

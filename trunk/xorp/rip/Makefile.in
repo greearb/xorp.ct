@@ -92,7 +92,7 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-bin_PROGRAMS = 
+bin_PROGRAMS = xorp_rip4 xorp_rip6
 
 # -- Test Programs
 TESTS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
@@ -101,13 +101,19 @@ TESTS = test_auth test_packets test_request test_route_walk test_timers test_upd
 noinst_PROGRAMS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
 
 # -- No-install Libraries
-noinst_LIBRARIES = librip.a
+noinst_LIBRARIES = librip.a libripxrl.a
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = 
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
-# -- Program Sources
+# -- Real Program Sources
+xorp_rip4_SOURCES = xorp_rip4.cc xrl_target4.hh xrl_target4.cc
+xorp_rip4_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/librip4base.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+xorp_rip6_SOURCES = xorp_rip6.cc
+
+# -- Test Program Sources
 test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
 test_request_SOURCES = test_request.cc
@@ -116,8 +122,11 @@ test_timers_SOURCES = test_timers.cc
 test_update_queue_SOURCES = test_update_queue.cc
 test_outputs_SOURCES = test_outputs.cc
 
-# -- Library Sources
-librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
+# -- RIP Core Library Sources
+librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
+
+# -- RIP Xrl library sources
+libripxrl_a_SOURCES = xrl_port_manager.hh xrl_process_spy.hh xrl_rib_notifier.hh xrl_port_manager.cc xrl_process_spy.cc xrl_rib_notifier.cc
 
 
 ################################################################
@@ -132,10 +141,15 @@ librip_a_AR = $(AR) cru
 librip_a_LIBADD =
 am_librip_a_OBJECTS = auth.$(OBJEXT) output_table.$(OBJEXT) \
 	output_updates.$(OBJEXT) packet_queue.$(OBJEXT) peer.$(OBJEXT) \
-	port.$(OBJEXT) redist.$(OBJEXT) route_db.$(OBJEXT) \
-	route_entry.$(OBJEXT) update_queue.$(OBJEXT)
+	port.$(OBJEXT) redist.$(OBJEXT) rib_notifier_base.$(OBJEXT) \
+	route_db.$(OBJEXT) route_entry.$(OBJEXT) update_queue.$(OBJEXT)
 librip_a_OBJECTS = $(am_librip_a_OBJECTS)
-bin_PROGRAMS =
+libripxrl_a_AR = $(AR) cru
+libripxrl_a_LIBADD =
+am_libripxrl_a_OBJECTS = xrl_port_manager.$(OBJEXT) \
+	xrl_process_spy.$(OBJEXT) xrl_rib_notifier.$(OBJEXT)
+libripxrl_a_OBJECTS = $(am_libripxrl_a_OBJECTS)
+bin_PROGRAMS = xorp_rip4$(EXEEXT) xorp_rip6$(EXEEXT)
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
 	test_request$(EXEEXT) test_route_walk$(EXEEXT) \
 	test_timers$(EXEEXT) test_update_queue$(EXEEXT) \
@@ -179,6 +193,25 @@ test_update_queue_LDADD = $(LDADD)
 test_update_queue_DEPENDENCIES = ./librip.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_update_queue_LDFLAGS =
+am_xorp_rip4_OBJECTS = xorp_rip4.$(OBJEXT) xrl_target4.$(OBJEXT)
+xorp_rip4_OBJECTS = $(am_xorp_rip4_OBJECTS)
+xorp_rip4_DEPENDENCIES = ./libripxrl.a ./librip.a \
+	$(top_builddir)/xrl/targets/librip4base.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_rip4_LDFLAGS =
+am_xorp_rip6_OBJECTS = xorp_rip6.$(OBJEXT)
+xorp_rip6_OBJECTS = $(am_xorp_rip6_OBJECTS)
+xorp_rip6_LDADD = $(LDADD)
+xorp_rip6_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+xorp_rip6_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -189,13 +222,19 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/output_updates.Po \
 @AMDEP_TRUE@	$(DEPDIR)/packet_queue.Po $(DEPDIR)/peer.Po \
 @AMDEP_TRUE@	$(DEPDIR)/port.Po $(DEPDIR)/redist.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rib_notifier_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/route_db.Po $(DEPDIR)/route_entry.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_outputs.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_packets.Po $(DEPDIR)/test_request.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
-@AMDEP_TRUE@	$(DEPDIR)/update_queue.Po
+@AMDEP_TRUE@	$(DEPDIR)/update_queue.Po $(DEPDIR)/xorp_rip4.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_rip6.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_port_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_process_spy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_rib_notifier.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target4.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -207,12 +246,14 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) \
-	$(test_outputs_SOURCES) $(test_packets_SOURCES) \
-	$(test_request_SOURCES) $(test_route_walk_SOURCES) \
-	$(test_timers_SOURCES) $(test_update_queue_SOURCES)
+DIST_SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) \
+	$(test_auth_SOURCES) $(test_outputs_SOURCES) \
+	$(test_packets_SOURCES) $(test_request_SOURCES) \
+	$(test_route_walk_SOURCES) $(test_timers_SOURCES) \
+	$(test_update_queue_SOURCES) $(xorp_rip4_SOURCES) \
+	$(xorp_rip6_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_outputs_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES)
+SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) $(test_auth_SOURCES) $(test_outputs_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES) $(xorp_rip4_SOURCES) $(xorp_rip6_SOURCES)
 
 all: all-am
 
@@ -234,6 +275,10 @@ librip.a: $(librip_a_OBJECTS) $(librip_a_DEPENDENCIES)
 	-rm -f librip.a
 	$(librip_a_AR) librip.a $(librip_a_OBJECTS) $(librip_a_LIBADD)
 	$(RANLIB) librip.a
+libripxrl.a: $(libripxrl_a_OBJECTS) $(libripxrl_a_DEPENDENCIES) 
+	-rm -f libripxrl.a
+	$(libripxrl_a_AR) libripxrl.a $(libripxrl_a_OBJECTS) $(libripxrl_a_LIBADD)
+	$(RANLIB) libripxrl.a
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -281,6 +326,12 @@ test_timers$(EXEEXT): $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES)
 test_update_queue$(EXEEXT): $(test_update_queue_OBJECTS) $(test_update_queue_DEPENDENCIES) 
 	@rm -f test_update_queue$(EXEEXT)
 	$(CXXLINK) $(test_update_queue_LDFLAGS) $(test_update_queue_OBJECTS) $(test_update_queue_LDADD) $(LIBS)
+xorp_rip4$(EXEEXT): $(xorp_rip4_OBJECTS) $(xorp_rip4_DEPENDENCIES) 
+	@rm -f xorp_rip4$(EXEEXT)
+	$(CXXLINK) $(xorp_rip4_LDFLAGS) $(xorp_rip4_OBJECTS) $(xorp_rip4_LDADD) $(LIBS)
+xorp_rip6$(EXEEXT): $(xorp_rip6_OBJECTS) $(xorp_rip6_DEPENDENCIES) 
+	@rm -f xorp_rip6$(EXEEXT)
+	$(CXXLINK) $(xorp_rip6_LDFLAGS) $(xorp_rip6_OBJECTS) $(xorp_rip6_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -295,6 +346,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/port.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_notifier_base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_entry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_auth.Po@am__quote@
@@ -305,6 +357,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_update_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip6.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_port_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_process_spy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_rib_notifier.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target4.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)

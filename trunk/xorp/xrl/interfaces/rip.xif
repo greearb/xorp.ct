@@ -1,0 +1,51 @@
+interface rip4/0.1 {
+
+    /**
+     * Add an address to run RIP process on.  The addition of address is
+     * not instantaneous, RIP has to instantiate state in the FEA to send
+     * and receive packets.  Once instantiated the address must be
+     * explicitly enabled with set_rip_address_enabled.
+     *
+     * @param ifname the interface that owns vif that has address.
+     * @param vifname virtual interface owning address.
+     * @param address the address to be added.
+     */
+    add_rip_address ? ifname:txt					\
+		    & vifname:txt					\
+		    & addr:ipv4
+
+    /**
+     * Remove an address RIP process is running on.
+     *
+     * @param ifname the interface that owns vif that has address.
+     * @param vifname virtual interface owning address.
+     * @param address the address to be removed.
+     */
+    remove_rip_address ? ifname:txt & vifname:txt & addr:ipv4
+
+    set_rip_address_enabled ? ifname:txt 	  			\
+			    & vifname:txt				\
+			    & addr:ipv4 				\
+			    & enabled:bool
+
+    get_rip_address_enabled ? ifname:txt				\
+			    & vifname:txt				\
+			    & addr:ipv4					\
+			    -> enabled:bool
+
+    /**
+     * Get a textual description of the status of address RIP is running
+     * upon.
+     *
+     * @param ifname the interface that owns vif that has the address.
+     * @param vifname virtual interface owns the address.
+     * @param address the address to query.
+     */
+    get_rip_address_status ? ifname:txt					\
+			   & vifname:txt				\
+			   & addr:ipv4					\
+			   -> status:txt
+}
+
+interface rip6/0.1 {
+}

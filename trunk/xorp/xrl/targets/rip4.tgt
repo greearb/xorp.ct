@@ -1,0 +1,7 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "rip.xif"
+
+target rip4 implements common/0.1, finder_event_observer/0.1, rip4/0.1

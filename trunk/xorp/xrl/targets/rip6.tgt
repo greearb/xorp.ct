@@ -1,0 +1,7 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "rip.xif"
+
+target rip6 implements common/0.1, finder_event_observer/0.1, rip6/0.1
