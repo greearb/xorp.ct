@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.8 2004/03/20 17:51:58 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.9 2004/03/24 19:14:09 atanu Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -22,8 +22,9 @@
 #include "peer.hh"
 
 class XrlProcessSpy;
-template<typename A> class XrlPortManager;
-template<typename A> class System;
+template <typename A> class XrlPortManager;
+template <typename A> class System;
+template <typename A> class XrlRedistManager;
 
 /**
  * @short Common handler for Xrl Requests.
@@ -36,12 +37,15 @@ class XrlRipCommonTarget {
 public:
     XrlRipCommonTarget(XrlProcessSpy& 		xps,
 		       XrlPortManager<A>&	xpm,
+		       XrlRedistManager<A>&	xrm,
 		       bool& 			should_exit);
+
     ~XrlRipCommonTarget();
 
     void set_status(ProcessStatus ps, const string& annotation = "");
 
     XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
+
     XrlCmdError common_0_1_shutdown();
 
     XrlCmdError
@@ -263,11 +267,19 @@ public:
 					   XrlAtomList&		values,
 					   uint32_t&		peer_last_pkt);
 
-    XrlCmdError ripx_0_1_add_static_route(const IPNet<A>& 	network,
-					  const A&	 	nexthop,
-					  const uint32_t& 	cost);
+    XrlCmdError ripx_0_1_import_protocol_routes(const string&	protocol,
+						const uint32_t& cost,
+						const uint32_t& tag);
 
-    XrlCmdError ripx_0_1_delete_static_route(const IPNet<A>& 	network);
+    XrlCmdError ripx_0_1_no_import_protocol_routes(const string& protocol);
+
+    XrlCmdError redistx_0_1_add_route(const IPNet<A>&		net,
+				      const A&			nexthop,
+				      const uint32_t&		global_metric,
+				      const string&		cookie);
+
+    XrlCmdError redistx_0_1_delete_route(const IPNet<A>&	net,
+					 const string&		cookie);
 
     XrlCmdError socketx_user_0_1_recv_event(const string&	sockid,
 					    const A&		src_host,
@@ -301,14 +313,14 @@ public:
 					 const A&	addr);
 
 protected:
-    XrlProcessSpy&	_xps;
-    XrlPortManager<A>&	_xpm;
-    System<A>&		_system;
+    XrlProcessSpy&		_xps;
+    XrlPortManager<A>&		_xpm;
+    XrlRedistManager<A>&	_xrm;
 
-    bool&		_should_exit;
+    bool&			_should_exit;
 
-    ProcessStatus	_status;
-    string		_status_note;
+    ProcessStatus		_status;
+    string			_status_note;
 };
 
 
@@ -318,10 +330,10 @@ protected:
 template <typename A>
 XrlRipCommonTarget<A>::XrlRipCommonTarget(XrlProcessSpy&	xps,
 					  XrlPortManager<A>& 	xpm,
+					  XrlRedistManager<A>&	xrm,
 					  bool&			should_exit)
-    : _xps(xps), _xpm(xpm), _system(xpm.system()),
-      _should_exit(should_exit),
-      _status(PROC_NULL), _status_note("")
+    : _xps(xps), _xpm(xpm), _xrm(xrm),
+      _should_exit(should_exit), _status(PROC_NULL), _status_note("")
 {
 }
 
@@ -1095,30 +1107,40 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_add_static_route(const IPNet<A>& network,
-						 const A& 	 nexthop,
-						 const uint32_t& cost)
+XrlRipCommonTarget<A>::ripx_0_1_import_protocol_routes(const string&	protocol,
+						       const uint32_t&	cost,
+						       const uint32_t& 	tag)
 {
-    if (cost > RIP_INFINITY) {
-	return XrlCmdError::COMMAND_FAILED(c_format("Bad cost %u", cost));
-    }
-
-    _system.add_route_redistributor("static", 0);
-    if (_system.redistributor_add_route("static", network, nexthop, cost)
-	== false) {
-	return XrlCmdError::COMMAND_FAILED("Route exists already.");
-    }
-
+    _xrm.request_redist_for(protocol, cost, tag);
     return XrlCmdError::OKAY();
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_delete_static_route(const IPNet<A>& network)
+XrlRipCommonTarget<A>::ripx_0_1_no_import_protocol_routes(const string& protocol)
 {
-    if (_system.redistributor_remove_route("static", network) == false) {
-	return XrlCmdError::COMMAND_FAILED("No route to delete.");
-    }
+    _xrm.request_no_redist_for(protocol);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
+					     const A&		nexthop,
+					     const uint32_t&	/* g_metric */,
+					     const string&	cookie)
+{
+    // We use cookie of the protocol name to make find the relevant redist table simple.
+    _xrm.add_route(cookie, net, nexthop);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::redistx_0_1_delete_route(const IPNet<A>&	net,
+						const string&	cookie)
+{
+    _xrm.delete_route(cookie, net);
     return XrlCmdError::OKAY();
 }
 

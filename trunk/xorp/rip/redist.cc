@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.1 2003/07/09 00:11:02 hodson Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.2 2004/02/20 01:22:04 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
 
+#include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv4net.hh"
@@ -51,8 +52,9 @@ RedistRouteOrigin<A>::deletion_secs() const
 template <typename A>
 RouteRedistributor<A>::RouteRedistributor(RouteDB<A>&	rdb,
 					  const string&	protocol,
+					  uint16_t	cost,
 					  uint16_t	tag)
-    : _route_db(rdb), _protocol(protocol), _tag(tag), _rt_origin(0)
+    : _route_db(rdb), _protocol(protocol), _cost(cost), _tag(tag), _wdrawer(0)
 {
     _rt_origin = new RedistRouteOrigin<A>();
 }
@@ -60,17 +62,25 @@ RouteRedistributor<A>::RouteRedistributor(RouteDB<A>&	rdb,
 template <typename A>
 RouteRedistributor<A>::~RouteRedistributor()
 {
-    XLOG_ASSERT(_rt_origin->route_count() == 0);
     delete _rt_origin;
+    delete _wdrawer;
 }
 
 template <typename A>
 bool
-RouteRedistributor<A>::add_route(const Net&  net,
-				 const Addr& nexthop,
-				 uint32_t    cost)
+RouteRedistributor<A>::add_route(const Net&  net, const Addr& nexthop)
 {
-    return _route_db.update_route(net, nexthop, cost, _tag, _rt_origin);
+    return _route_db.update_route(net, nexthop, _cost, _tag, _rt_origin);
+}
+
+template <typename A>
+bool
+RouteRedistributor<A>::add_route(const Net&  	net,
+				 const Addr& 	nexthop,
+				 uint16_t 	cost,
+				 uint16_t 	tag)
+{
+    return _route_db.update_route(net, nexthop, cost, tag, _rt_origin);
 }
 
 template <typename A>
@@ -93,6 +103,67 @@ uint16_t
 RouteRedistributor<A>::tag() const
 {
     return _tag;
+}
+
+template <typename A>
+uint16_t
+RouteRedistributor<A>::cost() const
+{
+    return _cost;
+}
+
+template <typename A>
+uint32_t
+RouteRedistributor<A>::route_count() const
+{
+    return _rt_origin->route_count();
+}
+
+template <typename A>
+void
+RouteRedistributor<A>::withdraw_routes()
+{
+    if (_wtimer.scheduled() == false) {
+	EventLoop& e = _route_db.eventloop();
+	_wtimer = e.new_periodic(5,
+			callback(this, &RouteRedistributor::withdraw_batch));
+    }
+}
+
+template <typename A>
+bool
+RouteRedistributor<A>::withdrawing_routes() const
+{
+    return _wtimer.scheduled();
+}
+
+template <typename A>
+bool
+RouteRedistributor<A>::withdraw_batch()
+{
+    if (_wdrawer == 0) {
+	_wdrawer = new RouteWalker<A>(_route_db);
+	_wdrawer->reset();
+    }
+
+    XLOG_ASSERT(_wdrawer->state() == RouteWalker<A>::RUNNING);
+
+    uint32_t visited = 0;
+    const RouteEntry<A>* r = _wdrawer->current_route();
+    while (r != 0) {
+	if (r->origin() == _rt_origin) {
+	    _route_db.update_route(r->net(), r->nexthop(),
+				   RIP_INFINITY, r->tag(), _rt_origin);
+	}
+	r = _wdrawer->next_route();
+
+	if (++visited == 5) {
+	    return true;	// we're not finished - reschedule timer
+	}
+    }
+    delete _wdrawer;
+    _wdrawer = 0;
+    return false; // we're finished - cancel timer
 }
 
 

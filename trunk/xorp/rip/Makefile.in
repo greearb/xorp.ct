@@ -151,15 +151,15 @@ libripng_a_CXXFLAGS = -DINSTANTIATE_IPV6
 
 libripng_a_SOURCES = rip_module.h constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
 
-# -- RIP Xrl library sources
+# -- RIP XRL library sources
 libripxrl_a_CXXFLAGS = -DINSTANTIATE_IPV4
 
-libripxrl_a_SOURCES = xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_rib_notifier.hh xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_rib_notifier.cc
+libripxrl_a_SOURCES = xrl_config.hh xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_redist_manager.hh xrl_rib_notifier.hh xrl_config.cc xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_redist_manager.cc xrl_rib_notifier.cc
 
 # -- RIP NG Xrl library sources
 libripngxrl_a_CXXFLAGS = -DINSTANTIATE_IPV6
 
-libripngxrl_a_SOURCES = xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_rib_notifier.hh xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_rib_notifier.cc
+libripngxrl_a_SOURCES = xrl_config.hh xrl_port_manager.hh xrl_port_io.hh xrl_process_spy.hh xrl_redist_manager.hh xrl_rib_notifier.hh xrl_config.cc xrl_port_manager.cc xrl_port_io.cc xrl_process_spy.cc xrl_rib_notifier.cc xrl_redist_manager.cc
 
 
 ################################################################
@@ -193,16 +193,20 @@ am_libripng_a_OBJECTS = libripng_a-output_table.$(OBJEXT) \
 libripng_a_OBJECTS = $(am_libripng_a_OBJECTS)
 libripngxrl_a_AR = $(AR) cru
 libripngxrl_a_LIBADD =
-am_libripngxrl_a_OBJECTS = libripngxrl_a-xrl_port_manager.$(OBJEXT) \
+am_libripngxrl_a_OBJECTS = libripngxrl_a-xrl_config.$(OBJEXT) \
+	libripngxrl_a-xrl_port_manager.$(OBJEXT) \
 	libripngxrl_a-xrl_port_io.$(OBJEXT) \
 	libripngxrl_a-xrl_process_spy.$(OBJEXT) \
-	libripngxrl_a-xrl_rib_notifier.$(OBJEXT)
+	libripngxrl_a-xrl_rib_notifier.$(OBJEXT) \
+	libripngxrl_a-xrl_redist_manager.$(OBJEXT)
 libripngxrl_a_OBJECTS = $(am_libripngxrl_a_OBJECTS)
 libripxrl_a_AR = $(AR) cru
 libripxrl_a_LIBADD =
-am_libripxrl_a_OBJECTS = libripxrl_a-xrl_port_manager.$(OBJEXT) \
+am_libripxrl_a_OBJECTS = libripxrl_a-xrl_config.$(OBJEXT) \
+	libripxrl_a-xrl_port_manager.$(OBJEXT) \
 	libripxrl_a-xrl_port_io.$(OBJEXT) \
 	libripxrl_a-xrl_process_spy.$(OBJEXT) \
+	libripxrl_a-xrl_redist_manager.$(OBJEXT) \
 	libripxrl_a-xrl_rib_notifier.$(OBJEXT)
 libripxrl_a_OBJECTS = $(am_libripxrl_a_OBJECTS)
 bin_PROGRAMS = xorp_rip$(EXEEXT) xorp_ripng$(EXEEXT)
@@ -303,13 +307,17 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-route_db.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-route_entry.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-update_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_config.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_port_io.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_process_spy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_config.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_port_io.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_port_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_process_spy.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_outputs.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_packets.Po $(DEPDIR)/test_request.Po \
@@ -391,17 +399,21 @@ libripng.a: $(libripng_a_OBJECTS) $(libripng_a_DEPENDENCIES)
 	-rm -f libripng.a
 	$(libripng_a_AR) libripng.a $(libripng_a_OBJECTS) $(libripng_a_LIBADD)
 	$(RANLIB) libripng.a
+libripngxrl_a-xrl_config.$(OBJEXT): xrl_config.cc
 libripngxrl_a-xrl_port_manager.$(OBJEXT): xrl_port_manager.cc
 libripngxrl_a-xrl_port_io.$(OBJEXT): xrl_port_io.cc
 libripngxrl_a-xrl_process_spy.$(OBJEXT): xrl_process_spy.cc
 libripngxrl_a-xrl_rib_notifier.$(OBJEXT): xrl_rib_notifier.cc
+libripngxrl_a-xrl_redist_manager.$(OBJEXT): xrl_redist_manager.cc
 libripngxrl.a: $(libripngxrl_a_OBJECTS) $(libripngxrl_a_DEPENDENCIES) 
 	-rm -f libripngxrl.a
 	$(libripngxrl_a_AR) libripngxrl.a $(libripngxrl_a_OBJECTS) $(libripngxrl_a_LIBADD)
 	$(RANLIB) libripngxrl.a
+libripxrl_a-xrl_config.$(OBJEXT): xrl_config.cc
 libripxrl_a-xrl_port_manager.$(OBJEXT): xrl_port_manager.cc
 libripxrl_a-xrl_port_io.$(OBJEXT): xrl_port_io.cc
 libripxrl_a-xrl_process_spy.$(OBJEXT): xrl_process_spy.cc
+libripxrl_a-xrl_redist_manager.$(OBJEXT): xrl_redist_manager.cc
 libripxrl_a-xrl_rib_notifier.$(OBJEXT): xrl_rib_notifier.cc
 libripxrl.a: $(libripxrl_a_OBJECTS) $(libripxrl_a_DEPENDENCIES) 
 	-rm -f libripxrl.a
@@ -488,13 +500,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-route_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-route_entry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-update_queue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_port_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_process_spy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripngxrl_a-xrl_rib_notifier.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_port_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_port_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_process_spy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripxrl_a-xrl_rib_notifier.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_outputs.Po@am__quote@
@@ -775,6 +791,18 @@ libripng_a-update_queue.obj: update_queue.cc
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-update_queue.obj `cygpath -w update_queue.cc`
 
+libripngxrl_a-xrl_config.o: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripngxrl_a-xrl_config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_config.o `test -f xrl_config.cc || echo '$(srcdir)/'`xrl_config.cc
+
+libripngxrl_a-xrl_config.obj: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripngxrl_a-xrl_config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_config.obj `cygpath -w xrl_config.cc`
+
 libripngxrl_a-xrl_port_manager.o: xrl_port_manager.cc
 @AMDEP_TRUE@	source='xrl_port_manager.cc' object='libripngxrl_a-xrl_port_manager.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_port_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_port_manager.TPo' @AMDEPBACKSLASH@
@@ -823,6 +851,30 @@ libripngxrl_a-xrl_rib_notifier.obj: xrl_rib_notifier.cc
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_rib_notifier.obj `cygpath -w xrl_rib_notifier.cc`
 
+libripngxrl_a-xrl_redist_manager.o: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripngxrl_a-xrl_redist_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_redist_manager.o `test -f xrl_redist_manager.cc || echo '$(srcdir)/'`xrl_redist_manager.cc
+
+libripngxrl_a-xrl_redist_manager.obj: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripngxrl_a-xrl_redist_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripngxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripngxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripngxrl_a-xrl_redist_manager.obj `cygpath -w xrl_redist_manager.cc`
+
+libripxrl_a-xrl_config.o: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripxrl_a-xrl_config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_config.o `test -f xrl_config.cc || echo '$(srcdir)/'`xrl_config.cc
+
+libripxrl_a-xrl_config.obj: xrl_config.cc
+@AMDEP_TRUE@	source='xrl_config.cc' object='libripxrl_a-xrl_config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_config.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_config.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_config.obj `cygpath -w xrl_config.cc`
+
 libripxrl_a-xrl_port_manager.o: xrl_port_manager.cc
 @AMDEP_TRUE@	source='xrl_port_manager.cc' object='libripxrl_a-xrl_port_manager.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_port_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_port_manager.TPo' @AMDEPBACKSLASH@
@@ -858,6 +910,18 @@ libripxrl_a-xrl_process_spy.obj: xrl_process_spy.cc
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_process_spy.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_process_spy.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_process_spy.obj `cygpath -w xrl_process_spy.cc`
+
+libripxrl_a-xrl_redist_manager.o: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripxrl_a-xrl_redist_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_redist_manager.o `test -f xrl_redist_manager.cc || echo '$(srcdir)/'`xrl_redist_manager.cc
+
+libripxrl_a-xrl_redist_manager.obj: xrl_redist_manager.cc
+@AMDEP_TRUE@	source='xrl_redist_manager.cc' object='libripxrl_a-xrl_redist_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.Po' tmpdepfile='$(DEPDIR)/libripxrl_a-xrl_redist_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripxrl_a_CXXFLAGS) $(CXXFLAGS) -c -o libripxrl_a-xrl_redist_manager.obj `cygpath -w xrl_redist_manager.cc`
 
 libripxrl_a-xrl_rib_notifier.o: xrl_rib_notifier.cc
 @AMDEP_TRUE@	source='xrl_rib_notifier.cc' object='libripxrl_a-xrl_rib_notifier.o' libtool=no @AMDEPBACKSLASH@

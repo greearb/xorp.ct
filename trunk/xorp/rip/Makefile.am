@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.27 2004/02/22 03:03:12 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.28 2004/03/11 00:05:29 hodson Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -170,29 +170,38 @@ libripng_a_SOURCES		+= route_db.cc
 libripng_a_SOURCES		+= route_entry.cc
 libripng_a_SOURCES		+= update_queue.cc
 
-# -- RIP Xrl library sources
+# -- RIP XRL library sources
 libripxrl_a_CXXFLAGS		 = -DINSTANTIATE_IPV4
-libripxrl_a_SOURCES		 = xrl_port_manager.hh
+libripxrl_a_SOURCES		 = xrl_config.hh
+libripxrl_a_SOURCES		+= xrl_port_manager.hh
 libripxrl_a_SOURCES		+= xrl_port_io.hh
 libripxrl_a_SOURCES		+= xrl_process_spy.hh
+libripxrl_a_SOURCES		+= xrl_redist_manager.hh
 libripxrl_a_SOURCES		+= xrl_rib_notifier.hh
 
+libripxrl_a_SOURCES		+= xrl_config.cc
 libripxrl_a_SOURCES		+= xrl_port_manager.cc
 libripxrl_a_SOURCES		+= xrl_port_io.cc
 libripxrl_a_SOURCES		+= xrl_process_spy.cc
+libripxrl_a_SOURCES		+= xrl_redist_manager.cc
 libripxrl_a_SOURCES		+= xrl_rib_notifier.cc
+
 
 # -- RIP NG Xrl library sources
 libripngxrl_a_CXXFLAGS		 = -DINSTANTIATE_IPV6
-libripngxrl_a_SOURCES		 = xrl_port_manager.hh
+libripngxrl_a_SOURCES		 = xrl_config.hh
+libripngxrl_a_SOURCES		+= xrl_port_manager.hh
 libripngxrl_a_SOURCES		+= xrl_port_io.hh
 libripngxrl_a_SOURCES		+= xrl_process_spy.hh
+libripngxrl_a_SOURCES		+= xrl_redist_manager.hh
 libripngxrl_a_SOURCES		+= xrl_rib_notifier.hh
 
+libripngxrl_a_SOURCES		+= xrl_config.cc
 libripngxrl_a_SOURCES		+= xrl_port_manager.cc
 libripngxrl_a_SOURCES		+= xrl_port_io.cc
 libripngxrl_a_SOURCES		+= xrl_process_spy.cc
 libripngxrl_a_SOURCES		+= xrl_rib_notifier.cc
+libripngxrl_a_SOURCES		+= xrl_redist_manager.cc
 
 ################################################################
 ##

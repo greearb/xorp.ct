@@ -26,8 +26,12 @@ class RouteDB;
  * @short Route Origination class for @ref RouteRedistributor instances.
  *
  * Route Origination class for @ref RouteRedistributor instances.
- * Provides hardwired time constants for route expiry (never) and
- * deletion (default value).
+ * Overrides time constant accessors for @ref RouteEntryOrigin.  By
+ * default the time constants for route expiry and deletion is never.
+ * If set_allow_timers() is called future updates will have timers
+ * associated with them.  set_allow_timers() is called when the
+ * RedistTable is going to be withdrawn.  This allows routes to be
+ * advertised as unreachable via host before they are deleted.
  */
 template <typename A>
 class RedistRouteOrigin : public RouteEntryOrigin<A>
@@ -39,15 +43,13 @@ public:
      * Retrieve number of seconds before routes associated with this
      * RedistRouteOrigin expire.
      *
-     * @return Always returns 0 as redistributed routes persist until
-     * explicitly expired.
+     * Always returns 0 to signify routes do not automatically expire.
      */
     uint32_t expiry_secs() const;
 
     /**
      * Retrieve number of seconds before route should be deleted after
      * expiry.
-     * @return Always returns DEFAULT_DELETION_SECS.
      */
     uint32_t deletion_secs() const;
 
@@ -72,10 +74,12 @@ public:
      *
      * @param route_db the route database to add and expire routes in.
      * @param protocol name of protocol redistributor handles.
-     * @param tag to be associated with redistributed routes.
+     * @param cost cost to associated with redistributed routes.
+     * @param tag tag to be associated with redistributed routes.
      */
     RouteRedistributor(RouteDB<A>&	route_db,
 		       const string&	protocol,
+		       uint16_t		cost,
 		       uint16_t		tag);
 
     ~RouteRedistributor();
@@ -85,13 +89,27 @@ public:
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
-     * @param cost of route.
      *
      * @return true on success, false if route could not be added to
      *         the RouteDatabase.  Failure may occur if route already exists
      *	       or a lower cost route exists.
      */
-    bool add_route(const Net& net, const Addr& nexthop, uint32_t cost = 0);
+    bool add_route(const Net& net, const Addr& nexthop);
+
+    /**
+     * Add a route to be redistributed with specific cost and tag values.
+     *
+     * @param net network described by route.
+     * @param nexthop router capable of forwarding route.
+     *
+     * @return true on success, false if route could not be added to
+     *         the RouteDatabase.  Failure may occur if route already exists
+     *	       or a lower cost route exists.
+     */
+    bool add_route(const Net&	net,
+		   const Addr&	nexthop,
+		   uint16_t	cost,
+		   uint16_t	tag);
 
     /**
      * Trigger route expiry.
@@ -117,15 +135,50 @@ public:
      */
     uint16_t tag() const;
 
+    /**
+     * Accessor.
+     *
+     * @return cost routes are redistributed with.
+     */
+    uint16_t cost() const;
+
+    /**
+     * Accessor.
+     *
+     * @return number of routes
+     */
+    uint32_t route_count() const;
+
+    /**
+     * Withdraw routes.  Triggers a walking of associated routes and
+     * their expiration from the RIP route database.
+     */
+    void withdraw_routes();
+
+    /**
+     * @return true if actively withdrawing routes, false otherwise.
+     */
+    bool withdrawing_routes() const;
+
 private:
     RouteRedistributor(const RouteRedistributor& );		// not impl
     RouteRedistributor& operator=(const RouteRedistributor& );	// not impl
 
+    /**
+     * Periodic timer callback for withdrawing a batch of routes.  The timer
+     * is triggered by @ref withdraw_routes().
+     */
+    bool withdraw_batch();
+
 protected:
-    RouteDB<A>&		 _route_db;
-    string		 _protocol;
-    uint16_t		 _tag;
-    RouteEntryOrigin<A>* _rt_origin;
+    RouteDB<A>&			_route_db;
+    string			_protocol;
+    uint16_t			_cost;
+    uint16_t			_tag;
+    RedistRouteOrigin<A>*	_rt_origin;
+
+    RouteWalker<A>* 		_wdrawer;	// Route Withdrawl Walker
+    XorpTimer			_wtimer;	// Clock for Withdrawls
 };
 
 #endif // __RIP_REDIST_HH__

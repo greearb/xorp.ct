@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.5 2004/04/02 00:27:57 mjh Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.6 2004/04/22 01:11:52 pavlin Exp $"
 
 #define DEBUG_LOGGING
 
@@ -27,9 +27,8 @@
 #include "xrl/interfaces/rib_xif.hh"
 
 #include "constants.hh"
+#include "xrl_config.hh"
 #include "xrl_rib_notifier.hh"
-
-static const char* RIBNAME = "rib";
 
 
 // ----------------------------------------------------------------------------
@@ -192,7 +191,7 @@ XrlRibNotifier<A>::startup()
     bool mcast = false;
 
     if ((c.*Send<A>::add_igp_table)
-	(RIBNAME, "rip", _cname, _iname, ucast, mcast,
+	(xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
 	 callback(this, &XrlRibNotifier<A>::add_igp_cb)) == false) {
 	XLOG_ERROR("Failed to send table creation request.");
 	set_status(FAILED);
@@ -232,7 +231,7 @@ XrlRibNotifier<A>::shutdown()
     bool mcast = false;
 
     if ((c.*Send<A>::delete_igp_table)
-	(RIBNAME, "rip", _cname, _iname, ucast, mcast,
+	(xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
 	 callback(this, &XrlRibNotifier<A>::delete_igp_cb)) == false) {
 	XLOG_ERROR("Failed to send table creation request.");
 	set_status(FAILED);
@@ -266,12 +265,12 @@ XrlRibNotifier<A>::send_add_route(const RouteEntry<A>& re)
     if (_ribnets.find(re.net()) == _ribnets.end()) {
 	_ribnets.insert(re.net());
 	ok = (c.*Send<A>::add_route)
-	      (RIBNAME, "rip", true, false,
+	      (xrl_rib_name(), "rip", true, false,
 	       re.net(), re.nexthop(), re.cost(),
 	       callback(this, &XrlRibNotifier<A>::send_route_cb));
     } else {
 	ok = (c.*Send<A>::replace_route)
-	      (RIBNAME, "rip", true, false,
+	      (xrl_rib_name(), "rip", true, false,
 	       re.net(), re.nexthop(), re.cost(),
 	       callback(this, &XrlRibNotifier<A>::send_route_cb));
     }
@@ -298,7 +297,7 @@ XrlRibNotifier<A>::send_delete_route(const RouteEntry<A>& re)
 
     XrlRibV0p1Client c(&_xs);
     if ((c.*Send<A>::delete_route)
-	(RIBNAME, "rip", true, false, re.net(),
+	(xrl_rib_name(), "rip", true, false, re.net(),
 	 callback(this, &XrlRibNotifier<A>::send_route_cb)) == false) {
 	shutdown();
 	return;

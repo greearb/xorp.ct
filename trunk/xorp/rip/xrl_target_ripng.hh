@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.8 2004/03/03 21:17:40 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.9 2004/03/09 22:17:07 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -23,9 +23,10 @@
 class XrlRouter;
 class XrlProcessSpy;
 
-template<typename A> class System;
-template<typename A> class XrlPortManager;
-template<typename A> class XrlRipCommonTarget;
+template <typename A> class System;
+template <typename A> class XrlPortManager;
+template <typename A> class XrlRipCommonTarget;
+template <typename A> class XrlRedistManager;
 
 class XrlRipngTarget : public XrlRipngTargetBase {
 public:
@@ -33,6 +34,7 @@ public:
 		   XrlRouter& 			xr,
 		   XrlProcessSpy& 		xps,
 		   XrlPortManager<IPv6>&	xpm,
+		   XrlRedistManager<IPv6>&	xrm,
 		   bool& 			should_exit);
     ~XrlRipngTarget();
 
@@ -268,11 +270,19 @@ public:
 				uint32_t&	peer_last_active
 				);
 
-    XrlCmdError ripng_0_1_add_static_route(const IPv6Net& 	network,
-					   const IPv6& 		nexthop,
-					   const uint32_t& 	cost);
+    XrlCmdError ripng_0_1_import_protocol_routes(const string&	protocol,
+						 const uint32_t& cost,
+						 const uint32_t& tag);
 
-    XrlCmdError ripng_0_1_delete_static_route(const IPv6Net& 	network);
+    XrlCmdError ripng_0_1_no_import_protocol_routes(const string& protocol);
+
+    XrlCmdError redist6_0_1_add_route(const IPv6Net&		net,
+				      const IPv6&		nexthop,
+				      const uint32_t&		global_metric,
+				      const string&		cookie);
+
+    XrlCmdError redist6_0_1_delete_route(const IPv6Net&		net,
+					 const string&		cookie);
 
     XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
 					    const IPv6&		src_host,

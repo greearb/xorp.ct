@@ -25,6 +25,7 @@
 #include "system.hh"
 #include "xrl_process_spy.hh"
 #include "xrl_port_manager.hh"
+#include "xrl_redist_manager.hh"
 #include "xrl_target_rip.hh"
 #include "xrl_target_common.hh"
 
@@ -32,10 +33,11 @@ XrlRipTarget::XrlRipTarget(EventLoop&			el,
 			   XrlRouter&			xr,
 			   XrlProcessSpy&		xps,
 			   XrlPortManager<IPv4>& 	xpm,
+			   XrlRedistManager<IPv4>&	xrm,
 			   bool&			should_exit)
     : XrlRipTargetBase(&xr), _e(el)
 {
-    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, should_exit);
+    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, should_exit);
 }
 
 XrlRipTarget::~XrlRipTarget()
@@ -533,17 +535,33 @@ XrlRipTarget::rip_0_1_get_peer_counters(const string&	ifn,
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_add_static_route(const IPv4Net& 	network,
-				       const IPv4& 	nexthop,
-				       const uint32_t& 	cost)
+XrlRipTarget::rip_0_1_import_protocol_routes(const string&	protocol_name,
+					     const uint32_t&	cost,
+					     const uint32_t&	tag)
 {
-    return _ct->ripx_0_1_add_static_route(network, nexthop, cost);
+    return _ct->ripx_0_1_import_protocol_routes(protocol_name, cost, tag);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_delete_static_route(const IPv4Net& network)
+XrlRipTarget::rip_0_1_no_import_protocol_routes(const string&	protocol_name)
 {
-    return _ct->ripx_0_1_delete_static_route(network);
+    return _ct->ripx_0_1_no_import_protocol_routes(protocol_name);
+}
+
+XrlCmdError
+XrlRipTarget::redist4_0_1_add_route(const IPv4Net&	net,
+				    const IPv4&		nexthop,
+				    const uint32_t&	global_metric,
+				    const string&	cookie)
+{
+    return _ct->redistx_0_1_add_route(net, nexthop, global_metric, cookie);
+}
+
+XrlCmdError
+XrlRipTarget::redist4_0_1_delete_route(const IPv4Net&	net,
+				       const string&	cookie)
+{
+    return _ct->redistx_0_1_delete_route(net, cookie);
 }
 
 XrlCmdError

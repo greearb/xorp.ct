@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.7 2004/03/03 21:17:40 hodson Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.8 2004/03/09 22:17:07 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -26,14 +26,16 @@ class XrlProcessSpy;
 template<typename A> class System;
 template<typename A> class XrlPortManager;
 template<typename A> class XrlRipCommonTarget;
+template<typename A> class XrlRedistManager;
 
 class XrlRipTarget : public XrlRipTargetBase {
 public:
-    XrlRipTarget(EventLoop&		e,
-		 XrlRouter& 		xr,
-		 XrlProcessSpy& 	xps,
-		 XrlPortManager<IPv4>&	xpm,
-		 bool& 			should_exit);
+    XrlRipTarget(EventLoop&			e,
+		 XrlRouter& 			xr,
+		 XrlProcessSpy& 		xps,
+		 XrlPortManager<IPv4>&		xpm,
+		 XrlRedistManager<IPv4>& 	xrm,
+		 bool& 				should_exit);
     ~XrlRipTarget();
 
     void set_status(ProcessStatus ps, const string& annotation = "");
@@ -274,11 +276,19 @@ public:
 					  XrlAtomList&	values,
 					  uint32_t&	peer_last_active);
 
-    XrlCmdError rip_0_1_add_static_route(const IPv4Net& 	network,
-					 const IPv4& 		nexthop,
-					 const uint32_t& 	cost);
+    XrlCmdError rip_0_1_import_protocol_routes(const string&	protocol_name,
+					       const uint32_t&	cost,
+					       const uint32_t&	tag);
 
-    XrlCmdError rip_0_1_delete_static_route(const IPv4Net& 	network);
+    XrlCmdError rip_0_1_no_import_protocol_routes(const string&	protocol_name);
+
+    XrlCmdError redist4_0_1_add_route(const IPv4Net&		net,
+				      const IPv4&		nexthop,
+				      const uint32_t&		global_metric,
+				      const string&		cookie);
+
+    XrlCmdError redist4_0_1_delete_route(const IPv4Net&		net,
+					 const string&		cookie);
 
     XrlCmdError socket4_user_0_1_recv_event(const string&	sockid,
 					    const IPv4&		src_host,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xorp_rip_common.hh,v 1.4 2004/03/21 01:38:38 hodson Exp $
+// $XORP: xorp/rip/xorp_rip_common.hh,v 1.5 2004/04/02 00:27:57 mjh Exp $
 
 #ifndef __RIP_XORP_RIP_COMMON_HH__
 #define __RIP_XORP_RIP_COMMON_HH__
@@ -31,9 +31,12 @@
 
 #include "rip/constants.hh"
 #include "rip/system.hh"
+
+#include "rip/xrl_config.hh"
 #include "rip/xrl_target_rip.hh"
 #include "rip/xrl_port_manager.hh"
 #include "rip/xrl_process_spy.hh"
+#include "rip/xrl_redist_manager.hh"
 #include "rip/xrl_rib_notifier.hh"
 #include "rip/xorp_rip_common.hh"
 
@@ -222,16 +225,18 @@ protected:
     {
 	XorpUnexpectedHandler catch_all(xorp_unexpected_handler);
 	try {
-	    EventLoop	      e;
-	    System<A>	      rip_system(e);
-	    XrlStdRouter      xsr(e, XrlTarget<A>::name(),
-				  finder_host.c_str(), finder_port);
-	    XrlProcessSpy     xps(xsr);
-	    IfMgrXrlMirror    ixm(e, "fea");
-	    XrlPortManager<A> xpm(rip_system, xsr, ixm);
+	    EventLoop		e;
+	    System<A>		rip_system(e);
+	    XrlStdRouter	xsr(e, XrlTarget<A>::name(),
+				    finder_host.c_str(), finder_port);
+	    XrlProcessSpy	xps(xsr);
+	    IfMgrXrlMirror	ixm(e, xrl_fea_name());
+	    XrlPortManager<A>	xpm(rip_system, xsr, ixm);
+	    XrlRedistManager<A>	xrm(rip_system, xsr);
 
 	    bool stop_requested(false);
-	    typename XrlTarget<A>::Type xrlt(e, xsr, xps, xpm, stop_requested);
+	    typename XrlTarget<A>::Type xrlt(e, xsr, xps, xpm, xrm,
+					     stop_requested);
 
 	    while (xsr.ready() == false) {
 		e.run();
@@ -255,6 +260,10 @@ protected:
 	    xpm.startup();
 	    smon.add_service(&xpm);
 
+	    // Start up xrl redist manager
+	    xrm.startup();
+	    smon.add_service(&xrm);
+
 	    while (stop_requested == false &&
 		   smon.have_status(FAILED) == false) {
 		e.run();
@@ -264,6 +273,7 @@ protected:
 	    xn.shutdown();
 	    ixm.shutdown();
 	    xpm.shutdown();
+	    xrm.shutdown();
 
 	    bool flag(false);
 	    XorpTimer t = e.set_flag_after_ms(5000, &flag);
