@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/README,v 1.4 2003/06/05 08:44:37 pavlin Exp $
+# $XORP: xorp/cli/README,v 1.5 2003/06/06 08:38:06 pavlin Exp $
 #
 
 Command-Line Interface Implementation
@@ -50,6 +50,6 @@ for a list of known problems.
 Status
 ======
 
-Currently (June 2003), the CLI implementation is reasonably
+Currently (August 2003), the CLI implementation is reasonably
 stable, but more tests are needed and there are still several minor
 things that need fixing.

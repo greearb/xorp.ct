@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.4 2003/06/06 08:43:34 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.5 2003/06/26 18:36:17 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -120,7 +120,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (June 2003), the MFEA supports abstraction for
+Currently (August 2003), the MFEA supports abstraction for
 the following systems:
 
  * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).

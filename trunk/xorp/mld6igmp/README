@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.4 2003/06/06 08:44:48 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.5 2003/06/26 18:36:40 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -97,7 +97,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (June 2003), the MLD/IGMP implementation is based
+Currently (August 2003), the MLD/IGMP implementation is based
 on the specification in the following documents:
 
  * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
