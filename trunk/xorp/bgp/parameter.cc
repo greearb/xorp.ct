@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.17 2003/09/27 08:37:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.18 2003/10/06 22:41:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -256,7 +256,7 @@ BGPRefreshCapability::str() const
 /* ************** BGPMultiProtocolCapability - ****************** */
 
 BGPMultiProtocolCapability::
-BGPMultiProtocolCapability(AddressFamily afi, SubsequentAddressFamily safi)
+BGPMultiProtocolCapability(Afi afi, Safi safi)
 {
     _cap_code = CAPABILITYMULTIPROTOCOL;
     _length = 8;
@@ -305,7 +305,10 @@ BGPMultiProtocolCapability::decode()
     XLOG_ASSERT(_cap_code == CAPABILITYMULTIPROTOCOL);
 
     _cap_length = *(_data+3);
-    uint16_t afi = ntohs(*reinterpret_cast<uint16_t *>(_data+4));
+    uint16_t afi;
+    afi = *(_data+4);
+    afi <<= 8;
+    afi = *(_data+5);
     switch(afi) {
     case AFI_IPV4_VAL:
 	_address_family = AFI_IPV4;
