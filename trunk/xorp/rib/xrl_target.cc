@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.19 2003/07/14 22:03:24 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.20 2003/07/14 22:27:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -718,7 +718,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
     RouteRegister<IPv6>* rt_reg = _urib6.route_register(addr, target);
     if (rt_reg->route() == NULL) {
 	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix = rt_reg->valid_subnet().prefix_len();
+	prefix = realprefix = rt_reg->valid_subnet().prefix_len();
 	resolves = false;
     } else {
 	metric = rt_reg->route()->metric();
