@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.118 2004/10/15 09:08:00 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.119 2004/10/15 09:16:10 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1524,6 +1524,13 @@ if test "${GCC}" = "yes" ; then
 	XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-20")
+
+	dnl
+	dnl Try to add the -pipe option, which can significantly speed up
+	dnl compile runs by avoiding the use of temporary files.
+	dnl
+	XR_TRY_ADD_CFLAGS("-pipe")
+	XR_TRY_ADD_CXXFLAGS("-pipe")
 
 	dnl
 	dnl If debugging is disabled, filter-out the "-g" flag
