@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.13 2004/06/15 19:17:19 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.14 2004/06/22 01:28:25 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -26,7 +26,7 @@ processes such as MLD/IGMP and PIM-SM.
     4) It receives from the FEA information about the underlying unicast
        forwarding table, and composes Reverse-Path Forwarding information
        for processes such as PIM-SM.
-       Note that currently (June 2004) this is used only when the MFEA
+       Note that currently (July 2004) this is used only when the MFEA
        is used as part of ths stand-alone ${XORP}/pim/test_pim binary.
 
     5) It allows protocol-specific packets (e.g., PIM or IGMP) to be
@@ -145,7 +145,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (June 2004), the MFEA supports abstraction for
+Currently (July 2004), the MFEA supports abstraction for
 the following systems:
 
  * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).

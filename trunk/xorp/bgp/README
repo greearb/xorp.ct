@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/README,v 1.8 2003/11/07 01:12:03 atanu Exp $
+# $XORP: xorp/bgp/README,v 1.9 2004/06/14 22:29:32 atanu Exp $
 #
 
 Border Gateway Protocol (BGP) Implementation
@@ -48,7 +48,7 @@ committed to bgp must come with it's own set of validation checks.
 Status
 ======
 
-June 2004: The core functionality of BGP is basically complete. We
+July 2004: The core functionality of BGP is basically complete. We
 have a reasonable number of test suites available, but nowhere near
 enough to be sure of correct operation in all cases.  Pretty much no
 optional functionality is supported:
