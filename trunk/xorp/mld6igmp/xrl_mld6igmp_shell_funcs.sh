@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.2 2003/03/03 02:00:42 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.3 2003/03/13 00:32:06 pavlin Exp $
 #
 
 #
@@ -10,7 +10,8 @@
 
 . ../mfea/xrl_shell_lib.sh
 
-MLD6IGMP_TARGET="IGMP"
+# Conditionally set the target name
+MLD6IGMP_TARGET=${MLD6IGMP_TARGET:="IGMP"}
 
 mld6igmp_enable_vif()
 {
