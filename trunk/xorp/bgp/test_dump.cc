@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.33 2004/05/08 13:05:43 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.34 2004/05/08 16:46:32 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -2232,6 +2232,75 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     //    printf("TEST 21 END\n");
+    //================================================================
+    // Test22: two copies of same route - only one should be dumped
+    // dumping old rib
+    //================================================================
+    //take peer3 down
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+
+
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 22");
+    debug_table1->write_comment("TWO COPIES OF SAME ROUTE");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT NO CHANGE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+    debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("**ONLY ONE COPY**");
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT REP 1.0.1.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY P1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
 
     //================================================================
 

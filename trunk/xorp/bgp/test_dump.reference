@@ -3074,4 +3074,114 @@ SubnetRoute:
 	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
+[** TABLE DebugTable-D1 **]
+[PUSH]
+[** TABLE DebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 22
+[comment] TWO COPIES OF SAME ROUTE
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE DebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] **ONLY ONE COPY**
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
+[comment] EXPECT REP 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 1
+[** TABLE DebugTable-D2 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D1 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D1 **]
+[PUSH]
+[** TABLE DebugTable-D2 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY P1 & 3
+[** TABLE DebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[** TABLE DebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP

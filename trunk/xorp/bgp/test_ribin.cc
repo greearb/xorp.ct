@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.21 2004/03/03 02:24:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.22 2004/03/04 03:23:47 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -72,12 +72,15 @@ test_ribin_dump(TestInfo& /*info*/)
     InternalMessage<IPv4>* msg;
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    //routes will only be dumped if they won
+    sr1->set_is_winner(1);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete msg;
     sr1->unref();
 
     sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
+    sr2->set_is_winner(1);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete msg;
@@ -95,6 +98,7 @@ test_ribin_dump(TestInfo& /*info*/)
 			       "dumping again");
 
     sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
+    sr3->set_is_winner(1);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete msg;
@@ -127,18 +131,21 @@ test_ribin_dump(TestInfo& /*info*/)
 			       "so the memory can be free'd");
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_is_winner(1);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     sr1->unref();
 
     sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
+    sr2->set_is_winner(1);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     sr2->unref();
 
     sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
+    sr3->set_is_winner(1);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
@@ -359,7 +366,11 @@ test_ribin(TestInfo& /*info*/)
 	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    //routes will only be dumped if they won at decision
+    sr1->set_is_winner(1);
+
     sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_is_winner(1);
 
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");

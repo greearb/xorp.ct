@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.26 2004/05/07 03:09:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.27 2004/05/07 11:45:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -319,8 +319,8 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	chained_rt = &(route_iterator.payload());
 	debug_msg("chained_rt: %s\n", chained_rt->str().c_str());
 	// propagate downstream
-	if (!chained_rt->is_filtered()) {
-	    // route is not filtered
+	// only dump routes that actually won
+	if (chained_rt->is_winner()) {
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	    rt_msg.set_push();
 	    this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
