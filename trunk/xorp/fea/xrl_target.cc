@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.49 2004/08/03 18:09:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.50 2004/10/02 03:42:10 atanu Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -37,6 +37,7 @@
 #include "xrl_rawsock4.hh"
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
+#include "profile_vars.hh"
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   XrlRouter&		 	r,
@@ -1594,6 +1595,9 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     if (protocol_origin == "connected")
 	return XrlCmdError::OKAY();
 
+    if (_profile.enabled(profile_route_in))
+	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
+
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
@@ -1622,6 +1626,10 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     //
     if (protocol_origin == "connected")
 	return XrlCmdError::OKAY();
+
+    if (_profile.enabled(profile_route_in))
+	_profile.log(profile_route_in,
+		     c_format("delete %s", network.str().c_str()));
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
@@ -1700,6 +1708,9 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     if (protocol_origin == "connected")
 	return XrlCmdError::OKAY();
 
+    if (_profile.enabled(profile_route_in))
+	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
+
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
@@ -1728,6 +1739,10 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     //
     if (protocol_origin == "connected")
 	return XrlCmdError::OKAY();
+
+    if (_profile.enabled(profile_route_in))
+	_profile.log(profile_route_in,
+		     c_format("delete %s", network.str().c_str()));
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
