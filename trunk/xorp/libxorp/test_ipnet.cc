@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.6 2004/06/10 22:41:19 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.7 2005/01/30 07:03:15 pavlin Exp $"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -61,7 +61,7 @@ v4_serialization_test()
     for (size_t i = 0; i < sizeof(srep) / sizeof(srep[0]); i++) {
 	IPv4Net n(srep[i].net);
 	if (n.prefix_len() != srep[i].prefix_len) {
-	    verbose_log("item %u bad prefix_len %u\n", (uint32_t)i,
+	    verbose_log("item %u bad prefix_len %u\n", XORP_UINT_CAST(i),
 			XORP_UINT_CAST(n.prefix_len()));
 	    return false;
 	} else if (n.masked_addr() != srep[i].v4) {
