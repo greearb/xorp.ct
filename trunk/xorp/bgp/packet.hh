@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.23 2003/10/28 19:24:05 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.24 2003/10/28 21:01:36 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -209,8 +209,8 @@ public:
     const PathAttributeList<IPv4>& pa_list() const	{ return _pa_list; }
     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
 
-    template <class A> MPReachNLRIAttribute<A> *mpreach(Safi) const;
-    template <class A> MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
+    template <typename A> MPReachNLRIAttribute<A> *mpreach(Safi) const;
+    template <typename A> MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
 
     const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 
@@ -229,7 +229,7 @@ private:
     BGPUpdateAttribList		_nlri_list;
 };
 
-template <class A> 
+template <typename A> 
 MPReachNLRIAttribute<A> *
 UpdatePacket::mpreach(Safi safi) const
 {
@@ -247,7 +247,7 @@ UpdatePacket::mpreach(Safi safi) const
     return 0;
 }
 
-template <class A> 
+template <typename A> 
 MPUNReachNLRIAttribute<A> *
 UpdatePacket::mpunreach(Safi safi) const
 {
