@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.23 2004/06/08 22:42:08 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.24 2004/06/09 02:43:29 pavlin Exp $
 #
 
 Urgent
@@ -90,8 +90,6 @@ Configure Mode
 
 Operational Mode
  - Add template specification for "show" output: fields formatting, etc.
- - Modify the *.cmds templates syntax to allow specification of the CLI
-   help per command.
 
 Done
 ====
@@ -119,3 +117,5 @@ RESOLVED: actually it was correct, the comment was wrong.
 RESOLVED: "-d" is removed, because it is redundant (the same info
    is printed by "-h"). The new command-line option to print
    verbose output is "-v".
+ - Modify the *.cmds templates syntax to allow specification of the CLI
+   help per command.
