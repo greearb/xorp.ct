@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.37 2004/07/26 08:40:20 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.38 2004/08/07 09:13:40 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -775,6 +775,8 @@ public:
 				       uint32_t measured_bytes);
     // Note: applies only for (S,G)
     void	set_switch_to_spt_desired_sg(bool v);
+    // Note: applies only for (S,G)
+    bool	was_switch_to_spt_desired_sg() const;
     
     
     //
@@ -789,6 +791,8 @@ public:
     bool	is_keepalive_timer_running() const;
     // Note: applies only for (S,G)
     void	keepalive_timer_timeout();
+    // Note: applies only for (S,G)
+    void	recompute_set_keepalive_timer_sg();
     
     //
     // MISC. other stuff

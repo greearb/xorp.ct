@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.17 2004/07/26 08:40:20 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.18 2004/08/07 09:13:41 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -205,6 +205,7 @@ public:
 	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT,	// 80
 	OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC,		// 81
 	OUTPUT_STATE_UPDATE_SPTBIT_MFC,				// 82
+	OUTPUT_STATE_SET_KEEPALIVE_TIMER_SG,			// 83
 	OUTPUT_STATE_MAX
     };
     
@@ -354,6 +355,7 @@ public:
     list<PimMreAction>	output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_update_sptbit_mfc(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_set_keepalive_timer_sg(list<PimMreAction> action_list);
     
     //
     // The output actions
@@ -591,6 +593,7 @@ private:
     void	track_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(list<PimMreAction> action_list);
     void	track_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> action_list);
     void	track_state_update_sptbit_mfc(list<PimMreAction> action_list);
+    void	track_state_set_keepalive_timer_sg(list<PimMreAction> action_list);
     
     // Private state
     PimMrt&	_pim_mrt;		// The PIM MRT

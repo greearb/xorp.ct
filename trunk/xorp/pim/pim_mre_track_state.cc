@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.28 2004/07/26 08:40:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.29 2004/08/07 09:13:41 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -143,6 +143,7 @@ PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
     output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(action_list);
     output_state_out_remove_pim_mfc_entry_mfc(action_list);
     output_state_update_sptbit_mfc(action_list);
+    output_state_set_keepalive_timer_sg(action_list);
     
     //
     // Create the final result
@@ -582,6 +583,7 @@ do {									\
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT);	// 80
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC);		// 81
     OUTPUT_NAME(OUTPUT_STATE_UPDATE_SPTBIT_MFC);			// 82
+    OUTPUT_NAME(OUTPUT_STATE_SET_KEEPALIVE_TIMER_SG);			// 83
     
 #undef INPUT_NAME
 #undef OUTPUT_NAME
@@ -2292,6 +2294,21 @@ PimMreTrackState::output_state_update_sptbit_mfc(list<PimMreAction> action_list)
     return (action_list);
 }
 
+list<PimMreAction>
+PimMreTrackState::output_state_set_keepalive_timer_sg(list<PimMreAction> action_list)
+{
+    bool init_flag = action_list.empty();
+    PimMreAction action(OUTPUT_STATE_SET_KEEPALIVE_TIMER_SG, PIM_MRE_SG);
+    
+    if (can_add_action_to_list(action_list, action))
+	action_list.push_back(action);
+    
+    if (init_flag)
+	track_state_set_keepalive_timer_sg(action_list);
+    
+    return (action_list);
+}
+
 //
 // Track state methods
 //
@@ -3519,11 +3536,27 @@ PimMreTrackState::track_state_update_sptbit_mfc(list<PimMreAction> action_list)
     track_state_rpf_interface_s(action_list);
     track_state_is_join_desired_sg(action_list);
     track_state_is_directly_connected_sg(action_list);
-    track_state_rpf_interface_s(action_list);
     track_state_rpf_interface_rp(action_list);
     track_state_inherited_olist_sg_rpt(action_list);
     track_state_rpfp_nbr_sg(action_list);
     track_state_rpfp_nbr_wc(action_list);
+}
+
+void
+PimMreTrackState::track_state_set_keepalive_timer_sg(list<PimMreAction> action_list)
+{
+    action_list = output_state_set_keepalive_timer_sg(action_list);
+
+    track_state_is_directly_connected_sg(action_list);
+    track_state_rpf_interface_s(action_list);
+    track_state_is_join_desired_sg(action_list);
+    track_state_upstream_jp_state_sg(action_list);
+    track_state_pim_include_wc(action_list);
+    track_state_pim_exclude_sg(action_list);
+    track_state_pim_include_sg(action_list);
+    track_state_monitoring_switch_to_spt_desired_sg(action_list);
+    track_state_rp(action_list);
+    track_state_sptbit_sg(action_list);
 }
 
 void
@@ -3903,6 +3936,10 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
     case PimMreTrackState::OUTPUT_STATE_UPDATE_SPTBIT_MFC:		// 82
 	XLOG_UNREACHABLE();
 	// pim_mfc.recompute_update_sptbit_mfc();
+	break;
+
+    case PimMreTrackState::OUTPUT_STATE_SET_KEEPALIVE_TIMER_SG:		// 83
+	pim_mre.recompute_set_keepalive_timer_sg();
 	break;
 	
     default:

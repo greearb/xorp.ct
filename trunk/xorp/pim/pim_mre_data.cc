@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.11 2004/02/24 19:57:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.12 2004/06/10 22:41:30 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -127,7 +127,7 @@ PimMre::is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
     //
     
     // Test if the switch was desired already
-    if (_flags & PIM_MRE_SWITCH_TO_SPT_DESIRED)
+    if (was_switch_to_spt_desired_sg())
 	return (true);
     
     //
@@ -189,4 +189,17 @@ PimMre::set_switch_to_spt_desired_sg(bool v)
 	_flags |= PIM_MRE_SWITCH_TO_SPT_DESIRED;
     else
 	_flags &= ~PIM_MRE_SWITCH_TO_SPT_DESIRED;
+}
+
+// Note: applies only for (S,G)
+bool
+PimMre::was_switch_to_spt_desired_sg() const
+{
+    if (! is_sg())
+	return (false);
+
+    if (_flags & PIM_MRE_SWITCH_TO_SPT_DESIRED)
+	return (true);
+    else
+	return (false);
 }

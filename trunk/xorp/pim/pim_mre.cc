@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.26 2004/02/25 00:35:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.27 2004/06/10 22:41:30 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -21,6 +21,7 @@
 
 #include "pim_module.h"
 #include "pim_private.hh"
+#include "pim_mfc.hh"
 #include "pim_mre.hh"
 #include "pim_mrt.hh"
 #include "pim_node.hh"
@@ -915,6 +916,127 @@ PimMre::keepalive_timer_timeout()
 	return;
     cancel_keepalive_timer();
     entry_try_remove();
+}
+
+// The KeepaliveTimer(S,G)
+// Note: applies only for (S,G)
+void
+PimMre::recompute_set_keepalive_timer_sg()
+{
+    bool should_set_keepalive_timer_sg = false;
+    PimMfc *pim_mfc;
+
+    if (! is_sg())
+	return;
+
+    if (is_keepalive_timer_running())
+	return;
+
+    //
+    // Test if there is PimMfc entry. If there is no PimMfc entry,
+    // then there is no (S,G) traffic, and therefore the KeepaliveTimer(S,G)
+    // does not need to be started.
+    //
+    pim_mfc = pim_mrt().pim_mfc_find(source_addr(), group_addr(), false);
+    if (pim_mfc == NULL)
+	return;
+
+    do {
+	//
+	// Test the following scenario:
+	//
+	// On receipt of data from S to G on interface iif:
+	//     if( DirectlyConnected(S) == TRUE AND iif == RPF_interface(S) ) {
+	//         set KeepaliveTimer(S,G) to Keepalive_Period
+	//
+	if (is_directly_connected_s()
+	    && (rpf_interface_s() == pim_mfc->iif_vif_index())) {
+	    should_set_keepalive_timer_sg = true;
+	    break;
+	}
+
+	//
+	// Test the following scenario:
+	//
+	// if( iif == RPF_interface(S) AND UpstreamJPState(S,G) == Joined ) {
+	//    oiflist = inherited_olist(S,G)
+	//    if( oiflist != NULL ) {
+	//        set KeepaliveTimer(S,G) to Keepalive_Period
+	//
+	if ((rpf_interface_s() == pim_mfc->iif_vif_index())
+	    && is_joined_state()) {
+	    should_set_keepalive_timer_sg = true;
+	    break;
+	}
+
+	//
+	// Test the following scenario:
+	//
+	// CheckSwitchToSpt(S,G) {
+	//     if ( ( pim_include(*,G) (-) pim_exclude(S,G)
+	//            (+) pim_include(S,G) != NULL )
+	//          AND SwitchToSptDesired(S,G) ) {
+	//            # Note: Restarting the KAT will result in the SPT switch
+	//            restart KeepaliveTimer(S,G);
+	//
+ 	Mifset mifs;
+	mifs = pim_include_wc();
+	mifs &= ~pim_exclude_sg();
+	mifs |= pim_include_sg();
+	if (mifs.any() && was_switch_to_spt_desired_sg()) {
+	    should_set_keepalive_timer_sg = true;
+	    break;
+	}
+
+	//
+	// Test the following scenario:
+	//
+	// packet_arrives_on_rp_tunnel( pkt ) {
+	//     ....
+	//
+	if (i_am_rp() && (is_spt() || was_switch_to_spt_desired_sg())) {
+	    should_set_keepalive_timer_sg = true;
+	    break;
+	}
+
+	break;
+    } while (false);
+
+    if (should_set_keepalive_timer_sg) {
+	//
+	// Start the (S,G) keepalive timer, and add a dataflow monitor
+	// (if it wasn't added yet).
+	//
+	start_keepalive_timer();
+
+	if (! pim_mfc->has_idle_dataflow_monitor()) {
+	    //
+	    // Add a dataflow monitor to expire idle (S,G) PimMre state
+	    // and/or idle PimMfc+MFC state
+	    //
+	    // First, compute the dataflow monitor value, which may be
+	    // different for (S,G) entry in the RP that is used for
+	    // Register decapsulation.
+	    //
+	    uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
+	    if ((pim_mfc->iif_vif_index() == pim_register_vif_index())
+		&& i_am_rp()) {
+		if (expected_dataflow_monitor_sec
+		    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
+		    expected_dataflow_monitor_sec
+			= PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
+		}
+	    }
+
+	    pim_mfc->add_dataflow_monitor(expected_dataflow_monitor_sec, 0,
+					  0,	// threshold_packets
+					  0,	// threshold_bytes
+					  true,	// is_threshold_in_packets
+					  false,// is_threshold_in_bytes
+					  false,// is_geq_upcall ">="
+					  true);// is_leq_upcall "<="
+	}
+    }
 }
 
 //
