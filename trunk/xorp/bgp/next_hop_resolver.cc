@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.10 2003/04/02 19:44:44 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.11 2003/04/02 20:34:38 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -626,9 +626,9 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net,
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    typename deque<RibRequest *>::iterator i;
+    typename deque<RibRequestQueueEntry<A> *>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->_nexthop == nexthop) {
+	if ((*i)->nexthop() == nexthop) {
 	    (*i)->register_nexthop(net, requester);
 	    return;
 	}
@@ -636,7 +636,8 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net,
     /*
     ** Construct a request.
     */
-    RibRequest *rr = new RibRequest(nexthop, net, requester);
+    RibRequestQueueEntry<A> *rr 
+	= new RibRequestQueueEntry<A>(nexthop, net, requester);
 
     /*
     ** Add the request to the queue.
@@ -748,7 +749,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** be masked by the prefix that is returned.
     */
     XLOG_ASSERT(IPNet<A>(*addr, *prefix) ==
-		IPNet<A>(_queue.front()->_nexthop, *prefix));
+		IPNet<A>(_queue.front()->nexthop(), *prefix));
 
     /*
     ** We have a lot to do here. This response may have satisfied
@@ -764,7 +765,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** NextHopCache. Then traverse the queue removing all entries that
     ** are satisfied by the NextHopCache.
     */
-    A first_nexthop = _queue.front()->_nexthop;
+    A first_nexthop = _queue.front()->nexthop();
     _next_hop_cache.add_entry(*addr, first_nexthop, *prefix, *real_prefix,
 			      *resolves, *metric);
 
@@ -774,25 +775,25 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     ** there are other entries later in the queue that may
     ** resolve. Don't worry about it we will get there eventually.
     */
-    for (RibRequest *rr = _queue.front(); !_queue.empty(); ) {
+    for (RibRequestQueueEntry<A> *rr = _queue.front(); !_queue.empty(); ) {
 	bool lookup_succeeded;
 	uint32_t m;
 
-	if (_next_hop_cache.lookup_by_nexthop_without_entry(rr->_nexthop,
+	if (_next_hop_cache.lookup_by_nexthop_without_entry(rr->nexthop(),
 					     lookup_succeeded, m)) {
-	    XLOG_ASSERT(rr->_register || rr->_reregister);
+	    XLOG_ASSERT(rr->new_register() || rr->reregister());
 	    /*
 	    ** See if this request was caused by a downcall from the next hop
 	    ** table.
 	    */
-	    if (rr->_register) {
-		NHRequest<A>* request_data = &rr->_requests;
+	    if (rr->new_register()) {
+		NHRequest<A>* request_data = &rr->requests();
 		/*
 		** If nobody is interested then don't register or run
 		** the callbacks.
 		*/
 		if(0 != request_data->requests()) {
-		    _next_hop_cache.register_nexthop(rr->_nexthop,
+		    _next_hop_cache.register_nexthop(rr->nexthop(),
 						     request_data->requests());
 
 		    typename set <NhLookupTable<A> *>::const_iterator req_iter;
@@ -800,7 +801,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 			 req_iter != request_data->requesters().end();
 			 req_iter++) {
 			NhLookupTable<A> *requester = (*req_iter);
-			requester->RIB_lookup_done(rr->_nexthop,
+			requester->RIB_lookup_done(rr->nexthop(),
 					request_data->request_nets(requester),
 						   lookup_succeeded);
 		    }
@@ -811,15 +812,15 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    ** RIB. If it was then notify decision that this next hop
 	    ** has changed.
 	    */
-	    if (rr->_reregister && 0 != rr->_ref_cnt) {
-		_next_hop_cache.register_nexthop(rr->_nexthop, rr->_ref_cnt);
+	    if (rr->reregister() && 0 != rr->ref_cnt()) {
+		_next_hop_cache.register_nexthop(rr->nexthop(), rr->ref_cnt());
 		/*
 		** Start the upcall with the old metrics. Only if the
 		** state has changed will the upcall be made.
 		*/
-		_next_hop_resolver.next_hop_changed(rr->_nexthop,
-						    rr->_resolvable,
-						    rr->_metric);
+		_next_hop_resolver.next_hop_changed(rr->nexthop(),
+						    rr->resolvable(),
+						    rr->metric());
 	    }
 
 	    delete rr;
@@ -850,8 +851,8 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     /*
     ** There are entries left on the queue, so, fire off another request.
     */
-    RibRequest *rr = _queue.front();
-    register_interest(rr->_nexthop);
+    RibRequestQueueEntry<A> *rr = _queue.front();
+    register_interest(rr->nexthop());
 }
 
 template<class A>
@@ -862,7 +863,7 @@ NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net,
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net.str().c_str(), requester);
 
-    typename deque<RibRequest *>::iterator i;
+    typename deque<RibRequestQueueEntry<A> *>::iterator i;
 
     /*
     ** The deregister may mean that there are no more interested parties.
@@ -873,7 +874,7 @@ NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net,
     ** no requesters.
     */
     for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->_nexthop == nexthop)
+	if ((*i)->nexthop() == nexthop)
 		return (*i)->deregister_nexthop(net, requester);
 
     return false;
@@ -913,9 +914,9 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    typename deque<RibRequest *>::iterator i;
+    typename deque<RibRequestQueueEntry<A> *>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->_nexthop == nexthop) {
+	if ((*i)->nexthop() == nexthop) {
 	    (*i)->reregister_nexthop(ref_cnt, resolvable, metric);
 	    return;
 	}
@@ -923,7 +924,8 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
     /*
     ** Construct a request.
     */
-    RibRequest *rr = new RibRequest(nexthop, ref_cnt, resolvable, metric);
+    RibRequestQueueEntry<A> *rr 
+	= new RibRequestQueueEntry<A>(nexthop, ref_cnt, resolvable, metric);
 
     /*
     ** Add the request to the queue.
@@ -949,11 +951,11 @@ NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    typename deque<RibRequest *>::const_iterator i;
+    typename deque<RibRequestQueueEntry<A> *>::const_iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++)
-	if ((*i)->_reregister && (*i)->_nexthop == nexthop) {
-	    resolvable = (*i)->_resolvable;
-	    metric = (*i)->_metric;
+	if ((*i)->reregister() && (*i)->nexthop() == nexthop) {
+	    resolvable = (*i)->resolvable();
+	    metric = (*i)->metric();
 	    debug_msg("nexthop %s resolvable %d metric %d\n",
 		      nexthop.str().c_str(), resolvable, metric);
 	    return true;

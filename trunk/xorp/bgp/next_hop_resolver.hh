@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.10 2003/04/02 19:44:44 mjh Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.11 2003/04/02 20:34:38 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -413,6 +413,109 @@ private:
 };
 
 /**
+ * The queue of outstanding requests to the RIB. Requests can have
+ * arrived in this queue in two ways. A simple call down from the next
+ * hop table or due to the previous result being marked invalid by
+ * an upcall from the RIB. The class variables "_register" and
+ * "_reregister" denote how the entry was created. It is possible
+ * that an upcall from the RIB has caused a queue entry, followed
+ * by a downcall from the next hop table in which case both
+ * "_register" and "_reregister" will be true.
+ */
+template <class A>
+class RibRequestQueueEntry {
+public:
+    RibRequestQueueEntry(A nexthop, IPNet<A> net, NhLookupTable<A> *requester)
+	: _register_mode(REGISTER),
+	  _nexthop(nexthop), _new_register(true), _requests(net, requester),
+	  _reregister(false), _ref_cnt(0)
+    {}
+    RibRequestQueueEntry(A nexthop, uint32_t ref_cnt, bool resolvable, uint32_t
+	       metric)
+	: _register_mode(REGISTER),
+	  _nexthop(nexthop), _new_register(false), _reregister(true),
+	  _ref_cnt(ref_cnt), _resolvable(resolvable), _metric(metric)
+    {}
+
+    void register_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
+	XLOG_ASSERT(true == _reregister || true == _new_register);
+	_new_register = true;
+	_requests.add_request(net, requester);
+    }
+
+    bool deregister_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
+	XLOG_ASSERT(true == _reregister || true == _new_register);
+	if (_new_register && _requests.remove_request(net, requester)) {
+	    return true;
+	}
+	if (_reregister) {
+	    XLOG_ASSERT(_ref_cnt > 0);
+	    _ref_cnt--;
+	    return true;
+	}
+	return false;
+    }
+
+    void reregister_nexthop(uint32_t ref_cnt, bool resolvable,
+			    uint32_t metric) {
+	XLOG_ASSERT(false == _reregister);
+	XLOG_ASSERT(0 == _ref_cnt);
+	_reregister = true;
+	_ref_cnt = ref_cnt;
+	_resolvable = resolvable;
+	_metric = metric;
+    }
+
+    bool resolvable() const {
+	assert(_register_mode == REGISTER);
+	return _resolvable;
+    }
+    bool reregister() const {
+	assert(_register_mode == REGISTER);
+	return _reregister;
+    }
+
+    bool new_register() const {
+	assert(_register_mode == REGISTER);
+	return _new_register;
+    }
+    bool metric() const {
+	assert(_register_mode == REGISTER);
+	return _metric;
+    }
+    const A& nexthop() const {
+	return _nexthop;
+    }
+    uint32_t ref_cnt() const {
+	return _ref_cnt;
+    }
+    NHRequest<A>& requests() {
+	return _requests;
+    }
+private:
+    enum {REGISTER, DEREGISTER} _register_mode;
+    A _nexthop;
+
+	/*
+	** Register info.
+	*/
+    bool _new_register;
+    NHRequest<A> _requests;
+
+	/*
+	** Reregister info.
+	*/
+    bool _reregister;
+    uint32_t _ref_cnt;
+    /**
+     * The old answer if we are in the process of reregistering so
+     * that lookups will be satisfied with this old answer.
+	 */
+    bool _resolvable;
+    uint32_t _metric;
+};
+
+/**
  * Make requests of the RIB and get responses.
  *
  * At any time there is only ever one outstanding request to the
@@ -537,83 +640,13 @@ private:
     NextHopResolver<A>& _next_hop_resolver;
     NextHopCache<A>& _next_hop_cache;
     /**
-     * The queue of outstanding requests to the RIB. Requests can have
-     * arrived in this queue in two ways. A simple call down from the next
-     * hop table or due to the previous result being marked invalid by
-     * an upcall from the RIB. The class variables "_register" and
-     * "_reregister" denote how the entry was created. It is possible
-     * that an upcall from the RIB has caused a queue entry, followed
-     * by a downcall from the next hop table in which case both
-     * "_register" and "_reregister" will be true.
-     */
-    struct RibRequest {
-	RibRequest(A nexthop, IPNet<A> net, NhLookupTable<A> *requester)
-	    : _nexthop(nexthop), _register(true), _requests(net, requester),
-	      _reregister(false), _ref_cnt(0)
-	{}
-	RibRequest(A nexthop, uint32_t ref_cnt, bool resolvable, uint32_t
-		   metric)
-	    : _nexthop(nexthop), _register(false), _reregister(true),
-	      _ref_cnt(ref_cnt), _resolvable(resolvable), _metric(metric)
-	{}
-
-	void register_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
-	    XLOG_ASSERT(true == _reregister || true == _register);
-	    _register = true;
-	    _requests.add_request(net, requester);
-	}
-
-	bool deregister_nexthop(IPNet<A> net, NhLookupTable<A> *requester) {
-	    XLOG_ASSERT(true == _reregister || true == _register);
-	    if (_register && _requests.remove_request(net, requester)) {
-		return true;
-	    }
-	    if (_reregister) {
-		XLOG_ASSERT(_ref_cnt > 0);
-		_ref_cnt--;
-		return true;
-	    }
-	    return false;
-	}
-
-	void reregister_nexthop(uint32_t ref_cnt, bool resolvable,
-				uint32_t metric) {
-	    XLOG_ASSERT(false == _reregister);
-	    XLOG_ASSERT(0 == _ref_cnt);
-	    _reregister = true;
-	    _ref_cnt = ref_cnt;
-	    _resolvable = resolvable;
-	    _metric = metric;
-	}
-
-	A _nexthop;
-
-	/*
-	** Register info.
-	*/
-	bool _register;
-	NHRequest<A> _requests;
-
-	/*
-	** Reregister info.
-	*/
-	bool _reregister;
-	uint32_t _ref_cnt;
-	/**
-	 * The old answer if we are in the process of reregistering so
-	 * that lookups will be satisfied with this old answer.
-	 */
-	bool _resolvable;
-	uint32_t _metric;
-    };
-    /**
      * Are we currently waiting for a response from the RIB.
      */
     bool _busy;
     /**
      * The queue of outstanding requests.
      */
-    deque<RibRequest *> _queue;
+    deque<RibRequestQueueEntry<A> *> _queue;
     /**
      * Retransmit delay timer list for sending registrations This is a
      * list because there might be one register and multiple
@@ -621,10 +654,10 @@ private:
      */
     list <XorpTimer> _rtx_delay_timers;
     /**
-     * Used by the destructor to delete all the "RibRequest" objects
+     * Used by the destructor to delete all the "RibRequestQueueEntry" objects
      * that have been allocated.
      */
-    static void zapper(RibRequest *req) { delete req; }
+    static void zapper(RibRequestQueueEntry<A> *req) { delete req; }
 };
 
 template<class A>
