@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.116 2004/09/17 14:23:19 abittau Exp $
+dnl $XORP: xorp/configure.in,v 1.117 2004/09/18 00:35:22 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -830,14 +830,21 @@ dnl Check for mreqn
 dnl ----------------------------
 
 AC_MSG_CHECKING(whether struct ip_mreqn is defined)
-AC_EGREP_HEADER(ip_mreqn, netinet/in.h,
-	        [
-		 AC_MSG_RESULT(yes)
-		 AC_DEFINE(HAVE_ST_IP_MREQN, 1,
-				[Define to 1 if you have struct ip_mreqn])
-		],
-		 AC_MSG_RESULT(no)
-)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+],
+[
+static struct ip_mreqn ipmreqn;
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_ST_IP_MREQN, 1,
+		[Define to 1 if you have struct ip_mreqn])],
+ AC_MSG_RESULT(no))
+
 
 dnl ----------------------------
 dnl Check for advanced multicast API support

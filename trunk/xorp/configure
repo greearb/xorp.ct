@@ -7004,26 +7004,55 @@ echo $ECHO_N "checking whether struct ip_mreqn is defined... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
+
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
 #include <netinet/in.h>
 
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "ip_mreqn" >/dev/null 2>&1; then
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
 
-		 echo "$as_me:$LINENO: result: yes" >&5
+static struct ip_mreqn ipmreqn;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_ST_IP_MREQN 1
 _ACEOF
 
-
 else
-  echo "$as_me:$LINENO: result: no" >&5
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-
 fi
-rm -f conftest*
+rm -f conftest.$ac_objext conftest.$ac_ext
 
 
 
