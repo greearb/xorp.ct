@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.15 2003/01/29 05:43:55 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.16 2003/02/02 00:10:28 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,7 +63,7 @@ AsSegment::encode(size_t &len, uint8_t *data) const
     assert(_entries <= 255);
     assert(_aslist.size() == _entries);		// XXX this is expensive
 
-    size_t i = wire_length();
+    size_t i = wire_size();
     const_iterator as;
 
     if (data == 0)
@@ -324,13 +324,13 @@ AsPath::short_str() const
 }
 
 size_t
-AsPath::wire_length() const
+AsPath::wire_size() const
 {
     size_t l = 0;
     const_iterator iter = _segments.begin();
 
     for (; iter != _segments.end(); ++iter)
-	l += iter->wire_length();
+	l += iter->wire_size();
     return l;
 }
 
@@ -339,7 +339,7 @@ AsPath::encode(size_t &len, uint8_t *buf) const
 {
     assert(_num_segments == _segments.size());	// XXX expensive
     const_iterator i;
-    size_t pos, l = wire_length();
+    size_t pos, l = wire_size();
 
     // allocate or check the memory.
     if (buf == 0)		// no buffer, allocate one
@@ -350,7 +350,7 @@ AsPath::encode(size_t &len, uint8_t *buf) const
 
     // encode into the buffer
     for (pos = 0, i = _segments.begin(); i != _segments.end(); ++i) {
-	l = i->wire_length();
+	l = i->wire_size();
 	i->encode(l, buf + pos);
 	pos += l;
     }
@@ -407,7 +407,7 @@ void
 AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
 {
     //See RFC 1657, Page 15 for the encoding.
-    size_t buf_size = wire_length();
+    size_t buf_size = wire_size();
     if (buf_size > 2)
 	encode_buf.resize(buf_size);
     else {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.14 2003/01/30 04:15:50 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.15 2003/02/01 04:41:54 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -174,14 +174,14 @@ PathAttribute::operator<(const PathAttribute& him) const
     if (sorttype() > him.sorttype())
 	return false;
     // equal sorttypes imply equal types
-    if (size() < him.size())
+    if (wire_size() < him.wire_size())
 	return true;
-    if (size() > him.size())
+    if (wire_size() > him.wire_size())
 	return false;
     // same size, must compare payload
     switch (type()) {
     default:
-	return (memcmp(data(), him.data(), size()) < 0);
+	return (memcmp(data(), him.data(), wire_size()) < 0);
 	break;
 
     case AS_PATH:
@@ -197,8 +197,8 @@ PathAttribute::operator<(const PathAttribute& him) const
 bool
 PathAttribute::operator==(const PathAttribute& him) const
 {
-    return (type() == him.type() && size() == him.size() &&
-    	memcmp(data(), him.data(), size()) == 0);
+    return (type() == him.type() && wire_size() == him.wire_size() &&
+    	memcmp(data(), him.data(), wire_size()) == 0);
 }
 
 uint8_t *
@@ -210,7 +210,7 @@ PathAttribute::set_header(size_t payload_size)
     else
 	_flags &= ~Extended;
 	
-    _data = new uint8_t[size()];	// allocate buffer
+    _data = new uint8_t[wire_size()];	// allocate buffer
     _data[0] = flags() & ValidFlags;
     _data[1] = type();
     if (extended()) {
@@ -321,7 +321,7 @@ void
 ASPathAttribute::encode()
 {
     debug_msg("ASPathAttribute encode()\n");
-    size_t l = as_path().wire_length();
+    size_t l = as_path().wire_size();
 
     uint8_t *d = set_header(l);	// allocate buffer and skip header
     as_path().encode(l, d);	// encode the payload in the buffer
@@ -592,15 +592,15 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d)
 		   "Bad Flags in Unknown attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
     _size = length(d);
-    _data = new uint8_t[size()];
-    memcpy(_data, d, size());
+    _data = new uint8_t[wire_size()];
+    memcpy(_data, d, wire_size());
 }
 
 string
 UnknownAttribute::str() const
 {
     string s = "Unknown Attribute ";
-    for (size_t i=0; i< size(); i++)
+    for (size_t i=0; i< wire_size(); i++)
 	s += c_format("%x ", _data[i]);
     return s;
 }

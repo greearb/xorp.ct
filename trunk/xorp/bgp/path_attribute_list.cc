@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.7 2003/01/29 05:43:55 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.8 2003/01/31 23:39:40 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -72,7 +72,7 @@ void
 PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 {
     size_t l;
-    PathAttribute *a = PathAttribute::create(att.data(), att.size(), l);
+    PathAttribute *a = PathAttribute::create(att.data(), att.wire_size(), l);
     // store a reference to the mandatory attributes, ignore others
     switch (att.type()) {
     default:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.14 2003/01/29 22:17:10 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.15 2003/01/30 04:25:06 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,7 +63,7 @@ void
 UpdatePacket::add_pathatt(const PathAttribute& pa)
 {
     size_t l;
-    PathAttribute *a = PathAttribute::create(pa.data(), pa.size(), l);
+    PathAttribute *a = PathAttribute::create(pa.data(), pa.wire_size(), l);
 
     _pa_list.push_back(a);
 }
@@ -103,11 +103,11 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     // compute packet length
 
     for (uai = wr_list().begin() ; uai != wr_list().end(); ++uai)
-	wr_len += uai->size();
+	wr_len += uai->wire_size();
     for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai)
-	pa_len += (*pai)->size();
+	pa_len += (*pai)->wire_size();
     for (uai = nlri_list().begin() ; uai != nlri_list().end(); ++uai)
-	nlri_len += uai->size();
+	nlri_len += uai->wire_size();
 
     size_t desired_len = MINUPDATEPACKET + wr_len + pa_len + nlri_len;
     if (d != 0)		// XXX have a buffer, check length
@@ -130,7 +130,7 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     i = BGP_COMMON_HEADER_LEN + 2;
     for (uai = wr_list().begin() ; uai != wr_list().end(); ++uai) {
 	uai->copy_out(d+i);
-	i += uai->size();
+	i += uai->wire_size();
     }
 
     // fill pathattribute length XXX (bytes ?)
@@ -139,14 +139,14 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
 
     // fill path attribute list
     for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai) {
-        memcpy(d+i, (*pai)->data(), (*pai)->size());
-	i += (*pai)->size();
+        memcpy(d+i, (*pai)->data(), (*pai)->wire_size());
+	i += (*pai)->wire_size();
     }	
 
     // fill NLRI list
     for (uai = nlri_list().begin() ; uai != nlri_list().end(); ++uai) {
 	uai->copy_out(d+i);
-	i += uai->size();
+	i += uai->wire_size();
     }	
     return d;
 }

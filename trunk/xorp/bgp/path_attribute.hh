@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/path_attribute.hh,v 1.8 2003/01/29 05:43:55 rizzo Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -105,7 +105,7 @@ public:
     /**
      * @return the size of the wire representation.
      */
-    size_t size() const				{
+    size_t wire_size() const			{
 	return _size + header_size();
     }
 
@@ -137,7 +137,7 @@ public:
      * compute the hash for this object.
      */
     void add_hash(MD5_CTX *context) const	{
-	MD5Update(context, data(), size());
+	MD5Update(context, data(), wire_size());
     }
 
     virtual string str() const;

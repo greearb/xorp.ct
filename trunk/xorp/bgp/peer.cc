@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.25 2003/02/04 23:48:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.26 2003/02/05 23:01:51 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -1036,7 +1036,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 		if ((*i)->well_known()) {
 		    // unrecognized well_known attribute.
 		    return new NotificationPacket(UPDATEMSGERR, UNRECOGWATTR,
-					(*i)->data(), (*i)->size());
+					(*i)->data(), (*i)->wire_size());
 		}
 	    }
 	}

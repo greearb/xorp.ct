@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.11 2003/01/29 02:09:37 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.12 2003/02/02 00:10:28 mjh Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -173,9 +173,9 @@ public:
     const uint8_t *encode(size_t &len, uint8_t *buf) const;
 
     /**
-     * @return the length of the list on the wire.
+     * @return the size of the list on the wire.
      */
-    size_t wire_length() const			{ return 2 + 2*_entries; }
+    size_t wire_size() const			{ return 2 + 2*_entries; }
 
     /**
      * @return fancy string representation of the segment
@@ -282,10 +282,10 @@ public:
     const uint8_t *encode(size_t &len, uint8_t *buf) const;
 
     /**
-     * @return the length of the list on the wire.
+     * @return the size of the list on the wire.
      * XXX this should be made more efficient.
      */
-    size_t wire_length() const;
+    size_t wire_size() const;
 
     /**
      * Add the As number to the begining of the AS_SEQUENCE that starts
