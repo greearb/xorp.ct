@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.56 2004/10/07 06:54:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.57 2005/02/01 10:21:04 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1559,6 +1559,8 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	string asnum;
 	string bgpid;
 	string holdtime;
+	string afi;
+	string safi;
 
 	for(size_t i = index + 1; i < size; i += 2) {
 	    debug_msg("name: %s value: %s\n",
@@ -1570,6 +1572,10 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		bgpid = words[i + 1];
 	    } else if("holdtime" == words[i]) {
 		holdtime = words[i + 1];
+	    } else if("afi" == words[i]) {
+		afi = words[i + 1];
+	    } else if("safi" == words[i]) {
+		safi = words[i + 1];
 	    } else 
 		xorp_throw(InvalidString, 
 		       c_format("Illegal argument to open: <%s>\n[%s]",
@@ -1591,10 +1597,23 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	       c_format("Holdtime not supplied to open:\n[%s]",
 				line.c_str()));
 	}
+	if(("" != afi && "" == safi) || ("" == afi && "" != safi)) {
+	    xorp_throw(InvalidString,
+	       c_format("Both AFI and SAFI must be set/not set to open:\n[%s]",
+				line.c_str()));
+	}
+
  	OpenPacket *open = new OpenPacket(AsNum(
 				 static_cast<uint16_t>(atoi(asnum.c_str()))),
 					  IPv4(bgpid.c_str()),
 					  atoi(holdtime.c_str()));
+
+	if("" != afi && "" != safi) {
+	    open->add_parameter(
+			       new BGPMultiProtocolCapability(
+					      (Afi)atoi(afi.c_str()), 
+					      (Safi)atoi(safi.c_str())));
+	}
 	pac = open;
     } else if("keepalive" == words[index]) {
 	pac = new KeepAlivePacket();

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.28 2004/12/05 02:44:48 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.29 2004/12/17 01:31:02 atanu Exp $
 #
 
 #
@@ -939,10 +939,22 @@ test27_ipv6()
 test28()
 {
     echo "TEST28 - Verify that routes originated by BGP reach an EBGP peer"
+    echo "Also verify that the nexthop in the originate route is honoured"
 
     coord reset
     coord target $HOST $PORT2
     coord initialise attach peer1
+
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME
+
+    coord peer1 expect packet keepalive
+
+    coord peer1 expect packet update \
+	origin 2 \
+	nexthop 20.20.20.20 \
+	aspath 65008 \
+	med 1 \
+	nlri 10.10.10.0/24
 
     # Introduce a route
     originate_route4 10.10.10.0/24 20.20.20.20 true false
@@ -959,10 +971,23 @@ test28()
 test28_ipv6()
 {
     echo "TEST28 (IPV6) - Verify that routes originated by BGP reach an EBGP peer"
+    echo "Also verify that the nexthop in the originate route is honoured"
 
     coord reset
     coord target $HOST $PORT4
     coord initialise attach peer1
+
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME \
+	afi 2 safi 1
+
+    coord peer1 expect packet keepalive
+
+    coord peer1 expect packet update \
+	origin 2 \
+	aspath 65008 \
+	med 1 \
+	nlri6 2000::/3 \
+	nexthop6 20:20:20:20:20:20:20:20
 
     # Introduce a route
     originate_route6 2000::/3 20:20:20:20:20:20:20:20 true false

@@ -310,9 +310,11 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
 \item {\sf send packet open
                         asnum $<$value$>$ 
                         bgpid $<$ipv4$>$ 
-                        holdtime $<$value$>$}
+                        holdtime $<$value$>$
+			afi $<$value$>$
+			safi $<$value$>$}
 
-  Send an open packet.  All fields shown are mandatory.
+  Send an open packet.  All fields apart from afi and safi are mandatory.
 
 \item {\sf send dump mrtd update filename $<$packet count$>$}
   

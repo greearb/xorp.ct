@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.23 2004/09/17 13:50:54 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.24 2005/03/03 07:29:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -149,6 +149,10 @@ const InternalMessage<A>*
 NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 				bool &modified) const
 {
+    // If we originated this route don't rewrite the nexthop
+    if (rtmsg->origin_peer()->originate_route_handler())
+	return rtmsg;
+
     //Form a new path attribute list containing the new nexthop
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
     palist.replace_nexthop(_local_nexthop);

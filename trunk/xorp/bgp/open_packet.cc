@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.18 2004/06/10 22:40:31 hodson Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.19 2005/01/31 19:32:00 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -155,8 +155,20 @@ OpenPacket::operator==(const OpenPacket& him) const
     // opt parm len
     if (_OptParmLen != him.OptParmLen())
 	return false;
-    // parameters ... problem here is that the "sending" packet, stores these
-    // in BGPLocalData and the receiving packet stores these in BGPPeerData
+    // Compare the parameters
+    ParameterList::const_iterator me_pi = parameter_list().begin();
+    ParameterList::const_iterator him_pi = him.parameter_list().begin();
+    for (; me_pi !=  parameter_list().end(); me_pi++) {
+	bool match = false;
+	for (; him_pi !=  him.parameter_list().end(); him_pi++) {
+	    if ((*me_pi)->compare(*(*him_pi))) {
+		match = true;
+		break;
+	    }
+	}
+	if (match == false)
+	    return false;
+    }
     return true;
 }
 
