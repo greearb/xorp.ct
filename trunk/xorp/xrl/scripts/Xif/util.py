@@ -11,11 +11,15 @@ def quit(file, lineno, reason):
 
 def file_write_string(fname, data):
     f = open(fname, "w")
+    ts = re.compile(r'[ \t]+$', re.MULTILINE)
+    data = ts.sub("", data)
     f.write(data)
     f.close()
 
 def file_append_string(fname, data):
     f = open(fname, "a")
+    ts = re.compile(r'[ \t]+$', re.MULTILINE)
+    data = ts.sub("", data)
     f.write(data)
     f.close()
 
