@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.3 2003/05/23 19:48:21 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -109,7 +109,7 @@ IfConfigGetIoctl::receive_data(const uint8_t* data, size_t n_bytes)
     debug_msg_indent(0);
     debug_msg("\nEnd configuration read.\n");
     
-    ifc().report_updates(ifc().live_config());
+    ifc().report_updates(ifc().live_config(), true);
     ifc().live_config().finalize_state();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.7 2003/05/14 09:37:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.8 2003/05/23 22:24:51 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -210,7 +210,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	//
 	// Propagate the configuration changes to all listeners.
 	//
-	ifconfig().report_updates(backup_config);
+	ifconfig().report_updates(backup_config, false);
 	backup_config.finalize_state();
 	
 	//
@@ -218,7 +218,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	// propagate the removal to all listeners.
 	//
 	backup_config.align_with(dev_config, false);
-	ifconfig().report_updates(backup_config);
+	ifconfig().report_updates(backup_config, false);
 	backup_config.finalize_state();
 	
 	if (push_success) {

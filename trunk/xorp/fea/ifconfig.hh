@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.8 2003/05/22 00:58:25 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.9 2003/05/23 19:52:34 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -124,32 +124,36 @@ public:
     /**
      * Check IfTreeInterface and report updates to IfConfigUpdateReporter.
      */
-    void   report_update(const IfTreeInterface& fi);
+    void   report_update(const IfTreeInterface& fi,
+			 bool is_all_interfaces_reportee);
 
     /**
      * Check IfTreeVif and report updates to IfConfigUpdateReporter.
      */
-    void   report_update(const IfTreeInterface& fi, const IfTreeVif& fv);
+    void   report_update(const IfTreeInterface& fi, const IfTreeVif& fv,
+			 bool is_all_interfaces_reportee);
 
     /**
      * Check IfTreeAddr4 and report updates to IfConfigUpdateReporter.
      */
     void   report_update(const IfTreeInterface&	fi,
 			 const IfTreeVif&	fv,
-			 const IfTreeAddr4&     fa);
+			 const IfTreeAddr4&     fa,
+			 bool  is_all_interfaces_reportee);
 
     /**
      * Check IfTreeAddr6 and report updates to IfConfigUpdateReporter.
      */
     void   report_update(const IfTreeInterface&	fi,
 			 const IfTreeVif&	fv,
-			 const IfTreeAddr6&     fa);
+			 const IfTreeAddr6&     fa,
+			 bool  is_all_interfaces_reportee);
 
     /**
      * Check every item within IfTree and report updates to
      * IfConfigUpdateReporter.
      */
-    void   report_updates(const IfTree& it);
+    void   report_updates(const IfTree& it, bool is_all_interfaces_reportee);
 
     void map_ifindex(uint32_t index, const string& name);
     void unmap_ifindex(uint32_t index);    
@@ -215,21 +219,25 @@ public:
     virtual ~IfConfigUpdateReporterBase() {}
 
     virtual void interface_update(const string& ifname,
-				  const Update& u) = 0;
+				  const Update& u,
+				  bool  is_all_interfaces_reportee) = 0;
 
     virtual void vif_update(const string& ifname,
 			    const string& vifname,
-			    const Update& u) = 0;
+			    const Update& u,
+			    bool  is_all_interfaces_reportee) = 0;
 
     virtual void vifaddr4_update(const string& ifname,
 				 const string& vifname,
 				 const IPv4&   addr,
-				 const Update& u) = 0;
+				 const Update& u,
+				 bool  is_all_interfaces_reportee) = 0;
 
     virtual void vifaddr6_update(const string& ifname,
 				 const string& vifname,
 				 const IPv6&   addr,
-				 const Update& u) = 0;
+				 const Update& u,
+				 bool  is_all_interfaces_reportee) = 0;
 };
 
 /**

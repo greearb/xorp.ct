@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.17 2003/05/21 00:40:29 atanu Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.18 2003/05/21 01:11:13 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1063,6 +1063,24 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_unregister_client(const string& client)
 {
     if (_xifcur.remove_reportee(client))
+	return XrlCmdError::OKAY();
+    return XrlCmdError::COMMAND_FAILED(client +
+				       string(" not registered."));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_register_all_interfaces_client(const string& client)
+{
+    if (_xifcur.add_all_interfaces_reportee(client))
+	return XrlCmdError::OKAY();
+    return XrlCmdError::COMMAND_FAILED(client +
+				       string(" already registered."));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_unregister_all_interfaces_client(const string& client)
+{
+    if (_xifcur.remove_all_interfaces_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
 				       string(" not registered."));

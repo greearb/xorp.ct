@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.2 2003/03/10 23:20:18 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.3 2003/05/09 05:32:54 mjh Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -69,29 +69,61 @@ XrlIfConfigUpdateReporter::XrlIfConfigUpdateReporter(XrlRouter& r)
 bool
 XrlIfConfigUpdateReporter::add_reportee(const string& tgt)
 {
-    if (find(_tgts.begin(), _tgts.end(), tgt) != _tgts.end())
+    if (find(_configured_interfaces_tgts.begin(),
+	     _configured_interfaces_tgts.end(), tgt)
+	!= _configured_interfaces_tgts.end())
 	return false;
-    _tgts.push_back(tgt);
+    _configured_interfaces_tgts.push_back(tgt);
+    return true;
+}
+
+bool
+XrlIfConfigUpdateReporter::add_all_interfaces_reportee(const string& tgt)
+{
+    if (find(_all_interfaces_tgts.begin(),
+	     _all_interfaces_tgts.end(), tgt)
+	!= _all_interfaces_tgts.end())
+	return false;
+    _all_interfaces_tgts.push_back(tgt);
     return true;
 }
 
 bool
 XrlIfConfigUpdateReporter::remove_reportee(const string& tgt)
 {
-    TgtList::iterator ti = find(_tgts.begin(), _tgts.end(), tgt);
-    if (ti == _tgts.end())
+    TgtList::iterator ti = find(_configured_interfaces_tgts.begin(),
+				_configured_interfaces_tgts.end(), tgt);
+    if (ti == _configured_interfaces_tgts.end())
 	return false;
-    _tgts.erase(ti);
+    _configured_interfaces_tgts.erase(ti);
+    return true;
+}
+
+bool
+XrlIfConfigUpdateReporter::remove_all_interfaces_reportee(const string& tgt)
+{
+    TgtList::iterator ti = find(_all_interfaces_tgts.begin(),
+				_all_interfaces_tgts.end(), tgt);
+    if (ti == _all_interfaces_tgts.end())
+	return false;
+    _all_interfaces_tgts.erase(ti);
     return true;
 }
 
 void
 XrlIfConfigUpdateReporter::interface_update(const string& ifname,
-					    const Update& u)
+					    const Update& u,
+					    bool  is_all_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
-
-    for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
+    TgtList *tgts = NULL;
+    
+    if (is_all_interfaces_reportee)
+	tgts = &_all_interfaces_tgts;
+    else
+	tgts = &_configured_interfaces_tgts;
+    
+    for (TgtList::const_iterator ti = tgts->begin(); ti != tgts->end(); ++ti) {
 	c.send_interface_update(ti->c_str(), ifname, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
 	_in_flight++;
@@ -101,11 +133,18 @@ XrlIfConfigUpdateReporter::interface_update(const string& ifname,
 void
 XrlIfConfigUpdateReporter::vif_update(const string& ifname,
 				      const string& vifname,
-				      const Update& u)
+				      const Update& u,
+				      bool  is_all_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
+    TgtList *tgts = NULL;
+    
+    if (is_all_interfaces_reportee)
+	tgts = &_all_interfaces_tgts;
+    else
+	tgts = &_configured_interfaces_tgts;
 
-    for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
+    for (TgtList::const_iterator ti = tgts->begin(); ti != tgts->end(); ++ti) {
 	c.send_vif_update(ti->c_str(), ifname, vifname, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
 	_in_flight++;
@@ -116,11 +155,18 @@ void
 XrlIfConfigUpdateReporter::vifaddr4_update(const string& ifname,
 					   const string& vifname,
 					   const IPv4&	 ip,
-					   const Update& u)
+					   const Update& u,
+					   bool  is_all_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
+    TgtList *tgts = NULL;
+    
+    if (is_all_interfaces_reportee)
+	tgts = &_all_interfaces_tgts;
+    else
+	tgts = &_configured_interfaces_tgts;
 
-    for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
+    for (TgtList::const_iterator ti = tgts->begin(); ti != tgts->end(); ++ti) {
 	c.send_vifaddr4_update(ti->c_str(), ifname, vifname, ip, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
 	_in_flight++;
@@ -131,11 +177,18 @@ void
 XrlIfConfigUpdateReporter::vifaddr6_update(const string& ifname,
 					   const string& vifname,
 					   const IPv6&	 ip,
-					   const Update& u)
+					   const Update& u,
+					   bool  is_all_interfaces_reportee)
 {
     XrlFeaIfmgrClientV0p1Client c(&_rtr);
+    TgtList *tgts = NULL;
+    
+    if (is_all_interfaces_reportee)
+	tgts = &_all_interfaces_tgts;
+    else
+	tgts = &_configured_interfaces_tgts;
 
-    for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
+    for (TgtList::const_iterator ti = tgts->begin(); ti != tgts->end(); ++ti) {
 	c.send_vifaddr6_update(ti->c_str(), ifname, vifname, ip, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
 	_in_flight++;

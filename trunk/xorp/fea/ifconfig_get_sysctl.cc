@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.1 2003/05/02 07:50:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -76,7 +76,7 @@ IfConfigGetSysctl::receive_data(const uint8_t* data, size_t n_bytes)
     debug_msg_indent(0);
     debug_msg("\nEnd configuration read.\n");
     
-    ifc().report_updates(ifc().live_config());
+    ifc().report_updates(ifc().live_config(), true);
     ifc().live_config().finalize_state();
 }
 

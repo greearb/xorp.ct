@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.4 2003/04/03 22:43:51 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.5 2003/05/09 05:32:54 mjh Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
@@ -34,7 +34,7 @@ public:
 
     /**
      * Add an xrl target to list of those that will receive interface
-     * event notifications.
+     * event notifications about configured interfaces.
      *
      * @param xrl_target the xrl target to be added.
      * @return true on success, false if target already listed.
@@ -43,7 +43,7 @@ public:
 
     /**
      * Remove an xrl target from the list of those that receive interface
-     * event notifications.
+     * event notifications about configured interfaces.
      *
      * @param xrl_target the xrl target to be removed.
      * @return true on success, false if target is not listed.
@@ -51,14 +51,35 @@ public:
     bool remove_reportee(const string& xrl_target);
 
     /**
+     * Add an xrl target to list of those that will receive interface
+     * event notifications about all interfaces.
+     *
+     * @param xrl_target the xrl target to be added.
+     * @return true on success, false if target already listed.
+     */
+    bool add_all_interfaces_reportee(const string& xrl_target);
+
+    /**
+     * Remove an xrl target from the list of those that receive interface
+     * event notifications about all interfaces.
+     *
+     * @param xrl_target the xrl target to be removed.
+     * @return true on success, false if target is not listed.
+     */
+    bool remove_all_interfaces_reportee(const string& xrl_target);
+
+    /**
      * Send announcement of interface update.
      *
      * @param ifname the name of the interface updated.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
+     * @param is_all_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all interfaces.
      */
     void interface_update(const string& ifname,
-			  const Update& u);
+			  const Update& u,
+			  bool		is_all_interfaces_reportee);
 
     /**
      * Send announcement of a vif update.
@@ -67,10 +88,13 @@ public:
      * @param vifname the name of the vif updated.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
+     * @param is_all_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all interfaces.
      */
-    void vif_update(const string& ifname,
-		    const string& vifname,
-		    const Update& u);
+    void vif_update(const string&	ifname,
+		    const string&	vifname,
+		    const Update&	u,
+		    bool		is_all_interfaces_reportee);
 
     /**
      * Send announcement of a vif address update.
@@ -80,11 +104,14 @@ public:
      * @param addr the updated address.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
+     * @param is_all_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all interfaces.
      */
     void vifaddr4_update(const string&	ifname,
 			 const string&	vifname,
 			 const IPv4&	addr,
-			 const Update&	u);
+			 const Update&	u,
+			 bool		is_all_interfaces_reportee);
 
     /**
      * Send announcement of a vif address update.
@@ -94,11 +121,14 @@ public:
      * @param addr the updated address.
      * @param u the update that occured
      * @see IfConfigUpdateReporterBase#Update
+     * @param is_all_interfaces_reportee true if the update is for reportee
+     * that expect event notifications about all interfaces.
      */
     void vifaddr6_update(const string&	ifname,
 			 const string&	vifname,
 			 const IPv6&	addr,
-			 const Update&	u);
+			 const Update&	u,
+			 bool		is_all_interfaces_reportee);
 
     /**
      * @return true if we have config changes in flight
@@ -113,7 +143,8 @@ protected:
 
 protected:
     XrlRouter&	_rtr;
-    TgtList	_tgts;
+    TgtList	_configured_interfaces_tgts;	// Targets for configured vifs
+    TgtList	_all_interfaces_tgts;		// Targets for all vifs
     uint32_t    _in_flight;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.9 2003/05/23 05:49:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.10 2003/05/23 09:50:46 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -234,17 +234,18 @@ XrlMfeaVifManager::clean_out_old_state()
 	return;
     
     //
-    // We call unregister_client first, to cause the FEA to remove any
+    // We try to unregister first, to cause the FEA to remove any
     // registrations left over from previous incarnations of the RIB.
     //
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &XrlMfeaVifManager::xrl_result_unregister_client);
-    _ifmgr_client.send_unregister_client(_fea_target_name.c_str(),
-					 _xrl_router.name(), cb);
+    cb = callback(this, &XrlMfeaVifManager::xrl_result_unregister_all_interfaces_client);
+    _ifmgr_client.send_unregister_all_interfaces_client(
+	_fea_target_name.c_str(),
+	_xrl_router.name(), cb);
 }
 
 void
-XrlMfeaVifManager::xrl_result_unregister_client(const XrlError& e)
+XrlMfeaVifManager::xrl_result_unregister_all_interfaces_client(const XrlError& e)
 {
     UNUSED(e);
     
@@ -262,13 +263,13 @@ void
 XrlMfeaVifManager::register_if_spy()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &XrlMfeaVifManager::xrl_result_register_client);
-    _ifmgr_client.send_register_client(_fea_target_name.c_str(),
-				       _xrl_router.name(), cb);
+    cb = callback(this, &XrlMfeaVifManager::xrl_result_register_all_interfaces_client);
+    _ifmgr_client.send_register_all_interfaces_client(_fea_target_name.c_str(),
+						      _xrl_router.name(), cb);
 }
 
 void
-XrlMfeaVifManager::xrl_result_register_client(const XrlError& e)
+XrlMfeaVifManager::xrl_result_register_all_interfaces_client(const XrlError& e)
 {
     if (_no_fea) {
 	_state = READY;
