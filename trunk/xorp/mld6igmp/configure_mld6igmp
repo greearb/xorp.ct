@@ -1,29 +1,32 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.10 2003/06/06 23:47:18 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.11 2003/06/18 00:07:03 pavlin Exp $
 #
 
 #
 # Send configuration commands to a running MLD/IGMP process.
 #
 
-MODULE_NAME="IGMP"
+MODULE_NAME="PIM-SM"
 HOSTNAME=`hostname`
 
-CLI_TARGET="CLI"
-MFEA_TARGET="MFEA_4"
-MLD6IGMP_TARGET="IGMP"
-
-. ../cli/xrl_cli_shell_funcs.sh
-. ../fea/xrl_mfea_shell_funcs.sh
-. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
-
 echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
+
 
 ###############################################################
 # USER CONFIGURATION BEGIN
 ###############################################################
+
+#
+# The IP version. It must be either IPV4 or IPV6
+#
+IP_VERSION=IPV4
+#IP_VERSION=IPV6
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
 
 #
 # Select the vifs to enable
@@ -104,9 +107,11 @@ fi
 # Configure CLI
 #
 for subnet in ${CLI_ENABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
 	cli_add_enable_cli_access_from_subnet4 ${subnet}
 done
 for subnet in ${CLI_DISABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
 	cli_add_disable_cli_access_from_subnet4 ${subnet}
 done
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.5 2003/03/25 06:55:08 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.6 2003/06/03 18:52:18 pavlin Exp $
 #
 
 #
@@ -10,8 +10,22 @@
 
 . ../utils/xrl_shell_lib.sh
 
+#
 # Conditionally set the target name
-MLD6IGMP_TARGET=${MLD6IGMP_TARGET:="IGMP"}
+#
+IP_VERSION=${IP_VERSION:?"IP_VERSION undefined. Must be defined to either IPV4 or IPV6"}
+case "${IP_VERSION}" in
+	IPV4)
+		MLD6IGMP_TARGET=${MLD6IGMP_TARGET:="IGMP"}
+		;;
+	IPV6)
+		MLD6IGMP_TARGET=${MLD6IGMP_TARGET:="MLD"}
+		;;
+	*)
+		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+		exit 1
+esac
+
 
 mld6igmp_enable_vif()
 {
