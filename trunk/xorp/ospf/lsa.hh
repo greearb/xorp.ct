@@ -63,8 +63,12 @@ class Lsa_header {
     /**
      * Decode a LSA header and return a LSA header inline not a pointer.
      */
-    Lsa_header
-    decode(uint8_t *ptr) throw(BadPacket);
+    Lsa_header decode(uint8_t *ptr) const throw(BadPacket);
+
+    /**
+     * Decode this lsa header in this context.
+     */
+    void decode_inline(uint8_t *ptr) throw(BadPacket);
     
     /**
      * Copy a wire format representation to the pointer provided.
@@ -166,6 +170,8 @@ class Lsa_header {
     string str() const;
 
  private:
+    void decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket);
+
     OspfTypes::Version _version;
     uint16_t 	_LS_age;
     uint8_t	_options;	// OSPF V2 Only  
@@ -194,12 +200,30 @@ class Lsa {
 	:  _header(version), _version(version)
     {}
 
+    /**
+     * Note passing in the LSA buffer does not imply that it will be
+     * decoded. The buffer is just being stored.
+     */
+    Lsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	:  _header(version), _version(version)
+    {
+	_pkt.resize(len);
+	memcpy(&_pkt[0], buf, len);
+    }
+
     virtual ~Lsa()
     {}
 
     OspfTypes::Version get_version() const {
 	return _version;
     }
+
+    /**
+     * It is the responsibilty of the derived type to return this
+     * information.
+     * @return The type this lsa represents.
+     */
+    virtual uint16_t get_lsa_type() const = 0;
 
     /**
      * Decode an LSA.
@@ -425,21 +449,102 @@ class RouterLsa : public Lsa {
 	: Lsa(version)
     {}
 
+    RouterLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {}
 
     /**
      * @return the minimum length of a RouterLSA.
      */
     size_t min_length() const {
-	XLOG_UNFINISHED();
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 20;
+	    break;
+	case OspfTypes::V3:
+	    return 24;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    uint16_t get_lsa_type() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 1;
+	    break;
+	case OspfTypes::V3:
+	    return 0x2001;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
     }
 
     LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+
+    // Wildcard multicast receiver! OSPFV3 Only
+    void set_w_bit(bool bit) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_w_bit = bit;
+    }
+
+    bool get_w_bit() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _w_bit;
+    }
+
+    // Virtual link endpoint
+    void set_v_bit(bool bit) {
+	_v_bit = bit;
+    }
+
+    bool get_v_bit() const {
+	return _v_bit;
+    }
+
+    // AS boundary router (E for external)
+    void set_e_bit(bool bit) {
+	_e_bit = bit;
+    }
+
+    bool get_e_bit() const {
+	return _e_bit;
+    }
+
+    // Area border router.
+    void set_b_bit(bool bit) {
+	_b_bit = bit;
+    }
+
+    bool get_b_bit() const {
+	return _b_bit;
+    }
+
+    void set_options(uint32_t options) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	if (options  > 0xffffff)
+	    XLOG_WARNING("Attempt to set %#x in a 24 bit field", options);
+	_options = options & 0xffffff;
+    }
+
+    uint32_t get_options() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _options;
+    }
+
+    list<RouterLink>& get_router_links() {
+	return _router_links;
+    }
 
  private:
     bool _w_bit;	// Wildcard multicast receiver! OSPFV3 Only
     bool _v_bit;	// Virtual link endpoint
     bool _e_bit;	// AS boundary router (E for external)
     bool _b_bit;	// Area border router.
+
+    uint32_t _options;	// OSPF V3 only.
 
     list<RouterLink> _router_links;
 };

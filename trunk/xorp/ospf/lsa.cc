@@ -34,16 +34,12 @@
 #include "ospf.hh"
 #include "lsa.hh"
 
-/**
- * A LSA header is a fixed length, the caller should have allocated
- * enough space by calling the length() method.
- */
-Lsa_header
-Lsa_header::decode(uint8_t *ptr) throw(BadPacket)
+void
+Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket)
 {
     OspfTypes::Version version = get_version();
 
-    Lsa_header header(version);
+//     Lsa_header header(version);
 
     header.set_ls_age(extract_16(&ptr[0]));
 
@@ -63,7 +59,26 @@ Lsa_header::decode(uint8_t *ptr) throw(BadPacket)
     header.set_ls_checksum(extract_16(&ptr[16]));
     header.set_length(extract_16(&ptr[18]));
 
-    return header;
+//     return header;
+}
+
+/**
+ * A LSA header is a fixed length, the caller should have allocated
+ * enough space by calling the length() method.
+ */
+Lsa_header
+Lsa_header::decode(uint8_t *ptr) const throw(BadPacket)
+{
+     Lsa_header header(get_version());
+     decode(header, ptr);
+
+     return header;
+}
+
+void
+Lsa_header::decode_inline(uint8_t *ptr) throw(BadPacket)
+{
+    decode(*this, ptr);
 }
 
 /**
@@ -334,9 +349,12 @@ RouterLink::str() const
 }
 
 Lsa::LsaRef
-RouterLsa::decode(uint8_t */*buf*/, size_t& len) const throw(BadPacket)
+RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 {
-    size_t required = _header.length() + min_length();
+    OspfTypes::Version version = get_version();
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
 
     if (len < required)
 	xorp_throw(BadPacket,
@@ -344,8 +362,63 @@ RouterLsa::decode(uint8_t */*buf*/, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
 
+    RouterLsa *lsa;
+    try {
+	lsa = new RouterLsa(version, buf, len);
+	size_t nlinks = 0;	// Number of Links OSPF V2 Only
 
-    RouterLsa *lsa = new RouterLsa(get_version());
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	
+	// Verify the checksum.
+	XLOG_UNFINISHED();
+
+	uint8_t flag = buf[header_length];
+	switch(version) {
+	case OspfTypes::V2:
+	    lsa->set_v_bit(flag & 0x4);
+	    lsa->set_e_bit(flag & 0x2);
+	    lsa->set_b_bit(flag & 0x1);
+	    nlinks = extract_16(&buf[header_length + 2]);
+	    break;
+	case OspfTypes::V3:
+	    lsa->set_w_bit(flag & 0x8);
+	    lsa->set_v_bit(flag & 0x4);
+	    lsa->set_e_bit(flag & 0x2);
+	    lsa->set_b_bit(flag & 0x1);
+	    lsa->set_options(extract_32(&buf[header_length + 1]) & 0xffffff);
+	    break;
+	}
+
+	// Extract the router links
+	RouterLink rl(version);
+	uint8_t *start = &buf[header_length + 4];
+	uint8_t *end = &buf[len];
+	while(start < end) {
+	    size_t link_len = end - start;
+	    lsa->get_router_links().push_back(rl.decode(start, link_len));
+	    XLOG_ASSERT(0 != link_len);
+	    start += link_len;
+	}
+
+	switch(version) {
+	case OspfTypes::V2:
+	    if (nlinks != lsa->get_router_links().size())
+		xorp_throw(BadPacket,
+			   c_format(
+				    "RouterLSA mismatch in router links"
+				    " expected %u received %u",
+				    nlinks,
+				    lsa->get_router_links().size()));
+	    break;
+	case OspfTypes::V3:
+	    break;
+	}
+
+    } catch(XorpReasonedException& e) {
+	delete lsa;
+	throw e;
+    }
 
     return Lsa::LsaRef(lsa);
 }
