@@ -29,7 +29,7 @@ protocols {
     }
     peer @ {
       %create: xrl "bgp/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
-      %delete: xrl "bgp/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)";
+      %delete: xrl "bgp/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       %activate: xrl "bgp/bgp/0.2/enable_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       peer-port {
       }
