@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.45 2004/11/29 01:59:43 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.46 2004/11/29 09:18:19 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -26,6 +26,7 @@ class InterfaceManager;
 class LibFeaClientBridge;
 class XrlIfConfigUpdateReporter;
 class XrlRawSocket4Manager;
+class XrlRawSocket6Manager;
 class XrlSocketServer;
 class Profile;
 
@@ -38,6 +39,7 @@ public:
 		 XrlIfConfigUpdateReporter&	ifupd,
 		 Profile&			profile,
 		 XrlRawSocket4Manager*		xrsm4	= 0,
+		 XrlRawSocket6Manager*		xrsm6	= 0,
 		 LibFeaClientBridge*		lfbr	= 0,
 		 XrlSocketServer*		xss	= 0);
 
@@ -1056,6 +1058,7 @@ private:
     XrlIfConfigUpdateReporter&	_xifcur;
     Profile&			_profile;
     XrlRawSocket4Manager*	_xrsm4;
+    XrlRawSocket6Manager*	_xrsm6;
     LibFeaClientBridge*		_lfcb;
     XrlSocketServer*		_xss;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.59 2004/11/29 02:56:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.60 2004/11/29 09:18:19 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -35,7 +35,7 @@
 #include "libfeaclient_bridge.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_rawsock4.hh"
-//#include "xrl_rawsock6.hh"
+#include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 #include "profile_vars.hh"
@@ -47,12 +47,12 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   XrlIfConfigUpdateReporter&	xifcur,
 			   Profile&			profile,
 			   XrlRawSocket4Manager*	xrsm4,
-//			   XrlRawSocket6Manager*	xrsm6,
+			   XrlRawSocket6Manager*	xrsm6,
 			   LibFeaClientBridge*		lfcb,
 			   XrlSocketServer*		xss)
     : XrlFeaTargetBase(&r), _xrl_router(r), _xftm(e, ftic, &r),
       _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile),
-      _xrsm4(xrsm4), //_xrsm6(xrsm6),
+      _xrsm4(xrsm4), _xrsm6(xrsm6),
       _lfcb(lfcb), _xss(xss), _done(false),
       _have_ipv4(false), _have_ipv6(false)
 {
