@@ -89,10 +89,16 @@ set_mac()
     $CALLXRL "finder://fea/ifmgr/0.1/set_mac?tid:u32=$1&ifname:txt=$2&mac:mac=$3"
 }
 
-get_mac()
+get_all_mac()
 {
-    echo -n "get_mac" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_mac?ifname:txt=$1"
+    echo -n "get_all_mac" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_all_mac?ifname:txt=$1"
+}
+
+get_configured_mac()
+{
+    echo -n "get_configured_mac" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_configured_mac?ifname:txt=$1"
 }
 
 set_mtu()
@@ -101,10 +107,16 @@ set_mtu()
     $CALLXRL "finder://fea/ifmgr/0.1/set_mtu?tid:u32=$1&ifname:txt=$2&mtu:u32=$3"
 }
 
-get_mtu()
+get_all_mtu()
 {
-    echo -n "get_mtu" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_mtu?ifname:txt=$1"
+    echo -n "get_all_mtu" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_all_mtu?ifname:txt=$1"
+}
+
+get_configured_mtu()
+{
+    echo -n "get_configured_mtu" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_configured_mtu?ifname:txt=$1"
 }
 
 get_all_vif_names()
@@ -185,10 +197,16 @@ set_prefix4()
     $CALLXRL "finder://fea/ifmgr/0.1/set_prefix4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&prefix:u32=$5"
 }
 
-get_prefix4()
+get_all_prefix4()
 {
-    echo -n "get_prefix4" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_prefix4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
+    echo -n "get_all_prefix4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_all_prefix4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
+}
+
+get_configured_prefix4()
+{
+    echo -n "get_configured_prefix4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_configured_prefix4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
 set_broadcast4()
@@ -197,15 +215,21 @@ set_broadcast4()
     $CALLXRL "finder://fea/ifmgr/0.1/set_broadcast4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&broadcast:ipv4=$5"
 }
 
-get_broadcast4()
+get_all_broadcast4()
 {
-    echo -n "get_broadcast4" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
+    echo -n "get_all_broadcast4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_all_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
+}
+
+get_configured_broadcast4()
+{
+    echo -n "get_configured_broadcast4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_configured_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
 get_all_vif_addresses6()
 {
-    echo -n "get_vif_addresses6" $*
+    echo -n "get_all_vif_addresses6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_all_vif_addresses6?ifname:txt=$1&vif:txt=$2"
 }
 
@@ -245,10 +269,16 @@ set_prefix6()
     $CALLXRL "finder://fea/ifmgr/0.1/set_prefix6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&prefix:u32=$5"
 }
 
-get_prefix6()
+get_all_prefix6()
 {
-    echo -n "get_prefix6" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/get_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
+    echo -n "get_all_prefix6" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_all_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
+}
+
+get_configured_prefix6()
+{
+    echo -n "get_configured_prefix6" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/get_configured_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
 }
 
 start_fti_transaction()
