@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.10 2004/02/26 13:52:16 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.11 2004/02/27 18:32:45 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -60,7 +60,12 @@ public:
     void new_config_user(uid_t user_id);
     void leave_config_done(const XrlError& e);
     void notify_user(const string& alert, bool urgent);
-    int help_func(const string& ,
+    int op_help_func(const string& ,
+		   const string& ,
+		   uint32_t ,
+		   const string& command_global_name,
+		   const vector<string>& argv);
+    int conf_help_func(const string& ,
 		   const string& ,
 		   uint32_t ,
 		   const string& command_global_name,
@@ -238,8 +243,12 @@ private:
 
     map<string,string> _help_o;  //short help strings for operational
 				 //mode commands
+    map<string,string> _help_long_o; //detailed help information for
+                                     //operational mode commands
     map<string,string> _help_c;  //short help strings for configuration
 				 //mode commands
+    map<string,string> _help_long_c; //detailed help information for
+                                     //configuration mode commands
 };
 
 #endif // __RTRMGR_CLI_HH__

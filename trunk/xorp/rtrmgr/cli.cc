@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.24 2004/02/27 12:12:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.25 2004/02/27 18:32:45 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -33,9 +33,6 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node)
       _mode(CLI_MODE_NONE),
       _changes_made(false)
 {
-    _current_config_node = &(config_tree()->root_node());
-    operational_mode();
-
     //we do all this here to allow for later extensions for
     //internationalization
     _help_o["configure"] = "Switch to configuration mode";
@@ -61,6 +58,119 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node)
     _help_c["show"] = "Show the value of a parameter";
     _help_c["top"] = "Exit to top level of configuration";
     _help_c["up"] = "Exit one level of configuration";
+
+    _help_long_o["NULL"] = "\
+A XORP router has two modes: operational mode and configuration mode.\n\
+Operational mode is used to monitor the state of the router, whereas \n\
+configuration mode is used to change the configuration of the router.\n\
+\n\
+You are currently in operational mode.\n\
+To switch to configuration mode, use the \"configure\" command.\n\
+You have to be in the xorp group to be able to use configuration mode.\n\
+\n\
+At most places in the user interface, typing \"?\" will give a list of\n\
+possible commands or completions for the current command. Hitting <tab>\n\
+will cause auto-completion to occur if this can be done unambiguously.\n\
+Command cannot be abbreviated - always complete then, either by typing or \n\
+by using <tab>. \n\
+\n\
+Type \"help help\" for more details on how to use help.\n\
+Type \"help <command>\" for details of how to use a particular command.\n\
+Type ? to list currently available commands.";
+
+    _help_long_o["configure"] = "\
+A XORP router has two modes: operational mode and configuration mode.\n\
+Operational mode is used to monitor the state of the router, whereas \n\
+configuration mode is used to change the configuration of the router.\n\
+\n\
+You are currently in operational mode.\n\
+To switch to configuration mode, use the \"configure\" command.\n\
+You have to be in the xorp group to be able to use configuration mode.\n\
+\n\
+Optional parameters to configure: \n\
+   exclusive\n\
+Use \"help configure exclusive\" for more details.";
+
+    _help_long_o["configure exclusive"] = "\
+To enter exclusive configuration mode you use the command:\n\
+   configure exclusive\n\
+This will allow you to make changes to the router configuration and lock\n\
+all other users out of configuration mode until you exit.\n\
+Use this command sparingly.";
+
+    _help_long_o["quit"] = "\
+The \"quit\" command will log you out of this command session.\n\
+Typing ^D (control-D) also has the same effect.";
+
+    _help_long_c["NULL"] = "\
+A XORP router has two modes: operational mode and configuration mode.\n\
+Operational mode is used to monitor the state of the router, whereas \n\
+configuration mode is used to change the configuration of the router.\n\
+\n\
+You are currently in configuration mode.\n\
+To return to operational mode, use the \"exit\" command.\n\
+\n\
+At most places in the user interface, typing \"?\" will give a list of\n\
+possible commands or completions for the current command. Hitting <tab>\n\
+will cause auto-completion to occur if this can be done unambiguously.\n\
+Command cannot be abbreviated - always complete then, either by typing or \n\
+by using <tab>. \n\
+\n\
+Type \"help help\" for more details on how to use help.\n\
+Type \"help <command>\" for details of how to use a particular command.\n\
+Type ? to list currently available commands.";
+
+    _help_long_c["commit"] = "\
+When you change the configuration of a XORP router, the changes do not take\n\
+place immediately.  This allows you to make additional related changes and\n\
+then apply all the changes together.  To apply changes to the running\n\
+configuration, the \"commit\" command is used.  Should the be an error, the\n\
+configuration should be rolled back to the previous state.";
+
+    _help_long_c["delete"] ="\
+The \"delete\" command is used to delete a part of the configuration tree.\n\
+All configuration nodes under the node that is named in the delete command\n\
+will also be deleted.  For example, if the configuration contained:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+then typing \"delete protocols bgp\", followed by \"commit\" would cause bgp\n\
+to be removed from the configuration, together with the peer 10.0.0.1, etc.\n\
+In this case this would also cause the BGP routing process to be shut down.";
+
+    _help_long_c["edit"] = "\
+The \"edit\" command allows you to navigate around the configuration tree, so\n\
+that changes can be made with minimal typing, or just a part of the router\n\
+configuration examined. For example, if the configuration contained:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+Then typing \"edit protocols bgp peer 10.0.0.1\" would move the current \n\
+position to the bgp peer 10.0.0.1.\n\
+Then if you wanted to set the as number, you could use the command\n\
+  set as 65002\n\
+instead of the much longer\n\
+  set protocols bgp peer 10.0.0.1 as 65002\n\
+which would have been necessary without changing the current position in \n\
+the configuration tree.\n\
+\n\
+See also the \"exit\", \"quit\", \"top\" and \"up\" commands.";
+
+
+    _current_config_node = &(config_tree()->root_node());
+    operational_mode();
+
+    
 }
 
 RouterCLI::~RouterCLI()
@@ -145,7 +255,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 
 	help_com->
 	    set_dynamic_process_callback(callback(this,
-						  &RouterCLI::help_func));
+						  &RouterCLI::op_help_func));
 	/*Quit Command*/
 	com0->add_command("quit", 
 			  get_help_o("quit"),
@@ -350,7 +460,7 @@ RouterCLI::add_static_configure_mode_commands()
     
     help_com->
 	set_dynamic_process_callback(callback(this,
-					      &RouterCLI::help_func));
+					      &RouterCLI::conf_help_func));
 
     // Load Command
     com1 = com0->add_command("load", get_help_c("load"),
@@ -957,11 +1067,11 @@ RouterCLI::notify_user(const string& alert, bool urgent)
 }
 
 int
-RouterCLI::help_func(const string& ,
-		     const string& ,
-		     uint32_t ,		// cli_session_id
-		     const string& command_global_name,
-		     const vector<string>& argv)
+RouterCLI::op_help_func(const string& ,
+			const string& ,
+			uint32_t ,		// cli_session_id
+			const string& command_global_name,
+			const vector<string>& argv)
 {
     if (argv.size() == 0) {
 	string cmd_name = command_global_name;
@@ -973,7 +1083,69 @@ RouterCLI::help_func(const string& ,
 	    XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
 	    path = cmd_name.substr(5, cmd_name.size() - 5);
 	}
-	_cli_client.cli_print("Help: " + path);
+
+	if (path == "") path = "NULL";
+
+	// try and find the detailed help for standard commands
+	map<string,string>::const_iterator i;
+	i = _help_long_o.find(path);
+	if (i != _help_long_o.end()) {
+	    _cli_client.cli_print("\n" + i->second + "\n\n");
+	    return (XORP_OK);
+	} 
+	
+	// there was no long help description available.  If there's a
+	// short description, that will have to do.
+	i = _help_o.find(path);
+	if (i != _help_o.end()) {
+	    _cli_client.cli_print(i->second + "\n");
+	    return (XORP_OK);
+	}
+
+	_cli_client.cli_print("Sorry, no help available for " + path + "\n");
+	return (XORP_OK);
+    } else {
+	return (XORP_ERROR);
+    }
+}
+
+int
+RouterCLI::conf_help_func(const string& ,
+			  const string& ,
+			  uint32_t ,		// cli_session_id
+			  const string& command_global_name,
+			  const vector<string>& argv)
+{
+    if (argv.size() == 0) {
+	string cmd_name = command_global_name;
+	string path;
+	if (cmd_name.size()==4) {
+	    XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
+	    path = "";
+	} else {
+	    XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
+	    path = cmd_name.substr(5, cmd_name.size() - 5);
+	}
+
+	if (path == "") path = "NULL";
+
+	// try and find the detailed help for standard commands
+	map<string,string>::const_iterator i;
+	i = _help_long_c.find(path);
+	if (i != _help_long_c.end()) {
+	    _cli_client.cli_print("\n" + i->second + "\n\n");
+	    return (XORP_OK);
+	} 
+	
+	// there was no long help description available.  If there's a
+	// short description, that will have to do.
+	i = _help_c.find(path);
+	if (i != _help_c.end()) {
+	    _cli_client.cli_print(i->second + "\n");
+	    return (XORP_OK);
+	}
+
+	_cli_client.cli_print("Sorry, no help available for " + path + "\n");
 	return (XORP_OK);
     } else {
 	return (XORP_ERROR);
