@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -244,6 +244,151 @@ test_ipv4_invalid_constructors()
     //
     try {
 	IPv4 ip(sin);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+}
+
+/**
+ * Test IPv4 valid copy in/out methods.
+ */
+void
+test_ipv4_valid_copy_in_out()
+{
+    // Test values for IPv4 address: "12.34.56.78"
+    const char *addr_string4 = "12.34.56.78";
+    uint32_t ui = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+    struct in_addr in_addr;
+    in_addr.s_addr = ui;
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+#ifdef HAVE_SIN_LEN
+    sin.sin_len = sizeof(sin);
+#endif
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = ui;
+    
+    struct sockaddr *sap;
+    
+    
+    //
+    // Copy the IPv4 raw address to specified memory location.
+    //
+    IPv4 ip1(addr_string4);
+    uint8_t ip1_uint8[4];
+    verbose_assert(ip1.copy_out(&ip1_uint8[0]) == 4,
+		   "copy_out(uint8_t *) for IPv4 address");
+    verbose_assert(memcmp(&ui, &ip1_uint8[0], 4) == 0,
+		   "compare copy_out(uint8_t *) for IPv4 address");
+    
+    //
+    // Copy the IPv4 raw address to an in_addr structure.
+    //
+    IPv4 ip3(addr_string4);
+    struct in_addr ip3_in_addr;
+    verbose_assert(ip3.copy_out(ip3_in_addr) == 4,
+		   "copy_out(in_addr&) for IPv4 address");
+    verbose_assert(memcmp(&in_addr, &ip3_in_addr, 4) == 0,
+		   "compare copy_out(in_addr&) for IPv4 address");
+    
+    //
+    // Copy the IPv4 raw address to a sockaddr structure.
+    //
+    IPv4 ip5(addr_string4);
+    struct sockaddr_in ip5_sockaddr_in;
+    sap = (struct sockaddr *)&ip5_sockaddr_in;
+    verbose_assert(ip5.copy_out(*sap) == 4,
+		   "copy_out(sockaddr&) for IPv4 address");
+    verbose_assert(memcmp(&sin, &ip5_sockaddr_in, sizeof(sin)) == 0,
+		   "compare copy_out(sockaddr&) for IPv4 address");
+    
+    //
+    // Copy the IPv4 raw address to a sockaddr_in structure.
+    //
+    IPv4 ip7(addr_string4);
+    struct sockaddr_in ip7_sockaddr_in;
+    verbose_assert(ip7.copy_out(ip7_sockaddr_in) == 4,
+		   "copy_out(sockaddr_in&) for IPv4 address");
+    verbose_assert(memcmp(&sin, &ip7_sockaddr_in, sizeof(sin)) == 0,
+		   "compare copy_out(sockaddr_in&) for IPv4 address");
+    
+    //
+    // Copy a raw address into IPv4 structure.
+    //
+    IPv4 ip11;
+    verbose_assert(ip11.copy_in((uint8_t *)&ui) == 4,
+		   "copy_in(uint8_t *) for IPv4 address");
+    verbose_match(ip11.str(), addr_string4);
+    
+    //
+    // Copy a raw IPv4 address from a in_addr structure into IPv4 structure.
+    //
+    IPv4 ip13;
+    verbose_assert(ip13.copy_in(in_addr) == 4,
+		   "copy_in(in_addr&) for IPv4 address");
+    verbose_match(ip13.str(), addr_string4);
+    
+    //
+    // Copy a raw address from a sockaddr structure into IPv4 structure.
+    //
+    IPv4 ip15;
+    sap = (struct sockaddr *)&sin;
+    verbose_assert(ip15.copy_in(*sap) == 4,
+		   "copy_in(sockaddr&) for IPv4 address");
+    verbose_match(ip15.str(), addr_string4);
+
+    //
+    // Copy a raw address from a sockaddr_in structure into IPv4 structure.
+    //
+    IPv4 ip17;
+    verbose_assert(ip17.copy_in(sin) == 4,
+		   "copy_in(sockaddr_in&) for IPv4 address");
+    verbose_match(ip17.str(), addr_string4);
+}
+
+/**
+ * Test IPv4 invalid copy in/out methods.
+ */
+void
+test_ipv4_invalid_copy_in_out()
+{
+    // Test values for IPv4 address: "12.34.56.78"
+    // const char *addr_string4 = "12.34.56.78";
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+#ifdef HAVE_SIN_LEN
+    sin.sin_len = sizeof(sin);
+#endif
+    sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
+    sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+    
+    struct sockaddr *sap;
+    
+    //
+    // Copy-in from a sockaddr structure for invalid address family.
+    //
+    try {
+	IPv4 ip;
+	sap = (struct sockaddr *)&sin;
+	ip.copy_in(*sap);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Copy-in from a sockaddr_in structure for invalid address family.
+    //
+    try {
+	IPv4 ip;
+	ip.copy_in(sin);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
 	UNUSED(ip);
@@ -522,6 +667,8 @@ main(int argc, char * const argv[])
     try {
 	test_ipv4_valid_constructors();
 	test_ipv4_invalid_constructors();
+	test_ipv4_valid_copy_in_out();
+	test_ipv4_invalid_copy_in_out();
 	test_ipv4_operators();
 	test_ipv4_address_type();
 	test_ipv4_address_const();

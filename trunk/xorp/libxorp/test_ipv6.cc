@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -255,6 +255,164 @@ test_ipv6_invalid_constructors()
     //
     try {
 	IPv6 ip(sin6);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+}
+
+/**
+ * Test IPv6 valid copy in/out methods.
+ */
+void
+test_ipv6_valid_copy_in_out()
+{
+    // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
+    const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+    struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+				     0x9a, 0xbc, 0xde, 0xf0,
+				     0x0f, 0xed, 0xcb, 0xa9,
+				     0x87, 0x65, 0x43, 0x21 } } };
+    uint8_t  ui8[16];
+    uint32_t ui32[4];
+    memcpy(&ui8[0], &in6_addr, sizeof(in6_addr));
+    memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
+    struct sockaddr_in6 sin6;
+    memset(&sin6, 0, sizeof(sin6));
+#ifdef HAVE_SIN6_LEN
+    sin6.sin6_len = sizeof(sin6);
+#endif
+    sin6.sin6_family = AF_INET6;
+    sin6.sin6_addr = in6_addr;
+    
+    struct sockaddr *sap;
+    
+    
+    //
+    // Copy the IPv6 raw address to specified memory location.
+    //
+    IPv6 ip2(addr_string6);
+    uint8_t ip2_uint8[16];
+    verbose_assert(ip2.copy_out(&ip2_uint8[0]) == 16,
+		   "copy_out(uint8_t *) for IPv6 address");
+    verbose_assert(memcmp(&ui8[0], &ip2_uint8[0], 16) == 0,
+		   "compare copy_out(uint8_t *) for IPv6 address");
+    
+    //
+    // Copy the IPv6 raw address to an in6_addr structure.
+    //
+    IPv6 ip4(addr_string6);
+    struct in6_addr ip4_in6_addr;
+    verbose_assert(ip4.copy_out(ip4_in6_addr) == 16,
+		   "copy_out(in6_addr&) for IPv6 address");
+    verbose_assert(memcmp(&in6_addr, &ip4_in6_addr, 16) == 0,
+		   "compare copy_out(in6_addr&) for IPv6 address");
+
+    //
+    // Copy the IPv6 raw address to a sockaddr structure.
+    //
+    IPv6 ip6(addr_string6);
+    struct sockaddr_in6 ip6_sockaddr_in6;
+    sap = (struct sockaddr *)&ip6_sockaddr_in6;
+    verbose_assert(ip6.copy_out(*sap) == 16,
+		   "copy_out(sockaddr&) for IPv6 address");
+    verbose_assert(memcmp(&sin6, &ip6_sockaddr_in6, sizeof(sin6)) == 0,
+		   "compare copy_out(sockaddr&) for IPv6 address");
+    
+    //
+    // Copy the IPv6 raw address to a sockaddr_in6 structure.
+    //
+    IPv6 ip10(addr_string6);
+    struct sockaddr_in6 ip10_sockaddr_in6;
+    verbose_assert(ip10.copy_out(ip10_sockaddr_in6) == 16,
+		   "copy_out(sockaddr_in6&) for IPv6 address");
+    verbose_assert(memcmp(&sin6, &ip10_sockaddr_in6, sizeof(sin6)) == 0,
+		   "compare copy_out(sockaddr_in6&) for IPv6 address");
+    
+    //
+    // Copy a raw address into IPv6 structure.
+    //
+    IPv6 ip12;
+    verbose_assert(ip12.copy_in(&ui8[0]) == 16,
+		   "copy_in(uint8_t *) for IPv6 address");
+    verbose_match(ip12.str(), addr_string6);
+    
+    //
+    // Copy a raw IPv6 address from a in6_addr structure into IPv6 structure.
+    //
+    IPv6 ip14;
+    verbose_assert(ip14.copy_in(in6_addr) == 16,
+		   "copy_in(in6_addr&) for IPv6 address");
+    verbose_match(ip14.str(), addr_string6);
+
+    //
+    // Copy a raw address from a sockaddr structure into IPv6 structure.
+    //
+    IPv6 ip16;
+    sap = (struct sockaddr *)&sin6;
+    verbose_assert(ip16.copy_in(*sap) == 16,
+		   "copy_in(sockaddr&) for IPv6 address");
+    verbose_match(ip16.str(), addr_string6);
+    
+    //
+    // Copy a raw address from a sockaddr_in6 structure into IPv6 structure.
+    //
+    IPv6 ip20;
+    verbose_assert(ip20.copy_in(sin6) == 16,
+		   "copy_in(sockaddr_in6&) for IPv6 address");
+    verbose_match(ip20.str(), addr_string6);
+}
+
+/**
+ * Test IPv6 invalid copy in/out methods.
+ */
+void
+test_ipv6_invalid_copy_in_out()
+{
+    // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
+    // const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+    struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+				     0x9a, 0xbc, 0xde, 0xf0,
+				     0x0f, 0xed, 0xcb, 0xa9,
+				     0x87, 0x65, 0x43, 0x21 } } };
+    uint8_t  ui8[16];
+    uint32_t ui32[4];
+    memcpy(&ui8[0], &in6_addr, sizeof(in6_addr));
+    memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
+    struct sockaddr_in6 sin6;
+    memset(&sin6, 0, sizeof(sin6));
+#ifdef HAVE_SIN6_LEN
+    sin6.sin6_len = sizeof(sin6);
+#endif
+    sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
+    sin6.sin6_addr = in6_addr;
+    
+    struct sockaddr *sap;
+    
+    //
+    // Copy-in from a sockaddr structure for invalid address family.
+    //
+    try {
+	IPv6 ip;
+	sap = (struct sockaddr *)&sin6;
+	ip.copy_in(*sap);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+    
+    //
+    // Copy-in from a sockaddr_in6 structure for invalid address family.
+    //
+    try {
+	IPv6 ip;
+	ip.copy_in(sin6);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
 	UNUSED(ip);
@@ -557,6 +715,8 @@ main(int argc, char * const argv[])
     try {
 	test_ipv6_valid_constructors();
 	test_ipv6_invalid_constructors();
+	test_ipv6_valid_copy_in_out();
+	test_ipv6_invalid_copy_in_out();
 	test_ipv6_operators();
 	test_ipv6_address_type();
 	test_ipv6_address_const();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.2 2003/02/26 00:14:14 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.3 2003/03/10 23:20:32 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -61,6 +61,97 @@ IPv6::IPv6(const char *from_cstring) throw (InvalidString)
 	xorp_throw(InvalidString, "Null value" );
     if (inet_pton(AF_INET6, from_cstring, &_addr[0]) <= 0)
 	xorp_throw(InvalidString, c_format("Bad IPv6 \"%s\"", from_cstring));
+}
+
+/**
+ * Copy the raw address to memory pointed by @to.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_out(uint8_t *to_uint8) const
+{
+    memcpy(to_uint8, _addr, addr_size());
+    return addr_size();
+}
+
+/**
+ * Copy the raw address to @in6_addr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_out(struct in6_addr& to_in6_addr) const
+{
+    return (copy_out((uint8_t *)&to_in6_addr));
+}
+
+/**
+ * Copy the raw address to @to_sockaddr, and assign appropriately
+ * the rest of the fields in @to_sockaddr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_out(struct sockaddr& to_sockaddr) const
+{
+    return (copy_out(reinterpret_cast<sockaddr_in6&>(to_sockaddr)));
+}
+
+/**
+ * Copy the raw address to @to_sockaddr_in6, and assign appropriately
+ * the rest of the fields in @to_sockaddr_in6.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
+{
+    memset(&to_sockaddr_in6, 0, sizeof(to_sockaddr_in6));
+#ifdef HAVE_SIN6_LEN
+    to_sockaddr_in6.sin6_len = sizeof(to_sockaddr_in6);
+#endif
+    to_sockaddr_in6.sin6_family = AF_INET6;
+    return (copy_out(to_sockaddr_in6.sin6_addr));
+}
+
+/**
+ * Copy a raw address from the memory pointed by @from_uint8.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_in(const uint8_t *from_uint8)
+{
+    memcpy(_addr, from_uint8, addr_size());
+    return (addr_size());
+}
+
+/**
+ * Copy a raw address of family %AF_INET6 from @from_in6_addr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_in(const in6_addr& from_in6_addr)
+{
+    return (copy_in(reinterpret_cast<const uint8_t *>(&from_in6_addr)));
+}
+
+/**
+ * Copy a raw address from @from_sockaddr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
+{
+    return (copy_in(reinterpret_cast<const sockaddr_in6&>(from_sockaddr)));
+}
+
+/**
+ * Copy a raw address from @from_sockaddr_in6.
+ * @return the number of copied octets.
+ */
+size_t
+IPv6::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
+{
+    if (from_sockaddr_in6.sin6_family != AF_INET6)
+	xorp_throw(InvalidFamily, from_sockaddr_in6.sin6_family);
+    return (copy_in(from_sockaddr_in6.sin6_addr));
 }
 
 IPv6

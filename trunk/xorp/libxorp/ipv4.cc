@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.2 2003/02/26 00:14:13 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.3 2003/03/10 23:20:32 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -55,12 +55,96 @@ IPv4::IPv4(const char *from_cstring) throw (InvalidString)
 	xorp_throw(InvalidString, c_format("Bad IPv4 \"%s\"", from_cstring));
 }
 
-IPv4
-IPv4::make_prefix(size_t len)
+/**
+ * Copy the raw address to memory pointed by @to.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_out(uint8_t *to_uint8) const
 {
-    assert(len <= 32);
-    uint32_t m = (len == 0) ? 0 : ((~0) << (32 - len));
-    return IPv4(htonl(m));
+    memcpy(to_uint8, &_addr, addr_size());
+    return addr_size();
+}
+
+/**
+ * Copy the raw address to @to_in_addr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_out(in_addr& to_in_addr) const
+{
+    return (copy_out((uint8_t *)&to_in_addr));
+}
+
+/**
+ * Copy the raw address to @to_sockaddr, and assign appropriately
+ * the rest of the fields in @to_sockaddr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_out(struct sockaddr& to_sockaddr) const
+{
+    return (copy_out(reinterpret_cast<sockaddr_in&>(to_sockaddr)));
+}
+
+/**
+ * Copy the raw address to @to_sockaddr_in, and assign appropriately
+ * the rest of the fields in @to_sockaddr_in.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_out(struct sockaddr_in& to_sockaddr_in) const
+{
+    memset(&to_sockaddr_in, 0, sizeof(to_sockaddr_in));
+#ifdef HAVE_SIN_LEN
+    to_sockaddr_in.sin_len = sizeof(to_sockaddr_in);
+#endif
+    to_sockaddr_in.sin_family = AF_INET;
+    to_sockaddr_in.sin_port = 0;                    // XXX: not used
+    return (copy_out(to_sockaddr_in.sin_addr));
+}
+
+/**
+ * Copy a raw address from the memory pointed by @from_uint8.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_in(const uint8_t *from_uint8)
+{
+    memcpy(&_addr, from_uint8, addr_size());
+    return (addr_size());
+}
+
+/**
+ * Copy a raw address of family %AF_INET from @from_in_addr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_in(const in_addr& from_in_addr)
+{
+    return (copy_in(reinterpret_cast<const uint8_t *>(&from_in_addr)));
+}
+
+/**
+ * Copy a raw address from @from_sockaddr.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
+{
+    return (copy_in(reinterpret_cast<const sockaddr_in&>(from_sockaddr)));
+}
+
+/**
+ * Copy a raw address from @from_sockaddr_in.
+ * @return the number of copied octets.
+ */
+size_t
+IPv4::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
+{
+    if (from_sockaddr_in.sin_family != AF_INET)
+	xorp_throw(InvalidFamily, from_sockaddr_in.sin_family);
+    return (copy_in(from_sockaddr_in.sin_addr));
 }
 
 IPv4
@@ -93,6 +177,14 @@ bool
 IPv4::operator<(const IPv4& other) const
 {
     return ntohl(_addr) < ntohl(other._addr);
+}
+
+IPv4
+IPv4::make_prefix(size_t len)
+{
+    assert(len <= 32);
+    uint32_t m = (len == 0) ? 0 : ((~0) << (32 - len));
+    return IPv4(htonl(m));
 }
 
 size_t

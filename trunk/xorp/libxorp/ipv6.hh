@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.4 2003/02/26 00:14:14 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.5 2003/03/10 23:20:32 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -91,6 +91,86 @@ public:
      * format used for initialization.
      */
     IPv6(const char *from_cstring) throw (InvalidString);
+
+    /**
+     * Copy the IPv6 raw address to specified memory location.
+     * 
+     * @param: to_uint8 the pointer to the memory to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(uint8_t *to_uint8) const;
+    
+    /**
+     * Copy the IPv6 raw address to an in6_addr structure.
+     * 
+     * @param to_in6_addr the storage to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(in6_addr& to_in6_addr) const;
+
+    /**
+     * Copy the IPv6 raw address to a sockaddr structure.
+     * 
+     * Copy the raw address held within an IPv6 instance to an sockaddr
+     * structure and assign appropriately and set fields within sockaddr
+     * appropriately.
+     * 
+     * @param to_sockaddr the storage to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(sockaddr& to_sockaddr) const;
+
+    /**
+     * Copy the IPv6 raw address to a sockaddr_in6 structure.
+     * 
+     * Copy the raw address held within an IPv6 instance to a sockaddr_in6 
+     * structure and assign appropriately and set fields within sockaddr_in
+     * appropriately.
+     * 
+     * @param to_sockaddr_in6 the storage to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(sockaddr_in6& to_sockaddr_in6) const;
+
+    /**
+     * Copy a raw IPv6 address from specificed memory location into IPv6
+     * structure.
+     * 
+     * @param from_uint8 the memory address to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const uint8_t *from_uint8);
+    
+    /**
+     * Copy a raw IPv6 address from a in6_addr structure into IPv6 structure.
+     * 
+     * @param from_in6_addr the storage to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const in6_addr& from_in6_addr);
+
+    /**
+     * Copy a raw IPv6 address from a sockaddr structure into IPv6 structure.
+     * 
+     * Note that the address in the sockaddr structure must be of IPv6 address
+     * family.
+     * 
+     * @param from_sockaddr the storage to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily);
+
+    /**
+     * Copy a raw address from sockaddr_in6 structure into IPv6 structure.
+     * 
+     * Note that the address in the sockaddr structure must be of IPv6 address
+     * family.
+     * 
+     * @param from_sockaddr_in6 the storage to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const sockaddr_in6& from_sockaddr_in6)
+	throw (InvalidFamily);
 
     /**
      * Bitwise-Negation Operator
@@ -314,19 +394,6 @@ public:
      * of 4 unsigned 32-bit integers.
      */
     const uint32_t *addr() const { return _addr; }
-
-    /**
-     * Copy the IPv6 raw address to specified memory location.
-     *
-     * @param: dst the pointer to the memory to copy the address to
-     * @return the number of copied octets.
-     * Assume the pointer is valid and properly aligned.
-     */
-    size_t copy_out(uint8_t *dst) const {
-        memcpy(dst, _addr, 16);
-        return 16;
-    }
-
 
     /**
      * Set the address value.
