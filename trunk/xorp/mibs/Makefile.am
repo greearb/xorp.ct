@@ -50,9 +50,9 @@ libnetsnmpxorp_so_DEPENDENCIES += $(top_builddir)/libcomm/libcomm.la
 # XXX: Depend on *.la for now; rework this to use libtool later.
 libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
     $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@		   \
-    $(top_builddir)/libxipc/libxipc.a \
-    $(top_builddir)/libxorp/libxorp.a \
-    $(top_builddir)/libcomm/libcomm.a \
+    $(top_builddir)/libxipc/libxipc.la \
+    $(top_builddir)/libxorp/libxorp.la \
+    $(top_builddir)/libcomm/libcomm.la \
     -Wl,--no-whole-archive
 
 test_xorpevents_LDADD  = $(top_builddir)/libxipc/libfinder.la
