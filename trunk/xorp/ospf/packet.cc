@@ -22,6 +22,7 @@
 #include "config.h"
 #include <map>
 #include <list>
+#include <vector>
 
 #include "ospf_module.h"
 
@@ -418,16 +419,15 @@ HelloPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
     return packet;
 }
 
-/**
- * The caller must free this packet.
- */
-uint8_t *
-HelloPacket::encode(size_t &len)
+bool
+HelloPacket::encode(vector<uint8_t>& pkt)
 {
     size_t offset = get_standard_header_length();
-    len = offset + MINIMUM_LENGTH + get_neighbours().size() * 4;
+    size_t len = offset + MINIMUM_LENGTH + get_neighbours().size() * 4;
 
-    uint8_t *ptr = new uint8_t[len];
+    pkt.resize(len);
+    uint8_t *ptr = &pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
     memset(ptr, 0, len);
 
     // Put the specific Hello Packet information first as the standard
@@ -467,10 +467,10 @@ HelloPacket::encode(size_t &len)
 	
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
-	return 0;
+	return false;
     }
 
-    return ptr;
+    return true;
 }
 
 string
@@ -580,17 +580,16 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
     return packet;
 }
 
-/**
- * The caller must free this packet.
- */
-uint8_t *
-DataDescriptionPacket::encode(size_t &len)
+bool
+DataDescriptionPacket::encode(vector<uint8_t>& pkt)
 {
     size_t offset = get_standard_header_length();
-    len = offset + minimum_length() + get_lsa_headers().size() *
+    size_t len = offset + minimum_length() + get_lsa_headers().size() *
 	Lsa_header::length();
 
-    uint8_t *ptr = new uint8_t[len];
+    pkt.resize(len);
+    uint8_t *ptr = &pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
     memset(ptr, 0, len);
 
     // Put the specific Data Description Packet information first as
@@ -636,10 +635,10 @@ DataDescriptionPacket::encode(size_t &len)
 	
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
-	return 0;
+	return false;
     }
 
-    return ptr;
+    return true;
 }
 
 string
@@ -706,19 +705,18 @@ LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
     return packet;
 }
 
-/**
- * The caller must free this packet.
- */
-uint8_t *
-LinkStateRequestPacket::encode(size_t &len)
+bool
+LinkStateRequestPacket::encode(vector<uint8_t>& pkt)
 {
     OspfTypes::Version version = get_version();
     Ls_request ls(version);
 
     size_t offset = get_standard_header_length();
-    len = offset + get_ls_request().size() * ls.length();
+    size_t len = offset + get_ls_request().size() * ls.length();
 
-    uint8_t *ptr = new uint8_t[len];
+    pkt.resize(len);
+    uint8_t *ptr = &pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
     memset(ptr, 0, len);
 
     // Put the specific Link State Request Packet information first as
@@ -733,10 +731,10 @@ LinkStateRequestPacket::encode(size_t &len)
 	
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
-	return 0;
+	return false;
     }
 
-    return ptr;
+    return true;
 }
 
 string

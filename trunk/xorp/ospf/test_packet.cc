@@ -190,33 +190,34 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
     DOUT(info) << hello1->str() << endl;
 
     // Encode the hello packet.
-    size_t len1;
-    uint8_t *ptr1 = hello1->encode(len1);
+    vector<uint8_t> pkt1;
+    hello1->encode(pkt1);
 
     // Now decode the packet.
     // Create a new packet to provide the decoder.
     HelloPacket *hello2= new HelloPacket(version);
 
     HelloPacket *hello3 =
-	dynamic_cast<HelloPacket *>(hello2->decode(ptr1, len1));
+	dynamic_cast<HelloPacket *>(hello2->decode(&pkt1[0], pkt1.size()));
 
     DOUT(info) << hello3->str() << endl;
 
     // Encode the second packet and compare.
-    size_t len2;
-    uint8_t *ptr2 = hello3->encode(len2);
+    vector<uint8_t> pkt2;
+    hello3->encode(pkt2);
     
-    if (len1 != len2) {
+    if (pkt1.size() != pkt2.size()) {
 	DOUT(info) << "Packet lengths don't match " <<
-	    len1 << " " << len2 << endl;
+	    pkt1.size() << " " << pkt2.size() << endl;
 	return false;
     }
     
-    if (0 != memcmp(ptr1, ptr2, len1)) {
-	for(size_t i = 0; i < len1; i++) {
-	    if (ptr1[i] != ptr2[i]) {
+    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
+	for(size_t i = 0; i < pkt1.size(); i++) {
+	    if (pkt1[i] != pkt2[i]) {
 		DOUT(info) << "mismatch at byte position " << i << endl;
-		DOUT(info) << "bytes " << (int)ptr1[i] << " " << (int)ptr2[i] << endl;
+		DOUT(info) << "bytes " <<
+		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
 		break;
 	    }
 	}
@@ -226,8 +227,6 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
     delete hello1;
     delete hello2;
     delete hello3;
-    delete ptr1;
-    delete ptr2;
 
     return true;
 }
@@ -261,34 +260,35 @@ data_description_packet_compare(TestInfo& info, OspfTypes::Version version)
     DOUT(info) << ddp1->str() << endl;
 
     // Encode the Data Description Packet.
-    size_t len1;
-    uint8_t *ptr1 = ddp1->encode(len1);
+    vector<uint8_t> pkt1;
+    ddp1->encode(pkt1);
 
     // Now decode the packet.
     // Create a new packet to provide the decoder.
     DataDescriptionPacket *ddp2= new DataDescriptionPacket(version);
 
     DataDescriptionPacket *ddp3 =
-	dynamic_cast<DataDescriptionPacket *>(ddp2->decode(ptr1, len1));
+	dynamic_cast<DataDescriptionPacket *>(ddp2->
+					      decode(&pkt1[0], pkt1.size()));
 
     DOUT(info) << ddp3->str() << endl;
 
     // Encode the second packet and compare.
-    size_t len2;
-    uint8_t *ptr2 = ddp3->encode(len2);
+    vector<uint8_t> pkt2;
+    ddp3->encode(pkt2);
     
-    if (len1 != len2) {
+    if (pkt1.size() != pkt2.size()) {
 	DOUT(info) << "Packet lengths don't match " <<
-	    len1 << " " << len2 << endl;
+	    pkt1.size() << " " << pkt2.size() << endl;
 	return false;
     }
     
-    if (0 != memcmp(ptr1, ptr2, len1)) {
-	for(size_t i = 0; i < len1; i++) {
-	    if (ptr1[i] != ptr2[i]) {
+    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
+	for(size_t i = 0; i < pkt1.size(); i++) {
+	    if (pkt1[i] != pkt2[i]) {
 		DOUT(info) << "mismatch at byte position " << i << endl;
-		DOUT(info) << "bytes " << (int)ptr1[i] << " " << 
-		    (int)ptr2[i] << endl;
+		DOUT(info) << "bytes " <<
+		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
 		break;
 	    }
 	}
@@ -298,8 +298,6 @@ data_description_packet_compare(TestInfo& info, OspfTypes::Version version)
     delete ddp1;
     delete ddp2;
     delete ddp3;
-    delete ptr1;
-    delete ptr2;
 
     return true;
 }
@@ -333,34 +331,35 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
     DOUT(info) << lsrp1->str() << endl;
 
     // Encode the Data Description Packet.
-    size_t len1;
-    uint8_t *ptr1 = lsrp1->encode(len1);
+    vector<uint8_t> pkt1;
+    lsrp1->encode(pkt1);
 
     // Now decode the packet.
     // Create a new packet to provide the decoder.
     LinkStateRequestPacket *lsrp2= new LinkStateRequestPacket(version);
 
     LinkStateRequestPacket *lsrp3 =
-	dynamic_cast<LinkStateRequestPacket *>(lsrp2->decode(ptr1, len1));
+	dynamic_cast<LinkStateRequestPacket *>(lsrp2->
+					       decode(&pkt1[0], pkt1.size()));
 
     DOUT(info) << lsrp3->str() << endl;
 
     // Encode the second packet and compare.
-    size_t len2;
-    uint8_t *ptr2 = lsrp3->encode(len2);
+    vector<uint8_t> pkt2;
+    lsrp3->encode(pkt2);
     
-    if (len1 != len2) {
+    if (pkt1.size() != pkt2.size()) {
 	DOUT(info) << "Packet lengths don't match " <<
-	    len1 << " " << len2 << endl;
+	    pkt1.size() << " " << pkt2.size() << endl;
 	return false;
     }
     
-    if (0 != memcmp(ptr1, ptr2, len1)) {
-	for(size_t i = 0; i < len1; i++) {
-	    if (ptr1[i] != ptr2[i]) {
+    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
+	for(size_t i = 0; i < pkt1.size(); i++) {
+	    if (pkt1[i] != pkt2[i]) {
 		DOUT(info) << "mismatch at byte position " << i << endl;
-		DOUT(info) << "bytes " << (int)ptr1[i] << " " << 
-		    (int)ptr2[i] << endl;
+		DOUT(info) << "bytes " <<
+		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
 		break;
 	    }
 	}
@@ -370,8 +369,6 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
     delete lsrp1;
     delete lsrp2;
     delete lsrp3;
-    delete ptr1;
-    delete ptr2;
 
     return true;
 }
@@ -383,13 +380,13 @@ decoder1(TestInfo& info, OspfTypes::Version version)
     HelloPacket hello(version);
     populate_hello(&hello, version);
 
-    size_t len;
-    uint8_t *ptr = hello.encode(len);
+    vector<uint8_t> pkt;
+    hello.encode(pkt);
 
     // An attempt to decode a packet with no decoders installed should
     // fail.
     try {
-	dec.decode(ptr, len);
+	dec.decode(&pkt[0], pkt.size());
     } catch(BadPacket& e) {
 	DOUT(info) << "Caught exception: " << e.str() << endl;
 	return true;
@@ -409,13 +406,16 @@ decoder2(TestInfo& info, OspfTypes::Version version)
     HelloPacket hello(version);
     populate_hello(&hello, version);
 
-    size_t len;
-    uint8_t *ptr = hello.encode(len);
+    
+    vector<uint8_t> pkt;
+    hello.encode(pkt);
 
     // An attempt to decode a packet with a decoder installed should succeed.
-    Packet *packet = dec.decode(ptr, len);
+    Packet *packet = dec.decode(&pkt[0], pkt.size());
 
     DOUT(info) << packet->str() << endl;
+
+    delete packet;
 
     return true;
 }

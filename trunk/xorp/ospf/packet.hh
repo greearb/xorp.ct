@@ -69,12 +69,11 @@ class Packet {
     /**
      * Encode the packet.
      *
-     * @param len an ouput paramater that returns the length of the
-     * encoded packet.
-     * @return pointer to packet, must be free'd.
+     * @param pkt vector into which the packet should be placed.
+     * @return true if the encoding suceeded.
      */
-    virtual uint8_t *encode(size_t &len) = 0;
-    
+    virtual bool encode(vector<uint8_t>& pkt) = 0;
+
     /**
      * @return The version this packet represents.
      */
@@ -249,11 +248,10 @@ class HelloPacket : public Packet {
     /**
      * Encode the packet.
      *
-     * @param len an ouput paramater that returns the length of the
-     * encoded packet.
-     * @return pointer to packet, must be free'd.
+     * @param pkt vector into which the packet should be placed.
+     * @return true if the encoding suceeded.
      */
-    uint8_t *encode(size_t &len);
+    bool encode(vector<uint8_t>& pkt);
 
     // Network Mask.
     void set_network_mask(uint32_t network_mask) {
@@ -406,11 +404,10 @@ class DataDescriptionPacket : public Packet {
     /**
      * Encode the packet.
      *
-     * @param len an ouput paramater that returns the length of the
-     * encoded packet.
-     * @return pointer to packet, must be free'd.
+     * @param pkt vector into which the packet should be placed.
+     * @return true if the encoding suceeded.
      */
-    uint8_t *encode(size_t &len);
+    bool encode(vector<uint8_t>& pkt);
 
     // Interface MTU
     void set_interface_mtu(uint16_t mtu) {
@@ -515,12 +512,11 @@ class LinkStateRequestPacket : public Packet {
     /**
      * Encode the packet.
      *
-     * @param len an ouput paramater that returns the length of the
-     * encoded packet.
-     * @return pointer to packet, must be free'd.
+     * @param pkt vector into which the packet should be placed.
+     * @return true if the encoding suceeded.
      */
-    uint8_t *encode(size_t &len);
-
+    bool encode(vector<uint8_t>& pkt);
+    
     list<Ls_request>& get_ls_request() {
 	return _ls_request;
     }
