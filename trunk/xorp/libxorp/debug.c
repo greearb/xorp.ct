@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.2 2003/03/10 23:20:31 hodson Exp $"
+#ident "$XORP: xorp/libxorp/debug.c,v 1.3 2004/06/10 22:41:15 hodson Exp $"
 
 #include <sys/types.h>
 
@@ -83,7 +83,7 @@ _xdebug_msg_va(const char*	file,
 	       const char* 	fmt, 
 	       va_list 		ap) {
     uint32_t i;
-    fprintf(stderr, _xdebug_preamble(file, line, func));
+    fprintf(stderr, "%s", _xdebug_preamble(file, line, func));
     for (i = 0; i < dbg_indent; i++) {
 	fprintf(stderr, " ");
     }
