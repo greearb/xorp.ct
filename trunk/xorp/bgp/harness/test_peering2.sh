@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.20 2003/07/02 02:19:41 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.21 2003/07/02 04:34:45 atanu Exp $
 #
 
 #
@@ -380,8 +380,57 @@ test5()
     fi
 }
 
+test6()
+{
+    TFILE=$1
+    UPDATE_COUNT=10
+
+    echo "TEST6 (testing sending only $UPDATE_COUNT updates):"
+    echo "      1) Start injecting a saved feed (peer2) - $TFILE" 
+    echo "      2) Immediately bring up a second peering (peer1) "
+    echo "      3) Wait for all the updates to arrive at (peer1) "
+    echo "      4) Verify that both peering still exist."
+
+    # Reset the peers
+    reset
+
+    status peer1
+    status peer1
+
+    # Establish the EBGP peering.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 assert established
+
+    # send in the saved file
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE $UPDATE_COUNT
+
+    # Bring up a second peering and wait for all the updates to arrive
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+
+    while :
+    do
+	# debug
+	status peer1
+	status peer2
+
+	a=$(status peer1)
+	sleep 2
+	b=$(status peer1)
+	if [ "$a" = "$b" ]
+	then
+	    break
+	fi
+    done
+
+    status peer1
+    status peer2
+
+    coord peer2 assert established
+    coord peer2 assert established
+}
+
 TESTS_NOT_FIXED='test2 test3 test5'
-TESTS='test1 test4'
+TESTS='test1 test4 test6'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`

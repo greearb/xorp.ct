@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.8 2003/06/26 19:41:48 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.9 2003/07/02 02:08:17 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -103,6 +103,8 @@ protected:
     SMCB _smcb;
     void send_message(const uint8_t *buf, const size_t len, SMCB cb);
     void send_dump_callback(const XrlError& error, FILE *fp,
+			    const size_t packet_number,
+			    const size_t packets_to_send,
 			    const char *comment);
     void send_open();
     

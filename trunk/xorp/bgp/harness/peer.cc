@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.26 2003/06/26 19:41:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.27 2003/07/02 02:08:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -434,9 +434,10 @@ struct mrt_update {
     uint32_t dest_ip;
 };
 
+inline
 const
 uint8_t *
-mrtd_traffic_send(FILE *fp, size_t& len)
+mrtd_traffic_file_read(FILE *fp, size_t& len)
 {
     mrt_header header;
 
@@ -470,14 +471,14 @@ mrtd_traffic_send(FILE *fp, size_t& len)
 }
 
 /*
-** peer send dump mrtd update fname
-** 0    1    2    3    4      5
+** peer send dump mrtd update fname <count>
+** 0    1    2    3    4      5	    6
 */
 void
 Peer::send_dump(const string& line, const vector<string>& words)
     throw(InvalidString)
 {
-    if(6 != words.size())
+    if(6 != words.size() && 7 != words.size())
 	xorp_throw(InvalidString,
 		   c_format("Incorrect number of arguments:\n[%s]",
 			    line.c_str()));
@@ -497,18 +498,29 @@ Peer::send_dump(const string& line, const vector<string>& words)
     string fname = words[5];
     FILE *fp = fopen(fname.c_str(), "r");
     if(0 == fp)
-	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
+	xorp_throw(InvalidString,
+		   c_format("fopen of %s failed: %s\n[%s]",
+			    fname.c_str(), strerror(errno), line.c_str()));
 
+    size_t packets_to_send = 0;
+    if(7 == words.size()) 
+	packets_to_send = atoi(words[6].c_str());
+	// XXX - We don't check for this to be an integer, we assume
+	// failure returns zero. In which case the whole file is sent.
 
     /*
     ** It could take quite a while to send a large file so we need to
     ** set up the transfer and then return.
     */
-    send_dump_callback(XrlError::OKAY(), fp, "mrtd_traffic_send");
+    send_dump_callback(XrlError::OKAY(), fp, 0, packets_to_send,
+		       "mrtd_traffic_send");
 }
 
 void
-Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
+Peer::send_dump_callback(const XrlError& error, FILE *fp,
+			 const size_t packet_number,
+			 const size_t packets_to_send,
+			 const char *comment)
 {
     debug_msg("callback %s %s\n", comment, error.str().c_str());
     if(XrlError::OKAY() != error) {
@@ -517,10 +529,15 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
 	return;
     }
 
+    if(packets_to_send != 0 && packet_number == packets_to_send) {
+	fclose(fp);
+	return;
+    }
+
     size_t len;
     const uint8_t *buf;
 
-    while(0 != (buf = mrtd_traffic_send(fp, len))) {
+    while(0 != (buf = mrtd_traffic_file_read(fp, len))) {
 	const fixed_header *header = 
 	    reinterpret_cast<const struct fixed_header *>(buf);
 	if(MESSAGETYPEUPDATE == header->type) {
@@ -532,7 +549,9 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
 	    _trie_sent.process_update_packet(tv, buf, len);
 
 	    _smcb = callback(this, &Peer::send_dump_callback,
-			     fp, "mrtd_traffic_send");
+			     fp, 
+			     packet_number + 1, packets_to_send,
+			     "mrtd_traffic_send");
 	    send_message(buf, len, _smcb);
 	    return;
 	} else {

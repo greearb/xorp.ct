@@ -289,9 +289,11 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   Send a BGP update packet to the BGP test target with the specified
   withdrawn routes, NLRI, and path attributes.
 
-\item {\sf send dump mrtd update filename}
-
-  Given a file in mrtd dump format send the update packets in this file. 
+\item {\sf send dump mrtd update filename $<$packet count$>$}
+  
+  Given a file in mrtd dump format send the update packets in this
+  file. Optionally supply a packet count for the number of update
+  packets that should be sent.
 
 \item {\sf trie $<$recv/sent$>$ lookup $<$net$>$}
 
