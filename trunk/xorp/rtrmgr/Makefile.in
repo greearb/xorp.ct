@@ -606,28 +606,24 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 ################################################################
 
 yacc:	.yacc_generated_files
+lex:	.lex_generated_files
 
 .yacc_generated_files: $(srcdir)/template.yy $(srcdir)/boot.yy $(srcdir)/op_commands.yy
-	( cd $(srcdir); \
-	yacc -d -p tplt -o y.tplt_tab.c template.yy; \
-	mv y.tplt_tab.c y.tplt_tab.cc; \
-	yacc -d -p boot -o y.boot_tab.c boot.yy; \
-	mv y.boot_tab.c y.boot_tab.cc; \
-	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy; \
-	mv y.opcmd_tab.c y.opcmd_tab.cc; \
+	( cd $(srcdir);						\
+	yacc -d -p tplt -o y.tplt_tab.c template.yy;		\
+	mv y.tplt_tab.c y.tplt_tab.cc;				\
+	yacc -d -p boot -o y.boot_tab.c boot.yy;		\
+	mv y.boot_tab.c y.boot_tab.cc;				\
+	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy;	\
+	mv y.opcmd_tab.c y.opcmd_tab.cc;			\
 	touch .yacc_generated_files )
 
-$(srcdir)/lex.tplt.cc: $(srcdir)/template.ll $(srcdir)/y.tplt_tab.cc
-	( cd $(srcdir); \
-	flex -Ptplt -olex.tplt.cc template.ll )
-
-$(srcdir)/lex.boot.cc: $(srcdir)/boot.ll $(srcdir)/y.boot_tab.cc
-	( cd $(srcdir); \
-	flex -Pboot -olex.boot.cc boot.ll )
-
-$(srcdir)/lex.opcmd.cc: $(srcdir)/op_commands.ll $(srcdir)/y.opcmd_tab.cc
-	( cd $(srcdir); \
-	flex -Popcmd -olex.opcmd.cc op_commands.ll )
+.lex_generated_files: $(srcdir)/template.ll $(srcdir)/boot.ll $(srcdir)/op_commands.ll
+	( cd $(srcdir);						\
+	flex -Ptplt -olex.tplt.cc template.ll;			\
+	flex -Pboot -olex.boot.cc boot.ll;			\
+	flex -Popcmd -olex.opcmd.cc op_commands.ll;		\
+	touch .lex_generated_files )
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
