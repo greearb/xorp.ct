@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.4 2003/02/26 00:12:14 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.5 2003/03/04 23:41:25 hodson Exp $
 
 #ifndef __XRLPF_SUDP_HH__
 #define __XRLPF_SUDP_HH__
@@ -52,17 +52,16 @@ public:
     void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
     bool sends_pending() const { return false; }
     static const char* protocol() { return _protocol; }
-private:
 
+protected:
+    static void recv(int fd, SelectorMask m);
+    void timeout_hook(XUID x);
+    
+private:
     sockaddr_in		_destination;
 
     static const char* _protocol;
-
     static int sender_fd;     		// shared fd between all senders
-
-    static void recv(int fd, SelectorMask m);
-
-    void timeout_hook(XUID x);
 
     static int instance_count;
     static map<const XUID, Request> requests_pending; // demux help
