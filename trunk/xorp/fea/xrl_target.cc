@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.64 2004/12/02 07:02:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.65 2004/12/10 09:39:16 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -1963,18 +1963,16 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     const string&	protocol_origin)
 {
     bool is_xorp_route;
+    bool is_connected_route = false;
 
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     is_xorp_route = true;	// XXX: unconditionally set to true
 
-    //
-    // XXX: don't add/delete routes for directly-connected subnets,
-    // because that should be managed by the underlying system.
-    //
+    // TODO: XXX: get rid of the hard-coded "connected" string here
     if (protocol_origin == "connected")
-	return XrlCmdError::OKAY();
+	is_connected_route = true;
 
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
@@ -1983,7 +1981,7 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
 	new FtiAddEntry4(_xftm.ftic(), dst, nexthop, ifname, vifname, metric,
-			 admin_distance, is_xorp_route)
+			 admin_distance, is_xorp_route, is_connected_route)
 	);
     return _xftm.add(tid, op);
 
@@ -1998,15 +1996,14 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     const string&	cookie,
     const string&	protocol_origin)
 {
+    bool is_connected_route = false;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    //
-    // XXX: don't add/delete routes for directly-connected subnets,
-    // because that should be managed by the underlying system.
-    //
+    // TODO: XXX: get rid of the hard-coded "connected" string here
     if (protocol_origin == "connected")
-	return XrlCmdError::OKAY();
+	is_connected_route = true;
 
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in,
@@ -2015,7 +2012,7 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry4(_xftm.ftic(), network)
+	new FtiDeleteEntry4(_xftm.ftic(), network, is_connected_route)
 	);
     return _xftm.add(tid, op);
 
@@ -2080,18 +2077,16 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     const string&	protocol_origin)
 {
     bool is_xorp_route;
+    bool is_connected_route = false;
 
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     is_xorp_route = true;	// XXX: unconditionally set to true
 
-    //
-    // XXX: don't add/delete routes for directly-connected subnets,
-    // because that should be managed by the underlying system.
-    //
+    // TODO: XXX: get rid of the hard-coded "connected" string here
     if (protocol_origin == "connected")
-	return XrlCmdError::OKAY();
+	is_connected_route = true;
 
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
@@ -2100,7 +2095,7 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
 	new FtiAddEntry6(_xftm.ftic(), dst, nexthop, ifname, vifname, metric,
-			 admin_distance, is_xorp_route)
+			 admin_distance, is_xorp_route, is_connected_route)
 	);
     return _xftm.add(tid, op);
 
@@ -2115,15 +2110,14 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     const string&	cookie,
     const string&	protocol_origin)
 {
+    bool is_connected_route = false;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    //
-    // XXX: don't add/delete routes for directly-connected subnets,
-    // because that should be managed by the underlying system.
-    //
+    // TODO: XXX: get rid of the hard-coded "connected" string here
     if (protocol_origin == "connected")
-	return XrlCmdError::OKAY();
+	is_connected_route = true;
 
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in,
@@ -2132,7 +2126,7 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry6(_xftm.ftic(), network)
+	new FtiDeleteEntry6(_xftm.ftic(), network, is_connected_route)
 	);
     return _xftm.add(tid, op);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.8 2004/08/03 07:48:44 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.9 2004/12/10 09:39:16 pavlin Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -55,10 +55,14 @@ public:
 		 const string&	vifname,
 		 uint32_t	metric,
 		 uint32_t	admin_distance,
-		 bool		xorp_route)
+		 bool		xorp_route,
+		 bool		is_connected_route)
 	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
 					      metric, admin_distance,
-					      xorp_route) {}
+					      xorp_route) {
+	if (is_connected_route)
+	    _fte.mark_connected_route();
+    }
 
     bool dispatch() { return ftic().add_entry4(_fte); }
 
@@ -74,8 +78,13 @@ private:
  */
 class FtiDeleteEntry4 : public FtiTransactionOperation {
 public:
-    FtiDeleteEntry4(FtiConfig& ftic, const IPv4Net& net)
-	: FtiTransactionOperation(ftic), _fte(net) {}
+    FtiDeleteEntry4(FtiConfig&		ftic,
+		    const IPv4Net&	net,
+		    bool		is_connected_route)
+	: FtiTransactionOperation(ftic), _fte(net) {
+	if (is_connected_route)
+	    _fte.mark_connected_route();
+    }
 
     bool dispatch() { return ftic().delete_entry4(_fte); }
 
@@ -111,10 +120,14 @@ public:
 		 const string&	vifname,
 		 uint32_t	metric,
 		 uint32_t	admin_distance,
-		 bool		xorp_route)
+		 bool		xorp_route,
+		 bool		is_connected_route)
 	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
 					      metric, admin_distance,
-					      xorp_route) {}
+					      xorp_route) {
+	if (is_connected_route)
+	    _fte.mark_connected_route();
+    }
 
     bool dispatch() { return ftic().add_entry6(_fte); }
 
@@ -130,8 +143,13 @@ private:
  */
 class FtiDeleteEntry6 : public FtiTransactionOperation {
 public:
-    FtiDeleteEntry6(FtiConfig& ftic, const IPv6Net& net)
-	: FtiTransactionOperation(ftic), _fte(net) {}
+    FtiDeleteEntry6(FtiConfig&		ftic,
+		    const IPv6Net&	net,
+		    bool		is_connected_route)
+	: FtiTransactionOperation(ftic), _fte(net) {
+	if (is_connected_route)
+	    _fte.mark_connected_route();
+    }
 
     bool dispatch() { return ftic().delete_entry6(_fte); }
 
