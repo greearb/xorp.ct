@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/rcommand_pim,v 1.2 2002/12/09 13:54:13 pavlin Exp $
+# $XORP: xorp/pim/rcommand_pim,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 #
 
 #
@@ -28,4 +28,4 @@ xrl_command_arguments=$*;
 # Run command on remote host
 ssh $hostname "(cd $config_path; ./command_pim $xrl_command $xrl_command_arguments; )"
 
-exit 0
+exit $?
