@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.2 2003/02/25 01:38:48 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -87,8 +87,8 @@ public:
 			 const IPvX& rp_addr) const;
     void	add_rps_to_rp_table();
     void	schedule_rp_table_apply_rp_changes();
-    void	clean_expire_bsr_zone();
-    void	schedule_clean_expire_bsr_zone();
+    void	clean_expire_bsr_zones();
+    void	schedule_clean_expire_bsr_zones();
     
 private:
     BsrZone	*find_bsr_zone_by_prefix_from_list(
@@ -106,7 +106,7 @@ private:
     list<BsrZone *> _expire_bsr_zone_list;	// List of expiring BSR zones
     Timer	_rp_table_apply_rp_changes_timer; // Timer to apply RP changes
 						  // to the RpTable
-    Timer	_clean_expire_bsr_zone_timer;	// Timer to cleanup expiring
+    Timer	_clean_expire_bsr_zones_timer;	// Timer to cleanup expiring
 						// BSR zones
 };
 
@@ -118,7 +118,20 @@ public:
 	    uint8_t hash_masklen, uint16_t fragment_tag);
     ~BsrZone();
     
-    PimBsr&	pim_bsr()		{ return (_pim_bsr);		}    
+    PimBsr&	pim_bsr()		{ return (_pim_bsr);		}
+    
+    //
+    // BsrZone type
+    //
+    bool	is_config_bsr_zone() const { return (_is_config_bsr_zone); }
+    bool	is_active_bsr_zone() const { return (_is_active_bsr_zone); }
+    bool	is_expire_bsr_zone() const { return (_is_expire_bsr_zone); }
+    bool	is_test_bsr_zone() const { return (_is_test_bsr_zone); }
+    void	set_config_bsr_zone(bool v);
+    void	set_active_bsr_zone(bool v);
+    void	set_expire_bsr_zone(bool v);
+    void	set_test_bsr_zone(bool v);
+    
     const IPvX&	bsr_addr() const	{ return (_bsr_addr);		}
     uint8_t	bsr_priority() const	{ return (_bsr_priority);	}
     uint8_t	hash_masklen() const	{ return (_hash_masklen);	}
@@ -220,6 +233,12 @@ public:
 private:
     PimBsr&	_pim_bsr;		// The PimBsr for this BsrZone
     
+    // BsrZone type
+    bool	_is_config_bsr_zone;	// True if config BSR zone
+    bool	_is_active_bsr_zone;	// True if active BSR zone
+    bool	_is_expire_bsr_zone;	// True if expire BSR zone
+    bool	_is_test_bsr_zone;	// True if test BSR zone
+    
     // State at all routers
     IPvX	_bsr_addr;		// The address of the Bootstrap router
     uint8_t	_bsr_priority;		// The BSR priority (larger is better)
@@ -259,10 +278,8 @@ private:
 
 class BsrGroupPrefix {
 public:
-    BsrGroupPrefix(BsrZone& bsr_zone,
-		   const IPvXNet& group_prefix,
-		   bool is_scope_zone,
-		   uint8_t expected_rp_count);
+    BsrGroupPrefix(BsrZone& bsr_zone, const IPvXNet& group_prefix,
+		   bool is_scope_zone, uint8_t expected_rp_count);
     BsrGroupPrefix(BsrZone& bsr_zone, const BsrGroupPrefix& bsr_group_prefix);
     ~BsrGroupPrefix();
     

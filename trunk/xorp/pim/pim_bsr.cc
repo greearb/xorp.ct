@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.5 2003/02/25 19:15:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.6 2003/02/26 03:32:11 pavlin Exp $"
 
 
 //
@@ -53,7 +53,7 @@
 // Local functions prototypes
 //
 static void pim_bsr_rp_table_apply_rp_changes_timeout(void *data_pointer);
-static void pim_bsr_clean_expire_bsr_zone_timeout(void *data_pointer);
+static void pim_bsr_clean_expire_bsr_zones_timeout(void *data_pointer);
 static void bsr_zone_bsr_timer_timeout(void *data_pointer);
 static void bsr_zone_scope_zone_expiry_timer_timeout(void *data_pointer);
 static void bsr_rp_candidate_rp_expiry_timer_timeout(void *data_pointer);
@@ -229,7 +229,7 @@ PimBsr::stop(void)
     delete_pointers_list(_expire_bsr_zone_list);
     
     // Cancel unwanted timers
-    _clean_expire_bsr_zone_timer.cancel();
+    _clean_expire_bsr_zones_timer.cancel();
     
     //
     // XXX: don't stop the _rp_table_apply_rp_changes_timer
@@ -293,6 +293,7 @@ PimBsr::add_config_bsr_zone(const BsrZone& bsr_zone, string& error_msg)
 	return (NULL);
     
     BsrZone *new_bsr_zone = new BsrZone(*this, bsr_zone);
+    new_bsr_zone->set_config_bsr_zone(true);
     _config_bsr_zone_list.push_back(new_bsr_zone);
     
     return (new_bsr_zone);
@@ -313,6 +314,7 @@ PimBsr::add_active_bsr_zone(const BsrZone& bsr_zone, string& error_msg)
     active_bsr_zone = find_active_bsr_zone(bsr_zone.zone_id());
     if (active_bsr_zone == NULL) {
 	active_bsr_zone = new BsrZone(*this, bsr_zone.zone_id());
+	active_bsr_zone->set_active_bsr_zone(true);
 	_active_bsr_zone_list.push_back(active_bsr_zone);
     }
     
@@ -376,6 +378,8 @@ PimBsr::add_expire_bsr_zone(const BsrZone& bsr_zone)
     }
     
     BsrZone *expire_bsr_zone = new BsrZone(*this, bsr_zone);
+    expire_bsr_zone->set_expire_bsr_zone(true);
+    
     //
     // Cancel all timers for this zone.
     // Note that we do keep the C-RP Expiry timers running
@@ -671,7 +675,7 @@ pim_bsr_rp_table_apply_rp_changes_timeout(void *data_pointer)
 // If an expiring zone has no group prefixes, it is deleted as well.
 //
 void
-PimBsr::clean_expire_bsr_zone()
+PimBsr::clean_expire_bsr_zones()
 {
     list<BsrZone *>::iterator bsr_zone_iter;
     list<BsrGroupPrefix *>::const_iterator bsr_group_prefix_iter;
@@ -696,16 +700,16 @@ PimBsr::clean_expire_bsr_zone()
 }
 
 void
-PimBsr::schedule_clean_expire_bsr_zone()
+PimBsr::schedule_clean_expire_bsr_zones()
 {
-    _clean_expire_bsr_zone_timer.start(0,
-				       0,
-				       pim_bsr_clean_expire_bsr_zone_timeout,
-				       this);
+    _clean_expire_bsr_zones_timer.start(0,
+					0,
+					pim_bsr_clean_expire_bsr_zones_timeout,
+					this);
 }
 
 static void
-pim_bsr_clean_expire_bsr_zone_timeout(void *data_pointer)
+pim_bsr_clean_expire_bsr_zones_timeout(void *data_pointer)
 {
     if (data_pointer == NULL)
 	return;
@@ -713,7 +717,7 @@ pim_bsr_clean_expire_bsr_zone_timeout(void *data_pointer)
     PimBsr& pim_bsr = *(PimBsr *)data_pointer;
     
     // Clean the expiring zones
-    pim_bsr.clean_expire_bsr_zone();
+    pim_bsr.clean_expire_bsr_zones();
     
 }
 
@@ -878,6 +882,10 @@ PimBsr::can_add_active_bsr_zone(const BsrZone& bsr_zone,
 
 BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
     : _pim_bsr(pim_bsr),
+      _is_config_bsr_zone(bsr_zone.is_config_bsr_zone()),
+      _is_active_bsr_zone(bsr_zone.is_active_bsr_zone()),
+      _is_expire_bsr_zone(bsr_zone.is_expire_bsr_zone()),
+      _is_test_bsr_zone(bsr_zone.is_test_bsr_zone()),
       _bsr_addr(bsr_zone.bsr_addr()),
       _bsr_priority(bsr_zone.bsr_priority()),
       _hash_masklen(bsr_zone.hash_masklen()),
@@ -936,6 +944,10 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
 
 BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
     : _pim_bsr(pim_bsr),
+      _is_config_bsr_zone(false),
+      _is_active_bsr_zone(false),
+      _is_expire_bsr_zone(false),
+      _is_test_bsr_zone(false),
       _bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _bsr_priority(0),
       _hash_masklen(PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(_pim_bsr.family())),
@@ -957,6 +969,10 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
 BsrZone::BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
 		 uint8_t hash_masklen, uint16_t fragment_tag)
     : _pim_bsr(pim_bsr),
+      _is_config_bsr_zone(false),
+      _is_active_bsr_zone(false),
+      _is_expire_bsr_zone(false),
+      _is_test_bsr_zone(false),
       _bsr_addr(bsr_addr),
       _bsr_priority(bsr_priority),
       _hash_masklen(hash_masklen),
@@ -979,6 +995,50 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
 BsrZone::~BsrZone()
 {
     delete_pointers_list(_bsr_group_prefix_list);
+}
+
+void
+BsrZone::set_config_bsr_zone(bool v)
+{
+    _is_config_bsr_zone = v;
+    if (v) {
+	_is_active_bsr_zone = false;
+	_is_expire_bsr_zone = false;
+	_is_test_bsr_zone = false;
+    }
+}
+
+void
+BsrZone::set_active_bsr_zone(bool v)
+{
+    _is_active_bsr_zone = v;
+    if (v) {
+	_is_config_bsr_zone = false;
+	_is_expire_bsr_zone = false;
+	_is_test_bsr_zone = false;
+    }
+}
+
+void
+BsrZone::set_expire_bsr_zone(bool v)
+{
+    _is_expire_bsr_zone = v;
+    if (v) {
+	_is_config_bsr_zone = false;
+	_is_active_bsr_zone = false;
+	_is_test_bsr_zone = false;
+    }
+}
+
+void
+BsrZone::set_test_bsr_zone(bool v)
+{
+    _is_test_bsr_zone = v;
+    if (v) {
+	_is_config_bsr_zone = false;
+	_is_active_bsr_zone = false;
+	_is_expire_bsr_zone = false;
+    }
 }
 
 bool
@@ -1216,7 +1276,8 @@ BsrZone::store_rp_set(const BsrZone& bsr_zone)
     //
     // Add a copy of this zone to the expiring zone list
     //
-    pim_bsr().add_expire_bsr_zone(*this);
+    if (is_active_bsr_zone())
+	pim_bsr().add_expire_bsr_zone(*this);
     
     //
     // Delete the old prefixes
@@ -1248,13 +1309,15 @@ BsrZone::store_rp_set(const BsrZone& bsr_zone)
     //
     // Remove all the old RPs for same new prefixes
     //
-    list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
-    for (group_prefix_iter = bsr_group_prefix_list().begin();
-	 group_prefix_iter != bsr_group_prefix_list().end();
-	 ++group_prefix_iter) {
-	const BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
-	pim_bsr().delete_expire_bsr_zone_prefix(bsr_group_prefix->group_prefix(),
-						bsr_group_prefix->is_scope_zone());
+    if (is_active_bsr_zone()) {
+	list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
+	for (group_prefix_iter = bsr_group_prefix_list().begin();
+	     group_prefix_iter != bsr_group_prefix_list().end();
+	     ++group_prefix_iter) {
+	    const BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
+	    pim_bsr().delete_expire_bsr_zone_prefix(bsr_group_prefix->group_prefix(),
+						    bsr_group_prefix->is_scope_zone());
+	}
     }
 }
 
@@ -1308,6 +1371,8 @@ BsrZone::find_bsr_group_prefix(const IPvXNet& group_prefix) const
 bool
 BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
 {
+    XLOG_ASSERT(is_active_bsr_zone());
+    
     // TODO: handle the case when reconfiguring the local BSR on-the-fly
     // (not in the spec).
     
@@ -1614,9 +1679,6 @@ BsrZone::is_new_bsr_same_priority(const BsrZone& bsr_zone) const
     return (false);
 }
 
-//
-// TODO: XXX: PAVPAVPAV: fix the spec for IPv6 (and probably even IPv4)
-//
 void
 BsrZone::randomized_override_interval(const IPvX& my_addr,
 				      uint8_t my_priority,
@@ -1677,7 +1739,7 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
 }
 
 //
-// (Re)start the BsrTimer so it will to expire immediately.
+// (Re)start the BsrTimer so it will expire immediately.
 //
 void
 BsrZone::timeout_bsr_timer()
@@ -1693,6 +1755,8 @@ bsr_zone_bsr_timer_timeout(void *data_pointer)
     
     BsrZone& bsr_zone = *(BsrZone *)data_pointer;
     PimNode& pim_node = bsr_zone.pim_bsr().pim_node();
+    
+    XLOG_ASSERT(bsr_zone.is_active_bsr_zone());
     
     if (bsr_zone.bsr_zone_state() == BsrZone::STATE_CANDIDATE_BSR)
 	goto bsr_zone_state_candidate_bsr_label;
@@ -1787,6 +1851,7 @@ bsr_zone_scope_zone_expiry_timer_timeout(void *data_pointer)
 	return;
     
     BsrZone& bsr_zone = *(BsrZone *)data_pointer;
+    XLOG_ASSERT(bsr_zone.is_active_bsr_zone());
     
     if (bsr_zone.bsr_zone_state() == BsrZone::STATE_ACCEPT_ANY)
 	goto bsr_zone_state_accept_any_label;
@@ -2055,25 +2120,30 @@ BsrGroupPrefix::delete_rp(BsrRp *bsr_rp)
 	// Entry found. Remove it.
 	set_received_rp_count(received_rp_count() - 1);
 	_rp_list.erase(iter);
-	
+
 	//
 	// Schedule the task to clean the expiring bsr zones
 	//
-	bsr_zone().pim_bsr().schedule_clean_expire_bsr_zone();
+	if (bsr_zone().is_expire_bsr_zone()) {
+	    bsr_zone().pim_bsr().schedule_clean_expire_bsr_zones();
+	}
 	
 	//
 	// If we don't have this RP anymore, then delete the RP entry
 	// from the RP table
 	//
-	if (bsr_zone().pim_bsr().find_rp(group_prefix(),
-					 is_scope_zone(),
-					 bsr_rp->rp_addr())
-	    == NULL) {
-	    bsr_zone().pim_bsr().pim_node().rp_table().delete_rp(
-		bsr_rp->rp_addr(),
-		group_prefix(),
-		PimRp::RP_LEARNED_METHOD_BOOTSTRAP);
-	    bsr_zone().pim_bsr().schedule_rp_table_apply_rp_changes();
+	if (bsr_zone().is_expire_bsr_zone()
+	    || bsr_zone().is_active_bsr_zone()) {
+	    if (bsr_zone().pim_bsr().find_rp(group_prefix(),
+					     is_scope_zone(),
+					     bsr_rp->rp_addr())
+		== NULL) {
+		bsr_zone().pim_bsr().pim_node().rp_table().delete_rp(
+		    bsr_rp->rp_addr(),
+		    group_prefix(),
+		    PimRp::RP_LEARNED_METHOD_BOOTSTRAP);
+		bsr_zone().pim_bsr().schedule_rp_table_apply_rp_changes();
+	    }
 	}
 	
 	delete bsr_rp;
