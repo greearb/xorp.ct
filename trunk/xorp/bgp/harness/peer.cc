@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.42 2003/09/18 04:36:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.43 2003/09/18 05:04:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1440,25 +1440,27 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 					    atoi(words[index + 2].c_str()));
 	    break;
 	default: {
-		int errlen = words.size() - (index + 3);
-		if (errlen < 1)
+	    int errlen = words.size() - (index + 3);
+	    if (errlen < 1)
+		xorp_throw(InvalidString,
+			   c_format(
+			   "Incorrect number of arguments to notify:\n[%s]",
+			   line.c_str()));
+	    uint8_t buf[errlen];
+	    for (int i=0; i< errlen; i++) {
+		int value = atoi(words[index + 3 + i].c_str());
+		if (value < 0 || value > 255)
 		    xorp_throw(InvalidString,
-			       c_format("Incorrect number of arguments to notify:\n[%s]",
-					line.c_str()));
-		uint8_t buf[errlen];
-		for (int i=0; i< errlen; i++) {
-		    int value = atoi(words[index + 3 + i].c_str());
-		    if (value < 0 || value > 255)
-			xorp_throw(InvalidString,
-				   c_format("Incorrect byte value to notify:\n[%s]",
-					    line.c_str()));
+			       c_format(
+			       "Incorrect byte value to notify:\n[%s]",
+			       line.c_str()));
 			
-		    buf[i] = (uint8_t)value;
-		    pac = new NotificationPacket(atoi(words[index+1].c_str()),
-						 atoi(words[index+2].c_str()),
-						 buf, errlen);
-		}
+		buf[i] = (uint8_t)value;
+		pac = new NotificationPacket(atoi(words[index+1].c_str()),
+					     atoi(words[index+2].c_str()),
+					     buf, errlen);
 	    }
+	}
 	}
     } else if("update" == words[index]) {
 	size_t size = words.size();
@@ -1569,7 +1571,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 					  IPv4(bgpid.c_str()),
 					  atoi(holdtime.c_str()));
 	pac = open;
-    } else  if("keepalive" == words[index]) {
+    } else if("keepalive" == words[index]) {
 	pac = new KeepAlivePacket();
     } else
 	xorp_throw(InvalidString,
