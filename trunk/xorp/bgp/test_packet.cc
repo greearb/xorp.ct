@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.11 2003/03/10 23:20:00 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.1 2003/08/21 18:37:09 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -74,6 +74,11 @@ void BGPTestPacket::run_tests()
 	printf("Update packet test passed\n");
     else
 	printf("Update packet test failed\n");
+
+    if (test_update_ipv6())
+	printf("Update packet IPv6 test passed\n");
+    else
+	printf("Update packet IPv6 test failed\n");
 
     if (test_notification())
 	printf("Notification test passed\n");
@@ -188,6 +193,42 @@ bool BGPTestPacket::test_update()
     return result;
 }
 
+bool BGPTestPacket::test_update_ipv6()
+{
+    // test packet writing.
+    // create a Update packet and then read it back.
+    bool result;
+
+    debug_msg("Starting test of UpdatePacket IPv6\n\n");
+    debug_msg("Encoding UpdatePacket IPv6\n\n");
+    
+    UpdatePacket *up = create_update_ipv6();
+    size_t len;
+    const uint8_t *buf = up->encode(len);
+    
+    debug_msg("Decoding UpdatePacket IPv6\n\n");
+    
+    UpdatePacket *updatepacket;
+    try {
+	updatepacket = new UpdatePacket(buf,len);
+    } catch (CorruptMessage &err) {
+	debug_msg("Construction of UpdatePacket IPv6 from buffer failed\n");
+	delete up;
+	delete[] buf;
+	return false;
+    }
+    
+    debug_msg("Ending test of UpdatePacket IPv6\n\n");
+    
+    result = (*updatepacket == *up);
+
+    delete updatepacket;
+    delete up;
+    delete[] buf;
+
+    return result;
+}
+
 bool BGPTestPacket::test_notification()
 {
     // test packet writing.
@@ -261,6 +302,43 @@ UpdatePacket* BGPTestPacket::create_update()
     bup->add_pathatt(path_att);
     bup->add_nlri(nlr_0);
     bup->add_nlri(nlr_1);
+    return bup;
+}
+
+UpdatePacket* BGPTestPacket::create_update_ipv6()
+{
+    IPv4Net net[3];
+    net[0] = IPv4Net("1.2.3.4/32");
+    net[1] = IPv4Net("5.6.7.8/32");
+    net[2] = IPv4Net("1.2.3.4/32");
+    BGPUpdateAttrib wdr(net[2]);
+	
+    AsSegment as_seq;
+    as_seq.set_type(AS_SEQUENCE);
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    as_seq.add_as(AsNum(12));
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    as_seq.add_as(AsNum(13));
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    as_seq.add_as(AsNum(14));
+    AsPath p;
+    p.add_segment(as_seq);
+    debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
+    BGPUpdateAttrib nlr_0(net[0]);
+    BGPUpdateAttrib nlr_1(net[1]);	
+    // nlr_0.dump();
+    // nlr_1.dump();
+    // wdr.dump();
+    ASPathAttribute path_att(p);
+    UpdatePacket *bup = new UpdatePacket();
+    bup->add_withdrawn(wdr);
+    bup->add_pathatt(path_att);
+    bup->add_nlri(nlr_0);
+    bup->add_nlri(nlr_1);
+
+    bup->add_pathatt(MPReachNLRIAttribute<IPv6>());
+    bup->add_pathatt(MPUNReachNLRIAttribute<IPv6>());
+
     return bup;
 }
 
