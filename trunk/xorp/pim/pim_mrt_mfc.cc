@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.4 2003/02/07 00:39:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.5 2003/03/10 23:20:49 hodson Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -49,7 +49,7 @@
 
 int
 PimMrt::signal_message_nocache_recv(const string& src_module_instance_name,
-				    x_module_id , // src_module_id,
+				    xorp_module_id , // src_module_id,
 				    uint16_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst)
@@ -67,7 +67,7 @@ PimMrt::signal_message_nocache_recv(const string& src_module_instance_name,
 
 int
 PimMrt::signal_message_wrongvif_recv(const string& src_module_instance_name,
-				     x_module_id , // src_module_id,
+				     xorp_module_id , // src_module_id,
 				     uint16_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst)
@@ -85,7 +85,7 @@ PimMrt::signal_message_wrongvif_recv(const string& src_module_instance_name,
 
 int
 PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
-				     x_module_id , // src_module_id,
+				     xorp_module_id , // src_module_id,
 				     uint16_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst,

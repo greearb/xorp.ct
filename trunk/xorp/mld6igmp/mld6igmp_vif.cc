@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.4 2003/03/13 09:25:47 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.5 2003/03/13 22:13:26 pavlin Exp $"
 
 
 //
@@ -455,7 +455,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 
 /**
  * Mld6igmpVif::add_protocol:
- * @module_id: The #x_module_id of the protocol to add.
+ * @module_id: The #xorp_module_id of the protocol to add.
  * @module_instance_name: The module instance name of the protocol to add.
  * 
  * Add a protocol to the list of entries that would be notified if there
@@ -464,25 +464,25 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::add_protocol(x_module_id module_id,
+Mld6igmpVif::add_protocol(xorp_module_id module_id,
 			  const string& module_instance_name)
 {
     if (find(_notify_routing_protocols.begin(),
 	     _notify_routing_protocols.end(),
-	     pair<x_module_id, string>(module_id, module_instance_name))
+	     pair<xorp_module_id, string>(module_id, module_instance_name))
 	!= _notify_routing_protocols.end()) {
 	return (XORP_ERROR);		// Already added
     }
     
     _notify_routing_protocols.push_back(
-	pair<x_module_id, string>(module_id, module_instance_name));
+	pair<xorp_module_id, string>(module_id, module_instance_name));
     
     return (XORP_OK);
 }
 
 /**
  * Mld6igmpVif::delete_protocol:
- * @module_id: The #x_module_id of the protocol to delete.
+ * @module_id: The #xorp_module_id of the protocol to delete.
  * @module_instance_name: The module instance name of the protocol to delete.
  * 
  * Delete a protocol from the list of entries that would be notified if there
@@ -491,14 +491,14 @@ Mld6igmpVif::add_protocol(x_module_id module_id,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::delete_protocol(x_module_id module_id,
+Mld6igmpVif::delete_protocol(xorp_module_id module_id,
 			     const string& module_instance_name)
 {
-    vector<pair<x_module_id, string> >::iterator iter;
+    vector<pair<xorp_module_id, string> >::iterator iter;
     
     iter = find(_notify_routing_protocols.begin(),
 		_notify_routing_protocols.end(),
-		pair<x_module_id, string>(module_id, module_instance_name));
+		pair<xorp_module_id, string>(module_id, module_instance_name));
     
     if (iter == _notify_routing_protocols.end())
 	return (XORP_ERROR);		// Not on the list
@@ -580,12 +580,12 @@ Mld6igmpVif::join_prune_notify_routing(const IPvX& source,
 				       const IPvX& group,
 				       action_jp_t action_jp) const
 {
-    vector<pair<x_module_id, string> >::const_iterator iter;
+    vector<pair<xorp_module_id, string> >::const_iterator iter;
     for (iter = _notify_routing_protocols.begin();
 	 iter != _notify_routing_protocols.end();
 	 ++iter) {
-	pair<x_module_id, string> my_pair = *iter;
-	x_module_id module_id = my_pair.first;
+	pair<xorp_module_id, string> my_pair = *iter;
+	xorp_module_id module_id = my_pair.first;
 	string module_instance_name = my_pair.second;
 
 	if (mld6igmp_node().join_prune_notify_routing(module_instance_name,

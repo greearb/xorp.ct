@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_vif.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+// $XORP: xorp/mfea/mfea_vif.hh,v 1.2 2003/03/10 23:20:41 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_VIF_HH__
@@ -91,24 +91,24 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to start on this vif.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to start on this vif.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_protocol(const string& module_instance_name,
-			       x_module_id module_id);
+			       xorp_module_id module_id);
 
     /**
      * Stop a protocol on a single virtual interface.
      * 
      * @param module_instance_name the module instance name of the protocol
      * to stop on this vif.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to stop on this vif.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_protocol(const string& module_instance_name,
-			      x_module_id module_id);
+			      xorp_module_id module_id);
     
     /**
      * Leave all previously joined multicast groups on this interface.
@@ -133,7 +133,7 @@ public:
      * or XORP_ERROR if error.
      */
     int		leave_all_multicast_groups(const string& module_instance_name,
-					   x_module_id module_id);
+					   xorp_module_id module_id);
     
     /**
      * Get the minimum TTL a multicast packet must have to be forwarded
@@ -174,24 +174,24 @@ public:
     /**
      * Test if a protocol is registeres with this virtual interface.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to test.
      * @return true if protocol with module ID of @ref module_id is
      * registered with this virtual interface, otherwise false.
      */
-    bool	proto_is_registered(x_module_id module_id) const {
+    bool	proto_is_registered(xorp_module_id module_id) const {
 	return (_proto_register.is_registered(module_id));
     }
     
     /**
      * Get the list of protocol instance names for a given protocol.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to get the list with instance names.
      * @return the list of protocol instance names for protocol
      * with module ID of @ref module_id.
      */
-    const list<string>& proto_module_instance_name_list(x_module_id module_id) const {
+    const list<string>& proto_module_instance_name_list(xorp_module_id module_id) const {
 	return (_proto_register.module_instance_name_list(module_id));
     }
     
@@ -201,13 +201,13 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * that has joined the group.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * that has joined the group.
      * @param group the group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	add_multicast_group(const string& module_instance_name,
-			    x_module_id module_id,
+			    xorp_module_id module_id,
 			    const IPvX& group) {
 	return (_joined_groups.add_multicast_group(module_instance_name,
 						   module_id,
@@ -220,13 +220,13 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * that has left the group.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * that has left the group.
      * @param group the group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	delete_multicast_group(const string& module_instance_name,
-			       x_module_id module_id,
+			       xorp_module_id module_id,
 			       const IPvX& group) {
 	return (_joined_groups.delete_multicast_group(module_instance_name,
 						      module_id,
@@ -260,23 +260,23 @@ private:
     class JoinedGroups {
     public:
 	int	add_multicast_group(const string& module_instance_name,
-				    x_module_id module_id,
+				    xorp_module_id module_id,
 				    const IPvX& group);
 	int	delete_multicast_group(const string& module_instance_name,
-				       x_module_id module_id,
+				       xorp_module_id module_id,
 				       const IPvX& group);
 	bool	has_multicast_group(const IPvX& group) const;
 	set<IPvX>& joined_multicast_groups() {
 	    return (_joined_multicast_groups);
 	}
-	list<pair<pair<string, x_module_id>, IPvX> >& joined_state() {
+	list<pair<pair<string, xorp_module_id>, IPvX> >& joined_state() {
 	    return (_joined_state);
 	}
 	
     private:
 	set<IPvX>	_joined_multicast_groups; // The joined mcast groups
 	// The state about who joined which group.
-	list<pair<pair<string, x_module_id>, IPvX> > _joined_state;
+	list<pair<pair<string, xorp_module_id>, IPvX> > _joined_state;
     };
     
     JoinedGroups _joined_groups;	// State with joined multicast groups

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.4 2003/01/23 09:16:37 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.5 2003/03/10 23:20:12 hodson Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -59,11 +59,11 @@ public:
      * IPv4 and IPv6 respectively). Note that this argument may disappear
      * in the future, and a single Cli node would provide access for
      * both IPv4 and IPv6.
-     * @param init_module_id the module ID (@ref x_module_id). Should be
-     * equal to X_MODULE_CLI.
+     * @param init_module_id the module ID (@ref xorp_module_id). Should be
+     * equal to XORP_MODULE_CLI.
      * @param init_event_loop the event loop to use.
      */
-    CliNode(int init_family, x_module_id init_module_id,
+    CliNode(int init_family, xorp_module_id init_module_id,
 	    EventLoop& init_event_loop);
 
     /**
@@ -231,7 +231,7 @@ public:
      * UNUSED
      */
     int	proto_recv(const string&	, // src_module_instance_name,
-		   x_module_id		, // src_module_id,
+		   xorp_module_id	, // src_module_id,
 		   uint16_t		, // vif_index,
 		   const IPvX&		, // src,
 		   const IPvX&		, // dst,
@@ -245,7 +245,7 @@ public:
      * UNUSED
      */
     int	proto_send(const string&	, // dst_module_instance_name,
-		   x_module_id		, // dst_module_id,
+		   xorp_module_id	, // dst_module_id,
 		   uint16_t		, // vif_index,
 		   const IPvX&		, // src,
 		   const IPvX&		, // dst,
@@ -259,7 +259,7 @@ public:
      * UNUSED
      */
     int	signal_message_recv(const string&	, // src_module_instance_name,
-			    x_module_id		, // src_module_id,
+			    xorp_module_id	, // src_module_id,
 			    int			, // message_type,
 			    uint16_t		, // vif_index,
 			    const IPvX&		, // src,
@@ -271,7 +271,7 @@ public:
      * UNUSED
      */
     int	signal_message_send(const string&	, // dst_module_instance_name,
-			    x_module_id		, // dst_module_id,
+			    xorp_module_id	, // dst_module_id,
 			    int			, // message_type,
 			    uint16_t		, // vif_index,
 			    const IPvX&		, // src,

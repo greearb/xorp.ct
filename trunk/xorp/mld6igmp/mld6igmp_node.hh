@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.2 2003/03/10 23:20:42 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.3 2003/03/13 00:32:05 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -57,11 +57,11 @@ public:
      * 
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
-     * @param module_id the module ID (@ref x_module_id). Should be
-     * equal to X_MODULE_MLD6IGMP.
+     * @param module_id the module ID (@ref xorp_module_id). Should be
+     * equal to XORP_MODULE_MLD6IGMP.
      * @param event_loop the event loop to use.
      */
-    Mld6igmpNode(int family, x_module_id module_id, EventLoop& event_loop);
+    Mld6igmpNode(int family, xorp_module_id module_id, EventLoop& event_loop);
     
     /**
      * Destructor
@@ -191,7 +191,7 @@ public:
      * @param src_module_instance_name the module instance name of the
      * module-origin of the message.
      * 
-     * @param src_module_id the module ID (@ref x_module_id) of the
+     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param vif_index the vif index of the interface used to receive this
@@ -217,7 +217,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_recv(const string& src_module_instance_name,
-			   x_module_id src_module_id,
+			   xorp_module_id src_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -251,7 +251,7 @@ public:
      * Receive signal message: not used by MLD6/IGMP.
      */
     int	signal_message_recv(const string&	, // src_module_instance_name,
-			    x_module_id		, // src_module_id,
+			    xorp_module_id	, // src_module_id,
 			    int			, // message_type,
 			    uint16_t		, // vif_index,
 			    const IPvX&		, // src,
@@ -264,7 +264,7 @@ public:
      * Send signal message: not used by MLD6/IGMP.
      */
     int	signal_message_send(const string&	, // dst_module_instance_name,
-			    x_module_id		, // dst_module_id,
+			    xorp_module_id	, // dst_module_id,
 			    int			, // message_type,
 			    uint16_t		, // vif_index,
 			    const IPvX&		, // src,
@@ -354,13 +354,13 @@ public:
      * 
      * @param module_instance_name the module instance name of the
      * protocol to add.
-     * @param module_id the module ID (@ref x_module_id) of the
+     * @param module_id the module ID (@ref xorp_module_id) of the
      * protocol to add.
      * @param vif_index the vif index of the interface to add the protocol to.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_protocol(const string& module_instance_name,
-		     x_module_id module_id,
+		     xorp_module_id module_id,
 		     uint16_t vif_index);
     
     /**
@@ -372,14 +372,14 @@ public:
      * 
      * @param module_instance_name the module instance name of the
      * protocol to delete.
-     * @param module_id the module ID (@ref x_module_id) of the
+     * @param module_id the module ID (@ref xorp_module_id) of the
      * protocol to delete.
      * @param vif_index the vif index of the interface to delete the
      * protocol from.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_protocol(const string& module_instance_name,
-			x_module_id module_id,
+			xorp_module_id module_id,
 			uint16_t vif_index);
     
     /**
@@ -391,7 +391,7 @@ public:
      * 
      * @param dst_module_instance_name the module instance name of the
      * protocol to notify.
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * protocol to notify.
      * @param vif_index the vif index of the interface with membership change.
      * @param source the source address of the (S,G) or (*,G) entry that has
@@ -400,7 +400,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int send_add_membership(const string& dst_module_instance_name,
-				    x_module_id dst_module_id,
+				    xorp_module_id dst_module_id,
 				    uint16_t vif_index,
 				    const IPvX& source,
 				    const IPvX& group) = 0;
@@ -413,7 +413,7 @@ public:
      * 
      * @param dst_module_instance_name the module instance name of the
      * protocol to notify.
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * protocol to notify.
      * @param vif_index the vif index of the interface with membership change.
      * @param source the source address of the (S,G) or (*,G) entry that has
@@ -423,7 +423,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int send_delete_membership(const string& dst_module_instance_name,
-				       x_module_id dst_module_id,
+				       xorp_module_id dst_module_id,
 				       uint16_t vif_index,
 				       const IPvX& source,
 				       const IPvX& group) = 0;
@@ -433,7 +433,7 @@ public:
      * 
      * @param module_instance_name the module instance name of the
      * protocol to notify.
-     * @param module_id the module ID (@ref x_module_id) of the
+     * @param module_id the module ID (@ref xorp_module_id) of the
      * protocol to notify.
      * @param vif_index the vif index of the interface with membership change.
      * @param source the source address of the (S,G) or (*,G) entry that has
@@ -445,7 +445,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int join_prune_notify_routing(const string& module_instance_name,
-				  x_module_id module_id,
+				  xorp_module_id module_id,
 				  uint16_t vif_index,
 				  const IPvX& source,
 				  const IPvX& group,

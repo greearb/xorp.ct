@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.3 2003/02/14 23:59:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.4 2003/03/10 23:20:49 hodson Exp $"
 
 
 //
@@ -56,14 +56,14 @@
  * PimNode::PimNode:
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
- * @module_id: The module ID (must be either %X_MODULE_PIMSM
- * or %X_MODULE_PIMDM).
- * TODO: XXX: X_MODULE_PIMDM is not implemented yet.
+ * @module_id: The module ID (must be either %XORP_MODULE_PIMSM
+ * or %XORP_MODULE_PIMDM).
+ * TODO: XXX: XORP_MODULE_PIMDM is not implemented yet.
  * @event_loop: The event loop.
  * 
  * PIM node constructor.
  **/
-PimNode::PimNode(int family, x_module_id module_id,
+PimNode::PimNode(int family, xorp_module_id module_id,
 		 EventLoop& event_loop)
     : ProtoNode<PimVif>(family, module_id, event_loop),
     _pim_mrt(*this),
@@ -75,13 +75,13 @@ PimNode::PimNode(int family, x_module_id module_id,
     _test_jp_header(*this)
 {
     // TODO: XXX: PIMDM not implemented yet
-    XLOG_ASSERT(module_id == X_MODULE_PIMSM);
-    XLOG_ASSERT((module_id == X_MODULE_PIMSM)
-		|| (module_id == X_MODULE_PIMDM));
-    if ((module_id != X_MODULE_PIMSM) && (module_id != X_MODULE_PIMDM)) {
-	XLOG_FATAL("Invalid module ID = %d (must be 'X_MODULE_PIMSM' = %d "
-		   "or 'X_MODULE_PIMDM' = %d",
-		   module_id, X_MODULE_PIMSM, X_MODULE_PIMDM);
+    XLOG_ASSERT(module_id == XORP_MODULE_PIMSM);
+    XLOG_ASSERT((module_id == XORP_MODULE_PIMSM)
+		|| (module_id == XORP_MODULE_PIMDM));
+    if ((module_id != XORP_MODULE_PIMSM) && (module_id != XORP_MODULE_PIMDM)) {
+	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_PIMSM' = %d "
+		   "or 'XORP_MODULE_PIMDM' = %d",
+		   module_id, XORP_MODULE_PIMSM, XORP_MODULE_PIMDM);
     }
     
     _pim_register_vif_index = Vif::VIF_INDEX_INVALID;
@@ -644,7 +644,7 @@ PimNode::delete_all_vifs(void)
  * PimNode::proto_recv:
  * @src_module_instance_name: The module instance name of the module-origin
  * of the message.
- * @src_module_id: The #x_module_id of the module-origin of the message.
+ * @src_module_id: The #xorp_module_id of the module-origin of the message.
  * @vif_index: The vif index of the interface used to receive this message.
  * @src: The source address of the message.
  * @dst: The destination address of the message.
@@ -663,7 +663,7 @@ PimNode::delete_all_vifs(void)
  **/
 int
 PimNode::proto_recv(const string&	, // src_module_instance_name,
-		    x_module_id src_module_id,
+		    xorp_module_id src_module_id,
 		    uint16_t vif_index,
 		    const IPvX& src, const IPvX& dst,
 		    int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -750,8 +750,8 @@ PimNode::pim_send(uint16_t vif_index,
 	return (XORP_ERROR);
     
     // TODO: the target name of the MFEA must be configurable.
-    if (proto_send(x_module_name(family(), X_MODULE_MFEA),
-		   X_MODULE_MFEA,
+    if (proto_send(xorp_module_name(family(), XORP_MODULE_MFEA),
+		   XORP_MODULE_MFEA,
 		   vif_index, src, dst,
 		   ip_ttl, ip_tos, router_alert_bool,
 		   BUFFER_DATA_HEAD(buffer),
@@ -766,7 +766,7 @@ PimNode::pim_send(uint16_t vif_index,
  * PimNode::signal_message_recv:
  * @src_module_instance_name: The module instance name of the module-origin
  * of the message.
- * @src_module_id: The #x_module_id of the module-origin of the message.
+ * @src_module_id: The #xorp_module_id of the module-origin of the message.
  * @message_type: The message type of the kernel signal.
  * At this moment, one of the following:
  * %MFEA_UNIX_KERNEL_MESSAGE_NOCACHE (if a cache-miss in the kernel)
@@ -786,7 +786,7 @@ PimNode::pim_send(uint16_t vif_index,
  **/
 int
 PimNode::signal_message_recv(const string& src_module_instance_name,
-			     x_module_id src_module_id,
+			     xorp_module_id src_module_id,
 			     int message_type,
 			     uint16_t vif_index,
 			     const IPvX& src,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.5 2003/03/10 23:20:12 hodson Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.6 2003/03/17 23:23:29 pavlin Exp $"
 
 
 //
@@ -187,10 +187,10 @@ main(int argc, char *argv[])
 	// CLI
 	//
 #if DO_IPV4
-	CliNode cli_node4(AF_INET, X_MODULE_CLI, event_loop);
+	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, event_loop);
 	cli_node4.set_cli_port(12000);
 #else
-	CliNode cli_node6(AF_INET6, X_MODULE_CLI, event_loop);
+	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, event_loop);
 	cli_node6.set_cli_port(12000);
 #endif // ! DO_IPV4
 	//

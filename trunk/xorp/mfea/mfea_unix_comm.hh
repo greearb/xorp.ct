@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.2 2003/03/10 23:20:40 hodson Exp $
+// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.3 2003/03/14 12:20:27 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_UNIX_COMM_HH__
@@ -322,13 +322,13 @@ class UnixComm : public ProtoUnit {
 public:
     /**
      * Constructor for given MFEA node, IP protocol, and module ID
-     * (@ref x_module_id).
+     * (@ref xorp_module_id).
      * 
      * @param mfea_node the MFEA node (@ref MfeaNode) this entry belongs to.
      * @param ipproto the IP protocol number (e.g., IPPROTO_PIM for PIM).
-     * @param module_id the module ID (@ref x_module_id) for the protocol.
+     * @param module_id the module ID (@ref xorp_module_id) for the protocol.
      */
-    UnixComm(MfeaNode& mfea_node, int ipproto, x_module_id module_id);
+    UnixComm(MfeaNode& mfea_node, int ipproto, xorp_module_id module_id);
     
     /**
      * Destructor
@@ -442,7 +442,7 @@ public:
      * 
      * The mrouter socket value of this entry is set by copying the mrouter
      * socket value from the special house-keeping @ref UnixComm
-     * with module ID (@ref x_module_id) of X_MODULE_NULL.
+     * with module ID (@ref xorp_module_id) of XORP_MODULE_NULL.
      * 
      * @return the value of the copied mrouter socket on success,
      * otherwise XORP_ERROR.
@@ -455,8 +455,8 @@ public:
      * The mrouter socket value of the other @ref UnixComm entries is
      * set by copying the mrouter socket value of this entry.
      * Note that this method should be applied only to the special
-     * house-keeping @ref UnixComm with module ID (@ref x_module_id)
-     * of X_MODULE_NULL.
+     * house-keeping @ref UnixComm with module ID (@ref xorp_module_id)
+     * of XORP_MODULE_NULL.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -919,13 +919,13 @@ public:
     }
     
     /**
-     * Get the module ID (@ref x_module_id) for the protocol that created
+     * Get the module ID (@ref xorp_module_id) for the protocol that created
      * this entry.
      * 
-     * @return the module ID (@ref x_module_id) of the protocol that created
+     * @return the module ID (@ref xorp_module_id) of the protocol that created
      * this entry.
      */
-    x_module_id	module_id() const { return (_module_id); }
+    xorp_module_id module_id() const { return (_module_id); }
     
     
 private:
@@ -943,7 +943,7 @@ private:
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
     int		  _ipproto;	// The protocol number (IPPROTO_*)
-    x_module_id	  _module_id;	// The corresponding module id (X_MODULE_*)
+    xorp_module_id _module_id;	// The corresponding module id (XORP_MODULE_*)
     int		  _mrouter_socket; // The socket for multicast routing access
     int		  _ioctl_socket;   // The socket for ioctl() access
     int		  _mrib_socket;	   // The socket for Mrib access

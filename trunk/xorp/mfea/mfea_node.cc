@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.3 2003/02/08 09:18:26 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.4 2003/03/10 23:20:39 hodson Exp $"
 
 
 //
@@ -57,12 +57,12 @@ static void mrib_table_read_timer_timeout(void *data_pointer);
  * MfeaNode::MfeaNode:
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
- * @module_id: The module ID (must be %X_MODULE_MFEA).
+ * @module_id: The module ID (must be %XORP_MODULE_MFEA).
  * @event_loop: The event loop.
  * 
  * MFEA node constructor.
  **/
-MfeaNode::MfeaNode(int family, x_module_id module_id,
+MfeaNode::MfeaNode(int family, xorp_module_id module_id,
 		   EventLoop& event_loop)
     : ProtoNode<MfeaVif>(family, module_id, event_loop),
     _mrib_table(family),
@@ -71,11 +71,11 @@ MfeaNode::MfeaNode(int family, x_module_id module_id,
     _mfea_dft(*this),
     _is_log_trace(true)			// XXX: default to print trace logs
 {
-    XLOG_ASSERT(module_id == X_MODULE_MFEA);
+    XLOG_ASSERT(module_id == XORP_MODULE_MFEA);
     
-    if (module_id != X_MODULE_MFEA) {
-	XLOG_FATAL("Invalid module ID = %d (must be 'X_MODULE_MFEA' = %d)",
-		   module_id, X_MODULE_MFEA);
+    if (module_id != XORP_MODULE_MFEA) {
+	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_MFEA' = %d)",
+		   module_id, XORP_MODULE_MFEA);
     }
     
     for (size_t i = 0; i < _unix_comms.size(); i++)
@@ -83,8 +83,8 @@ MfeaNode::MfeaNode(int family, x_module_id module_id,
     
     // XXX: The first UnixComm entry is used for misc. house-keeping.
     // XXX: This entry is not associated with any specific protocol,
-    // hence the module_id is X_MODULE_NULL
-    if (add_protocol("X_MODULE_NULL", X_MODULE_NULL) < 0) {
+    // hence the module_id is XORP_MODULE_NULL
+    if (add_protocol("XORP_MODULE_NULL", XORP_MODULE_NULL) < 0) {
 	XLOG_ERROR("Error creating the default communication middleware "
 		   "with the kernel");
     }
@@ -104,7 +104,7 @@ MfeaNode::~MfeaNode(void)
     delete_all_vifs();
     
     // XXX: the special house-keeping UnixComm entry
-    delete_protocol("X_MODULE_NULL", X_MODULE_NULL);
+    delete_protocol("XORP_MODULE_NULL", XORP_MODULE_NULL);
     
     // Delete the UnixComm
     for (size_t i = 0; i < _unix_comms.size(); i++) {
@@ -372,7 +372,7 @@ MfeaNode::delete_all_vifs(void)
 /**
  * MfeaNode::add_protocol:
  * @module_instance_name: The module instance name of the protocol to add.
- * @module_id: The #x_module_id of the protocol to add.
+ * @module_id: The #xorp_module_id of the protocol to add.
  * 
  * A method used by a protocol instance to register with this #MfeaNode.
  * 
@@ -380,7 +380,7 @@ MfeaNode::delete_all_vifs(void)
  **/
 int
 MfeaNode::add_protocol(const string& module_instance_name,
-		       x_module_id module_id)
+		       xorp_module_id module_id)
 {
     UnixComm *unix_comm;
     int ipproto;
@@ -402,7 +402,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
     //
     ipproto = -1;
     switch (module_id) {
-    case X_MODULE_MLD6IGMP:
+    case XORP_MODULE_MLD6IGMP:
 	switch (family()) {
 	case AF_INET:
 	    ipproto = IPPROTO_IGMP;
@@ -418,11 +418,11 @@ MfeaNode::add_protocol(const string& module_instance_name,
 	    return (XORP_ERROR);
 	}
 	break;
-    case X_MODULE_PIMSM:
-    case X_MODULE_PIMDM:
+    case XORP_MODULE_PIMSM:
+    case XORP_MODULE_PIMDM:
 	ipproto = IPPROTO_PIM;
 	break;
-    case X_MODULE_NULL:		// XXX: the special case of local house-keeping
+    case XORP_MODULE_NULL:	// XXX: the special case of local house-keeping
 	ipproto = -1;
 	break;
     default:
@@ -450,7 +450,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
 /**
  * MfeaNode::delete_protocol:
  * @module_instance_name: The module instance name of the protocol to delete.
- * @module_id: The #x_module_id of the protocol to delete.
+ * @module_id: The #xorp_module_id of the protocol to delete.
  * 
  * A method used by a protocol instance to deregister with this #MfeaNode.
  * 
@@ -458,7 +458,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
  **/
 int
 MfeaNode::delete_protocol(const string& module_instance_name,
-			  x_module_id module_id)
+			  xorp_module_id module_id)
 {
     // Delete MRIB registration
     if (_mrib_messages_register.is_registered(module_instance_name,
@@ -508,14 +508,14 @@ MfeaNode::delete_protocol(const string& module_instance_name,
 
 /**
  * MfeaNode::start_protocol:
- * @module_id: The #x_module_id of the protocol to start.
+ * @module_id: The #xorp_module_id of the protocol to start.
  * 
- * Start operation for protocol with #x_module_id of @x_module_id.
+ * Start operation for protocol with #xorp_module_id of @module_id.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::start_protocol(x_module_id module_id)
+MfeaNode::start_protocol(xorp_module_id module_id)
 {
     UnixComm *unix_comm = unix_comm_find_by_module_id(module_id);
     
@@ -533,14 +533,14 @@ MfeaNode::start_protocol(x_module_id module_id)
 
 /**
  * MfeaNode::stop_protocol:
- * @module_id: The #x_module_id of the protocol to stop.
+ * @module_id: The #xorp_module_id of the protocol to stop.
  * 
- * Stop operation for protocol with #x_module_id of @x_module_id.
+ * Stop operation for protocol with #xorp_module_id of @module_id.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::stop_protocol(x_module_id module_id)
+MfeaNode::stop_protocol(xorp_module_id module_id)
 {
     UnixComm *unix_comm = unix_comm_find_by_module_id(module_id);
     
@@ -557,7 +557,7 @@ MfeaNode::stop_protocol(x_module_id module_id)
  * MfeaNode::start_protocol_vif:
  * @module_instance_name: The module instance name of the protocol to start
  * on vif with vif_index of @vif_index.
- * @module_id: The #x_module_id of the protocol to start on vif with
+ * @module_id: The #xorp_module_id of the protocol to start on vif with
  * vif_index of @vif_index.
  * @vif_index: The index of the vif the protocol start to apply to.
  * 
@@ -567,7 +567,7 @@ MfeaNode::stop_protocol(x_module_id module_id)
  **/
 int
 MfeaNode::start_protocol_vif(const string& module_instance_name,
-			     x_module_id module_id,
+			     xorp_module_id module_id,
 			     uint16_t vif_index)
 {
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
@@ -589,7 +589,7 @@ MfeaNode::start_protocol_vif(const string& module_instance_name,
  * MfeaNode::stop_protocol_vif:
  * @module_instance_name: The module instance name of the protocol to stop
  * on vif with vif_index of @vif_index.
- * @module_id: The #x_module_id of the protocol to stop on vif with
+ * @module_id: The #xorp_module_id of the protocol to stop on vif with
  * vif_index of @vif_index.
  * @vif_index: The index of the vif the protocol stop to apply to.
  * 
@@ -599,7 +599,7 @@ MfeaNode::start_protocol_vif(const string& module_instance_name,
  **/
 int
 MfeaNode::stop_protocol_vif(const string& module_instance_name,
-			    x_module_id module_id,
+			    xorp_module_id module_id,
 			    uint16_t vif_index)
 {
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
@@ -620,8 +620,8 @@ MfeaNode::stop_protocol_vif(const string& module_instance_name,
 /**
  * MfeaNode::add_allow_kernel_signal_messages:
  * @module_instance_name: The module instance name of the protocol to add.
- * @module_id: The #x_module_id of the protocol to add to receive kernel signal
- * messages.
+ * @module_id: The #xorp_module_id of the protocol to add to receive kernel
+ * signal messages.
  * 
  * Add a protocol to the set of protocols that are interested in
  * receiving kernel signal messages.
@@ -630,7 +630,7 @@ MfeaNode::stop_protocol_vif(const string& module_instance_name,
  **/
 int
 MfeaNode::add_allow_kernel_signal_messages(const string& module_instance_name,
-					   x_module_id module_id)
+					   xorp_module_id module_id)
 {
     UnixComm *unix_comm = unix_comm_find_by_module_id(module_id);
     
@@ -655,7 +655,7 @@ MfeaNode::add_allow_kernel_signal_messages(const string& module_instance_name,
 /**
  * MfeaNode::delete_allow_kernel_signal_messages:
  * @module_instance_name: The module instance name of the protocol to delete.
- * @module_id: The #x_module_id of the protocol to delete from receiving
+ * @module_id: The #xorp_module_id of the protocol to delete from receiving
  * kernel signal messages.
  * 
  * Delete a protocol from the set of protocols that are interested in
@@ -665,7 +665,7 @@ MfeaNode::add_allow_kernel_signal_messages(const string& module_instance_name,
  **/
 int
 MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name,
-					      x_module_id module_id)
+					      xorp_module_id module_id)
 {
     // Delete the state
     if (_kernel_signal_messages_register.delete_protocol(module_instance_name,
@@ -695,7 +695,7 @@ MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name
  * MfeaNode::add_allow_mrib_messages:
  * @module_instance_name: The module instance name of the protocol to add to
  * receive MRIB messages.
- * @module_id: The #x_module_id of the protocol to add to receive
+ * @module_id: The #xorp_module_id of the protocol to add to receive
  * MRIB messages.
  * 
  * Add a protocol to the set of protocols that are interested in
@@ -705,7 +705,7 @@ MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name
  **/
 int
 MfeaNode::add_allow_mrib_messages(const string& module_instance_name,
-				  x_module_id module_id)
+				  xorp_module_id module_id)
 {
     UnixComm *unix_comm = unix_comm_find_by_module_id(module_id);
     
@@ -730,7 +730,7 @@ MfeaNode::add_allow_mrib_messages(const string& module_instance_name,
  * MfeaNode::delete_allow_mrib_messages:
  * @module_instance_name: The module instance name of the protocol to delete
  * from receiving MRIB messages.
- * @module_id: The #x_module_id of the protocol to delete from receiving
+ * @module_id: The #xorp_module_id of the protocol to delete from receiving
  * MRIB messages.
  * 
  * Delete a protocol from the set of protocols that are interested in
@@ -740,7 +740,7 @@ MfeaNode::add_allow_mrib_messages(const string& module_instance_name,
  **/
 int
 MfeaNode::delete_allow_mrib_messages(const string& module_instance_name,
-				     x_module_id module_id)
+				     xorp_module_id module_id)
 {
     // Delete the state
     if (_mrib_messages_register.delete_protocol(module_instance_name,
@@ -787,7 +787,7 @@ MfeaNode::send_add_mrib(const Mrib& mrib)
 	if (! _unix_comms[i]->is_allow_mrib_messages())
 	    continue;
 	
-	x_module_id dst_module_id = _unix_comms[i]->module_id();
+	xorp_module_id dst_module_id = _unix_comms[i]->module_id();
 	ProtoRegister& pr = _mrib_messages_register;
 	if (! pr.is_registered(dst_module_id))
 	    continue;		// The message is not expected
@@ -827,7 +827,7 @@ MfeaNode::send_delete_mrib(const Mrib& mrib)
 	if (! _unix_comms[i]->is_allow_mrib_messages())
 	    continue;
 	
-	x_module_id dst_module_id = _unix_comms[i]->module_id();
+	xorp_module_id dst_module_id = _unix_comms[i]->module_id();
 	ProtoRegister& pr = _mrib_messages_register;
 	if (! pr.is_registered(dst_module_id))
 	    continue;		// The message is not expected
@@ -867,7 +867,7 @@ MfeaNode::send_set_mrib_done()
 	if (! _unix_comms[i]->is_allow_mrib_messages())
 	    continue;
 	
-	x_module_id dst_module_id = _unix_comms[i]->module_id();
+	xorp_module_id dst_module_id = _unix_comms[i]->module_id();
 	ProtoRegister& pr = _mrib_messages_register;
 	if (! pr.is_registered(dst_module_id))
 	    continue;		// The message is not expected
@@ -889,7 +889,7 @@ MfeaNode::send_set_mrib_done()
  * MfeaNode::proto_recv:
  * @src_module_instance_name: The module instance name of the module-origin
  * of the message.
- * @src_module_id: The #x_module_id of the module-origin of the message.
+ * @src_module_id: The #xorp_module_id of the module-origin of the message.
  * @vif_index: The vif index of the interface to use to send this message.
  * @src: The source address of the message.
  * @dst: The destination address of the message.
@@ -909,7 +909,7 @@ MfeaNode::send_set_mrib_done()
  **/
 int
 MfeaNode::proto_recv(const string&	, // src_module_instance_name,
-		     x_module_id src_module_id,
+		     xorp_module_id src_module_id,
 		     uint16_t vif_index,
 		     const IPvX& src, const IPvX& dst,
 		     int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -941,7 +941,7 @@ MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 
 // The function to process incoming messages from the kernel
 int
-MfeaNode::unix_comm_recv(x_module_id dst_module_id,
+MfeaNode::unix_comm_recv(xorp_module_id dst_module_id,
 			 uint16_t vif_index,
 			 const IPvX& src, const IPvX& dst,
 			 int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -951,7 +951,7 @@ MfeaNode::unix_comm_recv(x_module_id dst_module_id,
 	       "RX packet for dst_module_name %s: "
 	       "vif_index = %d src = %s dst = %s ttl = %d tos = %#x "
 	       "router_alert = %d rcvbuf = %p rcvlen = %u",
-	       x_module_name(family(), dst_module_id), vif_index,
+	       xorp_module_name(family(), dst_module_id), vif_index,
 	       cstring(src), cstring(dst), ip_ttl, ip_tos, router_alert_bool,
 	       rcvbuf, (uint32_t)rcvlen);
     
@@ -992,7 +992,7 @@ MfeaNode::unix_comm_recv(x_module_id dst_module_id,
 /**
  * MfeaNode::signal_message_recv:
  * @src_module_instance_name: Unused.
- * @src_module_id: The #x_module_id module ID of the associated %UnixComm
+ * @src_module_id: The #xorp_module_id module ID of the associated %UnixComm
  * entry. XXX: in the future it may become irrelevant.
  * @message_type: The message type of the kernel signal
  * (%IGMPMSG_* or %MRT6MSG_*)
@@ -1009,7 +1009,7 @@ MfeaNode::unix_comm_recv(x_module_id dst_module_id,
  **/
 int
 MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
-			      x_module_id src_module_id,
+			      xorp_module_id src_module_id,
 			      int message_type,
 			      uint16_t vif_index,
 			      const IPvX& src, const IPvX& dst,
@@ -1140,7 +1140,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 	if (! _unix_comms[i]->is_allow_kernel_signal_messages())
 	    continue;
 	
-	x_module_id dst_module_id = _unix_comms[i]->module_id();
+	xorp_module_id dst_module_id = _unix_comms[i]->module_id();
 	if (! mfea_vif->proto_is_registered(dst_module_id))
 	    continue;		// The message is not expected
 	
@@ -1218,7 +1218,7 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
 	if (! _unix_comms[i]->is_allow_kernel_signal_messages())
 	    continue;
 	
-	x_module_id dst_module_id = _unix_comms[i]->module_id();
+	xorp_module_id dst_module_id = _unix_comms[i]->module_id();
 	ProtoRegister& pr = _kernel_signal_messages_register;
 	if (! pr.is_registered(dst_module_id))
 	    continue;		// The message is not expected
@@ -1254,7 +1254,8 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
  * MfeaNode::join_multicast_group:
  * @module_instance_name: The module instance name of the protocol to join the
  * multicast group.
- * @module_id: The #x_module_id of the protocol to join the multicast group.
+ * @module_id: The #xorp_module_id of the protocol to join the multicast
+ * group.
  * @vif_index: The vif index of the interface to join.
  * @group: The multicast group to join.
  * 
@@ -1264,7 +1265,7 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
  **/
 int
 MfeaNode::join_multicast_group(const string& module_instance_name,
-			       x_module_id module_id,
+			       xorp_module_id module_id,
 			       uint16_t vif_index,
 			       const IPvX& group)
 {
@@ -1299,7 +1300,8 @@ MfeaNode::join_multicast_group(const string& module_instance_name,
  * MfeaNode::leave_multicast_group:
  * @module_instance_name: The module instance name of the protocol to leave the
  * multicast group.
- * @module_id: The #x_module_id of the protocol to leave the multicast group.
+ * @module_id: The #xorp_module_id of the protocol to leave the multicast
+ * group.
  * @vif_index: The vif index of the interface to leave.
  * @group: The multicast group to leave.
  * 
@@ -1309,7 +1311,7 @@ MfeaNode::join_multicast_group(const string& module_instance_name,
  **/
 int
 MfeaNode::leave_multicast_group(const string& module_instance_name,
-				x_module_id module_id,
+				xorp_module_id module_id,
 				uint16_t vif_index,
 				const IPvX& group)
 {
@@ -1363,7 +1365,7 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
 {
     uint8_t oifs_ttl[MAX_VIFS];
     uint8_t oifs_flags[MAX_VIFS];
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1441,7 +1443,7 @@ int
 MfeaNode::delete_mfc(const string& , // module_instance_name,
 		     const IPvX& source, const IPvX& group)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1490,7 +1492,7 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			       bool is_geq_upcall,
 			       bool is_leq_upcall)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1570,7 +1572,7 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 				  bool is_geq_upcall,
 				  bool is_leq_upcall)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1633,7 +1635,7 @@ int
 MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
 				      const IPvX& source, const IPvX& group)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1672,7 +1674,7 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
 int
 MfeaNode::add_multicast_vif(uint16_t vif_index)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1695,7 +1697,7 @@ MfeaNode::add_multicast_vif(uint16_t vif_index)
 int
 MfeaNode::delete_multicast_vif(uint16_t vif_index)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1725,7 +1727,7 @@ int
 MfeaNode::get_sg_count(const IPvX& source, const IPvX& group,
 		       SgCount& sg_count)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1751,7 +1753,7 @@ MfeaNode::get_sg_count(const IPvX& source, const IPvX& group,
 int
 MfeaNode::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 {
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);
@@ -1765,14 +1767,14 @@ MfeaNode::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 
 /**
  * MfeaNode::unix_comm_find_by_module_id:
- * @module_id: The #x_module_id to search for.
+ * @module_id: The #xorp_module_id to search for.
  * 
  * Return the #UnixComm entry that corresponds to @module_id.
  * 
  * Return value: The corresponding #UnixComm entry if found, otherwise NULL.
  **/
 UnixComm *
-MfeaNode::unix_comm_find_by_module_id(x_module_id module_id) const
+MfeaNode::unix_comm_find_by_module_id(xorp_module_id module_id) const
 {
     for (size_t i = 0; i < _unix_comms.size(); i++) {
 	if (_unix_comms[i] != NULL) {
@@ -1796,7 +1798,7 @@ int
 MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 {
     int ret_value = XORP_ERROR;
-    UnixComm *unix_comm = unix_comm_find_by_module_id(X_MODULE_NULL);
+    UnixComm *unix_comm = unix_comm_find_by_module_id(XORP_MODULE_NULL);
     
     if (unix_comm == NULL)
 	return (XORP_ERROR);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.3 2003/01/23 09:16:37 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.4 2003/03/10 23:20:12 hodson Exp $"
 
 
 //
@@ -56,20 +56,20 @@
  * CliNode::CliNode:
  * @init_family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
- * @init_module_id: The module ID (must be %X_MODULE_CLI).
+ * @init_module_id: The module ID (must be %XORP_MODULE_CLI).
  * @init_event_loop: The event loop.
  * 
  * CLI node constructor.
  **/
-CliNode::CliNode(int init_family, x_module_id module_id,
+CliNode::CliNode(int init_family, xorp_module_id module_id,
 		 EventLoop& init_event_loop)
     : ProtoNode<Vif>(init_family, module_id, init_event_loop),
       _cli_command_root(NULL, "", "")
 {
-    assert(module_id == X_MODULE_CLI);
-    if (module_id != X_MODULE_CLI) {
-	XLOG_FATAL("Invalid module ID = %d (must be 'X_MODULE_CLI' = %d)",
-		   module_id, X_MODULE_CLI);
+    assert(module_id == XORP_MODULE_CLI);
+    if (module_id != XORP_MODULE_CLI) {
+	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_CLI' = %d)",
+		   module_id, XORP_MODULE_CLI);
     }
     
     _cli_socket = -1;

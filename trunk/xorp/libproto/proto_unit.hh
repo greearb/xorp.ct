@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_unit.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libproto/proto_unit.hh,v 1.2 2003/03/10 23:20:20 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_UNIT_HH__
@@ -38,23 +38,23 @@
 /**
  * @short The unique module IDs (one per protocol or module).
  * 
- * Note: the module IDs must be consistent with the _x_module_name definition
- * in file proto_unit.cc (TODO: a temporary. solution).
+ * Note: the module IDs must be consistent with the _xorp_module_name
+ * definition in file proto_unit.cc (TODO: a temporary. solution).
  */
-enum x_module_id {
-    X_MODULE_MIN		= 0,
-    X_MODULE_NULL		= 0,
-    X_MODULE_FEA		= 1,
-    X_MODULE_MFEA		= 2,
-    X_MODULE_MLD6IGMP		= 3,
-    X_MODULE_PIMSM		= 4,
-    X_MODULE_PIMDM		= 5,
-    X_MODULE_BGMP		= 6,
-    X_MODULE_BGP		= 7,
-    X_MODULE_OSPF		= 8,
-    X_MODULE_RIP		= 9,
-    X_MODULE_CLI		= 10,
-    X_MODULE_MAX
+enum xorp_module_id {
+    XORP_MODULE_MIN		= 0,
+    XORP_MODULE_NULL		= 0,
+    XORP_MODULE_FEA		= 1,
+    XORP_MODULE_MFEA		= 2,
+    XORP_MODULE_MLD6IGMP	= 3,
+    XORP_MODULE_PIMSM		= 4,
+    XORP_MODULE_PIMDM		= 5,
+    XORP_MODULE_BGMP		= 6,
+    XORP_MODULE_BGP		= 7,
+    XORP_MODULE_OSPF		= 8,
+    XORP_MODULE_RIP		= 9,
+    XORP_MODULE_CLI		= 10,
+    XORP_MODULE_MAX
 };
 
 class IPvX;
@@ -68,9 +68,9 @@ public:
      * Constructor for a given address family and module ID.
      * 
      * @param init_family the address family.
-     * @param init_module_id the module ID (@ref x_module_id).
+     * @param init_module_id the module ID (@ref xorp_module_id).
      */
-    ProtoUnit(int init_family, x_module_id init_module_id);
+    ProtoUnit(int init_family, xorp_module_id init_module_id);
     
     /**
      * Destructor
@@ -125,7 +125,7 @@ public:
      * 
      * If an unit is not enabled, it cannot be start, or pending-start.
      */
-    void	enable()		{ _flags |= X_ENABLED;		}
+    void	enable()		{ _flags |= XORP_ENABLED;	}
 
     /**
      * Disable the unit.
@@ -133,7 +133,7 @@ public:
      * If an unit is disabled, it cannot be start or pending-start.
      * If the unit was runnning, it will be stop first.
      */
-    void	disable()		{ stop(); _flags &= ~X_ENABLED;	}
+    void	disable()		{ stop(); _flags &= ~XORP_ENABLED; }
     
     /**
      * Get the address family.
@@ -146,9 +146,9 @@ public:
     /**
      * Get the module ID.
      * 
-     * @return the module ID (@ref x_module_id).
+     * @return the module ID (@ref xorp_module_id).
      */
-    x_module_id	module_id()	const	{ return (_module_id);		}
+    xorp_module_id	module_id()	const	{ return (_module_id);	}
     
     /**
      * Get the current protocol version.
@@ -197,35 +197,35 @@ public:
      * 
      * @return true if the unit state is UP.
      */
-    bool	is_up()		const	{ return (_flags & X_UP);	}
+    bool	is_up()		const	{ return (_flags & XORP_UP);	}
     
     /**
      * Test if the unit state is DOWN.
      * 
      * @return true if the unit state is DOWN.
      */
-    bool	is_down()	const	{ return (_flags & X_DOWN);	}
+    bool	is_down()	const	{ return (_flags & XORP_DOWN);	}
 
     /**
      * Test if the unit state is PENDING-UP.
      * 
      * @return true if the unit state is PENDING-UP.
      */
-    bool	is_pending_up()	const	{ return (_flags & X_PENDING_UP); }
+    bool	is_pending_up()	const	{ return (_flags & XORP_PENDING_UP); }
 
     /**
      * Test if the unit state is PENDING-DOWN.
      * 
      * @return true if the unit state is PENDING-DOWN.
      */
-    bool	is_pending_down() const	{ return (_flags & X_PENDING_DOWN); }
+    bool	is_pending_down() const	{ return (_flags & XORP_PENDING_DOWN); }
     
     /**
      * Test if the unit is enabled.
      * 
      * @return true if the unit is enabled.
      */
-    bool	is_enabled()	const	{ return (_flags & X_ENABLED);	}
+    bool	is_enabled()	const	{ return (_flags & XORP_ENABLED); }
     
     /**
      * Test if the unit is disabled.
@@ -251,7 +251,7 @@ public:
     /**
      * Get the module name.
      * 
-     * TODO: temporary, all names are listed in "_x_module_name[][]"
+     * TODO: temporary, all names are listed in "_xorp_module_name[][]"
      * in proto_unit.cc.
      * 
      * @return C-style string with the module name.
@@ -293,7 +293,7 @@ public:
      * 
      * @return true if the protocol is MLD6 or IGMP.
      */
-    bool	proto_is_mld6igmp() const { return (_module_id == X_MODULE_MLD6IGMP); }
+    bool	proto_is_mld6igmp() const { return (_module_id == XORP_MODULE_MLD6IGMP); }
     
     /**
      * Test if the protocol is IGMP.
@@ -314,55 +314,56 @@ public:
      * 
      * @return true if the protocol is PIM-SM.
      */
-    bool	proto_is_pimsm() const { return (_module_id == X_MODULE_PIMSM); }
+    bool	proto_is_pimsm() const { return (_module_id == XORP_MODULE_PIMSM); }
     
     /**
      * Test if the protocol is PIM-DM.
      * 
      * @return true if the protocol is PIM-DM.
      */
-    bool	proto_is_pimdm() const { return (_module_id == X_MODULE_PIMDM); }
+    bool	proto_is_pimdm() const { return (_module_id == XORP_MODULE_PIMDM); }
 
     /**
      * Test if the protocol is BGMP.
      * 
      * @return true if the protocol is BGMP.
      */
-    bool	proto_is_bgmp() const { return (_module_id == X_MODULE_BGMP); }
+    bool	proto_is_bgmp() const { return (_module_id == XORP_MODULE_BGMP); }
 
     /**
      * Test if the protocol is BGP.
      * 
      * @return true if the protocol is BGP.
      */
-    bool	proto_is_bgp() const { return (_module_id == X_MODULE_BGP); }
+    bool	proto_is_bgp() const { return (_module_id == XORP_MODULE_BGP); }
 
     /**
      * Test if the protocol is OSPF.
      * 
      * @return true if the protocol is OSPF.
      */
-    bool	proto_is_ospf() const { return (_module_id == X_MODULE_OSPF); }
+    bool	proto_is_ospf() const { return (_module_id == XORP_MODULE_OSPF); }
     
     /**
      * Test if the protocol is RIP.
      * 
      * @return true if the protocol is RIP.
      */
-    bool	proto_is_rip() const { return (_module_id == X_MODULE_RIP); }
+    bool	proto_is_rip() const { return (_module_id == XORP_MODULE_RIP); }
     
 private:
     int		_family;		// The address family.
-    x_module_id	_module_id;		// The module ID (X_MODULE_*).
+    xorp_module_id _module_id;		// The module ID (XORP_MODULE_*).
     int		_comm_handler;		// The communication handler.
     enum {
-	X_UP		= 1 << 0,	// Entity is UP and running.
-	X_DOWN		= 1 << 1,	// Entity is DOWN.
-	X_PENDING_UP	= 1 << 2,	// Entity is pending UP.
-	X_PENDING_DOWN	= 1 << 3,	// Entity is pending DOWN.
-	X_ENABLED	= 1 << 4	// Entity is enabled.
+	XORP_UP		= 1 << 0,	// Entity is UP and running.
+	XORP_DOWN	= 1 << 1,	// Entity is DOWN.
+	XORP_PENDING_UP	= 1 << 2,	// Entity is pending UP.
+	XORP_PENDING_DOWN = 1 << 3,	// Entity is pending DOWN.
+	XORP_ENABLED	= 1 << 4	// Entity is enabled.
     };
-    uint32_t	_flags;			// Misc. flags: %X_UP, etc (see above).
+    uint32_t	_flags;			// Misc. flags: %XORP_UP, etc
+					// (see above).
     int		_proto_version;		// Protocol version (proto. specific).
     int		_proto_version_default;	// Default protocol version.
     bool	_debug_flag;		// Enable/Disable debug messages.
@@ -379,36 +380,36 @@ private:
 /**
  * Get the module name for a given address family and module ID.
  * 
- * TODO: temporary, all names are listed in "_x_module_name[][]"
+ * TODO: temporary, all names are listed in "_xorp_module_name[][]"
  * in proto_unit.cc.
  * 
  * @param family the address family (e.g., AF_INET or AF_INET6 for
  * IPv4 and IPv6 respectively).
- * @param module_id the module ID (@ref x_module_id).
+ * @param module_id the module ID (@ref xorp_module_id).
  * @return C-style string with the module name.
  */
-const char	*x_module_name(int family, x_module_id module_id);
+const char	*xorp_module_name(int family, xorp_module_id module_id);
 
 /**
  * Convert from module name to module ID.
  * 
- * The module name must be a valid name returned by @ref x_module_name().
+ * The module name must be a valid name returned by @ref xorp_module_name().
  * 
  * @param module_name the module name.
- * @return the module ID (@ref x_module_id) if @ref module_name is valid,
- * otherwise @ref X_MODULE_NULL.
+ * @return the module ID (@ref xorp_module_id) if @ref module_name is valid,
+ * otherwise @ref XORP_MODULE_NULL.
  */
-x_module_id	x_module_name2id(const char *module_name);
+xorp_module_id	xorp_module_name2id(const char *module_name);
 
 /**
  * Test if a module ID is valid.
  * 
  * A valid module ID is defined as valid if it is in the interval
- * [@ref X_MODULE_MIN, @ref X_MODULE_MAX).
+ * [@ref XORP_MODULE_MIN, @ref XORP_MODULE_MAX).
  * 
- * @param module_id the module ID to test (@ref x_module_id).
+ * @param module_id the module ID to test (@ref xorp_module_id).
  * @return true if @ref module_id is valid, otherwise false.
  */
-bool		is_valid_module_id(x_module_id module_id);
+bool		is_valid_module_id(xorp_module_id module_id);
 
 #endif // __LIBPROTO_PROTO_UNIT_HH__

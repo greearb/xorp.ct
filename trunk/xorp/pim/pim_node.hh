@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.7 2003/03/10 23:20:49 hodson Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.8 2003/03/13 00:27:33 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -64,12 +64,12 @@ public:
      * 
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
-     * @param module_id the module ID (@ref x_module_id). Should be
-     * X_MODULE_PIMSM Note: if/after PIM-DM is implemented, X_MODULE_PIMDM
-     * would be allowed as well.
+     * @param module_id the module ID (@ref xorp_module_id). Should be
+     * XORP_MODULE_PIMSM Note: if/after PIM-DM is implemented,
+     * XORP_MODULE_PIMDM would be allowed as well.
      * @param event_loop the event loop to use.
      */
-    PimNode(int family, x_module_id module_id, EventLoop& event_loop);
+    PimNode(int family, xorp_module_id module_id, EventLoop& event_loop);
     
     /**
      * Destructor
@@ -240,7 +240,7 @@ public:
      * @param src_module_instance_name the module instance name of the
      * module-origin of the message.
      * 
-     * @param src_module_id the module ID (@ref x_module_id) of the
+     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param vif_index the vif index of the interface used to receive this
@@ -266,7 +266,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_recv(const string& src_module_instance_name,
-			   x_module_id src_module_id,
+			   xorp_module_id src_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -301,7 +301,7 @@ public:
      * @param src_module_instance_name the module instance name of the
      * module-origin of the message.
      * 
-     * @param src_module_id the module ID (@ref x_module_id) of the
+     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param message_type the message type.
@@ -328,7 +328,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		signal_message_recv(const string& src_module_instance_name,
-				    x_module_id src_module_id,
+				    xorp_module_id src_module_id,
 				    int message_type,
 				    uint16_t vif_index,
 				    const IPvX& src,
@@ -339,7 +339,7 @@ public:
      * Send signal message: not used by PIM.
      */
     int		signal_message_send(const string&, // dst_module_instance_name,
-				    x_module_id	, // dst_module_id,
+				    xorp_module_id, // dst_module_id,
 				    int		, // message_type,
 				    uint16_t	, // vif_index,
 				    const IPvX&	, // src,

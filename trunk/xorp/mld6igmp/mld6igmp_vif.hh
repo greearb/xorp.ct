@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.2 2003/03/10 23:20:43 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.3 2003/03/13 00:32:05 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -172,11 +172,11 @@ public:
      * 
      * @param module_instance_name the module instance name of the
      * protocol to add.
-     * @param module_id the module ID (@ref x_module_id) of the
+     * @param module_id the module ID (@ref xorp_module_id) of the
      * protocol to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_protocol(x_module_id module_id,
+    int add_protocol(xorp_module_id module_id,
 		     const string& module_instance_name);
     
     /**
@@ -188,11 +188,11 @@ public:
      * 
      * @param module_instance_name the module instance name of the
      * protocol to delete.
-     * @param module_id the module ID (@ref x_module_id) of the
+     * @param module_id the module ID (@ref xorp_module_id) of the
      * protocol to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_protocol(x_module_id module_id,
+    int delete_protocol(xorp_module_id module_id,
 			const string& module_instance_name);
     
 private:
@@ -227,7 +227,7 @@ private:
     // Misc. other state
     //
     // Registered protocols to notify for membership change.
-    vector<pair<x_module_id, string> > _notify_routing_protocols;
+    vector<pair<xorp_module_id, string> > _notify_routing_protocols;
     
     //
     // Not-so handy private functions that should go somewhere else

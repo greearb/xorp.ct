@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.2 2003/02/22 21:02:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.3 2003/03/10 23:21:03 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -71,7 +71,7 @@ XorpShell::XorpShell(const string& IPCname,
     _xclient(&_event_loop, &_xrlrouter),
     _rtrmgr_client(&_xrlrouter),
     _xorpsh_interface(&_xrlrouter, this),
-    _cli_node(AF_INET, X_MODULE_CLI, _event_loop),
+    _cli_node(AF_INET, XORP_MODULE_CLI, _event_loop),
     _mode(MODE_INITIALIZING)
 {
     _ipc_name = IPCname;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.2 2003/03/10 23:20:20 hodson Exp $"
 
 
 //
@@ -33,21 +33,21 @@
 // Local constants definitions
 //
 
-// XXX: must be consistent with x_module_id definition
+// XXX: must be consistent with xorp_module_id definition
 // (TODO: a temp. solution)
 // TODO: the _4/6 suffix is a temp. solution
-static const char *_x_module_name[][2] = {
-    { "X_MODULE_NULL",	"X_MODULE_NULL"	},	// 0
-    { "FEA_4",		"FEA_6"		},	// 1
-    { "MFEA_4",		"MFEA_6"	},	// 2
-    { "IGMP",		"MLD"		},	// 3
-    { "PIMSM_4",	"PIMSM_6"	},	// 4
-    { "PIMDM_4",	"PIMDM_6"	},	// 5
-    { "BGMP_4",		"BGMP_6"	},	// 6
-    { "BGP_4",		"BGP_6"		},	// 7
-    { "OSPF_4",		"OSPF_6"	},	// 8
-    { "RIP_4",		"RIP_6"		},	// 9
-    { "CLI",		"CLI"		}	// 10
+static const char *_xorp_module_name[][2] = {
+    { "XORP_MODULE_NULL",	"XORP_MODULE_NULL" },	// 0
+    { "FEA_4",			"FEA_6"		},	// 1
+    { "MFEA_4",			"MFEA_6"	},	// 2
+    { "IGMP",			"MLD"		},	// 3
+    { "PIMSM_4",		"PIMSM_6"	},	// 4
+    { "PIMDM_4",		"PIMDM_6"	},	// 5
+    { "BGMP_4",			"BGMP_6"	},	// 6
+    { "BGP_4",			"BGP_6"		},	// 7
+    { "OSPF_4",			"OSPF_6"	},	// 8
+    { "RIP_4",			"RIP_6"		},	// 9
+    { "CLI",			"CLI"		}	// 10
 };
 
 //
@@ -64,16 +64,16 @@ static const char *_x_module_name[][2] = {
 
 
 /**
- * x_module_name:
+ * xorp_module_name:
  * @family: The address family.
- * @module_id: The #x_module_id module ID to search for.
+ * @module_id: The #xorp_module_id module ID to search for.
  * 
  * Return the pre-defined module name for a given address family and module ID.
  * 
  * Return value: C string with the module name.
  **/
 const char *
-x_module_name(int family, x_module_id module_id)
+xorp_module_name(int family, xorp_module_id module_id)
 {
     if (! is_valid_module_id(module_id)) {
 	XLOG_ERROR("Invalid module_id = %d", module_id);
@@ -81,11 +81,11 @@ x_module_name(int family, x_module_id module_id)
     }
     
     if (family == AF_INET)
-	return (_x_module_name[module_id][0]);
+	return (_xorp_module_name[module_id][0]);
     
 #ifdef HAVE_IPV6
     if (family == AF_INET6)
-	return (_x_module_name[module_id][1]);
+	return (_xorp_module_name[module_id][1]);
 #endif // HAVE_IPV6
     
     XLOG_ERROR("Invalid address family = %d", family);
@@ -93,24 +93,24 @@ x_module_name(int family, x_module_id module_id)
 }
 
 /**
- * x_module_name2id:
+ * xorp_module_name2id:
  * @module_name: The module name to searh for.
  * 
  * Return the pre-defined module ID for a given module name.
  * 
  * Return value: The module ID if @module_name is a valid module name,
- * otherwise %X_MODULE_NULL.
+ * otherwise %XORP_MODULE_NULL.
  **/
-x_module_id
-x_module_name2id(const char *module_name)
+xorp_module_id
+xorp_module_name2id(const char *module_name)
 {
-    for (int i = X_MODULE_MIN; i < X_MODULE_MAX; i++) {
-	if ((strcmp(module_name, _x_module_name[i][0]) == 0)
-	    || (strcmp(module_name, _x_module_name[i][1]) == 0))
-	    return (static_cast<x_module_id>(i));
+    for (int i = XORP_MODULE_MIN; i < XORP_MODULE_MAX; i++) {
+	if ((strcmp(module_name, _xorp_module_name[i][0]) == 0)
+	    || (strcmp(module_name, _xorp_module_name[i][1]) == 0))
+	    return (static_cast<xorp_module_id>(i));
     }
     
-    return (X_MODULE_NULL);
+    return (XORP_MODULE_NULL);
 }
 
 /**
@@ -122,9 +122,9 @@ x_module_name2id(const char *module_name)
  * Return value: true if @module_id is valid, otherwise false.
  **/
 bool
-is_valid_module_id(x_module_id module_id)
+is_valid_module_id(xorp_module_id module_id)
 {
-    if ((X_MODULE_MIN <= module_id) && (module_id < X_MODULE_MAX))
+    if ((XORP_MODULE_MIN <= module_id) && (module_id < XORP_MODULE_MAX))
 	return (true);
     
     return (false);
@@ -134,11 +134,11 @@ is_valid_module_id(x_module_id module_id)
  * ProtoUnit::ProtoUnit:
  * @init_family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
- * @init_module_id: The module ID (X_MODULE_*).
+ * @init_module_id: The module ID (XORP_MODULE_*).
  * 
  * Proto unit node constructor.
  **/
-ProtoUnit::ProtoUnit(int init_family, x_module_id init_module_id)
+ProtoUnit::ProtoUnit(int init_family, xorp_module_id init_module_id)
     : _family(init_family),
       _module_id(init_module_id)
 {
@@ -151,7 +151,7 @@ ProtoUnit::ProtoUnit(int init_family, x_module_id init_module_id)
     _proto_version	= 0;
     _proto_version_default = 0;
     _debug_flag		= false;
-    _module_name	= x_module_name(init_family, init_module_id);
+    _module_name	= xorp_module_name(init_family, init_module_id);
     disable();			// XXX: default is to disable.
 }
 
@@ -184,8 +184,8 @@ ProtoUnit::start()
 	return (XORP_ERROR);
     if (is_up())
 	return (XORP_ERROR);		// Already running
-    _flags &= ~(X_UP | X_DOWN | X_PENDING_UP | X_PENDING_DOWN);
-    _flags |= X_UP;
+    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
+    _flags |= XORP_UP;
     
     return (XORP_OK);
 }
@@ -195,8 +195,8 @@ ProtoUnit::stop()
 {
     if (is_down())
 	return (XORP_ERROR);		// Wasn't running
-    _flags &= ~(X_UP | X_DOWN | X_PENDING_UP | X_PENDING_DOWN);
-    _flags |= X_DOWN;
+    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
+    _flags |= XORP_DOWN;
     
     return (XORP_OK);
 }
@@ -210,8 +210,8 @@ ProtoUnit::pending_start()
 	return (XORP_ERROR);		// Already running
     if (is_pending_up())
 	return (XORP_ERROR);		// Already pending UP
-    _flags &= ~(X_UP | X_DOWN | X_PENDING_UP | X_PENDING_DOWN);
-    _flags |= X_PENDING_UP;
+    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
+    _flags |= XORP_PENDING_UP;
     
     return (XORP_OK);
 }
@@ -223,8 +223,8 @@ ProtoUnit::pending_stop()
 	return (XORP_ERROR);		// Wasn't running
     if (is_pending_down())
 	return (XORP_ERROR);		// Already pending DOWN
-    _flags &= ~(X_UP | X_DOWN | X_PENDING_UP | X_PENDING_DOWN);
-    _flags |= X_PENDING_DOWN;
+    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
+    _flags |= XORP_PENDING_DOWN;
     
     return (XORP_OK);
 }

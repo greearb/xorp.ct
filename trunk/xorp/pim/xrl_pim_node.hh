@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.11 2003/03/10 23:20:54 hodson Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.12 2003/03/17 23:38:00 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -46,7 +46,7 @@ class XrlPimNode : public PimNode,
 		   public XrlCliManagerV0p1Client,
 		   public PimNodeCli {
 public:
-    XrlPimNode(int family, x_module_id module_id,
+    XrlPimNode(int family, xorp_module_id module_id,
 	       EventLoop& event_loop, XrlRouter* xrl_router)
 	: PimNode(family, module_id, event_loop),
 	  XrlPimTargetBase(xrl_router),
@@ -103,7 +103,7 @@ protected:
 					const string *reason);
     
     int	proto_send(const string& dst_module_instance_name,
-		   x_module_id dst_module_id,
+		   xorp_module_id dst_module_id,
 		   uint16_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl,int ip_tos,  bool router_alert_bool,

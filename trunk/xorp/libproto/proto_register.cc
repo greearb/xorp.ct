@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_register.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libproto/proto_register.cc,v 1.2 2003/03/10 23:20:20 hodson Exp $"
 
 
 //
@@ -50,7 +50,7 @@
  * ProtoRegister::add_protocol:
  * @module_instance_name: The module instance name of the protocol to
  * add/register.
- * @module_id: The #x_module_id of the protocol to add/register.
+ * @module_id: The #xorp_module_id of the protocol to add/register.
  * 
  * Add/register a protocol instance.
  * 
@@ -58,7 +58,7 @@
  **/
 int
 ProtoRegister::add_protocol(const string& module_instance_name,
-			    x_module_id module_id)
+			    xorp_module_id module_id)
 {
     if (! is_valid_module_id(module_id)) {
 	XLOG_ERROR("Cannot add protocol instance %s: "
@@ -79,7 +79,7 @@ ProtoRegister::add_protocol(const string& module_instance_name,
  * ProtoRegister::delete_protocol:
  * @module_instance_name: The module instance name of the protocol to
  * delete/deregister.
- * @module_id: The #x_module_id of the protocol to delete/deregister.
+ * @module_id: The #xorp_module_id of the protocol to delete/deregister.
  * 
  * Delete/deregister a protocol instance.
  * 
@@ -87,7 +87,7 @@ ProtoRegister::add_protocol(const string& module_instance_name,
  **/
 int
 ProtoRegister::delete_protocol(const string& module_instance_name,
-			       x_module_id module_id)
+			       xorp_module_id module_id)
 {
     if (! is_valid_module_id(module_id)) {
 	XLOG_ERROR("Cannot delete protocol instance %s: "
@@ -107,7 +107,7 @@ ProtoRegister::delete_protocol(const string& module_instance_name,
 /**
  * ProtoRegister::is_registered:
  * @module_instance_name: The module instance name of the protocol to test.
- * @module_id: The #x_module_id of the protocol to test.
+ * @module_id: The #xorp_module_id of the protocol to test.
  * 
  * Test if a protocol module instance is registered.
  * 
@@ -115,7 +115,7 @@ ProtoRegister::delete_protocol(const string& module_instance_name,
  **/
 bool
 ProtoRegister::is_registered(const string& module_instance_name,
-			     x_module_id module_id) const
+			     xorp_module_id module_id) const
 {
     if (! is_valid_module_id(module_id)) {
 	XLOG_ERROR("Cannot test if registered protocol instance %s: "

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.4 2003/03/10 23:20:43 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.5 2003/03/13 00:32:05 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -165,7 +165,7 @@ XrlMld6igmpNode::xrl_result_delete_protocol(const XrlError& xrl_error,
  * XrlMld6igmpNode::proto_send:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the destination of the message.
+ * @dst_module_id: The #xorp_module_id of the destination of the message.
  * @vif_index: The vif index of the interface to send this message.
  * @src: The source address of the message.
  * @dst: The destination address of the message.
@@ -184,7 +184,7 @@ XrlMld6igmpNode::xrl_result_delete_protocol(const XrlError& xrl_error,
  **/
 int
 XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
-			    x_module_id		, // dst_module_id,
+			    xorp_module_id		, // dst_module_id,
 			    uint16_t vif_index,
 			    const IPvX& src,
 			    const IPvX& dst,
@@ -277,14 +277,14 @@ XrlMld6igmpNode::start_protocol_kernel()
     //
     if (family() == AF_INET) {
 	XrlMfeaV0p1Client::send_add_protocol4(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(Mld6igmpNode::module_name()),
 	    Mld6igmpNode::module_id(),
 	    callback(this, &XrlMld6igmpNode::xrl_result_add_protocol));
     } else {
 	XrlMfeaV0p1Client::send_add_protocol6(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(Mld6igmpNode::module_name()),
 	    Mld6igmpNode::module_id(),
@@ -299,14 +299,14 @@ XrlMld6igmpNode::stop_protocol_kernel()
 {   
     if (family() == AF_INET) {
 	XrlMfeaV0p1Client::send_delete_protocol4(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(Mld6igmpNode::module_name()),
 	    Mld6igmpNode::module_id(),
 	    callback(this, &XrlMld6igmpNode::xrl_result_delete_protocol));
     } else {
 	XrlMfeaV0p1Client::send_delete_protocol6(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(Mld6igmpNode::module_name()),
 	    Mld6igmpNode::module_id(),
@@ -330,7 +330,7 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
     do {
 	if (Mld6igmpNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_start_protocol_vif4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -342,7 +342,7 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
 	
 	if (Mld6igmpNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_start_protocol_vif6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -388,7 +388,7 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
     do {
 	if (Mld6igmpNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_stop_protocol_vif4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -400,7 +400,7 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
 	
 	if (Mld6igmpNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_stop_protocol_vif6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -447,7 +447,7 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
     do {
 	if (multicast_group.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_join_multicast_group4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -460,7 +460,7 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
 	
 	if (multicast_group.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_join_multicast_group6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -508,7 +508,7 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
     do {
 	if (multicast_group.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_leave_multicast_group4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -521,7 +521,7 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
 	
 	if (multicast_group.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_leave_multicast_group6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
@@ -557,7 +557,7 @@ XrlMld6igmpNode::xrl_result_leave_multicast_group(const XrlError& xrl_error,
 
 int
 XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
-				     x_module_id , // dst_module_id,
+				     xorp_module_id , // dst_module_id,
 				     uint16_t vif_index,
 				     const IPvX& source,
 				     const IPvX& group)
@@ -624,7 +624,7 @@ XrlMld6igmpNode::xrl_result_send_add_membership(const XrlError& xrl_error,
 
 int
 XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
-					x_module_id , // dst_module_id,
+					xorp_module_id , // dst_module_id,
 					uint16_t vif_index,
 					const IPvX& source,
 					const IPvX& group)
@@ -702,7 +702,7 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
     )
 {
     XrlCliManagerV0p1Client::send_add_cli_command(
-	x_module_name(family(), X_MODULE_CLI),
+	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	string(command_help),
@@ -734,7 +734,7 @@ int
 XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
     XrlCliManagerV0p1Client::send_delete_cli_command(
-	x_module_name(family(), X_MODULE_CLI),
+	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	callback(this, &XrlMld6igmpNode::xrl_result_delete_cli_command));
@@ -1083,7 +1083,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	reason = c_format("Invalid module ID = %d", protocol_id);
 	fail = true;
@@ -1154,7 +1154,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1588,7 +1588,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	reason = c_format("Invalid module ID = %d", protocol_id);
 	fail = true;
@@ -1678,7 +1678,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1764,7 +1764,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	reason = c_format("Invalid module ID = %d", protocol_id);
 	fail = true;
@@ -1826,7 +1826,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);

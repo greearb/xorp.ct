@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.7 2003/03/13 00:32:06 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.8 2003/03/17 23:24:55 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -46,7 +46,7 @@ class XrlMld6igmpNode : public Mld6igmpNode,
 			public XrlMld6igmpClientV0p1Client,
 			public Mld6igmpNodeCli {
 public:
-    XrlMld6igmpNode(int family, x_module_id module_id, 
+    XrlMld6igmpNode(int family, xorp_module_id module_id, 
 		    EventLoop& event_loop, XrlRouter* xrl_router)
 	: Mld6igmpNode(family, module_id, event_loop),
 	  XrlMld6igmpTargetBase(xrl_router),
@@ -86,7 +86,7 @@ protected:
 				    const string *reason);
     
     int	proto_send(const string& dst_module_instance_name,
-		   x_module_id dst_module_id,
+		   xorp_module_id dst_module_id,
 		   uint16_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -121,7 +121,7 @@ protected:
 					  const string *reason);
     
     int send_add_membership(const string& dst_module_instance_name,
-			    x_module_id dst_module_id,
+			    xorp_module_id dst_module_id,
 			    uint16_t vif_index,
 			    const IPvX& source,
 			    const IPvX& group);
@@ -130,7 +130,7 @@ protected:
 					const string *reason);
 
     int send_delete_membership(const string& dst_module_instance_name,
-			       x_module_id dst_module_id,
+			       xorp_module_id dst_module_id,
 			       uint16_t vif_index,
 			       const IPvX& source,
 			       const IPvX& group);

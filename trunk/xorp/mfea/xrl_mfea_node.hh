@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.6 2003/03/10 23:20:42 hodson Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.7 2003/03/17 23:24:29 pavlin Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -46,7 +46,7 @@ class XrlMfeaNode : public MfeaNode,
 		    public XrlCliManagerV0p1Client,
 		    public MfeaNodeCli {
 public:
-    XrlMfeaNode(int family, x_module_id module_id,
+    XrlMfeaNode(int family, xorp_module_id module_id,
 		EventLoop& event_loop, XrlRouter* xrl_router)
 	: MfeaNode(family, module_id, event_loop),
 	  XrlMfeaTargetBase(xrl_router),
@@ -75,7 +75,7 @@ protected:
     // Protocol node methods
     //
     int	proto_send(const string& dst_module_instance_name,
-		   x_module_id dst_module_id,
+		   xorp_module_id dst_module_id,
 		   uint16_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -92,7 +92,7 @@ protected:
 					  const bool *fail,
 					  const string *reason);
     int signal_message_send(const string& dst_module_instance_name,
-			    x_module_id dst_module_id,
+			    xorp_module_id dst_module_id,
 			    int message_type,
 			    uint16_t vif_index,
 			    const IPvX& src, const IPvX& dst,
@@ -102,13 +102,13 @@ protected:
     // Methods for sending MRIB information
     //
     int	send_add_mrib(const string& dst_module_instance_name,
-		      x_module_id dst_module_id,
+		      xorp_module_id dst_module_id,
 		      const Mrib& mrib);
     int	send_delete_mrib(const string& dst_module_instance_name,
-			 x_module_id dst_module_id,
+			 xorp_module_id dst_module_id,
 			 const Mrib& mrib);
     int	send_set_mrib_done(const string& dst_module_instance_name,
-			   x_module_id dst_module_id);
+			   xorp_module_id dst_module_id);
     
     //
     // XXX: xrl_result_recv_kernel_signal_message() in fact
@@ -146,7 +146,7 @@ protected:
 				      const string *reason);
     
     int dataflow_signal_send(const string& dst_module_instance_name,
-			     x_module_id dst_module_id,
+			     xorp_module_id dst_module_id,
 			     const IPvX& source_addr,
 			     const IPvX& group_addr,
 			     uint32_t threshold_interval_sec,

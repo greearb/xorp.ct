@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_vif.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_vif.cc,v 1.2 2003/03/10 23:20:41 hodson Exp $"
 
 
 //
@@ -154,7 +154,7 @@ MfeaVif::stop(void)
  * MfeaVif::start_protocol:
  * @module_instance_name: The module instance name of the protocol to start
  * on this vif.
- * @module_id: The #x_module_id of the protocol to start on this vif.
+ * @module_id: The #xorp_module_id of the protocol to start on this vif.
  * 
  * Start a protocol on a single virtual vif.
  * 
@@ -162,7 +162,7 @@ MfeaVif::stop(void)
  **/
 int
 MfeaVif::start_protocol(const string& module_instance_name,
-			x_module_id module_id)
+			xorp_module_id module_id)
 {
     if (! is_valid_module_id(module_id)) {
 	XLOG_ERROR("Cannot start protocol instance %s on vif %s: "
@@ -196,7 +196,7 @@ MfeaVif::start_protocol(const string& module_instance_name,
  * MfeaVif::stop_protocol:
  * @module_instance_name: The module instance name of the protocol to stop
  * on this vif.
- * @module_id: The #x_module_id of the protocol to stop on this vif.
+ * @module_id: The #xorp_module_id of the protocol to stop on this vif.
  * 
  * Stop a protocol on this vif.
  * 
@@ -204,7 +204,7 @@ MfeaVif::start_protocol(const string& module_instance_name,
  **/
 int
 MfeaVif::stop_protocol(const string& module_instance_name,
-		       x_module_id module_id)
+		       xorp_module_id module_id)
 {
     if (! is_valid_module_id(module_id)) {
 	XLOG_ERROR("Cannot stop protocol instance %s on vif %s: "
@@ -225,8 +225,8 @@ MfeaVif::stop_protocol(const string& module_instance_name,
     // Test if we should stop the vif
     //
     bool do_stop = true;
-    for (size_t i = 0; i < X_MODULE_MAX; i++) {
-	if (_proto_register.is_registered(static_cast<x_module_id>(i))) {
+    for (size_t i = 0; i < XORP_MODULE_MAX; i++) {
+	if (_proto_register.is_registered(static_cast<xorp_module_id>(i))) {
 	    do_stop = false;		// Vif is still in use by a protocol
 	    break;
 	}
@@ -253,15 +253,15 @@ MfeaVif::leave_all_multicast_groups()
     int ret_value = 0;
     
     // Get a copy of the joined multicast state
-    list<pair<pair<string, x_module_id>, IPvX> > joined_state
+    list<pair<pair<string, xorp_module_id>, IPvX> > joined_state
 	= _joined_groups.joined_state();
-    list<pair<pair<string, x_module_id>, IPvX> >::iterator iter;
+    list<pair<pair<string, xorp_module_id>, IPvX> >::iterator iter;
     
     // Remove all the joined state and leave the groups
     for (iter = joined_state.begin(); iter != joined_state.end(); ++iter) {
-	pair<string, x_module_id>& proto_state = (*iter).first;
+	pair<string, xorp_module_id>& proto_state = (*iter).first;
 	string& tmp_module_instance_name = proto_state.first;
-	x_module_id tmp_module_id = proto_state.second;
+	xorp_module_id tmp_module_id = proto_state.second;
 	IPvX& group = (*iter).second;
 	
 	if (mfea_node().leave_multicast_group(tmp_module_instance_name,
@@ -289,21 +289,21 @@ MfeaVif::leave_all_multicast_groups()
  **/
 int
 MfeaVif::leave_all_multicast_groups(const string& module_instance_name,
-				    x_module_id module_id)
+				    xorp_module_id module_id)
 {
     int ret_value = 0;
     
     // Get a copy of the joined multicast state
-    list<pair<pair<string, x_module_id>, IPvX> > joined_state
+    list<pair<pair<string, xorp_module_id>, IPvX> > joined_state
 	= _joined_groups.joined_state();
-    list<pair<pair<string, x_module_id>, IPvX> >::iterator iter;
+    list<pair<pair<string, xorp_module_id>, IPvX> >::iterator iter;
     
     // Remove all the joined state and leave the groups that were joined by
     // a module that matches 'module_instance_name' and 'module_id'.
     for (iter = joined_state.begin(); iter != joined_state.end(); ++iter) {
-	pair<string, x_module_id>& proto_state = (*iter).first;
+	pair<string, xorp_module_id>& proto_state = (*iter).first;
 	string& tmp_module_instance_name = proto_state.first;
-	x_module_id tmp_module_id = proto_state.second;
+	xorp_module_id tmp_module_id = proto_state.second;
 	IPvX& group = (*iter).second;
 	
 	if ((module_instance_name != tmp_module_instance_name)
@@ -333,19 +333,19 @@ MfeaVif::leave_all_multicast_groups(const string& module_instance_name,
  **/
 int
 MfeaVif::JoinedGroups::add_multicast_group(const string& module_instance_name,
-					   x_module_id module_id,
+					   xorp_module_id module_id,
 					   const IPvX& group)
 {
-    pair<string, x_module_id> my_pair(module_instance_name, module_id);
+    pair<string, xorp_module_id> my_pair(module_instance_name, module_id);
     
     if (find(_joined_state.begin(), _joined_state.end(),
-	     pair<pair<string, x_module_id>, IPvX>(my_pair, group))
+	     pair<pair<string, xorp_module_id>, IPvX>(my_pair, group))
 	!= _joined_state.end()) {
 	return (XORP_ERROR);	// Already joined
     }
     
     // Add the pair of group address and module instance name
-    _joined_state.push_back(pair<pair<string, x_module_id>, IPvX>(my_pair, group));
+    _joined_state.push_back(pair<pair<string, xorp_module_id>, IPvX>(my_pair, group));
     
     //
     // Add the group address itself.
@@ -370,15 +370,15 @@ MfeaVif::JoinedGroups::add_multicast_group(const string& module_instance_name,
  **/
 int
 MfeaVif::JoinedGroups::delete_multicast_group(const string& module_instance_name,
-					      x_module_id module_id,
+					      xorp_module_id module_id,
 					      const IPvX& group)
 {
-    pair<string, x_module_id> my_pair(module_instance_name, module_id);
+    pair<string, xorp_module_id> my_pair(module_instance_name, module_id);
     
-    list<pair<pair<string, x_module_id>, IPvX> >::iterator iter;
+    list<pair<pair<string, xorp_module_id>, IPvX> >::iterator iter;
     
     iter = find(_joined_state.begin(), _joined_state.end(),
-		pair<pair<string, x_module_id>, IPvX>(my_pair, group));
+		pair<pair<string, xorp_module_id>, IPvX>(my_pair, group));
     if (iter == _joined_state.end())
 	return (XORP_ERROR);	// Probably not added before
     
@@ -388,7 +388,7 @@ MfeaVif::JoinedGroups::delete_multicast_group(const string& module_instance_name
     // Try to find if other instances have joined the same group
     //
     for (iter = _joined_state.begin(); iter != _joined_state.end(); ++iter) {
-	pair<pair<string, x_module_id>, IPvX>& tmp_pair = *iter;
+	pair<pair<string, xorp_module_id>, IPvX>& tmp_pair = *iter;
 	if (tmp_pair.second == group)
 	    return (XORP_OK);	// Group is still in use
     }

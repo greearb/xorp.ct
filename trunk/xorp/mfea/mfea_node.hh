@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.2 2003/02/08 09:18:26 pavlin Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.3 2003/03/10 23:20:39 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -63,11 +63,11 @@ public:
      * 
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
-     * @param module_id the module ID (@ref x_module_id). Should be
-     * equal to X_MODULE_MFEA.
+     * @param module_id the module ID (@ref xorp_module_id). Should be
+     * equal to XORP_MODULE_MFEA.
      * @param event_loop the event loop to use.
      */
-    MfeaNode(int family, x_module_id module_id, EventLoop& event_loop);
+    MfeaNode(int family, xorp_module_id module_id, EventLoop& event_loop);
     
     /**
      * Destructor
@@ -144,58 +144,58 @@ public:
     /**
      * Start operation for a given protocol.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to start.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_protocol(x_module_id module_id);
+    int		start_protocol(xorp_module_id module_id);
     
     /**
      * Stop operation for a given protocol.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to stop.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_protocol(x_module_id module_id);
+    int		stop_protocol(xorp_module_id module_id);
     
     /**
      * A method used by a protocol instance to register with this MfeaNode.
      * 
      * @param module_instance_name the module instance name of the protocol
      * to add.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_protocol(const string& module_instance_name,
-			     x_module_id module_id);
+			     xorp_module_id module_id);
     
     /**
      * A method used by a protocol instance to deregister with this MfeaNode.
      * 
      * @param module_instance_name the module instance name of the protocol
      * to delete.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_protocol(const string& module_instance_name,
-				x_module_id proto_id);
+				xorp_module_id module_id);
     
     /**
      * Start a protocol on an interface.
      * 
      * @param module_instance_name the module instance name of the protocol
      * to start on the interface.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to start on the interface.
      * @param vif_index the vif index of the interface to start the
      * protocol on.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_protocol_vif(const string& module_instance_name,
-				   x_module_id module_id,
+				   xorp_module_id module_id,
 				   uint16_t vif_index);
 
     /**
@@ -203,14 +203,14 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to stop on the interface.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to stop on the interface.
      * @param vif_index the vif index of the interface to stop the
      * protocol on.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_protocol_vif(const string& module_instance_name,
-				  x_module_id module_id,
+				  xorp_module_id module_id,
 				  uint16_t vif_index);
     
     /**
@@ -230,12 +230,12 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to add.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_allow_kernel_signal_messages(const string& module_instance_name,
-						 x_module_id module_id);
+						 xorp_module_id module_id);
     
     /**
      * Delete a protocol from receiving kernel signal messages.
@@ -254,12 +254,12 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to delete.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_allow_kernel_signal_messages(const string& module_instance_name,
-						    x_module_id module_id);
+						    xorp_module_id module_id);
     
     /**
      * Add a protocol to receive MRIB messages.
@@ -273,12 +273,12 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to add.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_allow_mrib_messages(const string& module_instance_name,
-					x_module_id module_id);
+					xorp_module_id module_id);
     
     /**
      * Delete a protocol from receiving MRIB messages.
@@ -292,12 +292,12 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to delete.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_allow_mrib_messages(const string& module_instance_name,
-					   x_module_id module_id);
+					   xorp_module_id module_id);
     
     /**
      * Add a @ref Mrib entry to user-level protocols.
@@ -340,7 +340,7 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param mrib the @ref Mrib entry to add.
@@ -348,7 +348,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_add_mrib(const string& dst_module_instance_name,
-			      x_module_id dst_module_id,
+			      xorp_module_id dst_module_id,
 			      const Mrib& mrib) = 0;
 
     /**
@@ -360,7 +360,7 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param mrib the @ref Mrib entry to delete.
@@ -368,7 +368,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_delete_mrib(const string& dst_module_instance_name,
-				 x_module_id dst_module_id,
+				 xorp_module_id dst_module_id,
 				 const Mrib& mrib) = 0;
 
     /**
@@ -381,13 +381,13 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_set_mrib_done(const string& dst_module_instance_name,
-				   x_module_id dst_module_id) = 0;
+				   xorp_module_id dst_module_id) = 0;
     
     /**
      * Receive a protocol message from an user-level protocol.
@@ -395,7 +395,7 @@ public:
      * @param src_module_instance_name the module instance name of the
      * module-origin of the message.
      * 
-     * @param src_module_id the module ID (@ref x_module_id) of the
+     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param vif_index the vif index of the interface used to receive this
@@ -421,7 +421,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_recv(const string& src_module_instance_name,
-			   x_module_id src_module_id,
+			   xorp_module_id src_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -433,7 +433,7 @@ public:
      * Note: it uses the pure virtual ProtoNode::proto_send() method
      * that is implemented somewhere else (at a class that inherits this one).
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param vif_index the vif index of the interface used to receive this
@@ -458,7 +458,7 @@ public:
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		unix_comm_recv(x_module_id dst_module_id,
+    int		unix_comm_recv(xorp_module_id dst_module_id,
 			       uint16_t vif_index,
 			       const IPvX& src, const IPvX& dst,
 			       int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -471,7 +471,7 @@ public:
      * The signal is sent to all user-level protocols that expect it.
      * 
      * @param src_module_instance_name unused.
-     * @param src_module_id the @ref x_module_id module ID of the
+     * @param src_module_id the @ref xorp_module_id module ID of the
      * associated @ref UnixComm entry. Note: in the future it may become
      * irrelevant.
      * @param message_type the message type of the kernel signal (for IPv4
@@ -499,7 +499,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		signal_message_recv(const string& src_module_instance_name,
-				    x_module_id src_module_id,
+				    xorp_module_id src_module_id,
 				    int message_type,
 				    uint16_t vif_index,
 				    const IPvX& src,
@@ -577,7 +577,7 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param source_addr the source address of the dataflow.
@@ -619,7 +619,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int dataflow_signal_send(const string& dst_module_instance_name,
-				     x_module_id dst_module_id,
+				     xorp_module_id dst_module_id,
 				     const IPvX& source_addr,
 				     const IPvX& group_addr,
 				     uint32_t threshold_interval_sec,
@@ -641,7 +641,7 @@ public:
      * @param module_instance_name the module instance name of the protocol
      * to join the multicast group.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to join the multicast group.
      * 
      * @param vif_index the vif index of the interface to join.
@@ -651,7 +651,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		join_multicast_group(const string& module_instance_name,
-				     x_module_id module_id,
+				     xorp_module_id module_id,
 				     uint16_t vif_index,
 				     const IPvX& group);
     
@@ -661,7 +661,7 @@ public:
      * @param module_instance_name the module instance name of the protocol
      * to leave the multicast group.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to leave the multicast group.
      * 
      * @param vif_index the vif index of the interface to leave.
@@ -671,7 +671,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		leave_multicast_group(const string& module_instance_name,
-				      x_module_id module_id,
+				      xorp_module_id module_id,
 				      uint16_t vif_index,
 				      const IPvX& group);
     
@@ -970,12 +970,12 @@ public:
     vector<UnixComm *>&	unix_comms() { return (_unix_comms); }
     
     /**
-     * Find an @ref UnixComm entry for a given module ID (@ref x_module_id).
+     * Find an @ref UnixComm entry for a given module ID (@ref xorp_module_id).
      * 
-     * @param module_id the module ID (@ref x_module_id) to search for.
+     * @param module_id the module ID (@ref xorp_module_id) to search for.
      * @return the corresponding #UnixComm entry if found, otherwise NULL.
      */
-    UnixComm	*unix_comm_find_by_module_id(x_module_id module_id) const;
+    UnixComm	*unix_comm_find_by_module_id(xorp_module_id module_id) const;
     
     /**
      * Test if trace log is enabled.

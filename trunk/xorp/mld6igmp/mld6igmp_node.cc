@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.2 2003/01/26 04:06:22 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.3 2003/03/10 23:20:42 hodson Exp $"
 
 
 //
@@ -55,20 +55,20 @@
  * Mld6igmpNode::Mld6igmpNode:
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
- * @module_id: The module ID (must be %X_MODULE_MLD6IGMP).
+ * @module_id: The module ID (must be %XORP_MODULE_MLD6IGMP).
  * @event_loop: The event loop.
  * 
  * MLD6IGMP node constructor.
  **/
-Mld6igmpNode::Mld6igmpNode(int family, x_module_id module_id,
+Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
 			   EventLoop& event_loop)
     : ProtoNode<Mld6igmpVif>(family, module_id, event_loop),
     _is_log_trace(true)			// XXX: default to print trace logs
 {
-    XLOG_ASSERT(module_id == X_MODULE_MLD6IGMP);
-    if (module_id != X_MODULE_MLD6IGMP) {
-	XLOG_FATAL("Invalid module ID = %d (must be 'X_MODULE_MLD6IGMP' = %d)",
-		   module_id, X_MODULE_MLD6IGMP);
+    XLOG_ASSERT(module_id == XORP_MODULE_MLD6IGMP);
+    if (module_id != XORP_MODULE_MLD6IGMP) {
+	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_MLD6IGMP' = %d)",
+		   module_id, XORP_MODULE_MLD6IGMP);
     }
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
@@ -522,7 +522,7 @@ Mld6igmpNode::delete_all_vifs(void)
  * Mld6igmpNode::proto_recv:
  * @src_module_instance_name: The module instance name of the module-origin
  * of the message.
- * @src_module_id: The #x_module_id of the module-origin of the message.
+ * @src_module_id: The #xorp_module_id of the module-origin of the message.
  * @vif_index: The vif index of the interface used to receive this message.
  * @src: The source address of the message.
  * @dst: The destination address of the message.
@@ -541,7 +541,7 @@ Mld6igmpNode::delete_all_vifs(void)
  **/
 int
 Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
-			 x_module_id src_module_id,
+			 xorp_module_id src_module_id,
 			 uint16_t vif_index,
 			 const IPvX& src, const IPvX& dst,
 			 int ip_ttl, int ip_tos, bool router_alert_bool,
@@ -628,8 +628,8 @@ Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
 	return (XORP_ERROR);
     
     // TODO: the target name of the MFEA must be configurable.
-    if (proto_send(x_module_name(family(), X_MODULE_MFEA),
-		   X_MODULE_MFEA,
+    if (proto_send(xorp_module_name(family(), XORP_MODULE_MFEA),
+		   XORP_MODULE_MFEA,
 		   vif_index, src, dst,
 		   ip_ttl, ip_tos, router_alert_bool,
 		   BUFFER_DATA_HEAD(buffer),
@@ -643,7 +643,7 @@ Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
 /**
  * Mld6igmpNode::add_protocol:
  * @module_instance_name: The module instance name of the protocol to add.
- * @module_id: The #x_module_id of the protocol to add.
+ * @module_id: The #xorp_module_id of the protocol to add.
  * @vif_index: The vif index of the interface to add the protocol to.
  * 
  * Add a protocol to the list of entries that would be notified if there
@@ -653,7 +653,7 @@ Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
  **/
 int
 Mld6igmpNode::add_protocol(const string& module_instance_name,
-			   x_module_id module_id,
+			   xorp_module_id module_id,
 			   uint16_t vif_index)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
@@ -674,7 +674,7 @@ Mld6igmpNode::add_protocol(const string& module_instance_name,
 /**
  * Mld6igmpNode::delete_protocol:
  * @module_instance_name: The module instance name of the protocol to delete.
- * @module_id: The #x_module_id of the protocol to delete.
+ * @module_id: The #xorp_module_id of the protocol to delete.
  * @vif_index: The vif index of the interface to delete the protocol from.
  * 
  * Delete a protocol from the list of entries that would be notified if there
@@ -684,7 +684,7 @@ Mld6igmpNode::add_protocol(const string& module_instance_name,
  **/
 int
 Mld6igmpNode::delete_protocol(const string& module_instance_name,
-			      x_module_id module_id,
+			      xorp_module_id module_id,
 			      uint16_t vif_index)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
@@ -705,7 +705,7 @@ Mld6igmpNode::delete_protocol(const string& module_instance_name,
 /**
  * Mld6igmpNode::join_prune_notify_routing:
  * @module_instance_name: The module instance name of the protocol to notify.
- * @module_id: The #x_module_id of the protocol to notify.
+ * @module_id: The #xorp_module_id of the protocol to notify.
  * @vif_index: The vif index of the interface with membership change.
  * @source: The source address of the (S,G) or (*,G) entry that has changed.
  * In case of group-specific membership, it is IPvX::ZERO().
@@ -720,7 +720,7 @@ Mld6igmpNode::delete_protocol(const string& module_instance_name,
  **/
 int
 Mld6igmpNode::join_prune_notify_routing(const string& module_instance_name,
-					x_module_id module_id,
+					xorp_module_id module_id,
 					uint16_t vif_index,
 					const IPvX& source,
 					const IPvX& group,

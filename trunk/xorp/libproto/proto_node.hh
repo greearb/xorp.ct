@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.3 2003/02/14 23:44:36 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.4 2003/03/10 23:20:20 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -55,10 +55,10 @@ public:
      * 
      * @param init_family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
-     * @param init_module_id the module ID X_MODULE_* (@ref x_module_id).
+     * @param init_module_id the module ID XORP_MODULE_* (@ref xorp_module_id).
      * @param init_event_loop the event loop to use.
      */
-    ProtoNode(int init_family, x_module_id init_module_id,
+    ProtoNode(int init_family, xorp_module_id init_module_id,
 	      EventLoop& init_event_loop)
 	: ProtoUnit(init_family, init_module_id),
 	  _event_loop(init_event_loop),
@@ -231,7 +231,7 @@ public:
      * @param src_module_instance_name the module instance name of the
      * module-origin of the message.
      * 
-     * @param src_module_id the module ID (@ref x_module_id) of the
+     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param vif_index the vif index of the interface used to receive this
@@ -257,7 +257,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	proto_recv(const string& src_module_instance_name,
-			   x_module_id src_module_id,
+			   xorp_module_id src_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src,
 			   const IPvX& dst,
@@ -276,7 +276,7 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param vif_index the vif index of the interface to send this message.
@@ -301,7 +301,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	proto_send(const string& dst_module_instance_name,
-			   x_module_id dst_module_id,
+			   xorp_module_id dst_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src,
 			   const IPvX& dst,
@@ -320,7 +320,7 @@ public:
      * @param src_module_instance_name the module instance name of the
      * module-origin of the message.
      * 
-     * @param src_module_id the module ID (@ref x_module_id) of the
+     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param message_type the message type. The particular values are
@@ -342,7 +342,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	signal_message_recv(const string& src_module_instance_name,
-				    x_module_id src_module_id,
+				    xorp_module_id src_module_id,
 				    int message_type,
 				    uint16_t vif_index,
 				    const IPvX& src,
@@ -359,7 +359,7 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref x_module_id) of the
+     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param message_type the message type. The particular values are
@@ -381,7 +381,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	signal_message_send(const string& dst_module_instance_name,
-				    x_module_id dst_module_id,
+				    xorp_module_id dst_module_id,
 				    int message_type,
 				    uint16_t vif_index,
 				    const IPvX& src,

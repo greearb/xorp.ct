@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.6 2003/02/14 23:55:18 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.7 2003/03/10 23:20:41 hodson Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -117,7 +117,8 @@ XrlMfeaNode::stop_mfea()
  * XrlMfeaNode::proto_send:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the protocol-destination of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
  * @vif_index: The vif index of the interface used to receive this message.
  * @src: The source address of the message.
  * @dst: The destination address of the message.
@@ -136,7 +137,7 @@ XrlMfeaNode::stop_mfea()
  **/
 int
 XrlMfeaNode::proto_send(const string& dst_module_instance_name,
-			x_module_id	, // dst_module_id,
+			xorp_module_id	, // dst_module_id,
 			uint16_t vif_index,
 			const IPvX& src,
 			const IPvX& dst,
@@ -226,7 +227,8 @@ XrlMfeaNode::xrl_result_recv_protocol_message(const XrlError& xrl_error,
  * XrlMfeaNode::signal_message_send:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the protocol-destination of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
  * @message_type: The message type of the kernel signal.
  * At this moment, one of the following:
  * %MFEA_UNIX_KERNEL_MESSAGE_NOCACHE (if a cache-miss in the kernel)
@@ -249,7 +251,7 @@ XrlMfeaNode::xrl_result_recv_protocol_message(const XrlError& xrl_error,
  **/
 int
 XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
-				 x_module_id	, // dst_module_id,
+				 xorp_module_id	, // dst_module_id,
 				 int message_type,
 				 uint16_t vif_index,
 				 const IPvX& src,
@@ -316,7 +318,8 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
  * XrlMfeaNode::send_add_mrib:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the protocol-destination of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
  * @mrib: The #Mrib entry to add.
  * 
  * Add a MRIB entry to an user-level protocol.
@@ -325,7 +328,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
  **/
 int
 XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
-			   x_module_id ,	// dst_module_id,
+			   xorp_module_id ,	// dst_module_id,
 			   const Mrib& mrib)
 {
     string vif_name;
@@ -372,7 +375,8 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
  * XrlMfeaNode::send_delete_mrib:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the protocol-destination of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
  * @mrib: The #Mrib entry to delete.
  * 
  * Delete a MRIB entry from an user-level protocol.
@@ -381,7 +385,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
  **/
 int
 XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
-			      x_module_id ,	// dst_module_id,
+			      xorp_module_id ,	// dst_module_id,
 			      const Mrib& mrib)
 {
     switch (family()) {
@@ -412,7 +416,8 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
  * XrlMfeaNode::send_set_mrib_done:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the protocol-destination of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
  * 
  * Complete add/delete MRIB transaction.
  * 
@@ -420,7 +425,7 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
  **/
 int
 XrlMfeaNode::send_set_mrib_done(const string& dst_module_instance_name,
-				x_module_id	// dst_module_id
+				xorp_module_id	// dst_module_id
     )
 {
     XrlMfeaClientV0p1Client::send_set_mrib_done(
@@ -561,7 +566,7 @@ XrlMfeaNode::xrl_result_set_all_vifs_done(const XrlError& xrl_error,
 
 int
 XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
-				  x_module_id	, // dst_module_id,
+				  xorp_module_id	, // dst_module_id,
 				  const IPvX& source_addr,
 				  const IPvX& group_addr,
 				  uint32_t threshold_interval_sec,
@@ -657,7 +662,7 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
     )
 {
     XrlCliManagerV0p1Client::send_add_cli_command(
-	x_module_name(family(), X_MODULE_CLI),
+	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	string(command_help),
@@ -689,7 +694,7 @@ int
 XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
     XrlCliManagerV0p1Client::send_delete_cli_command(
-	x_module_name(family(), X_MODULE_CLI),
+	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	callback(this, &XrlMfeaNode::xrl_result_delete_cli_command));
@@ -793,7 +798,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	reason = c_format("Invalid module ID = %d", protocol_id);
 	fail = true;
@@ -904,7 +909,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1010,7 +1015,7 @@ XrlMfeaNode::mfea_0_1_delete_protocol4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1072,7 +1077,7 @@ XrlMfeaNode::mfea_0_1_delete_protocol6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1132,7 +1137,7 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1198,7 +1203,7 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1260,7 +1265,7 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1326,7 +1331,7 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1369,7 +1374,7 @@ XrlMfeaNode::mfea_0_1_allow_signal_messages(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1412,7 +1417,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1577,7 +1582,7 @@ XrlMfeaNode::mfea_0_1_join_multicast_group4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1640,7 +1645,7 @@ XrlMfeaNode::mfea_0_1_join_multicast_group6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1699,7 +1704,7 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1762,7 +1767,7 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -2082,7 +2087,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -2165,7 +2170,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);

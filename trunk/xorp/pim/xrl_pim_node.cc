@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.8 2003/03/03 02:07:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.9 2003/03/10 23:20:53 hodson Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -227,7 +227,7 @@ XrlPimNode::xrl_result_delete_protocol_mfea(const XrlError& xrl_error,
  * XrlPimNode::proto_send:
  * @dst_module_instance name: The name of the protocol instance-destination
  * of the message.
- * @dst_module_id: The #x_module_id of the destination of the message.
+ * @dst_module_id: The #xorp_module_id of the destination of the message.
  * @vif_index: The vif index of the interface to send this message.
  * @src: The source address of the message.
  * @dst: The destination address of the message.
@@ -246,7 +246,7 @@ XrlPimNode::xrl_result_delete_protocol_mfea(const XrlError& xrl_error,
  **/
 int
 XrlPimNode::proto_send(const string& dst_module_instance_name,
-		       x_module_id	, // dst_module_id,
+		       xorp_module_id	, // dst_module_id,
 		       uint16_t vif_index,
 		       const IPvX& src,
 		       const IPvX& dst,
@@ -339,14 +339,14 @@ XrlPimNode::start_protocol_kernel()
     //
     if (family() == AF_INET) {
 	XrlMfeaV0p1Client::send_add_protocol4(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
 	    callback(this, &XrlPimNode::xrl_result_add_protocol_mfea));
     } else {
 	XrlMfeaV0p1Client::send_add_protocol6(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
@@ -357,7 +357,7 @@ XrlPimNode::start_protocol_kernel()
     // Enable the receiving of kernel signal messages
     //
     XrlMfeaV0p1Client::send_allow_signal_messages(
-	x_module_name(family(), X_MODULE_MFEA),
+	xorp_module_name(family(), XORP_MODULE_MFEA),
 	my_xrl_target_name(),
 	string(PimNode::module_name()),
 	PimNode::module_id(),
@@ -368,7 +368,7 @@ XrlPimNode::start_protocol_kernel()
     // Enable receiving of MRIB information
     //
     XrlMfeaV0p1Client::send_allow_mrib_messages(
-	x_module_name(family(), X_MODULE_MFEA),
+	xorp_module_name(family(), XORP_MODULE_MFEA),
 	my_xrl_target_name(),
 	string(PimNode::module_name()),
 	PimNode::module_id(),
@@ -385,14 +385,14 @@ XrlPimNode::stop_protocol_kernel()
 { 
     if (family() == AF_INET) {
 	XrlMfeaV0p1Client::send_delete_protocol4(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
 	    callback(this, &XrlPimNode::xrl_result_delete_protocol_mfea));
     } else {
 	XrlMfeaV0p1Client::send_delete_protocol6(
-	    x_module_name(family(), X_MODULE_MFEA),
+	    xorp_module_name(family(), XORP_MODULE_MFEA),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
@@ -416,7 +416,7 @@ XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
     do {
 	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_start_protocol_vif4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -428,7 +428,7 @@ XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
 	
 	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_start_protocol_vif6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -474,7 +474,7 @@ XrlPimNode::stop_protocol_kernel_vif(uint16_t vif_index)
     do {
 	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_stop_protocol_vif4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -486,7 +486,7 @@ XrlPimNode::stop_protocol_kernel_vif(uint16_t vif_index)
 	
 	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_stop_protocol_vif6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -533,7 +533,7 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
     do {
 	if (multicast_group.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_join_multicast_group4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -546,7 +546,7 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
 	
 	if (multicast_group.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_join_multicast_group6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -595,7 +595,7 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
     do {
 	if (multicast_group.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_leave_multicast_group4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -608,7 +608,7 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
 	
 	if (multicast_group.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_leave_multicast_group6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
@@ -656,7 +656,7 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
     do {
 	if (pim_mfc.source_addr().is_ipv4()) {
 	    XrlMfeaV0p1Client::send_add_mfc4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		pim_mfc.source_addr().get_ipv4(),
 		pim_mfc.group_addr().get_ipv4(),
@@ -671,7 +671,7 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 	
 	if (pim_mfc.source_addr().is_ipv6()) {
 	    XrlMfeaV0p1Client::send_add_mfc6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		pim_mfc.source_addr().get_ipv6(),
 		pim_mfc.group_addr().get_ipv6(),
@@ -713,7 +713,7 @@ XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
     do {
 	if (pim_mfc.source_addr().is_ipv4()) {
 	    XrlMfeaV0p1Client::send_delete_mfc4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		pim_mfc.source_addr().get_ipv4(),
 		pim_mfc.group_addr().get_ipv4(),
@@ -723,7 +723,7 @@ XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 	
 	if (pim_mfc.source_addr().is_ipv6()) {
 	    XrlMfeaV0p1Client::send_delete_mfc6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		pim_mfc.source_addr().get_ipv6(),
 		pim_mfc.group_addr().get_ipv6(),
@@ -769,7 +769,7 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
     do {
 	if (source_addr.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_add_dataflow_monitor4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		source_addr.get_ipv4(),
 		group_addr.get_ipv4(),
@@ -787,7 +787,7 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
 	
 	if (source_addr.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_add_dataflow_monitor6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		source_addr.get_ipv6(),
 		group_addr.get_ipv6(),
@@ -825,7 +825,7 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
     do {
 	if (source_addr.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_delete_dataflow_monitor4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		source_addr.get_ipv4(),
 		group_addr.get_ipv4(),
@@ -843,7 +843,7 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
 	
 	if (source_addr.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_delete_dataflow_monitor6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		source_addr.get_ipv6(),
 		group_addr.get_ipv6(),
@@ -873,7 +873,7 @@ XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
     do {
 	if (source_addr.is_ipv4()) {
 	    XrlMfeaV0p1Client::send_delete_all_dataflow_monitor4(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		source_addr.get_ipv4(),
 		group_addr.get_ipv4(),
@@ -883,7 +883,7 @@ XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 	
 	if (source_addr.is_ipv6()) {
 	    XrlMfeaV0p1Client::send_delete_all_dataflow_monitor6(
-		x_module_name(family(), X_MODULE_MFEA),
+		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
 		source_addr.get_ipv6(),
 		group_addr.get_ipv6(),
@@ -958,7 +958,7 @@ XrlPimNode::add_cli_command_to_cli_manager(const char *command_name,
     )
 {
     XrlCliManagerV0p1Client::send_add_cli_command(
-	x_module_name(family(), X_MODULE_CLI),
+	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	string(command_help),
@@ -990,7 +990,7 @@ int
 XrlPimNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
     XrlCliManagerV0p1Client::send_delete_cli_command(
-	x_module_name(family(), X_MODULE_CLI),
+	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
 	callback(this, &XrlPimNode::xrl_result_delete_cli_command));
@@ -1300,7 +1300,7 @@ XrlPimNode::add_protocol_mld6igmp(uint16_t vif_index)
     //
     if (family() == AF_INET) {
 	XrlMld6igmpV0p1Client::send_add_protocol4(
-	    x_module_name(family(), X_MODULE_MLD6IGMP),
+	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
@@ -1309,7 +1309,7 @@ XrlPimNode::add_protocol_mld6igmp(uint16_t vif_index)
 	    callback(this, &XrlPimNode::xrl_result_add_protocol_mld6igmp));
     } else {
 	XrlMld6igmpV0p1Client::send_add_protocol6(
-	    x_module_name(family(), X_MODULE_MLD6IGMP),
+	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
@@ -1335,7 +1335,7 @@ XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
     //
     if (family() == AF_INET) {
 	XrlMld6igmpV0p1Client::send_delete_protocol4(
-	    x_module_name(family(), X_MODULE_MLD6IGMP),
+	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
@@ -1344,7 +1344,7 @@ XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
 	    callback(this, &XrlPimNode::xrl_result_delete_protocol_mld6igmp));
     } else {
 	XrlMld6igmpV0p1Client::send_delete_protocol6(
-	    x_module_name(family(), X_MODULE_MLD6IGMP),
+	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
 	    my_xrl_target_name(),
 	    string(PimNode::module_name()),
 	    PimNode::module_id(),
@@ -1427,7 +1427,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	reason = c_format("Invalid module ID = %d", protocol_id);
 	fail = true;
@@ -1498,7 +1498,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);
@@ -1563,7 +1563,7 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	reason = c_format("Invalid module ID = %d", protocol_id);
 	fail = true;
@@ -1630,7 +1630,7 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     //
     // Verify the module ID
     //
-    x_module_id src_module_id = static_cast<x_module_id>(protocol_id);
+    xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
 	fail = true;
 	reason = c_format("Invalid module ID = %d", protocol_id);

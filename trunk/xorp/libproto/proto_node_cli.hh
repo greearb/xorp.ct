@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node_cli.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libproto/proto_node_cli.hh,v 1.2 2003/03/10 23:20:20 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_CLI_HH__
@@ -54,9 +54,9 @@ public:
      * 
      * @param init_family the address family (AF_INET or AF_INET6
      * for IPv4 and IPv6 respectively).
-     * @param init_module_id the module ID X_MODULE_* (@ref x_module_id).
+     * @param init_module_id the module ID XORP_MODULE_* (@ref xorp_module_id).
      */
-    ProtoNodeCli(int init_family, x_module_id init_module_id);
+    ProtoNodeCli(int init_family, xorp_module_id init_module_id);
     
     /**
      * Destructor

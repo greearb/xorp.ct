@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.7 2003/03/13 09:21:33 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.8 2003/03/17 23:24:55 pavlin Exp $"
 
 
 //
@@ -175,10 +175,10 @@ main(int argc, char *argv[])
 	// CLI
 	//
 #if DO_IPV4
-	CliNode cli_node4(AF_INET, X_MODULE_CLI, event_loop);
+	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, event_loop);
 	cli_node4.set_cli_port(12000);
 #else
-	CliNode cli_node6(AF_INET6, X_MODULE_CLI, event_loop);
+	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, event_loop);
 	cli_node6.set_cli_port(12000);
 #endif // ! DO_IPV4
 	//
@@ -209,18 +209,18 @@ main(int argc, char *argv[])
 	//
 #if DO_IPV4
 	XrlStdRouter xrl_std_router_mfea4(event_loop,
-					  x_module_name(AF_INET,
-							X_MODULE_MFEA),
+					  xorp_module_name(AF_INET,
+							   XORP_MODULE_MFEA),
 					    finder_hostname);
-	XrlMfeaNode xrl_mfea_node4(AF_INET, X_MODULE_MFEA,
+	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
 				   event_loop,
 				   &xrl_std_router_mfea4);
 #else
 	XrlStdRouter xrl_std_router_mfea6(event_loop,
-					  x_module_name(AF_INET6,
-							X_MODULE_MFEA),
+					  xorp_module_name(AF_INET6,
+							   XORP_MODULE_MFEA),
 					    finder_hostname);
-	XrlMfeaNode xrl_mfea_node6(AF_INET6, X_MODULE_MFEA,
+	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 				   event_loop,
 				   &xrl_std_router_mfea6);
 #endif // ! DO_IPV4
@@ -230,18 +230,18 @@ main(int argc, char *argv[])
 	//
 #if DO_IPV4
 	XrlStdRouter xrl_std_router_mld6igmp4(event_loop,
-					      x_module_name(AF_INET,
-							    X_MODULE_MLD6IGMP),
+					      xorp_module_name(AF_INET,
+							       XORP_MODULE_MLD6IGMP),
 						finder_hostname);
-	XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, X_MODULE_MLD6IGMP,
+	XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
 					   event_loop,
 					   &xrl_std_router_mld6igmp4);
 #else
 	XrlStdRouter xrl_std_router_mld6igmp6(event_loop,
-					      x_module_name(AF_INET6,
-							    X_MODULE_MLD6IGMP),
+					      xorp_module_name(AF_INET6,
+							       XORP_MODULE_MLD6IGMP),
 						finder_hostname);
-	XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, X_MODULE_MLD6IGMP,
+	XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
 					   event_loop,
 					   &xrl_std_router_mld6igmp6);
 #endif // ! DO_IPV4

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_register.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libproto/proto_register.hh,v 1.2 2003/03/10 23:20:20 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_REGISTER_HH__
@@ -50,34 +50,34 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to add/register.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to add/register.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_protocol(const string& module_instance_name,
-			     x_module_id module_id);
+			     xorp_module_id module_id);
 
     /**
      * Delete/deregister a protocol instance.
      * 
      * @param module_instance_name the module instance name of the protocol
      * to delete/deregister.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to delete/deregister.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_protocol(const string& module_instance_name,
-				x_module_id module_id);
+				xorp_module_id module_id);
 
     /**
      * Test if any instance of a given protocol is registered.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to test.
      * @return true if any instance of the given protocol is registered,
      * otherwise false.
      */
-    bool	is_registered(x_module_id module_id) const {
+    bool	is_registered(xorp_module_id module_id) const {
 	return (_registered_protocols[module_id].is_registered());
     }
 
@@ -86,21 +86,21 @@ public:
      * 
      * @param module_instance_name the module instance name of the protocol
      * to test.
-     * @param module_id the module ID (@ref x_module_id) of the protocol
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol
      * to test.
      * @return true if the module is registered, otherwise false.
      */
     bool	is_registered(const string& module_instance_name,
-			      x_module_id module_id) const;
+			      xorp_module_id module_id) const;
 
     /**
      * Get the list of all registered protocol instances for a given protocol.
      * 
-     * @param module_id the module ID (@ref x_module_id) of the protocol.
+     * @param module_id the module ID (@ref xorp_module_id) of the protocol.
      * @return the list of all registered protocol instances for the given
      * protocol.
      */
-    const list<string>& module_instance_name_list(x_module_id module_id) const {
+    const list<string>& module_instance_name_list(xorp_module_id module_id) const {
 	return (_registered_protocols[module_id].module_instance_name_list());
     }
     
@@ -126,7 +126,7 @@ private:
 	list<string>	_module_instance_name_list; // The list of instances
     };
     
-    RegisteredProtocol	_registered_protocols[X_MODULE_MAX];
+    RegisteredProtocol	_registered_protocols[XORP_MODULE_MAX];
 };
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.5 2003/03/13 09:00:59 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.6 2003/03/14 12:20:26 pavlin Exp $"
 
 
 //
@@ -74,7 +74,7 @@ static void unix_comm_proto_socket_read(int fd, SelectorMask mask,
  * @mfea_node: The MfeaNode I belong to.
  * @proto: The protocol number (e.g., %IPPROTO_IGMP, %IPPROTO_PIM, etc).
  **/
-UnixComm::UnixComm(MfeaNode& mfea_node, int ipproto, x_module_id module_id)
+UnixComm::UnixComm(MfeaNode& mfea_node, int ipproto, xorp_module_id module_id)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node),
       _ipproto(ipproto),
@@ -173,7 +173,7 @@ UnixComm::start(void)
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
-    if (_module_id == X_MODULE_NULL) {
+    if (_module_id == XORP_MODULE_NULL) {
 	// XXX: the special UnixComm that takes care of house-keeping
 	
 	// Open IOCTL socket used for ioctl() access to the kernel
@@ -304,7 +304,7 @@ UnixComm::stop(void)
 	stop_pim();
     }
     close_proto_socket();
-    if (_module_id == X_MODULE_NULL) {
+    if (_module_id == XORP_MODULE_NULL) {
 	stop_mrt();
 	close_mrib_socket();
 	close_mrouter_socket();
@@ -540,7 +540,7 @@ UnixComm::close_mrouter_socket(void)
     if (_mrouter_socket < 0)
 	return (XORP_ERROR);
     
-    if (_module_id == X_MODULE_NULL) {
+    if (_module_id == XORP_MODULE_NULL) {
 	// XXX: the special UnixComm that takes care of house-keeping
 	// XXX: this special UnixComm only would open/close the mrouter_socket
 
@@ -566,7 +566,7 @@ UnixComm::close_mrouter_socket(void)
  * @void: 
  * 
  * Set my mrouter socket by copying the mrouter socket value from the special
- * house-keeping #UnixComm with module_id of %X_MODULE_NULL.
+ * house-keeping #UnixComm with module_id of %XORP_MODULE_NULL.
  * 
  * Return value: The value of the copied mrouter socket on success,
  * otherwise %XORP_ERROR.
@@ -576,12 +576,12 @@ UnixComm::set_my_mrouter_socket(void)
 {
     UnixComm *unix_comm;
     
-    if (_module_id == X_MODULE_NULL)
+    if (_module_id == XORP_MODULE_NULL)
 	return (XORP_ERROR);	// XXX: the special house-keeping UnixComm
     
     
     // Copy the value from the special house-keeping UnixComm
-    unix_comm = mfea_node().unix_comm_find_by_module_id(X_MODULE_NULL);
+    unix_comm = mfea_node().unix_comm_find_by_module_id(XORP_MODULE_NULL);
     if (unix_comm == NULL)
 	return (XORP_ERROR);
     
@@ -608,15 +608,15 @@ UnixComm::set_my_mrouter_socket(void)
  * The mrouter socket value of the other #UnixComm entries is
  * set by copying the mrouter socket value of this entry.
  * Note that this method should be applied only to the special
- * house-keeping @ref UnixComm with module ID (#x_module_id)
- * of %X_MODULE_NULL.
+ * house-keeping @ref UnixComm with module ID (#xorp_module_id)
+ * of %XORP_MODULE_NULL.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 UnixComm::set_other_mrouter_socket(void)
 {
-    if (_module_id != X_MODULE_NULL)
+    if (_module_id != XORP_MODULE_NULL)
 	return (XORP_ERROR);	// XXX: not the special house-keeping UnixComm
     
     // Copy my _mrouter_socket value to the other UnixComm

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_node_cli.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libproto/proto_node_cli.cc,v 1.2 2003/03/10 23:20:20 hodson Exp $"
 
 
 //
@@ -54,11 +54,11 @@
  * ProtoNodeCli::ProtoNodeCli:
  * @init_family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
- * @init_module_id: The module ID (X_MODULE_*).
+ * @init_module_id: The module ID (XORP_MODULE_*).
  * 
  * ProtoNodeCli node constructor.
  **/
-ProtoNodeCli::ProtoNodeCli(int init_family, x_module_id init_module_id)
+ProtoNodeCli::ProtoNodeCli(int init_family, xorp_module_id init_module_id)
     : ProtoUnit(init_family, init_module_id)
 {
     
