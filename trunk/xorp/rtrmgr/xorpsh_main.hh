@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.5 2003/05/03 21:26:47 mjh Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.6 2003/05/10 23:23:04 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -110,6 +110,7 @@ private:
     string _ipc_name;
     string _authfile;
     string _authtoken;
+    bool _got_config;
     string _configuration;
 
     bool _done;  //used to move through the startup process

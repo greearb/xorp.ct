@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.8 2003/05/03 21:26:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.9 2003/06/03 00:19:46 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -88,6 +88,7 @@ XorpShell::XorpShell(const string& IPCname,
     _rtrmgr_client(&_xrlrouter),
     _xorpsh_interface(&_xrlrouter, *this),
     _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
+    _got_config(false),
     _mode(MODE_INITIALIZING)
 {
     _ipc_name = IPCname;
@@ -182,7 +183,7 @@ XorpShell::run() {
     _rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
         callback(this, &XorpShell::receive_config));
 
-    while (_configuration.empty()) {
+    while (_got_config == false) {
 #ifdef DEBUG_STARTUP
 	printf("+");
 	fflush(stdout);
@@ -263,6 +264,7 @@ void
 XorpShell::receive_config(const XrlError& e, const string* config) {
     if (e == XrlError::OKAY()) {
 	_configuration = *config;
+	_got_config = true;
 	return;
     } else if ((e == XrlError::COMMAND_FAILED()) 
 	       && (e.note()=="AUTH_FAIL")) {
