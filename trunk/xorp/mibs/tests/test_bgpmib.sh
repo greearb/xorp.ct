@@ -61,7 +61,7 @@ PEER2_AS=65000
 
 HOLDTIME=5
 
-TRAFFIC_FILES=""
+TRAFFIC_FILES="../../../data/bgp/icsi1.mrtd"
 
 configure_bgp()
 {
