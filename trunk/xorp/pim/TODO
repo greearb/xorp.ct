@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.34 2003/06/12 02:00:50 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.35 2003/06/12 03:02:03 pavlin Exp $
 #
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
@@ -83,11 +83,6 @@ probably should be replaced with
   RPF'(S,G,rpt) -> RPF'(*,G) (in case of (*,*,RP) Joins).
   Testing this scenario is pending spec-related clarification about
   changing RPF'(S,G,rpt) with (S,G)Asserts.
-
-* IMPL: Modify the "pim show join" CLI output NOT to print (S,G) and (S,G,rpt)
-  specific state for (*,*,RP) and (*,G) state. If necessary, modify
-  the (S,G) and (S,G,rpt) output NOT to print (*,*,RP) and (*,G)
-  specific state.
 
 * IMPL: lost_assert(S,G,rpt,I) (i.e., PimMre::lost_assert_sg_rpt()) should
   be computable for (S,G) state as well. Plug-in this modification for the
