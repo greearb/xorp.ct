@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.9 2004/06/18 17:06:35 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.10 2004/08/13 20:10:41 atanu Exp $"
 
 #include <list>
 #include <vector>
@@ -482,8 +482,9 @@ drip_run(EventLoop& e, list<OneoffTimerCallback>& locb, bool delay = false)
 		    break;
 	    e.run();
 	}
-	verbose_log("Events: %d ready: %d scheduled: %d delay %d\n",
-		    e.timer_list_length(), ready, pause.scheduled(), delay);
+	verbose_log("Events: %u ready: %d scheduled: %d delay %d\n",
+		    (uint32_t)e.timer_list_length(), ready, pause.scheduled(),
+		    delay);
 	if (0 != ready)
 	    XLOG_WARNING("ready is %d not zero", ready);
 	// XLOG_ASSERT(0 == ready);
