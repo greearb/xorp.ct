@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.24 2005/03/03 07:31:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.25 2005/03/05 01:41:26 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -426,9 +426,9 @@ MfeaMrouter::adopt_mrouter_socket()
 	ICMP6_FILTER_SETBLOCKALL(&filter);
 	if (setsockopt(_mrouter_socket, IPPROTO_ICMPV6, ICMP6_FILTER,
 		       (void *)&filter, sizeof(filter)) < 0) {
+	    XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s", strerror(errno));
 	    close(_mrouter_socket);
 	    _mrouter_socket = -1;
-	    XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s", strerror(errno));
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
@@ -494,8 +494,8 @@ MfeaMrouter::close_mrouter_socket()
     
     // Close the socket and reset it to -1
     if (close(_mrouter_socket) < 0) {
-	_mrouter_socket = -1;
 	XLOG_ERROR("Cannot close mrouter socket: %s", strerror(errno));
+	_mrouter_socket = -1;
 	return (XORP_ERROR);
     }
     
