@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.4 2003/03/18 02:44:36 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.5 2003/03/31 03:46:48 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -205,7 +205,7 @@ public:
 			const string& module_instance_name);
     
 private:
-    friend MemberQuery;
+    friend class MemberQuery;
     
     //
     // Private functions
