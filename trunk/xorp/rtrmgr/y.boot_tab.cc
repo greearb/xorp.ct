@@ -235,7 +235,7 @@ booterrormsg(const char *s)
 }
 
 void
-booterror(const char *s)
+booterror(const char *s) throw (ParseError)
 {
     xorp_throw(ParseError, booterrormsg(s));
 }
