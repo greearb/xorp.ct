@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.9 2004/11/30 20:01:14 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.10 2004/12/10 22:50:40 mjh Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
@@ -103,7 +103,8 @@ UserDB::add_user(uint32_t user_id, const string& username,
 	User* newuser = new User(user_id, username);
 	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
-	    debug_msg("group xorp exists, id=%d\n", grp->gr_gid);
+	    debug_msg("group xorp exists, id=%u\n",
+		      XORP_UINT_CAST(grp->gr_gid));
 	    if (pw_gid == (gid_t)grp->gr_gid) {
 		/* is the user's default group is the "xorp" group */
 		debug_msg("user's default groyp is xorp\n");

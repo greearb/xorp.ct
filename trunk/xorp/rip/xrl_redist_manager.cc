@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.6 2004/09/18 00:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.7 2005/02/01 02:54:39 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -328,7 +328,7 @@ template <typename A>
 string
 Pause<A>::str() const
 {
-    return c_format("Pause %d ms", this->_p_ms);
+    return c_format("Pause %u ms", XORP_UINT_CAST(this->_p_ms));
 }
 
 // ----------------------------------------------------------------------------

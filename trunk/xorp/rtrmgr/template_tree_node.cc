@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.32 2005/01/19 00:08:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.33 2005/01/22 09:34:24 pavlin Exp $"
 
 
 #include <glob.h>
@@ -619,7 +619,7 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 	    return false;
 
     debug_msg("TTN:check_command_tree %s type %s depth %u\n",
-	      _segname.c_str(), typestr().c_str(), (uint32_t)depth);
+	      _segname.c_str(), typestr().c_str(), XORP_UINT_CAST(depth));
 
     if (_parent != NULL && _parent->is_tag() && (depth == 0)) {
 	//

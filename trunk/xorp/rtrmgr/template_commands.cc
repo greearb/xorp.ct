@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.47 2004/09/17 14:09:02 abittau Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.48 2004/12/11 21:29:59 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -195,7 +195,7 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
 		segment = " " + segment.substr(1, segment.size() - 1);
 	}
 	string::size_type start = segment.find("->");
-	debug_msg("start=%u\n", (uint32_t)start);
+	debug_msg("start=%u\n", XORP_UINT_CAST(start));
 	if (start != string::npos) {
 	    debug_msg("found return spec\n");
 	    string::size_type orig_start = orig_segment.find("->");
