@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.13 2003/10/01 18:33:38 hodson Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.14 2003/11/17 00:21:50 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -67,7 +67,7 @@ public:
     int execute(const ConfigTreeNode& ctn,
 		TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
-    string expand_xrl_variables(const ConfigTreeNode& ctn) const;
+    template<class TreeNode> string expand_xrl_variables(const TreeNode& tn) const;
     string xrl_return_spec() const {return _response;}
     string affected_module(const ConfigTreeNode& ctn) const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.28 2003/11/17 00:21:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.29 2003/11/17 19:34:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -396,70 +396,76 @@ XrlAction::execute(const ConfigTreeNode& ctn,
     return result;
 }
 
-string XrlAction::expand_xrl_variables(const ConfigTreeNode& ctn) const {
-    //go through the split command, doing variable substitution
-    //put split words back together, and remove special "\n" characters
-    debug_msg(("expand_xrl_variables node " + ctn.segname() +
-	      " XRL " + _request + "\n").c_str());
-    list<string>::const_iterator ptr = _split_request.begin();
+template<class TreeNode>
+string
+XrlAction::expand_xrl_variables(const TreeNode& tn) const
+{
+    //
+    // Go through the split command, doing variable substitution
+    // put split words back together, and remove special "\n" characters
+    //
+    debug_msg(("expand_xrl_variables node " + tn.segname() +
+	       " XRL " + _request + "\n").c_str());
+    list<string>::const_iterator iter = _split_request.begin();
     string expanded_var;
     list <string> expanded_cmd;
     string word;
-    while (ptr != _split_request.end()) {
-	string segment = *ptr;
-	//"\n" at start of segment indicates start of a word
-	if (segment[0]=='\n') {
-	    //store the previous word
+
+    while (iter != _split_request.end()) {
+	string segment = *iter;
+	// "\n" at start of segment indicates start of a word
+	if (segment[0] == '\n') {
+	    // store the previous word
 	    if (word != "") {
 		expanded_cmd.push_back(word);
 		word = "";
 	    }
-	    //strip the magic "\n" off
-	    segment = segment.substr(1,segment.size()-1);
+	    // strip the magic "\n" off
+	    segment = segment.substr(1, segment.size() - 1);
 	}
 
-	//do variable expansion
+	// do variable expansion
 	bool expand_done = false;
-	if (segment[0]=='`') {
-	    expand_done = ctn.expand_expression(segment, expanded_var);
+	if (segment[0] == '`') {
+	    expand_done = tn.expand_expression(segment, expanded_var);
 	    if (expand_done) {
 		int len = expanded_var.length();
-		//remove quotes
-		if (expanded_var[0]=='"' && expanded_var[len-1]=='"')
-		    word += expanded_var.substr(1,len-2);
+		// remove quotes
+		if (expanded_var[0] == '"' && expanded_var[len - 1] == '"')
+		    word += expanded_var.substr(1, len - 2);
 		else
 		    word += expanded_var;
 	    } else {
-		fprintf(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
-		throw UnexpandedVariable(segment, ctn.segname());
+		fprintf(stderr, "FATAL ERROR: failed to expand expression %s associated with node \"%s\"\n", segment.c_str(), tn.segname().c_str());
+		throw UnexpandedVariable(segment, tn.segname());
 	    }
-	} else if (segment[0]=='$') {
-	    expand_done = ctn.expand_variable(segment, expanded_var);
+	} else if (segment[0] == '$') {
+	    expand_done = tn.expand_variable(segment, expanded_var);
 	    if (expand_done) {
 		int len = expanded_var.length();
-		//remove quotes
-		if (expanded_var[0]=='"' && expanded_var[len-1]=='"')
-		    word += expanded_var.substr(1,len-2);
+		// remove quotes
+		if (expanded_var[0] == '"' && expanded_var[len - 1] == '"')
+		    word += expanded_var.substr(1, len - 2);
 		else
 		    word += expanded_var;
 	    } else {
-		fprintf(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
-		throw UnexpandedVariable(segment, ctn.segname());
+		fprintf(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), tn.segname().c_str());
+		throw UnexpandedVariable(segment, tn.segname());
 	    }
 	} else {
 	    word += segment;
 	}
-	++ptr;
+	++iter;
     }
-    //store the last word
+    // store the last word
     if (word != "")
 	expanded_cmd.push_back(word);
 
-    assert(expanded_cmd.size() >= 1);
+    XLOG_ASSERT(expanded_cmd.size() >= 1);
 
     string xrlstr = expanded_cmd.front();
-    if (xrlstr[0]=='"' && xrlstr[xrlstr.size()-1]=='"')
-	xrlstr = xrlstr.substr(1,xrlstr.size()-2);
+    if (xrlstr[0] == '"' && xrlstr[xrlstr.size() - 1] == '"')
+	xrlstr = xrlstr.substr(1, xrlstr.size() - 2);
     return xrlstr;
 }
 
@@ -652,3 +658,8 @@ AllowCommand::str() const {
     return tmp;
 }
 
+//
+// Template explicit instatiation
+//
+template string XrlAction::expand_xrl_variables<ConfigTreeNode>(const ConfigTreeNode&);
+template string XrlAction::expand_xrl_variables<TemplateTreeNode>(const TemplateTreeNode&);
