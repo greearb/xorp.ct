@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.1 2003/03/13 00:32:05 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.3 2004/06/10 22:41:26 hodson Exp $"
 
 
 //
@@ -21,7 +21,11 @@
 
 
 #include "mld6igmp_module.h"
-#include "mld6igmp_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+
 #include "mld6igmp_node.hh"
 #include "mld6igmp_vif.hh"
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.8 2004/02/24 21:02:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.9 2004/06/10 22:41:26 hodson Exp $"
 
 //
 // Multicast group membership information used by
@@ -21,7 +21,11 @@
 
 
 #include "mld6igmp_module.h"
-#include "mld6igmp_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+
 #include "mld6igmp_member_query.hh"
 #include "mld6igmp_node.hh"
 #include "mld6igmp_vif.hh"
