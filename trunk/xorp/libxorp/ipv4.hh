@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.13 2003/10/02 03:51:53 hodson Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.14 2003/11/05 20:24:27 hodson Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -468,6 +468,11 @@ public:
     inline static IPv4 OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET);
     inline static IPv4 RIP2_ROUTERS(int af = AF_INET);
     inline static IPv4 PIM_ROUTERS(int af = AF_INET);
+
+    /**
+     * Number of bits in address as a constant.
+     */
+    static const uint32_t ADDR_BITLEN = 32;
 
 private:
     uint32_t _addr;		// The address value (in network-order)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.13 2003/10/02 03:51:54 hodson Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.14 2003/11/05 20:24:28 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -458,6 +458,11 @@ public:
     inline static const IPv6& OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET6);
     inline static const IPv6& RIP2_ROUTERS(int af = AF_INET6);
     inline static const IPv6& PIM_ROUTERS(int af = AF_INET6);
+
+    /**
+     * Number of bits in address as a constant.
+     */
+    static const uint32_t ADDR_BITLEN = 128;
 
 private:
     uint32_t _addr[4];		// The address value (in network-order)
