@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.123 2004/11/10 00:48:13 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.124 2004/11/12 02:44:27 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
