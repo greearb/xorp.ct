@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.2 2002/12/14 00:31:13 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.3 2003/01/16 23:18:57 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -158,10 +158,10 @@ public:
     virtual ~BGPPacket();
     virtual const uint8_t *encode(int& len) const = 0;
     const uint8_t *flatten(struct iovec *iov, int cnt, int& len) const;
-    uint8_t get_type() const;
+    uint8_t type() const			{ return _Type; }
     void set_marker(uint8_t* m);
-    const uint8_t* get_marker() const ;
-    uint16_t get_length() const { return _Length; }
+    const uint8_t* marker() const		{ return _Marker; }
+    uint16_t length() const			{ return _Length; }
     virtual string str() const = 0;
 protected:
     // don't allow the use of the default copy constructor

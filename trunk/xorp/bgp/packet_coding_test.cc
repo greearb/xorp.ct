@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.4 2002/12/15 04:09:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.5 2003/01/17 05:51:07 mjh Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -44,7 +44,7 @@ int test_simple_open_packet()
 
     OpenPacket receivedpacket(buf, plen);
     receivedpacket.decode();
-    assert(receivedpacket.get_type()==MESSAGETYPEOPEN);
+    assert(receivedpacket.type()==MESSAGETYPEOPEN);
 
     //check the information we put in came out again OK.
     assert(receivedpacket.HoldTime() == 1234);
@@ -96,7 +96,7 @@ int test_keepalive_packet()
 
     KeepAlivePacket receivedpacket(buf, plen);
     receivedpacket.decode();
-    assert(receivedpacket.get_type()==MESSAGETYPEKEEPALIVE);
+    assert(receivedpacket.type()==MESSAGETYPEKEEPALIVE);
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
@@ -152,7 +152,7 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
 
     NotificationPacket receivedpacket(buf, plen);
     receivedpacket.decode();
-    assert(receivedpacket.get_type()==MESSAGETYPENOTIFICATION);
+    assert(receivedpacket.type()==MESSAGETYPENOTIFICATION);
     assert(receivedpacket.error_code() == ec);
     assert(receivedpacket.error_subcode() == esc);
     if (d!=NULL)
@@ -207,7 +207,7 @@ int test_withdraw_packet(bool verbose)
 
     UpdatePacket receivedpacket(buf, plen);
     receivedpacket.decode();
-    assert(receivedpacket.get_type()==MESSAGETYPEUPDATE);
+    assert(receivedpacket.type()==MESSAGETYPEUPDATE);
     list <BGPWithdrawnRoute>::const_iterator iter;
     iter = receivedpacket.withdrawn_list().begin();
     if (verbose)
@@ -339,7 +339,7 @@ int test_announce_packet(bool verbose)
 
     UpdatePacket receivedpacket(buf, plen);
     receivedpacket.decode();
-    assert(receivedpacket.get_type()==MESSAGETYPEUPDATE);
+    assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
     assert(receivedpacket.withdrawn_list().begin()

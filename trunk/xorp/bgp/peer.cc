@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.4 2002/12/20 06:42:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.5 2003/01/21 03:33:18 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,9 +187,9 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 PeerOutputState
 BGPPeer::send_message(const BGPPacket& p)
 {
-    debug_msg("Packet sent of type %d\n", p.get_type());
+    debug_msg("Packet sent of type %d\n", p.type());
 
-    uint8_t packet_type = p.get_type();
+    uint8_t packet_type = p.type();
 
     if ( packet_type != MESSAGETYPEOPEN &&
 	 packet_type != MESSAGETYPEUPDATE &&
@@ -500,7 +500,7 @@ BGPPeer::state_machine(FSMEvent ConnectionEvent, const BGPPacket *p)
 
     if (p != NULL)
 	debug_msg("BGPPeer STATE %d EVENT %d and %d\n",
-		  _ConnectionState, ConnectionEvent, p->get_type());
+		  _ConnectionState, ConnectionEvent, p->type());
 
     switch (_ConnectionState) {
 /******************************************/

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.3 2002/12/15 04:09:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.4 2003/01/16 23:18:57 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -337,7 +337,7 @@ NotificationPacket::operator==(const NotificationPacket& him ) const
     // common packet headers apply to both length, so only need to compare raw
     // packet length
 
-    if (_Length != him.get_length())
+    if (_Length != him.length())
 	return false;
 
     if (0 != memcmp(_error_data, him.error_data(),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.4 2002/12/14 23:42:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.5 2002/12/16 22:39:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -782,10 +782,10 @@ Peer::dump(const string& line, const vector<string>& words)
 bool
 compare_packets(const BGPPacket *base_one, const BGPPacket *base_two)
 {
-    if(base_one->get_type() != base_two->get_type())
+    if(base_one->type() != base_two->type())
 	return false;
 
-    switch(base_one->get_type()) {
+    switch(base_one->type()) {
 	case MESSAGETYPEOPEN:
 	    {
 		const OpenPacket *one =
@@ -823,7 +823,7 @@ compare_packets(const BGPPacket *base_one, const BGPPacket *base_two)
 	    }
 	    break;
 	default:
-	    XLOG_FATAL("Unexpected BGP message type %d", base_one->get_type());
+	    XLOG_FATAL("Unexpected BGP message type %d", base_one->type());
     }
     return false;
 }
@@ -863,7 +863,7 @@ Peer::check_expect(BGPPacket *rec)
 	int rec_len;
 	const uint8_t *rec_buf = rec->encode(rec_len);
 
-	switch(rec->get_type()) {
+	switch(rec->type()) {
 	case MESSAGETYPEOPEN:
 	    {
 	    OpenPacket *pac = new OpenPacket(rec_buf, rec_len);
@@ -890,7 +890,7 @@ Peer::check_expect(BGPPacket *rec)
 	    _expect._bad = new KeepAlivePacket(rec_buf, rec_len);
 	    break;
 	default:
-	    XLOG_FATAL("Unexpected BGP message type %d", rec->get_type());
+	    XLOG_FATAL("Unexpected BGP message type %d", rec->type());
 	}
 	delete [] rec_buf;
     }

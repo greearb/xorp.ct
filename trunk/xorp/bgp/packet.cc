@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.3 2003/01/16 23:18:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,24 +33,11 @@ BGPPacket::~BGPPacket()
     debug_msg("BGPPacket destructor called\n");
 }
 
-uint8_t
-BGPPacket::get_type() const
-{
-    debug_msg("Packet type %d\n", _Type);
-    return _Type;
-}
-
 void
 BGPPacket::set_marker(uint8_t * m)
 {
     debug_msg("Packet marker set\n");
     memcpy(_Marker, m, MARKER_SIZE);
-}
-
-const uint8_t *
-BGPPacket::get_marker() const
-{
-    return _Marker;
 }
 
 const uint8_t *
