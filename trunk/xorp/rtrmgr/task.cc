@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.11 2003/05/23 00:02:08 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.12 2003/05/27 04:33:07 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -160,7 +160,7 @@ StatusReadyValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 const XrlRouter::XrlCallback& cb, Task& task) 
-    : _unexpanded_xrl(uxrl), _xrl_callback(cb), _task(task)
+    : _unexpanded_xrl(uxrl), _xrl_callback(cb), _task(task), _resend_counter(0)
 {
 }
 
@@ -187,6 +187,7 @@ TaskXrlItem::execute(string& errmsg)
     //for debugging purposes, record what we were doing
     errmsg = _unexpanded_xrl.str();
 
+    _resend_counter = 0;
     _task.xorp_client().
 	send_now(*xrl, callback(this,
 				&TaskXrlItem::execute_done),
@@ -196,13 +197,85 @@ TaskXrlItem::execute(string& errmsg)
 }
 
 void
+TaskXrlItem::resend()
+{
+    Xrl *xrl = _unexpanded_xrl.expand();
+    if (xrl == NULL) {
+	//this can't happen in a resend, because we already succeeded
+	//in the orginal send
+	XLOG_UNREACHABLE();
+    }
+
+    string xrl_return_spec = _unexpanded_xrl.return_spec();
+
+    _task.xorp_client().
+	send_now(*xrl, callback(this,
+				&TaskXrlItem::execute_done),
+		 xrl_return_spec, 
+		 _task.do_exec());
+}
+
+void
 TaskXrlItem::execute_done(const XrlError& err, 
 			  XrlArgs* xrlargs) 
 {
+    bool fatal = false;
     printf("TaskXrlItem::execute_done\n");
     if (err != XrlError::OKAY()) {
 	//XXXX handle XRL errors here
-	XLOG_UNFINISHED();
+	if ((err == XrlError::NO_FINDER())
+	    || (err == XrlError::SEND_FAILED())
+	    || (err == XrlError::NO_SUCH_METHOD())) {
+	    //The error was a fatal one for the target - we now
+	    //consider the target to be fatally wounded.
+	    XLOG_ERROR(err.str().c_str());
+	    fatal = true;
+	} else if ((err == XrlError::COMMAND_FAILED())
+		   || (err == XrlError::BAD_ARGS())) {
+	    //Non-fatal error for the target - typically this is
+	    //because the user entered bad information - we can't
+	    //change the target configuration to what the user
+	    //specified, but this doesn't mean the target is fatally
+	    //wounded.
+	    fatal = false;
+	} else if ((err == XrlError::REPLY_TIMED_OUT())
+		   || (err == XrlError::RESOLVE_FAILED())) {
+	    //REPLY_TIMED_OUT shouldn't happen on a reliable
+	    //transport, but at this point we don't know for sure
+	    //which Xrls are reliable and while are unreliable, so
+	    //best handle this as if it were packet loss.
+	    //
+	    //RESOLVE_FAILED shouldn't happen if the startup
+	    //validation has done it's job correctly, but just in case
+	    //we'll be lenient and give it ten more seconds to be
+	    //functioning before we declare it dead.
+	    if (_resend_counter > 10) {
+		//Give up.
+		//The error was a fatal one for the target - we now
+		//consider the target to be fatally wounded.
+		XLOG_ERROR(err.str().c_str());
+		fatal = true;
+	    } else {
+		//Re-send the Xrl after a short delay.
+		_resend_counter++;
+		_resend_timer = _task.eventloop().new_oneoff_after_ms(1000,
+                                     callback(this, &TaskXrlItem::resend));
+		return;
+	    }
+	} else if ((err == XrlError::INTERNAL_ERROR())
+		   || (err == XrlError::SYSCALL_FAILED())
+		   || (err == XrlError::FAILED_UNKNOWN())) {
+	    //Something bad happened but it's not clear what.  Don't
+	    //consider these to be fatal errors, but they may well
+	    //prove to be so.  XXX revisit this issue when we've more
+	    //experience with XRL errors.
+	    XLOG_ERROR(err.str().c_str());
+	    fatal = false;
+	} else {
+	    //we intended to explicitly handle all errors above, so if
+	    //we got here there's an error type we didn't know about.
+	    XLOG_UNREACHABLE();
+	}
     }
 
     if (!_xrl_callback.is_empty())
@@ -214,7 +287,7 @@ TaskXrlItem::execute_done(const XrlError& err,
 	success = false;
 	errmsg = err.str();
     }
-    _task.xrl_done(success, errmsg);
+    _task.xrl_done(success, fatal, errmsg);
 }
 
 
@@ -288,7 +361,7 @@ Task::step1_done(bool success)
     if (success)
 	step2();
     else
-	task_fail("Can't start process " + _modname);
+	task_fail("Can't start process " + _modname, false);
 }
 
 void
@@ -309,7 +382,7 @@ Task::step2_done(bool success)
     if (success)
 	step3();
     else
-	task_fail("Can't validate start of process " + _modname);
+	task_fail("Can't validate start of process " + _modname, true);
 }
 
 void 
@@ -323,21 +396,21 @@ Task::step3()
 	printf("step3: execute\n");
 	if (_xrls.front().execute(errmsg) == false) {
 	    XLOG_WARNING("Failed to execute XRL: %s\n", errmsg.c_str());
-	    task_fail(errmsg);
+	    task_fail(errmsg, false);
 	    return;
 	}
     }
 }
 
 void
-Task::xrl_done(bool success, string errmsg) 
+Task::xrl_done(bool success, bool fatal, string errmsg) 
 {
     printf("xrl_done\n");
     if (success) {
 	_xrls.pop_front();
 	step3();
     } else {
-	task_fail(errmsg);
+	task_fail(errmsg, fatal);
     }
 }
 
@@ -378,7 +451,7 @@ Task::step5_done(bool success)
     if (success)
 	step6();
     else
-	task_fail("Can't validate stop of process " + _modname);
+	task_fail("Can't validate stop of process " + _modname, false);
 }
 
 void 
@@ -390,9 +463,14 @@ Task::step6()
 }
 
 void
-Task::task_fail(string errmsg) 
+Task::task_fail(string errmsg, bool fatal) 
 {
     debug_msg((errmsg + "\n").c_str());
+    if (fatal) {
+	XLOG_ERROR(("Shutting down fatally wounded process " + _modname)
+		   .c_str());
+	_taskmgr.kill_process(_modname);
+    }
     _task_complete_cb->dispatch(false, errmsg);
 }
 
@@ -406,6 +484,12 @@ XorpClient&
 Task::xorp_client() const 
 {
     return _taskmgr.xorp_client();
+}
+
+EventLoop&
+Task::eventloop() const
+{
+    return _taskmgr.eventloop();
 }
 
 TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient,
@@ -518,6 +602,15 @@ TaskManager::find_task(const string& modname)
     assert(i != _tasks.end());
     assert(i->second != NULL);
     return *(i->second);
+}
+
+void
+TaskManager::kill_process(const string& modname) 
+{
+    //XXX We really should try to restart the failed process, but for
+    //now we'll just kill it.
+    XorpCallback0<void>::RefPtr null_cb;
+    _module_manager.stop_module(modname, null_cb);
 }
 
 EventLoop&

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.8 2003/05/05 22:43:04 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.9 2003/05/09 23:47:47 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -75,11 +75,13 @@ public:
     TaskXrlItem::TaskXrlItem(const TaskXrlItem& them);
     bool execute(string& errmsg);
     void execute_done(const XrlError& err, XrlArgs* xrlargs);
-
+    void resend();
 private:
     UnexpandedXrl _unexpanded_xrl;
     XrlRouter::XrlCallback _xrl_callback;
     Task& _task;
+    XorpTimer _resend_timer;
+    uint32_t _resend_counter;
 };
 
 class Task {
@@ -94,11 +96,12 @@ public:
 			 Validation* validation);
     void add_xrl(const UnexpandedXrl& xrl, XrlRouter::XrlCallback& cb);
     void run(CallBack cb);
-    void xrl_done(bool success, string errmsg); 
+    void xrl_done(bool success, bool fatal, string errmsg); 
     bool do_exec() const;
     XorpClient& xorp_client() const;
 
     const string& name() const {return _name;}
+    EventLoop& eventloop() const;
 protected:
     void step1();
     void step1_done(bool success);
@@ -116,7 +119,7 @@ protected:
     void step5_done(bool success);
 
     void step6();
-    void task_fail(string errmsg);
+    void task_fail(string errmsg, bool fatal);
 private:
     string _name; //the name of the task
     TaskManager& _taskmgr;
@@ -145,6 +148,18 @@ public:
     ModuleManager& module_manager() const {return _module_manager;}
     bool do_exec() const {return _current_do_exec;}
     EventLoop& eventloop() const;
+
+    /**
+     * @short kill_process is used to kill a fatally wounded process
+     *
+     * kill_process is used to kill a fatally wounded process. This
+     * does not politely ask the process to die, because if we get
+     * here we can't communicate with the process using XRLs, so we
+     * just kill it outright.
+     * 
+     * @param modname the module name of the process to be killed.  
+     */
+    void kill_process(const string& modname);
 private:
     void run_task();
     void task_done(bool success, string errmsg);
