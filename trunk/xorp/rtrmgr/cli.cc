@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.30 2004/03/08 18:14:29 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.31 2004/03/08 20:19:38 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -1484,7 +1484,8 @@ RouterCLI::text_entry_func(const string& ,
 	}
 
 	// If there are no arguments, it must be a void structuring node
-	if ((argv.size() == 0) && (tag_ttn->type() != NODE_VOID)) {
+	if ((argv.size() == 0) && 
+	    (tag_ttn->type() != NODE_VOID || tag_ttn->is_tag())) {
 	    _cli_client.cli_print("ERROR: Insufficient arguments\n");
 	    return (XORP_ERROR);
 	}
