@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.33 2004/05/20 20:57:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.34 2004/06/08 12:33:48 pavlin Exp $"
 
 
 //
@@ -122,6 +122,8 @@ MfeaNode::~MfeaNode()
     unset_observer(this);
 
     stop();
+
+    ProtoNode<MfeaVif>::set_node_status(PROC_NULL);
     
     delete_all_vifs();
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.46 2004/05/18 22:15:18 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.47 2004/05/20 20:59:07 pavlin Exp $"
 
 
 //
@@ -118,12 +118,9 @@ PimNode::~PimNode()
     unset_observer(this);
 
     stop();
-    
-    //
-    // XXX: the MRT, MRIB, etc tables, and the PimVifs will be automatically
-    // "destructed".
-    //
-    
+
+    ProtoNode<PimVif>::set_node_status(PROC_NULL);
+
     delete_all_vifs();
     
     BUFFER_FREE(_buffer_recv);
