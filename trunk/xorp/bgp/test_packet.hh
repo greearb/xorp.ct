@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/test_packet.hh,v 1.1 2003/08/21 18:37:09 atanu Exp $
+// $XORP: xorp/bgp/test_packet.hh,v 1.2 2003/08/21 18:51:51 atanu Exp $
 
 #ifndef __BGP_TEST_PACKET_HH__
 #define __BGP_TEST_PACKET_HH__
@@ -27,7 +27,7 @@ class BGPTestPacket
 {
 public:
     BGPTestPacket();
-    void run_tests();
+    int run_tests();
 protected:
 private:
     KeepAlivePacket* create_keepalive();

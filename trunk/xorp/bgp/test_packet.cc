@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.2 2003/08/21 18:51:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.3 2003/09/04 03:12:21 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -42,53 +42,49 @@ int main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
     
-    tp.run_tests();
+    int retval = tp.run_tests();
     
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    return 0;
+    return retval;
 }
 
 BGPTestPacket::BGPTestPacket()
 {
 }
 
-void BGPTestPacket::run_tests()
+int
+BGPTestPacket::run_tests()
 {
     // Run tests
     
-    if (test_keepalive())
-	printf("Keep alive packet test passed\n");
-    else
-	printf("Keep alive packet test failed\n");
-    if (test_open())
-	printf("Open packet test passed\n");
-    else
-	printf("Open packet test failed\n");
+    struct test {
+	const char *test_name;
+	bool (BGPTestPacket::*func)();
+    } tests[] = {
+	{"Keep alive",	&BGPTestPacket::test_keepalive},
+	{"Open", &BGPTestPacket::test_open},
+	{"Update IPv4", &BGPTestPacket::test_update},
+	{"Update IPv6", &BGPTestPacket::test_update_ipv6},
+	{"Notification", &BGPTestPacket::test_notification},
+	{"AS path", &BGPTestPacket::test_aspath},
+    };
 
-    if (test_update())
-	printf("Update packet test passed\n");
-    else
-	printf("Update packet test failed\n");
-
-    if (test_update_ipv6())
-	printf("Update packet IPv6 test passed\n");
-    else
-	printf("Update packet IPv6 test failed\n");
-
-    if (test_notification())
-	printf("Notification test passed\n");
-    else
-	printf("Notification test failed\n");
-    
-    if (test_aspath())
-	printf("AS path test passed\n");
-    else
-	printf("AS path test failed\n");
-
+    bool failed = false;
+    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); i++) {
+	printf("%-15s", tests[i].test_name);
+	if(!((*this).*tests[i].func)()) {
+	    printf("FAILED\n");
+	    failed = true;
+	} else {
+	    printf("passed\n");
+	}
+    }
+	    
+    return !failed ? 0 : -1;
 }
 
 bool BGPTestPacket::test_keepalive()
