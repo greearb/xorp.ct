@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.12 2003/04/02 19:51:14 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.13 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -372,8 +372,9 @@ PimVif::final_stop(void)
     //
     // Test if time to completely stop the PimNode itself because of this vif
     //
+    string dummy_string;
     if (pim_node().is_pending_down()
-	&& (! pim_node().has_pending_down_units())) {
+	&& (! pim_node().has_pending_down_units(dummy_string))) {
 	pim_node().final_stop();
     }
     

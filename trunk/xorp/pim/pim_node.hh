@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.13 2003/05/19 00:20:23 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.14 2003/05/21 05:32:54 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -122,14 +122,41 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop();
+
+    /**
+     * Test if waiting to complete registration with the MFEA.
+     * 
+     * @return true if waiting to complete registration with the MFEA,
+     * otherwise false.
+     */
+    bool is_waiting_for_mfea_startup() const;
+    
+    /**
+     * Test if waiting to complete registration with the MLD6IGMP.
+     * 
+     * @return true if waiting to complete registration with the MLD6IGMP,
+     * otherwise false.
+     */
+    bool is_waiting_for_mld6igmp_startup() const;
     
     /**
      * Test if there is an unit that is in PENDING_DOWN state.
      * 
+     * @param reason return-by-reference string that contains human-readable
+     * information about the unit that is in PENDING_DOWN state (if any).
      * @return true if there is an unit that is in PENDING_DOWN state,
      * otherwise false.
      */
-    bool	has_pending_down_units();
+    bool	has_pending_down_units(string& reason);
+
+    /**
+     * Get the node status (see @ref ProcessStatus).
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * information about the status.
+     * @return the node status (see @ref ProcessStatus).
+     */
+    ProcessStatus	node_status(string& reason);
     
     /**
      * Install a new PIM vif.
@@ -740,94 +767,176 @@ public:
     /**
      * Start the Bootstrap mechanism.
      * 
-     * @return XORP_OK if a new address, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_bsr() { return (pim_bsr().start()); }
     
     /**
      * Stop the Bootstrap mechanism.
      * 
-     * @return XORP_OK if a new address, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_bsr() { return (pim_bsr().stop()); }
     
     //
     // Configuration methods
     //
+    /**
+     * Start a set of configuration changes.
+     * 
+     * Note that it may change the node status.
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		start_config(string& reason);
+
+    /**
+     * End a set of configuration changes.
+     * 
+     * Note that it may change the node status.
+     * 
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		end_config(string& reason);
+    
+    int		add_config_vif(const string& vif_name,
+			       uint16_t vif_index,
+			       string& reason);
+    int		delete_config_vif(const string& vif_name,
+				  string& reason);
+    int		add_config_vif_addr(const string& vif_name,
+				    const IPvX& addr,
+				    const IPvXNet& subnet,
+				    const IPvX& broadcast,
+				    const IPvX& peer,
+				    string& reason);
+    int		delete_config_vif_addr(const string& vif_name,
+				       const IPvX& addr,
+				       string& reason);
+    int		set_config_vif_flags(const string& vif_name,
+				     bool is_pim_register,
+				     bool is_p2p,
+				     bool is_loopback,
+				     bool is_multicast,
+				     bool is_broadcast,
+				     bool is_up,
+				     string& reason);
+    int		set_config_all_vifs_done(string& reason);
+    
     int		set_vif_proto_version(const string& vif_name,
-				      int proto_version);
-    int		reset_vif_proto_version(const string& vif_name);
+				      int proto_version,
+				      string& reason);
+    int		reset_vif_proto_version(const string& vif_name,
+					string& reason);
     int		set_vif_hello_triggered_delay(const string& vif_name,
-					      uint16_t hello_triggered_delay);
-    int		reset_vif_hello_triggered_delay(const string vif_name);
+					      uint16_t hello_triggered_delay,
+					      string& reason);
+    int		reset_vif_hello_triggered_delay(const string& vif_name,
+						string& reason);
     int		set_vif_hello_period(const string& vif_name,
-				     uint16_t hello_period);
-    int		reset_vif_hello_period(const string& vif_name);
+				     uint16_t hello_period,
+				     string& reason);
+    int		reset_vif_hello_period(const string& vif_name, string& reason);
     int		set_vif_hello_holdtime(const string& vif_name,
-				       uint16_t	hello_holdtime);
-    int		reset_vif_hello_holdtime(const string& vif_name);
+				       uint16_t	hello_holdtime,
+				       string& reason);
+    int		reset_vif_hello_holdtime(const string& vif_name,
+					 string& reason);
     int		set_vif_dr_priority(const string& vif_name,
-				    uint32_t dr_priority);
-    int		reset_vif_dr_priority(const string& vif_name);
-    int		set_vif_lan_delay(const string&	vif_name, uint16_t lan_delay);
-    int		reset_vif_lan_delay(const string& vif_name);
+				    uint32_t dr_priority,
+				    string& reason);
+    int		reset_vif_dr_priority(const string& vif_name, string& reason);
+    int		set_vif_lan_delay(const string&	vif_name,
+				  uint16_t lan_delay,
+				  string& reason);
+    int		reset_vif_lan_delay(const string& vif_name, string& reason);
     int		set_vif_override_interval(const string&	vif_name,
-					  uint16_t override_interval);
-    int		reset_vif_override_interval(const string& vif_name);
+					  uint16_t override_interval,
+					  string& reason);
+    int		reset_vif_override_interval(const string& vif_name,
+					    string& reason);
     int		set_vif_is_tracking_support_disabled(const string& vif_name,
-						     bool is_tracking_support_disabled);
-    int		reset_vif_is_tracking_support_disabled(const string& vif_name);
+						     bool is_tracking_support_disabled,
+						     string& reason);
+    int		reset_vif_is_tracking_support_disabled(const string& vif_name,
+						       string& reason);
     int		set_vif_accept_nohello_neighbors(const string& vif_name,
-						 bool accept_nohello_neighbors);
-    int		reset_vif_accept_nohello_neighbors(const string& vif_name);
+						 bool accept_nohello_neighbors,
+						 string& reason);
+    int		reset_vif_accept_nohello_neighbors(const string& vif_name,
+						   string& reason);
     int		set_vif_join_prune_period(const string&	vif_name,
-					  uint16_t join_prune_period);
-    int		reset_vif_join_prune_period(const string& vif_name);
+					  uint16_t join_prune_period,
+					  string& reason);
+    int		reset_vif_join_prune_period(const string& vif_name,
+					    string& reason);
+    int		set_switch_to_spt_threshold(bool is_enabled,
+					    uint32_t interval_sec,
+					    uint32_t bytes,
+					    string& reason);
+    int		reset_switch_to_spt_threshold(string& reason);
     //
     int		add_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
-						  const string& vif_name);
+						  const string& vif_name,
+						  string& reason);
     int		add_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
-						  const IPvX& vif_addr);
+						  const IPvX& vif_addr,
+						  string& reason);
     int		delete_config_scope_zone_by_vif_name(const IPvXNet &scope_zone_id,
-						     const string& vif_name);
+						     const string& vif_name,
+						     string& reason);
     int		delete_config_scope_zone_by_vif_addr(const IPvXNet &scope_zone_id,
-						     const IPvX& vif_addr);
+						     const IPvX& vif_addr,
+						     string& reason);
     //
     int		add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 						bool is_scope_zone,
 						const string& vif_name,
 						uint8_t bsr_priority,
-						uint8_t hash_masklen);
+						uint8_t hash_masklen,
+						string& reason);
     int		add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
 					    bool is_scope_zone,
 					    const IPvX& my_cand_bsr_addr,
 					    uint8_t bsr_priority,
-					    uint8_t hash_masklen);
+					    uint8_t hash_masklen,
+					    string& reason);
     int		delete_config_cand_bsr(const IPvXNet& scope_zone_id,
-				       bool is_scope_zone);
+				       bool is_scope_zone,
+				       string& reason);
     int		add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 					       bool is_scope_zone,
 					       const string& vif_name,
 					       uint8_t rp_priority,
-					       uint16_t rp_holdtime);
+					       uint16_t rp_holdtime,
+					       string& reason);
     int		add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 					   bool is_scope_zone,
 					   const IPvX& my_cand_rp_addr,
 					   uint8_t rp_priority,
-					   uint16_t rp_holdtime);
+					   uint16_t rp_holdtime,
+					   string& reason);
     int		delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
 						  bool is_scope_zone,
-						  const string& vif_name);
+						  const string& vif_name,
+						  string& reason);
     int		delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
 					      bool is_scope_zone,
-					      const IPvX& my_cand_rp_addr);
+					      const IPvX& my_cand_rp_addr,
+					      string& reason);
     int		add_config_rp(const IPvXNet& group_prefix,
 			      const IPvX& rp_addr,
 			      uint8_t rp_priority,
-			      uint8_t hash_masklen);
+			      uint8_t hash_masklen,
+			      string& reason);
     int		delete_config_rp(const IPvXNet& group_prefix,
-				 const IPvX& rp_addr);
-    int		config_rp_done();
+				 const IPvX& rp_addr,
+				 string& reason);
+    int		config_rp_done(string& reason);
     
     //
     // Debug-related methods
@@ -927,6 +1036,14 @@ public:
     ConfigParam<uint32_t>& switch_to_spt_threshold_bytes() {
 	return (_switch_to_spt_threshold_bytes);
     }
+
+    //
+    // Status-related methods
+    //
+    void incr_waiting_for_mfea_startup_events();
+    void decr_waiting_for_mfea_startup_events();
+    void incr_waiting_for_mld6igmp_startup_events();
+    void decr_waiting_for_mld6igmp_startup_events();
     
 private:
     
@@ -950,6 +1067,17 @@ private:
     ConfigParam<bool>		_is_switch_to_spt_enabled;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_interval_sec;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_bytes;
+    
+    //
+    // Config-related state
+    //
+    map<string, Vif>		_configured_vifs;	// Configured vifs
+    
+    //
+    // Status-related state
+    //
+    size_t	_waiting_for_mfea_startup_events;
+    size_t	_waiting_for_mld6igmp_startup_events;
     
     //
     // Debug and test-related state

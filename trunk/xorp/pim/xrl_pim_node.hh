@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.20 2003/05/07 23:15:16 mjh Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.21 2003/05/29 21:17:16 mjh Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -81,17 +81,6 @@ protected:
     //
     // Protocol node methods
     //
-    void xrl_result_add_protocol_mfea(const XrlError& xrl_error);
-    void xrl_result_delete_protocol_mfea(const XrlError& xrl_error);
-    
-    int add_protocol_mld6igmp(uint16_t vif_index);
-    int delete_protocol_mld6igmp(uint16_t vif_index);
-    void xrl_result_add_protocol_mld6igmp(const XrlError& xrl_error);
-    void xrl_result_delete_protocol_mld6igmp(const XrlError& xrl_error);
-    
-    void xrl_result_allow_signal_messages(const XrlError& xrl_error);
-    void xrl_result_allow_mrib_messages(const XrlError& xrl_error);
-    
     int	proto_send(const string& dst_module_instance_name,
 		   xorp_module_id dst_module_id,
 		   uint16_t vif_index,
@@ -101,7 +90,12 @@ protected:
     void xrl_result_send_protocol_message(const XrlError& xrl_error);
     
     int start_protocol_kernel();
+    void xrl_result_add_protocol_mfea(const XrlError& xrl_error);
+    void xrl_result_allow_signal_messages(const XrlError& xrl_error);
+    void xrl_result_allow_mrib_messages(const XrlError& xrl_error);
+    
     int stop_protocol_kernel();
+    void xrl_result_delete_protocol_mfea(const XrlError& xrl_error);
     
     int start_protocol_kernel_vif(uint16_t vif_index);
     void xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error);
@@ -133,6 +127,8 @@ protected:
 			     bool is_threshold_in_bytes,
 			     bool is_geq_upcall,
 			     bool is_leq_upcall);
+    void xrl_result_add_dataflow_monitor(const XrlError& xrl_error);
+    
     int delete_dataflow_monitor(const IPvX& source_addr,
 				const IPvX& group_addr,
 				uint32_t threshold_interval_sec,
@@ -143,11 +139,17 @@ protected:
 				bool is_threshold_in_bytes,
 				bool is_geq_upcall,
 				bool is_leq_upcall);
+    void xrl_result_delete_dataflow_monitor(const XrlError& xrl_error);
+    
     int delete_all_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr);
-    void xrl_result_add_dataflow_monitor(const XrlError& xrl_error);
-    void xrl_result_delete_dataflow_monitor(const XrlError& xrl_error);
     void xrl_result_delete_all_dataflow_monitor(const XrlError& xrl_error);
+
+    int add_protocol_mld6igmp(uint16_t vif_index);
+    void xrl_result_add_protocol_mld6igmp(const XrlError& xrl_error);
+    
+    int delete_protocol_mld6igmp(uint16_t vif_index);
+    void xrl_result_delete_protocol_mld6igmp(const XrlError& xrl_error);
     
     //
     // Protocol node CLI methods
@@ -331,18 +333,6 @@ protected:
 	const bool&	is_multicast, 
 	const bool&	is_broadcast, 
 	const bool&	is_up);
-
-    /**
-     *  Complete a transaction with vif information.
-     *  
-     *  @param vif_name the name of the vif.
-     *  
-     *  @param vif_index the index of the vif.
-     */
-    XrlCmdError mfea_client_0_1_set_vif_done(
-	// Input values, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
 
     /**
      *  Complete all transactions with vif information.

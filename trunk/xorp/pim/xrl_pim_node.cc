@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.20 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.21 2003/05/29 21:17:16 mjh Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -155,47 +155,6 @@ XrlPimNode::stop_bsr()
     return (ret_code);
 }
 
-
-void
-XrlPimNode::xrl_result_add_protocol_mfea(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add a protocol to MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlPimNode::xrl_result_allow_signal_messages(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send allow_signal_messages() to MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlPimNode::xrl_result_allow_mrib_messages(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send allow_mrib_messages() to MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlPimNode::xrl_result_delete_protocol_mfea(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete a protocol with MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
 //
 // Protocol node methods
 //
@@ -249,7 +208,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 	snd_vector[i] = sndbuf[i];
     
     do {
-	if (dst.is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_send_protocol_message4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
@@ -267,7 +226,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	if (dst.is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_send_protocol_message6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
@@ -304,25 +263,35 @@ XrlPimNode::xrl_result_send_protocol_message(const XrlError& xrl_error)
 
 int
 XrlPimNode::start_protocol_kernel()
-{    
+{
     //
     // Register the protocol with the MFEA
     //
-    if (family() == AF_INET) {
-	XrlMfeaV0p1Client::send_add_protocol4(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    callback(this, &XrlPimNode::xrl_result_add_protocol_mfea));
-    } else {
-	XrlMfeaV0p1Client::send_add_protocol6(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    callback(this, &XrlPimNode::xrl_result_add_protocol_mfea));
-    }
+    do {
+	if (PimNode::is_ipv4()) {
+	    XrlMfeaV0p1Client::send_add_protocol4(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		callback(this, &XrlPimNode::xrl_result_add_protocol_mfea));
+	    break;
+	}
+	
+	if (PimNode::is_ipv6()) {
+	    XrlMfeaV0p1Client::send_add_protocol6(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		callback(this, &XrlPimNode::xrl_result_add_protocol_mfea));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+    PimNode::incr_waiting_for_mfea_startup_events();
     
     //
     // Enable the receiving of kernel signal messages
@@ -334,6 +303,7 @@ XrlPimNode::start_protocol_kernel()
 	PimNode::module_id(),
 	true,			// XXX: enable
 	callback(this, &XrlPimNode::xrl_result_allow_signal_messages));
+    PimNode::incr_waiting_for_mfea_startup_events();
     
     //
     // Enable receiving of MRIB information
@@ -345,32 +315,88 @@ XrlPimNode::start_protocol_kernel()
 	PimNode::module_id(),
 	true,			// XXX: enable
 	callback(this, &XrlPimNode::xrl_result_allow_mrib_messages));
+    PimNode::incr_waiting_for_mfea_startup_events();
     
     // TODO: explicitly start the XRL operations?
     
     return (XORP_OK);
 }
 
+void
+XrlPimNode::xrl_result_add_protocol_mfea(const XrlError& xrl_error)
+{
+    PimNode::decr_waiting_for_mfea_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to add a protocol to MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
+void
+XrlPimNode::xrl_result_allow_signal_messages(const XrlError& xrl_error)
+{
+    PimNode::decr_waiting_for_mfea_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to send allow_signal_messages() to MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
+void
+XrlPimNode::xrl_result_allow_mrib_messages(const XrlError& xrl_error)
+{
+    PimNode::decr_waiting_for_mfea_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to send allow_mrib_messages() to MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
 int
 XrlPimNode::stop_protocol_kernel()
-{ 
-    if (family() == AF_INET) {
-	XrlMfeaV0p1Client::send_delete_protocol4(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    callback(this, &XrlPimNode::xrl_result_delete_protocol_mfea));
-    } else {
-	XrlMfeaV0p1Client::send_delete_protocol6(
-	    xorp_module_name(family(), XORP_MODULE_MFEA),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    callback(this, &XrlPimNode::xrl_result_delete_protocol_mfea));
-    }
+{
+    do {
+	if (PimNode::is_ipv4()) {
+	    XrlMfeaV0p1Client::send_delete_protocol4(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		callback(this, &XrlPimNode::xrl_result_delete_protocol_mfea));
+	    break;
+	}
+	
+	if (PimNode::is_ipv6()) {
+	    XrlMfeaV0p1Client::send_delete_protocol6(
+		xorp_module_name(family(), XORP_MODULE_MFEA),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		callback(this, &XrlPimNode::xrl_result_delete_protocol_mfea));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
     
     return (XORP_OK);
+}
+
+void
+XrlPimNode::xrl_result_delete_protocol_mfea(const XrlError& xrl_error)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to delete a protocol with MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
 }
 
 int
@@ -412,12 +438,15 @@ XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
 	XLOG_UNREACHABLE();
 	break;
     } while (false);
+    PimNode::incr_waiting_for_mfea_startup_events();
     
     return (XORP_OK);
 }
 void
 XrlPimNode::xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error)
 {
+    PimNode::decr_waiting_for_mfea_startup_events();
+    
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to start a kernel vif with the MFEA: %s",
 		   xrl_error.str().c_str());
@@ -490,7 +519,7 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
     }
     
     do {
-	if (multicast_group.is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_join_multicast_group4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -503,7 +532,7 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
 	    break;
 	}
 	
-	if (multicast_group.is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_join_multicast_group6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -546,7 +575,7 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
     }
     
     do {
-	if (multicast_group.is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_leave_multicast_group4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -559,7 +588,7 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
 	    break;
 	}
 	
-	if (multicast_group.is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_leave_multicast_group6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -601,7 +630,7 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 		     oiflist_disable_wrongvif_vector);
     
     do {
-	if (pim_mfc.source_addr().is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_add_mfc4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -616,7 +645,7 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 	    break;
 	}
 	
-	if (pim_mfc.source_addr().is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_add_mfc6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -652,7 +681,7 @@ int
 XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 {
     do {
-	if (pim_mfc.source_addr().is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_delete_mfc4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -662,7 +691,7 @@ XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 	    break;
 	}
 	
-	if (pim_mfc.source_addr().is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_delete_mfc6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -702,7 +731,7 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
 				 bool is_leq_upcall)
 {
     do {
-	if (source_addr.is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_add_dataflow_monitor4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -720,7 +749,7 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
 	    break;
 	}
 	
-	if (source_addr.is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_add_dataflow_monitor6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -745,6 +774,16 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
     return (XORP_OK);
 }
 
+void
+XrlPimNode::xrl_result_add_dataflow_monitor(const XrlError& xrl_error)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to add dataflow monitor with the MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
 int
 XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr,
@@ -758,7 +797,7 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
 				    bool is_leq_upcall)
 {
     do {
-	if (source_addr.is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_delete_dataflow_monitor4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -776,7 +815,7 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
 	    break;
 	}
 	
-	if (source_addr.is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_delete_dataflow_monitor6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -801,12 +840,22 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
     return (XORP_OK);
 }
 
+void
+XrlPimNode::xrl_result_delete_dataflow_monitor(const XrlError& xrl_error)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to delete dataflow monitor with the MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
 int
 XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 					const IPvX& group_addr)
 {
     do {
-	if (source_addr.is_ipv4()) {
+	if (PimNode::is_ipv4()) {
 	    XrlMfeaV0p1Client::send_delete_all_dataflow_monitor4(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -816,7 +865,7 @@ XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 	    break;
 	}
 	
-	if (source_addr.is_ipv6()) {
+	if (PimNode::is_ipv6()) {
 	    XrlMfeaV0p1Client::send_delete_all_dataflow_monitor6(
 		xorp_module_name(family(), XORP_MODULE_MFEA),
 		my_xrl_target_name(),
@@ -834,30 +883,121 @@ XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 }
 
 void
-XrlPimNode::xrl_result_add_dataflow_monitor(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add dataflow monitor with the MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlPimNode::xrl_result_delete_dataflow_monitor(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete dataflow monitor with the MFEA: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
 XrlPimNode::xrl_result_delete_all_dataflow_monitor(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to delete all dataflow monitor with the MFEA: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
+int
+XrlPimNode::add_protocol_mld6igmp(uint16_t vif_index)
+{
+    PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
+    
+    if (pim_vif == NULL)
+	return (XORP_ERROR);		// Unknown vif
+    
+    //
+    // Register the protocol with the MLD6IGMP for membership
+    // change on this interface.
+    //
+    do {
+	if (PimNode::is_ipv4()) {
+	    XrlMld6igmpV0p1Client::send_add_protocol4(
+		xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		pim_vif->name(),
+		vif_index,
+		callback(this, &XrlPimNode::xrl_result_add_protocol_mld6igmp));
+	    break;
+	}
+	
+	if (PimNode::is_ipv6()) {
+	    XrlMld6igmpV0p1Client::send_add_protocol6(
+		xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		pim_vif->name(),
+		vif_index,
+		callback(this, &XrlPimNode::xrl_result_add_protocol_mld6igmp));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+    PimNode::incr_waiting_for_mld6igmp_startup_events();
+    
+    return (XORP_OK);
+}
+
+void
+XrlPimNode::xrl_result_add_protocol_mld6igmp(const XrlError& xrl_error)
+{
+    PimNode::decr_waiting_for_mld6igmp_startup_events();
+    
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to add a protocol to MLD6IGMP: %s",
+		   xrl_error.str().c_str());
+	return;
+    }
+}
+
+int
+XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
+{
+    PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
+    
+    if (pim_vif == NULL)
+	return (XORP_ERROR);		// Unknown vif
+    
+    //
+    // Deregister the protocol with the MLD6IGMP for membership
+    // change on this interface.
+    //
+    do {
+	if (PimNode::is_ipv4()) {
+	    XrlMld6igmpV0p1Client::send_delete_protocol4(
+		xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		pim_vif->name(),
+		vif_index,
+		callback(this, &XrlPimNode::xrl_result_delete_protocol_mld6igmp));
+	    break;
+	}
+	
+	if (PimNode::is_ipv6()) {
+	    XrlMld6igmpV0p1Client::send_delete_protocol6(
+		xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		pim_vif->name(),
+		vif_index,
+		callback(this, &XrlPimNode::xrl_result_delete_protocol_mld6igmp));
+	    break;
+	}
+	
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
+    
+    return (XORP_OK);
+}
+
+void
+XrlPimNode::xrl_result_delete_protocol_mld6igmp(const XrlError& xrl_error)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to delete a protocol with MLD6IGMP: %s",
 		   xrl_error.str().c_str());
 	return;
     }
@@ -949,17 +1089,16 @@ XrlPimNode::common_0_1_get_status(// Output values,
 				  uint32_t& status,
 				  string& reason)
 {
-    //XXX placeholder only
-    status = PROC_READY;
-    reason = "Ready";
+    status = PimNode::node_status(reason);
+    
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlPimNode::common_0_1_shutdown()
 {
-    //XXX placeholder only
-    exit(0);
+    // TODO: XXX: PAVPAVPAV: implement it!!
+    return XrlCmdError::COMMAND_FAILED();
 }
 
 XrlCmdError
@@ -997,7 +1136,7 @@ XrlPimNode::mfea_client_0_1_new_vif(
 {
     string err;
     
-    if (PimNode::add_vif(vif_name, vif_index, err) != XORP_OK) {
+    if (PimNode::add_config_vif(vif_name, vif_index, err) != XORP_OK) {
 	string msg = c_format("Failed to add vif %s with vif_index = %d: %s",
 			      vif_name.c_str(), vif_index, err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1014,7 +1153,7 @@ XrlPimNode::mfea_client_0_1_delete_vif(
 {
     string err;
     
-    if (PimNode::delete_vif(vif_name, err) != XORP_OK) {
+    if (PimNode::delete_config_vif(vif_name, err) != XORP_OK) {
 	string msg = c_format("Failed to delete vif %s with vif_index = %d: %s",
 			      vif_name.c_str(), vif_index, err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1035,13 +1174,13 @@ XrlPimNode::mfea_client_0_1_add_vif_addr4(
 {
     string err;
     
-    if (PimNode::add_vif_addr(vif_name,
-			      IPvX(addr),
-			      IPvXNet(subnet),
-			      IPvX(broadcast),
-			      IPvX(peer),
-			      err)
-	!= XORP_OK) {
+    if (PimNode::add_config_vif_addr(vif_name,
+				     IPvX(addr),
+				     IPvXNet(subnet),
+				     IPvX(broadcast),
+				     IPvX(peer),
+				     err)
+	    != XORP_OK) {
 	string msg = c_format("Failed to add address %s to vif %s: %s",
 			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1062,13 +1201,13 @@ XrlPimNode::mfea_client_0_1_add_vif_addr6(
 {
     string err;
     
-    if (PimNode::add_vif_addr(vif_name,
-			      IPvX(addr),
-			      IPvXNet(subnet),
-			      IPvX(broadcast),
-			      IPvX(peer),
-			      err)
-	!= XORP_OK) {
+    if (PimNode::add_config_vif_addr(vif_name,
+				     IPvX(addr),
+				     IPvXNet(subnet),
+				     IPvX(broadcast),
+				     IPvX(peer),
+				     err)
+	    != XORP_OK) {
 	string msg = c_format("Failed to add address %s to vif %s: %s",
 			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1086,10 +1225,10 @@ XrlPimNode::mfea_client_0_1_delete_vif_addr4(
 {
     string err;
     
-    if (PimNode::delete_vif_addr(vif_name,
-				 IPvX(addr),
-				 err)
-	!= XORP_OK) {
+    if (PimNode::delete_config_vif_addr(vif_name,
+					IPvX(addr),
+					err)
+	    != XORP_OK) {
 	string msg = c_format("Failed to delete address %s from vif %s: %s",
 			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1107,10 +1246,10 @@ XrlPimNode::mfea_client_0_1_delete_vif_addr6(
 {
     string err;
     
-    if (PimNode::delete_vif_addr(vif_name,
-				 IPvX(addr),
-				 err)
-	!= XORP_OK) {
+    if (PimNode::delete_config_vif_addr(vif_name,
+					IPvX(addr),
+					err)
+	    != XORP_OK) {
 	string msg = c_format("Failed to delete address %s from vif %s: %s",
 			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1133,15 +1272,15 @@ XrlPimNode::mfea_client_0_1_set_vif_flags(
 {
     string err;
     
-    if (PimNode::set_vif_flags(vif_name,
-			       is_pim_register,
-			       is_p2p,
-			       is_loopback,
-			       is_multicast,
-			       is_broadcast,
-			       is_up,
-			       err)
-	!= XORP_OK) {
+    if (PimNode::set_config_vif_flags(vif_name,
+				      is_pim_register,
+				      is_p2p,
+				      is_loopback,
+				      is_multicast,
+				      is_broadcast,
+				      is_up,
+				      err)
+	    != XORP_OK) {
 	string msg = c_format("Failed to set flags for vif %s: %s",
 			      vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -1151,28 +1290,15 @@ XrlPimNode::mfea_client_0_1_set_vif_flags(
 }
 
 XrlCmdError
-XrlPimNode::mfea_client_0_1_set_vif_done(
-    // Input values, 
-    const string&	vif_name, 
-    const uint32_t&	vif_index) 
-{
-    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
-    
-    if (pim_vif == NULL) {
-	string msg = c_format("Failed to complete setup for vif %s "
-			      "with vif_index = %d: "
-			      "no such vif",
-			      vif_name.c_str(), vif_index);
-	return XrlCmdError::COMMAND_FAILED(msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlPimNode::mfea_client_0_1_set_all_vifs_done()
 {
-    PimNode::set_vif_setup_completed(true);
+    string err;
+    
+    if (PimNode::set_config_all_vifs_done(err) != XORP_OK) {
+	string msg = c_format("Failed to complete setup for all vifs: %s",
+			      err.c_str());
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -1185,96 +1311,6 @@ XrlPimNode::mfea_client_0_1_is_vif_setup_completed(
     is_completed = PimNode::is_vif_setup_completed();
     
     return XrlCmdError::OKAY();
-}
-
-int
-XrlPimNode::add_protocol_mld6igmp(uint16_t vif_index)
-{
-    PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
-    
-    if (pim_vif == NULL)
-	return (XORP_ERROR);		// Unknown vif
-    
-    //
-    // Register the protocol with the MLD6IGMP for membership
-    // change on this interface.
-    //
-    if (family() == AF_INET) {
-	XrlMld6igmpV0p1Client::send_add_protocol4(
-	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    pim_vif->name(),
-	    vif_index,
-	    callback(this, &XrlPimNode::xrl_result_add_protocol_mld6igmp));
-    } else {
-	XrlMld6igmpV0p1Client::send_add_protocol6(
-	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    pim_vif->name(),
-	    vif_index,
-	    callback(this, &XrlPimNode::xrl_result_add_protocol_mld6igmp));
-    }
-    
-    return (XORP_OK);
-}
-
-int
-XrlPimNode::delete_protocol_mld6igmp(uint16_t vif_index)
-{
-    PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
-    
-    if (pim_vif == NULL)
-	return (XORP_ERROR);		// Unknown vif
-    
-    //
-    // Deregister the protocol with the MLD6IGMP for membership
-    // change on this interface.
-    //
-    if (family() == AF_INET) {
-	XrlMld6igmpV0p1Client::send_delete_protocol4(
-	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    pim_vif->name(),
-	    vif_index,
-	    callback(this, &XrlPimNode::xrl_result_delete_protocol_mld6igmp));
-    } else {
-	XrlMld6igmpV0p1Client::send_delete_protocol6(
-	    xorp_module_name(family(), XORP_MODULE_MLD6IGMP),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    pim_vif->name(),
-	    vif_index,
-	    callback(this, &XrlPimNode::xrl_result_delete_protocol_mld6igmp));
-    }
-    
-    return (XORP_OK);
-}
-
-void
-XrlPimNode::xrl_result_add_protocol_mld6igmp(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to add a protocol to MLD6IGMP: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlPimNode::xrl_result_delete_protocol_mld6igmp(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to delete a protocol with MLD6IGMP: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
 }
 
 XrlCmdError
@@ -2803,18 +2839,24 @@ XrlPimNode::pim_0_1_stop_bsr()
     return XrlCmdError::OKAY();
 }
 
+//
+// PIM configuration
+//
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name4(
     // Input values, 
     const IPv4Net&	scope_zone_id, 
     const string&	vif_name)
 {
+    string err;
+    
     if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
-						   vif_name)
+						   vif_name, err)
 	< 0) {
-	string msg = c_format("Failed to add scope zone %s on vif %s",
+	string msg = c_format("Failed to add scope zone %s on vif %s: %s",
 			      cstring(scope_zone_id),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2827,12 +2869,15 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name6(
     const IPv6Net&	scope_zone_id, 
     const string&	vif_name)
 {
+    string err;
+    
     if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
-						   vif_name)
+						   vif_name, err)
 	< 0) {
-	string msg = c_format("Failed to add scope zone %s on vif %s",
+	string msg = c_format("Failed to add scope zone %s on vif %s: %s",
 			      cstring(scope_zone_id),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2845,13 +2890,16 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr4(
     const IPv4Net&	scope_zone_id, 
     const IPv4&		vif_addr)
 {
+    string err;
+    
     if (PimNode::add_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
-						   IPvX(vif_addr))
+						   IPvX(vif_addr), err)
 	< 0) {
 	string msg = c_format("Failed to add scope zone %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(scope_zone_id),
-			      cstring(vif_addr));
+			      cstring(vif_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2864,13 +2912,16 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr6(
     const IPv6Net&	scope_zone_id, 
     const IPv6&		vif_addr)
 {
+    string err;
+    
     if (PimNode::add_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
-						   IPvX(vif_addr))
+						   IPvX(vif_addr), err)
 	< 0) {
 	string msg = c_format("Failed to add scope zone %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(scope_zone_id),
-			      cstring(vif_addr));
+			      cstring(vif_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2883,12 +2934,15 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name4(
     const IPv4Net&	scope_zone_id, 
     const string&	vif_name)
 {
+    string err;
+    
     if (PimNode::delete_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
-						      vif_name)
+						      vif_name, err)
 	< 0) {
-	string msg = c_format("Failed to delete scope zone %s on vif %s",
+	string msg = c_format("Failed to delete scope zone %s on vif %s: %s",
 			      cstring(scope_zone_id),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2901,12 +2955,15 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name6(
     const IPv6Net&	scope_zone_id, 
     const string&	vif_name)
 {
+    string err;
+    
     if (PimNode::delete_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
-						      vif_name)
+						      vif_name, err)
 	< 0) {
-	string msg = c_format("Failed to delete scope zone %s on vif %s",
+	string msg = c_format("Failed to delete scope zone %s on vif %s: %s",
 			      cstring(scope_zone_id),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2919,13 +2976,16 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr4(
     const IPv4Net&	scope_zone_id, 
     const IPv4&		vif_addr)
 {
+    string err;
+    
     if (PimNode::delete_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
-						      IPvX(vif_addr))
+						      IPvX(vif_addr), err)
 	< 0) {
 	string msg = c_format("Failed to delete scope zone %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(scope_zone_id),
-			      cstring(vif_addr));
+			      cstring(vif_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2938,13 +2998,16 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr6(
     const IPv6Net&	scope_zone_id, 
     const IPv6&		vif_addr)
 {
+    string err;
+    
     if (PimNode::delete_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
-						      IPvX(vif_addr))
+						      IPvX(vif_addr), err)
 	< 0) {
 	string msg = c_format("Failed to delete scope zone %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(scope_zone_id),
-			      cstring(vif_addr));
+			      cstring(vif_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2960,16 +3023,20 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen)
 {
+    string err;
+    
     if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
 						 is_scope_zone,
 						 vif_name,
 						 bsr_priority,
-						 hash_masklen)
+						 hash_masklen,
+						 err)
 	< 0) {
-	string msg = c_format("Failed to add cand-BSR for zone %s on vif %s",
+	string msg = c_format("Failed to add cand-BSR for zone %s on vif %s: %s",
 			      cstring(PimScopeZoneId(scope_zone_id,
 						     is_scope_zone)),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -2985,16 +3052,20 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen)
 {
+    string err;
+    
     if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
 						 is_scope_zone,
 						 vif_name,
 						 bsr_priority,
-						 hash_masklen)
+						 hash_masklen,
+						 err)
 	< 0) {
-	string msg = c_format("Failed to add cand-BSR for zone %s on vif %s",
+	string msg = c_format("Failed to add cand-BSR for zone %s on vif %s: %s",
 			      cstring(PimScopeZoneId(scope_zone_id,
 						     is_scope_zone)),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3010,17 +3081,21 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen)
 {
+    string err;
+    
     if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
 					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
 					     bsr_priority,
-					     hash_masklen)
+					     hash_masklen,
+					     err)
 	< 0) {
 	string msg = c_format("Failed to add cand-BSR for zone %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(PimScopeZoneId(scope_zone_id,
 						     is_scope_zone)),
-			      cstring(cand_bsr_addr));
+			      cstring(cand_bsr_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3036,17 +3111,21 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen)
 {
+    string err;
+    
     if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
 					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
 					     bsr_priority,
-					     hash_masklen)
+					     hash_masklen,
+					     err)
 	< 0) {
 	string msg = c_format("Failed to add cand-BSR for zone %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(PimScopeZoneId(scope_zone_id,
 						     is_scope_zone)),
-			      cstring(cand_bsr_addr));
+			      cstring(cand_bsr_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3059,12 +3138,15 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr4(
     const IPv4Net&	scope_zone_id, 
     const bool&		is_scope_zone)
 {
+    string err;
+    
     if (PimNode::delete_config_cand_bsr(IPvXNet(scope_zone_id),
-					is_scope_zone)
+					is_scope_zone, err)
 	< 0) {
-	string msg = c_format("Failed to delete cand-BSR for zone %s",
+	string msg = c_format("Failed to delete cand-BSR for zone %s: %s",
 			      cstring(PimScopeZoneId(scope_zone_id,
-						     is_scope_zone)));
+						     is_scope_zone)),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3077,12 +3159,15 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr6(
     const IPv6Net&	scope_zone_id, 
     const bool&		is_scope_zone)
 {
+    string err;
+    
     if (PimNode::delete_config_cand_bsr(IPvXNet(scope_zone_id),
-					is_scope_zone)
+					is_scope_zone, err)
 	< 0) {
-	string msg = c_format("Failed to delete cand-BSR for zone %s",
+	string msg = c_format("Failed to delete cand-BSR for zone %s: %s",
 			      cstring(PimScopeZoneId(scope_zone_id,
-						     is_scope_zone)));
+						     is_scope_zone)),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3098,15 +3183,19 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime)
 {
+    string err;
+    
     if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
 						is_scope_zone,
 						vif_name,
 						rp_priority,
-						rp_holdtime)
+						rp_holdtime,
+						err)
 	< 0) {
-	string msg = c_format("Failed to add Cand-RP for prefix %s on vif %s",
+	string msg = c_format("Failed to add Cand-RP for prefix %s on vif %s: %s",
 			      cstring(group_prefix),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3122,15 +3211,19 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime)
 {
+    string err;
+    
     if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
 						is_scope_zone,
 						vif_name,
 						rp_priority,
-						rp_holdtime)
+						rp_holdtime,
+						err)
 	< 0) {
-	string msg = c_format("Failed to add Cand-RP for prefix %s on vif %s",
+	string msg = c_format("Failed to add Cand-RP for prefix %s on vif %s: %s",
 			      cstring(group_prefix),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3146,16 +3239,20 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime)
 {
+    string err;
+    
     if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
 					    is_scope_zone,
 					    IPvX(cand_rp_addr),
 					    rp_priority,
-					    rp_holdtime)
+					    rp_holdtime,
+					    err)
 	< 0) {
 	string msg = c_format("Failed to add Cand-RP for prefix %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(group_prefix),
-			      cstring(cand_rp_addr));
+			      cstring(cand_rp_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3171,16 +3268,20 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime)
 {
+    string err;
+    
     if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
 					    is_scope_zone,
 					    IPvX(cand_rp_addr),
 					    rp_priority,
-					    rp_holdtime)
+					    rp_holdtime,
+					    err)
 	< 0) {
 	string msg = c_format("Failed to add Cand-RP for prefix %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(group_prefix),
-			      cstring(cand_rp_addr));
+			      cstring(cand_rp_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3194,15 +3295,21 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name4(
     const bool&		is_scope_zone, 
     const string&	vif_name)
 {
+    string err;
+    
     if (PimNode::delete_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
 						   is_scope_zone,
-						   vif_name)
+						   vif_name,
+						   err)
 	< 0) {
-	string msg = c_format("Failed to delete Cand-RP for prefix %s on vif %s",
+	string msg = c_format("Failed to delete Cand-RP for prefix %s on vif %s: %s",
 			      cstring(group_prefix),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
+    
+    // XXX: config_rp_done() will complete the configuration
     
     return XrlCmdError::OKAY();
 }
@@ -3214,13 +3321,16 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name6(
     const bool&		is_scope_zone, 
     const string&	vif_name)
 {
+    string err;
+    
     if (PimNode::delete_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
 						   is_scope_zone,
-						   vif_name)
+						   vif_name, err)
 	< 0) {
-	string msg = c_format("Failed to delete Cand-RP for prefix %s on vif %s",
+	string msg = c_format("Failed to delete Cand-RP for prefix %s on vif %s: %s",
 			      cstring(group_prefix),
-			      vif_name.c_str());
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3234,14 +3344,18 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr4(
     const bool&		is_scope_zone, 
     const IPv4&		cand_rp_addr)
 {
+    string err;
+    
     if (PimNode::delete_config_cand_rp_by_addr(IPvXNet(group_prefix),
 					       is_scope_zone,
-					       IPvX(cand_rp_addr))
+					       IPvX(cand_rp_addr),
+					       err)
 	< 0) {
 	string msg = c_format("Failed to delete Cand-RP for prefix %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(group_prefix),
-			      cstring(cand_rp_addr));
+			      cstring(cand_rp_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3255,14 +3369,18 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr6(
     const bool&		is_scope_zone, 
     const IPv6&		cand_rp_addr)
 {
+    string err;
+    
     if (PimNode::delete_config_cand_rp_by_addr(IPvXNet(group_prefix),
 					       is_scope_zone,
-					       IPvX(cand_rp_addr))
+					       IPvX(cand_rp_addr),
+					       err)
 	< 0) {
 	string msg = c_format("Failed to delete Cand-RP for prefix %s on vif "
-			      "with address %s",
+			      "with address %s: %s",
 			      cstring(group_prefix),
-			      cstring(cand_rp_addr));
+			      cstring(cand_rp_addr),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3277,14 +3395,18 @@ XrlPimNode::pim_0_1_add_config_rp4(
     const uint32_t&	rp_priority, 
     const uint32_t&	hash_masklen)
 {
+    string err;
+    
     if (PimNode::add_config_rp(IPvXNet(group_prefix),
 			       IPvX(rp_addr),
 			       rp_priority,
-			       hash_masklen)
+			       hash_masklen,
+			       err)
 	< 0) {
-	string msg = c_format("Failed to add %s to RP-Set for prefix %s",
+	string msg = c_format("Failed to add %s to RP-Set for prefix %s: %s",
 			      cstring(rp_addr),
-			      cstring(group_prefix));
+			      cstring(group_prefix),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3299,14 +3421,18 @@ XrlPimNode::pim_0_1_add_config_rp6(
     const uint32_t&	rp_priority, 
     const uint32_t&	hash_masklen)
 {
+    string err;
+    
     if (PimNode::add_config_rp(IPvXNet(group_prefix),
 			       IPvX(rp_addr),
 			       rp_priority,
-			       hash_masklen)
+			       hash_masklen,
+			       err)
 	< 0) {
-	string msg = c_format("Failed to add %s to RP-Set for prefix %s",
+	string msg = c_format("Failed to add %s to RP-Set for prefix %s: %s",
 			      cstring(rp_addr),
-			      cstring(group_prefix));
+			      cstring(group_prefix),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3319,12 +3445,16 @@ XrlPimNode::pim_0_1_delete_config_rp4(
     const IPv4Net&	group_prefix, 
     const IPv4&		rp_addr)
 {
+    string err;
+    
     if (PimNode::delete_config_rp(IPvXNet(group_prefix),
-				  IPvX(rp_addr))
+				  IPvX(rp_addr),
+				  err)
 	< 0) {
-	string msg = c_format("Failed to delete %s from RP-Set for prefix %s",
+	string msg = c_format("Failed to delete %s from RP-Set for prefix %s: %s",
 			      cstring(rp_addr),
-			      cstring(group_prefix));
+			      cstring(group_prefix),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3337,12 +3467,15 @@ XrlPimNode::pim_0_1_delete_config_rp6(
     const IPv6Net&	group_prefix, 
     const IPv6&		rp_addr)
 {
+    string err;
+    
     if (PimNode::delete_config_rp(IPvXNet(group_prefix),
-				  IPvX(rp_addr))
+				  IPvX(rp_addr), err)
 	< 0) {
-	string msg = c_format("Failed to delete %s from RP-Set for prefix %s",
+	string msg = c_format("Failed to delete %s from RP-Set for prefix %s: %s",
 			      cstring(rp_addr),
-			      cstring(group_prefix));
+			      cstring(group_prefix),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3352,8 +3485,11 @@ XrlPimNode::pim_0_1_delete_config_rp6(
 XrlCmdError
 XrlPimNode::pim_0_1_config_rp_done()
 {
-    if (PimNode::config_rp_done() < 0) {
-	string msg = string("Failed to complete the RP-Set configuration");
+    string err;
+    
+    if (PimNode::config_rp_done(err) < 0) {
+	string msg = string("Failed to complete the RP-Set configuration: %s",
+			    err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3387,10 +3523,13 @@ XrlPimNode::pim_0_1_set_vif_proto_version(
     const string&	vif_name, 
     const uint32_t&	proto_version)
 {
-    if (PimNode::set_vif_proto_version(vif_name, proto_version) < 0) {
-	string msg = c_format("Failed to set protocol version for vif %s to %d",
+    string err;
+    
+    if (PimNode::set_vif_proto_version(vif_name, proto_version, err) < 0) {
+	string msg = c_format("Failed to set protocol version for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      proto_version);
+			      proto_version,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3402,9 +3541,12 @@ XrlPimNode::pim_0_1_reset_vif_proto_version(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_proto_version(vif_name) < 0) {
-	string msg = c_format("Failed to reset protocol version for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_proto_version(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset protocol version for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3438,13 +3580,24 @@ XrlPimNode::pim_0_1_set_vif_hello_triggered_delay(
     const string&	vif_name, 
     const uint32_t&	hello_triggered_delay)
 {
+    string err;
+    
+    if (hello_triggered_delay > (uint16_t)~0) {
+	err = c_format("Invalid Hello triggered delay value %d: "
+		       "max allowed is %d",
+		       hello_triggered_delay,
+		       (uint16_t)~0);
+    }
+    
     if ((hello_triggered_delay > (uint16_t)~0)
 	|| (PimNode::set_vif_hello_triggered_delay(vif_name,
-						   hello_triggered_delay)
+						   hello_triggered_delay,
+						   err)
 	    < 0)) {
-	string msg = c_format("Failed to set 'Hello triggered delay' for vif %s to %d",
+	string msg = c_format("Failed to set 'Hello triggered delay' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      hello_triggered_delay);
+			      hello_triggered_delay,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3456,9 +3609,12 @@ XrlPimNode::pim_0_1_reset_vif_hello_triggered_delay(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_hello_triggered_delay(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'Hello triggered delay' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_hello_triggered_delay(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'Hello triggered delay' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3492,12 +3648,22 @@ XrlPimNode::pim_0_1_set_vif_hello_period(
     const string&	vif_name, 
     const uint32_t&	hello_period)
 {
+    string err;
+    
+    if (hello_period > (uint16_t)~0) {
+	err = c_format("Invalid Hello period value %d: "
+		       "max allowed is %d",
+		       hello_period,
+		       (uint16_t)~0);
+    }
+    
     if ((hello_period > (uint16_t)~0)
-	|| (PimNode::set_vif_hello_period(vif_name, hello_period)
+	|| (PimNode::set_vif_hello_period(vif_name, hello_period, err)
 	    < 0)) {
-	string msg = c_format("Failed to set 'Hello period' for vif %s to %d",
+	string msg = c_format("Failed to set 'Hello period' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      hello_period);
+			      hello_period,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3509,9 +3675,11 @@ XrlPimNode::pim_0_1_reset_vif_hello_period(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_hello_period(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'Hello period' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_hello_period(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'Hello period' for vif %s: %s",
+			      vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3545,8 +3713,17 @@ XrlPimNode::pim_0_1_set_vif_hello_holdtime(
     const string&	vif_name, 
     const uint32_t&	hello_holdtime)
 {
+    string err;
+    
+    if (hello_holdtime > (uint16_t)~0) {
+	err = c_format("Invalid Hello holdtime value %d: "
+		       "max allowed is %d",
+		       hello_holdtime,
+		       (uint16_t)~0);
+    }
+    
     if ((hello_holdtime > (uint16_t)~0)
-	|| (PimNode::set_vif_hello_holdtime(vif_name, hello_holdtime)
+	|| (PimNode::set_vif_hello_holdtime(vif_name, hello_holdtime, err)
 	    < 0)) {
 	string msg = c_format("Failed to set 'Hello holdtime' for vif %s to %d",
 			      vif_name.c_str(),
@@ -3562,9 +3739,12 @@ XrlPimNode::pim_0_1_reset_vif_hello_holdtime(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_hello_holdtime(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'Hello holdtime' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_hello_holdtime(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'Hello holdtime' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3598,11 +3778,21 @@ XrlPimNode::pim_0_1_set_vif_dr_priority(
     const string&	vif_name, 
     const uint32_t&	dr_priority)
 {
+    string err;
+    
+    if (dr_priority > (uint32_t)~0) {
+	err = c_format("Invalid DR priority value %d: "
+		       "max allowed is %d",
+		       dr_priority,
+		       (uint32_t)~0);
+    }
+    
     if ((dr_priority > (uint32_t)~0)
-	|| (PimNode::set_vif_dr_priority(vif_name, dr_priority) < 0)) {
-	string msg = c_format("Failed to set 'DR priority' for vif %s to %d",
+	|| (PimNode::set_vif_dr_priority(vif_name, dr_priority, err) < 0)) {
+	string msg = c_format("Failed to set 'DR priority' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      dr_priority);
+			      dr_priority,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3614,9 +3804,12 @@ XrlPimNode::pim_0_1_reset_vif_dr_priority(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_dr_priority(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'DR priority' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_dr_priority(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'DR priority' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3650,11 +3843,21 @@ XrlPimNode::pim_0_1_set_vif_lan_delay(
     const string&	vif_name, 
     const uint32_t&	lan_delay)
 {
+    string err;
+    
+    if (lan_delay > (uint16_t)~0) {
+	err = c_format("Invalid LAN delay value %d: "
+		       "max allowed is %d",
+		       lan_delay,
+		       (uint16_t)~0);
+    }
+    
     if ((lan_delay > (uint16_t)~0)
-	|| (PimNode::set_vif_lan_delay(vif_name, lan_delay) < 0)) {
-	string msg = c_format("Failed to set 'LAN delay' for vif %s to %d",
+	|| (PimNode::set_vif_lan_delay(vif_name, lan_delay, err) < 0)) {
+	string msg = c_format("Failed to set 'LAN delay' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      lan_delay);
+			      lan_delay,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3666,9 +3869,12 @@ XrlPimNode::pim_0_1_reset_vif_lan_delay(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_lan_delay(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'LAN delay' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_lan_delay(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'LAN delay' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3702,12 +3908,22 @@ XrlPimNode::pim_0_1_set_vif_override_interval(
     const string&	vif_name, 
     const uint32_t&	override_interval)
 {
+    string err;
+    
+    if (override_interval > (uint16_t)~0) {
+	err = c_format("Invalid Override interval value %d: "
+		       "max allowed is %d",
+		       override_interval,
+		       (uint16_t)~0);
+    }
+    
     if ((override_interval > (uint16_t)~0)
-	|| (PimNode::set_vif_override_interval(vif_name, override_interval)
+	|| (PimNode::set_vif_override_interval(vif_name, override_interval, err)
 	    < 0)) {
-	string msg = c_format("Failed to set 'override interval' for vif %s to %d",
+	string msg = c_format("Failed to set 'override interval' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      override_interval);
+			      override_interval,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3719,9 +3935,11 @@ XrlPimNode::pim_0_1_reset_vif_override_interval(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_override_interval(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'override interval' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_override_interval(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'override interval' for vif %s: %s",
+			      vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3755,12 +3973,15 @@ XrlPimNode::pim_0_1_set_vif_is_tracking_support_disabled(
     const string&	vif_name, 
     const bool&		is_tracking_support_disabled)
 {
+    string err;
+    
     if (PimNode::set_vif_is_tracking_support_disabled(vif_name,
-						      is_tracking_support_disabled)
-	< 0) {
-	string msg = c_format("Failed to set 'is_tracking_support_disabled' for vif %s to %d",
+						      is_tracking_support_disabled, err)
+	    < 0) {
+	string msg = c_format("Failed to set 'is_tracking_support_disabled' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      is_tracking_support_disabled);
+			      is_tracking_support_disabled,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3772,9 +3993,12 @@ XrlPimNode::pim_0_1_reset_vif_is_tracking_support_disabled(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_is_tracking_support_disabled(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'is_tracking_support_disabled' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_is_tracking_support_disabled(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'is_tracking_support_disabled' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3808,12 +4032,16 @@ XrlPimNode::pim_0_1_set_vif_accept_nohello_neighbors(
     const string&	vif_name, 
     const bool&		accept_nohello_neighbors)
 {
+    string err;
+    
     if (PimNode::set_vif_accept_nohello_neighbors(vif_name,
-						  accept_nohello_neighbors)
+						  accept_nohello_neighbors,
+						  err)
 	< 0) {
-	string msg = c_format("Failed to set 'accept_nohello_neighbors' for vif %s to %d",
+	string msg = c_format("Failed to set 'accept_nohello_neighbors' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      accept_nohello_neighbors);
+			      accept_nohello_neighbors,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3825,9 +4053,12 @@ XrlPimNode::pim_0_1_reset_vif_accept_nohello_neighbors(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_accept_nohello_neighbors(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'accept_nohello_neighbors' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_accept_nohello_neighbors(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'accept_nohello_neighbors' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3861,12 +4092,22 @@ XrlPimNode::pim_0_1_set_vif_join_prune_period(
     const string&	vif_name, 
     const uint32_t&	join_prune_period)
 {
+    string err;
+    
+    if (join_prune_period > (uint16_t)~0) {
+	err = c_format("Invalid Join/Prune period value %d: "
+		       "max allowed is %d",
+		       join_prune_period,
+		       (uint16_t)~0);
+    }
+    
     if ((join_prune_period > (uint16_t)~0)
-	|| (PimNode::set_vif_join_prune_period(vif_name, join_prune_period)
+	|| (PimNode::set_vif_join_prune_period(vif_name, join_prune_period, err)
 	    < 0)) {
-	string msg = c_format("Failed to set 'Join/Prune period' for vif %s to %d",
+	string msg = c_format("Failed to set 'Join/Prune period' for vif %s to %d: %s",
 			      vif_name.c_str(),
-			      join_prune_period);
+			      join_prune_period,
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3878,9 +4119,12 @@ XrlPimNode::pim_0_1_reset_vif_join_prune_period(
     // Input values, 
     const string&	vif_name)
 {
-    if (PimNode::reset_vif_join_prune_period(vif_name) < 0) {
-	string msg = c_format("Failed to reset 'Join/Prune period' for vif %s",
-			      vif_name.c_str());
+    string err;
+    
+    if (PimNode::reset_vif_join_prune_period(vif_name, err) < 0) {
+	string msg = c_format("Failed to reset 'Join/Prune period' for vif %s: %s",
+			      vif_name.c_str(),
+			      err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -3908,9 +4152,17 @@ XrlPimNode::pim_0_1_set_switch_to_spt_threshold(
     const uint32_t&	interval_sec, 
     const uint32_t&	bytes)
 {
-    PimNode::is_switch_to_spt_enabled().set(is_enabled);
-    PimNode::switch_to_spt_threshold_interval_sec().set(interval_sec);
-    PimNode::switch_to_spt_threshold_bytes().set(bytes);
+    string err;
+    
+    if (PimNode::set_switch_to_spt_threshold(is_enabled,
+					     interval_sec,
+					     bytes,
+					     err)
+	    < 0) {
+	string msg = c_format("Failed to set SPT switch threshold: %s",
+			      err.c_str());
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -3918,9 +4170,13 @@ XrlPimNode::pim_0_1_set_switch_to_spt_threshold(
 XrlCmdError
 XrlPimNode::pim_0_1_reset_switch_to_spt_threshold()
 {
-    PimNode::is_switch_to_spt_enabled().reset();
-    PimNode::switch_to_spt_threshold_interval_sec().reset();
-    PimNode::switch_to_spt_threshold_bytes().reset();
+    string err;
+    
+    if (PimNode::reset_switch_to_spt_threshold(err) < 0) {
+	string msg = c_format("Failed to reset SPT switch threshold: %s",
+			      err.c_str());
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
     
     return XrlCmdError::OKAY();
 }

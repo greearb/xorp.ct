@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.9 2003/05/19 00:20:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.10 2003/05/21 05:32:54 pavlin Exp $"
 
 
 //
@@ -90,6 +90,9 @@ PimNode::PimNode(int family, xorp_module_id module_id,
     _pim_register_vif_index = Vif::VIF_INDEX_INVALID;
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
+    
+    // Set the node status: waiting for MFEA and MLD6IGMP    
+    ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
 }
 
 /**
@@ -146,6 +149,9 @@ PimNode::start(void)
 {
     if (ProtoNode<PimVif>::start() < 0)
 	return (XORP_ERROR);
+    
+    // Set the node status: waiting for MFEA and MLD6IGMP
+    ProtoNode<PimVif>::set_node_status(PROC_STARTUP);
     
     //
     // Start the protocol with the kernel
@@ -208,6 +214,8 @@ PimNode::stop(void)
     // Stop the vifs
     stop_all_vifs();
     
+    // XXX: don't change the node status, because we are still ready
+    
     if (ProtoNode<PimVif>::pending_stop() < 0)
 	return (XORP_ERROR);
     
@@ -237,6 +245,8 @@ PimNode::final_stop(void)
 	XLOG_ERROR("Error stopping protocol with the kernel. Ignored.");
     }
     
+    // XXX: don't change the node status, because we are still ready
+    
     if (ProtoUnit::stop() < 0)
 	ret_value = XORP_ERROR;
     
@@ -244,8 +254,77 @@ PimNode::final_stop(void)
 }
 
 /**
- * PimNode::has_pending_stop_vif:
- * @void: 
+ * PimNode::is_waiting_for_mfea_startup:
+ * @: 
+ * 
+ * Test if waiting to complete registration with the MFEA.
+ * 
+ * Return value: True if waiting to complete registration with the MFEA,
+ * otherwise false.
+ **/
+bool
+PimNode::is_waiting_for_mfea_startup() const
+{
+    return (_waiting_for_mfea_startup_events != 0);
+}
+
+/**
+ * PimNode::is_waiting_for_mld6igmp_startup:
+ * @: 
+ * 
+ * Test if waiting to complete registration with the MLD6IGMP.
+ * 
+ * Return value: True if waiting to complete registration with the MLD6IGMP,
+ * otherwise false.
+ **/
+bool
+PimNode::is_waiting_for_mld6igmp_startup() const
+{
+    return (_waiting_for_mld6igmp_startup_events != 0);
+}
+
+void
+PimNode::incr_waiting_for_mfea_startup_events()
+{
+    _waiting_for_mfea_startup_events++;
+}
+
+void
+PimNode::decr_waiting_for_mfea_startup_events()
+{
+    XLOG_ASSERT(_waiting_for_mfea_startup_events > 0);
+    _waiting_for_mfea_startup_events--;
+    
+    if (_waiting_for_mfea_startup_events == 0) {
+	// If startup waiting is over, set node status to NOT_READY
+	if (ProtoNode<PimVif>::node_status() == PROC_STARTUP)
+	    ProtoNode<PimVif>::set_node_status(PROC_NOT_READY);
+    }
+}
+
+void
+PimNode::incr_waiting_for_mld6igmp_startup_events()
+{
+    _waiting_for_mld6igmp_startup_events++;
+}
+
+void
+PimNode::decr_waiting_for_mld6igmp_startup_events()
+{
+    XLOG_ASSERT(_waiting_for_mld6igmp_startup_events > 0);
+    _waiting_for_mld6igmp_startup_events--;
+    
+    if (_waiting_for_mld6igmp_startup_events == 0) {
+	// If startup waiting is over, set node status to NOT_READY
+	if (ProtoNode<PimVif>::node_status() == PROC_STARTUP)
+	    ProtoNode<PimVif>::set_node_status(PROC_NOT_READY);
+    }
+}
+
+/**
+ * PimNode::has_pending_down_units:
+ * @reason: return-by-reference string that contains human-readable
+ * information about the status.
  * 
  * Test if there is an unit that is in PENDING_DOWN state.
  * 
@@ -253,7 +332,7 @@ PimNode::final_stop(void)
  * otherwise false.
  **/
 bool
-PimNode::has_pending_down_units(void)
+PimNode::has_pending_down_units(string& reason)
 {
     vector<PimVif *>::iterator iter;
     
@@ -264,8 +343,13 @@ PimNode::has_pending_down_units(void)
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	if (pim_vif->is_pending_down())
+	if (pim_vif->is_pending_down()) {
+	    reason = c_format("Vif %s is in state %s: remaining %u tasks",
+			      pim_vif->name().c_str(),
+			      pim_vif->state_string(),
+			      (uint32_t)pim_vif->usage_by_pim_mre_task());
 	    return (true);
+	}
     }
     
     //
@@ -274,7 +358,67 @@ PimNode::has_pending_down_units(void)
     // PimScopeZoneTable, etc.
     //
     
+    reason = "No pending-down units";
     return (false);
+}
+
+/**
+ * PimNode::node_status:
+ * @reason: return-by-reference string that contains human-readable
+ * information about the status.
+ * 
+ * Get the node status (see @ref ProcessStatus).
+ * 
+ * Return value: The node status (see @ref ProcessStatus).
+ **/
+ProcessStatus
+PimNode::node_status(string& reason)
+{
+    ProcessStatus status = ProtoNode<PimVif>::node_status();
+    
+    // Set the return message with the reason
+    reason = "";
+    switch (status) {
+    case PROC_NULL:
+	// Can't be running and in this state
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_STARTUP:
+	if (is_waiting_for_mfea_startup()) {
+	    reason = "Waiting for MFEA startup";
+	    break;
+	}
+	if (is_waiting_for_mld6igmp_startup()) {
+	    reason = c_format("Waiting for %s startup",
+			      xorp_module_name(family(), XORP_MODULE_MLD6IGMP));
+	    break;
+	}
+	// Waiting for unknown reason
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_NOT_READY:
+	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
+	XLOG_UNFINISHED();
+	break;
+    case PROC_READY:
+	reason = c_format("Node is READY (running status %s)",
+			  ProtoState::state_string());
+	break;
+    case PROC_SHUTDOWN:
+	// Get the message about the shutdown progress
+	has_pending_down_units(reason);
+	break;
+    case PROC_FAILED:
+	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
+	XLOG_UNFINISHED();
+	break;
+    default:
+	// Unknown status
+	XLOG_UNREACHABLE();
+	break;
+    }
+    
+    return (status);
 }
 
 /**

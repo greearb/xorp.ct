@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.12 2003/03/30 03:50:46 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.13 2003/04/01 00:56:24 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -300,6 +300,7 @@ public:
     void	delete_pim_nbr_from_nbr_list(PimNbr *pim_nbr);
     
     // Usage-related functions
+    size_t	usage_by_pim_mre_task() const { return (_usage_by_pim_mre_task); }
     void	incr_usage_by_pim_mre_task();
     void	decr_usage_by_pim_mre_task();
     
