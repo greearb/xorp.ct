@@ -83,6 +83,20 @@ populate_helloV3(HelloPacket *hello)
     hello->get_neighbours().push_back(IPv4("11.12.13.14"));
 }
 
+inline
+void
+populate_hello(HelloPacket *hello,  OspfTypes::Version version)
+{
+    switch(version) {
+    case OspfTypes::V2:
+	populate_helloV2(hello);
+	break;
+    case OspfTypes::V3:
+	populate_helloV3(hello);
+	break;
+    }
+}
+
 bool
 hello_packet_print(TestInfo& info)
 {
@@ -102,57 +116,52 @@ hello_packet_print(TestInfo& info)
 }
 
 bool
-hello_packet_compareV2(TestInfo& info)
+hello_packet_compare(TestInfo& info, OspfTypes::Version version)
 {
-    HelloPacket *hello1= new HelloPacket(OspfTypes::V2);
-    populate_helloV2(hello1);
+    HelloPacket *hello1= new HelloPacket(version);
+    populate_hello(hello1, version);
 
     DOUT(info) << hello1->str() << endl;
 
     // Encode the hello packet.
-    size_t len;
-    uint8_t *ptr = hello1->encode(len);
+    size_t len1;
+    uint8_t *ptr1 = hello1->encode(len1);
 
     // Now decode the packet.
-    HelloPacket *hello2= new HelloPacket(OspfTypes::V2);
+    // Create a new packet to provide the decoder.
+    HelloPacket *hello2= new HelloPacket(version);
 
     HelloPacket *hello3 =
-	dynamic_cast<HelloPacket *>(hello2->decode(ptr, len));
+	dynamic_cast<HelloPacket *>(hello2->decode(ptr1, len1));
 
     DOUT(info) << hello3->str() << endl;
+
+    // Encode the second packet and compare.
+    size_t len2;
+    uint8_t *ptr2 = hello3->encode(len2);
+    
+    if (len1 != len2) {
+	DOUT(info) << "Packet lengths don't match " <<
+	    len1 << " " << len2 << endl;
+	return false;
+    }
+    
+    if (0 != memcmp(ptr1, ptr2, len1)) {
+	for(size_t i = 0; i < len1; i++) {
+	    if (ptr1[i] != ptr2[i]) {
+		DOUT(info) << "mismatch at byte position " << i << endl;
+		DOUT(info) << "bytes " << (int)ptr1[i] << " " << (int)ptr2[i] << endl;
+		break;
+	    }
+	}
+	return false;
+    }
 
     delete hello1;
     delete hello2;
     delete hello3;
-    delete ptr;
-
-    return true;
-}
-
-bool
-hello_packet_compareV3(TestInfo& info)
-{
-    HelloPacket *hello1= new HelloPacket(OspfTypes::V3);
-    populate_helloV3(hello1);
-
-    DOUT(info) << hello1->str() << endl;
-
-    // Encode the hello packet.
-    size_t len;
-    uint8_t *ptr = hello1->encode(len);
-
-    // Now decode the packet.
-    HelloPacket *hello2= new HelloPacket(OspfTypes::V3);
-
-    HelloPacket *hello3 =
-	dynamic_cast<HelloPacket *>(hello2->decode(ptr, len));
-
-    DOUT(info) << hello3->str() << endl;
-
-    delete hello1;
-    delete hello2;
-    delete hello3;
-    delete ptr;
+    delete ptr1;
+    delete ptr2;
 
     return true;
 }
@@ -217,8 +226,8 @@ main(int argc, char **argv)
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
     } tests[] = {
 	{"hello_print", callback(hello_packet_print)},
-	{"hello_compareV2", callback(hello_packet_compareV2)},
-	{"hello_compareV3", callback(hello_packet_compareV3)},
+	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
+	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
 	{"decoder1", callback(decoder1)},
 	{"decoder2", callback(decoder2)},
     };
