@@ -22,7 +22,7 @@
 [ \t]+	/* whitespace */
 
 "\n"	{
-	/* newline is not significant in op_commands */
+	/* newline is not significant */
 	opcmd_linenum++;
 	}
 
@@ -39,12 +39,12 @@
 	return COMMAND;
 	}
 
-\$\([a-zA-Z@][a-zA-Z0-9\-_.@\*]*\)	{
+\$\([a-zA-Z@][a-zA-Z0-9\-_\.@\*]*\)	{
 	opcmdlval = strdup(opcmdtext);
 	return VARIABLE;
 	}
 
-[a-zA-Z/][a-zA-Z0-9\-_/]*	{
+[a-zA-Z0-9_/\.][a-zA-Z0-9\-_/\.]*	{
 	opcmdlval = strdup(opcmdtext);
 	return LITERAL;
 	}
