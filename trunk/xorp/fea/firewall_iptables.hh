@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_iptables.hh,v 1.3 2004/09/14 15:03:38 bms Exp $
+// $XORP: xorp/fea/firewall_iptables.hh,v 1.4 2004/09/14 21:53:43 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPTABLES_HH__
 #define	__FEA_FIREWALL_IPTABLES_HH__
@@ -104,8 +104,6 @@ public:
 	}
 
 protected:
-	string		_providername;
-	string		_providerversion;
 #ifdef HAVE_FIREWALL_IPTABLES
 	string		_tablename;	// Name of the XORP-managed table.
 	iptc_handle_t	_handle;	// Handle to libiptc library.
