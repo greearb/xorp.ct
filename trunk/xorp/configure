@@ -9268,7 +9268,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile MakefileRootCheck bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile cli/tools/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/slides/status_2004_02/Makefile docs/snmp/Makefile docs/test_harness/Makefile etc/Makefile etc/templates/Makefile fea/Makefile fea/MakefileRootCheck fea/tools/Makefile fib2mrib/Makefile libcomm/Makefile libfeaclient/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/snmpdscripts/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rib/tools/Makefile rip/Makefile rip/tools/Makefile rtrmgr/Makefile static_routes/Makefile utils/Makefile utils/flower_malloc/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh mibs/snmpdscripts/startsnmp"
+ac_config_files="$ac_config_files Makefile MakefileRootCheck bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile cli/tools/Makefile contrib/Makefile contrib/ospfd/Makefile contrib/ospfd/src/Makefile contrib/ospfd/xorp/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/slides/status_2004_02/Makefile docs/snmp/Makefile docs/test_harness/Makefile etc/Makefile etc/templates/Makefile fea/Makefile fea/MakefileRootCheck fea/tools/Makefile fib2mrib/Makefile libcomm/Makefile libfeaclient/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/snmpdscripts/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile pim/Makefile policy/Makefile rib/Makefile rib/tools/Makefile rip/Makefile rip/tools/Makefile rtrmgr/Makefile static_routes/Makefile utils/Makefile utils/flower_malloc/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh mibs/snmpdscripts/startsnmp"
 ac_config_commands="$ac_config_commands default"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9759,6 +9759,10 @@ do
   "bgp/tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES bgp/tools/Makefile" ;;
   "cli/Makefile" ) CONFIG_FILES="$CONFIG_FILES cli/Makefile" ;;
   "cli/tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES cli/tools/Makefile" ;;
+  "contrib/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/Makefile" ;;
+  "contrib/ospfd/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/ospfd/Makefile" ;;
+  "contrib/ospfd/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/ospfd/src/Makefile" ;;
+  "contrib/ospfd/xorp/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/ospfd/xorp/Makefile" ;;
   "docs/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
   "docs/bgp/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/bgp/Makefile" ;;
   "docs/design_arch/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/design_arch/Makefile" ;;
@@ -9791,9 +9795,6 @@ do
   "mibs/tests/Makefile" ) CONFIG_FILES="$CONFIG_FILES mibs/tests/Makefile" ;;
   "mld6igmp/Makefile" ) CONFIG_FILES="$CONFIG_FILES mld6igmp/Makefile" ;;
   "mrt/Makefile" ) CONFIG_FILES="$CONFIG_FILES mrt/Makefile" ;;
-  "ospfd/Makefile" ) CONFIG_FILES="$CONFIG_FILES ospfd/Makefile" ;;
-  "ospfd/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES ospfd/src/Makefile" ;;
-  "ospfd/xorp/Makefile" ) CONFIG_FILES="$CONFIG_FILES ospfd/xorp/Makefile" ;;
   "pim/Makefile" ) CONFIG_FILES="$CONFIG_FILES pim/Makefile" ;;
   "policy/Makefile" ) CONFIG_FILES="$CONFIG_FILES policy/Makefile" ;;
   "rib/Makefile" ) CONFIG_FILES="$CONFIG_FILES rib/Makefile" ;;

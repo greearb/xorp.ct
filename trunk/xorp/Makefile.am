@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.13 2004/02/12 20:20:44 pavlin Exp $
+## $XORP: xorp/Makefile.am,v 1.14 2004/02/18 00:14:02 pavlin Exp $
 ##
 
 # --- Options
@@ -18,10 +18,10 @@ SUBDIRS	+= fea rib
 SUBDIRS += bgp fib2mrib mld6igmp pim rip rtrmgr static_routes
 
 # --- Other (directory ordering should not matter)
-SUBDIRS += etc
+SUBDIRS += etc contrib
 
 # --- Conditional applications
-SUBDIRS += @OSPFD@ @MIBS@
+SUBDIRS += @MIBS@
 
 ################################################################
 ##

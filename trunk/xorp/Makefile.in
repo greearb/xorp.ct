@@ -104,7 +104,7 @@ ETAGS_ARGS = --c++
 # --- Other (directory ordering should not matter)
 
 # --- Conditional applications
-SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli policy utils fea rib bgp fib2mrib mld6igmp pim rip rtrmgr static_routes etc @OSPFD@ @MIBS@
+SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli policy utils fea rib bgp fib2mrib mld6igmp pim rip rtrmgr static_routes etc contrib @MIBS@
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
