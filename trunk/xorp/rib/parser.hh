@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.4 2003/03/16 07:18:57 pavlin Exp $
+// $XORP: xorp/rib/parser.hh,v 1.5 2003/03/19 09:05:19 pavlin Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -318,16 +318,16 @@ protected:
 
 class EtherVifCommand : public Command {
 public:
-    EtherVifCommand() : Command("vif Ethernet ~String ~IPv4", 2) {
+    EtherVifCommand() : Command("vif Ethernet ~String ~IPv4 ~Int", 3) {
 	bind_string(0, _ifname);
 	bind_ipv4(1, _addr);
-	//	bind_int(2, _prefix_len);
+	bind_int(2, _prefix_len);
     }
     virtual int execute() = 0;
 protected:
     string	_ifname;
     IPv4	_addr;
-    //    int		_prefix_len;
+    int		_prefix_len;
 };
 
 class RedistEnableCommand : public Command {

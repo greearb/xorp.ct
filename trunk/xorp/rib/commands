@@ -1,9 +1,9 @@
 #local Vifs
 #     type  name   addr  netmask 
-vif Ethernet de0 10.0.0.1
-vif Ethernet de1 10.0.1.1
-vif Ethernet de2 10.0.2.1
-#vif Ethernet disc 0.0.0.0
+vif Ethernet de0 10.0.0.1 24
+vif Ethernet de1 10.0.1.1 24
+vif Ethernet de2 10.0.2.1 24
+#vif Ethernet disc 0.0.0.0 0
 #
 #routing tables
 #     type  name  tag     ad_dist
