@@ -1,0 +1,31 @@
+/* $XORP$ */
+
+/**
+ * Policy based IPv4 route redistribution XRL interface.
+ *
+ * This should be implemented by routing protocols which support policy based
+ * filtering and desire to be used for IPv4 route redistribution.
+ */
+interface policy_redist4/0.1 {
+	/**
+	 * Start route redistribution for an IPv4 route.
+	 *
+	 * @param network the route to advertise.
+	 * @param unicast whether the route is unicast.
+	 * @param multicast whether the route is multicast.
+	 * @param nexthop the nexthop of the route.
+	 * @param metric the metric of the route.
+	 * @param policytags the set of policy-tags associated with the route.
+	 */
+	add_route4	? network:ipv4net & unicast:bool & multicast:bool  \
+			& nexthop:ipv4 & metric:u32 & policytags:list
+
+	/**
+	 * Terminate route redistribution for an IPv4 route.
+	 *
+	 * @param network the route for which advertisements should cease.
+	 * @param unicast whether the route is unicast.
+	 * @param multicast whether the route is multicast.
+	 */
+	delete_route4	? network:ipv4net & unicast:bool & multicast:bool
+}

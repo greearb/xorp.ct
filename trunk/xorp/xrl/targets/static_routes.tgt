@@ -1,7 +1,9 @@
-/* $XORP: xorp/xrl/targets/pim.tgt,v 1.3 2003/03/29 19:03:14 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/static_routes.tgt,v 1.1 2004/02/12 20:02:44 pavlin Exp $ */
 
 #include "common.xif"
+#include "policy_backend.xif"
 #include "static_routes.xif"
 
 target static_routes implements	common/0.1,				\
+				policy_backend/0.1,			\
 				static_routes/0.1

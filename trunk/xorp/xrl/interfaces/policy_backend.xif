@@ -1,0 +1,29 @@
+/* $XORP$ */
+
+/**
+ * Policy backend XRL interface.
+ *
+ * This should interface be implemented by routing protocols which desire policy
+ * based filtering.
+ */
+interface policy_backend/0.1 {
+	/**
+	 * Configure a policy filter.
+	 *
+	 * @param filter the identifier of the filter to configure.
+	 * @param conf the configuration of the filter.
+	 */
+        configure ? filter:u32 & conf:txt
+
+	/**
+	 * Reset a policy filter.
+	 *
+	 * @param filter the identifier of the filter to reset.
+	 */
+        reset ? filter:u32
+
+	/**
+	 * Push all available routes through all filters for re-filtering.
+	 */
+        push_routes
+}

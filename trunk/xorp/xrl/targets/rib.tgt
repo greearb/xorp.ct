@@ -1,9 +1,11 @@
-/* $XORP: xorp/xrl/targets/rib.tgt,v 1.4 2004/04/10 07:41:42 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/rib.tgt,v 1.5 2004/05/20 22:18:19 pavlin Exp $ */
 
 #include "common.xif"
-#include "rib.xif"
 #include "finder_event_observer.xif"
+#include "policy_backend.xif"
+#include "rib.xif"
 
 target rib implements		common/0.1,				\
-				rib/0.1,				\
-				finder_event_observer/0.1
+				finder_event_observer/0.1,		\
+				policy_backend/0.1,			\
+				rib/0.1

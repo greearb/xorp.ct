@@ -1,0 +1,10 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "policy.xif"
+
+target policy implements \
+	common/0.1, \
+	finder_event_observer/0.1, \
+	policy/0.1

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.35 2004/06/10 13:49:28 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.36 2004/09/03 22:25:38 bms Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -26,6 +26,7 @@ tgt_files		+= firewall.tgt
 tgt_files		+= mfea.tgt
 tgt_files		+= mld6igmp.tgt
 tgt_files		+= ospf.tgt
+tgt_files               += policy.tgt
 tgt_files		+= pim.tgt
 tgt_files		+= rip.tgt
 tgt_files		+= ripng.tgt
@@ -69,6 +70,7 @@ noinst_LIBRARIES	+= libmfeabase.a
 noinst_LIBRARIES	+= libmld6igmpbase.a
 noinst_LIBRARIES	+= libospfbase.a
 noinst_LIBRARIES	+= libpimbase.a
+noinst_LIBRARIES        += libpolicybase.a
 noinst_LIBRARIES	+= libribbase.a
 noinst_LIBRARIES	+= libribclientbase.a
 noinst_LIBRARIES	+= libripbase.a
@@ -91,8 +93,11 @@ libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp.xif				\
-		$(INTERFACES_DIR)/rib_client.xif			\
-		$(INTERFACES_DIR)/finder_event_observer.xif
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+                $(INTERFACES_DIR)/policy_backend.xif                    \
+                $(INTERFACES_DIR)/policy_redist4.xif                    \
+                $(INTERFACES_DIR)/policy_redist6.xif			\
+		$(INTERFACES_DIR)/rib_client.xif
 
 # BGP4MIB
 libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
@@ -211,12 +216,21 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/mld6igmp_client.xif			\
 		$(INTERFACES_DIR)/pim.xif
 
+# Policy manager
+libpolicybase_a_SOURCES = policy_base.hh policy_base.cc
+$(srcdir)/policy_base.hh $(srcdir)/policy_base.cc:                      \
+                $(INTERFACES_DIR)/common.xif                            \
+                $(INTERFACES_DIR)/finder_event_observer.xif		\
+                $(INTERFACES_DIR)/policy.xif
+
+
 # RIB
 libribbase_a_SOURCES = rib_base.hh rib_base.cc
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/rib.xif				\
-		$(INTERFACES_DIR)/finder_event_observer.xif
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+                $(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/rib.xif
 
 # RIB client
 libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
@@ -228,18 +242,24 @@ libripbase_a_SOURCES = rip_base.hh rip_base.cc
 $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
+                $(INTERFACES_DIR)/policy_backend.xif                    \
+                $(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/rip.xif				\
 		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
+
 
 # RIP NG
 libripngbase_a_SOURCES = ripng_base.hh ripng_base.cc
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
+                $(INTERFACES_DIR)/policy_backend.xif                    \
+                $(INTERFACES_DIR)/policy_redist6.xif			\
 		$(INTERFACES_DIR)/ripng.xif				\
 		$(INTERFACES_DIR)/redist6.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
+
 
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
@@ -267,7 +287,9 @@ $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 libstaticroutesbase_a_SOURCES = static_routes_base.hh static_routes_base.cc
 $(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
+                $(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/static_routes.xif
+
 
 # TEST FEA IFMGR MIRROR
 libtestfeaifmgrmirrorbase_a_SOURCES  = test_fea_ifmgr_mirror_base.hh

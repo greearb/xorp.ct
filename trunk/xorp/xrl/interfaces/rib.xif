@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.17 2004/07/24 00:56:38 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.18 2004/08/03 05:02:57 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -69,18 +69,23 @@ interface rib/0.1 {
 	 * @param nexthop the address of the next-hop router toward the
 	 * destination.
 	 * @param metric the routing metric.
+	 * @param policytags a set of policy tags used for redistribution.
 	 */
 	add_route4	? protocol:txt & unicast:bool & multicast:bool	\
-			& network:ipv4net & nexthop:ipv4 & metric:u32
+			& network:ipv4net & nexthop:ipv4 & metric:u32   \
+			& policytags:list
 
 	add_route6	? protocol:txt & unicast:bool & multicast:bool	\
-			& network:ipv6net & nexthop:ipv6 & metric:u32
+			& network:ipv6net & nexthop:ipv6 & metric:u32   \
+			& policytags:list
 
 	replace_route4	? protocol:txt & unicast:bool & multicast:bool	\
-			& network:ipv4net & nexthop:ipv4 & metric:u32
+			& network:ipv4net & nexthop:ipv4 & metric:u32   \
+			& policytags:list
 
 	replace_route6	? protocol:txt & unicast:bool & multicast:bool	\
-			& network:ipv6net & nexthop:ipv6 & metric:u32
+			& network:ipv6net & nexthop:ipv6 & metric:u32   \
+			& policytags:list
 
 	delete_route4	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv4net
@@ -103,26 +108,31 @@ interface rib/0.1 {
 	 * @param vifname of the name of the virtual interface toward the
 	 * destination.
 	 * @param metric the routing metric.
+	 * @param policytags a set of policy tags used for redistribution.
 	 */
 	add_interface_route4	? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv4net & nexthop:ipv4	\
-				& ifname:txt & vifname:txt & metric:u32
+				& ifname:txt & vifname:txt & metric:u32 \
+				& policytags:list
 
 	add_interface_route6	? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv6net & nexthop:ipv6	\
-				& ifname:txt & vifname:txt & metric:u32
+				& ifname:txt & vifname:txt & metric:u32 \
+				& policytags:list
 
 	replace_interface_route4 ? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv4net & nexthop:ipv4	\
-				& ifname:txt & vifname:txt & metric:u32
+				& ifname:txt & vifname:txt & metric:u32 \
+				& policytags:list
 
 	replace_interface_route6 ? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv6net & nexthop:ipv6	\
-				& ifname:txt & vifname:txt & metric:u32
+				& ifname:txt & vifname:txt & metric:u32 \
+				& policytags:list
 
 	/**
 	 * Lookup nexthop.
@@ -460,4 +470,21 @@ interface rib/0.1 {
          * as given in the response from register_interest.
 	 */
 	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32
+
+	/**
+	 * Add policy tags for a specific protcol in the redistribution map.
+	 *
+	 * @param protocol The destination protocol of the redistribution.
+	 * @param policytags The set of policytags of interest for the protocol.
+	 *
+	 */
+	insert_policy_redist_tags ? protocol:txt & policytags:list
+
+	/**
+	 * Reset the policy redistribution map.
+	 *
+	 * No policy based route redistribution will be available at this point.
+	 *
+	 */
+	reset_policy_redist_tags
 }
