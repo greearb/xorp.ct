@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.26 2003/10/23 09:41:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.27 2003/10/28 21:01:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -243,10 +243,10 @@ PeerHandler::start_packet(bool ibgp)
     // if a router came from IBGP, it shouldn't go to IBGP (unless
     // we're a route reflector)
     if (ibgp)
-	assert(!_peer->ibgp());
+	XLOG_ASSERT(!_peer->ibgp());
     _ibgp = ibgp;
 
-    assert(_packet == NULL);
+    XLOG_ASSERT(_packet == NULL);
     _packet = new UpdatePacket();
     return 0;
 }
@@ -255,7 +255,7 @@ int
 PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
-    assert(_packet != NULL);
+    XLOG_ASSERT(_packet != NULL);
 
     if (_packet->big_enough()) {
 	push_packet();
@@ -286,7 +286,7 @@ int
 PeerHandler::add_route(const SubnetRoute<IPv6> &rt, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
-    assert(_packet != NULL);
+    XLOG_ASSERT(_packet != NULL);
 
     if (_packet->big_enough()) {
 	push_packet();
@@ -346,7 +346,7 @@ int
 PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
 {
     debug_msg("PeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
-    assert(_packet != NULL);
+    XLOG_ASSERT(_packet != NULL);
 
     if (_packet->big_enough()) {
 	push_packet();
@@ -362,7 +362,7 @@ int
 PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
-    assert(_packet != NULL);
+    XLOG_ASSERT(_packet != NULL);
 
     if (0 == _packet->mpunreach<IPv6>(safi)) {
 	MPUNReachNLRIAttribute<IPv6> mp(safi);
