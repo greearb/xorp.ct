@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.20 2003/09/04 04:17:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.21 2003/09/05 00:43:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -540,7 +540,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
 
     debug_msg("type = %d", prevrt->type());
     FilterTable<A> *filter_out = dynamic_cast<FilterTable<A> *>(prevrt);
-    assert(filter_out != NULL);
+    XLOG_ASSERT(filter_out != NULL);
 
     _fanout_table->add_next_table(filter_out, peer_handler);
     filter_out->set_parent(_fanout_table);
@@ -640,15 +640,16 @@ int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<A>::add_route\n");
+    debug_msg("BGPPlumbingAF<%s>::add_route\n", NameOf<A>::get());
 
     int result = 0;
     RibInTable<A> *rib_in;
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
-	XLOG_FATAL("BGPPlumbingAF: add_route called for a PeerHandler that \
-has no associated RibIn");
+	XLOG_FATAL("BGPPlumbingAF<%s>: "
+		   "add_route called for a PeerHandler "
+		   "that has no associated RibIn", NameOf<A>::get());
 
     rib_in = iter->second;
 

@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.12 2003/04/22 19:20:19 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.13 2003/05/23 00:02:07 mjh Exp $"
 
-//#define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "route_table_ribin.hh"
 #include "route_table_deletion.hh"
 #include "rib_ipc_handler.hh"
-
+#include "main.hh"
 
 template<class A>
 RibInTable<A>::RibInTable(string table_name, const PeerHandler *peer)
@@ -93,17 +93,19 @@ int
 RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			 BGPRouteTable<A> *caller)
 {
+    debug_msg("RibInTable<%s>::add_route\n", NameOf<A>::get());
+
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;
-    assert(caller == NULL);
-    assert(rtmsg.origin_peer() == _peer);
-    assert(_peer_is_up);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == NULL);
+    XLOG_ASSERT(rtmsg.origin_peer() == _peer);
+    XLOG_ASSERT(_peer_is_up);
+    XLOG_ASSERT(_next_table != NULL);
 
     existing_route = lookup_route(rtmsg.net());
     int response;
     if (existing_route != NULL) {
-	assert(existing_route->net() == rtmsg.net());
+	XLOG_ASSERT(existing_route->net() == rtmsg.net());
 #if 0
 	if (rtmsg.route()->attributes() == existing_route->attributes()) {
 	    // this route is the same as before.
@@ -128,7 +130,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	    _route_table->insert(rtmsg.net(), *(rtmsg.route()));
 	new_route = &(iter.payload());
 
-	// progogate downstream
+	// propagate downstream
 	InternalMessage<A> new_rt_msg(new_route, _peer, _genid);
 	if (rtmsg.push()) new_rt_msg.set_push();
 
@@ -172,9 +174,9 @@ int
 RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller)
 {
-    assert(caller == NULL);
-    assert(rtmsg.origin_peer() == _peer);
-    assert(_peer_is_up);
+    XLOG_ASSERT(caller == NULL);
+    XLOG_ASSERT(rtmsg.origin_peer() == _peer);
+    XLOG_ASSERT(_peer_is_up);
 
     const SubnetRoute<A> *existing_route;
     existing_route = lookup_route(rtmsg.net());
@@ -216,9 +218,9 @@ int
 RibInTable<A>::push(BGPRouteTable<A> *caller)
 {
     debug_msg("RibInTable<A>::push\n");
-    assert(caller == NULL);
-    assert(_peer_is_up);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == NULL);
+    XLOG_ASSERT(_peer_is_up);
+    XLOG_ASSERT(_next_table != NULL);
 
     return _next_table->push((BGPRouteTable<A>*)this);
 }
@@ -250,7 +252,7 @@ RibInTable<A>::route_used(const SubnetRoute<A>* used_route, bool in_use)
 	return;
     const SubnetRoute<A> *rt;
     rt = lookup_route(used_route->net());
-    assert(rt != NULL);
+    XLOG_ASSERT(rt != NULL);
     rt->set_in_use(in_use);
 }
 

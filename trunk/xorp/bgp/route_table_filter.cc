@@ -12,16 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.10 2003/03/10 23:20:05 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.11 2003/08/06 17:52:55 atanu Exp $"
 
-//#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "route_table_filter.hh"
 #include "peer_handler.hh"
-
+#include "main.hh"
 
 /*************************************************************************/
 
@@ -294,7 +294,7 @@ MEDInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
     debug_msg("Route: %s\n", rtmsg->route()->str().c_str());
 
     //XXX theoretically unsafe test for debugging purposes
-    assert(rtmsg->route()->igp_metric() != 0xffffffff);
+    XLOG_ASSERT(rtmsg->route()->igp_metric() != 0xffffffff);
 
     //Form a new path attribute list containing the new MED attribute
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
@@ -436,10 +436,11 @@ template<class A>
 int
 FilterTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			  BGPRouteTable<A> *caller) {
-    debug_msg("FilterTable<A>::add_route %x on %s\n",
-	   (u_int)(&rtmsg), tablename().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    debug_msg("FilterTable<%s>::add_route %x on %s\n", NameOf<A>::get(),
+	      (u_int)(&rtmsg), tablename().c_str());
+
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     XLOG_ASSERT(!rtmsg.changed());
     const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
@@ -474,8 +475,8 @@ FilterTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 			      BGPRouteTable<A> *caller) {
     debug_msg("FilterTable<A>::replace_route %x -> %x on %s\n",
 	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     const InternalMessage<A> *filtered_old_msg = apply_filters(&old_rtmsg);
     const InternalMessage<A> *filtered_new_msg = apply_filters(&new_rtmsg);
@@ -520,8 +521,8 @@ int
 FilterTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer) {
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
     if (filtered_msg == NULL)
@@ -542,8 +543,8 @@ template<class A>
 int
 FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
 			     BGPRouteTable<A> *caller) {
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
     if (filtered_msg == NULL)
@@ -568,8 +569,8 @@ FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 template<class A>
 int
 FilterTable<A>::push(BGPRouteTable<A> *caller) {
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
     return _next_table->push((BGPRouteTable<A>*)this);
 }
 
@@ -593,8 +594,8 @@ FilterTable<A>::lookup_route(const IPNet<A> &net) const {
 	return NULL;
 
     //the filters MUST NOT modify the route
-    assert(!filtered_msg->changed());
-    assert(filtered_msg == &msg);
+    XLOG_ASSERT(!filtered_msg->changed());
+    XLOG_ASSERT(filtered_msg == &msg);
     
     return found_route;
 }
